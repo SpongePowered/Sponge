@@ -472,7 +472,7 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
 
         this.register("beacon_secondary_effect", Key.builder().type(TypeTokens.OPTIONAL_POTION_VALUE_TOKEN).key(CatalogKey.sponge("beacon_secondary_effect")).name("Beacon Secondary Effect").query(of("BeaconSecondaryEffect")).build());
 
-        this.register("targeted_location", Key.builder().type(TypeTokens.VECTOR_3D_VALUE_TOKEN).id("targeted_vector_3d").name("Targeted Vector3d").query(of("TargetedVector3d")).build());
+        this.register("targeted_location", Key.builder().type(TypeTokens.VECTOR_3D_VALUE_TOKEN).key(CatalogKey.sponge("targeted_vector_3d")).name("Targeted Vector3d").query(of("TargetedVector3d")).build());
 
         this.register("fuse_duration", Key.builder().type(TypeTokens.INTEGER_VALUE_TOKEN).key(CatalogKey.sponge("fuse_duration")).name("Fuse Duration").query(of("FuseDuration")).build());
 

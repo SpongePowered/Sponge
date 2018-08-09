@@ -27,6 +27,7 @@ package org.spongepowered.common.registry;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
@@ -36,6 +37,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public abstract class AbstractCatalogRegistryModule<C extends CatalogType> implements AlternateCatalogRegistryModule<C> {
 
@@ -89,11 +91,15 @@ public abstract class AbstractCatalogRegistryModule<C extends CatalogType> imple
 
     @Override
     public final Collection<C> getAll() {
-        return this.map.values();
+        return this.map.values().stream().filter(this::filterAll).collect(ImmutableList.toImmutableList());
     }
 
     protected String marshalFieldKey(String key) {
         return key;
+    }
+
+    protected boolean filterAll(C element) {
+        return true;
     }
 
     @Override

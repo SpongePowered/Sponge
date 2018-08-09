@@ -53,6 +53,7 @@ import java.util.Optional;
  * Implementation of the CraftingRecipeRegistry.
  * Proxy for {@link CraftingManager}
  */
+@SuppressWarnings("deprecation")
 public class SpongeCraftingRecipeRegistry implements CraftingRecipeRegistry, SpongeAdditionalCatalogRegistryModule<CraftingRecipe> {
 
     public static SpongeCraftingRecipeRegistry getInstance() {
@@ -65,7 +66,7 @@ public class SpongeCraftingRecipeRegistry implements CraftingRecipeRegistry, Spo
     private boolean registrationsComplete = false;
     private List<CraftingRecipe> customRecipes = new ArrayList<>();
 
-    private SpongeCraftingRecipeRegistry() {
+    SpongeCraftingRecipeRegistry() {
     }
 
     @Override
@@ -131,7 +132,7 @@ public class SpongeCraftingRecipeRegistry implements CraftingRecipeRegistry, Spo
     }
 
     public List<CraftingRecipe> getCustomRecipes() {
-        return customRecipes;
+        return this.customRecipes;
     }
 
     public void registerCustomWithVanilla() {

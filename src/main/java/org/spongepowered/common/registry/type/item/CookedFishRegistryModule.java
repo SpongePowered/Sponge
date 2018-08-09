@@ -54,7 +54,7 @@ public final class CookedFishRegistryModule extends AbstractCatalogRegistryModul
     @AdditionalRegistration
     public void registerAdditional() {
         for (ItemFishFood.FishType fishType : ItemFishFood.FishType.values()) {
-            final CatalogKey key = ((Fish) (Object) fishType).getKey();
+            final CatalogKey key = CatalogKey.resolve(fishType.name());
             if (fishType.canCook() && !this.map.containsKey(key)) {
                 CookedFish cooked = new SpongeCookedFish(key,
                         new SpongeTranslation("item.fish." + fishType.getUnlocalizedName() + ".cooked.name"), fishType);

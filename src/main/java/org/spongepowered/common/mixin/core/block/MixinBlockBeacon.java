@@ -38,7 +38,13 @@ public abstract class MixinBlockBeacon {
     // For some reason, Vanilla runs this on a separate thread, which is utterly broken.
     // Here, we simply execute the Runnable directly, ignoring the execturo.
     @SuppressWarnings("rawtypes")
-    @Redirect(method = "updateColorAsync", at = @At(value = "INVOKE", target = "Lcom/google/common/util/concurrent/ListeningExecutorService;submit(Ljava/lang/Runnable;)Lcom/google/common/util/concurrent/ListenableFuture;"))
+    @Redirect(method = "updateColorAsync",
+        at = @At(
+            value = "INVOKE",
+            target = "Lcom/google/common/util/concurrent/ListeningExecutorService;submit(Ljava/lang/Runnable;)Lcom/google/common/util/concurrent/ListenableFuture;",
+            remap = false
+        )
+    )
     private static ListenableFuture onSubmit(ListeningExecutorService service, Runnable runnable) {
         runnable.run();
         return null;

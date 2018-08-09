@@ -62,8 +62,8 @@ public abstract class MixinEntityLivingBase_Collisions extends MixinEntity_Colli
     }
 
     // This injection allows maxEntityCramming to be applied first before checking for max collisions
-    @Redirect(method = "collideWithNearbyEntities", at = @At(value = "INVOKE", target = "Ljava/util/List;size()I"))
-    protected int onCollideWithNearbyEntities(List<Entity> list) {
+    @Redirect(method = "collideWithNearbyEntities", at = @At(value = "INVOKE", target = "Ljava/util/List;size()I", remap = false))
+    private int onSpongeCollideWithNearbyEntities(List<Entity> list) {
         for (Entity entity: list) {
             // ignore players and entities with parts (ex. EnderDragon)
             if (this.world.isRemote || entity == null || entity instanceof EntityPlayer || entity.getParts() != null) {

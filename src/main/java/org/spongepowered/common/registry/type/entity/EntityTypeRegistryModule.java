@@ -42,7 +42,6 @@ import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.registry.ExtraClassCatalogRegistryModule;
 import org.spongepowered.api.registry.util.CustomCatalogRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.SpongeEntityType;
@@ -77,117 +76,142 @@ public final class EntityTypeRegistryModule extends AbstractCatalogRegistryModul
 
     @Override
     public void registerDefaults() {
-        register(CatalogKey.resolve("item"), newEntityTypeFromName("Item"));
-        register(CatalogKey.resolve("experience_orb"), newEntityTypeFromName("xp_orb"));
-        register(CatalogKey.resolve("area_effect_cloud"), newEntityTypeFromName("area_effect_cloud"));
-        register(CatalogKey.resolve("dragon_fireball"), newEntityTypeFromName("dragon_fireball"));
-        register(CatalogKey.resolve("leash_hitch"), newEntityTypeFromName("leash_knot"));
-        register(CatalogKey.resolve("painting"), newEntityTypeFromName("painting"));
-        register(CatalogKey.resolve("tipped_arrow"), newEntityTypeFromName("arrow"));
-        register(CatalogKey.resolve("snowball"), newEntityTypeFromName("snowball"));
-        register(CatalogKey.resolve("fireball"), newEntityTypeFromName("fireball"));
-        register(CatalogKey.resolve("small_fireball"), newEntityTypeFromName("small_fireball"));
-        register(CatalogKey.resolve("ender_pearl"), newEntityTypeFromName("ender_pearl"));
-        register(CatalogKey.resolve("eye_of_ender"), newEntityTypeFromName("eye_of_ender_signal"));
-        register(CatalogKey.resolve("splash_potion"), newEntityTypeFromName("potion"));
-        register(CatalogKey.resolve("thrown_exp_bottle"), newEntityTypeFromName("xp_bottle"));
-        register(CatalogKey.resolve("item_frame"), newEntityTypeFromName("item_frame"));
-        register(CatalogKey.resolve("wither_skull"), newEntityTypeFromName("wither_skull"));
-        register(CatalogKey.resolve("primed_tnt"), newEntityTypeFromName("tnt"));
-        register(CatalogKey.resolve("falling_block"), newEntityTypeFromName("falling_block"));
-        register(CatalogKey.resolve("firework"), newEntityTypeFromName("fireworks_rocket"));
-        register(CatalogKey.resolve("armor_stand"), newEntityTypeFromName("armor_stand"));
-        register(CatalogKey.resolve("boat"), newEntityTypeFromName("boat"));
-        register(CatalogKey.resolve("rideable_minecart"), newEntityTypeFromName("minecart"));
-        register(CatalogKey.resolve("chested_minecart"), newEntityTypeFromName("chest_minecart"));
-        register(CatalogKey.resolve("furnace_minecart"), newEntityTypeFromName("furnace_minecart"));
-        register(CatalogKey.resolve("tnt_minecart"), newEntityTypeFromName("tnt_minecart"));
-        register(CatalogKey.resolve("hopper_minecart"), newEntityTypeFromName("hopper_minecart"));
-        register(CatalogKey.resolve("mob_spawner_minecart"), newEntityTypeFromName("spawner_minecart"));
-        register(CatalogKey.resolve("commandblock_minecart"), newEntityTypeFromName("commandblock_minecart"));
-        register(CatalogKey.resolve("evocation_fangs"), newEntityTypeFromName("evocation_fangs"));
-        register(CatalogKey.resolve("evocation_illager"), newEntityTypeFromName("evocation_illager"));
-        register(CatalogKey.resolve("vex"), newEntityTypeFromName("vex"));
-        register(CatalogKey.resolve("vindication_illager"), newEntityTypeFromName("vindication_illager"));
-        register(CatalogKey.resolve("creeper"), newEntityTypeFromName("creeper"));
-        register(CatalogKey.resolve("skeleton"), newEntityTypeFromName("skeleton"));
-        register(CatalogKey.resolve("stray"), newEntityTypeFromName("stray"));
-        register(CatalogKey.resolve("wither_skeleton"), newEntityTypeFromName("wither_skeleton"));
-        register(CatalogKey.resolve("spider"), newEntityTypeFromName("spider"));
-        register(CatalogKey.resolve("giant"), newEntityTypeFromName("giant"));
-        register(CatalogKey.resolve("zombie"), newEntityTypeFromName("zombie"));
-        register(CatalogKey.resolve("husk"), newEntityTypeFromName("husk"));
-        register(CatalogKey.resolve("slime"), newEntityTypeFromName("slime"));
-        register(CatalogKey.resolve("ghast"), newEntityTypeFromName("ghast"));
-        register(CatalogKey.resolve("pig_zombie"), newEntityTypeFromName("zombie_pigman"));
-        register(CatalogKey.resolve("enderman"), newEntityTypeFromName("enderman"));
-        register(CatalogKey.resolve("cave_spider"), newEntityTypeFromName("cave_spider"));
-        register(CatalogKey.resolve("silverfish"), newEntityTypeFromName("silverfish"));
-        register(CatalogKey.resolve("blaze"), newEntityTypeFromName("blaze"));
-        register(CatalogKey.resolve("magma_cube"), newEntityTypeFromName("magma_cube"));
-        register(CatalogKey.resolve("ender_dragon"), newEntityTypeFromName("ender_dragon"));
-        register(CatalogKey.resolve("wither"), newEntityTypeFromName("wither"));
-        register(CatalogKey.resolve("bat"), newEntityTypeFromName("bat"));
-        register(CatalogKey.resolve("witch"), newEntityTypeFromName("witch"));
-        register(CatalogKey.resolve("endermite"), newEntityTypeFromName("endermite"));
-        register(CatalogKey.resolve("guardian"), newEntityTypeFromName("guardian"));
-        register(CatalogKey.resolve("elder_guardian"), newEntityTypeFromName("elder_guardian"));
-        register(CatalogKey.resolve("pig"), newEntityTypeFromName("pig"));
-        register(CatalogKey.resolve("sheep"), newEntityTypeFromName("sheep"));
-        register(CatalogKey.resolve("cow"), newEntityTypeFromName("cow"));
-        register(CatalogKey.resolve("chicken"), newEntityTypeFromName("chicken"));
-        register(CatalogKey.resolve("squid"), newEntityTypeFromName("squid"));
-        register(CatalogKey.resolve("wolf"), newEntityTypeFromName("wolf"));
-        register(CatalogKey.resolve("mushroom_cow"), newEntityTypeFromName("mooshroom"));
-        register(CatalogKey.resolve("snowman"), newEntityTypeFromName("snowman"));
-        register(CatalogKey.resolve("ocelot"), newEntityTypeFromName("Ocelot"));
-        register(CatalogKey.resolve("iron_golem"), newEntityTypeFromName("villager_golem"));
+        newEntityType(CatalogKey.minecraft("item"));
+        newEntityType(CatalogKey.minecraft("experience_orb"), CatalogKey.minecraft("xp_orb"));
+        newEntityType(CatalogKey.minecraft("area_effect_cloud"));
+        newEntityType(CatalogKey.minecraft("dragon_fireball"));
+        newEntityType(CatalogKey.minecraft("leash_hitch"), CatalogKey.minecraft("leash_knot"));
+        newEntityType(CatalogKey.minecraft("painting"));
+        newEntityType(CatalogKey.minecraft("tipped_arrow"), CatalogKey.minecraft("arrow"));
+        newEntityType(CatalogKey.minecraft("snowball"));
+        newEntityType(CatalogKey.minecraft("fireball"));
+        newEntityType(CatalogKey.minecraft("small_fireball"));
+        newEntityType(CatalogKey.minecraft("ender_pearl"));
+        newEntityType(CatalogKey.minecraft("eye_of_ender"), CatalogKey.minecraft("eye_of_ender_signal"));
+        newEntityType(CatalogKey.minecraft("splash_potion"), CatalogKey.minecraft("potion"));
+        newEntityType(CatalogKey.minecraft("thrown_exp_bottle"), CatalogKey.minecraft("xp_bottle"));
+        newEntityType(CatalogKey.minecraft("item_frame"));
+        newEntityType(CatalogKey.minecraft("wither_skull"));
+        newEntityType(CatalogKey.minecraft("primed_tnt"), CatalogKey.minecraft("tnt"));
+        newEntityType(CatalogKey.minecraft("falling_block"));
+        newEntityType(CatalogKey.minecraft("firework"), CatalogKey.minecraft("fireworks_rocket"));
+        newEntityType(CatalogKey.minecraft("armor_stand"));
+        newEntityType(CatalogKey.minecraft("boat"));
+        newEntityType(CatalogKey.minecraft("rideable_minecart"), CatalogKey.minecraft("minecart"));
+        newEntityType(CatalogKey.minecraft("chested_minecart"), CatalogKey.minecraft("chest_minecart"));
+        newEntityType(CatalogKey.minecraft("furnace_minecart"));
+        newEntityType(CatalogKey.minecraft("tnt_minecart"));
+        newEntityType(CatalogKey.minecraft("hopper_minecart"));
+        newEntityType(CatalogKey.minecraft("mob_spawner_minecart"), CatalogKey.minecraft("spawner_minecart"));
+        newEntityType(CatalogKey.minecraft("commandblock_minecart"), CatalogKey.minecraft("commandblock_minecart"));
+        newEntityType(CatalogKey.minecraft("evocation_fangs"));
+        newEntityType(CatalogKey.minecraft("evocation_illager"));
+        newEntityType(CatalogKey.minecraft("vex"));
+        newEntityType(CatalogKey.minecraft("vindication_illager"));
+        newEntityType(CatalogKey.minecraft("creeper"));
+        newEntityType(CatalogKey.minecraft("skeleton"));
+        newEntityType(CatalogKey.minecraft("stray"));
+        newEntityType(CatalogKey.minecraft("wither_skeleton"));
+        newEntityType(CatalogKey.minecraft("spider"));
+        newEntityType(CatalogKey.minecraft("giant"));
+        newEntityType(CatalogKey.minecraft("zombie"));
+        newEntityType(CatalogKey.minecraft("husk"));
+        newEntityType(CatalogKey.minecraft("slime"));
+        newEntityType(CatalogKey.minecraft("ghast"));
+        newEntityType(CatalogKey.minecraft("pig_zombie"), CatalogKey.minecraft("zombie_pigman"));
+        newEntityType(CatalogKey.minecraft("enderman"));
+        newEntityType(CatalogKey.minecraft("cave_spider"));
+        newEntityType(CatalogKey.minecraft("silverfish"));
+        newEntityType(CatalogKey.minecraft("blaze"));
+        newEntityType(CatalogKey.minecraft("magma_cube"));
+        newEntityType(CatalogKey.minecraft("ender_dragon"));
+        newEntityType(CatalogKey.minecraft("wither"));
+        newEntityType(CatalogKey.minecraft("bat"));
+        newEntityType(CatalogKey.minecraft("witch"));
+        newEntityType(CatalogKey.minecraft("endermite"));
+        newEntityType(CatalogKey.minecraft("guardian"));
+        newEntityType(CatalogKey.minecraft("elder_guardian"));
+        newEntityType(CatalogKey.minecraft("pig"));
+        newEntityType(CatalogKey.minecraft("sheep"));
+        newEntityType(CatalogKey.minecraft("cow"));
+        newEntityType(CatalogKey.minecraft("chicken"));
+        newEntityType(CatalogKey.minecraft("squid"));
+        newEntityType(CatalogKey.minecraft("wolf"));
+        newEntityType(CatalogKey.minecraft("mushroom_cow"), CatalogKey.minecraft("mooshroom"));
+        newEntityType(CatalogKey.minecraft("snowman"));
+        newEntityType(CatalogKey.minecraft("ocelot"));
+        newEntityType(CatalogKey.minecraft("iron_golem"), CatalogKey.minecraft("villager_golem"));
 
-        register(CatalogKey.resolve("horse"), newEntityTypeFromName("horse"));
-        register(CatalogKey.resolve("skeleton_horse"), newEntityTypeFromName("skeleton_horse"));
-        register(CatalogKey.resolve("zombie_horse"), newEntityTypeFromName("zombie_horse"));
-        register(CatalogKey.resolve("donkey"), newEntityTypeFromName("donkey"));
-        register(CatalogKey.resolve("mule"), newEntityTypeFromName("mule"));
-        register(CatalogKey.resolve("llama"), newEntityTypeFromName("llama"));
+        newEntityType(CatalogKey.minecraft("horse"));
+        newEntityType(CatalogKey.minecraft("skeleton_horse"));
+        newEntityType(CatalogKey.minecraft("zombie_horse"));
+        newEntityType(CatalogKey.minecraft("donkey"));
+        newEntityType(CatalogKey.minecraft("mule"));
+        newEntityType(CatalogKey.minecraft("llama"));
 
-        register(CatalogKey.resolve("llama_spit"), newEntityTypeFromName("llama_spit"));
-        register(CatalogKey.resolve("rabbit"), newEntityTypeFromName("rabbit"));
-        register(CatalogKey.resolve("villager"), newEntityTypeFromName("villager"));
-        register(CatalogKey.resolve("zombie_villager"), newEntityTypeFromName("zombie_villager"));
-        register(CatalogKey.resolve("ender_crystal"), newEntityTypeFromName("ender_crystal"));
-        register(CatalogKey.resolve("shulker"), newEntityTypeFromName("shulker"));
-        register(CatalogKey.resolve("shulker_bullet"), newEntityTypeFromName("shulker_bullet"));
-        register(CatalogKey.resolve("spectral_arrow"), newEntityTypeFromName("spectral_arrow"));
-        register(CatalogKey.resolve("polar_bear"), newEntityTypeFromName("polar_bear"));
-        register(CatalogKey.resolve("egg"), new SpongeEntityType(-1, new ResourceLocation("egg"), EntityEgg.class, new SpongeTranslation("item.egg.name")));
-        register(CatalogKey.resolve("fishing_hook"), new SpongeEntityType(-2, new ResourceLocation("FishingHook"), EntityFishHook.class, new SpongeTranslation("item.fishingRod.name")));
-        register(CatalogKey.resolve("lightning"), new SpongeEntityType(-3, new ResourceLocation("lightning"), EntityLightningBolt.class, null));
-        register(CatalogKey.resolve("weather"), new SpongeEntityType(-4, new ResourceLocation("Weather"), EntityWeatherEffect.class, new SpongeTranslation("soundCategory.weather")));
-        register(CatalogKey.resolve("player"), new SpongeEntityType(-5, new ResourceLocation("Player"), EntityPlayerMP.class, new SpongeTranslation("soundCategory.player")));
-        register(CatalogKey.resolve("complex_part"), new SpongeEntityType(-6, new ResourceLocation("ComplexPart"), MultiPartEntityPart.class, null));
-        register(CatalogKey.resolve("human"), registerCustomEntity(EntityHuman.class, "human", "Human", 300, null)); // TODO: Figure out what id to use, as negative ids no longer work
+        newEntityType(CatalogKey.minecraft("llama_spit"));
+        newEntityType(CatalogKey.minecraft("rabbit"));
+        newEntityType(CatalogKey.minecraft("villager"));
+        newEntityType(CatalogKey.minecraft("zombie_villager"));
+        newEntityType(CatalogKey.minecraft("ender_crystal"));
+        newEntityType(CatalogKey.minecraft("shulker"));
+        newEntityType(CatalogKey.minecraft("shulker_bullet"));
+        newEntityType(CatalogKey.minecraft("spectral_arrow"));
+        newEntityType(CatalogKey.minecraft("polar_bear"));
+        register(CatalogKey.minecraft("egg"), new SpongeEntityType(-1, new ResourceLocation("egg"), new ResourceLocation("egg"), EntityEgg.class, new SpongeTranslation("item.egg.name")));
+        register(CatalogKey.minecraft("fishing_hook"), new SpongeEntityType(-2, new ResourceLocation("fishing_hook"), new ResourceLocation("FishingHook"), EntityFishHook.class, new SpongeTranslation("item.fishingRod.name")));
+        register(CatalogKey.minecraft("lightning"), new SpongeEntityType(-3, new ResourceLocation("lightning"), EntityLightningBolt.class, null));
+        register(CatalogKey.minecraft("weather"), new SpongeEntityType(-4, new ResourceLocation("Weather"), EntityWeatherEffect.class, new SpongeTranslation("soundCategory.weather")));
+        register(CatalogKey.minecraft("player"), new SpongeEntityType(-5, new ResourceLocation("Player"), EntityPlayerMP.class, new SpongeTranslation("soundCategory.player")));
+        register(CatalogKey.minecraft("complex_part"), new SpongeEntityType(-6, new ResourceLocation("complex_part"), new ResourceLocation("ComplexPart"), MultiPartEntityPart.class, null));
+        register(CatalogKey.sponge("human"), createHumanEntityType()); // TODO: Figure out what id to use, as negative ids no longer work
         //this.entityClassToTypeMappings.put("human", new SpongeEntityType(-6))
 
-        register(CatalogKey.resolve("parrot"), newEntityTypeFromName("parrot"));
-        register(CatalogKey.resolve("illusion_illager"), newEntityTypeFromName("illusion_illager"));
+        newEntityType(CatalogKey.minecraft("parrot"));
+        newEntityType(CatalogKey.minecraft("illusion_illager"));
         register(CatalogKey.of("unknown", "unknown"), SpongeEntityType.UNKNOWN);
     }
 
-    private SpongeEntityType newEntityTypeFromName(String mcName) {
-        ResourceLocation resourceLoc = new ResourceLocation(mcName);
-        Class<? extends Entity> cls = SpongeImplHooks.getEntityClass(resourceLoc);
-        if (cls == null) {
-            throw new IllegalArgumentException("No class mapping for entity name " + mcName);
+
+
+    private void newEntityType(CatalogKey minecraftKey) {
+        final SpongeEntityType spongeEntityType = newEntityTypeFromName(minecraftKey);
+        register(minecraftKey, spongeEntityType);
+    }
+
+    @Override
+    protected String marshalFieldKey(String key) {
+        return key.replace("minecraft:", "").replace("sponge:", "");
+    }
+
+    @Override
+    protected boolean filterAll(EntityType element) {
+        return element != SpongeEntityType.UNKNOWN;
+    }
+
+    private void newEntityType(CatalogKey spongeKey, CatalogKey minecraftKey) {
+        final SpongeEntityType spongeEntityType = newEntityTypeFromName(minecraftKey);
+        register(spongeKey, spongeEntityType);
+        if (!spongeKey.equals(minecraftKey)) { // Because we do this....
+            register(minecraftKey, spongeEntityType);
         }
-        final SpongeEntityType entityType = new SpongeEntityType(SpongeImplHooks.getEntityId(cls), resourceLoc, cls,
-            new SpongeTranslation("entity." + SpongeImplHooks.getEntityTranslation(resourceLoc) + ".name"));
+    }
+
+    private SpongeEntityType newEntityTypeFromName(CatalogKey minecraftKey) {
+        ResourceLocation minecraftLocation = (ResourceLocation) (Object) minecraftKey;
+        Class<? extends Entity> cls = SpongeImplHooks.getEntityClass(minecraftLocation);
+        if (cls == null) {
+            throw new IllegalArgumentException("No class mapping for entity name " + minecraftLocation);
+        }
+        final SpongeEntityType entityType = new SpongeEntityType(SpongeImplHooks.getEntityId(cls), minecraftLocation, cls,
+            new SpongeTranslation("entity." + SpongeImplHooks.getEntityTranslation(minecraftLocation) + ".name"));
         KeyRegistryModule.getInstance().registerForEntityClass(cls);
         return entityType;
     }
 
-    private SpongeEntityType registerCustomEntity(Class<? extends Entity> entityClass, String entityName, String oldName, int entityId, Translation translation) {
-        this.customEntities.add(new FutureRegistration(entityId, new ResourceLocation(SpongeImpl.ECOSYSTEM_ID, entityName), entityClass, oldName));
-        return new SpongeEntityType(entityId, entityName, SpongeImpl.ECOSYSTEM_NAME, entityClass, translation);
+    private SpongeEntityType createHumanEntityType() {
+        this.customEntities.add(new FutureRegistration(300, new ResourceLocation(SpongeImpl.ECOSYSTEM_ID, "human"), EntityHuman.class, "Human"));
+        return new SpongeEntityType(300, new ResourceLocation("sponge:human"), new ResourceLocation("sponge:human"), EntityHuman.class, null);
     }
 
     @CustomCatalogRegistration
@@ -197,7 +221,8 @@ public final class EntityTypeRegistryModule extends AbstractCatalogRegistryModul
             if (fieldName.equals("UNKNOWN")) {
                 return SpongeEntityType.UNKNOWN;
             }
-            EntityType entityType = this.map.get(CatalogKey.resolve(fieldName));
+            final CatalogKey key = fieldName.equalsIgnoreCase("human") ? CatalogKey.sponge(fieldName) : CatalogKey.minecraft(fieldName);
+            EntityType entityType = this.map.get(key);
             this.entityClassToTypeMappings.put(((SpongeEntityType) entityType).entityClass, entityType);
             return entityType;
         });

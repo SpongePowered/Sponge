@@ -135,6 +135,7 @@ public class SpongeManipulatorRegistry implements SpongeAdditionalCatalogRegistr
         return Optional.ofNullable(this.registrationMap.get(lookup));
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public Optional<DataRegistration<?, ?>> getById(String id) {
         final DataRegistration<?, ?> dataRegistration = this.registrationMap.get(id);

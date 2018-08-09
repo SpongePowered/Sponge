@@ -26,6 +26,7 @@ package org.spongepowered.common.data.builder.block.tileentity;
 
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityBanner;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.tileentity.Banner;
 import org.spongepowered.api.data.DataView;
@@ -57,7 +58,7 @@ public class SpongeBannerBuilder extends AbstractTileBuilder<Banner> {
             final BannerData bannerData = new SpongeBannerData(); // TODO when banner data is implemented.
 
             String dyeColorId = container.getString(DataQueries.BASE).get();
-            Optional<DyeColor> colorOptional = Sponge.getRegistry().getType(DyeColor.class, dyeColorId);
+            Optional<DyeColor> colorOptional = Sponge.getRegistry().getType(DyeColor.class, CatalogKey.resolve(dyeColorId));
             if (!colorOptional.isPresent()) {
                 throw new InvalidDataException("The provided container has an invalid dye color entry!");
             }

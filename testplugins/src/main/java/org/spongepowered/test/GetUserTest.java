@@ -42,7 +42,7 @@ import java.util.concurrent.ExecutionException;
 /*
  * Tests getting a user from a string, ensuring that an empty optional one time is an empty optional all the time.
  */
-@Plugin(id = "get_user", name = "Get User Test")
+@Plugin(id = "get_user", name = "Get User Test", version = "0.0.0", description = "get user test")
 public class GetUserTest {
 
     @Listener

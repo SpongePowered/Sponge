@@ -79,11 +79,9 @@ public final class BreakablePlaceableUtils {
         }
         Set<BlockType> blockTypes = Sets.newHashSetWithExpectedSize(blockIds.tagCount());
         for (int i = 0; i < blockIds.tagCount(); i++) {
-            Optional<BlockType> blockType = SpongeImpl.getGame().getRegistry()
-                    .getType(BlockType.class, blockIds.getStringTagAt(i));
-            if (blockType.isPresent()) {
-                blockTypes.add(blockType.get());
-            }
+            SpongeImpl.getGame().getRegistry()
+                .getType(BlockType.class, CatalogKey.resolve(blockIds.getStringTagAt(i)))
+                .ifPresent(blockTypes::add);
         }
         return Optional.of(blockTypes);
     }

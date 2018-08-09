@@ -44,6 +44,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
+@SuppressWarnings("deprecation")
 public final class ItemTypeRegistryModule implements SpongeAdditionalCatalogRegistryModule<ItemType>, AlternateCatalogRegistryModule<ItemType> {
 
     public static Item NONE_ITEM;

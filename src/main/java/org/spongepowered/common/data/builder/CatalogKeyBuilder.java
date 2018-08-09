@@ -80,6 +80,7 @@ public class CatalogKeyBuilder implements CatalogKey.Builder {
         return (CatalogKey) (Object) new ResourceLocation(this.nameSpace, this.value);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public CatalogKey.Builder from(CatalogKey value) throws UnsupportedOperationException {
         throw new UnsupportedOperationException("Cannot create new CatalogKeys from existing ones!");

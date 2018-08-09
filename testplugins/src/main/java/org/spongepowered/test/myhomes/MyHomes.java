@@ -27,6 +27,7 @@ package org.spongepowered.test.myhomes;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 import org.slf4j.Logger;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.data.DataQuery;
@@ -80,24 +81,24 @@ public class MyHomes {
     public void onKeyRegistration(GameRegistryEvent.Register<Key<?>> event) {
         this.logger.info("onKeyRegistration");
         DEFAULT_HOME = Key.builder()
-            .type(new TypeToken<Value<Home>>() { public static final long serialVersionUID = 1L; })
-            .id("default_home")
+            .type(new TypeToken<Value<Home>>() { private static final long serialVersionUID = 1L; })
+            .key(CatalogKey.of("myhomes","default_home"))
             .name("Default Home")
             .query(DataQuery.of("DefaultHome"))
             .build();
         event.register(DEFAULT_HOME);
 
         HOMES = Key.builder()
-            .type(new TypeToken<MapValue<String, Home>>() { public static final long serialVersionUID = 1L; })
-            .id("homes")
+            .type(new TypeToken<MapValue<String, Home>>() { private static final long serialVersionUID = 1L; })
+            .key(CatalogKey.of("myhomes","homes"))
             .name("Homes")
             .query(DataQuery.of("Homes"))
             .build();
         event.register(HOMES);
 
         FRIENDS = Key.builder()
-            .type(new TypeToken<ListValue<UUID>>() { public static final long serialVersionUID = 1L; })
-            .id("friends")
+            .type(new TypeToken<ListValue<UUID>>() { private static final long serialVersionUID = 1L; })
+            .key(CatalogKey.of("myhomes","friends"))
             .name("Friends")
             .query(DataQuery.of("Friends"))
             .build();

@@ -27,6 +27,7 @@ package org.spongepowered.common.data.processor.multi.tileentity;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.potion.Potion;
 import net.minecraft.tileentity.TileEntityBeacon;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
@@ -92,13 +93,13 @@ public class BeaconDataProcessor extends AbstractTileEntityDataProcessor<TileEnt
             return Optional.of(beaconData);
         }
         if (container.contains(Keys.BEACON_PRIMARY_EFFECT.getQuery())) {
-            PotionEffectType type =
-                    Sponge.getRegistry().getType(PotionEffectType.class, container.getString(Keys.BEACON_PRIMARY_EFFECT.getQuery()).get()).get();
+            final String id = container.getString(Keys.BEACON_PRIMARY_EFFECT.getQuery()).get();
+            PotionEffectType type = Sponge.getRegistry().getType(PotionEffectType.class, CatalogKey.resolve(id)).get();
             beaconData.primaryEffect().set(Optional.of(type));
         }
         if (container.contains(Keys.BEACON_SECONDARY_EFFECT.getQuery())) {
-            PotionEffectType type =
-                    Sponge.getRegistry().getType(PotionEffectType.class, container.getString(Keys.BEACON_SECONDARY_EFFECT.getQuery()).get()).get();
+            final String id = container.getString(Keys.BEACON_SECONDARY_EFFECT.getQuery()).get();
+            PotionEffectType type = Sponge.getRegistry().getType(PotionEffectType.class, CatalogKey.resolve(id)).get();
             beaconData.secondaryEffect().set(Optional.of(type));
         }
         return Optional.of(beaconData);

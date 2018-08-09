@@ -766,7 +766,9 @@ public class MemoryDataView implements DataView {
     public <T extends CatalogType> Optional<T> getCatalogType(DataQuery path, Class<T> catalogType) {
         checkNotNull(path, "path");
         checkNotNull(catalogType, "dummy type");
-        return getString(path).flatMap(string -> Sponge.getRegistry().getType(catalogType, string));
+        return getString(path)
+            .map(CatalogKey::resolve)
+            .flatMap(key -> Sponge.getRegistry().getType(catalogType, key));
     }
 
     @Override
@@ -775,7 +777,8 @@ public class MemoryDataView implements DataView {
         checkNotNull(catalogType, "catalogType");
         return getStringList(path).map(list ->
                 list.stream()
-                        .map(string -> Sponge.getRegistry().getType(catalogType, string))
+                        .map(CatalogKey::resolve)
+                        .map(key -> Sponge.getRegistry().getType(catalogType, key))
                         .filter(Optional::isPresent)
                         .map(Optional::get)
                         .collect(Collectors.toList())

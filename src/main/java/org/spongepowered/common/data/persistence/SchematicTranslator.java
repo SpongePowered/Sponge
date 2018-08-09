@@ -136,7 +136,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
             DataView paletteMap = paletteData.get();
             Set<DataQuery> paletteKeys = paletteMap.getKeys(false);
             for (DataQuery key : paletteKeys) {
-                BlockState state = Sponge.getRegistry().getType(BlockState.class, key.getParts().get(0)).get();
+                BlockState state = Sponge.getRegistry().getType(BlockState.class, CatalogKey.resolve(key.getParts().get(0))).get();
                 ((BimapPalette) palette).assign(state, paletteMap.getInt(key).get());
             }
         } else {

@@ -496,10 +496,10 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                 Transform<World> toTransform = player.getTransform().setLocation(to).setRotation(torot);
                 if (ShouldFire.MOVE_ENTITY_EVENT) {
                     try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                        Sponge.getCauseStackManager().pushCause(player);
+                        frame.pushCause(player);
                         MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), fromTransform, toTransform, player);
                         SpongeImpl.postEvent(event);
-                        Sponge.getCauseStackManager().popCause();
+                        frame.popCause();
                         if (event.isCancelled()) {
                             mixinPlayer.setLocationAndAngles(fromTransform);
                             this.lastMoveLocation = from;
@@ -845,7 +845,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                     Vector3d hitVec = null;
 
                     if (packetIn.getHitVec() == null) {
-                        final RayTraceResult result = SpongeImplHooks.rayTraceEyes(player, SpongeImplHooks.getBlockReachDistance(player));
+                        final RayTraceResult result = SpongeImplHooks.rayTraceEyes(this.player, SpongeImplHooks.getBlockReachDistance(this.player));
                         hitVec = result == null ? null : VecHelper.toVector3d(result.hitVec);
                     }
 

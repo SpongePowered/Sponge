@@ -326,7 +326,7 @@ public class SpongeGameRegistry implements GameRegistry {
         if (registryModule == null) {
             return Optional.empty();
         }
-        return registryModule.getById(id.toLowerCase(Locale.ENGLISH));
+        return registryModule.get(CatalogKey.resolve(id.toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
