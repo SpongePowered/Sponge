@@ -42,7 +42,7 @@ import java.util.Random;
 @Mixin(WorldGenSwamp.class)
 public abstract class MixinWorldGenSwamp extends MixinWorldGenAbstractTree implements PopulatorObject {
 
-    private final CatalogKey key = CatalogKey.minecraft("swap");
+    private final CatalogKey key = CatalogKey.minecraft("swamp");
 
     @Shadow
     public abstract boolean generate(net.minecraft.world.World worldIn, Random rand, BlockPos position);

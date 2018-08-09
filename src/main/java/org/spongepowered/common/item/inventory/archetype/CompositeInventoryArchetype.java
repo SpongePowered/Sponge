@@ -55,7 +55,7 @@ public class CompositeInventoryArchetype implements InventoryArchetype {
                 throw new IllegalStateException(p.getClass().getSimpleName() + ":" + p.getKey() + " is not a DELEGATE property!");
             }
         }
-        this.key = CatalogKey.minecraft(id);
+        this.key = CatalogKey.resolve(id);
         this.name = name;
         this.types = ImmutableList.copyOf(types);
         this.properties = ImmutableMap.copyOf(properties);

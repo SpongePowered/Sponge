@@ -24,72 +24,41 @@
  */
 package org.spongepowered.common.registry.type.item;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
 import net.minecraft.item.ItemFishFood;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.CookedFish;
 import org.spongepowered.api.data.type.CookedFishes;
+import org.spongepowered.api.data.type.Fish;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.data.type.SpongeCookedFish;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
+import org.spongepowered.common.registry.type.MinecraftEnumBasedAlternateCatalogTypeRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-
-public final class CookedFishRegistryModule implements AlternateCatalogRegistryModule<CookedFish> {
-
-    @RegisterCatalog(CookedFishes.class)
-    private final Map<String, CookedFish> fishMap = new HashMap<>();
+@RegisterCatalog(CookedFishes.class)
+public final class CookedFishRegistryModule extends AbstractCatalogRegistryModule<CookedFish>
+    implements AlternateCatalogRegistryModule<CookedFish> {
 
     @Override
-    public Map<String, CookedFish> provideCatalogMap() {
-        Map<String, CookedFish> fishMap = new HashMap<>();
-        for (Map.Entry<String, CookedFish> entry : this.fishMap.entrySet()) {
-            fishMap.put(entry.getKey().replace("cooked.", ""), entry.getValue());
-        }
-        return fishMap;
-    }
-
-    @Override
-    public Optional<CookedFish> getById(String id) {
-        return Optional.ofNullable(this.fishMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Optional<CookedFish> get(CatalogKey key) {
-        return getById(key.toString());
-    }
-
-    @Override
-    public Collection<CookedFish> getAll() {
-        return ImmutableList.copyOf(this.fishMap.values());
+    protected String marshalFieldKey(String key) {
+        return key.replace("cooked.", "");
     }
 
     @Override
     public void registerDefaults() {
-        for (ItemFishFood.FishType fishType : ItemFishFood.FishType.values()) {
-            if (fishType.canCook()) {
-                CookedFish cooked = new SpongeCookedFish(fishType.name(),
-                        new SpongeTranslation("item.fish." + fishType.getUnlocalizedName() + ".cooked.name"), fishType);
-                this.fishMap.put(cooked.getKey().toString().toLowerCase(Locale.ENGLISH), cooked);
-            }
-        }
+        registerAdditional();
     }
 
     @AdditionalRegistration
     public void registerAdditional() {
         for (ItemFishFood.FishType fishType : ItemFishFood.FishType.values()) {
-            if (fishType.canCook() && !this.fishMap.containsKey(fishType.name().toLowerCase(Locale.ENGLISH))) {
-                CookedFish cooked = new SpongeCookedFish(fishType.name(),
+            final CatalogKey key = ((Fish) (Object) fishType).getKey();
+            if (fishType.canCook() && !this.map.containsKey(key)) {
+                CookedFish cooked = new SpongeCookedFish(key,
                         new SpongeTranslation("item.fish." + fishType.getUnlocalizedName() + ".cooked.name"), fishType);
-                this.fishMap.put(cooked.getKey().toString().toLowerCase(Locale.ENGLISH), cooked);
+                this.map.put(cooked.getKey(), cooked);
             }
         }
     }

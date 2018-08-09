@@ -28,22 +28,35 @@ import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
 
+import java.util.function.BiConsumer;
+
 import javax.annotation.Nullable;
 
 final class EventListenerPhaseState extends ListenerPhaseState {
 
+    public final BiConsumer<CauseStackManager.StackFrame, ListenerPhaseContext> LISTENER_MODIFIER = super.getFrameModifier()
+        .andThen((frame, context) -> {
+            final PluginContainer container = context.getSource(PluginContainer.class)
+                .orElseThrow(TrackingUtil.throwWithContext("Expected to be processing on a Listener with plugin!", context));
+            frame.pushCause(container);
+        });
     private boolean hasPrintedEntities = false;
 
     EventListenerPhaseState() {
     }
 
-
+    @Override
+    public BiConsumer<CauseStackManager.StackFrame, ListenerPhaseContext> getFrameModifier() {
+        return this.LISTENER_MODIFIER;
+    }
 
     @Override
     public void unwind(ListenerPhaseContext phaseContext) {

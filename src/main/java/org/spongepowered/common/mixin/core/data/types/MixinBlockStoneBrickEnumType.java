@@ -43,6 +43,8 @@ public abstract class MixinBlockStoneBrickEnumType {
 
     @Shadow public abstract String shadow$getUnlocalizedName();
 
+    @Shadow public abstract String shadow$getName();
+
     @Nullable private Translation translation;
     @Nullable private CatalogKey key;
 

@@ -35,6 +35,7 @@ import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.data.type.SpongeSpawnType;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -42,38 +43,18 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-public class SpawnTypeRegistryModule implements AlternateCatalogRegistryModule<SpawnType>, AdditionalCatalogRegistryModule<SpawnType> {
+@RegisterCatalog(SpawnTypes.class)
+public class SpawnTypeRegistryModule extends AbstractCatalogRegistryModule<SpawnType>
+    implements AlternateCatalogRegistryModule<SpawnType>, AdditionalCatalogRegistryModule<SpawnType> {
 
     public static final SpawnType FORCED = generateType("forced", "Forced");
     public static final SpawnType ENTITY_DEATH = generateType("entity_death", "EntityDeath");
 
-    @RegisterCatalog(SpawnTypes.class)
-    private final Map<String, SpawnType> spawnTypeMap = new HashMap<>();
-
     @Override
     public void registerAdditionalCatalog(SpawnType extraCatalog) {
-        checkArgument(!this.spawnTypeMap.containsKey(extraCatalog.getKey().toString().toLowerCase(Locale.ENGLISH)),
+        checkArgument(!this.map.containsKey(extraCatalog.getKey()),
                 "SpawnType with the same id is already registered: {}", extraCatalog.getKey().toString());
-        this.spawnTypeMap.put(extraCatalog.getKey().toString().toLowerCase(Locale.ENGLISH), extraCatalog);
-    }
-
-    @Override
-    public Optional<SpawnType> getById(String id) {
-        String key = checkNotNull(id).toLowerCase(Locale.ENGLISH);
-        if (!key.contains(":")) {
-            key = "sponge:" + key; // There are no minecraft based spawn types.
-        }
-        return Optional.ofNullable(this.spawnTypeMap.get(key));
-    }
-
-    @Override
-    public Optional<SpawnType> get(CatalogKey key) {
-        return getById(key.toString());
-    }
-
-    @Override
-    public Collection<SpawnType> getAll() {
-        return ImmutableSet.copyOf(this.spawnTypeMap.values());
+        this.map.put(extraCatalog.getKey(), extraCatalog);
     }
 
     @Override
@@ -105,15 +86,7 @@ public class SpawnTypeRegistryModule implements AlternateCatalogRegistryModule<S
     }
 
     private void registerDefault(String id, String name) {
-        this.spawnTypeMap.put("sponge:" + id, generateType(id, name));
+        this.map.put(CatalogKey.sponge(id), generateType(id, name));
     }
 
-    @Override
-    public Map<String, SpawnType> provideCatalogMap() {
-        final HashMap<String, SpawnType> map = new HashMap<>();
-        for (Map.Entry<String, SpawnType> entry : this.spawnTypeMap.entrySet()) {
-            map.put(entry.getKey().replace("sponge:", ""), entry.getValue());
-        }
-        return map;
-    }
 }

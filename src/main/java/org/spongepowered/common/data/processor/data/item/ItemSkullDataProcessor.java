@@ -61,7 +61,7 @@ public class ItemSkullDataProcessor
     @Override
     public Optional<SkullData> fill(DataContainer container, SkullData skullData) {
         return Optional.of(skullData.set(Keys.SKULL_TYPE, SpongeImpl.getGame().getRegistry()
-                .getType(SkullType.class, DataUtil.getData(container, Keys.SKULL_TYPE, String.class)).get()));
+                .getType(SkullType.class, container.getString(Keys.SKULL_TYPE.getQuery()).get()).get()));
     }
 
     @Override

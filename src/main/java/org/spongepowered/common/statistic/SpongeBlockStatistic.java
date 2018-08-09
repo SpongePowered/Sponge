@@ -56,8 +56,8 @@ public final class SpongeBlockStatistic extends StatCrafting implements BlockSta
 
     @Override
     public ItemType getItemType() {
-        return ItemTypeRegistryModule.getInstance().getById(
-            this.statId.substring(this.statId.lastIndexOf('.') + 1)).get();
+        return ItemTypeRegistryModule.getInstance().get(
+            CatalogKey.resolve(this.statId.substring(this.statId.lastIndexOf('.') + 1))).get();
     }
 
     @Override

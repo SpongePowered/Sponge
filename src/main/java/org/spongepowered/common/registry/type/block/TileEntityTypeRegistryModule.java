@@ -30,6 +30,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.tileentity.TileEntityEnderChest;
 import net.minecraft.util.ITickable;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.block.tileentity.TileEntityTypes;
 import org.spongepowered.api.registry.ExtraClassCatalogRegistryModule;
@@ -117,7 +118,7 @@ public final class TileEntityTypeRegistryModule
         final String modId = SpongeImplHooks.getModIdFromClass(clazz);
         final String tileId = modId + ":" + id;
         final TileEntityType tileEntityType =
-                new SpongeTileEntityType((Class<? extends org.spongepowered.api.block.tileentity.TileEntity>) clazz, name, tileId, canTick, modId);
+                new SpongeTileEntityType((Class<? extends org.spongepowered.api.block.tileentity.TileEntity>) clazz, CatalogKey.of(modId, id), canTick);
 
         TileEntityTypeRegistryModule.getInstance().registerAdditionalCatalog(tileEntityType);
     }

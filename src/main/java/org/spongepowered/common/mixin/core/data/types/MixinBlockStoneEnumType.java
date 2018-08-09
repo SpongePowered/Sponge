@@ -50,7 +50,7 @@ public abstract class MixinBlockStoneEnumType {
 
     public CatalogKey stone$getKey() {
         if (this.key == null) {
-            this.key = CatalogKey.minecraft(this.shadow$getUnlocalizedName());
+            this.key = CatalogKey.minecraft(this.shadow$getName());
         }
         return this.key;
     }

@@ -49,7 +49,7 @@ public abstract class MixinBlockStoneSlabNewEnumType {
 
     public CatalogKey slab$getKey() {
         if (this.key == null) {
-            this.key = CatalogKey.minecraft(this.shadow$getUnlocalizedName());
+            this.key = CatalogKey.minecraft(this.shadow$getName());
         }
         return this.key;
     }

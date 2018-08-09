@@ -67,7 +67,7 @@ public class HorseColorRegistryModule extends AbstractPrefixAlternateCatalogType
 
     public static HorseColor getHorseColor(DataView container) {
 
-        return SpongeImpl.getRegistry().getType(HorseColor.class, getData(container, Keys.HORSE_COLOR, String.class)).get();
+        return SpongeImpl.getRegistry().getType(HorseColor.class, container.getString(Keys.HORSE_COLOR.getQuery()).get()).get();
     }
 
     @Override

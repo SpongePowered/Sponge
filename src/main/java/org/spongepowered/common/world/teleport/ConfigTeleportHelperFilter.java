@@ -60,22 +60,22 @@ public class ConfigTeleportHelperFilter implements TeleportHelperFilter {
         if (floorBlockTypes == null) {
             TeleportHelperCategory config = SpongeImpl.getGlobalConfig().getConfig().getTeleportHelper();
             floorBlockTypes = config.getUnsafeFloorBlockIds().stream()
-                    .map(x -> Sponge.getRegistry().getType(BlockType.class, x.toLowerCase(Locale.ENGLISH)).orElse(null))
+                    .map(x -> Sponge.getRegistry().getType(BlockType.class, CatalogKey.resolve(x)).orElse(null))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
 
             floorBlockStates = config.getUnsafeFloorBlockIds().stream()
-                    .map(x -> Sponge.getRegistry().getType(BlockState.class, x.toLowerCase(Locale.ENGLISH)).orElse(null))
+                    .map(x -> Sponge.getRegistry().getType(BlockState.class, CatalogKey.resolve(x)).orElse(null))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
 
             bodyBlockTypes = config.getUnsafeBodyBlockIds().stream()
-                    .map(x -> Sponge.getRegistry().getType(BlockType.class, x.toLowerCase(Locale.ENGLISH)).orElse(null))
+                    .map(x -> Sponge.getRegistry().getType(BlockType.class, CatalogKey.resolve(x)).orElse(null))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
 
             bodyBlockStates = config.getUnsafeBodyBlockIds().stream()
-                    .map(x -> Sponge.getRegistry().getType(BlockState.class, x.toLowerCase(Locale.ENGLISH)).orElse(null))
+                    .map(x -> Sponge.getRegistry().getType(BlockState.class, CatalogKey.resolve(x)).orElse(null))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
         }

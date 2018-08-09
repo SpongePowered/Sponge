@@ -30,6 +30,7 @@ import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataSerializable;
@@ -59,7 +60,7 @@ import javax.annotation.Nullable;
 public final class JsonDataFormat extends SpongeCatalogType implements StringDataFormat {
 
     public JsonDataFormat() {
-        super("json");
+        super(CatalogKey.sponge("json"), "json");
     }
 
     @Override

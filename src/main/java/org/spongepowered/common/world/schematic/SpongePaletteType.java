@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.world.schematic;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.world.schematic.BlockPalette;
 import org.spongepowered.api.world.schematic.BlockPaletteType;
 import org.spongepowered.common.SpongeCatalogType;
@@ -35,7 +36,7 @@ public class SpongePaletteType extends SpongeCatalogType implements BlockPalette
     private final Supplier<BlockPalette> builder;
 
     public SpongePaletteType(String id, Supplier<BlockPalette> builder) {
-        super(id);
+        super(CatalogKey.resolve(id), id);
         this.builder = builder;
     }
 

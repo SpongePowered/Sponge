@@ -25,25 +25,14 @@
 package org.spongepowered.common.data.type;
 
 import com.google.common.base.CaseFormat;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
 import org.spongepowered.common.SpongeCatalogType;
 
 public class SpongeSpawnType extends SpongeCatalogType implements SpawnType {
 
-    private final String name;
-
     public SpongeSpawnType(String id, String name) {
-        super("sponge:" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, id));
-        this.name = name;
+        super(CatalogKey.sponge(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, id)), name);
     }
 
-    public SpongeSpawnType(String id) {
-        super("sponge:" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, id));
-        this.name = id;
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
-    }
 }

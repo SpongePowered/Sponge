@@ -50,7 +50,7 @@ public class SpongeFireworkEffectDataBuilder extends AbstractDataBuilder<Firewor
     protected Optional<FireworkEffect> buildContent(DataView container) throws InvalidDataException {
         if (container.contains(DataQueries.FIREWORK_SHAPE, DataQueries.FIREWORK_COLORS, DataQueries.FIREWORK_FADE_COLORS,
                 DataQueries.FIREWORK_FLICKERS, DataQueries.FIREWORK_TRAILS)) {
-            final String fireworkShapeId = DataUtil.getData(container, DataQueries.FIREWORK_SHAPE, String.class);
+            final String fireworkShapeId = container.getString(DataQueries.FIREWORK_SHAPE).get();
             final Optional<FireworkShape> shapeOptional = Sponge.getRegistry().getType(FireworkShape.class, fireworkShapeId);
             if (!shapeOptional.isPresent()) {
                 throw new InvalidDataException("Could not find the FireworkShape for the provided id: " + fireworkShapeId);

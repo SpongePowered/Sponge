@@ -92,8 +92,8 @@ public final class SpongeEnchantmentBuilder extends AbstractDataBuilder<Enchantm
         if (!container.contains(Queries.ENCHANTMENT_ID, Queries.LEVEL)) {
             return Optional.empty();
         }
-        final String id = DataUtil.getData(container, Queries.ENCHANTMENT_ID, String.class);
-        final int level = DataUtil.getData(container, Queries.LEVEL, Integer.class);
+        final String id = container.getString(Queries.ENCHANTMENT_ID).get();
+        final int level = container.getInt(Queries.LEVEL).get();
         final Optional<EnchantmentType> enchantmentType = Sponge.getRegistry().getType(EnchantmentType.class, id);
         return enchantmentType.map(t -> Enchantment.builder().type(t).level(level).build());
     }

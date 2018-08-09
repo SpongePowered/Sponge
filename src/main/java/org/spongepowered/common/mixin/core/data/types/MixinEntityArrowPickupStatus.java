@@ -50,9 +50,10 @@ public class MixinEntityArrowPickupStatus implements PickupRule {
         this.key = CatalogKey.resolve(this.id);
     }
 
+    @Override
     public CatalogKey getKey() {
         if (this.key == null) {
-            this.key = CatalogKey.minecraft(this.name);
+            this.key = CatalogKey.resolve(this.name);
         }
         return this.key;
     }

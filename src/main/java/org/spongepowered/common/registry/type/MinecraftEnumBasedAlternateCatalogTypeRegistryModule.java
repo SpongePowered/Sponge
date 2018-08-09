@@ -56,19 +56,15 @@ public abstract class MinecraftEnumBasedAlternateCatalogTypeRegistryModule<E ext
     }
 
     @Override
-    public Map<String, T> provideCatalogMap() {
-        final HashMap<String, T> map = new HashMap<>();
-        for (Map.Entry<CatalogKey, T> entry : this.map.entrySet()) {
-            String catalogId = entry.getKey().toString();
-            catalogId = catalogId.replace(this.defaultModIdToPrepend + ":", "");
-            for (String s : this.modIdToFilter) {
-                catalogId = catalogId.replace(s, "");
-            }
-            if (this.catalogIdModifierFunction != null) {
-                catalogId = this.catalogIdModifierFunction.apply(catalogId);
-            }
-            map.put(catalogId, entry.getValue());
+    protected String marshalFieldKey(String key) {
+        String marshaled = key;
+        for (String s : this.modIdToFilter) {
+            marshaled = marshaled.replace(s, "");
         }
-        return map;
+        if (this.catalogIdModifierFunction != null) {
+            return this.catalogIdModifierFunction.apply(marshaled);
+        }
+        return marshaled;
     }
+
 }

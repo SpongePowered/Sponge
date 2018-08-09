@@ -54,7 +54,7 @@ public abstract class MixinWorldGenMegaPineTree extends WorldGenHugeTrees implem
             this.key = CatalogKey.minecraft("mega_tall_taiga");
             this.name = "Mega tall taiga tree";
         } else {
-            this.key = CatalogKey.minecraft("mega_pinty_taiga");
+            this.key = CatalogKey.minecraft("mega_pointy_taiga");
             this.name = "Mega pointy taiga tree";
         }
     }

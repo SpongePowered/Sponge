@@ -44,14 +44,14 @@ public class DataFormatRegistryModule extends AbstractCatalogRegistryModule<Data
     public void registerAdditionalCatalog(DataFormat extraCatalog) {
         checkNotNull(extraCatalog, "CatalogType cannot be null");
         checkArgument(!extraCatalog.getKey().getValue().isEmpty(), "Id cannot be empty");
-        checkArgument(!this.map.containsKey(extraCatalog.getKey().toString()), "Duplicate Id");
+        checkArgument(!this.map.containsKey(extraCatalog.getKey()), "Duplicate Id");
         this.map.put(extraCatalog.getKey(), extraCatalog);
     }
 
     @Override
     public void registerDefaults() {
-        register(CatalogKey.minecraft("nbt"), new NbtDataFormat("nbt"));
-        register(CatalogKey.minecraft("json"), new JsonDataFormat());
-        register(CatalogKey.minecraft("hocon"), new HoconDataFormat("hocon"));
+        register(CatalogKey.sponge("nbt"), new NbtDataFormat("nbt"));
+        register(CatalogKey.sponge("json"), new JsonDataFormat());
+        register(CatalogKey.sponge("hocon"), new HoconDataFormat("hocon"));
     }
 }

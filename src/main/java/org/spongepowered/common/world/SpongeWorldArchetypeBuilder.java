@@ -275,7 +275,7 @@ public class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder {
         spongeSettings.fromBuilder(true);
         spongeSettings.setPortalAgentType(this.portalAgentType);
         spongeSettings.setRandomSeed(this.seedRandomized);
-        SpongeImpl.getRegistry().register(WorldArchetype.class, (WorldArchetype) (Object) settings);
+        WorldArchetypeRegistryModule.getInstance().registerAdditionalCatalog((WorldArchetype) (Object) settings);
         return (WorldArchetype) (Object) settings;
     }
 

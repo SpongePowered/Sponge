@@ -26,6 +26,8 @@ package org.spongepowered.common.registry.type.entity;
 
 import com.google.common.collect.ImmutableMap;
 import org.spongepowered.api.data.type.Career;
+import org.spongepowered.api.data.type.Careers;
+import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.common.entity.SpongeCareer;
 import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
@@ -36,6 +38,7 @@ import java.util.Comparator;
 import java.util.Locale;
 import java.util.Map;
 
+@RegisterCatalog(Careers.class)
 @RegistrationDependency(ProfessionRegistryModule.class)
 public class CareerRegistryModule extends AbstractCatalogRegistryModule<Career> implements SpongeAdditionalCatalogRegistryModule<Career> {
 

@@ -81,7 +81,7 @@ public class ParticleOptionRegistryModule extends AbstractCatalogRegistryModule<
     }
 
     private <V> void registerOption(String id, Class<V> valueType, @Nullable Function<V, IllegalArgumentException> valueValidator) {
-        SpongeParticleOption<?> option = new SpongeParticleOption<>("minecraft:" + id, id, valueType, valueValidator);
+        SpongeParticleOption<?> option = new SpongeParticleOption<>(CatalogKey.minecraft(id), valueType, valueValidator);
         this.map.put(CatalogKey.resolve(id), option);
         this.particleOptions.put(option.getKey().toString(), option);
     }

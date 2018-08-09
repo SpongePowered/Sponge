@@ -27,6 +27,7 @@ package org.spongepowered.common.entity;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import com.google.common.base.MoreObjects;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.common.SpongeCatalogType;
@@ -38,7 +39,7 @@ public class SpongeEntityMeta extends SpongeCatalogType {
     public final int type;
 
     public SpongeEntityMeta(int type, String name) {
-        super(name);
+        super(CatalogKey.resolve(name), name);
         this.type = type;
     }
 

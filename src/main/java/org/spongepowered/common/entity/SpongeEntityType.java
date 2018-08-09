@@ -27,6 +27,7 @@ package org.spongepowered.common.entity;
 import com.google.common.base.MoreObjects;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EnumCreatureType;
+import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.text.translation.Translation;
@@ -88,12 +89,13 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
     public boolean allowsBlockEventCreation = true;
     public boolean allowsEntityEventCreation = true;
 
-    public SpongeEntityType(int id, String name, Class<? extends Entity> clazz, Translation translation) {
-        this(id, name.toLowerCase(Locale.ENGLISH), "minecraft", clazz, translation);
+    public SpongeEntityType(int id, ResourceLocation resourceLoc, Class<? extends Entity> clazz,
+        Translation translation) {
+        this(id, resourceLoc.getResourcePath(), resourceLoc.getResourceDomain(), clazz, translation);
     }
 
     public SpongeEntityType(int id, String name, String modId, Class<? extends Entity> clazz, Translation translation) {
-        super(modId.toLowerCase(Locale.ENGLISH) + ":" + name.toLowerCase(Locale.ENGLISH), check(translation));
+        super(CatalogKey.of(modId, name), check(translation));
         this.entityTypeId = id;
         this.entityName = name.toLowerCase(Locale.ENGLISH);
         this.entityClass = clazz;
@@ -106,11 +108,6 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
             return UNKNOWN.getTranslation();
         }
         return translation;
-    }
-
-    @Override
-    public String getName() {
-        return this.entityName;
     }
 
     public String getModId() {

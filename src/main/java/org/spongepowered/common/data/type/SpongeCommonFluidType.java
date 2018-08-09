@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.type;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.property.PropertyStore;
@@ -45,7 +46,7 @@ public final class SpongeCommonFluidType extends SpongeCatalogType implements Fl
     }
 
     public SpongeCommonFluidType(String id, BlockType base) {
-        super(id);
+        super(CatalogKey.minecraft(id), id);
         this.base = base;
     }
 

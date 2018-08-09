@@ -45,7 +45,7 @@ public abstract class MixinBlockSilverfishEnumType {
 
     public CatalogKey silver$getKey() {
         if (this.key == null) {
-            this.key = CatalogKey.minecraft(this.shadow$getUnlocalizedName());
+            this.key = CatalogKey.minecraft(this.shadow$getName());
         }
         return this.key;
     }

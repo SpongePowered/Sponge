@@ -31,16 +31,10 @@ import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.text.translation.Translation;
 
-// TODO - id's and names should NEVER be the same....
 public abstract class SpongeCatalogType implements CatalogType {
 
     private final CatalogKey key;
     private final String name;
-
-    @Deprecated
-    public SpongeCatalogType(String id) {
-        this(CatalogKey.resolve(id), id);
-    }
 
     public SpongeCatalogType(final CatalogKey key, final String name) {
         this.key = key;
@@ -89,8 +83,13 @@ public abstract class SpongeCatalogType implements CatalogType {
 
         private final Translation translation;
 
+        public Translatable(CatalogKey key, Translation translation) {
+            super(key, translation.get());
+            this.translation = checkNotNull(translation, "translation");
+        }
+
         public Translatable(String id, Translation translation) {
-            super(id);
+            super(CatalogKey.resolve(id), translation.get());
             this.translation = checkNotNull(translation, "translation");
         }
 

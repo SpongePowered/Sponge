@@ -37,6 +37,7 @@ import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.api.world.gen.WorldGeneratorModifiers;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 
 import java.util.Collection;
@@ -46,38 +47,13 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-public class WorldGeneratorModifierRegistryModule implements AlternateCatalogRegistryModule<WorldGeneratorModifier>,
+@RegisterCatalog(WorldGeneratorModifiers.class)
+public class WorldGeneratorModifierRegistryModule extends AbstractCatalogRegistryModule<WorldGeneratorModifier>
+    implements AlternateCatalogRegistryModule<WorldGeneratorModifier>,
         SpongeAdditionalCatalogRegistryModule<WorldGeneratorModifier> {
 
     public static WorldGeneratorModifierRegistryModule getInstance() {
         return Holder.INSTANCE;
-    }
-
-    @RegisterCatalog(WorldGeneratorModifiers.class)
-    private final Map<String, WorldGeneratorModifier> modifierMappings = new HashMap<>();
-
-    @Override
-    public Map<String, WorldGeneratorModifier> provideCatalogMap() {
-        final Map<String, WorldGeneratorModifier> modifierMap = new HashMap<>();
-        for (Map.Entry<String, WorldGeneratorModifier> entry : this.modifierMappings.entrySet()) {
-            modifierMap.put(entry.getKey().replace("sponge:", ""), entry.getValue());
-        }
-        return modifierMap;
-    }
-
-    @Override
-    public Optional<WorldGeneratorModifier> getById(String id) {
-        return Optional.ofNullable(this.modifierMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Optional<WorldGeneratorModifier> get(CatalogKey key) {
-        return getById(key.toString());
-    }
-
-    @Override
-    public Collection<WorldGeneratorModifier> getAll() {
-        return ImmutableList.copyOf(this.modifierMappings.values());
     }
 
     @SuppressWarnings("deprecation")
@@ -96,8 +72,7 @@ public class WorldGeneratorModifierRegistryModule implements AlternateCatalogReg
         checkNotNull(modifier, "modifier");
         final String id = modifier.getKey().toString();
         checkId(id, "World generator ID");
-
-        this.modifierMappings.put(id.toLowerCase(Locale.ENGLISH), modifier);
+        register(modifier);
     }
 
     private void checkId(String id, String subject) {
@@ -128,7 +103,7 @@ public class WorldGeneratorModifierRegistryModule implements AlternateCatalogReg
         for (WorldGeneratorModifier modifier : modifiers) {
             checkNotNull(modifier, "modifier (in collection)");
             final String id = modifier.getKey().toString();
-            checkArgument(this.modifierMappings.containsKey(id.toLowerCase(Locale.ENGLISH)), "unregistered modifier in collection");
+            checkArgument(this.map.containsKey(modifier.getKey()), "unregistered modifier in collection");
             ids.add(id);
         }
         return ids.build();
@@ -145,7 +120,7 @@ public class WorldGeneratorModifierRegistryModule implements AlternateCatalogReg
     public Collection<WorldGeneratorModifier> toModifiers(Collection<String> ids) {
         final List<WorldGeneratorModifier> modifiers = Lists.newArrayList();
         for (String id : ids) {
-            final WorldGeneratorModifier modifier = this.modifierMappings.get(id.toLowerCase(Locale.ENGLISH));
+            final WorldGeneratorModifier modifier = this.map.get(CatalogKey.resolve(id));
             if (modifier != null) {
                 modifiers.add(modifier);
             } else {

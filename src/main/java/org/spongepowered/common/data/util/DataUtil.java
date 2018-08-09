@@ -164,7 +164,7 @@ public final class DataUtil {
         if (clazz.isInstance(object)) {
             return (T) object;
         }
-        throw new InvalidDataException("Could not cast to the correct class type!");
+        throw new InvalidDataException("Could not cast to the correct class type! Found: " + object);
     }
 
     public static <T> T getData(final DataView dataView, final DataQuery query, Class<T> data) throws InvalidDataException {

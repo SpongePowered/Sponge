@@ -54,13 +54,13 @@ public abstract class MixinEnumChatVisibility implements ChatVisibility, IMixinE
     private String id;
     private Translation translation;
     private Set<ChatType> visibleChatTypes;
-    @Nullable private CatalogKey key;
+    private CatalogKey key;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void construct(String name, int i, int i2, String s2, CallbackInfo ci) {
         this.visibleChatTypes = Sets.newHashSet();
 
-        this.id = SpongeImplHooks.getModIdFromClass(this.getClass()) + ":" + ((EntityPlayer.EnumChatVisibility) (Object) this).name().toLowerCase(Locale.ENGLISH);
+        this.key = CatalogKey.of(SpongeImplHooks.getModIdFromClass(this.getClass()), ((EntityPlayer.EnumChatVisibility) (Object) this).name().toLowerCase(Locale.ENGLISH));
         this.translation = new SpongeTranslation(this.resourceKey);
     }
 
@@ -77,9 +77,6 @@ public abstract class MixinEnumChatVisibility implements ChatVisibility, IMixinE
 
     @Override
     public CatalogKey getKey() {
-        if (this.key == null) {
-            this.key = CatalogKey.minecraft(this.getName());
-        }
         return this.key;
     }
 

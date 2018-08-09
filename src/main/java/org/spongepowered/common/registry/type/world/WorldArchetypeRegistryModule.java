@@ -30,11 +30,13 @@ import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
+import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.api.world.DimensionTypes;
 import org.spongepowered.api.world.GeneratorTypes;
 import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.api.world.WorldArchetype;
+import org.spongepowered.api.world.WorldArchetypes;
 import org.spongepowered.api.world.difficulty.Difficulties;
 import org.spongepowered.api.world.gen.WorldGeneratorModifiers;
 import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
@@ -44,6 +46,7 @@ import org.spongepowered.common.registry.type.entity.GameModeRegistryModule;
 import java.util.HashMap;
 import java.util.Map;
 
+@RegisterCatalog(WorldArchetypes.class)
 @RegistrationDependency({GameModeRegistryModule.class, GeneratorTypeRegistryModule.class, DifficultyRegistryModule.class,
                          DimensionTypeRegistryModule.class, SerializationBehaviorRegistryModule.class, WorldGeneratorModifierRegistryModule.class,
                          DataFormatRegistryModule.class})
@@ -96,15 +99,6 @@ public class WorldArchetypeRegistryModule extends AbstractCatalogRegistryModule<
         //checkArgument(!id.startsWith("minecraft:"), "Plugin trying to register a fake minecraft generation settings!");
         //checkArgument(!id.startsWith("sponge:"), "Plugin trying to register a fake sponge generation settings!");
         this.map.put(extraCatalog.getKey(), extraCatalog);
-    }
-
-    @Override
-    public Map<String, WorldArchetype> provideCatalogMap() {
-        Map<String, WorldArchetype> provided = new HashMap<>();
-        for (Map.Entry<CatalogKey, WorldArchetype> entry : this.map.entrySet()) {
-            provided.put(entry.getKey().getValue(), entry.getValue());
-        }
-        return provided;
     }
 
     WorldArchetypeRegistryModule() {

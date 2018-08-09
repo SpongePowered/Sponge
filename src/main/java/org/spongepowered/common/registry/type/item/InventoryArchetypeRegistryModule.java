@@ -93,6 +93,7 @@ public class InventoryArchetypeRegistryModule extends AbstractCatalogRegistryMod
     @Override
     public void registerDefaults() {
         InventoryArchetype SLOT = new SlotArchetype(ImmutableMap.of(CustomInventory.INVENTORY_DIMENSION, new InventoryDimensionImpl(1, 1)));
+        register(SLOT);
         InventoryArchetype MENU_ROW;
         InventoryArchetype MENU_COLUMN;
         InventoryArchetype MENU_GRID;

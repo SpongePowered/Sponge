@@ -275,7 +275,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
             DataQueries.ITEM_DAMAGE_VALUE)) {
             return Optional.empty();
         }
-        final String itemTypeId = getData(container, DataQueries.ITEM_TYPE, String.class);
+        final String itemTypeId = container.getString(DataQueries.ITEM_TYPE).get();
         final int count = getData(container, DataQueries.ITEM_COUNT, Integer.class);
         final ItemType itemType = SpongeImpl.getRegistry().getType(ItemType.class, itemTypeId).orElseThrow(() -> new IllegalStateException("Unable to find item with id: " + itemTypeId));
         final int damage = getData(container, DataQueries.ITEM_DAMAGE_VALUE, Integer.class);
