@@ -360,7 +360,7 @@ public class SpongeCommandFactory {
                     }
 
                     protected Text getChunksInfo(WorldServer worldserver) {
-                        if (((IMixinWorld) worldserver).isFake()) {
+                        if (((IMixinWorld) worldserver).isFake() || worldserver.getWorldInfo() == null) {
                             return Text.of(NEWLINE_TEXT, "Fake world");
                         }
                         return Text.of(NEWLINE_TEXT, key("DimensionId: "), value(WorldManager.getDimensionId(worldserver)), NEWLINE_TEXT,
