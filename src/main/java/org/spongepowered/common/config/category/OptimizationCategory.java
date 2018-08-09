@@ -78,7 +78,12 @@ public class OptimizationCategory extends ConfigCategory {
                                                        + "much faster for better thread checks to ensure stability of sponge's systems.")
     private boolean fasterThreadChecks = true;
 
-    public OptimizationCategory() {  
+    @Setting(value = "map-optimization", comment = "If 'true', re-writes the incredibly inefficient Vanilla Map code.\n"
+            + "This yields enormous performance enhancements when using many maps, but has a tiny chance of breaking mods that invasively modify Vanilla."
+            + "It is strongly reccomended to keep this on, unless explicitly advised otherwise by a Sponge developer")
+    private boolean mapOptimization = true;
+
+    public OptimizationCategory() {
         try {
             // Enabled by default on SpongeVanilla, disabled by default on SpongeForge.
             // Because of how early this constructor gets called, we can't use SpongeImplHooks or even Game
@@ -86,7 +91,7 @@ public class OptimizationCategory extends ConfigCategory {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }  
+    }
 
 
     public StructureSaveCategory getStructureSaveCategory() {
@@ -95,6 +100,10 @@ public class OptimizationCategory extends ConfigCategory {
 
     public boolean useStructureSave() {
         return this.structureSaveCategory.isEnabled();
+    }
+
+    public boolean useMapOptimization() {
+        return this.mapOptimization;
     }
 
     /**
