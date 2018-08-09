@@ -44,8 +44,8 @@ public class DamageModifierTypeRegistryModule extends AbstractCatalogRegistryMod
         register(CatalogKey.minecraft("defensive_potion_effect"), new SpongeDamageModifierType("Defensive PotionEffect", "defensive_potion_effect"));
         register(CatalogKey.minecraft("negative_potion_effect"), new SpongeDamageModifierType("Negative PotionEffect", "negative_potion_effect"));
         register(CatalogKey.minecraft("hard_hat"), new SpongeDamageModifierType("Hard Hat", "hard_hat"));
-        register(CatalogKey.minecraft("shield"), new SpongeDamageModifierType("Shield", "shield"));
-        register(CatalogKey.minecraft("blocking"), this.map.get("shield"));
+        final SpongeDamageModifierType shield = new SpongeDamageModifierType("Shield", "shield");
+        register(CatalogKey.minecraft("shield"), shield);
         register(CatalogKey.minecraft("armor"), new SpongeDamageModifierType("Armor", "armor"));
         register(CatalogKey.minecraft("armor_enchantment"), new SpongeDamageModifierType("Armor Enchantment", "armor_enchantment"));
         register(CatalogKey.minecraft("magic"), new SpongeDamageModifierType("Magic", "magic"));
@@ -55,6 +55,5 @@ public class DamageModifierTypeRegistryModule extends AbstractCatalogRegistryMod
         register(CatalogKey.minecraft("attack_cooldown"), new SpongeDamageModifierType("Attack Cooldown", "attack_cooldown"));
         final DamageModifierType sweeping = new SpongeDamageModifierType("Sweeping", "sweeping");
         register(CatalogKey.minecraft("sweeping"), sweeping);
-        register(CatalogKey.minecraft("sweaping"), sweeping); // TODO: remove
     }
 }

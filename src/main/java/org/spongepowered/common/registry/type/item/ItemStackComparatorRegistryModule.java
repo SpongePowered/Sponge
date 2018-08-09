@@ -51,7 +51,7 @@ public final class ItemStackComparatorRegistryModule implements RegistryModule {
     @Override
     public void registerDefaults() {
 
-        Comparator<ItemStack> type = Comparator.comparing(i -> i.getType().getId());
+        Comparator<ItemStack> type = Comparator.comparing(i -> i.getType().getKey());
         this.comparators.put("type", type);
         Comparator<ItemStack> size = Comparator.comparing(ItemStack::getQuantity);
         this.comparators.put("size", size);

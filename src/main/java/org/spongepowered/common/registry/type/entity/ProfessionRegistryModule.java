@@ -56,6 +56,12 @@ public class ProfessionRegistryModule extends AbstractCatalogRegistryModule<Prof
     public static final Profession BLACKSMITH = new SpongeProfession(3, "minecraft:blacksmith", "blacksmith");
     public static final Profession BUTCHER = new SpongeProfession(4, "minecraft:butcher", "butcher");
     public static final Profession NITWIT = new SpongeProfession(5, "minecraft:nitwit", "nitwit");
+    public static final CatalogKey FARMER_KEY = CatalogKey.minecraft("farmer");
+    public static final CatalogKey LIBRARIAN_KEY = CatalogKey.minecraft("librarian");
+    public static final CatalogKey PRIEST_KEY = CatalogKey.minecraft("priest");
+    public static final CatalogKey BLACKSMITH_KEY = CatalogKey.minecraft("blacksmith");
+    public static final CatalogKey BUTCHER_KEY = CatalogKey.minecraft("butcher");
+    public static final CatalogKey NITWIT_KEY = CatalogKey.minecraft("nitwit");
 
     public static ProfessionRegistryModule getInstance() {
         return Holder.INSTANCE;
@@ -98,12 +104,24 @@ public class ProfessionRegistryModule extends AbstractCatalogRegistryModule<Prof
 
     @Override
     public void registerDefaults() {
-        register(CatalogKey.minecraft("farmer"), FARMER);
-        register(CatalogKey.minecraft("librarian"), LIBRARIAN);
-        register(CatalogKey.minecraft("priest"), PRIEST);
-        register(CatalogKey.minecraft("blacksmith"), BLACKSMITH);
-        register(CatalogKey.minecraft("butcher"), BUTCHER);
-        register(CatalogKey.minecraft("nitwit"), NITWIT);
+        if (this.map.get(FARMER_KEY) == null) {
+            register(FARMER_KEY, FARMER);
+        }
+        if (this.map.get(LIBRARIAN_KEY) == null) {
+            register(LIBRARIAN_KEY, LIBRARIAN);
+        }
+        if (this.map.get(PRIEST_KEY) == null) {
+            register(PRIEST_KEY, PRIEST);
+        }
+        if (this.map.get(BLACKSMITH_KEY) == null) {
+            register(BLACKSMITH_KEY, BLACKSMITH);
+        }
+        if (this.map.get(BUTCHER_KEY) == null) {
+            register(BUTCHER_KEY, BUTCHER);
+        }
+        if (this.map.get(NITWIT_KEY) == null) {
+            register(NITWIT_KEY, NITWIT);
+        }
     }
 
     ProfessionRegistryModule() { }

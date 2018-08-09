@@ -53,6 +53,7 @@ import net.minecraft.world.chunk.storage.AnvilSaveHandler;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.SaveHandler;
 import net.minecraft.world.storage.WorldInfo;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.GameState;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -961,7 +962,7 @@ public final class WorldManager {
 
                 dimensionTypeId = fixDimensionTypeId(dimensionTypeId);
                 org.spongepowered.api.world.DimensionType dimensionType
-                        = Sponge.getRegistry().getType(org.spongepowered.api.world.DimensionType.class, dimensionTypeId).orElse(null);
+                        = Sponge.getRegistry().getType(org.spongepowered.api.world.DimensionType.class, CatalogKey.resolve(dimensionTypeId)).orElse(null);
                 if (dimensionType == null) {
                     SpongeImpl.getLogger().warn("World [{}] (DIM{}) has specified dimension type that is not registered. Skipping...",
                             worldFolderName, dimensionId);

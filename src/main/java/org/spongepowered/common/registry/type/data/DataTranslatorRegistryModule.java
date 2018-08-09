@@ -38,6 +38,7 @@ import org.spongepowered.common.data.persistence.ConfigurateTranslator;
 import org.spongepowered.common.data.persistence.DataSerializers;
 import org.spongepowered.common.data.persistence.LegacySchematicTranslator;
 import org.spongepowered.common.data.persistence.SchematicTranslator;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 
 import java.util.Collection;
@@ -47,46 +48,21 @@ import java.util.Map;
 import java.util.Optional;
 
 @SuppressWarnings("rawtypes")
-public class DataTranslatorRegistryModule implements AlternateCatalogRegistryModule<DataTranslator>, SpongeAdditionalCatalogRegistryModule<DataTranslator> {
+@RegisterCatalog(DataTranslators.class)
+public class DataTranslatorRegistryModule extends AbstractCatalogRegistryModule<DataTranslator>
+    implements AlternateCatalogRegistryModule<DataTranslator>, SpongeAdditionalCatalogRegistryModule<DataTranslator> {
 
     public static DataTranslatorRegistryModule getInstance() {
         return Holder.INSTANCE;
     }
 
-    @RegisterCatalog(DataTranslators.class)
-    private final Map<String, DataTranslator> dataTranslatorMappings = new HashMap<>();
-
-    @Override
-    public Map<String, DataTranslator> provideCatalogMap() {
-        final Map<String, DataTranslator> modifierMap = new HashMap<>();
-        for (Map.Entry<String, DataTranslator> entry : this.dataTranslatorMappings.entrySet()) {
-            modifierMap.put(entry.getKey().replace("sponge:", ""), entry.getValue());
-        }
-        return modifierMap;
-    }
-
-    
-    @Override
-    public Optional<DataTranslator> getById(String id) {
-        return Optional.ofNullable(this.dataTranslatorMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Optional<DataTranslator> get(CatalogKey key) {
-        return getById(key.toString());
-    }
-
-    @Override
-    public Collection<DataTranslator> getAll() {
-        return ImmutableList.copyOf(this.dataTranslatorMappings.values());
-    }
 
     @Override
     public void registerAdditionalCatalog(DataTranslator extraCatalog) {
         checkNotNull(extraCatalog, "CatalogType cannot be null");
         checkArgument(!extraCatalog.getKey().getValue().isEmpty(), "Id cannot be empty");
-        checkArgument(!this.dataTranslatorMappings.containsKey(extraCatalog.getKey().toString()), "Duplicate Id");
-        this.dataTranslatorMappings.put(extraCatalog.getKey().toString(), extraCatalog);
+        checkArgument(!this.map.containsKey(extraCatalog.getKey().toString()), "Duplicate Id");
+        this.map.put(extraCatalog.getKey(), extraCatalog);
     }
 
     @Override

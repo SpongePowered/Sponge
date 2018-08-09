@@ -32,31 +32,22 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import javax.annotation.Nullable;
+import java.util.Locale;
 
 @Mixin(BossInfo.Overlay.class)
 public class MixinBossInfoOverlay implements BossBarOverlay {
 
     private String name;
-    private String id;
-    @Nullable private CatalogKey key;
+    private CatalogKey key;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void construct(CallbackInfo ci) {
         this.name = ((Enum<?>) (Object) this).name();
-        this.id = this.name.toLowerCase();
-    }
-
-    @Override
-    public String getId() {
-        return this.id;
+        this.key = CatalogKey.resolve(this.name.toLowerCase(Locale.ENGLISH));
     }
 
     @Override
     public CatalogKey getKey() {
-        if (this.key == null) {
-            this.key = CatalogKey.resolve(this.id);
-        }
         return this.key;
     }
 

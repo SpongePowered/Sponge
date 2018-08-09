@@ -59,14 +59,10 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
             return "Unknown";
         }
 
-        @Override
-        public String getId() {
-            return "unknown:unknown";
-        }
 
         @Override
         public CatalogKey getKey() {
-            return key;
+            return this.key;
         }
 
         @Override

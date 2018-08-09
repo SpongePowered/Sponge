@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.advancement;
 
 import net.minecraft.advancements.ICriterionTrigger;
 import net.minecraft.util.ResourceLocation;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTriggerConfiguration;
 import org.spongepowered.api.advancement.criteria.trigger.Trigger;
@@ -43,8 +44,8 @@ public interface MixinICriterionTrigger extends ITrigger {
 
     @Shadow ResourceLocation getId();
 
-    default String type$getId() {
-        return getId().toString();
+    default CatalogKey type$getKey() {
+        return (CatalogKey) (Object) getId();
     }
 
     default String type$getName() {

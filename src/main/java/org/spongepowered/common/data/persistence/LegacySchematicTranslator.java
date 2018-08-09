@@ -75,11 +75,6 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
     }
 
     @Override
-    public String getId() {
-        return "sponge:legacy_schematic";
-    }
-
-    @Override
     public CatalogKey getKey() {
         return KEY;
     }

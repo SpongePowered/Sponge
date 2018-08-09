@@ -33,26 +33,19 @@ import javax.annotation.Nullable;
 
 public final class SpongeStatisticType implements StatisticType {
 
-    private final String id;
     private final CatalogKey key;
     @Nullable private Translation translation;
 
     public SpongeStatisticType(String id) {
-        this.id = id;
-        this.key = CatalogKey.resolve(this.id);
+        this.key = CatalogKey.resolve(id);
     }
 
     @Override
     public Translation getTranslation() {
         if (this.translation == null) {
-            this.translation = new SpongeTranslation("sponge.statistic.type." + this.id);
+            this.translation = new SpongeTranslation("sponge.statistic.type." + this.key.toString());
         }
         return this.translation;
-    }
-
-    @Override
-    public String getId() {
-        return this.id;
     }
 
     @Override
@@ -62,7 +55,7 @@ public final class SpongeStatisticType implements StatisticType {
 
     @Override
     public String getName() {
-        return this.id;
+        return this.key.getValue();
     }
 
 }

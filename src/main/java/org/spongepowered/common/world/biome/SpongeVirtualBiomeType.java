@@ -64,11 +64,6 @@ public class SpongeVirtualBiomeType implements VirtualBiomeType {
     }
 
     @Override
-    public String getId() {
-        return this.id.toString();
-    }
-
-    @Override
     public CatalogKey getKey() {
         return this.id;
     }

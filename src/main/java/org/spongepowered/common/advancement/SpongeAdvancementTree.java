@@ -35,20 +35,13 @@ import java.util.Optional;
 public class SpongeAdvancementTree implements AdvancementTree {
 
     private final Advancement rootAdvancement;
-    private final String id;
     private final String name;
     private final CatalogKey key;
 
     public SpongeAdvancementTree(Advancement rootAdvancement, String id, String name) {
         this.rootAdvancement = rootAdvancement;
         this.name = name;
-        this.id = id;
         this.key = CatalogKey.resolve(id);
-    }
-
-    @Override
-    public String getId() {
-        return this.id;
     }
 
     @Override

@@ -42,7 +42,6 @@ import javax.annotation.Nullable;
 
 public class CompositeInventoryArchetype implements InventoryArchetype {
 
-    private final String id;
     private final CatalogKey key;
     private final String name;
     private final List<InventoryArchetype> types;
@@ -57,16 +56,10 @@ public class CompositeInventoryArchetype implements InventoryArchetype {
             }
         }
         this.key = CatalogKey.minecraft(id);
-        this.id = id;
         this.name = name;
         this.types = ImmutableList.copyOf(types);
         this.properties = ImmutableMap.copyOf(properties);
         this.containerProvider = containerProvider;
-    }
-
-    @Override
-    public String getId() {
-        return this.id;
     }
 
     @Override

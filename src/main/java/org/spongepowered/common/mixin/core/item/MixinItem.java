@@ -63,11 +63,6 @@ public abstract class MixinItem implements ItemType, IMixinItem, SpongeGameDicti
     @Nullable private org.spongepowered.api.item.inventory.ItemStack propertyItemStack;
 
     @Override
-    public String getId() {
-        return Item.REGISTRY.getNameForObject((Item) (Object) this).toString();
-    }
-
-    @Override
     public String getName() {
         return getKey().getValue();
     }

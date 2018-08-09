@@ -1438,7 +1438,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
             at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;fire:I", opcode = Opcodes.PUTFIELD)
     )
     private void onFire(net.minecraft.entity.Entity entity, int ticks) {
-        if (((IMixinWorld) world).isFake() || !ShouldFire.IGNITE_ENTITY_EVENT) {
+        if (((IMixinWorld) this.world).isFake() || !ShouldFire.IGNITE_ENTITY_EVENT) {
             this.fire = ticks; // Vanilla functionality
             return;
         }

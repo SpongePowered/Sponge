@@ -24,8 +24,10 @@
  */
 package org.spongepowered.common.interfaces.potion;
 
+import net.minecraft.util.ResourceLocation;
+
 public interface IMixinPotion {
 
-    void setId(String id);
+    void setId(ResourceLocation id);
 
 }

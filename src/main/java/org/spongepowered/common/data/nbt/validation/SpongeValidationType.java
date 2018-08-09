@@ -28,19 +28,12 @@ import org.spongepowered.api.CatalogKey;
 
 public class SpongeValidationType implements ValidationType {
 
-    private final String id;
     private final String name;
     private final CatalogKey key;
 
     public SpongeValidationType(String id, String name) {
-        this.id = id;
         this.key = CatalogKey.resolve(id);
         this.name = name;
-    }
-
-    @Override
-    public String getId() {
-        return this.id;
     }
 
     @Override

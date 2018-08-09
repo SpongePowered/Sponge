@@ -33,24 +33,15 @@ import org.spongepowered.api.CatalogType;
 
 public class SpongeShapedRecipe extends ShapedRecipes implements CatalogType {
 
-    private final String id;
-    private CatalogKey key;
+    private final CatalogKey key;
 
     public SpongeShapedRecipe(String id, String groupName, int width, int height, NonNullList<Ingredient> ingredients, ItemStack itemStack) {
         super(groupName, width, height, ingredients, itemStack);
-        this.id = id;
-    }
-
-    @Override
-    public String getId() {
-        return this.id;
+        this.key = CatalogKey.resolve(id);
     }
 
     @Override
     public CatalogKey getKey() {
-        if (this.key == null) {
-            this.key = CatalogKey.resolve(this.id);
-        }
         return this.key;
     }
 

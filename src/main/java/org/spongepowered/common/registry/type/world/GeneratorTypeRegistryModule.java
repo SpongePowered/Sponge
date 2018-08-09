@@ -56,7 +56,9 @@ public final class GeneratorTypeRegistryModule extends AbstractPrefixAlternateCa
     @Override
     public void registerDefaults() {
         for (WorldType worldType : WorldType.WORLD_TYPES) {
-            this.registerAdditionalCatalog((GeneratorType) worldType);
+            if (worldType != null) {
+                this.registerAdditionalCatalog((GeneratorType) worldType);
+            }
         }
         this.registerAdditionalCatalog((GeneratorType) new SpongeWorldTypeEnd());
         this.registerAdditionalCatalog((GeneratorType) new SpongeWorldTypeNether());
@@ -78,9 +80,8 @@ public final class GeneratorTypeRegistryModule extends AbstractPrefixAlternateCa
     public Map<String, GeneratorType> provideCatalogMap() {
         final HashMap<String, GeneratorType> map = new HashMap<>();
         for (Map.Entry<CatalogKey, GeneratorType> entry : this.map.entrySet()) {
-            final String namespace = entry.getKey().getNamespace().replace("minecraft:", "").replace("sponge:", "");
             final String value = entry.getKey().getValue().replace("debug_all_block_states", "debug");
-            map.put(namespace + ":" + value, entry.getValue());
+            map.put(value, entry.getValue());
         }
         return map;
     }

@@ -30,19 +30,12 @@ import org.spongepowered.api.service.economy.transaction.TransactionType;
 
 public class SpongeTransactionType implements TransactionType {
 
-    private final String id;
     private final String name;
     private final CatalogKey key;
 
     public SpongeTransactionType(String id, String name) {
-        this.id = id;
         this.name = name;
         this.key = CatalogKey.resolve(id);
-    }
-
-    @Override
-    public String getId() {
-        return this.id;
     }
 
     @Override
@@ -65,7 +58,7 @@ public class SpongeTransactionType implements TransactionType {
 
     @Override
     public int hashCode() {
-        return java.util.Objects.hash(this.id);
+        return java.util.Objects.hash(this.key);
     }
 
     @Override

@@ -25,14 +25,14 @@
 package org.spongepowered.common.world.teleport;
 
 import net.minecraft.block.material.Material;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.common.block.BlockUtil;
 
 public class NoPortalTeleportHelperFilter extends DefaultTeleportHelperFilter {
 
-    @Override
-    public String getId() {
-        return "sponge:no_portal";
+    public NoPortalTeleportHelperFilter() {
+        super(CatalogKey.sponge("no_portal"));
     }
 
     @Override

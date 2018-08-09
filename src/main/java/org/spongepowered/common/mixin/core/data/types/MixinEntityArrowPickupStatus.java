@@ -34,6 +34,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Locale;
 
+import javax.annotation.Nullable;
+
 @Mixin(EntityArrow.PickupStatus.class)
 public class MixinEntityArrowPickupStatus implements PickupRule {
 
@@ -48,13 +50,10 @@ public class MixinEntityArrowPickupStatus implements PickupRule {
         this.key = CatalogKey.resolve(this.id);
     }
 
-    @Override
-    public String getId() {
-        return this.id;
-    }
-
-    @Override
     public CatalogKey getKey() {
+        if (this.key == null) {
+            this.key = CatalogKey.minecraft(this.name);
+        }
         return this.key;
     }
 

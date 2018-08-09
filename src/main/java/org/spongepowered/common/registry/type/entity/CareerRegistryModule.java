@@ -24,25 +24,17 @@
  */
 package org.spongepowered.common.registry.type.entity;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.spongepowered.api.data.type.Career;
-import org.spongepowered.api.data.type.Careers;
-import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.common.entity.SpongeCareer;
 import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
-import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 
 @RegistrationDependency(ProfessionRegistryModule.class)
 public class CareerRegistryModule extends AbstractCatalogRegistryModule<Career> implements SpongeAdditionalCatalogRegistryModule<Career> {
@@ -113,24 +105,24 @@ public class CareerRegistryModule extends AbstractCatalogRegistryModule<Career> 
 
     @Override
     public void registerDefaults() {
-        register(registerCareer(this.FARMER));
-        register(registerCareer(this.FISHERMAN));
-        register(registerCareer(this.SHEPHERD));
-        register(registerCareer(this.FLETCHER));
+        registerCareer(this.FARMER);
+        registerCareer(this.FISHERMAN);
+        registerCareer(this.SHEPHERD);
+        registerCareer(this.FLETCHER);
 
-        register(registerCareer(this.LIBRARIAN));
-        register(registerCareer(this.CARTOGRAPHER));
+        registerCareer(this.LIBRARIAN);
+        registerCareer(this.CARTOGRAPHER);
 
-        register(registerCareer(this.CLERIC));
+        registerCareer(this.CLERIC);
 
-        register(registerCareer(this.ARMORER));
-        register(registerCareer(this.WEAPON_SMITH));
-        register(registerCareer(this.TOOL_SMITH));
+        registerCareer(this.ARMORER);
+        registerCareer(this.WEAPON_SMITH);
+        registerCareer(this.TOOL_SMITH);
 
-        register(registerCareer(this.BUTCHER));
-        register(registerCareer(this.LEATHERWORKER));
+        registerCareer(this.BUTCHER);
+        registerCareer(this.LEATHERWORKER);
 
-        register(registerCareer(this.NITWIT));
+        registerCareer(this.NITWIT);
     }
 
     CareerRegistryModule() { }

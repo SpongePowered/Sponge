@@ -334,11 +334,6 @@ public abstract class MixinBiome implements BiomeType, IMixinBiome {
     }
 
     @Override
-    public String getId() {
-        return this.id.toString();
-    }
-
-    @Override
     public CatalogKey getKey() {
         return this.id;
     }

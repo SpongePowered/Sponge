@@ -33,24 +33,16 @@ import org.spongepowered.api.CatalogType;
 
 public class SpongeShapelessRecipe extends ShapelessRecipes implements CatalogType {
 
-    private final String id;
-    private CatalogKey key;
+    private final CatalogKey key;
 
     public SpongeShapelessRecipe(String id, String groupName, ItemStack itemStack, NonNullList<Ingredient> ingredients) {
         super(groupName, itemStack, ingredients);
-        this.id = id;
+        this.key = CatalogKey.resolve(id);
     }
 
-    @Override
-    public String getId() {
-        return this.id;
-    }
 
     @Override
     public CatalogKey getKey() {
-        if (this.key == null) {
-            this.key = CatalogKey.resolve(this.id);
-        }
         return this.key;
     }
 

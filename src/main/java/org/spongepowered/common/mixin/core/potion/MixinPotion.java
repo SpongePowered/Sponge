@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableMap;
 import net.minecraft.potion.Potion;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.RegistryNamespaced;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Implements;
@@ -43,6 +44,8 @@ import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Locale;
 import java.util.Map;
+
+import javax.annotation.Nullable;
 
 @Mixin(Potion.class)
 @Implements(@Interface(iface = PotionEffectType.class, prefix = "potion$"))
@@ -70,12 +73,15 @@ public abstract class MixinPotion implements PotionEffectType, IMixinPotion {
 
     private Translation translation;
     private Translation potionTranslation;
-    private String spongeResourceID;
+    @Nullable private CatalogKey key;
 
-    @Intrinsic
-    public String potion$getId() {
-        return this.spongeResourceID;
+    public CatalogKey potion$getKey() {
+        if (this.key == null) { // Just in case???
+            this.key = (CatalogKey) (Object) Potion.REGISTRY.getNameForObject((Potion) (Object) this);
+        }
+        return this.key;
     }
+
 
     @Intrinsic
     public boolean potion$isInstant() {
@@ -107,8 +113,8 @@ public abstract class MixinPotion implements PotionEffectType, IMixinPotion {
     }
 
     @Override
-    public void setId(String id) {
-        this.spongeResourceID = id;
+    public void setId(ResourceLocation id) {
+        this.key = (CatalogKey) (Object) id;
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -116,7 +122,7 @@ public abstract class MixinPotion implements PotionEffectType, IMixinPotion {
     private static void onPotionRegister(RegistryNamespaced registry, int id, Object location, Object potion) {
         final ResourceLocation resource = (ResourceLocation) location;
         final Potion mcPotion = (Potion) potion;
-        ((IMixinPotion) mcPotion).setId(resource.toString().toLowerCase(Locale.ENGLISH));
+        ((IMixinPotion) mcPotion).setId(resource);
         PotionEffectTypeRegistryModule.getInstance().registerFromGameData(resource, (PotionEffectType) mcPotion);
         registry.register(id, location, potion);
     }

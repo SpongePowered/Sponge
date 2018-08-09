@@ -26,12 +26,14 @@ package org.spongepowered.common.mixin.core.block.properties;
 
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyHelper;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.block.trait.BlockTrait;
 import org.spongepowered.api.util.Functional;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.registry.provider.BlockPropertyIdProvider;
 import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
 
 import java.util.Collection;
@@ -52,8 +54,11 @@ import java.util.function.Predicate;
 @Implements(@Interface(iface = BlockTrait.class, prefix = "trait$"))
 public interface MixinIProperty<T extends Comparable<T>> extends IProperty<T> {
 
+
+
     default String trait$getId() {
-        return BlockTypeRegistryModule.getInstance().getIdFor(this);
+        return BlockPropertyIdProvider.getInstance().get(this).map(CatalogKey::toString)
+            .orElseThrow(() -> new IllegalStateException("Unknown registration for Property: " + this));
     }
 
     @Intrinsic

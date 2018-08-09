@@ -46,9 +46,19 @@ public class DefaultTeleportHelperFilter implements TeleportHelperFilter {
     // Materials it is NOT safe to put players on top of.
     private static final Set<Material> NOT_SAFE_FLOOR = ImmutableSet.of(Material.AIR, Material.CACTUS, Material.FIRE, Material.LAVA);
 
+    private final CatalogKey key;
+
+    public DefaultTeleportHelperFilter() {
+        this(CatalogKey.sponge("default"));
+    }
+
+    protected DefaultTeleportHelperFilter(CatalogKey key) {
+        this.key = key;
+    }
+
     @Override
-    public CatalogKey getKey() {
-        return CatalogKey.sponge("default");
+    public final CatalogKey getKey() {
+        return this.key;
     }
 
     @Override

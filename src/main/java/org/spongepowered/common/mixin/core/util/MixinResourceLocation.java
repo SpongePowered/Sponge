@@ -35,20 +35,20 @@ import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(ResourceLocation.class)
 @Implements(@Interface(iface = CatalogKey.class, prefix = "catalog$"))
-public abstract class MixinResourceLocation implements CatalogKey {
+public abstract class MixinResourceLocation {
 
     @Final @Shadow protected String resourceDomain;
     @Final @Shadow protected String resourcePath;
     @Shadow public abstract String shadow$toString();
     @Shadow public abstract int shadow$compareTo(ResourceLocation location);
 
-    @Override
-    public String getNamespace() {
+    @Intrinsic
+    public String catalog$getNamespace() {
         return this.resourceDomain;
     }
 
-    @Override
-    public String getValue() {
+    @Intrinsic
+    public String catalog$getValue() {
         return this.resourcePath;
     }
 
@@ -57,9 +57,8 @@ public abstract class MixinResourceLocation implements CatalogKey {
         return shadow$toString();
     }
 
-    @Override
     @Intrinsic
-    public int compareTo(CatalogKey o) {
+    public int catalog$compareTo(CatalogKey o) {
         if (o == null) {
             return 1;
         }

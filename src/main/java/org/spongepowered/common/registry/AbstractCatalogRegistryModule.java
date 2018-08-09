@@ -66,8 +66,8 @@ public abstract class AbstractCatalogRegistryModule<C extends CatalogType> imple
     }
 
     protected void register(final CatalogKey key, final C value) {
-        checkState(!this.map.containsKey(key), "duplicate value for key %s", key);
-        this.map.put(value.getKey(), value);
+        checkState(!this.map.containsKey(key), "duplicate value %s for key %s", value, key);
+        this.map.put(key, value);
     }
 
     @Override
@@ -75,6 +75,7 @@ public abstract class AbstractCatalogRegistryModule<C extends CatalogType> imple
         return this.map.getOptional(key);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public final Optional<C> getById(final String id) {
         // Here we can check for default prefixes.

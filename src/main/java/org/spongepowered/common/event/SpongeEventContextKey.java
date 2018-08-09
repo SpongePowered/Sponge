@@ -49,11 +49,6 @@ public final class SpongeEventContextKey<T> implements EventContextKey<T> {
     }
 
     @Override
-    public String getId() {
-        return this.key.toString();
-    }
-
-    @Override
     public CatalogKey getKey() {
         return this.key;
     }

@@ -25,18 +25,26 @@
 package org.spongepowered.common.mixin.core.util;
 
 import net.minecraft.util.EnumHand;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.Locale;
 
+import javax.annotation.Nullable;
+
 @Mixin(EnumHand.class)
 public abstract class MixinEnumHand implements HandType {
 
+    @Nullable private CatalogKey key;
+
     @Override
-    public String getId() {
-        return "minecraft:" + ((EnumHand) (Object) this).name().toLowerCase(Locale.ENGLISH);
+    public CatalogKey getKey() {
+        if (this.key == null) {
+            this.key = CatalogKey.minecraft(((EnumHand) (Object) this).name().toLowerCase(Locale.ENGLISH));
+        }
+        return this.key;
     }
 
     @Override

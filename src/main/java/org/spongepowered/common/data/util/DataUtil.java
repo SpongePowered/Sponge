@@ -118,13 +118,13 @@ public final class DataUtil {
         // any other handling (e.g. for CatalogTypes)
         if (elementToken.isSubtypeOf(TypeToken.of(DataSerializable.class))) {
             object = dataView.getSerializable(key.getQuery(), (Class<DataSerializable>) elementToken.getRawType())
-                .orElseThrow(() -> new InvalidDataException("Missing value for key: " + key.getId()));
+                .orElseThrow(() -> new InvalidDataException("Missing value for key: " + key.getKey()));
         } else if (elementToken.isSubtypeOf(TypeToken.of(CatalogType.class))) {
             object = dataView.getCatalogType(key.getQuery(), (Class<CatalogType>) elementToken.getRawType())
-                .orElseThrow(() -> new InvalidDataException("Missing value for key: " + key.getId()));
+                .orElseThrow(() -> new InvalidDataException("Missing value for key: " + key.getKey()));
         } else if (elementToken.isSubtypeOf(TypeToken.of(Text.class))) {
             final String input = dataView.getString(key.getQuery())
-                    .orElseThrow(() -> new InvalidDataException("Missing value for key: " + key.getId()));
+                    .orElseThrow(() -> new InvalidDataException("Missing value for key: " + key.getKey()));
             object = TextSerializers.PLAIN.deserialize(input);
         } else if (elementToken.isSubtypeOf(TypeToken.of(List.class))) {
             Optional<?> opt;
@@ -134,24 +134,24 @@ public final class DataUtil {
             } else {
                 opt = dataView.getList(key.getQuery());
             }
-            object = opt.orElseThrow(() -> new InvalidDataException("Missing value for key: " + key.getId()));
+            object = opt.orElseThrow(() -> new InvalidDataException("Missing value for key: " + key.getKey()));
         } else if (elementToken.isSubtypeOf(TypeToken.of(Set.class))) {
             final HashSet<Object> set = new HashSet<>();
             set.addAll(dataView.getList(key.getQuery()).orElse(Collections.emptyList()));
             object = set;
         } else if (elementToken.isSubtypeOf(TypeToken.of(Map.class))) {
-            object = dataView.getMap(key.getQuery()).orElseThrow(() -> new InvalidDataException("Missing value for key: " + key.getId()));
+            object = dataView.getMap(key.getQuery()).orElseThrow(() -> new InvalidDataException("Missing value for key: " + key.getKey()));
         } else if (elementToken.isSubtypeOf(TypeToken.of(Enum.class))) {
             object = Enum.valueOf((Class<Enum>) elementToken.getRawType(), dataView.getString(key.getQuery())
-                .orElseThrow(() -> new InvalidDataException("Missing value for key: " + key.getId())));
+                .orElseThrow(() -> new InvalidDataException("Missing value for key: " + key.getKey())));
         } else {
             final Optional<? extends DataTranslator<?>> translator = SpongeDataManager.getInstance().getTranslator(elementToken.getRawType());
             if (translator.isPresent()) {
-                object = translator.map(trans -> trans.translate(dataView.getView(key.getQuery()).orElseThrow(() -> new InvalidDataException("Missing value for key: " + key.getId()))))
-                    .orElseThrow(() -> new InvalidDataException("Could not translate translateable: " + key.getId()));
+                object = translator.map(trans -> trans.translate(dataView.getView(key.getQuery()).orElseThrow(() -> new InvalidDataException("Missing value for key: " + key.getKey()))))
+                    .orElseThrow(() -> new InvalidDataException("Could not translate translateable: " + key.getKey()));
             } else {
                 object = dataView.get(key.getQuery())
-                    .orElseThrow(() -> new InvalidDataException("Could not translate translateable: " + key.getId()));
+                    .orElseThrow(() -> new InvalidDataException("Could not translate translateable: " + key.getKey()));
             }
         }
 

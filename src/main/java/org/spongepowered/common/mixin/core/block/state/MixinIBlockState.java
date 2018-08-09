@@ -144,12 +144,6 @@ public interface MixinIBlockState extends IBlockState, BlockState {
         return (ImmutableMap) getProperties();
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    default String getId() {
-        return getKey().toString();
-    }
-
     @Override
     default CatalogKey getKey() {
         final String nameSpace = ((BlockType) shadow$getBlock()).getKey().getNamespace();

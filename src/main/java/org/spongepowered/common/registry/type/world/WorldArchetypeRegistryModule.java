@@ -30,30 +30,25 @@ import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
-import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.api.world.DimensionTypes;
 import org.spongepowered.api.world.GeneratorTypes;
 import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.api.world.WorldArchetype;
-import org.spongepowered.api.world.WorldArchetypes;
 import org.spongepowered.api.world.difficulty.Difficulties;
 import org.spongepowered.api.world.gen.WorldGeneratorModifiers;
 import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 import org.spongepowered.common.registry.type.data.DataFormatRegistryModule;
 import org.spongepowered.common.registry.type.entity.GameModeRegistryModule;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 
 @RegistrationDependency({GameModeRegistryModule.class, GeneratorTypeRegistryModule.class, DifficultyRegistryModule.class,
-        DimensionTypeRegistryModule.class, SerializationBehaviorRegistryModule.class, WorldGeneratorModifierRegistryModule.class,
-        DataFormatRegistryModule.class})
-public class WorldArchetypeRegistryModule extends AbstractCatalogRegistryModule<WorldArchetype> implements AdditionalCatalogRegistryModule<WorldArchetype>, AlternateCatalogRegistryModule<WorldArchetype> {
+                         DimensionTypeRegistryModule.class, SerializationBehaviorRegistryModule.class, WorldGeneratorModifierRegistryModule.class,
+                         DataFormatRegistryModule.class})
+public class WorldArchetypeRegistryModule extends AbstractCatalogRegistryModule<WorldArchetype>
+    implements AdditionalCatalogRegistryModule<WorldArchetype>, AlternateCatalogRegistryModule<WorldArchetype> {
 
     public static WorldArchetypeRegistryModule getInstance() {
         return Holder.INSTANCE;
@@ -62,38 +57,37 @@ public class WorldArchetypeRegistryModule extends AbstractCatalogRegistryModule<
     @SuppressWarnings("deprecation")
     @Override
     public void registerDefaults() {
+        // Note that we don't have to register them because when we call build, they're registered.
         final WorldArchetype overworld = WorldArchetype.builder()
-                .enabled(true)
-                .loadsOnStartup(true)
-                .keepsSpawnLoaded(true)
-                .generateSpawnOnLoad(true)
-                .commandsAllowed(true)
-                .gameMode(GameModes.SURVIVAL)
-                .generator(GeneratorTypes.DEFAULT)
-                .dimension(DimensionTypes.OVERWORLD)
-                .difficulty(Difficulties.NORMAL)
-                .usesMapFeatures(true)
-                .hardcore(false)
-                .pvp(true)
-                .generateBonusChest(false)
-                .serializationBehavior(SerializationBehaviors.AUTOMATIC)
-                .build("minecraft:overworld", "Overworld");
-        register(CatalogKey.minecraft("overworld"), overworld);
-        register(CatalogKey.minecraft("the_nether"), WorldArchetype.builder()
+            .enabled(true)
+            .loadsOnStartup(true)
+            .keepsSpawnLoaded(true)
+            .generateSpawnOnLoad(true)
+            .commandsAllowed(true)
+            .gameMode(GameModes.SURVIVAL)
+            .generator(GeneratorTypes.DEFAULT)
+            .dimension(DimensionTypes.OVERWORLD)
+            .difficulty(Difficulties.NORMAL)
+            .usesMapFeatures(true)
+            .hardcore(false)
+            .pvp(true)
+            .generateBonusChest(false)
+            .serializationBehavior(SerializationBehaviors.AUTOMATIC)
+            .build("minecraft:overworld", "Overworld");
+        WorldArchetype.builder()
             .from(overworld)
             .generator(GeneratorTypes.NETHER)
             .dimension(DimensionTypes.NETHER)
-            .build("minecraft:the_nether", "The Nether"));
-        register(CatalogKey.minecraft("the_end"), WorldArchetype.builder()
-                .from(overworld)
-                .generator(GeneratorTypes.THE_END)
-                .dimension(DimensionTypes.THE_END)
-                .build("minecraft:the_end", "The End")
-        );
-        register(CatalogKey.minecraft("the_void"), WorldArchetype.builder()
-                .from(overworld)
-                .generatorModifiers(WorldGeneratorModifiers.VOID)
-                .build("sponge:the_void", "The Void"));
+            .build("minecraft:the_nether", "The Nether");
+        WorldArchetype.builder()
+            .from(overworld)
+            .generator(GeneratorTypes.THE_END)
+            .dimension(DimensionTypes.THE_END)
+            .build("minecraft:the_end", "The End");
+        WorldArchetype.builder()
+            .from(overworld)
+            .generatorModifiers(WorldGeneratorModifiers.VOID)
+            .build("sponge:the_void", "The Void");
     }
 
     @Override
@@ -113,7 +107,8 @@ public class WorldArchetypeRegistryModule extends AbstractCatalogRegistryModule<
         return provided;
     }
 
-    WorldArchetypeRegistryModule() {}
+    WorldArchetypeRegistryModule() {
+    }
 
     private static final class Holder {
 

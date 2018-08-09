@@ -76,11 +76,6 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
     }
 
     @Override
-    public String getId() {
-        return "sponge:schematic";
-    }
-
-    @Override
     public CatalogKey getKey() {
         return this.key;
     }

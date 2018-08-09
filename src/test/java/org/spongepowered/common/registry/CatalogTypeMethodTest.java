@@ -157,8 +157,8 @@ public class CatalogTypeMethodTest {
                 if (silent) {
                     // Do nothing
                 } else if (ignore) {
-                    LOG.warn("Catalog Type: {} Id : {} fails to provide translation: '{}' in {} ({})",
-                            this.name, this.catalogId, translationId, this.methodName, this.implementationClass);
+//                    LOG.warn("Catalog Type: {} Id : {} fails to provide translation: '{}' in {} ({})",
+//                            this.name, this.catalogId, translationId, this.methodName, this.implementationClass);
                 } else {
                     throw new RuntimeException("No translation present for " + translationId);
                 }

@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.block.BlockQuartz;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.QuartzType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Final;
@@ -33,6 +34,7 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import javax.annotation.Nullable;
@@ -46,8 +48,13 @@ public abstract class MixinBlockQuartzEnumType {
 
     @Nullable private Translation translation;
 
-    public String quartz$getId() {
-        return "minecraft:" + shadow$getName();
+    @Nullable private CatalogKey key;
+
+    public CatalogKey quartz$getKey() {
+        if (this.key == null) {
+            this.key = CatalogKey.minecraft(this.shadow$getName());
+        }
+        return this.key;
     }
 
     @Intrinsic

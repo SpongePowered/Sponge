@@ -30,6 +30,7 @@ import static org.spongepowered.common.util.ReflectionUtil.findConstructor;
 import com.google.common.reflect.TypeToken;
 import net.minecraft.util.ResourceLocation;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataQuery;
@@ -39,7 +40,9 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.event.EventListener;
 import org.spongepowered.api.event.data.ChangeDataHolderEvent;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.lwts.runner.LaunchWrapperTestRunner;
 
+@RunWith(LaunchWrapperTestRunner.class)
 public class ReflectionTest {
 
     @Test
@@ -99,6 +102,7 @@ public class ReflectionTest {
     public void testImmutableValueCache() {
         final Key<Value<Double>> key = new Key<Value<Double>>() {
 
+            private final CatalogKey key = (CatalogKey) (Object) new ResourceLocation("sponge", "test");
             private final TypeToken<Double> type = new TypeToken<Double>() {
                 private static final long serialVersionUID = 2192586007346356478L;
             };
@@ -108,13 +112,8 @@ public class ReflectionTest {
             };
 
             @Override
-            public String getId() {
-                return "test";
-            }
-
-            @Override
             public CatalogKey getKey() {
-                return (CatalogKey) (Object) new ResourceLocation("sponge", "test");
+                return this.key;
             }
 
             @Override

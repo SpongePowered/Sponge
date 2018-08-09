@@ -33,19 +33,12 @@ import java.util.Locale;
 
 public class SpongeDamageType implements DamageType {
 
-    private String id; // TODO: figure out how to handle mods
     private CatalogKey key;
     private String name;
 
     public SpongeDamageType(String name) {
         this.name = name;
-        this.id = name.toLowerCase(Locale.ENGLISH);
-        this.key = CatalogKey.minecraft(this.id);
-    }
-
-    @Override
-    public String getId() {
-        return this.id;
+        this.key = CatalogKey.minecraft(name.toLowerCase(Locale.ENGLISH));
     }
 
     @Override
@@ -67,18 +60,18 @@ public class SpongeDamageType implements DamageType {
             return false;
         }
         final SpongeDamageType other = (SpongeDamageType) obj;
-        return this.id.equals(other.id);
+        return this.key.equals(other.key);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(this.id, this.name);
+        return Objects.hashCode(this.key, this.name);
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("id", this.id)
+                .add("id", this.key)
                 .add("name", this.name)
                 .toString();
     }

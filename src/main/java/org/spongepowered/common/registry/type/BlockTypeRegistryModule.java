@@ -69,12 +69,6 @@ public class BlockTypeRegistryModule extends AbstractCatalogRegistryModule<Block
         return Holder.INSTANCE;
     }
 
-    private final BiMap<String, BlockTrait<?>> blockTraitMap = HashBiMap.create();
-
-    public String getIdFor(IProperty<?> blockTrait) {
-        return checkNotNull(this.blockTraitMap.inverse().get(blockTrait), "BlockTrait doesn't have a registered id!");
-    }
-
     @Override
     public boolean allowsApiRegistration() {
         return false;
@@ -104,7 +98,7 @@ public class BlockTypeRegistryModule extends AbstractCatalogRegistryModule<Block
         }
         for (Map.Entry<BlockTrait<?>, ?> mapEntry : block.getDefaultState().getTraitMap().entrySet()) {
             BlockTrait<?> property = mapEntry.getKey();
-            final String propertyId = BlockPropertyIdProvider.getIdAndTryRegistration((IProperty<?>) property, (Block) block, id);
+            final CatalogKey propertyId = BlockPropertyIdProvider.getIdAndTryRegistration((IProperty<?>) property, (Block) block, id);
             if (property instanceof IMixinPropertyHolder) {
                 ((IMixinPropertyHolder) property).setId(propertyId);
             }

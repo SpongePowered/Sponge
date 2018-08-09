@@ -31,6 +31,7 @@ import com.google.common.base.CaseFormat;
 import net.minecraft.block.*;
 import net.minecraft.block.properties.IProperty;
 import org.apache.logging.log4j.LogManager;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.common.registry.TypeProvider;
 
 import java.lang.reflect.Field;
@@ -40,30 +41,30 @@ import java.util.IdentityHashMap;
 import java.util.Locale;
 import java.util.Optional;
 
-public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, String> {
+public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, CatalogKey> {
 
-    private final IdentityHashMap<IProperty<?>, String> propertyIdMap = new IdentityHashMap<>();
-    private final HashMap<String, IProperty<?>> idPropertyMap = new HashMap<>();
+    private final IdentityHashMap<IProperty<?>, CatalogKey> propertyIdMap = new IdentityHashMap<>();
+    private final HashMap<CatalogKey, IProperty<?>> idPropertyMap = new HashMap<>();
 
     public static BlockPropertyIdProvider getInstance() {
         return Holder.INSTANCE;
     }
 
     @Override
-    public Optional<String> get(IProperty<?> key) {
+    public Optional<CatalogKey> get(IProperty<?> key) {
         return Optional.ofNullable(this.propertyIdMap.get(checkNotNull(key, "Property cannot be null!")));
     }
 
     @Override
-    public Optional<IProperty<?>> getKey(String value) {
-        return Optional.ofNullable(this.idPropertyMap.get(checkNotNull(value, "Id cannot be null!").toLowerCase(Locale.ENGLISH)));
+    public Optional<IProperty<?>> getKey(CatalogKey value) {
+        return Optional.ofNullable(this.idPropertyMap.get(checkNotNull(value, "Id cannot be null!")));
     }
 
     private boolean isRegistered(IProperty<?> property) {
         return this.propertyIdMap.containsKey(property);
     }
 
-    public static String getIdAndTryRegistration(IProperty<?> property, Block block, String blockId) {
+    public static CatalogKey getIdAndTryRegistration(IProperty<?> property, Block block, String blockId) {
         BlockPropertyIdProvider instance = getInstance();
         checkNotNull(property, "Property is null! Cannot retrieve a registration for a null property!");
         checkNotNull(block, "Block cannot be null!");
@@ -75,14 +76,14 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Strin
         final String lowerCasedBlockId = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, blockId);
         final String modId = lowerCasedBlockId.split(":")[0];
         final String propertyName = property.getName();
-        final String lastAttemptId = lowerCasedBlockId + "_" + property.getName();
+        final CatalogKey lastAttemptId = CatalogKey.of(modId, lowerCasedBlockId + "_" + property.getName());
         try { // Seriously, don't look past this try state. just continue on with your day...
               // I warned you...
             final String originalClass = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, block.getClass().getSimpleName());
             Class<?> blockClass = block.getClass();
             while (true) {
                 if (blockClass == Object.class) {
-                    final String propertyId = modId + ":" + originalClass + "_" + property.getName();
+                    final CatalogKey propertyId = CatalogKey.of(modId, originalClass + "_" + property.getName());
                     LogManager.getLogger("Sponge").warn("Could not find {} owning class, assigning fallback id: {}", property.getName(),
                             propertyId);
                     instance.register(property, propertyId);
@@ -101,7 +102,7 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Strin
                     final String className = field.getDeclaringClass().getSimpleName().replace("Block", "").replace("block", "");
                     final String classNameId = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, className);
                     final String propertyClassName = isStatic ? classNameId : originalClass;
-                    final String combinedId = modId + ":" + propertyClassName + "_" + propertyName.toLowerCase(Locale.ENGLISH);
+                    final CatalogKey combinedId = CatalogKey.of(modId, propertyClassName + "_" + propertyName.toLowerCase(Locale.ENGLISH));
                     if (instance.idPropertyMap.containsKey(combinedId)) {
                         // in this case, we really do have to fall back on the full block id...
                         if (instance.idPropertyMap.containsKey(lastAttemptId)) {
@@ -127,153 +128,153 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Strin
         }
     }
 
-    private void register(IProperty<?> property, String id) {
+    private void register(IProperty<?> property, CatalogKey id) {
         checkArgument(!this.propertyIdMap.containsKey(property), "Property is already registered! Property: " + property.getName()
                                                                  + " is registered as : " + this.propertyIdMap.get(property));
-        this.propertyIdMap.put(property, id.toLowerCase(Locale.ENGLISH));
-        this.idPropertyMap.put(id.toLowerCase(Locale.ENGLISH), property);
+        this.propertyIdMap.put(property, id);
+        this.idPropertyMap.put(id, property);
     }
 
     BlockPropertyIdProvider() {
-        register(BlockHorizontal.FACING, "minecraft:horizontal_facing");
-        register(BlockRotatedPillar.AXIS, "minecraft:pillar_axis");
-        register(BlockDirectional.FACING, "minecraft:directional_facing");
-        register(BlockLog.LOG_AXIS, "minecraft:log_axis");
-        register(BlockNewLog.VARIANT, "minecraft:new_log_variant");
-        register(BlockOldLog.VARIANT, "minecraft:log_variant");
-        register(BlockFarmland.MOISTURE, "minecraft:farmland_moisture");
-        register(BlockPistonBase.EXTENDED, "minecraft:piston_extended");
-        register(BlockVine.NORTH, "minecraft:vine_north");
-        register(BlockVine.EAST, "minecraft:vine_east");
-        register(BlockVine.SOUTH, "minecraft:vine_south");
-        register(BlockVine.WEST, "minecraft:vine_west");
-        register(BlockVine.UP, "minecraft:vine_up");
-        register(BlockRedSandstone.TYPE, "minecraft:red_sandstone_type");
-        register(BlockLiquid.LEVEL, "minecraft:liquid_level");
-        register(BlockReed.AGE, "minecraft:reed_age");
-        register(BlockMycelium.SNOWY, "minecraft:mycelium_snowy");
-        register(BlockColored.COLOR, "minecraft:dyed_color");
-        register(BlockTorch.FACING, "minecraft:torch_facing");
-        register(BlockDirt.SNOWY, "minecraft:dirt_snowy");
-        register(BlockDirt.VARIANT, "minecraft:dirt_variant");
-        register(BlockEndPortalFrame.EYE, "minecraft:end_portal_eye");
-        register(BlockCarpet.COLOR, "minecraft:carpet_color");
-        register(BlockStone.VARIANT, "minecraft:stone_variant");
-        register(BlockHugeMushroom.VARIANT, "minecraft:huge_mushroom_variant");
-        register(BlockSnow.LAYERS, "minecraft:snow_layer");
-        register(BlockWall.UP, "minecraft:wall_up");
-        register(BlockWall.NORTH, "minecraft:wall_north");
-        register(BlockWall.EAST, "minecraft:wall_east");
-        register(BlockWall.SOUTH, "minecraft:wall_south");
-        register(BlockWall.WEST, "minecraft:wall_west");
-        register(BlockWall.VARIANT, "minecraft:wall_variant");
-        register(BlockStairs.HALF, "minecraft:stairs_half");
-        register(BlockStairs.SHAPE, "minecraft:stairs_shape");
-        register(BlockButton.POWERED, "minecraft:button_powered");
-        register(BlockCactus.AGE, "minecraft:cactus_age");
-        register(BlockCrops.AGE, "minecraft:crops_age");
-        register(BlockNetherWart.AGE, "minecraft:nether_wart_age");
-        register(BlockDoublePlant.VARIANT, "minecraft:double_plant_variant");
-        register(BlockDoublePlant.HALF, "minecraft:double_plant_half");
-        register(BlockStem.AGE, "minecraft:stem_age");
-        register(BlockTallGrass.TYPE, "minecraft:tall_grass_type");
-        register(BlockSapling.TYPE, "minecraft:sapling_type");
-        register(BlockSapling.STAGE, "minecraft:sapling_stage");
-        register(BlockPrismarine.VARIANT, "minecraft:prismarine_variant");
-        register(BlockFence.NORTH, "minecraft:fence_north");
-        register(BlockFence.EAST, "minecraft:fence_east");
-        register(BlockFence.SOUTH, "minecraft:fence_south");
-        register(BlockFence.WEST, "minecraft:fence_west");
-        register(BlockSilverfish.VARIANT, "minecraft:disguised_variant");
-        register(BlockPane.NORTH, "minecraft:pane_north");
-        register(BlockPane.EAST, "minecraft:pane_east");
-        register(BlockPane.SOUTH, "minecraft:pane_south");
-        register(BlockPane.WEST, "minecraft:pane_west");
-        register(BlockStainedGlassPane.COLOR, "minecraft:stained_dyed_color");
-        register(BlockQuartz.VARIANT, "minecraft:quartz_variant");
-        register(BlockPistonExtension.TYPE, "minecraft:piston_extension_type");
-        register(BlockPistonExtension.SHORT, "minecraft:piston_extension_short");
-        register(BlockSandStone.TYPE, "minecraft:sand_stone_type");
-        register(BlockPlanks.VARIANT, "minecraft:plank_variant");
-        register(BlockPortal.AXIS, "minecraft:portal_axis");
-        register(BlockStainedGlass.COLOR, "minecraft:stained_glass_color");
-        register(BlockRail.SHAPE, "minecraft:rail_shape");
-        register(BlockRailPowered.POWERED, "minecraft:powered_rail_powered");
-        register(BlockRailPowered.SHAPE, "minecraft:powered_rail_shape");
-        register(BlockRailDetector.POWERED, "minecraft:detector_rail_powered");
-        register(BlockRailDetector.SHAPE, "minecraft:detector_rail_shape");
-        register(BlockLeaves.DECAYABLE, "minecraft:leaves_decay");
-        register(BlockLeaves.CHECK_DECAY, "minecraft:leaves_check_decay");
-        register(BlockOldLeaf.VARIANT, "minecraft:old_leaves_variant");
-        register(BlockNewLeaf.VARIANT, "minecraft:new_leaves_variant");
-        register(BlockGrass.SNOWY, "minecraft:grass_snowy");
-        register(BlockCauldron.LEVEL, "minecraft:cauldron_level");
-        register(BlockBanner.ROTATION, "minecraft:banner_rotation");
-        register(BlockSkull.NODROP, "minecraft:skull_no_drop");
-        register(BlockStandingSign.ROTATION, "minecraft:standing_sign_rotation");
-        register(BlockBrewingStand.HAS_BOTTLE[0], "minecraft:brewing_stand_1_has_bottle");
-        register(BlockBrewingStand.HAS_BOTTLE[1], "minecraft:brewing_stand_2_has_bottle");
-        register(BlockBrewingStand.HAS_BOTTLE[2], "minecraft:brewing_stand_3_has_bottle");
-        register(BlockHopper.ENABLED, "minecraft:hopper_enabled");
-        register(BlockHopper.FACING, "minecraft:hopper_facing");
-        register(BlockFlowerPot.LEGACY_DATA, "minecraft:flower_pot_legacy");
-        register(BlockFlowerPot.CONTENTS, "minecraft:flower_pot_contents");
-        register(BlockDaylightDetector.POWER, "minecraft:daylight_detector_power");
-        register(BlockDispenser.TRIGGERED, "minecraft:dispenser_triggered");
-        register(BlockJukebox.HAS_RECORD, "minecraft:jukebox_has_record");
-        register(BlockSand.VARIANT, "minecraft:sand_variant");
-        register(BlockAnvil.DAMAGE, "minecraft:anvil_damage");
-        register(BlockCake.BITES, "minecraft:cake_bites");
-        register(BlockFire.AGE, "minecraft:fire_age");
-        register(BlockFire.NORTH, "minecraft:fire_north");
-        register(BlockFire.EAST, "minecraft:fire_east");
-        register(BlockFire.SOUTH, "minecraft:fire_south");
-        register(BlockFire.WEST, "minecraft:fire_west");
-        register(BlockFire.UPPER, "minecraft:fire_upper");
-        register(BlockSlab.HALF, "minecraft:slab_half");
-        register(BlockStoneSlabNew.SEAMLESS, "minecraft:stone_slab_new_seamless");
-        register(BlockStoneSlabNew.VARIANT, "minecraft:stone_slab_new_variant");
-        register(BlockStoneSlab.SEAMLESS, "minecraft:stone_slab_seamless");
-        register(BlockStoneSlab.VARIANT, "minecraft:stone_slab_variant");
-        register(BlockWoodSlab.VARIANT, "minecraft:wood_slab_variant");
-        register(BlockSponge.WET, "minecraft:sponge_wet");
-        register(BlockTripWireHook.ATTACHED, "minecraft:trip_wire_hook_attached");
-        register(BlockTripWireHook.POWERED, "minecraft:trip_wire_hook_powered");
-        register(BlockDoor.OPEN, "minecraft:door_open");
-        register(BlockDoor.HINGE, "minecraft:door_hinge");
-        register(BlockDoor.POWERED, "minecraft:door_powered");
-        register(BlockDoor.HALF, "minecraft:door_half");
-        register(BlockStoneBrick.VARIANT, "minecraft:stone_brick_variant");
-        register(BlockLever.FACING, "minecraft:lever_variant");
-        register(BlockLever.POWERED, "minecraft:lever_powered");
-        register(BlockTNT.EXPLODE, "minecraft:tnt_explode");
-        register(BlockBed.PART, "minecraft:bed_part");
-        register(BlockBed.OCCUPIED, "minecraft:bed_occupied");
-        register(BlockRedstoneComparator.MODE, "minecraft:comparator_mode");
-        register(BlockRedstoneComparator.POWERED, "minecraft:comparator_powered");
-        register(BlockCocoa.AGE, "minecraft:cocoa_age");
-        register(BlockFenceGate.IN_WALL, "minecraft:fence_gate_in_wall");
-        register(BlockFenceGate.OPEN, "minecraft:fence_gate_open");
-        register(BlockFenceGate.POWERED, "minecraft:fence_gate_powered");
-        register(BlockRedstoneWire.NORTH, "minecraft:redstone_north");
-        register(BlockRedstoneWire.EAST, "minecraft:redstone_east");
-        register(BlockRedstoneWire.SOUTH, "minecraft:redstone_south");
-        register(BlockRedstoneWire.WEST, "minecraft:redstone_west");
-        register(BlockRedstoneWire.POWER, "minecraft:redstone_power");
-        register(BlockTripWire.POWERED, "minecraft:trip_wire_powered");
-        register(BlockTripWire.ATTACHED, "minecraft:trip_wire_attached");
-        register(BlockTripWire.DISARMED, "minecraft:trip_wire_disarmed");
-        register(BlockTripWire.NORTH, "minecraft:trip_wire_north");
-        register(BlockTripWire.EAST, "minecraft:trip_wire_east");
-        register(BlockTripWire.SOUTH, "minecraft:trip_wire_south");
-        register(BlockTripWire.WEST, "minecraft:trip_wire_west");
-        register(BlockPressurePlateWeighted.POWER, "minecraft:weighted_pressure_plate_power");
-        register(BlockPressurePlate.POWERED, "minecraft:pressure_plate_power");
-        register(BlockTrapDoor.OPEN, "minecraft:trap_door_open");
-        register(BlockTrapDoor.HALF, "minecraft:trap_door_half");
-        register(BlockRedstoneRepeater.DELAY, "minecraft:redstone_repeater_delay");
-        register(BlockRedstoneRepeater.LOCKED, "minecraft:redstone_repeater_locked");
-        register(BlockConcretePowder.COLOR, "minecraft:concrete_powder_color");
+        register(BlockHorizontal.FACING, CatalogKey.minecraft("horizontal_facing"));
+        register(BlockRotatedPillar.AXIS, CatalogKey.minecraft("pillar_axis"));
+        register(BlockDirectional.FACING, CatalogKey.minecraft("directional_facing"));
+        register(BlockLog.LOG_AXIS, CatalogKey.minecraft("log_axis"));
+        register(BlockNewLog.VARIANT, CatalogKey.minecraft("new_log_variant"));
+        register(BlockOldLog.VARIANT, CatalogKey.minecraft("log_variant"));
+        register(BlockFarmland.MOISTURE, CatalogKey.minecraft("farmland_moisture"));
+        register(BlockPistonBase.EXTENDED, CatalogKey.minecraft("piston_extended"));
+        register(BlockVine.NORTH, CatalogKey.minecraft("vine_north"));
+        register(BlockVine.EAST, CatalogKey.minecraft("vine_east"));
+        register(BlockVine.SOUTH, CatalogKey.minecraft("vine_south"));
+        register(BlockVine.WEST, CatalogKey.minecraft("vine_west"));
+        register(BlockVine.UP, CatalogKey.minecraft("vine_up"));
+        register(BlockRedSandstone.TYPE, CatalogKey.minecraft("red_sandstone_type"));
+        register(BlockLiquid.LEVEL, CatalogKey.minecraft("liquid_level"));
+        register(BlockReed.AGE, CatalogKey.minecraft("reed_age"));
+        register(BlockMycelium.SNOWY, CatalogKey.minecraft("mycelium_snowy"));
+        register(BlockColored.COLOR, CatalogKey.minecraft("dyed_color"));
+        register(BlockTorch.FACING, CatalogKey.minecraft("torch_facing"));
+        register(BlockDirt.SNOWY, CatalogKey.minecraft("dirt_snowy"));
+        register(BlockDirt.VARIANT, CatalogKey.minecraft("dirt_variant"));
+        register(BlockEndPortalFrame.EYE, CatalogKey.minecraft("end_portal_eye"));
+        register(BlockCarpet.COLOR, CatalogKey.minecraft("carpet_color"));
+        register(BlockStone.VARIANT, CatalogKey.minecraft("stone_variant"));
+        register(BlockHugeMushroom.VARIANT, CatalogKey.minecraft("huge_mushroom_variant"));
+        register(BlockSnow.LAYERS, CatalogKey.minecraft("snow_layer"));
+        register(BlockWall.UP, CatalogKey.minecraft("wall_up"));
+        register(BlockWall.NORTH, CatalogKey.minecraft("wall_north"));
+        register(BlockWall.EAST, CatalogKey.minecraft("wall_east"));
+        register(BlockWall.SOUTH, CatalogKey.minecraft("wall_south"));
+        register(BlockWall.WEST, CatalogKey.minecraft("wall_west"));
+        register(BlockWall.VARIANT, CatalogKey.minecraft("wall_variant"));
+        register(BlockStairs.HALF, CatalogKey.minecraft("stairs_half"));
+        register(BlockStairs.SHAPE, CatalogKey.minecraft("stairs_shape"));
+        register(BlockButton.POWERED, CatalogKey.minecraft("button_powered"));
+        register(BlockCactus.AGE, CatalogKey.minecraft("cactus_age"));
+        register(BlockCrops.AGE, CatalogKey.minecraft("crops_age"));
+        register(BlockNetherWart.AGE, CatalogKey.minecraft("nether_wart_age"));
+        register(BlockDoublePlant.VARIANT, CatalogKey.minecraft("double_plant_variant"));
+        register(BlockDoublePlant.HALF, CatalogKey.minecraft("double_plant_half"));
+        register(BlockStem.AGE, CatalogKey.minecraft("stem_age"));
+        register(BlockTallGrass.TYPE, CatalogKey.minecraft("tall_grass_type"));
+        register(BlockSapling.TYPE, CatalogKey.minecraft("sapling_type"));
+        register(BlockSapling.STAGE, CatalogKey.minecraft("sapling_stage"));
+        register(BlockPrismarine.VARIANT, CatalogKey.minecraft("prismarine_variant"));
+        register(BlockFence.NORTH, CatalogKey.minecraft("fence_north"));
+        register(BlockFence.EAST, CatalogKey.minecraft("fence_east"));
+        register(BlockFence.SOUTH, CatalogKey.minecraft("fence_south"));
+        register(BlockFence.WEST, CatalogKey.minecraft("fence_west"));
+        register(BlockSilverfish.VARIANT, CatalogKey.minecraft("disguised_variant"));
+        register(BlockPane.NORTH, CatalogKey.minecraft("pane_north"));
+        register(BlockPane.EAST, CatalogKey.minecraft("pane_east"));
+        register(BlockPane.SOUTH, CatalogKey.minecraft("pane_south"));
+        register(BlockPane.WEST, CatalogKey.minecraft("pane_west"));
+        register(BlockStainedGlassPane.COLOR, CatalogKey.minecraft("stained_dyed_color"));
+        register(BlockQuartz.VARIANT, CatalogKey.minecraft("quartz_variant"));
+        register(BlockPistonExtension.TYPE, CatalogKey.minecraft("piston_extension_type"));
+        register(BlockPistonExtension.SHORT, CatalogKey.minecraft("piston_extension_short"));
+        register(BlockSandStone.TYPE, CatalogKey.minecraft("sand_stone_type"));
+        register(BlockPlanks.VARIANT, CatalogKey.minecraft("plank_variant"));
+        register(BlockPortal.AXIS, CatalogKey.minecraft("portal_axis"));
+        register(BlockStainedGlass.COLOR, CatalogKey.minecraft("stained_glass_color"));
+        register(BlockRail.SHAPE, CatalogKey.minecraft("rail_shape"));
+        register(BlockRailPowered.POWERED, CatalogKey.minecraft("powered_rail_powered"));
+        register(BlockRailPowered.SHAPE, CatalogKey.minecraft("powered_rail_shape"));
+        register(BlockRailDetector.POWERED, CatalogKey.minecraft("detector_rail_powered"));
+        register(BlockRailDetector.SHAPE, CatalogKey.minecraft("detector_rail_shape"));
+        register(BlockLeaves.DECAYABLE, CatalogKey.minecraft("leaves_decay"));
+        register(BlockLeaves.CHECK_DECAY, CatalogKey.minecraft("leaves_check_decay"));
+        register(BlockOldLeaf.VARIANT, CatalogKey.minecraft("old_leaves_variant"));
+        register(BlockNewLeaf.VARIANT, CatalogKey.minecraft("new_leaves_variant"));
+        register(BlockGrass.SNOWY, CatalogKey.minecraft("grass_snowy"));
+        register(BlockCauldron.LEVEL, CatalogKey.minecraft("cauldron_level"));
+        register(BlockBanner.ROTATION, CatalogKey.minecraft("banner_rotation"));
+        register(BlockSkull.NODROP, CatalogKey.minecraft("skull_no_drop"));
+        register(BlockStandingSign.ROTATION, CatalogKey.minecraft("standing_sign_rotation"));
+        register(BlockBrewingStand.HAS_BOTTLE[0], CatalogKey.minecraft("brewing_stand_1_has_bottle"));
+        register(BlockBrewingStand.HAS_BOTTLE[1], CatalogKey.minecraft("brewing_stand_2_has_bottle"));
+        register(BlockBrewingStand.HAS_BOTTLE[2], CatalogKey.minecraft("brewing_stand_3_has_bottle"));
+        register(BlockHopper.ENABLED, CatalogKey.minecraft("hopper_enabled"));
+        register(BlockHopper.FACING, CatalogKey.minecraft("hopper_facing"));
+        register(BlockFlowerPot.LEGACY_DATA, CatalogKey.minecraft("flower_pot_legacy"));
+        register(BlockFlowerPot.CONTENTS, CatalogKey.minecraft("flower_pot_contents"));
+        register(BlockDaylightDetector.POWER, CatalogKey.minecraft("daylight_detector_power"));
+        register(BlockDispenser.TRIGGERED, CatalogKey.minecraft("dispenser_triggered"));
+        register(BlockJukebox.HAS_RECORD, CatalogKey.minecraft("jukebox_has_record"));
+        register(BlockSand.VARIANT, CatalogKey.minecraft("sand_variant"));
+        register(BlockAnvil.DAMAGE, CatalogKey.minecraft("anvil_damage"));
+        register(BlockCake.BITES, CatalogKey.minecraft("cake_bites"));
+        register(BlockFire.AGE, CatalogKey.minecraft("fire_age"));
+        register(BlockFire.NORTH, CatalogKey.minecraft("fire_north"));
+        register(BlockFire.EAST, CatalogKey.minecraft("fire_east"));
+        register(BlockFire.SOUTH, CatalogKey.minecraft("fire_south"));
+        register(BlockFire.WEST, CatalogKey.minecraft("fire_west"));
+        register(BlockFire.UPPER, CatalogKey.minecraft("fire_upper"));
+        register(BlockSlab.HALF, CatalogKey.minecraft("slab_half"));
+        register(BlockStoneSlabNew.SEAMLESS, CatalogKey.minecraft("stone_slab_new_seamless"));
+        register(BlockStoneSlabNew.VARIANT, CatalogKey.minecraft("stone_slab_new_variant"));
+        register(BlockStoneSlab.SEAMLESS, CatalogKey.minecraft("stone_slab_seamless"));
+        register(BlockStoneSlab.VARIANT, CatalogKey.minecraft("stone_slab_variant"));
+        register(BlockWoodSlab.VARIANT, CatalogKey.minecraft("wood_slab_variant"));
+        register(BlockSponge.WET, CatalogKey.minecraft("sponge_wet"));
+        register(BlockTripWireHook.ATTACHED, CatalogKey.minecraft("trip_wire_hook_attached"));
+        register(BlockTripWireHook.POWERED, CatalogKey.minecraft("trip_wire_hook_powered"));
+        register(BlockDoor.OPEN, CatalogKey.minecraft("door_open"));
+        register(BlockDoor.HINGE, CatalogKey.minecraft("door_hinge"));
+        register(BlockDoor.POWERED, CatalogKey.minecraft("door_powered"));
+        register(BlockDoor.HALF, CatalogKey.minecraft("door_half"));
+        register(BlockStoneBrick.VARIANT, CatalogKey.minecraft("stone_brick_variant"));
+        register(BlockLever.FACING, CatalogKey.minecraft("lever_variant"));
+        register(BlockLever.POWERED, CatalogKey.minecraft("lever_powered"));
+        register(BlockTNT.EXPLODE, CatalogKey.minecraft("tnt_explode"));
+        register(BlockBed.PART, CatalogKey.minecraft("bed_part"));
+        register(BlockBed.OCCUPIED, CatalogKey.minecraft("bed_occupied"));
+        register(BlockRedstoneComparator.MODE, CatalogKey.minecraft("comparator_mode"));
+        register(BlockRedstoneComparator.POWERED, CatalogKey.minecraft("comparator_powered"));
+        register(BlockCocoa.AGE, CatalogKey.minecraft("cocoa_age"));
+        register(BlockFenceGate.IN_WALL, CatalogKey.minecraft("fence_gate_in_wall"));
+        register(BlockFenceGate.OPEN, CatalogKey.minecraft("fence_gate_open"));
+        register(BlockFenceGate.POWERED, CatalogKey.minecraft("fence_gate_powered"));
+        register(BlockRedstoneWire.NORTH, CatalogKey.minecraft("redstone_north"));
+        register(BlockRedstoneWire.EAST, CatalogKey.minecraft("redstone_east"));
+        register(BlockRedstoneWire.SOUTH, CatalogKey.minecraft("redstone_south"));
+        register(BlockRedstoneWire.WEST, CatalogKey.minecraft("redstone_west"));
+        register(BlockRedstoneWire.POWER, CatalogKey.minecraft("redstone_power"));
+        register(BlockTripWire.POWERED, CatalogKey.minecraft("trip_wire_powered"));
+        register(BlockTripWire.ATTACHED, CatalogKey.minecraft("trip_wire_attached"));
+        register(BlockTripWire.DISARMED, CatalogKey.minecraft("trip_wire_disarmed"));
+        register(BlockTripWire.NORTH, CatalogKey.minecraft("trip_wire_north"));
+        register(BlockTripWire.EAST, CatalogKey.minecraft("trip_wire_east"));
+        register(BlockTripWire.SOUTH, CatalogKey.minecraft("trip_wire_south"));
+        register(BlockTripWire.WEST, CatalogKey.minecraft("trip_wire_west"));
+        register(BlockPressurePlateWeighted.POWER, CatalogKey.minecraft("weighted_pressure_plate_power"));
+        register(BlockPressurePlate.POWERED, CatalogKey.minecraft("pressure_plate_power"));
+        register(BlockTrapDoor.OPEN, CatalogKey.minecraft("trap_door_open"));
+        register(BlockTrapDoor.HALF, CatalogKey.minecraft("trap_door_half"));
+        register(BlockRedstoneRepeater.DELAY, CatalogKey.minecraft("redstone_repeater_delay"));
+        register(BlockRedstoneRepeater.LOCKED, CatalogKey.minecraft("redstone_repeater_locked"));
+        register(BlockConcretePowder.COLOR, CatalogKey.minecraft("concrete_powder_color"));
     }
 
     private static final class Holder {

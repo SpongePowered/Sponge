@@ -72,11 +72,6 @@ public class DelegateSpongeCraftingRecipe extends AbstractSpongeCraftingRecipe {
     }
 
     @Override
-    public String getId() {
-        return this.id.toString();
-    }
-
-    @Override
     public CatalogKey getKey() {
         return this.id;
     }

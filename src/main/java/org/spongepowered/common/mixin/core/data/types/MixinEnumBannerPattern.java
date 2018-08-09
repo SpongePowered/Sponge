@@ -48,11 +48,6 @@ public class MixinEnumBannerPattern implements BannerPatternShape {
     }
 
     @Override
-    public String getId() {
-        return this.hashname;
-    }
-
-    @Override
     public CatalogKey getKey() {
         if (this.key == null) {
             this.key = CatalogKey.minecraft(this.hashname);

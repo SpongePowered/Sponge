@@ -132,11 +132,6 @@ public class ConfigurateTranslator implements DataTranslator<ConfigurationNode> 
     }
 
     @Override
-    public String getId() {
-        return "sponge:configuration_node";
-    }
-
-    @Override
     public CatalogKey getKey() {
         return KEY;
     }

@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.block.BlockDoor;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.Hinge;
 import org.spongepowered.api.data.type.Hinges;
 import org.spongepowered.asm.mixin.Implements;
@@ -33,14 +34,22 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
+import javax.annotation.Nullable;
+
 @Mixin(BlockDoor.EnumHingePosition.class)
 @Implements(@Interface(iface = Hinge.class, prefix = "hinge$"))
 public abstract class MixinBlockDoorEnumHingePosition implements Hinge {
 
     @Shadow public abstract String shadow$getName();
 
-    public String hinge$getId() {
-        return "minecraft:" + shadow$getName();
+    @Nullable private CatalogKey key;
+
+    @Override
+    public CatalogKey getKey() {
+        if (this.key == null) {
+            this.key = CatalogKey.minecraft(this.shadow$getName());
+        }
+        return this.key;
     }
 
     @Intrinsic

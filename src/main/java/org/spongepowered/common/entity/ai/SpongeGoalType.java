@@ -31,13 +31,11 @@ import org.spongepowered.api.entity.ai.GoalType;
 
 public final class SpongeGoalType implements GoalType {
 
-    private final String id;
     private final CatalogKey key;
     private final String name;
     private final Class<? extends Goal<?>> goalClass;
 
     public SpongeGoalType(String id, String name, Class<? extends Goal<?>> goalClass) {
-        this.id = id;
         this.name = name;
         this.goalClass = goalClass;
         this.key = CatalogKey.resolve(id);
@@ -46,11 +44,6 @@ public final class SpongeGoalType implements GoalType {
     @Override
     public Class<? extends Goal<?>> getGoalClass() {
         return this.goalClass;
-    }
-
-    @Override
-    public String getId() {
-        return this.id;
     }
 
     @Override
@@ -66,7 +59,7 @@ public final class SpongeGoalType implements GoalType {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-            .addValue(this.id)
+            .addValue(this.key)
             .addValue(this.name)
             .add("goalClass", this.goalClass)
             .toString();

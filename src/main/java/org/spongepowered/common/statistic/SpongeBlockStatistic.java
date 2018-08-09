@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.statistic;
 
+import com.google.common.base.CaseFormat;
 import net.minecraft.item.Item;
 import net.minecraft.stats.StatCrafting;
 import net.minecraft.util.text.ITextComponent;
@@ -42,6 +43,7 @@ import javax.annotation.Nullable;
 public final class SpongeBlockStatistic extends StatCrafting implements BlockStatistic, TypedSpongeStatistic {
 
     private String spongeId;
+    private CatalogKey key;
 
     public SpongeBlockStatistic(String statId, String itemName, ITextComponent statName, Item item) {
         super(statId, itemName, statName, item);
@@ -65,7 +67,10 @@ public final class SpongeBlockStatistic extends StatCrafting implements BlockSta
 
     @Override
     public CatalogKey getKey() {
-        return CatalogKey.resolve(this.spongeId);
+        if (this.key ==  null) {
+            this.key = CatalogKey.resolve(TypedSpongeStatistic.super.getId());
+        }
+        return this.key;
     }
 
     @Override
@@ -82,6 +87,7 @@ public final class SpongeBlockStatistic extends StatCrafting implements BlockSta
     @Override
     public void setSpongeId(String id) {
         this.spongeId = id;
+        this.key = CatalogKey.resolve(id);
     }
 
     @Override

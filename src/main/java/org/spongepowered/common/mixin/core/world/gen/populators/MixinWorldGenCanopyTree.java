@@ -29,6 +29,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.gen.feature.WorldGenAbstractTree;
 import net.minecraft.world.gen.feature.WorldGenCanopyTree;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.asm.mixin.Mixin;
@@ -38,13 +39,15 @@ import java.util.Random;
 @Mixin(WorldGenCanopyTree.class)
 public abstract class MixinWorldGenCanopyTree extends WorldGenAbstractTree implements PopulatorObject {
 
+    private final CatalogKey key = CatalogKey.minecraft("canopy");
+
     public MixinWorldGenCanopyTree(boolean p_i45448_1_) {
         super(p_i45448_1_);
     }
 
     @Override
-    public String getId() {
-        return "minecraft:canopy";
+    public CatalogKey getKey() {
+        return this.key;
     }
 
     @Override

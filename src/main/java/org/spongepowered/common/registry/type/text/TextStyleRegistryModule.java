@@ -45,7 +45,7 @@ public final class TextStyleRegistryModule extends AbstractCatalogRegistryModule
         register(CatalogKey.minecraft("strikethrough"), SpongeTextStyle.of(TextFormatting.STRIKETHROUGH));
         register(CatalogKey.minecraft("obfuscated"), SpongeTextStyle.of(TextFormatting.OBFUSCATED));
         register(CatalogKey.minecraft("reset"), SpongeTextStyle.of(TextFormatting.RESET));
-        register(CatalogKey.minecraft("none"), (TextStyle.Base) TextStyles.NONE);
+        register(CatalogKey.sponge("none"), (TextStyle.Base) TextStyles.NONE);
     }
 
 }

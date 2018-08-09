@@ -31,7 +31,6 @@ import org.spongepowered.common.interfaces.text.IMixinText;
 
 public final class SpongeFormattingCodeTextSerializer implements FormattingCodeTextSerializer {
 
-    private final String id;
     private final CatalogKey key;
     private final String name;
     private final char formattingChar;
@@ -41,15 +40,9 @@ public final class SpongeFormattingCodeTextSerializer implements FormattingCodeT
     }
 
     public SpongeFormattingCodeTextSerializer(String id, String name, char formattingChar) {
-        this.id = id;
         this.name = name;
         this.formattingChar = formattingChar;
         this.key = CatalogKey.resolve(id);
-    }
-
-    @Override
-    public String getId() {
-        return this.id;
     }
 
     @Override

@@ -22,37 +22,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.rotation;
-
-import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.api.util.rotation.Rotation;
-
-@NonnullByDefault
-public class SpongeRotation implements Rotation {
-
-    private final int angle;
-    private final String name;
-    private final CatalogKey key;
-
-    public SpongeRotation(int angle, String id, String name) {
-        this.angle = angle;
-        this.name = name;
-        this.key = CatalogKey.resolve(id);
-    }
-
-    @Override
-    public CatalogKey getKey() {
-        return this.key;
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
-    }
-
-    @Override
-    public int getAngle() {
-        return this.angle;
-    }
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault
+package org.spongepowered.common.mixin.core.sound;

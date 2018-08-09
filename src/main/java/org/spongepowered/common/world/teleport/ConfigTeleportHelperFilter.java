@@ -82,11 +82,6 @@ public class ConfigTeleportHelperFilter implements TeleportHelperFilter {
     }
 
     @Override
-    public String getId() {
-        return "sponge:config";
-    }
-
-    @Override
     public CatalogKey getKey() {
         return KEY;
     }

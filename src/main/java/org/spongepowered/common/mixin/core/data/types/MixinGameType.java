@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.world.GameType;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Implements;
@@ -43,16 +44,17 @@ import javax.annotation.Nullable;
 @Implements(@Interface(iface = GameMode.class, prefix = "gamemode$"))
 public abstract class MixinGameType {
 
-    @Nullable private String spongeId;
-
     @Shadow public abstract String shadow$getName();
 
-    public String gamemode$getId() {
-        if (this.spongeId == null) {
+    @Nullable private String spongeId;
+    @Nullable private CatalogKey key;
+
+    public CatalogKey gamemode$getKey() {
+        if (this.key == null) {
             final String gameTypeName = this.shadow$getName().equals("") ? "not_set" : this.shadow$getName().toLowerCase(Locale.ENGLISH);
-            this.spongeId = SpongeImplHooks.getModIdFromClass(this.getClass()) + ":" + gameTypeName;
+            this.key = CatalogKey.of(SpongeImplHooks.getModIdFromClass(this.getClass()), gameTypeName);
         }
-        return this.spongeId;
+        return this.key;
     }
 
     @Intrinsic

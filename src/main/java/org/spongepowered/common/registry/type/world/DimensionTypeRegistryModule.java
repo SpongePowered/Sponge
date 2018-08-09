@@ -24,28 +24,19 @@
  */
 package org.spongepowered.common.registry.type.world;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.Maps;
-import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.DimensionTypes;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 import org.spongepowered.common.registry.RegistryHelper;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.world.WorldManager;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
+@RegisterCatalog(DimensionTypes.class)
+public final class DimensionTypeRegistryModule extends AbstractCatalogRegistryModule<DimensionType>
+    implements SpongeAdditionalCatalogRegistryModule<DimensionType> {
 
-public final class DimensionTypeRegistryModule implements SpongeAdditionalCatalogRegistryModule<DimensionType> {
-
-    @RegisterCatalog(DimensionTypes.class)
-    private final Map<String, DimensionType> dimensionTypeMappings = Maps.newHashMap();
 
     public static DimensionTypeRegistryModule getInstance() {
         return Holder.instance;
@@ -56,7 +47,7 @@ public final class DimensionTypeRegistryModule implements SpongeAdditionalCatalo
         WorldManager.registerVanillaTypesAndDimensions();
         for (net.minecraft.world.DimensionType dimensionType : WorldManager.getDimensionTypes()) {
             final DimensionType apiDimensionType = (DimensionType) (Object) dimensionType;
-            this.dimensionTypeMappings.put(apiDimensionType.getKey().toString(), apiDimensionType);
+            this.map.put(apiDimensionType.getKey(), apiDimensionType);
         }
     }
 
@@ -67,31 +58,15 @@ public final class DimensionTypeRegistryModule implements SpongeAdditionalCatalo
 
     @Override
     public void registerAdditionalCatalog(DimensionType dimType) {
-        this.dimensionTypeMappings.put(dimType.getKey().toString().toLowerCase(Locale.ENGLISH), dimType);
+        this.map.put(dimType.getKey(), dimType);
         WorldManager.registerDimensionType((net.minecraft.world.DimensionType) (Object) dimType);
     }
 
-    @Override
-    public Optional<DimensionType> getById(String id) {
-        checkNotNull(id);
-        id = WorldManager.fixDimensionTypeId(id);
-        return Optional.ofNullable(this.dimensionTypeMappings.get(id.toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Optional<DimensionType> get(CatalogKey key) {
-        return getById(key.toString());
-    }
-
-    @Override
-    public Collection<DimensionType> getAll() {
-        return Collections.unmodifiableCollection(this.dimensionTypeMappings.values());
-    }
 
     @AdditionalRegistration
     public void reApplyDimensionTypes() {
         // Re-map fields in case mods have changed vanilla providers
-        RegistryHelper.mapFields(DimensionTypes.class, this.dimensionTypeMappings);
+        RegistryHelper.mapFields(DimensionTypes.class, this.provideCatalogMap());
     }
 
     DimensionTypeRegistryModule() {

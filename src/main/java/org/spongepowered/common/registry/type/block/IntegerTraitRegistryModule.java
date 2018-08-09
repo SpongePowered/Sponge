@@ -56,9 +56,9 @@ public final class IntegerTraitRegistryModule
         this.register(extraCatalog);
     }
 
-    public void registerBlock(String id, BlockType block, IntegerTrait property) {
+    public void registerBlock(CatalogKey id, BlockType block, IntegerTrait property) {
         checkNotNull(id, "Id was null!");
-        this.map.put(CatalogKey.resolve(id), property);
+        this.map.put(id, property);
         final String propertyId = block.getKey().toString().toLowerCase(Locale.ENGLISH) + "_" + property.getName().toLowerCase(Locale.ENGLISH);
         this.map.put(CatalogKey.resolve(propertyId), property);
     }

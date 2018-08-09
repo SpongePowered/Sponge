@@ -314,10 +314,6 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
         return container;
     }
 
-    @Override
-    public String getId() {
-        return "sponge:nbt";
-    }
 
     @Override
     public CatalogKey getKey() {

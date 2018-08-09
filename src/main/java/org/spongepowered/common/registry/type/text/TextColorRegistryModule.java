@@ -67,7 +67,7 @@ public final class TextColorRegistryModule extends AbstractCatalogRegistryModule
         addTextColor(TextFormatting.WHITE, Color.WHITE);
         addTextColor(TextFormatting.RESET, Color.WHITE);
 
-        register(CatalogKey.minecraft("none"), TextColors.NONE);
+        register(CatalogKey.sponge("none"), TextColors.NONE);
     }
 
     private void addTextColor(TextFormatting handle, Color color) {

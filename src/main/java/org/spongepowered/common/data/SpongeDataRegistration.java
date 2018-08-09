@@ -90,11 +90,6 @@ public final class SpongeDataRegistration<M extends DataManipulator<M, I>, I ext
     }
 
     @Override
-    public String getId() {
-        return this.id.toString();
-    }
-
-    @Override
     public CatalogKey getKey() {
         return this.id;
     }

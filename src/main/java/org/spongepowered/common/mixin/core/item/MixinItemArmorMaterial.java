@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.item;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemArmor;
 import org.apache.commons.lang3.StringUtils;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.ArmorType;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.asm.mixin.Final;
@@ -50,18 +51,22 @@ public abstract class MixinItemArmorMaterial implements ArmorType {
     // at dev time. Since it's capitalized, the client becomes unable to retrieve
     // the texture, as the resource location is wrong.
     private String capitalizedName;
+    private CatalogKey key;
 
     @Nullable
     private Optional<ItemType> repairItemType;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    public void onConstruct(CallbackInfo ci) {
+    private void onConstruct(CallbackInfo ci) {
         this.capitalizedName = StringUtils.capitalize(this.name);
     }
 
     @Override
-    public String getId() {
-        return "minecraft:" + this.name;
+    public CatalogKey getKey() {
+        if (this.key == null) {
+            this.key = CatalogKey.resolve(this.name);
+        }
+        return this.key;
     }
 
     @Override

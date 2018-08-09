@@ -81,10 +81,6 @@ public interface MixinIRecipe extends CraftingRecipe {
     }
 
     @Override
-    default String getId() {
-        return CraftingManager.REGISTRY.getNameForObject(((IRecipe) this)).toString();
-    }
-    @Override
     default CatalogKey getKey() {
         return (CatalogKey) (Object) CraftingManager.REGISTRY.getNameForObject((IRecipe) this);
     }

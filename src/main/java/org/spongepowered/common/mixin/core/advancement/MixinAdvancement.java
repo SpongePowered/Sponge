@@ -87,7 +87,6 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
     @Nullable private AdvancementTree tree;
     private List<Text> toastText;
     private Text text;
-    private String spongeId;
     private String name;
     private CatalogKey key;
 
@@ -114,7 +113,6 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
         }
         String path = id.getResourcePath();
         this.name = path.replace('/', '_');
-        this.spongeId = id.getResourceDomain() + ':' + this.name;
         this.key = (CatalogKey) (Object) id;
         if (displayIn != null) {
             this.name = SpongeTexts.toPlain(displayIn.getTitle());
@@ -278,12 +276,6 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
     public List<Text> toToastText() {
         checkServer();
         return this.toastText;
-    }
-
-    @Override
-    public String getId() {
-        checkServer();
-        return this.spongeId;
     }
 
     @Override

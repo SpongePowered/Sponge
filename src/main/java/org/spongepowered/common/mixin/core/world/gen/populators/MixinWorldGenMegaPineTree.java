@@ -28,6 +28,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.gen.feature.WorldGenHugeTrees;
 import net.minecraft.world.gen.feature.WorldGenMegaPineTree;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.asm.mixin.Mixin;
@@ -40,8 +41,8 @@ import java.util.Random;
 @Mixin(WorldGenMegaPineTree.class)
 public abstract class MixinWorldGenMegaPineTree extends WorldGenHugeTrees implements PopulatorObject {
     
-    private String id;
     private String name;
+    private CatalogKey key;
 
     public MixinWorldGenMegaPineTree(boolean a, int b, int c, IBlockState d, IBlockState e) {
         super(a, b, c, d, e);
@@ -50,17 +51,17 @@ public abstract class MixinWorldGenMegaPineTree extends WorldGenHugeTrees implem
     @Inject(method = "<init>(ZZ)V", at = @At("RETURN"))
     public void onConstructed(boolean notify, boolean useExtraRandomHeightIn, CallbackInfo ci) {
         if (useExtraRandomHeightIn) {
-            this.id = "minecraft:mega_tall_taiga";
+            this.key = CatalogKey.minecraft("mega_tall_taiga");
             this.name = "Mega tall taiga tree";
         } else {
-            this.id = "minecraft:mega_pointy_taiga";
+            this.key = CatalogKey.minecraft("mega_pinty_taiga");
             this.name = "Mega pointy taiga tree";
         }
     }
 
     @Override
-    public String getId() {
-        return this.id;
+    public CatalogKey getKey() {
+        return this.key;
     }
 
     @Override

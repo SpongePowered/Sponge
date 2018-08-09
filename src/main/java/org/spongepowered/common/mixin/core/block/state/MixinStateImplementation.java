@@ -382,14 +382,6 @@ public abstract class MixinStateImplementation extends BlockStateBase implements
     }
 
     @Override
-    public String getId() {
-        if (this.id == null) {
-            generateId(this.block);
-        }
-        return this.id.toString();
-    }
-
-    @Override
     public CatalogKey getKey() {
         if (this.id == null) {
             generateId(this.block);

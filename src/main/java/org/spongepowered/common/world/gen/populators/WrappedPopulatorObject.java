@@ -46,11 +46,6 @@ public class WrappedPopulatorObject implements PopulatorObject {
     }
 
     @Override
-    public String getId() {
-        return this.id;
-    }
-
-    @Override
     public CatalogKey getKey() {
         return CatalogKey.resolve(this.id);
     }

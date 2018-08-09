@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.item;
 
 import com.google.common.base.MoreObjects;
 import net.minecraft.util.ResourceLocation;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.translation.Translation;
@@ -59,7 +60,7 @@ public abstract class MixinEnchantment implements IMixinEnchantment, Enchantment
     @Shadow public abstract boolean isTreasureEnchantment();
     @Shadow public abstract boolean shadow$isCurse();
 
-    private String id = "";
+    private CatalogKey key;
 
     @Inject(method = "registerEnchantments", at = @At("RETURN"))
     private static void onRegister(CallbackInfo ci) {
@@ -70,12 +71,12 @@ public abstract class MixinEnchantment implements IMixinEnchantment, Enchantment
 
     @Override
     public void setId(ResourceLocation location) {
-        this.id = location.toString();
+        this.key = (CatalogKey) (Object) location;
     }
 
     @Override
-    public String getId() {
-        return this.id;
+    public CatalogKey getKey() {
+        return this.key;
     }
 
     @Override

@@ -26,32 +26,34 @@ package org.spongepowered.common.mixin.core.block.properties;
 
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyHelper;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.block.trait.BlockTrait;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.interfaces.block.IMixinPropertyHolder;
+import org.spongepowered.common.registry.provider.BlockPropertyIdProvider;
 import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
 
 import java.util.Optional;
 
 /**
  * This is retained solely for simplification not having to perform any
- * lookups to the {@link BlockTypeRegistryModule#getIdFor(IProperty)}.
+ * lookups to the {@link BlockPropertyIdProvider#getIdFor(IProperty)}.
  *
  * @param <T> The type of comparable
  */
 @Mixin(value = PropertyHelper.class)
 public abstract class MixinPropertyHelper<T extends Comparable<T>> implements BlockTrait<T>, IMixinPropertyHolder {
 
-    private String idString;
+    private CatalogKey key;
 
     @Override
-    public String getId() {
-        return this.idString;
+    public CatalogKey getKey() {
+        return this.key;
     }
 
     @Override
-    public void setId(String id) {
-        this.idString = id;
+    public void setId(CatalogKey id) {
+        this.key = id;
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})

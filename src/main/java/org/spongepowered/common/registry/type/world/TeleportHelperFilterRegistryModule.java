@@ -39,8 +39,6 @@ import org.spongepowered.common.world.teleport.FlyingTeleportHelperFilter;
 import org.spongepowered.common.world.teleport.NoPortalTeleportHelperFilter;
 import org.spongepowered.common.world.teleport.SurfaceOnlyTeleportHelperFilter;
 
-import java.util.Locale;
-
 @RegisterCatalog(TeleportHelperFilters.class)
 public class TeleportHelperFilterRegistryModule extends AbstractCatalogRegistryModule<TeleportHelperFilter>
     implements AdditionalCatalogRegistryModule<TeleportHelperFilter> {
@@ -56,13 +54,21 @@ public class TeleportHelperFilterRegistryModule extends AbstractCatalogRegistryM
 
     @Override
     public void registerDefaults() {
-        register(CatalogKey.minecraft("config"), new ConfigTeleportHelperFilter());
-        register(CatalogKey.minecraft("default"), new DefaultTeleportHelperFilter());
-        register(CatalogKey.minecraft("flying"), new FlyingTeleportHelperFilter());
-        register(CatalogKey.minecraft("no_portal"), new NoPortalTeleportHelperFilter());
-        register(CatalogKey.minecraft("surface_only"), new SurfaceOnlyTeleportHelperFilter());
-
-        this.map.forEach((key, value) -> this.map.put(value.getKey(), value));
+        final ConfigTeleportHelperFilter config = new ConfigTeleportHelperFilter();
+        register(CatalogKey.minecraft("config"), config);
+        register(config);
+        final DefaultTeleportHelperFilter defaultTeleporter = new DefaultTeleportHelperFilter();
+        register(CatalogKey.minecraft("default"), defaultTeleporter);
+        register(defaultTeleporter);
+        final FlyingTeleportHelperFilter flying = new FlyingTeleportHelperFilter();
+        register(CatalogKey.minecraft("flying"), flying);
+        register(flying);
+        final NoPortalTeleportHelperFilter noPortal = new NoPortalTeleportHelperFilter();
+        register(CatalogKey.minecraft("no_portal"), noPortal);
+        register(noPortal);
+        final SurfaceOnlyTeleportHelperFilter surface = new SurfaceOnlyTeleportHelperFilter();
+        register(CatalogKey.minecraft("surface_only"), surface);
+        register(surface);
     }
 
 }

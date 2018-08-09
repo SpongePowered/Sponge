@@ -66,6 +66,9 @@ public final class SpongeEntityStatistic extends StatBase implements EntityStati
 
     @Override
     public CatalogKey getKey() {
+        if (this.key == null) {
+            this.key = CatalogKey.resolve(TypedSpongeStatistic.super.getId());
+        }
         return this.key;
     }
 

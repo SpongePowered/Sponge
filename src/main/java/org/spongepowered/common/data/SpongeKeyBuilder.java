@@ -69,7 +69,7 @@ public final class SpongeKeyBuilder<E, V extends BaseValue<E>> implements Key.Bu
     @Override
     public Key.Builder<E, V> key(CatalogKey key) {
         checkState(this.valueToken != null, "Value Token must be set first!");
-        checkArgument(checkNotNull(key).toString().contains(" "), "Id cannot contain spaces!");
+        checkArgument(!checkNotNull(key).toString().contains(" "), "Id cannot contain spaces!");
         this.id = key;
         return this;
     }

@@ -86,7 +86,7 @@ public class InventoryArchetypeRegistryModule extends AbstractCatalogRegistryMod
     @Override
     public void registerAdditionalCatalog(InventoryArchetype archetype) {
         checkNotNull(archetype, "archetype");
-        this.map.put(archetype.getKey(), archetype);
+        register(archetype);
     }
 
     @SuppressWarnings("rawtypes")
@@ -340,46 +340,27 @@ public class InventoryArchetypeRegistryModule extends AbstractCatalogRegistryMod
         UNKNOWN = builder.reset()
             .build("minecraft:unknown", "UKNOWN");
 
-        registerAdditionalCatalog(SLOT);
-        registerAdditionalCatalog(MENU_ROW);
-        registerAdditionalCatalog(MENU_COLUMN);
-        registerAdditionalCatalog(MENU_GRID);
-        registerAdditionalCatalog(CHEST);
+
         SpongeInventoryBuilder.registerInventory(TileEntityChest.class, CHEST);
         SpongeInventoryBuilder.registerContainer(ContainerChest.class, CHEST);
-        registerAdditionalCatalog(DOUBLE_CHEST);
-        registerAdditionalCatalog(FURNACE);
         SpongeInventoryBuilder.registerInventory(TileEntityFurnace.class, FURNACE);
         SpongeInventoryBuilder.registerContainer(ContainerFurnace.class, FURNACE);
-        registerAdditionalCatalog(DISPENSER);
         SpongeInventoryBuilder.registerInventory(TileEntityDispenser.class, DISPENSER);
         SpongeInventoryBuilder.registerInventory(TileEntityDropper.class, DISPENSER);
         SpongeInventoryBuilder.registerContainer(ContainerDispenser.class, DISPENSER);
-        registerAdditionalCatalog(WORKBENCH);
         SpongeInventoryBuilder.registerContainer(ContainerWorkbench.class, WORKBENCH);
-        registerAdditionalCatalog(BREWING_STAND);
         SpongeInventoryBuilder.registerInventory(TileEntityBrewingStand.class, BREWING_STAND);
         SpongeInventoryBuilder.registerContainer(ContainerBrewingStand.class, BREWING_STAND);
-        registerAdditionalCatalog(HOPPER);
         SpongeInventoryBuilder.registerInventory(TileEntityHopper.class, HOPPER);
         SpongeInventoryBuilder.registerContainer(ContainerHopper.class, HOPPER);
-        registerAdditionalCatalog(BEACON);
         SpongeInventoryBuilder.registerInventory(TileEntityBeacon.class, BEACON);
         SpongeInventoryBuilder.registerContainer(ContainerBeacon.class, BEACON);
-        registerAdditionalCatalog(ENCHANTING_TABLE);
         SpongeInventoryBuilder.registerContainer(ContainerEnchantment.class, ENCHANTING_TABLE);
-        registerAdditionalCatalog(ANVIL);
         SpongeInventoryBuilder.registerContainer(ContainerRepair.class, ANVIL);
-        registerAdditionalCatalog(VILLAGER);
         // TODO internal Villager Inventory? make Villager Carrier?
         SpongeInventoryBuilder.registerContainer(ContainerMerchant.class, VILLAGER);
-        registerAdditionalCatalog(HORSE);
         // TODO Horse IInventory? SpongeInventoryBuilder.registerInventory(EntityHorse.class, HORSE);
         SpongeInventoryBuilder.registerContainer(ContainerHorseInventory.class, HORSE);
-        registerAdditionalCatalog(HORSE_WITH_CHEST);
-        registerAdditionalCatalog(CRAFTING);
-        registerAdditionalCatalog(PLAYER);
-        registerAdditionalCatalog(UNKNOWN);
 
         // Helper Archetypes for Menu
         InventoryArchetype MENU_ICON;
@@ -404,10 +385,6 @@ public class InventoryArchetypeRegistryModule extends AbstractCatalogRegistryMod
             // TODO icon + count up and down on click
             .build("sponge:menu_spinner", "Menu Spinner");
 
-        registerAdditionalCatalog(MENU_ICON);
-        registerAdditionalCatalog(MENU_BUTTON);
-        registerAdditionalCatalog(MENU_CHECKBOX);
-        registerAdditionalCatalog(MENU_SPINNER);
     }
 
     InventoryArchetypeRegistryModule() {}

@@ -44,11 +44,6 @@ public class SpongeTeleportType implements TeleportType {
     }
 
     @Override
-    public String getId() {
-        return this.id;
-    }
-
-    @Override
     public CatalogKey getKey() {
         return this.key;
     }
