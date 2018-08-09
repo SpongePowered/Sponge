@@ -103,6 +103,7 @@ import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.IMixinSubject;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -613,6 +614,10 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Redirect(method = "addServerStatsToSnooper", at = @At(value = "FIELD", target = "Lnet/minecraft/world/WorldServer;provider:Lnet/minecraft/world/WorldProvider;", opcode = Opcodes.GETFIELD))
     private WorldProvider onGetWorldProviderForSnooper(WorldServer world) {
+        if (((IMixinWorld) world).isFake()) {
+            // Return overworld provider
+            return ((net.minecraft.world.World) Sponge.getServer().getWorlds().iterator().next()).provider;
+        }
         this.dimensionId = WorldManager.getDimensionId(world);
         return world.provider;
     }

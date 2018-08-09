@@ -95,6 +95,7 @@ import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.util.SpongeHooks;
@@ -359,6 +360,9 @@ public class SpongeCommandFactory {
                     }
 
                     protected Text getChunksInfo(WorldServer worldserver) {
+                        if (((IMixinWorld) worldserver).isFake()) {
+                            return Text.of(NEWLINE_TEXT, "Fake world");
+                        }
                         return Text.of(NEWLINE_TEXT, key("DimensionId: "), value(WorldManager.getDimensionId(worldserver)), NEWLINE_TEXT,
                                 key("Loaded chunks: "), value(worldserver.getChunkProvider().getLoadedChunkCount()), NEWLINE_TEXT,
                                 key("Active chunks: "), value(worldserver.getChunkProvider().getLoadedChunks().size()), NEWLINE_TEXT,

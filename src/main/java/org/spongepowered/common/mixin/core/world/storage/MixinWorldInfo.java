@@ -857,7 +857,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     private void writeSpongeNbt() {
         // Never save Sponge data if we have no UUID
-        if (this.uuid != null) {
+        if (this.uuid != null && this.isValid()) {
             this.spongeNbt.setInteger(NbtDataUtil.DATA_VERSION, DataUtil.DATA_VERSION);
             this.spongeNbt.setUniqueId(NbtDataUtil.UUID, this.uuid);
             this.spongeNbt.setInteger(NbtDataUtil.DIMENSION_ID, this.dimensionId);
@@ -884,6 +884,25 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
                 iterator.remove();
             }
         }
+    }
+
+
+    /**
+     * @reason Some mods set a null levelName, which is incompatible with Sponge's policy
+     * of never returning null from our API. Since this method has the same deobfuscated
+     * name as an API method, I'm choosing to overwrite it to keep development and production
+     * consistent. If we end up breaking mods because of this, we'll probably need to switch
+     * to using a wrapepr type for WorldInfo
+     *
+     * @author Aaron1011 - August 9th, 2018
+     */
+    @Override
+    @Overwrite
+    public String getWorldName() {
+        if (this.levelName == null) {
+            this.levelName = "";
+        }
+        return this.levelName;
     }
 
     @Override
