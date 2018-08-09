@@ -30,6 +30,7 @@ import static com.google.common.base.Preconditions.checkState;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.PlayerAdvancements;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.Progressable;
@@ -97,7 +98,8 @@ public class MixinAdvancementProgress implements org.spongepowered.api.advanceme
             for (String req : reqs) {
                 if (!criteriaIn.containsKey(req)) {
                     final String advName = getOptionalAdvancement()
-                            .map(CatalogType::getId)
+                            .map(CatalogType::getKey)
+                            .map(CatalogKey::toString)
                             .orElse("unknown");
                     throw new IllegalStateException("Found a requirement which does not exist in the criteria, "
                             + req + " could not be found for the advancement: " + advName);

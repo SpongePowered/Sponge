@@ -24,51 +24,23 @@
  */
 package org.spongepowered.common.registry.type.text;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.text.selector.SelectorType;
 import org.spongepowered.api.text.selector.SelectorTypes;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 import org.spongepowered.common.text.selector.SpongeSelectorType;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-
-public final class SelectorTypeRegistryModule implements AlternateCatalogRegistryModule<SelectorType> {
-
-    @RegisterCatalog(SelectorTypes.class)
-    private final Map<String, SelectorType> selectorMappings = Maps.newHashMap();
-
-    @Override
-    public Optional<SelectorType> getById(String id) {
-        return Optional.ofNullable(this.selectorMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<SelectorType> getAll() {
-        return ImmutableList.copyOf(this.selectorMappings.values());
-    }
+@RegisterCatalog(SelectorTypes.class)
+public final class SelectorTypeRegistryModule extends AbstractCatalogRegistryModule<SelectorType> implements AlternateCatalogRegistryModule<SelectorType> {
 
     @Override
     public void registerDefaults() {
-        this.selectorMappings.put("minecraft:all_players", new SpongeSelectorType("minecraft:all_players", "a"));
-        this.selectorMappings.put("minecraft:all_entities", new SpongeSelectorType("minecraft:all_entities", "e"));
-        this.selectorMappings.put("minecraft:nearest_player", new SpongeSelectorType("minecraft:nearest_player", "p"));
-        this.selectorMappings.put("minecraft:random", new SpongeSelectorType("minecraft:random", "r"));
+        register(CatalogKey.minecraft("all_players"), new SpongeSelectorType("minecraft:all_players", "a"));
+        register(CatalogKey.minecraft("all_entities"), new SpongeSelectorType("minecraft:all_entities", "e"));
+        register(CatalogKey.minecraft("nearest_player"), new SpongeSelectorType("minecraft:nearest_player", "p"));
+        register(CatalogKey.minecraft("random"), new SpongeSelectorType("minecraft:random", "r"));
     }
 
-    @Override
-    public Map<String, SelectorType> provideCatalogMap() {
-        final HashMap<String, SelectorType> map = new HashMap<>();
-        for (Map.Entry<String, SelectorType> entry : this.selectorMappings.entrySet()) {
-            map.put(entry.getKey().replace("minecraft:", ""), entry.getValue());
-        }
-        return map;
-    }
 }

@@ -45,7 +45,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-@Plugin(id = "tagdatatest", name = "Tag Data Test", description = "A plugin to test scoreboard tag data.")
+@Plugin(id = "tagdatatest", name = "Tag Data Test", description = "A plugin to test scoreboard tag data.", version = "0.0.0")
 public final class TagDataTest {
 
     @Listener

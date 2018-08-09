@@ -31,6 +31,8 @@ import java.util.LinkedHashSet;
 
 public final class RootAdvancementSet extends LinkedHashSet<Advancement> {
 
+    private static final long serialVersionUID = 4921542661462938585L;
+
     @Override
     public boolean add(Advancement advancement) {
         if (super.add(advancement)) {

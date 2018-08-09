@@ -26,49 +26,37 @@ package org.spongepowered.common.registry.type;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import net.minecraft.tileentity.BannerPattern;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.api.data.type.BannerPatternShapes;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 
-import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 
-public final class BannerPatternShapeRegistryModule implements CatalogRegistryModule<BannerPatternShape> {
-
-    @RegisterCatalog(BannerPatternShapes.class)
-    private final Map<String, BannerPatternShape> bannerPatternShapeMappings = Maps.newHashMap();
-
-    @Override
-    public Optional<BannerPatternShape> getById(String id) {
-        return Optional.ofNullable(this.bannerPatternShapeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<BannerPatternShape> getAll() {
-        return ImmutableList.copyOf(this.bannerPatternShapeMappings.values());
-    }
+@RegisterCatalog(BannerPatternShapes.class)
+public final class BannerPatternShapeRegistryModule extends AbstractCatalogRegistryModule<BannerPatternShape>
+    implements CatalogRegistryModule<BannerPatternShape> {
 
     @Override
     public void registerDefaults() {
         for (BannerPattern pattern : BannerPattern.values()) {
-            this.bannerPatternShapeMappings.put(pattern.name().toLowerCase(Locale.ENGLISH), (BannerPatternShape) (Object) pattern);
-            this.bannerPatternShapeMappings.put(pattern.getHashname().toLowerCase(Locale.ENGLISH), (BannerPatternShape) (Object) pattern);
+            this.map.put(CatalogKey.resolve(pattern.name().toLowerCase(Locale.ENGLISH)), (BannerPatternShape) (Object) pattern);
+            this.map.put(CatalogKey.resolve(pattern.getHashname().toLowerCase(Locale.ENGLISH)), (BannerPatternShape) (Object) pattern);
         }
     }
 
     @AdditionalRegistration
     public void registerAdditional() {
         for (BannerPattern pattern : BannerPattern.values()) {
-            if (!this.bannerPatternShapeMappings.containsKey(pattern.name())) {
-                this.bannerPatternShapeMappings.put(pattern.name().toLowerCase(Locale.ENGLISH), (BannerPatternShape) (Object) pattern);
-                this.bannerPatternShapeMappings.put(pattern.getHashname().toLowerCase(Locale.ENGLISH), (BannerPatternShape) (Object) pattern);
+            if (!this.map.containsKey(CatalogKey.minecraft(pattern.name()))) {
+                this.map.put(CatalogKey.resolve(pattern.name().toLowerCase(Locale.ENGLISH)), (BannerPatternShape) (Object) pattern);
+                this.map.put(CatalogKey.resolve(pattern.getHashname().toLowerCase(Locale.ENGLISH)), (BannerPatternShape) (Object) pattern);
             }
         }
     }

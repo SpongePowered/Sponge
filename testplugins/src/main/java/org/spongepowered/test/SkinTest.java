@@ -40,7 +40,7 @@ import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-@Plugin(id = "skin-test", name = "Skin Test", description = "Use '/skin' to change your skin")
+@Plugin(id = "skin-test", name = "Skin Test", description = "Use '/skin' to change your skin", version = "0.0.0")
 public class SkinTest {
 
     @Listener

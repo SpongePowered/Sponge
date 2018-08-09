@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.data.types;
 
 import com.flowpowered.math.GenericMath;
 import net.minecraft.item.EnumDyeColor;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.Color;
@@ -35,6 +36,8 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.text.translation.SpongeTranslation;
+
+import javax.annotation.Nullable;
 
 @Mixin(EnumDyeColor.class)
 @Implements(@Interface(iface = DyeColor.class, prefix = "dye$"))
@@ -46,14 +49,18 @@ public abstract class MixinEnumDyeColor implements DyeColor {
     @Shadow public abstract float[] getColorComponentValues();
 
     private Translation translation;
+    @Nullable private CatalogKey key;
 
     @Intrinsic
     public String dye$getName() {
         return this.shadow$getTranslationKey();
     }
 
-    public String dye$getId() {
-        return shadow$getName();
+    public CatalogKey dye$getKey() {
+        if (this.key == null) {
+            this.key = CatalogKey.resolve(shadow$getName());
+        }
+        return this.key;
     }
 
     public Color dye$getColor() {

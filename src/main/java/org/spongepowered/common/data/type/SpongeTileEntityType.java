@@ -27,6 +27,7 @@ package org.spongepowered.common.data.type;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.common.SpongeCatalogType;
@@ -36,11 +37,12 @@ import org.spongepowered.common.config.category.TileEntityTrackerCategory;
 import org.spongepowered.common.config.category.TileEntityTrackerModCategory;
 import org.spongepowered.common.config.type.TrackerConfig;
 
+import java.util.Locale;
+
 public class SpongeTileEntityType extends SpongeCatalogType implements TileEntityType {
 
-    private final String name;
-    private final String modId;
     private final Class<? extends TileEntity> clazz;
+    private final CatalogKey key;
     private final boolean canTick;
     // Used by tracker config
     public boolean allowsBlockBulkCapture = true;
@@ -48,22 +50,16 @@ public class SpongeTileEntityType extends SpongeCatalogType implements TileEntit
     public boolean allowsBlockEventCreation = true;
     public boolean allowsEntityEventCreation = true;
 
-    public SpongeTileEntityType(Class<? extends TileEntity> clazz, String name, String id, boolean canTick, String modId) {
-        super(id);
-        this.name = checkNotNull(name, "name");
+    public SpongeTileEntityType(Class<? extends TileEntity> clazz, CatalogKey key, boolean canTick) {
+        super(key, key.getValue());
         this.clazz = checkNotNull(clazz, "clazz");
         this.canTick = canTick;
-        this.modId = modId;
+        this.key = key;
         this.initializeTrackerState();
     }
 
-    @Override
-    public String getName() {
-        return this.name;
-    }
-
     public String getModId() {
-        return this.modId;
+        return this.getKey().getNamespace();
     }
 
     public boolean canTick() {
@@ -73,8 +69,7 @@ public class SpongeTileEntityType extends SpongeCatalogType implements TileEntit
     public void initializeTrackerState() {
         SpongeConfig<TrackerConfig> trackerConfig = SpongeImpl.getTrackerConfig();
         TileEntityTrackerCategory tileEntityTracker = trackerConfig.getConfig().getTileEntityTracker();
-        final String modId = this.modId;
-        final String name = this.name;
+        final String modId = this.key.getNamespace();
 
         TileEntityTrackerModCategory modCapturing = tileEntityTracker.getModMappings().get(modId);
 
@@ -88,15 +83,15 @@ public class SpongeTileEntityType extends SpongeCatalogType implements TileEntit
             this.allowsEntityBulkCapture = false;
             this.allowsBlockEventCreation = false;
             this.allowsEntityEventCreation = false;
-            modCapturing.getBlockBulkCaptureMap().computeIfAbsent(name.toLowerCase(), k -> this.allowsBlockBulkCapture);
-            modCapturing.getEntityBulkCaptureMap().computeIfAbsent(name.toLowerCase(), k -> this.allowsEntityBulkCapture);
-            modCapturing.getBlockEventCreationMap().computeIfAbsent(name.toLowerCase(), k -> this.allowsBlockEventCreation);
-            modCapturing.getEntityEventCreationMap().computeIfAbsent(name.toLowerCase(), k -> this.allowsEntityEventCreation);
+            modCapturing.getBlockBulkCaptureMap().computeIfAbsent(this.key.getValue().toLowerCase(Locale.ENGLISH), k -> this.allowsBlockBulkCapture);
+            modCapturing.getEntityBulkCaptureMap().computeIfAbsent(this.key.getValue().toLowerCase(Locale.ENGLISH), k -> this.allowsEntityBulkCapture);
+            modCapturing.getBlockEventCreationMap().computeIfAbsent(this.key.getValue().toLowerCase(Locale.ENGLISH), k -> this.allowsBlockEventCreation);
+            modCapturing.getEntityEventCreationMap().computeIfAbsent(this.key.getValue().toLowerCase(Locale.ENGLISH), k -> this.allowsEntityEventCreation);
         } else {
-            this.allowsBlockBulkCapture = modCapturing.getBlockBulkCaptureMap().computeIfAbsent(name.toLowerCase(), k -> true);
-            this.allowsEntityBulkCapture = modCapturing.getEntityBulkCaptureMap().computeIfAbsent(name.toLowerCase(), k -> true);
-            this.allowsBlockEventCreation = modCapturing.getBlockEventCreationMap().computeIfAbsent(name.toLowerCase(), k -> true);
-            this.allowsEntityEventCreation = modCapturing.getEntityEventCreationMap().computeIfAbsent(name.toLowerCase(), k -> true);
+            this.allowsBlockBulkCapture = modCapturing.getBlockBulkCaptureMap().computeIfAbsent(this.key.getValue().toLowerCase(Locale.ENGLISH), k -> true);
+            this.allowsEntityBulkCapture = modCapturing.getEntityBulkCaptureMap().computeIfAbsent(this.key.getValue().toLowerCase(Locale.ENGLISH), k -> true);
+            this.allowsBlockEventCreation = modCapturing.getBlockEventCreationMap().computeIfAbsent(this.key.getValue().toLowerCase(Locale.ENGLISH), k -> true);
+            this.allowsEntityEventCreation = modCapturing.getEntityEventCreationMap().computeIfAbsent(this.key.getValue().toLowerCase(Locale.ENGLISH), k -> true);
         }
 
         if (tileEntityTracker.autoPopulateData()) {

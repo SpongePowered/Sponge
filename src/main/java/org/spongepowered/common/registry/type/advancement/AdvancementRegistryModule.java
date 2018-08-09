@@ -105,11 +105,11 @@ public class AdvancementRegistryModule extends AbstractPrefixCheckCatalogRegistr
     }
 
     void remove(net.minecraft.advancements.Advancement advancement) {
-        this.catalogTypeMap.remove(advancement.getId().toString());
+        this.map.remove(((Advancement) advancement).getKey());
     }
 
     void clear() {
-        this.catalogTypeMap.clear();
+        this.map.clear();
     }
 
     private static final class Holder {

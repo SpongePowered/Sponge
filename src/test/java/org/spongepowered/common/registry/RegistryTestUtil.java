@@ -49,7 +49,7 @@ class RegistryTestUtil {
         final ArrayList<Object[]> array = new ArrayList<>();
         for (Map.Entry<Class<? extends CatalogType>, CatalogRegistryModule<?>> entry : registry.catalogRegistryMap.entrySet()) {
             for (CatalogType catalogType : entry.getValue().getAll()) {
-                array.add(new Object[]{entry.getKey().getSimpleName(), entry.getKey(), entry.getValue(), catalogType, catalogType.getId()});
+                array.add(new Object[]{entry.getKey().getSimpleName(), entry.getKey(), entry.getValue(), catalogType, catalogType.getKey().toString()});
             }
         }
         return array;
@@ -83,7 +83,7 @@ class RegistryTestUtil {
         for (Map.Entry<Class<? extends CatalogType>, CatalogRegistryModule<?>> entry : registry.catalogRegistryMap.entrySet()) {
             for (CatalogType catalogType : entry.getValue().getAll()) {
                 for (Method method : getTestableApiMethods(getApplicableApiCatalogTypeInterfaces(catalogType))) {
-                    array.add(new Object[] {entry.getKey().getSimpleName(), entry.getKey(), catalogType, catalogType.getId(), method,
+                    array.add(new Object[] {entry.getKey().getSimpleName(), entry.getKey(), catalogType, catalogType.getKey().toString(), method,
                             method.getDeclaringClass().getSimpleName() + "#" + method.getName() + "()", catalogType.getClass().getName()});
                 }
             }

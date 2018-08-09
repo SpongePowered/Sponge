@@ -72,7 +72,7 @@ public class MixinAdvancementList implements IMixinAdvancementList {
             return;
         }
         try (ListenerPhaseContext context = PluginPhase.Listener.GENERAL_LISTENER.createPhaseContext()
-                .source(Sponge.getGame())) {
+                .source(SpongeImpl.getPlugin())) {
             context.buildAndSwitch();
 
             SpongeImpl.getCauseStackManager().pushCause(SpongeImpl.getRegistry());

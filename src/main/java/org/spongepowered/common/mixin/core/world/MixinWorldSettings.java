@@ -32,6 +32,7 @@ import net.minecraft.world.GameType;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.storage.WorldInfo;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
@@ -57,7 +58,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
@@ -84,7 +84,8 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
     @Shadow public abstract WorldType getTerrainType();
     @Shadow public abstract boolean shadow$areCommandsAllowed();
 
-    @Nullable private String id, name;
+    @Nullable private String name;
+    @Nullable private CatalogKey key;
     private DimensionType dimensionType = DimensionTypes.OVERWORLD;
     private Difficulty difficulty = Difficulties.NORMAL;
     private SerializationBehavior serializationBehavior = SerializationBehaviors.AUTOMATIC;
@@ -247,23 +248,23 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
     }
 
     @Override
-    public String getId() {
-        return this.id;
-    }
-
-    @Override
     public String getName() {
         return this.name;
     }
 
     @Override
-    public void setId(String id) {
-        checkNotNull(id);
-        if (this.id != null) {
-            throw new IllegalStateException("Attempt made to set id twice!");
+    public CatalogKey getKey() {
+        return this.key;
+    }
+
+    @Override
+    public void setId(CatalogKey key) {
+        checkNotNull(key);
+        if (this.key != null) {
+            throw new IllegalStateException("Attempt made to set key twice!");
         }
 
-        this.id = id;
+        this.key = key;
     }
 
     @Override

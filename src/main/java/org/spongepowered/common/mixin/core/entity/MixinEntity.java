@@ -60,6 +60,7 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataContainer;
@@ -397,7 +398,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
             AxisAlignedBB bb = this.getEntityBoundingBox().grow(-0.10000000149011612D, -0.4000000059604645D, -0.10000000149011612D);
             Location<World> location = DamageEventHandler.findFirstMatchingBlock((net.minecraft.entity.Entity) (Object) this, bb, block ->
                     block.getMaterial() == Material.LAVA);
-            DamageSource.LAVA = new MinecraftBlockDamageSource("lava", location).setFireDamage();
+            DamageSource.LAVA = new MinecraftBlockDamageSource(CatalogKey.minecraft("lava"), location).setFireDamage();
             return entity.attackEntityFrom(DamageSource.LAVA, damage);
         } finally {
             // Since "source" is already the DamageSource.LAVA object, we can simply re-use it here.
@@ -420,7 +421,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
             AxisAlignedBB bb = this.getEntityBoundingBox().grow(-0.001D, -0.001D, -0.001D);
             Location<World> location = DamageEventHandler.findFirstMatchingBlock((net.minecraft.entity.Entity) (Object) this, bb, block ->
                     block.getBlock() == Blocks.FIRE || block.getBlock() == Blocks.FLOWING_LAVA || block.getBlock() == Blocks.LAVA);
-            DamageSource.IN_FIRE = new MinecraftBlockDamageSource("inFire", location).setFireDamage();
+            DamageSource.IN_FIRE = new MinecraftBlockDamageSource(CatalogKey.minecraft("inFire"), location).setFireDamage();
             return entity.attackEntityFrom(DamageSource.IN_FIRE, damage);
         } finally {
             // Since "source" is already the DamageSource.IN_FIRE object, we can re-use it to re-assign.
@@ -1040,7 +1041,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
                 .set(Queries.POSITION_Y, transform.getScale().getY())
                 .set(Queries.POSITION_Z, transform.getScale().getZ())
                 .getContainer()
-                .set(DataQueries.ENTITY_TYPE, this.entityType.getId())
+                .set(DataQueries.ENTITY_TYPE, this.entityType.getKey())
                 .set(DataQueries.UNSAFE_NBT, unsafeNbt);
         final Collection<DataManipulator<?, ?>> manipulators = ((IMixinCustomDataHolder) this).getCustomManipulators();
         if (!manipulators.isEmpty()) {
@@ -1067,7 +1068,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
         try {
             final NBTTagCompound compound = new NBTTagCompound();
             writeToNBT(compound);
-            net.minecraft.entity.Entity entity = EntityList.createEntityByIDFromName(new ResourceLocation(this.entityType.getId()), this.world);
+            net.minecraft.entity.Entity entity = EntityList.createEntityByIDFromName((ResourceLocation) (Object) this.entityType.getKey(), this.world);
             compound.setUniqueId(NbtDataUtil.UUID, entity.getUniqueID());
             entity.readFromNBT(compound);
             return (Entity) entity;
@@ -1437,7 +1438,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
             at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;fire:I", opcode = Opcodes.PUTFIELD)
     )
     private void onFire(net.minecraft.entity.Entity entity, int ticks) {
-        if (((IMixinWorld) world).isFake() || !ShouldFire.IGNITE_ENTITY_EVENT) {
+        if (((IMixinWorld) this.world).isFake() || !ShouldFire.IGNITE_ENTITY_EVENT) {
             this.fire = ticks; // Vanilla functionality
             return;
         }

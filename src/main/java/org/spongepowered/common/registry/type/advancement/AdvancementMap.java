@@ -32,6 +32,8 @@ import java.util.HashMap;
 
 public final class AdvancementMap extends HashMap<ResourceLocation, Advancement> {
 
+    private static final long serialVersionUID = -1502089520911684373L;
+
     @Override
     public Advancement put(ResourceLocation key, Advancement value) {
         final Advancement old = super.put(key, value);

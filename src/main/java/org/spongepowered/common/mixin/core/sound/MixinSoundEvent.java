@@ -26,30 +26,24 @@ package org.spongepowered.common.mixin.core.sound;
 
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.effect.sound.SoundType;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(SoundEvent.class)
 public abstract class MixinSoundEvent implements SoundType {
-
-    private String id;
-
-    @Inject(method = "<init>", at = @At("RETURN"))
-    public void onInit(ResourceLocation name, CallbackInfo ci) {
-        this.id = name.toString();
-    }
+    @Final @Shadow private ResourceLocation soundName;
 
     @Override
-    public String getId() {
-        return this.id;
+    public CatalogKey getKey() {
+        return (CatalogKey) (Object) this.soundName;
     }
 
     @Override
     public String getName() {
-        return this.id;
+        return this.soundName.getResourcePath();
     }
 
 }

@@ -40,6 +40,6 @@ public final class WireAttachmentRegistryModule extends MinecraftEnumBasedCatalo
 
     @Override
     public void registerDefaults() {
-        RegistryHelper.mapFields(WireAttachmentTypes.class, this.catalogTypeMap);
+        RegistryHelper.mapFields(WireAttachmentTypes.class, this.provideCatalogMap());
     }
 }

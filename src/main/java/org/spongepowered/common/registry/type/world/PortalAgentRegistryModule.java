@@ -25,10 +25,9 @@
 package org.spongepowered.common.registry.type.world;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.ImmutableList;
 import net.minecraft.world.Teleporter;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.world.PortalAgent;
@@ -37,39 +36,28 @@ import org.spongepowered.api.world.PortalAgentTypes;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.interfaces.world.IMixinITeleporter;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.world.SpongePortalAgentType;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 
-public final class PortalAgentRegistryModule implements SpongeAdditionalCatalogRegistryModule<PortalAgentType>, AlternateCatalogRegistryModule<PortalAgentType> {
+@RegisterCatalog(PortalAgentTypes.class)
+public final class PortalAgentRegistryModule extends AbstractCatalogRegistryModule<PortalAgentType>
+    implements SpongeAdditionalCatalogRegistryModule<PortalAgentType>, AlternateCatalogRegistryModule<PortalAgentType> {
 
     public static PortalAgentRegistryModule getInstance() {
         return Holder.INSTANCE;
     }
 
-    @RegisterCatalog(PortalAgentTypes.class)
-    private final Map<String, PortalAgentType> portalAgentTypeMappings = new HashMap<>();
     private final Map<Class<? extends PortalAgent>, PortalAgentType> portalAgentClassToTypeMappings = new HashMap<>();
 
     @Override
-    public Optional<PortalAgentType> getById(String id) {
-        return Optional.ofNullable(this.portalAgentTypeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<PortalAgentType> getAll() {
-        return ImmutableList.copyOf(this.portalAgentTypeMappings.values());
-    }
-
-    @Override
     public void registerAdditionalCatalog(PortalAgentType portalAgentType) {
-        checkArgument(this.portalAgentTypeMappings.get(portalAgentType.getId()) == null, "Cannot re-register a PortalAgent with the same id: " + portalAgentType.getId());
-        this.portalAgentTypeMappings.put(portalAgentType.getId().toLowerCase(Locale.ENGLISH), portalAgentType);
+        checkArgument(this.map.get(portalAgentType.getKey().toString()) == null, "Cannot re-register a PortalAgent with the same id: " + portalAgentType.getKey().toString());
+        this.map.put(portalAgentType.getKey(), portalAgentType);
         this.portalAgentClassToTypeMappings.put(portalAgentType.getPortalAgentClass(), portalAgentType);
     }
 
@@ -82,20 +70,10 @@ public final class PortalAgentRegistryModule implements SpongeAdditionalCatalogR
     @Override
     public void registerDefaults() {
         final Class clazz = Teleporter.class;
-        this.portalAgentTypeMappings.put("minecraft:default",
-            new SpongePortalAgentType("minecraft:default", "Default", (Class<? extends IMixinITeleporter>) clazz));
+        register(new SpongePortalAgentType("minecraft:default", "Default", (Class<? extends IMixinITeleporter>) clazz));
     }
 
-    @Override
-    public Map<String, PortalAgentType> provideCatalogMap() {
-        final HashMap<String, PortalAgentType> map = new HashMap<>();
-        for (Map.Entry<String, PortalAgentType> entry : this.portalAgentTypeMappings.entrySet()) {
-            map.put(entry.getKey().replace("minecraft:", ""), entry.getValue());
-        }
-        return map;
-    }
-
-    private PortalAgentRegistryModule() {
+    PortalAgentRegistryModule() {
     }
 
     @SuppressWarnings("unchecked")
@@ -133,13 +111,13 @@ public final class PortalAgentRegistryModule implements SpongeAdditionalCatalogR
 
         // used for mods only as plugins register in PreInit
         String teleporterName = clazz.getSimpleName().toLowerCase(Locale.ENGLISH);
-        String id = modId.toLowerCase(Locale.ENGLISH) + ":" + teleporterName;
-        if (this.portalAgentTypeMappings.get(id) == null) {
-            portalAgentType = new SpongePortalAgentType(teleporterName, id, clazz);
-            this.portalAgentTypeMappings.put(id, portalAgentType);
+        final CatalogKey id = CatalogKey.of(modId, teleporterName);
+        if (this.map.get(id) == null) {
+            portalAgentType = new SpongePortalAgentType(teleporterName, id.toString(), clazz);
+            this.map.put(id, portalAgentType);
             this.portalAgentClassToTypeMappings.put((Class<? extends PortalAgent>) clazz, portalAgentType);
         }
-        return this.portalAgentTypeMappings.get(id);
+        return this.map.get(id);
 
     }
 

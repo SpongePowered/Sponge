@@ -25,6 +25,7 @@
 package org.spongepowered.common.scoreboard;
 
 import com.google.common.base.MoreObjects;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.common.SpongeCatalogType;
@@ -37,7 +38,7 @@ public class SpongeDisplaySlot extends SpongeCatalogType implements DisplaySlot 
     private int id;
 
     public SpongeDisplaySlot(String name, TextColor textColor, int id) {
-        super("minecraft:" + name);
+        super(CatalogKey.minecraft(name), name);
         this.textColor = Optional.ofNullable(textColor);
         this.id = id;
     }

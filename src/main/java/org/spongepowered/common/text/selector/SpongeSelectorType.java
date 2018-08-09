@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.text.selector;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.text.selector.SelectorType;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.SpongeCatalogType;
@@ -31,15 +32,8 @@ import org.spongepowered.common.SpongeCatalogType;
 @NonnullByDefault
 public class SpongeSelectorType extends SpongeCatalogType implements SelectorType {
 
-    private String name;
-
     public SpongeSelectorType(String id, String name) {
-        super(id);
-        this.name = name;
+        super(CatalogKey.resolve(id), name);
     }
 
-    @Override
-    public String getName() {
-        return this.name;
-    }
 }

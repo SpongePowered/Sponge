@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.potion.Potion;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
@@ -71,7 +72,7 @@ public class SpongePotionBuilder extends AbstractDataBuilder<PotionEffect> imple
             return Optional.empty();
         }
         String effectName = container.getString(DataQueries.POTION_TYPE).get();
-        Optional<PotionEffectType> optional = Sponge.getRegistry().getType(PotionEffectType.class, effectName);
+        Optional<PotionEffectType> optional = Sponge.getRegistry().getType(PotionEffectType.class, CatalogKey.resolve(effectName));
         if (!optional.isPresent()) {
             throw new InvalidDataException("The container has an invalid potion type name: " + effectName);
         }

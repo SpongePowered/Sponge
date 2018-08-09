@@ -48,6 +48,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import org.apache.logging.log4j.Level;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSoundGroup;
 import org.spongepowered.api.block.BlockState;
@@ -176,12 +177,12 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     @Inject(method = "registerBlock(ILnet/minecraft/util/ResourceLocation;Lnet/minecraft/block/Block;)V", at = @At("RETURN"))
     private static void onRegisterBlock(int id, ResourceLocation location, Block block, CallbackInfo ci) {
-        BlockTypeRegistryModule.getInstance().registerFromGameData(location.toString(), (BlockType) block);
+        BlockTypeRegistryModule.getInstance().registerFromGameData(location, (BlockType) block);
     }
 
     @Override
-    public String getId() {
-        return this.getNameFromRegistry();
+    public CatalogKey getKey() {
+        return (CatalogKey) (Object) Block.REGISTRY.getNameForObject((Block) (Object) this);
     }
 
     @Override
@@ -463,28 +464,8 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     public void initializeTrackerState() {
         SpongeConfig<TrackerConfig> trackerConfig = SpongeImpl.getTrackerConfig();
         BlockTrackerCategory blockTracker = trackerConfig.getConfig().getBlockTracker();
-        String[] ids = this.getId().split(":");
-        if (ids.length != 2) {
-            final PrettyPrinter printer = new PrettyPrinter(60).add("Malformatted Block ID discovered!").centre().hr()
-                .addWrapped(60, "Sponge has found a malformatted block id when trying to"
-                                + " load configurations for the block id. The printed out block id"
-                                + "is not originally from sponge, and should be brought up with the"
-                                + "mod developer as the registration for this block is not likely"
-                                + "to work with other systems and assumptions of having a properly"
-                                + "formatted block id.")
-                .add("%s : %s", "Malformed ID", this.getId())
-                .add("%s : %s", "Discovered id array", ids)
-                .add();
-            final String id = ids[0];
-            ids = new String[]{"unknown", id};
-            printer
-                .add("Sponge will attempt to work around this by using the provided generated id:")
-                .add("%s : %s", "Generated ID", Arrays.toString(ids))
-                .log(SpongeImpl.getLogger(), Level.WARN);
-
-        }
-        final String modId = ids[0];
-        final String name = ids[1];
+        final String modId = getKey().getNamespace();
+        final String name = getKey().getValue();
 
         BlockTrackerModCategory modCapturing = blockTracker.getModMappings().get(modId);
 

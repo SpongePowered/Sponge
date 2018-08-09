@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.world.teleport;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -46,6 +47,7 @@ public class ConfigTeleportHelperFilter implements TeleportHelperFilter {
     @Nullable private static List<BlockState> floorBlockStates = null;
     @Nullable private static List<BlockType> bodyBlockTypes = null;
     @Nullable private static List<BlockState> bodyBlockStates = null;
+    private static final CatalogKey KEY = CatalogKey.sponge("config");
 
     public static void invalidateCache() {
         floorBlockTypes = null;
@@ -58,30 +60,30 @@ public class ConfigTeleportHelperFilter implements TeleportHelperFilter {
         if (floorBlockTypes == null) {
             TeleportHelperCategory config = SpongeImpl.getGlobalConfig().getConfig().getTeleportHelper();
             floorBlockTypes = config.getUnsafeFloorBlockIds().stream()
-                    .map(x -> Sponge.getRegistry().getType(BlockType.class, x.toLowerCase(Locale.ENGLISH)).orElse(null))
+                    .map(x -> Sponge.getRegistry().getType(BlockType.class, CatalogKey.resolve(x)).orElse(null))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
 
             floorBlockStates = config.getUnsafeFloorBlockIds().stream()
-                    .map(x -> Sponge.getRegistry().getType(BlockState.class, x.toLowerCase(Locale.ENGLISH)).orElse(null))
+                    .map(x -> Sponge.getRegistry().getType(BlockState.class, CatalogKey.resolve(x)).orElse(null))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
 
             bodyBlockTypes = config.getUnsafeBodyBlockIds().stream()
-                    .map(x -> Sponge.getRegistry().getType(BlockType.class, x.toLowerCase(Locale.ENGLISH)).orElse(null))
+                    .map(x -> Sponge.getRegistry().getType(BlockType.class, CatalogKey.resolve(x)).orElse(null))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
 
             bodyBlockStates = config.getUnsafeBodyBlockIds().stream()
-                    .map(x -> Sponge.getRegistry().getType(BlockState.class, x.toLowerCase(Locale.ENGLISH)).orElse(null))
+                    .map(x -> Sponge.getRegistry().getType(BlockState.class, CatalogKey.resolve(x)).orElse(null))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
         }
     }
 
     @Override
-    public String getId() {
-        return "sponge:config";
+    public CatalogKey getKey() {
+        return KEY;
     }
 
     @Override

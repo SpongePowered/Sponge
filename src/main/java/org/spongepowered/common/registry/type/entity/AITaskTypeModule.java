@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.entity.ai.task.AITask;
 import org.spongepowered.api.entity.ai.task.AITaskType;
 import org.spongepowered.api.entity.ai.task.AITaskTypes;
@@ -44,6 +45,7 @@ import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.ai.SpongeAITaskType;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -52,40 +54,15 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class AITaskTypeModule implements AlternateCatalogRegistryModule<AITaskType> {
+@RegisterCatalog(AITaskTypes.class)
+public class AITaskTypeModule extends AbstractCatalogRegistryModule<AITaskType> implements AlternateCatalogRegistryModule<AITaskType> {
 
     public static AITaskTypeModule getInstance() {
         return Holder.INSTANCE;
     }
 
-    @RegisterCatalog(AITaskTypes.class)
-    private final Map<String, AITaskType> aiTaskTypes = new ConcurrentHashMap<>();
-
-    @Override
-    public Map<String, AITaskType> provideCatalogMap() {
-        Map<String, AITaskType> aiMap = new HashMap<>();
-        for (Map.Entry<String, AITaskType> entry : this.aiTaskTypes.entrySet()) {
-            aiMap.put(entry.getKey().replace("minecraft:", ""), entry.getValue());
-        }
-        return aiMap;
-    }
-
-    @Override
-    public Optional<AITaskType> getById(String id) {
-        checkNotNull(id);
-        if (!id.contains(":")) {
-            id = "minecraft:" + id; // assume vanilla
-        }
-        return Optional.ofNullable(this.aiTaskTypes.get(id.toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<AITaskType> getAll() {
-        return ImmutableList.copyOf(this.aiTaskTypes.values());
-    }
-
     public Optional<AITaskType> getByAIClass(Class<?> clazz) {
-        for (AITaskType type : this.aiTaskTypes.values()) {
+        for (AITaskType type : this.map.values()) {
             if (type.getAIClass().isAssignableFrom(clazz)) {
                 return Optional.of(type);
             }
@@ -107,7 +84,7 @@ public class AITaskTypeModule implements AlternateCatalogRegistryModule<AITaskTy
 
     private AITaskType createAITaskType(String combinedId, String name, Class<? extends AITask<? extends Agent>> aiClass) {
         final SpongeAITaskType newType = new SpongeAITaskType(combinedId, name, aiClass);
-        this.aiTaskTypes.put(combinedId, newType);
+        this.map.put(CatalogKey.resolve(combinedId), newType);
         return newType;
     }
 

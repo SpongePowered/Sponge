@@ -198,6 +198,7 @@ public class ManipulatorTest {
     }
 
 
+    @SuppressWarnings("unchecked")
     private <T> T createType(Class<T> type) {
         if (CatalogType.class.isAssignableFrom(type)) {
             return (T) Sponge.getRegistry().getAllOf((Class<CatalogType>) type).iterator().next();

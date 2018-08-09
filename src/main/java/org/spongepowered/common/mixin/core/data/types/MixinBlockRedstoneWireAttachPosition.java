@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.block.BlockRedstoneWire;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.WireAttachmentType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
@@ -33,15 +34,21 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
+import javax.annotation.Nullable;
+
 @Mixin(BlockRedstoneWire.EnumAttachPosition.class)
 @Implements(@Interface(iface = WireAttachmentType.class, prefix = "type$"))
 public abstract class MixinBlockRedstoneWireAttachPosition implements WireAttachmentType {
 
     @Shadow @Final private String name;
 
-    @Override
-    public String getId() {
-        return "minecraft:" + this.name;
+    @Nullable private CatalogKey key;
+
+    public CatalogKey type$getKey() {
+        if (this.key == null) {
+            this.key = CatalogKey.minecraft(this.name);
+        }
+        return this.key;
     }
 
     @Intrinsic

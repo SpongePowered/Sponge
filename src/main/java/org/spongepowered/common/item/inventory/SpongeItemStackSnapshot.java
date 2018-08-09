@@ -186,7 +186,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     public DataContainer toContainer() {
         final DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, getContentVersion())
-            .set(DataQueries.ITEM_TYPE, this.itemType.getId())
+            .set(DataQueries.ITEM_TYPE, this.itemType.getKey())
             .set(DataQueries.ITEM_COUNT, this.quantity)
             .set(DataQueries.ITEM_DAMAGE_VALUE, this.damageValue);
         if (!this.manipulators.isEmpty()) {
@@ -341,7 +341,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("itemType", this.itemType.getId())
+                .add("itemType", this.itemType.getKey())
                 .add("quantity", this.quantity)
                 .toString();
     }

@@ -28,6 +28,7 @@ import com.google.common.base.CaseFormat;
 import net.minecraft.scoreboard.IScoreCriteria;
 import net.minecraft.scoreboard.ScoreCriteria;
 import net.minecraft.scoreboard.ScoreCriteriaColored;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.scoreboard.critieria.Criterion;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -40,17 +41,17 @@ import javax.annotation.Nullable;
 @Implements(@Interface(iface = Criterion.class, prefix = "criterion$"))
 public abstract class MixinCriterion implements IScoreCriteria { // Trick to allow avoid shadowing, since multiple targets are used
 
-    @Nullable private String spongeId;
+    @Nullable private CatalogKey key;
 
     @Intrinsic
     public String criterion$getName() {
         return this.getName();
     }
 
-    public String criterion$getId() {
-        if (this.spongeId == null) {
-            this.spongeId = "minecraft:" + CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, this.getName().replace("count", "s"));
+    public CatalogKey criterion$getKey() {
+        if (this.key == null) {
+            this.key = CatalogKey.resolve(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, this.getName().replace("count", "s")));
         }
-        return this.spongeId;
+        return this.key;
     }
 }

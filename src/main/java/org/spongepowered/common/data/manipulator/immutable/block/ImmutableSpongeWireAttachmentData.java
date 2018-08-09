@@ -99,11 +99,11 @@ public class ImmutableSpongeWireAttachmentData extends AbstractImmutableData<Imm
     public DataContainer toContainer() {
         return super.toContainer()
             .set(Keys.WIRE_ATTACHMENTS.getQuery(), this.wireAttachmentMap.entrySet().stream()
-                .collect(Collectors.toMap(k -> k.getKey().name(), v -> v.getValue().getId())))
-            .set(Keys.WIRE_ATTACHMENT_NORTH.getQuery(), this.wireAttachmentMap.get(Direction.NORTH).getId())
-            .set(Keys.WIRE_ATTACHMENT_EAST.getQuery(), this.wireAttachmentMap.get(Direction.EAST).getId())
-            .set(Keys.WIRE_ATTACHMENT_SOUTH.getQuery(), this.wireAttachmentMap.get(Direction.SOUTH).getId())
-            .set(Keys.WIRE_ATTACHMENT_WEST.getQuery(), this.wireAttachmentMap.get(Direction.WEST).getId());
+                .collect(Collectors.toMap(k -> k.getKey().name(), v -> v.getValue().getKey())))
+            .set(Keys.WIRE_ATTACHMENT_NORTH.getQuery(), this.wireAttachmentMap.get(Direction.NORTH).getKey())
+            .set(Keys.WIRE_ATTACHMENT_EAST.getQuery(), this.wireAttachmentMap.get(Direction.EAST).getKey())
+            .set(Keys.WIRE_ATTACHMENT_SOUTH.getQuery(), this.wireAttachmentMap.get(Direction.SOUTH).getKey())
+            .set(Keys.WIRE_ATTACHMENT_WEST.getQuery(), this.wireAttachmentMap.get(Direction.WEST).getKey());
     }
 
     public ImmutableMap<Direction, WireAttachmentType> getWireAttachmentMap() {

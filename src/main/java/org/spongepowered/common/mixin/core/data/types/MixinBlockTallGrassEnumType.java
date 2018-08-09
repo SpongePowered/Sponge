@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.block.BlockTallGrass;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.ShrubType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Final;
@@ -35,6 +36,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
+import javax.annotation.Nullable;
+
 @Mixin(BlockTallGrass.EnumType.class)
 @Implements(@Interface(iface = ShrubType.class, prefix = "shrub$"))
 public abstract class MixinBlockTallGrassEnumType implements ShrubType {
@@ -42,9 +45,13 @@ public abstract class MixinBlockTallGrassEnumType implements ShrubType {
     @Shadow @Final private String name;
 
     private Translation translation;
+    @Nullable private CatalogKey key;
 
-    public String shrub$getId() {
-        return "minecraft:" + this.name;
+    public CatalogKey shrub$getKey() {
+        if (this.key == null) {
+            this.key = CatalogKey.minecraft(this.name);
+        }
+        return this.key;
     }
 
     @Intrinsic

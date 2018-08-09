@@ -140,7 +140,7 @@ public abstract class MixinDamageSource implements DamageSource {
     public String toString() {
         return MoreObjects.toStringHelper("DamageSource")
                 .add("Name", this.damageType)
-                .add("Type", this.apiDamageType.getId())
+                .add("Type", this.apiDamageType.getKey())
                 .toString();
     }
 }

@@ -25,11 +25,14 @@
 package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.tileentity.BannerPattern;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+
+import javax.annotation.Nullable;
 
 @NonnullByDefault
 @Mixin(BannerPattern.class)
@@ -37,6 +40,7 @@ public class MixinEnumBannerPattern implements BannerPatternShape {
 
     @Shadow @Final private String fileName;
     @Shadow @Final private String hashname;
+    @Nullable private CatalogKey key;
 
     @Override
     public String getName() {
@@ -44,8 +48,11 @@ public class MixinEnumBannerPattern implements BannerPatternShape {
     }
 
     @Override
-    public String getId() {
-        return this.hashname;
+    public CatalogKey getKey() {
+        if (this.key == null) {
+            this.key = CatalogKey.minecraft(this.hashname);
+        }
+        return this.key;
     }
 
 }

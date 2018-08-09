@@ -65,7 +65,7 @@ public class AdvancementTreeRegistryModule extends AbstractPrefixCheckCatalogReg
     }
 
     void clear() {
-        this.catalogTypeMap.clear();
+        this.map.clear();
     }
 
     void registerSilently(Advancement rootAdvancement) {
@@ -79,7 +79,7 @@ public class AdvancementTreeRegistryModule extends AbstractPrefixCheckCatalogReg
 
     void remove(Advancement rootAdvancement) {
         final Optional<AdvancementTree> optTree = ((org.spongepowered.api.advancement.Advancement) rootAdvancement).getTree();
-        optTree.ifPresent(advancementTree -> this.catalogTypeMap.remove(advancementTree.getId()));
+        optTree.ifPresent(advancementTree -> this.map.remove(advancementTree.getKey()));
     }
 
     private static final class Holder {

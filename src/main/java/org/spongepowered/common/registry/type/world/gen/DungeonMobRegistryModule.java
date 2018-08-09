@@ -29,6 +29,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.gen.feature.WorldGenDungeons;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.registry.RegistryModule;
 import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.api.util.weighted.WeightedSerializableObject;
@@ -60,8 +61,11 @@ public class DungeonMobRegistryModule implements RegistryModule {
                 .collect(Collectors.groupingBy(ResourceLocation::toString, Collectors.counting()));
 
         for(String mob : types.keySet()) {
-            put(EntityUtil.fromNameToType(mob).get(),
-                    types.get(mob).intValue() * 100); // times 100 to fit with forge's format
+            final Optional<EntityType> entityType = EntityUtil.fromNameToType(mob);
+            if (!entityType.isPresent() || entityType.get() == EntityTypes.UNKNOWN) {
+                continue;
+            }
+            put(entityType.get(), types.get(mob).intValue() * 100); // times 100 to fit with forge's format
         }
     }
 

@@ -108,7 +108,7 @@ public class SpongeFireworkEffect implements FireworkEffect {
     public DataContainer toContainer() {
         return DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, getContentVersion())
-                .set(DataQueries.FIREWORK_SHAPE, this.shape.getId())
+                .set(DataQueries.FIREWORK_SHAPE, this.shape.getKey())
                 .set(DataQueries.FIREWORK_COLORS, this.colors)
                 .set(DataQueries.FIREWORK_FADE_COLORS, this.fades)
                 .set(DataQueries.FIREWORK_TRAILS, this.trails)

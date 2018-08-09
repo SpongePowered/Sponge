@@ -27,6 +27,7 @@ package org.spongepowered.common.item.inventory.archetype;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryProperty;
+import org.spongepowered.common.registry.type.item.InventoryArchetypeRegistryModule;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -87,6 +88,11 @@ public class SpongeInventoryArchetypeBuilder implements InventoryArchetype.Build
     public InventoryArchetype build(String id, String name) {
         // TODO register archetype
         // TODO events
-        return new CompositeInventoryArchetype(id, name, this.types, this.properties, this.containerProvider);
+        final CompositeInventoryArchetype
+            archetype =
+            new CompositeInventoryArchetype(id, name, this.types, this.properties, this.containerProvider);
+        InventoryArchetypeRegistryModule.getInstance()
+            .registerAdditionalCatalog(archetype);
+        return archetype;
     }
 }

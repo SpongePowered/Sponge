@@ -25,32 +25,18 @@
 package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.world.BossInfo;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.boss.BossBarColor;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.util.Locale;
 
 @Mixin(BossInfo.Color.class)
 public class MixinBossInfoColor implements BossBarColor {
 
-    private String name;
-    private String id;
-
-    @Inject(method = "<init>", at = @At("RETURN"))
-    public void construct(CallbackInfo ci) {
-        this.name = ((Enum<?>) (Object) this).name();
-        this.id = "minecraft:" + this.name.toLowerCase();
-    }
-
     @Override
-    public String getId() {
-        return this.id;
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
+    public CatalogKey getKey() {
+        return CatalogKey.minecraft(((Enum<?>) (Object) this).name().toLowerCase(Locale.ENGLISH));
     }
 
 }

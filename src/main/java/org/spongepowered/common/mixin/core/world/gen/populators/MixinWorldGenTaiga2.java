@@ -30,6 +30,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.gen.feature.WorldGenTaiga2;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.asm.mixin.Mixin;
@@ -41,12 +42,14 @@ import java.util.Random;
 @Mixin(WorldGenTaiga2.class)
 public abstract class MixinWorldGenTaiga2 extends MixinWorldGenAbstractTree implements PopulatorObject {
 
+    private final CatalogKey key = CatalogKey.minecraft("tall_taiga");
+
     @Shadow
     public abstract boolean generate(net.minecraft.world.World worldIn, Random rand, BlockPos position);
 
     @Override
-    public String getId() {
-        return "minecraft:tall_taiga";
+    public CatalogKey getKey() {
+        return this.key;
     }
 
     @Override

@@ -24,40 +24,22 @@
  */
 package org.spongepowered.common.registry.type.event;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.event.cause.entity.dismount.DismountType;
 import org.spongepowered.api.event.cause.entity.dismount.DismountTypes;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.data.type.SpongeDismountType;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-
-public final class DismountTypeRegistryModule implements CatalogRegistryModule<DismountType> {
-
-    @RegisterCatalog(DismountTypes.class)
-    private final Map<String, DismountType> dismountMappings = Maps.newHashMap();
+@RegisterCatalog(DismountTypes.class)
+public final class DismountTypeRegistryModule extends AbstractCatalogRegistryModule<DismountType> implements CatalogRegistryModule<DismountType> {
 
     @Override
     public void registerDefaults() {
-        this.dismountMappings.put("player", new SpongeDismountType("player"));
-        this.dismountMappings.put("derail", new SpongeDismountType("derail"));
-        this.dismountMappings.put("death", new SpongeDismountType("death"));
+        register(CatalogKey.minecraft("player"), new SpongeDismountType("player"));
+        register(CatalogKey.minecraft("derail"), new SpongeDismountType("derail"));
+        register(CatalogKey.minecraft("death"), new SpongeDismountType("death"));
     }
 
-    @Override
-    public Optional<DismountType> getById(String id) {
-        return Optional.ofNullable(this.dismountMappings.get(checkNotNull(id, "id").toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<DismountType> getAll() {
-        return ImmutableSet.copyOf(this.dismountMappings.values());
-    }
 }

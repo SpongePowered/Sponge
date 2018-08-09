@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.block.BlockSand;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.SandType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Implements;
@@ -43,9 +44,13 @@ public abstract class MixinBlockSandEnumType {
     @Shadow public abstract String shadow$getTranslationKey();
 
     @Nullable private Translation translation;
+    @Nullable private CatalogKey key;
 
-    public String sand$getId() {
-        return "minecraft:" + shadow$getTranslationKey();
+    public CatalogKey sand$getKey() {
+        if (this.key == null) {
+            this.key = CatalogKey.minecraft(this.shadow$getTranslationKey());
+        }
+        return this.key;
     }
 
     @Intrinsic

@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.util;
 
 import net.minecraft.util.text.ChatType;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.Locale;
@@ -33,8 +34,8 @@ import java.util.Locale;
 public class MixinChatType implements org.spongepowered.api.text.chat.ChatType {
 
     @Override
-    public String getId() {
-        return "minecraft:" + ((ChatType) (Object) this).name().toLowerCase(Locale.ENGLISH);
+    public CatalogKey getKey() {
+        return CatalogKey.minecraft(((ChatType) (Object) this).name().toLowerCase(Locale.ENGLISH));
     }
 
     @Override

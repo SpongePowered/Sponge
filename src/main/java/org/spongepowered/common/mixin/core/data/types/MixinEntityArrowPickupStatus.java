@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.entity.projectile.EntityArrow;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.PickupRule;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -33,21 +34,28 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Locale;
 
+import javax.annotation.Nullable;
+
 @Mixin(EntityArrow.PickupStatus.class)
 public class MixinEntityArrowPickupStatus implements PickupRule {
 
     private String id;
     private String name;
+    private CatalogKey key;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void construct(CallbackInfo ci) {
         this.name = ((Enum<?>) (Object) this).name();
         this.id = this.name.toLowerCase(Locale.ENGLISH);
+        this.key = CatalogKey.resolve(this.id);
     }
 
     @Override
-    public String getId() {
-        return this.id;
+    public CatalogKey getKey() {
+        if (this.key == null) {
+            this.key = CatalogKey.resolve(this.name);
+        }
+        return this.key;
     }
 
     @Override

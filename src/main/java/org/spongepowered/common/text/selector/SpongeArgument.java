@@ -60,7 +60,7 @@ public class SpongeArgument<T> implements Argument<T> {
 
     private static String toSelectorArgument(Object val) {
         if (val instanceof CatalogType) {
-            return ((CatalogType) val).getId();
+            return ((CatalogType) val).getKey().toString();
         }
         return String.valueOf(val);
     }

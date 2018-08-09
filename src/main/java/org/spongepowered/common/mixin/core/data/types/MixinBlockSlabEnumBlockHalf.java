@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.block.BlockSlab;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.PortionType;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -32,14 +33,20 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
+import javax.annotation.Nullable;
+
 @Mixin(BlockSlab.EnumBlockHalf.class)
 @Implements(@Interface(iface = PortionType.class, prefix = "portion$"))
 public abstract class MixinBlockSlabEnumBlockHalf {
 
     @Shadow public abstract String shadow$getName();
+    @Nullable private CatalogKey key;
 
-    public String portion$getId() {
-        return "minecraft:" + shadow$getName();
+    public CatalogKey portion$getKey() {
+        if (this.key == null) {
+            this.key = CatalogKey.minecraft(this.shadow$getName());
+        }
+        return this.key;
     }
 
     @Intrinsic

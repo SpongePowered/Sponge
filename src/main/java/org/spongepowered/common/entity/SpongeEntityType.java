@@ -27,6 +27,8 @@ package org.spongepowered.common.entity;
 import com.google.common.base.MoreObjects;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EnumCreatureType;
+import net.minecraft.util.ResourceLocation;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.SpongeCatalogType;
@@ -46,6 +48,7 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
     public static final EntityType UNKNOWN = new EntityType() {
 
         private final Translation translation = new SpongeTranslation("entity.generic.name");
+        private final CatalogKey key = CatalogKey.of("unknown", "unknown");
 
         @Override
         public Translation getTranslation() {
@@ -57,9 +60,10 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
             return "Unknown";
         }
 
+
         @Override
-        public String getId() {
-            return "unknown:unknown";
+        public CatalogKey getKey() {
+            return this.key;
         }
 
         @Override
@@ -70,7 +74,7 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
     };
 
     public final int entityTypeId;
-    public final String entityName;
+    public String entityName;
     public final String modId;
     public final Class<? extends Entity> entityClass;
     private EnumCreatureType creatureType;
@@ -85,17 +89,22 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
     public boolean allowsBlockEventCreation = true;
     public boolean allowsEntityEventCreation = true;
 
-    public SpongeEntityType(int id, String name, Class<? extends Entity> clazz, Translation translation) {
-        this(id, name.toLowerCase(Locale.ENGLISH), "minecraft", clazz, translation);
+    public SpongeEntityType(int id, ResourceLocation resourceLoc, Class<? extends Entity> clazz, Translation translation) {
+        this(id, resourceLoc, resourceLoc, clazz, translation);
+    }
+
+    public SpongeEntityType(int id, ResourceLocation spongeKey, ResourceLocation minecraftId, Class<? extends Entity> clazz, Translation translation) {
+        super((CatalogKey) (Object) spongeKey, check(translation));
+        this.entityTypeId = id;
+        this.entityName = minecraftId.getResourcePath();
+        this.entityClass = clazz;
+        this.modId = minecraftId.getResourceDomain();
+        this.initializeTrackerState();
     }
 
     public SpongeEntityType(int id, String name, String modId, Class<? extends Entity> clazz, Translation translation) {
-        super(modId.toLowerCase(Locale.ENGLISH) + ":" + name.toLowerCase(Locale.ENGLISH), check(translation));
-        this.entityTypeId = id;
-        this.entityName = name.toLowerCase(Locale.ENGLISH);
-        this.entityClass = clazz;
-        this.modId = modId.toLowerCase(Locale.ENGLISH);
-        this.initializeTrackerState();
+        this(id, new ResourceLocation(modId), new ResourceLocation(modId), clazz, translation);
+        this.entityName = name;
     }
 
     private static Translation check(@Nullable Translation translation) {
@@ -103,11 +112,6 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
             return UNKNOWN.getTranslation();
         }
         return translation;
-    }
-
-    @Override
-    public String getName() {
-        return this.entityName;
     }
 
     public String getModId() {

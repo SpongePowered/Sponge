@@ -494,7 +494,7 @@ public class SpongeCommandFactory {
                     final IMixinChunk mixinChunk = (IMixinChunk) chunk;
                     final IBlockState blockState = worldServer.getBlockState(rayTraceResult.getBlockPos());
                     final BlockState spongeState = BlockUtil.fromNative(blockState);
-                    src.sendMessage(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "Block Type: ", TextColors.BLUE, TextStyles.RESET, spongeState.getId()));
+                    src.sendMessage(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "Block Type: ", TextColors.BLUE, TextStyles.RESET, spongeState.getKey().toString()));
                     src.sendMessage(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "Block Owner: ", TextColors.BLUE, TextStyles.RESET, mixinChunk.getBlockOwner(rayTraceResult.getBlockPos())));
                     src.sendMessage(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "Block Notifier: ", TextColors.BLUE, TextStyles.RESET, mixinChunk.getBlockNotifier(rayTraceResult.getBlockPos())));
                     return CommandResult.success();
@@ -522,7 +522,7 @@ public class SpongeCommandFactory {
                     final org.spongepowered.api.entity.Entity spongeEntity = EntityUtil.fromNative(entityHit);
                     final Text.Builder builder = Text.builder();
                     builder.append(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "EntityType: "))
-                            .append(Text.of(TextColors.BLUE, TextStyles.RESET, spongeEntity.getType().getId()));
+                            .append(Text.of(TextColors.BLUE, TextStyles.RESET, spongeEntity.getType().getKey().toString()));
                     src.sendMessage(builder.build());
                     final Optional<User> owner = mixinEntity.getCreatorUser();
                     final Optional<User> notifier = mixinEntity.getNotifierUser();

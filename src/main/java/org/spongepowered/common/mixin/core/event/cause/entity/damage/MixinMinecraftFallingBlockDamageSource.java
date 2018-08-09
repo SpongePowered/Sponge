@@ -53,7 +53,7 @@ public abstract class MixinMinecraftFallingBlockDamageSource extends MixinEntity
     public String toString() {
         return MoreObjects.toStringHelper("FallingBlockDamageSource")
             .add("Name", this.damageType)
-            .add("Type", this.getType().getId())
+            .add("Type", this.getType().getKey())
             .add("FallingBlock", getSource().toString())
             .add("Data", getFallingBlockData())
             .toString();

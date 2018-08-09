@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.item.ItemFishFood;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.CookedFish;
 import org.spongepowered.api.data.type.Fish;
 import org.spongepowered.api.text.translation.Translation;
@@ -36,6 +37,8 @@ import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 @Mixin(ItemFishFood.FishType.class)
 public abstract class MixinFishType implements Fish {
 
@@ -43,10 +46,14 @@ public abstract class MixinFishType implements Fish {
     @Final @Shadow private boolean cookable;
 
     private Translation translation;
+    @Nullable private CatalogKey key;
 
     @Override
-    public String getId() {
-        return "minecraft:raw." + this.translationKey;
+    public CatalogKey getKey() {
+        if (this.key == null) {
+            this.key = CatalogKey.minecraft("raw." + this.translationKey);
+        }
+        return this.key;
     }
 
     @Override

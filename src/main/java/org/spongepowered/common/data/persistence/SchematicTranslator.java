@@ -30,6 +30,7 @@ import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntityArchetype;
@@ -64,6 +65,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
     private static final TypeToken<Schematic> TYPE_TOKEN = TypeToken.of(Schematic.class);
     private static final int VERSION = 1;
     private static final int MAX_SIZE = 65535;
+    private final CatalogKey key = CatalogKey.sponge("schematic");
 
     public static SchematicTranslator get() {
         return INSTANCE;
@@ -74,8 +76,8 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
     }
 
     @Override
-    public String getId() {
-        return "sponge:schematic";
+    public CatalogKey getKey() {
+        return this.key;
     }
 
     @Override
@@ -134,7 +136,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
             DataView paletteMap = paletteData.get();
             Set<DataQuery> paletteKeys = paletteMap.getKeys(false);
             for (DataQuery key : paletteKeys) {
-                BlockState state = Sponge.getRegistry().getType(BlockState.class, key.getParts().get(0)).get();
+                BlockState state = Sponge.getRegistry().getType(BlockState.class, CatalogKey.resolve(key.getParts().get(0))).get();
                 ((BimapPalette) palette).assign(state, paletteMap.getInt(key).get());
             }
         } else {
@@ -254,7 +256,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
             DataQuery paletteQuery = DataQueries.Schematic.PALETTE;
             for (BlockState state : palette.getEntries()) {
                 // getOrAssign to skip the optional, it will never assign
-                data.set(paletteQuery.then(state.getId()), palette.getOrAssign(state));
+                data.set(paletteQuery.then(state.getKey().toString()), palette.getOrAssign(state));
             }
             data.set(DataQueries.Schematic.PALETTE_MAX, palette.getHighestId());
         }

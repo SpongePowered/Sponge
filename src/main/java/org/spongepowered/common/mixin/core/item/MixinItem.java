@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.item;
 import com.google.common.base.MoreObjects;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -62,13 +63,13 @@ public abstract class MixinItem implements ItemType, IMixinItem, SpongeGameDicti
     @Nullable private org.spongepowered.api.item.inventory.ItemStack propertyItemStack;
 
     @Override
-    public String getId() {
-        return Item.REGISTRY.getNameForObject((Item) (Object) this).toString();
+    public String getName() {
+        return getKey().getValue();
     }
 
     @Override
-    public String getName() {
-        return getId();
+    public CatalogKey getKey() {
+        return (CatalogKey) (Object) Item.REGISTRY.getNameForObject((Item) (Object) this);
     }
 
     @Override

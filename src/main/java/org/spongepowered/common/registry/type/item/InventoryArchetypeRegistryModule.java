@@ -27,7 +27,6 @@ package org.spongepowered.common.registry.type.item;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.api.data.Property.Operator.DELEGATE;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.entity.IMerchant;
 import net.minecraft.entity.passive.AbstractHorse;
@@ -53,7 +52,6 @@ import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.item.inventory.property.GuiIds;
 import org.spongepowered.api.item.inventory.property.InventoryTitle;
-import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
@@ -67,45 +65,17 @@ import org.spongepowered.common.item.inventory.property.GuiIdPropertyImpl;
 import org.spongepowered.common.item.inventory.property.InventoryDimensionImpl;
 import org.spongepowered.common.item.inventory.property.InventoryTitleImpl;
 import org.spongepowered.common.item.inventory.property.SlotIndexImpl;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-
+@RegisterCatalog(InventoryArchetypes.class)
 @RegistrationDependency(GuiIdRegistryModule.class)
-public class InventoryArchetypeRegistryModule implements AlternateCatalogRegistryModule<InventoryArchetype>,
-    SpongeAdditionalCatalogRegistryModule<InventoryArchetype> {
+public class InventoryArchetypeRegistryModule extends AbstractCatalogRegistryModule<InventoryArchetype>
+    implements AlternateCatalogRegistryModule<InventoryArchetype>, SpongeAdditionalCatalogRegistryModule<InventoryArchetype> {
 
     public static InventoryArchetypeRegistryModule getInstance() {
         return Holder.INSTANCE;
-    }
-
-    @RegisterCatalog(InventoryArchetypes.class)
-    private final Map<String, InventoryArchetype> mapping = new HashMap<>();
-
-    @Override
-    public Map<String, InventoryArchetype> provideCatalogMap() {
-
-        Map<String, InventoryArchetype> map = new HashMap<>();
-        map.putAll(this.mapping);
-        for (Map.Entry<String, InventoryArchetype> entry : this.mapping.entrySet()) {
-            map.put(entry.getKey().replace("minecraft:", "").replace("sponge:", ""), entry.getValue());
-        }
-        return map;
-    }
-
-    @Override
-    public Optional<InventoryArchetype> getById(String id) {
-        return Optional.ofNullable(this.mapping.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<InventoryArchetype> getAll() {
-        return ImmutableList.copyOf(this.mapping.values());
     }
 
     @Override
@@ -116,14 +86,14 @@ public class InventoryArchetypeRegistryModule implements AlternateCatalogRegistr
     @Override
     public void registerAdditionalCatalog(InventoryArchetype archetype) {
         checkNotNull(archetype, "archetype");
-        String id = archetype.getId();
-        this.mapping.put(id.toLowerCase(Locale.ENGLISH), archetype);
+        register(archetype);
     }
 
     @SuppressWarnings("rawtypes")
     @Override
     public void registerDefaults() {
         InventoryArchetype SLOT = new SlotArchetype(ImmutableMap.of(CustomInventory.INVENTORY_DIMENSION, new InventoryDimensionImpl(1, 1)));
+        register(SLOT);
         InventoryArchetype MENU_ROW;
         InventoryArchetype MENU_COLUMN;
         InventoryArchetype MENU_GRID;
@@ -296,9 +266,8 @@ public class InventoryArchetypeRegistryModule implements AlternateCatalogRegistr
                             && ((CarriedInventory) i).getCarrier().isPresent()
                             && ((CarriedInventory) i).getCarrier().get() instanceof IMerchant) {
                         IMerchant merchant = ((IMerchant) ((CarriedInventory) i).getCarrier().get());
-                        ContainerMerchant container = new ContainerMerchant(p.inventory, merchant, p.getEntityWorld());
                         // TODO Pre-Fill the Container?
-                        return container;
+                        return new ContainerMerchant(p.inventory, merchant, p.getEntityWorld());
                     }
                     throw new IllegalArgumentException("Cannot open merchant inventory without a merchant as Carrier");
                 })
@@ -372,46 +341,27 @@ public class InventoryArchetypeRegistryModule implements AlternateCatalogRegistr
         UNKNOWN = builder.reset()
             .build("minecraft:unknown", "UKNOWN");
 
-        registerAdditionalCatalog(SLOT);
-        registerAdditionalCatalog(MENU_ROW);
-        registerAdditionalCatalog(MENU_COLUMN);
-        registerAdditionalCatalog(MENU_GRID);
-        registerAdditionalCatalog(CHEST);
+
         SpongeInventoryBuilder.registerInventory(TileEntityChest.class, CHEST);
         SpongeInventoryBuilder.registerContainer(ContainerChest.class, CHEST);
-        registerAdditionalCatalog(DOUBLE_CHEST);
-        registerAdditionalCatalog(FURNACE);
         SpongeInventoryBuilder.registerInventory(TileEntityFurnace.class, FURNACE);
         SpongeInventoryBuilder.registerContainer(ContainerFurnace.class, FURNACE);
-        registerAdditionalCatalog(DISPENSER);
         SpongeInventoryBuilder.registerInventory(TileEntityDispenser.class, DISPENSER);
         SpongeInventoryBuilder.registerInventory(TileEntityDropper.class, DISPENSER);
         SpongeInventoryBuilder.registerContainer(ContainerDispenser.class, DISPENSER);
-        registerAdditionalCatalog(WORKBENCH);
         SpongeInventoryBuilder.registerContainer(ContainerWorkbench.class, WORKBENCH);
-        registerAdditionalCatalog(BREWING_STAND);
         SpongeInventoryBuilder.registerInventory(TileEntityBrewingStand.class, BREWING_STAND);
         SpongeInventoryBuilder.registerContainer(ContainerBrewingStand.class, BREWING_STAND);
-        registerAdditionalCatalog(HOPPER);
         SpongeInventoryBuilder.registerInventory(TileEntityHopper.class, HOPPER);
         SpongeInventoryBuilder.registerContainer(ContainerHopper.class, HOPPER);
-        registerAdditionalCatalog(BEACON);
         SpongeInventoryBuilder.registerInventory(TileEntityBeacon.class, BEACON);
         SpongeInventoryBuilder.registerContainer(ContainerBeacon.class, BEACON);
-        registerAdditionalCatalog(ENCHANTING_TABLE);
         SpongeInventoryBuilder.registerContainer(ContainerEnchantment.class, ENCHANTING_TABLE);
-        registerAdditionalCatalog(ANVIL);
         SpongeInventoryBuilder.registerContainer(ContainerRepair.class, ANVIL);
-        registerAdditionalCatalog(VILLAGER);
         // TODO internal Villager Inventory? make Villager Carrier?
         SpongeInventoryBuilder.registerContainer(ContainerMerchant.class, VILLAGER);
-        registerAdditionalCatalog(HORSE);
         // TODO Horse IInventory? SpongeInventoryBuilder.registerInventory(EntityHorse.class, HORSE);
         SpongeInventoryBuilder.registerContainer(ContainerHorseInventory.class, HORSE);
-        registerAdditionalCatalog(HORSE_WITH_CHEST);
-        registerAdditionalCatalog(CRAFTING);
-        registerAdditionalCatalog(PLAYER);
-        registerAdditionalCatalog(UNKNOWN);
 
         // Helper Archetypes for Menu
         InventoryArchetype MENU_ICON;
@@ -436,13 +386,9 @@ public class InventoryArchetypeRegistryModule implements AlternateCatalogRegistr
             // TODO icon + count up and down on click
             .build("sponge:menu_spinner", "Menu Spinner");
 
-        registerAdditionalCatalog(MENU_ICON);
-        registerAdditionalCatalog(MENU_BUTTON);
-        registerAdditionalCatalog(MENU_CHECKBOX);
-        registerAdditionalCatalog(MENU_SPINNER);
     }
 
-    private InventoryArchetypeRegistryModule() {}
+    InventoryArchetypeRegistryModule() {}
 
     private static final class Holder {
         static final InventoryArchetypeRegistryModule INSTANCE = new InventoryArchetypeRegistryModule();

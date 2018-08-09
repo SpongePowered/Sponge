@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
@@ -257,7 +258,7 @@ public class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder {
                 new WorldSettings(this.seed, (GameType) (Object) this.gameMode, this.mapFeaturesEnabled, this.hardcore,
                         (WorldType) this.generatorType);
         IMixinWorldSettings spongeSettings = (IMixinWorldSettings) (Object) settings;
-        spongeSettings.setId(id);
+        spongeSettings.setId(CatalogKey.resolve(id));
         spongeSettings.setName(name);
         spongeSettings.setDimensionType(this.dimensionType);
         spongeSettings.setDifficulty(this.difficulty);
@@ -274,7 +275,7 @@ public class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder {
         spongeSettings.fromBuilder(true);
         spongeSettings.setPortalAgentType(this.portalAgentType);
         spongeSettings.setRandomSeed(this.seedRandomized);
-        SpongeImpl.getRegistry().register(WorldArchetype.class, (WorldArchetype) (Object) settings);
+        WorldArchetypeRegistryModule.getInstance().registerAdditionalCatalog((WorldArchetype) (Object) settings);
         return (WorldArchetype) (Object) settings;
     }
 

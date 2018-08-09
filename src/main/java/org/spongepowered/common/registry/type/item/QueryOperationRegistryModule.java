@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.registry.type.item;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.item.inventory.query.QueryOperationType;
 import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.registry.CatalogRegistryModule;
@@ -38,6 +39,7 @@ import org.spongepowered.common.item.inventory.query.operation.ItemStackExactQue
 import org.spongepowered.common.item.inventory.query.operation.ItemStackIgnoreQuantityOperation;
 import org.spongepowered.common.item.inventory.query.operation.ItemTypeQueryOperation;
 import org.spongepowered.common.item.inventory.query.operation.TypeQueryOperation;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -45,20 +47,9 @@ import java.util.Map;
 import java.util.Optional;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
-public final class QueryOperationRegistryModule implements CatalogRegistryModule<QueryOperationType> {
-
-    @RegisterCatalog(QueryOperationTypes.class)
-    private final Map<String, QueryOperationType> types = new HashMap<>();
-
-    @Override
-    public Optional<QueryOperationType> getById(String id) {
-        return Optional.ofNullable(this.types.get(id));
-    }
-
-    @Override
-    public Collection<QueryOperationType> getAll() {
-        return this.types.values();
-    }
+@RegisterCatalog(QueryOperationTypes.class)
+public final class QueryOperationRegistryModule extends AbstractCatalogRegistryModule<QueryOperationType>
+    implements CatalogRegistryModule<QueryOperationType> {
 
     @Override
     public void registerDefaults() {
@@ -73,9 +64,5 @@ public final class QueryOperationRegistryModule implements CatalogRegistryModule
 
         register(SpongeQueryOperationTypes.LENS);
         register(SpongeQueryOperationTypes.SLOT_LENS);
-    }
-
-    private void register(QueryOperationType<?> type) {
-        this.types.put(type.getId(), type);
     }
 }

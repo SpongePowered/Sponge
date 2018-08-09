@@ -124,7 +124,7 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
                         return;
                     }
                     spongeTile.setSpongeNotifier(user);
-                } else { 
+                } else {
                     if (spongeTile.getSpongeOwner() == user) {
                         return;
                     }
@@ -135,7 +135,7 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
 
         final SpongeConfig<? extends GeneralConfigBase> activeConfig = SpongeHooks.getActiveConfig((WorldServer) this.world);
         if (activeConfig.getConfig().getLogging().blockTrackLogging()) {
-            if (!activeConfig.getConfig().getBlockTracking().getBlockBlacklist().contains(((BlockType) block).getId())) {
+            if (!activeConfig.getConfig().getBlockTracking().getBlockBlacklist().contains(((BlockType) block).getKey().toString())) {
                 SpongeHooks.logBlockTrack(this.world, block, pos, user, true);
             } else {
                 SpongeHooks.logBlockTrack(this.world, block, pos, user, false);

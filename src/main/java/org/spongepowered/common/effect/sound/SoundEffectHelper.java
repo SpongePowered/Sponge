@@ -37,7 +37,7 @@ public final class SoundEffectHelper {
     public static SPacketCustomPayload createStopSoundPacket(@Nullable SoundType sound, @Nullable SoundCategory category) {
         final PacketBuffer buffer = new PacketBuffer(Unpooled.buffer());
         buffer.writeString(category == null ? "" : category.getName());
-        buffer.writeString(sound == null ? "" : sound.getId());
+        buffer.writeString(sound == null ? "" : sound.getKey().toString());
         return new SPacketCustomPayload("MC|StopSound", buffer);
     }
 

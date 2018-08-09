@@ -52,7 +52,7 @@ public class ImmutableSpongePlaceableData extends AbstractImmutableSingleSetData
         return super.toContainer()
             .set(Keys.PLACEABLE_BLOCKS.getQuery(), getValue()
                 .stream()
-                .map(BlockType::getId)
+                .map(BlockType::getKey)
                 .collect(Collectors.toList()));
     }
 

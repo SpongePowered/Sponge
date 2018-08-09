@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.registry;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementTree;
@@ -173,6 +174,7 @@ import org.spongepowered.common.boss.ServerBossBarBuilder;
 import org.spongepowered.common.data.SpongeDataRegistrationBuilder;
 import org.spongepowered.common.data.SpongeKeyBuilder;
 import org.spongepowered.common.data.SpongeManipulatorRegistry;
+import org.spongepowered.common.data.builder.CatalogKeyBuilder;
 import org.spongepowered.common.item.enchantment.SpongeEnchantmentBuilder;
 import org.spongepowered.common.data.builder.meta.SpongePatternLayerBuilder;
 import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
@@ -409,6 +411,7 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(InventoryDimension.Builder.class, InventoryDimensionImpl.BuilderImpl::new)
             .registerBuilderSupplier(InventoryTitle.Builder.class, InventoryTitleImpl.BuilderImpl::new)
             .registerBuilderSupplier(InventoryTransactionResult.Builder.class, InventoryTransactionResultImpl.Builder::new)
+            .registerBuilderSupplier(CatalogKey.Builder.class, CatalogKeyBuilder::new)
         ;
     }
 
@@ -497,7 +500,7 @@ public final class CommonModuleRegistry {
             .registerModule(StoneType.class, new StoneTypeRegistryModule())
             .registerModule(TeleportHelperFilter.class, new TeleportHelperFilterRegistryModule())
             .registerModule(TeleportType.class, TeleportTypeRegistryModule.getInstance())
-            .registerModule(TextColor.class, new TextColorRegistryModule())
+            .registerModule(TextColor.class, TextColorRegistryModule.getInstance())
             .registerModule(TextSerializer.class, new TextSerializerRegistryModule())
             .registerModule(TextStyle.Base.class, new TextStyleRegistryModule())
             .registerModule(TileEntityType.class, TileEntityTypeRegistryModule.getInstance())

@@ -466,7 +466,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
         if (entityClass.isAssignableFrom(EntityPlayerMP.class) || entityClass.isAssignableFrom(MultiPartEntityPart.class)) {
             // Unable to construct these
-            throw new IllegalArgumentException("Cannot construct " + type.getId() + " please look to using entity types correctly!");
+            throw new IllegalArgumentException("Cannot construct " + type.getKey() + " please look to using entity types correctly!");
         }
 
         net.minecraft.world.World world = (net.minecraft.world.World) (Object) this;
@@ -495,7 +495,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 entity = ConstructorUtils.invokeConstructor(entityClass, this);
                 ((net.minecraft.entity.Entity) entity).setPosition(x, y, z);
             } catch (Exception e) {
-                throw new RuntimeException("There was an issue attempting to construct " + type.getId(), e);
+                throw new RuntimeException("There was an issue attempting to construct " + type.getKey(), e);
             }
         }
 

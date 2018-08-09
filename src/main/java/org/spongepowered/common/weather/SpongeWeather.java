@@ -28,22 +28,23 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.weather.Weather;
 
 @NonnullByDefault
 public class SpongeWeather implements Weather {
 
-    private final String id;
+    private final CatalogKey id;
     private final String name;
 
-    public SpongeWeather(String id, String name) {
+    public SpongeWeather(CatalogKey id, String name) {
         this.id = checkNotNull(id);
         this.name = checkNotNull(name);
     }
 
     @Override
-    public String getId() {
+    public CatalogKey getKey() {
         return this.id;
     }
 

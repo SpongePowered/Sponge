@@ -25,27 +25,30 @@
 package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.world.BossInfo;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.boss.BossBarOverlay;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.Locale;
+
 @Mixin(BossInfo.Overlay.class)
 public class MixinBossInfoOverlay implements BossBarOverlay {
 
     private String name;
-    private String id;
+    private CatalogKey key;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void construct(CallbackInfo ci) {
         this.name = ((Enum<?>) (Object) this).name();
-        this.id = this.name.toLowerCase();
+        this.key = CatalogKey.resolve(this.name.toLowerCase(Locale.ENGLISH));
     }
 
     @Override
-    public String getId() {
-        return this.id;
+    public CatalogKey getKey() {
+        return this.key;
     }
 
     @Override

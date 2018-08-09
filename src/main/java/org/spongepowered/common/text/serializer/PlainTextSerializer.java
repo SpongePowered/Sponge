@@ -24,14 +24,15 @@
  */
 package org.spongepowered.common.text.serializer;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.SafeTextSerializer;
 
 public final class PlainTextSerializer implements SafeTextSerializer {
 
     @Override
-    public String getId() {
-        return "minecraft:plain";
+    public CatalogKey getKey() {
+        return CatalogKey.minecraft("plain");
     }
 
     @Override

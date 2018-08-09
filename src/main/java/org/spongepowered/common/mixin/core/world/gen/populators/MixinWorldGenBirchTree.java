@@ -29,6 +29,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.gen.feature.WorldGenBirchTree;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.asm.mixin.Mixin;
@@ -42,7 +43,7 @@ import java.util.Random;
 @Mixin(WorldGenBirchTree.class)
 public abstract class MixinWorldGenBirchTree extends MixinWorldGenAbstractTree implements PopulatorObject {
     
-    private String id;
+    private CatalogKey key;
     private String name;
 
     @Shadow
@@ -51,17 +52,17 @@ public abstract class MixinWorldGenBirchTree extends MixinWorldGenAbstractTree i
     @Inject(method = "<init>(ZZ)V", at = @At("RETURN"))
     public void onConstructed(boolean notify, boolean useExtraRandomHeightIn, CallbackInfo ci) {
         if (useExtraRandomHeightIn) {
-            this.id = "minecraft:mega_birch";
+            this.key = CatalogKey.minecraft("mega_birch");
             this.name = "Mega birch tree";
         } else {
-            this.id = "minecraft:birch";
+            this.key = CatalogKey.minecraft("birch");
             this.name = "Birch tree";
         }
     }
 
     @Override
-    public String getId() {
-        return this.id;
+    public CatalogKey getKey() {
+        return this.key;
     }
 
     @Override

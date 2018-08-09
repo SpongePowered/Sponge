@@ -39,18 +39,16 @@ import net.minecraft.stats.StatList;
 import net.minecraft.util.ResourceLocation;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 import org.apache.logging.log4j.Level;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.GameRegistry;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.value.ValueFactory;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.ai.task.AITaskType;
 import org.spongepowered.api.entity.ai.task.AbstractAITask;
 import org.spongepowered.api.entity.living.Agent;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.merchant.VillagerRegistry;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipeRegistry;
@@ -159,6 +157,17 @@ public class SpongeGameRegistry implements GameRegistry {
         this.propertyRegistry = propertyRegistry;
     }
 
+    @Override
+    public CatalogKey resolveKey(final String value) {
+        checkNotNull(value, "value");
+        return (CatalogKey) (Object) new ResourceLocation(value);
+    }
+
+    @Override
+    public <T extends CatalogType> Optional<T> getType(final Class<T> typeClass, final CatalogKey key) {
+        return this.getRegistryModuleFor(typeClass).flatMap(module -> module.get(key));
+    }
+
     public final RegistrationPhase getPhase() {
         return this.phase;
     }
@@ -210,9 +219,9 @@ public class SpongeGameRegistry implements GameRegistry {
 
                 final Collection<? extends CatalogType> all = module.getSecond().getAll();
                 final List<CatalogType> catalogTypes = new ArrayList<>(all);
-                catalogTypes.sort(Comparator.comparing(CatalogType::getId));
+                catalogTypes.sort(Comparator.comparing(CatalogType::getKey));
                 for (CatalogType catalogType : catalogTypes) {
-                    printer.add("  -%s", catalogType.getId());
+                    printer.add("  -%s", catalogType.getKey().toString());
                 }
                 printer.hr();
             }
@@ -317,7 +326,7 @@ public class SpongeGameRegistry implements GameRegistry {
         if (registryModule == null) {
             return Optional.empty();
         }
-        return registryModule.getById(id.toLowerCase(Locale.ENGLISH));
+        return registryModule.get(CatalogKey.resolve(id.toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
@@ -339,7 +348,7 @@ public class SpongeGameRegistry implements GameRegistry {
         ImmutableList.Builder<T> builder = ImmutableList.builder();
         registryModule.getAll()
                 .stream()
-                .filter(type -> pluginId.equals(type.getId().split(":")[0]))
+                .filter(type -> pluginId.equals(type.getKey().getNamespace()))
                 .forEach(builder::add);
 
         return builder.build();
@@ -392,7 +401,7 @@ public class SpongeGameRegistry implements GameRegistry {
     public Optional<EntityStatistic> getEntityStatistic(StatisticType statType, EntityType entityType) {
         checkNotNull(statType, "null stat type");
         checkNotNull(entityType, "null entity type");
-        EntityList.EntityEggInfo eggInfo = EntityList.ENTITY_EGGS.get(new ResourceLocation(entityType.getId()));
+        EntityList.EntityEggInfo eggInfo = EntityList.ENTITY_EGGS.get((ResourceLocation) (Object) entityType.getKey());
         if (statType.equals(StatisticTypes.ENTITIES_KILLED)) {
             return Optional.of((EntityStatistic) eggInfo.killEntityStat);
         } else if (statType.equals(StatisticTypes.KILLED_BY_ENTITY)) {
@@ -489,7 +498,7 @@ public class SpongeGameRegistry implements GameRegistry {
 
     @Override
     public Optional<DisplaySlot> getDisplaySlotForColor(TextColor color) {
-        return Optional.ofNullable(DisplaySlotRegistryModule.getInstance().displaySlotMappings.get(color.getId()));
+        return Optional.ofNullable(DisplaySlotRegistryModule.getInstance().map.get(color.getKey().toString()));
     }
 
     @Override

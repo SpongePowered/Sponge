@@ -115,7 +115,7 @@ public class CustomDataNbtUtil {
             customData = spongeTag.getViewList(DataQueries.General.CUSTOM_MANIPULATOR_LIST).orElseThrow(DataUtil.dataNotFound());
             for (DataView dataView : customData) {
                 final String dataId = dataView.getString(DataQueries.DATA_ID).orElseThrow(DataUtil.dataNotFound());
-                if (DataUtil.getRegistrationFor(manipulator).getId().equals(dataId)) {
+                if (DataUtil.getRegistrationFor(manipulator).getKey().toString().equals(dataId)) {
                     final DataView existingData = dataView.getView(DataQueries.INTERNAL_DATA).orElseThrow(DataUtil.dataNotFound());
                     DataManipulator<?, ?> existing = deserialize(dataId, existingData);
                     isReplacing = existing != null;
@@ -132,7 +132,7 @@ public class CustomDataNbtUtil {
             customData = new ArrayList<>();
         }
         final DataContainer container = DataContainer.createNew();
-        container.set(DataQueries.DATA_ID, DataUtil.getRegistrationFor(manipulator).getId());
+        container.set(DataQueries.DATA_ID, DataUtil.getRegistrationFor(manipulator).getKey());
         container.set(DataQueries.INTERNAL_DATA, manipulator.toContainer());
         customData.add(container);
         spongeTag.set(DataQueries.General.CUSTOM_MANIPULATOR_LIST, customData);

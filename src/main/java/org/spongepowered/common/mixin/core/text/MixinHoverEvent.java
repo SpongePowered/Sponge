@@ -31,6 +31,7 @@ import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.event.HoverEvent;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.text.action.HoverAction;
 import org.spongepowered.api.text.action.TextActions;
@@ -71,7 +72,7 @@ public abstract class MixinHoverEvent implements IMixinHoverEvent {
                         String name = nbt.getString("name");
                         EntityType type = null;
                         if (nbt.hasKey("type", NbtDataUtil.TAG_STRING)) {
-                            type = SpongeImpl.getGame().getRegistry().getType(EntityType.class, name).orElse(null);
+                            type = SpongeImpl.getGame().getRegistry().getType(EntityType.class, CatalogKey.resolve(name)).orElse(null);
                         }
 
                         UUID uniqueId = UUID.fromString(nbt.getString("id"));

@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.block.BlockPlanks;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.TreeType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Final;
@@ -33,6 +34,7 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import javax.annotation.Nullable;
@@ -45,9 +47,14 @@ public abstract class MixinBlockPlanksEnumType implements TreeType {
     @Shadow @Final private String translationKey;
 
     @Nullable private Translation translation;
+    @Nullable private CatalogKey key;
 
-    public String tree$getId() {
-        return "minecraft:" + this.name;
+    @Unique
+    public CatalogKey tree$getKey() {
+        if (this.key == null) {
+            this.key = CatalogKey.minecraft(this.name);
+        }
+        return this.key;
     }
 
     @Intrinsic

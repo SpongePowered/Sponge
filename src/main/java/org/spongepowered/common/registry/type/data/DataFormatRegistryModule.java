@@ -27,7 +27,7 @@ package org.spongepowered.common.registry.type.data;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.ImmutableList;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.persistence.DataFormat;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
@@ -35,40 +35,23 @@ import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.data.persistence.HoconDataFormat;
 import org.spongepowered.common.data.persistence.JsonDataFormat;
 import org.spongepowered.common.data.persistence.NbtDataFormat;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-
-public class DataFormatRegistryModule implements AdditionalCatalogRegistryModule<DataFormat> {
-
-    @RegisterCatalog(DataFormats.class)
-    private final Map<String, DataFormat> dataFormatMappings = new HashMap<>();
-
-    @Override
-    public Optional<DataFormat> getById(String id) {
-        return Optional.ofNullable(this.dataFormatMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<DataFormat> getAll() {
-        return ImmutableList.copyOf(this.dataFormatMappings.values());
-    }
+@RegisterCatalog(DataFormats.class)
+public class DataFormatRegistryModule extends AbstractCatalogRegistryModule<DataFormat> implements AdditionalCatalogRegistryModule<DataFormat> {
 
     @Override
     public void registerAdditionalCatalog(DataFormat extraCatalog) {
         checkNotNull(extraCatalog, "CatalogType cannot be null");
-        checkArgument(!extraCatalog.getId().isEmpty(), "Id cannot be empty");
-        checkArgument(!this.dataFormatMappings.containsKey(extraCatalog.getId()), "Duplicate Id");
-        this.dataFormatMappings.put(extraCatalog.getId(), extraCatalog);
+        checkArgument(!extraCatalog.getKey().getValue().isEmpty(), "Id cannot be empty");
+        checkArgument(!this.map.containsKey(extraCatalog.getKey()), "Duplicate Id");
+        this.map.put(extraCatalog.getKey(), extraCatalog);
     }
 
     @Override
     public void registerDefaults() {
-        this.dataFormatMappings.put("nbt", new NbtDataFormat("nbt"));
-        this.dataFormatMappings.put("json", new JsonDataFormat());
-        this.dataFormatMappings.put("hocon", new HoconDataFormat("hocon"));
+        register(CatalogKey.sponge("nbt"), new NbtDataFormat("nbt"));
+        register(CatalogKey.sponge("json"), new JsonDataFormat());
+        register(CatalogKey.sponge("hocon"), new HoconDataFormat("hocon"));
     }
 }

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.registry.type.block;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.util.rotation.Rotation;
@@ -60,7 +61,7 @@ public final class RotationRegistryModule
     }
 
     public Optional<Rotation> getRotationFromDegree(int degrees) {
-        for (Map.Entry<String, Rotation> entry : this.catalogTypeMap.entrySet()) {
+        for (Map.Entry<CatalogKey, Rotation> entry : this.map.entrySet()) {
             if (entry.getValue().getAngle() == degrees) {
                 return Optional.of(entry.getValue());
             }

@@ -24,6 +24,8 @@
  */
 package org.spongepowered.test.myhomes.data.home.impl;
 
+import org.spongepowered.api.CatalogKey;
+import org.spongepowered.test.myhomes.data.home.Home;
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.reflect.TypeToken;
 import org.spongepowered.api.Sponge;
@@ -80,8 +82,8 @@ public class HomeTranslator implements DataTranslator<Home> {
     }
 
     @Override
-    public String getId() {
-        return "myhomes:home_translator";
+    public CatalogKey getKey() {
+        return CatalogKey.of("myhomes", "home_translator");
     }
 
     @Override

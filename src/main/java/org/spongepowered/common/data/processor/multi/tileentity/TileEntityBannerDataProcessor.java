@@ -26,6 +26,7 @@ package org.spongepowered.common.data.processor.multi.tileentity;
 
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.tileentity.TileEntityBanner;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
@@ -85,7 +86,7 @@ public class TileEntityBannerDataProcessor extends AbstractTileEntityDataProcess
         if (container.contains(Keys.BANNER_PATTERNS.getQuery()) || container.contains(Keys.BANNER_BASE_COLOR.getQuery())) {
             List<PatternLayer> layers = container.getSerializableList(Keys.BANNER_PATTERNS.getQuery(), PatternLayer.class).get();
             String colorId = container.getString(Keys.BANNER_BASE_COLOR.getQuery()).get();
-            DyeColor color = Sponge.getRegistry().getType(DyeColor.class, colorId).get();
+            DyeColor color = Sponge.getRegistry().getType(DyeColor.class, CatalogKey.resolve(colorId)).get();
             bannerData.set(Keys.BANNER_BASE_COLOR, color);
             bannerData.set(Keys.BANNER_PATTERNS, layers);
             return Optional.of(bannerData);

@@ -26,50 +26,38 @@ package org.spongepowered.common.registry.type.item;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.ImmutableSet;
 import net.minecraft.item.Item;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.ToolType;
 import org.spongepowered.api.data.type.ToolTypes;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 
-public class ToolTypeRegistryModule implements CatalogRegistryModule<ToolType> {
-
-    @RegisterCatalog(ToolTypes.class)
-    private final Map<String, ToolType> armorTypeMap = new HashMap<>();
-
-    @Override
-    public Optional<ToolType> getById(String id) {
-        return Optional.ofNullable(this.armorTypeMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<ToolType> getAll() {
-        return ImmutableSet.copyOf(this.armorTypeMap.values());
-    }
+@RegisterCatalog(ToolTypes.class)
+public class ToolTypeRegistryModule extends AbstractCatalogRegistryModule<ToolType> implements CatalogRegistryModule<ToolType> {
 
     @Override
     public void registerDefaults() {
         for (Item.ToolMaterial toolMaterial : Item.ToolMaterial.values()) {
             if (toolMaterial == Item.ToolMaterial.DIAMOND) {
-                this.armorTypeMap.put("diamond", (ToolType) (Object) toolMaterial);
+                this.map.put(CatalogKey.minecraft("diamond"), (ToolType) (Object) toolMaterial);
             }
-            this.armorTypeMap.put(toolMaterial.name().toLowerCase(Locale.ENGLISH), (ToolType) (Object) toolMaterial);
+            this.map.put(CatalogKey.resolve(toolMaterial.name().toLowerCase(Locale.ENGLISH)), (ToolType) (Object) toolMaterial);
         }
     }
 
     @AdditionalRegistration
     public void customRegistration() {
         for (Item.ToolMaterial toolMaterial : Item.ToolMaterial.values()) {
-            if (!this.armorTypeMap.containsKey(toolMaterial.name().toLowerCase(Locale.ENGLISH))) {
-                this.armorTypeMap.put(toolMaterial.name().toLowerCase(Locale.ENGLISH), (ToolType) (Object) toolMaterial);
+            final CatalogKey key = ((ToolType) (Object) toolMaterial).getKey();
+            if (!this.map.containsKey(key)) {
+                register((ToolType) (Object) toolMaterial);
             }
         }
     }

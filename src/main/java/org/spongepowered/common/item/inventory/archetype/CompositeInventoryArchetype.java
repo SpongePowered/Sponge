@@ -29,6 +29,7 @@ import com.google.common.collect.ImmutableMap;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.Property;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryProperty;
@@ -41,7 +42,7 @@ import javax.annotation.Nullable;
 
 public class CompositeInventoryArchetype implements InventoryArchetype {
 
-    private final String id;
+    private final CatalogKey key;
     private final String name;
     private final List<InventoryArchetype> types;
     private final Map<String, InventoryProperty<String, ?>> properties;
@@ -54,8 +55,7 @@ public class CompositeInventoryArchetype implements InventoryArchetype {
                 throw new IllegalStateException(p.getClass().getSimpleName() + ":" + p.getKey() + " is not a DELEGATE property!");
             }
         }
-
-        this.id = id;
+        this.key = CatalogKey.resolve(id);
         this.name = name;
         this.types = ImmutableList.copyOf(types);
         this.properties = ImmutableMap.copyOf(properties);
@@ -63,8 +63,8 @@ public class CompositeInventoryArchetype implements InventoryArchetype {
     }
 
     @Override
-    public String getId() {
-        return this.id;
+    public CatalogKey getKey() {
+        return this.key;
     }
 
     @Override

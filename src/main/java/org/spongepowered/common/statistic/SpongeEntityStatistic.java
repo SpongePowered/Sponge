@@ -26,6 +26,7 @@ package org.spongepowered.common.statistic;
 
 import net.minecraft.stats.StatBase;
 import net.minecraft.util.text.ITextComponent;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.scoreboard.critieria.Criterion;
 import org.spongepowered.api.statistic.EntityStatistic;
@@ -41,6 +42,7 @@ public final class SpongeEntityStatistic extends StatBase implements EntityStati
 
     private final String entityId;
     private String spongeId;
+    private CatalogKey key;
 
     public SpongeEntityStatistic(String statIdIn, ITextComponent statNameIn, String entityId) {
         super(statIdIn, statNameIn);
@@ -63,6 +65,14 @@ public final class SpongeEntityStatistic extends StatBase implements EntityStati
     }
 
     @Override
+    public CatalogKey getKey() {
+        if (this.key == null) {
+            this.key = CatalogKey.resolve(TypedSpongeStatistic.super.getId());
+        }
+        return this.key;
+    }
+
+    @Override
     public String getName() {
         return getStatName().getUnformattedText();
     }
@@ -76,6 +86,7 @@ public final class SpongeEntityStatistic extends StatBase implements EntityStati
     @Override
     public void setSpongeId(String id) {
         this.spongeId = id;
+        this.key = CatalogKey.resolve(this.spongeId);
     }
 
     @Override

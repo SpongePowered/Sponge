@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.world.gen.populators;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.gen.feature.WorldGenAbstractTree;
 import net.minecraft.world.gen.feature.WorldGenBigTree;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.asm.mixin.Mixin;
@@ -49,9 +50,11 @@ public abstract class MixinWorldGenBigTree extends WorldGenAbstractTree implemen
         return true; // Shadowed
     }
 
+    private final CatalogKey key = CatalogKey.minecraft("mega_oak");
+
     @Override
-    public String getId() {
-        return "minecraft:mega_oak";
+    public CatalogKey getKey() {
+        return this.key;
     }
 
     @Override

@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.registry;
 
+import org.apache.commons.lang3.text.WordUtils;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.common.SpongeImpl;
 
 import java.lang.reflect.Field;
@@ -98,5 +100,9 @@ public final class RegistryHelper {
         } catch (Exception e) {
             SpongeImpl.getLogger().error("Error while setting field {}.{}", clazz.getName(), fieldName, e);
         }
+    }
+
+    public static String name(final CatalogKey key) {
+        return WordUtils.capitalize(key.getValue(), '_');
     }
 }

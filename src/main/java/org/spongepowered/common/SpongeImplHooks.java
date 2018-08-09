@@ -65,6 +65,7 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.storage.MapStorage;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.args.ChildCommandElementExecutor;
 import org.spongepowered.api.data.type.Profession;
@@ -352,7 +353,7 @@ public final class SpongeImplHooks {
 
     public static void onCraftingRecipeRegister(CraftingRecipe recipe) {
         // Overridden in SF
-        CraftingManager.register(recipe.getId(), ((IRecipe) recipe));
+        CraftingManager.register(recipe.getKey().toString(), ((IRecipe) recipe));
     }
 
     public static Optional<CraftingRecipe> findMatchingRecipe(CraftingGridInventory inventory, org.spongepowered.api.world.World world) {
@@ -366,6 +367,14 @@ public final class SpongeImplHooks {
 
     public static Optional<CraftingRecipe> getRecipeById(String id) {
         IRecipe recipe = CraftingManager.REGISTRY.getObject(new ResourceLocation(id));
+        if (recipe == null) {
+            return Optional.empty();
+        }
+        return Optional.of(((CraftingRecipe) recipe));
+    }
+
+    public static Optional<CraftingRecipe> getRecipeById(CatalogKey id) {
+        IRecipe recipe = CraftingManager.REGISTRY.getObject((ResourceLocation) (Object) id);
         if (recipe == null) {
             return Optional.empty();
         }

@@ -114,8 +114,8 @@ public class CatalogTypeMethodTest {
             }
         } catch (Throwable t) {
             if (ignoredFailures.contains(this.implementationClass + "#" + this.method.getName() + "()")) {
-                LOG.warn("Catalog Type: {} Id : {} has broken Method: {} ({}): {}", this.name, this.catalogId, this.methodName,
-                        this.implementationClass, t);
+//                LOG.warn("Catalog Type: {} Id : {} has broken Method: {} ({}): {}", this.name, this.catalogId, this.methodName,
+//                        this.implementationClass, t);
                 return;
             }
             throw t;
@@ -157,8 +157,8 @@ public class CatalogTypeMethodTest {
                 if (silent) {
                     // Do nothing
                 } else if (ignore) {
-                    LOG.warn("Catalog Type: {} Id : {} fails to provide translation: '{}' in {} ({})",
-                            this.name, this.catalogId, translationId, this.methodName, this.implementationClass);
+//                    LOG.warn("Catalog Type: {} Id : {} fails to provide translation: '{}' in {} ({})",
+//                            this.name, this.catalogId, translationId, this.methodName, this.implementationClass);
                 } else {
                     throw new RuntimeException("No translation present for " + translationId);
                 }

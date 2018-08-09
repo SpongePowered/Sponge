@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.tileentity;
 
 import net.minecraft.tileentity.TileEntityStructure;
 import org.apache.commons.lang3.StringUtils;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.StructureMode;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
@@ -37,11 +38,14 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import javax.annotation.Nullable;
+
 @Mixin(TileEntityStructure.Mode.class)
 @Implements(@Interface(iface = StructureMode.class, prefix = "structure$"))
 public abstract class MixinTileEntityStructureMode implements StructureMode {
 
     @Shadow @Final private String modeName;
+    @Nullable private CatalogKey key;
     private String friendlyName;
 
     @Inject(method = "<init>", at = @At("RETURN"))
@@ -50,8 +54,11 @@ public abstract class MixinTileEntityStructureMode implements StructureMode {
     }
 
     @Override
-    public String getId() {
-        return this.modeName;
+    public CatalogKey getKey() {
+        if (this.key == null) {
+            this.key = CatalogKey.resolve(this.modeName);
+        }
+        return this.key;
     }
 
     @Intrinsic

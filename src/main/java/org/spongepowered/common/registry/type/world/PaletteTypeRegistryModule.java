@@ -29,9 +29,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.world.schematic.BlockPaletteType;
 import org.spongepowered.api.world.schematic.BlockPaletteTypes;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.world.schematic.BimapPalette;
 import org.spongepowered.common.world.schematic.GlobalPalette;
@@ -42,26 +44,17 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-public class PaletteTypeRegistryModule implements SpongeAdditionalCatalogRegistryModule<BlockPaletteType> {
+@RegisterCatalog(BlockPaletteTypes.class)
+public class PaletteTypeRegistryModule extends AbstractCatalogRegistryModule<BlockPaletteType>
+    implements SpongeAdditionalCatalogRegistryModule<BlockPaletteType> {
 
-    @RegisterCatalog(BlockPaletteTypes.class) private final Map<String, BlockPaletteType> paletteMappings = Maps.newHashMap();
 
     @Override
     public void registerAdditionalCatalog(BlockPaletteType extraCatalog) {
         checkNotNull(extraCatalog);
-        String id = extraCatalog.getId();
+        String id = extraCatalog.getKey().toString();
         checkArgument(id.indexOf(' ') == -1, "Palette Type ID " + id + " may not contain a space");
-        this.paletteMappings.put(id.toLowerCase(Locale.ENGLISH), extraCatalog);
-    }
-
-    @Override
-    public Optional<BlockPaletteType> getById(String id) {
-        return Optional.ofNullable(this.paletteMappings.get(id));
-    }
-
-    @Override
-    public Collection<BlockPaletteType> getAll() {
-        return ImmutableList.copyOf(this.paletteMappings.values());
+        this.map.put(extraCatalog.getKey(), extraCatalog);
     }
 
     @Override

@@ -28,11 +28,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.RabbitType;
 import org.spongepowered.api.data.type.RabbitTypes;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.entity.SpongeRabbitType;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -40,7 +42,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-public class RabbitTypeRegistryModule implements CatalogRegistryModule<RabbitType> {
+@RegisterCatalog(RabbitTypes.class)
+public class RabbitTypeRegistryModule extends AbstractCatalogRegistryModule<RabbitType> implements CatalogRegistryModule<RabbitType> {
 
     public static final Map<String, RabbitType> RABBIT_TYPES = Maps.newHashMap();
     public static final Map<Integer, RabbitType> RABBIT_IDMAP = Maps.newHashMap();
@@ -52,18 +55,6 @@ public class RabbitTypeRegistryModule implements CatalogRegistryModule<RabbitTyp
     public static final RabbitType GOLD_RABBIT = new SpongeRabbitType(4, "GOLD");
     public static final RabbitType SALT_AND_PEPPER_RABBIT = new SpongeRabbitType(5, "SALT_AND_PEPPER");
     public static final RabbitType KILLER_RABBIT = new SpongeRabbitType(99, "KILLER");
-    @RegisterCatalog(RabbitTypes.class)
-    private final Map<String, RabbitType> rabbitTypeMap = new HashMap<>();
-
-    @Override
-    public Optional<RabbitType> getById(String id) {
-        return Optional.ofNullable(this.rabbitTypeMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<RabbitType> getAll() {
-        return ImmutableList.copyOf(this.rabbitTypeMap.values());
-    }
 
     @Override
     public void registerDefaults() {
@@ -82,7 +73,9 @@ public class RabbitTypeRegistryModule implements CatalogRegistryModule<RabbitTyp
         RabbitTypeRegistryModule.RABBIT_IDMAP.put(4, RabbitTypeRegistryModule.GOLD_RABBIT);
         RabbitTypeRegistryModule.RABBIT_IDMAP.put(5, RabbitTypeRegistryModule.SALT_AND_PEPPER_RABBIT);
         RabbitTypeRegistryModule.RABBIT_IDMAP.put(99, RabbitTypeRegistryModule.KILLER_RABBIT);
-        this.rabbitTypeMap.putAll(RABBIT_TYPES);
+        for (Map.Entry<String, RabbitType> entry : RABBIT_TYPES.entrySet()) {
+            register(CatalogKey.resolve(entry.getKey()), entry.getValue());
+        }
 
     }
 

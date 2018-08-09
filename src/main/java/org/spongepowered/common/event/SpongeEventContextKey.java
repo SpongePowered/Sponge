@@ -27,29 +27,30 @@ package org.spongepowered.common.event;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.event.cause.EventContextKey;
 
 public final class SpongeEventContextKey<T> implements EventContextKey<T> {
 
-    private final String id;
+    private final CatalogKey key;
     private final Class<T> allowed;
     private final String name;
 
     SpongeEventContextKey(SpongeEventContextKeyBuilder<T> builder) {
-        this.id = builder.id;
+        this.key = builder.key;
         this.allowed = builder.typeClass;
         this.name = builder.name;
     }
 
-    public SpongeEventContextKey(String id, String name, Class<T> allowed) {
-        this.id = checkNotNull(id, "Id");
+    public SpongeEventContextKey(CatalogKey id, String name, Class<T> allowed) {
+        this.key = checkNotNull(id, "Id");
         this.allowed = checkNotNull(allowed, "Allowed");
         this.name = checkNotNull(name, "Name");
     }
 
     @Override
-    public String getId() {
-        return this.id;
+    public CatalogKey getKey() {
+        return this.key;
     }
 
     @Override
@@ -65,7 +66,7 @@ public final class SpongeEventContextKey<T> implements EventContextKey<T> {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-            .add("id", this.id)
+            .add("id", this.key)
             .toString();
     }
 
@@ -77,12 +78,12 @@ public final class SpongeEventContextKey<T> implements EventContextKey<T> {
         if (!(o instanceof EventContextKey)) {
             return false;
         }
-        return this.id.equals(((EventContextKey<?>) o).getId());
+        return this.key.equals(((EventContextKey<?>) o).getKey());
     }
 
     @Override
     public int hashCode() {
-        return this.id.hashCode();
+        return this.key.hashCode();
     }
 
 }

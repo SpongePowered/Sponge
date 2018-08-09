@@ -32,6 +32,7 @@ import com.google.gson.JsonParseException;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.gen.ChunkGeneratorSettings;
 import net.minecraft.world.gen.FlatGeneratorInfo;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.GeneratorType;
@@ -51,6 +52,8 @@ import org.spongepowered.common.registry.type.world.GeneratorTypeRegistryModule;
 
 import java.io.IOException;
 
+import javax.annotation.Nullable;
+
 @NonnullByDefault
 @Mixin(WorldType.class)
 public abstract class MixinWorldType implements GeneratorType {
@@ -58,16 +61,20 @@ public abstract class MixinWorldType implements GeneratorType {
     @Shadow @Final private String name;
     @Shadow @Final private int id;
 
+    @Nullable private CatalogKey key;
+
     @Inject(method = "<init>(ILjava/lang/String;)V", at = @At("RETURN"))
     private void onConstructSpongeRegister(int id, String name, CallbackInfo callbackInfo) {
         // Ensures that new world types are automatically registered with the registry module
         GeneratorTypeRegistryModule.getInstance().registerAdditionalCatalog(this);
     }
 
-
     @Override
-    public String getId() {
-        return SpongeImplHooks.getModIdFromClass(this.getClass()) + ":" + CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, this.name);
+    public CatalogKey getKey() {
+        if (this.key == null) {
+            this.key = CatalogKey.of(SpongeImplHooks.getModIdFromClass(this.getClass()), CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, this.name));
+        }
+        return this.key;
     }
 
     @Override
@@ -124,7 +131,7 @@ public abstract class MixinWorldType implements GeneratorType {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("id", getId())
+                .add("id", getKey())
                 .add("name", getName())
                 .add("settings", getGeneratorSettings())
                 .toString();

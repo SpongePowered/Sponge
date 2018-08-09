@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
 import net.minecraft.world.Teleporter;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.world.PortalAgent;
 import org.spongepowered.api.world.PortalAgentType;
 import org.spongepowered.common.interfaces.world.IMixinITeleporter;
@@ -35,18 +36,19 @@ import org.spongepowered.common.interfaces.world.IMixinITeleporter;
 public final class SpongePortalAgentType implements PortalAgentType {
 
     private final String name;
-    private final String id;
     private final Class<? extends IMixinITeleporter> portalAgentClass;
+    private final CatalogKey key;
 
     public SpongePortalAgentType(String id, String name, Class<? extends IMixinITeleporter> portalAgentClass) {
-        this.id = checkNotNull(id);
         this.name = checkNotNull(name);
         this.portalAgentClass = checkNotNull(portalAgentClass, "The class was null! The id was: " + id);
+        this.key = CatalogKey.resolve(id);
     }
 
+
     @Override
-    public String getId() {
-        return this.id;
+    public CatalogKey getKey() {
+        return this.key;
     }
 
     @Override
@@ -63,7 +65,7 @@ public final class SpongePortalAgentType implements PortalAgentType {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-            .add("id", this.id)
+            .add("id", this.key)
             .add("name", this.name)
             .add("class", this.portalAgentClass.getName())
             .toString();
@@ -76,12 +78,12 @@ public final class SpongePortalAgentType implements PortalAgentType {
         }
 
         PortalAgentType other = (PortalAgentType) obj;
-        return this.id.equals(other.getId());
+        return this.key.equals(other.getKey());
 
     }
 
     @Override
     public int hashCode() {
-        return this.id.hashCode();
+        return this.key.hashCode();
     }
 }

@@ -27,6 +27,7 @@ package org.spongepowered.common.registry.type.entity;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.data.type.Profession;
 import org.spongepowered.api.data.type.Professions;
@@ -34,6 +35,7 @@ import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.entity.SpongeCareer;
 import org.spongepowered.common.entity.SpongeProfession;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 
 import java.util.Collection;
@@ -45,7 +47,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-public class ProfessionRegistryModule implements AlternateCatalogRegistryModule<Profession>, SpongeAdditionalCatalogRegistryModule<Profession> {
+@RegisterCatalog(Professions.class)
+public class ProfessionRegistryModule extends AbstractCatalogRegistryModule<Profession> implements AlternateCatalogRegistryModule<Profession>, SpongeAdditionalCatalogRegistryModule<Profession> {
 
     public static final Profession FARMER = new SpongeProfession(0, "minecraft:farmer", "farmer");
     public static final Profession LIBRARIAN = new SpongeProfession(1, "minecraft:librarian", "librarian");
@@ -53,13 +56,16 @@ public class ProfessionRegistryModule implements AlternateCatalogRegistryModule<
     public static final Profession BLACKSMITH = new SpongeProfession(3, "minecraft:blacksmith", "blacksmith");
     public static final Profession BUTCHER = new SpongeProfession(4, "minecraft:butcher", "butcher");
     public static final Profession NITWIT = new SpongeProfession(5, "minecraft:nitwit", "nitwit");
+    public static final CatalogKey FARMER_KEY = CatalogKey.minecraft("farmer");
+    public static final CatalogKey LIBRARIAN_KEY = CatalogKey.minecraft("librarian");
+    public static final CatalogKey PRIEST_KEY = CatalogKey.minecraft("priest");
+    public static final CatalogKey BLACKSMITH_KEY = CatalogKey.minecraft("blacksmith");
+    public static final CatalogKey BUTCHER_KEY = CatalogKey.minecraft("butcher");
+    public static final CatalogKey NITWIT_KEY = CatalogKey.minecraft("nitwit");
 
     public static ProfessionRegistryModule getInstance() {
         return Holder.INSTANCE;
     }
-
-    @RegisterCatalog(Professions.class)
-    private final Map<String, Profession> professionMap = new LinkedHashMap<>();
 
     @Override
     public boolean allowsApiRegistration() {
@@ -68,23 +74,13 @@ public class ProfessionRegistryModule implements AlternateCatalogRegistryModule<
 
     @Override
     public void registerAdditionalCatalog(Profession extraCatalog) {
-        final String catalogId = extraCatalog.getId().toLowerCase(Locale.ENGLISH);
+        final String catalogId = extraCatalog.getKey().toString().toLowerCase(Locale.ENGLISH);
         if (catalogId.equals("smith")) {
             return;
         }
-        if (!this.professionMap.containsKey(catalogId)) {
-            this.professionMap.put(catalogId, extraCatalog);
+        if (!this.map.containsKey(extraCatalog.getKey())) {
+            this.map.put(extraCatalog.getKey(), extraCatalog);
         }
-    }
-
-    @Override
-    public Optional<Profession> getById(String id) {
-        return Optional.ofNullable(this.professionMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<Profession> getAll() {
-        return ImmutableList.copyOf(this.professionMap.values());
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -108,12 +104,24 @@ public class ProfessionRegistryModule implements AlternateCatalogRegistryModule<
 
     @Override
     public void registerDefaults() {
-        this.professionMap.put("minecraft:farmer", FARMER);
-        this.professionMap.put("minecraft:librarian", LIBRARIAN);
-        this.professionMap.put("minecraft:priest", PRIEST);
-        this.professionMap.put("minecraft:blacksmith", BLACKSMITH);
-        this.professionMap.put("minecraft:butcher", BUTCHER);
-        this.professionMap.put("minecraft:nitwit", NITWIT);
+        if (this.map.get(FARMER_KEY) == null) {
+            register(FARMER_KEY, FARMER);
+        }
+        if (this.map.get(LIBRARIAN_KEY) == null) {
+            register(LIBRARIAN_KEY, LIBRARIAN);
+        }
+        if (this.map.get(PRIEST_KEY) == null) {
+            register(PRIEST_KEY, PRIEST);
+        }
+        if (this.map.get(BLACKSMITH_KEY) == null) {
+            register(BLACKSMITH_KEY, BLACKSMITH);
+        }
+        if (this.map.get(BUTCHER_KEY) == null) {
+            register(BUTCHER_KEY, BUTCHER);
+        }
+        if (this.map.get(NITWIT_KEY) == null) {
+            register(NITWIT_KEY, NITWIT);
+        }
     }
 
     ProfessionRegistryModule() { }
@@ -121,8 +129,8 @@ public class ProfessionRegistryModule implements AlternateCatalogRegistryModule<
     @Override
     public Map<String, Profession> provideCatalogMap() {
         final HashMap<String, Profession> map = new HashMap<>();
-        for (Map.Entry<String, Profession> entry : this.professionMap.entrySet()) {
-            map.put(entry.getKey().replace("minecraft:", ""), entry.getValue());
+        for (Map.Entry<CatalogKey, Profession> entry : this.map.entrySet()) {
+            map.put(entry.getKey().getValue(), entry.getValue());
         }
         return map;
     }

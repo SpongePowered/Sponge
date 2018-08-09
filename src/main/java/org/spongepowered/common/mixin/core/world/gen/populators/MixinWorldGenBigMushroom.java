@@ -32,6 +32,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenBigMushroom;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.api.world.Location;
@@ -64,7 +65,7 @@ public abstract class MixinWorldGenBigMushroom extends MixinWorldGenerator imple
     private WeightedTable<PopulatorObject> types;
     private Function<Location<Extent>, PopulatorObject> override = null;
     private VariableAmount mushroomsPerChunk;
-    private String id;
+    private CatalogKey catalogKey;
     private String name;
 
     @Inject(method = "<init>", at = @At("RETURN") )
@@ -78,17 +79,17 @@ public abstract class MixinWorldGenBigMushroom extends MixinWorldGenerator imple
         this.types = new WeightedTable<>();
         this.mushroomsPerChunk = VariableAmount.fixed(1);
         if(block == Blocks.RED_MUSHROOM_BLOCK) {
-            this.id = "minecraft:red";
+            this.catalogKey = CatalogKey.minecraft("red");
             this.name = "Red mushroom";
         } else {
-            this.id = "minecraft:brown";
+            this.catalogKey = CatalogKey.minecraft("brown");
             this.name = "Brown mushroom";
         }
     }
 
     @Override
-    public String getId() {
-        return this.id;
+    public CatalogKey getKey() {
+        return this.catalogKey;
     }
 
     @Override

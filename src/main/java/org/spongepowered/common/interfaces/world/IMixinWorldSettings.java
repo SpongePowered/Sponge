@@ -25,6 +25,7 @@
 package org.spongepowered.common.interfaces.world;
 
 import com.google.common.collect.ImmutableList;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.SerializationBehavior;
@@ -36,7 +37,7 @@ import javax.annotation.Nullable;
 
 public interface IMixinWorldSettings {
 
-    void setId(String id);
+    void setId(CatalogKey id);
 
     void setName(String name);
 

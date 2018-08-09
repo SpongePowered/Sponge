@@ -44,7 +44,7 @@ public abstract class MixinEntityDamageSource extends MixinDamageSource implemen
     public String toString() {
         return MoreObjects.toStringHelper("EntityDamageSource")
             .add("Name", this.damageType)
-            .add("Type", this.getType().getId())
+            .add("Type", this.getType().getKey())
             .add("Source", getSource())
             .toString();
     }

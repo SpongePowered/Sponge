@@ -189,7 +189,7 @@ class TimingsExport extends Thread {
                     if (entityType == EntityTypes.UNKNOWN) {
                         return null;
                     }
-                    return JSONUtil.singleObjectPair(TimingsPls.getEntityId(entityType), entityType.getId());
+                    return JSONUtil.singleObjectPair(TimingsPls.getEntityId(entityType), entityType.getKey().toString());
                 })));
 
         // Information about loaded plugins

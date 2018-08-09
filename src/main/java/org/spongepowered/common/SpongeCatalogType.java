@@ -27,31 +27,33 @@ package org.spongepowered.common;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.text.translation.Translation;
 
-// TODO - id's and names should NEVER be the same....
 public abstract class SpongeCatalogType implements CatalogType {
 
-    private final String id;
+    private final CatalogKey key;
+    private final String name;
 
-    public SpongeCatalogType(String id) {
-        this.id = checkNotNull(id, "id");
+    public SpongeCatalogType(final CatalogKey key, final String name) {
+        this.key = key;
+        this.name = name;
     }
 
     @Override
-    public final String getId() {
-        return this.id;
+    public final CatalogKey getKey() {
+        return this.key;
     }
 
     @Override
     public String getName() {
-        return getId();
+        return this.name;
     }
 
     @Override
     public final int hashCode() {
-        return this.id.hashCode();
+        return this.key.hashCode();
     }
 
     @Override
@@ -63,7 +65,7 @@ public abstract class SpongeCatalogType implements CatalogType {
             return false;
         }
         final CatalogType other = (CatalogType) obj;
-        return getId().equals(other.getId());
+        return getKey().equals(other.getKey());
     }
 
     @Override
@@ -73,7 +75,7 @@ public abstract class SpongeCatalogType implements CatalogType {
 
     protected MoreObjects.ToStringHelper toStringHelper() {
         return MoreObjects.toStringHelper(this)
-                .add("id", getId())
+                .add("id", getKey().toString())
                 .add("name", getName());
     }
 
@@ -81,8 +83,13 @@ public abstract class SpongeCatalogType implements CatalogType {
 
         private final Translation translation;
 
+        public Translatable(CatalogKey key, Translation translation) {
+            super(key, translation.get());
+            this.translation = checkNotNull(translation, "translation");
+        }
+
         public Translatable(String id, Translation translation) {
-            super(id);
+            super(CatalogKey.resolve(id), translation.get());
             this.translation = checkNotNull(translation, "translation");
         }
 

@@ -99,7 +99,7 @@ public class CustomDataRegistrationCategory extends ConfigCategory {
     public void populateRegistrations(Collection<DataRegistration<?, ?>> registrations) {
         this.registeredDataIds.clear();
         for (DataRegistration<?, ?> registration : registrations) {
-            this.registeredDataIds.add(registration.getId());
+            this.registeredDataIds.add(registration.getKey().toString());
         }
     }
 

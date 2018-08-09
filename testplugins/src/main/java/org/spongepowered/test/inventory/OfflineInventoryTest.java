@@ -70,7 +70,7 @@ public class OfflineInventoryTest {
                         return CommandResult.success();
                     }
                     Player player = (Player) src;
-                    receiveDiamonds.add(player.getUniqueId());
+                    this.receiveDiamonds.add(player.getUniqueId());
                     src.sendMessage(Text.of(TextColors.GREEN, "You will receive diamonds."));
                     return CommandResult.success();
                 })
@@ -80,7 +80,7 @@ public class OfflineInventoryTest {
     @Listener
     public void onDisconnect(ClientConnectionEvent.Disconnect event, @Root Player player) {
         UUID uuid = player.getUniqueId();
-        if (receiveDiamonds.remove(uuid)) {
+        if (this.receiveDiamonds.remove(uuid)) {
             Sponge.getScheduler().createTaskBuilder().delayTicks(20).execute(() -> this.run(uuid)).submit(this);
         }
     }
@@ -91,12 +91,12 @@ public class OfflineInventoryTest {
         this.logger.info(user.getName() + " has an Inventory with:");
         for (Inventory slot : user.getInventory().children()) {
             ItemStack stack = slot.peek();
-            this.logger.info(stack.getType().getId() + "x" + stack.getQuantity());
+            this.logger.info(stack.getType().getKey() + "x" + stack.getQuantity());
         }
-        this.logger.info("Helmet: " + user.getHelmet().getType().getId());
-        this.logger.info("Chestplate: " + user.getChestplate().getType().getId());
-        this.logger.info("Leggings: " + user.getLeggings().getType().getId());
-        this.logger.info("Boots: " + user.getBoots().getType().getId());
+        this.logger.info("Helmet: " + user.getHelmet().getType().getKey());
+        this.logger.info("Chestplate: " + user.getChestplate().getType().getKey());
+        this.logger.info("Leggings: " + user.getLeggings().getType().getKey());
+        this.logger.info("Boots: " + user.getBoots().getType().getKey());
 
         this.logger.info("and a hotbar full of diamonds!");
         for (Inventory inv : user.getInventory().query(QueryOperationTypes.INVENTORY_TYPE.of(Hotbar.class)).slots()) {

@@ -29,10 +29,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.statistic.Statistic;
 import org.spongepowered.api.statistic.Statistics;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 
 import java.util.Collection;
@@ -41,32 +43,22 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-public final class StatisticRegistryModule implements SpongeAdditionalCatalogRegistryModule<Statistic>, AlternateCatalogRegistryModule<Statistic> {
+@RegisterCatalog(Statistics.class)
+public final class StatisticRegistryModule extends AbstractCatalogRegistryModule<Statistic>
+    implements SpongeAdditionalCatalogRegistryModule<Statistic>, AlternateCatalogRegistryModule<Statistic> {
 
-    @RegisterCatalog(Statistics.class)
-    private final Map<String, Statistic> statisticMappings = Maps.newHashMap();
 
     public static StatisticRegistryModule getInstance() {
         return Holder.INSTANCE;
     }
 
-    private StatisticRegistryModule() {
-    }
-
-    @Override
-    public Optional<Statistic> getById(String id) {
-        return Optional.ofNullable(this.statisticMappings.get(id.toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<Statistic> getAll() {
-        return ImmutableList.copyOf(this.statisticMappings.values());
+    StatisticRegistryModule() {
     }
 
     @Override
     public void registerAdditionalCatalog(Statistic stat) {
         checkNotNull(stat, "null statistic");
-        this.statisticMappings.put(stat.getId().toLowerCase(Locale.ENGLISH), stat);
+        this.map.put(stat.getKey(), stat);
     }
 
     @Override
@@ -77,8 +69,8 @@ public final class StatisticRegistryModule implements SpongeAdditionalCatalogReg
     @Override
     public Map<String, Statistic> provideCatalogMap() {
         final HashMap<String, Statistic> map = new HashMap<>();
-        for (Map.Entry<String, Statistic> entry : this.statisticMappings.entrySet()) {
-            final String key = entry.getKey();
+        for (Map.Entry<CatalogKey, Statistic> entry : this.map.entrySet()) {
+            final String key = entry.getKey().getValue();
             final String alternateKey = MINECRAFT_SPONGE_ID_MAPPINGS.get(key);
             if (alternateKey != null) {
                 map.put(alternateKey, entry.getValue());

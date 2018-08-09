@@ -64,7 +64,7 @@ public abstract class MixinIndirectEntityDamageSource extends MixinEntityDamageS
     public String toString() {
         MoreObjects.ToStringHelper helper = MoreObjects.toStringHelper("IndirectEntityDamageSource")
             .add("Name", this.damageType)
-            .add("Type", this.getType().getId())
+            .add("Type", this.getType().getKey())
             .add("Source", this.getSource())
             .add("IndirectSource", this.getIndirectSource());
         if (this.owner != null && this.owner.isPresent()) {

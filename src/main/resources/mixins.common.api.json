@@ -6,10 +6,12 @@
     "target": "@env(DEFAULT)",
     "compatibilityLevel": "JAVA_8",
     "mixins": [
+        "MixinCatalogKey",
         "ai.MixinAbstractAITask",
         "data.MixinDataContainer",
         "event.cause.damage.MixinAbstractDamageSource",
         "event.cause.damage.MixinAbstractEntityDamageSource",
+        "event.cause.damage.MixinAbstractIndirectEntityDamageSource",
         "item.merchant.MixinMerchant",
         "text.MixinText",
         "text.MixinTextLiteral",

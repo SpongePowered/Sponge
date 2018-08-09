@@ -310,7 +310,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                 this.worldTeleporter = (Teleporter) portalAgentType.getPortalAgentClass().getConstructor(new Class<?>[] {WorldServer.class})
                         .newInstance(new Object[] {this});
             } catch (Exception e) {
-                SpongeImpl.getLogger().log(Level.ERROR, "Could not create PortalAgent of type " + portalAgentType.getId()
+                SpongeImpl.getLogger().log(Level.ERROR, "Could not create PortalAgent of type " + portalAgentType.getKey()
                         + " for world " + this.getName() + ": " + e.getMessage() + ". Falling back to default...");
             }
         }
@@ -2338,10 +2338,10 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         SoundEvent event;
         try {
             // Check if the event is registered (ie has an integer ID)
-            event = SoundEvents.getRegisteredSoundEvent(sound.getId());
+            event = SoundEvents.getRegisteredSoundEvent(sound.getKey().toString());
         } catch (IllegalStateException e) {
             // Otherwise send it as a custom sound
-            this.playCustomSound(null, position.getX(), position.getY(), position.getZ(), sound.getId(),
+            this.playCustomSound(null, position.getX(), position.getY(), position.getZ(), sound.getKey().toString(),
                     (net.minecraft.util.SoundCategory) (Object) category, (float) Math.max(minVolume, volume), (float) pitch);
             return;
         }
@@ -2576,7 +2576,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         return MoreObjects.toStringHelper(this)
                 .add("Name", this.worldInfo.getWorldName())
                 .add("DimensionId", ((IMixinWorldServer) this).getDimensionId())
-                .add("DimensionType", ((org.spongepowered.api.world.DimensionType) (Object) this.provider.getDimensionType()).getId())
+                .add("DimensionType", ((org.spongepowered.api.world.DimensionType) (Object) this.provider.getDimensionType()).getKey())
                 .add("DimensionTypeId", this.provider.getDimensionType().getId())
                 .toString();
     }

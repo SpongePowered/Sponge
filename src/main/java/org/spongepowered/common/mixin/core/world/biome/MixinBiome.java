@@ -33,6 +33,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeDecorator;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.ChunkGeneratorSettings;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.type.PlantTypes;
 import org.spongepowered.api.data.type.ShrubTypes;
@@ -84,7 +85,7 @@ public abstract class MixinBiome implements BiomeType, IMixinBiome {
     @Shadow public IBlockState fillerBlock;
     @Shadow public BiomeDecorator decorator;
 
-    private String id;
+    private CatalogKey id;
     private String modId;
 
     @Override
@@ -324,7 +325,7 @@ public abstract class MixinBiome implements BiomeType, IMixinBiome {
         final String biomeName = name.toLowerCase().replace(" ", "_").replaceAll("[^A-Za-z0-9_]", "");
 
         ((IMixinBiome) biome).setModId(modId);
-        ((IMixinBiome) biome).setId(modId + ":" + biomeName);
+        ((IMixinBiome) biome).setId(CatalogKey.of(modId, biomeName));
     }
 
     @Override
@@ -333,12 +334,12 @@ public abstract class MixinBiome implements BiomeType, IMixinBiome {
     }
 
     @Override
-    public String getId() {
+    public CatalogKey getKey() {
         return this.id;
     }
 
     @Override
-    public void setId(String id) {
+    public void setId(CatalogKey id) {
         checkState(this.id == null, "Attempt made to set ID!");
 
         this.id = id;

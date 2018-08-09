@@ -25,19 +25,26 @@
 package org.spongepowered.common.mixin.core.scoreboard;
 
 import net.minecraft.scoreboard.IScoreCriteria;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
+import javax.annotation.Nullable;
+
 @Mixin(IScoreCriteria.EnumRenderType.class)
 public abstract class MixinScoreboardObjectiveDisplayType implements ObjectiveDisplayMode {
 
     @Shadow @Final public String renderType;
+    @Nullable private CatalogKey key;
 
     @Override
-    public String getId() {
-        return this.renderType;
+    public CatalogKey getKey() {
+        if (this.key == null) {
+            this.key = CatalogKey.resolve(this.renderType);
+        }
+        return this.key;
     }
 
     @Override

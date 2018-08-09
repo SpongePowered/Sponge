@@ -27,6 +27,7 @@ package org.spongepowered.common.data.type;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.item.ItemFishFood;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.CookedFish;
 import org.spongepowered.api.data.type.Fish;
 import org.spongepowered.api.text.translation.Translation;
@@ -36,8 +37,8 @@ public class SpongeCookedFish extends SpongeCatalogType.Translatable implements 
 
     public final ItemFishFood.FishType fish;
 
-    public SpongeCookedFish(String id, Translation translation, ItemFishFood.FishType fish) {
-        super("cooked." + id, translation);
+    public SpongeCookedFish(CatalogKey key, Translation translation, ItemFishFood.FishType fish) {
+        super(key, translation);
         this.fish = checkNotNull(fish);
     }
 

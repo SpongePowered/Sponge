@@ -25,18 +25,21 @@
 package org.spongepowered.common.entity.ai;
 
 import com.google.common.base.MoreObjects;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.entity.ai.task.AITask;
 import org.spongepowered.api.entity.ai.task.AITaskType;
 import org.spongepowered.api.entity.living.Agent;
 
 public final class SpongeAITaskType implements AITaskType {
-    private final String id, name;
+
+    private final String name;
     private final Class<? extends AITask<? extends Agent>> aiClass;
+    private final CatalogKey key;
 
     public SpongeAITaskType(String id, String name, Class<? extends AITask<? extends Agent>> aiClass) {
-        this.id = id;
         this.name = name;
         this.aiClass = aiClass;
+        this.key = CatalogKey.resolve(id);
     }
 
     @Override
@@ -45,8 +48,8 @@ public final class SpongeAITaskType implements AITaskType {
     }
 
     @Override
-    public String getId() {
-        return this.id;
+    public CatalogKey getKey() {
+        return this.key;
     }
 
     @Override
@@ -57,7 +60,7 @@ public final class SpongeAITaskType implements AITaskType {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .addValue(this.id)
+                .addValue(this.getKey())
                 .addValue(this.name)
                 .add("aiClass", this.aiClass)
                 .toString();

@@ -27,6 +27,7 @@ package org.spongepowered.common.registry.type.event;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
@@ -64,12 +65,12 @@ public final class EventContextKeysModule
 
     @Override
     public void registerAdditionalCatalog(EventContextKey extraCatalog) {
-        final String id = checkNotNull(extraCatalog).getId();
-        final String key = id.toLowerCase(Locale.ENGLISH);
-        checkArgument(!key.contains("sponge:"), "Cannot register spoofed event context key!");
-        checkArgument(!key.contains("minecraft:"), "Cannot register spoofed event context key!");
-        checkArgument(!this.catalogTypeMap.containsKey(key), "Cannot register an already registered EventContextKey: %s", key);
-        this.catalogTypeMap.put(key, extraCatalog);
+        final CatalogKey key = extraCatalog.getKey();
+        checkArgument(!key.getNamespace().equals(CatalogKey.SPONGE_NAMESPACE), "Cannot register spoofed event context key!");
+        checkArgument(!key.getNamespace().equals(CatalogKey.MINECRAFT_NAMESPACE), "Cannot register spoofed event context key!");
+        checkArgument(!this.map.containsKey(key), "Cannot register an already registered EventContextKey: %s",
+            key);
+        this.map.put(key, extraCatalog);
 
     }
 
@@ -107,7 +108,8 @@ public final class EventContextKeysModule
     }
 
     private void createKey(String id, String name, Class<?> usedClass) {
-        this.catalogTypeMap.put(id, new SpongeEventContextKey<>(id, name, usedClass));
+        final CatalogKey key = CatalogKey.resolve(id);
+        this.map.put(key, new SpongeEventContextKey<>(key, name, usedClass));
     }
 
     private EventContextKeysModule() {

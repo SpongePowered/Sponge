@@ -167,7 +167,7 @@ public class SpongeHooks {
             logInfo("Tracking Block " + "[RootCause: {0}][World: {1}][Block: {2}][Pos: {3}]",
                     user.getName(),
                     world.getWorldInfo().getWorldName() + "(" + ((IMixinWorldServer) world).getDimensionId() + ")",
-                    ((BlockType) block).getId(),
+                    ((BlockType) block).getKey(),
                     pos);
             logStack(config);
         } else if (config.getConfig().getLogging().blockTrackLogging() && !allowed) {
@@ -175,7 +175,7 @@ public class SpongeHooks {
                     user.getName(),
                     world.getWorldInfo().getWorldName(),
                     ((IMixinWorldServer) world).getDimensionId(),
-                    ((BlockType) block).getId(),
+                    ((BlockType) block).getKey(),
                     pos.getX() + ", " + pos.getY() + ", " + pos.getZ());
         }
     }
@@ -544,10 +544,10 @@ public class SpongeHooks {
             causedBy = causeEntity.getName();
         }else if (rootCause instanceof BlockSnapshot) {
             BlockSnapshot snapshot = (BlockSnapshot) rootCause;
-            causedBy = snapshot.getState().getType().getId();
+            causedBy = snapshot.getState().getType().getKey().toString();
         } else if (rootCause instanceof CatalogType) {
             CatalogType type = (CatalogType) rootCause;
-            causedBy = type.getId();
+            causedBy = type.getKey().toString();
         } else if (rootCause instanceof PluginContainer) {
             PluginContainer plugin = (PluginContainer) rootCause;
             causedBy = plugin.getId();

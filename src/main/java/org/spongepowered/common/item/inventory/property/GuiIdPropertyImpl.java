@@ -40,15 +40,7 @@ public final class GuiIdPropertyImpl extends AbstractInventoryProperty<String, G
 
     @Override
     public int compareTo(Property<?, ?> other) {
-        if (other == null) {
-            return 1;
-        }
-
-        if (other instanceof GuiIdProperty) {
-            return this.getValue().getId().compareTo(((GuiId) other.getValue()).getId());
-        }
-
-        return 1;
+        return getValue().getKey().compareTo(((GuiId) other).getKey());
     }
 
     public static final class BuilderImpl extends PropertyBuilderImpl<GuiId, GuiIdProperty, GuiIdProperty.Builder> implements GuiIdProperty.Builder {

@@ -34,6 +34,7 @@ import net.minecraft.inventory.InventoryCraftResult;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.inventory.InventoryLargeChest;
 import net.minecraft.tileentity.TileEntityLockable;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.entity.Entity;
@@ -149,13 +150,15 @@ public abstract class MixinTraitInventory implements MinecraftInventoryAdapter {
             }
 
             if (base instanceof TileEntity) {
-                final String id = ((TileEntity) base).getBlock().getType().getId();
-                final String pluginId = id.substring(0, id.indexOf(":"));
+                final CatalogKey key = ((TileEntity) base).getBlock().getType().getKey();
+                final String id = key.toString();
+                final String pluginId = key.getNamespace();
                 container = Sponge.getPluginManager().getPlugin(pluginId)
                         .orElseThrow(() -> new AssertionError("Missing plugin " + pluginId + " for block " + id));
             } else if (base instanceof Entity) {
-                final String id = ((Entity) base).getType().getId();
-                final String pluginId = id.substring(0, id.indexOf(":"));
+                final CatalogKey key = ((Entity) base).getType().getKey();
+                final String id = key.toString();
+                final String pluginId = key.getNamespace();
                 container = Sponge.getPluginManager().getPlugin(pluginId)
                         .orElseThrow(() -> new AssertionError("Missing plugin " + pluginId + " for entity " + id + " (" + this.getClass().getName() +
                                 ")"));

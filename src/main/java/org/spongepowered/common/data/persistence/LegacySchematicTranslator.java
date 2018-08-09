@@ -31,6 +31,7 @@ import com.google.common.reflect.TypeToken;
 import net.minecraft.block.Block;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.tileentity.TileEntityArchetype;
@@ -63,6 +64,7 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
     private static final TypeToken<Schematic> TYPE_TOKEN = TypeToken.of(Schematic.class);
     private static final int MAX_SIZE = 65535;
     private static final DataQuery TILE_ID = DataQuery.of("id");
+    private static final CatalogKey KEY = CatalogKey.sponge("legacy_schematic");
 
     public static LegacySchematicTranslator get() {
         return INSTANCE;
@@ -73,8 +75,8 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
     }
 
     @Override
-    public String getId() {
-        return "sponge:legacy_schematic";
+    public CatalogKey getKey() {
+        return KEY;
     }
 
     @Override

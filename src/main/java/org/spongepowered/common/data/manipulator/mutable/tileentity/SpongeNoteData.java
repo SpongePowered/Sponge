@@ -68,6 +68,6 @@ public class SpongeNoteData extends AbstractSingleData<NotePitch, NoteData, Immu
     @Override
     public DataContainer toContainer() {
         return super.toContainer()
-            .set(Keys.NOTE_PITCH.getQuery(), getValue().getId());
+            .set(Keys.NOTE_PITCH.getQuery(), getValue().getKey());
     }
 }

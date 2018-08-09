@@ -35,6 +35,7 @@ import net.minecraft.advancements.DisplayInfo;
 import net.minecraft.advancements.FrameType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.advancement.AdvancementType;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
@@ -86,8 +87,8 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
     @Nullable private AdvancementTree tree;
     private List<Text> toastText;
     private Text text;
-    private String spongeId;
     private String name;
+    private CatalogKey key;
 
     @Nullable private Advancement tempParent;
 
@@ -112,7 +113,7 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
         }
         String path = id.getPath();
         this.name = path.replace('/', '_');
-        this.spongeId = id.getNamespace() + ':' + this.name;
+        this.key = (CatalogKey) (Object) id;
         if (displayIn != null) {
             this.name = SpongeTexts.toPlain(displayIn.getTitle());
         }
@@ -148,7 +149,7 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
             toastText.add(getDisplayInfo().get().getTitle());
         } else {
             toastText.add(Text.of("Unlocked advancement"));
-            toastText.add(Text.of(getId()));
+            toastText.add(Text.of(getKey().toString()));
         }
         this.toastText = toastText.build();
         final Set<String> scoreCriteria = new HashSet<>();
@@ -278,9 +279,8 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
     }
 
     @Override
-    public String getId() {
-        checkServer();
-        return this.spongeId;
+    public CatalogKey getKey() {
+        return this.key;
     }
 
     @Override

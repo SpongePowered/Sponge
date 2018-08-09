@@ -158,7 +158,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
             .set(Queries.POSITION_X, this.getPos().getX())
             .set(Queries.POSITION_Y, this.getPos().getY())
             .set(Queries.POSITION_Z, this.getPos().getZ())
-            .set(DataQueries.BLOCK_ENTITY_TILE_TYPE, this.tileType.getId());
+            .set(DataQueries.BLOCK_ENTITY_TILE_TYPE, this.tileType.getKey());
         final NBTTagCompound compound = new NBTTagCompound();
         this.writeToNBT(compound);
         NbtDataUtil.filterSpongeCustomData(compound); // We must filter the custom data so it isn't stored twice

@@ -24,38 +24,21 @@
  */
 package org.spongepowered.common.registry.type.scoreboard;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import net.minecraft.scoreboard.IScoreCriteria;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayModes;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-
-public final class ObjectiveDisplayModeRegistryModule implements CatalogRegistryModule<ObjectiveDisplayMode> {
-
-    @RegisterCatalog(ObjectiveDisplayModes.class)
-    private final Map<String, ObjectiveDisplayMode> objectiveDisplayModeMappings =
-        new ImmutableMap.Builder<String, ObjectiveDisplayMode>()
-            .put("integer", (ObjectiveDisplayMode) (Object) IScoreCriteria.EnumRenderType.INTEGER)
-            .put("hearts", (ObjectiveDisplayMode) (Object) IScoreCriteria.EnumRenderType.HEARTS)
-            .build();
+@RegisterCatalog(ObjectiveDisplayModes.class)
+public final class ObjectiveDisplayModeRegistryModule extends AbstractCatalogRegistryModule<ObjectiveDisplayMode>
+    implements CatalogRegistryModule<ObjectiveDisplayMode> {
 
     @Override
-    public Optional<ObjectiveDisplayMode> getById(String id) {
-        return Optional.ofNullable(this.objectiveDisplayModeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
+    public void registerDefaults() {
+        register(CatalogKey.minecraft("integer"), (ObjectiveDisplayMode) (Object) IScoreCriteria.EnumRenderType.INTEGER);
+        register(CatalogKey.minecraft("hearts"), (ObjectiveDisplayMode) (Object) IScoreCriteria.EnumRenderType.HEARTS);
     }
-
-    @Override
-    public Collection<ObjectiveDisplayMode> getAll() {
-        return ImmutableList.copyOf(this.objectiveDisplayModeMappings.values());
-    }
-
 }

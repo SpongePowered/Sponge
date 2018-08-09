@@ -26,6 +26,7 @@ package org.spongepowered.common.extra.fluid;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
@@ -99,7 +100,7 @@ public class SpongeFluidStack implements FluidStack {
             }
             final String fluidId = container.getString(DataQueries.FLUID_TYPE).get();
             final int volume = container.getInt(DataQueries.FLUID_VOLUME).get();
-            final Optional<FluidType> fluidType = Sponge.getRegistry().getType(FluidType.class, fluidId);
+            final Optional<FluidType> fluidType = Sponge.getRegistry().getType(FluidType.class, CatalogKey.resolve(fluidId));
             if (!fluidType.isPresent()) {
                 throw new InvalidDataException("Unknown FluidType found! Requested: " + fluidId + "but got none.");
             }
@@ -172,7 +173,7 @@ public class SpongeFluidStack implements FluidStack {
     public DataContainer toContainer() {
         DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, this.getContentVersion())
-            .set(DataQueries.FLUID_TYPE, this.fluidType.getId())
+            .set(DataQueries.FLUID_TYPE, this.fluidType.getKey())
             .set(DataQueries.FLUID_VOLUME, this.volume);
         if (this.extraData != null) {
             container.set(DataQueries.UNSAFE_NBT, this.extraData);
