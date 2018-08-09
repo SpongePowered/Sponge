@@ -38,9 +38,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.interfaces.IMixinEntityTracker;
 
 @Mixin(EntityTracker.class)
-public abstract class MixinEntityTracker {
+public abstract class MixinEntityTracker implements IMixinEntityTracker {
 
     @Shadow @Final private WorldServer world;
 
@@ -85,5 +86,10 @@ public abstract class MixinEntityTracker {
                     + " Skipping...");
             ci.cancel();
         }
+    }
+
+    @Override
+    public net.minecraft.world.World getWorld() {
+        return this.world;
     }
 }

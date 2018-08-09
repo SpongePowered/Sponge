@@ -566,6 +566,7 @@
         "world.gen.structure.MixinMapGenStronghold",
         "world.gen.structure.MixinMapGenStructure",
         "world.gen.structure.MixinMapGenVillage",
+        "world.storage.IMixinMapStorage",
         "world.storage.MixinSaveHandler",
         "world.storage.MixinThreadedFileIOBase",
         "world.storage.MixinWorldInfo"
