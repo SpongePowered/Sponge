@@ -40,22 +40,22 @@ import javax.annotation.Nullable;
 @Implements(@Interface(iface = BrickType.class, prefix = "brick$"))
 public abstract class MixinBlockStoneBrickEnumType {
 
-    @Shadow public abstract String shadow$getUnlocalizedName();
+    @Shadow public abstract String shadow$getTranslationKey();
 
     @Nullable private Translation translation;
 
     public String brick$getId() {
-        return "minecraft:" + shadow$getUnlocalizedName();
+        return "minecraft:" + shadow$getTranslationKey();
     }
 
     @Intrinsic
     public String brick$getName() {
-        return shadow$getUnlocalizedName();
+        return shadow$getTranslationKey();
     }
 
     public Translation brick$getTranslation() {
         if (this.translation == null) {
-            this.translation = new SpongeTranslation("tile.stonebricksmooth." + shadow$getUnlocalizedName() + ".name");
+            this.translation = new SpongeTranslation("tile.stonebricksmooth." + shadow$getTranslationKey() + ".name");
         }
         return this.translation;
     }

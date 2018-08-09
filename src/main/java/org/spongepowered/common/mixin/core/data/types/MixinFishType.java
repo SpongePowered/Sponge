@@ -39,25 +39,25 @@ import java.util.Optional;
 @Mixin(ItemFishFood.FishType.class)
 public abstract class MixinFishType implements Fish {
 
-    @Shadow @Final private String unlocalizedName;
+    @Shadow @Final private String translationKey;
     @Final @Shadow private boolean cookable;
 
     private Translation translation;
 
     @Override
     public String getId() {
-        return "minecraft:raw." + this.unlocalizedName;
+        return "minecraft:raw." + this.translationKey;
     }
 
     @Override
     public String getName() {
-        return this.unlocalizedName;
+        return this.translationKey;
     }
 
     @Override
     public Optional<CookedFish> getCookedFish() {
         if (this.cookable) {
-            final Optional<CookedFish> optional = SpongeImpl.getRegistry().getType(CookedFish.class, "cooked." + this.unlocalizedName);
+            final Optional<CookedFish> optional = SpongeImpl.getRegistry().getType(CookedFish.class, "cooked." + this.translationKey);
             if (optional.isPresent()) {
                 return optional;
             }
@@ -69,7 +69,7 @@ public abstract class MixinFishType implements Fish {
     public Translation getTranslation() {
         // Maybe move this to a @Inject at the end of the constructor
         if (this.translation == null) {
-            this.translation = new SpongeTranslation("item.fish." + this.unlocalizedName + ".raw.name");
+            this.translation = new SpongeTranslation("item.fish." + this.translationKey + ".raw.name");
         }
         return this.translation;
     }

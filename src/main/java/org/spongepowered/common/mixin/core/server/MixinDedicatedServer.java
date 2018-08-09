@@ -90,7 +90,7 @@ public abstract class MixinDedicatedServer extends MinecraftServer implements Se
     @Redirect(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/dedicated/PropertyManager;getIntProperty(Ljava/lang/String;I)I"))
     private int fixWrongDefaultDifficulty(PropertyManager propertyManager, String key, int defaultValue) {
         if ("difficulty".equalsIgnoreCase(key)) {
-            return propertyManager.getIntProperty(key, WorldInfo.DEFAULT_DIFFICULTY.getDifficultyId());
+            return propertyManager.getIntProperty(key, WorldInfo.DEFAULT_DIFFICULTY.getId());
         }
 
         return propertyManager.getIntProperty(key, defaultValue);

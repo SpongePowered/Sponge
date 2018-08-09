@@ -108,7 +108,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
                 }
             }
             NbtDataUtil.filterSpongeCustomData(compound);
-            if (!compound.hasNoTags()) {
+            if (!compound.isEmpty()) {
                 this.compound = compound;
             } else {
                 this.compound = null;

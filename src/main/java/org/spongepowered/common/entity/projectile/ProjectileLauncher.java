@@ -279,11 +279,11 @@ public class ProjectileLauncher {
                 TileEntityDispenser dispenser = (TileEntityDispenser) source;
                 EnumFacing enumfacing = DispenserSourceLogic.getFacing(dispenser);
                 Random random = dispenser.getWorld().rand;
-                double d3 = random.nextGaussian() * 0.05D + enumfacing.getFrontOffsetX();
-                double d4 = random.nextGaussian() * 0.05D + enumfacing.getFrontOffsetY();
-                double d5 = random.nextGaussian() * 0.05D + enumfacing.getFrontOffsetZ();
-                EntityLivingBase thrower = new EntityArmorStand(dispenser.getWorld(), loc.getX() + enumfacing.getFrontOffsetX(),
-                        loc.getY() + enumfacing.getFrontOffsetY(), loc.getZ() + enumfacing.getFrontOffsetZ());
+                double d3 = random.nextGaussian() * 0.05D + enumfacing.getXOffset();
+                double d4 = random.nextGaussian() * 0.05D + enumfacing.getYOffset();
+                double d5 = random.nextGaussian() * 0.05D + enumfacing.getZOffset();
+                EntityLivingBase thrower = new EntityArmorStand(dispenser.getWorld(), loc.getX() + enumfacing.getXOffset(),
+                        loc.getY() + enumfacing.getYOffset(), loc.getZ() + enumfacing.getZOffset());
                 LargeFireball fireball = (LargeFireball) new EntityLargeFireball(dispenser.getWorld(), thrower, d3, d4, d5);
                 return doLaunch(loc.getExtent(), fireball);
             }

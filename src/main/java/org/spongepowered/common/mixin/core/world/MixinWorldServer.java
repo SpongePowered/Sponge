@@ -255,7 +255,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     private IMixinChunkProviderServer mixinChunkProviderServer;
     @Nullable private NextTickListEntry tmpScheduledObj;
 
-    @Shadow @Final private MinecraftServer mcServer;
+    @Shadow @Final private MinecraftServer server;
     @Shadow @Final private Set<NextTickListEntry> pendingTickListEntriesHashSet;
     @Shadow @Final private TreeSet<NextTickListEntry> pendingTickListEntriesTreeSet;
     @Shadow @Final private PlayerChunkMap playerChunkMap;
@@ -1014,7 +1014,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Inject(method = "saveLevel", at = @At("HEAD"))
     private void onSaveLevel(CallbackInfo ci) {
         // Always call the provider's onWorldSave method as we do not use WorldServerMulti
-        for (WorldServer worldServer : this.mcServer.worlds) {
+        for (WorldServer worldServer : this.server.worlds) {
             worldServer.provider.onWorldSave();
         }
     }
@@ -1638,7 +1638,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         for (int currentX = minChunkX; currentX < maxChunkX; ++currentX) {
             for (int currentZ = minChunkZ; currentZ < maxChunkZ; ++currentZ) {
                 if (this.isChunkLoaded(currentX, currentZ, true)) {
-                    this.getChunkFromChunkCoords(currentX, currentZ).getEntitiesOfTypeWithinAABB(clazz, aabb, list, filter);
+                    this.getChunk(currentX, currentZ).getEntitiesOfTypeWithinAABB(clazz, aabb, list, filter);
                 }
             }
         }
@@ -1764,7 +1764,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             return true;
         }
 
-        this.getChunkFromChunkCoords(chunkX, chunkZ).addEntity(entity);
+        this.getChunk(chunkX, chunkZ).addEntity(entity);
         this.loadedEntityList.add(entity);
         this.onSpongeEntityAdded(entity);
         return true;
@@ -1788,7 +1788,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
         if (state.getBlock() instanceof ITileEntityProvider) {
             // We MUST only check to see if a TE exists to avoid creating a new one.
-            final net.minecraft.tileentity.TileEntity te = this.getChunkFromBlockCoords(pos).getTileEntity(pos, net.minecraft.world.chunk.Chunk.EnumCreateEntityType.CHECK);
+            final net.minecraft.tileentity.TileEntity te = this.getChunk(pos).getTileEntity(pos, net.minecraft.world.chunk.Chunk.EnumCreateEntityType.CHECK);
             if (te != null) {
                 TileEntity tile = (TileEntity) te;
                 for (DataManipulator<?, ?> manipulator : ((IMixinCustomDataHolder) tile).getCustomManipulators()) {
@@ -1899,7 +1899,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             if (currentState == TickPhase.Tick.TILE_ENTITY) {
                 ((IMixinChunkProviderServer) this.getChunkProvider()).setForceChunkRequests(true);
             }
-            net.minecraft.world.chunk.Chunk chunk = this.getChunkFromBlockCoords(pos);
+            net.minecraft.world.chunk.Chunk chunk = this.getChunk(pos);
             this.mixinChunkProviderServer.setForceChunkRequests(forceChunkRequests);
             return chunk.getBlockState(pos);
         }
@@ -1947,7 +1947,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                 pos = new BlockPos(pos.getX(), 255, pos.getZ());
             }
             // Sponge Start - Use our hook to get the chunk only if it is loaded
-            // return this.getChunkFromBlockCoords(pos).getLightSubtracted(pos, 0);
+            // return this.getChunk(pos).getLightSubtracted(pos, 0);
             final Chunk chunk = this.mixinChunkProviderServer.getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
             return chunk == null ? 0 : chunk.getLightSubtracted(pos, 0);
             // Sponge End
@@ -2001,7 +2001,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                 }
 
                 // Sponge - Gets only loaded chunks, unloaded chunks will not get loaded to check lighting
-                // Chunk chunk = this.getChunkFromBlockCoords(pos);
+                // Chunk chunk = this.getChunk(pos);
                 // return chunk.getLightSubtracted(pos, this.skylightSubtracted);
                 final Chunk chunk = this.mixinChunkProviderServer.getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
                 return chunk == null ? 0 : chunk.getLightSubtracted(pos, this.getSkylightSubtracted());
@@ -2390,7 +2390,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     private void stopSounds0(@Nullable SoundType sound, @Nullable SoundCategory category) {
-        this.mcServer.getPlayerList().sendPacketToAllPlayersInDimension(
+        this.server.getPlayerList().sendPacketToAllPlayersInDimension(
                 SoundEffectHelper.createStopSoundPacket(sound, category), getDimensionId());
     }
 
@@ -2408,7 +2408,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         List<Packet<?>> packets = SpongeParticleHelper.toPackets((SpongeParticleEffect) particleEffect, position);
 
         if (!packets.isEmpty()) {
-            PlayerList playerList = this.mcServer.getPlayerList();
+            PlayerList playerList = this.server.getPlayerList();
 
             double x = position.getX();
             double y = position.getY();
@@ -2431,7 +2431,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     private void playRecord0(Vector3i position, @Nullable RecordType recordType) {
-        this.mcServer.getPlayerList().sendPacketToAllPlayersInDimension(
+        this.server.getPlayerList().sendPacketToAllPlayersInDimension(
                 SpongeRecordType.createPacket(position, recordType), getDimensionId());
     }
 
@@ -2566,7 +2566,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     private int chooseViewDistanceValue(final int value) {
         if (value == WorldCategory.USE_SERVER_VIEW_DISTANCE) {
-            return this.mcServer.getPlayerList().getViewDistance();
+            return this.server.getPlayerList().getViewDistance();
         }
         return value;
     }

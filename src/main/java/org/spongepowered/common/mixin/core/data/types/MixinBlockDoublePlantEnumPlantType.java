@@ -41,7 +41,7 @@ import javax.annotation.Nullable;
 public abstract class MixinBlockDoublePlantEnumPlantType implements DoublePlantType {
 
     @Shadow public abstract String shadow$getName();
-    @Shadow public abstract String shadow$getUnlocalizedName();
+    @Shadow public abstract String shadow$getTranslationKey();
 
     @Nullable private Translation translation;
 
@@ -51,13 +51,13 @@ public abstract class MixinBlockDoublePlantEnumPlantType implements DoublePlantT
 
     @Intrinsic
     public String plant$getName() {
-        return this.shadow$getUnlocalizedName();
+        return this.shadow$getTranslationKey();
     }
 
     public Translation plant$getTranslation() {
         // Maybe move this to a @Inject at the end of the constructor
         if (this.translation == null) {
-            this.translation = new SpongeTranslation("tile.doublePlant." + this.shadow$getUnlocalizedName() + ".name");
+            this.translation = new SpongeTranslation("tile.doublePlant." + this.shadow$getTranslationKey() + ".name");
         }
         return this.translation;
     }

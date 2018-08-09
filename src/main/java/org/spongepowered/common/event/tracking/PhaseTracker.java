@@ -629,7 +629,7 @@ public final class PhaseTracker {
             crashreportcategory.addDetail("Source block type", () -> {
                 try {
                     return String.format("ID #%d (%s // %s)", Block.getIdFromBlock(sourceBlock),
-                            sourceBlock.getUnlocalizedName(), sourceBlock.getClass().getCanonicalName());
+                            sourceBlock.getTranslationKey(), sourceBlock.getClass().getCanonicalName());
                 } catch (Throwable var2) {
                     return "ID #" + Block.getIdFromBlock(sourceBlock);
                 }
@@ -668,7 +668,7 @@ public final class PhaseTracker {
         }
         final SpongeBlockChangeFlag spongeFlag = (SpongeBlockChangeFlag) flag;
         final net.minecraft.world.World minecraftWorld = WorldUtil.asNative(mixinWorld);
-        final Chunk chunk = minecraftWorld.getChunkFromBlockCoords(pos);
+        final Chunk chunk = minecraftWorld.getChunk(pos);
         // It is now possible for setBlockState to be called on an empty chunk due to our optimization
         // for returning empty chunks when we don't want a chunk to load.
         // If chunk is empty, we simply return to avoid any further logic.
@@ -911,7 +911,7 @@ public final class PhaseTracker {
                 }
             }
             // Sponge end - continue on with the checks.
-            minecraftWorld.getChunkFromChunkCoords(chunkX, chunkZ).addEntity(minecraftEntity);
+            minecraftWorld.getChunk(chunkX, chunkZ).addEntity(minecraftEntity);
             minecraftWorld.loadedEntityList.add(minecraftEntity);
             mixinWorldServer.onSpongeEntityAdded(minecraftEntity); // Sponge - Cannot add onEntityAdded to the access transformer because forge makes it public
             return true;

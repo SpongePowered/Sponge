@@ -71,7 +71,7 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
         // If we do not have a notifier at this point then there is no need to attempt to retrieve one from the chunk
         final User user = context.getNotifier().orElse(null);
         if (user != null) {
-            final IMixinChunk mixinChunk = (IMixinChunk) minecraftWorld.getChunkFromBlockCoords(notifyPos);
+            final IMixinChunk mixinChunk = (IMixinChunk) minecraftWorld.getChunk(notifyPos);
             mixinChunk.addTrackedBlockPosition(block, notifyPos, user, PlayerTracker.Type.NOTIFIER);
         }
     }
@@ -99,7 +99,7 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
         final Location<World> changedLocation = snapshotTransaction.getOriginal().getLocation().get();
         final Vector3d changedPosition = changedLocation.getPosition();
         final BlockPos changedBlockPos = VecHelper.toBlockPos(changedPosition);
-        final IMixinChunk changedMixinChunk = (IMixinChunk) ((WorldServer) changedLocation.getExtent()).getChunkFromBlockCoords(changedBlockPos);
+        final IMixinChunk changedMixinChunk = (IMixinChunk) ((WorldServer) changedLocation.getExtent()).getChunk(changedBlockPos);
         changedMixinChunk.getBlockOwner(changedBlockPos)
                 .ifPresent(owner -> changedMixinChunk.addTrackedBlockPosition(block, changedBlockPos, owner, PlayerTracker.Type.OWNER));
         final User user = TrackingUtil.getNotifierOrOwnerFromBlock(changedLocation);

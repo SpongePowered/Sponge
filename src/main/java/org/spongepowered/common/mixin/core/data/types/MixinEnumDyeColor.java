@@ -40,7 +40,7 @@ import org.spongepowered.common.text.translation.SpongeTranslation;
 @Implements(@Interface(iface = DyeColor.class, prefix = "dye$"))
 public abstract class MixinEnumDyeColor implements DyeColor {
 
-    @Shadow public abstract String shadow$getUnlocalizedName();
+    @Shadow public abstract String shadow$getTranslationKey();
     @Shadow public abstract String shadow$getName();
 
     @Shadow public abstract float[] getColorComponentValues();
@@ -49,7 +49,7 @@ public abstract class MixinEnumDyeColor implements DyeColor {
 
     @Intrinsic
     public String dye$getName() {
-        return this.shadow$getUnlocalizedName();
+        return this.shadow$getTranslationKey();
     }
 
     public String dye$getId() {
@@ -67,7 +67,7 @@ public abstract class MixinEnumDyeColor implements DyeColor {
     public Translation dye$getTranslation() {
         // Maybe move this to a @Inject at the end of the constructor
         if (this.translation == null) {
-            this.translation = new SpongeTranslation("item.dyePowder." + this.shadow$getUnlocalizedName() + ".name");
+            this.translation = new SpongeTranslation("item.dyePowder." + this.shadow$getTranslationKey() + ".name");
         }
         return this.translation;
     }

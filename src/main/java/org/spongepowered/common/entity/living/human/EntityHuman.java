@@ -521,11 +521,11 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
         double d1 = target.getEntityBoundingBox().minY + target.height / 3.0F - entitytippedarrow.posY;
         double d2 = target.posZ - this.posZ;
         double d3 = MathHelper.sqrt(d0 * d0 + d2 * d2);
-        entitytippedarrow.shoot(d0, d1 + d3 * 0.20000000298023224D, d2, 1.6F, 14 - this.world.getDifficulty().getDifficultyId() * 4);
+        entitytippedarrow.shoot(d0, d1 + d3 * 0.20000000298023224D, d2, 1.6F, 14 - this.world.getDifficulty().getId() * 4);
         // These names are wrong
         int i = EnchantmentHelper.getMaxEnchantmentLevel(Enchantments.PUNCH, this);
         int j = EnchantmentHelper.getMaxEnchantmentLevel(Enchantments.FLAME, this);
-        entitytippedarrow.setDamage(distanceFactor * 2.0F + this.rand.nextGaussian() * 0.25D + this.world.getDifficulty().getDifficultyId() * 0.11F);
+        entitytippedarrow.setDamage(distanceFactor * 2.0F + this.rand.nextGaussian() * 0.25D + this.world.getDifficulty().getId() * 0.11F);
 
         if (i > 0) {
             entitytippedarrow.setDamage(entitytippedarrow.getDamage() + i * 0.5D + 0.5D);

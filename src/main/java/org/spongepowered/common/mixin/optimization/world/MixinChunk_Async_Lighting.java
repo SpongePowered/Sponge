@@ -203,7 +203,7 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
 
                     for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL)
                     {
-                        final Chunk chunk = this.getLightChunk((l + enumfacing.getFrontOffsetX()) >> 4, (i1 + enumfacing.getFrontOffsetZ()) >> 4, neighbors);
+                        final Chunk chunk = this.getLightChunk((l + enumfacing.getXOffset()) >> 4, (i1 + enumfacing.getZOffset()) >> 4, neighbors);
                         if (chunk == null || chunk.unloadQueued) {
                             continue;
                         }
@@ -214,7 +214,7 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
 
                     for (EnumFacing enumfacing1 : EnumFacing.Plane.HORIZONTAL)
                     {
-                        this.checkSkylightNeighborHeight(l + enumfacing1.getFrontOffsetX(), i1 + enumfacing1.getFrontOffsetZ(), k);
+                        this.checkSkylightNeighborHeight(l + enumfacing1.getXOffset(), i1 + enumfacing1.getZOffset(), k);
                     }
                 }
             }
@@ -606,7 +606,7 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
             {
                 for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL)
                 {
-                    this.updateSkylightNeighborHeight(k + enumfacing.getFrontOffsetX(), l + enumfacing.getFrontOffsetZ(), j2, k2);
+                    this.updateSkylightNeighborHeight(k + enumfacing.getXOffset(), l + enumfacing.getZOffset(), j2, k2);
                 }
 
                 this.updateSkylightNeighborHeight(k, l, j2, k2);

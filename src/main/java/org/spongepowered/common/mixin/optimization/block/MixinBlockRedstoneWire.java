@@ -177,7 +177,7 @@ public abstract class MixinBlockRedstoneWire extends Block {
             IBlockState state = worldIn.getBlockState(pos);
             int oldPower = state.getValue(BlockRedstoneWire.POWER);
             this.canProvidePower = false;
-            int blockPower = worldIn.isBlockIndirectlyGettingPowered(pos);
+            int blockPower = worldIn.getRedstonePowerFromNeighbors(pos);
             this.canProvidePower = true;
             int wirePower = this.getSurroundingWirePower(worldIn, pos);
             // Lower the strength as it moved a block
@@ -206,7 +206,7 @@ public abstract class MixinBlockRedstoneWire extends Block {
             IBlockState state = worldIn.getBlockState(pos);
             int oldPower = state.getValue(BlockRedstoneWire.POWER);
             this.canProvidePower = false;
-            int blockPower = worldIn.isBlockIndirectlyGettingPowered(pos);
+            int blockPower = worldIn.getRedstonePowerFromNeighbors(pos);
             this.canProvidePower = true;
             int wirePower = this.getSurroundingWirePower(worldIn, pos);
             // Lower the strength as it moved a block

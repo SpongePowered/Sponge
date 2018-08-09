@@ -125,7 +125,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Shadow protected SoundType blockSoundType;
     @Shadow @Final protected BlockStateContainer blockState;
 
-    @Shadow public abstract String getUnlocalizedName();
+    @Shadow public abstract String getTranslationKey();
     @Shadow public abstract Material getMaterial(IBlockState state);
     @Shadow public abstract IBlockState shadow$getDefaultState();
     @Shadow public abstract boolean shadow$getTickRandomly();
@@ -156,9 +156,9 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
             // ignore
         }
 
-        // onEntityCollidedWithBlock (IBlockState)
+        // onEntityCollision (IBlockState)
         try {
-            String mapping = SpongeImplHooks.isDeobfuscatedEnvironment() ? "onEntityCollidedWithBlock" : "func_180634_a";
+            String mapping = SpongeImplHooks.isDeobfuscatedEnvironment() ? "onEntityCollision" : "func_180634_a";
             Class<?>[] argTypes = { net.minecraft.world.World.class, BlockPos.class, IBlockState.class, Entity.class };
             Class<?> clazz = this.getClass().getMethod(mapping, argTypes).getDeclaringClass();
             if (clazz.equals(Block.class)) {
@@ -218,7 +218,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     @Override
     public Translation getTranslation() {
-        return new SpongeTranslation(getUnlocalizedName() + ".name");
+        return new SpongeTranslation(getTranslationKey() + ".name");
     }
 
     @Intrinsic

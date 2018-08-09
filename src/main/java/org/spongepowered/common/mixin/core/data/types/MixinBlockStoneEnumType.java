@@ -42,7 +42,7 @@ public abstract class MixinBlockStoneEnumType {
 
     @Shadow public abstract String shadow$getName();
 
-    @Shadow public abstract String shadow$getUnlocalizedName();
+    @Shadow public abstract String shadow$getTranslationKey();
 
     @Nullable private Translation translation;
 
@@ -52,12 +52,12 @@ public abstract class MixinBlockStoneEnumType {
 
     @Intrinsic
     public String stone$getName() {
-        return shadow$getUnlocalizedName();
+        return shadow$getTranslationKey();
     }
 
     public Translation stone$getTranslation() {
         if (this.translation == null) {
-            this.translation = new SpongeTranslation("tile.stone." + shadow$getUnlocalizedName() + ".name");
+            this.translation = new SpongeTranslation("tile.stone." + shadow$getTranslationKey() + ".name");
         }
         return this.translation;
     }

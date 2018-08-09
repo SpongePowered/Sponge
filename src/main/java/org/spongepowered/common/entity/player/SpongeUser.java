@@ -131,7 +131,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
         final NBTTagCompound spongeCompound = compound.getCompoundTag(NbtDataUtil.FORGE_DATA).getCompoundTag(NbtDataUtil.SPONGE_DATA);
         CustomDataNbtUtil.readCustomData(spongeCompound, ((DataHolder) this));
-        if (!spongeCompound.hasNoTags()) {
+        if (!spongeCompound.isEmpty()) {
             final NBTTagList spawnList = spongeCompound.getTagList(NbtDataUtil.USER_SPAWN_LIST, NbtDataUtil.TAG_COMPOUND);
 
             for (int i = 0; i < spawnList.tagCount(); i++) {
@@ -208,7 +208,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
             spawnList.appendTag(spawnCompound);
         }
 
-        if (!spawnList.hasNoTags()) {
+        if (!spawnList.isEmpty()) {
             spongeCompound.setTag(NbtDataUtil.USER_SPAWN_LIST, spawnList);
             forgeCompound.setTag(NbtDataUtil.SPONGE_DATA, spongeCompound);
             compound.setTag(NbtDataUtil.FORGE_DATA, forgeCompound);

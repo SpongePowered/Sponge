@@ -40,22 +40,22 @@ import javax.annotation.Nullable;
 @Implements(@Interface(iface = PrismarineType.class, prefix = "prismarine$"))
 public abstract class MixinBlockPrismarineEnumType {
 
-    @Shadow public abstract String shadow$getUnlocalizedName();
+    @Shadow public abstract String shadow$getTranslationKey();
 
     @Nullable private Translation translation;
 
     public String prismarine$getId() {
-        return "minecraft:" + shadow$getUnlocalizedName();
+        return "minecraft:" + shadow$getTranslationKey();
     }
 
     @Intrinsic
     public String prismarine$getName() {
-        return shadow$getUnlocalizedName();
+        return shadow$getTranslationKey();
     }
 
     public Translation prismarine$getTranslation() {
         if (this.translation == null) {
-            this.translation = new SpongeTranslation("tile.prismarine." + shadow$getUnlocalizedName() + ".name");
+            this.translation = new SpongeTranslation("tile.prismarine." + shadow$getTranslationKey() + ".name");
         }
         return this.translation;
     }

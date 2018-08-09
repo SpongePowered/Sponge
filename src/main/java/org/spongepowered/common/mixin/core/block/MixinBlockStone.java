@@ -79,6 +79,6 @@ public abstract class MixinBlockStone extends MixinBlock {
 
     @Override
     public Translation getTranslation() {
-        return new SpongeTranslation(getUnlocalizedName() +  "." + BlockStone.EnumType.STONE.getUnlocalizedName() + ".name");
+        return new SpongeTranslation(getTranslationKey() +  "." + BlockStone.EnumType.STONE.getTranslationKey() + ".name");
     }
 }

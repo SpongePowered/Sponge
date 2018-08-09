@@ -80,7 +80,7 @@ public final class SpongeMessageHandler {
         Optional<User> notifier = Optional.empty();
 
         if (message.type == 0) { // block
-            IMixinChunk spongeChunk = (IMixinChunk) sender.world.getChunkFromBlockCoords(pos);
+            IMixinChunk spongeChunk = (IMixinChunk) sender.world.getChunk(pos);
             owner = spongeChunk.getBlockOwner(pos);
             notifier = spongeChunk.getBlockNotifier(pos);
         } else if (message.type == 1) { // entity

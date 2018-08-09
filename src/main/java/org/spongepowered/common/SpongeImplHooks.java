@@ -308,7 +308,7 @@ public final class SpongeImplHooks {
 
     public static void blockExploded(Block block, World world, BlockPos blockpos, Explosion explosion) {
         world.setBlockToAir(blockpos);
-        block.onBlockDestroyedByExplosion(world, blockpos, explosion);
+        block.onExplosionDestroy(world, blockpos, explosion);
     }
 
     public static boolean isRestoringBlocks(World world) {

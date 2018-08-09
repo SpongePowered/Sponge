@@ -388,7 +388,7 @@ public class DamageEventHandler {
         } else if (damageSource instanceof BlockDamageSource) {
             Location<org.spongepowered.api.world.World> location = ((BlockDamageSource) damageSource).getLocation();
             BlockPos blockPos = VecHelper.toBlockPos(location);
-            final IMixinChunk mixinChunk = (IMixinChunk) ((net.minecraft.world.World) location.getExtent()).getChunkFromBlockCoords(blockPos);
+            final IMixinChunk mixinChunk = (IMixinChunk) ((net.minecraft.world.World) location.getExtent()).getChunk(blockPos);
             mixinChunk.getBlockNotifier(blockPos).ifPresent(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
             mixinChunk.getBlockOwner(blockPos).ifPresent(owner -> frame.addContext(EventContextKeys.CREATOR, owner));
         }
@@ -401,7 +401,7 @@ public class DamageEventHandler {
         final List<DamageFunction> damageModifierFunctions = new ArrayList<>();
         if (!heldItem.isEmpty()) {
             NBTTagList nbttaglist = heldItem.getEnchantmentTagList();
-            if (nbttaglist.hasNoTags()) {
+            if (nbttaglist.isEmpty()) {
                 return ImmutableList.of();
             }
 

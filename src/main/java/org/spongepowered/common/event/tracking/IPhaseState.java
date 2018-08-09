@@ -738,7 +738,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param phaseContext the block tick context being entered
      */
     default void appendNotifierPreBlockTick(IMixinWorldServer mixinWorld, BlockPos pos, C context, BlockTickContext phaseContext) {
-        final Chunk chunk = WorldUtil.asNative(mixinWorld).getChunkFromBlockCoords(pos);
+        final Chunk chunk = WorldUtil.asNative(mixinWorld).getChunk(pos);
         final IMixinChunk mixinChunk = (IMixinChunk) chunk;
         if (chunk != null && !chunk.isEmpty()) {
             mixinChunk.getBlockOwner(pos).ifPresent(phaseContext::owner);

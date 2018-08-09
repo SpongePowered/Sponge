@@ -41,7 +41,7 @@ import javax.annotation.Nullable;
 public abstract class MixinBlockStoneSlabEnumType {
 
     @Shadow public abstract String shadow$getName();
-    @Shadow public abstract String shadow$getUnlocalizedName();
+    @Shadow public abstract String shadow$getTranslationKey();
 
     @Nullable private Translation translation;
 
@@ -51,12 +51,12 @@ public abstract class MixinBlockStoneSlabEnumType {
 
     @Intrinsic
     public String slab$getName() {
-        return shadow$getUnlocalizedName();
+        return shadow$getTranslationKey();
     }
 
     public Translation slab$getTranslation() {
         if (this.translation == null) {
-            this.translation = new SpongeTranslation("tile.stoneSlab." + shadow$getUnlocalizedName() + ".name");
+            this.translation = new SpongeTranslation("tile.stoneSlab." + shadow$getTranslationKey() + ".name");
         }
         return this.translation;
     }
