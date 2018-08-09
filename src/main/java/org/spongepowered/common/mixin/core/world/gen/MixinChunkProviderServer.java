@@ -87,7 +87,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
     @Shadow @Final private IChunkLoader chunkLoader;
     @Shadow public IChunkGenerator chunkGenerator;
     @SuppressWarnings({"unchecked", "rawtypes"})
-    @Shadow @Final @Mutable public Long2ObjectMap<Chunk> id2ChunkMap = new CachedLong2ObjectMap();
+    @Shadow @Final @Mutable public Long2ObjectMap<Chunk> loadedChunks = new CachedLong2ObjectMap();
 
     @Shadow public abstract Chunk getLoadedChunk(int x, int z);
     @Shadow public abstract Chunk loadChunk(int x, int z);
@@ -160,7 +160,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
 
         if (chunk != null)
         {
-            this.id2ChunkMap.put(ChunkPos.asLong(x, z), chunk);
+            this.loadedChunks.put(ChunkPos.asLong(x, z), chunk);
             chunk.onLoad();
             chunk.populate((ChunkProviderServer) (Object) this, this.chunkGenerator);
         }
@@ -280,7 +280,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
         if (!this.world.disableLevelSaving && !((IMixinWorld) this.world).isFake())
         {
             ((IMixinWorldServer) this.world).getTimingsHandler().doChunkUnload.startTiming();
-            Iterator<Chunk> iterator = this.id2ChunkMap.values().iterator();
+            Iterator<Chunk> iterator = this.loadedChunks.values().iterator();
             int chunksUnloaded = 0;
             long now = System.currentTimeMillis();
             while (chunksUnloaded < this.maxChunkUnloads && iterator.hasNext()) {
@@ -312,7 +312,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
     @Override
     public Chunk getLoadedChunkWithoutMarkingActive(int x, int z){
         long i = ChunkPos.asLong(x, z);
-        Chunk chunk = this.id2ChunkMap.get(i);
+        Chunk chunk = this.loadedChunks.get(i);
         return chunk;
     }
 

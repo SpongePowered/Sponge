@@ -1124,7 +1124,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
         this.setCurrentCollidingBlock(null);
     }
 
-    @Redirect(method = "doBlockCollisions", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;onEntityCollidedWithBlock(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/Entity;)V")) // doBlockCollisions
+    @Redirect(method = "doBlockCollisions", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;onEntityCollision(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/Entity;)V")) // doBlockCollisions
     public void onEntityCollideWithBlockState(Block block, net.minecraft.world.World world, BlockPos pos, IBlockState state, net.minecraft.entity.Entity entity) {
         // if block can't collide, return
         if (!((IMixinBlock) block).hasCollideWithStateLogic()) {
@@ -1132,13 +1132,13 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
         }
 
         if (world.isRemote) {
-            block.onEntityCollidedWithBlock(world, pos, state, entity);
+            block.onEntityCollision(world, pos, state, entity);
             return;
         }
 
         this.setCurrentCollidingBlock((BlockState) state);
         if (!SpongeCommonEventFactory.handleCollideBlockEvent(block, world, pos, state, entity, Direction.NONE)) {
-            block.onEntityCollidedWithBlock(world, pos, state, entity);
+            block.onEntityCollision(world, pos, state, entity);
             this.lastCollidedBlockPos = pos;
         }
 

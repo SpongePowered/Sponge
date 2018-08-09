@@ -40,22 +40,22 @@ import javax.annotation.Nullable;
 @Implements(@Interface(iface = SandstoneType.class, prefix = "sandstone$"))
 public abstract class MixinBlockSandStoneEnumType {
 
-    @Shadow public abstract String shadow$getUnlocalizedName();
+    @Shadow public abstract String shadow$getTranslationKey();
 
     @Nullable private Translation translation;
 
     public String sandstone$getId() {
-        return "minecraft:" + shadow$getUnlocalizedName();
+        return "minecraft:" + shadow$getTranslationKey();
     }
 
     @Intrinsic
     public String sandstone$getName() {
-        return shadow$getUnlocalizedName();
+        return shadow$getTranslationKey();
     }
 
     public Translation sandstone$getTranslation() {
         if (this.translation == null) {
-            this.translation = new SpongeTranslation("tile.sandStone." + shadow$getUnlocalizedName() + ".name");
+            this.translation = new SpongeTranslation("tile.sandStone." + shadow$getTranslationKey() + ".name");
         }
         return this.translation;
     }

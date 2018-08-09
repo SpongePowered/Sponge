@@ -97,7 +97,7 @@ final class CommandState extends GeneralState<CommandPhaseContext> implements IE
     public void associateNeighborStateNotifier(CommandPhaseContext context, BlockPos sourcePos, Block block, BlockPos notifyPos,
         WorldServer minecraftWorld, PlayerTracker.Type notifier) {
         context.getSource(Player.class)
-            .ifPresent(player -> ((IMixinChunk) minecraftWorld.getChunkFromBlockCoords(notifyPos))
+            .ifPresent(player -> ((IMixinChunk) minecraftWorld.getChunk(notifyPos))
                 .addTrackedBlockPosition(block, notifyPos, player, PlayerTracker.Type.NOTIFIER));
     }
 

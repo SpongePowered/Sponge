@@ -105,9 +105,9 @@ public abstract class MixinWorldServer_Async_Lighting extends MixinWorld impleme
                                 BlockPos.PooledMutableBlockPos blockpos$pooledmutableblockpos = BlockPos.PooledMutableBlockPos.retain();
 
                                 for (EnumFacing enumfacing : EnumFacing.values()) {
-                                    int i4 = i2 + enumfacing.getFrontOffsetX();
-                                    int j4 = j2 + enumfacing.getFrontOffsetY();
-                                    int k4 = k2 + enumfacing.getFrontOffsetZ();
+                                    int i4 = i2 + enumfacing.getXOffset();
+                                    int j4 = j2 + enumfacing.getYOffset();
+                                    int k4 = k2 + enumfacing.getZOffset();
                                     blockpos$pooledmutableblockpos.setPos(i4, j4, k4);
                                     // Sponge start - get chunk safely
                                     final Chunk pooledChunk = this.getLightChunk(blockpos$pooledmutableblockpos, currentChunk, neighbors);

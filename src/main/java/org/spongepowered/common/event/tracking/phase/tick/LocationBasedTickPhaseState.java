@@ -70,7 +70,7 @@ abstract class LocationBasedTickPhaseState<T extends LocationBasedTickContext<T>
                                                WorldServer minecraftWorld, PlayerTracker.Type notifier) {
         // If we do not have a notifier at this point then there is no need to attempt to retrieve one from the chunk
         context.getNotifier().ifPresent(user -> {
-            final IMixinChunk mixinChunk = (IMixinChunk) minecraftWorld.getChunkFromBlockCoords(notifyPos);
+            final IMixinChunk mixinChunk = (IMixinChunk) minecraftWorld.getChunk(notifyPos);
             mixinChunk.addTrackedBlockPosition(block, notifyPos, user, PlayerTracker.Type.NOTIFIER);
         });
     }
@@ -84,7 +84,7 @@ abstract class LocationBasedTickPhaseState<T extends LocationBasedTickContext<T>
             final Block block = (Block) snapshotTransaction.getOriginal().getState().getType();
             final Location<World> changedLocation = snapshotTransaction.getOriginal().getLocation().get();
             final BlockPos changedBlockPos = VecHelper.toBlockPos(changedLocation);
-            final IMixinChunk changedMixinChunk = (IMixinChunk) ((WorldServer) changedLocation.getExtent()).getChunkFromBlockCoords(changedBlockPos);
+            final IMixinChunk changedMixinChunk = (IMixinChunk) ((WorldServer) changedLocation.getExtent()).getChunk(changedBlockPos);
             changedMixinChunk.addTrackedBlockPosition(block, changedBlockPos, user, PlayerTracker.Type.NOTIFIER);
         }
     }

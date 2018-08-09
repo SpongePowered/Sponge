@@ -110,9 +110,9 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
         if (displayIn != null) {
             ((IMixinDisplayInfo) displayIn).setAdvancement(this);
         }
-        String path = id.getResourcePath();
+        String path = id.getPath();
         this.name = path.replace('/', '_');
-        this.spongeId = id.getResourceDomain() + ':' + this.name;
+        this.spongeId = id.getNamespace() + ':' + this.name;
         if (displayIn != null) {
             this.name = SpongeTexts.toPlain(displayIn.getTitle());
         }
@@ -132,7 +132,7 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
             if (displayIn != null) {
                 name = this.name;
             }
-            path = id.getResourceDomain() + ':' + path;
+            path = id.getNamespace() + ':' + path;
             this.tree = new SpongeAdvancementTree(this, path, name);
             AdvancementTreeRegistryModule.getInstance().registerAdditionalCatalog(this.tree);
         } else {

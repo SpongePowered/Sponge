@@ -687,7 +687,7 @@ public class SpongeCommonEventFactory {
                 context.addNotifierAndOwnerToCauseStack(frame);
             } else {
 
-                final IMixinChunk mixinChunk = (IMixinChunk) ((WorldServer) world).getChunkFromBlockCoords(sourcePos);
+                final IMixinChunk mixinChunk = (IMixinChunk) ((WorldServer) world).getChunk(sourcePos);
                 mixinChunk.getBlockNotifier(sourcePos).ifPresent(user -> frame.addContext(EventContextKeys.NOTIFIER, user));
                 mixinChunk.getBlockOwner(sourcePos).ifPresent(owner -> frame.addContext(EventContextKeys.OWNER, owner));
             }
@@ -985,7 +985,7 @@ public class SpongeCommonEventFactory {
                     if (notifier != null) {
                         IMixinChunk spongeChunk = spongeEntity.getActiveChunk();
                         if (spongeChunk == null) {
-                            spongeChunk = (IMixinChunk) world.getChunkFromBlockCoords(pos);
+                            spongeChunk = (IMixinChunk) world.getChunk(pos);
                         }
                         spongeChunk.addTrackedBlockPosition(block, pos, notifier, PlayerTracker.Type.NOTIFIER);
                     }
@@ -1029,7 +1029,7 @@ public class SpongeCommonEventFactory {
                 // Track impact block if event is not cancelled
                 if (!cancelled && owner.isPresent()) {
                     BlockPos targetPos = VecHelper.toBlockPos(impactPoint.getBlockPosition());
-                    IMixinChunk spongeChunk = (IMixinChunk) projectile.world.getChunkFromBlockCoords(targetPos);
+                    IMixinChunk spongeChunk = (IMixinChunk) projectile.world.getChunk(targetPos);
                     spongeChunk.addTrackedBlockPosition((Block) targetBlock.getState().getType(), targetPos, owner.get(), PlayerTracker.Type.NOTIFIER);
                 }
             } else if (movingObjectPosition.entityHit != null) { // entity

@@ -141,7 +141,7 @@ public abstract class MixinBlockStoneSlab extends MixinBlock {
     @Override
     public Translation getTranslation() {
         if (getBlockState().getBlock() instanceof BlockStoneSlabNew) {
-            return new SpongeTranslation(getUnlocalizedName() + ".red_sandstone.name");
+            return new SpongeTranslation(getTranslationKey() + ".red_sandstone.name");
         }
         return super.getTranslation();
     }

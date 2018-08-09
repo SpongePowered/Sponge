@@ -36,14 +36,14 @@ import org.spongepowered.asm.mixin.Shadow;
 @Implements(@Interface(iface = WallType.class, prefix = "wall$"))
 public abstract class MixinBlockWallEnumType {
 
-    @Shadow public abstract String shadow$getUnlocalizedName();
+    @Shadow public abstract String shadow$getTranslationKey();
 
     public String wall$getId() {
-        return "minecraft:" + shadow$getUnlocalizedName();
+        return "minecraft:" + shadow$getTranslationKey();
     }
 
     @Intrinsic
     public String wall$getName() {
-        return shadow$getUnlocalizedName();
+        return shadow$getTranslationKey();
     }
 }

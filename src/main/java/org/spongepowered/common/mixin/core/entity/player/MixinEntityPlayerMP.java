@@ -219,7 +219,7 @@ import javax.annotation.Nullable;
 public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements Player, IMixinSubject, IMixinEntityPlayerMP, IMixinCommandSender,
         IMixinCommandSource {
 
-    @Shadow @Final public MinecraftServer mcServer;
+    @Shadow @Final public MinecraftServer server;
     @Shadow @Final public PlayerInteractionManager interactionManager;
     @Shadow @Final private PlayerAdvancements advancements;
     @Shadow private String language;
@@ -345,14 +345,14 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
                 if (team != null && team.getDeathMessageVisibility() != Team.EnumVisible.ALWAYS) {
                     if (team.getDeathMessageVisibility() == Team.EnumVisible.HIDE_FOR_OTHER_TEAMS) {
-                        this.mcServer.getPlayerList()
+                        this.server.getPlayerList()
                             .sendMessageToAllTeamMembers((EntityPlayerMP) (Object) this, this.getCombatTracker().getDeathMessage());
                     } else if (team.getDeathMessageVisibility() == Team.EnumVisible.HIDE_FOR_OWN_TEAM) {
-                        this.mcServer.getPlayerList()
+                        this.server.getPlayerList()
                             .sendMessageToTeamOrAllPlayers((EntityPlayerMP) (Object) this, this.getCombatTracker().getDeathMessage());
                     }
                 } else {
-                    this.mcServer.getPlayerList().sendMessage(this.getCombatTracker().getDeathMessage());
+                    this.server.getPlayerList().sendMessage(this.getCombatTracker().getDeathMessage());
                 }
             }
 
@@ -557,7 +557,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             // Don't bother sending messages to fake players
             return;
         }
-        ChatUtil.sendMessage(component, MessageChannel.fixed(this), (CommandSource) this.mcServer, false);
+        ChatUtil.sendMessage(component, MessageChannel.fixed(this), (CommandSource) this.server, false);
     }
 
     @Override
@@ -1094,7 +1094,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         if (this.getHealth() > 0.0F) {
             return false;
         }
-        this.connection.player = this.mcServer.getPlayerList().recreatePlayerEntity((EntityPlayerMP) (Object) this, this.dimension, false);
+        this.connection.player = this.server.getPlayerList().recreatePlayerEntity((EntityPlayerMP) (Object) this, this.dimension, false);
         return true;
     }
 

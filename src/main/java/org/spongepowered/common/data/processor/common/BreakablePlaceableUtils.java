@@ -44,7 +44,7 @@ public final class BreakablePlaceableUtils {
         if (value.isEmpty()) {
             if (stackTag != null) {
                 stackTag.removeTag(nbtKey);
-                if (stackTag.hasNoTags()) {
+                if (stackTag.isEmpty()) {
                     stack.setTagCompound(null);
                 }
             }
@@ -73,7 +73,7 @@ public final class BreakablePlaceableUtils {
             return Optional.empty();
         }
         NBTTagList blockIds = tag.getTagList(nbtKey, NbtDataUtil.TAG_STRING);
-        if (blockIds.hasNoTags()) {
+        if (blockIds.isEmpty()) {
             return Optional.empty();
         }
         Set<BlockType> blockTypes = Sets.newHashSetWithExpectedSize(blockIds.tagCount());

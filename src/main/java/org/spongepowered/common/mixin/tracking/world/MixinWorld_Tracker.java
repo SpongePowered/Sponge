@@ -42,7 +42,7 @@ import javax.annotation.Nullable;
 @Mixin(value = net.minecraft.world.World.class, priority = 1111)
 public abstract class MixinWorld_Tracker implements World, IMixinWorld{
 
-    @Shadow public abstract net.minecraft.world.chunk.Chunk getChunkFromBlockCoords(BlockPos pos);
+    @Shadow public abstract net.minecraft.world.chunk.Chunk getChunk(BlockPos pos);
     @Shadow public abstract IChunkProvider getChunkProvider();
 
     @Override

@@ -100,6 +100,6 @@ public abstract class MixinBlockSapling extends MixinBlock {
 
     @Override
     public Translation getTranslation() {
-        return new SpongeTranslation(this.getUnlocalizedName() + "." + BlockPlanks.EnumType.OAK.getUnlocalizedName() + ".name");
+        return new SpongeTranslation(this.getTranslationKey() + "." + BlockPlanks.EnumType.OAK.getTranslationKey() + ".name");
     }
 }

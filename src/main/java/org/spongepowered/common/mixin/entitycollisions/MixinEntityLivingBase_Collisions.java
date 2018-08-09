@@ -62,7 +62,7 @@ public abstract class MixinEntityLivingBase_Collisions extends MixinEntity_Colli
     }
 
     // This injection allows maxEntityCramming to be applied first before checking for max collisions
-    @Redirect(method = "collideWithNearbyEntities", at = @At(value = "INVOKE", target = "Ljava/util/List;size()I"))
+    @Redirect(method = "collideWithNearbyEntities", at = @At(value = "INVOKE", target = "Ljava/util/List;size()I", remap = false))
     protected int onCollideWithNearbyEntities(List<Entity> list) {
         for (Entity entity: list) {
             // ignore players and entities with parts (ex. EnderDragon)

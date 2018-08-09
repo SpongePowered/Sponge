@@ -116,8 +116,8 @@ public abstract class MixinEntityHanging extends MixinEntity implements Hanging,
     @Overwrite
     public EntityItem entityDropItem(ItemStack stack, float offsetY) {
         // Sponge Start - Check for client worlds,, don't care about them really. If it's server world, then we care.
-        final double xOffset = ((float) this.facingDirection.getFrontOffsetX() * 0.15F);
-        final double zOffset = ((float) this.facingDirection.getFrontOffsetZ() * 0.15F);
+        final double xOffset = ((float) this.facingDirection.getXOffset() * 0.15F);
+        final double zOffset = ((float) this.facingDirection.getZOffset() * 0.15F);
         if (((IMixinWorld) this.world).isFake()) {
             // Sponge End
             EntityItem entityitem = new EntityItem(this.world, this.posX + xOffset, this.posY + (double) offsetY, this.posZ + zOffset, stack);

@@ -48,7 +48,7 @@ public interface MixinICriterionTrigger extends ITrigger {
     }
 
     default String type$getName() {
-        return getId().getResourcePath();
+        return getId().getPath();
     }
 
     default void type$trigger() {

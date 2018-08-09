@@ -114,7 +114,7 @@ public abstract class MixinBlockDispenser extends MixinBlock {
     public void onDispenseHead(World worldIn, BlockPos pos, CallbackInfo ci) {
         final IBlockState state = worldIn.getBlockState(pos);
         final SpongeBlockSnapshot spongeBlockSnapshot = ((IMixinWorldServer) worldIn).createSpongeBlockSnapshot(state, state, pos, BlockChangeFlags.ALL);
-        final IMixinChunk mixinChunk = (IMixinChunk) worldIn.getChunkFromBlockCoords(pos);
+        final IMixinChunk mixinChunk = (IMixinChunk) worldIn.getChunk(pos);
         this.context = BlockPhase.State.DISPENSE.createPhaseContext()
             .source(spongeBlockSnapshot)
             .owner(() -> mixinChunk.getBlockOwner(pos))

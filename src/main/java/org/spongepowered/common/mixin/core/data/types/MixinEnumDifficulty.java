@@ -40,33 +40,33 @@ import org.spongepowered.common.text.translation.SpongeTranslation;
 @Mixin(EnumDifficulty.class)
 public class MixinEnumDifficulty implements Difficulty {
 
-    @Shadow @Final private int difficultyId;
-    @Shadow @Final private String difficultyResourceKey;
+    @Shadow @Final private int id;
+    @Shadow @Final private String translationKey;
     
-    private String id;
+    private String key;
 
     private Translation translation;
 
     @Inject(method = "<init>", at = @At(value = "RETURN"))
     public void onConstruction(CallbackInfo callbackInfo) {
-        this.id = this.difficultyResourceKey.replace("options.difficulty.", "minecraft:");
+        this.key = this.translationKey.replace("options.difficulty.", "minecraft:");
     }
     
     @Override
     public String getId() {
-        return this.id;
+        return this.key;
     }
 
     @Override
     public String getName() {
-        return this.id;
+        return this.key;
     }
 
     @Override
     public Translation getTranslation() {
         // Maybe move this to a @Inject at the end of the constructor
         if (this.translation == null) {
-            this.translation = new SpongeTranslation(this.difficultyResourceKey);
+            this.translation = new SpongeTranslation(this.translationKey);
         }
         return this.translation;
     }

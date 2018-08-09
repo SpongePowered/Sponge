@@ -427,7 +427,7 @@ public final class TrackingUtil {
 
     @Nullable
     private static User getNotifierOrOwnerFromBlock(WorldServer world, BlockPos blockPos) {
-        final IMixinChunk mixinChunk = (IMixinChunk) world.getChunkFromBlockCoords(blockPos);
+        final IMixinChunk mixinChunk = (IMixinChunk) world.getChunk(blockPos);
         User notifier = mixinChunk.getBlockNotifier(blockPos).orElse(null);
         if (notifier != null) {
             return notifier;

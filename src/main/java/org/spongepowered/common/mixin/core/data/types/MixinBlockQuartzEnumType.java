@@ -42,7 +42,7 @@ import javax.annotation.Nullable;
 public abstract class MixinBlockQuartzEnumType {
 
     @Shadow public abstract String shadow$getName();
-    @Shadow @Final private String unlocalizedName;
+    @Shadow @Final private String translationKey;
 
     @Nullable private Translation translation;
 
@@ -52,12 +52,12 @@ public abstract class MixinBlockQuartzEnumType {
 
     @Intrinsic
     public String quartz$getName() {
-        return this.unlocalizedName;
+        return this.translationKey;
     }
 
     public Translation quartz$getTranslation() {
         if (this.translation == null) {
-            this.translation = new SpongeTranslation("tile.quartzBlock." + this.unlocalizedName + ".name");
+            this.translation = new SpongeTranslation("tile.quartzBlock." + this.translationKey + ".name");
         }
         return this.translation;
     }

@@ -88,7 +88,7 @@ public abstract class MixinBlockTNT extends MixinBlock {
         }
     }
 
-    @Redirect(method = "onBlockDestroyedByExplosion", at = @At(value = "INVOKE", target = TARGET_PRIME))
+    @Redirect(method = "onExplosionDestroy", at = @At(value = "INVOKE", target = TARGET_PRIME))
     public boolean onPrimePostExplosion(World world, Entity tnt) {
         // Called when prime triggered by explosion
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
@@ -118,7 +118,7 @@ public abstract class MixinBlockTNT extends MixinBlock {
         return removed;
     }
 
-    @Redirect(method = "onEntityCollidedWithBlock", at = @At(value = "INVOKE", target = TARGET_REMOVE))
+    @Redirect(method = "onEntityCollision", at = @At(value = "INVOKE", target = TARGET_REMOVE))
     public boolean onRemovePostCollision(World world, BlockPos pos) {
         // Called when the TNT is hit with a flaming arrow
         return onRemove(world, pos);

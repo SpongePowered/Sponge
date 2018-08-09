@@ -490,7 +490,7 @@ public class SpongeCommandFactory {
                         return CommandResult.empty();
                     }
                     final WorldServer worldServer = (WorldServer) entityPlayerMP.world;
-                    final Chunk chunk = worldServer.getChunkFromBlockCoords(rayTraceResult.getBlockPos());
+                    final Chunk chunk = worldServer.getChunk(rayTraceResult.getBlockPos());
                     final IMixinChunk mixinChunk = (IMixinChunk) chunk;
                     final IBlockState blockState = worldServer.getBlockState(rayTraceResult.getBlockPos());
                     final BlockState spongeState = BlockUtil.fromNative(blockState);

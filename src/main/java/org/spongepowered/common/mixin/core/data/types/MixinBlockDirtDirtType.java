@@ -42,7 +42,7 @@ import javax.annotation.Nullable;
 public abstract class MixinBlockDirtDirtType {
 
     @Shadow public abstract String shadow$getName();
-    @Shadow public abstract String shadow$getUnlocalizedName();
+    @Shadow public abstract String shadow$getTranslationKey();
 
     @Nullable private Translation translation;
 
@@ -53,12 +53,12 @@ public abstract class MixinBlockDirtDirtType {
 
     @Intrinsic
     public String dirt$getName() {
-        return shadow$getUnlocalizedName();
+        return shadow$getTranslationKey();
     }
 
     public Translation dirt$getTranslation() {
         if (this.translation == null) {
-            this.translation = new SpongeTranslation("tile.dirt." + shadow$getUnlocalizedName() + ".name");
+            this.translation = new SpongeTranslation("tile.dirt." + shadow$getTranslationKey() + ".name");
         }
         return this.translation;
     }

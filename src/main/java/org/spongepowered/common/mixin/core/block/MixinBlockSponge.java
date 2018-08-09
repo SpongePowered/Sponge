@@ -80,6 +80,6 @@ public abstract class MixinBlockSponge extends MixinBlock {
 
     @Override
     public Translation getTranslation() {
-        return new SpongeTranslation(getUnlocalizedName() + ".dry.name");
+        return new SpongeTranslation(getTranslationKey() + ".dry.name");
     }
 }

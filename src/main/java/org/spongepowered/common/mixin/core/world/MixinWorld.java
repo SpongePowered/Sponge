@@ -231,7 +231,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract int getLight(BlockPos pos, boolean checkNeighbors);
     @Shadow public abstract int getRawLight(BlockPos pos, EnumSkyBlock lightType);
     @Shadow public abstract int getSkylightSubtracted();
-    @Shadow public abstract net.minecraft.world.chunk.Chunk getChunkFromBlockCoords(BlockPos pos);
+    @Shadow public abstract net.minecraft.world.chunk.Chunk getChunk(BlockPos pos);
     @Shadow public abstract WorldInfo getWorldInfo();
     @Shadow public abstract boolean checkLight(BlockPos pos);
     @Shadow public abstract boolean checkLightFor(EnumSkyBlock lightType, BlockPos pos);
@@ -249,7 +249,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract Biome getBiome(BlockPos pos);
     @Shadow public abstract BiomeProvider getBiomeProvider();
     @Shadow public abstract boolean isBlockPowered(BlockPos pos);
-    @Shadow public abstract net.minecraft.world.chunk.Chunk getChunkFromChunkCoords(int chunkX, int chunkZ);
+    @Shadow public abstract net.minecraft.world.chunk.Chunk getChunk(int chunkX, int chunkZ);
     @Shadow public abstract net.minecraft.world.Explosion newExplosion(@Nullable net.minecraft.entity.Entity entityIn, double x, double y, double z, float strength,
             boolean isFlaming, boolean isSmoking);
     @Shadow public abstract List<net.minecraft.entity.Entity> getEntities(Class<net.minecraft.entity.Entity> entityType,
@@ -408,7 +408,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         }
         checkBlockBounds(x, y, z);
         // avoid intermediate object creation from using BlockState
-        return (BlockType) getChunkFromChunkCoords(x >> 4, z >> 4).getBlockState(new BlockPos(x, y, z)).getBlock();
+        return (BlockType) getChunk(x >> 4, z >> 4).getBlockState(new BlockPos(x, y, z)).getBlock();
     }
 
     @Override
@@ -426,7 +426,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public void setBiome(int x, int y, int z, BiomeType biome) {
         checkBiomeBounds(x, y, z);
-        ((Chunk) getChunkFromChunkCoords(x >> 4, z >> 4)).setBiome(x, y, z, biome);
+        ((Chunk) getChunk(x >> 4, z >> 4)).setBiome(x, y, z, biome);
     }
 
     @SuppressWarnings("unchecked")
@@ -1235,7 +1235,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         if (!this.isFake()) {
             chunk = ((IMixinChunkProviderServer) ((WorldServer) (Object) this).getChunkProvider()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
         } else {
-            chunk = this.getChunkFromBlockCoords(pos);
+            chunk = this.getChunk(pos);
         }
         if (chunk == null || chunk.unloadQueued) {
             cir.setReturnValue(0);
@@ -1257,7 +1257,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             // Sponge end
             return Blocks.AIR.getDefaultState();
         }
-        net.minecraft.world.chunk.Chunk chunk = this.getChunkFromBlockCoords(pos);
+        net.minecraft.world.chunk.Chunk chunk = this.getChunk(pos);
         return chunk.getBlockState(pos);
     }
 
@@ -1283,7 +1283,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             // Sponge - Don't create or obtain pending tileentity async, simply check if TE exists in chunk
             // Mods such as pixelmon call this method async, so this is a temporary workaround until fixed
             if (!this.isFake() && !SpongeImpl.getServer().isCallingFromMinecraftThread()) {
-                return this.getChunkFromBlockCoords(pos).getTileEntity(pos, net.minecraft.world.chunk.Chunk.EnumCreateEntityType.CHECK);
+                return this.getChunk(pos).getTileEntity(pos, net.minecraft.world.chunk.Chunk.EnumCreateEntityType.CHECK);
             }
             // Sponge end
 
@@ -1292,7 +1292,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             }
 
             if (tileentity == null) {
-                 tileentity = this.getChunkFromBlockCoords(pos).getTileEntity(pos, net.minecraft.world.chunk.Chunk.EnumCreateEntityType.IMMEDIATE);
+                 tileentity = this.getChunk(pos).getTileEntity(pos, net.minecraft.world.chunk.Chunk.EnumCreateEntityType.IMMEDIATE);
             }
 
             if (tileentity == null) {
@@ -1366,7 +1366,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             // Sponge End
             return type.defaultLightValue;
         } else {
-            net.minecraft.world.chunk.Chunk chunk = this.getChunkFromBlockCoords(pos);
+            net.minecraft.world.chunk.Chunk chunk = this.getChunk(pos);
             return chunk.getLightFor(type, pos);
         }
     }
@@ -1386,7 +1386,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         if (((IMixinBlockPos) pos).isValidPosition()) { // Sponge - Replace with inlined method to check
             // Sponge End
             if (this.isBlockLoaded(pos)) {
-                net.minecraft.world.chunk.Chunk chunk = this.getChunkFromBlockCoords(pos);
+                net.minecraft.world.chunk.Chunk chunk = this.getChunk(pos);
                 chunk.setLightFor(type, pos, lightValue);
                 this.notifyLightSet(pos);
             }
@@ -1607,7 +1607,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 // Sponge start - use cached chunk
                 final net.minecraft.world.chunk.Chunk activeChunk = (net.minecraft.world.chunk.Chunk) ((IMixinTileEntity) tileentity).getActiveChunk();
                 if (activeChunk != null) {
-                    //this.getChunkFromBlockCoords(tileentity.getPos()).removeTileEntity(tileentity.getPos());
+                    //this.getChunk(tileentity.getPos()).removeTileEntity(tileentity.getPos());
                     //Forge: Bugfix: If we set the tile entity it immediately sets it in the chunk, so we could be desynced
                     if (activeChunk.getTileEntity(tileentity.getPos(), net.minecraft.world.chunk.Chunk.EnumCreateEntityType.CHECK) == tileentity) {
                         activeChunk.removeTileEntity(tileentity.getPos());
@@ -1654,7 +1654,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                     }
 
                     if (this.isBlockLoaded(tileentity1.getPos())) {
-                        net.minecraft.world.chunk.Chunk chunk = this.getChunkFromBlockCoords(tileentity1.getPos());
+                        net.minecraft.world.chunk.Chunk chunk = this.getChunk(tileentity1.getPos());
                         IBlockState iblockstate = chunk.getBlockState(tileentity1.getPos());
                         chunk.addTileEntity(tileentity1.getPos(), tileentity1);
                         this.notifyBlockUpdate(tileentity1.getPos(), iblockstate, iblockstate, 3);

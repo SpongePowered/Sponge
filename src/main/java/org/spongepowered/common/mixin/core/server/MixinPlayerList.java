@@ -146,7 +146,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
             SERVER_SEND_PACKET_TO_ALL_PLAYERS =
             "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V";
     @Shadow @Final private static Logger LOGGER;
-    @Shadow @Final private MinecraftServer mcServer;
+    @Shadow @Final private MinecraftServer server;
     @Shadow @Final public Map<UUID, EntityPlayerMP> uuidToPlayerMap;
     @Shadow @Final public List<EntityPlayerMP> playerEntityList;
     @Shadow @Final private Map<UUID, PlayerAdvancements> advancements;
@@ -228,7 +228,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
 
     private void initializeConnectionToPlayer(NetworkManager netManager, EntityPlayerMP playerIn, @Nullable NetHandlerPlayServer handler) {
         GameProfile gameprofile = playerIn.getGameProfile();
-        PlayerProfileCache playerprofilecache = this.mcServer.getPlayerProfileCache();
+        PlayerProfileCache playerprofilecache = this.server.getPlayerProfileCache();
         GameProfile gameprofile1 = playerprofilecache.getProfileByUUID(gameprofile.getId());
         String s = gameprofile1 == null ? gameprofile.getName() : gameprofile1.getName();
         playerprofilecache.addEntry(gameprofile);
@@ -241,7 +241,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         // Sponge end
 
         NBTTagCompound nbttagcompound = this.readPlayerDataFromFile(playerIn);
-        WorldServer worldServer = this.mcServer.getWorld(playerIn.dimension);
+        WorldServer worldServer = this.server.getWorld(playerIn.dimension);
         int actualDimensionId = ((IMixinWorldServer) worldServer).getDimensionId();
         BlockPos spawnPos;
         // Join data
@@ -320,7 +320,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         // Sponge start
         if (handler == null) {
             // Create the handler here (so the player's gets set)
-            handler = new NetHandlerPlayServer(this.mcServer, netManager, playerIn);
+            handler = new NetHandlerPlayServer(this.server, netManager, playerIn);
         }
         playerIn.connection = handler;
         // Sponge end
@@ -343,7 +343,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         this.updatePermissionLevel(playerIn);
         playerIn.getStatFile().markAllDirty();
         playerIn.getRecipeBook().init(playerIn);
-        this.mcServer.refreshStatusNextTick();
+        this.server.refreshStatusNextTick();
 
         handler.setPlayerLocation(x, y, z, yaw, pitch);
         this.playerLoggedIn(playerIn);
@@ -357,7 +357,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         this.updateTimeAndWeatherForPlayer(playerIn, worldServer);
 
         // Sponge Start - Use the server's ResourcePack object
-        Optional<ResourcePack> pack = ((Server)this.mcServer).getDefaultResourcePack();
+        Optional<ResourcePack> pack = ((Server)this.server).getDefaultResourcePack();
         pack.ifPresent(((Player) playerIn)::sendResourcePack);
         // Sponge End
 
@@ -478,7 +478,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
 
         final Player player = (Player) playerIn;
         final Transform<World> fromTransform = player.getTransform();
-        WorldServer worldServer = this.mcServer.getWorld(targetDimension);
+        WorldServer worldServer = this.server.getWorld(targetDimension);
         Transform<World> toTransform = new Transform<>(EntityUtil.getPlayerRespawnLocation(playerIn, worldServer), Vector3d.ZERO, Vector3d.ZERO);
         targetDimension = ((IMixinWorldServer) toTransform.getExtent()).getDimensionId();
         Location<World> location = toTransform.getLocation();
@@ -509,17 +509,17 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         playerIn.getServerWorld().getEntityTracker().untrack(playerIn);
         playerIn.getServerWorld().getPlayerChunkMap().removePlayer(playerIn);
         this.playerEntityList.remove(playerIn);
-        this.mcServer.getWorld(playerIn.dimension).removeEntityDangerously(playerIn);
+        this.server.getWorld(playerIn.dimension).removeEntityDangerously(playerIn);
         final BlockPos bedPos = SpongeImplHooks.getBedLocation(playerIn, targetDimension);
 
         // ### PHASE 3 ### Reset player (if applicable)
         // Recreate the player object in order to support Forge's PlayerEvent.Clone
         PlayerInteractionManager playerinteractionmanager;
 
-        if (this.mcServer.isDemo()) {
-            playerinteractionmanager = new DemoPlayerInteractionManager(this.mcServer.getWorld(targetDimension));
+        if (this.server.isDemo()) {
+            playerinteractionmanager = new DemoPlayerInteractionManager(this.server.getWorld(targetDimension));
         } else {
-            playerinteractionmanager = new PlayerInteractionManager(this.mcServer.getWorld(targetDimension));
+            playerinteractionmanager = new PlayerInteractionManager(this.server.getWorld(targetDimension));
         }
 
         EntityPlayerMP newPlayer = new EntityPlayerMP(SpongeImpl.getServer(), worldServer, playerIn.getGameProfile(), playerinteractionmanager);
@@ -806,7 +806,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         }
 
         // Spawn player into level
-        WorldServer level = this.mcServer.getWorld(player.dimension);
+        WorldServer level = this.server.getWorld(player.dimension);
         // TODO direct this appropriately
         level.spawnEntity(player);
         this.preparePlayer(player, null);
@@ -851,7 +851,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
      */
     @Overwrite
     public void sendMessage(ITextComponent component, boolean isSystem) {
-        ChatUtil.sendMessage(component, MessageChannel.TO_ALL, (CommandSource) this.mcServer, !isSystem);
+        ChatUtil.sendMessage(component, MessageChannel.TO_ALL, (CommandSource) this.server, !isSystem);
     }
 
     @Inject(method = "createPlayerForUser", at = @At("RETURN"), cancellable = true)

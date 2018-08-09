@@ -56,7 +56,7 @@ import javax.annotation.Nullable;
 @Mixin(BlockCactus.class)
 public abstract class MixinBlockCactus extends MixinBlock {
 
-    @Redirect(method = "onEntityCollidedWithBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"))
+    @Redirect(method = "onEntityCollision", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"))
     private boolean onSpongeCactusDamage(Entity entity, DamageSource source, float damage, net.minecraft.world.World world, BlockPos pos, IBlockState state, Entity entityIn) {
         if (world.isRemote) {
             return entity.attackEntityFrom(source, damage);

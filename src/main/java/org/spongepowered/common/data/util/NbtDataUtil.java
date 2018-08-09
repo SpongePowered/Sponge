@@ -282,7 +282,7 @@ public final class NbtDataUtil {
 
     private static void cleanseInnerCompound(NBTTagCompound compound, String innerCompound) {
         final NBTTagCompound inner = compound.getCompoundTag(innerCompound);
-        if (inner.hasNoTags()) {
+        if (inner.isEmpty()) {
             compound.removeTag(innerCompound);
         }
     }
@@ -331,7 +331,7 @@ public final class NbtDataUtil {
 
     public static List<Text> getPagesFromNBT(NBTTagCompound compound) {
         final NBTTagList list = compound.getTagList(ITEM_BOOK_PAGES, TAG_STRING);
-        if (list.hasNoTags()) {
+        if (list.isEmpty()) {
             return new ArrayList<>();
         }
         return SpongeTexts.fromNbtLegacy(list);

@@ -158,7 +158,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
 
     @Shadow @Final private static Logger LOGGER;
     @Shadow @Final public NetworkManager netManager;
-    @Shadow @Final private MinecraftServer serverController;
+    @Shadow @Final private MinecraftServer server;
     @Shadow @Final private IntHashMap<Short> pendingTransactions;
     @Shadow public EntityPlayerMP player;
     @Shadow private Entity lowestRiddenEnt;
@@ -762,7 +762,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         }
         // Sponge end
 
-        WorldServer worldserver = this.serverController.getWorld(this.player.dimension);
+        WorldServer worldserver = this.server.getWorld(this.player.dimension);
         Entity entity = packetIn.getEntityFromWorld(worldserver);
         this.player.markPlayerActive();
 
@@ -792,7 +792,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                         ItemStack itemstack = hand != null ? this.player.getHeldItem(hand) : ItemStack.EMPTY;
                         frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(itemstack));
 
-                        SpongeCommonEventFactory.lastSecondaryPacketTick = this.serverController.getTickCounter();
+                        SpongeCommonEventFactory.lastSecondaryPacketTick = this.server.getTickCounter();
 
                         // Is interaction allowed with item in hand
                         if (SpongeCommonEventFactory.callInteractItemEventSecondary(this.player, itemstack, hand, VecHelper.toVector3d(packetIn
@@ -838,7 +838,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                     // Sponge start - Call interact event
                     EnumHand hand = EnumHand.MAIN_HAND; // Will be null in the packet during ATTACK
                     ItemStack itemstack = this.player.getHeldItem(hand);
-                    SpongeCommonEventFactory.lastPrimaryPacketTick = this.serverController.getTickCounter();
+                    SpongeCommonEventFactory.lastPrimaryPacketTick = this.server.getTickCounter();
 
                     Vector3d hitVec = null;
 
@@ -855,7 +855,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
 
                     if (entity instanceof EntityItem || entity instanceof EntityXPOrb || entity instanceof EntityArrow || entity == this.player) {
                         this.disconnect(new TextComponentTranslation("multiplayer.disconnect.invalid_entity_attacked"));
-                        this.serverController.logWarning("Player " + this.player.getName() + " tried to attack an invalid entity");
+                        this.server.logWarning("Player " + this.player.getName() + " tried to attack an invalid entity");
                         return;
                     }
 
