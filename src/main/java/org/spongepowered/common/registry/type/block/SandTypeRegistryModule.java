@@ -25,6 +25,7 @@
 package org.spongepowered.common.registry.type.block;
 
 import net.minecraft.block.BlockSand;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.SandType;
 import org.spongepowered.api.data.type.SandTypes;
 import org.spongepowered.api.registry.util.RegisterCatalog;
@@ -41,6 +42,6 @@ public final class SandTypeRegistryModule extends MinecraftEnumBasedCatalogTypeM
     @Override
     protected void generateInitialMap() {
         super.generateInitialMap();
-        this.catalogTypeMap.put("normal", (SandType) (Object) BlockSand.EnumType.SAND);
+        this.map.put(CatalogKey.minecraft("normal"), (SandType) (Object) BlockSand.EnumType.SAND);
     }
 }

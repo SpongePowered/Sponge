@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.statistic;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.statistic.StatisticType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.text.translation.SpongeTranslation;
@@ -33,10 +34,12 @@ import javax.annotation.Nullable;
 public final class SpongeStatisticType implements StatisticType {
 
     private final String id;
+    private final CatalogKey key;
     @Nullable private Translation translation;
 
     public SpongeStatisticType(String id) {
         this.id = id;
+        this.key = CatalogKey.resolve(this.id);
     }
 
     @Override
@@ -50,6 +53,11 @@ public final class SpongeStatisticType implements StatisticType {
     @Override
     public String getId() {
         return this.id;
+    }
+
+    @Override
+    public CatalogKey getKey() {
+        return this.key;
     }
 
     @Override

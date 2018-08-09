@@ -27,12 +27,14 @@ package org.spongepowered.common.registry.type.extra;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableSet;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.extra.fluid.FluidType;
 import org.spongepowered.api.extra.fluid.FluidTypes;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.common.data.type.SpongeCommonFluidType;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
 
@@ -42,15 +44,14 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
+@RegisterCatalog(FluidTypes.class)
 @RegistrationDependency(BlockTypeRegistryModule.class)
-public final class FluidTypeRegistryModule implements SpongeAdditionalCatalogRegistryModule<FluidType> {
+public final class FluidTypeRegistryModule extends AbstractCatalogRegistryModule<FluidType> implements SpongeAdditionalCatalogRegistryModule<FluidType> {
 
     public static FluidTypeRegistryModule getInstance() {
         return Holder.INSTANCE;
     }
 
-    @RegisterCatalog(FluidTypes.class)
-    private final Map<String, FluidType> fluidTypeMap = new HashMap<>();
 
     @Override
     public boolean allowsApiRegistration() {
@@ -64,26 +65,18 @@ public final class FluidTypeRegistryModule implements SpongeAdditionalCatalogReg
 
     public void registerForge(FluidType fluidType) {
         checkNotNull(fluidType, "Someone is registering a null FluidType!");
-        this.fluidTypeMap.put(fluidType.getKey().toString(), fluidType);
-    }
-
-    @Override
-    public Optional<FluidType> getById(String id) {
-        return Optional.ofNullable(this.fluidTypeMap.get(checkNotNull(id, "FluidType id cannot be null!").toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<FluidType> getAll() {
-        return ImmutableSet.copyOf(this.fluidTypeMap.values());
+        this.map.put(fluidType.getKey(), fluidType);
     }
 
     @Override
     public void registerDefaults() {
-        if (!this.fluidTypeMap.containsKey("water")) {
-            this.fluidTypeMap.put("water", new SpongeCommonFluidType("water", BlockTypes.WATER));
+        final CatalogKey water = CatalogKey.minecraft("water");
+        if (!this.map.containsKey(water)) {
+            register(water, new SpongeCommonFluidType("water", BlockTypes.WATER));
         }
-        if (!this.fluidTypeMap.containsKey("lava")) {
-            this.fluidTypeMap.put("lava", new SpongeCommonFluidType("lava", BlockTypes.LAVA));
+        final CatalogKey lava = CatalogKey.minecraft("lava");
+        if (!this.map.containsKey(lava)) {
+            register(lava, new SpongeCommonFluidType("lava", BlockTypes.LAVA));
         }
     }
 

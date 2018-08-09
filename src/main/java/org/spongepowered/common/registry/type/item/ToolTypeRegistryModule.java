@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.item.Item;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.ToolType;
 import org.spongepowered.api.data.type.ToolTypes;
 import org.spongepowered.api.registry.CatalogRegistryModule;
@@ -48,6 +49,11 @@ public class ToolTypeRegistryModule implements CatalogRegistryModule<ToolType> {
     @Override
     public Optional<ToolType> getById(String id) {
         return Optional.ofNullable(this.armorTypeMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
+    }
+
+    @Override
+    public Optional<ToolType> get(CatalogKey key) {
+        return getById(key.toString());
     }
 
     @Override

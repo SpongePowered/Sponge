@@ -500,7 +500,7 @@ public final class CommonModuleRegistry {
             .registerModule(StoneType.class, new StoneTypeRegistryModule())
             .registerModule(TeleportHelperFilter.class, new TeleportHelperFilterRegistryModule())
             .registerModule(TeleportType.class, TeleportTypeRegistryModule.getInstance())
-            .registerModule(TextColor.class, new TextColorRegistryModule())
+            .registerModule(TextColor.class, TextColorRegistryModule.getInstance())
             .registerModule(TextSerializer.class, new TextSerializerRegistryModule())
             .registerModule(TextStyle.Base.class, new TextStyleRegistryModule())
             .registerModule(TileEntityType.class, TileEntityTypeRegistryModule.getInstance())

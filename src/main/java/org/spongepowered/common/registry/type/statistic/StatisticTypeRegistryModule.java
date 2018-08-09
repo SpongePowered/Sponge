@@ -24,55 +24,44 @@
  */
 package org.spongepowered.common.registry.type.statistic;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.statistic.StatisticType;
 import org.spongepowered.api.statistic.StatisticTypes;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 import org.spongepowered.common.statistic.SpongeStatisticType;
 
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-
-public final class StatisticTypeRegistryModule implements CatalogRegistryModule<StatisticType> {
-
-    @RegisterCatalog(StatisticTypes.class)
-    private final Map<String, StatisticType> statisticTypeMappings = Maps.newHashMap();
-
-    @Override
-    public Optional<StatisticType> getById(String id) {
-        return Optional.ofNullable(this.statisticTypeMappings.get(id.toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<StatisticType> getAll() {
-        return ImmutableSet.copyOf(this.statisticTypeMappings.values());
-    }
+@RegisterCatalog(StatisticTypes.class)
+public final class StatisticTypeRegistryModule extends AbstractCatalogRegistryModule<StatisticType> implements CatalogRegistryModule<StatisticType> {
 
     @Override
     public void registerDefaults() {
-        this.registerDefault("basic");
-        this.registerDefault("blocks_broken", "mine_block");
-        this.registerDefault("entities_killed", "kill_entity");
-        this.registerDefault("items_broken", "break_item");
-        this.registerDefault("items_crafted", "craft_item");
-        this.registerDefault("items_dropped", "drop");
-        this.registerDefault("items_picked_up", "pickup");
-        this.registerDefault("items_used", "use_item");
-        this.registerDefault("killed_by_entity", "entity_killed_by");
-    }
-
-    private void registerDefault(String id) {
-        this.statisticTypeMappings.put(id, new SpongeStatisticType(id));
-    }
-
-    private void registerDefault(String id, String alias) {
-        SpongeStatisticType type = new SpongeStatisticType(id);
-        this.statisticTypeMappings.put(id, type);
-        this.statisticTypeMappings.put(alias, type);
+        register(CatalogKey.minecraft("basic"), new SpongeStatisticType("basic"));
+        SpongeStatisticType type7 = new SpongeStatisticType("blocks_broken");
+        register(CatalogKey.minecraft("blocks_broken"), type7);
+        register(CatalogKey.minecraft("mine_block"), type7);
+        SpongeStatisticType type6 = new SpongeStatisticType("entities_killed");
+        register(CatalogKey.minecraft("entities_killed"), type6);
+        register(CatalogKey.minecraft("kill_entity"), type6);
+        SpongeStatisticType type5 = new SpongeStatisticType("items_broken");
+        register(CatalogKey.minecraft("items_broken"), type5);
+        register(CatalogKey.minecraft("break_item"), type5);
+        SpongeStatisticType type4 = new SpongeStatisticType("items_crafted");
+        register(CatalogKey.minecraft("items_crafted"), type4);
+        register(CatalogKey.minecraft("craft_item"), type4);
+        SpongeStatisticType type3 = new SpongeStatisticType("items_dropped");
+        register(CatalogKey.minecraft("items_dropped"), type3);
+        register(CatalogKey.minecraft("drop"), type3);
+        SpongeStatisticType type2 = new SpongeStatisticType("items_picked_up");
+        register(CatalogKey.minecraft("items_picked_up"), type2);
+        register(CatalogKey.minecraft("pickup"), type2);
+        SpongeStatisticType type1 = new SpongeStatisticType("items_used");
+        register(CatalogKey.minecraft("items_used"), type1);
+        register(CatalogKey.minecraft("use_item"), type1);
+        SpongeStatisticType type = new SpongeStatisticType("killed_by_entity");
+        register(CatalogKey.minecraft("killed_by_entity"), type);
+        register(CatalogKey.minecraft("entity_killed_by"), type);
     }
 
 }

@@ -24,38 +24,28 @@
  */
 package org.spongepowered.common.registry.type.text;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import net.minecraft.util.text.TextFormatting;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.util.Color;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 import org.spongepowered.common.text.format.SpongeTextColor;
 
-import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 
-public final class TextColorRegistryModule implements CatalogRegistryModule<TextColor> {
+@RegisterCatalog(TextColors.class)
+public final class TextColorRegistryModule extends AbstractCatalogRegistryModule<TextColor> implements CatalogRegistryModule<TextColor> {
 
-    @RegisterCatalog(TextColors.class)
-    public static final Map<String, TextColor> textColorMappings = Maps.newHashMap();
-    public static final Map<TextFormatting, SpongeTextColor> enumChatColor = Maps.newEnumMap(TextFormatting.class);
-
-    @Override
-    public Optional<TextColor> getById(String id) {
-        return Optional.ofNullable(textColorMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
+    public static TextColorRegistryModule getInstance() {
+        return Holder.INSTANCE;
     }
 
-    @Override
-    public Collection<TextColor> getAll() {
-        return ImmutableList.copyOf(textColorMappings.values());
-    }
+    public final Map<TextFormatting, SpongeTextColor> enumChatColor = Maps.newEnumMap(TextFormatting.class);
 
     @Override
     public void registerDefaults() {
@@ -77,12 +67,19 @@ public final class TextColorRegistryModule implements CatalogRegistryModule<Text
         addTextColor(TextFormatting.WHITE, Color.WHITE);
         addTextColor(TextFormatting.RESET, Color.WHITE);
 
-        textColorMappings.put("none", TextColors.NONE);
+        register(CatalogKey.minecraft("none"), TextColors.NONE);
     }
 
-    private static void addTextColor(TextFormatting handle, Color color) {
+    private void addTextColor(TextFormatting handle, Color color) {
         SpongeTextColor spongeColor = new SpongeTextColor(handle, color);
-        textColorMappings.put(handle.name().toLowerCase(Locale.ENGLISH), spongeColor);
-        enumChatColor.put(handle, spongeColor);
+        register(CatalogKey.resolve(handle.name().toLowerCase(Locale.ENGLISH)), spongeColor);
+        this.enumChatColor.put(handle, spongeColor);
+    }
+
+    TextColorRegistryModule() {
+    }
+
+    private static final class Holder {
+        static final TextColorRegistryModule INSTANCE = new TextColorRegistryModule();
     }
 }

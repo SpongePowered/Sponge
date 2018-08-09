@@ -167,7 +167,7 @@ public final class PopulatorTypeRegistryModule extends AbstractCatalogRegistryMo
     public void registerCatalogs() {
         registerDefaults();
 
-        final Map<String, PopulatorType> map = this.map.forCatalogRegistration();
+        final Map<String, PopulatorType> map = this.provideCatalogMap();
         RegistryHelper.mapFields(PopulatorTypes.class, map);
         RegistryHelper.mapFields(InternalPopulatorTypes.class, map);
     }

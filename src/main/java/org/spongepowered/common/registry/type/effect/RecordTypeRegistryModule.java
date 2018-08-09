@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.registry.type.effect;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import org.spongepowered.api.effect.sound.SoundTypes;
@@ -36,48 +33,29 @@ import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.common.effect.record.SpongeRecordType;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
 import java.util.Optional;
 
+@RegisterCatalog(RecordTypes.class)
 @RegistrationDependency(SoundRegistryModule.class)
-public final class RecordTypeRegistryModule implements CatalogRegistryModule<RecordType> {
+public final class RecordTypeRegistryModule extends AbstractCatalogRegistryModule<RecordType> implements CatalogRegistryModule<RecordType> {
 
     public static RecordTypeRegistryModule getInstance() {
         return Holder.INSTANCE;
     }
 
-    @RegisterCatalog(RecordTypes.class)
-    private final Map<String, RecordType> mappings = new HashMap<>();
     private final Int2ObjectMap<RecordType> byInternalId = new Int2ObjectOpenHashMap<>();
 
-    private RecordTypeRegistryModule() {
+    RecordTypeRegistryModule() {
     }
 
     public Optional<RecordType> getByInternalId(int internalId) {
         return Optional.ofNullable(this.byInternalId.get(internalId));
     }
 
-    @Override
-    public Optional<RecordType> getById(String id) {
-        checkNotNull(id);
-        if (!id.contains(":")) {
-            id = "minecraft:" + id; // assume vanilla
-        }
-        return Optional.ofNullable(this.mappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<RecordType> getAll() {
-        return ImmutableList.copyOf(this.mappings.values());
-    }
-
     private void add(SpongeRecordType recordType) {
-        final String id = recordType.getKey().toString();
-        this.mappings.put(id, recordType);
+        register(recordType);
         this.byInternalId.put(recordType.getInternalId(), recordType);
     }
 

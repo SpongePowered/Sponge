@@ -26,46 +26,33 @@ package org.spongepowered.common.registry.type;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.ImmutableList;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.registry.CatalogRegistryModule;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 
-import java.util.Collection;
 import java.util.LinkedHashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
 
-public final class BlockStateRegistryModule implements CatalogRegistryModule<BlockState> {
-
-    private final Map<String, BlockState> blockStateMap = new LinkedHashMap<>();
+public final class BlockStateRegistryModule extends AbstractCatalogRegistryModule<BlockState> implements CatalogRegistryModule<BlockState> {
 
     public static BlockStateRegistryModule getInstance() {
         return Holder.INSTANCE;
     }
 
-    @Override
-    public Optional<BlockState> getById(String id) {
-        return Optional.ofNullable(this.blockStateMap.get(checkNotNull(id, "Id cannot be null!").toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<BlockState> getAll() {
-        return ImmutableList.copyOf(this.blockStateMap.values());
-    }
-
     void registerBlockState(BlockState blockState) {
         checkNotNull(blockState, "BlockState cannot be null!");
-        final String key = blockState.getKey().toString().toLowerCase(Locale.ENGLISH);
-        if (!this.blockStateMap.containsKey(key)) {
-            this.blockStateMap.put(key, blockState);
+        final CatalogKey key = blockState.getKey();
+        if (!this.map.containsKey(key)) {
+            this.map.put(key, blockState);
         }
     }
 
     BlockStateRegistryModule() {
+        super(new LinkedHashMap<>());
     }
 
     private static final class Holder {
+
         static final BlockStateRegistryModule INSTANCE = new BlockStateRegistryModule();
     }
 

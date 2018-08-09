@@ -24,55 +24,37 @@
  */
 package org.spongepowered.common.registry.type.event;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifierType;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifierTypes;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.event.damage.SpongeDamageModifierType;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-
-public class DamageModifierTypeRegistryModule implements CatalogRegistryModule<DamageModifierType> {
-
-    @RegisterCatalog(DamageModifierTypes.class)
-    private final Map<String, DamageModifierType> modifierTypeMap = new HashMap<>();
-
-    @Override
-    public Optional<DamageModifierType> getById(String id) {
-        return Optional.ofNullable(this.modifierTypeMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<DamageModifierType> getAll() {
-        return ImmutableList.copyOf(this.modifierTypeMap.values());
-    }
+@RegisterCatalog(DamageModifierTypes.class)
+public class DamageModifierTypeRegistryModule extends AbstractCatalogRegistryModule<DamageModifierType>
+    implements CatalogRegistryModule<DamageModifierType> {
 
     @Override
     public void registerDefaults() {
         // TODO - convert these to properly use the sponge id.
-        this.modifierTypeMap.put("weapon_enchantment", new SpongeDamageModifierType("Weapon Enchantment", "weapon_enchantment"));
-        this.modifierTypeMap.put("offensive_potion_effect", new SpongeDamageModifierType("Offensive PotionEffect", "offensive_potion_effect"));
-        this.modifierTypeMap.put("defensive_potion_effect", new SpongeDamageModifierType("Defensive PotionEffect", "defensive_potion_effect"));
-        this.modifierTypeMap.put("negative_potion_effect", new SpongeDamageModifierType("Negative PotionEffect", "negative_potion_effect"));
-        this.modifierTypeMap.put("hard_hat", new SpongeDamageModifierType("Hard Hat", "hard_hat"));
-        this.modifierTypeMap.put("shield", new SpongeDamageModifierType("Shield", "shield"));
-        this.modifierTypeMap.put("blocking", this.modifierTypeMap.get("shield"));
-        this.modifierTypeMap.put("armor", new SpongeDamageModifierType("Armor", "armor"));
-        this.modifierTypeMap.put("armor_enchantment", new SpongeDamageModifierType("Armor Enchantment", "armor_enchantment"));
-        this.modifierTypeMap.put("magic", new SpongeDamageModifierType("Magic", "magic"));
-        this.modifierTypeMap.put("difficulty", new SpongeDamageModifierType("Difficulty", "difficulty"));
-        this.modifierTypeMap.put("absorption", new SpongeDamageModifierType("Absorption", "absorption"));
-        this.modifierTypeMap.put("critical_hit", new SpongeDamageModifierType("Critical Hit", "critical_hit"));
-        this.modifierTypeMap.put("attack_cooldown", new SpongeDamageModifierType("Attack Cooldown", "attack_cooldown"));
+        register(CatalogKey.minecraft("weapon_enchantment"), new SpongeDamageModifierType("Weapon Enchantment", "weapon_enchantment"));
+        register(CatalogKey.minecraft("offensive_potion_effect"), new SpongeDamageModifierType("Offensive PotionEffect", "offensive_potion_effect"));
+        register(CatalogKey.minecraft("defensive_potion_effect"), new SpongeDamageModifierType("Defensive PotionEffect", "defensive_potion_effect"));
+        register(CatalogKey.minecraft("negative_potion_effect"), new SpongeDamageModifierType("Negative PotionEffect", "negative_potion_effect"));
+        register(CatalogKey.minecraft("hard_hat"), new SpongeDamageModifierType("Hard Hat", "hard_hat"));
+        register(CatalogKey.minecraft("shield"), new SpongeDamageModifierType("Shield", "shield"));
+        register(CatalogKey.minecraft("blocking"), this.map.get("shield"));
+        register(CatalogKey.minecraft("armor"), new SpongeDamageModifierType("Armor", "armor"));
+        register(CatalogKey.minecraft("armor_enchantment"), new SpongeDamageModifierType("Armor Enchantment", "armor_enchantment"));
+        register(CatalogKey.minecraft("magic"), new SpongeDamageModifierType("Magic", "magic"));
+        register(CatalogKey.minecraft("difficulty"), new SpongeDamageModifierType("Difficulty", "difficulty"));
+        register(CatalogKey.minecraft("absorption"), new SpongeDamageModifierType("Absorption", "absorption"));
+        register(CatalogKey.minecraft("critical_hit"), new SpongeDamageModifierType("Critical Hit", "critical_hit"));
+        register(CatalogKey.minecraft("attack_cooldown"), new SpongeDamageModifierType("Attack Cooldown", "attack_cooldown"));
         final DamageModifierType sweeping = new SpongeDamageModifierType("Sweeping", "sweeping");
-        this.modifierTypeMap.put("sweeping", sweeping);
-        this.modifierTypeMap.put("sweaping", sweeping); // TODO: remove
+        register(CatalogKey.minecraft("sweeping"), sweeping);
+        register(CatalogKey.minecraft("sweaping"), sweeping); // TODO: remove
     }
 }

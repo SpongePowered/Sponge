@@ -43,6 +43,7 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagLong;
 import net.minecraft.nbt.NBTTagShort;
 import net.minecraft.nbt.NBTTagString;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataSerializable;
@@ -59,6 +60,7 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
     private static final NbtTranslator instance = new NbtTranslator();
     private static final TypeToken<NBTTagCompound> TOKEN = TypeToken.of(NBTTagCompound.class);
     public static final String BOOLEAN_IDENTIFER = "$Boolean";
+    private static final CatalogKey KEY = CatalogKey.sponge("nbt");
 
     public static NbtTranslator getInstance() {
         return instance;
@@ -315,6 +317,11 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
     @Override
     public String getId() {
         return "sponge:nbt";
+    }
+
+    @Override
+    public CatalogKey getKey() {
+        return KEY;
     }
 
     @Override

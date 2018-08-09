@@ -498,7 +498,7 @@ public class SpongeGameRegistry implements GameRegistry {
 
     @Override
     public Optional<DisplaySlot> getDisplaySlotForColor(TextColor color) {
-        return Optional.ofNullable(DisplaySlotRegistryModule.getInstance().displaySlotMappings.get(color.getKey().toString()));
+        return Optional.ofNullable(DisplaySlotRegistryModule.getInstance().map.get(color.getKey().toString()));
     }
 
     @Override

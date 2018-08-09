@@ -24,28 +24,24 @@
  */
 package org.spongepowered.common.registry.type.world;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableMap;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.SerializationBehaviors;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.world.SpongeSerializationBehavior;
 
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
+@RegisterCatalog(SerializationBehaviors.class)
+public class SerializationBehaviorRegistryModule extends AbstractCatalogRegistryModule<SerializationBehavior>
+    implements SpongeAdditionalCatalogRegistryModule<SerializationBehavior> {
 
-public class SerializationBehaviorRegistryModule implements SpongeAdditionalCatalogRegistryModule<SerializationBehavior> {
-
-    @RegisterCatalog(SerializationBehaviors.class)
-    private final Map<String, SerializationBehavior> serializationBehaviorMap = ImmutableMap.<String, SerializationBehavior>builder()
-            .put("automatic", new SpongeSerializationBehavior("automatic", "Automatic"))
-            .put("manual", new SpongeSerializationBehavior("manual", "Manual"))
-            .put("none", new SpongeSerializationBehavior("none", "None"))
-            .build();
+    @Override
+    public void registerDefaults() {
+        register(CatalogKey.minecraft("automatic"), new SpongeSerializationBehavior("automatic", "Automatic"));
+        register(CatalogKey.minecraft("manual"), new SpongeSerializationBehavior("manual", "Manual"));
+        register(CatalogKey.minecraft("none"), new SpongeSerializationBehavior("none", "None"));
+    }
 
     @Override
     public boolean allowsApiRegistration() {
@@ -57,14 +53,4 @@ public class SerializationBehaviorRegistryModule implements SpongeAdditionalCata
 
     }
 
-    @Override
-    public Optional<SerializationBehavior> getById(String id) {
-        return Optional.ofNullable(this.serializationBehaviorMap.get(checkNotNull(id, "SerializationBehavior ID cannot be null!").toLowerCase(
-                Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<SerializationBehavior> getAll() {
-        return this.serializationBehaviorMap.values();
-    }
 }

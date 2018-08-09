@@ -24,39 +24,20 @@
  */
 package org.spongepowered.common.registry.type.item;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.GoldenApple;
 import org.spongepowered.api.data.type.GoldenApples;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.item.SpongeGoldenApple;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-
-public final class GoldenAppleRegistryModule implements CatalogRegistryModule<GoldenApple> {
-
-    @RegisterCatalog(GoldenApples.class)
-    private final Map<String, GoldenApple> goldenAppleMap = new HashMap<>();
-
-    @Override
-    public Optional<GoldenApple> getById(String id) {
-        return Optional.ofNullable(this.goldenAppleMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<GoldenApple> getAll() {
-        return ImmutableList.copyOf(this.goldenAppleMap.values());
-    }
+@RegisterCatalog(GoldenApples.class)
+public final class GoldenAppleRegistryModule extends AbstractCatalogRegistryModule<GoldenApple> implements CatalogRegistryModule<GoldenApple> {
 
     @Override
     public void registerDefaults() {
-        this.goldenAppleMap.put("golden_apple", new SpongeGoldenApple(0, "GOLDEN_APPLE"));
-        this.goldenAppleMap.put("enchanted_golden_apple", new SpongeGoldenApple(1, "ENCHANTED_GOLDEN_APPLE"));
+        register(CatalogKey.minecraft("golden_apple"), new SpongeGoldenApple(0, "GOLDEN_APPLE"));
+        register(CatalogKey.minecraft("enchanted_golden_apple"), new SpongeGoldenApple(1, "ENCHANTED_GOLDEN_APPLE"));
     }
 }

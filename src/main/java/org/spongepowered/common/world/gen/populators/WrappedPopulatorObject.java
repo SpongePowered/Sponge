@@ -26,6 +26,7 @@ package org.spongepowered.common.world.gen.populators;
 
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.gen.feature.WorldGenerator;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.PopulatorObject;
 
@@ -47,6 +48,11 @@ public class WrappedPopulatorObject implements PopulatorObject {
     @Override
     public String getId() {
         return this.id;
+    }
+
+    @Override
+    public CatalogKey getKey() {
+        return CatalogKey.resolve(this.id);
     }
 
     @Override

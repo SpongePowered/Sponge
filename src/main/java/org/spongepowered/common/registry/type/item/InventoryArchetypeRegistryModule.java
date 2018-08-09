@@ -27,7 +27,6 @@ package org.spongepowered.common.registry.type.item;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.api.data.Property.Operator.DELEGATE;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.entity.IMerchant;
 import net.minecraft.entity.passive.AbstractHorse;
@@ -53,7 +52,6 @@ import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.item.inventory.property.GuiIds;
 import org.spongepowered.api.item.inventory.property.InventoryTitle;
-import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
@@ -67,45 +65,17 @@ import org.spongepowered.common.item.inventory.property.GuiIdPropertyImpl;
 import org.spongepowered.common.item.inventory.property.InventoryDimensionImpl;
 import org.spongepowered.common.item.inventory.property.InventoryTitleImpl;
 import org.spongepowered.common.item.inventory.property.SlotIndexImpl;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-
+@RegisterCatalog(InventoryArchetypes.class)
 @RegistrationDependency(GuiIdRegistryModule.class)
-public class InventoryArchetypeRegistryModule implements AlternateCatalogRegistryModule<InventoryArchetype>,
-    SpongeAdditionalCatalogRegistryModule<InventoryArchetype> {
+public class InventoryArchetypeRegistryModule extends AbstractCatalogRegistryModule<InventoryArchetype>
+    implements AlternateCatalogRegistryModule<InventoryArchetype>, SpongeAdditionalCatalogRegistryModule<InventoryArchetype> {
 
     public static InventoryArchetypeRegistryModule getInstance() {
         return Holder.INSTANCE;
-    }
-
-    @RegisterCatalog(InventoryArchetypes.class)
-    private final Map<String, InventoryArchetype> mapping = new HashMap<>();
-
-    @Override
-    public Map<String, InventoryArchetype> provideCatalogMap() {
-
-        Map<String, InventoryArchetype> map = new HashMap<>();
-        map.putAll(this.mapping);
-        for (Map.Entry<String, InventoryArchetype> entry : this.mapping.entrySet()) {
-            map.put(entry.getKey().replace("minecraft:", "").replace("sponge:", ""), entry.getValue());
-        }
-        return map;
-    }
-
-    @Override
-    public Optional<InventoryArchetype> getById(String id) {
-        return Optional.ofNullable(this.mapping.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<InventoryArchetype> getAll() {
-        return ImmutableList.copyOf(this.mapping.values());
     }
 
     @Override
@@ -116,8 +86,7 @@ public class InventoryArchetypeRegistryModule implements AlternateCatalogRegistr
     @Override
     public void registerAdditionalCatalog(InventoryArchetype archetype) {
         checkNotNull(archetype, "archetype");
-        String id = archetype.getKey().toString();
-        this.mapping.put(id.toLowerCase(Locale.ENGLISH), archetype);
+        this.map.put(archetype.getKey(), archetype);
     }
 
     @SuppressWarnings("rawtypes")
@@ -296,9 +265,8 @@ public class InventoryArchetypeRegistryModule implements AlternateCatalogRegistr
                             && ((CarriedInventory) i).getCarrier().isPresent()
                             && ((CarriedInventory) i).getCarrier().get() instanceof IMerchant) {
                         IMerchant merchant = ((IMerchant) ((CarriedInventory) i).getCarrier().get());
-                        ContainerMerchant container = new ContainerMerchant(p.inventory, merchant, p.getEntityWorld());
                         // TODO Pre-Fill the Container?
-                        return container;
+                        return new ContainerMerchant(p.inventory, merchant, p.getEntityWorld());
                     }
                     throw new IllegalArgumentException("Cannot open merchant inventory without a merchant as Carrier");
                 })
@@ -442,7 +410,7 @@ public class InventoryArchetypeRegistryModule implements AlternateCatalogRegistr
         registerAdditionalCatalog(MENU_SPINNER);
     }
 
-    private InventoryArchetypeRegistryModule() {}
+    InventoryArchetypeRegistryModule() {}
 
     private static final class Holder {
         static final InventoryArchetypeRegistryModule INSTANCE = new InventoryArchetypeRegistryModule();

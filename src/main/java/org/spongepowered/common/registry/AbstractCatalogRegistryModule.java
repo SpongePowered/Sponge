@@ -32,20 +32,32 @@ import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
 public abstract class AbstractCatalogRegistryModule<C extends CatalogType> implements AlternateCatalogRegistryModule<C> {
 
-    protected final RegistryMap<C> map = new RegistryMap<>();
+    protected final RegistryMapWrapper<C> map;
     protected final String defaultModIdToPrepend;
 
-    public AbstractCatalogRegistryModule() {
+    protected AbstractCatalogRegistryModule() {
         this("minecraft");
     }
 
-    public AbstractCatalogRegistryModule(String defaultModIdToPrepend) {
+    protected AbstractCatalogRegistryModule(String defaultModIdToPrepend) {
+        this.defaultModIdToPrepend = defaultModIdToPrepend;
+        this.map = new RegistryMapWrapper<>(new HashMap<>());
+    }
+
+    protected AbstractCatalogRegistryModule(Map<CatalogKey, C> map) {
+        this.map = new RegistryMapWrapper<>(map);
+        this.defaultModIdToPrepend = "minecraft";
+    }
+
+    protected AbstractCatalogRegistryModule(Map<CatalogKey, C> map, String defaultModIdToPrepend) {
+        this.map = new RegistryMapWrapper<>(map);
         this.defaultModIdToPrepend = defaultModIdToPrepend;
     }
 
@@ -79,8 +91,12 @@ public abstract class AbstractCatalogRegistryModule<C extends CatalogType> imple
         return this.map.values();
     }
 
+    protected String marshalFieldKey(String key) {
+        return key;
+    }
+
     @Override
     public Map<String, C> provideCatalogMap() {
-        return this.map.forCatalogRegistration();
+        return this.map.forCatalogRegistration(this::marshalFieldKey);
     }
 }

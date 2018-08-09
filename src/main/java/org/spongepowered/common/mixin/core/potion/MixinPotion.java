@@ -117,7 +117,7 @@ public abstract class MixinPotion implements PotionEffectType, IMixinPotion {
         final ResourceLocation resource = (ResourceLocation) location;
         final Potion mcPotion = (Potion) potion;
         ((IMixinPotion) mcPotion).setId(resource.toString().toLowerCase(Locale.ENGLISH));
-        PotionEffectTypeRegistryModule.getInstance().registerFromGameData(resource.toString(), (PotionEffectType) mcPotion);
+        PotionEffectTypeRegistryModule.getInstance().registerFromGameData(resource, (PotionEffectType) mcPotion);
         registry.register(id, location, potion);
     }
 

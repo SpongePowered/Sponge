@@ -24,14 +24,13 @@
  */
 package org.spongepowered.common.registry.type.effect;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumParticleTypes;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.NotePitches;
 import org.spongepowered.api.effect.particle.ParticleOption;
 import org.spongepowered.api.effect.particle.ParticleOptions;
@@ -48,41 +47,29 @@ import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.effect.particle.SpongeParticleType;
 import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 import org.spongepowered.common.registry.type.NotePitchRegistryModule;
 import org.spongepowered.common.registry.type.item.FireworkShapeRegistryModule;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 
 import javax.annotation.Nullable;
 
+@RegisterCatalog(ParticleTypes.class)
 @RegistrationDependency({ ParticleOptionRegistryModule.class, NotePitchRegistryModule.class, BlockTypeRegistryModule.class,
         ItemTypeRegistryModule.class, PotionEffectTypeRegistryModule.class, FireworkShapeRegistryModule.class })
-public final class ParticleRegistryModule implements CatalogRegistryModule<ParticleType> {
+public final class ParticleRegistryModule extends AbstractCatalogRegistryModule<ParticleType> implements CatalogRegistryModule<ParticleType> {
 
     public static ParticleRegistryModule getInstance() {
         return Holder.INSTANCE;
     }
 
-    @RegisterCatalog(ParticleTypes.class)
-    private final Map<String, SpongeParticleType> particleMappings = Maps.newHashMap();
     private final Map<String, ParticleType> particleByName = Maps.newHashMap();
-    private final Map<EnumParticleTypes, SpongeParticleType> particleTypeMapping = Maps.newHashMap();
 
-    @Override
-    public Optional<ParticleType> getById(String id) {
-        return Optional.ofNullable(this.particleByName.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<ParticleType> getAll() {
-        return ImmutableList.copyOf(this.particleByName.values());
-    }
 
     @Override
     public void registerDefaults() {
@@ -185,11 +172,11 @@ public final class ParticleRegistryModule implements CatalogRegistryModule<Parti
 
     private void addEffectType(String id, @Nullable EnumParticleTypes internalType, Map<ParticleOption<?>, Object> options) {
         SpongeParticleType particleType = new SpongeParticleType("minecraft:" + id, id, internalType, options);
-        this.particleMappings.put(id, particleType);
+        this.map.put(CatalogKey.minecraft(id), particleType);
         this.particleByName.put(particleType.getKey().toString().toLowerCase(Locale.ENGLISH), particleType);
     }
 
-    private ParticleRegistryModule() {
+    ParticleRegistryModule() {
     }
 
     private static class Holder {

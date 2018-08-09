@@ -27,6 +27,7 @@ package org.spongepowered.common.registry.type.entity;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.data.type.Profession;
 import org.spongepowered.api.data.type.Professions;
@@ -34,6 +35,7 @@ import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.entity.SpongeCareer;
 import org.spongepowered.common.entity.SpongeProfession;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 
 import java.util.Collection;
@@ -45,7 +47,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-public class ProfessionRegistryModule implements AlternateCatalogRegistryModule<Profession>, SpongeAdditionalCatalogRegistryModule<Profession> {
+@RegisterCatalog(Professions.class)
+public class ProfessionRegistryModule extends AbstractCatalogRegistryModule<Profession> implements AlternateCatalogRegistryModule<Profession>, SpongeAdditionalCatalogRegistryModule<Profession> {
 
     public static final Profession FARMER = new SpongeProfession(0, "minecraft:farmer", "farmer");
     public static final Profession LIBRARIAN = new SpongeProfession(1, "minecraft:librarian", "librarian");
@@ -58,9 +61,6 @@ public class ProfessionRegistryModule implements AlternateCatalogRegistryModule<
         return Holder.INSTANCE;
     }
 
-    @RegisterCatalog(Professions.class)
-    private final Map<String, Profession> professionMap = new LinkedHashMap<>();
-
     @Override
     public boolean allowsApiRegistration() {
         return false;
@@ -72,19 +72,9 @@ public class ProfessionRegistryModule implements AlternateCatalogRegistryModule<
         if (catalogId.equals("smith")) {
             return;
         }
-        if (!this.professionMap.containsKey(catalogId)) {
-            this.professionMap.put(catalogId, extraCatalog);
+        if (!this.map.containsKey(extraCatalog.getKey())) {
+            this.map.put(extraCatalog.getKey(), extraCatalog);
         }
-    }
-
-    @Override
-    public Optional<Profession> getById(String id) {
-        return Optional.ofNullable(this.professionMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<Profession> getAll() {
-        return ImmutableList.copyOf(this.professionMap.values());
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -108,12 +98,12 @@ public class ProfessionRegistryModule implements AlternateCatalogRegistryModule<
 
     @Override
     public void registerDefaults() {
-        this.professionMap.put("minecraft:farmer", FARMER);
-        this.professionMap.put("minecraft:librarian", LIBRARIAN);
-        this.professionMap.put("minecraft:priest", PRIEST);
-        this.professionMap.put("minecraft:blacksmith", BLACKSMITH);
-        this.professionMap.put("minecraft:butcher", BUTCHER);
-        this.professionMap.put("minecraft:nitwit", NITWIT);
+        register(CatalogKey.minecraft("farmer"), FARMER);
+        register(CatalogKey.minecraft("librarian"), LIBRARIAN);
+        register(CatalogKey.minecraft("priest"), PRIEST);
+        register(CatalogKey.minecraft("blacksmith"), BLACKSMITH);
+        register(CatalogKey.minecraft("butcher"), BUTCHER);
+        register(CatalogKey.minecraft("nitwit"), NITWIT);
     }
 
     ProfessionRegistryModule() { }
@@ -121,8 +111,8 @@ public class ProfessionRegistryModule implements AlternateCatalogRegistryModule<
     @Override
     public Map<String, Profession> provideCatalogMap() {
         final HashMap<String, Profession> map = new HashMap<>();
-        for (Map.Entry<String, Profession> entry : this.professionMap.entrySet()) {
-            map.put(entry.getKey().replace("minecraft:", ""), entry.getValue());
+        for (Map.Entry<CatalogKey, Profession> entry : this.map.entrySet()) {
+            map.put(entry.getKey().getValue(), entry.getValue());
         }
         return map;
     }

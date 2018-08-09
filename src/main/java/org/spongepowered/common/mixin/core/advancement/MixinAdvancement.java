@@ -35,6 +35,7 @@ import net.minecraft.advancements.DisplayInfo;
 import net.minecraft.advancements.FrameType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.advancement.AdvancementType;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
@@ -88,6 +89,7 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
     private Text text;
     private String spongeId;
     private String name;
+    private CatalogKey key;
 
     @Nullable private Advancement tempParent;
 
@@ -113,6 +115,7 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
         String path = id.getResourcePath();
         this.name = path.replace('/', '_');
         this.spongeId = id.getResourceDomain() + ':' + this.name;
+        this.key = (CatalogKey) (Object) id;
         if (displayIn != null) {
             this.name = SpongeTexts.toPlain(displayIn.getTitle());
         }
@@ -281,6 +284,11 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
     public String getId() {
         checkServer();
         return this.spongeId;
+    }
+
+    @Override
+    public CatalogKey getKey() {
+        return this.key;
     }
 
     @Override

@@ -24,76 +24,49 @@
  */
 package org.spongepowered.common.registry.type.scoreboard;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Maps;
 import net.minecraft.util.text.TextFormatting;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlots;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 import org.spongepowered.common.registry.type.text.TextColorRegistryModule;
 import org.spongepowered.common.scoreboard.SpongeDisplaySlot;
 import org.spongepowered.common.text.format.SpongeTextColor;
 
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
+@RegisterCatalog(DisplaySlots.class)
 @RegistrationDependency(TextColorRegistryModule.class)
-public final class DisplaySlotRegistryModule implements AlternateCatalogRegistryModule<DisplaySlot> {
+public final class DisplaySlotRegistryModule extends AbstractCatalogRegistryModule<DisplaySlot> implements AlternateCatalogRegistryModule<DisplaySlot> {
 
     public static DisplaySlotRegistryModule getInstance() {
         return Holder.INSTANCE;
     }
 
-    @RegisterCatalog(DisplaySlots.class)
-    public final Map<String, SpongeDisplaySlot> displaySlotMappings = Maps.newLinkedHashMap();
-
     public Optional<DisplaySlot> getForIndex(int id) {
-        return Optional.ofNullable(Iterables.get(this.displaySlotMappings.values(), id, null));
-    }
-
-    @Override
-    public Optional<DisplaySlot> getById(String id) {
-        return Optional.ofNullable(this.displaySlotMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<DisplaySlot> getAll() {
-        return ImmutableList.copyOf(this.displaySlotMappings.values());
+        return Optional.ofNullable(Iterables.get(this.map.values(), id, null));
     }
 
     @Override
     public void registerDefaults() {
-        this.displaySlotMappings.put("minecraft:list", new SpongeDisplaySlot("list", null, 0));
-        this.displaySlotMappings.put("minecraft:sidebar", new SpongeDisplaySlot("sidebar", null, 1));
-        this.displaySlotMappings.put("minecraft:below_name", new SpongeDisplaySlot("below_name", null, 2));
+        register(CatalogKey.minecraft("list"), new SpongeDisplaySlot("list", null, 0));
+        register(CatalogKey.minecraft("sidebar"), new SpongeDisplaySlot("sidebar", null, 1));
+        register(CatalogKey.minecraft("below_name"), new SpongeDisplaySlot("below_name", null, 2));
 
-        for (Map.Entry<TextFormatting, SpongeTextColor> entry : TextColorRegistryModule.enumChatColor.entrySet()) {
+        for (Map.Entry<TextFormatting, SpongeTextColor> entry : TextColorRegistryModule.getInstance().enumChatColor.entrySet()) {
             final String id = entry.getValue().getKey().toString().toLowerCase(Locale.ENGLISH);
             final SpongeDisplaySlot value = new SpongeDisplaySlot(id, entry.getValue(), entry.getKey().getColorIndex() + 3);
-            this.displaySlotMappings.put("minecraft:" + id, value);
+            register(CatalogKey.minecraft(id), value);
         }
     }
-
-
 
     DisplaySlotRegistryModule() {
-    }
-
-    @Override
-    public Map<String, DisplaySlot> provideCatalogMap() {
-        final HashMap<String, DisplaySlot> map = new HashMap<>();
-        for (Map.Entry<String, SpongeDisplaySlot> entry : this.displaySlotMappings.entrySet()) {
-            map.put(entry.getKey().replace("minecraft:", ""), entry.getValue());
-        }
-        return map;
     }
 
     private static final class Holder {

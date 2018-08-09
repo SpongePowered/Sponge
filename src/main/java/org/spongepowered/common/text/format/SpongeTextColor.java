@@ -71,7 +71,7 @@ public class SpongeTextColor implements TextColor {
     }
 
     public static SpongeTextColor of(TextFormatting color) {
-        return TextColorRegistryModule.enumChatColor.get(color);
+        return TextColorRegistryModule.getInstance().enumChatColor.get(color);
     }
 
 }

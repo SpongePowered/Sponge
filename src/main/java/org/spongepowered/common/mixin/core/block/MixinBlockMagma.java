@@ -28,6 +28,7 @@ import net.minecraft.block.BlockMagma;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
@@ -46,7 +47,7 @@ public abstract class MixinBlockMagma extends MixinBlock {
             BlockPos pos, Entity original) {
         if (!world.isRemote) {
             DamageSource.HOT_FLOOR =
-                    new MinecraftBlockDamageSource("hotFloor", new Location<>((World) world, VecHelper.toVector3i(pos))).setFireDamage();
+                    new MinecraftBlockDamageSource(CatalogKey.minecraft("hotFloor"), new Location<>((World) world, VecHelper.toVector3i(pos))).setFireDamage();
             boolean result = entity.attackEntityFrom(DamageSource.HOT_FLOOR, damage);
             DamageSource.HOT_FLOOR = originalDamageSource;
             return result;

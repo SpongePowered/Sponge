@@ -30,6 +30,7 @@ import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntityArchetype;
@@ -64,6 +65,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
     private static final TypeToken<Schematic> TYPE_TOKEN = TypeToken.of(Schematic.class);
     private static final int VERSION = 1;
     private static final int MAX_SIZE = 65535;
+    private final CatalogKey key = CatalogKey.sponge("schematic");
 
     public static SchematicTranslator get() {
         return INSTANCE;
@@ -76,6 +78,11 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
     @Override
     public String getId() {
         return "sponge:schematic";
+    }
+
+    @Override
+    public CatalogKey getKey() {
+        return this.key;
     }
 
     @Override
@@ -254,7 +261,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
             DataQuery paletteQuery = DataQueries.Schematic.PALETTE;
             for (BlockState state : palette.getEntries()) {
                 // getOrAssign to skip the optional, it will never assign
-                data.set(paletteQuery.then(state.getKey()), palette.getOrAssign(state));
+                data.set(paletteQuery.then(state.getKey().toString()), palette.getOrAssign(state));
             }
             data.set(DataQueries.Schematic.PALETTE_MAX, palette.getHighestId());
         }

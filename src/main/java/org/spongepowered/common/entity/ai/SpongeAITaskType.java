@@ -25,6 +25,7 @@
 package org.spongepowered.common.entity.ai;
 
 import com.google.common.base.MoreObjects;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.entity.ai.task.AITask;
 import org.spongepowered.api.entity.ai.task.AITaskType;
 import org.spongepowered.api.entity.living.Agent;
@@ -47,6 +48,11 @@ public final class SpongeAITaskType implements AITaskType {
     @Override
     public String getId() {
         return this.id;
+    }
+
+    @Override
+    public CatalogKey getKey() {
+        return CatalogKey.resolve(this.id);
     }
 
     @Override

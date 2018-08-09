@@ -37,7 +37,7 @@ public class MinecraftBlockDamageSource extends DamageSource {
     private final Location<World> location;
 
     public MinecraftBlockDamageSource(CatalogKey damageTypeIn, Location<World> location) {
-        super(damageTypeIn.toString());
+        super(damageTypeIn.getValue());
         this.blockSnapshot = location.createSnapshot();
         this.location = location;
     }

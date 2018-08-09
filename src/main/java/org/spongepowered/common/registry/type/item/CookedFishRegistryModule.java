@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.item.ItemFishFood;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.CookedFish;
 import org.spongepowered.api.data.type.CookedFishes;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
@@ -59,6 +60,11 @@ public final class CookedFishRegistryModule implements AlternateCatalogRegistryM
     @Override
     public Optional<CookedFish> getById(String id) {
         return Optional.ofNullable(this.fishMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
+    }
+
+    @Override
+    public Optional<CookedFish> get(CatalogKey key) {
+        return getById(key.toString());
     }
 
     @Override

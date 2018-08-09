@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.world.teleport;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -46,6 +47,7 @@ public class ConfigTeleportHelperFilter implements TeleportHelperFilter {
     @Nullable private static List<BlockState> floorBlockStates = null;
     @Nullable private static List<BlockType> bodyBlockTypes = null;
     @Nullable private static List<BlockState> bodyBlockStates = null;
+    private static final CatalogKey KEY = CatalogKey.sponge("config");
 
     public static void invalidateCache() {
         floorBlockTypes = null;
@@ -82,6 +84,11 @@ public class ConfigTeleportHelperFilter implements TeleportHelperFilter {
     @Override
     public String getId() {
         return "sponge:config";
+    }
+
+    @Override
+    public CatalogKey getKey() {
+        return KEY;
     }
 
     @Override

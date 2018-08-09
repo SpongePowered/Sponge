@@ -30,6 +30,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.extra.modifier.empty.VoidWorldGeneratorModifier;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
@@ -67,6 +68,11 @@ public class WorldGeneratorModifierRegistryModule implements AlternateCatalogReg
     @Override
     public Optional<WorldGeneratorModifier> getById(String id) {
         return Optional.ofNullable(this.modifierMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
+    }
+
+    @Override
+    public Optional<WorldGeneratorModifier> get(CatalogKey key) {
+        return getById(key.toString());
     }
 
     @Override

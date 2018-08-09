@@ -30,6 +30,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.DamageSource;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -63,7 +64,7 @@ public abstract class MixinBlockCactus extends MixinBlock {
         }
         try {
             Location<World> location = new Location<>((World) world, pos.getX(), pos.getY(), pos.getZ());
-            DamageSource.CACTUS = new MinecraftBlockDamageSource("cactus", location);
+            DamageSource.CACTUS = new MinecraftBlockDamageSource(CatalogKey.minecraft("cactus"), location);
             return entity.attackEntityFrom(DamageSource.CACTUS, damage);
         } finally {
             DamageSource.CACTUS = source;

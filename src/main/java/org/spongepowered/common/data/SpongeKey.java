@@ -66,7 +66,7 @@ public final class SpongeKey<V extends BaseValue<?>> implements Key<V> {
         this.id = builder.id;
     }
 
-    private static PluginContainer getCurrentContainer() {
+    static PluginContainer getCurrentContainer() {
         return Sponge.getCauseStackManager().getCurrentCause().first(PluginContainer.class)
             .orElse(SpongeImpl.getMinecraftPlugin());
     }

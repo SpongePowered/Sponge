@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.item;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.item.FireworkShape;
 
 public class SpongeFireworkShape implements FireworkShape {
@@ -39,6 +40,11 @@ public class SpongeFireworkShape implements FireworkShape {
     @Override
     public String getId() {
         return this.name;
+    }
+
+    @Override
+    public CatalogKey getKey() {
+        return CatalogKey.resolve(this.name);
     }
 
     @Override

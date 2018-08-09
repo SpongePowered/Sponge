@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.type.NotePitch;
 import org.spongepowered.api.effect.particle.ParticleOption;
@@ -39,6 +40,7 @@ import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.effect.particle.SpongeParticleOption;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -50,21 +52,10 @@ import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
-public class ParticleOptionRegistryModule implements CatalogRegistryModule<ParticleOption<?>> {
+@RegisterCatalog(ParticleOptions.class)
+public class ParticleOptionRegistryModule extends AbstractCatalogRegistryModule<ParticleOption<?>> implements CatalogRegistryModule<ParticleOption<?>> {
 
-    @RegisterCatalog(ParticleOptions.class)
-    private final Map<String, ParticleOption<?>> particleOptionsMappings = new HashMap<>();
     private final Map<String, ParticleOption<?>> particleOptions = new HashMap<>();
-
-    @Override
-    public Optional<ParticleOption<?>> getById(String id) {
-        return Optional.ofNullable(this.particleOptions.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<ParticleOption<?>> getAll() {
-        return ImmutableList.copyOf(this.particleOptions.values());
-    }
 
     @Override
     public void registerDefaults() {
@@ -91,7 +82,7 @@ public class ParticleOptionRegistryModule implements CatalogRegistryModule<Parti
 
     private <V> void registerOption(String id, Class<V> valueType, @Nullable Function<V, IllegalArgumentException> valueValidator) {
         SpongeParticleOption<?> option = new SpongeParticleOption<>("minecraft:" + id, id, valueType, valueValidator);
-        this.particleOptionsMappings.put(id, option);
+        this.map.put(CatalogKey.resolve(id), option);
         this.particleOptions.put(option.getKey().toString(), option);
     }
 }

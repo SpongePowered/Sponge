@@ -28,11 +28,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.util.ResourceLocation;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.item.enchantment.EnchantmentTypes;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 
 import java.util.Collection;
@@ -41,55 +43,30 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-public final class EnchantmentRegistryModule implements SpongeAdditionalCatalogRegistryModule<EnchantmentType>, AlternateCatalogRegistryModule<EnchantmentType> {
+@RegisterCatalog(EnchantmentTypes.class)
+public final class EnchantmentRegistryModule extends AbstractCatalogRegistryModule<EnchantmentType> implements SpongeAdditionalCatalogRegistryModule<EnchantmentType>, AlternateCatalogRegistryModule<EnchantmentType> {
 
     public static EnchantmentRegistryModule getInstance() {
         return Holder.INSTANCE;
     }
 
-    @RegisterCatalog(EnchantmentTypes.class)
-    private final Map<String, EnchantmentType> enchantmentMappings = new HashMap<>();
-
-    @Override
-    public Optional<EnchantmentType> getById(String id) {
-        checkNotNull(id);
-        if (!id.contains(":")) {
-            id = "minecraft:" + id; // assume vanilla
-        }
-        return Optional.ofNullable(this.enchantmentMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<EnchantmentType> getAll() {
-        return ImmutableList.copyOf(this.enchantmentMappings.values());
-    }
-
-    @Override
-    public Map<String, EnchantmentType> provideCatalogMap() {
-        Map<String, EnchantmentType> newMap = new HashMap<>();
-        for (Map.Entry<String, EnchantmentType> entry : this.enchantmentMappings.entrySet()) {
-            newMap.put(entry.getKey().replace("minecraft:", ""), entry.getValue());
-        }
-        return newMap;
-    }
 
     @Override
     public void registerDefaults() {
         for (ResourceLocation key: net.minecraft.enchantment.Enchantment.REGISTRY.getKeys()) {
-            this.enchantmentMappings.put(key.toString(), (EnchantmentType) net.minecraft.enchantment.Enchantment.REGISTRY.getObject(key));
+            this.map.put((CatalogKey) (Object) key, (EnchantmentType) net.minecraft.enchantment.Enchantment.REGISTRY.getObject(key));
         }
     }
 
     @AdditionalRegistration
     public void registerAdditional() {
-        for (ResourceLocation key: net.minecraft.enchantment.Enchantment.REGISTRY.getKeys()) {
+        for (ResourceLocation key : net.minecraft.enchantment.Enchantment.REGISTRY.getKeys()) {
             net.minecraft.enchantment.Enchantment enchantment = net.minecraft.enchantment.Enchantment.REGISTRY.getObject(key);
             if (enchantment == null) {
                 continue;
             }
-            if (!this.enchantmentMappings.containsValue(enchantment)) {
-                final String name = enchantment.getName().replace("enchantment.", "");
-                this.enchantmentMappings.put(name.toLowerCase(Locale.ENGLISH), (EnchantmentType) enchantment);
+            if (!this.map.containsValue(enchantment)) {
+                this.map.put((CatalogKey) (Object) key, (EnchantmentType) enchantment);
             }
         }
 
@@ -106,12 +83,12 @@ public final class EnchantmentRegistryModule implements SpongeAdditionalCatalogR
     @Override
     public void registerAdditionalCatalog(EnchantmentType extraCatalog) {
         checkNotNull(extraCatalog, "EnchantmentType cannot be null!");
-        this.enchantmentMappings.put(extraCatalog.getKey().toString(), extraCatalog);
+        this.map.put(extraCatalog.getKey(), extraCatalog);
     }
 
-    public void registerFromGameData(String s, EnchantmentType obj) {
+    public void registerFromGameData(ResourceLocation s, EnchantmentType obj) {
         checkNotNull(obj, "EnchantmentType cannot be null!");
-        this.enchantmentMappings.put(s, obj);
+        this.map.put((CatalogKey) (Object) s, obj);
     }
 
     static final class Holder {

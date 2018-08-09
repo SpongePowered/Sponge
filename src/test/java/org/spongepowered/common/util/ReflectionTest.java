@@ -28,7 +28,9 @@ import static org.spongepowered.common.util.ReflectionUtil.createInstance;
 import static org.spongepowered.common.util.ReflectionUtil.findConstructor;
 
 import com.google.common.reflect.TypeToken;
+import net.minecraft.util.ResourceLocation;
 import org.junit.Test;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.key.Key;
@@ -108,6 +110,11 @@ public class ReflectionTest {
             @Override
             public String getId() {
                 return "test";
+            }
+
+            @Override
+            public CatalogKey getKey() {
+                return (CatalogKey) (Object) new ResourceLocation("sponge", "test");
             }
 
             @Override

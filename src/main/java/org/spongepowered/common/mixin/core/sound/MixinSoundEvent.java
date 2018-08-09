@@ -38,7 +38,7 @@ public abstract class MixinSoundEvent implements SoundType {
 
     @Override
     public CatalogKey getKey() {
-        return (CatalogKey) this.soundName;
+        return (CatalogKey) (Object) this.soundName;
     }
 
     @Override

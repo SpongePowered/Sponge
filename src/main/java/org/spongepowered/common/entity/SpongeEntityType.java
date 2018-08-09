@@ -27,6 +27,7 @@ package org.spongepowered.common.entity;
 import com.google.common.base.MoreObjects;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EnumCreatureType;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.SpongeCatalogType;
@@ -46,6 +47,7 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
     public static final EntityType UNKNOWN = new EntityType() {
 
         private final Translation translation = new SpongeTranslation("entity.generic.name");
+        private final CatalogKey key = CatalogKey.of("unknown", "unknown");
 
         @Override
         public Translation getTranslation() {
@@ -60,6 +62,11 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
         @Override
         public String getId() {
             return "unknown:unknown";
+        }
+
+        @Override
+        public CatalogKey getKey() {
+            return key;
         }
 
         @Override

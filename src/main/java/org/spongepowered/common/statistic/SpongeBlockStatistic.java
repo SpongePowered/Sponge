@@ -27,6 +27,7 @@ package org.spongepowered.common.statistic;
 import net.minecraft.item.Item;
 import net.minecraft.stats.StatCrafting;
 import net.minecraft.util.text.ITextComponent;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.scoreboard.critieria.Criterion;
 import org.spongepowered.api.statistic.BlockStatistic;
@@ -60,6 +61,11 @@ public final class SpongeBlockStatistic extends StatCrafting implements BlockSta
     @Override
     public Optional<Criterion> getCriterion() {
         return Optional.ofNullable((Criterion) getCriteria());
+    }
+
+    @Override
+    public CatalogKey getKey() {
+        return CatalogKey.resolve(this.spongeId);
     }
 
     @Override
