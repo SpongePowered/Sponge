@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.plugin;
 
 import com.google.common.collect.ImmutableMap;
+import org.checkerframework.checker.nullness.Opt;
 import org.spongepowered.asm.lib.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -105,6 +106,18 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
                     OptimizationCategory::useAsyncLighting)
             .put("org.spongepowered.common.mixin.optimization.world.gen.structure.MixinMapGenStructure_Structure_Saving",
                     OptimizationCategory::useStructureSave)
+            .put("org.spongepowered.common.mixin.optimization.mapoptimization.MixinEntityItemFrame_MapOptimization",
+                    OptimizationCategory::useMapOptimization)
+            .put("org.spongepowered.common.mixin.optimization.mapoptimization.MixinEntityTrackerEntry_MapOptimization",
+                    OptimizationCategory::useMapOptimization)
+            .put("org.spongepowered.common.mixin.optimization.mapoptimization.MixinItemMap_MapOptimization",
+                    OptimizationCategory::useMapOptimization)
+            .put("org.spongepowered.common.mixin.optimization.mapoptimization.MixinMapData_MapOptimization",
+                    OptimizationCategory::useMapOptimization)
+            .put("org.spongepowered.common.mixin.optimization.mapoptimization.MixinMapInfo_MapOptimization",
+                    OptimizationCategory::useMapOptimization)
+            .put("org.spongepowered.common.mixin.optimization.mapoptimization.MixinMinecraftServer_MapOptimization",
+                    OptimizationCategory::useMapOptimization)
             .build();
 
 }
