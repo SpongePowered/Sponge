@@ -44,9 +44,8 @@ final class EventListenerPhaseState extends ListenerPhaseState {
 
     public final BiConsumer<CauseStackManager.StackFrame, ListenerPhaseContext> LISTENER_MODIFIER = super.getFrameModifier()
         .andThen((frame, context) -> {
-            final PluginContainer container = context.getSource(PluginContainer.class)
-                .orElseThrow(TrackingUtil.throwWithContext("Expected to be processing on a Listener with plugin!", context));
-            frame.pushCause(container);
+            context.getSource(PluginContainer.class)
+                .ifPresent(frame::pushCause);
         });
     private boolean hasPrintedEntities = false;
 
