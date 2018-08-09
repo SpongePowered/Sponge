@@ -296,8 +296,9 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * "single" tick. It was pretty cool, but did not work out as it broke vanilla mechanics.
      *
      * @param context The context to re-check for captures
+     * @param depth THe current processing depth
      */
-    default void performOnBlockAddedSpawns(C context) {
+    default void performOnBlockAddedSpawns(C context, int depth) {
 
     }
     /**

@@ -49,14 +49,18 @@ public final class PostState extends GeneralState<UnwindingPhaseContext> {
 
     @SuppressWarnings("unchecked")
     private static void postBlockAddedSpawns(UnwindingPhaseContext postContext, IPhaseState<?> unwindingState, PhaseContext<?> unwindingPhaseContext,
-        CapturedSupplier<BlockSnapshot> capturedBlockSupplier) {
+        CapturedSupplier<BlockSnapshot> capturedBlockSupplier, int depth) {
+        if (PhaseTracker.checkMaxBlockProcessingDepth(GeneralPhase.Post.UNWINDING, postContext, depth)) {
+            return;
+        }
+
         postContext.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> {
             final ArrayList<Entity> capturedEntities = new ArrayList<>(entities);
             ((IPhaseState) unwindingState).postProcessSpawns(unwindingPhaseContext, capturedEntities);
         });
         capturedBlockSupplier.acceptAndClearIfNotEmpty(blocks -> {
             final List<BlockSnapshot> blockSnapshots = new ArrayList<>(blocks);
-            TrackingUtil.processBlockCaptures(blockSnapshots, GeneralPhase.Post.UNWINDING, postContext);
+            TrackingUtil.processBlockCaptures(blockSnapshots, GeneralPhase.Post.UNWINDING, postContext, depth);
         });
     }
 
@@ -192,8 +196,8 @@ public final class PostState extends GeneralState<UnwindingPhaseContext> {
     }
 
     @Override
-    public void performOnBlockAddedSpawns(UnwindingPhaseContext context) {
-        postBlockAddedSpawns(context, context.getUnwindingState(), context.getUnwindingContext(), context.getCapturedBlockSupplier());
+    public void performOnBlockAddedSpawns(UnwindingPhaseContext context, int depth) {
+        postBlockAddedSpawns(context, context.getUnwindingState(), context.getUnwindingContext(), context.getCapturedBlockSupplier(), depth);
     }
 
     @Override

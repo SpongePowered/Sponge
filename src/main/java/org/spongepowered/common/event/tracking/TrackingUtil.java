@@ -676,7 +676,7 @@ public final class TrackingUtil {
         final Block newBlock = newState.getBlock();
         if (originalState.getBlock() != newBlock && changeFlag.performBlockPhysics() && !SpongeImplHooks.hasBlockTileEntity(newBlock, newState)) {
             newBlock.onBlockAdded(world, pos, newState);
-            ((IPhaseState) phaseState).performOnBlockAddedSpawns(phaseContext);
+            ((IPhaseState) phaseState).performOnBlockAddedSpawns(phaseContext, currentDepth + 1);
         }
 
         ((IPhaseState) phaseState).postBlockTransactionApplication(oldBlockSnapshot.blockChange, transaction, phaseContext);
