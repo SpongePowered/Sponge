@@ -603,11 +603,15 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             // Sponge start
             this.timings.updateBlocksThunder.startTiming();
 
-            //if (this.provider.canDoLightning(chunk) && flag && flag1 && this.rand.nextInt(100000) == 0) // Sponge - Add SpongeImplHooks for forge
-            if (this.weatherThunderEnabled && SpongeImplHooks.canDoLightning(this.provider, chunk) && flag && flag1 && this.rand.nextInt(100000) == 0)
-            {
-                try (final PhaseContext<?> context = TickPhase.Tick.WEATHER.createPhaseContext().source(this)) {
-                    context.buildAndSwitch();
+            // Sponge start - wrap call to canDoLightning in phase, since mods can run arbitrary code here
+
+            try (final PhaseContext<?> context = TickPhase.Tick.WEATHER.createPhaseContext().source(this)) {
+                context.buildAndSwitch();
+
+                //if (this.provider.canDoLightning(chunk) && flag && flag1 && this.rand.nextInt(100000) == 0) // Sponge - Add SpongeImplHooks for forge
+                if (this.weatherThunderEnabled && SpongeImplHooks.canDoLightning(this.provider, chunk) && flag && flag1
+                        && this.rand.nextInt(100000) == 0) {
+
                     // Sponge end
                     this.updateLCG = this.updateLCG * 3 + 1013904223;
                     int l = this.updateLCG >> 2;
@@ -618,18 +622,19 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
                         // Sponge - create a transform to be used for events
                         final Transform<org.spongepowered.api.world.World>
-                            transform =
-                            new Transform<>(this, VecHelper.toVector3d(blockpos).toDouble());
+                                transform =
+                                new Transform<>(this, VecHelper.toVector3d(blockpos).toDouble());
 
-                        if (world.getGameRules().getBoolean("doMobSpawning") && this.rand.nextDouble() < (double)difficultyinstance.getAdditionalDifficulty() * 0.01D) {
+                        if (world.getGameRules().getBoolean("doMobSpawning")
+                                && this.rand.nextDouble() < (double) difficultyinstance.getAdditionalDifficulty() * 0.01D) {
                             // Sponge Start - Throw construction events
                             try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                                 frame.pushCause(this.getWeather());
                                 frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
                                 ConstructEntityEvent.Pre
-                                    constructEntityEvent =
-                                    SpongeEventFactory
-                                        .createConstructEntityEventPre(frame.getCurrentCause(), EntityTypes.HORSE, transform);
+                                        constructEntityEvent =
+                                        SpongeEventFactory
+                                                .createConstructEntityEventPre(frame.getCurrentCause(), EntityTypes.HORSE, transform);
                                 SpongeImpl.postEvent(constructEntityEvent);
                                 if (!constructEntityEvent.isCancelled()) {
                                     // Sponge End
@@ -642,10 +647,10 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                                 }
 
                                 ConstructEntityEvent.Pre
-                                    lightning =
-                                    SpongeEventFactory
-                                        .createConstructEntityEventPre(frame.getCurrentCause(), EntityTypes.LIGHTNING,
-                                            transform);
+                                        lightning =
+                                        SpongeEventFactory
+                                                .createConstructEntityEventPre(frame.getCurrentCause(), EntityTypes.LIGHTNING,
+                                                        transform);
                                 SpongeImpl.postEvent(lightning);
                                 if (!lightning.isCancelled()) {
                                     LightningEvent.Pre lightningPre = SpongeEventFactory.createLightningEventPre(frame.getCurrentCause());
@@ -662,9 +667,9 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                                 frame.pushCause(this.getWeather());
                                 frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
                                 ConstructEntityEvent.Pre
-                                    event =
-                                    SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(),
-                                        EntityTypes.LIGHTNING, transform);
+                                        event =
+                                        SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(),
+                                                EntityTypes.LIGHTNING, transform);
                                 SpongeImpl.postEvent(event);
                                 if (!event.isCancelled()) {
                                     LightningEvent.Pre lightningPre = SpongeEventFactory.createLightningEventPre(frame.getCurrentCause());
@@ -680,19 +685,13 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                 } // Sponge - brackets
                 // Sponge End
 
-            }
+                this.timings.updateBlocksThunder.stopTiming(); // Sponge - Stop thunder timing
+                this.timings.updateBlocksIceAndSnow.startTiming(); // Sponge - Start thunder timing
+                // this.profiler.endStartSection("iceandsnow"); // Sponge - don't use the profiler
 
-            this.timings.updateBlocksThunder.stopTiming(); // Sponge - Stop thunder timing
-            this.timings.updateBlocksIceAndSnow.startTiming(); // Sponge - Start thunder timing
-            // this.profiler.endStartSection("iceandsnow"); // Sponge - don't use the profiler
-
-            // if (this.rand.nextInt(16) == 0) // Sponge - Rewrite to use our boolean, and forge hook
-            if (this.weatherIceAndSnowEnabled && SpongeImplHooks.canDoRainSnowIce(this.provider, chunk) && this.rand.nextInt(16) == 0)
-            {
-                // Sponge Start - Enter weather phase for snow and ice and flooding.
-                try (final PhaseContext<?> context = TickPhase.Tick.WEATHER.createPhaseContext()
-                        .source(this)) {
-                    context.buildAndSwitch();
+                // if (this.rand.nextInt(16) == 0) // Sponge - Rewrite to use our boolean, and forge hook
+                if (this.weatherIceAndSnowEnabled && SpongeImplHooks.canDoRainSnowIce(this.provider, chunk) && this.rand.nextInt(16) == 0) {
+                    // Sponge Start - Enter weather phase for snow and ice and flooding.
                     // Sponge End
                     this.updateLCG = this.updateLCG * 3 + 1013904223;
                     int j2 = this.updateLCG >> 2;
@@ -710,8 +709,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                     if (flag && this.getBiome(blockpos2).canRain()) {
                         this.getBlockState(blockpos2).getBlock().fillWithRain((WorldServer) (Object) this, blockpos2);
                     }
-                } // Sponge - brackets
-            }
+                }
+            } // Sponge end phase - brackets
 
             this.timings.updateBlocksIceAndSnow.stopTiming(); // Sponge - Stop ice and snow timing
             this.timings.updateBlocksRandomTick.startTiming(); // Sponge - Start random block tick timing
