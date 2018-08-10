@@ -47,7 +47,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-@Plugin(id = "cooldowntracker", name = "Cooldown Tracker", description = "A plugin to test the cooldown tracker.")
+@Plugin(id = "cooldowntracker", name = "Cooldown Tracker", description = "A plugin to test the cooldown tracker.", version = "0.0.0")
 public final class CooldownTrackerTest {
 
     private final Set<UUID> enabled = new HashSet<>();
@@ -62,7 +62,7 @@ public final class CooldownTrackerTest {
                     }
                     final Player player = (Player) src;
                     final CooldownTracker cooldownTracker = player.getCooldownTracker();
-                    final ItemType itemType = player.getItemInHand(HandTypes.MAIN_HAND).orElse(ItemStack.empty()).getType();
+                    final ItemType itemType = player.getItemInHand(HandTypes.MAIN_HAND).getType();
                     if (!cooldownTracker.hasCooldown(itemType)) {
                         player.sendMessage(Text.of(TextColors.GRAY, "The item type in your hand is not on cooldown!"));
                     } else {
@@ -83,8 +83,7 @@ public final class CooldownTrackerTest {
                     }
                     final Player player = (Player) src;
                     final int cooldown = args.<Integer>getOne("cooldown").orElse(10);
-                    player.getCooldownTracker().setCooldown(player.getItemInHand(HandTypes.MAIN_HAND)
-                            .orElse(ItemStack.empty()).getType(), cooldown);
+                    player.getCooldownTracker().setCooldown(player.getItemInHand(HandTypes.MAIN_HAND).getType(), cooldown);
                     player.sendMessage(Text.of(TextColors.GRAY, "You have given the item type in your hand a cooldown of ",
                             TextColors.GOLD, cooldown, TextColors.GRAY, " tick(s)."));
                     return CommandResult.success();
@@ -126,7 +125,7 @@ public final class CooldownTrackerTest {
         final Player player = event.getTargetEntity();
         if (this.enabled.contains(player.getUniqueId())) {
             event.setNewCooldown(event.getOriginalNewCooldown() * 2);
-            player.sendMessage(Text.of(TextColors.GOLD, event.getItemType().getId() + " are now on cooldown for you for "
+            player.sendMessage(Text.of(TextColors.GOLD, event.getItemType().getKey().toString() + " are now on cooldown for you for "
                     + event.getNewCooldown() + " ticks!"));
         }
     }
@@ -135,7 +134,7 @@ public final class CooldownTrackerTest {
     public void onCooldownEnd(final CooldownEvent.End event) {
         final Player player = event.getTargetEntity();
         if (this.enabled.contains(player.getUniqueId())) {
-            player.sendMessage(Text.of(TextColors.GOLD, event.getItemType().getId() + " are no longer on cooldown for you!"));
+            player.sendMessage(Text.of(TextColors.GOLD, event.getItemType().getKey().toString() + " are no longer on cooldown for you!"));
         }
     }
 

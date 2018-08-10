@@ -24,8 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.entity.player;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import com.flowpowered.math.vector.Vector3d;
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Preconditions;
+import net.minecraft.inventory.InventoryEnderChest;
 import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.entity.living.player.Player;
@@ -33,19 +39,37 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.interfaces.IMixinSubject;
+import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
+import org.spongepowered.common.mixin.core.world.storage.MixinWorldInfo;
+import org.spongepowered.common.world.WorldManager;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Mixin(value = SpongeUser.class, remap = false)
 public abstract class MixinSpongeUser implements User, IMixinSubject {
 
     @Shadow @Final private com.mojang.authlib.GameProfile profile;
+
+    @Shadow private double posX;
+    @Shadow private double posY;
+    @Shadow private double posZ;
+    @Shadow private int dimension;
+    @Shadow private float rotationPitch;
+    @Shadow private float rotationYaw;
+
+    @Shadow protected abstract void markDirty();
+
+    @Shadow protected abstract SpongeUser loadEnderInventory();
+
+    @Shadow private InventoryEnderChest enderChest;
 
     @Override
     public GameProfile getProfile() {
@@ -76,6 +100,51 @@ public abstract class MixinSpongeUser implements User, IMixinSubject {
     @Override
     public void setRawData(DataView container) throws InvalidDataException {
         throw new UnsupportedOperationException(); // TODO Data API
+    }
+
+    @Override
+    public Vector3d getPosition() {
+        return new Vector3d(this.posX, this.posY, this.posZ);
+    }
+
+    @Override
+    public Optional<UUID> getWorldUniqueId() {
+        Optional<String> folder = WorldManager.getWorldFolderByDimensionId(this.dimension);
+        return folder.map(WorldManager::getWorldProperties).flatMap(e -> e.map(WorldProperties::getUniqueId));
+    }
+
+    @Override
+    public boolean setLocation(Vector3d position, UUID world) {
+        WorldProperties prop = WorldManager.getWorldProperties(world).orElseThrow(() -> new IllegalArgumentException("Invalid World: No world found for UUID"));
+        Integer dimensionId = ((IMixinWorldInfo) prop).getDimensionId();
+        if (dimensionId == null) {
+            throw new IllegalArgumentException("Invalid World: missing dimensionID)");
+        }
+        this.dimension = dimensionId;
+        this.posX = position.getX();
+        this.posY = position.getY();
+        this.posZ = position.getZ();
+        this.markDirty();
+        return true;
+    }
+
+    @Override
+    public Vector3d getRotation() {
+        return new Vector3d(this.rotationPitch, this.rotationYaw, 0);
+    }
+
+    @Override
+    public void setRotation(Vector3d rotation) {
+        checkNotNull(rotation, "Rotation was null!");
+        this.markDirty();
+        this.rotationPitch = ((float) rotation.getX()) % 360.0F;
+        this.rotationYaw = ((float) rotation.getY()) % 360.0F;
+    }
+
+    @Override
+    public Inventory getEnderChestInventory() {
+        this.loadEnderInventory();
+        return ((Inventory) this.enderChest);
     }
 
     @Override

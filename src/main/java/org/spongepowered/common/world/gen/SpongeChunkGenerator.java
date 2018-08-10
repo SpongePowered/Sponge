@@ -57,6 +57,7 @@ import net.minecraft.world.gen.structure.MapGenStructure;
 import net.minecraft.world.gen.structure.MapGenVillage;
 import net.minecraft.world.gen.structure.StructureOceanMonument;
 import net.minecraft.world.gen.structure.WoodlandMansion;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -77,6 +78,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
+import org.spongepowered.common.event.tracking.phase.generation.PopulatorPhaseContext;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IChunkProviderOverworld;
@@ -84,6 +86,7 @@ import org.spongepowered.common.interfaces.world.gen.IFlaggedPopulator;
 import org.spongepowered.common.interfaces.world.gen.IGenerationPopulator;
 import org.spongepowered.common.util.gen.ChunkPrimerBuffer;
 import org.spongepowered.common.util.gen.ObjectArrayMutableBiomeBuffer;
+import org.spongepowered.common.world.WorldUtil;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 import org.spongepowered.common.world.extent.SoftBufferExtentViewDownsize;
 import org.spongepowered.common.world.gen.populators.SnowPopulator;
@@ -117,7 +120,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
     private NoiseGeneratorPerlin noise4;
     private double[] stoneNoise;
 
-    protected Map<String, Timing> populatorTimings = Maps.newHashMap();
+    protected Map<CatalogKey, Timing> populatorTimings = Maps.newHashMap();
     protected Timing chunkGeneratorTiming;
 
     public SpongeChunkGenerator(World world, GenerationPopulator base, BiomeGenerator biomegen) {
@@ -213,8 +216,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         if (settings == null) {
             if (SpongeGenerationPopulator.class.isInstance(this.baseGenerator)) {
                 // If the base generator was mod provided then we assume that it
-                // will handle its own
-                // generation so we don't add the base game's generation
+                // will handle its own generation so we don't add the base game's generation
                 settings = new SpongeBiomeGenerationSettings();
             } else {
                 settings = type.createDefaultGenerationSettings((org.spongepowered.api.world.World) this.world);
@@ -247,7 +249,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         this.baseGenerator.populate((org.spongepowered.api.world.World) this.world, blockBuffer, biomeBuffer);
 
         if (!(this.baseGenerator instanceof SpongeGenerationPopulator)) {
-            replaceBiomeBlocks(this.world, this.rand, chunkX, chunkZ, chunkprimer, biomeBuffer);
+            this.replaceBiomeBlocks(this.world, this.rand, chunkX, chunkZ, chunkprimer, biomeBuffer);
         }
 
         // Apply the generator populators to complete the blockBuffer
@@ -269,7 +271,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
 
         // run our generator populators
         for (BiomeType type : uniqueBiomes) {
-            BiomeGenerationSettings settings = getBiomeSettings(type);
+            BiomeGenerationSettings settings = this.getBiomeSettings(type);
             for (GenerationPopulator populator : settings.getGenerationPopulators()) {
                 populator.populate((org.spongepowered.api.world.World) this.world, blockBuffer, biomeBuffer);
             }
@@ -309,7 +311,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         BlockPos blockpos = new BlockPos(chunkX * 16, 0, chunkZ * 16);
         BiomeType biome = (BiomeType) this.world.getBiome(blockpos.add(16, 0, 16));
 
-        org.spongepowered.api.world.Chunk chunk = (org.spongepowered.api.world.Chunk) this.world.getChunkFromChunkCoords(chunkX, chunkZ);
+        org.spongepowered.api.world.Chunk chunk = (org.spongepowered.api.world.Chunk) this.world.getChunk(chunkX, chunkZ);
 
         BiomeGenerationSettings settings = getBiomeSettings(biome);
 
@@ -338,34 +340,32 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         Extent volume = new SoftBufferExtentViewDownsize(chunk.getWorld(), min, min.add(15, 255, 15), min.sub(8, 0, 8), min.add(23, 255, 23));
         for (Populator populator : populators) {
             final PopulatorType type = populator.getType();
-            if (type == null) {
-                System.err.printf("Found a populator with a null type: %s populator%n", populator);
-            }
             if (Sponge.getGame().getEventManager().post(SpongeEventFactory.createPopulateChunkEventPopulate(Sponge.getCauseStackManager().getCurrentCause(), populator, chunk))) {
                 continue;
             }
-            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            try (CauseStackManager.StackFrame ignored = Sponge.getCauseStackManager().pushCauseFrame()) {
                 Timing timing = null;
+                ignored.pushCause(populator);
                 if (Timings.isTimingsEnabled()) {
-                    timing = this.populatorTimings.get(populator.getType().getId());
+                    timing = this.populatorTimings.get(populator.getType().getKey());
                     if (timing == null) {
-                        timing = SpongeTimingsFactory.ofSafe("populate - " + populator.getType().getId());// ,
+                        timing = SpongeTimingsFactory.ofSafe("populate - " + populator.getType().getKey());// ,
                                                                                                           // this.chunkGeneratorTiming);
-                        this.populatorTimings.put(populator.getType().getId(), timing);
+                        this.populatorTimings.put(populator.getType().getKey(), timing);
                     }
                     timing.startTimingIfSync();
                 }
                 try (PhaseContext<?> context = GenerationPhase.State.POPULATOR_RUNNING.createPhaseContext()
-                    .world(world)
-                    .populator(type)
-                    .buildAndSwitch()) {
+                    .world(WorldUtil.asNative(world))
+                    .populator(type)) {
+                    context.buildAndSwitch();
 
                     if (populator instanceof IFlaggedPopulator) {
                         ((IFlaggedPopulator) populator).populate(spongeWorld, volume, this.rand, biomeBuffer, flags);
                     } else {
                         populator.populate(spongeWorld, volume, this.rand, biomeBuffer);
                     }
-                    if (Timings.isTimingsEnabled()) {
+                    if (timing != null) { // It wouldn't be null if we are enabled or we set it up before hand.
                         timing.stopTimingIfSync();
                     }
                 }
@@ -396,13 +396,14 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
     }
 
     @Override
+    @SuppressWarnings("try")
     public boolean generateStructures(Chunk chunk, int chunkX, int chunkZ) {
         boolean flag = false;
         if (chunk.getInhabitedTime() < 3600L) {
             for (Populator populator : this.pop) {
                 if (populator instanceof StructureOceanMonument) {
                     try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
-                         GenerationContext context = GenerationPhase.State.POPULATOR_RUNNING.createPhaseContext()
+                         GenerationContext<PopulatorPhaseContext> context = GenerationPhase.State.POPULATOR_RUNNING.createPhaseContext()
                              .world(this.world)
                              .populator(populator.getType())
                             .buildAndSwitch()) {
@@ -432,22 +433,31 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
     @Override
     public BlockPos getNearestStructurePos(World worldIn, String structureName, BlockPos position, boolean p_180513_4_) {
         Class<? extends MapGenStructure> target = null;
-        if("Stronghold".equals(structureName)) {
-            target = MapGenStronghold.class;
-        } else if("Mansion".equals(structureName)) {
-            target = WoodlandMansion.class;
-        } else if("Monument".equals(structureName)) {
-            target = StructureOceanMonument.class;
-        } else if("Village".equals(structureName)) {
-            target = MapGenVillage.class;
-        } else if("Mineshaft".equals(structureName)) {
-            target = MapGenMineshaft.class;
-        } else if("Temple".equals(structureName)) {
-            target = MapGenScatteredFeature.class;
-        } else if ("Fortress".equals(structureName)) {
-            target = MapGenNetherBridge.class;
-        } else if ("EndCity".equals(structureName)) {
-            target = MapGenEndCity.class;
+        switch (structureName) {
+            case "Stronghold":
+                target = MapGenStronghold.class;
+                break;
+            case "Mansion":
+                target = WoodlandMansion.class;
+                break;
+            case "Monument":
+                target = StructureOceanMonument.class;
+                break;
+            case "Village":
+                target = MapGenVillage.class;
+                break;
+            case "Mineshaft":
+                target = MapGenMineshaft.class;
+                break;
+            case "Temple":
+                target = MapGenScatteredFeature.class;
+                break;
+            case "Fortress":
+                target = MapGenNetherBridge.class;
+                break;
+            case "EndCity":
+                target = MapGenEndCity.class;
+                break;
         }
         if (target != null) {
             for (GenerationPopulator gen : this.genpop) {
@@ -467,22 +477,31 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
     @Override
     public boolean isInsideStructure(World worldIn, String structureName, BlockPos position) {
         Class<? extends MapGenStructure> target = null;
-        if ("Stronghold".equals(structureName)) {
-            target = MapGenStronghold.class;
-        } else if ("Mansion".equals(structureName)) {
-            target = WoodlandMansion.class;
-        } else if ("Monument".equals(structureName)) {
-            target = StructureOceanMonument.class;
-        } else if ("Village".equals(structureName)) {
-            target = MapGenVillage.class;
-        } else if ("Mineshaft".equals(structureName)) {
-            target = MapGenMineshaft.class;
-        } else if ("Temple".equals(structureName)) {
-            target = MapGenScatteredFeature.class;
-        } else if ("Fortress".equals(structureName)) {
-            target = MapGenNetherBridge.class;
-        } else if ("EndCity".equals(structureName)) {
-            target = MapGenEndCity.class;
+        switch (structureName) {
+            case "Stronghold":
+                target = MapGenStronghold.class;
+                break;
+            case "Mansion":
+                target = WoodlandMansion.class;
+                break;
+            case "Monument":
+                target = StructureOceanMonument.class;
+                break;
+            case "Village":
+                target = MapGenVillage.class;
+                break;
+            case "Mineshaft":
+                target = MapGenMineshaft.class;
+                break;
+            case "Temple":
+                target = MapGenScatteredFeature.class;
+                break;
+            case "Fortress":
+                target = MapGenNetherBridge.class;
+                break;
+            case "EndCity":
+                target = MapGenEndCity.class;
+                break;
         }
         if (target != null) {
             for (GenerationPopulator gen : this.genpop) {
@@ -523,8 +542,8 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         for (int x0 = 0; x0 < 16; ++x0) {
             for (int z0 = 0; z0 < 16; ++z0) {
                 BiomeType biomegenbase = biomes.getBiome(min.getX() + x0, 0, min.getZ() + z0);
-                generateBiomeTerrain(world, rand, chunk, x * 16 + x0, z * 16 + z0, this.stoneNoise[x0 + z0 * 16],
-                        getBiomeSettings(biomegenbase).getGroundCoverLayers());
+                this.generateBiomeTerrain(world, rand, chunk, x * 16 + x0, z * 16 + z0, this.stoneNoise[x0 + z0 * 16],
+                        this.getBiomeSettings(biomegenbase).getGroundCoverLayers());
             }
         }
     }

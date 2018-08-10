@@ -41,6 +41,7 @@ public class SpongeIngredientBuilder implements Ingredient.Builder {
     private List<ItemStack> matchItems = new ArrayList<>();
     private List<ItemStack> displayItems = new ArrayList<>();
 
+    @SuppressWarnings("rawtypes")
     @Override
     public Ingredient.Builder from(Ingredient value) {
         this.reset();

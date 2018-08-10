@@ -28,6 +28,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.gen.feature.WorldGenHugeTrees;
 import net.minecraft.world.gen.feature.WorldGenMegaJungle;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,13 +38,15 @@ import java.util.Random;
 @Mixin(WorldGenMegaJungle.class)
 public abstract class MixinWorldGenMegaJungle extends WorldGenHugeTrees implements PopulatorObject {
 
+    private final CatalogKey key = CatalogKey.minecraft("mega_jungle");
+
     public MixinWorldGenMegaJungle(boolean a, int b, int c, IBlockState d, IBlockState e) {
         super(a, b, c, d, e);
     }
 
     @Override
-    public String getId() {
-        return "minecraft:mega_jungle";
+    public CatalogKey getKey() {
+        return this.key;
     }
 
     @Override

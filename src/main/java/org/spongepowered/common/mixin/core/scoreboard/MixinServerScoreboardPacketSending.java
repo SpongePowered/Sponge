@@ -55,7 +55,7 @@ public abstract class MixinServerScoreboardPacketSending extends Scoreboard impl
     private static final String SEND_PACKET_METHOD = "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V";
     private static final String SET_CONTAINS = "Ljava/util/Set;contains(Ljava/lang/Object;)Z";
 
-    @Shadow @Final private MinecraftServer scoreboardMCServer;
+    @Shadow @Final private MinecraftServer server;
 
     private List<EntityPlayerMP> players = new ArrayList<>();
 
@@ -67,9 +67,11 @@ public abstract class MixinServerScoreboardPacketSending extends Scoreboard impl
     }
 
     @Override
-    public void addPlayer(EntityPlayerMP player) {
+    public void addPlayer(EntityPlayerMP player, boolean sendPackets) {
         this.players.add(player);
-        this.sendScoreboard(player);
+        if (sendPackets) {
+            this.sendScoreboard(player);
+        }
     }
 
     void sendScoreboard(EntityPlayerMP player) {

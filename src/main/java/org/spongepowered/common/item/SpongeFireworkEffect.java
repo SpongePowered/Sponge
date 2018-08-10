@@ -34,6 +34,7 @@ import org.spongepowered.api.util.Color;
 import org.spongepowered.common.data.util.DataQueries;
 
 import java.util.List;
+import java.util.Objects;
 
 public class SpongeFireworkEffect implements FireworkEffect {
 
@@ -49,6 +50,28 @@ public class SpongeFireworkEffect implements FireworkEffect {
         this.colors = ImmutableList.copyOf(colors);
         this.fades = ImmutableList.copyOf(fades);
         this.shape = shape;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        SpongeFireworkEffect that = (SpongeFireworkEffect) o;
+        return flicker == that.flicker &&
+                trails == that.trails &&
+                Objects.equals(colors, that.colors) &&
+                Objects.equals(fades, that.fades) &&
+                Objects.equals(shape, that.shape);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(flicker, trails, colors, fades, shape);
     }
 
     @Override
@@ -85,7 +108,7 @@ public class SpongeFireworkEffect implements FireworkEffect {
     public DataContainer toContainer() {
         return DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, getContentVersion())
-                .set(DataQueries.FIREWORK_SHAPE, this.shape.getId())
+                .set(DataQueries.FIREWORK_SHAPE, this.shape.getKey())
                 .set(DataQueries.FIREWORK_COLORS, this.colors)
                 .set(DataQueries.FIREWORK_FADE_COLORS, this.fades)
                 .set(DataQueries.FIREWORK_TRAILS, this.trails)

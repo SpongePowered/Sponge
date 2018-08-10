@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.advancement;
 
 import net.minecraft.advancements.ICriterionTrigger;
 import net.minecraft.util.ResourceLocation;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTriggerConfiguration;
 import org.spongepowered.api.advancement.criteria.trigger.Trigger;
@@ -43,12 +44,12 @@ public interface MixinICriterionTrigger extends ITrigger {
 
     @Shadow ResourceLocation getId();
 
-    default String type$getId() {
-        return getId().toString();
+    default CatalogKey type$getKey() {
+        return (CatalogKey) (Object) getId();
     }
 
     default String type$getName() {
-        return getId().getResourcePath();
+        return getId().getPath();
     }
 
     default void type$trigger() {
@@ -59,7 +60,7 @@ public interface MixinICriterionTrigger extends ITrigger {
         players.forEach(this::trigger);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     default Class<FilteredTriggerConfiguration> getConfigurationType() {
         return (Class) UnknownFilteredTriggerConfiguration.class;

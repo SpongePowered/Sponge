@@ -30,6 +30,7 @@ import static org.spongepowered.api.data.DataQuery.of;
 import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.SimpleConfigurationNode;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.persistence.DataTranslator;
@@ -46,6 +47,7 @@ public class ConfigurateTranslator implements DataTranslator<ConfigurationNode> 
 
     private static final ConfigurateTranslator instance = new ConfigurateTranslator();
     private static final TypeToken<ConfigurationNode> TOKEN = TypeToken.of(ConfigurationNode.class);
+    private static final CatalogKey KEY = CatalogKey.sponge("configuration_node");
 
     private ConfigurateTranslator() {
     }
@@ -130,8 +132,8 @@ public class ConfigurateTranslator implements DataTranslator<ConfigurationNode> 
     }
 
     @Override
-    public String getId() {
-        return "sponge:configuration_node";
+    public CatalogKey getKey() {
+        return KEY;
     }
 
     @Override

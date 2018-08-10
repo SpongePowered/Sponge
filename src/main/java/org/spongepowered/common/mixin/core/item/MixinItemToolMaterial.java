@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.item;
 
 import net.minecraft.item.Item;
 import org.apache.commons.lang3.StringUtils;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.ToolType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -37,7 +38,7 @@ import java.util.Locale;
 @Mixin(Item.ToolMaterial.class)
 public abstract class MixinItemToolMaterial implements ToolType {
 
-    private String name;
+    private CatalogKey key;
     private String capitalizedName;
 
     @Inject(method = "<init>", at = @At("RETURN"))
@@ -49,13 +50,14 @@ public abstract class MixinItemToolMaterial implements ToolType {
         if (toString.equalsIgnoreCase("emerald")) {
             toString = "diamond";
         }
-        this.name = toString.toLowerCase(Locale.ENGLISH);
-        this.capitalizedName = StringUtils.capitalize(this.name);
+        final String name = toString.toLowerCase(Locale.ENGLISH);
+        this.key = CatalogKey.resolve(name);
+        this.capitalizedName = StringUtils.capitalize(name);
     }
 
     @Override
-    public String getId() {
-        return this.name;
+    public CatalogKey getKey() {
+        return this.key;
     }
 
     @Override

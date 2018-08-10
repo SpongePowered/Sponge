@@ -24,43 +24,24 @@
  */
 package org.spongepowered.common.registry.type.entity;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableSet;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.BodyPart;
 import org.spongepowered.api.data.type.BodyParts;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.data.type.SpongeBodyPart;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-
-public class BodyPartRegistryModule implements CatalogRegistryModule<BodyPart> {
-
-    @RegisterCatalog(BodyParts.class)
-    private final Map<String, BodyPart> bodyPartMap = new HashMap<>();
-
-    @Override
-    public Optional<BodyPart> getById(String id) {
-        return Optional.ofNullable(this.bodyPartMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<BodyPart> getAll() {
-        return ImmutableSet.copyOf(this.bodyPartMap.values());
-    }
+@RegisterCatalog(BodyParts.class)
+public class BodyPartRegistryModule extends AbstractCatalogRegistryModule<BodyPart> {
 
     @Override
     public void registerDefaults() {
-        this.bodyPartMap.put("head", new SpongeBodyPart("HEAD"));
-        this.bodyPartMap.put("chest", new SpongeBodyPart("CHEST"));
-        this.bodyPartMap.put("left_arm", new SpongeBodyPart("LEFT_ARM"));
-        this.bodyPartMap.put("right_arm", new SpongeBodyPart("RIGHT_ARM"));
-        this.bodyPartMap.put("left_leg", new SpongeBodyPart("LEFT_LEG"));
-        this.bodyPartMap.put("right_leg", new SpongeBodyPart("RIGHT_LEG"));
+        this.register(new SpongeBodyPart(CatalogKey.minecraft("head")));
+        this.register(new SpongeBodyPart(CatalogKey.minecraft("chest")));
+        this.register(new SpongeBodyPart(CatalogKey.minecraft("left_arm")));
+        this.register(new SpongeBodyPart(CatalogKey.minecraft("right_arm")));
+        this.register(new SpongeBodyPart(CatalogKey.minecraft("left_leg")));
+        this.register(new SpongeBodyPart(CatalogKey.minecraft("right_leg")));
     }
+
 }

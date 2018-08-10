@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.Queries;
@@ -92,9 +93,9 @@ public final class SpongeEnchantmentBuilder extends AbstractDataBuilder<Enchantm
         if (!container.contains(Queries.ENCHANTMENT_ID, Queries.LEVEL)) {
             return Optional.empty();
         }
-        final String id = DataUtil.getData(container, Queries.ENCHANTMENT_ID, String.class);
-        final int level = DataUtil.getData(container, Queries.LEVEL, Integer.class);
-        final Optional<EnchantmentType> enchantmentType = Sponge.getRegistry().getType(EnchantmentType.class, id);
+        final String id = container.getString(Queries.ENCHANTMENT_ID).get();
+        final int level = container.getInt(Queries.LEVEL).get();
+        final Optional<EnchantmentType> enchantmentType = Sponge.getRegistry().getType(EnchantmentType.class, CatalogKey.resolve(id));
         return enchantmentType.map(t -> Enchantment.builder().type(t).level(level).build());
     }
 

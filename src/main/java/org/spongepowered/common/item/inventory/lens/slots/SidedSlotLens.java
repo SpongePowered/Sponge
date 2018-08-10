@@ -28,10 +28,10 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 
-public interface SidedSlotLens<TInventory, TStack> extends FilteringSlotLens<TInventory, TStack> {
+public interface SidedSlotLens<TInventory, TStack> extends FilteringSlotLens {
 
-    boolean canAccept(Fabric<TInventory> inv, ItemStack stack, Direction from);
+    boolean canAccept(Fabric inv, ItemStack stack, Direction from);
 
-    boolean canGet(Fabric<TInventory> inv, ItemStack stack, Direction from);
+    boolean canGet(Fabric inv, ItemStack stack, Direction from);
 
 }

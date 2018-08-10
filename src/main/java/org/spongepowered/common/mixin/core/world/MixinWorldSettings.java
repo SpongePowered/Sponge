@@ -32,6 +32,7 @@ import net.minecraft.world.GameType;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.storage.WorldInfo;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
@@ -66,6 +67,8 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 @NonnullByDefault
 @Mixin(WorldSettings.class)
 @Implements(value = @Interface(iface = WorldArchetype.class, prefix = "archetype$"))
@@ -81,26 +84,25 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
     @Shadow public abstract WorldType getTerrainType();
     @Shadow public abstract boolean shadow$areCommandsAllowed();
 
-    private String id, name;
+    @Nullable private String name;
+    @Nullable private CatalogKey key;
     private DimensionType dimensionType = DimensionTypes.OVERWORLD;
     private Difficulty difficulty = Difficulties.NORMAL;
     private SerializationBehavior serializationBehavior = SerializationBehaviors.AUTOMATIC;
     private DataContainer generatorSettings = DataContainer.createNew();
     private boolean isEnabled = true;
     private boolean loadOnStartup = true;
-    private Boolean keepSpawnLoaded = null;
+    @Nullable private Boolean keepSpawnLoaded = null;
     private boolean generateSpawnOnLoad = false;
     private boolean pvpEnabled = true;
     private boolean generateBonusChest = false;
     private boolean fromBuilder = false;
-    private PortalAgentType portalAgentType;
+    @Nullable private PortalAgentType portalAgentType;
     private Collection<WorldGeneratorModifier> generatorModifiers = ImmutableList.of();
     private boolean seedRandomized = false;
 
     @Inject(method = "<init>(Lnet/minecraft/world/storage/WorldInfo;)V", at = @At(value = "RETURN"))
-    public void onConstruct(WorldInfo info, CallbackInfo ci) {
-        //Set above: info.getSeed(), info.getGameType(),  info.isMapFeaturesEnabled(), info.isHardcoreModeEnabled(), info.getTerrainType()
-
+    private void onConstruct(WorldInfo info, CallbackInfo ci) {
         final WorldProperties properties = (WorldProperties) info;
         if (((IMixinWorldInfo) properties).getWorldConfig() != null) {
             this.dimensionType = properties.getDimensionType();
@@ -134,7 +136,7 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
     }
 
     @Inject(method = "setGeneratorOptions", at = @At(value = "RETURN"))
-    public void onSetGeneratorOptions(String generatorOptions, CallbackInfoReturnable<WorldSettings> cir) {
+    private void onSetGeneratorOptions(String generatorOptions, CallbackInfoReturnable<WorldSettings> cir) {
         // Minecraft uses a String, we want to return a fancy DataContainer
         // Parse the world generator settings as JSON
         DataContainer settings = null;
@@ -246,23 +248,23 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
     }
 
     @Override
-    public String getId() {
-        return this.id;
-    }
-
-    @Override
     public String getName() {
         return this.name;
     }
 
     @Override
-    public void setId(String id) {
-        checkNotNull(id);
-        if (this.id != null) {
-            throw new IllegalStateException("Attempt made to set id twice!");
+    public CatalogKey getKey() {
+        return this.key;
+    }
+
+    @Override
+    public void setId(CatalogKey key) {
+        checkNotNull(key);
+        if (this.key != null) {
+            throw new IllegalStateException("Attempt made to set key twice!");
         }
 
-        this.id = id;
+        this.key = key;
     }
 
     @Override
@@ -327,7 +329,7 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
     }
 
     @Override
-    public void setKeepSpawnLoaded(boolean state) {
+    public void setKeepSpawnLoaded(@Nullable Boolean state) {
         this.keepSpawnLoaded = state;
     }
 

@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.block.BlockDirt;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.DirtType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Implements;
@@ -42,23 +43,27 @@ import javax.annotation.Nullable;
 public abstract class MixinBlockDirtDirtType {
 
     @Shadow public abstract String shadow$getName();
-    @Shadow public abstract String shadow$getUnlocalizedName();
+    @Shadow public abstract String shadow$getTranslationKey();
 
     @Nullable private Translation translation;
+    @Nullable private CatalogKey key;
 
     @Unique
-    public String dirt$getId() {
-        return "minecraft:" + shadow$getName();
+    public CatalogKey dirt$getKey() {
+        if (this.key == null) {
+            this.key = CatalogKey.minecraft(shadow$getName());
+        }
+        return this.key;
     }
 
     @Intrinsic
     public String dirt$getName() {
-        return shadow$getUnlocalizedName();
+        return shadow$getTranslationKey();
     }
 
     public Translation dirt$getTranslation() {
         if (this.translation == null) {
-            this.translation = new SpongeTranslation("tile.dirt." + shadow$getUnlocalizedName() + ".name");
+            this.translation = new SpongeTranslation("tile.dirt." + shadow$getTranslationKey() + ".name");
         }
         return this.translation;
     }

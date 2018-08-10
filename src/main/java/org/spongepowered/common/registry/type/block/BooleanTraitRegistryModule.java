@@ -26,6 +26,7 @@ package org.spongepowered.common.registry.type.block;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.trait.BooleanTrait;
 import org.spongepowered.api.block.trait.BooleanTraits;
@@ -51,15 +52,15 @@ public final class BooleanTraitRegistryModule
 
     @Override
     public void registerAdditionalCatalog(BooleanTrait extraCatalog) {
-        this.catalogTypeMap.put(extraCatalog.getId().toLowerCase(Locale.ENGLISH), extraCatalog);
+        this.map.put(extraCatalog.getKey(), extraCatalog);
     }
 
-    public void registerBlock(String id, BlockType block, BooleanTrait property) {
+    public void registerBlock(CatalogKey id, BlockType block, BooleanTrait property) {
         checkNotNull(id, "Id was null!");
         checkNotNull(property, "Property was null!");
-        this.catalogTypeMap.put(id.toLowerCase(Locale.ENGLISH), property);
-        final String propertyId = block.getId().toLowerCase(Locale.ENGLISH) + "_" + property.getName().toLowerCase(Locale.ENGLISH);
-        this.catalogTypeMap.put(propertyId, property);
+        this.map.put(id, property);
+        final String propertyId = block.getKey().toString().toLowerCase(Locale.ENGLISH) + "_" + property.getName().toLowerCase(Locale.ENGLISH);
+        this.map.put(CatalogKey.resolve(propertyId), property);
     }
 
     BooleanTraitRegistryModule() {

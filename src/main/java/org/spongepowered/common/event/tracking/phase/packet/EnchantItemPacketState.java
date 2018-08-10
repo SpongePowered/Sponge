@@ -32,15 +32,16 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.AffectEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
-import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
@@ -88,6 +89,7 @@ public class EnchantItemPacketState extends BasicInventoryPacketState {
         for (EntityItem entityItem : context.getCapturedItems()) {
             capturedItems.add(EntityUtil.fromNative(entityItem));
         }
+        context.getCapturedItems().clear();
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(player);
             Sponge.getCauseStackManager().pushCause(openContainer);
@@ -140,37 +142,12 @@ public class EnchantItemPacketState extends BasicInventoryPacketState {
                         PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.getCursorTransaction().getOriginal());
                     } else if (inventoryEvent.getCursorTransaction().getCustom().isPresent()) {
                         PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.getCursorTransaction().getFinal());
-                    } else if (inventoryEvent instanceof ClickInventoryEvent.Drag) {
-                        int increment;
-
-                        increment = slotTransactions.stream()
-                            .filter((t) -> !t.isValid())
-                            .mapToInt((t) -> t.getFinal().getQuantity())
-                            .sum();
-
-                        final ItemStack cursor = inventoryEvent.getCursorTransaction().getFinal().createStack();
-                        cursor.setQuantity(cursor.getQuantity() + increment);
-                        PacketPhaseUtil.handleCustomCursor(player, cursor.createSnapshot());
-                    } else if (inventoryEvent instanceof ClickInventoryEvent.Double && !(inventoryEvent instanceof ClickInventoryEvent.Shift)) {
-                        int decrement;
-
-                        decrement = slotTransactions.stream()
-                            .filter((t) -> !t.isValid())
-                            .mapToInt((t) -> t.getOriginal().getQuantity())
-                            .sum();
-
-                        final ItemStack cursor = inventoryEvent.getCursorTransaction().getFinal().createStack();
-                        cursor.setQuantity(cursor.getQuantity() - decrement);
-                        PacketPhaseUtil.handleCustomCursor(player, cursor.createSnapshot());
                     }
                     if (inventoryEvent instanceof SpawnEntityEvent) {
                         processSpawnedEntities(player, (SpawnEntityEvent) inventoryEvent);
                     } else if (!context.getCapturedEntitySupplier().isEmpty()) {
-                        SpawnEntityEvent spawnEntityEvent = SpongeEventFactory
-                            .createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), context.getCapturedEntities());
-                        SpongeImpl.postEvent(spawnEntityEvent);
-                        if (!spawnEntityEvent.isCancelled()) {
-                            processSpawnedEntities(player, spawnEntityEvent);}
+                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+                        SpongeCommonEventFactory.callSpawnEntity(context.getCapturedEntities(), context);
                     }
                 }
             }

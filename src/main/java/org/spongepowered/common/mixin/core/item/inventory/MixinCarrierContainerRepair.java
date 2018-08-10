@@ -40,13 +40,14 @@ import org.spongepowered.common.interfaces.IMixinSingleBlockCarrier;
 public class MixinCarrierContainerRepair implements IMixinSingleBlockCarrier {
 
     @Shadow @Final private net.minecraft.world.World world;
-    @Shadow @Final private BlockPos selfPosition;
+    @Shadow @Final private BlockPos pos;
 
     @Override
     public Location<World> getLocation() {
-        return new Location<>(((World) this.world), new Vector3d(this.selfPosition.getX(), this.selfPosition.getY(), this.selfPosition.getZ()));
+        return new Location<>(((World) this.world), new Vector3d(this.pos.getX(), this.pos.getY(), this.pos.getZ()));
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public CarriedInventory<? extends Carrier> getInventory() {
         return ((CarriedInventory) this);

@@ -39,6 +39,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
+import org.spongepowered.common.data.util.DataVersions;
 import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
 
 import java.util.Optional;
@@ -47,16 +48,14 @@ import javax.annotation.Nullable;
 
 public class SpongeItemStackSnapshotBuilder extends AbstractDataBuilder<ItemStackSnapshot> implements DataBuilder<ItemStackSnapshot> {
 
-    private final static int SUPPORTED_VERSION = 1;
-
     public SpongeItemStackSnapshotBuilder() {
-        super(ItemStackSnapshot.class, SUPPORTED_VERSION);
+        super(ItemStackSnapshot.class, DataVersions.ItemStackSnapshot.CURRENT_VERSION);
     }
 
     @Override
     protected Optional<ItemStackSnapshot> buildContent(DataView container) throws InvalidDataException {
         if (container.contains(DataQueries.ITEM_TYPE, DataQueries.ITEM_COUNT)) {
-            final String itemString = getData(container, DataQueries.ITEM_TYPE, String.class);
+            final String itemString = container.getString(DataQueries.ITEM_TYPE).get();
             final ItemType itemType = SpongeImpl.getRegistry().getType(ItemType.class, itemString).get();
             final int count = getData(container, DataQueries.ITEM_COUNT, Integer.class);
             final int damage = container.getInt(DataQueries.ITEM_DAMAGE_VALUE).orElse(0);

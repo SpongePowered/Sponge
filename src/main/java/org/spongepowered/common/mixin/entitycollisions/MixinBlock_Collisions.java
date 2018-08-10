@@ -84,9 +84,8 @@ public abstract class MixinBlock_Collisions implements IModData_Collisions {
         SpongeConfig<? extends GeneralConfigBase> activeConfig = ((IMixinWorldServer) worldIn).getActiveConfig();
         EntityCollisionCategory collisionCat = activeConfig.getConfig().getEntityCollisionCategory();
         this.setMaxCollisions(collisionCat.getMaxEntitiesWithinAABB());
-        String[] ids = ((BlockType) this).getId().split(":");
-        String modId = ids[0];
-        String name = ids[1];
+        String modId = ((BlockType) this).getKey().getNamespace();
+        String name = ((BlockType) this).getKey().getValue();
         CollisionModCategory collisionMod = collisionCat.getModList().get(modId);
         if (collisionMod == null && activeConfig.getConfig().getEntityCollisionCategory().autoPopulateData()) {
             collisionMod = new CollisionModCategory(modId);

@@ -36,6 +36,10 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.play.server.SPacketPlayerPosLook;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.MathHelper;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -128,25 +132,31 @@ public abstract class MixinCommandTP extends CommandBase {
                     {
                         // Sponge start
                         EntityPlayerMP player = (EntityPlayerMP) entity;
-                        MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent(entity, entity1.posX, entity1.posY, entity1.posZ, entity1.rotationYaw, entity1.rotationPitch);
-                        if (event.isCancelled()) {
-                            return;
-                        }
+                        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                            frame.addContext(EventContextKeys.TELEPORT_TYPE, TeleportTypes.COMMAND);
+                            MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent(entity, entity1.posX, entity1.posY, entity1.posZ, entity1.rotationYaw, entity1.rotationPitch);
+                            if (event.isCancelled()) {
+                                return;
+                            }
 
-                        Vector3d position = event.getToTransform().getPosition();
-                        player.connection.setPlayerLocation(position.getX(), position.getY(), position.getZ(), (float) event.getToTransform().getYaw(), (float) event.getToTransform().getPitch());
+                            Vector3d position = event.getToTransform().getPosition();
+                            player.connection.setPlayerLocation(position.getX(), position.getY(), position.getZ(), (float) event.getToTransform().getYaw(), (float) event.getToTransform().getPitch());
+                        }
                         // Sponge end
                     }
                     else
                     {
                         // Sponge Start - Events
-                        MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent(entity, entity1.posX, entity1.posY, entity1.posZ, entity1.rotationYaw, entity1.rotationPitch);
-                        if (event.isCancelled()) {
-                            return;
-                        }
+                        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                            frame.addContext(EventContextKeys.TELEPORT_TYPE, TeleportTypes.COMMAND);
+                            MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent(entity, entity1.posX, entity1.posY, entity1.posZ, entity1.rotationYaw, entity1.rotationPitch);
+                            if (event.isCancelled()) {
+                                return;
+                            }
 
-                        Vector3d position = event.getToTransform().getPosition();
-                        entity.setLocationAndAngles(position.getX(), position.getY(), position.getZ(), (float) event.getToTransform().getYaw(), (float) event.getToTransform().getPitch());
+                            Vector3d position = event.getToTransform().getPosition();
+                            entity.setLocationAndAngles(position.getX(), position.getY(), position.getZ(), (float) event.getToTransform().getYaw(), (float) event.getToTransform().getPitch());
+                        }
                         // Sponge End
                     }
 

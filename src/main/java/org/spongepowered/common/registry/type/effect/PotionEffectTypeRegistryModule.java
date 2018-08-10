@@ -24,27 +24,23 @@
  */
 package org.spongepowered.common.registry.type.effect;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
 import net.minecraft.potion.Potion;
+import net.minecraft.util.ResourceLocation;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.api.effect.potion.PotionEffectTypes;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
 
-public final class PotionEffectTypeRegistryModule implements SpongeAdditionalCatalogRegistryModule<PotionEffectType>,
-        AlternateCatalogRegistryModule<PotionEffectType> {
+@RegisterCatalog(PotionEffectTypes.class)
+public final class PotionEffectTypeRegistryModule extends AbstractCatalogRegistryModule<PotionEffectType>
+    implements SpongeAdditionalCatalogRegistryModule<PotionEffectType>, AlternateCatalogRegistryModule<PotionEffectType> {
 
     public static PotionEffectTypeRegistryModule getInstance() {
         return Holder.INSTANCE;
@@ -52,39 +48,13 @@ public final class PotionEffectTypeRegistryModule implements SpongeAdditionalCat
 
     private final List<PotionEffectType> potionList = new ArrayList<>();
 
-    @RegisterCatalog(PotionEffectTypes.class)
-    private final Map<String, PotionEffectType> potionEffectTypeMap = new HashMap<>();
-
-    @Override
-    public Map<String, PotionEffectType> provideCatalogMap() {
-        Map<String, PotionEffectType> potionEffectTypeMap = new HashMap<>();
-        for (Map.Entry<String, PotionEffectType> entry : this.potionEffectTypeMap.entrySet()) {
-            potionEffectTypeMap.put(entry.getKey().replace("minecraft:", ""), entry.getValue());
-        }
-        return potionEffectTypeMap;
-    }
-
-
-    @Override
-    public Optional<PotionEffectType> getById(String id) {
-        if (!checkNotNull(id).contains(":")) {
-            id = "minecraft:" + id; // assume vanilla
-        }
-        return Optional.ofNullable(this.potionEffectTypeMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<PotionEffectType> getAll() {
-        return ImmutableList.copyOf(this.potionList);
-    }
-
     @Override
     public void registerDefaults() {
         for (Potion potion : Potion.REGISTRY) {
             if (potion != null) {
                 PotionEffectType potionEffectType = (PotionEffectType) potion;
                 this.potionList.add(potionEffectType);
-                this.potionEffectTypeMap.put(Potion.REGISTRY.getNameForObject(potion).toString(), potionEffectType);
+                this.map.put((CatalogKey) (Object) Potion.REGISTRY.getNameForObject(potion), potionEffectType);
             }
         }
     }
@@ -96,7 +66,7 @@ public final class PotionEffectTypeRegistryModule implements SpongeAdditionalCat
                 PotionEffectType potionEffectType = (PotionEffectType) potion;
                 if (!this.potionList.contains(potionEffectType)) {
                     this.potionList.add(potionEffectType);
-                    this.potionEffectTypeMap.put(Potion.REGISTRY.getNameForObject(potion).toString(), potionEffectType);
+                    this.map.put((CatalogKey) (Object) Potion.REGISTRY.getNameForObject(potion), potionEffectType);
                 }
             }
         }
@@ -111,8 +81,8 @@ public final class PotionEffectTypeRegistryModule implements SpongeAdditionalCat
     public void registerAdditionalCatalog(PotionEffectType extraCatalog) {
     }
 
-    public void registerFromGameData(String id, PotionEffectType itemType) {
-        this.potionEffectTypeMap.put(id.toLowerCase(Locale.ENGLISH), itemType);
+    public void registerFromGameData(ResourceLocation id, PotionEffectType itemType) {
+        this.map.put((CatalogKey) (Object) id, itemType);
     }
 
     PotionEffectTypeRegistryModule() {

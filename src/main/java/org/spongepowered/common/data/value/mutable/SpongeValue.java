@@ -59,4 +59,9 @@ public class SpongeValue<E> extends AbstractBaseValue<E> implements Value<E> {
     public ImmutableValue<E> asImmutable() {
         return ImmutableSpongeValue.cachedOf(this.getKey(), this.getDefault(), this.actualValue);
     }
+
+    @Override
+    public Value<E> copy() {
+        return new SpongeValue<>(this.getKey(), this.getDefault(), this.actualValue);
+    }
 }

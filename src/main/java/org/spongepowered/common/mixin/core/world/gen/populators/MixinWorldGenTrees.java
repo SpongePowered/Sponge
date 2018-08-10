@@ -29,6 +29,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.gen.feature.WorldGenTrees;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.PopulatorObject;
@@ -46,18 +47,19 @@ public abstract class MixinWorldGenTrees extends MixinWorldGenAbstractTree imple
     private String id = "minecraft:oak";
     private String name = "Oak tree";
     private VariableAmount minHeight = VariableAmount.fixed(4);
+    private CatalogKey key = CatalogKey.minecraft("oak");
 
     @Shadow
     public abstract boolean generate(net.minecraft.world.World worldIn, Random rand, BlockPos position);
 
     @Override
-    public String getId() {
-        return this.id;
+    public CatalogKey getKey() {
+        return this.key;
     }
 
     @Override
     public void setId(String id) {
-        this.id = id;
+        this.key = CatalogKey.resolve(id);
     }
 
     @Override

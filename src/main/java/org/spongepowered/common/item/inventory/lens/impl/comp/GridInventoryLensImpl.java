@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.comp;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
 import org.apache.commons.lang3.ObjectUtils;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
@@ -35,93 +33,58 @@ import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.comp.GridInventoryLens;
 import org.spongepowered.common.item.inventory.lens.comp.InventoryColumnLens;
 import org.spongepowered.common.item.inventory.lens.comp.InventoryRowLens;
-import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
+import org.spongepowered.common.item.inventory.lens.impl.fabric.MinecraftFabric;
 import org.spongepowered.common.item.inventory.lens.impl.struct.LensHandle;
 
 import java.util.ArrayList;
 import java.util.List;
 
+public class GridInventoryLensImpl extends Inventory2DLensImpl implements GridInventoryLens {
 
-public class GridInventoryLensImpl extends Inventory2DLensImpl implements GridInventoryLens<IInventory, net.minecraft.item.ItemStack> {
+    protected List<LensHandle> rows;
+    protected List<LensHandle> cols;
 
-    protected List<LensHandle<IInventory, ItemStack>> rows;
-    protected List<LensHandle<IInventory, ItemStack>> cols;
-
-    public GridInventoryLensImpl(int base, int width, int height, SlotProvider<IInventory, ItemStack> slots) {
-        this(base, width, height, 1, GridInventoryAdapter.class, slots);
+    public GridInventoryLensImpl(int base, int width, int height, SlotProvider slots) {
+        this(base, width, height, GridInventoryAdapter.class, slots);
     }
 
-    public GridInventoryLensImpl(int base, int width, int height, Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots) {
-        this(base, width, height, width, adapterType, slots);
+    public GridInventoryLensImpl(int base, int width, int height, Class<? extends Inventory> adapterType, SlotProvider slots) {
+        super(base, width, height, 1, 0, 0, adapterType, slots);
+        this.init(slots);
     }
 
-    public GridInventoryLensImpl(int base, int width, int height, int rowStride, SlotProvider<IInventory, ItemStack> slots) {
-        this(base, width, height, rowStride, 0, 0, GridInventoryAdapter.class, slots);
-    }
+    private void init(SlotProvider slots) {
 
-    public GridInventoryLensImpl(int base, int width, int height, int rowStride, Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots) {
-        this(base, width, height, rowStride, 0, 0, adapterType, slots);
-    }
-
-    public GridInventoryLensImpl(int base, int width, int height, int rowStride, int xBase, int yBase, SlotProvider<IInventory, ItemStack> slots) {
-        this(base, width, height, rowStride, xBase, yBase, GridInventoryAdapter.class, slots);
-    }
-
-    public GridInventoryLensImpl(int base, int width, int height, int rowStride, int xBase, int yBase, Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots) {
-        super(base, width, height, rowStride, xBase, yBase, adapterType, slots);
-    }
-
-    @Override
-    protected void init(SlotProvider<IInventory, ItemStack> slots) {
-    }
-
-    @Override
-    protected void init(SlotProvider<IInventory, ItemStack> slots, boolean spanning) {
-        super.init(slots, false);
         this.rows = new ArrayList<>();
         this.cols = new ArrayList<>();
 
-        for (int y = 0, base = this.base; y < this.height; y++, base += this.stride) {
+        for (int y = 0, base = this.base; y < this.height; y++, base += this.width) {
             InventoryRowLensImpl row = new InventoryRowLensImpl(base, this.width, this.xBase, this.yBase + y, slots);
-            this.addRow(row);
+            this.rows.add(new LensHandle(row));
+            this.addChild(row);
         }
 
         for (int x = 0, base = this.base; x < this.width; x++, base++) {
-            InventoryColumnLensImpl column = new InventoryColumnLensImpl(base, this.height, this.stride, this.xBase + x, this.yBase, slots);
-            this.addColumn(column);
+            InventoryColumnLensImpl column = new InventoryColumnLensImpl(base, this.height, this.width, this.xBase + x, this.yBase, slots);
+            this.cols.add(new LensHandle(column));
+            this.addChild(column);
         }
 
-        this.cache();
-    }
-
-    protected void addRow(InventoryRowLens<IInventory, ItemStack> row) {
-        super.addSpanningChild(row);
-        this.rows.add(new LensHandle<>(row));
-    }
-
-    protected void addColumn(InventoryColumnLens<IInventory, ItemStack> column) {
-        super.addChild(column);
-        this.cols.add(new LensHandle<>(column));
     }
 
     @Override
-    public InventoryRowLens<IInventory, ItemStack> getRow(int row) {
-        return (InventoryRowLens<IInventory, ItemStack>) this.rows.get(row).lens;
+    public InventoryRowLens getRow(int row) {
+        return (InventoryRowLens) this.rows.get(row).lens;
     }
 
     @Override
-    public InventoryColumnLens<IInventory, ItemStack> getColumn(int column) {
-        return (InventoryColumnLens<IInventory, ItemStack>) this.cols.get(column).lens;
+    public InventoryColumnLens getColumn(int column) {
+        return (InventoryColumnLens) this.cols.get(column).lens;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public int getRealIndex(Fabric<IInventory> inv, int ordinal) {
-        LensHandle<IInventory, ItemStack> child = this.getLensForOrdinal(ordinal);
-        return child.lens.getRealIndex(inv, ordinal - child.ordinal);
-    }
-
-    @Override
-    public InventoryAdapter<IInventory, ItemStack> getAdapter(Fabric<IInventory> fabric, Inventory parent) {
+    public InventoryAdapter getAdapter(Fabric fabric, Inventory parent) {
         return ObjectUtils.firstNonNull(MinecraftFabric.getAdapter(fabric, parent, this.base, this.adapterType), new GridInventoryAdapter(fabric, this, parent));
     }
 

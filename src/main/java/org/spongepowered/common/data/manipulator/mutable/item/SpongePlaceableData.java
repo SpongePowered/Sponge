@@ -48,10 +48,15 @@ public class SpongePlaceableData extends AbstractSingleSetData<BlockType, Placea
     }
 
     @Override
+    public PlaceableData setValue(Set<BlockType> value) {
+        return super.setValue(value);
+    }
+
+    @Override
     public DataContainer toContainer() {
         return super.toContainer()
             .set(Keys.PLACEABLE_BLOCKS.getQuery(), getValue().stream()
-                .map(BlockType::getId)
+                .map(BlockType::getKey)
                 .collect(Collectors.toList()));
     }
 

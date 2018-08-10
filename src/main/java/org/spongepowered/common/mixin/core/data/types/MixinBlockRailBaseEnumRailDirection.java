@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.block.BlockRailBase;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.RailDirection;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -32,17 +33,22 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
+import javax.annotation.Nullable;
+
 @Mixin(BlockRailBase.EnumRailDirection.class)
 @Implements(@Interface(iface = RailDirection.class, prefix = "rail$"))
 public abstract class MixinBlockRailBaseEnumRailDirection implements RailDirection {
 
     @Shadow public abstract String shadow$getName();
     @Shadow public abstract int getMetadata();
+    @Nullable private CatalogKey key;
 
-    public String rail$getId() {
-        return "minecraft:" + shadow$getName();
+    public CatalogKey rail$getKey() {
+        if (this.key == null) {
+            this.key = CatalogKey.minecraft(this.shadow$getName());
+        }
+        return this.key;
     }
-
     @Intrinsic
     public String rail$getName() {
         return shadow$getName();

@@ -56,11 +56,8 @@ public abstract class MixinEntityEnderPearl extends MixinEntityThrowable impleme
         }
 
         MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent(player, this.getLocation());
-        if (event.isCancelled()) {
-            return true;
-        }
+        return event.isCancelled();
 
-        return false;
     }
 
     @Override

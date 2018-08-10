@@ -30,6 +30,7 @@ import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTriggerConfiguration;
 import org.spongepowered.api.advancement.criteria.trigger.Trigger;
 
+@SuppressWarnings("rawtypes")
 public class SpongeFilteredTrigger implements ICriterionInstance, FilteredTrigger {
 
     private final SpongeTrigger triggerType;

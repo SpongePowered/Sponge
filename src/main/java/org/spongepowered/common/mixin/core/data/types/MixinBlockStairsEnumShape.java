@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.block.BlockStairs;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.StairShape;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -32,14 +33,20 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
+import javax.annotation.Nullable;
+
 @Mixin(BlockStairs.EnumShape.class)
 @Implements(@Interface(iface = StairShape.class, prefix = "stair$"))
 public abstract class MixinBlockStairsEnumShape {
 
     @Shadow public abstract String shadow$getName();
+    @Nullable private CatalogKey key;
 
-    public String stair$getId() {
-        return "minecraft:" + shadow$getName();
+    public CatalogKey stair$getKey() {
+        if (this.key == null) {
+            this.key = CatalogKey.minecraft(this.shadow$getName());
+        }
+        return this.key;
     }
 
     @Intrinsic

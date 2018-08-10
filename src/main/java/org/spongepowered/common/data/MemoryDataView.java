@@ -37,6 +37,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.ArrayUtils;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
@@ -267,7 +268,7 @@ public class MemoryDataView implements DataView {
             // see above for why this is copied
             copyDataView(path, valueContainer);
         } else if (value instanceof CatalogType) {
-            return set(path, ((CatalogType) value).getId());
+            return set(path, ((CatalogType) value).getKey().toString());
         } else if (manager != null && manager.getTranslator(value.getClass()).isPresent()) {
             DataTranslator serializer = manager.getTranslator(value.getClass()).get();
             final DataContainer container = serializer.translate(value);
@@ -337,7 +338,9 @@ public class MemoryDataView implements DataView {
                     builder.add(object);
                 }
             } else if (object instanceof CatalogType) {
-                builder.add(((CatalogType) object).getId());
+                builder.add(((CatalogType) object).getKey().toString());
+            } else if (object instanceof CatalogKey) {
+                builder.add(((CatalogKey) object).toString());
             } else if (object instanceof Map) {
                 builder.add(ensureSerialization((Map) object));
             } else if (object instanceof Collection) {
@@ -763,7 +766,9 @@ public class MemoryDataView implements DataView {
     public <T extends CatalogType> Optional<T> getCatalogType(DataQuery path, Class<T> catalogType) {
         checkNotNull(path, "path");
         checkNotNull(catalogType, "dummy type");
-        return getString(path).flatMap(string -> Sponge.getRegistry().getType(catalogType, string));
+        return getString(path)
+            .map(CatalogKey::resolve)
+            .flatMap(key -> Sponge.getRegistry().getType(catalogType, key));
     }
 
     @Override
@@ -772,7 +777,8 @@ public class MemoryDataView implements DataView {
         checkNotNull(catalogType, "catalogType");
         return getStringList(path).map(list ->
                 list.stream()
-                        .map(string -> Sponge.getRegistry().getType(catalogType, string))
+                        .map(CatalogKey::resolve)
+                        .map(key -> Sponge.getRegistry().getType(catalogType, key))
                         .filter(Optional::isPresent)
                         .map(Optional::get)
                         .collect(Collectors.toList())

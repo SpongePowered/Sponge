@@ -30,6 +30,8 @@ import static com.google.common.base.Preconditions.checkState;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.PlayerAdvancements;
+import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.Progressable;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
@@ -45,12 +47,13 @@ import org.spongepowered.api.event.advancement.CriterionEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.advancement.ICriterionProgress;
 import org.spongepowered.common.advancement.SpongeAndCriterion;
 import org.spongepowered.common.advancement.SpongeAndCriterionProgress;
@@ -81,19 +84,48 @@ public class MixinAdvancementProgress implements org.spongepowered.api.advanceme
     @Nullable private String advancement;
     @Nullable private PlayerAdvancements playerAdvancements;
 
+    private void checkServer() {
+        checkState(SpongeImplHooks.isMainThread());
+    }
+
     @Inject(method = "update", at = @At("RETURN"))
     private void onUpdate(Map<String, Criterion> criteriaIn, String[][] requirements, CallbackInfo ci) {
-        this.progressMap = null;
-        if (this.advancement != null) {
-            getProgressMap();
+        // Validate the requirements to check whether their
+        // criterion actually exists, prevents bugs when mods
+        // accidentally use non existent requirements
+        // See https://github.com/SpongePowered/SpongeForge/issues/2191
+        for (String[] reqs : requirements) {
+            for (String req : reqs) {
+                if (!criteriaIn.containsKey(req)) {
+                    final String advName = getOptionalAdvancement()
+                            .map(CatalogType::getKey)
+                            .map(CatalogKey::toString)
+                            .orElse("unknown");
+                    throw new IllegalStateException("Found a requirement which does not exist in the criteria, "
+                            + req + " could not be found for the advancement: " + advName);
+                }
+            }
+        }
+        // Update the progress map
+        updateProgressMap();
+    }
+
+    @Override
+    public void updateProgressMap() {
+        if (!SpongeImplHooks.isMainThread()) {
+            return;
+        }
+        final Optional<Advancement> advancement = getOptionalAdvancement();
+        if (advancement.isPresent()) {
+            this.progressMap = new HashMap<>();
+            processProgressMap(advancement.get().getCriterion(), this.progressMap);
+        } else {
+            this.progressMap = null;
         }
     }
 
     private Map<AdvancementCriterion, ICriterionProgress> getProgressMap() {
-        if (this.progressMap == null) {
-            this.progressMap = new HashMap<>();
-            processProgressMap(getAdvancement().getCriterion(), this.progressMap);
-        }
+        checkState(this.progressMap != null, "progressMap isn't initialized");
         return this.progressMap;
     }
 
@@ -122,11 +154,18 @@ public class MixinAdvancementProgress implements org.spongepowered.api.advanceme
 
     /**
      * @author Cybermaxke
-     * @reason Rewrite the method to add support for the complex advancement criteria.
+     * @reason Rewrite the method to add support for the complex advancement criteria, only triggered on the server.
      */
-    @Overwrite
-    public boolean isDone() {
-        return get(getAdvancement().getCriterion()).map(Progressable::achieved).orElse(false);
+    @Inject(method = "isDone", at = @At("HEAD"), cancellable = true)
+    private void onIsDone(CallbackInfoReturnable<Boolean> ci) {
+        if (this.advancement == null || !SpongeImplHooks.isMainThread()) { // Use vanilla behavior on the client
+            return;
+        }
+
+        final Advancement advancement = getOptionalAdvancement().orElse(null);
+        if (advancement != null) {
+            ci.setReturnValue(get(advancement.getCriterion()).map(Progressable::achieved).orElse(false));
+        }
     }
 
     /**
@@ -134,8 +173,15 @@ public class MixinAdvancementProgress implements org.spongepowered.api.advanceme
      * @reason Rewrite the method to add support for triggering
      *         score criteria and calling grant events.
      */
-    @Overwrite
-    public boolean grantCriterion(String criterionIn) {
+    @Inject(method = "grantCriterion(Ljava/lang/String;)Z", at = @At("HEAD"), cancellable = true)
+    private void onGrantCriterion(String criterionIn, CallbackInfoReturnable<Boolean> ci) {
+        if (!SpongeImplHooks.isMainThread()) { // Use vanilla behavior on the client
+            return;
+        }
+        ci.setReturnValue(spongeGrantCriterion(criterionIn));
+    }
+
+    private boolean spongeGrantCriterion(String criterionIn) {
         final net.minecraft.advancements.CriterionProgress criterionProgress = this.criteria.get(criterionIn);
         if (criterionProgress == null || criterionProgress.isObtained()) {
             return false;
@@ -182,8 +228,15 @@ public class MixinAdvancementProgress implements org.spongepowered.api.advanceme
      * @reason Rewrite the method to add support for triggering
      *         score criteria and calling revoke events.
      */
-    @Overwrite
-    public boolean revokeCriterion(String criterionIn) {
+    @Inject(method = "revokeCriterion(Ljava/lang/String;)Z", at = @At("HEAD"), cancellable = true)
+    private void revokeCriterion(String criterionIn, CallbackInfoReturnable<Boolean> ci) {
+        if (!SpongeImplHooks.isMainThread()) { // Use vanilla behavior on the client
+            return;
+        }
+        ci.setReturnValue(spongeRevokeCriterion(criterionIn));
+    }
+
+    private boolean spongeRevokeCriterion(String criterionIn) {
         final net.minecraft.advancements.CriterionProgress criterionProgress = this.criteria.get(criterionIn);
         if (criterionProgress == null || !criterionProgress.isObtained()) {
             return false;
@@ -227,41 +280,60 @@ public class MixinAdvancementProgress implements org.spongepowered.api.advanceme
 
     @Override
     public PlayerAdvancements getPlayerAdvancements() {
+        checkServer();
         checkState(this.playerAdvancements != null, "The playerAdvancements is not yet initialized");
         return this.playerAdvancements;
     }
 
     @Override
     public void setPlayerAdvancements(PlayerAdvancements playerAdvancements) {
-        getProgressMap();
+        checkServer();
         this.playerAdvancements = playerAdvancements;
     }
 
     @Override
     public void setAdvancement(String advancement) {
+        checkServer();
         this.advancement = advancement;
     }
 
     @Override
     public void invalidateAchievedState() {
-        for (ICriterionProgress progress : this.progressMap.values()) {
+        if (!SpongeImplHooks.isMainThread()) { // Ignore on the client
+            return;
+        }
+        for (ICriterionProgress progress : getProgressMap().values()) {
             progress.invalidateAchievedState();
         }
     }
 
+    /**
+     * Gets the {@link Advancement} without checking if it's still
+     * loaded on the server.
+     *
+     * @return The advancement
+     */
+    private Optional<Advancement> getOptionalAdvancement() {
+        checkServer();
+        checkState(this.advancement != null, "The advancement is not yet initialized");
+        return AdvancementRegistryModule.getInstance().getById(this.advancement);
+    }
+
     @Override
     public Advancement getAdvancement() {
-        checkState(this.advancement != null, "The advancement is not yet initialized");
-        return AdvancementRegistryModule.getInstance().getById(this.advancement).get();
+        return getOptionalAdvancement().orElseThrow(() -> new IllegalStateException(
+                "The advancement of this advancement progress is unloaded: " + this.advancement));
     }
 
     @Override
     public Optional<ScoreCriterionProgress> get(ScoreAdvancementCriterion criterion) {
+        checkServer();
         return Optional.ofNullable((ScoreCriterionProgress) getProgressMap().get(criterion));
     }
 
     @Override
     public Optional<CriterionProgress> get(AdvancementCriterion criterion) {
+        checkServer();
         checkNotNull(criterion, "criterion");
         return Optional.ofNullable(getProgressMap().get(criterion));
     }

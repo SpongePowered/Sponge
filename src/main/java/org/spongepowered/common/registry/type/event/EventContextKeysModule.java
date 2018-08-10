@@ -27,6 +27,7 @@ package org.spongepowered.common.registry.type.event;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
@@ -64,48 +65,51 @@ public final class EventContextKeysModule
 
     @Override
     public void registerAdditionalCatalog(EventContextKey extraCatalog) {
-        final String id = checkNotNull(extraCatalog).getId();
-        final String key = id.toLowerCase(Locale.ENGLISH);
-        checkArgument(!key.contains("sponge:"), "Cannot register spoofed event context key!");
-        checkArgument(!key.contains("minecraft:"), "Cannot register spoofed event context key!");
-        checkArgument(!this.catalogTypeMap.containsKey(key), "Cannot register an already registered EventContextKey: %s", key);
-        this.catalogTypeMap.put(key, extraCatalog);
+        final CatalogKey key = extraCatalog.getKey();
+        checkArgument(!key.getNamespace().equals(CatalogKey.SPONGE_NAMESPACE), "Cannot register spoofed event context key!");
+        checkArgument(!key.getNamespace().equals(CatalogKey.MINECRAFT_NAMESPACE), "Cannot register spoofed event context key!");
+        checkArgument(!this.map.containsKey(key), "Cannot register an already registered EventContextKey: %s",
+            key);
+        this.map.put(key, extraCatalog);
 
     }
 
     @Override
     public void registerDefaults() {
-        createKey("sponge:creator", "Creator", User.class);
-        createKey("sponge:damage_type", "Damage Type", DamageType.class);
-        createKey("sponge:dismount_type", "Dimension Type", DismountType.class);
-        createKey("sponge:igniter", "Igniter", User.class);
-        createKey("sponge:last_damage_source", "Last Damage Source", DamageSource.class);
-        createKey("sponge:liquid_mix", "Liquid Mix", World.class);
-        createKey("sponge:notifier", "Notifier", User.class);
-        createKey("sponge:owner", "Owner", User.class);
-        createKey("sponge:player", "Player", Player.class);
-        createKey("sponge:player_simulated", "Game Profile", GameProfile.class);
-        createKey("sponge:projectile_source", "Projectile Source", ProjectileSource.class);
-        createKey("sponge:service_manager", "Service Manager", ServiceManager.class);
-        createKey("sponge:spawn_type", "Spawn Type", SpawnType.class);
-        createKey("sponge:teleport_type", "Teleport Type", TeleportType.class);
-        createKey("sponge:thrower", "Thrower", User.class);
-        createKey("sponge:weapon", "Weapon", ItemStackSnapshot.class);
-        createKey("sponge:fake_player", "Fake Player", Player.class);
-        createKey("sponge:player_break", "Player Break", World.class);
-        createKey("sponge:player_place", "Player Place", World.class);
-        createKey("sponge:fire_spread", "Fire Spread", World.class);
-        createKey("sponge:leaves_decay", "Leaves Decay", World.class);
-        createKey("sponge:piston_retract", "Piston Retract", World.class);
-        createKey("sponge:piston_extend", "Piston Extend", World.class);
-        createKey("sponge:block_hit", "Block Hit", BlockSnapshot.class);
-        createKey("sponge:entity_hit", "Entity Hit", BlockSnapshot.class);
-        createKey("sponge:used_item", "Used Item", ItemStackSnapshot.class);
-        createKey("sponge:plugin", "Plugin", PluginContainer.class);
+        this.createKey("sponge:creator", "Creator", User.class);
+        this.createKey("sponge:damage_type", "Damage Type", DamageType.class);
+        this.createKey("sponge:dismount_type", "Dimension Type", DismountType.class);
+        this.createKey("sponge:igniter", "Igniter", User.class);
+        this.createKey("sponge:last_damage_source", "Last Damage Source", DamageSource.class);
+        this.createKey("sponge:liquid_break", "Liquid Break", World.class);
+        this.createKey("sponge:liquid_flow", "Liquid Flow", World.class);
+        this.createKey("sponge:liquid_mix", "Liquid Mix", World.class);
+        this.createKey("sponge:notifier", "Notifier", User.class);
+        this.createKey("sponge:owner", "Owner", User.class);
+        this.createKey("sponge:player", "Player", Player.class);
+        this.createKey("sponge:player_simulated", "Game Profile", GameProfile.class);
+        this.createKey("sponge:projectile_source", "Projectile Source", ProjectileSource.class);
+        this.createKey("sponge:service_manager", "Service Manager", ServiceManager.class);
+        this.createKey("sponge:spawn_type", "Spawn Type", SpawnType.class);
+        this.createKey("sponge:teleport_type", "Teleport Type", TeleportType.class);
+        this.createKey("sponge:thrower", "Thrower", User.class);
+        this.createKey("sponge:weapon", "Weapon", ItemStackSnapshot.class);
+        this.createKey("sponge:fake_player", "Fake Player", Player.class);
+        this.createKey("sponge:player_break", "Player Break", World.class);
+        this.createKey("sponge:player_place", "Player Place", World.class);
+        this.createKey("sponge:fire_spread", "Fire Spread", World.class);
+        this.createKey("sponge:leaves_decay", "Leaves Decay", World.class);
+        this.createKey("sponge:piston_retract", "Piston Retract", World.class);
+        this.createKey("sponge:piston_extend", "Piston Extend", World.class);
+        this.createKey("sponge:block_hit", "Block Hit", BlockSnapshot.class);
+        this.createKey("sponge:entity_hit", "Entity Hit", BlockSnapshot.class);
+        this.createKey("sponge:used_item", "Used Item", ItemStackSnapshot.class);
+        this.createKey("sponge:plugin", "Plugin", PluginContainer.class);
     }
 
     private void createKey(String id, String name, Class<?> usedClass) {
-        this.catalogTypeMap.put(id, new SpongeEventContextKey<>(id, name, usedClass));
+        final CatalogKey key = CatalogKey.resolve(id);
+        this.map.put(key, new SpongeEventContextKey<>(key, name, usedClass));
     }
 
     private EventContextKeysModule() {

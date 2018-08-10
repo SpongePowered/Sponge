@@ -47,7 +47,7 @@ public abstract class MixinAbstractEntityDamageSource implements EntityDamageSou
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstruct(CallbackInfo callbackInfo) {
-        ((SpongeCommonEntityDamageSource) (Object) this).setDamageType(getType().getId());
+        ((SpongeCommonEntityDamageSource) (Object) this).setDamageType(getType().getKey().toString());
         ((SpongeCommonEntityDamageSource) (Object) this).setEntitySource((Entity) getSource());
         if (isAbsolute()) {
             ((SpongeCommonEntityDamageSource) (Object) this).setDamageIsAbsolute();

@@ -30,6 +30,11 @@ import java.util.List;
 
 public interface IMixinInventory {
 
+    /**
+     * Gets the captured transactions.
+     *
+     * @return The captured transactions.
+     */
     List<SlotTransaction> getCapturedTransactions();
 
 }

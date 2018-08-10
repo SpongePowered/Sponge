@@ -24,42 +24,24 @@
  */
 package org.spongepowered.common.registry.type.item;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.item.FireworkShapes;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.data.processor.common.FireworkUtils;
+import org.spongepowered.common.item.SpongeFireworkShape;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class FireworkShapeRegistryModule implements CatalogRegistryModule<FireworkShape> {
-
-    @RegisterCatalog(FireworkShapes.class)
-    private Map<String, FireworkShape> fireworkShapeMap = new HashMap<>();
-
-    @Override
-    public Optional<FireworkShape> getById(String id) {
-        return Optional.ofNullable(this.fireworkShapeMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<FireworkShape> getAll() {
-        return ImmutableList.copyOf(this.fireworkShapeMap.values());
-    }
+@RegisterCatalog(FireworkShapes.class)
+public class FireworkShapeRegistryModule extends AbstractCatalogRegistryModule<FireworkShape> implements CatalogRegistryModule<FireworkShape> {
 
     @Override
     public void registerDefaults() {
-        this.fireworkShapeMap.putAll(FireworkUtils.shapeMapping.values()
-        .stream()
-        .collect(Collectors.toMap(shape -> shape.getId().toLowerCase(Locale.ENGLISH), Function.identity())));
+        this.map.putAll(FireworkUtils.shapeMapping.values()
+            .stream()
+            .collect(Collectors.toMap(SpongeFireworkShape::getKey, Function.identity())));
     }
 }

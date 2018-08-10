@@ -31,6 +31,7 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -40,7 +41,6 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
-import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 import java.util.ArrayList;
 
@@ -53,8 +53,8 @@ public class DropInventoryState extends BasicInventoryPacketState {
         final ItemStackSnapshot usedSnapshot = ItemStackUtil.snapshotOf(usedStack);
         final Entity spongePlayer = EntityUtil.fromNative(player);
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(spongePlayer);
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
+            frame.pushCause(spongePlayer);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
             context.getCapturedBlockSupplier()
                 .acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
 

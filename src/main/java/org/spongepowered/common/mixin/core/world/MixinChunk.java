@@ -95,7 +95,9 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
@@ -104,6 +106,7 @@ import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMapEntry;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
@@ -245,9 +248,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
 
     @Inject(method = "addEntity", at = @At("RETURN"))
     private void onChunkAddEntity(Entity entityIn, CallbackInfo ci) {
-        if (!entityIn.isDead) {
-            ((IMixinEntity) entityIn).setActiveChunk(this);
-        }
+        ((IMixinEntity) entityIn).setActiveChunk(this);
     }
 
     @Inject(method = "addTileEntity(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntity;validate()V"))
@@ -281,7 +282,9 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
             }
         }
 
-        SpongeImpl.postEvent(SpongeEventFactory.createLoadChunkEvent(Sponge.getCauseStackManager().getCurrentCause(), (Chunk) this));
+        if (ShouldFire.LOAD_CHUNK_EVENT) {
+            SpongeImpl.postEvent(SpongeEventFactory.createLoadChunkEvent(Sponge.getCauseStackManager().getCurrentCause(), (Chunk) this));
+        }
         if (!this.world.isRemote) {
             SpongeHooks.logChunkLoad(this.world, this.chunkPos);
         }
@@ -335,7 +338,13 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public int getInhabittedTime() {
+        return (int) this.inhabitedTime;
+    }
+
+    @Override
+    public int getInhabitedTime() {
         return (int) this.inhabitedTime;
     }
 
@@ -430,8 +439,9 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         return this.sponge_world.restoreSnapshot((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), snapshot, force, flag);
     }
 
-    public double getHighestYAt(double x, double z) {
-        return this.sponge_world.getHighestYAt(this.x << 4 + ((int)x & 15), this.z << 4 + ((int)z & 15));
+    @Override
+    public int getHighestYAt(int x, int z) {
+        return this.sponge_world.getHighestYAt((this.x << 4) + (x & 15), (this.z << 4) + (z & 15));
     }
 
     @Override
@@ -519,6 +529,10 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
             return;
         }
 
+        if (!ShouldFire.COLLIDE_ENTITY_EVENT) {
+            return;
+        }
+
         CollideEntityEvent event = SpongeCommonEventFactory.callCollideEntityEvent(this.world, entityIn, listToFill);
         final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
 
@@ -580,6 +594,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     /**
      * @author blood - November 2015
      * @author gabizou - updated April 10th, 2016 - Add cause tracking refactor changes
+     * @author gabizou - Updated June 26th, 2018 - Bulk capturing changes
      *
      *
      * @param pos The position changing
@@ -589,6 +604,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
      *      as there's no block snapshot to change.
      * @return The changed block state if not null
      */
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     @Nullable
     public IBlockState setBlockState(BlockPos pos, IBlockState newState, IBlockState currentState, @Nullable BlockSnapshot newBlockSnapshot, BlockChangeFlag flag) {
@@ -633,9 +649,11 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         }
         // Sponge end
 
-        extendedblockstorage.set(xPos, yPos & 15, zPos, newState);
-
         // Sponge Start
+        final int modifiedY = yPos & 15;
+        extendedblockstorage.set(xPos, modifiedY, zPos, newState);
+
+
         // if (block1 != block) // Sponge - Forge removes this change.
         {
             if (!this.world.isRemote) {
@@ -654,16 +672,16 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
                 TileEntity tileEntity = this.getTileEntity(pos, EnumCreateEntityType.CHECK);
                 // Sponge - Add hook for refreshing, because again, forge hooks.
                 if (tileEntity != null && SpongeImplHooks.shouldRefresh(tileEntity, this.world, pos, currentState, newState)) {
-                    // Sponge End
                     this.world.removeTileEntity(pos);
                 }
             }
         }
 
-        if (extendedblockstorage.get(xPos, yPos & 15, zPos).getBlock() != newBlock) {
+        final IBlockState blockAfterSet = extendedblockstorage.get(xPos, modifiedY, zPos);
+        if (blockAfterSet.getBlock() != newBlock) {
             return null;
         }
-        // Sponge Start - Slight modifications
+
         // } else { // Sponge - remove unnecessary else
         if (requiresNewLightCalculations) {
             this.generateSkylightMap();
@@ -687,17 +705,15 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
             }
         }
 
-        if (!this.world.isRemote && currentBlock != newBlock) {
+        if (!((IMixinWorld) this.world).isFake() && currentBlock != newBlock) {
+            final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
+            final boolean isBulkCapturing = ((IPhaseState) peek.state).doesBulkBlockCapture(peek.context);
             // Sponge start - Ignore block activations during block placement captures unless it's
-            // a BlockContainer. Prevents blocks such as TNT from activating when
-            // cancelled.
-            final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-            final PhaseData peek = phaseTracker.getCurrentPhaseData();
-            final boolean requiresCapturing = peek.state.requiresBlockCapturing();
-            if (!requiresCapturing || SpongeImplHooks.hasBlockTileEntity(newBlock, newState)) {
+            // a BlockContainer. Prevents blocks such as TNT from activating when cancelled.
+            if (!isBulkCapturing || SpongeImplHooks.hasBlockTileEntity(newBlock, newState)) {
                 // The new block state is null if called directly from Chunk#setBlockState(BlockPos, IBlockState)
                 // If it is null, then directly call the onBlockAdded logic.
-                if (newBlockSnapshot == null && flag.performBlockPhysics()) {
+                if (flag.performBlockPhysics()) {
                     newBlock.onBlockAdded(this.world, pos, newState);
                 }
             }
@@ -712,8 +728,17 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
 
             if (tileentity == null) {
                 // Sponge Start - use SpongeImplHooks for forge compatibility
-                // tileentity = ((ITileEntityProvider)block).createNewTileEntity(this.worldObj, block.getMetaFromState(state)); // Sponge
-                tileentity = SpongeImplHooks.createTileEntity(newBlock, this.world, newState);
+                if (!((IMixinWorld) this.world).isFake()) { // Surround with a server check
+                    // tileentity = ((ITileEntityProvider)block).createNewTileEntity(this.worldObj, block.getMetaFromState(state)); // Sponge
+                    tileentity = SpongeImplHooks.createTileEntity(newBlock, this.world, newState);
+                    final User owner = PhaseTracker.getInstance().getCurrentContext().getOwner().orElse(null);
+                    // If current owner exists, transfer it to newly created TE pos
+                    // This is required for TE's that get created during move such as pistons and ComputerCraft turtles.
+                    if (owner != null) {
+                        this.addTrackedBlockPosition(newBlock, pos, owner, PlayerTracker.Type.OWNER);
+                    }
+                }
+                
                 // Sponge End
                 this.world.setTileEntity(pos, tileentity);
             }
@@ -929,7 +954,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     )
     private void onPopulateFinish(IChunkGenerator generator, CallbackInfo info) {
         if (!this.world.isRemote) {
-            PhaseTracker.getInstance().completePhase(GenerationPhase.State.TERRAIN_GENERATION);
+            PhaseTracker.getInstance().getCurrentContext().close();
         }
     }
 
@@ -1248,6 +1273,25 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
                 }
             }
         }
+    }
+
+    @Redirect(method = "addTileEntity(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V", at = @At(target =
+            "Lnet/minecraft/tileentity/TileEntity;invalidate()V", value = "INVOKE"))
+    private void redirectInvalidate(TileEntity te) {
+        SpongeImplHooks.onTileEntityInvalidate(te);
+    }
+
+    @Override
+    public boolean isActive() {
+        if (this.isPersistedChunk()) {
+            return true;
+        }
+
+        if (!this.loaded || this.isQueuedForUnload() || this.getScheduledForUnload() != -1) {
+            return false;
+        }
+
+        return true;
     }
 
     @Override

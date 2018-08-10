@@ -27,14 +27,17 @@ package org.spongepowered.common.event;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.event.cause.EventContextKey;
 import org.spongepowered.common.registry.type.event.EventContextKeysModule;
 
+import javax.annotation.Nullable;
+
 public final class SpongeEventContextKeyBuilder<T> implements EventContextKey.Builder<T> {
 
-    Class<T> typeClass;
-    String id;
-    String name;
+    @Nullable Class<T> typeClass;
+    @Nullable CatalogKey key;
+    @Nullable String name;
 
     @Override
     public SpongeEventContextKeyBuilder<T> type(Class<T> aClass) {
@@ -44,10 +47,10 @@ public final class SpongeEventContextKeyBuilder<T> implements EventContextKey.Bu
     }
 
     @Override
-    public SpongeEventContextKeyBuilder<T> id(String id) {
+    public SpongeEventContextKeyBuilder<T> id(CatalogKey id) {
         checkArgument(id != null, "Id cannot be null for EventContextKey");
-        checkArgument(!id.isEmpty(), "Cannot have an empty string id!");
-        this.id = id;
+        checkArgument(!id.toString().isEmpty(), "Cannot have an empty string id!");
+        this.key = id;
         return this;
     }
 
@@ -62,24 +65,24 @@ public final class SpongeEventContextKeyBuilder<T> implements EventContextKey.Bu
     @Override
     public EventContextKey<T> build() {
         checkState(this.typeClass != null, "Allowed type cannot be null!");
-        checkState(this.id != null, "ID cannot be null!");
-        checkState(!this.id.isEmpty(), "ID cannot be empty!");
-        checkState(this.name != null, "Name cannot be null for id: " + this.id);
-        checkState(!this.name.isEmpty(), "Name cannot be empty for id: " + this.id);
+        checkState(this.key != null, "ID cannot be null!");
+        checkState(this.name != null, "Name cannot be null for id: " + this.key);
+        checkState(!this.name.isEmpty(), "Name cannot be empty for id: " + this.key);
         final SpongeEventContextKey<T> key = new SpongeEventContextKey<>(this);
         EventContextKeysModule.getInstance().registerAdditionalCatalog(key);
         return key;
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
-    public SpongeEventContextKeyBuilder<T> from(EventContextKey value) throws UnsupportedOperationException {
+    public SpongeEventContextKeyBuilder<T> from(EventContextKey<T> value) throws UnsupportedOperationException {
         throw new UnsupportedOperationException("Cannot create a new EventContextKey based on another key!");
     }
 
     @Override
     public SpongeEventContextKeyBuilder<T> reset() {
         this.typeClass = null;
-        this.id = null;
+        this.key = null;
         this.name = null;
         return this;
     }

@@ -28,11 +28,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.ParrotVariant;
 import org.spongepowered.api.data.type.ParrotVariants;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.entity.SpongeParrotVariant;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -40,7 +42,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-public class ParrotVariantRegistryModule implements CatalogRegistryModule<ParrotVariant> {
+@RegisterCatalog(ParrotVariants.class)
+public class ParrotVariantRegistryModule extends AbstractCatalogRegistryModule<ParrotVariant> implements CatalogRegistryModule<ParrotVariant> {
 
     public static final Map<String, ParrotVariant> PARROT_VARIANTS = Maps.newHashMap();
     public static final Map<Integer, ParrotVariant> PARROT_VARIANT_IDMAP = Maps.newHashMap();
@@ -51,22 +54,11 @@ public class ParrotVariantRegistryModule implements CatalogRegistryModule<Parrot
     public static final SpongeParrotVariant CYAN_PARROT = new SpongeParrotVariant(3, "CYAN");
     public static final SpongeParrotVariant GRAY_PARROT = new SpongeParrotVariant(4, "GRAY");
 
-    @RegisterCatalog(ParrotVariants.class)
-    private final Map<String, ParrotVariant> parrotVariantMap = new HashMap<>();
-
-    @Override
-    public Optional<ParrotVariant> getById(String id) {
-        return Optional.ofNullable(this.parrotVariantMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<ParrotVariant> getAll() {
-        return ImmutableList.copyOf(this.parrotVariantMap.values());
-    }
-
     @Override
     public void registerDefaults() {
-        this.parrotVariantMap.putAll(PARROT_VARIANTS);
+        for (Map.Entry<String, ParrotVariant> entry : PARROT_VARIANTS.entrySet()) {
+            register(CatalogKey.resolve(entry.getKey()), entry.getValue());
+        }
 
     }
 

@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.entity.item;
 
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityFallingBlock;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
@@ -56,8 +57,6 @@ public abstract class MixinEntityFallingBlock extends MixinEntity implements Fal
     @Shadow public float fallHurtAmount;
     @Shadow public NBTTagCompound tileEntityData;
 
-    private DamageSource original;
-    private boolean isAnvil;
 
     @Inject(method = "onUpdate",
         at = @At(value = "INVOKE",
@@ -87,27 +86,31 @@ public abstract class MixinEntityFallingBlock extends MixinEntity implements Fal
         }
     }
 
-    @Inject(method = "fall(FF)V", at = @At(value = "JUMP", opcode = Opcodes.IFEQ, ordinal = 1))
-    public void beforeFall(float distance, float damageMultipleier, CallbackInfo callbackInfo) {
-        this.isAnvil = this.fallTile.getBlock() == Blocks.ANVIL;
-        this.original = this.isAnvil ? DamageSource.ANVIL : DamageSource.FALLING_BLOCK;
-        if (this.isAnvil) {
-            DamageSource.ANVIL = new MinecraftFallingBlockDamageSource("anvil", (EntityFallingBlock) (Object) this);
-        } else {
-            DamageSource.FALLING_BLOCK = new MinecraftFallingBlockDamageSource("fallingblock", (EntityFallingBlock) (Object) this);
+    @Redirect(method = "fall",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"
+        )
+    )
+    private boolean spongeAttackFallingOrAnvil(Entity entity, DamageSource source, float damage) {
+        if (entity.world.isRemote) {
+            return entity.attackEntityFrom(source, damage);
+        }
+        boolean isAnvil = this.fallTile.getBlock() == Blocks.ANVIL;
+        try {
+            if (isAnvil) {
+                DamageSource.ANVIL = new MinecraftFallingBlockDamageSource("anvil", (EntityFallingBlock) (Object) this);
+                return entity.attackEntityFrom(DamageSource.ANVIL, damage);
+            } else {
+                DamageSource.FALLING_BLOCK = new MinecraftFallingBlockDamageSource("fallingblock", (EntityFallingBlock) (Object) this);
+                return entity.attackEntityFrom(DamageSource.FALLING_BLOCK, damage);
+            }
+        } finally {
+            if (isAnvil) {
+                DamageSource.ANVIL = source;
+            } else {
+                DamageSource.FALLING_BLOCK = source;
+            }
         }
     }
-
-    @Inject(method = "fall(FF)V", at = @At("RETURN"))
-    public void afterFall(float distance, float damageMultiplier, CallbackInfo ci) {
-        if (this.original == null) {
-            return;
-        }
-        if (this.isAnvil) {
-            DamageSource.ANVIL = this.original;
-        } else {
-            DamageSource.FALLING_BLOCK = this.original;
-        }
-    }
-
 }

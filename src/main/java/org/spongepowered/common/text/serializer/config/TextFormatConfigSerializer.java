@@ -28,6 +28,7 @@ import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.GameRegistry;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.text.format.TextColor;
@@ -51,13 +52,14 @@ public class TextFormatConfigSerializer implements TypeSerializer<TextFormat> {
         GameRegistry registry = Sponge.getRegistry();
         String colorId = value.getNode(NODE_COLOR).getString();
         if (colorId != null) {
-            color = registry.getType(TextColor.class, colorId).orElseThrow(() -> new ObjectMappingException("Color not found: " + colorId));
+            color = registry.getType(TextColor.class, CatalogKey.resolve(colorId))
+                .orElseThrow(() -> new ObjectMappingException("Color not found: " + colorId));
         }
 
         TextStyle style = TextStyles.NONE;
         ConfigurationNode styleNode = value.getNode(NODE_STYLE);
         for (TextStyle.Base component : registry.getAllOf(TextStyle.Base.class)) {
-            if (styleNode.getNode(component.getId().toLowerCase()).getBoolean()) {
+            if (styleNode.getNode(component.getKey().toString()).getBoolean()) {
                 style = style.and(component);
             }
         }
@@ -67,11 +69,11 @@ public class TextFormatConfigSerializer implements TypeSerializer<TextFormat> {
 
     @Override
     public void serialize(TypeToken<?> type, TextFormat obj, ConfigurationNode value) throws ObjectMappingException {
-        value.getNode(NODE_COLOR).setValue(obj.getColor().getId());
+        value.getNode(NODE_COLOR).setValue(obj.getColor().getKey().toString());
         ConfigurationNode styleNode = value.getNode(NODE_STYLE);
         TextStyle composite = obj.getStyle();
         Sponge.getRegistry().getAllOf(TextStyle.Base.class)
-                .forEach(style -> styleNode.getNode(style.getId().toLowerCase()).setValue(composite.contains(style)));
+                .forEach(style -> styleNode.getNode(style.getKey().toString()).setValue(composite.contains(style)));
     }
 
 }

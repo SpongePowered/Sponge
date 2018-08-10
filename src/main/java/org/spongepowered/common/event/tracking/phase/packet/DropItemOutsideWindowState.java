@@ -29,6 +29,7 @@ import net.minecraft.network.Packet;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
@@ -46,7 +47,7 @@ final class DropItemOutsideWindowState extends BasicInventoryPacketState {
     }
 
     @Override
-    public boolean doesCaptureEntityDrops() {
+    public boolean doesCaptureEntityDrops(InventoryPacketContext context) {
         return true;
     }
 
@@ -58,14 +59,18 @@ final class DropItemOutsideWindowState extends BasicInventoryPacketState {
     @Override
     public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
             List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, int usedButton) {
-        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
 
-        for (Entity currentEntity : capturedEntities) {
-            currentEntity.setCreator(playerMP.getUniqueID());
+            for (Entity currentEntity : capturedEntities) {
+                currentEntity.setCreator(playerMP.getUniqueID());
+            }
+            return usedButton == PacketPhase.PACKET_BUTTON_PRIMARY_ID
+                   ? SpongeEventFactory.createClickInventoryEventDropOutsidePrimary(frame.getCurrentCause(), transaction, capturedEntities,
+                        openContainer, slotTransactions)
+                   : SpongeEventFactory.createClickInventoryEventDropOutsideSecondary(frame.getCurrentCause(), transaction, capturedEntities,
+                        openContainer, slotTransactions);
         }
-        return usedButton == PacketPhase.PACKET_BUTTON_PRIMARY_ID
-               ? SpongeEventFactory.createClickInventoryEventDropOutsidePrimary(Sponge.getCauseStackManager().getCurrentCause(), transaction, capturedEntities, openContainer, slotTransactions)
-               : SpongeEventFactory.createClickInventoryEventDropOutsideSecondary(Sponge.getCauseStackManager().getCurrentCause(), transaction, capturedEntities, openContainer, slotTransactions);
     }
 
     @Override

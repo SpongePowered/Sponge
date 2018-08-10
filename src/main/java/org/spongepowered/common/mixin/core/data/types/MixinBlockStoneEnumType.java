@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.block.BlockStone;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.StoneType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Implements;
@@ -42,22 +43,26 @@ public abstract class MixinBlockStoneEnumType {
 
     @Shadow public abstract String shadow$getName();
 
-    @Shadow public abstract String shadow$getUnlocalizedName();
+    @Shadow public abstract String shadow$getTranslationKey();
 
     @Nullable private Translation translation;
+    @Nullable private CatalogKey key;
 
-    public String stone$getId() {
-        return "minecraft:" + shadow$getName();
+    public CatalogKey stone$getKey() {
+        if (this.key == null) {
+            this.key = CatalogKey.minecraft(this.shadow$getName());
+        }
+        return this.key;
     }
 
     @Intrinsic
     public String stone$getName() {
-        return shadow$getUnlocalizedName();
+        return shadow$getTranslationKey();
     }
 
     public Translation stone$getTranslation() {
         if (this.translation == null) {
-            this.translation = new SpongeTranslation("tile.stone." + shadow$getUnlocalizedName() + ".name");
+            this.translation = new SpongeTranslation("tile.stone." + shadow$getTranslationKey() + ".name");
         }
         return this.translation;
     }

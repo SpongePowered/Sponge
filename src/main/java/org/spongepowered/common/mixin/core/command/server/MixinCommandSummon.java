@@ -43,7 +43,9 @@ import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.action.LightningEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -55,7 +57,6 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
-import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 @Mixin(CommandSummon.class)
 public abstract class MixinCommandSummon extends CommandBase {
@@ -82,8 +83,8 @@ public abstract class MixinCommandSummon extends CommandBase {
 
         Transform<org.spongepowered.api.world.World> transform = new Transform<>(((org.spongepowered.api.world.World) world), new Vector3d(x, y, z));
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PLACEMENT);
-            ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), type, transform);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
+            ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), type, transform);
             SpongeImpl.postEvent(event);
             return event.isCancelled() ? null : AnvilChunkLoader.readWorldEntityPos(nbt, world, x, y, z, b);
         }
@@ -94,12 +95,17 @@ public abstract class MixinCommandSummon extends CommandBase {
     private void onProcess(MinecraftServer server, ICommandSender sender, String args[], CallbackInfo ci, String s, BlockPos blockpos, Vec3d vec3d, double x, double y, double z, World world) {
         Transform<org.spongepowered.api.world.World> transform = new Transform<>((org.spongepowered.api.world.World) world, new Vector3d(x, y, z));
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PLACEMENT);
-            ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(),
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
+            ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(),
                     EntityTypes.LIGHTNING, transform);
             SpongeImpl.postEvent(event);
             if (event.isCancelled()) {
                 ci.cancel();
+            } else {
+                LightningEvent.Pre lightningPre = SpongeEventFactory.createLightningEventPre(frame.getCurrentCause());
+                if (SpongeImpl.postEvent(lightningPre)) {
+                    ci.cancel();
+                }
             }
         }
     }

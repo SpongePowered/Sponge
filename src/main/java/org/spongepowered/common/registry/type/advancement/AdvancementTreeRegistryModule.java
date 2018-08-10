@@ -24,20 +24,24 @@
  */
 package org.spongepowered.common.registry.type.advancement;
 
+import static com.google.common.base.Preconditions.checkState;
+
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementList;
 import net.minecraft.advancements.AdvancementManager;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.interfaces.advancement.IMixinAdvancementList;
 import org.spongepowered.common.registry.CustomRegistrationPhase;
 import org.spongepowered.common.registry.type.AbstractPrefixCheckCatalogRegistryModule;
 
+import java.util.Optional;
+
 @CustomRegistrationPhase
 public class AdvancementTreeRegistryModule extends AbstractPrefixCheckCatalogRegistryModule<AdvancementTree>
         implements AdditionalCatalogRegistryModule<AdvancementTree> {
-
-    public static boolean INSIDE_REGISTER_EVENT = false;
 
     public static AdvancementTreeRegistryModule getInstance() {
         return Holder.INSTANCE;
@@ -47,23 +51,35 @@ public class AdvancementTreeRegistryModule extends AbstractPrefixCheckCatalogReg
         super("minecraft");
     }
 
-    public void clear() {
-        this.catalogTypeMap.clear();
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public void registerAdditionalCatalog(AdvancementTree advancementTree) {
-        super.register(advancementTree);
-        if (INSIDE_REGISTER_EVENT) {
-            final Advancement advancement = (Advancement) advancementTree.getRootAdvancement();
-            final IMixinAdvancementList advancementList = (IMixinAdvancementList) AdvancementManager.ADVANCEMENT_LIST;
-            advancementList.getRootsSet().add(advancement);
-            final AdvancementList.Listener listener = advancementList.getListener();
-            if (listener != null) {
-                listener.rootAdvancementAdded(advancement);
-            }
+        checkState(SpongeImplHooks.isMainThread());
+        final Advancement advancement = (Advancement) advancementTree.getRootAdvancement();
+        final IMixinAdvancementList advancementList = (IMixinAdvancementList) AdvancementManager.ADVANCEMENT_LIST;
+        advancementList.getRootsSet().add(advancement);
+        final AdvancementList.Listener listener = advancementList.getListener();
+        if (listener != null) {
+            listener.rootAdvancementAdded(advancement);
         }
+    }
+
+    void clear() {
+        this.map.clear();
+    }
+
+    void registerSilently(Advancement rootAdvancement) {
+        final Optional<AdvancementTree> optTree = ((org.spongepowered.api.advancement.Advancement) rootAdvancement).getTree();
+        if (optTree.isPresent()) {
+            super.register(optTree.get());
+        } else {
+            SpongeImpl.getLogger().warn("Attempted to register a root advancement {} without a advancement tree?", rootAdvancement.getId());
+        }
+    }
+
+    void remove(Advancement rootAdvancement) {
+        final Optional<AdvancementTree> optTree = ((org.spongepowered.api.advancement.Advancement) rootAdvancement).getTree();
+        optTree.ifPresent(advancementTree -> this.map.remove(advancementTree.getKey()));
     }
 
     private static final class Holder {

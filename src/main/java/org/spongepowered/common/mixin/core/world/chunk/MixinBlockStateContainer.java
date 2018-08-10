@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.world.chunk;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.BitArray;
 import net.minecraft.world.chunk.BlockStateContainer;
 import net.minecraft.world.chunk.NibbleArray;
 import org.spongepowered.asm.mixin.Mixin;
@@ -70,4 +71,27 @@ public abstract class MixinBlockStateContainer {
         }
         this.set(i, newState);
     }
+
+    /**
+     * Serializing a BlockStateContainer to a PacketBuffer is done in two parts:
+     * calculating the size of the allocation needed in the PacketBuffer, and actually
+     * writing it.
+     *
+     * When the BlockStateContainer is actually written to the PacketBuffer,
+     * its 'storage.BitArray.getBackingLongArray' is written as a VarInt-length-prefixed
+     * array. However, when calculating the size of the allocation needed, the size of
+     * 'storage.size()' encoded as a VarInt is used, not the size of 'getBackingLongArray'
+     * encoded as a VarInt. If the size of getBackingLongArray is ever large enough to require
+     * an extra byte in its VarInt encoding, the allocated buffer will be too small, resuling in a crash.
+     *
+     * To fix this issue, we calculate the length of getBackingLongArray encoded as a VarInt,
+     * when we're calculating the necessary allocation size.
+     * @param bits
+     * @return
+     */
+    @Redirect(method = "getSerializedSize", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/BitArray;size()I"))
+    public int onGetStorageSize$FixVanillaBug(BitArray bits) {
+        return bits.getBackingLongArray().length;
+    }
+
 }

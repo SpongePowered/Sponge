@@ -36,10 +36,10 @@ import org.spongepowered.common.data.value.SpongeValueFactory;
 public class SpongeFoodData extends AbstractData<FoodData, ImmutableFoodData> implements FoodData {
 
     private int foodLevel;
-    private float foodSaturationLevel;
-    private float foodExhaustionLevel;
+    private double foodSaturationLevel;
+    private double foodExhaustionLevel;
 
-    public SpongeFoodData(int foodLevel, float foodSaturationLevel, float foodExhaustionLevel) {
+    public SpongeFoodData(int foodLevel, double foodSaturationLevel, double foodExhaustionLevel) {
         super(FoodData.class);
         this.foodLevel = foodLevel;
         this.foodSaturationLevel = foodSaturationLevel;
@@ -85,7 +85,7 @@ public class SpongeFoodData extends AbstractData<FoodData, ImmutableFoodData> im
             .defaultValue(0D)
             .minimum(0D)
             .maximum(Double.MAX_VALUE)
-            .actualValue((double) this.foodExhaustionLevel)
+            .actualValue(this.foodExhaustionLevel)
             .build();
     }
 
@@ -95,7 +95,7 @@ public class SpongeFoodData extends AbstractData<FoodData, ImmutableFoodData> im
             .defaultValue(20D)
             .minimum(0D)
             .maximum(Double.MAX_VALUE)
-            .actualValue((double) this.foodSaturationLevel)
+            .actualValue(this.foodSaturationLevel)
             .build();
     }
 

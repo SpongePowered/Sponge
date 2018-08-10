@@ -27,9 +27,10 @@ package org.spongepowered.common.item.inventory.lens;
 import org.spongepowered.api.item.inventory.InventoryProperty;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
-
-public interface LensCollection<TInventory, TStack> extends Iterable<Lens<TInventory, TStack>> {
+public interface LensCollection {
     
     /**
      * Gets the lens at the specified index in this collection
@@ -37,7 +38,7 @@ public interface LensCollection<TInventory, TStack> extends Iterable<Lens<TInven
      * @param index
      * @return
      */
-    Lens<TInventory, TStack> getLens(int index);
+    Lens getLens(int index);
     
     /**
      * Get all the properties for the specified target slot.
@@ -52,11 +53,11 @@ public interface LensCollection<TInventory, TStack> extends Iterable<Lens<TInven
      * Get all the properties for the specified lens (if contained in this
      * collection).
      * 
-     * @param index the lens index to fetch
+     * @param lens the lens to fetch
      * @return collection of properties for the specified slot when viewed
      *      through this lens
      */
-    Collection<InventoryProperty<?, ?>> getProperties(Lens<TInventory, TStack> lens);
+    Collection<InventoryProperty<?, ?>> getProperties(Lens lens);
 
     /**
      * A strongly-typed {@link java.util.Collection#contains}.
@@ -64,7 +65,7 @@ public interface LensCollection<TInventory, TStack> extends Iterable<Lens<TInven
      * @param lens
      * @return
      */
-    boolean has(Lens<TInventory, TStack> lens);
+    boolean has(Lens lens);
 
     /**
      * Somewhat the inverse of {@link java.util.Collection#containsAll} in
@@ -75,6 +76,8 @@ public interface LensCollection<TInventory, TStack> extends Iterable<Lens<TInven
      * @param c Collection to inspect
      * @return
      */
-    boolean isSubsetOf(Collection<Lens<TInventory, TStack>> c);
+    boolean isSubsetOf(Collection<Lens> c);
+
+    List<Lens> getChildren();
     
 }

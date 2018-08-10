@@ -24,10 +24,8 @@
  */
 package org.spongepowered.common.registry.type.item;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
 import net.minecraft.inventory.EntityEquipmentSlot;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.api.registry.CatalogRegistryModule;
@@ -35,27 +33,10 @@ import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.data.type.SpongeEquipmentType;
 import org.spongepowered.common.data.type.SpongeHeldEquipmentType;
 import org.spongepowered.common.data.type.SpongeWornEquipmentType;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-
-public class EquipmentTypeRegistryModule implements CatalogRegistryModule<EquipmentType> {
-
-    @RegisterCatalog(EquipmentTypes.class)
-    private final Map<String, EquipmentType> equipmentTypeMap = new HashMap<>();
-
-    @Override
-    public Optional<EquipmentType> getById(String id) {
-        return Optional.ofNullable(this.equipmentTypeMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<EquipmentType> getAll() {
-        return ImmutableList.copyOf(this.equipmentTypeMap.values());
-    }
+@RegisterCatalog(EquipmentTypes.class)
+public class EquipmentTypeRegistryModule extends AbstractCatalogRegistryModule<EquipmentType> implements CatalogRegistryModule<EquipmentType> {
 
     @Override
     public void registerDefaults() {
@@ -63,7 +44,7 @@ public class EquipmentTypeRegistryModule implements CatalogRegistryModule<Equipm
         this.registerType("equipped");
 
         final SpongeWornEquipmentType head = this.registerWornType("head", EntityEquipmentSlot.HEAD);
-        this.equipmentTypeMap.put("headwear", head);
+        this.map.put(CatalogKey.minecraft("headwear"), head);
         this.registerWornType("chestplate", EntityEquipmentSlot.CHEST);
         this.registerWornType("leggings", EntityEquipmentSlot.LEGS);
         this.registerWornType("boots", EntityEquipmentSlot.FEET);
@@ -75,16 +56,16 @@ public class EquipmentTypeRegistryModule implements CatalogRegistryModule<Equipm
     }
 
     private void registerType(String id) {
-        this.equipmentTypeMap.put(id, new SpongeEquipmentType(id));
+        this.map.put(CatalogKey.minecraft(id), new SpongeEquipmentType(id));
     }
 
     private SpongeWornEquipmentType registerWornType(String id, EntityEquipmentSlot... types) {
         SpongeWornEquipmentType newType = new SpongeWornEquipmentType(id, types);
-        this.equipmentTypeMap.put(id, newType);
+        this.map.put(CatalogKey.minecraft(id), newType);
         return newType;
     }
 
     private void registerHeldType(String id, EntityEquipmentSlot... types) {
-        this.equipmentTypeMap.put(id, new SpongeHeldEquipmentType(id, types));
+        this.map.put(CatalogKey.minecraft(id), new SpongeHeldEquipmentType(id, types));
     }
 }

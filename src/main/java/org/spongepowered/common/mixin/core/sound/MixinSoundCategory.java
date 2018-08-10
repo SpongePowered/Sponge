@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.sound;
 
 import net.minecraft.util.SoundCategory;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -39,16 +40,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class MixinSoundCategory implements org.spongepowered.api.effect.sound.SoundCategory {
 
     @Shadow public abstract String shadow$getName();
-    private String id;
+    private CatalogKey key;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onInit(String enumName, int i, String realName, CallbackInfo ci) {
-        this.id = "minecraft:" + realName;
+        this.key = CatalogKey.resolve(realName);
     }
 
     @Override
-    public String getId() {
-        return this.id;
+    public CatalogKey getKey() {
+        return this.key;
     }
 
     @Intrinsic

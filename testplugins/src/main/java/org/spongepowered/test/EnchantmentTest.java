@@ -46,7 +46,7 @@ import org.spongepowered.api.text.format.TextColors;
 import java.util.ArrayList;
 import java.util.List;
 
-@Plugin(id = "enchantmenttest", name = "Enchantment Test", description = "Tests Sponge's simple enchantment API.")
+@Plugin(id = "enchantmenttest", name = "Enchantment Test", description = "Tests Sponge's simple enchantment API.", version = "0.0.0")
 public final class EnchantmentTest {
 
     @Listener
@@ -60,7 +60,7 @@ public final class EnchantmentTest {
                                 throw new CommandException(Text.of(TextColors.RED, "You must be a player to use this command!"));
                             }
                             final Player player = (Player) src;
-                            final ItemStack itemStack = player.getItemInHand(HandTypes.MAIN_HAND).orElse(ItemStack.empty());
+                            final ItemStack itemStack = player.getItemInHand(HandTypes.MAIN_HAND);
                             if (!itemStack.supports(Keys.ITEM_ENCHANTMENTS)) {
                                 throw new CommandException(Text.of(TextColors.RED, "This item does not support item enchantments."));
                             }
@@ -86,7 +86,7 @@ public final class EnchantmentTest {
                                 throw new CommandException(Text.of(TextColors.RED, "You must be a player to use this command!"));
                             }
                             final Player player = (Player) src;
-                            final ItemStack itemStack = player.getItemInHand(HandTypes.MAIN_HAND).orElse(ItemStack.empty());
+                            final ItemStack itemStack = player.getItemInHand(HandTypes.MAIN_HAND);
                             if (!itemStack.supports(Keys.ITEM_ENCHANTMENTS)) {
                                 throw new CommandException(Text.of(TextColors.RED, "This item does not support item enchantments."));
                             }
@@ -98,7 +98,7 @@ public final class EnchantmentTest {
                                 final EnchantmentType type = enchantment.getType();
                                 src.sendMessage(Text.of(TextColors.GOLD, "============================="));
                                 src.sendMessage(Text.of(TextColors.GOLD, "Type: ", TextColors.GRAY, type.getName()));
-                                src.sendMessage(Text.of(TextColors.GOLD, "Type ID: ", TextColors.GRAY, type.getId()));
+                                src.sendMessage(Text.of(TextColors.GOLD, "Type ID: ", TextColors.GRAY, type.getKey().toString()));
                                 src.sendMessage(Text.of(TextColors.GOLD, "Translation: ", TextColors.GRAY, enchantment.getType().getTranslation()));
                                 src.sendMessage(Text.of(TextColors.GOLD, "Level: ", TextColors.GRAY, enchantment.getLevel()));
                                 src.sendMessage(Text.of(TextColors.GOLD, "Maximum level: ", TextColors.GRAY, type.getMaximumLevel()));

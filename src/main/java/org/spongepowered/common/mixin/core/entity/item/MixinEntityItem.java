@@ -122,12 +122,17 @@ public abstract class MixinEntityItem extends MixinEntity implements Item, IMixi
 
     @Override
     public int getDespawnDelay() {
-        return this.infiniteDespawnDelay ? this.previousDespawnDelay : this.age;
+        return 6000 - (this.infiniteDespawnDelay ? this.previousDespawnDelay : this.age);
+    }
+
+    @Override
+    public void setDespawnDelay(int delay) {
+        this.age = 6000 - delay;
     }
 
     @Override
     public void setDespawnDelay(int delay, boolean infinite) {
-        this.age = delay;
+        this.age = 6000 - delay;
         boolean previous = this.infiniteDespawnDelay;
         this.infiniteDespawnDelay = infinite;
         if (infinite && !previous) {
@@ -198,7 +203,7 @@ public abstract class MixinEntityItem extends MixinEntity implements Item, IMixi
         return (ItemType) getItem().getItem();
     }
 
-    @Inject(method = "onCollideWithPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;getItem()Lnet/minecraft/item/ItemStack;"), cancellable = true)
+    @Inject(method = "onCollideWithPlayer", at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/minecraft/entity/item/EntityItem;getItem()Lnet/minecraft/item/ItemStack;"), cancellable = true)
     public void onPlayerItemPickup(EntityPlayer entityIn, CallbackInfo ci) {
         if (!SpongeCommonEventFactory.callPlayerChangeInventoryPickupPreEvent(entityIn, (EntityItem) (Object) this, this.pickupDelay, this.getCreator().orElse(null))) {
             ci.cancel();

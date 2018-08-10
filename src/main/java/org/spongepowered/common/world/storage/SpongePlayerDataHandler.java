@@ -90,6 +90,8 @@ public final class SpongePlayerDataHandler {
 
                     try (final InputStream stream = Files.newInputStream(playerFile)) {
                         compound = CompressedStreamTools.readCompressed(stream);
+                    } catch (Exception e) {
+                        throw new RuntimeException("Failed to decompress playerdata for playerfile " + playerFile, e);
                     }
 
                     // TODO Hard exception? Logger entry?

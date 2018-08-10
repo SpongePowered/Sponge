@@ -25,14 +25,14 @@
 package org.spongepowered.common.world.teleport;
 
 import net.minecraft.block.material.Material;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.common.block.BlockUtil;
 
 public class FlyingTeleportHelperFilter extends DefaultTeleportHelperFilter {
 
-    @Override
-    public String getId() {
-        return "sponge:flying";
+    public FlyingTeleportHelperFilter() {
+        super(CatalogKey.sponge("flying"));
     }
 
     @Override

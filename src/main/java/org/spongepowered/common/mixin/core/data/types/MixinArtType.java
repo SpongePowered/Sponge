@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.entity.item.EntityPainting;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.Art;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -39,9 +40,14 @@ public abstract class MixinArtType implements Art {
     @Shadow @Final public int sizeX;
     @Shadow @Final public int sizeY;
 
+    private CatalogKey key;
+
     @Override
-    public String getId() {
-        return this.title;
+    public CatalogKey getKey() {
+        if (this.key == null) {
+            this.key = CatalogKey.resolve(this.title);
+        }
+        return this.key;
     }
 
     @Override

@@ -63,13 +63,18 @@ abstract class ListenerPhaseState extends PluginPhaseState<ListenerPhaseContext>
     }
 
     @Override
-    public boolean tracksBlockSpecificDrops() {
+    public boolean isEvent() {
+        return true;
+    }
+
+    @Override
+    public boolean tracksBlockSpecificDrops(ListenerPhaseContext context) {
         return true;
     }
 
 
     @Override
-    public void addNotifierToBlockEvent(ListenerPhaseContext context, IMixinWorldServer mixinWorldServer, BlockPos pos, IMixinBlockEventData blockEvent) {
+    public void appendNotifierToBlockEvent(ListenerPhaseContext context, IMixinWorldServer mixinWorldServer, BlockPos pos, IMixinBlockEventData blockEvent) {
 
     }
 

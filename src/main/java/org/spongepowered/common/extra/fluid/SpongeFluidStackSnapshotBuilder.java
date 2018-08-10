@@ -27,6 +27,7 @@ package org.spongepowered.common.extra.fluid;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataView;
@@ -113,7 +114,7 @@ public class SpongeFluidStackSnapshotBuilder extends AbstractDataBuilder<FluidSt
         try {
             if (container.contains(DataQueries.FLUID_TYPE, DataQueries.FLUID_VOLUME)) {
                 final String fluidId = container.getString(DataQueries.FLUID_TYPE).get();
-                final Optional<FluidType> type = Sponge.getRegistry().getType(FluidType.class, fluidId);
+                final Optional<FluidType> type = Sponge.getRegistry().getType(FluidType.class, CatalogKey.resolve(fluidId));
                 if (!type.isPresent()) {
                     throw new InvalidDataException("Unknown fluid id found: " + fluidId);
                 }

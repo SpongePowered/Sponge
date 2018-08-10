@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.block.BlockSilverfish;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.DisguisedBlockType;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -32,19 +33,25 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
+import javax.annotation.Nullable;
+
 @Mixin(BlockSilverfish.EnumType.class)
 @Implements(@Interface(iface = DisguisedBlockType.class, prefix = "silver$"))
 public abstract class MixinBlockSilverfishEnumType {
 
     @Shadow public abstract String shadow$getName();
-    @Shadow public abstract String shadow$getUnlocalizedName();
+    @Shadow public abstract String shadow$getTranslationKey();
+    @Nullable private CatalogKey key;
 
-    public String silver$getId() {
-        return "minecraft:" + shadow$getName();
+    public CatalogKey silver$getKey() {
+        if (this.key == null) {
+            this.key = CatalogKey.minecraft(this.shadow$getName());
+        }
+        return this.key;
     }
 
     @Intrinsic
     public String silver$getName() {
-        return shadow$getUnlocalizedName();
+        return shadow$getTranslationKey();
     }
 }

@@ -32,10 +32,13 @@ import org.spongepowered.common.interfaces.inventory.IMixinCarriedInventory;
 
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
+@SuppressWarnings("rawtypes")
 @Mixin(ContainerHorseChest.class)
 public abstract class MixinContainerHorseChest implements CarriedInventory, IMixinCarriedInventory {
 
-    private Carrier carrier;
+    @Nullable private Carrier carrier;
 
     @Override
     public Optional<Carrier> getCarrier() {

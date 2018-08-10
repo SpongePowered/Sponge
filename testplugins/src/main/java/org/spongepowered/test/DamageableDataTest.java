@@ -39,7 +39,7 @@ import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Optional;
 
-@Plugin(id = "damageabledatatest", name = "Damageable Data Test", description = "A plugin to test damageable data.")
+@Plugin(id = "damageabledatatest", name = "Damageable Data Test", description = "A plugin to test damageable data.", version = "0.0.0")
 public class DamageableDataTest {
 
     @Listener

@@ -24,8 +24,10 @@
  */
 package org.spongepowered.common.interfaces.block;
 
+import org.spongepowered.api.CatalogKey;
+
 public interface IMixinPropertyHolder {
 
-    void setId(String id);
+    void setId(CatalogKey id);
 
 }

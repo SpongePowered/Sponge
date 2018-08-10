@@ -26,21 +26,22 @@ package org.spongepowered.common.event.damage;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifierType;
 
 public class SpongeDamageModifierType implements DamageModifierType {
 
-    private final String id;
     private final String name;
+    private final CatalogKey key;
 
     public SpongeDamageModifierType(String name, String id) {
         this.name = name;
-        this.id = id;
+        this.key = CatalogKey.resolve(id);
     }
 
     @Override
-    public String getId() {
-        return this.id;
+    public CatalogKey getKey() {
+        return this.key;
     }
 
     @Override
@@ -57,19 +58,19 @@ public class SpongeDamageModifierType implements DamageModifierType {
             return false;
         }
         SpongeDamageModifierType that = (SpongeDamageModifierType) o;
-        return Objects.equal(this.id, that.id) &&
+        return Objects.equal(this.key, that.key) &&
                Objects.equal(this.name, that.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(this.id, this.name);
+        return Objects.hashCode(this.key, this.name);
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-            .add("id", this.id)
+            .add("id", this.key)
             .add("name", this.name)
             .toString();
     }

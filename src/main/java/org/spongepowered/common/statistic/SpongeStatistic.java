@@ -34,6 +34,12 @@ import javax.annotation.Nullable;
 
 public interface SpongeStatistic extends Statistic {
 
+    /**
+     * We need this method to generate the id of this statistic. Since it's soft implemented
+     * into various target class
+     * @return
+     */
+    @SuppressWarnings("deprecation")
     @Override
     default String getId() {
         String spongeId = getSpongeId();

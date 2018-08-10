@@ -25,6 +25,7 @@
 package org.spongepowered.common.item.recipe.crafting;
 
 import com.google.common.base.Preconditions;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
@@ -36,13 +37,13 @@ import java.util.Optional;
 public class DelegateSpongeCraftingRecipe extends AbstractSpongeCraftingRecipe {
 
     private final CraftingRecipe recipe;
-    private final String id;
+    private final CatalogKey id;
 
     public DelegateSpongeCraftingRecipe(CraftingRecipe recipe) {
         Preconditions.checkNotNull(recipe, "recipe");
 
         this.recipe = recipe;
-        this.id = recipe.getId();
+        this.id = recipe.getKey();
     }
 
     @Override
@@ -71,7 +72,7 @@ public class DelegateSpongeCraftingRecipe extends AbstractSpongeCraftingRecipe {
     }
 
     @Override
-    public String getId() {
+    public CatalogKey getKey() {
         return this.id;
     }
 

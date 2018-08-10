@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.registry;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementTree;
@@ -91,9 +92,22 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackGenerator;
+import org.spongepowered.api.item.inventory.InventoryTransformation;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
+import org.spongepowered.api.item.inventory.property.EquipmentSlotType;
 import org.spongepowered.api.item.inventory.property.GuiId;
+import org.spongepowered.api.item.inventory.property.GuiIdProperty;
+import org.spongepowered.api.item.inventory.property.Identifiable;
+import org.spongepowered.api.item.inventory.property.IntProperty;
+import org.spongepowered.api.item.inventory.property.InventoryCapacity;
+import org.spongepowered.api.item.inventory.property.InventoryDimension;
+import org.spongepowered.api.item.inventory.property.InventoryTitle;
+import org.spongepowered.api.item.inventory.property.SlotIndex;
+import org.spongepowered.api.item.inventory.property.SlotPos;
+import org.spongepowered.api.item.inventory.property.SlotSide;
+import org.spongepowered.api.item.inventory.property.StringProperty;
 import org.spongepowered.api.item.inventory.query.QueryOperationType;
+import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.item.merchant.TradeOfferGenerator;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
@@ -170,6 +184,7 @@ import org.spongepowered.common.boss.ServerBossBarBuilder;
 import org.spongepowered.common.data.SpongeDataRegistrationBuilder;
 import org.spongepowered.common.data.SpongeKeyBuilder;
 import org.spongepowered.common.data.SpongeManipulatorRegistry;
+import org.spongepowered.common.data.builder.CatalogKeyBuilder;
 import org.spongepowered.common.item.enchantment.SpongeEnchantmentBuilder;
 import org.spongepowered.common.data.builder.meta.SpongePatternLayerBuilder;
 import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
@@ -185,10 +200,23 @@ import org.spongepowered.common.event.damage.*;
 import org.spongepowered.common.extra.fluid.SpongeFluidStackBuilder;
 import org.spongepowered.common.extra.fluid.SpongeFluidStackSnapshotBuilder;
 import org.spongepowered.common.item.SpongeFireworkEffectBuilder;
+import org.spongepowered.common.item.inventory.InventoryTransactionResultImpl;
 import org.spongepowered.common.item.inventory.SpongeInventoryBuilder;
 import org.spongepowered.common.item.inventory.SpongeItemStackBuilder;
 import org.spongepowered.common.item.inventory.archetype.SpongeInventoryArchetypeBuilder;
 import org.spongepowered.common.item.inventory.generation.SpongeItemStackGenerator;
+import org.spongepowered.common.item.inventory.property.EquipmentSlotTypeImpl;
+import org.spongepowered.common.item.inventory.property.GuiIdPropertyImpl;
+import org.spongepowered.common.item.inventory.property.IdentifiableImpl;
+import org.spongepowered.common.item.inventory.property.IntPropertyImpl;
+import org.spongepowered.common.item.inventory.property.InventoryCapacityImpl;
+import org.spongepowered.common.item.inventory.property.InventoryDimensionImpl;
+import org.spongepowered.common.item.inventory.property.InventoryTitleImpl;
+import org.spongepowered.common.item.inventory.property.SlotIndexImpl;
+import org.spongepowered.common.item.inventory.property.SlotPosImpl;
+import org.spongepowered.common.item.inventory.property.SlotSideImpl;
+import org.spongepowered.common.item.inventory.property.StringPropertyImpl;
+import org.spongepowered.common.item.inventory.query.SpongeTransformationBuilder;
 import org.spongepowered.common.item.merchant.SpongeTradeOfferBuilder;
 import org.spongepowered.common.item.merchant.SpongeTradeOfferGenerator;
 import org.spongepowered.common.item.recipe.crafting.SpongeCraftingRecipeRegistry;
@@ -388,6 +416,7 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(BiomeGenerationSettings.Builder.class, SpongeBiomeGenerationSettingsBuilder::new)
             .registerBuilderSupplier(InventoryArchetype.Builder.class, SpongeInventoryArchetypeBuilder::new)
             .registerBuilderSupplier(Inventory.Builder.class, SpongeInventoryBuilder::new)
+            .registerBuilderSupplier(InventoryTransformation.Builder.class, SpongeTransformationBuilder::new)
             .registerBuilderSupplier(SoundType.Builder.class, SpongeSoundBuilder::new)
             .registerBuilderSupplier(LocatableBlock.Builder.class, SpongeLocatableBlockBuilder::new)
             .registerBuilderSupplier(Fossil.Builder.class, FossilBuilder::new)
@@ -407,6 +436,19 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(ScoreAdvancementCriterion.Builder.class, SpongeScoreCriterionBuilder::new)
             .registerBuilderSupplier(FilteredTrigger.Builder.class, SpongeFilteredTriggerBuilder::new)
             .registerBuilderSupplier(Trigger.Builder.class, SpongeTriggerBuilder::new)
+            .registerBuilderSupplier(SlotPos.Builder.class, SlotPosImpl.BuilderImpl::new)
+            .registerBuilderSupplier(SlotSide.Builder.class, SlotSideImpl.BuilderImpl::new)
+            .registerBuilderSupplier(StringProperty.Builder.class, StringPropertyImpl.BuilderImpl::new)
+            .registerBuilderSupplier(IntProperty.Builder.class, IntPropertyImpl.BuilderImpl::new)
+            .registerBuilderSupplier(SlotIndex.Builder.class, SlotIndexImpl.BuilderImpl::new)
+            .registerBuilderSupplier(InventoryCapacity.Builder.class, InventoryCapacityImpl.BuilderImpl::new)
+            .registerBuilderSupplier(Identifiable.Builder.class, IdentifiableImpl.BuilderImpl::new)
+            .registerBuilderSupplier(GuiIdProperty.Builder.class, GuiIdPropertyImpl.BuilderImpl::new)
+            .registerBuilderSupplier(EquipmentSlotType.Builder.class, EquipmentSlotTypeImpl.BuilderImpl::new)
+            .registerBuilderSupplier(InventoryDimension.Builder.class, InventoryDimensionImpl.BuilderImpl::new)
+            .registerBuilderSupplier(InventoryTitle.Builder.class, InventoryTitleImpl.BuilderImpl::new)
+            .registerBuilderSupplier(InventoryTransactionResult.Builder.class, InventoryTransactionResultImpl.Builder::new)
+            .registerBuilderSupplier(CatalogKey.Builder.class, CatalogKeyBuilder::new)
         ;
     }
 
@@ -438,7 +480,7 @@ public final class CommonModuleRegistry {
             .registerModule(DamageType.class, new DamageTypeRegistryModule())
             .registerModule(DataFormat.class, new DataFormatRegistryModule())
             .registerModule(DataTranslator.class, DataTranslatorRegistryModule.getInstance())
-            .registerModule(Difficulty.class, new DifficultyRegistryModule())
+            .registerModule(Difficulty.class, DifficultyRegistryModule.getInstance())
             .registerModule(DimensionType.class, DimensionTypeRegistryModule.getInstance())
             .registerModule(DirtType.class, new DirtTypeRegistryModule())
             .registerModule(DisguisedBlockType.class, new DisguisedBlockTypeRegistryModule())
@@ -495,7 +537,7 @@ public final class CommonModuleRegistry {
             .registerModule(StoneType.class, new StoneTypeRegistryModule())
             .registerModule(TeleportHelperFilter.class, new TeleportHelperFilterRegistryModule())
             .registerModule(TeleportType.class, TeleportTypeRegistryModule.getInstance())
-            .registerModule(TextColor.class, new TextColorRegistryModule())
+            .registerModule(TextColor.class, TextColorRegistryModule.getInstance())
             .registerModule(TextSerializer.class, new TextSerializerRegistryModule())
             .registerModule(TextStyle.Base.class, new TextStyleRegistryModule())
             .registerModule(TileEntityType.class, TileEntityTypeRegistryModule.getInstance())
@@ -506,6 +548,7 @@ public final class CommonModuleRegistry {
             .registerModule(StatisticType.class, new StatisticTypeRegistryModule())
             .registerModule(WallType.class, new WallTypeRegistryModule())
             .registerModule(Weather.class, new WeatherRegistryModule())
+            .registerModule(WireAttachmentType.class, new WireAttachmentRegistryModule())
             .registerModule(WorldGeneratorModifier.class, WorldGeneratorModifierRegistryModule.getInstance())
             .registerModule(TransactionType.class, new TransactionTypeRegistryModule())
             .registerModule(ChatVisibility.class, new ChatVisibilityRegistryModule())
@@ -522,6 +565,7 @@ public final class CommonModuleRegistry {
             .registerModule((Class<Key<?>>) (Class<?>) Key.class, KeyRegistryModule.getInstance())
             .registerModule(GuiId.class, GuiIdRegistryModule.getInstance())
             .registerModule(InventoryArchetype.class, InventoryArchetypeRegistryModule.getInstance())
+            .registerModule(TransformationRegistryModule.getInstance())
             .registerModule(StructureMode.class, new StructureModeRegistryModule())
             .registerModule(CraftingRecipe.class, SpongeCraftingRecipeRegistry.getInstance())
             .registerModule(EventContextKey.class, EventContextKeysModule.getInstance())
@@ -535,13 +579,14 @@ public final class CommonModuleRegistry {
             .registerModule(Trigger.class, TriggerTypeRegistryModule.getInstance())
             .registerModule(new CriterionRegistryModule())
             .registerModule(((Class<DataRegistration<?, ?>>) (Class<?>) DataRegistration.class), SpongeManipulatorRegistry.getInstance())
+            .registerModule(new ItemStackComparatorRegistryModule())
 
             // Miscellaneous Registries
             .registerModule(DungeonMobRegistryModule.getInstance())
             ;
     }
 
-    CommonModuleRegistry() { }
+    private CommonModuleRegistry() { }
 
     private static final class Holder {
 

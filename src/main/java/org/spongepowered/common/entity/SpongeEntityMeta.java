@@ -27,20 +27,24 @@ package org.spongepowered.common.entity;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import com.google.common.base.MoreObjects;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.common.SpongeCatalogType;
 
 public class SpongeEntityMeta extends SpongeCatalogType {
 
+    public static final DataQuery ENTITY_TYPE_ID = of("id");
+    public static final DataQuery ENTITY_TYPE_NAME = of("name");
     public final int type;
 
     public SpongeEntityMeta(int type, String name) {
-        super(name);
+        super(CatalogKey.resolve(name), name);
         this.type = type;
     }
 
     public DataContainer toContainer() {
-        return DataContainer.createNew().set(of("id"), this.type).set(of("name"), getId());
+        return DataContainer.createNew().set(ENTITY_TYPE_ID, this.type).set(ENTITY_TYPE_NAME, getKey());
     }
 
     @Override

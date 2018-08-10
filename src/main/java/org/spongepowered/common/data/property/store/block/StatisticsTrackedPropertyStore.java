@@ -26,9 +26,12 @@ package org.spongepowered.common.data.property.store.block;
 
 import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.data.property.block.StatisticsTrackedProperty;
+import org.spongepowered.api.world.Location;
 import org.spongepowered.common.data.property.store.common.AbstractBlockPropertyStore;
 
 import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 public class StatisticsTrackedPropertyStore extends AbstractBlockPropertyStore<StatisticsTrackedProperty> {
 
@@ -40,7 +43,7 @@ public class StatisticsTrackedPropertyStore extends AbstractBlockPropertyStore<S
     }
 
     @Override
-    protected Optional<StatisticsTrackedProperty> getForBlock(IBlockState block) {
+    protected Optional<StatisticsTrackedProperty> getForBlock(@Nullable Location<?> location, IBlockState block) {
         return Optional.of(block.getBlock().getEnableStats() ? TRUE : FALSE);
     }
 

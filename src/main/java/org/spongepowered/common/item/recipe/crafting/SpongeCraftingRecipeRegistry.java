@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipeRegistry;
@@ -52,6 +53,7 @@ import java.util.Optional;
  * Implementation of the CraftingRecipeRegistry.
  * Proxy for {@link CraftingManager}
  */
+@SuppressWarnings("deprecation")
 public class SpongeCraftingRecipeRegistry implements CraftingRecipeRegistry, SpongeAdditionalCatalogRegistryModule<CraftingRecipe> {
 
     public static SpongeCraftingRecipeRegistry getInstance() {
@@ -64,7 +66,7 @@ public class SpongeCraftingRecipeRegistry implements CraftingRecipeRegistry, Spo
     private boolean registrationsComplete = false;
     private List<CraftingRecipe> customRecipes = new ArrayList<>();
 
-    private SpongeCraftingRecipeRegistry() {
+    SpongeCraftingRecipeRegistry() {
     }
 
     @Override
@@ -98,7 +100,7 @@ public class SpongeCraftingRecipeRegistry implements CraftingRecipeRegistry, Spo
     public void registerDefaults() {
         for (IRecipe iRecipe : CraftingManager.REGISTRY) {
             CraftingRecipe recipe = (CraftingRecipe) iRecipe;
-            this.recipeMappings.put(recipe.getId(), recipe);
+            this.recipeMappings.put(recipe.getKey().toString(), recipe);
         }
 
         RegistryHelper.setFinalStatic(Ingredient.class, "NONE", net.minecraft.item.crafting.Ingredient.EMPTY);
@@ -110,7 +112,7 @@ public class SpongeCraftingRecipeRegistry implements CraftingRecipeRegistry, Spo
         if (!(recipe instanceof IRecipe)) { // Handle custom implemented Recipe Interfaces
             recipe = new DelegateSpongeCraftingRecipe(recipe);
         }
-        this.recipeMappings.put(recipe.getId(), recipe);
+        this.recipeMappings.put(recipe.getKey().toString(), recipe);
         this.customRecipes.add(recipe);
     }
 
@@ -120,12 +122,17 @@ public class SpongeCraftingRecipeRegistry implements CraftingRecipeRegistry, Spo
     }
 
     @Override
+    public Optional<CraftingRecipe> get(CatalogKey key) {
+        return SpongeImplHooks.getRecipeById(key);
+    }
+
+    @Override
     public Collection<CraftingRecipe> getAll() {
         return this.getRecipes();
     }
 
     public List<CraftingRecipe> getCustomRecipes() {
-        return customRecipes;
+        return this.customRecipes;
     }
 
     public void registerCustomWithVanilla() {

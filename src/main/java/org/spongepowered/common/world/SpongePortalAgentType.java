@@ -28,24 +28,27 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
 import net.minecraft.world.Teleporter;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.world.PortalAgent;
 import org.spongepowered.api.world.PortalAgentType;
+import org.spongepowered.common.interfaces.world.IMixinITeleporter;
 
-public class SpongePortalAgentType implements PortalAgentType {
+public final class SpongePortalAgentType implements PortalAgentType {
 
-    private String name;
-    private String id;
-    private Class<? extends Teleporter> portalAgentClass;
+    private final String name;
+    private final Class<? extends IMixinITeleporter> portalAgentClass;
+    private final CatalogKey key;
 
-    public SpongePortalAgentType(String name, String id, Class<? extends Teleporter> portalAgentClass) {
+    public SpongePortalAgentType(String id, String name, Class<? extends IMixinITeleporter> portalAgentClass) {
         this.name = checkNotNull(name);
-        this.id = checkNotNull(id);
-        this.portalAgentClass = checkNotNull(portalAgentClass, "The portalAgent class was null! The name was: " + name);
+        this.portalAgentClass = checkNotNull(portalAgentClass, "The class was null! The id was: " + id);
+        this.key = CatalogKey.resolve(id);
     }
 
+
     @Override
-    public String getId() {
-        return this.id;
+    public CatalogKey getKey() {
+        return this.key;
     }
 
     @Override
@@ -62,9 +65,10 @@ public class SpongePortalAgentType implements PortalAgentType {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("name", this.name)
-                .add("class", this.portalAgentClass.getName())
-                .toString();
+            .add("id", this.key)
+            .add("name", this.name)
+            .add("class", this.portalAgentClass.getName())
+            .toString();
     }
 
     @Override
@@ -74,12 +78,12 @@ public class SpongePortalAgentType implements PortalAgentType {
         }
 
         PortalAgentType other = (PortalAgentType) obj;
-        return this.name.equalsIgnoreCase(other.getName()) && this.portalAgentClass.equals(other.getPortalAgentClass());
+        return this.key.equals(other.getKey());
 
     }
 
     @Override
     public int hashCode() {
-        return super.hashCode(); // todo this is a warning
+        return this.key.hashCode();
     }
 }

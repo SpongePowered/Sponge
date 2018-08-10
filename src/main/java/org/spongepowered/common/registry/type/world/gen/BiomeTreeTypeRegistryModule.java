@@ -42,23 +42,20 @@ import net.minecraft.world.gen.feature.WorldGenTaiga1;
 import net.minecraft.world.gen.feature.WorldGenTaiga2;
 import net.minecraft.world.gen.feature.WorldGenTrees;
 import net.minecraft.world.gen.feature.WorldGenerator;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.api.world.gen.type.BiomeTreeType;
 import org.spongepowered.api.world.gen.type.BiomeTreeTypes;
 import org.spongepowered.common.interfaces.world.gen.IWorldGenTrees;
-import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 import org.spongepowered.common.world.gen.type.SpongeBiomeTreeType;
 
 import javax.annotation.Nullable;
 
 @RegisterCatalog(BiomeTreeTypes.class)
-public class BiomeTreeTypeRegistryModule extends AbstractPrefixAlternateCatalogTypeRegistryModule<BiomeTreeType> {
-
-    public BiomeTreeTypeRegistryModule() {
-        super("minecraft");
-    }
+public class BiomeTreeTypeRegistryModule extends AbstractCatalogRegistryModule<BiomeTreeType> {
 
     @Override
     public void registerDefaults() {
@@ -97,6 +94,6 @@ public class BiomeTreeTypeRegistryModule extends AbstractPrefixAlternateCatalogT
     }
 
     private SpongeBiomeTreeType create(String name, WorldGenerator small, @Nullable WorldGenerator large) {
-        return new SpongeBiomeTreeType("minecraft:" + name, name, (PopulatorObject) small, (PopulatorObject) large);
+        return new SpongeBiomeTreeType(CatalogKey.minecraft(name), name, (PopulatorObject) small, (PopulatorObject) large);
     }
 }

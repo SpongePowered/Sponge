@@ -55,7 +55,7 @@ public class SpongeBlockDamageSourceBuilder extends AbstractDamageSourceBuilder<
         checkState(this.location != null);
         checkState(this.blockSnapshot != null);
         checkState(this.damageType != null);
-        MinecraftBlockDamageSource damageSource = new MinecraftBlockDamageSource(this.damageType.getId(), this.location);
+        MinecraftBlockDamageSource damageSource = new MinecraftBlockDamageSource(this.damageType.getKey(), this.location);
         if (this.absolute) {
             damageSource.setDamageIsAbsolute();
         }

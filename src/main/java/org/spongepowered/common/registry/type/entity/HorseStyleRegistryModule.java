@@ -60,7 +60,7 @@ public class HorseStyleRegistryModule extends AbstractPrefixAlternateCatalogType
     }
 
     public static HorseStyle getHorseStyle(DataView container) {
-        return SpongeImpl.getRegistry().getType(HorseStyle.class, getData(container, Keys.HORSE_STYLE, String.class)).get();
+        return SpongeImpl.getRegistry().getType(HorseStyle.class, container.getString(Keys.HORSE_STYLE.getQuery()).get()).get();
     }
 
     public static HorseStyleRegistryModule getInstance() {

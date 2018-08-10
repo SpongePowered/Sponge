@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.server.management;
 
+import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockChest;
 import net.minecraft.block.BlockCommandBlock;
@@ -52,6 +53,7 @@ import net.minecraft.world.GameType;
 import net.minecraft.world.ILockableContainer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.util.Tristate;
@@ -59,10 +61,12 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerInteractionManager;
+import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
-import org.spongepowered.common.util.VecHelper;
 
 @Mixin(value = PlayerInteractionManager.class)
 public abstract class MixinPlayerInteractionManager implements IMixinPlayerInteractionManager {
@@ -109,13 +113,20 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
         } // else { // Sponge - Remove unecessary else
         // Sponge Start - Create an interact block event before something happens.
         final ItemStack oldStack = stack.copy();
-
+        final Vector3d hitVec = new Vector3d(pos.getX() + hitX, pos.getY() + hitY, pos.getZ() + hitZ);
         final BlockSnapshot currentSnapshot = ((World) worldIn).createSnapshot(pos.getX(), pos.getY(), pos.getZ());
-        final InteractBlockEvent.Secondary event = SpongeCommonEventFactory.callInteractBlockEventSecondary(player, oldStack, VecHelper.toVector3d(pos.add
-                (hitX, hitY, hitZ)), currentSnapshot, DirectionFacingProvider.getInstance().getKey(facing).get(), hand);
+        Sponge.getCauseStackManager().addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(oldStack));
+        final boolean interactItemCancelled = SpongeCommonEventFactory.callInteractItemEventSecondary(player, oldStack, hand, hitVec, currentSnapshot).isCancelled();
+        final InteractBlockEvent.Secondary event = SpongeCommonEventFactory.createInteractBlockEventSecondary(player, oldStack,
+                hitVec, currentSnapshot, DirectionFacingProvider.getInstance().getKey(facing).get(), hand);
+        if (interactItemCancelled) {
+            event.setUseItemResult(Tristate.FALSE);
+        }
+        SpongeImpl.postEvent(event);
         if (!ItemStack.areItemStacksEqual(oldStack, this.player.getHeldItem(hand))) {
             SpongeCommonEventFactory.playerInteractItemChanged = true;
         }
+        SpongeCommonEventFactory.lastInteractItemOnBlockCancelled = event.getUseItemResult() == Tristate.UNDEFINED ? false : !event.getUseItemResult().asBoolean();
 
         if (event.isCancelled()) {
             final IBlockState state = (IBlockState) currentSnapshot.getState();
@@ -201,10 +212,13 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
         // }
         // } // Sponge - Remove unecessary else bracket
         // Sponge Start - complete the method with the micro change of resetting item damage and quantity from the copied stack.
-        final EnumActionResult result = stack.onItemUse(player, worldIn, pos, hand, facing, hitX, hitY, hitZ);
-        if (this.isCreative()) {
-            stack.setItemDamage(oldStack.getItemDamage());
-            stack.setCount(oldStack.getCount());
+        EnumActionResult result = EnumActionResult.PASS;
+        if (event.getUseItemResult() != Tristate.FALSE) {
+            result = stack.onItemUse(player, worldIn, pos, hand, facing, hitX, hitY, hitZ);
+            if (this.isCreative()) {
+                stack.setItemDamage(oldStack.getItemDamage());
+                stack.setCount(oldStack.getCount());
+            }
         }
 
         if (!ItemStack.areItemStacksEqual(player.getHeldItem(hand), oldStack) || result != EnumActionResult.SUCCESS) {
@@ -218,15 +232,16 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
 
     @Override
     public EnumActionResult handleOpenEvent(Container lastOpenContainer, EntityPlayerMP player, BlockSnapshot blockSnapshot, EnumActionResult result) {
-
         if (lastOpenContainer != player.openContainer) {
-            Sponge.getCauseStackManager().pushCause(player);
-            Sponge.getCauseStackManager().addContext(EventContextKeys.BLOCK_HIT, blockSnapshot);
-            if (!SpongeCommonEventFactory.callInteractInventoryOpenEvent(player)) {
-                result = EnumActionResult.FAIL;
-                SpongeCommonEventFactory.interactBlockEventCancelled = true;
+            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                frame.pushCause(player);
+                frame.addContext(EventContextKeys.BLOCK_HIT, blockSnapshot);
+                ((IMixinContainer) player.openContainer).setOpenLocation(blockSnapshot.getLocation().orElse(null));
+                if (!SpongeCommonEventFactory.callInteractInventoryOpenEvent(player)) {
+                    result = EnumActionResult.FAIL;
+                    SpongeCommonEventFactory.interactBlockEventCancelled = true;
+                }
             }
-            Sponge.getCauseStackManager().popCause();
         }
         return result;
     }

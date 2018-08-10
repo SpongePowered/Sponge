@@ -59,17 +59,17 @@ public class RegistryModuleTest {
     @Test
     public void testGetCatalogTypeFromAll() {
         final boolean contains = this.registryModule.getAll().contains(this.catalogType);
-        assertThat("The CatalogType " + this.catalogType.getId() + " could not be located in the \n"
+        assertThat("The CatalogType " + this.catalogType.getKey() + " could not be located in the \n"
                    + "all collection of " + this.registryModule.getClass().getSimpleName() + ".",
             contains, is(true));
     }
 
     @Test
     public void testGetCatalogTypeById() {
-        assertThat("The CatalogType " + this.catalogType.getId() + " could not be retrieved by id \n"
+        assertThat("The CatalogType " + this.catalogType.getKey() + " could not be retrieved by id \n"
                    + "from " + this.registryModule.getClass().getSimpleName() + " with the following id: \n"
                    + this.catalogId,
-            this.registryModule.getById(this.catalogType.getId()).isPresent(), is(true));
+            this.registryModule.get(this.catalogType.getKey()).isPresent(), is(true));
     }
 
 

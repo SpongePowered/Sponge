@@ -29,9 +29,12 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import org.spongepowered.api.data.property.block.HeldItemProperty;
 import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.world.Location;
 import org.spongepowered.common.data.property.store.common.AbstractBlockPropertyStore;
 
 import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 public class HeldItemPropertyStore extends AbstractBlockPropertyStore<HeldItemProperty> {
 
@@ -40,7 +43,7 @@ public class HeldItemPropertyStore extends AbstractBlockPropertyStore<HeldItemPr
     }
 
     @Override
-    protected Optional<HeldItemProperty> getForBlock(IBlockState block) {
+    protected Optional<HeldItemProperty> getForBlock(@Nullable Location<?> location, IBlockState block) {
         final Item item = Item.getItemFromBlock(block.getBlock());
         if (item instanceof ItemBlock) {
             return Optional.of(new HeldItemProperty((ItemType) item));

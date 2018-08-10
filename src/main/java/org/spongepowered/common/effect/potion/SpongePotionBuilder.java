@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.potion.Potion;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
@@ -36,6 +37,7 @@ import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.data.util.DataVersions;
 
 import java.util.Optional;
 
@@ -48,7 +50,7 @@ public class SpongePotionBuilder extends AbstractDataBuilder<PotionEffect> imple
     private boolean showParticles;
 
     public SpongePotionBuilder() {
-        super(PotionEffect.class, 1);
+        super(PotionEffect.class, DataVersions.Potion.CURRENT_VERSION);
     }
 
     @Override
@@ -70,7 +72,7 @@ public class SpongePotionBuilder extends AbstractDataBuilder<PotionEffect> imple
             return Optional.empty();
         }
         String effectName = container.getString(DataQueries.POTION_TYPE).get();
-        Optional<PotionEffectType> optional = Sponge.getRegistry().getType(PotionEffectType.class, effectName);
+        Optional<PotionEffectType> optional = Sponge.getRegistry().getType(PotionEffectType.class, CatalogKey.resolve(effectName));
         if (!optional.isPresent()) {
             throw new InvalidDataException("The container has an invalid potion type name: " + effectName);
         }

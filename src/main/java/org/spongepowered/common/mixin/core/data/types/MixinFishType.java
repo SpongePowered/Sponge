@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.item.ItemFishFood;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.CookedFish;
 import org.spongepowered.api.data.type.Fish;
 import org.spongepowered.api.text.translation.Translation;
@@ -36,28 +37,34 @@ import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 @Mixin(ItemFishFood.FishType.class)
 public abstract class MixinFishType implements Fish {
 
-    @Shadow @Final private String unlocalizedName;
+    @Shadow @Final private String translationKey;
     @Final @Shadow private boolean cookable;
 
     private Translation translation;
+    @Nullable private CatalogKey key;
 
     @Override
-    public String getId() {
-        return "minecraft:raw." + this.unlocalizedName;
+    public CatalogKey getKey() {
+        if (this.key == null) {
+            this.key = CatalogKey.minecraft("raw." + this.translationKey);
+        }
+        return this.key;
     }
 
     @Override
     public String getName() {
-        return this.unlocalizedName;
+        return this.translationKey;
     }
 
     @Override
     public Optional<CookedFish> getCookedFish() {
         if (this.cookable) {
-            final Optional<CookedFish> optional = SpongeImpl.getRegistry().getType(CookedFish.class, "cooked." + this.unlocalizedName);
+            final Optional<CookedFish> optional = SpongeImpl.getRegistry().getType(CookedFish.class, "cooked." + this.translationKey);
             if (optional.isPresent()) {
                 return optional;
             }
@@ -69,7 +76,7 @@ public abstract class MixinFishType implements Fish {
     public Translation getTranslation() {
         // Maybe move this to a @Inject at the end of the constructor
         if (this.translation == null) {
-            this.translation = new SpongeTranslation("item.fish." + this.unlocalizedName + ".raw.name");
+            this.translation = new SpongeTranslation("item.fish." + this.translationKey + ".raw.name");
         }
         return this.translation;
     }

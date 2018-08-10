@@ -24,53 +24,27 @@
  */
 package org.spongepowered.common.registry.type.effect;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.effect.sound.SoundCategories;
 import org.spongepowered.api.effect.sound.SoundCategory;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
-public final class SoundCategoryRegistryModule implements AlternateCatalogRegistryModule<SoundCategory> {
-
-    @RegisterCatalog(SoundCategories.class)
-    private final Map<String, SoundCategory> soundCategoryMap = new HashMap<>();
-
-    @Override
-    public Map<String, SoundCategory> provideCatalogMap() {
-        Map<String, SoundCategory> soundCategoryMap = new HashMap<>();
-        for (Map.Entry<String, SoundCategory> entry : this.soundCategoryMap.entrySet()) {
-            soundCategoryMap.put(entry.getKey().replace("minecraft:", ""), entry.getValue());
-        }
-        return soundCategoryMap;
-    }
-
-    @Override
-    public Optional<SoundCategory> getById(String id) {
-        return Optional.ofNullable(this.soundCategoryMap.get(Preconditions.checkNotNull(id).toLowerCase()));
-    }
-
-    @Override
-    public Collection<SoundCategory> getAll() {
-        return ImmutableList.copyOf(this.soundCategoryMap.values());
-    }
+@RegisterCatalog(SoundCategories.class)
+public final class SoundCategoryRegistryModule extends AbstractCatalogRegistryModule<SoundCategory> implements AlternateCatalogRegistryModule<SoundCategory> {
 
     @Override
     public void registerDefaults() {
-        this.soundCategoryMap.put("minecraft:master", (SoundCategory) (Object) net.minecraft.util.SoundCategory.MASTER);
-        this.soundCategoryMap.put("minecraft:music", (SoundCategory) (Object) net.minecraft.util.SoundCategory.MUSIC);
-        this.soundCategoryMap.put("minecraft:record", (SoundCategory) (Object) net.minecraft.util.SoundCategory.RECORDS);
-        this.soundCategoryMap.put("minecraft:weather", (SoundCategory) (Object) net.minecraft.util.SoundCategory.WEATHER);
-        this.soundCategoryMap.put("minecraft:block", (SoundCategory) (Object) net.minecraft.util.SoundCategory.BLOCKS);
-        this.soundCategoryMap.put("minecraft:hostile", (SoundCategory) (Object) net.minecraft.util.SoundCategory.HOSTILE);
-        this.soundCategoryMap.put("minecraft:neutral", (SoundCategory) (Object) net.minecraft.util.SoundCategory.NEUTRAL);
-        this.soundCategoryMap.put("minecraft:player",  (SoundCategory) (Object) net.minecraft.util.SoundCategory.PLAYERS);
-        this.soundCategoryMap.put("minecraft:ambient", (SoundCategory) (Object) net.minecraft.util.SoundCategory.AMBIENT);
-        this.soundCategoryMap.put("minecraft:voice", (SoundCategory) (Object) net.minecraft.util.SoundCategory.VOICE);
+        register(CatalogKey.minecraft("master"), (SoundCategory) (Object) net.minecraft.util.SoundCategory.MASTER);
+        register(CatalogKey.minecraft("music"), (SoundCategory) (Object) net.minecraft.util.SoundCategory.MUSIC);
+        register(CatalogKey.minecraft("record"), (SoundCategory) (Object) net.minecraft.util.SoundCategory.RECORDS);
+        register(CatalogKey.minecraft("weather"), (SoundCategory) (Object) net.minecraft.util.SoundCategory.WEATHER);
+        register(CatalogKey.minecraft("block"), (SoundCategory) (Object) net.minecraft.util.SoundCategory.BLOCKS);
+        register(CatalogKey.minecraft("hostile"), (SoundCategory) (Object) net.minecraft.util.SoundCategory.HOSTILE);
+        register(CatalogKey.minecraft("neutral"), (SoundCategory) (Object) net.minecraft.util.SoundCategory.NEUTRAL);
+        register(CatalogKey.minecraft("player"),  (SoundCategory) (Object) net.minecraft.util.SoundCategory.PLAYERS);
+        register(CatalogKey.minecraft("ambient"), (SoundCategory) (Object) net.minecraft.util.SoundCategory.AMBIENT);
+        register(CatalogKey.minecraft("voice"), (SoundCategory) (Object) net.minecraft.util.SoundCategory.VOICE);
     }
 }

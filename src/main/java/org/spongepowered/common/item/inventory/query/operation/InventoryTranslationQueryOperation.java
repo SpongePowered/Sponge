@@ -42,7 +42,7 @@ public final class InventoryTranslationQueryOperation extends SpongeQueryOperati
     }
 
     @Override
-    public <TInventory, TStack> boolean matches(Lens<TInventory, TStack> lens, Lens<TInventory, TStack> parent, Fabric<TInventory> inventory) {
+    public boolean matches(Lens lens, Lens parent, Fabric inventory) {
         return Objects.equals(lens.getName(inventory), translation);
     }
 

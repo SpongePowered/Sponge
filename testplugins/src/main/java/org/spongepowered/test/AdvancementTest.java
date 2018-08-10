@@ -29,6 +29,7 @@ import com.google.inject.Inject;
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 import org.slf4j.Logger;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.advancement.AdvancementTypes;
@@ -45,12 +46,15 @@ import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.advancement.AdvancementEvent;
 import org.spongepowered.api.event.advancement.AdvancementTreeEvent;
+import org.spongepowered.api.event.advancement.CriterionEvent;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.filter.Getter;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.game.GameRegistryEvent;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
+import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
@@ -59,6 +63,7 @@ import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.explosion.Explosion;
 
 import java.util.HashMap;
@@ -67,7 +72,7 @@ import java.util.Random;
 
 import javax.annotation.Nullable;
 
-@Plugin(id = "advancement_test", name = "Advancement Test")
+@Plugin(id = "advancement_test", name = "Advancement Test", version = "0.0.0", description = "sponge-test")
 public class AdvancementTest {
 
     @Inject private Logger logger;
@@ -92,6 +97,7 @@ public class AdvancementTest {
         private float chance;
     }
 
+    @SuppressWarnings("rawtypes")
     @Listener
     public void onRegister(GameRegistryEvent.Register event) {
         this.logger.info("onRegister: " + event.getCatalogType().getName());
@@ -102,11 +108,13 @@ public class AdvancementTest {
         this.logger.info("onRegister<?>: " + event.getCatalogType().getName());
     }
 
+    @SuppressWarnings("rawtypes")
     @Listener
     public void onRegister3(GameRegistryEvent.Register<? extends Trigger> event) {
         this.logger.info("onRegister<? extends Trigger>: " + event.getCatalogType().getName());
     }
 
+    @SuppressWarnings("rawtypes")
     @Listener
     public void onRegisterKeys1(GameRegistryEvent.Register<Key> event) {
         this.logger.info("onRegister<Key>: " + event.getCatalogType().getName());
@@ -117,6 +125,7 @@ public class AdvancementTest {
         this.logger.info("onRegister<Key<?>>: " + event.getCatalogType().getName());
     }
 
+    @SuppressWarnings("rawtypes")
     @Listener
     public void onRegisterTriggers(GameRegistryEvent.Register<Trigger> event) {
         this.logger.info("Advancements test source: " + this.pluginContainer.getSource().orElse(null));
@@ -192,7 +201,7 @@ public class AdvancementTest {
         event.register(this.cookDirtAdvancement);
 
         this.suicidalAdvancement = null;
-        event.getRegistryModule().getById("minecraft:adventure_root").ifPresent(parent -> {
+        event.getRegistryModule().get(CatalogKey.minecraft("adventure_root")).ifPresent(parent -> {
             // Create the suicidal advancement
             this.suicidalAdvancement = Advancement.builder()
                     .parent(parent)
@@ -208,6 +217,11 @@ public class AdvancementTest {
                     .build();
             event.register(this.suicidalAdvancement);
         });
+    }
+
+    @Listener
+    public void onPlayerJoin(ClientConnectionEvent.Join event) {
+        event.getTargetEntity().getProgress(this.rootAdvancement).grant();
     }
 
     @Listener
@@ -285,7 +299,7 @@ public class AdvancementTest {
             return;
         }
         for (SlotTransaction transaction : event.getTransactions()) {
-            if (transaction.getSlot().getInventoryProperty(SlotIndex.class).get().getValue() == 0) {
+            if (transaction.getSlot().getProperty(SlotIndex.class).get().getValue() == 0) {
                 if (transaction.getFinal().getType() == ItemTypes.DIRT) {
                     player.getProgress(this.cookDirtAdvancement).grant();
                 } else if (this.suicidalAdvancement != null && (transaction.getFinal().getType() == ItemTypes.TNT ||
@@ -302,5 +316,15 @@ public class AdvancementTest {
                 }
             }
         }
+    }
+
+    @Listener
+    public void onCriterionGrant(CriterionEvent.Grant event) {
+        event.getTargetEntity().sendMessage(Text.of(TextColors.GREEN, "Congratulations on achieving criterion " + event.getCriterion().getName()));
+    }
+
+    @Listener
+    public void onAdvancementGrant(AdvancementEvent.Grant event) {
+        event.getTargetEntity().sendMessage(Text.of(TextColors.BLUE, "You achieved advancement " + event.getAdvancement().getName()));
     }
 }

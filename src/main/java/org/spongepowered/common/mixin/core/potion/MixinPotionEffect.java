@@ -37,6 +37,7 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.data.util.DataVersions;
 
 @NonnullByDefault
 @Mixin(net.minecraft.potion.PotionEffect.class)
@@ -76,14 +77,14 @@ public abstract class MixinPotionEffect implements PotionEffect {
 
     @Override
     public int getContentVersion() {
-        return 1;
+        return DataVersions.Potion.CURRENT_VERSION;
     }
 
     @Override
     public DataContainer toContainer() {
         return DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, getContentVersion())
-                .set(DataQueries.POTION_TYPE, this.potion.getName())
+                .set(DataQueries.POTION_TYPE, this.getType().getKey())
                 .set(DataQueries.POTION_DURATION, this.duration)
                 .set(DataQueries.POTION_AMPLIFIER, this.amplifier)
                 .set(DataQueries.POTION_AMBIANCE, this.isAmbient)

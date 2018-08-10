@@ -27,6 +27,7 @@ package org.spongepowered.common.world.biome;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.biome.BiomeGenerationSettings;
 import org.spongepowered.api.world.biome.BiomeType;
@@ -105,7 +106,7 @@ public class SpongeVirtualBiomeTypeBuilder implements VirtualBiomeType.Builder {
         checkNotNull(this.persisted, "persistedBiome");
         checkNotNull(this.func, "settings_function");
         checkArgument(!id.isEmpty());
-        return new SpongeVirtualBiomeType(id, this.name, this.temperature, this.humidity, this.persisted, this.func);
+        return new SpongeVirtualBiomeType(CatalogKey.resolve(id), this.name, this.temperature, this.humidity, this.persisted, this.func);
     }
 
 }

@@ -25,6 +25,7 @@
 package org.spongepowered.common.world.gen;
 
 import com.google.common.base.MoreObjects;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.world.gen.PopulatorType;
 
@@ -32,21 +33,21 @@ import java.util.Locale;
 
 public class SpongePopulatorType implements PopulatorType {
 
+    public final CatalogKey id;
     public final String populatorName;
-    public final String modId;
 
     public SpongePopulatorType(String name) {
         this(name.toLowerCase(Locale.ENGLISH), "minecraft");
     }
 
     public SpongePopulatorType(String name, String modId) {
+        this.id = CatalogKey.of(modId, name);
         this.populatorName = name.toLowerCase(Locale.ENGLISH);
-        this.modId = modId.toLowerCase(Locale.ENGLISH);
     }
 
     @Override
-    public String getId() {
-        return this.modId + ":" + this.populatorName;
+    public CatalogKey getKey() {
+        return this.id;
     }
 
     @Override
@@ -55,7 +56,7 @@ public class SpongePopulatorType implements PopulatorType {
     }
 
     public String getModId() {
-        return this.modId;
+        return this.id.getNamespace();
     }
 
     @Override
@@ -67,7 +68,7 @@ public class SpongePopulatorType implements PopulatorType {
             return false;
         }
         final SpongePopulatorType other = (SpongePopulatorType) obj;
-        if (!this.getId().equals(other.getId())) {
+        if (!this.getKey().equals(other.getKey())) {
             return false;
         }
         return true;
@@ -75,15 +76,14 @@ public class SpongePopulatorType implements PopulatorType {
 
     @Override
     public int hashCode() {
-        return this.getId().hashCode();
+        return this.getKey().hashCode();
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("id", this.getId())
+                .add("id", this.getKey())
                 .add("name", this.populatorName)
-                .add("modid", this.modId)
                 .toString();
     }
 

@@ -26,6 +26,7 @@ package org.spongepowered.common.data.type;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.event.cause.entity.teleport.TeleportType;
 
 import java.util.Locale;
@@ -34,15 +35,17 @@ public class SpongeTeleportType implements TeleportType {
 
     private String name;
     private String id;
+    private CatalogKey key;
 
     public SpongeTeleportType(String id, String name) {
         this.name = name;
         this.id = id.toLowerCase(Locale.ENGLISH);
+        this.key = CatalogKey.resolve(id);
     }
 
     @Override
-    public String getId() {
-        return this.id;
+    public CatalogKey getKey() {
+        return this.key;
     }
 
     @Override

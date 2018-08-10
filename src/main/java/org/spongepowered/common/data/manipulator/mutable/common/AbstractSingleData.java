@@ -27,6 +27,7 @@ package org.spongepowered.common.data.manipulator.mutable.common;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Objects;
+import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
@@ -93,6 +94,12 @@ public abstract class AbstractSingleData<T, M extends DataManipulator<M, I>, I e
         this.value = checkNotNull(value);
         // double casting due to jdk 6 type inference
         return (M) this;
+    }
+
+    @Override
+    public DataContainer toContainer() {
+        return super.toContainer()
+            .set(this.usedKey, getValue());
     }
 
     @Override

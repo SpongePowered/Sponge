@@ -46,6 +46,7 @@ import java.util.stream.Collectors;
 @Plugin(id = "entityspawntest", name = "EntitySpawnTest", version = "0.1.0", description = "Tests entity spawning.")
 public final class EntitySpawnTest {
 
+    @SuppressWarnings("rawtypes")
     @Listener
     public void onInitialization(final GameInitializationEvent event) {
         Sponge.getCommandManager().register(this,
@@ -81,7 +82,7 @@ public final class EntitySpawnTest {
                                     failed = true;
                                 }
                                 if (failed) {
-                                    throw new CommandException(Text.of(TextColors.RED, "You have failed to spawn a " + type.getId()));
+                                    throw new CommandException(Text.of(TextColors.RED, "You have failed to spawn a " + type.getKey().toString()));
                                 }
                             } else {
                                 src.sendMessage(Text.of(TextColors.GOLD, "You have spawned the following entities:"));

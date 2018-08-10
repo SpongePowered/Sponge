@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.item.inventory.adapter.impl.comp;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.type.InventoryRow;
 import org.spongepowered.common.item.inventory.lens.Fabric;
@@ -33,13 +31,13 @@ import org.spongepowered.common.item.inventory.lens.comp.InventoryRowLens;
 
 public class InventoryRowAdapter extends Inventory2DAdapter implements InventoryRow {
 
-    protected InventoryRowLens<IInventory, net.minecraft.item.ItemStack> rowLens;
+    protected InventoryRowLens rowLens;
 
-    public InventoryRowAdapter(Fabric<IInventory> inventory, InventoryRowLens<IInventory, ItemStack> root) {
+    public InventoryRowAdapter(Fabric inventory, InventoryRowLens root) {
         this(inventory, root, null);
     }
 
-    public InventoryRowAdapter(Fabric<IInventory> inventory, InventoryRowLens<IInventory, ItemStack> root, Inventory parent) {
+    public InventoryRowAdapter(Fabric inventory, InventoryRowLens root, Inventory parent) {
         super(inventory, root, parent);
         this.rowLens = root;
     }

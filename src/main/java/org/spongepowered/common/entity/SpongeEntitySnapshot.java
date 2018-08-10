@@ -179,23 +179,23 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
     public DataContainer toContainer() {
         final List<DataView> dataList = DataUtil.getSerializedImmutableManipulatorList(this.manipulators);
         final DataContainer container = DataContainer.createNew()
-                .set(Queries.CONTENT_VERSION, getContentVersion())
-                .set(Queries.WORLD_ID, this.worldUuid.toString())
-                .set(DataQueries.ENTITY_TYPE, this.entityType.getId())
+                    .set(Queries.CONTENT_VERSION, getContentVersion())
+                    .set(Queries.WORLD_ID, this.worldUuid.toString())
+                    .set(DataQueries.ENTITY_TYPE, this.entityType.getKey())
                 .createView(DataQueries.SNAPSHOT_WORLD_POSITION)
-                .set(Queries.POSITION_X, this.position.getX())
-                .set(Queries.POSITION_Y, this.position.getY())
-                .set(Queries.POSITION_Z, this.position.getZ())
+                    .set(Queries.POSITION_X, this.position.getX())
+                    .set(Queries.POSITION_Y, this.position.getY())
+                    .set(Queries.POSITION_Z, this.position.getZ())
                 .getContainer()
                 .createView(DataQueries.ENTITY_ROTATION)
-                .set(Queries.POSITION_X, this.rotation.getX())
-                .set(Queries.POSITION_Y, this.rotation.getY())
-                .set(Queries.POSITION_Z, this.rotation.getZ())
+                    .set(Queries.POSITION_X, this.rotation.getX())
+                    .set(Queries.POSITION_Y, this.rotation.getY())
+                    .set(Queries.POSITION_Z, this.rotation.getZ())
                 .getContainer()
                 .createView(DataQueries.ENTITY_SCALE)
-                .set(Queries.POSITION_X, this.scale.getX())
-                .set(Queries.POSITION_Y, this.scale.getY())
-                .set(Queries.POSITION_Z, this.scale.getZ())
+                    .set(Queries.POSITION_X, this.scale.getX())
+                    .set(Queries.POSITION_Y, this.scale.getY())
+                    .set(Queries.POSITION_Z, this.scale.getZ())
                 .getContainer()
                 .set(DataQueries.DATA_MANIPULATORS, dataList);
 
@@ -428,7 +428,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
             }
         }
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLUGIN);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLUGIN);
             Entity newEntity = world.get().createEntity(getType(), this.position);
             if (newEntity != null) {
                 net.minecraft.entity.Entity nmsEntity = (net.minecraft.entity.Entity) newEntity;

@@ -61,6 +61,11 @@ public class SpongeWeightedCollectionValue<E> extends SpongeCollectionValue<Tabl
         return new ImmutableSpongeWeightedCollectionValue<>(getKey(), getAll());
     }
 
+    @Override
+    public WeightedCollectionValue<E> copy() {
+        return new SpongeWeightedCollectionValue<>(getKey(), getAll());
+    }
+
     @Nullable
     @Override
     public List<E> get(Random random) {

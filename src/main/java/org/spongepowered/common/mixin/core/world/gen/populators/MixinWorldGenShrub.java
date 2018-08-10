@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.world.gen.populators;
 
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.gen.feature.WorldGenShrub;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.asm.mixin.Mixin;
@@ -36,12 +37,14 @@ import java.util.Random;
 @Mixin(WorldGenShrub.class)
 public abstract class MixinWorldGenShrub implements PopulatorObject {
 
+    private final CatalogKey key = CatalogKey.minecraft("jungle_bush");
+
     @Shadow
     public abstract boolean generate(net.minecraft.world.World worldIn, Random p_180709_2_, BlockPos p_180709_3_);
 
     @Override
-    public String getId() {
-        return "minecraft:jungle_bush";
+    public CatalogKey getKey() {
+        return this.key;
     }
 
     @Override

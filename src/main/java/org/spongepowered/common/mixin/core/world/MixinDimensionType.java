@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.world;
 
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.WorldProvider;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.asm.mixin.Final;
@@ -55,7 +56,7 @@ public abstract class MixinDimensionType implements IMixinDimensionType {
     @Shadow @Final private Class <? extends WorldProvider> clazz;
     @Shadow public abstract String getName();
 
-    private String sanitizedId;
+    private CatalogKey key;
     private String enumName;
     private String modId;
     private Path configPath;
@@ -71,12 +72,12 @@ public abstract class MixinDimensionType implements IMixinDimensionType {
         this.enumName = dimName;
         this.modId = SpongeImplHooks.getModIdFromClass(clazzIn);
         this.configPath = SpongeImpl.getSpongeConfigDir().resolve("worlds").resolve(this.modId).resolve(this.enumName);
-        this.config = new SpongeConfig<>(SpongeConfig.Type.DIMENSION, this.configPath.resolve("dimension.conf"), SpongeImpl.ECOSYSTEM_ID);
+        this.config = new SpongeConfig<>(SpongeConfig.Type.DIMENSION, this.configPath.resolve("dimension.conf"), SpongeImpl.ECOSYSTEM_ID, SpongeImpl.getGlobalConfig());
         this.generateSpawnOnLoad = idIn == 0;
         this.loadSpawn = this.generateSpawnOnLoad;
         this.config.getConfig().getWorld().setGenerateSpawnOnLoad(this.generateSpawnOnLoad);
-        this.sanitizedId = this.modId + ":" + dimName;
-        String contextId = this.sanitizedId.replace(":", ".");
+        this.key = CatalogKey.of(this.modId, dimName);
+        String contextId = this.key.toString().replace(":", ".");
         this.context = new Context(Context.DIMENSION_KEY, contextId);
         if (!WorldManager.isDimensionRegistered(idIn)) {
             DimensionTypeRegistryModule.getInstance().registerAdditionalCatalog((org.spongepowered.api.world.DimensionType) this);
@@ -98,8 +99,8 @@ public abstract class MixinDimensionType implements IMixinDimensionType {
         this.loadSpawn = keepSpawnLoaded;
     }
 
-    public String dimensionType$getId() {
-        return this.sanitizedId;
+    public CatalogKey dimensionType$getKey() {
+        return this.key;
     }
 
     @Intrinsic

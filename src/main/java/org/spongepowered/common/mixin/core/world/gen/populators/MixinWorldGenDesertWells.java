@@ -31,6 +31,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenDesertWells;
 import net.minecraft.world.gen.feature.WorldGenerator;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.api.world.gen.PopulatorType;
@@ -49,7 +50,7 @@ import java.util.Random;
 public abstract class MixinWorldGenDesertWells extends WorldGenerator implements DesertWell, PopulatorObject {
 
     @Shadow @Final private static BlockStateMatcher IS_SAND;
-
+    private final CatalogKey key = CatalogKey.minecraft("desert_well");
     private double spawnProbability;
     private PopulatorObject obj;
 
@@ -60,8 +61,8 @@ public abstract class MixinWorldGenDesertWells extends WorldGenerator implements
     }
 
     @Override
-    public String getId() {
-        return "minecraft:desert_well";
+    public CatalogKey getKey() {
+        return this.key;
     }
 
     @Override

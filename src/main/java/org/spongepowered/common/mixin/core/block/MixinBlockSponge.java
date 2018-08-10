@@ -33,9 +33,11 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableWetData;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeWetData;
+import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.List;
 import java.util.Optional;
@@ -74,5 +76,10 @@ public abstract class MixinBlockSponge extends MixinBlock {
     @Override
     public List<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
         return ImmutableList.of(getWetData(blockState));
+    }
+
+    @Override
+    public Translation getTranslation() {
+        return new SpongeTranslation(getTranslationKey() + ".dry.name");
     }
 }

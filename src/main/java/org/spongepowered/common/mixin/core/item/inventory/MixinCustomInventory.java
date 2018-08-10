@@ -24,9 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.item.inventory;
 
-import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryBasic;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -44,45 +42,37 @@ import org.spongepowered.common.item.inventory.custom.CustomInventory;
 import org.spongepowered.common.item.inventory.custom.CustomLens;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
-import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
-import org.spongepowered.common.item.inventory.observer.InventoryEventArgs;
+import org.spongepowered.common.item.inventory.lens.impl.collections.SlotLensCollection;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+@SuppressWarnings("rawtypes")
 @Mixin(CustomInventory.class)
-public abstract class MixinCustomInventory implements MinecraftInventoryAdapter<IInventory>, Inventory, CarriedInventory<Carrier> {
+public abstract class MixinCustomInventory implements MinecraftInventoryAdapter, Inventory, CarriedInventory<Carrier> {
 
     @Shadow(remap = false) protected InventoryArchetype archetype;
     @Shadow(remap = false) private InventoryBasic inv;
     @Shadow(remap = false) private Carrier carrier;
 
-    private SlotCollection slots;
+    private SlotLensCollection slots;
     private CustomLens lens;
     private PluginContainer plugin;
 
+    @SuppressWarnings("unchecked")
     @Inject(method = "<init>*", at = @At("RETURN"), remap = false)
     private void onConstructed(InventoryArchetype archetype, Map<String, InventoryProperty<?, ?>> properties, Carrier carrier, Map<Class<? extends
-            InteractInventoryEvent>, List<Consumer<? extends InteractInventoryEvent>>> listeners, PluginContainer plugin, CallbackInfo ci) {
-        this.slots = new SlotCollection.Builder().add(this.inv.getSizeInventory()).build();
+            InteractInventoryEvent>, List<Consumer<? extends InteractInventoryEvent>>> listeners, boolean isVirtual, PluginContainer plugin,CallbackInfo ci) {
+        this.slots = new SlotLensCollection.Builder().add(this.inv.getSizeInventory()).build();
         this.lens = new CustomLens(this, this.slots, archetype, properties);
         this.plugin = plugin;
     }
 
     @Override
-    public Lens<IInventory, ItemStack> getRootLens() {
+    public Lens getRootLens() {
         return this.lens;
-    }
-
-    @Override
-    public Inventory getChild(Lens<IInventory, ItemStack> lens) {
-        return null; // TODO ?
-    }
-
-    @Override
-    public void notify(Object source, InventoryEventArgs eventArgs) {
     }
 
     @Override
@@ -100,8 +90,9 @@ public abstract class MixinCustomInventory implements MinecraftInventoryAdapter<
         return this.plugin;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public SlotProvider<IInventory, ItemStack> getSlotProvider() {
+    public SlotProvider getSlotProvider() {
         return this.slots;
     }
 }

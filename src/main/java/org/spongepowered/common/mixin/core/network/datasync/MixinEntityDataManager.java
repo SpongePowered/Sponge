@@ -68,7 +68,7 @@ public abstract class MixinEntityDataManager {
      * @param value The value
      * @param <T> The type of value
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Overwrite
     public <T> void set(DataParameter<T> key, T value) {
         EntityDataManager.DataEntry<T> dataentry = this.<T>getEntry(key);

@@ -24,25 +24,27 @@
  */
 package org.spongepowered.common.item;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.item.FireworkShape;
 
 public class SpongeFireworkShape implements FireworkShape {
 
     private final byte id;
-    private final String name;
+    private final CatalogKey key;
 
     public SpongeFireworkShape(byte id, String name) {
         this.id = id;
-        this.name = name;
+        this.key = CatalogKey.resolve(name);
     }
 
+
     @Override
-    public String getId() {
-        return this.name;
+    public CatalogKey getKey() {
+        return this.key;
     }
 
     @Override
     public String getName() {
-        return this.name;
+        return this.key.getValue();
     }
 }

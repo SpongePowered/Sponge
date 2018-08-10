@@ -25,6 +25,7 @@
 package org.spongepowered.common.interfaces.world;
 
 import com.google.common.collect.ImmutableList;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.SerializationBehavior;
@@ -32,9 +33,11 @@ import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.PortalAgentType;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 
+import javax.annotation.Nullable;
+
 public interface IMixinWorldSettings {
 
-    void setId(String id);
+    void setId(CatalogKey id);
 
     void setName(String name);
 
@@ -54,7 +57,7 @@ public interface IMixinWorldSettings {
 
     void setLoadOnStartup(boolean state);
 
-    void setKeepSpawnLoaded(boolean state);
+    void setKeepSpawnLoaded(@Nullable Boolean state);
 
     void setGenerateSpawnOnLoad(boolean state);
 
@@ -70,5 +73,6 @@ public interface IMixinWorldSettings {
 
     void setRandomSeed(boolean state);
 
+    @Nullable
     Boolean internalKeepSpawnLoaded();
 }

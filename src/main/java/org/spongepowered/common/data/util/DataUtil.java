@@ -31,8 +31,10 @@ import static com.google.common.base.Preconditions.checkState;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableList;
+import com.google.common.reflect.TypeToken;
 import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.util.datafix.FixTypes;
+import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataRegistration;
@@ -43,8 +45,12 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
+import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.serializer.TextSerializers;
+import org.spongepowered.api.util.TypeTokens;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
@@ -63,10 +69,15 @@ import org.spongepowered.common.data.nbt.validation.ValidationType;
 import org.spongepowered.common.data.nbt.value.NbtValueProcessor;
 import org.spongepowered.common.data.persistence.SerializedDataTransaction;
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
+import org.spongepowered.common.util.TypeTokenHelper;
 
 import java.lang.reflect.Modifier;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -97,9 +108,53 @@ public final class DataUtil {
         return dataView;
     }
 
+    @SuppressWarnings("rawtypes")
     public static <T> T getData(final DataView dataView, final Key<? extends BaseValue<T>> key) throws InvalidDataException {
         checkDataExists(dataView, checkNotNull(key).getQuery());
-        final Object object = dataView.get(key.getQuery()).get();
+        final Object object;
+        final TypeToken<?> elementToken = key.getElementToken();
+        // Order matters here
+        // We always check DataSerializeable first, since this should override
+        // any other handling (e.g. for CatalogTypes)
+        if (elementToken.isSubtypeOf(TypeToken.of(DataSerializable.class))) {
+            object = dataView.getSerializable(key.getQuery(), (Class<DataSerializable>) elementToken.getRawType())
+                .orElseThrow(() -> new InvalidDataException("Missing value for key: " + key.getKey()));
+        } else if (elementToken.isSubtypeOf(TypeToken.of(CatalogType.class))) {
+            object = dataView.getCatalogType(key.getQuery(), (Class<CatalogType>) elementToken.getRawType())
+                .orElseThrow(() -> new InvalidDataException("Missing value for key: " + key.getKey()));
+        } else if (elementToken.isSubtypeOf(TypeToken.of(Text.class))) {
+            final String input = dataView.getString(key.getQuery())
+                    .orElseThrow(() -> new InvalidDataException("Missing value for key: " + key.getKey()));
+            object = TextSerializers.PLAIN.deserialize(input);
+        } else if (elementToken.isSubtypeOf(TypeToken.of(List.class))) {
+            Optional<?> opt;
+            if (elementToken.isSubtypeOf(TypeTokens.LIST_DATA_SERIALIZEABLE_TOKEN)) {
+                Class<?> listElement = TypeTokenHelper.getGenericParam(elementToken, 0);
+                opt = dataView.getSerializableList(key.getQuery(), (Class) listElement);
+            } else {
+                opt = dataView.getList(key.getQuery());
+            }
+            object = opt.orElseThrow(() -> new InvalidDataException("Missing value for key: " + key.getKey()));
+        } else if (elementToken.isSubtypeOf(TypeToken.of(Set.class))) {
+            final HashSet<Object> set = new HashSet<>();
+            set.addAll(dataView.getList(key.getQuery()).orElse(Collections.emptyList()));
+            object = set;
+        } else if (elementToken.isSubtypeOf(TypeToken.of(Map.class))) {
+            object = dataView.getMap(key.getQuery()).orElseThrow(() -> new InvalidDataException("Missing value for key: " + key.getKey()));
+        } else if (elementToken.isSubtypeOf(TypeToken.of(Enum.class))) {
+            object = Enum.valueOf((Class<Enum>) elementToken.getRawType(), dataView.getString(key.getQuery())
+                .orElseThrow(() -> new InvalidDataException("Missing value for key: " + key.getKey())));
+        } else {
+            final Optional<? extends DataTranslator<?>> translator = SpongeDataManager.getInstance().getTranslator(elementToken.getRawType());
+            if (translator.isPresent()) {
+                object = translator.map(trans -> trans.translate(dataView.getView(key.getQuery()).orElseThrow(() -> new InvalidDataException("Missing value for key: " + key.getKey()))))
+                    .orElseThrow(() -> new InvalidDataException("Could not translate translateable: " + key.getKey()));
+            } else {
+                object = dataView.get(key.getQuery())
+                    .orElseThrow(() -> new InvalidDataException("Could not translate translateable: " + key.getKey()));
+            }
+        }
+
         return (T) object;
     }
 
@@ -109,7 +164,7 @@ public final class DataUtil {
         if (clazz.isInstance(object)) {
             return (T) object;
         }
-        throw new InvalidDataException("Could not cast to the correct class type!");
+        throw new InvalidDataException("Could not cast to the correct class type! Found: " + object);
     }
 
     public static <T> T getData(final DataView dataView, final DataQuery query, Class<T> data) throws InvalidDataException {
@@ -129,13 +184,14 @@ public final class DataUtil {
         return getSerializedManipulatorList(manipulators, DataUtil::getRegistrationFor);
     }
 
+    @SuppressWarnings("rawtypes")
     private static <T extends DataSerializable> List<DataView> getSerializedManipulatorList(Iterable<T> manipulators, Function<T, DataRegistration> func) {
         checkNotNull(manipulators);
         final ImmutableList.Builder<DataView> builder = ImmutableList.builder();
         for (T manipulator : manipulators) {
             final DataContainer container = DataContainer.createNew();
             container.set(Queries.CONTENT_VERSION, DataVersions.Data.CURRENT_CUSTOM_DATA);
-            container.set(DataQueries.DATA_ID, func.apply(manipulator).getId())
+            container.set(DataQueries.DATA_ID, func.apply(manipulator).getKey())
                      .set(DataQueries.INTERNAL_DATA, manipulator.toContainer());
             builder.add(container);
         }
@@ -186,6 +242,12 @@ public final class DataUtil {
     private static void addFailedDeserialization(SerializedDataTransaction.Builder builder, DataView view, String dataId, @Nullable Throwable cause) {
         SpongeImpl.getDataConfig().getConfig().getDataRegistrationConfig().addFailedData(dataId, cause);
         SpongeImpl.getDataConfig().getConfig().getDataRegistrationConfig().purgeOrAllow(builder, dataId, view);
+        try {
+            // we need to save the config with the updated values.
+            SpongeImpl.getDataConfig().save();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private static DataView updateDataViewForDataManipulator(DataView dataView) {

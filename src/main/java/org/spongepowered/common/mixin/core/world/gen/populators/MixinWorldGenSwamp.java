@@ -31,6 +31,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.gen.feature.WorldGenSwamp;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.asm.mixin.Mixin;
@@ -41,12 +42,14 @@ import java.util.Random;
 @Mixin(WorldGenSwamp.class)
 public abstract class MixinWorldGenSwamp extends MixinWorldGenAbstractTree implements PopulatorObject {
 
+    private final CatalogKey key = CatalogKey.minecraft("swamp");
+
     @Shadow
     public abstract boolean generate(net.minecraft.world.World worldIn, Random rand, BlockPos position);
 
     @Override
-    public String getId() {
-        return "minecraft:swamp";
+    public CatalogKey getKey() {
+        return this.key;
     }
 
     @Override

@@ -24,13 +24,15 @@
  */
 package org.spongepowered.common.item.inventory.lens;
 
-import it.unimi.dsi.fastutil.ints.IntSet;
+import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 
 import java.util.List;
+
+import javax.annotation.Nullable;
 
 /**
  * Base Lens interface. A lens presents an indexed view of a number of child
@@ -43,16 +45,13 @@ import java.util.List;
  * part of the lens's spanning set. For query purposes, the lens may have other
  * child lenses which provide other ways of looking at the same collection of
  * slots, however most of the time access is via the spanning set.</p>
- * 
- * @param <TInventory>
- * @param <TStack>
  */
-public interface Lens<TInventory, TStack> extends LensCollection<TInventory, TStack> {
+public interface Lens extends LensCollection {
     
     /**
      * Returns the <em>primary</em> parent lens of this lens. Can be null. 
      */
-    Lens<TInventory, TStack> getParent();
+    Lens getParent();
     
     /**
      * Get the corresponding adapter type for this lens
@@ -66,12 +65,12 @@ public interface Lens<TInventory, TStack> extends LensCollection<TInventory, TSt
      * 
      * @return adapter for this lens
      */
-    InventoryAdapter<TInventory, TStack> getAdapter(Fabric<TInventory> inv, Inventory parent);
+    InventoryAdapter getAdapter(Fabric inv, Inventory parent);
     
     /**
      * Returns the display name of this lens 
      */
-    Translation getName(Fabric<TInventory> inv);
+    Translation getName(Fabric inv);
     
     /**
      * Get the number of slots referenced by this lens
@@ -79,81 +78,67 @@ public interface Lens<TInventory, TStack> extends LensCollection<TInventory, TSt
      * @return
      */
     int slotCount();
-    
-    /**
-     * Used by parent lenses when marshalling their spanning tree, queries
-     * whether this lens has access to a slot with the specified absolute index.
-     * 
-     * @param inv Inventory
-     * @param index Absolute slot index
-     * @return true if this lens has a path to the specified slot index
-     */
-//    @Deprecated // TODO deprecate
-    boolean hasSlot(int index); //TInventory inv, int index);
-    
-//    @Deprecated // TODO deprecate
-    IntSet getSlots(); //TInventory inv);
-    
-    /**
-     * Returns the "real" underlying slot index in the target inventory for the
-     * specified slot ordinal. This method returns -1 if the ordinal is less
-     * than 0 or greater than or equal to the value returned by
-     * {@link #slotCount()}.
-     * 
-     * @param inv inventory
-     * @param ordinal 
-     * @return the "real" slot index (ordinal), or -1 for invalid indices
-     */
-    int getRealIndex(Fabric<TInventory> inv, int ordinal);
-    
-    /**
-     * Gets the itemstack for the specified slot ordinal. Returns null if the
-     * slot is empty, or if the specified ordinal is outside the range of this
-     * lens.
-     * 
-     * @param inv inventory
-     * @param ordinal slot ordinal
-     * @return the item stack in the specified slot
-     */
-    TStack getStack(Fabric<TInventory> inv, int ordinal);
-    
+
     /**
      * Get the maximum stack size from the target inventory
-     * 
+     *
      * @param inv
      * @return
      */
-    int getMaxStackSize(Fabric<TInventory> inv);
+    int getMaxStackSize(Fabric inv);
 
     /**
      * Get child lenses of this lens
-     * 
+     *
      * @return
      */
-    List<Lens<TInventory, TStack>> getChildren();
-    
+    List<Lens> getChildren();
+
     /**
      * Get child lenses of this lens
-     * 
+     *
      * @return
      */
-    List<Lens<TInventory, TStack>> getSpanningChildren();
-    
+    List<Lens> getSpanningChildren();
+
+    @Nullable SlotLens getSlot(int ordinal);
+
     /**
-     * Set the stack at the specified offset 
-     * 
+     * Set the stack at the specified offset
+     *
      * @param inv
      * @param ordinal
      * @param stack
      * @return
      */
-    boolean setStack(Fabric<TInventory> inv, int ordinal, TStack stack);
-    
+    default boolean setStack(Fabric inv, int ordinal, ItemStack stack) {
+        SlotLens slot = this.getSlot(ordinal);
+        if (slot != null) {
+            return slot.setStack(inv, stack);
+        }
+        return false;
+    }
+
     /**
-     * Invalidate this lens for the supplied inventory, notify all observers
-     * 
+     * Gets the itemstack for the specified slot ordinal. Returns null if
+     * the specified ordinal is outside the range of this lens.
+     *
      * @param inv inventory
+     * @param ordinal slot ordinal
+     * @return the item stack in the specified slot
      */
-    void invalidate(Fabric<TInventory> inv);
+    @Nullable default ItemStack getStack(Fabric inv, int ordinal) {
+        SlotLens slot = this.getSlot(ordinal);
+        if (slot != null) {
+            return slot.getStack(inv);
+        }
+        return null;
+    }
+
+    List<SlotLens> getSlots();
+
+    String toString(int deep);
+
+    SlotLens getSlotLens(int ordinal);
 
 }

@@ -142,6 +142,7 @@ public class SpongePaginationService implements PaginationService {
         return this.playerActivePaginations.get(source.getUniqueId(), k -> create ? new SourcePaginations() : null);
     }
 
+    @SuppressWarnings("deprecation")
     private CommandSpec buildPaginationCommand() {
 
         final ActivePaginationCommandElement paginationElement = new ActivePaginationCommandElement(t("pagination-id"));
@@ -202,12 +203,12 @@ public class SpongePaginationService implements PaginationService {
                 throw args.createError(t("Source %s has no paginations!", source.getName()));
             }
 
-            Object state = args.getState();
+            CommandArgs.Snapshot state = args.getSnapshot();
             try {
                 id = UUID.fromString(args.next());
             } catch (IllegalArgumentException ex) {
                 if (paginations.getLastUuid() != null) {
-                    args.setState(state);
+                    args.applySnapshot(state);
                     return paginations.get(paginations.getLastUuid());
                 }
                 throw args.createError(t("Input was not a valid UUID!"));

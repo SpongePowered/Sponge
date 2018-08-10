@@ -5,7 +5,7 @@ src/main/java/org/spongepowered/common/boss/** @kashike
 src/main/java/org/spongepowered/common/command/** @kashike
 src/main/java/org/spongepowered/common/data/** @gabizou
 src/main/java/org/spongepowered/common/effect/** @gabizou
-src/main/java/org/spongepowered/common/event/** @gabizou @Deamon5550
+src/main/java/org/spongepowered/common/event/** @gabizou
 src/main/java/org/spongepowered/common/inject/** @kashike
 src/main/java/org/spongepowered/common/item/inventory/** @Faithcaio
 src/main/java/org/spongepowered/common/item/recipe/** @Faithcaio

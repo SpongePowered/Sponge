@@ -56,7 +56,7 @@ public class CatalogTypeClassesTest {
     public void testCatalogFieldExists() throws Exception {
         try {
             final CatalogType o = (CatalogType) this.targetedField.get(null);
-            o.getId(); // Validates that the field is not a dummy object. If it is, it will throw an exception.
+            o.getKey().toString(); // Validates that the field is not a dummy object. If it is, it will throw an exception.
         } catch (Exception e) {
             this.isDummy = true;
             throw e;
@@ -67,7 +67,7 @@ public class CatalogTypeClassesTest {
     public void testCatalogCanBeRetrieved() throws Exception {
         assumeFalse(this.isDummy);
         final CatalogType o = (CatalogType) this.targetedField.get(null);
-        this.registryModule.getById(o.getId())
+        this.registryModule.get(o.getKey())
             .orElseThrow(() -> new RegistryException("Could not locate " + this.fieldName + " in the registry: " + this.registryModule));
     }
 

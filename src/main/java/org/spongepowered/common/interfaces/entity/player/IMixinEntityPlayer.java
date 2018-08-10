@@ -47,4 +47,14 @@ public interface IMixinEntityPlayer extends IMixinEntity {
     void setSpawnLocations(EntityPlayer oldPlayer);
 
     boolean keepInventory();
+
+    void setOverworldSpawnPoint(@Nullable BlockPos pos);
+
+    void shouldRestoreInventory(boolean flag);
+
+    boolean shouldRestoreInventory();
+
+    int getExperienceSinceLevel();
+
+    void setExperienceSinceLevel(int experience);
 }

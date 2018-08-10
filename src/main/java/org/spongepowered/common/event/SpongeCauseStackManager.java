@@ -36,21 +36,27 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.cause.EventContextKey;
+import org.spongepowered.api.util.Tuple;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.util.ThreadUtil;
 
+import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiConsumer;
 
 import javax.annotation.Nullable;
 
 @Singleton
-public class SpongeCauseStackManager implements CauseStackManager {
+public final class SpongeCauseStackManager implements CauseStackManager {
 
     public static final boolean DEBUG_CAUSE_FRAMES = Boolean.valueOf(System.getProperty("sponge.debugcauseframes", "false"));
 
@@ -59,8 +65,15 @@ public class SpongeCauseStackManager implements CauseStackManager {
     private Map<EventContextKey<?>, Object> ctx = Maps.newHashMap();
 
     private int min_depth = 0;
-    private Cause cached_cause;
-    private EventContext cached_ctx;
+    @Nullable private Cause cached_cause;
+    @Nullable private EventContext cached_ctx;
+    private boolean pendingProviders = false;
+    /**
+     * Specifically a Deque because we need to replicate
+     * the stack iteration from the bottom of the stack
+     * to the top when pushing frames.
+     */
+    private Deque<Tuple<PhaseContext<?>, BiConsumer<StackFrame, PhaseContext<?>>>> phaseContextProviders = new ArrayDeque<>();
 
     @Inject
     private SpongeCauseStackManager() { }
@@ -71,13 +84,16 @@ public class SpongeCauseStackManager implements CauseStackManager {
             throw new IllegalStateException(String.format(
                     "CauseStackManager called from off main thread (current='%s', expected='%s')!",
                     ThreadUtil.getDescription(Thread.currentThread()),
-                    ThreadUtil.getDescription(SpongeImpl.getServer().getServerThread())
+                    ThreadUtil.getDescription(SpongeImpl.getServer().serverThread)
             ));
+        }
+        if (this.pendingProviders) {
+            checkProviders();
         }
     }
 
     private static boolean isPermittedThread() {
-        return Sponge.getServer().isMainThread() || Thread.currentThread().getName().equals("Server Shutdown Thread");
+        return SpongeImplHooks.isMainThread() || Thread.currentThread().getName().equals("Server Shutdown Thread");
     }
 
     @Override
@@ -91,6 +107,29 @@ public class SpongeCauseStackManager implements CauseStackManager {
             }
         }
         return this.cached_cause;
+    }
+
+    private void checkProviders() {
+        if (!this.pendingProviders) {
+            return; // we've done our work already
+        }
+        // This is the first time we're calling it, we want to reset it before
+        // we have the chance to re-enter and cause frame corruption.
+        this.pendingProviders = false;
+        // Then, we want to inversely iterate the stack (from bottom to top)
+        // to properly mimic as though the frames were created at the time of the
+        // phase switches. It does not help the debugging of cause frames
+        // except for this method call-point.
+        for (Iterator<Tuple<PhaseContext<?>, BiConsumer<StackFrame, PhaseContext<?>>>> iterator = this.phaseContextProviders.descendingIterator(); iterator.hasNext(); ) {
+            final Tuple<PhaseContext<?>, BiConsumer<StackFrame, PhaseContext<?>>> tuple = iterator.next();
+            final StackFrame frame = pushCauseFrame(); // these should auto close
+            tuple.getSecond().accept(frame, tuple.getFirst()); // The frame will be auto closed by the phase context
+        }
+        // Clear the list since everything is now loaded.
+        // PhaseStates will handle automatically closing their frames
+        // and then any new phase states that get entered can still be lazily loaded afterwards, while
+        // we take advantage of the already made modifications are being tracked by the stack manager
+        this.phaseContextProviders.clear();
     }
 
     @Override
@@ -180,7 +219,7 @@ public class SpongeCauseStackManager implements CauseStackManager {
                 throw new IllegalStateException("Cause Stack Frame Corruption! Attempted to pop a frame that was not on the stack.");
             }
             final PrettyPrinter printer = new PrettyPrinter(100).add("Cause Stack Frame Corruption!").centre().hr()
-                .add("Found %d frames left on the stack. Clearing them all.", new Object[]{offset + 1});
+                .add("Found %n frames left on the stack. Clearing them all.", new Object[]{offset + 1});
             if (!DEBUG_CAUSE_FRAMES) {
                 printer.add()
                     .add("Please add -Dsponge.debugcauseframes=true to your startup flags to enable further debugging output.");
@@ -197,7 +236,7 @@ public class SpongeCauseStackManager implements CauseStackManager {
             while (offset >= 0) {
                 CauseStackFrameImpl f = this.frames.peek();
                 if (DEBUG_CAUSE_FRAMES && offset > 0) {
-                    printer.add("   Stack frame in position %n:", offset);
+                    printer.add("   Stack frame in position %n :", offset);
                     printer.add(f.stack_debug);
                 }
                 popCauseFrame(f);
@@ -280,6 +319,36 @@ public class SpongeCauseStackManager implements CauseStackManager {
             }
         }
         return Optional.ofNullable((T) existing);
+    }
+
+    public int registerPhaseContextProvider(PhaseContext<?> context, BiConsumer<StackFrame, PhaseContext<?>> consumer) {
+        checkNotNull(consumer, "Consumer");
+        // Reset our cached objects
+        this.pendingProviders = true; //I Reset the cache
+        this.cached_cause = null; // Reset the cache
+        this.cached_ctx = null; // Reset the cache
+        // Since we cannot rely on the PhaseStack being tied to this stack of providers,
+        // we have to make the tuple to tie the phase context to provide the consumer.
+        this.phaseContextProviders.push(Tuple.of(context, consumer));
+        return this.phaseContextProviders.size();
+    }
+
+    public void popFrameMutator(PhaseContext<?> context) {
+        final Tuple<PhaseContext<?>, BiConsumer<StackFrame, PhaseContext<?>>> peek = this.phaseContextProviders.peek();
+        if (peek == null) {
+            return;
+        }
+        if (peek.getFirst() != context) {
+            // there's an exception to be thrown or printed out at least, basically a copy of popFrame.
+            System.err.println("oops. corrupted phase context providers!");
+        }
+        this.phaseContextProviders.pop();
+        if (this.phaseContextProviders.isEmpty()) {
+            // if we're empty, we don't need to bother with the context providers
+            // because there's nothing to push.
+            this.pendingProviders = false;
+        }
+
     }
 
     // TODO could pool these for more fasts

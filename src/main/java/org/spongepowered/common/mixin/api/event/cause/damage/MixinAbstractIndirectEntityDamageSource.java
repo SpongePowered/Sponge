@@ -47,7 +47,7 @@ public abstract class MixinAbstractIndirectEntityDamageSource implements Indirec
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstruct(CallbackInfo callbackInfo) {
-        ((SpongeCommonIndirectEntityDamageSource) (Object) this).setDamageType(getType().getId());
+        ((SpongeCommonIndirectEntityDamageSource) (Object) this).setDamageType(getType().getKey().toString());
         ((SpongeCommonIndirectEntityDamageSource) (Object) this).setEntitySource((Entity) getSource());
         ((SpongeCommonIndirectEntityDamageSource) (Object) this).setIndirectSource((Entity) getIndirectSource());
         if (isAbsolute()) {

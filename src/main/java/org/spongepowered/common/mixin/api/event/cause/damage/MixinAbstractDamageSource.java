@@ -46,7 +46,7 @@ public abstract class MixinAbstractDamageSource implements DamageSource {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstruct(CallbackInfo callbackInfo) {
-        ((SpongeCommonDamageSource) (Object) this).setDamageType(getType().getId());
+        ((SpongeCommonDamageSource) (Object) this).setDamageType(getType().getKey().toString());
         if (isAbsolute()) {
             ((SpongeCommonDamageSource) (Object) this).setDamageIsAbsolute();
         }

@@ -26,38 +26,24 @@ package org.spongepowered.common.registry.type.item;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.CoalType;
 import org.spongepowered.api.data.type.CoalTypes;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.item.SpongeCoalType;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
-import java.util.Collection;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 
-public final class CoalTypeRegistryModule implements CatalogRegistryModule<CoalType> {
-
-    @RegisterCatalog(CoalTypes.class)
-    public final Map<String, CoalType> coaltypeMappings = Maps.newHashMap();
-
-    @Override
-    public Optional<CoalType> getById(String id) {
-        return Optional.ofNullable(this.coaltypeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<CoalType> getAll() {
-        return ImmutableList.copyOf(this.coaltypeMappings.values());
-    }
+@RegisterCatalog(CoalTypes.class)
+public final class CoalTypeRegistryModule extends AbstractCatalogRegistryModule<CoalType> implements CatalogRegistryModule<CoalType> {
 
     @Override
     public void registerDefaults() {
-        this.coaltypeMappings.put("coal", new SpongeCoalType(0, "COAL", new SpongeTranslation("item.coal.name")));
-        this.coaltypeMappings.put("charcoal", new SpongeCoalType(1, "CHARCOAL", new SpongeTranslation("item.charcoal.name")));
+        register(CatalogKey.minecraft("coal"), new SpongeCoalType(0, "COAL", new SpongeTranslation("item.coal.name")));
+        register(CatalogKey.minecraft("charcoal"), new SpongeCoalType(1, "CHARCOAL", new SpongeTranslation("item.charcoal.name")));
     }
 }

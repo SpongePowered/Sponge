@@ -32,11 +32,13 @@ import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReport;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureType;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
@@ -44,6 +46,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.ResourceLocation;
@@ -62,7 +65,11 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.storage.MapStorage;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.args.ChildCommandElementExecutor;
+import org.spongepowered.api.data.type.Profession;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
@@ -70,18 +77,27 @@ import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.command.SpongeCommandFactory;
-import org.spongepowered.common.event.tracking.context.ItemDropData;
+import org.spongepowered.common.entity.SpongeProfession;
+import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
+import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
+import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
+import org.spongepowered.common.interfaces.world.IMixinITeleporter;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.mixin.core.world.MixinWorldServer;
+import org.spongepowered.common.registry.type.entity.ProfessionRegistryModule;
 import org.spongepowered.common.util.SpawnerSpawnType;
 import org.spongepowered.common.world.WorldManager;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.FutureTask;
 import java.util.function.Predicate;
@@ -97,6 +113,10 @@ public final class SpongeImplHooks {
 
     public static boolean isVanilla() {
         return true;
+    }
+
+    public static boolean isClientAvailable() {
+        return false;
     }
 
     public static boolean isDeobfuscatedEnvironment() {
@@ -197,7 +217,7 @@ public final class SpongeImplHooks {
         return world.getPlayerChunkMap().getChunkIterator();
     }
 
-    public static void registerPortalAgentType(@Nullable Teleporter teleporter) {
+    public static void registerPortalAgentType(@Nullable IMixinITeleporter teleporter) {
         // Overwritten in SpongeForge
     }
 
@@ -269,8 +289,8 @@ public final class SpongeImplHooks {
     public static Object onUtilRunTask(FutureTask<?> task, Logger logger) {
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         try (final BasicPluginContext context = PluginPhase.State.SCHEDULED_TASK.createPhaseContext()
-                .source(task)
-                .buildAndSwitch())  {
+                .source(task))  {
+            context.buildAndSwitch();
             final Object o = Util.runTask(task, logger);
             return o;
         } catch (Exception e) {
@@ -289,7 +309,7 @@ public final class SpongeImplHooks {
 
     public static void blockExploded(Block block, World world, BlockPos blockpos, Explosion explosion) {
         world.setBlockToAir(blockpos);
-        block.onBlockDestroyedByExplosion(world, blockpos, explosion);
+        block.onExplosionDestroy(world, blockpos, explosion);
     }
 
     public static boolean isRestoringBlocks(World world) {
@@ -333,7 +353,7 @@ public final class SpongeImplHooks {
 
     public static void onCraftingRecipeRegister(CraftingRecipe recipe) {
         // Overridden in SF
-        CraftingManager.register(recipe.getId(), ((IRecipe) recipe));
+        CraftingManager.register(recipe.getKey().toString(), ((IRecipe) recipe));
     }
 
     public static Optional<CraftingRecipe> findMatchingRecipe(CraftingGridInventory inventory, org.spongepowered.api.world.World world) {
@@ -347,6 +367,14 @@ public final class SpongeImplHooks {
 
     public static Optional<CraftingRecipe> getRecipeById(String id) {
         IRecipe recipe = CraftingManager.REGISTRY.getObject(new ResourceLocation(id));
+        if (recipe == null) {
+            return Optional.empty();
+        }
+        return Optional.of(((CraftingRecipe) recipe));
+    }
+
+    public static Optional<CraftingRecipe> getRecipeById(CatalogKey id) {
+        IRecipe recipe = CraftingManager.REGISTRY.getObject((ResourceLocation) (Object) id);
         if (recipe == null) {
             return Optional.empty();
         }
@@ -382,5 +410,88 @@ public final class SpongeImplHooks {
 
     public static void setShouldLoadSpawn(net.minecraft.world.DimensionType dimensionType, boolean keepSpawnLoaded) {
         // This is only used in SpongeForge
+    }
+
+    public static BlockPos getBedLocation(EntityPlayer playerIn, int dimension) {
+        return ((IMixinEntityPlayer) playerIn).getBedLocation(dimension);
+    }
+
+    public static boolean isSpawnForced(EntityPlayer playerIn, int dimension) {
+        return ((IMixinEntityPlayer) playerIn).isSpawnForced(dimension);
+    }
+
+    public static Inventory toInventory(Object inventory, @Nullable Object fallback) {
+        SpongeImpl.getLogger().error("Unknown inventory " + inventory.getClass().getName() + " report this to Sponge");
+        return null;
+    }
+
+    public static void onTileEntityInvalidate(TileEntity te) {
+        te.invalidate();
+    }
+
+    public static void capturePerEntityItemDrop(PhaseContext<?> phaseContext, Entity owner,
+        EntityItem entityitem) {
+        phaseContext.getPerEntityItemEntityDropSupplier().get().put(owner.getUniqueID(), entityitem);
+    }
+
+    /**
+     * @author gabizou - April 21st, 2018
+     * Gets the enchantment modifier for looting on the entity living base from the damage source, but in forge cases, we need to use their hooks.
+     *
+     * @param mixinEntityLivingBase
+     * @param entity
+     * @param cause
+     * @return
+     */
+    public static int getLootingEnchantmentModifier(IMixinEntityLivingBase mixinEntityLivingBase, EntityLivingBase entity, DamageSource cause) {
+        return EnchantmentHelper.getLootingModifier(entity);
+    }
+
+    public static double getWorldMaxEntityRadius(IMixinWorldServer mixinWorldServer) {
+        return 2.0D;
+    }
+
+    /**
+     * Provides the {@link Profession} to set onto the villager. Since forge has it's own
+     * villager profession system, sponge has to bridge the compatibility and
+     * the profession may not be "properly" registered.
+     * @param professionId
+     * @return
+     */
+    public static Profession validateProfession(int professionId) {
+        List<Profession> professions = (List<Profession>) ProfessionRegistryModule.getInstance().getAll();
+        for (Profession profession : professions) {
+            if (profession instanceof SpongeProfession) {
+                if (professionId == ((SpongeProfession) profession).type) {
+                    return profession;
+                }
+            }
+        }
+        throw new IllegalStateException("Invalid Villager profession id is present! Found: " + professionId
+                                        + " when the expected contain: " + professions);
+
+    }
+
+    public static void onTETickStart(TileEntity te) {
+
+    }
+
+    public static void onTETickEnd(TileEntity te) {
+
+    }
+
+    public static void onEntityTickStart(Entity entity) {
+
+    }
+
+    public static void onEntityTickEnd(Entity entity) {
+
+    }
+
+    public static boolean isMainThread() {
+        // Return true when the server isn't yet initialized, this means on a client
+        // that the game is still being loaded. This is needed to support initialization
+        // events with cause tracking.
+        return !Sponge.isServerAvailable() || Sponge.getServer().isMainThread();
     }
 }

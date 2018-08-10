@@ -25,8 +25,15 @@
 package org.spongepowered.common.interfaces;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import org.spongepowered.api.event.item.inventory.CraftItemEvent;
 import org.spongepowered.api.item.inventory.Slot;
+import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
+
+import java.util.List;
 import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
@@ -46,4 +53,28 @@ public interface IMixinContainer extends IMixinInventory {
     Slot getContainerSlot(int slot);
 
     void setPlugin(PluginContainer plugin);
+
+    void setShiftCrafting(boolean flag);
+    boolean isShiftCrafting();
+
+    void setLastCraft(CraftItemEvent.Craft event);
+
+    net.minecraft.item.ItemStack getPreviousCursor();
+
+    void setFirePreview(boolean firePreview);
+
+    List<SlotTransaction> getPreviewTransactions();
+
+    @Nullable Location<World> getOpenLocation();
+    void setOpenLocation(@Nullable Location<World> loc);
+
+    void setInUse(boolean inUse);
+    boolean isInUse();
+
+    List<EntityPlayerMP> listeners();
+
+    void setViewed(Object viewed);
+
+    boolean capturePossible();
+
 }

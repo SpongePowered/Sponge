@@ -58,12 +58,12 @@ public class EntityCommandDataProcessor extends AbstractEntityDataProcessor<Enti
             return Optional.empty();
         }
         @SuppressWarnings("unchecked")
-        Optional<Text> lastCommandOutput = (Optional<Text>) container.get(Keys.LAST_COMMAND_OUTPUT.getQuery()).get();
+        Text lastCommandOutput = Text.of(container.getString(Keys.LAST_COMMAND_OUTPUT.getQuery()).get());
         int successCount = container.getInt(Keys.SUCCESS_COUNT.getQuery()).get();
         String command = container.getString(Keys.COMMAND.getQuery()).get();
         boolean tracksOutput = container.getBoolean(Keys.TRACKS_OUTPUT.getQuery()).get();
         
-        commandData.set(Keys.LAST_COMMAND_OUTPUT, lastCommandOutput);
+        commandData.set(Keys.LAST_COMMAND_OUTPUT, Optional.of(lastCommandOutput));
         commandData.set(Keys.SUCCESS_COUNT, successCount);
         commandData.set(Keys.COMMAND, command);
         commandData.set(Keys.TRACKS_OUTPUT, tracksOutput);

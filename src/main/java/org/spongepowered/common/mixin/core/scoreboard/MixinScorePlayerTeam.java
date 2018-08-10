@@ -34,6 +34,7 @@ import org.spongepowered.api.scoreboard.Visibility;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.format.TextColor;
+import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -92,7 +93,7 @@ public abstract class MixinScorePlayerTeam extends net.minecraft.scoreboard.Team
         this.spongeDisplayName = SpongeTexts.fromLegacy(this.displayName);
         this.spongePrefix = SpongeTexts.fromLegacy(this.prefix);
         this.spongeSuffix = SpongeTexts.fromLegacy(this.suffix);
-        this.spongeColor = TextColorRegistryModule.enumChatColor.get(this.color);
+        this.spongeColor = TextColorRegistryModule.getInstance().enumChatColor.get(this.color);
     }
 
     public String team$getName() {
@@ -118,6 +119,9 @@ public abstract class MixinScorePlayerTeam extends net.minecraft.scoreboard.Team
     }
 
     public void team$setColor(TextColor color) {
+        if (color.equals(TextColors.NONE)) {
+            color = TextColors.RESET;
+        }
         this.spongeColor = color;
         this.color = ((SpongeTextColor) color).getHandle();
         this.doTeamUpdate();
@@ -298,7 +302,7 @@ public abstract class MixinScorePlayerTeam extends net.minecraft.scoreboard.Team
 
     @Inject(method = "setColor", at = @At("RETURN"))
     private void onSetChatFormat(TextFormatting format, CallbackInfo ci) {
-        this.spongeColor = TextColorRegistryModule.enumChatColor.get(format);
+        this.spongeColor = TextColorRegistryModule.getInstance().enumChatColor.get(format);
         // This isn't called by Vanilla, so we inject the call ourselves.
         this.doTeamUpdate();
     }

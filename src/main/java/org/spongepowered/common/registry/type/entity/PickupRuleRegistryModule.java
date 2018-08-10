@@ -24,51 +24,40 @@
  */
 package org.spongepowered.common.registry.type.entity;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
 import net.minecraft.entity.projectile.EntityArrow;
 import org.spongepowered.api.data.type.PickupRule;
 import org.spongepowered.api.data.type.PickupRules;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
 
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
+@RegisterCatalog(PickupRules.class)
+public final class PickupRuleRegistryModule extends MinecraftEnumBasedCatalogTypeModule<EntityArrow.PickupStatus, PickupRule> implements CatalogRegistryModule<PickupRule> {
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-public final class PickupRuleRegistryModule implements CatalogRegistryModule<PickupRule> {
-
-    @RegisterCatalog(PickupRules.class)
-    private final Map<String, PickupRule> ruleMapping = Maps.newHashMap();
-
-    @Override
-    public Optional<PickupRule> getById(String id) {
-        return Optional.ofNullable(this.ruleMapping.get(checkNotNull(id, "id").toLowerCase(Locale.ENGLISH)));
+    public PickupRuleRegistryModule() {
+        super();
     }
 
     @Override
-    public Collection<PickupRule> getAll() {
-        return ImmutableList.copyOf(this.ruleMapping.values());
+    protected EntityArrow.PickupStatus[] getValues() {
+        return EntityArrow.PickupStatus.values();
     }
 
     @Override
     public void registerDefaults() {
         for (EntityArrow.PickupStatus status : EntityArrow.PickupStatus.values()) {
-            PickupRule rule = (PickupRule) (Object) status;
-            this.ruleMapping.put(rule.getId().toLowerCase(Locale.ENGLISH), rule);
+            final PickupRule rule = enumAs(status);
+            this.map.put(rule.getKey(), rule);
         }
     }
 
     @AdditionalRegistration
     public void customRegistration() {
         for (EntityArrow.PickupStatus status : EntityArrow.PickupStatus.values()) {
-            PickupRule rule = (PickupRule) (Object) status;
-            if (!this.ruleMapping.containsValue(rule)) {
-                this.ruleMapping.put(rule.getId().toLowerCase(Locale.ENGLISH), rule);
+            PickupRule rule = enumAs(status);
+            if (!this.map.containsValue(rule)) {
+                this.map.put(rule.getKey(), rule);
             }
         }
     }

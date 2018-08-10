@@ -51,10 +51,9 @@ public class LegacyCustomDataClassContentUpdater implements DataContentUpdater {
 
         final Optional<DataRegistration<?, ?>> registration = SpongeManipulatorRegistry.getInstance().getRegistrationForLegacyId(className);
         if (!registration.isPresent()) {
-            SpongeImpl.getLogger().warn("Could not find data registration for class '{}' - ignoring", className);
             return content;
         }
-        content.set(DataQueries.DATA_ID, registration.get().getId());
+        content.set(DataQueries.DATA_ID, registration.get().getKey());
         content.remove(DataQueries.DATA_CLASS);
         return content;
     }

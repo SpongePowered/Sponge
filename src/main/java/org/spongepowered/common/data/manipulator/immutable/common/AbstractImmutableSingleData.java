@@ -27,6 +27,7 @@ package org.spongepowered.common.data.manipulator.immutable.common;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableSet;
+import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
@@ -80,4 +81,9 @@ public abstract class AbstractImmutableSingleData<T, I extends ImmutableDataMani
         return ImmutableSet.<Key<?>>of(this.usedKey);
     }
 
+    @Override
+    public DataContainer toContainer() {
+        return super.toContainer()
+            .set(this.usedKey, getValue());
+    }
 }

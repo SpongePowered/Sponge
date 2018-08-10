@@ -33,7 +33,7 @@ import java.util.Map;
 @ConfigSerializable
 public class TileEntityActivationModCategory extends ConfigCategory {
 
-    @Setting(value = "enabled", comment = "Set to false if you want mod to ignore tileentity activation rules and always tick.")
+    @Setting(value = "enabled", comment = "If 'false', tileentity activation rules for this mod will be ignored and always tick.")
     private boolean isEnabled = true;
     @Setting(value = "default-block-range")
     private Integer defaultBlockRange;

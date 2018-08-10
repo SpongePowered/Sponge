@@ -33,7 +33,7 @@ import org.spongepowered.api.plugin.Plugin;
 
 import javax.inject.Inject;
 
-@Plugin(id = "injection-test", authors = "kashike")
+@Plugin(id = "injection-test", authors = "kashike", version = "0.0.0", description = "tests injectors", name = "Guice Injection Test")
 public class InjectionTest {
 
     private final Logger logger;

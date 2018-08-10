@@ -27,57 +27,48 @@ package org.spongepowered.common.registry.type.world;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.world.teleport.TeleportHelperFilter;
 import org.spongepowered.api.world.teleport.TeleportHelperFilters;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 import org.spongepowered.common.world.teleport.ConfigTeleportHelperFilter;
 import org.spongepowered.common.world.teleport.DefaultTeleportHelperFilter;
 import org.spongepowered.common.world.teleport.FlyingTeleportHelperFilter;
 import org.spongepowered.common.world.teleport.NoPortalTeleportHelperFilter;
 import org.spongepowered.common.world.teleport.SurfaceOnlyTeleportHelperFilter;
 
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-
-public class TeleportHelperFilterRegistryModule implements AdditionalCatalogRegistryModule<TeleportHelperFilter> {
-
-    @RegisterCatalog(TeleportHelperFilters.class)
-    private final Map<String, TeleportHelperFilter> filterMap = Maps.newHashMap();
-
-    private final Map<String, TeleportHelperFilter> idMap = Maps.newHashMap();
-
-    @Override
-    public Optional<TeleportHelperFilter> getById(String id) {
-        return Optional.ofNullable(this.idMap.get(id.toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<TeleportHelperFilter> getAll() {
-        return ImmutableList.copyOf(this.idMap.values());
-    }
+@RegisterCatalog(TeleportHelperFilters.class)
+public class TeleportHelperFilterRegistryModule extends AbstractCatalogRegistryModule<TeleportHelperFilter>
+    implements AdditionalCatalogRegistryModule<TeleportHelperFilter> {
 
     @Override
     public void registerAdditionalCatalog(TeleportHelperFilter extraCatalog) {
         checkNotNull(extraCatalog, "TeleportHelperFilter cannot be null!");
-        checkState(!this.idMap.containsKey(extraCatalog.getId().toLowerCase(Locale.ENGLISH)),
+        final CatalogKey key = extraCatalog.getKey();
+        checkState(!this.map.containsKey(key),
                 "TeleportHelperFilter must have a unique id!");
-        this.idMap.put(extraCatalog.getId(), extraCatalog);
+        this.map.put(key, extraCatalog);
     }
 
     @Override
     public void registerDefaults() {
-        this.filterMap.put("config", new ConfigTeleportHelperFilter());
-        this.filterMap.put("default", new DefaultTeleportHelperFilter());
-        this.filterMap.put("flying", new FlyingTeleportHelperFilter());
-        this.filterMap.put("no_portal", new NoPortalTeleportHelperFilter());
-        this.filterMap.put("surface_only", new SurfaceOnlyTeleportHelperFilter());
-
-        this.filterMap.forEach((key, value) -> this.idMap.put(value.getId().toLowerCase(Locale.ENGLISH), value));
+        final ConfigTeleportHelperFilter config = new ConfigTeleportHelperFilter();
+        register(CatalogKey.minecraft("config"), config);
+        register(config);
+        final DefaultTeleportHelperFilter defaultTeleporter = new DefaultTeleportHelperFilter();
+        register(CatalogKey.minecraft("default"), defaultTeleporter);
+        register(defaultTeleporter);
+        final FlyingTeleportHelperFilter flying = new FlyingTeleportHelperFilter();
+        register(CatalogKey.minecraft("flying"), flying);
+        register(flying);
+        final NoPortalTeleportHelperFilter noPortal = new NoPortalTeleportHelperFilter();
+        register(CatalogKey.minecraft("no_portal"), noPortal);
+        register(noPortal);
+        final SurfaceOnlyTeleportHelperFilter surface = new SurfaceOnlyTeleportHelperFilter();
+        register(CatalogKey.minecraft("surface_only"), surface);
+        register(surface);
     }
 
 }

@@ -24,8 +24,11 @@
  */
 package org.spongepowered.common.scheduler;
 
+import org.spongepowered.api.Sponge;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
+
+import javax.annotation.Nullable;
 
 public class SyncScheduler extends SchedulerBase {
 
@@ -64,11 +67,18 @@ public class SyncScheduler extends SchedulerBase {
 
     @Override
     protected void executeTaskRunnable(ScheduledTask task, Runnable runnable) {
-        try (BasicPluginContext context = PluginPhase.State.SCHEDULED_TASK.createPhaseContext()
-                .source(task)
-                .buildAndSwitch()) {
+        try (BasicPluginContext context = createContext(task)) {
+            if (context != null) {
+                context.buildAndSwitch();
+            }
             runnable.run();
         }
+    }
+
+    @Nullable
+    private BasicPluginContext createContext(ScheduledTask task) {
+        return Sponge.isServerAvailable() ? PluginPhase.State.SCHEDULED_TASK.createPhaseContext()
+                .source(task) : null;
     }
 
 }

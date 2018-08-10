@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.processor.data.tileentity;
 
 import net.minecraft.tileentity.TileEntitySkull;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
@@ -65,8 +66,9 @@ public class TileEntitySkullDataProcessor
 
     @Override
     public Optional<SkullData> fill(DataContainer container, SkullData skullData) {
+        final String id = container.getString(Keys.SKULL_TYPE.getQuery()).get();
         return Optional.of(skullData.set(Keys.SKULL_TYPE, SpongeImpl.getGame().getRegistry()
-                .getType(SkullType.class, DataUtil.getData(container, Keys.SKULL_TYPE, String.class)).get()));
+                .getType(SkullType.class, CatalogKey.resolve(id)).get()));
     }
 
     @Override

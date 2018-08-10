@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.advancement;
 
+import static com.google.common.base.Preconditions.checkState;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.advancements.Advancement;
@@ -33,6 +35,7 @@ import net.minecraft.advancements.DisplayInfo;
 import net.minecraft.advancements.FrameType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.advancement.AdvancementType;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
@@ -46,10 +49,11 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.advancement.ICriterion;
-import org.spongepowered.common.advancement.SpongeAdvancementBuilder;
 import org.spongepowered.common.advancement.SpongeAdvancementTree;
 import org.spongepowered.common.advancement.SpongeScoreCriterion;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.interfaces.advancement.IMixinAdvancement;
 import org.spongepowered.common.interfaces.advancement.IMixinCriterion;
 import org.spongepowered.common.interfaces.advancement.IMixinDisplayInfo;
@@ -73,7 +77,6 @@ import javax.annotation.Nullable;
 public class MixinAdvancement implements org.spongepowered.api.advancement.Advancement, IMixinAdvancement {
 
     @Shadow @Final @Mutable @Nullable private Advancement parent;
-    @Shadow @Final private ResourceLocation id;
     @Shadow @Final @Mutable private String[][] requirements;
     @Shadow @Final @Mutable private Map<String, Criterion> criteria;
     @Shadow @Final @Nullable private DisplayInfo display;
@@ -84,30 +87,40 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
     @Nullable private AdvancementTree tree;
     private List<Text> toastText;
     private Text text;
-    private String spongeId;
     private String name;
+    private CatalogKey key;
 
     @Nullable private Advancement tempParent;
+
+    private void checkServer() {
+        checkState(this.isMainThread());
+    }
+
+    private boolean isMainThread() {
+        return SpongeImplHooks.isMainThread();
+    }
 
     @SuppressWarnings("ConstantConditions")
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onInit(ResourceLocation id, @Nullable Advancement parentIn, @Nullable DisplayInfo displayIn,
             AdvancementRewards rewardsIn, Map<String, Criterion> criteriaIn, String[][] requirementsIn, CallbackInfo ci) {
+        // Don't do anything on the client, unless we're performing registry initialization
+        if (!this.isMainThread()) {
+            return;
+        }
         if (displayIn != null) {
             ((IMixinDisplayInfo) displayIn).setAdvancement(this);
         }
-        String path = id.getResourcePath();
+        String path = id.getPath();
         this.name = path.replace('/', '_');
-        this.spongeId = id.getResourceDomain() + ':' + this.name;
+        this.key = (CatalogKey) (Object) id;
         if (displayIn != null) {
             this.name = SpongeTexts.toPlain(displayIn.getTitle());
         }
-        if (!AdvancementRegistryModule.INSIDE_REGISTER_EVENT) {
-            AdvancementRegistryModule.getInstance().registerAdditionalCatalog(this);
-        } else {
+        if (PhaseTracker.getInstance().getCurrentState().isEvent()) {
             // Wait to set the parent until the advancement is registered
             this.tempParent = parentIn;
-            this.parent = SpongeAdvancementBuilder.DUMMY_ROOT_ADVANCEMENT;
+            this.parent = AdvancementRegistryModule.DUMMY_ROOT_ADVANCEMENT;
         }
         // This is only possible when REGISTER_ADVANCEMENTS_ON_CONSTRUCT is true
         if (parentIn == null) {
@@ -120,13 +133,12 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
             if (displayIn != null) {
                 name = this.name;
             }
-            path = id.getResourceDomain() + ':' + path;
+            path = id.getNamespace() + ':' + path;
             this.tree = new SpongeAdvancementTree(this, path, name);
             AdvancementTreeRegistryModule.getInstance().registerAdditionalCatalog(this.tree);
         } else {
             this.tree = ((org.spongepowered.api.advancement.Advancement) parentIn).getTree().orElse(null);
         }
-        this.text = SpongeTexts.toText(this.displayText);
         final ImmutableList.Builder<Text> toastText = ImmutableList.builder();
         if (this.display != null) {
             final FrameType frameType = this.display.getFrame();
@@ -136,7 +148,7 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
             toastText.add(getDisplayInfo().get().getTitle());
         } else {
             toastText.add(Text.of("Unlocked advancement"));
-            toastText.add(Text.of(getId()));
+            toastText.add(Text.of(getKey().toString()));
         }
         this.toastText = toastText.build();
         final Set<String> scoreCriteria = new HashSet<>();
@@ -182,60 +194,72 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
 
     @Override
     public Optional<AdvancementTree> getTree() {
+        checkServer();
         return Optional.ofNullable(this.tree);
     }
 
     @Override
     public void setParent(@Nullable Advancement advancement) {
+        checkServer();
         this.parent = advancement;
     }
 
     @Override
     public void setTree(AdvancementTree tree) {
+        checkServer();
         this.tree = tree;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public Collection<org.spongepowered.api.advancement.Advancement> getChildren() {
+        checkServer();
         return ImmutableList.copyOf((Collection) this.children);
     }
 
     @Override
     public AdvancementCriterion getCriterion() {
+        checkServer();
         return this.criterion;
     }
 
     @Override
     public void setCriterion(AdvancementCriterion criterion) {
+        checkServer();
         this.criterion = criterion;
     }
 
     @Override
     public void setName(String name) {
+        checkServer();
         this.name = name;
     }
 
     @Override
     public boolean isRegistered() {
+        checkServer();
         return this.tempParent == null;
     }
 
     @Override
     public void setRegistered() {
+        checkServer();
         if (this.tempParent == null) {
             return;
         }
         this.parent = this.tempParent;
+        // The child didn't get added yet to it's actual parent
+        this.parent.addChild((Advancement) (Object) this);
         this.tempParent = null;
     }
 
     @Override
     public Optional<org.spongepowered.api.advancement.Advancement> getParent() {
+        checkServer();
         if (this.tempParent != null) {
             return Optional.of((org.spongepowered.api.advancement.Advancement) this.tempParent);
         }
-        if (this.parent == SpongeAdvancementBuilder.DUMMY_ROOT_ADVANCEMENT) {
+        if (this.parent == AdvancementRegistryModule.DUMMY_ROOT_ADVANCEMENT) {
             return Optional.empty();
         }
         return Optional.ofNullable((org.spongepowered.api.advancement.Advancement) this.parent);
@@ -243,26 +267,33 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
 
     @Override
     public Optional<org.spongepowered.api.advancement.DisplayInfo> getDisplayInfo() {
+        checkServer();
         return Optional.ofNullable((org.spongepowered.api.advancement.DisplayInfo) this.display);
     }
 
     @Override
     public List<Text> toToastText() {
+        checkServer();
         return this.toastText;
     }
 
     @Override
-    public String getId() {
-        return this.spongeId;
+    public CatalogKey getKey() {
+        return this.key;
     }
 
     @Override
     public String getName() {
+        checkServer();
         return this.name;
     }
 
     @Override
     public Text toText() {
+        checkServer();
+        if (this.text == null) {
+            this.text = SpongeTexts.toText(this.displayText);
+        }
         return this.text;
     }
 }

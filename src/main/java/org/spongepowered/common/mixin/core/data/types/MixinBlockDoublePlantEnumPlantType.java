@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.block.BlockDoublePlant;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.DoublePlantType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Implements;
@@ -41,23 +42,28 @@ import javax.annotation.Nullable;
 public abstract class MixinBlockDoublePlantEnumPlantType implements DoublePlantType {
 
     @Shadow public abstract String shadow$getName();
-    @Shadow public abstract String shadow$getUnlocalizedName();
+    @Shadow public abstract String shadow$getTranslationKey();
 
     @Nullable private Translation translation;
+    @Nullable private CatalogKey key;
 
-    public String plant$getId() {
-        return "minecraft:" + this.shadow$getName();
+    @Override
+    public CatalogKey getKey() {
+        if (this.key == null) {
+            this.key = CatalogKey.minecraft(this.shadow$getName());
+        }
+        return this.key;
     }
 
     @Intrinsic
     public String plant$getName() {
-        return this.shadow$getUnlocalizedName();
+        return this.shadow$getTranslationKey();
     }
 
     public Translation plant$getTranslation() {
         // Maybe move this to a @Inject at the end of the constructor
         if (this.translation == null) {
-            this.translation = new SpongeTranslation("tile.doublePlant." + this.shadow$getUnlocalizedName() + ".name");
+            this.translation = new SpongeTranslation("tile.doublePlant." + this.shadow$getTranslationKey() + ".name");
         }
         return this.translation;
     }

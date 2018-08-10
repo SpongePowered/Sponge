@@ -26,7 +26,6 @@ package org.spongepowered.common.registry.type.entity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import net.minecraft.entity.Entity;
@@ -37,32 +36,31 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityEgg;
 import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.util.ResourceLocation;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.registry.ExtraClassCatalogRegistryModule;
 import org.spongepowered.api.registry.util.CustomCatalogRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.entity.living.human.EntityHuman;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 import org.spongepowered.common.registry.RegistryHelper;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.registry.type.data.KeyRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
-import java.util.Collection;
 import java.util.HashSet;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistryModule<EntityType, Entity>, SpongeAdditionalCatalogRegistryModule<EntityType> {
+@RegisterCatalog(EntityTypes.class)
+public final class EntityTypeRegistryModule extends AbstractCatalogRegistryModule<EntityType>
+    implements ExtraClassCatalogRegistryModule<EntityType, Entity>, SpongeAdditionalCatalogRegistryModule<EntityType> {
 
-    @RegisterCatalog(EntityTypes.class)
-    protected final Map<String, EntityType> entityTypeMappings = Maps.newHashMap();
 
     public final Map<Class<? extends Entity>, EntityType> entityClassToTypeMappings = Maps.newHashMap();
     private final Set<FutureRegistration> customEntities = new HashSet<>();
@@ -72,142 +70,148 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
     }
 
     public void registerEntityType(EntityType type) {
-        this.entityTypeMappings.put(type.getId(), type);
+        this.map.put(type.getKey(), type);
         this.entityClassToTypeMappings.put(((SpongeEntityType) type).entityClass, type);
     }
 
     @Override
-    public Optional<EntityType> getById(String id) {
-        if (!checkNotNull(id).contains(":")) {
-            id = "minecraft:" + id;
-        }
-        if ("unknown:unknown".equalsIgnoreCase(id)) {
-            return Optional.of(SpongeEntityType.UNKNOWN);
-        }
-        return Optional.ofNullable(this.entityTypeMappings.get(id.toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<EntityType> getAll() {
-        return ImmutableList.copyOf(this.entityTypeMappings.values());
-    }
-
-    @Override
     public void registerDefaults() {
-        this.entityTypeMappings.put("item", newEntityTypeFromName("Item"));
-        this.entityTypeMappings.put("experience_orb", newEntityTypeFromName("xp_orb"));
-        this.entityTypeMappings.put("area_effect_cloud", newEntityTypeFromName("area_effect_cloud"));
-        this.entityTypeMappings.put("dragon_fireball", newEntityTypeFromName("dragon_fireball"));
-        this.entityTypeMappings.put("leash_hitch", newEntityTypeFromName("leash_knot"));
-        this.entityTypeMappings.put("painting", newEntityTypeFromName("painting"));
-        this.entityTypeMappings.put("tipped_arrow", newEntityTypeFromName("arrow"));
-        this.entityTypeMappings.put("snowball", newEntityTypeFromName("snowball"));
-        this.entityTypeMappings.put("fireball", newEntityTypeFromName("LargeFireball", "fireball"));
-        this.entityTypeMappings.put("small_fireball", newEntityTypeFromName("small_fireball"));
-        this.entityTypeMappings.put("ender_pearl", newEntityTypeFromName("ender_pearl"));
-        this.entityTypeMappings.put("eye_of_ender", newEntityTypeFromName("eye_of_ender_signal"));
-        this.entityTypeMappings.put("splash_potion", newEntityTypeFromName("potion"));
-        this.entityTypeMappings.put("thrown_exp_bottle", newEntityTypeFromName("xp_bottle"));
-        this.entityTypeMappings.put("item_frame", newEntityTypeFromName("item_frame"));
-        this.entityTypeMappings.put("wither_skull", newEntityTypeFromName("wither_skull"));
-        this.entityTypeMappings.put("primed_tnt", newEntityTypeFromName("tnt"));
-        this.entityTypeMappings.put("falling_block", newEntityTypeFromName("falling_block"));
-        this.entityTypeMappings.put("firework", newEntityTypeFromName("fireworks_rocket"));
-        this.entityTypeMappings.put("armor_stand", newEntityTypeFromName("armor_stand"));
-        this.entityTypeMappings.put("boat", newEntityTypeFromName("boat"));
-        this.entityTypeMappings.put("rideable_minecart", newEntityTypeFromName("minecart"));
-        this.entityTypeMappings.put("chested_minecart", newEntityTypeFromName("chest_minecart"));
-        this.entityTypeMappings.put("furnace_minecart", newEntityTypeFromName("furnace_minecart"));
-        this.entityTypeMappings.put("tnt_minecart", newEntityTypeFromName("tnt_minecart"));
-        this.entityTypeMappings.put("hopper_minecart", newEntityTypeFromName("hopper_minecart"));
-        this.entityTypeMappings.put("mob_spawner_minecart", newEntityTypeFromName("spawner_minecart"));
-        this.entityTypeMappings.put("commandblock_minecart", newEntityTypeFromName("commandblock_minecart"));
-        this.entityTypeMappings.put("evocation_fangs", newEntityTypeFromName("evocation_fangs"));
-        this.entityTypeMappings.put("evocation_illager", newEntityTypeFromName("evocation_illager"));
-        this.entityTypeMappings.put("vex", newEntityTypeFromName("vex"));
-        this.entityTypeMappings.put("vindication_illager", newEntityTypeFromName("vindication_illager"));
-        this.entityTypeMappings.put("creeper", newEntityTypeFromName("creeper"));
-        this.entityTypeMappings.put("skeleton", newEntityTypeFromName("skeleton"));
-        this.entityTypeMappings.put("stray", newEntityTypeFromName("stray"));
-        this.entityTypeMappings.put("wither_skeleton", newEntityTypeFromName("wither_skeleton"));
-        this.entityTypeMappings.put("spider", newEntityTypeFromName("spider"));
-        this.entityTypeMappings.put("giant", newEntityTypeFromName("giant"));
-        this.entityTypeMappings.put("zombie", newEntityTypeFromName("zombie"));
-        this.entityTypeMappings.put("husk", newEntityTypeFromName("husk"));
-        this.entityTypeMappings.put("slime", newEntityTypeFromName("slime"));
-        this.entityTypeMappings.put("ghast", newEntityTypeFromName("ghast"));
-        this.entityTypeMappings.put("pig_zombie", newEntityTypeFromName("zombie_pigman"));
-        this.entityTypeMappings.put("enderman", newEntityTypeFromName("enderman"));
-        this.entityTypeMappings.put("cave_spider", newEntityTypeFromName("cave_spider"));
-        this.entityTypeMappings.put("silverfish", newEntityTypeFromName("silverfish"));
-        this.entityTypeMappings.put("blaze", newEntityTypeFromName("blaze"));
-        this.entityTypeMappings.put("magma_cube", newEntityTypeFromName("magma_cube"));
-        this.entityTypeMappings.put("ender_dragon", newEntityTypeFromName("ender_dragon"));
-        this.entityTypeMappings.put("wither", newEntityTypeFromName("wither"));
-        this.entityTypeMappings.put("bat", newEntityTypeFromName("bat"));
-        this.entityTypeMappings.put("witch", newEntityTypeFromName("witch"));
-        this.entityTypeMappings.put("endermite", newEntityTypeFromName("endermite"));
-        this.entityTypeMappings.put("guardian", newEntityTypeFromName("guardian"));
-        this.entityTypeMappings.put("elder_guardian", newEntityTypeFromName("elder_guardian"));
-        this.entityTypeMappings.put("pig", newEntityTypeFromName("pig"));
-        this.entityTypeMappings.put("sheep", newEntityTypeFromName("sheep"));
-        this.entityTypeMappings.put("cow", newEntityTypeFromName("cow"));
-        this.entityTypeMappings.put("chicken", newEntityTypeFromName("chicken"));
-        this.entityTypeMappings.put("squid", newEntityTypeFromName("squid"));
-        this.entityTypeMappings.put("wolf", newEntityTypeFromName("wolf"));
-        this.entityTypeMappings.put("mushroom_cow", newEntityTypeFromName("mooshroom"));
-        this.entityTypeMappings.put("snowman", newEntityTypeFromName("snowman"));
-        this.entityTypeMappings.put("ocelot", newEntityTypeFromName("Ocelot"));
-        this.entityTypeMappings.put("iron_golem", newEntityTypeFromName("villager_golem"));
+        newEntityType(CatalogKey.minecraft("item"));
+        newEntityType(CatalogKey.minecraft("experience_orb"), CatalogKey.minecraft("xp_orb"));
+        newEntityType(CatalogKey.minecraft("area_effect_cloud"));
+        newEntityType(CatalogKey.minecraft("dragon_fireball"));
+        newEntityType(CatalogKey.minecraft("leash_hitch"), CatalogKey.minecraft("leash_knot"));
+        newEntityType(CatalogKey.minecraft("painting"));
+        newEntityType(CatalogKey.minecraft("tipped_arrow"), CatalogKey.minecraft("arrow"));
+        newEntityType(CatalogKey.minecraft("snowball"));
+        newEntityType(CatalogKey.minecraft("fireball"));
+        newEntityType(CatalogKey.minecraft("small_fireball"));
+        newEntityType(CatalogKey.minecraft("ender_pearl"));
+        newEntityType(CatalogKey.minecraft("eye_of_ender"), CatalogKey.minecraft("eye_of_ender_signal"));
+        newEntityType(CatalogKey.minecraft("splash_potion"), CatalogKey.minecraft("potion"));
+        newEntityType(CatalogKey.minecraft("thrown_exp_bottle"), CatalogKey.minecraft("xp_bottle"));
+        newEntityType(CatalogKey.minecraft("item_frame"));
+        newEntityType(CatalogKey.minecraft("wither_skull"));
+        newEntityType(CatalogKey.minecraft("primed_tnt"), CatalogKey.minecraft("tnt"));
+        newEntityType(CatalogKey.minecraft("falling_block"));
+        newEntityType(CatalogKey.minecraft("firework"), CatalogKey.minecraft("fireworks_rocket"));
+        newEntityType(CatalogKey.minecraft("armor_stand"));
+        newEntityType(CatalogKey.minecraft("boat"));
+        newEntityType(CatalogKey.minecraft("rideable_minecart"), CatalogKey.minecraft("minecart"));
+        newEntityType(CatalogKey.minecraft("chested_minecart"), CatalogKey.minecraft("chest_minecart"));
+        newEntityType(CatalogKey.minecraft("furnace_minecart"));
+        newEntityType(CatalogKey.minecraft("tnt_minecart"));
+        newEntityType(CatalogKey.minecraft("hopper_minecart"));
+        newEntityType(CatalogKey.minecraft("mob_spawner_minecart"), CatalogKey.minecraft("spawner_minecart"));
+        newEntityType(CatalogKey.minecraft("commandblock_minecart"), CatalogKey.minecraft("commandblock_minecart"));
+        newEntityType(CatalogKey.minecraft("evocation_fangs"));
+        newEntityType(CatalogKey.minecraft("evocation_illager"));
+        newEntityType(CatalogKey.minecraft("vex"));
+        newEntityType(CatalogKey.minecraft("vindication_illager"));
+        newEntityType(CatalogKey.minecraft("creeper"));
+        newEntityType(CatalogKey.minecraft("skeleton"));
+        newEntityType(CatalogKey.minecraft("stray"));
+        newEntityType(CatalogKey.minecraft("wither_skeleton"));
+        newEntityType(CatalogKey.minecraft("spider"));
+        newEntityType(CatalogKey.minecraft("giant"));
+        newEntityType(CatalogKey.minecraft("zombie"));
+        newEntityType(CatalogKey.minecraft("husk"));
+        newEntityType(CatalogKey.minecraft("slime"));
+        newEntityType(CatalogKey.minecraft("ghast"));
+        newEntityType(CatalogKey.minecraft("pig_zombie"), CatalogKey.minecraft("zombie_pigman"));
+        newEntityType(CatalogKey.minecraft("enderman"));
+        newEntityType(CatalogKey.minecraft("cave_spider"));
+        newEntityType(CatalogKey.minecraft("silverfish"));
+        newEntityType(CatalogKey.minecraft("blaze"));
+        newEntityType(CatalogKey.minecraft("magma_cube"));
+        newEntityType(CatalogKey.minecraft("ender_dragon"));
+        newEntityType(CatalogKey.minecraft("wither"));
+        newEntityType(CatalogKey.minecraft("bat"));
+        newEntityType(CatalogKey.minecraft("witch"));
+        newEntityType(CatalogKey.minecraft("endermite"));
+        newEntityType(CatalogKey.minecraft("guardian"));
+        newEntityType(CatalogKey.minecraft("elder_guardian"));
+        newEntityType(CatalogKey.minecraft("pig"));
+        newEntityType(CatalogKey.minecraft("sheep"));
+        newEntityType(CatalogKey.minecraft("cow"));
+        newEntityType(CatalogKey.minecraft("chicken"));
+        newEntityType(CatalogKey.minecraft("squid"));
+        newEntityType(CatalogKey.minecraft("wolf"));
+        newEntityType(CatalogKey.minecraft("mushroom_cow"), CatalogKey.minecraft("mooshroom"));
+        newEntityType(CatalogKey.minecraft("snowman"));
+        newEntityType(CatalogKey.minecraft("ocelot"));
+        newEntityType(CatalogKey.minecraft("iron_golem"), CatalogKey.minecraft("villager_golem"));
 
-        this.entityTypeMappings.put("horse", newEntityTypeFromName("horse"));
-        this.entityTypeMappings.put("skeleton_horse", newEntityTypeFromName("skeleton_horse"));
-        this.entityTypeMappings.put("zombie_horse", newEntityTypeFromName("zombie_horse"));
-        this.entityTypeMappings.put("donkey", newEntityTypeFromName("donkey"));
-        this.entityTypeMappings.put("mule", newEntityTypeFromName("mule"));
-        this.entityTypeMappings.put("llama", newEntityTypeFromName("llama"));
+        newEntityType(CatalogKey.minecraft("horse"));
+        newEntityType(CatalogKey.minecraft("skeleton_horse"));
+        newEntityType(CatalogKey.minecraft("zombie_horse"));
+        newEntityType(CatalogKey.minecraft("donkey"));
+        newEntityType(CatalogKey.minecraft("mule"));
+        newEntityType(CatalogKey.minecraft("llama"));
 
-        this.entityTypeMappings.put("llama_spit", newEntityTypeFromName("llama_spit"));
-        this.entityTypeMappings.put("rabbit", newEntityTypeFromName("rabbit"));
-        this.entityTypeMappings.put("villager", newEntityTypeFromName("villager"));
-        this.entityTypeMappings.put("zombie_villager", newEntityTypeFromName("zombie_villager"));
-        this.entityTypeMappings.put("ender_crystal", newEntityTypeFromName("ender_crystal"));
-        this.entityTypeMappings.put("shulker", newEntityTypeFromName("shulker"));
-        this.entityTypeMappings.put("shulker_bullet", newEntityTypeFromName("shulker_bullet"));
-        this.entityTypeMappings.put("spectral_arrow", newEntityTypeFromName("spectral_arrow"));
-        this.entityTypeMappings.put("polar_bear", newEntityTypeFromName("polar_bear"));
-        this.entityTypeMappings.put("egg", new SpongeEntityType(-1, "egg", EntityEgg.class, new SpongeTranslation("item.egg.name")));
-        this.entityTypeMappings.put("fishing_hook", new SpongeEntityType(-2, "FishingHook", EntityFishHook.class, new SpongeTranslation("item.fishingRod.name")));
-        this.entityTypeMappings.put("lightning", new SpongeEntityType(-3, "lightning", EntityLightningBolt.class, null));
-        this.entityTypeMappings.put("weather", new SpongeEntityType(-4, "Weather", EntityWeatherEffect.class, new SpongeTranslation("soundCategory.weather")));
-        this.entityTypeMappings.put("player", new SpongeEntityType(-5, "Player", EntityPlayerMP.class, new SpongeTranslation("soundCategory.player")));
-        this.entityTypeMappings.put("complex_part", new SpongeEntityType(-6, "ComplexPart", MultiPartEntityPart.class, null));
-        this.entityTypeMappings.put("human", registerCustomEntity(EntityHuman.class, "human", "Human", 300, null)); // TODO: Figure out what id to use, as negative ids no longer work
+        newEntityType(CatalogKey.minecraft("llama_spit"));
+        newEntityType(CatalogKey.minecraft("rabbit"));
+        newEntityType(CatalogKey.minecraft("villager"));
+        newEntityType(CatalogKey.minecraft("zombie_villager"));
+        newEntityType(CatalogKey.minecraft("ender_crystal"));
+        newEntityType(CatalogKey.minecraft("shulker"));
+        newEntityType(CatalogKey.minecraft("shulker_bullet"));
+        newEntityType(CatalogKey.minecraft("spectral_arrow"));
+        newEntityType(CatalogKey.minecraft("polar_bear"));
+        register(CatalogKey.minecraft("egg"), new SpongeEntityType(-1, new ResourceLocation("egg"), new ResourceLocation("egg"), EntityEgg.class, new SpongeTranslation("item.egg.name")));
+        register(CatalogKey.minecraft("fishing_hook"), new SpongeEntityType(-2, new ResourceLocation("fishing_hook"), new ResourceLocation("FishingHook"), EntityFishHook.class, new SpongeTranslation("item.fishingRod.name")));
+        register(CatalogKey.minecraft("lightning"), new SpongeEntityType(-3, new ResourceLocation("lightning"), EntityLightningBolt.class, null));
+        register(CatalogKey.minecraft("weather"), new SpongeEntityType(-4, new ResourceLocation("Weather"), EntityWeatherEffect.class, new SpongeTranslation("soundCategory.weather")));
+        register(CatalogKey.minecraft("player"), new SpongeEntityType(-5, new ResourceLocation("Player"), EntityPlayerMP.class, new SpongeTranslation("soundCategory.player")));
+        register(CatalogKey.minecraft("complex_part"), new SpongeEntityType(-6, new ResourceLocation("complex_part"), new ResourceLocation("ComplexPart"), MultiPartEntityPart.class, null));
+        register(CatalogKey.sponge("human"), createHumanEntityType()); // TODO: Figure out what id to use, as negative ids no longer work
         //this.entityClassToTypeMappings.put("human", new SpongeEntityType(-6))
 
-        this.entityTypeMappings.put("parrot", newEntityTypeFromName("parrot"));
-        this.entityTypeMappings.put("illusion_illager", newEntityTypeFromName("illusion_illager"));
+        newEntityType(CatalogKey.minecraft("parrot"));
+        newEntityType(CatalogKey.minecraft("illusion_illager"));
+        register(CatalogKey.of("unknown", "unknown"), SpongeEntityType.UNKNOWN);
     }
 
-    private SpongeEntityType newEntityTypeFromName(String spongeName, String mcName) {
-        ResourceLocation resourceLoc = new ResourceLocation(mcName);
-        Class<? extends Entity> cls = SpongeImplHooks.getEntityClass(resourceLoc);
-        if (cls == null) {
-            throw new IllegalArgumentException("No class mapping for entity name " + mcName);
+
+
+    private void newEntityType(CatalogKey minecraftKey) {
+        final SpongeEntityType spongeEntityType = newEntityTypeFromName(minecraftKey);
+        register(minecraftKey, spongeEntityType);
+    }
+
+    @Override
+    protected String marshalFieldKey(String key) {
+        return key.replace("minecraft:", "").replace("sponge:", "");
+    }
+
+    @Override
+    protected boolean filterAll(EntityType element) {
+        return element != SpongeEntityType.UNKNOWN;
+    }
+
+    private void newEntityType(CatalogKey spongeKey, CatalogKey minecraftKey) {
+        final SpongeEntityType spongeEntityType = newEntityTypeFromName(minecraftKey);
+        register(spongeKey, spongeEntityType);
+        if (!spongeKey.equals(minecraftKey)) { // Because we do this....
+            register(minecraftKey, spongeEntityType);
         }
-        final SpongeEntityType entityType = new SpongeEntityType(SpongeImplHooks.getEntityId(cls), spongeName, cls,
-            new SpongeTranslation("entity." + SpongeImplHooks.getEntityTranslation(resourceLoc) + ".name"));
+    }
+
+    private SpongeEntityType newEntityTypeFromName(CatalogKey minecraftKey) {
+        ResourceLocation minecraftLocation = (ResourceLocation) (Object) minecraftKey;
+        Class<? extends Entity> cls = SpongeImplHooks.getEntityClass(minecraftLocation);
+        if (cls == null) {
+            throw new IllegalArgumentException("No class mapping for entity name " + minecraftLocation);
+        }
+        final SpongeEntityType entityType = new SpongeEntityType(SpongeImplHooks.getEntityId(cls), minecraftLocation, cls,
+            new SpongeTranslation("entity." + SpongeImplHooks.getEntityTranslation(minecraftLocation) + ".name"));
         KeyRegistryModule.getInstance().registerForEntityClass(cls);
         return entityType;
     }
 
-    private SpongeEntityType newEntityTypeFromName(String name) {
-        return newEntityTypeFromName(name, name);
-    }
-
-    private SpongeEntityType registerCustomEntity(Class<? extends Entity> entityClass, String entityName, String oldName, int entityId, Translation translation) {
-        this.customEntities.add(new FutureRegistration(entityId, new ResourceLocation(SpongeImpl.ECOSYSTEM_ID, entityName), entityClass, oldName));
-        return new SpongeEntityType(entityId, entityName, SpongeImpl.ECOSYSTEM_NAME, entityClass, translation);
+    private SpongeEntityType createHumanEntityType() {
+        this.customEntities.add(new FutureRegistration(300, new ResourceLocation(SpongeImpl.ECOSYSTEM_ID, "human"), EntityHuman.class, "Human"));
+        return new SpongeEntityType(300, new ResourceLocation("sponge:human"), new ResourceLocation("sponge:human"), EntityHuman.class, null);
     }
 
     @CustomCatalogRegistration
@@ -217,15 +221,12 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
             if (fieldName.equals("UNKNOWN")) {
                 return SpongeEntityType.UNKNOWN;
             }
-            EntityType entityType = this.entityTypeMappings.get(fieldName.toLowerCase(Locale.ENGLISH));
+            final CatalogKey key = fieldName.equalsIgnoreCase("human") ? CatalogKey.sponge(fieldName) : CatalogKey.minecraft(fieldName);
+            EntityType entityType = this.map.get(key);
             this.entityClassToTypeMappings.put(((SpongeEntityType) entityType).entityClass, entityType);
-            // remove old mapping
-            this.entityTypeMappings.remove(fieldName.toLowerCase(Locale.ENGLISH));
-            // add new mapping with minecraft id
-            this.entityTypeMappings.put(entityType.getId(), entityType);
             return entityType;
         });
-        this.entityTypeMappings.put("minecraft:ozelot", this.entityTypeMappings.get("minecraft:ocelot"));
+        this.map.put(CatalogKey.minecraft("ozelot"), this.map.get(CatalogKey.minecraft("ocelot")));
 
     }
 
@@ -236,7 +237,7 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
 
     @Override
     public void registerAdditionalCatalog(EntityType extraCatalog) {
-        this.entityTypeMappings.put(extraCatalog.getId(), extraCatalog);
+        this.map.put(extraCatalog.getKey(), extraCatalog);
         this.entityClassToTypeMappings.put(((SpongeEntityType) extraCatalog).entityClass, extraCatalog);
     }
 
@@ -266,7 +267,7 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
     }
 
     public Optional<EntityType> getEntity(Class<? extends org.spongepowered.api.entity.Entity> entityClass) {
-        for (EntityType type : this.entityTypeMappings.values()) {
+        for (EntityType type : this.map.values()) {
             if (entityClass.isAssignableFrom(type.getEntityClass())) {
                 return Optional.of(type);
             }

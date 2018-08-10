@@ -29,6 +29,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -44,16 +45,16 @@ public final class BreakablePlaceableUtils {
         if (value.isEmpty()) {
             if (stackTag != null) {
                 stackTag.removeTag(nbtKey);
-                if (stackTag.hasNoTags()) {
+                if (stackTag.isEmpty()) {
                     stack.setTagCompound(null);
                 }
             }
         } else {
             NBTTagList breakableIds = new NBTTagList();
             for (BlockType breakable : value) {
-                String id = breakable.getId();
-                if (id.startsWith("minecraft:")) {
-                    id = id.substring("minecraft:".length());
+                String id = breakable.getKey().toString();
+                if (breakable.getKey().getNamespace().equals(CatalogKey.MINECRAFT_NAMESPACE)) {
+                    id = breakable.getKey().getValue(); // Trim the minecraft namespace, because vanilla.
                 }
                 breakableIds.appendTag(new NBTTagString(id));
             }
@@ -73,16 +74,14 @@ public final class BreakablePlaceableUtils {
             return Optional.empty();
         }
         NBTTagList blockIds = tag.getTagList(nbtKey, NbtDataUtil.TAG_STRING);
-        if (blockIds.hasNoTags()) {
+        if (blockIds.isEmpty()) {
             return Optional.empty();
         }
         Set<BlockType> blockTypes = Sets.newHashSetWithExpectedSize(blockIds.tagCount());
         for (int i = 0; i < blockIds.tagCount(); i++) {
-            Optional<BlockType> blockType = SpongeImpl.getGame().getRegistry()
-                    .getType(BlockType.class, blockIds.getStringTagAt(i));
-            if (blockType.isPresent()) {
-                blockTypes.add(blockType.get());
-            }
+            SpongeImpl.getGame().getRegistry()
+                .getType(BlockType.class, CatalogKey.resolve(blockIds.getStringTagAt(i)))
+                .ifPresent(blockTypes::add);
         }
         return Optional.of(blockTypes);
     }

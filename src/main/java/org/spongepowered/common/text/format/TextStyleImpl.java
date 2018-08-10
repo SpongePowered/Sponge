@@ -30,6 +30,7 @@ import com.google.common.base.CaseFormat;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import net.minecraft.util.text.TextFormatting;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextStyle;
 import org.spongepowered.api.util.OptBool;
@@ -351,11 +352,13 @@ public class TextStyleImpl implements TextStyle {
     public static final class Real extends TextStyleImpl implements TextStyle.Base {
 
         private final TextFormatting handle;
+        private final CatalogKey key;
 
         protected Real(TextFormatting handle, @Nullable Boolean bold, @Nullable Boolean italic, @Nullable Boolean underline,
                 @Nullable Boolean strikethrough, @Nullable Boolean obfuscated) {
             super(bold, italic, underline, strikethrough, obfuscated);
             this.handle = checkNotNull(handle, "handle");
+            this.key = CatalogKey.minecraft(this.handle.name());
         }
 
         @Override
@@ -364,8 +367,8 @@ public class TextStyleImpl implements TextStyle {
         }
 
         @Override
-        public String getId() {
-            return "minecraft:" + this.handle.name().toLowerCase(Locale.ENGLISH);
+        public CatalogKey getKey() {
+            return this.key;
         }
 
         public static Real of(final TextFormatting real) {
@@ -390,13 +393,15 @@ public class TextStyleImpl implements TextStyle {
 
     public static final class None extends TextStyleImpl implements TextStyle.Base {
 
+        private CatalogKey none = CatalogKey.sponge("none");
+
         public None() {
             super((Boolean) null, null, null, null, null);
         }
 
         @Override
-        public String getId() {
-            return "NONE"; // TODO
+        public CatalogKey getKey() {
+            return this.none;
         }
 
         @Override

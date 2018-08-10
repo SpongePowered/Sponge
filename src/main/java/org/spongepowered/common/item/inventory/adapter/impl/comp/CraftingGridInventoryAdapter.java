@@ -26,8 +26,6 @@ package org.spongepowered.common.item.inventory.adapter.impl.comp;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
@@ -40,13 +38,13 @@ import java.util.Optional;
 
 public class CraftingGridInventoryAdapter extends GridInventoryAdapter implements CraftingGridInventory {
 
-    protected final CraftingGridInventoryLens<IInventory, net.minecraft.item.ItemStack> craftingLens;
+    protected final CraftingGridInventoryLens craftingLens;
 
-    public CraftingGridInventoryAdapter(Fabric<IInventory> inventory, CraftingGridInventoryLens<IInventory, ItemStack> root) {
+    public CraftingGridInventoryAdapter(Fabric inventory, CraftingGridInventoryLens root) {
         this(inventory, root, null);
     }
 
-    public CraftingGridInventoryAdapter(Fabric<IInventory> inventory, CraftingGridInventoryLens<IInventory, net.minecraft.item.ItemStack> root, Inventory parent) {
+    public CraftingGridInventoryAdapter(Fabric inventory, CraftingGridInventoryLens root, Inventory parent) {
         super(inventory, root, parent);
         this.craftingLens = root;
     }

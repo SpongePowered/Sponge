@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.item;
 import com.google.common.base.MoreObjects;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -53,22 +54,22 @@ public abstract class MixinItem implements ItemType, IMixinItem, SpongeGameDicti
 
     public Optional<BlockType> blockType = Optional.empty();
 
-    @Shadow private String unlocalizedName;
+    @Shadow private String translationKey;
 
     @Shadow public abstract int getItemStackLimit();
-    @Shadow public abstract String getUnlocalizedName();
+    @Shadow public abstract String getTranslationKey();
 
     // A item stack used to retrieve properties
     @Nullable private org.spongepowered.api.item.inventory.ItemStack propertyItemStack;
 
     @Override
-    public String getId() {
-        return Item.REGISTRY.getNameForObject((Item) (Object) this).toString();
+    public String getName() {
+        return getKey().getValue();
     }
 
     @Override
-    public String getName() {
-        return getId();
+    public CatalogKey getKey() {
+        return (CatalogKey) (Object) Item.REGISTRY.getNameForObject((Item) (Object) this);
     }
 
     @Override
@@ -81,7 +82,7 @@ public abstract class MixinItem implements ItemType, IMixinItem, SpongeGameDicti
 
     @Override
     public Translation getTranslation() {
-        return new SpongeTranslation(getUnlocalizedName() + ".name");
+        return new SpongeTranslation(getTranslationKey() + ".name");
     }
 
     @Override
@@ -120,7 +121,7 @@ public abstract class MixinItem implements ItemType, IMixinItem, SpongeGameDicti
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("Name", this.unlocalizedName)
+                .add("Name", this.translationKey)
                 .toString();
     }
 }

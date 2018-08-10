@@ -41,6 +41,7 @@ import org.spongepowered.common.data.util.DataQueries;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -91,7 +92,7 @@ public class SpongeFluidStackSnapshot implements FluidStackSnapshot {
     public DataContainer toContainer() {
         DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, this.getContentVersion())
-            .set(DataQueries.FLUID_TYPE, this.fluidType.getId())
+            .set(DataQueries.FLUID_TYPE, this.fluidType.getKey())
             .set(DataQueries.FLUID_VOLUME, this.volume);
         if (this.extraData != null) {
             container.set(DataQueries.UNSAFE_NBT, this.extraData);
@@ -197,5 +198,24 @@ public class SpongeFluidStackSnapshot implements FluidStackSnapshot {
     @Override
     public Set<ImmutableValue<?>> getValues() {
         return Collections.emptySet();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(fluidType, volume, extraData);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        final SpongeFluidStackSnapshot other = (SpongeFluidStackSnapshot) obj;
+        return Objects.equals(this.fluidType, other.fluidType)
+               && Objects.equals(this.volume, other.volume)
+               && Objects.equals(this.extraData, other.extraData);
     }
 }

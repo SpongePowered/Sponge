@@ -30,8 +30,9 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import ninja.leaping.configurate.objectmapping.Setting;
+import org.spongepowered.common.config.category.BrokenModCategory;
 import org.spongepowered.common.config.category.BungeeCordCategory;
-import org.spongepowered.common.config.category.CauseTrackerCategory;
+import org.spongepowered.common.config.category.PhaseTrackerCategory;
 import org.spongepowered.common.config.category.CommandsCategory;
 import org.spongepowered.common.config.category.ExploitCategory;
 import org.spongepowered.common.config.category.GlobalGeneralCategory;
@@ -80,7 +81,7 @@ public class GlobalConfig extends GeneralConfigBase {
     protected GlobalWorldCategory world = new GlobalWorldCategory();
 
     @Setting(value = "cause-tracker")
-    protected CauseTrackerCategory causeTracker = new CauseTrackerCategory();
+    private PhaseTrackerCategory causeTracker = new PhaseTrackerCategory();
 
     @Setting(value = "teleport-helper", comment = "Blocks to blacklist for safe teleportation.")
     private TeleportHelperCategory teleportHelper = new TeleportHelperCategory();
@@ -88,8 +89,15 @@ public class GlobalConfig extends GeneralConfigBase {
     @Setting("movement-checks")
     private MovementChecksCategory movementChecks = new MovementChecksCategory();
 
+    @Setting(value = "broken-mods", comment = "Stopgap measures for dealing with broken mods")
+    private BrokenModCategory brokenMods = new BrokenModCategory();
+
     public GlobalConfig() {
         super();
+    }
+
+    public BrokenModCategory getBrokenMods() {
+        return this.brokenMods;
     }
 
     public BungeeCordCategory getBungeeCord() {
@@ -141,13 +149,7 @@ public class GlobalConfig extends GeneralConfigBase {
         return this.world;
     }
 
-    @Override
-    public boolean isConfigEnabled() {
-        // always return true as there is only 1 global config
-        return true;
-    }
-
-    public CauseTrackerCategory getCauseTracker() {
+    public PhaseTrackerCategory getPhaseTracker() {
         return this.causeTracker;
     }
 

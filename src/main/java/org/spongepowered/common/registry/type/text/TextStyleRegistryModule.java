@@ -24,55 +24,37 @@
  */
 package org.spongepowered.common.registry.type.text;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import net.minecraft.util.text.TextFormatting;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.text.format.TextStyle;
 import org.spongepowered.api.text.format.TextStyles;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 import org.spongepowered.common.text.format.TextStyleImpl;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-
-@RegisterCatalog(TextStyles.class)
-public final class TextStyleRegistryModule implements AlternateCatalogRegistryModule<TextStyle.Base> {
-
-    public static final ImmutableMap<String, TextStyle.Base> textStyleMappings = ImmutableMap.<String, TextStyle.Base>builder()
-        .put("minecraft:bold", TextStyleImpl.Real.of(TextFormatting.BOLD))
-        .put("minecraft:italic", TextStyleImpl.Real.of(TextFormatting.ITALIC))
-        .put("minecraft:underline", TextStyleImpl.Real.of(TextFormatting.UNDERLINE))
-        .put("minecraft:strikethrough", TextStyleImpl.Real.of(TextFormatting.STRIKETHROUGH))
-        .put("minecraft:obfuscated", TextStyleImpl.Real.of(TextFormatting.OBFUSCATED))
-        .put("minecraft:reset", TextStyleImpl.Real.of(TextFormatting.RESET))
-        .put("none", new TextStyleImpl.None())
-        .build();
+@RegisterCatalog(value = TextStyles.class)
+public final class TextStyleRegistryModule extends AbstractCatalogRegistryModule<TextStyle.Base>
+    implements AlternateCatalogRegistryModule<TextStyle.Base> {
 
     @Override
-    public Optional<TextStyle.Base> getById(String id) {
-        id = id.toLowerCase(Locale.ENGLISH);
-        if (id.equals("none")) {
-            return Optional.of((TextStyle.Base) TextStyles.NONE);
-        }
-        return Optional.ofNullable(textStyleMappings.get(Preconditions.checkNotNull(id)));
+    public void registerDefaults() {
+        register(CatalogKey.minecraft("bold"), TextStyleImpl.Real.of(TextFormatting.BOLD));
+        register(CatalogKey.minecraft("italic"), TextStyleImpl.Real.of(TextFormatting.ITALIC));
+        register(CatalogKey.minecraft("underline"), TextStyleImpl.Real.of(TextFormatting.UNDERLINE));
+        register(CatalogKey.minecraft("strikethrough"), TextStyleImpl.Real.of(TextFormatting.STRIKETHROUGH));
+        register(CatalogKey.minecraft("obfuscated"), TextStyleImpl.Real.of(TextFormatting.OBFUSCATED));
+        register(CatalogKey.minecraft("reset"), TextStyleImpl.Real.of(TextFormatting.RESET));
+        register(CatalogKey.sponge("none"), new TextStyleImpl.None());
     }
 
     @Override
-    public Collection<TextStyle.Base> getAll() {
-        return ImmutableList.copyOf(textStyleMappings.values());
+    protected String marshalFieldKey(String key) {
+        return key.replace("sponge:", "");
     }
 
     @Override
-    public Map<String, TextStyle.Base> provideCatalogMap() {
-        final HashMap<String, TextStyle.Base> map = new HashMap<>();
-        for (Map.Entry<String, TextStyle.Base> entry : textStyleMappings.entrySet()) {
-            map.put(entry.getKey().replace("minecraft:", ""), entry.getValue());
-        }
-        return map;
+    protected boolean filterAll(TextStyle.Base element) {
+        return element != TextStyles.NONE;
     }
 }

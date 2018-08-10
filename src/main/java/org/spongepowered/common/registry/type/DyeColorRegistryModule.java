@@ -24,54 +24,35 @@
  */
 package org.spongepowered.common.registry.type;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
 import net.minecraft.item.EnumDyeColor;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.type.DyeColors;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Map;
 import java.util.Optional;
 
-public final class DyeColorRegistryModule implements CatalogRegistryModule<DyeColor> {
+@RegisterCatalog(DyeColors.class)
+public final class DyeColorRegistryModule extends AbstractCatalogRegistryModule<DyeColor> {
 
     public static DyeColorRegistryModule getInstance() {
         return Holder.INSTANCE;
     }
 
-    @RegisterCatalog(DyeColors.class)
-    private final Map<String, DyeColor> dyeColorMappings = Maps.newHashMap();
-
-    @Override
-    public Optional<DyeColor> getById(String id) {
-        return Optional.ofNullable(this.dyeColorMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-
-    @Override
-    public Collection<DyeColor> getAll() {
-        return ImmutableList.copyOf(this.dyeColorMappings.values());
-    }
-
     @Override
     public void registerDefaults() {
         for (EnumDyeColor dyeColor : EnumDyeColor.values()) {
-            this.dyeColorMappings.put(dyeColor.getName().toLowerCase(Locale.ENGLISH), (DyeColor) (Object) dyeColor);
+            this.map.put(CatalogKey.minecraft(dyeColor.getName()), (DyeColor) (Object) dyeColor);
         }
     }
 
     @AdditionalRegistration
     public void registerAdditional() {
         for (EnumDyeColor dyeColor : EnumDyeColor.values()) {
-            if (!this.dyeColorMappings.containsValue(dyeColor)) {
-                this.dyeColorMappings.put(dyeColor.getName().toLowerCase(Locale.ENGLISH), (DyeColor) (Object) dyeColor);
+            if (!this.map.containsValue(dyeColor)) {
+                this.map.put(CatalogKey.minecraft(dyeColor.getName()), (DyeColor) (Object) dyeColor);
             }
         }
     }

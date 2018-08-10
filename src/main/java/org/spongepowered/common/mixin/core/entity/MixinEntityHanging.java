@@ -26,6 +26,8 @@ package org.spongepowered.common.mixin.core.entity;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityHanging;
+import net.minecraft.entity.item.EntityItem;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumFacing;
@@ -40,6 +42,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.AttackEntityEvent;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -49,7 +52,9 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeDirectionalData;
 import org.spongepowered.common.data.util.DirectionResolver;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.interfaces.entity.IMixinEntityHanging;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -90,16 +95,38 @@ public abstract class MixinEntityHanging extends MixinEntity implements Hanging,
         }
     }
 
-    @Inject(method = "attackEntityFrom", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityHanging;setDead()V"))
+    @Inject(method = "attackEntityFrom", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityHanging;setDead()V"), cancellable = true)
     private void onAttackEntityFrom(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(source);
-            AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.getCurrentCause(), new ArrayList(), this, 0, amount);
+            AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.getCurrentCause(), new ArrayList<>(), this, 0, amount);
             SpongeImpl.postEvent(event);
             if (event.isCancelled()) {
                 cir.setReturnValue(true);
             }
         }
+    }
+
+    /**
+     * @author gabizou - April 19th, 2018
+     * @reason Redirect the flow of logic to sponge for events and captures. Forge's compatibility is built in
+     * to the implementation.
+     */
+    @Override
+    @Overwrite
+    public EntityItem entityDropItem(ItemStack stack, float offsetY) {
+        // Sponge Start - Check for client worlds,, don't care about them really. If it's server world, then we care.
+        final double xOffset = ((float) this.facingDirection.getXOffset() * 0.15F);
+        final double zOffset = ((float) this.facingDirection.getZOffset() * 0.15F);
+        if (((IMixinWorld) this.world).isFake()) {
+            // Sponge End
+            EntityItem entityitem = new EntityItem(this.world, this.posX + xOffset, this.posY + (double) offsetY, this.posZ + zOffset, stack);
+            entityitem.setDefaultPickupDelay();
+            this.world.spawnEntity(entityitem);
+            return entityitem;
+        }
+        // Sponge - redirect server sided logic to sponge to handle cause stacks and phase states
+        return EntityUtil.entityOnDropItem((EntityHanging) (Object) this, stack, offsetY, this.posX + xOffset, this.posZ + zOffset);
     }
 
     // Data delegated methods

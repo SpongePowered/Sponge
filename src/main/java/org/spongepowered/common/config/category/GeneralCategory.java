@@ -33,21 +33,21 @@ public class GeneralCategory extends ConfigCategory {
     @Setting(value = "disable-warnings", comment = "Disable warning messages to server admins")
     private boolean disableWarnings = false;
     
-    @Setting(value = "plugins-dir", comment = "Additional directory to search for plugins, relative to the "
-                                              + "\nexecution root or specified as an absolute path."
-                                              + "\nNote that the default: \"${CANONICAL_MODS_DIR}/plugins\""
-                                              + "\nis going to search for a plugins folder in the mods directory."
-                                              + "\nIf you wish for the plugins folder to reside in the root game"
-                                              + "\ndirectory, change the value to \"${CANONICAL_GAME_DIR}/plugins\".")
+    @Setting(value = "plugins-dir", comment = "Additional directory to search for plugins, relative to the \n"
+                                            + "execution root or specified as an absolute path. \n"
+                                            + "Note that the default: \"${CANONICAL_MODS_DIR}/plugins\" \n"
+                                            + "is going to search for a plugins folder in the mods directory. \n"
+                                            + "If you wish for the plugins folder to reside in the root game \n"
+                                            + "directory, change the value to \"${CANONICAL_GAME_DIR}/plugins\".")
     private String pluginsDir = "${CANONICAL_MODS_DIR}/plugins";
-    @Setting(value = "config-dir", comment = "The directory for Sponge plugin configurations, relative to the "
-                                              + "\nexecution root or specified as an absolute path."
-                                              + "\nNote that the default: \"${CANONICAL_GAME_DIR}/config\""
-                                              + "\nis going to use the \"plugins\" directory in the root game directory."
-                                              + "\nIf you wish for plugin configs to reside within a child of the configuration"
-                                              + "\ndirectory, change the value to, for example, \"${CANONICAL_CONFIG_DIR}/sponge/plugins\"."
-                                              + "\nNote: It is not recommended to set this to \"${CANONICAL_CONFIG_DIR}/sponge\", as there is"
-                                              + "\na possibility that plugin configurations can conflict the Sponge core configurations.")
+    @Setting(value = "config-dir", comment = "The directory for Sponge plugin configurations, relative to the  \n"
+                                           + "execution root or specified as an absolute path. \n"
+                                           + "Note that the default: \"${CANONICAL_GAME_DIR}/config\" \n"
+                                           + "is going to use the \"plugins\" directory in the root game directory. \n"
+                                           + "If you wish for plugin configs to reside within a child of the configuration \n"
+                                           + "directory, change the value to, for example, \"${CANONICAL_CONFIG_DIR}/sponge/plugins\". \n"
+                                           + "Note: It is not recommended to set this to \"${CANONICAL_CONFIG_DIR}/sponge\", as there is \n"
+                                           + "a possibility that plugin configurations can conflict the Sponge core configurations. \n")
     private String configDir = "${CANONICAL_GAME_DIR}/config";
 
     public boolean disableWarnings() {

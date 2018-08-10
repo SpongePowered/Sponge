@@ -30,10 +30,4 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import java.util.List;
 
 public class AnimationPacketState extends BasicPacketState {
-
-    @Override
-    public void unwind(BasicPacketContext context) {
-        final List<BlockSnapshot> capturedBlocks = context.getCapturedBlocks();
-        TrackingUtil.processBlockCaptures(capturedBlocks, this, context);
-    }
 }

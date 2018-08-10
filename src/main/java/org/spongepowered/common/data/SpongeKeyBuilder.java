@@ -29,19 +29,24 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.reflect.TypeToken;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.registry.type.data.KeyRegistryModule;
 
 import java.util.Locale;
 
-public class SpongeKeyBuilder<E, V extends BaseValue<E>> implements Key.Builder<E, V> {
+import javax.annotation.Nullable;
 
-    TypeToken<V> valueToken;
-    String id;
-    String name;
-    DataQuery query;
+@SuppressWarnings("deprecation")
+public final class SpongeKeyBuilder<E, V extends BaseValue<E>> implements Key.Builder<E, V> {
+
+    @Nullable TypeToken<V> valueToken;
+    @Nullable CatalogKey id;
+    @Nullable String name;
+    @Nullable DataQuery query;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -52,15 +57,26 @@ public class SpongeKeyBuilder<E, V extends BaseValue<E>> implements Key.Builder<
 
     @Override
     public Key.Builder<E, V> id(String id) {
-        checkState(this.valueToken != null, "Value Token must be set first!");
         checkArgument(!checkNotNull(id, "ID cannot be null!").contains(" "), "Id cannot contain spaces!");
-        this.id = id.toLowerCase(Locale.ENGLISH);
+        String value = id.toLowerCase(Locale.ENGLISH);
+        final PluginContainer parent = SpongeKey.getCurrentContainer();
+        if (value.indexOf(':') == -1) {
+            value = parent.getId() + ':' + value;
+        }
+        this.id = CatalogKey.resolve(value);
+        return this;
+    }
+
+    @Override
+    public Key.Builder<E, V> key(CatalogKey key) {
+        checkState(this.valueToken != null, "Value Token must be set first!");
+        checkArgument(!checkNotNull(key).toString().contains(" "), "Id cannot contain spaces!");
+        this.id = key;
         return this;
     }
 
     @Override
     public Key.Builder<E, V> name(String name) {
-        checkState(this.valueToken != null, "Value Token must be set first!");
         checkArgument(!checkNotNull(name).isEmpty(), "Name cannot be empty!");
         this.name = name;
         return this;
@@ -68,7 +84,6 @@ public class SpongeKeyBuilder<E, V extends BaseValue<E>> implements Key.Builder<
 
     @Override
     public Key.Builder<E, V> query(DataQuery query) {
-        checkState(this.valueToken != null, "Value Token must be set first!");
         checkArgument(!query.getParts().isEmpty(), "DataQuery cannot be null!");
         this.query = query;
         return this;

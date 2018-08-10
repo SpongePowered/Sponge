@@ -59,7 +59,7 @@ public abstract class MixinEntityTracker {
     @Redirect(method = "track(Lnet/minecraft/entity/Entity;IIZ)V", at = @At(value = "NEW", args = "class=java/lang/IllegalStateException", remap = false))
     private IllegalStateException reportEntityAlreadyTrackedWithWorld(String string, Entity entityIn, int trackingRange, final int updateFrequency, boolean sendVelocityUpdates) {
         IllegalStateException exception = new IllegalStateException(String.format("Entity %s is already tracked for world: %s", entityIn, ((World) this.world).getName()));;
-        if (PhaseTracker.getInstance().verboseErrors) {
+        if (SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().verboseErrors()) {
             PhaseTracker.getInstance().printMessageWithCaughtException("Exception tracking entity", "An entity that was already tracked was added to the tracker!", exception);
         }
         return exception;
@@ -67,7 +67,7 @@ public abstract class MixinEntityTracker {
 
     @Inject(method = "track(Lnet/minecraft/entity/Entity;IIZ)V", at = @At("HEAD"), cancellable = true)
     public void onAddEntityToTracker(Entity entityIn, int trackingRange, final int updateFrequency, boolean sendVelocityUpdates, CallbackInfo ci) {
-        if (!SpongeImpl.getServer().isCallingFromMinecraftThread() ) {
+        if (!SpongeImpl.getServer().isServerStopped() && !SpongeImpl.getServer().isCallingFromMinecraftThread() ) {
             Thread.dumpStack();
             SpongeImpl.getLogger().error("Detected attempt to add entity '" + entityIn + "' to tracker asynchronously.\n"
                     + " This is very bad as it can cause ConcurrentModificationException's during a server tick.\n"
@@ -78,7 +78,7 @@ public abstract class MixinEntityTracker {
 
     @Inject(method = "untrack", at = @At("HEAD"), cancellable = true)
     public void onUntrackEntity(Entity entityIn, CallbackInfo ci) {
-        if (!SpongeImpl.getServer().isCallingFromMinecraftThread() ) {
+        if (!SpongeImpl.getServer().isServerStopped() && !SpongeImpl.getServer().isCallingFromMinecraftThread() ) {
             Thread.dumpStack();
             SpongeImpl.getLogger().error("Detected attempt to untrack entity '" + entityIn + "' asynchronously.\n"
                     + "This is very bad as it can cause ConcurrentModificationException's during a server tick.\n"

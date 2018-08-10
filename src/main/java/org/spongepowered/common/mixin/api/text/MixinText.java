@@ -31,21 +31,24 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.common.text.impl.LiteralTextImpl;
+import org.spongepowered.common.text.impl.TextFactoryImpl;
 
 @Mixin(value = Text.class, remap = false)
 public interface MixinText {
 
     /**
-     * @author kashike
+     * @author gabizou - August 8th, 2018
+     * @reason Text is loaded super early...
      */
-    @Overwrite
     @SuppressWarnings("deprecation")
-    static Text of() {
-        return LiteralTextImpl.EMPTY;
+    @Overwrite
+    static Text of(Object... objects) {
+        return new TextFactoryImpl().of(objects);
     }
 
     /**
-     * @author kashike
+     * @author kashike - August 8, 2018
+     * @reason - faster impl
      */
     @Overwrite
     @SuppressWarnings("deprecation")
@@ -54,7 +57,8 @@ public interface MixinText {
     }
 
     /**
-     * @author kashike
+     * @author kashike - August 8, 2018
+     * @reason - faster impl
      */
     @Overwrite
     @SuppressWarnings("deprecation")
@@ -63,7 +67,8 @@ public interface MixinText {
     }
 
     /**
-     * @author kashike
+     * @author kashike - August 8, 2018
+     * @reason - faster impl
      */
     @Overwrite
     @SuppressWarnings("deprecation")
@@ -78,7 +83,8 @@ public interface MixinText {
     }
 
     /**
-     * @author kashike
+     * @author kashike - August 8, 2018
+     * @reason - faster impl
      */
     @Overwrite
     @SuppressWarnings("deprecation")

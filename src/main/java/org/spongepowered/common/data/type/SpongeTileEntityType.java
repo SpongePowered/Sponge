@@ -27,36 +27,76 @@ package org.spongepowered.common.data.type;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.common.SpongeCatalogType;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.config.category.TileEntityTrackerCategory;
+import org.spongepowered.common.config.category.TileEntityTrackerModCategory;
+import org.spongepowered.common.config.type.TrackerConfig;
+
+import java.util.Locale;
 
 public class SpongeTileEntityType extends SpongeCatalogType implements TileEntityType {
 
-    private final String name;
-    private final String modId;
     private final Class<? extends TileEntity> clazz;
+    private final CatalogKey key;
     private final boolean canTick;
+    // Used by tracker config
+    public boolean allowsBlockBulkCapture = true;
+    public boolean allowsEntityBulkCapture = true;
+    public boolean allowsBlockEventCreation = true;
+    public boolean allowsEntityEventCreation = true;
 
-    public SpongeTileEntityType(Class<? extends TileEntity> clazz, String name, String id, boolean canTick, String modId) {
-        super(id);
-        this.name = checkNotNull(name, "name");
+    public SpongeTileEntityType(Class<? extends TileEntity> clazz, CatalogKey key, boolean canTick) {
+        super(key, key.getValue());
         this.clazz = checkNotNull(clazz, "clazz");
         this.canTick = canTick;
-        this.modId = modId;
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
+        this.key = key;
+        this.initializeTrackerState();
     }
 
     public String getModId() {
-        return this.modId;
+        return this.getKey().getNamespace();
     }
 
     public boolean canTick() {
         return this.canTick;
+    }
+
+    public void initializeTrackerState() {
+        SpongeConfig<TrackerConfig> trackerConfig = SpongeImpl.getTrackerConfig();
+        TileEntityTrackerCategory tileEntityTracker = trackerConfig.getConfig().getTileEntityTracker();
+        final String modId = this.key.getNamespace();
+
+        TileEntityTrackerModCategory modCapturing = tileEntityTracker.getModMappings().get(modId);
+
+        if (modCapturing == null) {
+            modCapturing = new TileEntityTrackerModCategory();
+            tileEntityTracker.getModMappings().put(modId, modCapturing);
+        }
+
+        if (!modCapturing.isEnabled()) {
+            this.allowsBlockBulkCapture = false;
+            this.allowsEntityBulkCapture = false;
+            this.allowsBlockEventCreation = false;
+            this.allowsEntityEventCreation = false;
+            modCapturing.getBlockBulkCaptureMap().computeIfAbsent(this.key.getValue().toLowerCase(Locale.ENGLISH), k -> this.allowsBlockBulkCapture);
+            modCapturing.getEntityBulkCaptureMap().computeIfAbsent(this.key.getValue().toLowerCase(Locale.ENGLISH), k -> this.allowsEntityBulkCapture);
+            modCapturing.getBlockEventCreationMap().computeIfAbsent(this.key.getValue().toLowerCase(Locale.ENGLISH), k -> this.allowsBlockEventCreation);
+            modCapturing.getEntityEventCreationMap().computeIfAbsent(this.key.getValue().toLowerCase(Locale.ENGLISH), k -> this.allowsEntityEventCreation);
+        } else {
+            this.allowsBlockBulkCapture = modCapturing.getBlockBulkCaptureMap().computeIfAbsent(this.key.getValue().toLowerCase(Locale.ENGLISH), k -> true);
+            this.allowsEntityBulkCapture = modCapturing.getEntityBulkCaptureMap().computeIfAbsent(this.key.getValue().toLowerCase(Locale.ENGLISH), k -> true);
+            this.allowsBlockEventCreation = modCapturing.getBlockEventCreationMap().computeIfAbsent(this.key.getValue().toLowerCase(Locale.ENGLISH), k -> true);
+            this.allowsEntityEventCreation = modCapturing.getEntityEventCreationMap().computeIfAbsent(this.key.getValue().toLowerCase(Locale.ENGLISH), k -> true);
+        }
+
+        if (tileEntityTracker.autoPopulateData()) {
+            trackerConfig.save();
+        }
     }
 
     @Override

@@ -39,14 +39,15 @@ import org.spongepowered.common.interfaces.IMixinSingleBlockCarrier;
 @Mixin(ContainerEnchantment.class)
 public class MixinCarrierContainerEnchantment implements IMixinSingleBlockCarrier {
 
-    @Shadow @Final public net.minecraft.world.World worldPointer;
+    @Shadow @Final public net.minecraft.world.World world;
     @Shadow @Final public BlockPos position;
 
     @Override
     public Location<World> getLocation() {
-        return new Location<>(((World) this.worldPointer), new Vector3d(this.position.getX(), this.position.getY(), this.position.getZ()));
+        return new Location<>(((World) this.world), new Vector3d(this.position.getX(), this.position.getY(), this.position.getZ()));
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public CarriedInventory<? extends Carrier> getInventory() {
         return ((CarriedInventory) this);

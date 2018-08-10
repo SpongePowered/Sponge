@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.block.BlockStoneBrick;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.BrickType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Implements;
@@ -40,22 +41,28 @@ import javax.annotation.Nullable;
 @Implements(@Interface(iface = BrickType.class, prefix = "brick$"))
 public abstract class MixinBlockStoneBrickEnumType {
 
-    @Shadow public abstract String shadow$getUnlocalizedName();
+    @Shadow public abstract String shadow$getTranslationKey();
+
+    @Shadow public abstract String shadow$getName();
 
     @Nullable private Translation translation;
+    @Nullable private CatalogKey key;
 
-    public String brick$getId() {
-        return "minecraft:" + shadow$getUnlocalizedName();
+    public CatalogKey brick$getKey() {
+        if (this.key == null) {
+            this.key = CatalogKey.minecraft(this.shadow$getTranslationKey());
+        }
+        return this.key;
     }
 
     @Intrinsic
     public String brick$getName() {
-        return shadow$getUnlocalizedName();
+        return shadow$getTranslationKey();
     }
 
     public Translation brick$getTranslation() {
         if (this.translation == null) {
-            this.translation = new SpongeTranslation("tile.stonebricksmooth." + shadow$getUnlocalizedName() + ".name");
+            this.translation = new SpongeTranslation("tile.stonebricksmooth." + shadow$getTranslationKey() + ".name");
         }
         return this.translation;
     }

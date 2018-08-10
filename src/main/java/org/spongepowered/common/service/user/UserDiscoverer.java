@@ -33,6 +33,7 @@ import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.server.management.PlayerProfileCache;
 import net.minecraft.server.management.UserListBans;
+import net.minecraft.server.management.UserListEntry;
 import net.minecraft.server.management.UserListEntryBan;
 import net.minecraft.server.management.UserListWhitelist;
 import net.minecraft.server.management.UserListWhitelistEntry;
@@ -40,23 +41,25 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.storage.SaveHandler;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.profile.ProfileNotFoundException;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
-import org.spongepowered.common.util.SpongeUsernameCache;
 import org.spongepowered.common.world.WorldManager;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 class UserDiscoverer {
 
@@ -64,10 +67,32 @@ class UserDiscoverer {
             .expireAfterAccess(1, TimeUnit.DAYS)
             .build();
 
+    // It's possible for plugins to create 'fake users' with UserStorageService#getOrCreate,
+    // whose names aren't registered with Mojang. To allow plugins to lookup
+    // these users with UserStorageService#get, we need to cache users by name as well as by UUID
+    private static final Cache<String, User> userByNameCache = CacheBuilder.newBuilder()
+            .expireAfterAccess(1, TimeUnit.DAYS)
+            .build();
+
+    // If a user doesn't exist, we should not put it into the cache, instead, we track it here.
+    private static final Set<UUID> nonExistentUsers = new HashSet<>();
+
     static User create(GameProfile profile) {
         User user = (User) new SpongeUser(profile);
         userCache.put(profile.getId(), user);
+        if (profile.getName() != null) {
+            userByNameCache.put(profile.getName(), user);
+        }
+        nonExistentUsers.remove(profile.getId());
         return user;
+    }
+
+    static User forceRecreate(GameProfile profile) {
+        SpongeUser user = (SpongeUser) userCache.getIfPresent(profile.getId());
+        if (user != null && SpongeUser.dirtyUsers.contains(user)) {
+            user.save();
+        }
+        return create(profile);
     }
 
     /**
@@ -91,6 +116,7 @@ class UserDiscoverer {
         }
         user = getOnlinePlayer(uniqueId);
         if (user != null) {
+            nonExistentUsers.remove(profile.getUniqueId());
             return user;
         }
         user = getFromStoredData(profile);
@@ -106,6 +132,11 @@ class UserDiscoverer {
     }
 
     static User findByUsername(String username) {
+        User user = userByNameCache.getIfPresent(username);
+        if (user != null) {
+            return user;
+        }
+
         // check mojang cache
         PlayerProfileCache cache = SpongeImpl.getServer().getPlayerProfileCache();
         HashSet<String> names = Sets.newHashSet(cache.getUsernames());
@@ -117,24 +148,31 @@ class UserDiscoverer {
         }
 
         // check username cache
-        final UUID uuid = SpongeUsernameCache.getLastKnownUUID(username);
-        if (uuid != null) {
-            return create(new GameProfile(uuid, username));
+        org.spongepowered.api.profile.GameProfile profile;
+        try {
+            profile = Sponge.getServer().getGameProfileManager().get(username).get();
+        } catch (InterruptedException e) {
+            throw new RuntimeException("Interrupted while looking up username " + username, e);
+        } catch (ExecutionException e) {
+            if (e.getCause() instanceof ProfileNotFoundException) {
+                return null;
+            }
+            throw new RuntimeException("Exception while looking up username " + username, e);
         }
-
-        return null;
+        return UserDiscoverer.findByProfile(profile);
     }
 
     static Collection<org.spongepowered.api.profile.GameProfile> getAllProfiles() {
         Preconditions.checkState(Sponge.isServerAvailable(), "Server is not available!");
-        Set<org.spongepowered.api.profile.GameProfile> profiles = Sets.newHashSet();
+        final Map<UUID, org.spongepowered.api.profile.GameProfile> profiles = new HashMap<>();
 
         // Add all cached profiles
-        profiles.addAll(userCache.asMap().values().stream().map(User::getProfile).collect(Collectors.toList()));
+        userCache.asMap().values().stream().map(User::getProfile).forEach(p -> profiles.put(p.getUniqueId(), p));
 
         // Add all known profiles from the data files
         SaveHandler saveHandler = (SaveHandler) WorldManager.getWorldByDimensionId(0).get().getSaveHandler();
         String[] uuids = saveHandler.getAvailablePlayerDat();
+        final PlayerProfileCache profileCache = SpongeImpl.getServer().getPlayerProfileCache();
         for (String playerUuid : uuids) {
 
             // If the filename contains a period, we can fail fast. Vanilla code fixes the Strings that have ".dat" to strip that out
@@ -152,23 +190,46 @@ class UserDiscoverer {
                 continue;
             }
 
-            final GameProfile profile = SpongeImpl.getServer().getPlayerProfileCache().getProfileByUUID(uuid);
+            // it exists, so we make sure to remove the uuid from the map (it may have been added manually in the meantime)
+            nonExistentUsers.remove(uuid);
+            final GameProfile profile = profileCache.getProfileByUUID(uuid);
             if (profile != null) {
-                profiles.add((org.spongepowered.api.profile.GameProfile) profile);
+                profiles.put(profile.getId(), (org.spongepowered.api.profile.GameProfile) profile);
             }
         }
 
         // Add all whitelisted users
-        final UserListWhitelist whiteList = SpongeImpl.getServer().getPlayerList().getWhitelistedPlayers();
-        profiles.addAll(whiteList.getValues().values().stream().map(entry -> (org.spongepowered.api.profile.GameProfile) entry.value)
-                .collect(Collectors.toList()));
+        // Note: as the equality check in GameProfile requires both the UUID and name to be equal, we have to filter
+        // out the game profiles by UUID only in the whitelist and ban list. If we don't, we end up with two GameProfiles
+        // with the same UUID but different names, one of which is potentially invalid. For some
+        // We assume that the cache is superior to the whitelist/banlist.
+        //
+        // See https://github.com/SpongePowered/SpongeCommon/issues/1989
+        addToProfiles(SpongeImpl.getServer().getPlayerList().getWhitelistedPlayers().getValues().values(), profiles, profileCache);
+        addToProfiles(SpongeImpl.getServer().getPlayerList().getBannedPlayers().getValues().values(), profiles, profileCache);
+        return profiles.values();
+    }
 
-        // Add all banned users
-        final UserListBans banList = SpongeImpl.getServer().getPlayerList().getBannedPlayers();
-        profiles.addAll(banList.getValues().values().stream().filter(entry -> entry != null).map(entry -> (org.spongepowered.api.profile.GameProfile)
-                entry.value).collect(Collectors.toList()));
+    private static void addToProfiles(
+            final Collection<? extends UserListEntry<GameProfile>> gameProfiles,
+            final Map<UUID, org.spongepowered.api.profile.GameProfile> profiles,
+            final PlayerProfileCache profileCache) {
 
-        return profiles;
+        gameProfiles.stream()
+                .filter(x -> !profiles.containsKey(x.value.getId()))
+                .map(entry -> entry.value)
+                .forEach(x -> {
+                    // Get the known name, if it doesn't exist, then we don't add it - we assume no user backing
+                    GameProfile profile = profileCache.getProfileByUUID(x.getId());
+                    if (profile == null) {
+                        // the name could be valid in this case (e.g. old ban that has dropped off the cache),
+                        // so we add it to the Mojang cache
+                        profile = x;
+                        profileCache.addEntry(profile);
+                    }
+
+                    profiles.put(profile.getId(), (org.spongepowered.api.profile.GameProfile) profile);
+                });
     }
 
     static boolean delete(UUID uniqueId) {
@@ -185,6 +246,7 @@ class UserDiscoverer {
     private static User getOnlinePlayer(UUID uniqueId) {
         Preconditions.checkState(Sponge.isServerAvailable(), "Server is not available!");
         final PlayerList playerList = SpongeImpl.getServer().getPlayerList();
+        Preconditions.checkNotNull(playerList, "Server is not fully initialized yet! (Try a later event)");
 
         // Although the player itself could be returned here (as Player extends
         // User), a plugin is more likely to cache the User object and we don't
@@ -193,6 +255,7 @@ class UserDiscoverer {
         if (player != null) {
             final User user = player.getUserObject();
             userCache.put(uniqueId, user);
+            userByNameCache.put(user.getName(), user);
             return user;
         }
 
@@ -200,14 +263,28 @@ class UserDiscoverer {
     }
 
     private static User getFromStoredData(org.spongepowered.api.profile.GameProfile profile) {
-        // Always cache user to avoid constant lookups in storage when file does not exist
-        final User user = create((GameProfile) profile);
-        // Note: Uses the overworld's player data
-        final File dataFile = getPlayerDataFile(profile.getUniqueId());
-        if (dataFile == null) {
+        // if we already saw there was no stored data, then there is no stored data!
+        if (nonExistentUsers.contains(profile.getUniqueId())) {
             return null;
         }
 
+        // Note: Uses the overworld's player data
+        final File dataFile = getPlayerDataFile(profile.getUniqueId());
+        if (dataFile == null) {
+            // Tell the discoverer that we found nothing so we don't need to make this check in the future
+            nonExistentUsers.add(profile.getUniqueId());
+            return null;
+        }
+
+        // Create the user, this will cache it too.
+        // Note: this was previously before the data file check. This had the unfortunate side effect of
+        // creating a user when the user wasn't asked to be created (UserStorageService#get). The effect
+        // was that the first get call would return Optional#empty, but the second would return a user
+        // when a user wasn't expected to be created (that's what getOrCreate is for!)
+        //
+        // A call to create(GameProfile) will remove the profile UUID from nonExistentUsers, as the user
+        // now exists!
+        final User user = create((GameProfile) profile);
         try {
             ((SpongeUser) user).readFromNbt(CompressedStreamTools.readCompressed(new FileInputStream(dataFile)));
         } catch (IOException e) {

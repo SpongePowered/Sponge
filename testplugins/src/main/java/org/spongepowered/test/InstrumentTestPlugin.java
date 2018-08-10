@@ -44,7 +44,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 @SuppressWarnings("ConstantConditions")
-@Plugin(id = "instrumenttest", name = "InstrumentTest", description = "Tests instrument types and properties.")
+@Plugin(id = "instrumenttest", name = "InstrumentTest", description = "Tests instrument types and properties.", version = "0.0.0")
 public class InstrumentTestPlugin {
 
     private static boolean enabled = false;
@@ -75,7 +75,7 @@ public class InstrumentTestPlugin {
                                     .title(Text.of(TextColors.GREEN, "Instrument Types"))
                                     .padding(Text.of(TextColors.DARK_GREEN, "="))
                                     .contents(Sponge.getRegistry().getAllOf(InstrumentType.class).stream()
-                                            .map(i -> Text.of(TextColors.GREEN, "Id: ", TextColors.GRAY, i.getId(),
+                                            .map(i -> Text.of(TextColors.GREEN, "Id: ", TextColors.GRAY, i.getKey().toString(),
                                                     TextColors.GREEN, " Name: ", TextColors.GRAY, i.getName(),
                                                     TextColors.GREEN, " SoundType: ", TextColors.GRAY, i.getSound().getName()))
                                             .collect(ImmutableList.toImmutableList()))

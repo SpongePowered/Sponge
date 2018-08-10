@@ -45,6 +45,7 @@ import net.minecraft.network.play.client.CPacketEntityAction;
 import net.minecraft.network.play.client.CPacketHeldItemChange;
 import net.minecraft.network.play.client.CPacketInput;
 import net.minecraft.network.play.client.CPacketKeepAlive;
+import net.minecraft.network.play.client.CPacketPlaceRecipe;
 import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.network.play.client.CPacketPlayerAbilities;
 import net.minecraft.network.play.client.CPacketPlayerDigging;
@@ -64,6 +65,7 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.packet.drag.DragInventoryAddSlotState;
 import org.spongepowered.common.event.tracking.phase.packet.drag.DragInventoryStartState;
+import org.spongepowered.common.event.tracking.phase.packet.drag.MiddleDragInventoryStopState;
 import org.spongepowered.common.event.tracking.phase.packet.drag.PrimaryDragInventoryStopState;
 import org.spongepowered.common.event.tracking.phase.packet.drag.SecondaryDragInventoryStopState;
 
@@ -110,6 +112,7 @@ public final class PacketPhase extends TrackingPhase {
         public static final BasicInventoryPacketState MIDDLE_INVENTORY_CLICK = new MiddleInventoryClickState();
         public static final BasicInventoryPacketState DROP_ITEM_OUTSIDE_WINDOW = new DropItemOutsideWindowState();
         public static final BasicInventoryPacketState DROP_ITEM_WITH_HOTKEY = new DropItemWithHotkeyState();
+        public static final BasicInventoryPacketState DROP_ITEM_OUTSIDE_WINDOW_NOOP = new DropItemOutsideWindowNoOpState();
         public static final BasicInventoryPacketState DROP_ITEMS = new BasicInventoryPacketState();
         public static final BasicInventoryPacketState DROP_INVENTORY = new DropInventoryState();
         public static final BasicInventoryPacketState SWITCH_HOTBAR_NUMBER_PRESS = new SwitchHotbarNumberPressState();
@@ -119,18 +122,22 @@ public final class PacketPhase extends TrackingPhase {
 
         public static final BasicInventoryPacketState PRIMARY_DRAG_INVENTORY_START = new DragInventoryStartState("PRIMARY_DRAG_INVENTORY_START", DRAG_MODE_PRIMARY_BUTTON);
         public static final BasicInventoryPacketState SECONDARY_DRAG_INVENTORY_START = new DragInventoryStartState("SECONDARY_DRAG_INVENTORY_START", DRAG_MODE_SECONDARY_BUTTON);
+        public static final BasicInventoryPacketState MIDDLE_DRAG_INVENTORY_START = new DragInventoryStartState("MIDDLE_DRAG_INVENTORY_START", DRAG_MODE_MIDDLE_BUTTON);
 
         public static final BasicInventoryPacketState PRIMARY_DRAG_INVENTORY_ADDSLOT = new DragInventoryAddSlotState("PRIMARY_DRAG_INVENTORY_ADD_SLOT", DRAG_MODE_PRIMARY_BUTTON);
         public static final BasicInventoryPacketState SECONDARY_DRAG_INVENTORY_ADDSLOT = new DragInventoryAddSlotState("SECONDARY_DRAG_INVENTORY_ADD_SLOT", DRAG_MODE_SECONDARY_BUTTON);
+        public static final BasicInventoryPacketState MIDDLE_DRAG_INVENTORY_ADDSLOT = new DragInventoryAddSlotState("MIDDLE_DRAG_INVENTORY_ADD_SLOT", DRAG_MODE_MIDDLE_BUTTON);
 
         public static final BasicInventoryPacketState PRIMARY_DRAG_INVENTORY_STOP = new PrimaryDragInventoryStopState();
         public static final BasicInventoryPacketState SECONDARY_DRAG_INVENTORY_STOP = new SecondaryDragInventoryStopState();
+        public static final BasicInventoryPacketState MIDDLE_DRAG_INVENTORY_STOP = new MiddleDragInventoryStopState();
 
         public static final BasicInventoryPacketState SWITCH_HOTBAR_SCROLL = new SwitchHotbarScrollState();
         public static final BasicInventoryPacketState OPEN_INVENTORY = new OpenInventoryState();
         public static final BasicInventoryPacketState ENCHANT_ITEM = new EnchantItemPacketState();
         public static final BasicInventoryPacketState SWAP_HAND_ITEMS = new SwapHandItemsState();
 
+        public static final BasicInventoryPacketState PLACE_RECIPE = new PlaceRecipePacketState();
 
         static final ImmutableList<BasicInventoryPacketState> VALUES = ImmutableList.<BasicInventoryPacketState>builder()
                 .add(INVENTORY)
@@ -139,6 +146,7 @@ public final class PacketPhase extends TrackingPhase {
                 .add(MIDDLE_INVENTORY_CLICK)
                 .add(DROP_ITEM_OUTSIDE_WINDOW)
                 .add(DROP_ITEM_WITH_HOTKEY)
+                .add(DROP_ITEM_OUTSIDE_WINDOW_NOOP)
                 .add(DROP_ITEMS)
                 .add(DROP_INVENTORY)
                 .add(SWITCH_HOTBAR_NUMBER_PRESS)
@@ -148,12 +156,15 @@ public final class PacketPhase extends TrackingPhase {
 
                 .add(PRIMARY_DRAG_INVENTORY_START)
                 .add(SECONDARY_DRAG_INVENTORY_START)
+                .add(MIDDLE_DRAG_INVENTORY_START)
 
                 .add(PRIMARY_DRAG_INVENTORY_ADDSLOT)
                 .add(SECONDARY_DRAG_INVENTORY_ADDSLOT)
+                .add(MIDDLE_DRAG_INVENTORY_ADDSLOT)
 
                 .add(PRIMARY_DRAG_INVENTORY_STOP)
                 .add(SECONDARY_DRAG_INVENTORY_STOP)
+                .add(MIDDLE_DRAG_INVENTORY_STOP)
 
                 .add(SWITCH_HOTBAR_SCROLL)
                 .add(OPEN_INVENTORY)
@@ -232,6 +243,7 @@ public final class PacketPhase extends TrackingPhase {
         return PacketPhase.General.UNKNOWN;
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public PhaseContext<?> populateContext(Packet<?> packet, EntityPlayerMP entityPlayerMP, IPhaseState<?> state, PhaseContext<?> context) {
         checkNotNull(packet, "Packet cannot be null!");
         checkArgument(!context.isComplete(), "PhaseContext cannot be marked as completed!");
@@ -348,6 +360,7 @@ public final class PacketPhase extends TrackingPhase {
         this.packetTranslationMap.put(CPacketCustomPayload.class, packet -> General.HANDLED_EXTERNALLY);
         this.packetTranslationMap.put(CPacketSpectate.class, packet -> General.IGNORED);
         this.packetTranslationMap.put(CPacketResourcePackStatus.class, packet -> General.RESOURCE_PACK);
+        this.packetTranslationMap.put(CPacketPlaceRecipe.class, packet -> Inventory.PLACE_RECIPE);
     }
 
     private static final ImmutableMap<CPacketEntityAction.Action, IPhaseState<? extends PacketContext<?>>> PLAYER_ACTION_MAPPINGS = ImmutableMap.<CPacketEntityAction.Action, IPhaseState<? extends PacketContext<?>>>builder()

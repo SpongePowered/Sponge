@@ -39,6 +39,7 @@ import net.minecraft.stats.StatList;
 import net.minecraft.util.ResourceLocation;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 import org.apache.logging.log4j.Level;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.GameRegistry;
 import org.spongepowered.api.Sponge;
@@ -129,6 +130,7 @@ import java.util.function.Supplier;
 import javax.annotation.Nullable;
 
 @Singleton
+@SuppressWarnings("deprecation")
 public class SpongeGameRegistry implements GameRegistry {
 
     public static final boolean PRINT_CATALOG_TYPES = Boolean.parseBoolean(System.getProperty("sponge.print_all_catalog_types"));
@@ -138,7 +140,7 @@ public class SpongeGameRegistry implements GameRegistry {
         TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(Text.class), new TextConfigSerializer());
         TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(BookView.class), new BookViewDataBuilder());
         TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(TextTemplate.class), new TextTemplateConfigSerializer());
-        TypeSerializers.getDefaultSerializers().registerType(new TypeToken<Set<?>>() {}, new SetSerializer());
+        TypeSerializers.getDefaultSerializers().registerType(new TypeToken<Set<?>>() { public static final long serialVersionUID = 1L; }, new SetSerializer());
     }
 
     private final SpongePropertyRegistry propertyRegistry;
@@ -155,6 +157,17 @@ public class SpongeGameRegistry implements GameRegistry {
     @Inject
     public SpongeGameRegistry(SpongePropertyRegistry propertyRegistry) {
         this.propertyRegistry = propertyRegistry;
+    }
+
+    @Override
+    public CatalogKey resolveKey(final String value) {
+        checkNotNull(value, "value");
+        return (CatalogKey) (Object) new ResourceLocation(value);
+    }
+
+    @Override
+    public <T extends CatalogType> Optional<T> getType(final Class<T> typeClass, final CatalogKey key) {
+        return this.getRegistryModuleFor(typeClass).flatMap(module -> module.get(key));
     }
 
     public final RegistrationPhase getPhase() {
@@ -174,22 +187,7 @@ public class SpongeGameRegistry implements GameRegistry {
             addToGraph(module, graph);
         }
 
-        try {
-            this.orderedModules.addAll(TopologicalOrder.createOrderedLoad(graph));
-        } catch (CyclicGraphException e) {
-            StringBuilder msg = new StringBuilder();
-            msg.append("Registry module dependencies are cyclical!\n");
-            msg.append("Dependency loops are:\n");
-            for (DataNode<?>[] cycle : e.getCycles()) {
-                msg.append("[");
-                for (DataNode<?> node : cycle) {
-                    msg.append(node.getData().toString()).append(" ");
-                }
-                msg.append("]\n");
-            }
-            SpongeImpl.getLogger().fatal(msg.toString());
-            throw new RuntimeException("Registry modules dependencies error.");
-        }
+        topologicalSort(graph);
 
         registerModulePhase();
         SpongeVillagerRegistry.registerVanillaTrades();
@@ -208,9 +206,9 @@ public class SpongeGameRegistry implements GameRegistry {
 
                 final Collection<? extends CatalogType> all = module.getSecond().getAll();
                 final List<CatalogType> catalogTypes = new ArrayList<>(all);
-                catalogTypes.sort(Comparator.comparing(CatalogType::getId));
+                catalogTypes.sort(Comparator.comparing(CatalogType::getKey));
                 for (CatalogType catalogType : catalogTypes) {
-                    printer.add("  -%s", catalogType.getId());
+                    printer.add("  -%s", catalogType.getKey().toString());
                 }
                 printer.hr();
             }
@@ -263,6 +261,10 @@ public class SpongeGameRegistry implements GameRegistry {
             addToGraph(aModule, graph);
         }
         this.orderedModules.clear();
+        topologicalSort(graph);
+    }
+
+    private void topologicalSort(DirectedGraph<Class<? extends RegistryModule>> graph) {
         try {
             this.orderedModules.addAll(TopologicalOrder.createOrderedLoad(graph));
         } catch (CyclicGraphException e) {
@@ -315,7 +317,7 @@ public class SpongeGameRegistry implements GameRegistry {
         if (registryModule == null) {
             return Optional.empty();
         }
-        return registryModule.getById(id.toLowerCase(Locale.ENGLISH));
+        return registryModule.get(CatalogKey.resolve(id.toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
@@ -337,7 +339,7 @@ public class SpongeGameRegistry implements GameRegistry {
         ImmutableList.Builder<T> builder = ImmutableList.builder();
         registryModule.getAll()
                 .stream()
-                .filter(type -> pluginId.equals(type.getId().split(":")[0]))
+                .filter(type -> pluginId.equals(type.getKey().getNamespace()))
                 .forEach(builder::add);
 
         return builder.build();
@@ -354,6 +356,7 @@ public class SpongeGameRegistry implements GameRegistry {
         return (T) supplier.get();
     }
 
+    @SuppressWarnings("deprecation")
     public <T extends CatalogType> T register(Class<T> type, T obj) throws IllegalArgumentException, UnsupportedOperationException {
         CatalogRegistryModule<T> registryModule = getRegistryModuleFor(type).orElse(null);
         if (registryModule == null) {
@@ -389,7 +392,7 @@ public class SpongeGameRegistry implements GameRegistry {
     public Optional<EntityStatistic> getEntityStatistic(StatisticType statType, EntityType entityType) {
         checkNotNull(statType, "null stat type");
         checkNotNull(entityType, "null entity type");
-        EntityList.EntityEggInfo eggInfo = EntityList.ENTITY_EGGS.get(new ResourceLocation(entityType.getId()));
+        EntityList.EntityEggInfo eggInfo = EntityList.ENTITY_EGGS.get((ResourceLocation) (Object) entityType.getKey());
         if (statType.equals(StatisticTypes.ENTITIES_KILLED)) {
             return Optional.of((EntityStatistic) eggInfo.killEntityStat);
         } else if (statType.equals(StatisticTypes.KILLED_BY_ENTITY)) {
@@ -486,7 +489,7 @@ public class SpongeGameRegistry implements GameRegistry {
 
     @Override
     public Optional<DisplaySlot> getDisplaySlotForColor(TextColor color) {
-        return Optional.ofNullable(DisplaySlotRegistryModule.getInstance().displaySlotMappings.get(color.getId()));
+        return Optional.ofNullable(DisplaySlotRegistryModule.getInstance().map.get(color.getKey().toString()));
     }
 
     @Override
@@ -566,7 +569,7 @@ public class SpongeGameRegistry implements GameRegistry {
         registerAdditionalPhase();
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private void throwRegistryEvent(RegistryModule module) {
         if (this.phase == RegistrationPhase.INIT
             && module instanceof AdditionalCatalogRegistryModule

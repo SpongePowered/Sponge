@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.scoreboard;
 
 import com.google.common.base.CaseFormat;
 import net.minecraft.scoreboard.Team;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.scoreboard.CollisionRule;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,15 +38,14 @@ import javax.annotation.Nullable;
 public class MixinCollisionRule implements CollisionRule {
 
     @Shadow @Final public String name;
-
-    @Nullable private String spongeId;
+    @Nullable private CatalogKey key;
 
     @Override
-    public String getId() {
-        if (this.spongeId == null) {
-            this.spongeId = "minecraft:" + CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, this.name);
+    public CatalogKey getKey() {
+        if (this.key == null) {
+            this.key = CatalogKey.resolve(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, this.name));
         }
-        return this.spongeId;
+        return this.key;
     }
 
     @Override

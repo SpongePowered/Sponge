@@ -77,7 +77,7 @@ public class SpongeBlockStateMetaContentUpdater implements DataContentUpdater {
         // Cast to the API state to get the id
         final BlockState apiState = (BlockState) blockState;
         // set the id
-        content.set(DataQueries.BLOCK_STATE, apiState.getId());
+        content.set(DataQueries.BLOCK_STATE, apiState.getKey());
         // set the version!!
         content.set(Queries.CONTENT_VERSION, 2);
         // Presto!

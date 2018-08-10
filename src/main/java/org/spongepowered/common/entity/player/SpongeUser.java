@@ -27,9 +27,9 @@ package org.spongepowered.common.entity.player;
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.inventory.InventoryEnderChest;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -68,10 +68,9 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
-import javax.annotation.Nullable;
 
 /**
  * Implements things that are not implemented by mixins into this class. <p>This
@@ -85,14 +84,23 @@ import javax.annotation.Nullable;
  */
 public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carrier, ISpongeUser {
 
-    public static final Set<SpongeUser> dirtyUsers = Sets.newHashSet();
+    public static final Set<SpongeUser> dirtyUsers = ConcurrentHashMap.newKeySet();
 
     private final User self = (User) this; // convenient access
     private final GameProfile profile;
 
     private final Map<UUID, RespawnLocation> spawnLocations = Maps.newHashMap();
 
+    private double posX;
+    private double posY;
+    private double posZ;
+    private int dimension;
+    private float rotationYaw;
+    private float rotationPitch;
+
+
     private SpongeUserInventory inventory; // lazy load when accessing inventory
+    private InventoryEnderChest enderChest; // lazy load when accessing inventory
     private NBTTagCompound nbt;
 
     public SpongeUser(GameProfile profile) {
@@ -106,11 +114,24 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     public void readFromNbt(NBTTagCompound compound) {
         this.reset();
         this.nbt = compound;
+
+        NBTTagList position = compound.getTagList(NbtDataUtil.ENTITY_POSITION, NbtDataUtil.TAG_DOUBLE);
+        this.posX = position.getDoubleAt(0);
+        this.posY = position.getDoubleAt(1);
+        this.posZ = position.getDoubleAt(2);
+        this.dimension = 0;
+        if (compound.hasKey(NbtDataUtil.ENTITY_DIMENSION)) {
+            this.dimension = compound.getInteger(NbtDataUtil.ENTITY_DIMENSION);
+        }
+        NBTTagList rotation = compound.getTagList(NbtDataUtil.ENTITY_ROTATION, NbtDataUtil.TAG_FLOAT);
+        this.rotationYaw = rotation.getFloatAt(0);
+        this.rotationPitch = rotation.getFloatAt(1);
+
         // See EntityPlayer#readEntityFromNBT
 
         final NBTTagCompound spongeCompound = compound.getCompoundTag(NbtDataUtil.FORGE_DATA).getCompoundTag(NbtDataUtil.SPONGE_DATA);
         CustomDataNbtUtil.readCustomData(spongeCompound, ((DataHolder) this));
-        if (!spongeCompound.hasNoTags()) {
+        if (!spongeCompound.isEmpty()) {
             final NBTTagList spawnList = spongeCompound.getTagList(NbtDataUtil.USER_SPAWN_LIST, NbtDataUtil.TAG_COMPOUND);
 
             for (int i = 0; i < spawnList.tagCount(); i++) {
@@ -146,11 +167,29 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         return this;
     }
 
+    private SpongeUser loadEnderInventory() {
+        if (this.enderChest == null) {
+            this.enderChest = new SpongeUserInventoryEnderchest(this);
+            if (this.nbt.hasKey(NbtDataUtil.Minecraft.ENDERCHEST_INVENTORY, 9))
+            {
+                NBTTagList nbttaglist1 = this.nbt.getTagList(NbtDataUtil.Minecraft.ENDERCHEST_INVENTORY, 10);
+                this.enderChest.loadInventoryFromNBT(nbttaglist1);
+            }
+        }
+        return this;
+    }
+
     public void writeToNbt(NBTTagCompound compound) {
 
         this.loadInventory();
+        this.loadEnderInventory();
         compound.setTag(NbtDataUtil.Minecraft.INVENTORY, this.inventory.writeToNBT(new NBTTagList()));
+        compound.setTag(NbtDataUtil.Minecraft.ENDERCHEST_INVENTORY, this.enderChest.saveInventoryToNBT());
         compound.setInteger(NbtDataUtil.Minecraft.SELECTED_ITEM_SLOT, this.inventory.currentItem);
+
+        compound.setTag(NbtDataUtil.ENTITY_POSITION, NbtDataUtil.newDoubleNBTList(this.posX, this.posY, this.posZ));
+        compound.setInteger(NbtDataUtil.ENTITY_DIMENSION, this.dimension);
+        compound.setTag(NbtDataUtil.ENTITY_ROTATION, NbtDataUtil.newFloatNBTList(this.rotationYaw, this.rotationPitch));
 
         final NBTTagCompound forgeCompound = compound.getCompoundTag(NbtDataUtil.FORGE_DATA);
         final NBTTagCompound spongeCompound = forgeCompound.getCompoundTag(NbtDataUtil.SPONGE_DATA);
@@ -169,7 +208,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
             spawnList.appendTag(spawnCompound);
         }
 
-        if (!spawnList.hasNoTags()) {
+        if (!spawnList.isEmpty()) {
             spongeCompound.setTag(NbtDataUtil.USER_SPAWN_LIST, spawnList);
             forgeCompound.setTag(NbtDataUtil.SPONGE_DATA, spongeCompound);
             compound.setTag(NbtDataUtil.FORGE_DATA, forgeCompound);
@@ -205,12 +244,12 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
     @Override
     public boolean canEquip(EquipmentType type) {
-        return getForInventory(p -> p.canEquip(type), u -> true); // TODO Inventory API
+        return this.getForInventory(p -> p.canEquip(type), u -> true);
     }
 
     @Override
     public boolean canEquip(EquipmentType type, ItemStack equipment) {
-        return getForInventory(p -> p.canEquip(type, equipment), u -> true); // TODO Inventory API
+        return this.getForInventory(p -> p.canEquip(type, equipment), u -> true);
     }
 
     @Override
@@ -227,24 +266,24 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         return false;
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public CarriedInventory<?> getInventory() {
         return this.getForInventory(Player::getInventory, u -> ((CarriedInventory) u.inventory));
     }
 
-
     @Override
-    public Optional<ItemStack> getItemInHand(HandType handType) {
+    public ItemStack getItemInHand(HandType handType) {
         if (handType == HandTypes.MAIN_HAND) {
-            return this.getForInventory(p -> p.getItemInHand(handType), u -> u.getEquipped(EquipmentTypes.MAIN_HAND));
+            return this.getForInventory(p -> p.getItemInHand(handType), u -> u.getEquipped(EquipmentTypes.MAIN_HAND).orElseThrow(IllegalStateException::new));
         } else if (handType == HandTypes.OFF_HAND) {
-            return this.getForInventory(p -> p.getItemInHand(handType), u -> u.getEquipped(EquipmentTypes.OFF_HAND));
+            return this.getForInventory(p -> p.getItemInHand(handType), u -> u.getEquipped(EquipmentTypes.OFF_HAND).orElseThrow(IllegalStateException::new));
         }
         throw new IllegalArgumentException("Invalid hand " + handType);
     }
 
     @Override
-    public void setItemInHand(HandType handType, @Nullable ItemStack itemInHand) {
+    public void setItemInHand(HandType handType, ItemStack itemInHand) {
         if (handType == HandTypes.MAIN_HAND) {
             this.setForInventory(p -> p.setItemInHand(handType, itemInHand), u -> u.setEquippedItem(EquipmentTypes.MAIN_HAND, itemInHand));
         } else if (handType == HandTypes.OFF_HAND) {
@@ -252,6 +291,46 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         } else {
             throw new IllegalArgumentException("Invalid hand " + handType);
         }
+    }
+
+    @Override
+    public ItemStack getHelmet() {
+        return this.getEquipped(EquipmentTypes.HEADWEAR).orElseThrow(IllegalStateException::new);
+    }
+
+    @Override
+    public void setHelmet(ItemStack helmet) {
+        this.equip(EquipmentTypes.HEADWEAR, helmet);
+    }
+
+    @Override
+    public ItemStack getChestplate() {
+        return this.getEquipped(EquipmentTypes.CHESTPLATE).orElseThrow(IllegalStateException::new);
+    }
+
+    @Override
+    public void setChestplate(ItemStack chestplate) {
+        this.equip(EquipmentTypes.CHESTPLATE, chestplate);
+    }
+
+    @Override
+    public ItemStack getLeggings() {
+        return this.getEquipped(EquipmentTypes.LEGGINGS).orElseThrow(IllegalStateException::new);
+    }
+
+    @Override
+    public void setLeggings(ItemStack leggings) {
+        this.equip(EquipmentTypes.LEGGINGS, leggings);
+    }
+
+    @Override
+    public ItemStack getBoots() {
+        return this.getEquipped(EquipmentTypes.BOOTS).orElseThrow(IllegalStateException::new);
+    }
+
+    @Override
+    public void setBoots(ItemStack boots) {
+        this.equip(EquipmentTypes.BOOTS, boots);
     }
 
     @Override

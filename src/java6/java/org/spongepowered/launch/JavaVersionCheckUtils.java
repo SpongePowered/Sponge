@@ -32,9 +32,9 @@ public class JavaVersionCheckUtils {
 
     private static final String REQUIRED_VERSION = "1.8.0_20";
 
-    private static final String ERROR_MESSAGE = "We have detected that you are JRE version %s, which is out of date!\n"
-                                                + "In order to run Sponge, you **must** be running JRE version %s (or above).\n"
-                                                + "Previous builds of JRE version 1.8 will not work with Sponge.\n"
+    private static final String ERROR_MESSAGE = "We have detected that you are JRE version %s, which is not supported!!\n"
+                                                + "In order to run Sponge, you **must** be running JRE version %s or above.\n"
+                                                + "Older builds or newer Java major versions (like 9 or 10) are not supported.\n"
                                                 + "This can be downloaded from Oracle: http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html";
 
     public static void ensureJava8() {

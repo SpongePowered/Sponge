@@ -77,6 +77,11 @@ public class FriendsDataImpl extends AbstractListData<UUID, FriendsData, Immutab
     }
 
     @Override
+    protected DataContainer fillContainer(DataContainer dataContainer) {
+        return dataContainer.set(MyHomes.FRIENDS, this.getValue());
+    }
+
+    @Override
     public FriendsData copy() {
         return new FriendsDataImpl(getValue());
     }

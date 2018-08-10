@@ -31,9 +31,6 @@ import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.data.type.SpongeInstrumentType;
 import org.spongepowered.common.registry.type.AbstractPrefixCheckCatalogRegistryModule;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @RegisterCatalog(InstrumentTypes.class)
 public class InstrumentTypeRegistryModule extends AbstractPrefixCheckCatalogRegistryModule<InstrumentType>
         implements AlternateCatalogRegistryModule<InstrumentType> {
@@ -42,17 +39,8 @@ public class InstrumentTypeRegistryModule extends AbstractPrefixCheckCatalogRegi
         return Holder.INSTANCE;
     }
 
-    private InstrumentTypeRegistryModule() {
+    InstrumentTypeRegistryModule() {
         super("minecraft");
-    }
-
-    @Override
-    public Map<String, InstrumentType> provideCatalogMap() {
-        final Map<String, InstrumentType> mappings = new HashMap<>();
-        for (Map.Entry<String, InstrumentType> entry : this.catalogTypeMap.entrySet()) {
-            mappings.put(entry.getKey().replace("minecraft:", ""), entry.getValue());
-        }
-        return mappings;
     }
 
     @Override

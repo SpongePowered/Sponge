@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.DataAlreadyRegisteredException;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.key.Key;
@@ -52,6 +53,7 @@ public final class SpongeDataRegistrationBuilder<M extends DataManipulator<M, I>
     @Nullable String name;
     @Nullable Class<? extends M> implementationData;
     @Nullable Class<? extends I> immutableImplementation;
+    @Nullable CatalogKey catalogKey;
     // These are used internally, not necessarily refactored yet, but will be used to enhance the DataRegistrar.
     private DataProcessor<M, I> dataProcessor;
     private List<Key<?>> keys = new ArrayList<>();
@@ -161,6 +163,7 @@ public final class SpongeDataRegistrationBuilder<M extends DataManipulator<M, I>
         checkState(this.immutableClass != null, "ImmutableDataManipulator class cannot be null!");
         checkState(this.id != null, "Data ID cannot be null!");
         this.container = container;
+        this.catalogKey = CatalogKey.of(this.container.getId(), this.id);
         SpongeManipulatorRegistry.getInstance().validateRegistration(this);
         SpongeDataManager.getInstance().validateRegistration(this);
         final SpongeDataRegistration<M, I> registration = new SpongeDataRegistration<>(this);

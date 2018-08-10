@@ -52,15 +52,21 @@ final class ChangingToDimensionState extends EntityPhaseState<TeleportingContext
     }
 
     @Override
-    public boolean tracksBlockSpecificDrops() {
+    public boolean tracksBlockSpecificDrops(TeleportingContext context) {
         return true;
     }
 
     @Override
     public boolean spawnEntityOrCapture(TeleportingContext context, Entity entity, int chunkX, int chunkZ) {
         final WorldServer worldServer = context.getTargetWorld();
+        // Allowed to use the force spawn because it's the same "entity"
         ((IMixinWorldServer) worldServer).forceSpawnEntity(entity);
         return true;
+    }
+
+    @Override
+    public boolean doesCaptureEntitySpawns() {
+        return false;
     }
 
     @Nullable

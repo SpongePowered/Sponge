@@ -33,7 +33,8 @@ import org.spongepowered.common.text.impl.TitleImpl;
 public interface MixinTitle {
 
     /**
-     * @author kashike
+     * @author kashike - August 8, 2018
+     * @reason faster impl
      */
     @Overwrite
     static Title of() {
@@ -41,7 +42,8 @@ public interface MixinTitle {
     }
 
     /**
-     * @author kashike
+     * @author kashike - August 8, 2018
+     * @reason faster impl
      */
     @Overwrite
     static Title clear() {
@@ -49,7 +51,8 @@ public interface MixinTitle {
     }
 
     /**
-     * @author kashike
+     * @author kashike - August 8, 2018
+     * @reason faster impl
      */
     @Overwrite
     static Title reset() {

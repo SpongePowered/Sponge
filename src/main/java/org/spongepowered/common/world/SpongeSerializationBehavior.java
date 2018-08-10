@@ -24,21 +24,15 @@
  */
 package org.spongepowered.common.world;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.common.SpongeCatalogType;
 
 public class SpongeSerializationBehavior extends SpongeCatalogType implements SerializationBehavior {
 
-    private final String name;
-
     public SpongeSerializationBehavior(String id, String name) {
-        super(id);
-        this.name = name;
+        super(CatalogKey.resolve(id), name);
     }
 
-    @Override
-    public String getName() {
-        return this.name;
-    }
 
 }

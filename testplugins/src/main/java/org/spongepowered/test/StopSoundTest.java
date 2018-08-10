@@ -37,7 +37,7 @@ import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scheduler.Task;
 
-@Plugin(id = "stopsoundtest")
+@Plugin(id = "stopsoundtest", version = "0.0.0", name = "StopSounds", description = "Stops sounds when right clicking an ender rod")
 public class StopSoundTest {
 
     @Inject private PluginContainer pluginContainer;

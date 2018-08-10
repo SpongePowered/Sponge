@@ -26,6 +26,7 @@ package org.spongepowered.common.item.inventory.query;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.item.inventory.query.QueryOperation;
 import org.spongepowered.api.item.inventory.query.QueryOperationType;
 import org.spongepowered.common.SpongeCatalogType;
@@ -37,7 +38,7 @@ public final class SpongeQueryOperationType<T> extends SpongeCatalogType impleme
     private final Function<T, SpongeQueryOperation<T>> newInstance;
 
     public SpongeQueryOperationType(String id, Function<T, SpongeQueryOperation<T>> newInstance) {
-        super(id);
+        super(CatalogKey.sponge(id), id);
         this.newInstance = newInstance;
     }
 

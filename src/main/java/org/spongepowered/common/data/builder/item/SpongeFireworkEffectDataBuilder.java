@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.builder.item;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
@@ -50,8 +51,8 @@ public class SpongeFireworkEffectDataBuilder extends AbstractDataBuilder<Firewor
     protected Optional<FireworkEffect> buildContent(DataView container) throws InvalidDataException {
         if (container.contains(DataQueries.FIREWORK_SHAPE, DataQueries.FIREWORK_COLORS, DataQueries.FIREWORK_FADE_COLORS,
                 DataQueries.FIREWORK_FLICKERS, DataQueries.FIREWORK_TRAILS)) {
-            final String fireworkShapeId = DataUtil.getData(container, DataQueries.FIREWORK_SHAPE, String.class);
-            final Optional<FireworkShape> shapeOptional = Sponge.getRegistry().getType(FireworkShape.class, fireworkShapeId);
+            final String fireworkShapeId = container.getString(DataQueries.FIREWORK_SHAPE).get();
+            final Optional<FireworkShape> shapeOptional = Sponge.getRegistry().getType(FireworkShape.class, CatalogKey.resolve(fireworkShapeId));
             if (!shapeOptional.isPresent()) {
                 throw new InvalidDataException("Could not find the FireworkShape for the provided id: " + fireworkShapeId);
             }

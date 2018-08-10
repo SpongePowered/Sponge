@@ -26,70 +26,58 @@ package org.spongepowered.common.registry.type.effect;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
-import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
 
-public final class SoundRegistryModule implements AdditionalCatalogRegistryModule<SoundType>, AlternateCatalogRegistryModule<SoundType> {
+import javax.annotation.Nullable;
 
-    @RegisterCatalog(SoundTypes.class)
-    private final Map<String, SoundType> soundMappings = Maps.newHashMap();
+@RegisterCatalog(SoundTypes.class)
+public final class SoundRegistryModule extends AbstractCatalogRegistryModule<SoundType> implements AdditionalCatalogRegistryModule<SoundType> {
+
 
     public static SoundRegistryModule inst() {
         return Holder.INSTANCE;
     }
 
     @Override
-    public Map<String, SoundType> provideCatalogMap() {
-        Map<String, SoundType> soundTypeMap = new HashMap<>();
-        for (Map.Entry<String, SoundType> entry : this.soundMappings.entrySet()) {
-            soundTypeMap.put(entry.getKey().replace("minecraft:", "").replace('.', '_'), entry.getValue());
-        }
-        return soundTypeMap;
-    }
-
-    @Override
     public void registerDefaults() {
-        for (ResourceLocation key: SoundEvent.REGISTRY.getKeys()) {
-            this.soundMappings.put(key.toString(), (SoundType) SoundEvent.REGISTRY.getObject(key));
+        for (ResourceLocation key : SoundEvent.REGISTRY.getKeys()) {
+            this.map.put((CatalogKey) (Object) key, (SoundType) SoundEvent.REGISTRY.getObject(key));
         }
     }
 
     @Override
-    public Optional<SoundType> getById(String id) {
-        checkNotNull(id);
-        if (!id.contains(":")) {
-            id = "minecraft:" + id; // assume vanilla
-        }
-        return Optional.ofNullable(this.soundMappings.get(id.toLowerCase(Locale.ENGLISH)));
+    protected String marshalFieldKey(String key) {
+        return key.replace('.', '_');
     }
 
-    @Override
-    public Collection<SoundType> getAll() {
-        return ImmutableList.copyOf(this.soundMappings.values());
+    @Nullable
+    private SoundType getInternal(final String id) {
+        final SoundType sound = this.map.get(id);
+        if (sound != null) {
+            return sound;
+        }
+        return this.map.get(id.replace('_', '.'));
     }
 
     @Override
     public void registerAdditionalCatalog(SoundType extraCatalog) {
-        String catalogId = new ResourceLocation(checkNotNull(extraCatalog).getId().toLowerCase(Locale.ENGLISH)).toString();
-        if(!this.soundMappings.containsKey(catalogId)) {
-            this.soundMappings.put(catalogId, extraCatalog);
+        ResourceLocation catalogId = new ResourceLocation(checkNotNull(extraCatalog).getKey().toString().toLowerCase(Locale.ENGLISH));
+        if (!this.map.containsKey((CatalogKey) (Object) catalogId)) {
+            this.map.put((CatalogKey) (Object) catalogId, extraCatalog);
         }
     }
 
     private static final class Holder {
+
         static final SoundRegistryModule INSTANCE = new SoundRegistryModule();
     }
 }

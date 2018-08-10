@@ -90,7 +90,7 @@ public final class LiteralTextImpl extends TextImpl implements LiteralText {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof SelectorTextImpl) || !super.equals(o)) {
+        if (!(o instanceof LiteralTextImpl) || !super.equals(o)) {
             return false;
         }
 

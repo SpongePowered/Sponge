@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.rotation;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.util.rotation.Rotation;
 
@@ -32,17 +33,17 @@ public class SpongeRotation implements Rotation {
 
     private final int angle;
     private final String name;
-    private final String id;
+    private final CatalogKey key;
 
     public SpongeRotation(int angle, String id, String name) {
         this.angle = angle;
-        this.id = id;
         this.name = name;
+        this.key = CatalogKey.resolve(id);
     }
 
     @Override
-    public String getId() {
-        return this.id;
+    public CatalogKey getKey() {
+        return this.key;
     }
 
     @Override

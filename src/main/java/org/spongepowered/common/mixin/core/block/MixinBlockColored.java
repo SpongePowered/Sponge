@@ -26,11 +26,13 @@ package org.spongepowered.common.mixin.core.block;
 
 import net.minecraft.block.BlockColored;
 import net.minecraft.block.material.Material;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.interfaces.block.IMixinDyeableBlock;
+import org.spongepowered.common.text.translation.SpongeTranslation;
 
 @Mixin(BlockColored.class)
 public abstract class MixinBlockColored extends MixinBlock implements IMixinDyeableBlock {
@@ -38,5 +40,10 @@ public abstract class MixinBlockColored extends MixinBlock implements IMixinDyea
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onInit(Material material, CallbackInfo ci) {
         this.setProperty(BlockColored.COLOR);
+    }
+
+    @Override
+    public Translation getTranslation() {
+        return new SpongeTranslation(getTranslationKey() + ".white.name");
     }
 }

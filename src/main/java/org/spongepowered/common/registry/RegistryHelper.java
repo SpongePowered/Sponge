@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.registry;
 
+import org.apache.commons.lang3.text.WordUtils;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.common.SpongeImpl;
 
 import java.lang.reflect.Field;
@@ -33,29 +35,23 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
-public class RegistryHelper {
+import javax.annotation.Nullable;
+
+public final class RegistryHelper {
 
     public static boolean mapFields(Class<?> apiClass, Map<String, ?> mapping) {
         return mapFields(apiClass, mapping, null);
     }
 
-    public static boolean mapFields(Class<?> apiClass, Map<String, ?> mapping, Set<String> ignoredFields) {
+    public static boolean mapFields(Class<?> apiClass, Map<String, ?> mapping, @Nullable Set<String> ignoredFields) {
         return mapFields(apiClass, fieldName -> mapping.get(fieldName.toLowerCase(Locale.ENGLISH)), ignoredFields, false);
-    }
-
-    public static boolean mapFieldsIgnoreWarning(Class<?> apiClass, Map<String, ?> mapping) {
-        return mapFields(apiClass, fieldname -> mapping.get(fieldname.toLowerCase(Locale.ENGLISH)), null, true);
     }
 
     public static boolean mapFields(Class<?> apiClass, Function<String, ?> mapFunction) {
         return mapFields(apiClass, mapFunction, null, false);
     }
 
-    public static boolean mapFields(Class<?> apiClass, Function<String, ?> mapFunction, Set<String> ignoredFields) {
-        return mapFields(apiClass, mapFunction, ignoredFields, false);
-    }
-
-    public static boolean mapFields(Class<?> apiClass, Function<String, ?> mapFunction, Set<String> ignoredFields, boolean ignore) {
+    public static boolean mapFields(Class<?> apiClass, Function<String, ?> mapFunction, @Nullable Set<String> ignoredFields, boolean ignore) {
         boolean mappingSuccess = true;
         for (Field f : apiClass.getDeclaredFields()) {
             final String fieldName = f.getName();
@@ -104,5 +100,9 @@ public class RegistryHelper {
         } catch (Exception e) {
             SpongeImpl.getLogger().error("Error while setting field {}.{}", clazz.getName(), fieldName, e);
         }
+    }
+
+    public static String name(final CatalogKey key) {
+        return WordUtils.capitalize(key.getValue(), '_');
     }
 }

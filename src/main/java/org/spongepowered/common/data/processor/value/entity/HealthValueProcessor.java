@@ -34,6 +34,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
+import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
 import org.spongepowered.common.registry.type.event.DamageSourceRegistryModule;
 
 import java.util.Optional;
@@ -95,7 +96,8 @@ public class HealthValueProcessor extends AbstractSpongeValueProcessor<EntityLiv
         final ImmutableBoundedValue<Double> proposedValue = constructImmutableValue(value);
         if (container instanceof EntityLivingBase) {
             final DataTransactionResult.Builder builder = DataTransactionResult.builder();
-            final double maxHealth = ((EntityLivingBase) container).getMaxHealth();
+            final EntityLivingBase livingbase = (EntityLivingBase) container;
+            final double maxHealth = livingbase.getMaxHealth();
             final ImmutableBoundedValue<Double> newHealthValue = SpongeValueFactory.boundedBuilder(Keys.HEALTH)
                 .defaultValue(maxHealth)
                 .minimum(0D)
@@ -108,12 +110,14 @@ public class HealthValueProcessor extends AbstractSpongeValueProcessor<EntityLiv
                 return DataTransactionResult.errorResult(newHealthValue);
             }
             try {
-                ((EntityLivingBase) container).setHealth(value.floatValue());
+                livingbase.setHealth(value.floatValue());
             } catch (Exception e) {
                 return DataTransactionResult.errorResult(newHealthValue);
             }
             if (value.floatValue() <= 0.0F) {
-                ((EntityLivingBase) container).attackEntityFrom(DamageSourceRegistryModule.IGNORED_DAMAGE_SOURCE, 1000F);
+                livingbase.attackEntityFrom(DamageSourceRegistryModule.IGNORED_DAMAGE_SOURCE, 1000F);
+            } else {
+                ((IMixinEntityLivingBase) livingbase).resetDeathEventsPosted();
             }
             return builder.success(newHealthValue).replace(oldHealthValue).result(DataTransactionResult.Type.SUCCESS).build();
         }

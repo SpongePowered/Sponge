@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.event.tracking.context;
 
+import net.minecraft.util.NonNullList;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -34,7 +36,7 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
-public abstract class CapturedSupplier<T> implements Supplier<List<T>> {
+public abstract class CapturedSupplier<T> implements Supplier<List<T>>, ICaptureSupplier {
     @Nullable private List<T> captured;
 
     CapturedSupplier() {
@@ -43,29 +45,31 @@ public abstract class CapturedSupplier<T> implements Supplier<List<T>> {
     @Override
     public final List<T> get() {
         if (this.captured == null) {
-            this.captured = new ArrayList<>();
+            this.captured = NonNullList.create();
         }
         return this.captured;
     }
 
     /**
      * Returns {@code true} if there are no captured objects.
-     * 
+     *
      * @return {@code true} if empty
      */
+    @Override
     public final boolean isEmpty() {
         return this.captured == null || this.captured.isEmpty();
     }
 
     /**
      * If not empty, activates the consumer then clears all captures.
-     * 
+     *
      * @param consumer The consumer to activate
      */
     public final void acceptAndClearIfNotEmpty(Consumer<List<T>> consumer) {
-        if (!this.isEmpty()) {
-            consumer.accept(this.captured);
+        if (this.captured != null && !this.captured.isEmpty()) {
+            final List<T> consumed = new ArrayList<>(this.captured);
             this.captured.clear(); // We should be clearing after it is processed. Avoids extraneous issues
+            consumer.accept(consumed);
             // with recycling the captured object.
         }
     }
@@ -73,7 +77,7 @@ public abstract class CapturedSupplier<T> implements Supplier<List<T>> {
     /**
      * If not empty, returns the captured {@link List}.
      * Otherwise, this will return the passed list.
-     * 
+     *
      * @param list The fallback list
      * @return If not empty, the captured list otherwise the fallback list
      */
@@ -87,8 +91,7 @@ public abstract class CapturedSupplier<T> implements Supplier<List<T>> {
 
     /**
      * If not empty, returns a sequential stream of values associated with key.
-     * 
-     * @param key The key
+     *
      * @return A sequential stream of values
      */
     public final Stream<T> stream() {

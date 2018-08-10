@@ -28,6 +28,7 @@ import net.minecraft.scoreboard.IScoreCriteria;
 import net.minecraft.stats.IStatType;
 import net.minecraft.stats.StatBase;
 import net.minecraft.util.text.ITextComponent;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.scoreboard.critieria.Criterion;
 import org.spongepowered.api.statistic.Statistic;
 import org.spongepowered.api.text.translation.Translation;
@@ -61,6 +62,7 @@ public abstract class MixinStatBase implements Statistic, SpongeStatistic, IMixi
     @Shadow @Final private IScoreCriteria objectiveCriteria;
 
     private String spongeId;
+    private CatalogKey key;
 
     @Inject(method = "registerStat()Lnet/minecraft/stats/StatBase;", at = @At("RETURN"))
     public void registerStat(CallbackInfoReturnable<StatBase> ci) {
@@ -78,6 +80,14 @@ public abstract class MixinStatBase implements Statistic, SpongeStatistic, IMixi
     }
 
     @Override
+    public CatalogKey getKey() {
+        if (this.key == null) {
+            this.key = CatalogKey.resolve(SpongeStatistic.super.getId());
+        }
+        return this.key;
+    }
+
+    @Override
     public String getName() {
         return SpongeTexts.toText(this.statName).toPlain();
     }
@@ -91,6 +101,7 @@ public abstract class MixinStatBase implements Statistic, SpongeStatistic, IMixi
     @Override
     public void setSpongeId(String id) {
         this.spongeId = id;
+        this.key = CatalogKey.resolve(id);
     }
 
     @Override

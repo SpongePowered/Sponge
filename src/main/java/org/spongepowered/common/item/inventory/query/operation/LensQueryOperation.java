@@ -29,17 +29,17 @@ import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.query.SpongeQueryOperation;
 import org.spongepowered.common.item.inventory.query.SpongeQueryOperationTypes;
 
-public final class LensQueryOperation extends SpongeQueryOperation<Lens<?, ?>> {
+public final class LensQueryOperation extends SpongeQueryOperation<Lens> {
 
-    private final Lens<?, ?> lens;
+    private final Lens lens;
 
-    public LensQueryOperation(Lens<?, ?> lens) {
+    public LensQueryOperation(Lens lens) {
         super(SpongeQueryOperationTypes.LENS);
         this.lens = lens;
     }
 
     @Override
-    public <TInventory, TStack> boolean matches(Lens<TInventory, TStack> lens, Lens<TInventory, TStack> parent, Fabric<TInventory> inventory) {
+    public boolean matches(Lens lens, Lens parent, Fabric inventory) {
         return this.lens.equals(lens);
     }
 

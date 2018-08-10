@@ -28,11 +28,14 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableSet;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.data.type.SpongeSpawnType;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -40,60 +43,50 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-public class SpawnTypeRegistryModule implements AlternateCatalogRegistryModule<SpawnType>, AdditionalCatalogRegistryModule<SpawnType> {
+@RegisterCatalog(SpawnTypes.class)
+public class SpawnTypeRegistryModule extends AbstractCatalogRegistryModule<SpawnType>
+    implements AlternateCatalogRegistryModule<SpawnType>, AdditionalCatalogRegistryModule<SpawnType> {
 
-    @RegisterCatalog(SpawnTypes.class)
-    private final Map<String, SpawnType> spawnTypeMap = new HashMap<>();
+    public static final SpawnType FORCED = generateType("forced", "Forced");
+    public static final SpawnType ENTITY_DEATH = generateType("entity_death", "EntityDeath");
 
     @Override
     public void registerAdditionalCatalog(SpawnType extraCatalog) {
-        checkArgument(!this.spawnTypeMap.containsKey(extraCatalog.getId().toLowerCase(Locale.ENGLISH)),
-                "SpawnType with the same id is already registered: {}", extraCatalog.getId());
-        this.spawnTypeMap.put(extraCatalog.getId().toLowerCase(Locale.ENGLISH), extraCatalog);
-    }
-
-    @Override
-    public Optional<SpawnType> getById(String id) {
-        String key = checkNotNull(id).toLowerCase(Locale.ENGLISH);
-        if (!key.contains(":")) {
-            key = "sponge:" + key; // There are no minecraft based spawn types.
-        }
-        return Optional.ofNullable(this.spawnTypeMap.get(key));
-    }
-
-    @Override
-    public Collection<SpawnType> getAll() {
-        return ImmutableSet.copyOf(this.spawnTypeMap.values());
+        checkArgument(!this.map.containsKey(extraCatalog.getKey()),
+                "SpawnType with the same id is already registered: {}", extraCatalog.getKey().toString());
+        this.map.put(extraCatalog.getKey(), extraCatalog);
     }
 
     @Override
     public void registerDefaults() {
-        this.spawnTypeMap.put("sponge:block_spawning", InternalSpawnTypes.BLOCK_SPAWNING);
-        this.spawnTypeMap.put("sponge:breeding", InternalSpawnTypes.BREEDING);
-        this.spawnTypeMap.put("sponge:dispense", InternalSpawnTypes.DISPENSE);
-        this.spawnTypeMap.put("sponge:dropped_item", InternalSpawnTypes.DROPPED_ITEM);
-        this.spawnTypeMap.put("sponge:experience", InternalSpawnTypes.EXPERIENCE);
-        this.spawnTypeMap.put("sponge:falling_block", InternalSpawnTypes.FALLING_BLOCK);
-        this.spawnTypeMap.put("sponge:mob_spawner", InternalSpawnTypes.MOB_SPAWNER);
-        this.spawnTypeMap.put("sponge:passive", InternalSpawnTypes.PASSIVE);
-        this.spawnTypeMap.put("sponge:placement", InternalSpawnTypes.PLACEMENT);
-        this.spawnTypeMap.put("sponge:projectile", InternalSpawnTypes.PROJECTILE);
-        this.spawnTypeMap.put("sponge:spawn_egg", InternalSpawnTypes.SPAWN_EGG);
-        this.spawnTypeMap.put("sponge:structure", InternalSpawnTypes.STRUCTURE);
-        this.spawnTypeMap.put("sponge:tnt_ignite", InternalSpawnTypes.TNT_IGNITE);
-        this.spawnTypeMap.put("sponge:weather", InternalSpawnTypes.WEATHER);
-        this.spawnTypeMap.put("sponge:custom", InternalSpawnTypes.CUSTOM);
-        this.spawnTypeMap.put("sponge:chunk_load", InternalSpawnTypes.CHUNK_LOAD);
-        this.spawnTypeMap.put("sponge:world_spawner", InternalSpawnTypes.WORLD_SPAWNER);
-        this.spawnTypeMap.put("sponge:plugin", InternalSpawnTypes.PLUGIN);
+        registerDefault("dispense", "Dispense");
+        registerDefault("block_spawning", "BlockSpawning");
+        registerDefault("breeding", "Breeding");
+        registerDefault("dropped_item", "DroppedItem");
+        registerDefault("experience", "Experience");
+        registerDefault("falling_block", "FallingBlock");
+        registerDefault("mob_spawner", "MobSpawner");
+        registerDefault("passive", "Passive");
+        registerDefault("placement", "Placement");
+        registerDefault("projectile", "Projectile");
+        registerDefault("spawn_egg", "SpawnEgg");
+        registerDefault("structure", "Structure");
+        registerDefault("tnt_ignite", "TNTIgnite");
+        registerDefault("weather", "Weather");
+        registerDefault("custom", "Custom");
+        registerDefault("chunk_load", "ChunkLoad");
+        registerDefault("world_spawner", "WorldSpawner");
+        registerDefault("plugin", "Plugin");
+        registerAdditionalCatalog(FORCED);
+        registerAdditionalCatalog(ENTITY_DEATH);
     }
 
-    @Override
-    public Map<String, SpawnType> provideCatalogMap() {
-        final HashMap<String, SpawnType> map = new HashMap<>();
-        for (Map.Entry<String, SpawnType> entry : this.spawnTypeMap.entrySet()) {
-            map.put(entry.getKey().replace("sponge:", ""), entry.getValue());
-        }
-        return map;
+    private static SpawnType generateType(String id, String name) {
+        return new SpongeSpawnType(id, name);
     }
+
+    private void registerDefault(String id, String name) {
+        this.map.put(CatalogKey.sponge(id), generateType(id, name));
+    }
+
 }
