@@ -71,12 +71,11 @@ import org.spongepowered.api.statistic.StatisticType;
 import org.spongepowered.api.statistic.StatisticTypes;
 import org.spongepowered.api.text.BookView;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.TextFactory;
 import org.spongepowered.api.text.TextTemplate;
 import org.spongepowered.api.text.format.TextColor;
-import org.spongepowered.api.text.serializer.BookViewDataBuilder;
-import org.spongepowered.api.text.serializer.TextConfigSerializer;
-import org.spongepowered.api.text.serializer.TextSerializerFactory;
-import org.spongepowered.api.text.serializer.TextTemplateConfigSerializer;
+import org.spongepowered.common.text.serializer.config.BookViewDataBuilder;
+import org.spongepowered.common.text.serializer.config.TextConfigSerializer;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.ResettableBuilder;
 import org.spongepowered.api.util.Tuple;
@@ -97,8 +96,9 @@ import org.spongepowered.common.registry.type.block.RotationRegistryModule;
 import org.spongepowered.common.registry.type.entity.AITaskTypeModule;
 import org.spongepowered.common.registry.type.scoreboard.DisplaySlotRegistryModule;
 import org.spongepowered.common.registry.util.RegistryModuleLoader;
+import org.spongepowered.common.text.impl.TextFactoryImpl;
 import org.spongepowered.common.text.selector.SpongeSelectorFactory;
-import org.spongepowered.common.text.serializer.SpongeTextSerializerFactory;
+import org.spongepowered.common.text.serializer.config.TextTemplateConfigSerializer;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 import org.spongepowered.common.util.LocaleCache;
 import org.spongepowered.common.util.SetSerializer;
@@ -152,6 +152,7 @@ public class SpongeGameRegistry implements GameRegistry {
     final Map<Class<? extends RegistryModule>, RegistryModule> classMap = new IdentityHashMap<>();
     private final Map<Class<?>, Supplier<?>> builderSupplierMap = new IdentityHashMap<>();
     private final Set<RegistryModule> registryModules = new HashSet<>();
+    private final TextFactory textFactory = new TextFactoryImpl();
 
     @Inject
     public SpongeGameRegistry(SpongePropertyRegistry propertyRegistry) {
@@ -508,12 +509,6 @@ public class SpongeGameRegistry implements GameRegistry {
 
     @SuppressWarnings("deprecation")
     @Override
-    public TextSerializerFactory getTextSerializerFactory() {
-        return SpongeTextSerializerFactory.INSTANCE;
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
     public SpongeSelectorFactory getSelectorFactory() {
         return SpongeSelectorFactory.INSTANCE;
     }
@@ -607,5 +602,10 @@ public class SpongeGameRegistry implements GameRegistry {
             SpongeImpl.postEvent(new SpongeGameRegistryRegisterEvent(
                     Sponge.getCauseStackManager().getCurrentCause(), catalogClass, registryModule));
         }
+    }
+
+    @Override
+    public TextFactory getTextFactory() {
+        return this.textFactory;
     }
 }

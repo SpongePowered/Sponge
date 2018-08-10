@@ -29,6 +29,7 @@ import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.InvalidDataException;
+import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.common.data.util.DataQueries;
 
@@ -50,6 +51,9 @@ public class SpongeProfilePropertyBuilder extends AbstractDataBuilder<ProfilePro
         String value = container.getString(DataQueries.PROPERTY_VALUE).get();
         Optional<String> signature = container.getString(DataQueries.PROPERTY_SIGNATURE);
 
-        return Optional.of(Sponge.getServer().getGameProfileManager().createProfileProperty(name, value, signature.orElse(null)));
+        final GameProfileManager gameProfileManager = Sponge.getServer().getGameProfileManager();
+        final String signature1 = signature.orElse(null);
+        final ProfileProperty profileProperty = gameProfileManager.createProfileProperty(name, value, signature1);
+        return Optional.of(profileProperty);
     }
 }

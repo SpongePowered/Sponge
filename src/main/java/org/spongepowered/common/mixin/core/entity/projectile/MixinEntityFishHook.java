@@ -159,7 +159,7 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
 
             // Sponge start - Moved up to event call
             if (!transactions.isEmpty()) { // Sponge: Check if we have any transactions instead
-                //LootContext.Builder lootcontext$builder = new LootContext.Builder((WorldServer) this.world);
+                //LootContext.Builder lootcontext$builder = new LootContext.BuilderImpl((WorldServer) this.world);
                 //lootcontext$builder.withLuck((float) this.field_191518_aw + this.angler.getLuck());
 
                 // Use transactions

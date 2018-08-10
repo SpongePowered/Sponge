@@ -116,7 +116,7 @@ public class ItemSignDataProcessor extends AbstractItemSingleDataProcessor<List<
         final NBTTagCompound tileCompound = NbtDataUtil.getOrCreateSubCompound(mainCompound, NbtDataUtil.BLOCK_ENTITY_TAG);
         tileCompound.setString(NbtDataUtil.BLOCK_ENTITY_ID, NbtDataUtil.SIGN);
         for (int i = 0; i < 4; i++) {
-            Text line = lines.size() > i ? lines.get(i) : Text.EMPTY;
+            Text line = lines.size() > i ? lines.get(i) : Text.empty();
             if (line == null) {
                 throw new IllegalArgumentException("A null line was given at index " + i);
             }

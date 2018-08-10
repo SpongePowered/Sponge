@@ -22,23 +22,50 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.text;
+package org.spongepowered.common.text.action;
 
-import net.minecraft.util.text.TextComponentBase;
-import net.minecraft.util.text.TextComponentString;
-import org.spongepowered.api.text.LiteralText;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-@Mixin(value = LiteralText.class, remap = false)
-public abstract class MixinTextLiteral extends MixinText {
+import com.google.common.base.MoreObjects;
+import org.spongepowered.api.text.action.TextAction;
 
-    @Shadow @Final protected String content;
+import javax.annotation.Nullable;
 
-    @Override
-    protected TextComponentBase createComponent() {
-        return new TextComponentString(this.content);
+public abstract class TextActionImpl<R> implements TextAction<R> {
+
+    protected final R result;
+
+    protected TextActionImpl(final R result) {
+        this.result = checkNotNull(result, "result");
     }
 
+    @Override
+    public R getResult() {
+        return this.result;
+    }
+
+    @Override
+    public boolean equals(@Nullable final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+
+        final TextActionImpl<?> that = (TextActionImpl<?>) o;
+        return this.result.equals(that.result);
+    }
+
+    @Override
+    public int hashCode() {
+        return this.result.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .addValue(this.result)
+                .toString();
+    }
 }

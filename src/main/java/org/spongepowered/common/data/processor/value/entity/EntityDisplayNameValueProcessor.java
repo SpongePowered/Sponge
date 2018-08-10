@@ -47,7 +47,7 @@ public class EntityDisplayNameValueProcessor extends AbstractSpongeValueProcesso
 
     @Override
     protected Value<Text> constructValue(Text actualValue) {
-        return new SpongeValue<>(this.key, Text.of(), actualValue);
+        return new SpongeValue<>(this.key, Text.empty(), actualValue);
     }
 
     @Override
@@ -63,7 +63,7 @@ public class EntityDisplayNameValueProcessor extends AbstractSpongeValueProcesso
 
     @Override
     protected ImmutableValue<Text> constructImmutableValue(Text value) {
-        return new ImmutableSpongeValue<>(this.key, Text.of(), value);
+        return new ImmutableSpongeValue<>(this.key, Text.empty(), value);
     }
 
     @Override

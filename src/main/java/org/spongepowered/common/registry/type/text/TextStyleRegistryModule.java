@@ -31,21 +31,30 @@ import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.text.format.TextStyle;
 import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
-import org.spongepowered.common.text.format.SpongeTextStyle;
+import org.spongepowered.common.text.format.TextStyleImpl;
 
-@RegisterCatalog(value = TextStyles.class, ignoredFields = "NONE")
+@RegisterCatalog(value = TextStyles.class)
 public final class TextStyleRegistryModule extends AbstractCatalogRegistryModule<TextStyle.Base>
     implements AlternateCatalogRegistryModule<TextStyle.Base> {
 
     @Override
     public void registerDefaults() {
-        register(CatalogKey.minecraft("bold"), SpongeTextStyle.of(TextFormatting.BOLD));
-        register(CatalogKey.minecraft("italic"), SpongeTextStyle.of(TextFormatting.ITALIC));
-        register(CatalogKey.minecraft("underline"), SpongeTextStyle.of(TextFormatting.UNDERLINE));
-        register(CatalogKey.minecraft("strikethrough"), SpongeTextStyle.of(TextFormatting.STRIKETHROUGH));
-        register(CatalogKey.minecraft("obfuscated"), SpongeTextStyle.of(TextFormatting.OBFUSCATED));
-        register(CatalogKey.minecraft("reset"), SpongeTextStyle.of(TextFormatting.RESET));
-        register(CatalogKey.sponge("none"), (TextStyle.Base) TextStyles.NONE);
+        register(CatalogKey.minecraft("bold"), TextStyleImpl.Real.of(TextFormatting.BOLD));
+        register(CatalogKey.minecraft("italic"), TextStyleImpl.Real.of(TextFormatting.ITALIC));
+        register(CatalogKey.minecraft("underline"), TextStyleImpl.Real.of(TextFormatting.UNDERLINE));
+        register(CatalogKey.minecraft("strikethrough"), TextStyleImpl.Real.of(TextFormatting.STRIKETHROUGH));
+        register(CatalogKey.minecraft("obfuscated"), TextStyleImpl.Real.of(TextFormatting.OBFUSCATED));
+        register(CatalogKey.minecraft("reset"), TextStyleImpl.Real.of(TextFormatting.RESET));
+        register(CatalogKey.sponge("none"), new TextStyleImpl.None());
     }
 
+    @Override
+    protected String marshalFieldKey(String key) {
+        return key.replace("sponge:", "");
+    }
+
+    @Override
+    protected boolean filterAll(TextStyle.Base element) {
+        return element != TextStyles.NONE;
+    }
 }

@@ -160,7 +160,7 @@ public final class LegacyTexts {
             // No formatted text found
             if (pos == 0) {
                 // Text contains only (redundant) formatting codes => empty text
-                return Text.EMPTY;
+                return Text.empty();
             } else {
                 // No valid formatting code found => plain text
                 return Text.of(input);

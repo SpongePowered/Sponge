@@ -62,7 +62,7 @@ public class SpongeDisplayNameData extends AbstractSingleData<Text, DisplayNameD
 
     @Override
     public Value<Text> displayName() {
-        return new SpongeValue<>(this.usedKey, Text.of(), this.getValue());
+        return new SpongeValue<>(this.usedKey, Text.empty(), this.getValue());
     }
 
     @Override

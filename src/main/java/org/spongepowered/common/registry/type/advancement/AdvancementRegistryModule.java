@@ -41,12 +41,14 @@ import org.spongepowered.common.interfaces.advancement.IMixinAdvancement;
 import org.spongepowered.common.interfaces.advancement.IMixinAdvancementList;
 import org.spongepowered.common.registry.CustomRegistrationPhase;
 import org.spongepowered.common.registry.type.AbstractPrefixCheckCatalogRegistryModule;
+import org.spongepowered.common.registry.type.text.TextColorRegistryModule;
+import org.spongepowered.common.registry.type.text.TextStyleRegistryModule;
 
 import java.util.Map;
 
 @SuppressWarnings("unchecked")
 @CustomRegistrationPhase
-@RegistrationDependency(CriterionRegistryModule.class)
+@RegistrationDependency({CriterionRegistryModule.class, TextColorRegistryModule.class, TextStyleRegistryModule.class})
 public class AdvancementRegistryModule extends AbstractPrefixCheckCatalogRegistryModule<Advancement>
         implements AdditionalCatalogRegistryModule<Advancement> {
 

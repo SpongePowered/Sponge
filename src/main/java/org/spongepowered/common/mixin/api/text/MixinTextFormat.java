@@ -24,38 +24,26 @@
  */
 package org.spongepowered.common.mixin.api.text;
 
-import com.google.common.collect.ImmutableList;
-import net.minecraft.util.text.TextComponentBase;
-import net.minecraft.util.text.TextComponentTranslation;
-import org.spongepowered.api.text.TranslatableText;
-import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.network.ServerStatusResponse;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.text.format.TextFormat;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.text.IMixinText;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.common.text.format.TextFormatImpl;
 
-@Mixin(value = TranslatableText.class, remap = false)
-public abstract class MixinTextTranslatable extends MixinText {
+@Mixin(value = TextFormat.class, remap = false)
+public interface MixinTextFormat {
 
-    @Shadow @Final protected Translation translation;
-    @Shadow @Final protected ImmutableList<Object> arguments;
-
-    @Override
-    protected TextComponentBase createComponent() {
-        return new TextComponentTranslation(this.translation.getId(), unwrapArguments(this.arguments));
+    /**
+     * @author gabizou - August 9th, 2018
+     * @reason Due to early initialization of the
+     * {@link ServerStatusResponse}, parts of text are
+     * needed sooner than when {@link Sponge} as a class
+     * has been initialized.
+     */
+    @Overwrite
+    @SuppressWarnings("deprecation")
+    static TextFormat of() {
+        return TextFormatImpl.getNone();
     }
-
-    private Object[] unwrapArguments(ImmutableList<Object> args) {
-        Object[] result = new Object[args.size()];
-        for (int i = 0; i < args.size(); i++) {
-            final Object arg = args.get(i);
-            if (arg instanceof IMixinText) {
-                result[i] = ((IMixinText) arg).toComponent();
-            } else {
-                result[i] = arg;
-            }
-        }
-        return result;
-    }
-
 }

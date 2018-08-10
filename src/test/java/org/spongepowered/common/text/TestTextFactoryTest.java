@@ -22,21 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.text.serializer;
+package org.spongepowered.common.text;
 
-import org.spongepowered.api.text.serializer.FormattingCodeTextSerializer;
-import org.spongepowered.api.text.serializer.TextSerializerFactory;
+import static org.junit.Assert.assertEquals;
 
-public final class SpongeTextSerializerFactory implements TextSerializerFactory {
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.translation.FixedTranslation;
+import org.spongepowered.lwts.runner.LaunchWrapperTestRunner;
 
-    public static final TextSerializerFactory INSTANCE = new SpongeTextSerializerFactory();
+@RunWith(LaunchWrapperTestRunner.class)
+public class TestTextFactoryTest {
 
-    private SpongeTextSerializerFactory() {
+    @Before
+    public void initialize() throws Exception {
     }
 
-    @Override
-    public FormattingCodeTextSerializer getFormattingCodeTextSerializer(char legacyChar) {
-        return new SpongeFormattingCodeTextSerializer(legacyChar);
+    @Test
+    public void testToPlainLiterals() {
+        Text testText = Text.builder("Hello ").append(Text.of("world"), Text.of(", this is here")).build();
+        assertEquals("Hello world, this is here", testText.toPlain());
+    }
+
+    @Test
+    public void testToPlainTranslatables() {
+        Text testText = Text.of(new FixedTranslation("This is a translated %s"), Text.of("string"));
+        assertEquals("This is a translated string", testText.toPlain());
     }
 
 }

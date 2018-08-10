@@ -150,8 +150,8 @@ public class SpongeTeamBuilder implements Team.Builder {
         this.name = null;
         this.displayName = null;
         this.color = TextColors.RESET;
-        this.prefix = Text.of();
-        this.suffix = Text.of();
+        this.prefix = Text.empty();
+        this.suffix = Text.empty();
         this.allowFriendlyFire = false;
         this.showFriendlyInvisibles = false;
         this.nameTagVisibility = Visibilities.ALWAYS;

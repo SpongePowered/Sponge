@@ -126,11 +126,11 @@ public class SpongeCommandFactory {
 
     protected static final Text SEPARATOR_TEXT = Text.of(", ");
     static final Text INDENT_TEXT = Text.of(INDENT);
-    static final Text NEWLINE_TEXT = Text.NEW_LINE;
+    static final Text NEWLINE_TEXT = Text.newLine();
     static final Text LIST_ITEM_TEXT = Text.of(TextColors.GRAY, "- ");
     static final Text UNKNOWN = Text.of("UNKNOWN");
 
-    private static final CommandElement DUMMY_ELEMENT = new CommandElement(Text.EMPTY) {
+    private static final CommandElement DUMMY_ELEMENT = new CommandElement(Text.empty()) {
         @Nullable @Override protected Object parseValue(CommandSource source, CommandArgs args) throws ArgumentParseException {
             throw args.createError(t("No subcommand was specified")); // this will never be visible, but just in case
         }
@@ -605,7 +605,7 @@ public class SpongeCommandFactory {
                                         .onClick(TextActions.runCommand("/sponge:sponge plugins " + container.getId()))
                                         .onHover(TextActions.showText(Text.of(
                                                 TextColors.RESET,
-                                                "ID: ", container.getId(), Text.NEW_LINE,
+                                                "ID: ", container.getId(), Text.newLine(),
                                                 "Version: ", container.getVersion().orElse("Unknown"))));
 
                                 containerList.add(containerBuilder.build());

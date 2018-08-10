@@ -32,10 +32,13 @@ import com.google.common.collect.Maps;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.api.statistic.Statistic;
 import org.spongepowered.api.statistic.Statistics;
 import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
+import org.spongepowered.common.registry.type.text.TextColorRegistryModule;
+import org.spongepowered.common.registry.type.text.TextStyleRegistryModule;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -44,6 +47,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RegisterCatalog(Statistics.class)
+@RegistrationDependency({TextColorRegistryModule.class, TextStyleRegistryModule.class})
 public final class StatisticRegistryModule extends AbstractCatalogRegistryModule<Statistic>
     implements SpongeAdditionalCatalogRegistryModule<Statistic>, AlternateCatalogRegistryModule<Statistic> {
 

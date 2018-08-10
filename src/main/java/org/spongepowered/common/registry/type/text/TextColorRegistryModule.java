@@ -67,7 +67,28 @@ public final class TextColorRegistryModule extends AbstractCatalogRegistryModule
         addTextColor(TextFormatting.WHITE, Color.WHITE);
         addTextColor(TextFormatting.RESET, Color.WHITE);
 
-        register(CatalogKey.sponge("none"), TextColors.NONE);
+        register(CatalogKey.sponge("none"), new TextColor() {
+            private final CatalogKey key = CatalogKey.sponge("none");
+            @Override
+            public String getName() {
+                return "NONE";
+            }
+
+            @Override
+            public Color getColor() {
+                return Color.BLACK;
+            }
+
+            @Override
+            public CatalogKey getKey() {
+                return this.key;
+            }
+
+            @Override
+            public String toString() {
+                return this.getId();
+            }
+        });
     }
 
     private void addTextColor(TextFormatting handle, Color color) {

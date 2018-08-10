@@ -139,19 +139,7 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
         } else {
             this.tree = ((org.spongepowered.api.advancement.Advancement) parentIn).getTree().orElse(null);
         }
-        this.text = SpongeTexts.toText(this.displayText);
-        final ImmutableList.Builder<Text> toastText = ImmutableList.builder();
-        if (this.display != null) {
-            final FrameType frameType = this.display.getFrame();
-            toastText.add(Text.builder(new SpongeTranslation("advancements.toast." + frameType.getName()))
-                    .format(((AdvancementType) (Object) frameType).getTextFormat())
-                    .build());
-            toastText.add(getDisplayInfo().get().getTitle());
-        } else {
-            toastText.add(Text.of("Unlocked advancement"));
-            toastText.add(Text.of(getKey().toString()));
-        }
-        this.toastText = toastText.build();
+
         final Set<String> scoreCriteria = new HashSet<>();
         final Map<String, ICriterion> criterionMap = new HashMap<>();
         for (Map.Entry<String, Criterion> entry : new HashMap<>(criteriaIn).entrySet()) {
@@ -275,6 +263,20 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
     @Override
     public List<Text> toToastText() {
         checkServer();
+        if (this.toastText == null) {
+            final ImmutableList.Builder<Text> toastText = ImmutableList.builder();
+            if (this.display != null) {
+                final FrameType frameType = this.display.getFrame();
+                toastText.add(Text.builder(new SpongeTranslation("advancements.toast." + frameType.getName()))
+                    .format(((AdvancementType) (Object) frameType).getTextFormat())
+                    .build());
+                toastText.add(getDisplayInfo().get().getTitle());
+            } else {
+                toastText.add(Text.of("Unlocked advancement"));
+                toastText.add(Text.of(getKey().toString()));
+            }
+            this.toastText = toastText.build();
+        }
         return this.toastText;
     }
 
@@ -292,6 +294,9 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
     @Override
     public Text toText() {
         checkServer();
+        if (this.text == null) {
+            this.text = SpongeTexts.toText(this.displayText);
+        }
         return this.text;
     }
 }
