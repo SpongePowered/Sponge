@@ -1,6 +1,10 @@
 # https://help.github.com/articles/about-codeowners/
 # please keep this file in the same order as packages
 
+.travis.yml @Minecrell
+*gradle* @Minecrell
+Jenkinsfile @Minecrell
+
 src/main/java/org/spongepowered/common/boss/** @kashike
 src/main/java/org/spongepowered/common/command/** @kashike
 src/main/java/org/spongepowered/common/data/** @gabizou
@@ -13,7 +17,7 @@ src/main/java/org/spongepowered/common/profile/** @kashike
 
 src/main/java/org/spongepowered/common/mixin/api/data/** @gabizou
 src/main/java/org/spongepowered/common/mixin/api/event/cause/damage/** @gabizou
-src/main/java/org/spongepowered/common/mixin/api/text/** @kashike @minecrell
+src/main/java/org/spongepowered/common/mixin/api/text/** @kashike
 src/main/java/org/spongepowered/common/mixin/bungee/** @kashike
 src/main/java/org/spongepowered/common/mixin/core/block/** @gabizou
 src/main/java/org/sgponepowered/common/mixin/core/data/** @gabizou
@@ -27,7 +31,7 @@ src/main/java/org/spongepowered/common/mixin/core/item/merchant/** @gabizou
 src/main/java/org/spongepowered/common/mixin/core/item/recipe/** @Faithcaio
 src/main/java/org/spongepowered/common/mixin/core/nbt/** @gabizou
 src/main/java/org/spongepowered/common/mixin/core/potion/** @gabizou
-src/main/java/org/spongepowered/common/mixin/core/text/** @kashike @minecrell
+src/main/java/org/spongepowered/common/mixin/core/text/** @kashike
 src/main/java/org/spongepowered/common/mixin/core/world/biome/** @Deamon5550
 src/main/java/org/spongepowered/common/mixin/core/world/gen/** @Deamon5550
 src/main/java/org/spongepowered/common/mixin/core/world/MixinBossInfo.java @kashike
@@ -40,13 +44,13 @@ src/main/java/org/spongepowered/common/mixin/optimization/** @gabizou
 src/main/java/org/spongepowered/common/mixin/tracking/** @gabizou
 
 src/main/java/org/spongepowered/common/registry/** @gabizou
-src/main/java/org/spongepowered/common/registry/type/text/** @kashike @minecrell
-src/main/java/org/spongepowered/common/text/** @kashike @minecrell
+src/main/java/org/spongepowered/common/registry/type/text/** @kashike
+src/main/java/org/spongepowered/common/text/** @kashike
 src/main/java/org/spongepowered/common/util/ReflectionUtil.java @gabizou
 src/main/java/org/spongepowered/common/world/biome/** @Deamon5550
 src/main/java/org/spongepowered/common/world/gen/** @Deamon5550
 src/main/java/org/spongepowered/common/world/schematic/** @Deamon5550
 
-src/main/resources/org/spongepowered/common/service/pagination/font-sizes.json @kashike @minecrell
+src/main/resources/org/spongepowered/common/service/pagination/font-sizes.json @kashike
 
 testplugins/** @gabizou
