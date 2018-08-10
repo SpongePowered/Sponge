@@ -22,34 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.text;
+package org.spongepowered.common.mixin.api.text;
 
-import static org.junit.Assert.assertEquals;
+import net.minecraft.network.ServerStatusResponse;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.text.format.TextFormat;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.common.text.format.TextFormatImpl;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.translation.FixedTranslation;
-import org.spongepowered.lwts.runner.LaunchWrapperTestRunner;
+@Mixin(value = TextFormat.class, remap = false)
+public interface MixinTextFormat {
 
-@RunWith(LaunchWrapperTestRunner.class)
-public class TestTextFactoryTest {
-
-    @Before
-    public void initialize() throws Exception {
+    /**
+     * @author gabizou - August 9th, 2018
+     * @reason Due to early initialization of the
+     * {@link ServerStatusResponse}, parts of text are
+     * needed sooner than when {@link Sponge} as a class
+     * has been initialized.
+     */
+    @Overwrite
+    @SuppressWarnings("deprecation")
+    static TextFormat of() {
+        return TextFormatImpl.getNone();
     }
-
-    @Test
-    public void testToPlainLiterals() {
-        Text testText = Text.builder("Hello ").append(Text.of("world"), Text.of(", this is here")).build();
-        assertEquals("Hello world, this is here", testText.toPlain());
-    }
-
-    @Test
-    public void testToPlainTranslatables() {
-        Text testText = Text.of(new FixedTranslation("This is a translated %s"), Text.of("string"));
-        assertEquals("This is a translated string", testText.toPlain());
-    }
-
 }

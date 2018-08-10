@@ -14,6 +14,7 @@
         "event.cause.damage.MixinAbstractIndirectEntityDamageSource",
         "item.merchant.MixinMerchant",
         "text.MixinText",
+        "text.MixinTextFormat",
         "text.title.MixinTitle",
         "world.MixinLocation"
     ],

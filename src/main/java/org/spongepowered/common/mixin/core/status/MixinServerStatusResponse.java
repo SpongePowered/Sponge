@@ -39,6 +39,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.interfaces.text.IMixinTextComponent;
 import org.spongepowered.common.network.status.SpongeFavicon;
 import org.spongepowered.common.text.SpongeTexts;
 
@@ -55,17 +56,22 @@ public abstract class MixinServerStatusResponse implements ClientPingServerEvent
     @Shadow private ServerStatusResponse.Version version;
     @Shadow @Nullable private String favicon;
 
-    private Text descriptionText = Text.empty();
+    private Text descriptionText = null;
     @Nullable private ServerStatusResponse.Players playerBackup;
     @Nullable private Favicon faviconHandle;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    public void onInit(CallbackInfo ci) {
-        setServerDescription(null);
+    private void onSpongeInit(CallbackInfo ci) {
+        // We can't call setDescription here because it's too early to classload various
+        // text related classes, it's what I hate about statics....
+        this.description = new TextComponentString("");
     }
 
     @Override
     public Text getDescription() {
+        if (this.descriptionText == null && this.description != null) {
+            this.descriptionText = ((IMixinTextComponent) this.description).toText();
+        }
         return this.descriptionText;
     }
 
@@ -88,7 +94,7 @@ public abstract class MixinServerStatusResponse implements ClientPingServerEvent
             this.descriptionText = SpongeTexts.toText(motd);
         } else {
             this.description = new TextComponentString("");
-            this.descriptionText = Text.empty();
+            this.descriptionText = null;
         }
     }
 
