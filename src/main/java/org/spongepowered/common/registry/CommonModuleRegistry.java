@@ -134,6 +134,7 @@ import org.spongepowered.api.text.LiteralText;
 import org.spongepowered.api.text.ScoreText;
 import org.spongepowered.api.text.SelectorText;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.TextTemplate;
 import org.spongepowered.api.text.TranslatableText;
 import org.spongepowered.api.text.action.ClickAction;
 import org.spongepowered.api.text.action.HoverAction;
@@ -284,6 +285,7 @@ import org.spongepowered.common.text.impl.BookViewImpl;
 import org.spongepowered.common.text.impl.LiteralTextImpl;
 import org.spongepowered.common.text.impl.ScoreTextImpl;
 import org.spongepowered.common.text.impl.SelectorTextImpl;
+import org.spongepowered.common.text.impl.TextTemplateImpl;
 import org.spongepowered.common.text.impl.TitleImpl;
 import org.spongepowered.common.text.impl.TranslatableTextImpl;
 import org.spongepowered.common.world.SpongeExplosionBuilder;
@@ -452,6 +454,7 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(InventoryTitle.Builder.class, InventoryTitleImpl.BuilderImpl::new)
             .registerBuilderSupplier(InventoryTransactionResult.Builder.class, InventoryTransactionResultImpl.Builder::new)
             .registerBuilderSupplier(CatalogKey.Builder.class, CatalogKeyBuilder::new)
+            .registerBuilderSupplier(TextTemplate.Arg.Builder.class, TextTemplateImpl.ArgImpl.BuilderImpl::new)
         ;
     }
 
