@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.withSettings;
@@ -48,7 +47,6 @@ import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.common.InjectedTest;
 import org.spongepowered.common.event.listener.NonPreListener;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.lwts.runner.LaunchWrapperTestRunner;
 
 import java.lang.reflect.Field;

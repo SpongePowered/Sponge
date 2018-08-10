@@ -144,7 +144,10 @@ public final class LiteralTextImpl extends TextImpl implements LiteralText {
         @Override
         public LiteralText build() {
             // Special case for empty builder
-            if (this.format.isEmpty() && this.children.isEmpty() && this.clickAction == null && this.hoverAction == null
+            if (this.format.isEmpty()
+                && this.children.isEmpty()
+                && this.clickAction == null
+                && this.hoverAction == null
                     && this.shiftClickAction == null) {
                 if (this.content.isEmpty()) {
                     return EMPTY;

@@ -151,7 +151,7 @@ public abstract class TextImpl implements Text {
 
     @Override
     public final String toPlain() {
-        return TextSerializers.PLAIN.serialize(this);
+        return ((IMixinTextComponent) asComponent()).toPlain();
     }
 
     @Override

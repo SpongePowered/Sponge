@@ -35,6 +35,7 @@ import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextFormat;
 import org.spongepowered.api.text.format.TextStyle;
 import org.spongepowered.api.text.format.TextStyles;
+import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.text.serializer.config.TextFormatConfigSerializer;
 
 import java.util.Objects;
@@ -46,9 +47,29 @@ public final class TextFormatImpl implements TextFormat {
     }
 
     /**
-     * An empty {@link TextFormat} with no {@link TextColor} and no {@link TextStyle}.
+     * Gets the no formatting format. This is lazy loaded to prevent issues with
+     * static field initialization, mostly during tests due to such early
+     * class referencing occurring.
+     *
+     * @return The none text format.
      */
-    public static final TextFormat NONE = new TextFormatImpl(TextColors.NONE, TextStyles.NONE);
+    public static TextFormat getNone() {
+        return Holder.NONE;
+    }
+
+    private static class Holder {
+        static {
+            System.err.println("derp");
+            new PrettyPrinter(50).add("Initializing Holder").centre().hr()
+                .add("Holder is being initialized with TextFormat:")
+                .add("%s : %s", "TextColor", TextColors.NONE)
+                .add()
+                .add(new Exception(""))
+                .print(System.err);
+        }
+        static final TextFormat NONE = new TextFormatImpl(TextColors.NONE, TextStyles.NONE);
+    }
+
     private final TextColor color;
     private final TextStyle style;
 

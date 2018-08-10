@@ -29,6 +29,7 @@ import static org.mockito.Mockito.when;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.manipulator.mutable.entity.SkinData;
 import org.spongepowered.api.entity.Entity;
@@ -58,9 +59,11 @@ import org.spongepowered.common.event.listener.InvalidCancelledListener;
 import org.spongepowered.common.event.listener.InvalidIncludeExcludeListener;
 import org.spongepowered.common.event.listener.RootListener;
 import org.spongepowered.common.event.listener.SimpleListener;
+import org.spongepowered.lwts.runner.LaunchWrapperTestRunner;
 
 import java.util.Optional;
 
+@RunWith(LaunchWrapperTestRunner.class)
 public class EventFilterTest {
     
     public static final Cause TEST_CAUSE = Cause.of(EventContext.empty(), EventFilterTest.class);

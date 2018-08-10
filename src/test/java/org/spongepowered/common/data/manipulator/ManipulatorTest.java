@@ -30,8 +30,6 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 import com.google.common.collect.Lists;
-import com.google.common.reflect.TypeToken;
-import org.checkerframework.checker.nullness.Opt;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -46,11 +44,13 @@ import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.event.SpongeEventFactoryTest;
-import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.util.PEBKACException;
+import org.spongepowered.api.text.action.ClickAction;
+import org.spongepowered.api.text.action.HoverAction;
+import org.spongepowered.api.text.action.ShiftClickAction;
+import org.spongepowered.api.text.action.TextActions;
+import org.spongepowered.api.text.format.TextFormat;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.util.TypeTokenHelper;
 import org.spongepowered.lwts.runner.LaunchWrapperParameterized;
@@ -58,8 +58,6 @@ import org.spongepowered.lwts.runner.LaunchWrapperParameterized;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -204,6 +202,16 @@ public class ManipulatorTest {
             return (T) Sponge.getRegistry().getAllOf((Class<CatalogType>) type).iterator().next();
         } else if (isBuildable(type)) {
             return (T) createFromBuilder(type);
+        } else if (type == Text.class) {
+            return (T) Text.of();
+        } else if (type == TextFormat.class) {
+            return (T) TextFormat.of();
+        } else if (type == ShiftClickAction.class) {
+            return (T) TextActions.insertText("MOCK_SPONGE_SHIFT_CLICK_INSERT");
+        } else if (type == HoverAction.class) {
+            return (T) TextActions.showText(Text.of("MOCK_SPONGE_HOVER_ACTION_SHOW_TEXT"));
+        } else if (type == ClickAction.class) {
+            return (T) TextActions.runCommand("MOCK_SPONGE_EVENT_FACTORY_RUN_COMMAND");
         } else {
             return (T) SpongeEventFactoryTest.mockParam(type);
         }

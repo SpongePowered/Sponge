@@ -36,8 +36,6 @@ import org.spongepowered.api.network.ChannelRegistrar;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.common.SpongeGame;
-import org.spongepowered.common.SpongePlatform;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.inject.SpongeImplementationModule;
 import org.spongepowered.common.test.TestGame;
 import org.spongepowered.common.test.TestServer;

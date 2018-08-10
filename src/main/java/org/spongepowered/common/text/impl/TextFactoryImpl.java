@@ -213,7 +213,7 @@ public final class TextFactoryImpl implements TextFactory {
 
     @Override
     public TextFormat emptyFormat() {
-        return TextFormatImpl.NONE;
+        return TextFormatImpl.getNone();
     }
 
     @Override
