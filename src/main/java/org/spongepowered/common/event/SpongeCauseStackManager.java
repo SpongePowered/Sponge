@@ -56,7 +56,7 @@ import java.util.function.BiConsumer;
 import javax.annotation.Nullable;
 
 @Singleton
-public final class SpongeCauseStackManager implements CauseStackManager {
+public class SpongeCauseStackManager implements CauseStackManager {
 
     public static final boolean DEBUG_CAUSE_FRAMES = Boolean.valueOf(System.getProperty("sponge.debugcauseframes", "false"));
 
@@ -76,7 +76,7 @@ public final class SpongeCauseStackManager implements CauseStackManager {
     private Deque<Tuple<PhaseContext<?>, BiConsumer<StackFrame, PhaseContext<?>>>> phaseContextProviders = new ArrayDeque<>();
 
     @Inject
-    private SpongeCauseStackManager() { }
+    protected SpongeCauseStackManager() { }
 
     private void enforceMainThread() {
         // On clients, this may not be available immediately, we can't bomb out that early.

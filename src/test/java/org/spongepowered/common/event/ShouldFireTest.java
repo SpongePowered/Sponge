@@ -27,6 +27,7 @@ package org.spongepowered.common.event;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.event.Listener;
@@ -34,6 +35,7 @@ import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.common.InjectedTest;
+import org.spongepowered.lwts.runner.LaunchWrapperTestRunner;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;

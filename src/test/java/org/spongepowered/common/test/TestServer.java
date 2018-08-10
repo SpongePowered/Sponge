@@ -24,7 +24,10 @@
  */
 package org.spongepowered.common.test;
 
+import com.google.common.collect.Lists;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import org.mockito.Mockito;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.command.source.ConsoleSource;
 import org.spongepowered.api.entity.living.player.Player;
@@ -43,6 +46,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
@@ -51,11 +55,24 @@ import java.util.concurrent.CompletableFuture;
 @Singleton
 public class TestServer implements Server {
 
-    private TestGameProfileManager gameProfileManager = new TestGameProfileManager();
+    private TestGameProfileManager gameProfileManager;
+    private Player test1;
+    private Player test2;
+    private List<Player> players;
+
+    @Inject
+    public TestServer() {
+        this.gameProfileManager = new TestGameProfileManager();
+        this.test1 = Mockito.mock(Player.class);
+        Mockito.when(this.test1.getName()).thenReturn("test1");
+        this.test2 = Mockito.mock(Player.class);
+        Mockito.when(this.test2.getName()).thenReturn("test2");
+        this.players = Lists.newArrayList(this.test1, this.test2);
+    }
 
     @Override
     public Collection<Player> getOnlinePlayers() {
-        return Collections.emptyList();
+        return this.players;
     }
 
     @Override
@@ -70,6 +87,11 @@ public class TestServer implements Server {
 
     @Override
     public Optional<Player> getPlayer(String name) {
+        if ("test1".equalsIgnoreCase(name)) {
+            return Optional.of(this.test1);
+        } else if ("test2".equalsIgnoreCase(name)) {
+            return Optional.of(this.test2);
+        }
         return Optional.empty();
     }
 

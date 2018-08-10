@@ -36,6 +36,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventManager;
@@ -83,14 +84,10 @@ public class SnapshotGenerationTest extends InjectedTest {
         PluginContainer container = Mockito.mock(PluginContainer.class);
         Mockito.when(manager.fromInstance(this.plugin)).thenReturn(Optional.of(container));
 
-        Cause cause = Cause.of(EventContext.empty(), this);
         this.entity = Mockito.mock(Entity.class, withSettings().defaultAnswer(Mockito.RETURNS_MOCKS));
 
-        this.event = SpongeEventFactory.createSpawnEntityEvent(cause, Lists.newArrayList(this.entity));
+        this.event = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), Lists.newArrayList(this.entity));
 
-        Game game = mock(Game.class);
-        CauseStackManager csm = mock(CauseStackManager.class);
-        Mockito.when(game.getCauseStackManager()).thenReturn(csm);
     }
 
     @Test

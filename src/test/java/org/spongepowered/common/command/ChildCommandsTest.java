@@ -59,20 +59,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @RunWith(LaunchWrapperTestRunner.class)
 public class ChildCommandsTest {
 
-    @Before
-    public void initialize() throws Exception {
-
-        Game game = mock(Game.class);
-        CauseStackManager csm = mock(CauseStackManager.class);
-        when(game.getCauseStackManager()).thenReturn(csm);
-        when(csm.pushCause(null)).thenReturn(csm);
-        when(csm.popCause()).thenReturn(null);
-        CommandManager cm = mock(CommandManager.class);
-        when(game.getCommandManager()).thenReturn(cm);
-        TestHooks.setGame(game);
-        TestHooks.setInstance("commandManager", cm);
-    }
-
     @Test
     public void testEmptyChildrenWorks() throws CommandException {
         final AtomicBoolean parent = new AtomicBoolean();

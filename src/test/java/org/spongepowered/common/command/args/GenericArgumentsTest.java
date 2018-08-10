@@ -250,22 +250,6 @@ public class GenericArgumentsTest {
 
     private CommandElement getPlayerElement() throws Exception {
         // Create two fake players
-        Player player1 = Mockito.mock(Player.class);
-        Mockito.when(player1.getName()).thenReturn("test1");
-        Player player2 = Mockito.mock(Player.class);
-        Mockito.when(player2.getName()).thenReturn("test2");
-
-        Server mock = Mockito.mock(Server.class);
-        Mockito.when(mock.getOnlinePlayers()).thenReturn(Lists.newArrayList(player1, player2));
-        Mockito.when(mock.getPlayer(Mockito.anyString())).thenReturn(Optional.empty());
-        Mockito.when(mock.getPlayer("test1")).thenReturn(Optional.of(player1));
-        Mockito.when(mock.getPlayer("test2")).thenReturn(Optional.of(player2));
-
-        Game gameMock = Mockito.mock(Game.class);
-        Mockito.when(gameMock.getServer()).thenReturn(mock);
-        Field field = Sponge.class.getDeclaredField("game");
-        field.setAccessible(true);
-        field.set(null, gameMock);
 
         // Create element
         return GenericArguments.player(Text.of("player"));
