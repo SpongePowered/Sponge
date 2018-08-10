@@ -33,6 +33,7 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.property.store.common.AbstractSpongePropertyStore;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
+import org.spongepowered.common.util.VecHelper;
 
 import java.util.Optional;
 
@@ -40,10 +41,13 @@ public class GroundLuminancePropertyStore extends AbstractSpongePropertyStore<Gr
 
     @Override
     public Optional<GroundLuminanceProperty> getFor(PropertyHolder propertyHolder) {
-        if (propertyHolder instanceof Location && ((Location<?>) propertyHolder).getExtent() instanceof Chunk) {
-            final Chunk chunk = (Chunk) ((Location<?>) propertyHolder).getExtent();
-            final float light = chunk.getLightFor(EnumSkyBlock.BLOCK, ((IMixinLocation) propertyHolder).getBlockPos());
-            return Optional.of(new GroundLuminanceProperty(light));
+        if (propertyHolder instanceof Location) {
+            final Location<?> location = (Location<?>) propertyHolder;
+            if (location.getExtent() instanceof Chunk) {
+                final Chunk chunk = (Chunk) location.getExtent();
+                final float light = chunk.getLightFor(EnumSkyBlock.BLOCK, VecHelper.toBlockPos(location));
+                return Optional.of(new GroundLuminanceProperty(light));
+            }
         }
         return super.getFor(propertyHolder);
     }
@@ -51,7 +55,7 @@ public class GroundLuminancePropertyStore extends AbstractSpongePropertyStore<Gr
     @Override
     public Optional<GroundLuminanceProperty> getFor(Location<World> location) {
         final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
-        final float light = world.getLightFor(EnumSkyBlock.BLOCK, ((IMixinLocation) (Object) location).getBlockPos());
+        final float light = world.getLightFor(EnumSkyBlock.BLOCK, VecHelper.toBlockPos(location));
         return Optional.of(new GroundLuminanceProperty(light));
     }
 

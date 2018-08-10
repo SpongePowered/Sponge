@@ -24,18 +24,12 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.minecraft.container;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
+import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
+import org.spongepowered.api.item.inventory.property.EquipmentSlotType;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
-import org.spongepowered.common.item.inventory.lens.comp.MainPlayerInventoryLens;
 import org.spongepowered.common.item.inventory.lens.impl.comp.CraftingInventoryLensImpl;
-import org.spongepowered.common.item.inventory.lens.impl.comp.EquipmentInventoryLensImpl;
-import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
-import org.spongepowered.common.item.inventory.lens.impl.comp.HotbarLensImpl;
-import org.spongepowered.common.item.inventory.lens.impl.comp.MainPlayerInventoryLensImpl;
-import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
-import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
+import org.spongepowered.common.item.inventory.lens.impl.minecraft.PlayerInventoryLens;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,40 +38,26 @@ public class ContainerPlayerInventoryLens extends ContainerLens {
 
     private static final int CRAFTING_OUTPUT = 1;
     private static final int CRAFTING_GRID = 2;
-    private static final int EQUIPMENT = 4;
-    private static final int INVENTORY_WIDTH = 9;
-    private static final int MAIN_INVENTORY_HEIGHT = 3;
-    private static final int HOTBAR = 1;
-    private static final int OFFHAND = 1;
 
-    public ContainerPlayerInventoryLens(InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots) {
+    public ContainerPlayerInventoryLens(InventoryAdapter adapter, SlotProvider slots) {
         super(adapter, slots);
         this.init(slots);
     }
 
     @Override
-    protected void init(SlotProvider<IInventory, ItemStack> slots) {
+    protected void init(SlotProvider slots) {
         int base = CRAFTING_OUTPUT; // 1
         final CraftingInventoryLensImpl crafting = new CraftingInventoryLensImpl(0, base, CRAFTING_GRID, CRAFTING_GRID, slots);
         base += CRAFTING_GRID * CRAFTING_GRID; // 4
-        // TODO pass player for carrier to EquipmentInventory
-        final EquipmentInventoryLensImpl armor = new EquipmentInventoryLensImpl(null, base, EQUIPMENT, 1, slots);
-        base += EQUIPMENT; // 4
-        final MainPlayerInventoryLensImpl main = new MainPlayerInventoryLensImpl(base, slots);
-        base += MAIN_INVENTORY_HEIGHT * INVENTORY_WIDTH + HOTBAR * INVENTORY_WIDTH; // 9
-        final SlotLens<IInventory, ItemStack> offHand = slots.getSlot(base);
-        base += OFFHAND;
+        final PlayerInventoryLens player = new PlayerInventoryLens(base, this.size - base, slots);
+        this.addChild(slots.getSlot(base + 0), new EquipmentSlotType(EquipmentTypes.HEADWEAR));
+        this.addChild(slots.getSlot(base + 1), new EquipmentSlotType(EquipmentTypes.CHESTPLATE));
+        this.addChild(slots.getSlot(base + 2), new EquipmentSlotType(EquipmentTypes.LEGGINGS));
+        this.addChild(slots.getSlot(base + 3), new EquipmentSlotType(EquipmentTypes.BOOTS));
+        this.addChild(slots.getSlot(base + 4 + 4*9), new EquipmentSlotType(EquipmentTypes.OFF_HAND));
 
-        this.viewedInventories = new ArrayList<>(Arrays.asList(crafting, armor, offHand, main));
+        this.viewedInventories = new ArrayList<>(Arrays.asList(crafting, player));
 
-        int additionalSlots = this.size - base - 1;
-        if (additionalSlots > 0) {
-            viewedInventories.add(new OrderedInventoryLensImpl(base, additionalSlots, 1, slots));
-        }
-
-        // TODO actual Container order is:
-        // CraftingOutput (1) -> Crafting (4) -> ArmorSlots (4) -> MainInventory (27) -> Hotbar (9) -> Offhand (1)
-        // how to handle issues like in #939? ; e.g. Inventory#offer using a different insertion order
         super.init(slots);
     }
 }

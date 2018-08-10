@@ -416,13 +416,14 @@ public class SoftBufferExtentViewDownsize implements DefaultedExtent {
 
     @Override
     public boolean spawnEntity(Entity entity) {
+        checkNotNull(entity, "The entity cannot be null!");
         final Location<World> location = entity.getLocation();
         checkBlockRange(location.getX(), location.getY(), location.getZ());
         return this.extent.spawnEntity(entity);
     }
 
     @Override
-    public boolean spawnEntities(Iterable<? extends Entity> entities) {
+    public Collection<Entity> spawnEntities(Iterable<? extends Entity> entities) {
         return this.extent.spawnEntities(entities);
     }
 

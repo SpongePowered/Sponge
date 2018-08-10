@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.tileentity;
 import static net.minecraft.inventory.SlotFurnaceFuel.isBucket;
 import static org.spongepowered.api.data.DataQuery.of;
 
-import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityFurnace;
 import org.spongepowered.api.block.tileentity.carrier.Furnace;
@@ -55,14 +54,14 @@ public abstract class MixinTileEntityFurnace extends MixinTileEntityLockable imp
 
     @Shadow private String furnaceCustomName;
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public ReusableLens<?> generateLens(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
+    public ReusableLens<?> generateLens(Fabric fabric, InventoryAdapter adapter) {
         return ReusableLens.getLens(FurnaceInventoryLens.class, ((InventoryAdapter) this), this::generateSlotProvider, this::generateRootLens);
     }
 
     @SuppressWarnings("unchecked")
-    private SlotProvider<IInventory, ItemStack> generateSlotProvider() {
+    private SlotProvider generateSlotProvider() {
         return new SlotCollection.Builder().add(InputSlotAdapter.class, InputSlotLensImpl::new)
                 .add(FuelSlotAdapter.class, (i) -> new FuelSlotLensImpl(i, (s) -> TileEntityFurnace.isItemFuel((ItemStack) s) || isBucket(
                         (ItemStack) s), t -> {
@@ -74,8 +73,8 @@ public abstract class MixinTileEntityFurnace extends MixinTileEntityLockable imp
     }
 
     @SuppressWarnings("unchecked")
-    private FurnaceInventoryLens generateRootLens(SlotProvider<IInventory, ItemStack> slots) {
-        return new FurnaceInventoryLens((InventoryAdapter<IInventory, ItemStack>) this, slots);
+    private FurnaceInventoryLens generateRootLens(SlotProvider slots) {
+        return new FurnaceInventoryLens((InventoryAdapter) this, slots);
     }
 
     @Override

@@ -36,8 +36,6 @@ import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.SpongeHorseColor;
 import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
-import org.spongepowered.common.registry.type.AbstractPrefixCheckCatalogRegistryModule;
-
 import java.util.Map;
 
 @RegisterCatalog(HorseColors.class)

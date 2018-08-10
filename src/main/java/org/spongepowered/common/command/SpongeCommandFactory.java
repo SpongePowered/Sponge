@@ -36,6 +36,7 @@ import static org.spongepowered.api.command.args.GenericArguments.plugin;
 import static org.spongepowered.api.command.args.GenericArguments.seq;
 import static org.spongepowered.api.command.args.GenericArguments.string;
 import static org.spongepowered.api.command.args.GenericArguments.world;
+import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 
 import co.aikar.timings.SpongeTimingsFactory;
 import co.aikar.timings.Timings;
@@ -83,10 +84,13 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.config.type.ConfigBase;
 import org.spongepowered.common.config.type.DimensionConfig;
 import org.spongepowered.common.config.type.GlobalConfig;
+import org.spongepowered.common.config.type.TrackerConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
@@ -126,6 +130,15 @@ public class SpongeCommandFactory {
     static final Text LIST_ITEM_TEXT = Text.of(TextColors.GRAY, "- ");
     static final Text UNKNOWN = Text.of("UNKNOWN");
 
+    private static final CommandElement DUMMY_ELEMENT = new CommandElement(Text.EMPTY) {
+        @Nullable @Override protected Object parseValue(CommandSource source, CommandArgs args) throws ArgumentParseException {
+            throw args.createError(t("No subcommand was specified")); // this will never be visible, but just in case
+        }
+
+        @Override public List<String> complete(CommandSource src, CommandArgs args, CommandContext context) {
+            return ImmutableList.of();
+        }
+    };
     private static final DecimalFormat THREE_DECIMAL_DIGITS_FORMATTER = new DecimalFormat("########0.000");
     private static final Comparator<CommandMapping> COMMAND_COMPARATOR = Comparator.comparing(CommandMapping::getPrimaryAlias);
     private static final Text PAGE_KEY = Text.of("page");
@@ -158,9 +171,11 @@ public class SpongeCommandFactory {
      *
      * @return The newly created command
      */
+    @SuppressWarnings("deprecation")
     public static CommandSpec createSpongeCommand() {
-        final ChildCommandElementExecutor flagChildren = new ChildCommandElementExecutor(null);
-        final ChildCommandElementExecutor nonFlagChildren = new ChildCommandElementExecutor(flagChildren);
+        final ChildCommandElementExecutor trackerFlagChildren = new ChildCommandElementExecutor(null);
+        final ChildCommandElementExecutor flagChildren = new ChildCommandElementExecutor(trackerFlagChildren, DUMMY_ELEMENT, true);
+        final ChildCommandElementExecutor nonFlagChildren = new ChildCommandElementExecutor(flagChildren, DUMMY_ELEMENT, true);
         nonFlagChildren.register(createSpongeVersionCommand(), "version");
         nonFlagChildren.register(createSpongeBlockInfoCommand(), "blockInfo");
         nonFlagChildren.register(createSpongeEntityInfoCommand(), "entityInfo");
@@ -170,10 +185,10 @@ public class SpongeCommandFactory {
         nonFlagChildren.register(createSpongeTimingsCommand(), "timings");
         nonFlagChildren.register(createSpongeWhichCommand(), "which");
         flagChildren.register(createSpongeChunksCommand(), "chunks");
-        flagChildren.register(createSpongeConfigCommand(), "config");
-        flagChildren.register(createSpongeReloadCommand(), "reload"); // TODO: Should these two be subcommands of config, and what is now config be set?
-        flagChildren.register(createSpongeSaveCommand(), "save");
         flagChildren.register(createSpongeTpsCommand(), "tps");
+        trackerFlagChildren.register(createSpongeConfigCommand(), "config");
+        trackerFlagChildren.register(createSpongeReloadCommand(), "reload"); // TODO: Should these two be subcommands of config, and what is now config be set?
+        trackerFlagChildren.register(createSpongeSaveCommand(), "save");
 
         SpongeImplHooks.registerAdditionalCommands(flagChildren, nonFlagChildren);
 
@@ -191,11 +206,14 @@ public class SpongeCommandFactory {
                         INDENT, title("which"), LONG_INDENT, "List plugins that own a specific command\n",
                         INDENT, title("tps"), LONG_INDENT, "Provides TPS (ticks per second) data for loaded worlds\n",
                         SpongeImplHooks.getAdditionalCommandDescriptions()))
-                .arguments(firstParsing(nonFlagChildren, flags()
-                        .flag("-global", "g")
-                        .valueFlag(world(Text.of("world")), "-world", "w")
-                        .valueFlag(dimension(Text.of("dimension")), "-dimension", "d")
-                        .buildWith(flagChildren)))
+                .arguments(firstParsing(nonFlagChildren,
+                        flags().flag("-global", "g")
+                                .valueFlag(world(Text.of("world")), "-world", "w")
+                                .valueFlag(dimension(Text.of("dimension")), "-dimension", "d").buildWith(flagChildren),
+                        flags().flag("-global", "g")
+                                .valueFlag(world(Text.of("world")), "-world", "w")
+                                .valueFlag(dimension(Text.of("dimension")), "-dimension", "d")
+                                .flag("-tracker", "t").buildWith(trackerFlagChildren)))
                 .executor(nonFlagChildren)
                 .build();
     }
@@ -210,7 +228,10 @@ public class SpongeCommandFactory {
 
         @Override
         public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-            int successes = 0;
+            return execute(src, args, 0);
+        }
+
+        public CommandResult execute(CommandSource src, CommandContext args, int successes) throws CommandException {
             if (args.hasAny("global")) {
                 src.sendMessage(Text.of("Global: ", processGlobal(SpongeImpl.getGlobalConfig(), src, args)));
                 ++successes;
@@ -254,8 +275,31 @@ public class SpongeCommandFactory {
             return process(config, source, args);
         }
 
-        protected Text process(SpongeConfig<?> config, CommandSource source, CommandContext args) throws CommandException {
+        protected Text process(SpongeConfig<? extends ConfigBase> config, CommandSource source, CommandContext args) throws CommandException {
             return Text.of("Unimplemented");
+        }
+    }
+
+    private abstract static class ConfigIncludingTrackerUsingExecutor extends ConfigUsingExecutor {
+
+        ConfigIncludingTrackerUsingExecutor(boolean requireWorldLoaded) {
+            super(requireWorldLoaded);
+        }
+
+        @Override
+        public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
+            int successes = 0;
+            if (args.hasAny("tracker")) {
+                src.sendMessage(Text.of("Tracker: ", processTracker(SpongeImpl.getTrackerConfig(), src, args)));
+                ++successes;
+            }
+
+            return execute(src, args, successes);
+        }
+
+        protected Text processTracker(SpongeConfig<TrackerConfig> config, CommandSource source, CommandContext args)
+                throws CommandException {
+            return process(config, source, args);
         }
     }
 
@@ -328,14 +372,17 @@ public class SpongeCommandFactory {
                 .build();
     }
 
+    // Tracker flag children
+
     private static CommandSpec createSpongeConfigCommand() {
         return CommandSpec.builder()
                 .description(Text.of("Inspect the Sponge config"))
                 .arguments(seq(string(Text.of("key")), optional(string(Text.of("value")))))
                 .permission("sponge.command.config")
-                .executor(new ConfigUsingExecutor(false) {
+                .executor(new ConfigIncludingTrackerUsingExecutor(false) {
                     @Override
-                    protected Text process(SpongeConfig<?> config, CommandSource source, CommandContext args) throws CommandException {
+                    protected Text process(SpongeConfig<? extends ConfigBase> config, CommandSource source, CommandContext args)
+                            throws CommandException {
                         final Optional<String> key = args.getOne("key");
                         final Optional<String> value = args.getOne("value");
                         if (config.getSetting(key.get()) == null || config.getSetting(key.get()).isVirtual()) {
@@ -360,9 +407,10 @@ public class SpongeCommandFactory {
         return CommandSpec.builder()
                 .description(Text.of("Reload the Sponge game"))
                 .permission("sponge.command.reload")
-                .executor(new ConfigUsingExecutor(false) {
+                .executor(new ConfigIncludingTrackerUsingExecutor(false) {
                     @Override
-                    protected Text process(SpongeConfig<?> config, CommandSource source, CommandContext args) throws CommandException {
+                    protected Text process(SpongeConfig<? extends ConfigBase> config, CommandSource source, CommandContext args)
+                            throws CommandException {
                         config.reload();
                         SpongeHooks.refreshActiveConfigs();
                         return Text.of("Reloaded configuration");
@@ -375,9 +423,10 @@ public class SpongeCommandFactory {
         return CommandSpec.builder()
                 .description(Text.of("Save the configuration"))
                 .permission("sponge.command.save")
-                .executor(new ConfigUsingExecutor(false) {
+                .executor(new ConfigIncludingTrackerUsingExecutor(false) {
                     @Override
-                    protected Text process(SpongeConfig<?> config, CommandSource source, CommandContext args) throws CommandException {
+                    protected Text process(SpongeConfig<? extends ConfigBase> config, CommandSource source, CommandContext args)
+                            throws CommandException {
                         config.save();
                         return Text.of("Saved");
                     }
@@ -441,7 +490,7 @@ public class SpongeCommandFactory {
                         return CommandResult.empty();
                     }
                     final WorldServer worldServer = (WorldServer) entityPlayerMP.world;
-                    final Chunk chunk = worldServer.getChunkFromBlockCoords(rayTraceResult.getBlockPos());
+                    final Chunk chunk = worldServer.getChunk(rayTraceResult.getBlockPos());
                     final IMixinChunk mixinChunk = (IMixinChunk) chunk;
                     final IBlockState blockState = worldServer.getBlockState(rayTraceResult.getBlockPos());
                     final BlockState spongeState = BlockUtil.fromNative(blockState);
@@ -512,9 +561,18 @@ public class SpongeCommandFactory {
                 .arguments(optionalWeak(literal(Text.of("reload"), "reload")), optional(plugin(Text.of("plugin"))))
                 .executor((src, args) -> {
                     if (args.hasAny("reload") && src.hasPermission("sponge.command.plugins.reload")) {
-                        src.sendMessage(Text.of("Sending reload event to all plugins. Please wait."));
                         Sponge.getCauseStackManager().pushCause(src);
-                        SpongeImpl.postEvent(SpongeEventFactory.createGameReloadEvent(Sponge.getCauseStackManager().getCurrentCause()));
+                        if (args.hasAny("plugin")) {
+                            PluginContainer plugin = args.<PluginContainer>getOne("plugin")
+                                    .orElseThrow(() -> new CommandException(
+                                            Text.of("More than one plugin was matched by the input, please be more specific.")));
+
+                            src.sendMessage(Text.of("Sending reload event to " + plugin.getId() + ". Please wait."));
+                            ((SpongeEventManager) Sponge.getEventManager()).post(SpongeEventFactory.createGameReloadEvent(Sponge.getCauseStackManager().getCurrentCause()), plugin);
+                        } else {
+                            src.sendMessage(Text.of("Sending reload event to all plugins. Please wait."));
+                            SpongeImpl.postEvent(SpongeEventFactory.createGameReloadEvent(Sponge.getCauseStackManager().getCurrentCause()));
+                        }
                         Sponge.getCauseStackManager().popCause();
                         src.sendMessage(Text.of("Reload complete!"));
                     } else if (args.hasAny("plugin")) {
@@ -867,4 +925,5 @@ public class SpongeCommandFactory {
         }
         return Text.of(text, " ", description.orElse(mapping.getCallable().getUsage(source)));
     }
+
 }

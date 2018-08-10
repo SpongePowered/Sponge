@@ -35,11 +35,13 @@ import org.spongepowered.api.data.manipulator.immutable.block.ImmutableConnected
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableWallData;
 import org.spongepowered.api.data.type.WallType;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeConnectedDirectionData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeWallData;
+import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -110,5 +112,10 @@ public abstract class MixinBlockWall extends MixinBlock {
             directions.add(Direction.UP);
         }
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeConnectedDirectionData.class, directions);
+    }
+
+    @Override
+    public Translation getTranslation() {
+        return new SpongeTranslation(this.getTranslationKey() + "." + BlockWall.EnumType.NORMAL.getTranslationKey() + ".name");
     }
 }

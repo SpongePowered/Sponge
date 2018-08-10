@@ -41,6 +41,9 @@ import org.spongepowered.api.data.manipulator.mutable.block.*;
 import org.spongepowered.api.data.manipulator.mutable.entity.*;
 import org.spongepowered.api.data.manipulator.mutable.item.*;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.*;
+import org.spongepowered.api.effect.potion.PotionEffect;
+import org.spongepowered.api.entity.EntityArchetype;
+import org.spongepowered.api.extra.fluid.FluidStackSnapshot;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.property.PropertyRegistry;
@@ -54,11 +57,13 @@ import org.spongepowered.api.extra.fluid.data.manipulator.mutable.FluidItemData;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.text.BookView;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.BookViewDataBuilder;
 import org.spongepowered.api.text.serializer.TextConfigSerializer;
+import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
@@ -73,6 +78,10 @@ import org.spongepowered.common.data.builder.item.*;
 import org.spongepowered.common.data.builder.manipulator.InvisibilityDataAddVanishUpdater;
 import org.spongepowered.common.data.builder.manipulator.immutable.block.ImmutableSpongeTreeDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.immutable.item.ImmutableItemEnchantmentDataBuilder;
+import org.spongepowered.common.effect.potion.PotionEffectContentUpdater;
+import org.spongepowered.common.effect.potion.SpongePotionBuilder;
+import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
+import org.spongepowered.common.extra.fluid.SpongeFluidStackSnapshotBuilder;
 import org.spongepowered.common.item.enchantment.SpongeEnchantmentBuilder;
 import org.spongepowered.common.data.builder.meta.SpongePatternLayerBuilder;
 import org.spongepowered.common.data.builder.util.weighted.BaseAndAdditionBuilder;
@@ -116,6 +125,8 @@ import org.spongepowered.common.data.util.LegacyCustomDataClassContentUpdater;
 import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.item.inventory.SpongeItemStackBuilder;
+import org.spongepowered.common.item.inventory.ItemStackSnapshotDuplicateManipulatorUpdater;
+import org.spongepowered.common.item.merchant.SpongeTradeOfferBuilder;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 import org.spongepowered.common.world.storage.SpongePlayerData;
 
@@ -154,6 +165,7 @@ public class DataRegistrar {
 
         // Entity stuff
         dataManager.registerBuilder(EntitySnapshot.class, new SpongeEntitySnapshotBuilder());
+        dataManager.registerBuilder(EntityArchetype.class, new SpongeEntityArchetypeBuilder());
 
         // ItemStack stuff
         dataManager.registerBuilder(ItemStack.class, new SpongeItemStackBuilder());
@@ -166,6 +178,7 @@ public class DataRegistrar {
         // Text stuff
         dataManager.registerBuilder(Text.class, new TextConfigSerializer());
         dataManager.registerBuilder(BookView.class, new BookViewDataBuilder());
+        dataManager.registerBuilder(FluidStackSnapshot.class, new SpongeFluidStackSnapshotBuilder());
 
         // Effects stuff
         dataManager.registerBuilder(ParticleEffect.class, new SpongeParticleEffectBuilder());
@@ -181,6 +194,11 @@ public class DataRegistrar {
 
         dataManager.registerBuilder(GameProfile.class, new SpongeGameProfileBuilder());
 
+        dataManager.registerBuilder(Color.class, new Color.Builder());
+        dataManager.registerBuilder(TradeOffer.class, new SpongeTradeOfferBuilder());
+
+        dataManager.registerBuilder(PotionEffect.class, new SpongePotionBuilder());
+
         // Content Updaters
         dataManager.registerContentUpdater(BlockState.class, new SpongeBlockStateMetaContentUpdater());
         final InvisibilityDataAddVanishUpdater invisibilityUpdater = new InvisibilityDataAddVanishUpdater();
@@ -188,6 +206,13 @@ public class DataRegistrar {
         dataManager.registerContentUpdater(ImmutableInvisibilityData.class, invisibilityUpdater);
         dataManager.registerContentUpdater(SpongeInvisibilityData.class, invisibilityUpdater);
         dataManager.registerContentUpdater(ImmutableSpongeInvisibilityData.class, invisibilityUpdater);
+        final PotionEffectContentUpdater potionUpdater = new PotionEffectContentUpdater();
+        dataManager.registerContentUpdater(PotionEffect.class, potionUpdater);
+        dataManager.registerContentUpdater(PotionEffectData.class, potionUpdater);
+        dataManager.registerContentUpdater(ImmutablePotionEffectData.class, potionUpdater);
+        dataManager.registerContentUpdater(SpongePotionEffectData.class, potionUpdater);
+        dataManager.registerContentUpdater(ImmutableSpongePotionEffectData.class, potionUpdater);
+        dataManager.registerContentUpdater(ItemStackSnapshot.class, new ItemStackSnapshotDuplicateManipulatorUpdater());
 
         // Content Updaters for Custom Data
         dataManager.registerContentUpdater(DataManipulator.class, new LegacyCustomDataClassContentUpdater());
@@ -197,9 +222,6 @@ public class DataRegistrar {
         DataUtil.registerDataProcessorAndImpl(DisplayNameData.class, SpongeDisplayNameData.class,
                 ImmutableDisplayNameData.class, ImmutableSpongeDisplayNameData.class, new DisplayNameDataProcessor());
 
-        DataUtil.registerDataProcessorAndImpl(DyeableData.class, SpongeDyeableData.class, ImmutableDyeableData.class,
-                ImmutableSpongeDyeableData.class, new DyeableDataProcessor());
-
         // Entity Processors
 
         DataUtil.registerDataProcessorAndImpl(ArmorStandData.class, SpongeArmorStandData.class,
@@ -207,6 +229,9 @@ public class DataRegistrar {
 
         DataUtil.registerDataProcessorAndImpl(InvulnerabilityData.class, SpongeInvulnerabilityData.class,
                 ImmutableInvulnerabilityData.class, ImmutableSpongeInvulnerabilityData.class, new InvulnerabilityDataProcessor());
+
+        DataUtil.registerDataProcessorAndImpl(DamageableData.class, SpongeDamageableData.class,
+                ImmutableDamageableData.class, ImmutableSpongeDamageableData.class, new DamageableDataProcessor());
 
         DataUtil.registerDataProcessorAndImpl(FuseData.class, SpongeFuseData.class, ImmutableFuseData.class,
                 ImmutableSpongeFuseData.class, new FuseDataProcessor());
@@ -250,6 +275,9 @@ public class DataRegistrar {
         DataUtil.registerDualProcessor(RepresentedItemData.class, SpongeRepresentedItemData.class, ImmutableRepresentedItemData.class,
                 ImmutableSpongeRepresentedItemData.class, new RepresentedItemDataProcessor());
 
+        DataUtil.registerDualProcessor(RepresentedItemData.class, SpongeRepresentedItemData.class, ImmutableRepresentedItemData.class,
+                ImmutableSpongeRepresentedItemData.class, new ThrownPotionItemDataProcessor());
+
         DataUtil.registerDataProcessorAndImpl(HorseData.class, SpongeHorseData.class, ImmutableHorseData.class,
                 ImmutableSpongeHorseData.class, new HorseDataProcessor());
 
@@ -262,6 +290,9 @@ public class DataRegistrar {
         DataUtil.registerDataProcessorAndImpl(MovementSpeedData.class, SpongeMovementSpeedData.class, ImmutableMovementSpeedData.class,
                 ImmutableSpongeMovementSpeedData.class, new MovementSpeedDataProcessor());
 
+        DataUtil.registerDualProcessor(ElytraFlyingData.class, SpongeElytraFlyingData.class, ImmutableElytraFlyingData.class,
+            ImmutableSpongeElytraFlyingData.class, new ElytraFlyingDataProcessor());
+
         DataUtil.registerDualProcessor(SlimeData.class, SpongeSlimeData.class, ImmutableSlimeData.class, ImmutableSpongeSlimeData.class,
                 new SlimeDataProcessor());
 
@@ -270,6 +301,9 @@ public class DataRegistrar {
 
         DataUtil.registerDualProcessor(SittingData.class, SpongeSittingData.class, ImmutableSittingData.class,
                 ImmutableSpongeSittingData.class, new SittingDataProcessor());
+
+        DataUtil.registerDualProcessor(JohnnyData.class, SpongeJohnnyData.class, ImmutableJohnnyData.class,
+                ImmutableSpongeJohnnyData.class, new JohnnyDataProcessor());
 
         DataUtil.registerDualProcessor(ShearedData.class, SpongeShearedData.class, ImmutableShearedData.class,
                 ImmutableSpongeShearedData.class, new ShearedDataProcessor());
@@ -439,6 +473,11 @@ public class DataRegistrar {
         DataUtil.registerDataProcessorAndImpl(AreaEffectCloudData.class, SpongeAreaEffectData.class, ImmutableAreaEffectCloudData.class,
                 ImmutableSpongeAreaEffectCloudData.class, new AreaEffectCloudDataProcessor());
 
+        DataUtil.registerDualProcessor(DyeableData.class, SpongeDyeableData.class, ImmutableDyeableData.class, ImmutableSpongeDyeableData.class,
+                new SheepDyeColorDataProcessor());
+        DataUtil.registerDualProcessor(DyeableData.class, SpongeDyeableData.class, ImmutableDyeableData.class, ImmutableSpongeDyeableData.class,
+                new WolfDyeColorDataProcessor());
+
         // Item Processors
 
         DataUtil.registerDualProcessor(FireworkEffectData.class, SpongeFireworkEffectData.class,
@@ -518,6 +557,9 @@ public class DataRegistrar {
 
         DataUtil.registerDataProcessorAndImpl(HideData.class, SpongeHideData.class, ImmutableHideData.class, ImmutableSpongeHideData.class,
                 new HideDataProcessor());
+
+        DataUtil.registerDualProcessor(DyeableData.class, SpongeDyeableData.class, ImmutableDyeableData.class, ImmutableSpongeDyeableData.class, new
+                ItemDyeColorDataProcessor());
 
         // Block Processors
 
@@ -641,6 +683,9 @@ public class DataRegistrar {
         DataUtil.registerDualProcessor(MoistureData.class, SpongeMoistureData.class, ImmutableMoistureData.class,
                 ImmutableSpongeMoistureData.class, new MoistureDataProcessor());
 
+        DataUtil.registerDataProcessorAndImpl(WireAttachmentData.class, SpongeWireAttachmentData.class, ImmutableWireAttachmentData.class,
+                ImmutableSpongeWireAttachmentData.class, new WireAttachmentDataProcessor());
+
         // TileEntity Processors
 
         DataUtil.registerDualProcessor(SkullData.class, SpongeSkullData.class, ImmutableSkullData.class,
@@ -706,6 +751,9 @@ public class DataRegistrar {
         DataUtil.registerDualProcessor(HealthScalingData.class, SpongeHealthScaleData.class, ImmutableHealthScalingData.class, ImmutableSpongeHealthScalingData.class,
                 new HealthScalingProcessor());
 
+        DataUtil.registerDualProcessor(DyeableData.class, SpongeDyeableData.class, ImmutableDyeableData.class, ImmutableSpongeDyeableData.class,
+                new BedDyeColorDataProcessor());
+
         // Values
 
         DataUtil.registerValueProcessor(Keys.FUSE_DURATION, new FuseDurationValueProcessor());
@@ -766,9 +814,6 @@ public class DataRegistrar {
         DataUtil.registerValueProcessor(Keys.VANISH, new VanishValueProcessor());
         DataUtil.registerValueProcessor(Keys.VANISH_IGNORES_COLLISION, new VanishCollisionValueProcessor());
         DataUtil.registerValueProcessor(Keys.VANISH_PREVENTS_TARGETING, new VanishTargetValueProcessor());
-        DataUtil.registerValueProcessor(Keys.DYE_COLOR, new WolfDyeColorValueProcessor());
-        DataUtil.registerValueProcessor(Keys.DYE_COLOR, new SheepDyeColorValueProcessor());
-        DataUtil.registerValueProcessor(Keys.DYE_COLOR, new ItemDyeColorValueProcessor());
         DataUtil.registerValueProcessor(Keys.FIRST_DATE_PLAYED, new FirstJoinValueProcessor());
         DataUtil.registerValueProcessor(Keys.LAST_DATE_PLAYED, new LastPlayedValueProcessor());
         DataUtil.registerValueProcessor(Keys.HIDE_ENCHANTMENTS, new HideEnchantmentsValueProcessor());
@@ -817,6 +862,12 @@ public class DataRegistrar {
         DataUtil.registerValueProcessor(Keys.AGE, new AgeableAgeValueProcessor());
         DataUtil.registerValueProcessor(Keys.INVULNERABILITY_TICKS, new InvulnerabilityTicksValueProcessor());
         DataUtil.registerValueProcessor(Keys.INVULNERABLE, new InvulnerableValueProcessor());
+        DataUtil.registerValueProcessor(Keys.LAST_ATTACKER, new LastAttackerValueProcessor());
+        DataUtil.registerValueProcessor(Keys.LAST_DAMAGE, new LastDamageValueProcessor());
+        DataUtil.registerValueProcessor(Keys.END_GATEWAY_TELEPORT_COOLDOWN, new EndGatewayTeleportCooldownValueProcessor());
+        DataUtil.registerValueProcessor(Keys.END_GATEWAY_AGE, new EndGatewayAgeValueProcessor());
+        DataUtil.registerValueProcessor(Keys.EXIT_POSITION, new EndGatewayExitPositionValueProcessor());
+        DataUtil.registerValueProcessor(Keys.EXACT_TELEPORT, new EndGatewayExactTeleportValueProcessor());
 
         // Properties
         final PropertyRegistry propertyRegistry = Sponge.getPropertyRegistry();

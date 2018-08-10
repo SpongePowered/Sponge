@@ -50,7 +50,7 @@ public class SimulatedPlayer extends EntityPlayerMP implements FakePlayer {
         private static final NetworkManager fakeNetworkManager = new NetworkManager(EnumPacketDirection.CLIENTBOUND);
 
         public FakeNetHandler(EntityPlayerMP player) {
-            super(player.mcServer, fakeNetworkManager, player);
+            super(player.server, fakeNetworkManager, player);
         }
 
         @Override

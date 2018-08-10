@@ -42,7 +42,7 @@ public final class ExplosionContext extends GeneralPhaseContext<ExplosionContext
         super(GeneralPhase.State.EXPLOSION);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public ExplosionContext populateFromCurrentState() {
         final PhaseData currentPhaseData = PhaseTracker.getInstance().getCurrentPhaseData();
         ((IPhaseState) currentPhaseData.state).appendContextPreExplosion(this, currentPhaseData.context);
@@ -72,8 +72,9 @@ public final class ExplosionContext extends GeneralPhaseContext<ExplosionContext
     }
 
     @Override
-    public PrettyPrinter printCustom(PrettyPrinter printer) {
-        return super.printCustom(printer)
-            .add("    - %s: %s", "Explosion", this.explosion);
+    public PrettyPrinter printCustom(PrettyPrinter printer, int indent) {
+        String s = String.format("%1$"+indent+"s", "");
+        return super.printCustom(printer, indent)
+            .add(s + "- %s: %s", "Explosion", this.explosion);
     }
 }

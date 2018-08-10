@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet;
 
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.util.math.BlockPos;
 
 final class NoCaptureUseItemPacketState extends UseItemPacketState {
@@ -34,7 +36,22 @@ final class NoCaptureUseItemPacketState extends UseItemPacketState {
     }
 
     @Override
-    public boolean requiresBlockCapturing() {
+    public boolean doesBulkBlockCapture(BasicPacketContext context) {
         return false;
+    }
+
+    @Override
+    public boolean doesCaptureEntityDrops(BasicPacketContext context) {
+        return false;
+    }
+
+    @Override
+    public boolean spawnItemOrCapture(BasicPacketContext phaseContext, Entity entity, EntityItem entityitem) {
+        return false;
+    }
+
+    @Override
+    public void unwind(BasicPacketContext context) {
+        // We didn't capture anything, so there's nothing to do
     }
 }

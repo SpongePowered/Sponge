@@ -33,29 +33,23 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
-public class RegistryHelper {
+import javax.annotation.Nullable;
+
+public final class RegistryHelper {
 
     public static boolean mapFields(Class<?> apiClass, Map<String, ?> mapping) {
         return mapFields(apiClass, mapping, null);
     }
 
-    public static boolean mapFields(Class<?> apiClass, Map<String, ?> mapping, Set<String> ignoredFields) {
+    public static boolean mapFields(Class<?> apiClass, Map<String, ?> mapping, @Nullable Set<String> ignoredFields) {
         return mapFields(apiClass, fieldName -> mapping.get(fieldName.toLowerCase(Locale.ENGLISH)), ignoredFields, false);
-    }
-
-    public static boolean mapFieldsIgnoreWarning(Class<?> apiClass, Map<String, ?> mapping) {
-        return mapFields(apiClass, fieldname -> mapping.get(fieldname.toLowerCase(Locale.ENGLISH)), null, true);
     }
 
     public static boolean mapFields(Class<?> apiClass, Function<String, ?> mapFunction) {
         return mapFields(apiClass, mapFunction, null, false);
     }
 
-    public static boolean mapFields(Class<?> apiClass, Function<String, ?> mapFunction, Set<String> ignoredFields) {
-        return mapFields(apiClass, mapFunction, ignoredFields, false);
-    }
-
-    public static boolean mapFields(Class<?> apiClass, Function<String, ?> mapFunction, Set<String> ignoredFields, boolean ignore) {
+    public static boolean mapFields(Class<?> apiClass, Function<String, ?> mapFunction, @Nullable Set<String> ignoredFields, boolean ignore) {
         boolean mappingSuccess = true;
         for (Field f : apiClass.getDeclaredFields()) {
             final String fieldName = f.getName();

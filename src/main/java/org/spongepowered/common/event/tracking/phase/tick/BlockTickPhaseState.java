@@ -29,26 +29,19 @@ import net.minecraft.entity.item.EntityXPOrb;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.CauseStackManager.StackFrame;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.ShouldFire;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
-import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> {
 
@@ -71,37 +64,19 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
     }
 
     @Override
-    Location<World> getLocationSourceFromContext(PhaseContext<?> context) {
-        return context.getSource(LocatableBlock.class)
-                .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over at a location!", context)).getLocation();
-    }
-
-    @Override
     public void unwind(BlockTickContext context) {
-        final LocatableBlock locatableBlock = context.requireSource(LocatableBlock.class);
-        try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(locatableBlock);
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
-            final User entityCreator = context.getNotifier().orElseGet(() -> context.getOwner().orElse(null));
             context.getCapturedBlockSupplier()
                     .acceptAndClearIfNotEmpty(blockSnapshots -> TrackingUtil.processBlockCaptures(blockSnapshots, this, context));
             context.getCapturedItemsSupplier()
                     .acceptAndClearIfNotEmpty(items -> {
+                        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
                         final ArrayList<Entity> capturedEntities = new ArrayList<>();
                         for (EntityItem entity : items) {
                             capturedEntities.add(EntityUtil.fromNative(entity));
                         }
-                        final SpawnEntityEvent spawnEntityEvent =
-                                SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), capturedEntities);
-                        SpongeImpl.postEvent(spawnEntityEvent);
-                        for (Entity entity : spawnEntityEvent.getEntities()) {
-                            if (entityCreator != null) {
-                                EntityUtil.toMixin(entity).setCreator(entityCreator.getUniqueId());
-                            }
-                            EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
-                        }
+                        SpongeCommonEventFactory.callSpawnEntity(capturedEntities, context);
                     });
-        }
+
     }
 
     @Override
@@ -115,60 +90,61 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
     @Override
     public boolean spawnEntityOrCapture(BlockTickContext context, Entity entity, int chunkX, int chunkZ) {
         final LocatableBlock locatableBlock = getLocatableBlockSourceFromContext(context);
-        final Optional<User> owner = context.getOwner();
-        final Optional<User> notifier = context.getNotifier();
-        final User entityCreator = notifier.orElseGet(() -> owner.orElse(null));
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(locatableBlock);
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.EXPERIENCE);
-            if (notifier.isPresent()) {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.NOTIFIER, notifier.get());
-            }
-            if (owner.isPresent()) {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, owner.get());
-            }
-            if (entity instanceof EntityXPOrb) {
-                final ArrayList<Entity> entities = new ArrayList<>(1);
-                entities.add(entity);
-                final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
-                SpongeImpl.postEvent(event);
-                if (!event.isCancelled()) {
-                    for (Entity anEntity : event.getEntities()) {
-                        if (entityCreator != null) {
-                            EntityUtil.toMixin(anEntity).setCreator(entityCreator.getUniqueId());
-                        }
-                        EntityUtil.getMixinWorld(entity).forceSpawnEntity(anEntity);
-                    }
-                    return true;
-                }
-                return false;
-            }
-            final List<Entity> nonExpEntities = new ArrayList<>(1);
-            nonExpEntities.add(entity);
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.BLOCK_SPAWNING);
-            final SpawnEntityEvent spawnEntityEvent =
-                    SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), nonExpEntities);
-            SpongeImpl.postEvent(spawnEntityEvent);
-            if (!spawnEntityEvent.isCancelled()) {
-                for (Entity anEntity : spawnEntityEvent.getEntities()) {
-                    if (entityCreator != null) {
-                        EntityUtil.toMixin(anEntity).setCreator(entityCreator.getUniqueId());
-                    }
-                    EntityUtil.getMixinWorld(entity).forceSpawnEntity(anEntity);
-                }
-                return true;
-            }
+        if (!context.allowsEntityEvents() || !ShouldFire.SPAWN_ENTITY_EVENT) { // We don't want to throw an event if we don't need to.
+            return EntityUtil.processEntitySpawn(entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
         }
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(locatableBlock);
+            if (entity instanceof EntityXPOrb) {
+                frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
+                final ArrayList<org.spongepowered.api.entity.Entity> entities = new ArrayList<>(1);
+                entities.add(entity);
+                return SpongeCommonEventFactory.callSpawnEntity(entities, context);
+            }
+            final List<org.spongepowered.api.entity.Entity> nonExpEntities = new ArrayList<>(1);
+            nonExpEntities.add(entity);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
+            return SpongeCommonEventFactory.callSpawnEntity(nonExpEntities, context);
+        }
+    }
+
+
+    @Override
+    public boolean doesCaptureEntitySpawns() {
         return false;
     }
 
     @Override
-    public void postTrackBlock(BlockSnapshot snapshot, PhaseTracker tracker, BlockTickContext context) {
+    public void postTrackBlock(BlockSnapshot snapshot, BlockTickContext context) {
         if (context.shouldProcessImmediately()) {
             TrackingUtil.processBlockCaptures(context.getCapturedBlocks(), this, context);
             context.getCapturedBlockSupplier().get().remove(snapshot);
         }
+    }
 
+    /**
+     * Specifically overridden here because some states have defaults and don't check the context.
+     * @param context The context
+     * @return True if bulk block captures are usable for this entity type (default true)
+     */
+    @Override
+    public boolean doesBulkBlockCapture(BlockTickContext context) {
+        return context.allowsBulkBlockCaptures();
+    }
+
+    /**
+     * Specifically overridden here because some states have defaults and don't check the context.
+     * @param context The context
+     * @return True if block events are to be tracked by the specific type of entity (default is true)
+     */
+    @Override
+    public boolean doesBlockEventTracking(BlockTickContext context) {
+        return context.allowsBlockEvents();
+    }
+
+    @Override
+    public boolean doesCaptureEntityDrops(BlockTickContext context) {
+        return true; // Maybe make this configurable as well.
     }
 
     @Override

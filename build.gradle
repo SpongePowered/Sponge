@@ -44,7 +44,7 @@ dependencies {
         exclude module: 'spongeapi'
     }
     compile 'org.ow2.asm:asm-debug-all:5.2'
-    compile('org.spongepowered:mixin:0.7.4-SNAPSHOT') {
+    compile('org.spongepowered:mixin:0.7.11-SNAPSHOT') {
         exclude module: 'launchwrapper'
     }
 
@@ -61,7 +61,18 @@ dependencies {
         transitive = false
     }
 
-    testCompile 'org.spongepowered:lwts:1.0.0'
+    // Taken from https://stackoverflow.com/a/7969292
+    testCompile api.sourceSets.test.output
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            pom.whenConfigured {
+                pom -> pom.dependencies.removeAll { it.groupId == 'org.spongepowered' && it.artifactId == 'testplugins' }
+            }
+        }
+    }
 }
 
 // Include API dependencies in our POM
@@ -69,5 +80,4 @@ ext.shadedDevProject = api
 
 test {
     systemProperty 'lwts.tweaker', 'org.spongepowered.common.launch.TestTweaker'
-    workingDir = {test.temporaryDir}
 }

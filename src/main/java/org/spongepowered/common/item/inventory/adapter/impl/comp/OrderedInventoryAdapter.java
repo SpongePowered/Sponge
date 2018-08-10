@@ -26,7 +26,6 @@ package org.spongepowered.common.item.inventory.adapter.impl.comp;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.inventory.IInventory;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.Slot;
@@ -43,18 +42,18 @@ import java.util.Optional;
 
 public class OrderedInventoryAdapter extends VanillaAdapter implements OrderedInventory {
 
-    protected final OrderedInventoryLens<IInventory, net.minecraft.item.ItemStack> orderedLens;
+    protected final OrderedInventoryLens orderedLens;
 
-    public OrderedInventoryAdapter(Fabric<IInventory> inventory, OrderedInventoryLens<IInventory, net.minecraft.item.ItemStack> root) {
+    public OrderedInventoryAdapter(Fabric inventory, OrderedInventoryLens root) {
         this(inventory, root, null);
     }
 
-    public OrderedInventoryAdapter(Fabric<IInventory> inventory, OrderedInventoryLens<IInventory, net.minecraft.item.ItemStack> root, Inventory parent) {
+    public OrderedInventoryAdapter(Fabric inventory, OrderedInventoryLens root, Inventory parent) {
         super(inventory, checkNotNull(root), parent);
         this.orderedLens = root;
     }
 
-    protected SlotLens<IInventory, net.minecraft.item.ItemStack> getSlotLens(int index) {
+    protected SlotLens getSlotLens(int index) {
         if (index < 0) {
             return null;
         }
@@ -77,7 +76,7 @@ public class OrderedInventoryAdapter extends VanillaAdapter implements OrderedIn
         return null;*/
     }
 
-    protected SlotLens<IInventory, net.minecraft.item.ItemStack> getSlotLens(SlotIndex index) {
+    protected SlotLens getSlotLens(SlotIndex index) {
         return this.getSlotLens(index.getValue().intValue());
     }
 

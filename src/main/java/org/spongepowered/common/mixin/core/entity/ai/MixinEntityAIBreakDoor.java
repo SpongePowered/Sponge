@@ -24,11 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.entity.ai;
 
+import net.minecraft.block.BlockDoor;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.ai.EntityAIBreakDoor;
 import net.minecraft.entity.ai.EntityAIDoorInteract;
 import net.minecraft.world.GameRules;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.interfaces.entity.IMixinGriefer;
@@ -40,8 +43,22 @@ public abstract class MixinEntityAIBreakDoor extends EntityAIDoorInteract {
         super(entityLiving);
     }
 
-    @Redirect(method = "shouldExecute", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z"))
-    private boolean onCanGrief(GameRules gameRules, String rule) {
-        return gameRules.getBoolean(rule) && ((IMixinGriefer) this.entity).canGrief();
+
+    /**
+     * @author gabizou - April 13th, 2018
+     * @reason - Due to Forge's changes, there's no clear redirect or injection
+     * point where Sponge can add the griefer checks. The original redirect aimed
+     * at the gamerule check, but this can suffice for now.
+     */
+    @Redirect(
+        method = "shouldExecute",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/entity/ai/EntityAIDoorInteract;shouldExecute()Z"
+        )
+    )
+    private boolean spongeShouldExecuteForGriefer(EntityAIDoorInteract entityAIDoorInteract) {
+        return super.shouldExecute() && ((IMixinGriefer) this.entity).canGrief();
+
     }
 }

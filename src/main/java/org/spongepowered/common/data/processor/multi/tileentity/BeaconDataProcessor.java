@@ -89,7 +89,7 @@ public class BeaconDataProcessor extends AbstractTileEntityDataProcessor<TileEnt
     @Override
     public Optional<BeaconData> fill(DataContainer container, BeaconData beaconData) {
         if (!container.contains(Keys.BEACON_PRIMARY_EFFECT.getQuery()) && !container.contains(Keys.BEACON_SECONDARY_EFFECT.getQuery())) {
-            return Optional.empty();
+            return Optional.of(beaconData);
         }
         if (container.contains(Keys.BEACON_PRIMARY_EFFECT.getQuery())) {
             PotionEffectType type =

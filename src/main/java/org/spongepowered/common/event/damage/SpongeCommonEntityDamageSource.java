@@ -48,7 +48,7 @@ public abstract class SpongeCommonEntityDamageSource extends EntityDamageSource 
      * Purely for use with {@link AbstractDamageSource} such that
      * the damage type is set after the super constructor is called.
      *
-     * @param type The damgae type id
+     * @param type The damage type id
      */
     public void setDamageType(String type) {
         this.damageType = type;
@@ -91,6 +91,11 @@ public abstract class SpongeCommonEntityDamageSource extends EntityDamageSource 
     @Override
     public boolean isMagicDamage() {
         return this.isMagic();
+    }
+
+    @Override
+    public float getHungerDamage() {
+        return (float) this.getExhaustion();
     }
 
 }

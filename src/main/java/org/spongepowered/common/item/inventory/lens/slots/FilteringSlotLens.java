@@ -29,7 +29,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 
 import java.util.function.Predicate;
 
-public interface FilteringSlotLens<TInventory, TStack> extends SlotLens<TInventory, TStack> {
+public interface FilteringSlotLens extends SlotLens {
     
     Predicate<ItemStack> getItemStackFilter();
     

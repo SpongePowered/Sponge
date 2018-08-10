@@ -33,9 +33,9 @@ import java.util.Map;
 @ConfigSerializable
 public class CollisionModCategory extends ConfigCategory {
 
-    @Setting(value = "enabled", comment = "Set to false if you want mod to ignore entity collision rules.")
+    @Setting(value = "enabled", comment = "If 'false', entity collision rules for this mod will be ignored.")
     private boolean isEnabled = true;
-    @Setting(value = "defaults", comment = "Default max collisions used for all entities/blocks unless overridden.")
+    @Setting(value = "defaults", comment = "Default maximum collisions used for all entities/blocks unless overridden.")
     private Map<String, Integer> defaultMaxCollisions = new HashMap<>();
     @Setting(value = "blocks")
     private Map<String, Integer> blockList = new HashMap<>();

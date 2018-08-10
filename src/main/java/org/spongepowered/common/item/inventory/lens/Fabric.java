@@ -24,13 +24,8 @@
  */
 package org.spongepowered.common.item.inventory.lens;
 
-import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
-import org.spongepowered.common.item.inventory.lens.impl.fabric.ContainerFabric;
 
 import java.util.Collection;
 
@@ -38,16 +33,14 @@ import java.util.Collection;
  * A fabric is an underlying view of an indexed container, this allows raw
  * inventories and containers to be handled the same via lenses, without the
  * lenses themselves having to care about the type of the target object.
- *
- * @param <TInventory> Type of inventory being manipulated.
  */
-public interface Fabric<TInventory> {
+public interface Fabric {
 
     /**
      * Return all inventories which compose this fabric, order is not guaranteed
      * or enforced.
      */
-    Collection<TInventory> allInventories();
+    Collection<?> allInventories();
 
     /**
      * Return the inventory at the specified index in the fabric.
@@ -55,7 +48,7 @@ public interface Fabric<TInventory> {
      * @param index
      * @return
      */
-    TInventory get(int index);
+    <TInventory> TInventory get(int index);
 
     ItemStack getStack(int index);
 

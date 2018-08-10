@@ -31,6 +31,8 @@ import org.spongepowered.common.data.util.DataVersions;
 
 public class InvisibilityDataAddVanishUpdater implements DataContentUpdater {
 
+    // TODO: 'Invisiblity' is a typo, was it a typo orgiginally or is this
+    // updater not removing the correct data?
     public static final DataQuery INVISIBLE_COLLISION = DataQuery.of("InvisiblityIgnoresCollision");
     public static final DataQuery INVISIBLE_TARGET = DataQuery.of("InvisibilityPreventsTargeting");
     public static final DataQuery INVISIBLE = DataQuery.of("Invisible");

@@ -32,6 +32,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemArmor.ArmorMaterial;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -44,6 +45,10 @@ public final class ColorUtil {
         // Special case for armor: it has a special method
         final Item item = stack.getItem();
         if (item instanceof ItemArmor) {
+            final NBTTagCompound tagCompound = stack.getTagCompound();
+            if (tagCompound == null || !tagCompound.hasKey(NbtDataUtil.ARMOR_COLOR_DISPLAY_TAG)) {
+                return Optional.empty();
+            }
             final int color = ((ItemArmor) item).getColor(stack);
             return color == -1 ? Optional.empty() : Optional.of(Color.ofRgb(color));
         }

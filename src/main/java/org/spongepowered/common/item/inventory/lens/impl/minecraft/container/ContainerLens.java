@@ -24,37 +24,44 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.minecraft.container;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.RealLens;
 
+import java.util.Collections;
 import java.util.List;
 
 public class ContainerLens extends RealLens {
 
     // The viewed inventories
-    protected List<Lens<IInventory, ItemStack>> viewedInventories;
+    protected List<Lens> viewedInventories;
+    private List<Lens> additonal;
 
-    public ContainerLens(InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots,
-            List<Lens<IInventory, ItemStack>> lenses) {
+    public ContainerLens(InventoryAdapter adapter, SlotProvider slots,
+            List<Lens> lenses) {
+        this(adapter, slots, lenses, Collections.emptyList());
+    }
+
+    public ContainerLens(InventoryAdapter adapter, SlotProvider slots,
+            List<Lens> lenses, List<Lens> additonal) {
         this(adapter, slots);
         this.viewedInventories = lenses;
+        this.additonal = additonal;
         this.init(slots);
     }
 
     /**
      * Do not forget to call init when using this constructor!
      */
-    public ContainerLens(InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots) {
+    public ContainerLens(InventoryAdapter adapter, SlotProvider slots) {
         super(0, adapter.getFabric().getSize(), adapter, slots);
+        this.additonal = Collections.emptyList();
     }
 
     @Override
-    protected void init(SlotProvider<IInventory, ItemStack> slots) {
+    protected void init(SlotProvider slots) {
 
         // Adding slots
         for (int ord = 0, slot = this.base; ord < this.size; ord++, slot++) {
@@ -62,8 +69,14 @@ public class ContainerLens extends RealLens {
         }
 
         // Adding spanning children
-        for (Lens<IInventory, ItemStack> lens : this.viewedInventories) {
+        for (Lens lens : this.viewedInventories) {
             this.addSpanningChild(lens);
         }
+
+        // Adding additional lenses
+        for (Lens lens : this.additonal) {
+            this.addChild(lens);
+        }
+
     }
 }

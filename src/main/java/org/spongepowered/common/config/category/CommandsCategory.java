@@ -33,12 +33,13 @@ import java.util.Map;
 @ConfigSerializable
 public class CommandsCategory extends ConfigCategory {
 
-    @Setting(comment = "A mapping from unqualified command alias to plugin id of the plugin that should handle a certain command")
+    @Setting(comment = "Command aliases will resolve conflicts when multiple plugins request a specific command, \n"
+                     + "Correct syntax is <unqualified command>=<plugin name> e.g. \"sethome=homeplugin\"")
     private Map<String, String> aliases = new HashMap<>();
 
 
-    @Setting(value = "multi-world-patches", comment = "Patches the specified commands to respect the world of the sender instead of applying the "
-            + "changes on the all worlds.")
+    @Setting(value = "multi-world-patches", comment = "Patches the specified commands to respect the world of the sender instead of applying the \n"
+                                                    + "changes on the all worlds.")
     private Map<String, Boolean> multiWorldCommandPatches = new HashMap<>();
 
     public Map<String, String> getAliases() {

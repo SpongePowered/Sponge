@@ -28,30 +28,39 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.spongepowered.api.data.DataQuery.of;
-import static org.spongepowered.api.data.key.KeyFactory.makeListKey;
-import static org.spongepowered.api.data.key.KeyFactory.makeMapKey;
-import static org.spongepowered.api.data.key.KeyFactory.makeOptionalKey;
-import static org.spongepowered.api.data.key.KeyFactory.makeSetKey;
-import static org.spongepowered.api.data.key.KeyFactory.makeSingleKey;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.MapMaker;
-import com.google.common.reflect.TypeToken;
-import org.spongepowered.api.data.DataQuery;
+import net.minecraft.entity.Entity;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.meta.PatternLayer;
-import org.spongepowered.api.data.value.mutable.PatternListValue;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.util.TypeTokens;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.SpongeDataManager;
+import org.spongepowered.common.data.SpongeKey;
+import org.spongepowered.common.data.datasync.DataParameterConverter;
+import org.spongepowered.common.data.datasync.entity.EntityAirConverter;
+import org.spongepowered.common.data.datasync.entity.EntityBabyConverter;
+import org.spongepowered.common.data.datasync.entity.EntityCustomNameConverter;
+import org.spongepowered.common.data.datasync.entity.EntityCustomNameVisibleConverter;
+import org.spongepowered.common.data.datasync.entity.EntityFlagsConverter;
+import org.spongepowered.common.data.datasync.entity.EntityNoGravityConverter;
+import org.spongepowered.common.data.datasync.entity.EntitySilentConverter;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>> {
 
@@ -69,545 +78,568 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
     @Override
     public void registerDefaults() {
         checkState(!SpongeDataManager.areRegistrationsComplete(), "Attempting to register Keys illegally!");
+        Sponge.getCauseStackManager().pushCause(SpongeImpl.getPlugin());
 
-        this.fieldMap.put("axis", makeSingleKey(TypeTokens.AXIS_TOKEN, TypeTokens.AXIS_VALUE_TOKEN, of("Axis"), "sponge:axis", "Axis"));
+        this.register("axis", Key.builder().type(TypeTokens.AXIS_VALUE_TOKEN).id("axis").name("Axis").query(of("Axis")).build());
 
-        this.fieldMap.put("color", makeSingleKey(TypeTokens.COLOR_TOKEN, TypeTokens.COLOR_VALUE_TOKEN, of("Color"), "sponge:color", "Color"));
+        this.register("color", Key.builder().type(TypeTokens.COLOR_VALUE_TOKEN).id("color").name("Color").query(of("Color")).build());
 
-        this.fieldMap.put("health", makeSingleKey(TypeTokens.DOUBLE_TOKEN, TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN, of("Health"), "sponge:health", "Health"));
+        this.register("health", Key.builder().type(TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN).id("health").name("Health").query(of("Health")).build());
 
-        this.fieldMap.put("max_health", makeSingleKey(TypeTokens.DOUBLE_TOKEN, TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN, of("MaxHealth"), "sponge:max_health", "Max Health"));
+        this.register("max_health", Key.builder().type(TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN).id("max_health").name("Max Health").query(of("MaxHealth")).build());
 
-        this.fieldMap.put("display_name", makeSingleKey(TypeTokens.TEXT_TOKEN, TypeTokens.TEXT_VALUE_TOKEN, of("DisplayName"), "sponge:display_name", "Display Name"));
+        this.register("display_name", Key.builder().type(TypeTokens.TEXT_VALUE_TOKEN).id("display_name").name("Display Name").query(of("DisplayName")).build());
 
-        this.fieldMap.put("career", makeSingleKey(TypeTokens.CAREER_TOKEN, TypeTokens.CAREER_VALUE_TOKEN, of("Career"), "sponge:career", "Career"));
+        this.register("career", Key.builder().type(TypeTokens.CAREER_VALUE_TOKEN).id("career").name("Career").query(of("Career")).build());
 
-        this.fieldMap.put("sign_lines", makeListKey(TypeTokens.LIST_TEXT_TOKEN, TypeTokens.LIST_TEXT_VALUE_TOKEN, of("SignLines"), "sponge:sign_lines", "Sign Lines"));
+        this.register("sign_lines", Key.builder().type(TypeTokens.LIST_TEXT_VALUE_TOKEN).id("sign_lines").name("Sign Lines").query(of("SignLines")).build());
 
-        this.fieldMap.put("skull_type", makeSingleKey(TypeTokens.SKULL_TOKEN, TypeTokens.SKULL_VALUE_TOKEN, of("SkullType"), "sponge:skull_type", "Skull Type"));
+        this.register("skull_type", Key.builder().type(TypeTokens.SKULL_VALUE_TOKEN).id("skull_type").name("Skull Type").query(of("SkullType")).build());
 
-        this.fieldMap.put("is_sneaking", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("IsSneaking"), "sponge:sneaking", "Is Sneaking"));
+        this.register("is_sneaking", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("sneaking").name("Is Sneaking").query(of("IsSneaking")).build());
 
-        this.fieldMap.put("velocity", makeSingleKey(TypeTokens.VECTOR_3D_TOKEN, TypeTokens.VECTOR_3D_VALUE_TOKEN, of("Velocity"), "sponge:velocity", "Velocity"));
+        this.register("velocity", Key.builder().type(TypeTokens.VECTOR_3D_VALUE_TOKEN).id("velocity").name("Velocity").query(of("Velocity")).build());
 
-        this.fieldMap.put("food_level", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.INTEGER_VALUE_TOKEN, of("FoodLevel"), "sponge:food_level", "Food Level"));
+        this.register("food_level", Key.builder().type(TypeTokens.INTEGER_VALUE_TOKEN).id("food_level").name("Food Level").query(of("FoodLevel")).build());
 
-        this.fieldMap.put("saturation", makeSingleKey(TypeTokens.DOUBLE_TOKEN, TypeTokens.DOUBLE_VALUE_TOKEN, of("FoodSaturationLevel"), "sponge:food_saturation_level", "Food Saturation Level"));
+        this.register("saturation", Key.builder().type(TypeTokens.DOUBLE_VALUE_TOKEN).id("food_saturation_level").name("Food Saturation Level").query(of("FoodSaturationLevel")).build());
 
-        this.fieldMap.put("exhaustion", makeSingleKey(TypeTokens.DOUBLE_TOKEN, TypeTokens.DOUBLE_VALUE_TOKEN, of("FoodExhaustionLevel"), "sponge:food_exhaustion_level", ""));
+        this.register("exhaustion", Key.builder().type(TypeTokens.DOUBLE_VALUE_TOKEN).id("food_exhaustion_level").name("Food Exhaustion Level").query(of("FoodExhaustionLevel")).build());
 
-        this.fieldMap.put("max_air", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.INTEGER_VALUE_TOKEN, of("MaxAir"), "sponge:max_air", "Max Air"));
+        this.register("max_air", Key.builder().type(TypeTokens.INTEGER_VALUE_TOKEN).id("max_air").name("Max Air").query(of("MaxAir")).build());
 
-        this.fieldMap.put("remaining_air", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.INTEGER_VALUE_TOKEN, of("RemainingAir"), "sponge:remaining_air", "Remaining Air"));
+        this.register("remaining_air", Key.builder().type(TypeTokens.INTEGER_VALUE_TOKEN).id("remaining_air").name("Remaining Air").query(of("RemainingAir")).build());
 
-        this.fieldMap.put("fire_ticks", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("FireTicks"), "sponge:fire_ticks", "Fire Ticks"));
+        this.register("fire_ticks", Key.builder().type(TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN).id("fire_ticks").name("Fire Ticks").query(of("FireTicks")).build());
 
-        this.fieldMap.put("fire_damage_delay", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("FireDamageDelay"), "sponge:fire_damage_delay", "Fire Damage Delay"));
+        this.register("fire_damage_delay", Key.builder().type(TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN).id("fire_damage_delay").name("Fire Damage Delay").query(of("FireDamageDelay")).build());
 
-        this.fieldMap.put("game_mode", makeSingleKey(TypeTokens.GAME_MODE_TOKEN, TypeTokens.GAME_MODE_VALUE_TOKEN, of("GameMode"), "sponge:game_mode", "Game Mode"));
+        this.register("game_mode", Key.builder().type(TypeTokens.GAME_MODE_VALUE_TOKEN).id("game_mode").name("Game Mode").query(of("GameMode")).build());
 
-        this.fieldMap.put("is_screaming", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("IsScreaming"), "sponge:screaming", "Is Screaming"));
+        this.register("is_screaming", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("screaming").name("Is Screaming").query(of("IsScreaming")).build());
 
-        this.fieldMap.put("can_fly", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("CanFly"), "sponge:can_fly", "Can Fly"));
+        this.register("can_fly", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("can_fly").name("Can Fly").query(of("CanFly")).build());
 
-        this.fieldMap.put("can_grief", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("CanGrief"), "sponge:can_grief", "Can Grief"));
+        this.register("can_grief", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("can_grief").name("Can Grief").query(of("CanGrief")).build());
 
-        this.fieldMap.put("shrub_type", makeSingleKey(TypeTokens.SHRUB_TOKEN, TypeTokens.SHRUB_VALUE_TOKEN, of("ShrubType"), "sponge:shrub_type", "Shrub Type"));
+        this.register("shrub_type", Key.builder().type(TypeTokens.SHRUB_VALUE_TOKEN).id("shrub_type").name("Shrub Type").query(of("ShrubType")).build());
 
-        this.fieldMap.put("plant_type", makeSingleKey(TypeTokens.PLANT_TOKEN, TypeTokens.PLANT_VALUE_TOKEN, of("PlantType"), "sponge:plant_type", "Plant Type"));
+        this.register("plant_type", Key.builder().type(TypeTokens.PLANT_VALUE_TOKEN).id("plant_type").name("Plant Type").query(of("PlantType")).build());
 
-        this.fieldMap.put("tree_type", makeSingleKey(TypeTokens.TREE_TOKEN, TypeTokens.TREE_VALUE_TOKEN, of("TreeType"), "sponge:tree_type", "Tree Type"));
+        this.register("tree_type", Key.builder().type(TypeTokens.TREE_VALUE_TOKEN).id("tree_type").name("Tree Type").query(of("TreeType")).build());
 
-        this.fieldMap.put("log_axis", makeSingleKey(TypeTokens.LOG_AXIS_TOKEN, TypeTokens.LOG_AXIS_VALUE_TOKEN, of("LogAxis"), "sponge:log_axis", "Log Axis"));
+        this.register("log_axis", Key.builder().type(TypeTokens.LOG_AXIS_VALUE_TOKEN).id("log_axis").name("Log Axis").query(of("LogAxis")).build());
 
-        this.fieldMap.put("invisible", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("Invisible"), "sponge:invisible", "Invisible"));
+        this.register("invisible", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("invisible").name("Invisible").query(of("Invisible")).build());
 
-        this.fieldMap.put("vanish", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("Vanish"), "sponge:vanish", "Vanish"));
+        this.register("vanish", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("vanish").name("Vanish").query(of("Vanish")).build());
 
-        this.fieldMap.put("invisible", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("Invisible"), "sponge:invisible", "Invisible"));
+        this.register("invisible", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("invisible").name("Invisible").query(of("Invisible")).build());
 
-        this.fieldMap.put("powered", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("Powered"), "sponge:powered", "Powered"));
+        this.register("powered", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("powered").name("Powered").query(of("Powered")).build());
 
-        this.fieldMap.put("layer", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("Layer"), "sponge:layer", "Layer"));
+        this.register("layer", Key.builder().type(TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN).id("layer").name("Layer").query(of("Layer")).build());
 
-        this.fieldMap.put("represented_item", makeSingleKey(TypeTokens.ITEM_SNAPSHOT_TOKEN, TypeTokens.ITEM_SNAPSHOT_VALUE_TOKEN, of("ItemStackSnapshot"), "sponge:item_stack_snapshot", "Item Stack Snapshot"));
+        this.register("represented_item", Key.builder().type(TypeTokens.ITEM_SNAPSHOT_VALUE_TOKEN).id("item_stack_snapshot").name("Item Stack Snapshot").query(of("ItemStackSnapshot")).build());
 
-        this.fieldMap.put("command", makeSingleKey(TypeTokens.STRING_TOKEN, TypeTokens.STRING_VALUE_TOKEN, of("Command"), "sponge:command", "Command"));
+        this.register("command", Key.builder().type(TypeTokens.STRING_VALUE_TOKEN).id("command").name("Command").query(of("Command")).build());
 
-        this.fieldMap.put("success_count", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.INTEGER_VALUE_TOKEN, of("SuccessCount"), "sponge:success_count", "SuccessCount"));
+        this.register("success_count", Key.builder().type(TypeTokens.INTEGER_VALUE_TOKEN).id("success_count").name("SuccessCount").query(of("SuccessCount")).build());
 
-        this.fieldMap.put("tracks_output", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("TracksOutput"), "sponge:tracks_output", "Tracks Output"));
+        this.register("tracks_output", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("tracks_output").name("Tracks Output").query(of("TracksOutput")).build());
 
-        this.fieldMap.put("last_command_output", makeOptionalKey(TypeTokens.OPTIONAL_TEXT_TOKEN, TypeTokens.OPTIONAL_TEXT_VALUE_TOKEN, of("LastCommandOutput"), "sponge:last_command_output", "Last Command Output"));
+        this.register("last_command_output", Key.builder().type(TypeTokens.OPTIONAL_TEXT_VALUE_TOKEN).id("last_command_output").name("Last Command Output").query(of("LastCommandOutput")).build());
 
-        this.fieldMap.put("trade_offers", makeListKey(TypeTokens.LIST_TRADE_OFFER_TOKEN, TypeTokens.LIST_VALUE_TRADE_OFFER_TOKEN, of("TradeOffers"), "sponge:trade_offers", "Trade Offers"));
+        this.register("trade_offers", Key.builder().type(TypeTokens.LIST_VALUE_TRADE_OFFER_TOKEN).id("trade_offers").name("Trade Offers").query(of("TradeOffers")).build());
 
-        this.fieldMap.put("dye_color", makeSingleKey(TypeTokens.DYE_COLOR_TOKEN, TypeTokens.DYE_COLOR_VALUE_TOKEN, of("DyeColor"), "sponge:dye_color", "Dye Color"));
+        this.register("dye_color", Key.builder().type(TypeTokens.DYE_COLOR_VALUE_TOKEN).id("dye_color").name("Dye Color").query(of("DyeColor")).build());
 
-        this.fieldMap.put("firework_flight_modifier", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("FlightModifier"), "sponge:flight_modifier", "Flight Modifier"));
+        this.register("firework_flight_modifier", Key.builder().type(TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN).id("flight_modifier").name("Flight Modifier").query(of("FlightModifier")).build());
 
-        this.fieldMap.put("firework_effects", makeListKey(TypeTokens.LIST_FIREWORK_TOKEN, TypeTokens.LIST_VALUE_FIREWORK_TOKEN, of("FireworkEffects"), "sponge:firework_effects", "Firework Effects"));
+        this.register("firework_effects", Key.builder().type(TypeTokens.LIST_VALUE_FIREWORK_TOKEN).id("firework_effects").name("Firework Effects").query(of("FireworkEffects")).build());
 
-        this.fieldMap.put("spawner_entities", makeSingleKey(
-            TypeTokens.WEIGHTED_ENTITY_ARCHETYPE_TABLE_TOKEN, TypeTokens.WEIGHTED_ENTITY_ARCHETYPE_COLLECTION_VALUE_TOKEN,
-                of("SpawnerEntities"), "sponge:spawner_entities", "Spawner Entities"));
+        this.register("spawner_entities", Key.builder().type(TypeTokens.WEIGHTED_ENTITY_ARCHETYPE_COLLECTION_VALUE_TOKEN).id("spawner_entities").name("Spawner Entities").query(of("SpawnerEntities")).build());
 
-        this.fieldMap.put("spawner_maximum_delay", makeSingleKey(TypeTokens.SHORT_TOKEN, TypeTokens.BOUNDED_SHORT_VALUE_TOKEN, of("SpawnerMaximumDelay"),
-                "sponge:spawner_maximum_delay", "Spawner Maximum Delay"));
+        this.register("spawner_maximum_delay", Key.builder().type(TypeTokens.BOUNDED_SHORT_VALUE_TOKEN).id("spawner_maximum_delay").name("Spawner Maximum Delay").query(of("SpawnerMaximumDelay")).build());
 
-        this.fieldMap.put("spawner_maximum_nearby_entities", makeSingleKey(TypeTokens.SHORT_TOKEN, TypeTokens.BOUNDED_SHORT_VALUE_TOKEN, of
-                ("SpawnerMaximumNearbyEntities"), "sponge:spawner_maximum_nearby_entities", "Spawner Maximum Nearby Entities"));
+        this.register("spawner_maximum_nearby_entities", Key.builder().type(TypeTokens.BOUNDED_SHORT_VALUE_TOKEN).id("spawner_maximum_nearby_entities").name("Spawner Maximum Nearby Entities").query(of("SpawnerMaximumNearbyEntities")).build());
 
-        this.fieldMap.put("spawner_minimum_delay", makeSingleKey(TypeTokens.SHORT_TOKEN, TypeTokens.BOUNDED_SHORT_VALUE_TOKEN, of("SpawnerMinimumDelay"),
-                "sponge:spawner_minimum_delay", "Spawner Minimum Delay"));
+        this.register("spawner_minimum_delay", Key.builder().type(TypeTokens.BOUNDED_SHORT_VALUE_TOKEN).id("spawner_minimum_delay").name("Spawner Minimum Delay").query(of("SpawnerMinimumDelay")).build());
 
-        this.fieldMap.put("spawner_next_entity_to_spawn", makeSingleKey(
-            TypeTokens.WEIGHTED_ENTITY_ARCHETYPE_TOKEN, TypeTokens.WEIGHTED_ENTITY_ARCHETYPE_VALUE_TOKEN,
-                of("SpawnerNextEntityToSpawn"), "sponge:spawner_next_entity_to_spawn", "Spawner Next Entity To Spawn"));
+        this.register("spawner_next_entity_to_spawn", Key.builder().type(TypeTokens.WEIGHTED_ENTITY_ARCHETYPE_VALUE_TOKEN).id("spawner_next_entity_to_spawn").name("Spawner Next Entity To Spawn").query(of("SpawnerNextEntityToSpawn")).build());
 
-        this.fieldMap.put("spawner_remaining_delay", makeSingleKey(TypeTokens.SHORT_TOKEN, TypeTokens.BOUNDED_SHORT_VALUE_TOKEN, of("SpawnerRemainingDelay"),
-                "sponge:spawner_remaining_delay", "Spawner Remaining Delay"));
+        this.register("spawner_remaining_delay", Key.builder().type(TypeTokens.BOUNDED_SHORT_VALUE_TOKEN).id("spawner_remaining_delay").name("Spawner Remaining Delay").query(of("SpawnerRemainingDelay")).build());
 
-        this.fieldMap.put("spawner_required_player_range", makeSingleKey(TypeTokens.SHORT_TOKEN, TypeTokens.BOUNDED_SHORT_VALUE_TOKEN, of("SpawnerRequiredPlayerRange"),
-                "sponge:spawner_required_player_range", "Spawner Required Player Range"));
+        this.register("spawner_required_player_range", Key.builder().type(TypeTokens.BOUNDED_SHORT_VALUE_TOKEN).id("spawner_required_player_range").name("Spawner Required Player Range").query(of("SpawnerRequiredPlayerRange")).build());
 
-        this.fieldMap.put("spawner_spawn_count", makeSingleKey(TypeTokens.SHORT_TOKEN, TypeTokens.BOUNDED_SHORT_VALUE_TOKEN, of("SpawnerSpawnCount"),
-                "sponge:spawner_spawn_count", "Spawner Spawn Count"));
+        this.register("spawner_spawn_count", Key.builder().type(TypeTokens.BOUNDED_SHORT_VALUE_TOKEN).id("spawner_spawn_count").name("Spawner Spawn Count").query(of("SpawnerSpawnCount")).build());
 
-        this.fieldMap.put("spawner_spawn_range", makeSingleKey(TypeTokens.SHORT_TOKEN, TypeTokens.BOUNDED_SHORT_VALUE_TOKEN, of("SpawnerSpawnRange"),
-                "sponge:spawner_spawn_range", "Spawner Spawn Range"));
+        this.register("spawner_spawn_range", Key.builder().type(TypeTokens.BOUNDED_SHORT_VALUE_TOKEN).id("spawner_spawn_range").name("Spawner Spawn Range").query(of("SpawnerSpawnRange")).build());
 
-        this.fieldMap.put("connected_directions", makeSetKey(TypeTokens.SET_DIRECTION_TOKEN, TypeTokens.SET_DIRECTION_VALUE_TOKEN, of("ConnectedDirections"), "sponge:connected_directions", "Connected Directions"));
+        this.register("connected_directions", Key.builder().type(TypeTokens.SET_DIRECTION_VALUE_TOKEN).id("connected_directions").name("Connected Directions").query(of("ConnectedDirections")).build());
 
-        this.fieldMap.put("connected_north", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("ConnectedNorth"), "sponge:connected_north", "Connected North"));
+        this.register("connected_north", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("connected_north").name("Connected North").query(of("ConnectedNorth")).build());
 
-        this.fieldMap.put("connected_south", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("ConnectedSouth"), "sponge:connected_south", "Connected South"));
+        this.register("connected_south", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("connected_south").name("Connected South").query(of("ConnectedSouth")).build());
 
-        this.fieldMap.put("connected_east", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("ConnectedEast"), "sponge:connected_east", "Connected East"));
+        this.register("connected_east", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("connected_east").name("Connected East").query(of("ConnectedEast")).build());
 
-        this.fieldMap.put("connected_west", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("ConnectedWest"), "sponge:connected_west", "Connected West"));
+        this.register("connected_west", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("connected_west").name("Connected West").query(of("ConnectedWest")).build());
 
-        this.fieldMap.put("direction", makeSingleKey(TypeTokens.DIRECTION_TOKEN, TypeTokens.DIRECTION_VALUE_TOKEN, of("Direction"), "sponge:direction", "Direction"));
+        this.register("direction", Key.builder().type(TypeTokens.DIRECTION_VALUE_TOKEN).id("direction").name("Direction").query(of("Direction")).build());
 
-        this.fieldMap.put("dirt_type", makeSingleKey(TypeTokens.DIRT_TOKEN, TypeTokens.DIRT_VALUE_TOKEN, of("DirtType"), "sponge:dirt_type", "Dirt Type"));
+        this.register("dirt_type", Key.builder().type(TypeTokens.DIRT_VALUE_TOKEN).id("dirt_type").name("Dirt Type").query(of("DirtType")).build());
 
-        this.fieldMap.put("disguised_block_type", makeSingleKey(TypeTokens.DISGUISED_BLOCK_TOKEN, TypeTokens.DISGUISED_BLOCK_VALUE_TOKEN, of("DisguisedBlockType"), "sponge:disguised_block_type", "Disguised Block Type"));
+        this.register("disguised_block_type", Key.builder().type(TypeTokens.DISGUISED_BLOCK_VALUE_TOKEN).id("disguised_block_type").name("Disguised Block Type").query(of("DisguisedBlockType")).build());
 
-        this.fieldMap.put("disarmed", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("Disarmed"), "sponge:disarmed", "Disarmed"));
+        this.register("disarmed", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("disarmed").name("Disarmed").query(of("Disarmed")).build());
 
-        this.fieldMap.put("item_enchantments", makeListKey(TypeTokens.LIST_ENCHANTMENT_TOKEN, TypeTokens.LIST_ENCHANTMENT_VALUE_TOKEN, of("ItemEnchantments"), "sponge:item_enchantments", "Item EnchantmentTypes"));
+        this.register("item_enchantments", Key.builder().type(TypeTokens.LIST_ENCHANTMENT_VALUE_TOKEN).id("item_enchantments").name("Item EnchantmentTypes").query(of("ItemEnchantments")).build());
 
-        this.fieldMap.put("banner_patterns", makeListKey(TypeTokens.LIST_PATTERN_TOKEN, TypeTokens.LIST_PATTERN_VALUE_TOKEN, of("BannerPatterns"), "sponge:banner_patterns", "Banner Patterns"));
+        this.register("banner_patterns", Key.builder().type(TypeTokens.LIST_PATTERN_VALUE_TOKEN).id("banner_patterns").name("Banner Patterns").query(of("BannerPatterns")).build());
 
-        this.fieldMap.put("banner_base_color", makeListKey(TypeTokens.LIST_DYE_COLOR_TOKEN, TypeTokens.LIST_DYE_COLOR_VALUE_TOKEN, of("BannerBaseColor"), "sponge:banner_base_color", "Banner Base Color"));
+        this.register("banner_base_color", Key.builder().type(TypeTokens.LIST_DYE_COLOR_VALUE_TOKEN).id("banner_base_color").name("Banner Base Color").query(of("BannerBaseColor")).build());
 
-        this.fieldMap.put("horse_color", makeSingleKey(TypeTokens.HORSE_COLOR_TOKEN, TypeTokens.HORSE_COLOR_VALUE_TOKEN, of("HorseColor"), "sponge:horse_color", "Horse Color"));
+        this.register("horse_color", Key.builder().type(TypeTokens.HORSE_COLOR_VALUE_TOKEN).id("horse_color").name("Horse Color").query(of("HorseColor")).build());
 
-        this.fieldMap.put("horse_style", makeSingleKey(TypeTokens.HORSE_STYLE_TOKEN, TypeTokens.HORSE_STYLE_VALUE_TOKEN, of("HorseStyle"), "sponge:horse_style", "Horse Style"));
+        this.register("horse_style", Key.builder().type(TypeTokens.HORSE_STYLE_VALUE_TOKEN).id("horse_style").name("Horse Style").query(of("HorseStyle")).build());
 
-        this.fieldMap.put("item_lore", makeListKey(TypeTokens.LIST_TEXT_TOKEN, TypeTokens.LIST_TEXT_VALUE_TOKEN, of("ItemLore"), "sponge:item_lore", "Item Lore"));
+        this.register("item_lore", Key.builder().type(TypeTokens.LIST_TEXT_VALUE_TOKEN).id("item_lore").name("Item Lore").query(of("ItemLore")).build());
 
-        this.fieldMap.put("book_pages", makeListKey(TypeTokens.LIST_TEXT_TOKEN, TypeTokens.LIST_TEXT_VALUE_TOKEN, of("BookPages"), "sponge:book_pages", "Book Pages"));
+        this.register("book_pages", Key.builder().type(TypeTokens.LIST_TEXT_VALUE_TOKEN).id("book_pages").name("Book Pages").query(of("BookPages")).build());
 
-        this.fieldMap.put("golden_apple_type", makeSingleKey(TypeTokens.GOLDEN_APPLE_TOKEN, TypeTokens.GOLDEN_APPLE_VALUE_TOKEN, of("GoldenAppleType"), "sponge:golden_apple_type", "Golden Apple Type"));
+        this.register("golden_apple_type", Key.builder().type(TypeTokens.GOLDEN_APPLE_VALUE_TOKEN).id("golden_apple_type").name("Golden Apple Type").query(of("GoldenAppleType")).build());
 
-        this.fieldMap.put("is_flying", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("IsFlying"), "sponge:is_flying", "Is Flying"));
+        this.register("is_flying", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("is_flying").name("Is Flying").query(of("IsFlying")).build());
 
-        this.fieldMap.put("experience_level", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("ExperienceLevel"), "sponge:experience_level", "Experience Level"));
+        this.register("experience_level", Key.builder().type(TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN).id("experience_level").name("Experience Level").query(of("ExperienceLevel")).build());
 
-        this.fieldMap.put("total_experience", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("TotalExperience"), "sponge:total_experience", "Total Experience"));
+        this.register("total_experience", Key.builder().type(TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN).id("total_experience").name("Total Experience").query(of("TotalExperience")).build());
 
-        this.fieldMap.put("experience_since_level", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("ExperienceSinceLevel"), "sponge:experience_since_level", "Experience Since Level"));
+        this.register("experience_since_level", Key.builder().type(TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN).id("experience_since_level").name("Experience Since Level").query(of("ExperienceSinceLevel")).build());
 
-        this.fieldMap.put("experience_from_start_of_level", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("ExperienceFromStartOfLevel"), "sponge:experience_from_start_of_level", "Experience From Start Of Level"));
+        this.register("experience_from_start_of_level", Key.builder().type(TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN).id("experience_from_start_of_level").name("Experience From Start Of Level").query(of("ExperienceFromStartOfLevel")).build());
 
-        this.fieldMap.put("book_author", makeSingleKey(TypeTokens.TEXT_TOKEN, TypeTokens.TEXT_VALUE_TOKEN, of("BookAuthor"), "sponge:book_author", "Book Author"));
+        this.register("book_author", Key.builder().type(TypeTokens.TEXT_VALUE_TOKEN).id("book_author").name("Book Author").query(of("BookAuthor")).build());
 
-        this.fieldMap.put("breakable_block_types", makeSetKey(TypeTokens.SET_BLOCK_TOKEN, TypeTokens.SET_BLOCK_VALUE_TOKEN, of("CanDestroy"), "sponge:can_destroy", "Can Destroy"));
+        this.register("breakable_block_types", Key.builder().type(TypeTokens.SET_BLOCK_VALUE_TOKEN).id("can_destroy").name("Can Destroy").query(of("CanDestroy")).build());
 
-        this.fieldMap.put("placeable_blocks", makeSetKey(TypeTokens.SET_BLOCK_TOKEN, TypeTokens.SET_BLOCK_VALUE_TOKEN, of("CanPlaceOn"), "sponge:can_place_on", "Can Place On"));
+        this.register("placeable_blocks", Key.builder().type(TypeTokens.SET_BLOCK_VALUE_TOKEN).id("can_place_on").name("Can Place On").query(of("CanPlaceOn")).build());
 
-        this.fieldMap.put("walking_speed", makeSingleKey(TypeTokens.DOUBLE_TOKEN, TypeTokens.DOUBLE_VALUE_TOKEN, of("WalkingSpeed"), "sponge:walking_speed", "Walking Speed"));
+        this.register("walking_speed", Key.builder().type(TypeTokens.DOUBLE_VALUE_TOKEN).id("walking_speed").name("Walking Speed").query(of("WalkingSpeed")).build());
 
-        this.fieldMap.put("flying_speed", makeSingleKey(TypeTokens.DOUBLE_TOKEN, TypeTokens.DOUBLE_VALUE_TOKEN, of("FlyingSpeed"), "sponge:flying_speed", "Flying Speed"));
+        this.register("flying_speed", Key.builder().type(TypeTokens.DOUBLE_VALUE_TOKEN).id("flying_speed").name("Flying Speed").query(of("FlyingSpeed")).build());
 
-        this.fieldMap.put("slime_size", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("SlimeSize"), "sponge:slime_size", "Slime Size"));
+        this.register("slime_size", Key.builder().type(TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN).id("slime_size").name("Slime Size").query(of("SlimeSize")).build());
 
-        this.fieldMap.put("villager_zombie_profession", makeOptionalKey(
-            TypeTokens.OPTIONAL_PROFESSION_TOKEN, TypeTokens.OPTIONAL_PROFESSION_VALUE_TOKEN, of("VillagerZombieProfession"), "sponge:villager_zombie_profession", "Villager Zombie Profession"));
+        this.register("villager_zombie_profession", Key.builder().type(TypeTokens.OPTIONAL_PROFESSION_VALUE_TOKEN).id("villager_zombie_profession").name("Villager Zombie Profession").query(of("VillagerZombieProfession")).build());
 
-        this.fieldMap.put("is_playing", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("IsPlaying"), "sponge:is_playing", "Is Playing"));
+        this.register("is_playing", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("is_playing").name("Is Playing").query(of("IsPlaying")).build());
 
-        this.fieldMap.put("is_sitting", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("IsSitting"), "sponge:is_sitting", "Is Sitting"));
+        this.register("is_sitting", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("is_sitting").name("Is Sitting").query(of("IsSitting")).build());
 
-        this.fieldMap.put("is_sheared", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("IsSheared"), "sponge:is_sheared", "Is Sheared"));
+        this.register("is_sheared", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("is_sheared").name("Is Sheared").query(of("IsSheared")).build());
 
-        this.fieldMap.put("pig_saddle", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("IsPigSaddled"), "sponge:is_pig_saddled", "Is Pig Saddled"));
+        this.register("pig_saddle", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("is_pig_saddled").name("Is Pig Saddled").query(of("IsPigSaddled")).build());
 
-        this.fieldMap.put("tamed_owner", makeOptionalKey(TypeTokens.OPTIONAL_UUID_TOKEN, TypeTokens.OPTIONAL_UUID_VALUE_TOKEN, of("TamerUUID"), "sponge:tamer_uuid", "Tamer UUID"));
+        this.register("tamed_owner", Key.builder().type(TypeTokens.OPTIONAL_UUID_VALUE_TOKEN).id("tamer_uuid").name("Tamer UUID").query(of("TamerUUID")).build());
 
-        this.fieldMap.put("is_wet", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("IsWet"), "sponge:is_wet", "Is Wet"));
+        this.register("is_wet", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("is_wet").name("Is Wet").query(of("IsWet")).build());
 
-        this.fieldMap.put("elder_guardian", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("Elder"), "sponge:elder", "Elder"));
+        this.register("elder_guardian", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("elder").name("Elder").query(of("Elder")).build());
 
-        this.fieldMap.put("coal_type", makeSingleKey(TypeTokens.COAL_TOKEN, TypeTokens.COAL_VALUE_TOKEN, of("CoalType"), "sponge:coal_type", "Coal Type"));
+        this.register("coal_type", Key.builder().type(TypeTokens.COAL_VALUE_TOKEN).id("coal_type").name("Coal Type").query(of("CoalType")).build());
 
-        this.fieldMap.put("cooked_fish", makeSingleKey(TypeTokens.COOKED_FISH_TOKEN, TypeTokens.COOKED_FISH_VALUE_TOKEN, of("CookedFishType"), "sponge:cooked_fish_type", "Cooked Fish Type"));
+        this.register("cooked_fish", Key.builder().type(TypeTokens.COOKED_FISH_VALUE_TOKEN).id("cooked_fish_type").name("Cooked Fish Type").query(of("CookedFishType")).build());
 
-        this.fieldMap.put("fish_type", makeSingleKey(TypeTokens.FISH_TOKEN, TypeTokens.FISH_VALUE_TOKEN, of("RawFishType"), "sponge:raw_fish_type", "Raw Fish Type"));
+        this.register("fish_type", Key.builder().type(TypeTokens.FISH_VALUE_TOKEN).id("raw_fish_type").name("Raw Fish Type").query(of("RawFishType")).build());
 
-        this.fieldMap.put("represented_player", makeSingleKey(TypeTokens.GAME_PROFILE_TOKEN, TypeTokens.GAME_PROFILE_VALUE_TOKEN, of("RepresentedPlayer"), "sponge:represented_player", "Represented Player"));
+        this.register("represented_player", Key.builder().type(TypeTokens.GAME_PROFILE_VALUE_TOKEN).id("represented_player").name("Represented Player").query(of("RepresentedPlayer")).build());
 
-        this.fieldMap.put("passed_burn_time", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("PassedBurnTime"), "sponge:passed_burn_time", "Passed Burn Time"));
+        this.register("passed_burn_time", Key.builder().type(TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN).id("passed_burn_time").name("Passed Burn Time").query(of("PassedBurnTime")).build());
 
-        this.fieldMap.put("max_burn_time", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("MaxBurnTime"), "sponge:max_burn_time", "Max Burn Time"));
+        this.register("max_burn_time", Key.builder().type(TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN).id("max_burn_time").name("Max Burn Time").query(of("MaxBurnTime")).build());
 
-        this.fieldMap.put("passed_cook_time", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("PassedCookTime"), "sponge:passed_cook_time", "Passed Cook Time"));
+        this.register("passed_cook_time", Key.builder().type(TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN).id("passed_cook_time").name("Passed Cook Time").query(of("PassedCookTime")).build());
 
-        this.fieldMap.put("max_cook_time", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("MaxCookTime"), "sponge:max_cook_time", "Max Cook Time"));
+        this.register("max_cook_time", Key.builder().type(TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN).id("max_cook_time").name("Max Cook Time").query(of("MaxCookTime")).build());
 
-        this.fieldMap.put("contained_experience", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.INTEGER_VALUE_TOKEN, of("ContainedExperience"), "sponge:contained_experience", "Contained Experience"));
+        this.register("contained_experience", Key.builder().type(TypeTokens.INTEGER_VALUE_TOKEN).id("contained_experience").name("Contained Experience").query(of("ContainedExperience")).build());
 
-        this.fieldMap.put("remaining_brew_time", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("RemainingBrewTime"), "sponge:remaining_brew_time", "Remaining Brew Time"));
+        this.register("remaining_brew_time", Key.builder().type(TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN).id("remaining_brew_time").name("Remaining Brew Time").query(of("RemainingBrewTime")).build());
 
-        this.fieldMap.put("stone_type", makeSingleKey(TypeTokens.STONE_TOKEN, TypeTokens.STONE_VALUE_TOKEN, of("StoneType"), "sponge:stone_type", "Stone Type"));
+        this.register("stone_type", Key.builder().type(TypeTokens.STONE_VALUE_TOKEN).id("stone_type").name("Stone Type").query(of("StoneType")).build());
 
-        this.fieldMap.put("prismarine_type", makeSingleKey(TypeTokens.PRISMARINE_TOKEN, TypeTokens.PRISMARINE_VALUE_TOKEN, of("PrismarineType"), "sponge:prismarine_type", "Prismarine Type"));
+        this.register("prismarine_type", Key.builder().type(TypeTokens.PRISMARINE_VALUE_TOKEN).id("prismarine_type").name("Prismarine Type").query(of("PrismarineType")).build());
 
-        this.fieldMap.put("brick_type", makeSingleKey(TypeTokens.BRICK_TOKEN, TypeTokens.BRICK_VALUE_TOKEN, of("BrickType"), "sponge:brick_type", "Brick Type"));
+        this.register("brick_type", Key.builder().type(TypeTokens.BRICK_VALUE_TOKEN).id("brick_type").name("Brick Type").query(of("BrickType")).build());
 
-        this.fieldMap.put("quartz_type", makeSingleKey(TypeTokens.QUARTZ_TOKEN, TypeTokens.QUARTZ_VALUE_TOKEN, of("QuartzType"), "sponge:quartz_type", "Quartz Type"));
+        this.register("quartz_type", Key.builder().type(TypeTokens.QUARTZ_VALUE_TOKEN).id("quartz_type").name("Quartz Type").query(of("QuartzType")).build());
 
-        this.fieldMap.put("sand_type", makeSingleKey(TypeTokens.SAND_TOKEN, TypeTokens.SAND_VALUE_TOKEN, of("SandType"), "sponge:sand_type", "Sand Type"));
+        this.register("sand_type", Key.builder().type(TypeTokens.SAND_VALUE_TOKEN).id("sand_type").name("Sand Type").query(of("SandType")).build());
 
-        this.fieldMap.put("sandstone_type", makeSingleKey(TypeTokens.SAND_STONE_TOKEN, TypeTokens.SAND_STONE_VALUE_TOKEN, of("SandstoneType"), "sponge:sandstone_type", "Sandstone Type"));
+        this.register("sandstone_type", Key.builder().type(TypeTokens.SAND_STONE_VALUE_TOKEN).id("sandstone_type").name("Sandstone Type").query(of("SandstoneType")).build());
 
-        this.fieldMap.put("slab_type", makeSingleKey(TypeTokens.SLAB_TOKEN, TypeTokens.SLAB_VALUE_TOKEN, of("SlabType"), "sponge:slab_type", "Slab Type"));
+        this.register("slab_type", Key.builder().type(TypeTokens.SLAB_VALUE_TOKEN).id("slab_type").name("Slab Type").query(of("SlabType")).build());
 
-        this.fieldMap.put("sandstone_type", makeSingleKey(TypeTokens.SAND_STONE_TOKEN, TypeTokens.SAND_STONE_VALUE_TOKEN, of("SandstoneType"), "sponge:sandstone_type", "Sandstone Type"));
+        this.register("sandstone_type", Key.builder().type(TypeTokens.SAND_STONE_VALUE_TOKEN).id("sandstone_type").name("Sandstone Type").query(of("SandstoneType")).build());
 
-        this.fieldMap.put("comparator_type", makeSingleKey(TypeTokens.COMPARATOR_TOKEN, TypeTokens.COMPARATOR_VALUE_TOKEN, of("ComparatorType"), "sponge:comparator_type", "Comparator Type"));
+        this.register("comparator_type", Key.builder().type(TypeTokens.COMPARATOR_VALUE_TOKEN).id("comparator_type").name("Comparator Type").query(of("ComparatorType")).build());
 
-        this.fieldMap.put("hinge_position", makeSingleKey(TypeTokens.HINGE_TOKEN, TypeTokens.HINGE_VALUE_TOKEN, of("HingePosition"), "sponge:hinge_position", "Hinge Position"));
+        this.register("hinge_position", Key.builder().type(TypeTokens.HINGE_VALUE_TOKEN).id("hinge_position").name("Hinge Position").query(of("HingePosition")).build());
 
-        this.fieldMap.put("piston_type", makeSingleKey(TypeTokens.PISTON_TOKEN, TypeTokens.PISTON_VALUE_TOKEN, of("PistonType"), "sponge:piston_type", "Piston Type"));
+        this.register("piston_type", Key.builder().type(TypeTokens.PISTON_VALUE_TOKEN).id("piston_type").name("Piston Type").query(of("PistonType")).build());
 
-        this.fieldMap.put("portion_type", makeSingleKey(TypeTokens.PORTION_TOKEN, TypeTokens.PORTION_VALUE_TOKEN, of("PortionType"), "sponge:portion_type", "Portion Type"));
+        this.register("portion_type", Key.builder().type(TypeTokens.PORTION_VALUE_TOKEN).id("portion_type").name("Portion Type").query(of("PortionType")).build());
 
-        this.fieldMap.put("rail_direction", makeSingleKey(TypeTokens.RAIL_TOKEN, TypeTokens.RAIL_VALUE_TOKEN, of("RailDirection"), "sponge:rail_direction", "Rail Direction"));
+        this.register("rail_direction", Key.builder().type(TypeTokens.RAIL_VALUE_TOKEN).id("rail_direction").name("Rail Direction").query(of("RailDirection")).build());
 
-        this.fieldMap.put("stair_shape", makeSingleKey(TypeTokens.STAIR_TOKEN, TypeTokens.STAIR_VALUE_TOKEN, of("StairShape"), "sponge:stair_shape", "Stair Shape"));
+        this.register("stair_shape", Key.builder().type(TypeTokens.STAIR_VALUE_TOKEN).id("stair_shape").name("Stair Shape").query(of("StairShape")).build());
 
-        this.fieldMap.put("wall_type", makeSingleKey(TypeTokens.WALL_TOKEN, TypeTokens.WALL_VALUE_TOKEN, of("WallType"), "sponge:wall_type", "Wall Type"));
+        this.register("wall_type", Key.builder().type(TypeTokens.WALL_VALUE_TOKEN).id("wall_type").name("Wall Type").query(of("WallType")).build());
 
-        this.fieldMap.put("double_plant_type", makeSingleKey(TypeTokens.DOUBLE_PLANT_TOKEN, TypeTokens.DOUBLE_PLANT_VALUE_TOKEN, of("DoublePlantType"), "sponge:double_plant_type", "Double Plant Type"));
+        this.register("double_plant_type", Key.builder().type(TypeTokens.DOUBLE_PLANT_VALUE_TOKEN).id("double_plant_type").name("Double Plant Type").query(of("DoublePlantType")).build());
 
-        this.fieldMap.put("big_mushroom_type", makeSingleKey(TypeTokens.MUSHROOM_TOKEN, TypeTokens.MUSHROOM_VALUE_TOKEN, of("BigMushroomType"), "sponge:big_mushroom_type", "Big Mushroom Type"));
+        this.register("big_mushroom_type", Key.builder().type(TypeTokens.MUSHROOM_VALUE_TOKEN).id("big_mushroom_type").name("Big Mushroom Type").query(of("BigMushroomType")).build());
 
-        this.fieldMap.put("ai_enabled", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("IsAiEnabled"), "sponge:is_ai_enabled", "Is Ai Enabled"));
+        this.register("ai_enabled", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("is_ai_enabled").name("Is Ai Enabled").query(of("IsAiEnabled")).build());
 
-        this.fieldMap.put("creeper_charged", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("IsCreeperCharged"), "sponge:is_creeper_charged", "Is Creeper Charged"));
+        this.register("creeper_charged", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("is_creeper_charged").name("Is Creeper Charged").query(of("IsCreeperCharged")).build());
 
-        this.fieldMap.put("item_durability", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("ItemDurability"), "sponge:item_durability", "Item Durability"));
+        this.register("item_durability", Key.builder().type(TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN).id("item_durability").name("Item Durability").query(of("ItemDurability")).build());
 
-        this.fieldMap.put("unbreakable", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("Unbreakable"), "sponge:unbreakable", "Unbreakable"));
+        this.register("unbreakable", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("unbreakable").name("Unbreakable").query(of("Unbreakable")).build());
 
-        this.fieldMap.put("spawnable_entity_type", makeSingleKey(TypeTokens.ENTITY_TYPE_TOKEN, TypeTokens.ENTITY_TYPE_VALUE_TOKEN, of("SpawnableEntityType"), "sponge:spawnable_entity_type", "Spawnable Entity Type"));
+        this.register("spawnable_entity_type", Key.builder().type(TypeTokens.ENTITY_TYPE_VALUE_TOKEN).id("spawnable_entity_type").name("Spawnable Entity Type").query(of("SpawnableEntityType")).build());
 
-        this.fieldMap.put("fall_distance", makeSingleKey(TypeTokens.FLOAT_TOKEN, TypeTokens.FLOAT_VALUE_TOKEN, of("FallDistance"), "sponge:fall_distance", "Fall Distance"));
+        this.register("fall_distance", Key.builder().type(TypeTokens.FLOAT_VALUE_TOKEN).id("fall_distance").name("Fall Distance").query(of("FallDistance")).build());
 
-        this.fieldMap.put("cooldown", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.INTEGER_VALUE_TOKEN, of("Cooldown"), "sponge:cooldown", "Cooldown"));
+        this.register("cooldown", Key.builder().type(TypeTokens.INTEGER_VALUE_TOKEN).id("cooldown").name("Cooldown").query(of("Cooldown")).build());
 
-        this.fieldMap.put("note_pitch", makeSingleKey(TypeTokens.NOTE_TOKEN, TypeTokens.NOTE_VALUE_TOKEN, of("Note"), "sponge:note", "Note"));
+        this.register("note_pitch", Key.builder().type(TypeTokens.NOTE_VALUE_TOKEN).id("note").name("Note").query(of("Note")).build());
 
-        this.fieldMap.put("vehicle", makeSingleKey(TypeTokens.ENTITY_TOKEN, TypeTokens.ENTITY_VALUE_TOKEN, of("Vehicle"), "sponge:vehicle", "Vehicle"));
+        this.register("vehicle", Key.builder().type(TypeTokens.ENTITY_VALUE_TOKEN).id("vehicle").name("Vehicle").query(of("Vehicle")).build());
 
-        this.fieldMap.put("base_vehicle", makeSingleKey(TypeTokens.ENTITY_TOKEN, TypeTokens.ENTITY_VALUE_TOKEN, of("BaseVehicle"), "sponge:base_vehicle", "Base Vehicle"));
+        this.register("base_vehicle", Key.builder().type(TypeTokens.ENTITY_VALUE_TOKEN).id("base_vehicle").name("Base Vehicle").query(of("BaseVehicle")).build());
 
-        this.fieldMap.put("art", makeSingleKey(TypeTokens.ART_TOKEN, TypeTokens.ART_VALUE_TOKEN, of("Art"), "sponge:art", "Art"));
+        this.register("art", Key.builder().type(TypeTokens.ART_VALUE_TOKEN).id("art").name("Art").query(of("Art")).build());
 
-        this.fieldMap.put("fall_damage_per_block", makeSingleKey(TypeTokens.DOUBLE_TOKEN, TypeTokens.DOUBLE_VALUE_TOKEN, of("FallDamagePerBlock"), "sponge:fall_damage_per_block", "Fall Damage Per Block"));
+        this.register("fall_damage_per_block", Key.builder().type(TypeTokens.DOUBLE_VALUE_TOKEN).id("fall_damage_per_block").name("Fall Damage Per Block").query(of("FallDamagePerBlock")).build());
 
-        this.fieldMap.put("max_fall_damage", makeSingleKey(TypeTokens.DOUBLE_TOKEN, TypeTokens.DOUBLE_VALUE_TOKEN, of("MaxFallDamage"), "sponge:max_fall_damage", "Max Fall Damage"));
+        this.register("max_fall_damage", Key.builder().type(TypeTokens.DOUBLE_VALUE_TOKEN).id("max_fall_damage").name("Max Fall Damage").query(of("MaxFallDamage")).build());
 
-        this.fieldMap.put("falling_block_state", makeSingleKey(TypeTokens.BLOCK_TOKEN, TypeTokens.BLOCK_VALUE_TOKEN, of("FallingBlockState"), "sponge:falling_block_state", "Falling Block State"));
+        this.register("falling_block_state", Key.builder().type(TypeTokens.BLOCK_VALUE_TOKEN).id("falling_block_state").name("Falling Block State").query(of("FallingBlockState")).build());
 
-        this.fieldMap.put("can_place_as_block", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("CanPlaceAsBlock"), "sponge:can_place_as_block", "Can Place As Block"));
+        this.register("can_place_as_block", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("can_place_as_block").name("Can Place As Block").query(of("CanPlaceAsBlock")).build());
 
-        this.fieldMap.put("can_drop_as_item", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("CanDropAsItem"), "sponge:can_drop_as_item", "Can Drop As Item"));
+        this.register("can_drop_as_item", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("can_drop_as_item").name("Can Drop As Item").query(of("CanDropAsItem")).build());
 
-        this.fieldMap.put("fall_time", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.INTEGER_VALUE_TOKEN, of("FallTime"), "sponge:fall_time", "Fall Time"));
+        this.register("fall_time", Key.builder().type(TypeTokens.INTEGER_VALUE_TOKEN).id("fall_time").name("Fall Time").query(of("FallTime")).build());
 
-        this.fieldMap.put("falling_block_can_hurt_entities", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("CanFallingBlockHurtEntities"), "sponge:can_falling_block_hurt_entities", "Can Falling Block Hurt Entities"));
+        this.register("falling_block_can_hurt_entities", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("can_falling_block_hurt_entities").name("Can Falling Block Hurt Entities").query(of("CanFallingBlockHurtEntities")).build());
 
-        this.fieldMap.put("represented_block", makeSingleKey(TypeTokens.BLOCK_TOKEN, TypeTokens.BLOCK_VALUE_TOKEN, of("RepresentedBlock"), "sponge:represented_block", "Represented Block"));
+        this.register("represented_block", Key.builder().type(TypeTokens.BLOCK_VALUE_TOKEN).id("represented_block").name("Represented Block").query(of("RepresentedBlock")).build());
 
-        this.fieldMap.put("offset", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.INTEGER_VALUE_TOKEN, of("BlockOffset"), "sponge:block_offset", "Block Offset"));
+        this.register("offset", Key.builder().type(TypeTokens.INTEGER_VALUE_TOKEN).id("block_offset").name("Block Offset").query(of("BlockOffset")).build());
 
-        this.fieldMap.put("attached", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("Attached"), "sponge:attached", "Attached"));
+        this.register("attached", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("attached").name("Attached").query(of("Attached")).build());
 
-        this.fieldMap.put("should_drop", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("ShouldDrop"), "sponge:should_drop", "Should Drop"));
+        this.register("should_drop", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("should_drop").name("Should Drop").query(of("ShouldDrop")).build());
 
-        this.fieldMap.put("extended", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("Extended"), "sponge:extended", "Extended"));
+        this.register("extended", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("extended").name("Extended").query(of("Extended")).build());
 
-        this.fieldMap.put("growth_stage", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("GrowthStage"), "sponge:growth_stage", "Growth Stage"));
+        this.register("growth_stage", Key.builder().type(TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN).id("growth_stage").name("Growth Stage").query(of("GrowthStage")).build());
 
-        this.fieldMap.put("open", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("Open"), "sponge:open", "Open"));
+        this.register("open", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("open").name("Open").query(of("Open")).build());
 
-        this.fieldMap.put("power", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("Power"), "sponge:power", "Power"));
+        this.register("power", Key.builder().type(TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN).id("power").name("Power").query(of("Power")).build());
 
-        this.fieldMap.put("seamless", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("Seamless"), "sponge:seamless", "Seamless"));
+        this.register("seamless", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("seamless").name("Seamless").query(of("Seamless")).build());
 
-        this.fieldMap.put("snowed", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("Snowed"), "sponge:snowed", "Snowed"));
+        this.register("snowed", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("snowed").name("Snowed").query(of("Snowed")).build());
 
-        this.fieldMap.put("suspended", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("Suspended"), "sponge:suspended", "Suspended"));
+        this.register("suspended", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("suspended").name("Suspended").query(of("Suspended")).build());
 
-        this.fieldMap.put("occupied", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("Occupied"), "sponge:occupied", "Occupied"));
+        this.register("occupied", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("occupied").name("Occupied").query(of("Occupied")).build());
 
-        this.fieldMap.put("decayable", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("Decayable"), "sponge:decayable", "Decayable"));
+        this.register("decayable", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("decayable").name("Decayable").query(of("Decayable")).build());
 
-        this.fieldMap.put("in_wall", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("InWall"), "sponge:in_wall", "In Wall"));
+        this.register("in_wall", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("in_wall").name("In Wall").query(of("InWall")).build());
 
-        this.fieldMap.put("delay", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("Delay"), "sponge:delay", "Delay"));
+        this.register("delay", Key.builder().type(TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN).id("delay").name("Delay").query(of("Delay")).build());
 
-        this.fieldMap.put("player_created", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("PlayerCreated"), "sponge:player_created", "Player Created"));
+        this.register("player_created", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("player_created").name("Player Created").query(of("PlayerCreated")).build());
 
-        this.fieldMap.put("item_blockstate", makeSingleKey(TypeTokens.BLOCK_TOKEN, TypeTokens.BLOCK_VALUE_TOKEN, of("ItemBlockState"), "sponge:item_block_state", "Item Block State"));
+        this.register("item_blockstate", Key.builder().type(TypeTokens.BLOCK_VALUE_TOKEN).id("item_block_state").name("Item Block State").query(of("ItemBlockState")).build());
 
-        this.fieldMap.put("ocelot_type", makeSingleKey(TypeTokens.OCELOT_TOKEN, TypeTokens.OCELOT_VALUE_TOKEN, of("OcelotType"), "sponge:ocelot_type", "Ocelot Type"));
+        this.register("ocelot_type", Key.builder().type(TypeTokens.OCELOT_VALUE_TOKEN).id("ocelot_type").name("Ocelot Type").query(of("OcelotType")).build());
 
-        this.fieldMap.put("rabbit_type", makeSingleKey(TypeTokens.RABBIT_TOKEN, TypeTokens.RABBIT_VALUE_TOKEN, of("RabbitType"), "sponge:rabbit_type", "Rabbit Type"));
+        this.register("rabbit_type", Key.builder().type(TypeTokens.RABBIT_VALUE_TOKEN).id("rabbit_type").name("Rabbit Type").query(of("RabbitType")).build());
 
-        this.fieldMap.put("parrot_variant", makeSingleKey(TypeTokens.PARROT_VARIANT_TOKEN, TypeTokens.PARROT_VARIANT_VALUE_TOKEN, of("ParrotVariant"), "sponge:parrot_variant", "Parrot Variant"));
+        this.register("parrot_variant", Key.builder().type(TypeTokens.PARROT_VARIANT_VALUE_TOKEN).id("parrot_variant").name("Parrot Variant").query(of("ParrotVariant")).build());
 
-        this.fieldMap.put("lock_token", makeSingleKey(TypeTokens.STRING_TOKEN, TypeTokens.STRING_VALUE_TOKEN, of("Lock"), "sponge:lock", "Lock"));
+        this.register("lock_token", Key.builder().type(TypeTokens.STRING_VALUE_TOKEN).id("lock").name("Lock").query(of("Lock")).build());
 
-        this.fieldMap.put("banner_base_color", makeSingleKey(TypeTokens.DYE_COLOR_TOKEN, TypeTokens.DYE_COLOR_VALUE_TOKEN, of("BannerBaseColor"), "sponge:banner_base_color", "Banner Base Color"));
+        this.register("banner_base_color", Key.builder().type(TypeTokens.DYE_COLOR_VALUE_TOKEN).id("banner_base_color").name("Banner Base Color").query(of("BannerBaseColor")).build());
 
-        this.fieldMap.put("banner_patterns", new PatternKey());
+        this.register("banner_patterns", Key.builder().type(TypeTokens.PATTERN_LIST_VALUE_TOKEN).id("banner_patterns").name("Banner Patterns").query(of("BannerPatterns")).build());
 
-        this.fieldMap.put("respawn_locations", makeMapKey(TypeTokens.MAP_UUID_VECTOR3D_TOKEN, TypeTokens.MAP_UUID_VECTOR3D_VALUE_TOKEN, of("RespawnLocations"), "sponge:respawn_locations", "Respawn Locations"));
+        this.register("respawn_locations", Key.builder().type(TypeTokens.MAP_UUID_VECTOR3D_VALUE_TOKEN).id("respawn_locations").name("Respawn Locations").query(of("RespawnLocations")).build());
 
-        this.fieldMap.put("expiration_ticks", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("ExpirationTicks"), "sponge:expiration_ticks", "Expiration Ticks"));
+        this.register("expiration_ticks", Key.builder().type(TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN).id("expiration_ticks").name("Expiration Ticks").query(of("ExpirationTicks")).build());
 
-        this.fieldMap.put("skin_unique_id", makeSingleKey(TypeTokens.UUID_TOKEN, TypeTokens.UUID_VALUE_TOKEN, of("SkinUUID"), "sponge:skin_uuid", "Skin UUID"));
+        this.register("skin_unique_id", Key.builder().type(TypeTokens.UUID_VALUE_TOKEN).id("skin_uuid").name("Skin UUID").query(of("SkinUUID")).build());
 
-        this.fieldMap.put("moisture", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("Moisture"), "sponge:moisture", "Moisture"));
+        this.register("moisture", Key.builder().type(TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN).id("moisture").name("Moisture").query(of("Moisture")).build());
 
-        this.fieldMap.put("angry", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("Angry"), "sponge:angry", "Angry"));
+        this.register("angry", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("angry").name("Angry").query(of("Angry")).build());
 
-        this.fieldMap.put("anger", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("Anger"), "sponge:anger", "Anger"));
+        this.register("anger", Key.builder().type(TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN).id("anger").name("Anger").query(of("Anger")).build());
 
-        this.fieldMap.put("rotation", makeSingleKey(TypeTokens.ROTATION_TOKEN, TypeTokens.ROTATION_VALUE_TOKEN, of("Rotation"), "sponge:rotation", "Rotation"));
+        this.register("rotation", Key.builder().type(TypeTokens.ROTATION_VALUE_TOKEN).id("rotation").name("Rotation").query(of("Rotation")).build());
 
-        this.fieldMap.put("is_splash_potion", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("IsSplashPotion"), "sponge:is_splash_potion", "Is Splash Potion"));
+        this.register("is_splash_potion", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("is_splash_potion").name("Is Splash Potion").query(of("IsSplashPotion")).build());
 
-        this.fieldMap.put("affects_spawning", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("AffectsSpawning"), "sponge:affects_spawning", "Affects Spawning"));
+        this.register("affects_spawning", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("affects_spawning").name("Affects Spawning").query(of("AffectsSpawning")).build());
 
-        this.fieldMap.put("critical_hit", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("CriticalHit"), "sponge:critical_hit", "Critical Hit"));
+        this.register("critical_hit", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("critical_hit").name("Critical Hit").query(of("CriticalHit")).build());
 
-        this.fieldMap.put("generation", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("Generation"), "sponge:generation", "Generation"));
+        this.register("generation", Key.builder().type(TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN).id("generation").name("Generation").query(of("Generation")).build());
 
-        this.fieldMap.put("passengers", makeSingleKey(TypeTokens.ENTITY_TOKEN, TypeTokens.ENTITY_VALUE_TOKEN, of("PassengerSnapshot"), "sponge:passenger_snapshot", "Passenger Snapshot"));
+        this.register("passengers", Key.builder().type(TypeTokens.ENTITY_VALUE_TOKEN).id("passenger_snapshot").name("Passenger Snapshot").query(of("PassengerSnapshot")).build());
 
-        this.fieldMap.put("knockback_strength", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("KnockbackStrength"), "sponge:knockback_strength", "Knockback Strength"));
+        this.register("knockback_strength", Key.builder().type(TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN).id("knockback_strength").name("Knockback Strength").query(of("KnockbackStrength")).build());
 
-        this.fieldMap.put("persists", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("Persists"), "sponge:persists", "Persists"));
+        this.register("persists", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("persists").name("Persists").query(of("Persists")).build());
 
-        this.fieldMap.put("stored_enchantments", makeListKey(TypeTokens.LIST_ENCHANTMENT_TOKEN, TypeTokens.LIST_ENCHANTMENT_VALUE_TOKEN, of("StoredEnchantments"), "sponge:stored_enchantments", "Stored Enchantments"));
+        this.register("stored_enchantments", Key.builder().type(TypeTokens.LIST_ENCHANTMENT_VALUE_TOKEN).id("stored_enchantments").name("Stored Enchantments").query(of("StoredEnchantments")).build());
 
-        this.fieldMap.put("is_sprinting", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("Sprinting"), "sponge:sprinting", "Sprinting"));
+        this.register("is_sprinting", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("sprinting").name("Sprinting").query(of("Sprinting")).build());
 
-        this.fieldMap.put("stuck_arrows", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("StuckArrows"), "sponge:stuck_arrows", "Stuck Arrows"));
+        this.register("stuck_arrows", Key.builder().type(TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN).id("stuck_arrows").name("Stuck Arrows").query(of("StuckArrows")).build());
 
-        this.fieldMap.put("vanish_ignores_collision", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("VanishIgnoresCollision"), "sponge:vanish_ignores_collision", "Vanish Ignores Collision"));
+        this.register("vanish_ignores_collision", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("vanish_ignores_collision").name("Vanish Ignores Collision").query(of("VanishIgnoresCollision")).build());
 
-        this.fieldMap.put("vanish_prevents_targeting", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("VanishPreventsTargeting"), "sponge:vanish_prevents_targeting", "Vanish Prevents Targeting"));
+        this.register("vanish_prevents_targeting", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("vanish_prevents_targeting").name("Vanish Prevents Targeting").query(of("VanishPreventsTargeting")).build());
 
-        this.fieldMap.put("is_aflame", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("IsAflame"), "sponge:is_aflame", "Is Aflame"));
+        this.register("is_aflame", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("is_aflame").name("Is Aflame").query(of("IsAflame")).build());
 
-        this.fieldMap.put("can_breed", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("CanBreed"), "sponge:can_breed", "Can Breed"));
+        this.register("can_breed", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("can_breed").name("Can Breed").query(of("CanBreed")).build());
 
-        this.fieldMap.put("fluid_item_stack", makeSingleKey(TypeTokens.FLUID_TOKEN, TypeTokens.FLUID_VALUE_TOKEN, of("FluidItemContainerSnapshot"), "sponge:fluid_item_container_snapshot", "Fluid Item Container Snapshot"));
+        this.register("fluid_item_stack", Key.builder().type(TypeTokens.FLUID_VALUE_TOKEN).id("fluid_item_container_snapshot").name("Fluid Item Container Snapshot").query(of("FluidItemContainerSnapshot")).build());
 
-        this.fieldMap.put("fluid_tank_contents", makeMapKey(TypeTokens.MAP_DIRECTION_FLUID_TOKEN, TypeTokens.MAP_DIRECTION_FLUID_VALUE_TOKEN, of("FluidTankContents"), "sponge:fluid_tank_contents", "Fluid Tank Contents"));
+        this.register("fluid_tank_contents", Key.builder().type(TypeTokens.MAP_DIRECTION_FLUID_VALUE_TOKEN).id("fluid_tank_contents").name("Fluid Tank Contents").query(of("FluidTankContents")).build());
 
-        this.fieldMap.put("custom_name_visible", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("CustomNameVisible"), "sponge:custom_name_visible", "Custom Name Visible"));
+        this.register("custom_name_visible", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("custom_name_visible").name("Custom Name Visible").query(of("CustomNameVisible")).build());
 
-        this.fieldMap.put("first_date_played", makeSingleKey(TypeTokens.INSTANT_TOKEN, TypeTokens.INSTANT_VALUE_TOKEN, of("FirstTimeJoined"), "sponge:first_time_joined", "First Time Joined"));
+        this.register("first_date_played", Key.builder().type(TypeTokens.INSTANT_VALUE_TOKEN).id("first_time_joined").name("First Time Joined").query(of("FirstTimeJoined")).build());
 
-        this.fieldMap.put("last_date_played", makeSingleKey(TypeTokens.INSTANT_TOKEN, TypeTokens.INSTANT_VALUE_TOKEN, of("LastTimePlayed"), "sponge:last_time_played", "Last Time Played"));
+        this.register("last_date_played", Key.builder().type(TypeTokens.INSTANT_VALUE_TOKEN).id("last_time_played").name("Last Time Played").query(of("LastTimePlayed")).build());
 
-        this.fieldMap.put("hide_enchantments", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("HideEnchantments"), "sponge:hide_enchantments", "Hide Enchantments"));
+        this.register("hide_enchantments", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("hide_enchantments").name("Hide Enchantments").query(of("HideEnchantments")).build());
 
-        this.fieldMap.put("hide_attributes", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("HideAttributes"), "sponge:hide_attributes", "Hide Attributes"));
+        this.register("hide_attributes", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("hide_attributes").name("Hide Attributes").query(of("HideAttributes")).build());
 
-        this.fieldMap.put("hide_unbreakable", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("HideUnbreakable"), "sponge:hide_unbreakable", "Hide Unbreakable"));
+        this.register("hide_unbreakable", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("hide_unbreakable").name("Hide Unbreakable").query(of("HideUnbreakable")).build());
 
-        this.fieldMap.put("hide_can_destroy", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("HideCanDestroy"), "sponge:hide_can_destroy", "Hide Can Destroy"));
+        this.register("hide_can_destroy", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("hide_can_destroy").name("Hide Can Destroy").query(of("HideCanDestroy")).build());
 
-        this.fieldMap.put("hide_can_place", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("HideCanPlace"), "sponge:hide_can_place", "Hide Can Place"));
+        this.register("hide_can_place", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("hide_can_place").name("Hide Can Place").query(of("HideCanPlace")).build());
 
-        this.fieldMap.put("hide_miscellaneous", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("HideMiscellaneous"), "sponge:hide_miscellaneous", "Hide Miscellaneous"));
+        this.register("hide_miscellaneous", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("hide_miscellaneous").name("Hide Miscellaneous").query(of("HideMiscellaneous")).build());
 
-        this.fieldMap.put("potion_effects", makeListKey(TypeTokens.LIST_POTION_TOKEN, TypeTokens.LIST_POTION_VALUE_TOKEN, of("PotionEffects"), "sponge:potion_effects", "Potion Effects"));
+        this.register("potion_effects", Key.builder().type(TypeTokens.LIST_POTION_VALUE_TOKEN).id("potion_effects").name("Potion Effects").query(of("PotionEffects")).build());
 
-        this.fieldMap.put("body_rotations", makeMapKey(TypeTokens.MAP_BODY_VECTOR3D_TOKEN, TypeTokens.MAP_BODY_VECTOR3D_VALUE_TOKEN, of("BodyRotations"), "sponge:body_rotations", "Body Rotations"));
+        this.register("body_rotations", Key.builder().type(TypeTokens.MAP_BODY_VECTOR3D_VALUE_TOKEN).id("body_rotations").name("Body Rotations").query(of("BodyRotations")).build());
 
-        this.fieldMap.put("head_rotation", makeSingleKey(TypeTokens.VECTOR_3D_TOKEN, TypeTokens.VECTOR_3D_VALUE_TOKEN, of("HeadRotation"), "sponge:head_rotation", "Head Rotation"));
+        this.register("head_rotation", Key.builder().type(TypeTokens.VECTOR_3D_VALUE_TOKEN).id("head_rotation").name("Head Rotation").query(of("HeadRotation")).build());
 
-        this.fieldMap.put("chest_rotation", makeSingleKey(TypeTokens.VECTOR_3D_TOKEN, TypeTokens.VECTOR_3D_VALUE_TOKEN, of("ChestRotation"), "sponge:chest_rotation", "Chest Rotation"));
+        this.register("chest_rotation", Key.builder().type(TypeTokens.VECTOR_3D_VALUE_TOKEN).id("chest_rotation").name("Chest Rotation").query(of("ChestRotation")).build());
 
-        this.fieldMap.put("left_arm_rotation", makeSingleKey(TypeTokens.VECTOR_3D_TOKEN, TypeTokens.VECTOR_3D_VALUE_TOKEN, of("LeftArmRotation"), "sponge:left_arm_rotation", "Left Arm Rotation"));
+        this.register("left_arm_rotation", Key.builder().type(TypeTokens.VECTOR_3D_VALUE_TOKEN).id("left_arm_rotation").name("Left Arm Rotation").query(of("LeftArmRotation")).build());
 
-        this.fieldMap.put("right_arm_rotation", makeSingleKey(TypeTokens.VECTOR_3D_TOKEN, TypeTokens.VECTOR_3D_VALUE_TOKEN, of("RightArmRotation"), "sponge:right_arm_rotation", "Right Arm Rotation"));
+        this.register("right_arm_rotation", Key.builder().type(TypeTokens.VECTOR_3D_VALUE_TOKEN).id("right_arm_rotation").name("Right Arm Rotation").query(of("RightArmRotation")).build());
 
-        this.fieldMap.put("left_leg_rotation", makeSingleKey(TypeTokens.VECTOR_3D_TOKEN, TypeTokens.VECTOR_3D_VALUE_TOKEN, of("LeftLegRotation"), "sponge:left_leg_rotation", "Left Leg Rotation"));
+        this.register("left_leg_rotation", Key.builder().type(TypeTokens.VECTOR_3D_VALUE_TOKEN).id("left_leg_rotation").name("Left Leg Rotation").query(of("LeftLegRotation")).build());
 
-        this.fieldMap.put("right_leg_rotation", makeSingleKey(TypeTokens.VECTOR_3D_TOKEN, TypeTokens.VECTOR_3D_VALUE_TOKEN, of("RightLegRotation"), "sponge:right_leg_rotation", "Right Leg Rotation"));
+        this.register("right_leg_rotation", Key.builder().type(TypeTokens.VECTOR_3D_VALUE_TOKEN).id("right_leg_rotation").name("Right Leg Rotation").query(of("RightLegRotation")).build());
 
-        this.fieldMap.put("beacon_primary_effect", makeOptionalKey(TypeTokens.OPTIONAL_POTION_TOKEN, TypeTokens.OPTIONAL_POTION_VALUE_TOKEN, of("BeaconPrimaryEffect"), "sponge:beacon_primary_effect", "Beacon Primary Effect"));
+        this.register("beacon_primary_effect", Key.builder().type(TypeTokens.OPTIONAL_POTION_VALUE_TOKEN).id("beacon_primary_effect").name("Beacon Primary Effect").query(of("BeaconPrimaryEffect")).build());
 
-        this.fieldMap.put("beacon_secondary_effect", makeOptionalKey(TypeTokens.OPTIONAL_POTION_TOKEN, TypeTokens.OPTIONAL_POTION_VALUE_TOKEN, of("BeaconSecondaryEffect"), "sponge:beacon_secondary_effect", "Beacon Secondary Effect"));
+        this.register("beacon_secondary_effect", Key.builder().type(TypeTokens.OPTIONAL_POTION_VALUE_TOKEN).id("beacon_secondary_effect").name("Beacon Secondary Effect").query(of("BeaconSecondaryEffect")).build());
 
-        this.fieldMap.put("targeted_location", makeSingleKey(TypeTokens.VECTOR_3D_TOKEN, TypeTokens.VECTOR_3D_VALUE_TOKEN, of("TargetedVector3d"), "sponge:targeted_vector_3d", "Targeted Vector3d"));
+        this.register("targeted_location", Key.builder().type(TypeTokens.VECTOR_3D_VALUE_TOKEN).id("targeted_vector_3d").name("Targeted Vector3d").query(of("TargetedVector3d")).build());
 
-        this.fieldMap.put("fuse_duration", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.INTEGER_VALUE_TOKEN, of("FuseDuration"), "sponge:fuse_duration", "Fuse Duration"));
+        this.register("fuse_duration", Key.builder().type(TypeTokens.INTEGER_VALUE_TOKEN).id("fuse_duration").name("Fuse Duration").query(of("FuseDuration")).build());
 
-        this.fieldMap.put("ticks_remaining", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.INTEGER_VALUE_TOKEN, of("TicksRemaining"), "sponge:ticks_remaining", "Ticks Remaining"));
+        this.register("ticks_remaining", Key.builder().type(TypeTokens.INTEGER_VALUE_TOKEN).id("ticks_remaining").name("Ticks Remaining").query(of("TicksRemaining")).build());
 
-        this.fieldMap.put("explosion_radius", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.INTEGER_VALUE_TOKEN, of("ExplosionRadius"), "sponge:explosion_radius", "Explosion Radius"));
+        this.register("explosion_radius", Key.builder().type(TypeTokens.INTEGER_VALUE_TOKEN).id("explosion_radius").name("Explosion Radius").query(of("ExplosionRadius")).build());
 
-        this.fieldMap.put("armor_stand_has_arms", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("HasArms"), "sponge:has_arms", "Has Arms"));
+        this.register("armor_stand_has_arms", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("has_arms").name("Has Arms").query(of("HasArms")).build());
 
-        this.fieldMap.put("armor_stand_has_base_plate", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("HasBasePlate"), "sponge:has_base_plate", "Has Base Plate"));
+        this.register("armor_stand_has_base_plate", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("has_base_plate").name("Has Base Plate").query(of("HasBasePlate")).build());
 
-        this.fieldMap.put("armor_stand_marker", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("IsMarker"), "sponge:is_marker", "Is Marker"));
+        this.register("armor_stand_marker", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("is_marker").name("Is Marker").query(of("IsMarker")).build());
 
-        this.fieldMap.put("armor_stand_is_small", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("IsSmall"), "sponge:is_small", "Is Small"));
+        this.register("armor_stand_is_small", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("is_small").name("Is Small").query(of("IsSmall")).build());
 
-        this.fieldMap.put("is_silent", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("IsSilent"), "sponge:is_silent", "Is Silent"));
+        this.register("is_silent", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("is_silent").name("Is Silent").query(of("IsSilent")).build());
 
-        this.fieldMap.put("glowing", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("Glowing"), "sponge:glowing", "Glowing"));
+        this.register("glowing", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("glowing").name("Glowing").query(of("Glowing")).build());
 
-        this.fieldMap.put("pickup_rule", makeSingleKey(TypeTokens.PICKUP_TOKEN, TypeTokens.PICKUP_VALUE_TOKEN, of("PickupRule"), "sponge:pickup_rule", "Pickup Rule"));
+        this.register("pickup_rule", Key.builder().type(TypeTokens.PICKUP_VALUE_TOKEN).id("pickup_rule").name("Pickup Rule").query(of("PickupRule")).build());
 
-        this.fieldMap.put("invulnerability_ticks", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("HurtTime"), "sponge:invulnerability_ticks", "Invulnerability Ticks"));
-        this.fieldMap.put("invulnerable", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("Invulnerable"), "sponge:invulnerable", "Invulnerable"));
+        this.register("invulnerability_ticks", Key.builder().type(TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN).id("invulnerability_ticks").name("Invulnerability Ticks").query(of("HurtTime")).build());
+        this.register("invulnerable", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("invulnerable").name("Invulnerable").query(of("Invulnerable")).build());
 
-        this.fieldMap.put("has_gravity", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("HasGravity"), "sponge:has_gravity", "Has Gravity"));
+        this.register("has_gravity", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("has_gravity").name("Has Gravity").query(of("HasGravity")).build());
 
-        this.fieldMap.put("statistics", makeSingleKey(TypeTokens.STATISTIC_MAP_TOKEN, TypeTokens.STATISTIC_MAP_VALUE_TOKEN, of("Statistics"), "sponge:statistics", "Statistics"));
+        this.register("statistics", Key.builder().type(TypeTokens.STATISTIC_MAP_VALUE_TOKEN).id("statistics").name("Statistics").query(of("Statistics")).build());
 
-        this.fieldMap.put("infinite_despawn_delay", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("InfiniteDespawnDelay"), "sponge:infinite_despawn_delay", "Infinite Despawn Delay"));
+        this.register("infinite_despawn_delay", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("infinite_despawn_delay").name("Infinite Despawn Delay").query(of("InfiniteDespawnDelay")).build());
 
-        this.fieldMap.put("infinite_pickup_delay", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("InfinitePickupDelay"), "sponge:infinite_pickup_delay", "Infinite Pickup Delay"));
+        this.register("infinite_pickup_delay", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("infinite_pickup_delay").name("Infinite Pickup Delay").query(of("InfinitePickupDelay")).build());
 
-        this.fieldMap.put("despawn_delay", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("DespawnDelay"), "sponge:despawn_delay", "Despawn Delay"));
+        this.register("despawn_delay", Key.builder().type(TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN).id("despawn_delay").name("Despawn Delay").query(of("DespawnDelay")).build());
 
-        this.fieldMap.put("pickup_delay", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("PickupDelay"), "sponge:pickup_delay", "Pickup Delay"));
+        this.register("pickup_delay", Key.builder().type(TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN).id("pickup_delay").name("Pickup Delay").query(of("PickupDelay")).build());
 
-        this.fieldMap.put("end_gateway_age", makeSingleKey(TypeTokens.LONG_TOKEN, TypeTokens.LONG_VALUE_TOKEN, of("EndGatewayAge"), "sponge:end_gateway_age", "End Gateway Age"));
-        this.fieldMap.put("end_gateway_teleport_cooldown", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.INTEGER_VALUE_TOKEN, of("EndGatewayTeleportCooldown"), "sponge:end_gateway_teleport_cooldown", "End Gateway Teleport Cooldown"));
-        this.fieldMap.put("exit_position", makeSingleKey(TypeTokens.VECTOR_3I_TOKEN, TypeTokens.VECTOR_3I_VALUE_TOKEN, of("ExitPosition"), "sponge:exit_position", "Exit Position"));
-        this.fieldMap.put("exact_teleport", makeSingleKey(TypeTokens.VECTOR_3I_TOKEN, TypeTokens.VECTOR_3I_VALUE_TOKEN, of("ExactTeleport"), "sponge:exact_teleport", "Exact Teleport"));
-        this.fieldMap.put("structure_author", makeSingleKey(TypeTokens.STRING_TOKEN, TypeTokens.STRING_VALUE_TOKEN, of("StructureAuthor"), "sponge:structure_author", "Structure Author"));
-        this.fieldMap.put("structure_ignore_entities", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("StructureIgnoreEntities"), "sponge:structure_ignore_entities", "Structure Ignore Entities"));
-        this.fieldMap.put("structure_integrity", makeSingleKey(TypeTokens.FLOAT_TOKEN, TypeTokens.FLOAT_VALUE_TOKEN, of("StructureIntegrity"), "sponge:structure_integrity", "Structure Integrity"));
-        this.fieldMap.put("structure_mode", makeSingleKey(TypeTokens.STRUCTURE_MODE_TOKEN, TypeTokens.STRUCTURE_MODE_VALUE_TOKEN, of("StructureMode"), "sponge:structure_mode", "Structure Mode"));
-        this.fieldMap.put("structure_position", makeSingleKey(TypeTokens.STRING_TOKEN, TypeTokens.STRING_VALUE_TOKEN, of("StructurePosition"), "sponge:structure_position", "Structure Position"));
-        this.fieldMap.put("structure_powered", makeSingleKey(TypeTokens.STRING_TOKEN, TypeTokens.STRING_VALUE_TOKEN, of("StructurePowered"), "sponge:structure_powered", "Structure Powered"));
-        this.fieldMap.put("structure_seed", makeSingleKey(TypeTokens.LONG_TOKEN, TypeTokens.LONG_VALUE_TOKEN, of("StructureSeed"), "sponge:structure_seed", "Structure Seed"));
-        this.fieldMap.put("structure_show_air", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("StructureShowAir"), "sponge:structure_show_air", "Structure Show Air"));
-        this.fieldMap.put("structure_show_bounding_box", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("StructureShowBoundingBox"), "sponge:structure_show_bounding_box", "Structure Show Bounding Box"));
-        this.fieldMap.put("structure_size", makeSingleKey(TypeTokens.VECTOR_3I_TOKEN, TypeTokens.VECTOR_3I_VALUE_TOKEN, of("StructureSize"), "sponge:structure_size", "Structure Size"));
-        this.fieldMap.put("absorption", makeSingleKey(TypeTokens.DOUBLE_TOKEN, TypeTokens.DOUBLE_VALUE_TOKEN, of("Absorption"), "sponge:absorption", "Absorption"));
+        this.register("end_gateway_age", Key.builder().type(TypeTokens.LONG_VALUE_TOKEN).id("end_gateway_age").name("End Gateway Age").query(of("EndGatewayAge")).build());
 
-        this.fieldMap.put("area_effect_cloud_radius", makeSingleKey(TypeTokens.DOUBLE_TOKEN, TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN, of("CloudRadius"), "sponge:area_effect_cloud_radius", "AreaEffectCloud Radius"));
+        this.register("end_gateway_teleport_cooldown", Key.builder().type(TypeTokens.INTEGER_VALUE_TOKEN).id("end_gateway_teleport_cooldown").name("End Gateway Teleport Cooldown").query(of("EndGatewayTeleportCooldown")).build());
 
-        this.fieldMap.put("area_effect_cloud_radius_on_use", makeSingleKey(TypeTokens.DOUBLE_TOKEN, TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN, of("CloudRadiusOnUse"), "sponge:area_effect_cloud_radius_on_use", "AreaEffectCloud Radius On Use"));
+        this.register("exit_position", Key.builder().type(TypeTokens.VECTOR_3I_VALUE_TOKEN).id("exit_position").name("Exit Position").query(of("ExitPosition")).build());
 
-        this.fieldMap.put("area_effect_cloud_radius_per_tick", makeSingleKey(TypeTokens.DOUBLE_TOKEN, TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN, of("CloudRadiusPerTick"), "sponge:area_effect_cloud_radius_per_tick", "AreaEffectCloud Radius Per Tick"));
+        this.register("exact_teleport", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("exact_teleport").name("Exact Teleport").query(of("ExactTeleport")).build());
 
-        this.fieldMap.put("area_effect_cloud_color", makeSingleKey(TypeTokens.COLOR_TOKEN, TypeTokens.COLOR_VALUE_TOKEN, of("CloudColor"), "sponge:area_effect_cloud_color", "AreaEffectCloud Color"));
+        this.register("structure_author", Key.builder().type(TypeTokens.STRING_VALUE_TOKEN).id("structure_author").name("Structure Author").query(of("StructureAuthor")).build());
 
-        this.fieldMap.put("area_effect_cloud_duration", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("CloudDuration"), "sponge:area_effect_cloud_duration", "AreaEffectCloud Duration"));
+        this.register("structure_ignore_entities", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("structure_ignore_entities").name("Structure Ignore Entities").query(of("StructureIgnoreEntities")).build());
 
-        this.fieldMap.put("area_effect_cloud_duration_on_use", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("CloudDurationOnUse"), "sponge:area_effect_cloud_duration_on_use", "AreaEffectCloud Duration On Use"));
+        this.register("structure_integrity", Key.builder().type(TypeTokens.FLOAT_VALUE_TOKEN).id("structure_integrity").name("Structure Integrity").query(of("StructureIntegrity")).build());
 
-        this.fieldMap.put("area_effect_cloud_wait_time", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("CloudWaitTime"), "sponge:area_effect_cloud_wait_time", "AreaEffectCloud Wait Time"));
+        this.register("structure_mode", Key.builder().type(TypeTokens.STRUCTURE_MODE_VALUE_TOKEN).id("structure_mode").name("Structure Mode").query(of("StructureMode")).build());
 
-        this.fieldMap.put("area_effect_cloud_reapplication_delay", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("CloudReapplicationDelay"), "sponge:area_effect_cloud_wait_time", "AreaEffectCloud Wait Time"));
+        this.register("structure_position", Key.builder().type(TypeTokens.STRING_VALUE_TOKEN).id("structure_position").name("Structure Position").query(of("StructurePosition")).build());
 
-        this.fieldMap.put("area_effect_cloud_age", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("CloudAge"), "sponge:area_effect_cloud_age", "AreaEffectCloud Age"));
+        this.register("structure_powered", Key.builder().type(TypeTokens.STRING_VALUE_TOKEN).id("structure_powered").name("Structure Powered").query(of("StructurePowered")).build());
 
-        this.fieldMap.put("area_effect_cloud_particle_type", makeSingleKey(TypeTokens.PARTICLE_TYPE_TOKEN, TypeTokens.PARTICLE_TYPE_VALUE_TOKEN, of("CloudParticleType"), "sponge:area_effect_cloud_particle_type", "AreaEffectCloud ParticleType"));
+        this.register("structure_seed", Key.builder().type(TypeTokens.LONG_VALUE_TOKEN).id("structure_seed").name("Structure Seed").query(of("StructureSeed")).build());
 
-        this.fieldMap.put("age", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("EntityAge"), "sponge:entity_age", "Entity Age"));
+        this.register("structure_show_air", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("structure_show_air").name("Structure Show Air").query(of("StructureShowAir")).build());
 
-        this.fieldMap.put("attack_damage", makeSingleKey(TypeTokens.DOUBLE_TOKEN, TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN, of("EntityAttackDamage"), "sponge:entity_attack_damage", "Entity Attack Damage"));
+        this.register("structure_show_bounding_box", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("structure_show_bounding_box").name("Structure Show Bounding Box").query(of("StructureShowBoundingBox")).build());
 
-        this.fieldMap.put("base_size", makeSingleKey(TypeTokens.DOUBLE_TOKEN, TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN, of("EntityBaseSize"), "sponge:base_size", "Entity Base Size"));
+        this.register("structure_size", Key.builder().type(TypeTokens.VECTOR_3I_VALUE_TOKEN).id("structure_size").name("Structure Size").query(of("StructureSize")).build());
 
-        this.fieldMap.put("damage_entity_map", makeMapKey(TypeTokens.ENTITY_TYPE_DOUBLE_MAP_TOKEN, TypeTokens.ENTITY_TYPE_DOUBLE_MAP_VALUE_TOKEN, of("DamageEntityTypeMap"), "sponge:entity_type_damage_map", "Entity Type Damage Map"));
+        this.register("absorption", Key.builder().type(TypeTokens.DOUBLE_VALUE_TOKEN).id("absorption").name("Absorption").query(of("Absorption")).build());
 
-        this.fieldMap.put("dominant_hand", makeSingleKey(TypeTokens.HAND_PREFERENCE_TYPE_TOKEN, TypeTokens.HAND_PREFERENCE_VALUE_TOKEN, of("HandPreference"), "sponge:hand_preference", "Hand Preference"));
+        this.register("area_effect_cloud_radius", Key.builder().type(TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN).id("area_effect_cloud_radius").name("AreaEffectCloud Radius").query(of("CloudRadius")).build());
 
-        this.fieldMap.put("filled", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("Filled"), "sponge:filled", "Filled"));
+        this.register("area_effect_cloud_radius_on_use", Key.builder().type(TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN).id("area_effect_cloud_radius_on_use").name("AreaEffectCloud Radius On Use").query(of("CloudRadiusOnUse")).build());
 
-        this.fieldMap.put("fluid_level", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("LiquidLevel"), "sponge:fluid_level", "Fluid Level"));
+        this.register("area_effect_cloud_radius_per_tick", Key.builder().type(TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN).id("area_effect_cloud_radius_per_tick").name("AreaEffectCloud Radius Per Tick").query(of("CloudRadiusPerTick")).build());
 
-        this.fieldMap.put("health_scale", makeSingleKey(TypeTokens.DOUBLE_TOKEN, TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN, of("HealthScale"), "sponge:health_scale", "Health Scale"));
+        this.register("area_effect_cloud_color", Key.builder().type(TypeTokens.COLOR_VALUE_TOKEN).id("area_effect_cloud_color").name("AreaEffectCloud Color").query(of("CloudColor")).build());
 
-        this.fieldMap.put("height", makeSingleKey(TypeTokens.DOUBLE_TOKEN, TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN, of("EntityHeight"), "sponge:entity_height", "Entity Height"));
+        this.register("area_effect_cloud_duration", Key.builder().type(TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN).id("area_effect_cloud_duration").name("AreaEffectCloud Duration").query(of("CloudDuration")).build());
 
-        this.fieldMap.put("held_experience", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("HeldExperience"), "sponge:held_experience", "Held Experience"));
+        this.register("area_effect_cloud_duration_on_use", Key.builder().type(TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN).id("area_effect_cloud_duration_on_use").name("AreaEffectCloud Duration On Use").query(of("CloudDurationOnUse")).build());
 
-        this.fieldMap.put("is_sleeping", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("IsSleeping"), "sponge:is_sleeping", "Is Sleeping"));
+        this.register("area_effect_cloud_wait_time", Key.builder().type(TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN).id("area_effect_cloud_wait_time").name("AreaEffectCloud Wait Time").query(of("CloudWaitTime")).build());
 
-        this.fieldMap.put("johnny_vindicator", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("JohnnyVindicator"), "sponge:johnny_vindicator", "Johnny Vindicator"));
+        this.register("area_effect_cloud_reapplication_delay", Key.builder().type(TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN).id("area_effect_cloud_wait_time").name("AreaEffectCloud Wait Time").query(of("CloudReapplicationDelay")).build());
 
-        this.fieldMap.put("last_attacker", makeSingleKey(TypeTokens.LAST_ATTACKER_TOKEN, TypeTokens.LAST_ATTACKER_VALUE_TOKEN, of("LastAttacker"), "sponge:last_attacker", "Last Attacking Entity"));
+        this.register("area_effect_cloud_age", Key.builder().type(TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN).id("area_effect_cloud_age").name("AreaEffectCloud Age").query(of("CloudAge")).build());
 
-        this.fieldMap.put("llama_strength", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("LlamaStrength"), "sponge:llama_strength", "Llama Strength"));
+        this.register("area_effect_cloud_particle_type", Key.builder().type(TypeTokens.PARTICLE_TYPE_VALUE_TOKEN).id("area_effect_cloud_particle_type").name("AreaEffectCloud ParticleType").query(of("CloudParticleType")).build());
 
-        this.fieldMap.put("llama_variant", makeSingleKey(TypeTokens.LLAMA_VARIANT_TOKEN, TypeTokens.LLAMA_VARIANT_VALUE_TOKEN, of("LlamaVariant"), "sponge:llama_variant", "Llama Variant"));
+        this.register("age", Key.builder().type(TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN).id("entity_age").name("Entity Age").query(of("EntityAge")).build());
 
-        this.fieldMap.put("scale", makeSingleKey(TypeTokens.DOUBLE_TOKEN, TypeTokens.DOUBLE_VALUE_TOKEN, of("EntityScale"), "sponge:entity_scale", "Entity Scale"));
+        this.register("attack_damage", Key.builder().type(TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN).id("entity_attack_damage").name("Entity Attack Damage").query(of("EntityAttackDamage")).build());
 
-        this.fieldMap.put("will_shatter", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("WillShatter"), "sponge:will_shatter", "Will Shatter"));
+        this.register("base_size", Key.builder().type(TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN).id("base_size").name("Entity Base Size").query(of("EntityBaseSize")).build());
 
-        this.fieldMap.put("wire_attachments", makeMapKey(TypeTokens.WIRE_ATTACHMENT_MAP_TOKEN, TypeTokens.WIRE_ATTACHMENT_MAP_VALUE_TOKEN, of("WireAttachmentMap"), "sponge:wire_attachment_map", "Wire Attachment Map"));
+        this.register("damage_entity_map", Key.builder().type(TypeTokens.ENTITY_TYPE_DOUBLE_MAP_VALUE_TOKEN).id("entity_type_damage_map").name("Entity Type Damage Map").query(of("DamageEntityTypeMap")).build());
 
-        this.fieldMap.put("wire_attachment_east", makeSingleKey(TypeTokens.WIRE_ATTACHMENT_TYPE_TOKEN, TypeTokens.WIRE_ATTACHMENT_TYPE_VALUE_TOKEN, of("WireAttachmentEast"), "sponge:wire_attachment_east", "Wire Attachment East"));
-        this.fieldMap.put("wire_attachment_south", makeSingleKey(TypeTokens.WIRE_ATTACHMENT_TYPE_TOKEN, TypeTokens.WIRE_ATTACHMENT_TYPE_VALUE_TOKEN, of("WireAttachmentSouth"), "sponge:wire_attachment_south", "Wire Attachment South"));
-        this.fieldMap.put("wire_attachment_north", makeSingleKey(TypeTokens.WIRE_ATTACHMENT_TYPE_TOKEN, TypeTokens.WIRE_ATTACHMENT_TYPE_VALUE_TOKEN, of("WireAttachmentNorth"), "sponge:wire_attachment_north", "Wire Attachment North"));
-        this.fieldMap.put("wire_attachment_west", makeSingleKey(TypeTokens.WIRE_ATTACHMENT_TYPE_TOKEN, TypeTokens.WIRE_ATTACHMENT_TYPE_VALUE_TOKEN, of("WireAttachmentWest"), "sponge:wire_attachment_west", "Wire Attachment West"));
+        this.register("dominant_hand", Key.builder().type(TypeTokens.HAND_PREFERENCE_VALUE_TOKEN).id("hand_preference").name("Hand Preference").query(of("HandPreference")).build());
 
-        this.fieldMap.put("age", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("Age"), "sponge:age", "Age"));
-        this.fieldMap.put("is_adult", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("IsAdult"), "sponge:is_adult", "Is Adult"));
-        this.fieldMap.put("is_baby", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("IsBaby"), "sponge:is_baby", "Is Baby"));
+        this.register("filled", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("filled").name("Filled").query(of("Filled")).build());
 
-        this.fieldMap.put("health_scale", makeSingleKey(TypeTokens.DOUBLE_TOKEN, TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN, of("HealthScale"), "sponge:health_scale", "Health Scale"));
+        this.register("fluid_level", Key.builder().type(TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN).id("fluid_level").name("Fluid Level").query(of("LiquidLevel")).build());
 
-        for (Key<?> key : this.fieldMap.values()) {
-            this.keyMap.put(key.getId().toLowerCase(Locale.ENGLISH), key);
-        }
+        this.register("health_scale", Key.builder().type(TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN).id("health_scale").name("Health Scale").query(of("HealthScale")).build());
 
+        this.register("height", Key.builder().type(TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN).id("entity_height").name("Entity Height").query(of("EntityHeight")).build());
+
+        this.register("held_experience", Key.builder().type(TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN).id("held_experience").name("Held Experience").query(of("HeldExperience")).build());
+
+        this.register("is_sleeping", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("is_sleeping").name("Is Sleeping").query(of("IsSleeping")).build());
+
+        this.register("is_johnny", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("is_johnny").name("Is Johnny").query(of("IsJohnny")).build());
+
+        // Deprecated
+        this.register("johnny_vindicator", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("johnny_vindicator").name("Johnny Vindicator").query(of("JohnnyVindicator")).build());
+
+        this.register("last_attacker", Key.builder().type(TypeTokens.OPTIONAL_ENTITY_SNAPSHOT_VALUE_TOKEN).id("last_attacker").name("Last Attacker").query(of("LastAttacker")).build());
+
+        this.register("last_damage", Key.builder().type(TypeTokens.OPTIONAL_DOUBLE_VALUE_TOKEN).id("last_damage").name("Last Damage Taken").query(of("LastDamage")).build());
+
+        this.register("llama_strength", Key.builder().type(TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN).id("llama_strength").name("Llama Strength").query(of("LlamaStrength")).build());
+
+        this.register("llama_variant", Key.builder().type(TypeTokens.LLAMA_VARIANT_VALUE_TOKEN).id("llama_variant").name("Llama Variant").query(of("LlamaVariant")).build());
+
+        this.register("scale", Key.builder().type(TypeTokens.DOUBLE_VALUE_TOKEN).id("entity_scale").name("Entity Scale").query(of("EntityScale")).build());
+
+        this.register("will_shatter", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("will_shatter").name("Will Shatter").query(of("WillShatter")).build());
+
+        this.register("wire_attachments", Key.builder().type(TypeTokens.WIRE_ATTACHMENT_MAP_VALUE_TOKEN).id("wire_attachment_map").name("Wire Attachment Map").query(of("WireAttachmentMap")).build());
+
+        this.register("wire_attachment_east", Key.builder().type(TypeTokens.WIRE_ATTACHMENT_TYPE_VALUE_TOKEN).id("wire_attachment_east").name("Wire Attachment East").query(of("WireAttachmentEast")).build());
+
+        this.register("wire_attachment_south", Key.builder().type(TypeTokens.WIRE_ATTACHMENT_TYPE_VALUE_TOKEN).id("wire_attachment_south").name("Wire Attachment South").query(of("WireAttachmentSouth")).build());
+
+        this.register("wire_attachment_north", Key.builder().type(TypeTokens.WIRE_ATTACHMENT_TYPE_VALUE_TOKEN).id("wire_attachment_north").name("Wire Attachment North").query(of("WireAttachmentNorth")).build());
+
+        this.register("wire_attachment_west", Key.builder().type(TypeTokens.WIRE_ATTACHMENT_TYPE_VALUE_TOKEN).id("wire_attachment_west").name("Wire Attachment West").query(of("WireAttachmentWest")).build());
+
+        this.register("age", Key.builder().type(TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN).id("age").name("Age").query(of("Age")).build());
+
+        this.register("is_adult", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("is_adult").name("Is Adult").query(of("IsAdult")).build());
+
+        this.register("is_baby", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("is_baby").name("Is Baby").query(of("IsBaby")).build());
+
+        this.register("health_scale", Key.builder().type(TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN).id("health_scale").name("Health Scale").query(of("HealthScale")).build());
+
+        register("is_elytra_flying", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("is_elytra_flying").name("Is Elytra Flying").query(of("ElytraFlying")).build());
+
+        // All sponge provided keys are belong to sponge. Other plugins are going to have their own keys with their own plugin containers
+        Sponge.getCauseStackManager().popCause();
     }
 
+    private void register(String fieldName, Key<?> key) {
+        this.fieldMap.put(fieldName, key);
+        this.keyMap.put(key.getId().toLowerCase(Locale.ENGLISH), key);
+    }
+
+    @SuppressWarnings("rawtypes")
     @Override
     public void registerAdditionalCatalog(Key<?> extraCatalog) {
-        checkState(!SpongeDataManager.areRegistrationsComplete(), "Cannot register new Keys after Data Registration has completed!");
+        checkState(!SpongeDataManager.areRegistrationsComplete(), "Cannot this.register new Keys after Data Registration has completed!");
         checkNotNull(extraCatalog, "Key cannot be null!");
+        final PluginContainer parent = ((SpongeKey) extraCatalog).getParent();
+        final String pluginId = parent.getId().toLowerCase(Locale.ENGLISH);
         final String id = extraCatalog.getId().toLowerCase(Locale.ENGLISH);
-        checkArgument(!id.startsWith("sponge:"), "A plugin is trying to register custom keys under the sponge id namespace! This is a fake key! " + id);
+        final String[] split = id.split(":");
+        checkArgument(split.length == 2, "Key id's have to be in two parts! The first part being the plugin id, the second part being the key's individual id. Currently you have: " + Arrays.toString(split));
+        checkArgument(split[0].equals(pluginId),  "A plugin is trying to this.register custom keys under a different plugin id namespace! This is unsupported! The provided key: " + id);
         this.keyMap.put(id, extraCatalog);
     }
 
     @Override
     public Optional<Key<?>> getById(String id) {
-        return Optional.ofNullable(this.keyMap.get(id));
+        return Optional.ofNullable(this.keyMap.get(id.toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
@@ -615,47 +647,61 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
         return Collections.unmodifiableCollection(this.keyMap.values());
     }
 
-    private static final class PatternKey implements Key<PatternListValue> {
+    private KeyRegistryModule() {
+    }
 
-        static final TypeToken<PatternListValue> VALUE_TOKEN = new TypeToken<PatternListValue>() {
-            private static final long serialVersionUID = -1;
-        };
-        static final TypeToken<List<PatternLayer>> ELEMENT_TOKEN = new TypeToken<List<PatternLayer>>() {
-            private static final long serialVersionUID = -1;
-        };
-        private static final DataQuery BANNER_PATTERNS = of("BannerPatterns");
-
-        PatternKey() {
-        }
-
-        @Override
-        public TypeToken<PatternListValue> getValueToken() {
-            return VALUE_TOKEN;
-        }
-
-        @Override
-        public TypeToken<?> getElementToken() {
-            return ELEMENT_TOKEN;
-        }
-
-        @Override
-        public DataQuery getQuery() {
-            return BANNER_PATTERNS;
-        }
-
-        @Override
-        public String getId() {
-            return "sponge:banner_patterns";
-        }
-
-        @Override
-        public String getName() {
-            return "BannerPatterns";
+    @SuppressWarnings("rawtypes")
+    public void registerKeyListeners() {
+        for (Key<?> key : this.keyMap.values()) {
+            ((SpongeKey) key).registerListeners();
         }
     }
 
-    KeyRegistryModule() {
+    public void registerForEntityClass(Class<? extends Entity> cls) {
+        try {
+            List<DataParameterConverter<?>> converters = LOADED_CLASSES.computeIfAbsent(cls, k -> new ArrayList<>());
+            final Callable<List<DataParameterConverter<?>>> callable = DATA_PARAMETER_FUNCTION_GETTERS.get(cls);
+            if (callable != null) {
+                final List<DataParameterConverter<?>> call = callable.call();
+                converters.addAll(call);
+                // just need to call, the constructor should perform the actual registration to the parameter.
+            }
+            // Then start climbing the hierarchy
+            Class<?> clazz = cls.getSuperclass();
+            do {
+                List<DataParameterConverter<?>> superConverters = LOADED_CLASSES.computeIfAbsent(clazz, k -> new ArrayList<>());
+
+                final Callable<List<DataParameterConverter<?>>> listCallable = DATA_PARAMETER_FUNCTION_GETTERS.get(clazz);
+                if (listCallable != null) {
+                    final List<DataParameterConverter<?>> call = listCallable.call();
+                    superConverters.addAll(call);
+                    converters.addAll(call);
+                    // just need to call, the constructor should perform the actual registration to the parameter.
+                }
+                clazz = clazz.getSuperclass();
+            }  while (clazz.getSuperclass() != Object.class && !LOADED_CLASSES.containsKey(clazz));
+        } catch (Exception e) {
+            // we don't care about exceptions
+        }
     }
+
+    // This is to avoid duplication of calling converters and creating them.
+    // Likewise, this will allow us to maybe do some super management
+    // of multiple changes in one go.
+    private static final ConcurrentHashMap<Class<?>, List<DataParameterConverter<?>>> LOADED_CLASSES = new ConcurrentHashMap<>();
+    private static final Map<Class<? extends Entity>, Callable<List<DataParameterConverter<?>>>> DATA_PARAMETER_FUNCTION_GETTERS = ImmutableMap.<Class<? extends Entity>, Callable<List<DataParameterConverter<?>>>>builder()
+        .put(Entity.class, () -> {
+            final ArrayList<DataParameterConverter<?>> objects = new ArrayList<>();
+            objects.add(new EntityFlagsConverter());
+            objects.add(new EntityCustomNameVisibleConverter());
+            objects.add(new EntitySilentConverter());
+            objects.add(new EntityAirConverter());
+            objects.add(new EntityCustomNameConverter());
+            objects.add(new EntityNoGravityConverter());
+            objects.add(new EntityBabyConverter());
+            return objects;
+        })
+        .build();
 
     static final class Holder {
         static final KeyRegistryModule INSTANCE = new KeyRegistryModule();

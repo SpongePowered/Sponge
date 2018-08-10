@@ -53,9 +53,9 @@ public class DispenserSourceLogic implements ProjectileSourceLogic<Dispenser> {
         if (projectile.isPresent()) {
             EnumFacing enumfacing = getFacing((TileEntityDispenser) source);
             net.minecraft.entity.Entity projectileEntity = (net.minecraft.entity.Entity) projectile.get();
-            projectileEntity.motionX = enumfacing.getFrontOffsetX();
-            projectileEntity.motionY = enumfacing.getFrontOffsetY() + 0.1F;
-            projectileEntity.motionZ = enumfacing.getFrontOffsetZ();
+            projectileEntity.motionX = enumfacing.getXOffset();
+            projectileEntity.motionY = enumfacing.getYOffset() + 0.1F;
+            projectileEntity.motionZ = enumfacing.getZOffset();
         }
         return projectile;
     }

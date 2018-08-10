@@ -57,6 +57,8 @@ public final class DataConstants {
 
     public static final int DEFAULT_FIRE_TICKSVALUE = 10;
     public static final int DEFAULT_FIRE_DAMAGE_DELAY = 20;
+    public static final int ADULT = 6000;
+    public static final int CHILD = -24000;
 
     private DataConstants() {}
 
@@ -67,6 +69,7 @@ public final class DataConstants {
     public static final boolean DEFAULT_SHOULD_DROP = true;
     public static final boolean DEFAULT_PISTON_EXTENDED = false;
 
+    public static final int ELYTRA_FLYING_FLAG = 7;
 
     // A bunch of entity defaults (for use in constructing "default" values)
     public static final boolean CAN_FLY_DEFAULT = false;

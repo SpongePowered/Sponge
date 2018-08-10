@@ -25,16 +25,94 @@
 package org.spongepowered.common.mixin.core.network.datasync;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.minecraft.entity.Entity;
+import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.EntityDataManager;
+import org.apache.commons.lang3.ObjectUtils;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.data.ChangeDataHolderEvent;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.data.datasync.DataParameterConverter;
+import org.spongepowered.common.interfaces.network.datasync.IMixinDataParameter;
+import org.spongepowered.common.registry.type.data.KeyRegistryModule;
 
 import java.util.Map;
+import java.util.Optional;
 
 @Mixin(EntityDataManager.class)
-public class MixinEntityDataManager {
+public abstract class MixinEntityDataManager {
 
-    @Shadow @Final @Mutable public Map < Integer, EntityDataManager.DataEntry<? >> entries = new Int2ObjectOpenHashMap<>();
+    // This overrides the setter for the entries of the
+    // data manager to use a "faster" map.
+    @Shadow @Final @Mutable private Map < Integer, EntityDataManager.DataEntry<? >> entries = new Int2ObjectOpenHashMap<>();
+
+    // The rest is actually used in the overwrite below.
+    @Shadow @Final protected Entity entity;
+    @Shadow private boolean dirty;
+
+    @Shadow protected abstract <T> EntityDataManager.DataEntry<T> getEntry(DataParameter<T> key);
+
+    /**
+     * @author gabizou December 27th, 2017
+     * @reason Inject ChangeValueEvent for entities by utilizing keys. Keys are registered
+     *     based on the entity of which they belong to. This is to make the events more streamlined
+     *     with regards to "when" they are being changed.
+     * @param key The parameter key
+     * @param value The value
+     * @param <T> The type of value
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Overwrite
+    public <T> void set(DataParameter<T> key, T value) {
+        EntityDataManager.DataEntry<T> dataentry = this.<T>getEntry(key);
+
+        // Sponge Start - set up the current value, so we don't have to retrieve it multiple times
+        final T currentValue = dataentry.getValue();
+        final T incomingValue = value;
+        if (ObjectUtils.notEqual(value, currentValue)) { // Sponge - change dataentry.getValue() to use local variable
+            // Sponge Start - retrieve the associated key, if available
+            // Client side can have an entity, because reasons.......
+            // Really silly reasons......
+            // I don't know, ask Grum....
+            if (this.entity != null && this.entity.world != null && !this.entity.world.isRemote) { // We only want to spam the server world ;)
+                final Optional<DataParameterConverter<T>> converter = ((IMixinDataParameter) key).getConverter();
+                // At this point it is changing
+                if (converter.isPresent()) {
+                    // Ok, we have a key ready to use the converter
+                    final Optional<DataTransactionResult> optional = converter.get().createTransaction(currentValue, value);
+                    if (optional.isPresent()) {
+                        // Only need to make a transaction if there are actual changes necessary.
+                        final DataTransactionResult transaction = optional.get();
+                        final ChangeDataHolderEvent.ValueChange
+                            event =
+                            SpongeEventFactory.createChangeDataHolderEventValueChange(Sponge.getCauseStackManager().getCurrentCause(), transaction,
+                                (DataHolder) this.entity);
+                        Sponge.getEventManager().post(event);
+                        if (event.isCancelled()) {
+                            //If the event is cancelled, well, don't change the underlying value.
+                            return;
+                        }
+                        try {
+                            value = converter.get().getValueFromEvent(currentValue, event.getEndResult().getSuccessfulData());
+                        } catch (Exception e) {
+                            // Worst case scenario, we don't want to cause an issue, so we just set the value
+                            value = incomingValue;
+                        }
+                    }
+                }
+            }
+            // Sponge End
+            dataentry.setValue(value);
+            this.entity.notifyDataManagerChange(key);
+            dataentry.setDirty(true);
+            this.dirty = true;
+        }
+    }
 }

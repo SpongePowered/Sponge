@@ -34,6 +34,8 @@ public interface IMixinEntityItem {
 
     boolean infiniteDespawnDelay();
 
+    void setDespawnDelay(int delay);
+
     int getDespawnDelay();
 
     void setDespawnDelay(int delay, boolean infinite);

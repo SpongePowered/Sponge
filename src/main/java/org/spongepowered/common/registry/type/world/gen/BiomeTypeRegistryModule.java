@@ -66,7 +66,7 @@ public final class BiomeTypeRegistryModule
                 String id = ((BiomeType) biome).getId();
                 if (id == null) {
                     ResourceLocation reg_id = Biome.REGISTRY.getNameForObject(biome);
-                    ((IMixinBiome) biome).setModId(reg_id.getResourceDomain());
+                    ((IMixinBiome) biome).setModId(reg_id.getNamespace());
                     id = reg_id.toString();
                     ((IMixinBiome) biome).setId(id);
                 }
@@ -83,7 +83,7 @@ public final class BiomeTypeRegistryModule
                 String id = ((BiomeType) biome).getId();
                 if (id == null) {
                     ResourceLocation reg_id = Biome.REGISTRY.getNameForObject(biome);
-                    ((IMixinBiome) biome).setModId(reg_id.getResourceDomain());
+                    ((IMixinBiome) biome).setModId(reg_id.getNamespace());
                     id = reg_id.toString();
                     ((IMixinBiome) biome).setId(id);
                 }

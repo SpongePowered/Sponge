@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking.phase.packet;
 
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.Packet;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
@@ -33,6 +34,8 @@ import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.common.event.tracking.phase.packet.drag.DragInventoryStopState;
+import org.spongepowered.common.interfaces.IMixinContainer;
 
 import java.util.List;
 
@@ -47,4 +50,17 @@ final class DoubleClickInventoryState extends BasicInventoryPacketState {
             List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, int usedButton) {
         return SpongeEventFactory.createClickInventoryEventDouble(Sponge.getCauseStackManager().getCurrentCause(), transaction, openContainer, slotTransactions);
     }
+
+    @Override
+    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, InventoryPacketContext context) {
+        super.populateContext(playerMP, packet, context);
+        ((IMixinContainer) playerMP.openContainer).setFirePreview(false);
+    }
+
+    @Override
+    public void unwind(InventoryPacketContext context) {
+        DragInventoryStopState.unwindCraftPreview(context);
+        super.unwind(context);
+    }
+
 }

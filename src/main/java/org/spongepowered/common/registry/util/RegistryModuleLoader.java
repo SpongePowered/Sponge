@@ -55,7 +55,6 @@ public final class RegistryModuleLoader {
                 if (isCustomProperPhase(module)) {
                     Method method = getCustomRegistration(module);
                     invokeCustomRegistration(module, checkNotNull(method, "Custom registration module was null!"));
-
                 }
             } else if (isDefaultProperPhase(module)) {
                 module.registerDefaults();

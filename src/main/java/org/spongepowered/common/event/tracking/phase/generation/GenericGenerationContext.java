@@ -28,7 +28,6 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 
 public class GenericGenerationContext extends GenerationContext<GenericGenerationContext> {
 
-
     GenericGenerationContext(IPhaseState<? extends GenericGenerationContext> state) {
         super(state);
     }

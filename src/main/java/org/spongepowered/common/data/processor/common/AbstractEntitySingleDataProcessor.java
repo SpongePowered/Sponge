@@ -30,6 +30,15 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
 
+/**
+ * A superclass for targeting specific {@link Entity} hierarchical types,
+ * since we can
+ * @param <E>
+ * @param <ValueType>
+ * @param <ValueClassType>
+ * @param <Manipulator>
+ * @param <Immutable>
+ */
 public abstract class AbstractEntitySingleDataProcessor<E extends Entity, ValueType, ValueClassType extends BaseValue<ValueType>,
     Manipulator extends DataManipulator<Manipulator, Immutable>, Immutable extends ImmutableDataManipulator<Immutable, Manipulator>>
     extends AbstractSingleDataSingleTargetProcessor<E, ValueType, ValueClassType, Manipulator, Immutable> {

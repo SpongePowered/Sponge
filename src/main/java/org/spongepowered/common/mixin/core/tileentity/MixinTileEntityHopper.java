@@ -34,7 +34,6 @@ import net.minecraft.tileentity.IHopper;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityHopper;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.tileentity.carrier.Hopper;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -54,6 +53,7 @@ import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinInventory;
+import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
@@ -69,6 +69,7 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
+@SuppressWarnings("rawtypes")
 @NonnullByDefault
 @Mixin(TileEntityHopper.class)
 public abstract class MixinTileEntityHopper extends MixinTileEntityLockableLoot implements Hopper, IMixinInventory {
@@ -96,17 +97,17 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockableLoot 
 
     @SuppressWarnings("unchecked")
     @Override
-    public ReusableLens<?> generateLens(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
+    public ReusableLens<?> generateLens(Fabric fabric, InventoryAdapter adapter) {
         return ReusableLens.getLens(GridInventoryLens.class, ((InventoryAdapter) this), this::generateSlotProvider, this::generateRootLens);
     }
 
     @SuppressWarnings("unchecked")
-    private SlotProvider<IInventory, ItemStack> generateSlotProvider() {
+    private SlotProvider generateSlotProvider() {
         return new SlotCollection.Builder().add(5).build();
     }
 
     @SuppressWarnings("unchecked")
-    private GridInventoryLens<IInventory, ItemStack> generateRootLens(SlotProvider<IInventory, ItemStack> slots) {
+    private GridInventoryLens generateRootLens(SlotProvider slots) {
         Class<? extends InventoryAdapter> thisClass = ((Class) this.getClass());
         return new GridInventoryLensImpl(0, 5, 1, 5, thisClass, slots);
     }
@@ -116,9 +117,8 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockableLoot 
         ((IMixinEntity) entityItem).getCreatorUser().ifPresent(owner -> {
             if (inventory instanceof TileEntity) {
                 TileEntity te = (TileEntity) inventory;
-                BlockPos pos = te.getPos();
-                IMixinChunk spongeChunk = (IMixinChunk) te.getWorld().getChunkFromBlockCoords(pos);
-                spongeChunk.addTrackedBlockPosition(te.getBlockType(), pos, owner, PlayerTracker.Type.NOTIFIER);
+                IMixinChunk spongeChunk = (IMixinChunk) ((IMixinTileEntity) te).getActiveChunk();
+                spongeChunk.addTrackedBlockPosition(te.getBlockType(), te.getPos(), owner, PlayerTracker.Type.NOTIFIER);
             }
         });
     }
@@ -142,11 +142,9 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockableLoot 
 
     @Redirect(method = "pullItems", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntityHopper;isInventoryEmpty(Lnet/minecraft/inventory/IInventory;Lnet/minecraft/util/EnumFacing;)Z"))
     private static boolean onIsInventoryEmpty(IInventory inventory, EnumFacing facing, IHopper hopper) {
-        if (isInventoryEmpty(inventory, facing)) {
-            return true;
-        }
-        if (!ShouldFire.CHANGE_INVENTORY_EVENT_TRANSFER_PRE) {
-            return true;
+        boolean result = isInventoryEmpty(inventory, facing);
+        if (result || !ShouldFire.CHANGE_INVENTORY_EVENT_TRANSFER_PRE) {
+            return result;
         }
         return SpongeCommonEventFactory.callTransferPre(toInventory(inventory), toInventory(hopper)).isCancelled();
     }
@@ -154,11 +152,9 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockableLoot 
     @Redirect(method = "transferItemsOut", at = @At(value = "INVOKE",
               target = "Lnet/minecraft/tileentity/TileEntityHopper;isInventoryFull(Lnet/minecraft/inventory/IInventory;Lnet/minecraft/util/EnumFacing;)Z"))
     private boolean onIsInventoryFull(TileEntityHopper hopper, IInventory inventory, EnumFacing enumfacing) {
-        if (this.isInventoryFull(inventory, enumfacing)) {
-            return true;
-        }
-        if (!ShouldFire.CHANGE_INVENTORY_EVENT_TRANSFER_PRE) {
-            return true;
+        boolean result = this.isInventoryFull(inventory, enumfacing);
+        if (result || !ShouldFire.CHANGE_INVENTORY_EVENT_TRANSFER_PRE) {
+            return result;
         }
         return SpongeCommonEventFactory.callTransferPre(toInventory(hopper), toInventory(inventory)).isCancelled();
     }
@@ -219,6 +215,12 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockableLoot 
                 itemStack1 = itemStack;
             }
         }
+    }
+
+
+    @Redirect(method = "putDropInInventoryAllSlots", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntityHopper;putStackInInventoryAllSlots(Lnet/minecraft/inventory/IInventory;Lnet/minecraft/inventory/IInventory;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/EnumFacing;)Lnet/minecraft/item/ItemStack;"))
+    private static ItemStack onPutStackInInventoryAllSlots(IInventory source, IInventory destination, ItemStack stack, EnumFacing direction, IInventory s2, IInventory d2, EntityItem entity) {
+        return SpongeCommonEventFactory.callInventoryPickupEvent(destination, entity, stack);
     }
 
     private static @Nullable IMixinInventory forCapture(Object toCapture) {

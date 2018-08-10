@@ -24,10 +24,33 @@
  */
 package org.spongepowered.common.event.tracking.phase.plugin;
 
+import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseContext;
+
+import javax.annotation.Nullable;
 
 public class BasicPluginContext extends PluginPhaseContext<BasicPluginContext> {
+
+    @Nullable PluginContainer container;
+
     public BasicPluginContext(IPhaseState<BasicPluginContext> phaseState) {
         super(phaseState);
+    }
+
+    public BasicPluginContext container(PluginContainer container) {
+        this.container = container;
+        return this;
+    }
+
+    @Override
+    public PrettyPrinter printCustom(PrettyPrinter printer, int indent) {
+        super.printCustom(printer, indent);
+        String s = String.format("%1$"+indent+"s", "");
+        if (this.container != null) {
+            printer.add(s + "- %s: %s", "PluginContainer", this.container);
+        }
+        return printer;
     }
 }

@@ -34,9 +34,11 @@ import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
+import org.spongepowered.common.util.VecHelper;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Optional;
 
 public final class SpongeProxyBlockAccess implements IBlockAccess {
 
@@ -49,7 +51,10 @@ public final class SpongeProxyBlockAccess implements IBlockAccess {
     public SpongeProxyBlockAccess(List<Transaction<BlockSnapshot>> snapshotTransaction) {
         this.transactions = snapshotTransaction;
         this.poses = this.transactions.stream()
-            .map(transaction -> ((IMixinLocation) (Object) transaction.getOriginal().getLocation().get()).getBlockPos())
+            .map(transaction -> transaction.getOriginal().getLocation())
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .map(VecHelper::toBlockPos)
             .collect(ImmutableList.toImmutableList());
         this.index = 0;
         this.processingWorld = ((WorldServer) snapshotTransaction.get(0).getOriginal().getLocation().get().getExtent());

@@ -24,45 +24,74 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.comp;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.api.entity.ArmorEquipable;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.api.item.inventory.property.EquipmentSlotType;
+import org.spongepowered.api.item.inventory.property.SlotIndex;
+import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.EquipmentInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.comp.EquipmentInventoryLens;
-import org.spongepowered.common.item.inventory.lens.impl.slots.EquipmentSlotLensImpl;
 
-public class EquipmentInventoryLensImpl extends OrderedInventoryLensImpl implements EquipmentInventoryLens<IInventory, ItemStack> {
+import java.util.Optional;
 
-    final ArmorEquipable carrier;
+public class EquipmentInventoryLensImpl extends OrderedInventoryLensImpl implements EquipmentInventoryLens {
 
-    public EquipmentInventoryLensImpl(ArmorEquipable carrier, int base, int size, int stride, SlotProvider<IInventory, ItemStack> slots) {
+    public EquipmentInventoryLensImpl(int base, int size, int stride, SlotProvider slots,
+            boolean isContainer) {
         super(base, size, stride, EquipmentInventoryAdapter.class, slots);
-        this.carrier = carrier;
+        if (isContainer) {
+            this.initContainer(slots);
+        } else {
+            this.initInventory(slots);
+        }
     }
 
     @Override
-    protected void init(SlotProvider<IInventory, ItemStack> slots) {
-        super.init(slots);
-        // TODO predicates for ItemStack/ItemType?
-        int index = base;
-        // BOOTS
-        this.addChild(new EquipmentSlotLensImpl(index, i -> true, t -> true, e -> e == EquipmentTypes.BOOTS), EquipmentSlotType.of(EquipmentTypes.BOOTS));
-        index++;       // LEGGINGS
-        this.addChild(new EquipmentSlotLensImpl(index, i -> true, t -> true, e -> e == EquipmentTypes.LEGGINGS), EquipmentSlotType.of(EquipmentTypes.LEGGINGS));
-        index++;       // CHEST
-        this.addChild(new EquipmentSlotLensImpl(index, i -> true, t -> true, e -> e == EquipmentTypes.CHESTPLATE), EquipmentSlotType.of(EquipmentTypes.CHESTPLATE));
-        index ++;       // HEAD
-        this.addChild(new EquipmentSlotLensImpl(index, i -> true, t -> true, e -> e == EquipmentTypes.HEADWEAR), EquipmentSlotType.of(EquipmentTypes.HEADWEAR));
+    protected void init(SlotProvider slots) {
     }
 
+    private void initInventory(SlotProvider slots) {
+        int index = this.base;
+        int ord = 0;
+        this.addSpanningChild(slots.getSlot(index), new SlotIndex(ord++), EquipmentSlotType.of(EquipmentTypes.BOOTS));
+        index += this.stride;
+        this.addSpanningChild(slots.getSlot(index), new SlotIndex(ord++), EquipmentSlotType.of(EquipmentTypes.LEGGINGS));
+        index += this.stride;
+        this.addSpanningChild(slots.getSlot(index), new SlotIndex(ord++), EquipmentSlotType.of(EquipmentTypes.CHESTPLATE));
+        index += this.stride;
+        this.addSpanningChild(slots.getSlot(index), new SlotIndex(ord), EquipmentSlotType.of(EquipmentTypes.HEADWEAR));
+
+        this.cache();
+    }
+
+    private void initContainer(SlotProvider slots) {
+        int index = this.base;
+        int ord = 0;
+        this.addSpanningChild(slots.getSlot(index), new SlotIndex(ord++), EquipmentSlotType.of(EquipmentTypes.HEADWEAR));
+        index += this.stride;
+        this.addSpanningChild(slots.getSlot(index), new SlotIndex(ord++), EquipmentSlotType.of(EquipmentTypes.CHESTPLATE));
+        index += this.stride;
+        this.addSpanningChild(slots.getSlot(index), new SlotIndex(ord++), EquipmentSlotType.of(EquipmentTypes.LEGGINGS));
+        index += this.stride;
+        this.addSpanningChild(slots.getSlot(index), new SlotIndex(ord), EquipmentSlotType.of(EquipmentTypes.BOOTS));
+
+        this.cache();
+    }
+
+    @SuppressWarnings("rawtypes")
     @Override
-    public InventoryAdapter<IInventory, ItemStack> getAdapter(Fabric<IInventory> inv, Inventory parent) {
-        return new EquipmentInventoryAdapter(this.carrier, inv, this, parent);
+    public InventoryAdapter getAdapter(Fabric inv, Inventory parent) {
+        ArmorEquipable carrier = null;
+        if (parent instanceof CarriedInventory) {
+            Optional opt = ((CarriedInventory) parent).getCarrier();
+            if (opt.isPresent() && opt.get() instanceof ArmorEquipable) {
+                carrier = ((ArmorEquipable) opt.get());
+            }
+        }
+        return new EquipmentInventoryAdapter(carrier, inv, this, parent);
     }
 }

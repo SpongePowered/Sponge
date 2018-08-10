@@ -26,11 +26,12 @@ package org.spongepowered.common.interfaces.world;
 
 import org.spongepowered.api.world.PortalAgentType;
 
-public interface IMixinTeleporter {
+public interface IMixinTeleporter extends IMixinITeleporter {
 
-    void removePortalPositionFromCache(Long portalLocation);
+  void removePortalPositionFromCache(Long portalLocation);
 
-    void setPortalAgentType(PortalAgentType type);
+  void setPortalAgentType(PortalAgentType type);
 
-    void setPortalType(int dimensionId);
+  void setNetherPortalType(boolean isNetherPortal);
+
 }

@@ -150,27 +150,33 @@ public abstract class MixinEntityFireworkRocket extends MixinEntity implements F
         this.explosionRadius = radius.orElse(DEFAULT_EXPLOSION_RADIUS);
     }
 
+    @SuppressWarnings("deprecation")
     @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = TARGET_ENTITY_STATE))
     protected void onExplode(World world, Entity self, byte state) {
-        // Fireworks don't typically explode like other explosives, but we'll
-        // post an event regardless and if the radius is zero the explosion
-        // won't be triggered (the default behavior).
-        Sponge.getCauseStackManager().pushCause(this);
-        Sponge.getCauseStackManager().addContext(EventContextKeys.THROWER, getShooter());
-        detonate(Explosion.builder()
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            // Fireworks don't typically explode like other explosives, but we'll
+            // post an event regardless and if the radius is zero the explosion
+            // won't be triggered (the default behavior).
+            frame.pushCause(this);
+            frame.addContext(EventContextKeys.THROWER, getShooter()); // TODO - Remove in 1.13/API 8
+            frame.addContext(EventContextKeys.PROJECTILE_SOURCE, getShooter());
+            detonate(Explosion.builder()
                 .sourceExplosive(this)
                 .location(getLocation())
                 .radius(this.explosionRadius))
                 .ifPresent(explosion -> world.setEntityState(self, state));
-        Sponge.getCauseStackManager().popCause();
+            frame.popCause();
+        }
     }
 
+    @SuppressWarnings("deprecation")
     @Inject(method = "onUpdate", at = @At("RETURN"))
     protected void onUpdate(CallbackInfo ci) {
         if (this.fireworkAge == 1 && !this.world.isRemote) {
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                Sponge.getCauseStackManager().pushCause(this);
-                Sponge.getCauseStackManager().addContext(EventContextKeys.THROWER, getShooter());
+                frame.pushCause(this);
+                frame.addContext(EventContextKeys.THROWER, getShooter()); // TODO - Remove in 1.13/API 8
+                frame.addContext(EventContextKeys.PROJECTILE_SOURCE, getShooter());
                 postPrime();
             }
         }
@@ -179,11 +185,11 @@ public abstract class MixinEntityFireworkRocket extends MixinEntity implements F
     @Redirect(method = "dealExplosionDamage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;attackEntityFrom"
             + "(Lnet/minecraft/util/DamageSource;F)Z"))
     public boolean useEntitySource(EntityLivingBase entityLivingBase, DamageSource source, float amount) {
-        final DamageSource originalFireworks = DamageSource.FIREWORKS;
-        DamageSource.FIREWORKS = new EntityDamageSource(originalFireworks.damageType, (Entity) (Object) this).setExplosion();
-        final boolean result = entityLivingBase.attackEntityFrom(DamageSource.FIREWORKS, amount);
-        DamageSource.FIREWORKS = originalFireworks;
-
-        return result;
+        try {
+            DamageSource.FIREWORKS = new EntityDamageSource(DamageSource.FIREWORKS.damageType, (Entity) (Object) this).setExplosion();
+            return entityLivingBase.attackEntityFrom(DamageSource.FIREWORKS, amount);
+        } finally {
+            DamageSource.FIREWORKS = source;
+        }
     }
 }

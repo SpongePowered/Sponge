@@ -1,0 +1,23 @@
+{
+    "display": {
+        "icon": {
+            "item": "minecraft:leaves"
+        },
+        "title": "Where are they?",
+        "description": "Break leaves to find apples.",
+        "frame": "task",
+        "show_toast": true,
+        "announce_to_chat": true,
+        "hidden": false
+    },
+    "parent": "advancement_test:apples/root",
+    "criteria": {
+        "test": {
+            "trigger": "advancement_test:my_trigger",
+            "trigger_times": 5,
+            "conditions": {
+                "chance": 0.25
+            }
+        }
+    }
+}

@@ -32,6 +32,11 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import java.util.Map;
 import java.util.OptionalDouble;
@@ -45,7 +50,9 @@ public abstract class MixinCooldownTracker implements org.spongepowered.api.enti
 
     @Shadow public abstract boolean hasCooldown(Item itemIn);
     @Shadow public abstract float getCooldown(Item itemIn, float partialTicks);
-    @Shadow public abstract void setCooldown(Item itemIn, int ticksIn);
+    @Shadow public abstract void setCooldown(final Item item, final int ticks);
+
+    private boolean lastSetCooldownResult;
 
     @Override
     public boolean hasCooldown(final ItemType type) {
@@ -70,16 +77,40 @@ public abstract class MixinCooldownTracker implements org.spongepowered.api.enti
     }
 
     @Override
-    public void setCooldown(final ItemType type, final int ticks) {
+    public boolean setCooldown(final ItemType type, final int ticks) {
         checkNotNull(type, "Item type cannot be null!");
         isItem(type);
 
-        setCooldown((Item) type, ticks);
+        this.setCooldown((Item) type, ticks);
+        return this.lastSetCooldownResult;
+    }
+
+    @Inject(
+            method = "setCooldown",
+            at = @At(
+                    value = "INVOKE",
+                    shift = At.Shift.BEFORE,
+                    target = "Ljava/util/Map;put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",
+                    remap = false
+            ),
+            locals = LocalCapture.CAPTURE_FAILHARD
+    )
+    private void catchIt(final Item item, final int ticks, final CallbackInfo ci) {
+        this.lastSetCooldownResult = this.throwSetCooldownEvent((ItemType) item, ticks);
+        if (!this.lastSetCooldownResult) {
+            ci.cancel();
+        }
+    }
+
+    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Ljava/util/Map$Entry;getKey()Ljava/lang/Object;", remap = false))
+    private Object onTick(Map.Entry<Item, CooldownTracker.Cooldown> entry) {
+        throwEndCooldownEvent((ItemType) entry.getKey());
+        return entry.getKey();
     }
 
     @Override
-    public void resetCooldown(final ItemType type) {
-        setCooldown(type, 0);
+    public boolean resetCooldown(final ItemType type) {
+        return setCooldown(type, 0);
     }
 
     @Override
@@ -99,6 +130,14 @@ public abstract class MixinCooldownTracker implements org.spongepowered.api.enti
         if (!(type instanceof Item)) {
             throw new RuntimeException("The specified ItemType was not properly mapped internally.");
         }
+    }
+
+    protected boolean throwSetCooldownEvent(final ItemType type, final int ticks) {
+        return true;
+    }
+
+    protected void throwEndCooldownEvent(final ItemType type) {
+
     }
 
 }

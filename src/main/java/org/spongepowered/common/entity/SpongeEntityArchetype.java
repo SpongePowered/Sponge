@@ -36,7 +36,8 @@ import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -107,16 +108,20 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
         final org.spongepowered.api.entity.Entity spongeEntity = EntityUtil.fromNative(entity);
         final List<org.spongepowered.api.entity.Entity> entities = new ArrayList<>();
         entities.add(spongeEntity);
+        // We require spawn types. This is more of a sanity check to throw an IllegalStateException otherwise for the plugin developer to properly associate the type.
+        final SpawnType require = Sponge.getCauseStackManager().getCurrentContext().require(EventContextKeys.SPAWN_TYPE);
         final SpawnEntityEvent.Custom event = SpongeEventFactory.createSpawnEntityEventCustom(Sponge.getCauseStackManager().getCurrentCause(), entities);
         if (!event.isCancelled()) {
             final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) worldServer;
             entity.setPositionAndRotation(x, y, z, entity.rotationYaw, entity.rotationPitch);
             if (entity instanceof EntityLiving) {
-                mixinWorldServer.forceSpawnEntity(entity);
+                // This is ok to force spawn since we aren't considering custom items.
+                mixinWorldServer.forceSpawnEntity(EntityUtil.fromNative(entity));
                 ((EntityLiving) entity).onInitialSpawn(worldServer.getDifficultyForLocation(blockPos), null);
                 ((EntityLiving) entity).spawnExplosionParticle();
             } else {
-                mixinWorldServer.forceSpawnEntity(entity);
+                // This is ok to force spawn since we aren't considering custom items.
+                mixinWorldServer.forceSpawnEntity(EntityUtil.fromNative(entity));
             }
             return Optional.of(spongeEntity);
         }

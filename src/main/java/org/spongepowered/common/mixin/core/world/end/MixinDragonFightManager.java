@@ -38,7 +38,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.event.tracking.GeneralizedContext;
+import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.event.tracking.phase.world.dragon.DragonPhase;
 
 import java.util.List;
@@ -69,7 +69,7 @@ public abstract class MixinDragonFightManager {
     @Shadow private boolean hasDragonBeenKilled() {
         return false; // Shadowed
     }
-    @Shadow private void updateplayers() { }
+    @Shadow private void updatePlayers() { }
     @Shadow private void findAliveCrystals() { }
     @Shadow private void loadChunks() { }
     @Shadow private void generatePortal(boolean flag) { }
@@ -86,7 +86,7 @@ public abstract class MixinDragonFightManager {
         this.bossInfo.setVisible(!this.dragonKilled);
 
         if (++this.ticksSinceLastPlayerScan >= 20) {
-            this.updateplayers();
+            this.updatePlayers();
             this.ticksSinceLastPlayerScan = 0;
         }
 
@@ -135,7 +135,8 @@ public abstract class MixinDragonFightManager {
                 }
 
                 // Sponge Start - Cause tracker - todo: do more logistical configuration of how this all works.
-                try (GeneralizedContext context = DragonPhase.State.RESPAWN_DRAGON.createPhaseContext().buildAndSwitch()) {
+                try (GeneralizedContext context = DragonPhase.State.RESPAWN_DRAGON.createPhaseContext()) {
+                    context.buildAndSwitch();
                     // Sponge End
                     this.respawnState
                         .process(this.world, (DragonFightManager) (Object) this, this.crystals, this.respawnStateTicks++, this.exitPortalLocation);

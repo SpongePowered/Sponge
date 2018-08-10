@@ -26,18 +26,25 @@ package org.spongepowered.common.event.tracking.phase.block;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.event.tracking.GeneralizedContext;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 
 import java.util.ArrayList;
+import java.util.function.BiConsumer;
 
 final class RestoringBlockPhaseState extends BlockPhaseState {
 
     RestoringBlockPhaseState() {
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public BiConsumer<CauseStackManager.StackFrame, GeneralizedContext> getFrameModifier() {
+        return (BiConsumer<CauseStackManager.StackFrame, GeneralizedContext>) IPhaseState.DEFAULT_OWNER_NOTIFIER;
     }
 
     @Override
@@ -46,32 +53,32 @@ final class RestoringBlockPhaseState extends BlockPhaseState {
     }
 
     @Override
-    public boolean allowEntitySpawns() {
+    public boolean doesAllowEntitySpawns() {
         return false;
     }
 
     @Override
     public boolean spawnEntityOrCapture(GeneralizedContext context, Entity entity, int chunkX, int chunkZ) {
-        final User user = context.getNotifier().orElseGet(() -> context.getOwner().orElse(null));
-        if (user != null) {
-            entity.setCreator(user.getUniqueId());
-        }
         final ArrayList<Entity> entities = new ArrayList<>(1);
         entities.add(entity);
-        final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(),
-            entities);
-        SpongeImpl.postEvent(event);
-        if (!event.isCancelled() && event.getEntities().size() > 0) {
-            for (org.spongepowered.api.entity.Entity item: event.getEntities()) {
-                ((IMixinWorldServer) item.getWorld()).forceSpawnEntity(item);
-            }
-            return true;
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()){
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
+            return SpongeCommonEventFactory.callSpawnEntity(entities, context);
         }
+    }
+
+    @Override
+    public boolean doesCaptureEntitySpawns() {
+        return false; // Since we throw the spawn event directly
+    }
+
+    @Override
+    public boolean doesBulkBlockCapture(GeneralizedContext context) {
         return false;
     }
 
     @Override
-    public boolean requiresBlockCapturing() {
+    public boolean doesBlockEventTracking(GeneralizedContext context) {
         return false;
     }
 }

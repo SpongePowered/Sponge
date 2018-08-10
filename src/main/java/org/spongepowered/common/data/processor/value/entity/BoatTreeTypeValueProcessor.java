@@ -88,6 +88,8 @@ public class BoatTreeTypeValueProcessor extends AbstractEntitySingleDataProcesso
                 return Optional.of(TreeTypes.ACACIA);
             case DARK_OAK:
                 return Optional.of(TreeTypes.DARK_OAK);
+            default:
+                break;
         }
 
         return Optional.empty();

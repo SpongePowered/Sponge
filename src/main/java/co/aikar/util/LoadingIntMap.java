@@ -55,8 +55,20 @@ public class LoadingIntMap<V> extends Int2ObjectOpenHashMap<V> {
      * @param loader
      */
     public LoadingIntMap(Function<Integer, V> loader) {
+        super();
         this.loader = loader;
     }
+
+    public LoadingIntMap(int expectedSize, Function<Integer, V> loader) {
+        super(expectedSize);
+        this.loader = loader;
+    }
+
+    public LoadingIntMap(int expectedSize, float loadFactor, Function<Integer, V> loader) {
+        super(expectedSize, loadFactor);
+        this.loader = loader;
+    }
+
 
     @Override
     public V get(int key) {
@@ -73,7 +85,7 @@ public class LoadingIntMap<V> extends Int2ObjectOpenHashMap<V> {
     /**
      * Due to java stuff, you will need to cast it to (Function) for some cases
      *
-     * @param <T>
+     * @param <T> Type
      */
     public abstract static class Feeder<T> implements Function<T, T> {
 

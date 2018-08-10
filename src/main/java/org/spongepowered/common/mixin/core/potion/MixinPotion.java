@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.potion;
 
+import com.google.common.collect.ImmutableMap;
 import net.minecraft.potion.Potion;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.RegistryNamespaced;
@@ -41,6 +42,7 @@ import org.spongepowered.common.registry.type.effect.PotionEffectTypeRegistryMod
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Locale;
+import java.util.Map;
 
 @Mixin(Potion.class)
 @Implements(@Interface(iface = PotionEffectType.class, prefix = "potion$"))
@@ -48,6 +50,23 @@ public abstract class MixinPotion implements PotionEffectType, IMixinPotion {
 
     @Shadow public abstract String shadow$getName();
     @Shadow public abstract boolean shadow$isInstant();
+
+    private static final Map<String, String> potionMapping = ImmutableMap.<String, String>builder()
+            .put("effect.damageBoost", "effect.strength")
+            .put("effect.fireResistance", "effect.fire_resistance")
+            .put("effect.harm", "effect.harming")
+            .put("effect.heal", "effect.healing")
+            .put("effect.invisibility", "effect.invisibility")
+            .put("effect.jump", "effect.leaping")
+            .put("effect.luck", "effect.luck")
+            .put("effect.moveSlowdown", "effect.slowness")
+            .put("effect.moveSpeed", "effect.swiftness")
+            .put("effect.nightVision", "effect.night_vision")
+            .put("effect.poison", "effect.poison")
+            .put("effect.regeneration", "effect.regeneration")
+            .put("effect.waterBreathing", "effect.water_breathing")
+            .put("effect.weakness", "effect.weakness")
+            .build();
 
     private Translation translation;
     private Translation potionTranslation;
@@ -60,7 +79,7 @@ public abstract class MixinPotion implements PotionEffectType, IMixinPotion {
 
     @Intrinsic
     public boolean potion$isInstant() {
-        return this.isInstant();
+        return shadow$isInstant();
     }
 
     @Intrinsic
@@ -77,11 +96,12 @@ public abstract class MixinPotion implements PotionEffectType, IMixinPotion {
         return this.translation;
     }
 
+    // TODO: Remove this from the API or change return type to Optional
     @Override
     public Translation getPotionTranslation() {
-        // Maybe move this to a @Inject at the end of the constructor
         if (this.potionTranslation == null) {
-            this.potionTranslation = new SpongeTranslation(shadow$getName() + ".postfix");
+            String name = shadow$getName();
+            this.potionTranslation = new SpongeTranslation("potion." + potionMapping.getOrDefault(name, "effect.missing"));
         }
         return this.potionTranslation;
     }

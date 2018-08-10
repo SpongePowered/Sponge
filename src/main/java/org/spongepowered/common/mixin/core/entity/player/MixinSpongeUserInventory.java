@@ -52,12 +52,14 @@ import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.IInventoryFabric;
 import org.spongepowered.common.item.inventory.lens.impl.minecraft.PlayerInventoryLens;
-import org.spongepowered.common.item.inventory.observer.InventoryEventArgs;
 
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
+@SuppressWarnings("rawtypes")
 @Mixin(SpongeUserInventory.class)
-public abstract class MixinSpongeUserInventory implements MinecraftInventoryAdapter<IInventory>, UserInventory<User> {
+public abstract class MixinSpongeUserInventory implements MinecraftInventoryAdapter, UserInventory<User> {
 
     @Shadow(remap = false) @Final public NonNullList<ItemStack> mainInventory;
     @Shadow(remap = false) @Final public NonNullList<ItemStack> armorInventory;
@@ -68,14 +70,15 @@ public abstract class MixinSpongeUserInventory implements MinecraftInventoryAdap
     @Shadow public abstract int getSizeInventory();
 
     protected SlotCollection slots;
-    protected Fabric<IInventory> inventory;
+    protected Fabric inventory;
     protected PlayerInventoryLens lens;
 
-    private User carrier;
-    private MainPlayerInventoryAdapter main;
-    private EquipmentInventoryAdapter equipment;
-    private SlotAdapter offhand;
+    @Nullable private User carrier;
+    @Nullable private MainPlayerInventoryAdapter main;
+    @Nullable private EquipmentInventoryAdapter equipment;
+    @Nullable private SlotAdapter offhand;
 
+    @SuppressWarnings("unchecked")
     @Inject(method = "<init>*", at = @At("RETURN"), remap = false)
     private void onConstructed(SpongeUser playerIn, CallbackInfo ci) {
         // We only care about Server inventories
@@ -93,17 +96,17 @@ public abstract class MixinSpongeUserInventory implements MinecraftInventoryAdap
     }
 
     @Override
-    public Lens<IInventory, ItemStack> getRootLens() {
+    public Lens getRootLens() {
         return this.lens;
     }
 
     @Override
-    public Fabric<IInventory> getFabric() {
+    public Fabric getFabric() {
         return this.inventory;
     }
 
     @Override
-    public Inventory getChild(Lens<IInventory, ItemStack> lens) {
+    public Inventory getChild(Lens lens) {
         return null;
     }
 
@@ -136,12 +139,9 @@ public abstract class MixinSpongeUserInventory implements MinecraftInventoryAdap
         return this.offhand;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public void notify(Object source, InventoryEventArgs eventArgs) {
-    }
-
-    @Override
-    public SlotProvider<IInventory, ItemStack> getSlotProvider() {
+    public SlotProvider getSlotProvider() {
         return this.slots;
     }
 

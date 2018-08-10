@@ -27,12 +27,8 @@ package org.spongepowered.common.item.inventory.lens;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.impl.ReusableLens;
 
-/**
- * @param <TInventory>
- * @param <TStack>
- */
-public interface ReusableLensProvider<TInventory, TStack> {
+public interface ReusableLensProvider {
 
-    ReusableLens<?> generateLens(Fabric<TInventory> fabric, InventoryAdapter<TInventory, TStack> adapter);
+    ReusableLens<?> generateLens(Fabric fabric, InventoryAdapter adapter);
     
 }

@@ -118,6 +118,7 @@ public class InventoryArchetypeRegistryModule implements AlternateCatalogRegistr
         this.mapping.put(id.toLowerCase(Locale.ENGLISH), archetype);
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public void registerDefaults() {
         InventoryArchetype SLOT = new SlotArchetype(ImmutableMap.of(CustomInventory.INVENTORY_DIMENSION, new InventoryDimension(1, 1)));
@@ -369,7 +370,7 @@ public class InventoryArchetypeRegistryModule implements AlternateCatalogRegistr
             .build("minecraft:player", "Player");
 
         UNKNOWN = builder.reset()
-            .build("minecraft:unknown", "UKNOWN");
+            .build("minecraft:unknown", "UNKNOWN");
 
         registerAdditionalCatalog(SLOT);
         registerAdditionalCatalog(MENU_ROW);

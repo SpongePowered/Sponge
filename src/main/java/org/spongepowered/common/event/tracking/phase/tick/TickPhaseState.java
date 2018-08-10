@@ -29,11 +29,11 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
@@ -63,7 +63,12 @@ abstract class TickPhaseState<C extends TickContext<C>> implements IPhaseState<C
     }
 
     @Override
-    public boolean tracksBlockSpecificDrops() {
+    public boolean doesCaptureEntityDrops(C context) {
+        return true;
+    }
+
+    @Override
+    public boolean tracksBlockSpecificDrops(C context) {
         return true;
     }
 
@@ -90,14 +95,11 @@ abstract class TickPhaseState<C extends TickContext<C>> implements IPhaseState<C
 
     @Override
     public void postProcessSpawns(C phaseContext, ArrayList<Entity> entities) {
-        final SpawnEntityEvent
-                event =
-                SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
-        SpongeImpl.postEvent(event);
-        if (!event.isCancelled()) {
-            for (Entity entity : event.getEntities()) {
-                EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            if (!frame.getCurrentContext().get(EventContextKeys.SPAWN_TYPE).isPresent()) {
+                frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
             }
+            SpongeCommonEventFactory.callSpawnEntity(entities, phaseContext);
         }
     }
 

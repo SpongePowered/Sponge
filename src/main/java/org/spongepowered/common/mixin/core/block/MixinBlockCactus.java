@@ -42,6 +42,7 @@ import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
@@ -55,27 +56,17 @@ import javax.annotation.Nullable;
 @Mixin(BlockCactus.class)
 public abstract class MixinBlockCactus extends MixinBlock {
 
-    private static final String CACTUS_DAMAGE_FIELD = "Lnet/minecraft/util/DamageSource;CACTUS:Lnet/minecraft/util/DamageSource;";
-
-    @Nullable private DamageSource originalCactus;
-
-    @Inject(method = "onEntityCollidedWithBlock", at = @At(value = "FIELD", target = CACTUS_DAMAGE_FIELD, opcode = Opcodes.GETSTATIC))
-    public void preSetOnFire(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Entity entityIn, CallbackInfo callbackInfo) {
-        if (!worldIn.isRemote) {
-            this.originalCactus = DamageSource.CACTUS;
-            Location<World> location = new Location<>((World) worldIn, pos.getX(), pos.getY(), pos.getZ());
-            DamageSource.CACTUS = new MinecraftBlockDamageSource("cactus", location).setFireDamage();
+    @Redirect(method = "onEntityCollision", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"))
+    private boolean onSpongeCactusDamage(Entity entity, DamageSource source, float damage, net.minecraft.world.World world, BlockPos pos, IBlockState state, Entity entityIn) {
+        if (world.isRemote) {
+            return entity.attackEntityFrom(source, damage);
         }
-    }
-
-    @Inject(method = "onEntityCollidedWithBlock", at = @At(value = "FIELD", target = CACTUS_DAMAGE_FIELD, opcode = Opcodes.GETSTATIC, shift = At.Shift.AFTER))
-    public void postSetOnFire(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Entity entityIn, CallbackInfo callbackInfo) {
-        if (!worldIn.isRemote) {
-            if (this.originalCactus == null) {
-                SpongeImpl.getLogger().error("Original cactus is null!");
-                Thread.dumpStack();
-            }
-            DamageSource.CACTUS = this.originalCactus;
+        try {
+            Location<World> location = new Location<>((World) world, pos.getX(), pos.getY(), pos.getZ());
+            DamageSource.CACTUS = new MinecraftBlockDamageSource("cactus", location);
+            return entity.attackEntityFrom(DamageSource.CACTUS, damage);
+        } finally {
+            DamageSource.CACTUS = source;
         }
     }
 

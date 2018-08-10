@@ -32,6 +32,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.util.OptBool;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
+import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
@@ -50,7 +51,7 @@ public class IsAdultValueProcessor extends AbstractSpongeValueProcessor<EntityAg
 
     @Override
     protected boolean set(EntityAgeable container, Boolean adult) {
-        container.setGrowingAge(adult ? Integer.MAX_VALUE : Integer.MIN_VALUE);
+        container.setGrowingAge(adult ? DataConstants.ADULT : DataConstants.CHILD);
         return true;
     }
 

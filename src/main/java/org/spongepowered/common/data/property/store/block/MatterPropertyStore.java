@@ -29,9 +29,12 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.data.property.block.MatterProperty;
 import org.spongepowered.api.data.property.block.MatterProperty.Matter;
+import org.spongepowered.api.world.Location;
 import org.spongepowered.common.data.property.store.common.AbstractBlockPropertyStore;
 
 import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 // This is just for basic matter properties. Forge compatibles are provided by the
 // sponge implementation.
@@ -46,7 +49,7 @@ public class MatterPropertyStore extends AbstractBlockPropertyStore<MatterProper
     }
 
     @Override
-    protected Optional<MatterProperty> getForBlock(IBlockState block) {
+    protected Optional<MatterProperty> getForBlock(@Nullable Location<?> location, IBlockState block) {
         if (block.getBlock() instanceof BlockLiquid) {
             return Optional.of(LIQUID);
         } else if (block.getMaterial() == Material.AIR) {

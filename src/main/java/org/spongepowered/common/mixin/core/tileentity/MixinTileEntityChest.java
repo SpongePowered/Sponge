@@ -26,8 +26,6 @@ package org.spongepowered.common.mixin.core.tileentity;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.world.ILockableContainer;
@@ -55,6 +53,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+@SuppressWarnings("rawtypes")
 @NonnullByDefault
 @Mixin(TileEntityChest.class)
 public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot implements Chest, ILockableContainer {
@@ -70,17 +69,17 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot i
 
     @SuppressWarnings("unchecked")
     @Override
-    public ReusableLens<?> generateLens(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
+    public ReusableLens<?> generateLens(Fabric fabric, InventoryAdapter adapter) {
         return ReusableLens.getLens(GridInventoryLens.class, ((InventoryAdapter) this), this::generateSlotProvider, this::generateRootLens);
     }
 
     @SuppressWarnings("unchecked")
-    private SlotProvider<IInventory, ItemStack> generateSlotProvider() {
+    private SlotProvider generateSlotProvider() {
         return new SlotCollection.Builder().add(27).build();
     }
 
     @SuppressWarnings("unchecked")
-    private GridInventoryLens<IInventory, ItemStack> generateRootLens(SlotProvider<IInventory, ItemStack> slots) {
+    private GridInventoryLens generateRootLens(SlotProvider slots) {
         Class<? extends InventoryAdapter> thisClass = ((Class) this.getClass());
         return new GridInventoryLensImpl(0, 9, 3, 9, thisClass, slots);
     }
@@ -91,7 +90,7 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot i
      * @reason Overwritten in case chests ever attempt to tick
      */
     @Inject(method = "update", at = @At("HEAD"), cancellable = true)
-    public void onUpdate(CallbackInfo ci) {
+    private void onUpdate(CallbackInfo ci) {
         if (this.world == null || !this.world.isRemote) {
             // chests should never tick on server
             ci.cancel();
@@ -99,7 +98,7 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot i
     }
 
     @Inject(method = "openInventory", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;addBlockEvent(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;II)V"), cancellable = true)
-    public void onOpenInventory(EntityPlayer player, CallbackInfo ci) {
+    private void onOpenInventory(EntityPlayer player, CallbackInfo ci) {
         // Moved out of tick loop
         if (this.world == null) {
             ci.cancel();
@@ -129,7 +128,7 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot i
     }
 
     @Inject(method = "closeInventory", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;addBlockEvent(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;II)V"), cancellable = true)
-    public void onCloseInventory(EntityPlayer player, CallbackInfo ci) {
+    private void onCloseInventory(EntityPlayer player, CallbackInfo ci) {
         // Moved out of tick loop
         if (this.world == null) {
             ci.cancel();

@@ -60,11 +60,11 @@ public class OpLevelCollection extends SpongeSubjectCollection {
 
     @Override
     public SpongeSubject get(String identifier) {
-        if (this.levels.containsKey(identifier)) {
-            return this.levels.get(identifier);
-        } else {
+        SpongeSubject subject = this.levels.get(identifier);
+        if (subject == null) {
             throw new IllegalArgumentException(identifier + " is not a valid op level group name (op_{0,4})");
         }
+        return subject;
     }
 
     @Override
@@ -73,7 +73,7 @@ public class OpLevelCollection extends SpongeSubjectCollection {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public Collection<Subject> getLoadedSubjects() {
         return (Collection) this.levels.values();
     }

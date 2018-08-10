@@ -55,10 +55,10 @@ import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDecayableData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
 import org.spongepowered.common.data.util.TreeTypeResolver;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
@@ -71,15 +71,15 @@ import java.util.Optional;
 public abstract class MixinBlockLeaves extends MixinBlock {
 
     @Inject(method = "<init>", at = @At(value = "RETURN"))
-    public void onLeavesConstruction(CallbackInfo ci) {
+    private void onLeavesConstruction(CallbackInfo ci) {
         this.setTickRandomly(SpongeImpl.getGlobalConfig().getConfig().getWorld().getLeafDecay());
     }
 
     @Redirect(method = "updateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;I)Z"))
-    public boolean onUpdateDecayState(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, int flags) {
+    private boolean onUpdateDecayState(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, int flags) {
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final boolean isBlockAlready = phaseTracker.getCurrentState().getPhase() != TrackingPhases.BLOCK;
-        final IPhaseState currentState = phaseTracker.getCurrentPhaseData().state;
+        final IPhaseState<?> currentState = phaseTracker.getCurrentPhaseData().state;
         final boolean isWorldGen = currentState.isWorldGeneration();
         try (PhaseContext<?> context = isBlockAlready && !isWorldGen
                                        ? BlockPhase.State.BLOCK_DECAY.createPhaseContext()
@@ -87,8 +87,10 @@ public abstract class MixinBlockLeaves extends MixinBlock {
                                                .location(new Location<World>((World) worldIn, pos.getX(), pos.getY(), pos.getZ()))
                                                .state((BlockState) state)
                                                .build())
-                                           .buildAndSwitch()
                                        : null) {
+            if (context != null) {
+                context.buildAndSwitch();
+            }
             return worldIn.setBlockState(pos, state, flags);
         }
     }
@@ -112,15 +114,17 @@ public abstract class MixinBlockLeaves extends MixinBlock {
         if (!((IMixinWorld) worldIn).isFake()) {
             final PhaseTracker phaseTracker = PhaseTracker.getInstance();
             final PhaseData peek = phaseTracker.getCurrentPhaseData();
-            final IPhaseState currentState = peek.state;
+            final IPhaseState<?> currentState = peek.state;
             final boolean isWorldGen = currentState.isWorldGeneration();
             final boolean isBlockAlready = phaseTracker.getCurrentState().getPhase() != TrackingPhases.BLOCK;
             try (PhaseContext<?> context = isBlockAlready && !isWorldGen ? BlockPhase.State.BLOCK_DECAY.createPhaseContext()
                 .source(LocatableBlock.builder()
-                    .location(new Location<World>((World) worldIn, pos.getX(), pos.getY(), pos.getZ()))
+                    .location(new Location<>((World) worldIn, pos.getX(), pos.getY(), pos.getZ()))
                     .state((BlockState) state)
-                    .build())
-                .buildAndSwitch() : null) {
+                    .build()) : null) {
+                if (context != null) {
+                    context.buildAndSwitch();
+                }
                 this.dropBlockAsItem(worldIn, pos, state, 0);
                 worldIn.setBlockToAir(pos);
             }
@@ -132,7 +136,7 @@ public abstract class MixinBlockLeaves extends MixinBlock {
 
     }
 
-    protected ImmutableTreeData getTreeData(IBlockState blockState) {
+    private ImmutableTreeData getTreeData(IBlockState blockState) {
         BlockPlanks.EnumType type;
         if (blockState.getBlock() instanceof BlockOldLeaf) {
             type = blockState.getValue(BlockOldLeaf.VARIANT);

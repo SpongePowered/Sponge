@@ -32,21 +32,21 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-public class InventoryIterator<TInventory, TStack> implements Iterator<Inventory> {
+public class InventoryIterator implements Iterator<Inventory> {
     
-    protected final List<Lens<TInventory, TStack>> children;
+    protected final List<Lens> children;
     
-    protected final Fabric<TInventory> inventory;
+    protected final Fabric inventory;
     
     protected final Inventory parent;
 
     protected int next = 0;
 
-    public InventoryIterator(Lens<TInventory, TStack> lens, Fabric<TInventory> inventory) {
+    public InventoryIterator(Lens lens, Fabric inventory) {
         this(lens, inventory, null);
     }
     
-    public InventoryIterator(Lens<TInventory, TStack> lens, Fabric<TInventory> inventory, Inventory parent) {
+    public InventoryIterator(Lens lens, Fabric inventory, Inventory parent) {
         this.children = lens.getSpanningChildren();
         this.inventory = inventory;
         this.parent = parent;

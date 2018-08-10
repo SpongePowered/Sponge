@@ -27,7 +27,6 @@ package org.spongepowered.common.item.inventory.lens.impl.fabric;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
 
 import java.util.Collection;
@@ -47,10 +46,10 @@ public class CompoundFabric extends MinecraftFabric {
     }
 
     @Override
-    public Collection<IInventory> allInventories() {
-        Set<IInventory> inv = new HashSet<>();
-        inv.addAll(fabric1.allInventories());
-        inv.addAll(fabric2.allInventories());
+    public Collection<?> allInventories() {
+        Set<Object> inv = new HashSet<>();
+        inv.addAll(this.fabric1.allInventories());
+        inv.addAll(this.fabric2.allInventories());
         return inv;
     }
 
@@ -58,25 +57,25 @@ public class CompoundFabric extends MinecraftFabric {
     public IInventory get(int index) {
 
         if (index < this.fabric1.getSize()) {
-            return fabric1.get(index);
+            return this.fabric1.get(index);
         }
-        return fabric2.get(index - fabric1.getSize());
+        return this.fabric2.get(index - this.fabric1.getSize());
     }
 
     @Override
     public ItemStack getStack(int index) {
         if (index < this.fabric1.getSize()) {
-            return fabric1.getStack(index);
+            return this.fabric1.getStack(index);
         }
-        return fabric2.getStack(index - fabric1.getSize());
+        return this.fabric2.getStack(index - this.fabric1.getSize());
     }
 
     @Override
     public void setStack(int index, ItemStack stack) {
         if (index < this.fabric1.getSize()) {
-            fabric1.setStack(index, stack);
+            this.fabric1.setStack(index, stack);
         } else {
-            fabric2.setStack(index - fabric1.getSize(), stack);
+            this.fabric2.setStack(index - this.fabric1.getSize(), stack);
         }
     }
 

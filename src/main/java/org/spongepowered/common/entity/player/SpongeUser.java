@@ -27,9 +27,9 @@ package org.spongepowered.common.entity.player;
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.inventory.InventoryEnderChest;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -45,6 +45,7 @@ import org.spongepowered.api.entity.Tamer;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.item.inventory.Carrier;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
@@ -67,6 +68,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -84,14 +86,23 @@ import javax.annotation.Nullable;
  */
 public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carrier, ISpongeUser {
 
-    public static final Set<SpongeUser> dirtyUsers = Sets.newHashSet();
+    public static final Set<SpongeUser> dirtyUsers = ConcurrentHashMap.newKeySet();
 
     private final User self = (User) this; // convenient access
     private final GameProfile profile;
 
     private final Map<UUID, RespawnLocation> spawnLocations = Maps.newHashMap();
 
+    private double posX;
+    private double posY;
+    private double posZ;
+    private int dimension;
+    private float rotationYaw;
+    private float rotationPitch;
+
+
     private SpongeUserInventory inventory; // lazy load when accessing inventory
+    private InventoryEnderChest enderChest; // lazy load when accessing inventory
     private NBTTagCompound nbt;
 
     public SpongeUser(GameProfile profile) {
@@ -105,11 +116,24 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     public void readFromNbt(NBTTagCompound compound) {
         this.reset();
         this.nbt = compound;
+
+        NBTTagList position = compound.getTagList(NbtDataUtil.ENTITY_POSITION, NbtDataUtil.TAG_DOUBLE);
+        this.posX = position.getDoubleAt(0);
+        this.posY = position.getDoubleAt(1);
+        this.posZ = position.getDoubleAt(2);
+        this.dimension = 0;
+        if (compound.hasKey(NbtDataUtil.ENTITY_DIMENSION)) {
+            this.dimension = compound.getInteger(NbtDataUtil.ENTITY_DIMENSION);
+        }
+        NBTTagList rotation = compound.getTagList(NbtDataUtil.ENTITY_ROTATION, NbtDataUtil.TAG_FLOAT);
+        this.rotationYaw = rotation.getFloatAt(0);
+        this.rotationPitch = rotation.getFloatAt(1);
+
         // See EntityPlayer#readEntityFromNBT
 
         final NBTTagCompound spongeCompound = compound.getCompoundTag(NbtDataUtil.FORGE_DATA).getCompoundTag(NbtDataUtil.SPONGE_DATA);
         CustomDataNbtUtil.readCustomData(spongeCompound, ((DataHolder) this));
-        if (!spongeCompound.hasNoTags()) {
+        if (!spongeCompound.isEmpty()) {
             final NBTTagList spawnList = spongeCompound.getTagList(NbtDataUtil.USER_SPAWN_LIST, NbtDataUtil.TAG_COMPOUND);
 
             for (int i = 0; i < spawnList.tagCount(); i++) {
@@ -145,11 +169,29 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         return this;
     }
 
+    private SpongeUser loadEnderInventory() {
+        if (this.enderChest == null) {
+            this.enderChest = new SpongeUserInventoryEnderchest(this);
+            if (this.nbt.hasKey(NbtDataUtil.Minecraft.ENDERCHEST_INVENTORY, 9))
+            {
+                NBTTagList nbttaglist1 = this.nbt.getTagList(NbtDataUtil.Minecraft.ENDERCHEST_INVENTORY, 10);
+                this.enderChest.loadInventoryFromNBT(nbttaglist1);
+            }
+        }
+        return this;
+    }
+
     public void writeToNbt(NBTTagCompound compound) {
 
         this.loadInventory();
+        this.loadEnderInventory();
         compound.setTag(NbtDataUtil.Minecraft.INVENTORY, this.inventory.writeToNBT(new NBTTagList()));
+        compound.setTag(NbtDataUtil.Minecraft.ENDERCHEST_INVENTORY, this.enderChest.saveInventoryToNBT());
         compound.setInteger(NbtDataUtil.Minecraft.SELECTED_ITEM_SLOT, this.inventory.currentItem);
+
+        compound.setTag(NbtDataUtil.ENTITY_POSITION, NbtDataUtil.newDoubleNBTList(this.posX, this.posY, this.posZ));
+        compound.setInteger(NbtDataUtil.ENTITY_DIMENSION, this.dimension);
+        compound.setTag(NbtDataUtil.ENTITY_ROTATION, NbtDataUtil.newFloatNBTList(this.rotationYaw, this.rotationPitch));
 
         final NBTTagCompound forgeCompound = compound.getCompoundTag(NbtDataUtil.FORGE_DATA);
         final NBTTagCompound spongeCompound = forgeCompound.getCompoundTag(NbtDataUtil.SPONGE_DATA);
@@ -168,7 +210,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
             spawnList.appendTag(spawnCompound);
         }
 
-        if (!spawnList.hasNoTags()) {
+        if (!spawnList.isEmpty()) {
             spongeCompound.setTag(NbtDataUtil.USER_SPAWN_LIST, spawnList);
             forgeCompound.setTag(NbtDataUtil.SPONGE_DATA, spongeCompound);
             compound.setTag(NbtDataUtil.FORGE_DATA, forgeCompound);
@@ -208,7 +250,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     }
 
     @Override
-    public boolean canEquip(EquipmentType type, ItemStack equipment) {
+    public boolean canEquip(EquipmentType type, @Nullable ItemStack equipment) {
         return getForInventory(p -> p.canEquip(type, equipment), u -> true); // TODO Inventory API
     }
 
@@ -218,7 +260,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     }
 
     @Override
-    public boolean equip(EquipmentType type, ItemStack equipment) {
+    public boolean equip(EquipmentType type, @Nullable ItemStack equipment) {
         if (this.canEquip(type, equipment)) {
             this.setForInventory(p -> p.equip(type, equipment), u -> u.setEquippedItem(type, equipment));
             return true;
@@ -226,11 +268,16 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         return false;
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
-    public CarriedInventory<? extends Carrier> getInventory() {
+    public CarriedInventory<?> getInventory() {
         return this.getForInventory(Player::getInventory, u -> ((CarriedInventory) u.inventory));
     }
 
+    public Inventory getEnderChestInventory() {
+        this.loadEnderInventory();
+        return ((Inventory) this.enderChest);
+    }
 
     @Override
     public Optional<ItemStack> getItemInHand(HandType handType) {
@@ -346,7 +393,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         return Optional.empty();
     }
 
-    private void setEquippedItem(EquipmentType type, ItemStack item) {
+    private void setEquippedItem(EquipmentType type, @Nullable ItemStack item) {
         if (type instanceof SpongeEquipmentType) {
             EntityEquipmentSlot[] slots = ((SpongeEquipmentType) type).getSlots();
             for (EntityEquipmentSlot slot : slots) {

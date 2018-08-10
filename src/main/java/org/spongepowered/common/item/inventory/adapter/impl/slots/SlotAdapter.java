@@ -46,12 +46,11 @@ import java.util.Optional;
 
 /**
  * Base SlotAdapter implementation for {@link net.minecraft.item.ItemStack} based Inventories.
- *
- * @param <TInventory> the Inventory Type
  */
-public class SlotAdapter<TInventory> extends AbstractInventoryAdapter<TInventory> implements Slot {
+@SuppressWarnings("rawtypes")
+public class SlotAdapter extends AbstractInventoryAdapter implements Slot {
 
-    private final SlotLens<TInventory, net.minecraft.item.ItemStack> slot;
+    private final SlotLens slot;
 
     private final int ordinal;
 
@@ -62,7 +61,7 @@ public class SlotAdapter<TInventory> extends AbstractInventoryAdapter<TInventory
     public int slotNumber = -1;
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private static <TInventory> SlotLens<TInventory, net.minecraft.item.ItemStack> getLens(net.minecraft.inventory.Slot slot) {
+    private static SlotLens getLens(net.minecraft.inventory.Slot slot) {
         if (((IMixinSlot) slot).getSlotIndex() >= 0) { // Normal Slot?
             if (slot.inventory instanceof InventoryAdapter) { // If the inventory is an adapter we can get the existing SlotLens
                 return ((InventoryAdapter) slot.inventory).getSlotProvider().getSlot(((IMixinSlot) slot).getSlotIndex());
@@ -73,7 +72,7 @@ public class SlotAdapter<TInventory> extends AbstractInventoryAdapter<TInventory
         return new FakeSlotLensImpl(slot);
     }
 
-    public SlotAdapter(Fabric<TInventory> inventory, SlotLens<TInventory, net.minecraft.item.ItemStack> lens, Inventory parent) {
+    public SlotAdapter(Fabric inventory, SlotLens lens, Inventory parent) {
         super(inventory, lens, parent);
         this.slot = lens;
         this.ordinal = lens.getOrdinal(inventory);
@@ -250,6 +249,7 @@ public class SlotAdapter<TInventory> extends AbstractInventoryAdapter<TInventory
                 if (this.inventory instanceof ContainerFabric) {
                     return ((Slot) ((ContainerFabric) this.inventory).getContainer().getSlot(this.slotNumber));
                 }
+                return this;
             default:
                 return this;
         }

@@ -40,4 +40,6 @@ public interface IMixinMinecraftServer {
     void prepareSpawnArea(WorldServer worldServer);
 
     void setSaveEnabled(boolean enabled);
+
+    void spongeStopServer();
 }

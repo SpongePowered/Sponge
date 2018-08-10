@@ -24,29 +24,18 @@
  */
 package org.spongepowered.common.item.inventory.adapter.impl.comp;
 
-import net.minecraft.inventory.IInventory;
-import org.spongepowered.api.entity.ArmorEquipable;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.entity.Hotbar;
 import org.spongepowered.api.item.inventory.entity.MainPlayerInventory;
-import org.spongepowered.api.item.inventory.equipment.EquipmentInventory;
-import org.spongepowered.api.item.inventory.equipment.EquipmentType;
-import org.spongepowered.api.item.inventory.property.EquipmentSlotType;
-import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.item.inventory.type.GridInventory;
 import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.comp.EquipmentInventoryLens;
 import org.spongepowered.common.item.inventory.lens.impl.comp.MainPlayerInventoryLensImpl;
-
-import java.util.Optional;
 
 public class MainPlayerInventoryAdapter extends GridInventoryAdapter implements MainPlayerInventory {
 
     private final MainPlayerInventoryLensImpl root;
 
-    public MainPlayerInventoryAdapter(Fabric<IInventory> inv, MainPlayerInventoryLensImpl lens, Inventory parent) {
+    public MainPlayerInventoryAdapter(Fabric inv, MainPlayerInventoryLensImpl lens, Inventory parent) {
         super(inv, lens, parent);
         this.root = lens;
     }

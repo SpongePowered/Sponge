@@ -55,6 +55,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.config.type.GeneralConfigBase;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
@@ -102,8 +103,8 @@ public abstract class MixinWorldEntitySpawner {
         }
 
         try (PhaseContext<?> context = GenerationPhase.State.WORLD_SPAWNER_SPAWNING.createPhaseContext()
-                .world(worldServerIn)
-                .buildAndSwitch()) {
+                .world(worldServerIn)) {
+            context.buildAndSwitch();
             Iterator<Chunk> chunkIterator = this.eligibleSpawnChunks.iterator();
             while (chunkIterator.hasNext()) {
                 Chunk chunk = chunkIterator.next();
@@ -116,7 +117,7 @@ public abstract class MixinWorldEntitySpawner {
 
             int chunkSpawnCandidates = 0;
             final int mobSpawnRange = Math.min(((IMixinWorldServer) worldServerIn).getActiveConfig().getConfig().getWorld().getMobSpawnRange(),
-                SpongeImpl.getServer().getPlayerList().getViewDistance());
+                    ((org.spongepowered.api.world.World) worldServerIn).getViewDistance());
             // Vanilla uses a div count of 289 (17x17) which assumes the view distance is 8.
             // Since we allow for custom ranges, we need to adjust the div count based on the
             // mob spawn range set by server.
@@ -166,7 +167,7 @@ public abstract class MixinWorldEntitySpawner {
 
             int totalSpawned = 0;
             final long worldTotalTime = worldServerIn.getTotalWorldTime();
-            final SpongeConfig<?> activeConfig = ((IMixinWorldServer) worldServerIn).getActiveConfig();
+            final SpongeConfig<? extends GeneralConfigBase> activeConfig = ((IMixinWorldServer) worldServerIn).getActiveConfig();
 
             labelOuterLoop:
             for (EnumCreatureType enumCreatureType : EnumCreatureType.values()) {
@@ -349,7 +350,7 @@ public abstract class MixinWorldEntitySpawner {
 
     @Inject(method = "performWorldGenSpawning", at = @At(value = "RETURN"))
     private static void onPerformWorldGenSpawningReturn(World worldServer, Biome biome, int j, int k, int l, int m, Random rand, CallbackInfo ci) {
-        PhaseTracker.getInstance().completePhase(GenerationPhase.State.WORLD_SPAWNER_SPAWNING);
+        PhaseTracker.getInstance().getCurrentContext().close();
         spawnerEntityType = null;
     }
 

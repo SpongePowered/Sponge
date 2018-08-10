@@ -37,7 +37,7 @@ import org.spongepowered.asm.mixin.Shadow;
 public abstract class MixinBlockSilverfishEnumType {
 
     @Shadow public abstract String shadow$getName();
-    @Shadow public abstract String shadow$getUnlocalizedName();
+    @Shadow public abstract String shadow$getTranslationKey();
 
     public String silver$getId() {
         return "minecraft:" + shadow$getName();
@@ -45,6 +45,6 @@ public abstract class MixinBlockSilverfishEnumType {
 
     @Intrinsic
     public String silver$getName() {
-        return shadow$getUnlocalizedName();
+        return shadow$getTranslationKey();
     }
 }

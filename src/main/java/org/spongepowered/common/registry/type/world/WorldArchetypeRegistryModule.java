@@ -60,6 +60,7 @@ public class WorldArchetypeRegistryModule implements AdditionalCatalogRegistryMo
     @RegisterCatalog(WorldArchetypes.class)
     private final Map<String, WorldArchetype> worldCreationSettingsMap = new HashMap<>();
 
+    @SuppressWarnings("deprecation")
     @Override
     public void registerDefaults() {
         final WorldArchetype overworld = WorldArchetype.builder()
@@ -130,7 +131,7 @@ public class WorldArchetypeRegistryModule implements AdditionalCatalogRegistryMo
         return provided;
     }
 
-    WorldArchetypeRegistryModule() {}
+    private WorldArchetypeRegistryModule() {}
 
     private static final class Holder {
 

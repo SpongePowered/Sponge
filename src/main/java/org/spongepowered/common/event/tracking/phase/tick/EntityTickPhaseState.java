@@ -24,10 +24,9 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
-import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.EntityHanging;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.IProjectile;
+import net.minecraft.entity.item.EntityFallingBlock;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityItemFrame;
 import net.minecraft.entity.item.EntityXPOrb;
@@ -39,25 +38,17 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.Ageable;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
-import org.spongepowered.api.event.entity.MoveEntityEvent;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.api.event.item.inventory.DropItemEvent;
-import org.spongepowered.api.world.World;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
-import org.spongepowered.common.interfaces.world.IMixinLocation;
-import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 
@@ -65,271 +56,180 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
 
 class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
 
-    EntityTickPhaseState() {
+    private final BiConsumer<CauseStackManager.StackFrame, EntityTickContext> ENTITY_TICK_MODIFIER =
+        super.getFrameModifier().andThen((frame, context) -> {
+            final Entity tickingEntity = context.getSource(Entity.class)
+                .orElseThrow(TrackingUtil.throwWithContext("Not ticking on an Entity!", context));
+            frame.pushCause(tickingEntity);
+            if (tickingEntity instanceof EntityFallingBlock) {
+                context.getOwner().ifPresent(frame::pushCause);
+            }
+        });
+
+    private String name;
+
+    EntityTickPhaseState(String name) {
+        this.name = name;
     }
+
+    @Override
+    public BiConsumer<CauseStackManager.StackFrame, EntityTickContext> getFrameModifier() {
+        return this.ENTITY_TICK_MODIFIER;
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public void unwind(EntityTickContext phaseContext) {
         final Entity tickingEntity = phaseContext.getSource(Entity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Not ticking on an Entity!", phaseContext));
-        final Optional<User> creator = phaseContext.getOwner();
-        final Optional<User> notifier = phaseContext.getNotifier();
-        final User entityCreator = notifier.orElseGet(() -> creator.orElse(null));
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(tickingEntity);
-            phaseContext.addNotifierAndOwnerToCauseStack();
-            phaseContext.getCapturedEntitySupplier()
-                    .acceptAndClearIfNotEmpty(entities -> {
-                        final List<Entity> experience = new ArrayList<Entity>(entities.size());
-                        final List<Entity> nonExp = new ArrayList<Entity>(entities.size());
-                        final List<Entity> breeding = new ArrayList<Entity>(entities.size());
-                        final List<Entity> projectile = new ArrayList<Entity>(entities.size());
-                        for (Entity entity : entities) {
-                            if (entity instanceof EntityXPOrb) {
-                                experience.add(entity);
-                            } else if (tickingEntity instanceof Ageable && tickingEntity.getClass() == entity.getClass()) {
-                                breeding.add(entity);
-                            } else if (entity instanceof Projectile) {
-                                projectile.add(entity);
-                            } else {
-                                nonExp.add(entity);
-                            }
-                        }
-
-                        if (!experience.isEmpty()) {
-                            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.EXPERIENCE);
-                            if (EntityUtil.isEntityDead(tickingEntity)) {
-                                if (tickingEntity instanceof EntityLivingBase) {
-                                    CombatEntry entry = ((EntityLivingBase) tickingEntity).getCombatTracker().getBestCombatEntry();
-                                    if (entry != null) {
-                                        if (entry.damageSrc != null) {
-                                            Sponge.getCauseStackManager().addContext(EventContextKeys.LAST_DAMAGE_SOURCE,
-                                                    (DamageSource) entry.damageSrc);
-                                        }
-                                    }
-                                }
-                            }
-                            final SpawnEntityEvent event =
-                                    SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), experience);
-                            if (!SpongeImpl.postEvent(event)) {
-                                for (Entity entity : event.getEntities()) {
-                                    if (entityCreator != null) {
-                                        EntityUtil.toMixin(entity).setCreator(entityCreator.getUniqueId());
-                                    }
-                                    EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
-                                }
-                            }
-                            Sponge.getCauseStackManager().removeContext(EventContextKeys.LAST_DAMAGE_SOURCE);
-                        }
-                        if (!breeding.isEmpty()) {
-                            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.BREEDING);
-                            if (tickingEntity instanceof EntityAnimal) {
-                                final EntityPlayer playerInLove = ((EntityAnimal) tickingEntity).getLoveCause();
-                                if (playerInLove != null) {
-                                    Sponge.getCauseStackManager().addContext(EventContextKeys.PLAYER, (Player) playerInLove);
-                                }
-                            }
-                            SpawnEntityEvent event =
-                                    SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), breeding);
-                            if (!SpongeImpl.postEvent(event)) {
-                                for (Entity entity : event.getEntities()) {
-                                    if (entityCreator != null) {
-                                        EntityUtil.toMixin(entity).setCreator(entityCreator.getUniqueId());
-                                    }
-                                    EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
-                                }
-                            }
-                            Sponge.getCauseStackManager().removeContext(EventContextKeys.PLAYER);
-                        }
-                        if (!projectile.isEmpty()) {
-                            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PROJECTILE);
-                            final SpawnEntityEvent event =
-                                    SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), projectile);
-                            SpongeImpl.postEvent(event);
-                            if (!event.isCancelled()) {
-                                for (Entity entity : event.getEntities()) {
-                                    if (entityCreator != null) {
-                                        entity.setCreator(entityCreator.getUniqueId());
-                                    }
-                                    EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
-                                }
-                            }
-                        }
-                        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PASSIVE);
-                        final SpawnEntityEvent event =
-                                SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), nonExp);
-                        SpongeImpl.postEvent(event);
-                        if (!event.isCancelled()) {
-                            for (Entity entity : event.getEntities()) {
-                                if (entityCreator != null) {
-                                    entity.setCreator(entityCreator.getUniqueId());
-                                }
-                                EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
-                            }
-                        }
-                    });
-            phaseContext.getCapturedItemsSupplier()
-                    .acceptAndClearIfNotEmpty(entities -> {
-                        final ArrayList<Entity> capturedEntities = new ArrayList<>();
-                        for (EntityItem entity : entities) {
-                            capturedEntities.add(EntityUtil.fromNative(entity));
-                        }
-                        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
-                        final DropItemEvent.Custom event = SpongeEventFactory
-                                .createDropItemEventCustom(Sponge.getCauseStackManager().getCurrentCause(), capturedEntities);
-                        SpongeImpl.postEvent(event);
-                        if (!event.isCancelled()) {
-                            for (Entity entity : event.getEntities()) {
-                                if (entityCreator != null) {
-                                    EntityUtil.toMixin(entity).setCreator(entityCreator.getUniqueId());
-                                }
-                                EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
-                            }
-                        }
-                    });
-            phaseContext.getCapturedBlockSupplier()
-                    .acceptAndClearIfNotEmpty(blockSnapshots -> TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext));
-            phaseContext.getBlockItemDropSupplier()
-                    .acceptIfNotEmpty(map -> {
-                        final List<BlockSnapshot> capturedBlocks = phaseContext.getCapturedBlocks();
-                        for (BlockSnapshot snapshot : capturedBlocks) {
-                            final BlockPos blockPos = ((IMixinLocation) (Object) snapshot.getLocation().get()).getBlockPos();
-                            final Collection<EntityItem> entityItems = map.get(blockPos);
-                            if (!entityItems.isEmpty()) {
-                                Sponge.getCauseStackManager().pushCause(snapshot);
-                                Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
-                                final List<Entity> items = entityItems.stream().map(EntityUtil::fromNative).collect(Collectors.toList());
-                                final DropItemEvent.Destruct event =
-                                        SpongeEventFactory.createDropItemEventDestruct(Sponge.getCauseStackManager().getCurrentCause(), items);
-                                SpongeImpl.postEvent(event);
-                                if (!event.isCancelled()) {
-                                    for (Entity entity : event.getEntities()) {
-                                        creator.ifPresent(user -> entity.setCreator(user.getUniqueId()));
-                                        EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
-                                    }
-                                }
-                                Sponge.getCauseStackManager().popCause();
-                            }
-                        }
-
-                    });
-            phaseContext.getCapturedItemStackSupplier()
-                    .acceptAndClearIfNotEmpty(drops -> {
-                        final List<EntityItem> items = drops.stream()
-                                .map(drop -> drop.create(EntityUtil.getMinecraftWorld(tickingEntity)))
-                                .collect(Collectors.toList());
-                        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
-                        final List<Entity> entities = (List<Entity>) (List<?>) items;
-                        if (!entities.isEmpty()) {
-                            DropItemEvent.Custom event =
-                                    SpongeEventFactory.createDropItemEventCustom(Sponge.getCauseStackManager().getCurrentCause(), entities);
-                            SpongeImpl.postEvent(event);
-                            if (!event.isCancelled()) {
-                                for (Entity droppedItem : event.getEntities()) {
-                                    EntityUtil.getMixinWorld(droppedItem).forceSpawnEntity(droppedItem);
-                                }
-                            }
-                        }
-                    });
-            this.fireMovementEvents(EntityUtil.toNative(tickingEntity));
+            frame.pushCause(tickingEntity);
+            this.processCaptures(tickingEntity, phaseContext, frame);
         }
     }
 
-    private void fireMovementEvents(net.minecraft.entity.Entity entity) {
-        // Ignore movement event if entity is dead, a projectile, or item.
-        // Note: Projectiles are handled with CollideBlockEvent.Impact
-        if (entity.isDead || entity instanceof IProjectile || entity instanceof EntityItem) {
-            return;
+    protected void processCaptures(Entity tickingEntity, EntityTickContext phaseContext, CauseStackManager.StackFrame frame) {
+        phaseContext.addNotifierAndOwnerToCauseStack(frame);
+        // If we're doing bulk captures for blocks, go ahead and do them. otherwise continue with entity checks
+        if (phaseContext.allowsBulkBlockCaptures()) {
+            phaseContext.getCapturedBlockSupplier()
+                .acceptAndClearIfNotEmpty(blockSnapshots -> {
+                    if (!TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext)) {
+                        EntityUtil.toMixin(tickingEntity).onCancelledBlockChange(phaseContext);
+                    }
+                });
         }
-        Entity spongeEntity = (Entity) entity;
+        // And finally, if we're not capturing entities, there's nothing left for us to do.
+        if (!phaseContext.allowsBulkEntityCaptures()) {
+            return; // The rest of this method is all about entity captures
+        }
+        phaseContext.getCapturedEntitySupplier()
+                .acceptAndClearIfNotEmpty(entities -> {
+                    final List<Entity> experience = new ArrayList<>(entities.size());
+                    final List<Entity> nonExp = new ArrayList<>(entities.size());
+                    final List<Entity> breeding = new ArrayList<>(entities.size());
+                    final List<Entity> projectile = new ArrayList<>(entities.size());
+                    for (Entity entity : entities) {
+                        if (entity instanceof EntityXPOrb) {
+                            experience.add(entity);
+                        } else if (tickingEntity instanceof Ageable && tickingEntity.getClass() == entity.getClass()) {
+                            breeding.add(entity);
+                        } else if (entity instanceof Projectile) {
+                            projectile.add(entity);
+                        } else {
+                            nonExp.add(entity);
+                        }
+                    }
 
-        if (entity.lastTickPosX != entity.posX
-            || entity.lastTickPosY != entity.posY
-            || entity.lastTickPosZ != entity.posZ
-            || entity.rotationPitch != entity.prevRotationPitch
-            || entity.rotationYaw != entity.prevRotationYaw) {
-            // yes we have a move event.
-            final double currentPosX = entity.posX;
-            final double currentPosY = entity.posY;
-            final double currentPosZ = entity.posZ;
+                    if (!experience.isEmpty()) {
+                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
+                        appendContextOfPossibleEntityDeath(tickingEntity, frame);
+                        SpongeCommonEventFactory.callSpawnEntity(experience, phaseContext);
+                        frame.removeContext(EventContextKeys.LAST_DAMAGE_SOURCE);
+                    }
+                    if (!breeding.isEmpty()) {
+                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BREEDING);
+                        if (tickingEntity instanceof EntityAnimal) {
+                            final EntityPlayer playerInLove = ((EntityAnimal) tickingEntity).getLoveCause();
+                            if (playerInLove != null) {
+                                frame.addContext(EventContextKeys.PLAYER, (Player) playerInLove);
+                            }
+                        }
+                        SpongeCommonEventFactory.callSpawnEntity(breeding, phaseContext);
 
-            final Vector3d oldPositionVector = new Vector3d(entity.lastTickPosX, entity.lastTickPosY, entity.lastTickPosZ);
-            final Vector3d currentPositionVector = new Vector3d(currentPosX, currentPosY, currentPosZ);
+                        frame.removeContext(EventContextKeys.PLAYER);
+                    }
+                    if (!projectile.isEmpty()) {
+                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PROJECTILE);
+                        SpongeCommonEventFactory.callSpawnEntity(projectile, phaseContext);
+                        frame.removeContext(EventContextKeys.SPAWN_TYPE);
 
-            Vector3d oldRotationVector = new Vector3d(entity.prevRotationPitch, entity.prevRotationYaw, 0);
-            Vector3d currentRotationVector = new Vector3d(entity.rotationPitch, entity.rotationYaw, 0);
-            final Transform<World> oldTransform = new Transform<>(spongeEntity.getWorld(), oldPositionVector, oldRotationVector,
-                    spongeEntity.getScale());
-            final Transform<World> newTransform = new Transform<>(spongeEntity.getWorld(), currentPositionVector, currentRotationVector,
-                    spongeEntity.getScale());
-            final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), oldTransform, newTransform, spongeEntity);
+                    }
+                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PASSIVE);
+                    SpongeCommonEventFactory.callSpawnEntity(nonExp, phaseContext);
+                    frame.removeContext(EventContextKeys.SPAWN_TYPE);
 
-            if (SpongeImpl.postEvent(event)) {
-                entity.posX = entity.lastTickPosX;
-                entity.posY = entity.lastTickPosY;
-                entity.posZ = entity.lastTickPosZ;
-                entity.rotationPitch = entity.prevRotationPitch;
-                entity.rotationYaw = entity.prevRotationYaw;
-            } else {
-                Vector3d newPosition = event.getToTransform().getPosition();
-                if (!newPosition.equals(currentPositionVector)) {
-                    entity.posX = newPosition.getX();
-                    entity.posY = newPosition.getY();
-                    entity.posZ = newPosition.getZ();
+                });
+        phaseContext.getCapturedItemsSupplier()
+                .acceptAndClearIfNotEmpty(entities -> {
+                    final ArrayList<Entity> capturedEntities = new ArrayList<>();
+                    for (EntityItem entity : entities) {
+                        capturedEntities.add(EntityUtil.fromNative(entity));
+                    }
+                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+                    SpongeCommonEventFactory.callDropItemCustom(capturedEntities, phaseContext);
+                    frame.removeContext(EventContextKeys.SPAWN_TYPE);
+                });
+        // This could be happening regardless whether block bulk captures are done or not.
+        // Would depend on whether entity captures are done.
+        phaseContext.getBlockItemDropSupplier()
+            .acceptAndClearIfNotEmpty(map -> {
+                final List<BlockSnapshot> capturedBlocks = phaseContext.getCapturedBlocks();
+                for (BlockSnapshot snapshot : capturedBlocks) {
+                    final BlockPos blockPos = VecHelper.toBlockPos(snapshot.getLocation().get());
+                    final Collection<EntityItem> entityItems = map.get(blockPos);
+                    if (!entityItems.isEmpty()) {
+                        frame.pushCause(snapshot);
+                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+                        final List<Entity> items = entityItems.stream().map(EntityUtil::fromNative).collect(Collectors.toList());
+                        SpongeCommonEventFactory.callDropItemDestruct(items, phaseContext);
+
+                        frame.popCause();
+                    }
                 }
-                if (!event.getToTransform().getRotation().equals(currentRotationVector)) {
-                    entity.rotationPitch = (float) currentRotationVector.getX();
-                    entity.rotationYaw = (float) currentRotationVector.getY();
+
+            });
+        phaseContext.getCapturedItemStackSupplier()
+                .acceptAndClearIfNotEmpty(drops -> {
+                    final List<Entity> items = drops.stream()
+                            .map(drop -> drop.create(EntityUtil.getMinecraftWorld(tickingEntity)))
+                            .map(EntityUtil::fromNative)
+                            .collect(Collectors.toList());
+                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+                    SpongeCommonEventFactory.callDropItemCustom(items, phaseContext);
+                });
+    }
+
+    private void appendContextOfPossibleEntityDeath(Entity tickingEntity, CauseStackManager.StackFrame frame) {
+        if (EntityUtil.isEntityDead(tickingEntity)) {
+            if (tickingEntity instanceof EntityLivingBase) {
+                CombatEntry entry = ((EntityLivingBase) tickingEntity).getCombatTracker().getBestCombatEntry();
+                if (entry != null) {
+                    if (entry.damageSrc != null) {
+                        frame.addContext(EventContextKeys.LAST_DAMAGE_SOURCE,
+                                (DamageSource) entry.damageSrc);
+                    }
                 }
-                //entity.setPositionWithRotation(position.getX(), position.getY(), position.getZ(), rotation.getFloorX(), rotation.getFloorY());
-                    /*
-                    Some thoughts from gabizou: The interesting thing here is that while this is only called
-                    in World.updateEntityWithOptionalForce, by default, it supposedly handles updating the rider entity
-                    of the entity being handled here. The interesting issue is that since we are setting the transform,
-                    the rider entity (and the rest of the rider entities) are being updated as well with the new position
-                    and potentially world, which results in a dirty world usage (since the world transfer is handled by
-                    us). Now, the thing is, the previous position is not updated either, and likewise, the current position
-                    is being set by us as well. So, there's some issue I'm sure that is bound to happen with this
-                    logic.
-                     */
-                //((Entity) entity).setTransform(event.getToTransform());
             }
         }
     }
 
     @Override
     public EntityTickContext createPhaseContext() {
-        return new EntityTickContext().addCaptures();
+        return new EntityTickContext(this).addCaptures();
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Override
-    public void handleBlockChangeWithUser(@Nullable BlockChange blockChange, Transaction<BlockSnapshot> transaction,
+    public void postBlockTransactionApplication(BlockChange blockChange, Transaction<BlockSnapshot> transaction,
         EntityTickContext context) {
         if (blockChange == BlockChange.BREAK) {
             final Entity tickingEntity = context.getSource(Entity.class).get();
             final BlockPos blockPos = VecHelper.toBlockPos(transaction.getOriginal().getPosition());
             for (EntityHanging entityHanging : EntityUtil.findHangingEntities(EntityUtil.getMinecraftWorld(tickingEntity), blockPos)) {
                 if (entityHanging instanceof EntityItemFrame) {
-                    final EntityItemFrame frame = (EntityItemFrame) entityHanging;
-                    if (tickingEntity != null && !frame.isDead) {
-                        frame.dropItemOrSelf(EntityUtil.toNative(tickingEntity), true);
+                    final EntityItemFrame itemFrame = (EntityItemFrame) entityHanging;
+                    if (!itemFrame.isDead) {
+                        itemFrame.dropItemOrSelf(EntityUtil.toNative(tickingEntity), true);
                     }
-                    frame.setDead();
+                    itemFrame.setDead();
                 }
             }
         }
-    }
-
-    @Override
-    public void postProcessSpawns(EntityTickContext phaseContext, ArrayList<Entity> entities) {
-        super.postProcessSpawns(phaseContext, entities);
     }
 
     @Override
@@ -343,101 +243,96 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
 
     @Override
     public boolean spawnEntityOrCapture(EntityTickContext context, Entity entity, int chunkX, int chunkZ) {
+        // Always need our source
         final Entity tickingEntity = context.getSource(Entity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Not ticking on an Entity!", context));
-        final Optional<User> creator = context.getOwner();
-        final Optional<User> notifier = context.getNotifier();
-        final User entityCreator = notifier.orElseGet(() -> creator.orElse(null));
+
+        // Now to actually do something....
+        if (context.allowsBulkEntityCaptures()) {
+            // We need to check if any blocks are being broken at the moment. If they are, we need to
+            // put them in the associated block pos multimap, because the block change may not have
+            // occurred yet.
+            // Refer to https://github.com/SpongePowered/SpongeCommon/issues/1443
+            // Look at net.minecraft.world.World#breakBlock
+            final Optional<BlockPos> pos = context.getCaptureBlockPos().getPos();
+            if (pos.isPresent()) {
+                return context.getPerBlockEntitySpawnSuppplier().get().put(pos.get(), EntityUtil.toNative(entity));
+            } else {
+                return context.getCapturedEntities().add(entity);
+            }
+            // Otherwise... we'll just spawn them normally.
+        }
+        // It kinda sucks we have to make the cause frame here, but if we're already here, we are
+        // effectively already going to throw an event, and we're configured not to bulk capture.
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            context.addNotifierAndOwnerToCauseStack();
-            Sponge.getCauseStackManager().pushCause(tickingEntity);
+            context.addNotifierAndOwnerToCauseStack(frame);
+            frame.pushCause(tickingEntity);
             if (entity instanceof EntityXPOrb) {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.EXPERIENCE);
-                if (EntityUtil.isEntityDead(tickingEntity)) {
-                    if (tickingEntity instanceof EntityLivingBase) {
-                        CombatEntry entry = ((EntityLivingBase) tickingEntity).getCombatTracker().getBestCombatEntry();
-                        if (entry != null) {
-                            if (entry.damageSrc != null) {
-                                Sponge.getCauseStackManager().addContext(EventContextKeys.LAST_DAMAGE_SOURCE, (DamageSource) entry.damageSrc);
-                            }
-                        }
-                    }
-                }
-                final List<Entity> experience = new ArrayList<Entity>(1);
+                frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
+                appendContextOfPossibleEntityDeath(tickingEntity, frame);
+                final List<Entity> experience = new ArrayList<>(1);
                 experience.add(entity);
-    
-                final SpawnEntityEvent
-                        event =
-                        SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), experience);
-                if (!SpongeImpl.postEvent(event)) {
-                    for (Entity anEntity : event.getEntities()) {
-                        if (entityCreator != null) {
-                            EntityUtil.toMixin(anEntity).setCreator(entityCreator.getUniqueId());
-                        }
-                        EntityUtil.getMixinWorld(entity).forceSpawnEntity(anEntity);
-                    }
-                    return true;
-                }
-                return false;
+
+                return SpongeCommonEventFactory.callSpawnEntity(experience, context);
             } else if (tickingEntity instanceof Ageable && tickingEntity.getClass() == entity.getClass()) {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.BREEDING);
+                frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BREEDING);
                 if (tickingEntity instanceof EntityAnimal) {
                     final EntityPlayer playerInLove = ((EntityAnimal) tickingEntity).getLoveCause();
                     if (playerInLove != null) {
-                        Sponge.getCauseStackManager().addContext(EventContextKeys.PLAYER, (Player) playerInLove);
+                        frame.addContext(EventContextKeys.PLAYER, (Player) playerInLove);
                     }
                 }
-                final List<Entity> breeding = new ArrayList<Entity>(1);
+                final List<Entity> breeding = new ArrayList<>(1);
                 breeding.add(entity);
-                SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), breeding);
-                if (!SpongeImpl.postEvent(event)) {
-                    for (Entity anEntity : event.getEntities()) {
-                        if (entityCreator != null) {
-                            EntityUtil.toMixin(anEntity).setCreator(entityCreator.getUniqueId());
-                        }
-                        EntityUtil.getMixinWorld(entity).forceSpawnEntity(anEntity);
-                    }
-                    return true;
-                }
-                return false;
+                return SpongeCommonEventFactory.callSpawnEntity(breeding, context);
+
             } else if (entity instanceof Projectile) {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PROJECTILE);
-                final List<Entity> projectile = new ArrayList<Entity>(1);
+                frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PROJECTILE);
+                final List<Entity> projectile = new ArrayList<>(1);
                 projectile.add(entity);
-                final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), projectile);
-                SpongeImpl.postEvent(event);
-                if (!event.isCancelled()) {
-                    for (Entity anEntity : event.getEntities()) {
-                        if (entityCreator != null) {
-                            anEntity.setCreator(entityCreator.getUniqueId());
-                        }
-                        EntityUtil.getMixinWorld(entity).forceSpawnEntity(anEntity);
-                    }
-                    return true;
-                }
-                return false;
+                return SpongeCommonEventFactory.callSpawnEntity(projectile, context);
+
             }
-            final List<Entity> nonExp = new ArrayList<Entity>(1);
+            final List<Entity> nonExp = new ArrayList<>(1);
             nonExp.add(entity);
-    
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PASSIVE);
-            final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), nonExp);
-            SpongeImpl.postEvent(event);
-            if (!event.isCancelled()) {
-                for (Entity anEntity : event.getEntities()) {
-                    if (entityCreator != null) {
-                        anEntity.setCreator(entityCreator.getUniqueId());
-                    }
-                    EntityUtil.getMixinWorld(entity).forceSpawnEntity(anEntity);
-                }
-                return true;
-            }
+
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PASSIVE);
+            return SpongeCommonEventFactory.callSpawnEntity(nonExp, context);
         }
+    }
+
+    @Override
+    public boolean doesCaptureEntitySpawns() {
         return false;
     }
 
     @Override
+    public boolean alreadyProcessingBlockItemDrops() {
+        return true;
+    }
+
+    /**
+     * Specifically overridden here because some states have defaults and don't check the context.
+     * @param context The context
+     * @return True if bulk block captures are usable for this entity type (default true)
+     */
+    @Override
+    public boolean doesBulkBlockCapture(EntityTickContext context) {
+        return context.allowsBulkBlockCaptures();
+    }
+
+    /**
+     * Specifically overridden here because some states have defaults and don't check the context.
+     * @param context The context
+     * @return True if block events are to be tracked by the specific type of entity (default is true)
+     */
+    @Override
+    public boolean doesBlockEventTracking(EntityTickContext context) {
+        return context.allowsBlockEvents();
+    }
+
+    @Override
     public String toString() {
-        return "EntityTickPhase";
+        return this.name;
     }
 }

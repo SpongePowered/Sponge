@@ -37,9 +37,6 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityEgg;
 import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.util.ResourceLocation;
-import org.spongepowered.api.data.type.HorseColors;
-import org.spongepowered.api.data.type.OcelotTypes;
-import org.spongepowered.api.data.type.RabbitTypes;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.registry.ExtraClassCatalogRegistryModule;
@@ -52,6 +49,7 @@ import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.registry.RegistryHelper;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
+import org.spongepowered.common.registry.type.data.KeyRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Collection;
@@ -197,8 +195,10 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
         if (cls == null) {
             throw new IllegalArgumentException("No class mapping for entity name " + mcName);
         }
-        return new SpongeEntityType(SpongeImplHooks.getEntityId(cls), spongeName, cls,
-                new SpongeTranslation("entity." + SpongeImplHooks.getEntityTranslation(resourceLoc) + ".name"));
+        final SpongeEntityType entityType = new SpongeEntityType(SpongeImplHooks.getEntityId(cls), spongeName, cls,
+            new SpongeTranslation("entity." + SpongeImplHooks.getEntityTranslation(resourceLoc) + ".name"));
+        KeyRegistryModule.getInstance().registerForEntityClass(cls);
+        return entityType;
     }
 
     private SpongeEntityType newEntityTypeFromName(String name) {

@@ -52,6 +52,7 @@ public class SpongeInvisibilityData extends AbstractData<InvisibilityData, Immut
         this.collision = collision;
         this.untargetable = untargetable;
         this.invisible = invisible;
+        this.registerGettersAndSetters();
     }
 
     @Override
@@ -81,9 +82,11 @@ public class SpongeInvisibilityData extends AbstractData<InvisibilityData, Immut
         registerKeyValue(Keys.VANISH, this::vanish);
 
         registerFieldGetter(Keys.VANISH_IGNORES_COLLISION, this::isCollision);
+        registerFieldSetter(Keys.VANISH_IGNORES_COLLISION, (value) -> this.collision = value);
         registerKeyValue(Keys.VANISH_IGNORES_COLLISION, this::ignoresCollisionDetection);
 
         registerFieldGetter(Keys.VANISH_PREVENTS_TARGETING, this::isUntargetable);
+        registerFieldSetter(Keys.VANISH_PREVENTS_TARGETING, (value) -> this.untargetable = value);
         registerKeyValue(Keys.VANISH_PREVENTS_TARGETING, this::untargetable);
 
         registerFieldGetter(Keys.INVISIBLE, () -> this.invisible);

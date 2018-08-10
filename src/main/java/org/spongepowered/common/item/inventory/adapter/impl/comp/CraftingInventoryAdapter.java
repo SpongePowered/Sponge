@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.item.inventory.adapter.impl.comp;
 
-import net.minecraft.inventory.IInventory;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
@@ -34,16 +33,16 @@ import org.spongepowered.common.item.inventory.lens.comp.CraftingInventoryLens;
 
 public class CraftingInventoryAdapter extends OrderedInventoryAdapter implements CraftingInventory {
 
-    protected final CraftingInventoryLens<IInventory, net.minecraft.item.ItemStack> craftingLens;
+    protected final CraftingInventoryLens craftingLens;
     
     private CraftingGridInventory craftingGrid;
     private CraftingOutput result;
     
-    public CraftingInventoryAdapter(Fabric<IInventory> inventory, CraftingInventoryLens<IInventory, net.minecraft.item.ItemStack> root) {
+    public CraftingInventoryAdapter(Fabric inventory, CraftingInventoryLens root) {
         this(inventory, root, null);
     }
 
-    public CraftingInventoryAdapter(Fabric<IInventory> inventory, CraftingInventoryLens<IInventory, net.minecraft.item.ItemStack> root, Inventory parent) {
+    public CraftingInventoryAdapter(Fabric inventory, CraftingInventoryLens root, Inventory parent) {
         super(inventory, root, parent);
         this.craftingLens = root;
     }

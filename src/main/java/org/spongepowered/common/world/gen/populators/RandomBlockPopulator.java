@@ -31,13 +31,19 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.util.weighted.VariableAmount;
+import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.RandomBlock;
+import org.spongepowered.common.block.BlockUtil;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.util.VecHelper;
 
 import java.util.Random;
 import java.util.function.Predicate;
@@ -78,10 +84,14 @@ public class RandomBlockPopulator implements RandomBlock {
         for (int i = 0; i < n; i++) {
             Location<World> pos = chunkMin.add(random.nextInt(size.getX()), this.height.getFlooredAmount(random), random.nextInt(size.getZ()));
             if (this.check.test(pos)) {
-                world.setBlock(pos.getBlockPosition(), this.state);
+                if (((IMixinWorld) world).isFake()) {
+                    world.setBlock(pos.getBlockPosition(), this.state, BlockChangeFlags.PHYSICS_OBSERVER);
+                } else { // This is the most direct call to set a block state, due to neighboring updates we don't want to cause.
+                    PhaseTracker.getInstance().setBlockState((IMixinWorldServer) world, VecHelper.toBlockPos(pos), BlockUtil.toNative(this.state), BlockChangeFlags.PHYSICS_OBSERVER);
+                }
                 // Liquids force a block update tick so they may flow during world gen
                 try {
-                    ((WorldServer) world).immediateBlockTick(((IMixinLocation) (Object) pos).getBlockPos(), (IBlockState) this.state, random);
+                    ((WorldServer) world).immediateBlockTick(VecHelper.toBlockPos(pos), (IBlockState) this.state, random);
                 } catch(IllegalArgumentException e) {
                     // ignore
                 }

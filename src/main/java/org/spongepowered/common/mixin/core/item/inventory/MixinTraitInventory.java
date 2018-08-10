@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.item.inventory;
 
+import net.minecraft.entity.item.EntityMinecartContainer;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
@@ -79,10 +80,11 @@ import javax.annotation.Nullable;
         InventoryBasic.class,
         SpongeUserInventory.class,
         InventoryCrafting.class,
-        InventoryCraftResult.class
+        InventoryCraftResult.class,
+        EntityMinecartContainer.class
 }, priority = 999)
 @Implements(@Interface(iface = Inventory.class, prefix = "inventory$"))
-public abstract class MixinTraitInventory implements MinecraftInventoryAdapter<IInventory> {
+public abstract class MixinTraitInventory implements MinecraftInventoryAdapter {
 
     protected EmptyInventory empty;
     @Nullable protected Inventory parent;
@@ -92,7 +94,7 @@ public abstract class MixinTraitInventory implements MinecraftInventoryAdapter<I
 
     private PluginContainer plugin = null;
 
-    protected Fabric<IInventory> fabric;
+    protected Fabric fabric;
 
     @Override
     public Inventory parent() {
@@ -145,7 +147,7 @@ public abstract class MixinTraitInventory implements MinecraftInventoryAdapter<I
     @Override
     public <T extends Inventory> Iterable<T> slots() {
         if (this.slotIterator == null) {
-            this.slotIterator = new SlotCollectionIterator<>(this, this.getFabric(), this.getRootLens(), this.getSlotProvider());
+            this.slotIterator = new SlotCollectionIterator(this, this.getFabric(), this.getRootLens(), this.getSlotProvider());
         }
         return (Iterable<T>) this.slotIterator;
     }
@@ -155,7 +157,8 @@ public abstract class MixinTraitInventory implements MinecraftInventoryAdapter<I
         this.getFabric().clear();
     }
 
-    public Fabric<IInventory> getFabric() {
+    @Override
+    public Fabric getFabric() {
         if (this.fabric == null) {
             this.fabric = MinecraftFabric.of(this);
         }

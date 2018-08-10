@@ -41,17 +41,17 @@ public abstract class MixinNetHandlerPlayServer {
     private static final String NET_HANDLER_PLAY_DROP_SPAM_FIELD = "Lnet/minecraft/network/NetHandlerPlayServer;itemDropThreshold:I";
     @Shadow private int chatSpamThresholdCount;
     @Shadow private int itemDropThreshold;
-    @Shadow @Final private MinecraftServer serverController;
+    @Shadow @Final private MinecraftServer server;
 
     @Redirect(method = "update", at = @At(value = "FIELD", target = NET_HANDLER_PLAY_CHAT_SPAM_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
     public void fixupChatSpamCheck(NetHandlerPlayServer self, int modifier) {
-        int ticks = (int) ((IMixinRealTimeTicking) this.serverController).getRealTimeTicks();
+        int ticks = (int) ((IMixinRealTimeTicking) this.server).getRealTimeTicks();
         this.chatSpamThresholdCount = Math.max(0, this.chatSpamThresholdCount - ticks);
     }
 
     @Redirect(method = "update", at = @At(value = "FIELD", target = NET_HANDLER_PLAY_DROP_SPAM_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
     public void fixupDropSpamCheck(NetHandlerPlayServer self, int modifier) {
-        int ticks = (int) ((IMixinRealTimeTicking) this.serverController).getRealTimeTicks();
+        int ticks = (int) ((IMixinRealTimeTicking) this.server).getRealTimeTicks();
         this.itemDropThreshold = Math.max(0, this.itemDropThreshold - ticks);
     }
 

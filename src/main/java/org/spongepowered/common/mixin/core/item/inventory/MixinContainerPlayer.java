@@ -25,9 +25,9 @@
 package org.spongepowered.common.mixin.core.item.inventory;
 
 import net.minecraft.inventory.ContainerPlayer;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
+import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.interfaces.inventory.IMixinContainerPlayer;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.CraftingOutputAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.EquipmentSlotAdapter;
@@ -38,23 +38,42 @@ import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.impl.minecraft.container.ContainerPlayerInventoryLens;
 import org.spongepowered.common.item.inventory.lens.impl.slots.CraftingOutputSlotLensImpl;
+import org.spongepowered.common.item.inventory.lens.impl.slots.EquipmentSlotLensImpl;
 
 @Mixin(ContainerPlayer.class)
-public abstract class MixinContainerPlayer extends MixinContainer implements LensProvider<IInventory, ItemStack> {
+public abstract class MixinContainerPlayer extends MixinContainer implements IMixinContainerPlayer, LensProvider {
 
     @Override
-    public Lens<IInventory, ItemStack> rootLens(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
+    public Lens rootLens(Fabric fabric, InventoryAdapter adapter) {
         return new ContainerPlayerInventoryLens(adapter, inventory$getSlotProvider());
     }
 
+    private int offHandSlot = -1;
+
     @Override
-    public SlotProvider<IInventory, ItemStack> slotProvider(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
+    public int getOffHandSlot() {
+        return this.offHandSlot;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public SlotProvider slotProvider(Fabric fabric, InventoryAdapter adapter) {
         SlotCollection.Builder builder = new SlotCollection.Builder()
                 .add(1, CraftingOutputAdapter.class, (i) -> new CraftingOutputSlotLensImpl(i, (t) -> false, (t) -> false))
                 .add(4)
-                .add(4, EquipmentSlotAdapter.class)
+                // TODO predicates for ItemStack/ItemType?
+                // order for equipment is reversed in containers
+                .add(EquipmentSlotAdapter.class, index -> new EquipmentSlotLensImpl(index, i -> true, t -> true, e -> e == EquipmentTypes.HEADWEAR))
+                .add(EquipmentSlotAdapter.class, index -> new EquipmentSlotLensImpl(index, i -> true, t -> true, e -> e == EquipmentTypes.CHESTPLATE))
+                .add(EquipmentSlotAdapter.class, index -> new EquipmentSlotLensImpl(index, i -> true, t -> true, e -> e == EquipmentTypes.LEGGINGS))
+                .add(EquipmentSlotAdapter.class, index -> new EquipmentSlotLensImpl(index, i -> true, t -> true, e -> e == EquipmentTypes.BOOTS))
                 .add(36)
-                .add(1);
+                .add(EquipmentSlotAdapter.class, index -> new EquipmentSlotLensImpl(index, i -> true, t -> true, e -> e == EquipmentTypes.OFF_HAND));
+
+        if (this.offHandSlot == -1) {
+            this.offHandSlot = builder.size() - 1;
+        }
+
         builder.add(this.inventorySlots.size() - 46); // Add additional slots (e.g. from mods)
         return builder.build();
     }

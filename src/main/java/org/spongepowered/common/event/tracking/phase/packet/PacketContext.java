@@ -26,22 +26,26 @@ package org.spongepowered.common.event.tracking.phase.packet;
 
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.PhaseContext;
 
+import javax.annotation.Nullable;
+
 @SuppressWarnings("unchecked")
 public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
 
-    EntityPlayerMP packetPlayer;
-    Packet<?> packet;
-    private ItemStackSnapshot cursor;
+    @Nullable EntityPlayerMP packetPlayer;
+    @Nullable Packet<?> packet;
+    @Nullable private ItemStackSnapshot cursor;
+    @Nullable private ItemStack itemUsed;
+    @Nullable private BlockSnapshot targetBlock;
     private boolean ignoreCreative;
-    private ItemStack itemUsed;
 
-    protected PacketContext(PacketState<? extends P> state) {
+    PacketContext(PacketState<? extends P> state) {
         super(state);
     }
 
@@ -52,6 +56,11 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
 
     public P packetPlayer(EntityPlayerMP playerMP) {
         this.packetPlayer = playerMP;
+        return (P) this;
+    }
+
+    public P targetBlock(BlockSnapshot snapshot) {
+        this.targetBlock = snapshot;
         return (P) this;
     }
 
@@ -66,7 +75,7 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
     }
 
     public EntityPlayerMP getPacketPlayer() {
-        return packetPlayer;
+        return this.packetPlayer;
     }
 
     public Player getSpongePlayer() {
@@ -74,15 +83,19 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
     }
 
     public <K extends Packet<?>> K getPacket() {
-        return (K) packet;
+        return (K) this.packet;
     }
 
     public ItemStackSnapshot getCursor() {
-        return cursor;
+        return this.cursor;
+    }
+
+    public BlockSnapshot getTargetBlock() {
+        return this.targetBlock;
     }
 
     public boolean getIgnoringCreative() {
-        return ignoreCreative;
+        return this.ignoreCreative;
     }
 
     public P itemUsed(ItemStack stack) {
@@ -91,16 +104,17 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
     }
 
     public ItemStack getItemUsed() {
-        return itemUsed;
+        return this.itemUsed;
     }
 
     @Override
-    public PrettyPrinter printCustom(PrettyPrinter printer) {
-        return super.printCustom(printer)
-            .add("    - %s: %s", "PacketPlayer", this.packetPlayer)
-            .add("    - %s: %s", "Packet", this.packet)
-            .add("    - %s: %s", "IgnoreCreative", this.ignoreCreative)
-            .add("    - %s: %s", "ItemStackUsed", this.itemUsed);
+    public PrettyPrinter printCustom(PrettyPrinter printer, int indent) {
+        String s = String.format("%1$"+indent+"s", "");
+        return super.printCustom(printer, indent)
+            .add(s + "- %s: %s", "PacketPlayer", this.packetPlayer)
+            .add(s + "- %s: %s", "Packet", this.packet)
+            .add(s + "- %s: %s", "IgnoreCreative", this.ignoreCreative)
+            .add(s + "- %s: %s", "ItemStackUsed", this.itemUsed);
 
     }
 }

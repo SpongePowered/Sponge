@@ -37,7 +37,7 @@ import org.spongepowered.api.plugin.Plugin;
 /**
  * Bedrock in hoppers prevents them from working
  */
-@Plugin(id = "hoppereventtest", name = "Hopper Event Test", description = "A plugin to test hopper event")
+@Plugin(id = "hoppereventtest", name = "Hopper Event Test", description = "A plugin to test hopper event", version = "0.0.0")
 public class TransferEventTest {
 
     private final TransferListener listener = new TransferListener();
@@ -60,6 +60,7 @@ public class TransferEventTest {
 
     public static class TransferListener {
 
+        @SuppressWarnings("deprecation")
         @Listener
         public void onPreTransferEvent(ChangeInventoryEvent.Transfer.Pre event) {
             if (event.getSourceInventory().queryAny(ItemStack.of(ItemTypes.BEDROCK, 1)).capacity() != 0) {

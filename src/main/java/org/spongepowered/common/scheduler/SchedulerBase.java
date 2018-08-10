@@ -24,19 +24,23 @@
  */
 package org.spongepowered.common.scheduler;
 
+import co.aikar.timings.Timing;
+import co.aikar.timings.TimingsManager;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-
-import co.aikar.timings.TimingsManager;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+
+import javax.annotation.Nullable;
 
 abstract class SchedulerBase {
 
@@ -178,21 +182,31 @@ abstract class SchedulerBase {
     protected void startTask(final ScheduledTask task) {
         this.executeTaskRunnable(task, () -> {
             task.setState(ScheduledTask.ScheduledTaskState.RUNNING);
-            if(!task.isAsynchronous()) {
-                Sponge.getCauseStackManager().pushCause(task.getOwner());
+            try (final PhaseContext<?> context = createContext(task, task.getOwner());
+                 final Timing timings = task.getTimingsHandler()) {
+                timings.startTimingIfSync();
+                if (context != null) {
+                    context.buildAndSwitch();
+                }
+                try {
+                    task.getConsumer().accept(task);
+                } catch (Throwable t) {
+                    SpongeImpl.getLogger().error("The Scheduler tried to run the task {} owned by {}, but an error occured.", task.getName(),
+                        task.getOwner(), t);
+                }
             }
-            task.getTimingsHandler().startTimingIfSync();
-            try {
-                task.getConsumer().accept(task);
-            } catch (Throwable t) {
-                SpongeImpl.getLogger().error("The Scheduler tried to run the task {} owned by {}, but an error occured.", task.getName(),
-                                             task.getOwner(), t);
-            }
-            if(!task.isAsynchronous()) {
-                Sponge.getCauseStackManager().popCause();
-            }
-            task.getTimingsHandler().stopTimingIfSync();
         });
+    }
+
+    @Nullable
+    protected PhaseContext<?> createContext(ScheduledTask task, PluginContainer container) {
+        if (task.isAsynchronous() || !Sponge.isServerAvailable()) {
+            // If the server is not available, we don't want to run it.  (client main menu ticks)
+            return null;
+        }
+        return PluginPhase.State.SCHEDULED_TASK.createPhaseContext()
+            .source(task)
+            .container(container);
     }
 
     /**

@@ -34,6 +34,9 @@ public class MixinChatType implements org.spongepowered.api.text.chat.ChatType {
 
     @Override
     public String getId() {
+        if ((Object) this == ChatType.GAME_INFO) {
+            return "minecraft:action_bar";
+        }
         return "minecraft:" + ((ChatType) (Object) this).name().toLowerCase(Locale.ENGLISH);
     }
 

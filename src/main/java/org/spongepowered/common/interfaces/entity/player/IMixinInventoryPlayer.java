@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.interfaces.entity.player;
 
-import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
@@ -32,7 +31,7 @@ import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAd
 
 import java.util.List;
 
-public interface IMixinInventoryPlayer extends MinecraftInventoryAdapter<IInventory> {
+public interface IMixinInventoryPlayer extends MinecraftInventoryAdapter {
 
     int getHeldItemIndex(EnumHand hand);
 
@@ -67,4 +66,5 @@ public interface IMixinInventoryPlayer extends MinecraftInventoryAdapter<IInvent
      */
     void setCapture(boolean enable);
 
+    boolean capturesTransactions();
 }

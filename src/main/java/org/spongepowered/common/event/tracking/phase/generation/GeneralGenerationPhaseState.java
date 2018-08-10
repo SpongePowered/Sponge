@@ -30,14 +30,8 @@ import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.tick.BlockTickContext;
@@ -49,8 +43,11 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * A generalized
+ * A generalized generation phase state. Used for entering populator world generation,
+ * new chunk generation, and world spawner entity spawning (since it is used as a populator).
+ * Generally does not capture or throw events unless necessary.
  */
+@SuppressWarnings("rawtypes")
 abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> implements IPhaseState<G> {
 
     private Set<IPhaseState<?>> compatibleStates = new HashSet<>();
@@ -90,8 +87,13 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
     }
 
     @Override
-    public final boolean isExpectedForReEntrance() {
-        return true;
+    public boolean requiresPost() {
+        return false;
+    }
+
+    @Override
+    public final boolean isNotReEntrant() {
+        return false;
     }
 
     @Override
@@ -100,17 +102,22 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
     }
 
     @Override
-    public boolean ignoresBlockUpdateTick(PhaseData phaseData) {
+    public boolean ignoresBlockUpdateTick(G context) {
         return true;
     }
 
     @Override
-    public boolean requiresBlockCapturing() {
+    public boolean ignoresEntityCollisions() {
+        return true;
+    }
+
+    @Override
+    public boolean doesBulkBlockCapture(G context) {
         return false;
     }
 
     @Override
-    public boolean alreadyCapturingItemSpawns() {
+    public boolean alreadyProcessingBlockItemDrops() {
         return true;
     }
 
@@ -125,39 +132,31 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
     }
 
     @Override
+    public boolean doesBlockEventTracking(G context) {
+        return false;
+    }
+
+    @Override
     public final void unwind(G context) {
         final List<Entity> spawnedEntities = context.getCapturedEntitySupplier().orEmptyList();
         if (spawnedEntities.isEmpty()) {
             return;
         }
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WORLD_SPAWNER);
-    
-            final SpawnEntityEvent.Spawner
-                    event =
-                    SpongeEventFactory.createSpawnEntityEventSpawner(Sponge.getCauseStackManager().getCurrentCause(), spawnedEntities);
-            SpongeImpl.postEvent(event);
-            if (!event.isCancelled()) {
-                for (Entity entity : event.getEntities()) {
-                    EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
-                }
-            }
-        }
+        SpongeCommonEventFactory.callSpawnEntitySpawner(spawnedEntities, context);
     }
 
     @Override
     public boolean spawnEntityOrCapture(G context, Entity entity, int chunkX, int chunkZ) {
         final ArrayList<Entity> entities = new ArrayList<>(1);
         entities.add(entity);
-        final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEventSpawner(Sponge.getCauseStackManager().getCurrentCause(),
-            entities);
-        SpongeImpl.postEvent(event);
-        if (!event.isCancelled() && event.getEntities().size() > 0) {
-            for (Entity item : event.getEntities()) {
-                ((IMixinWorldServer) item.getWorld()).forceSpawnEntity(item);
-            }
-            return true;
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(entity.getLocation().getExtent());
+            return SpongeCommonEventFactory.callSpawnEntitySpawner(entities, context);
         }
+    }
+
+    @Override
+    public boolean doesCaptureEntitySpawns() {
         return false;
     }
 

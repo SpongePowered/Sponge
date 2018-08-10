@@ -31,13 +31,12 @@ import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.item.inventory.InventoryProperty;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.query.QueryOperation;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult.Type;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.common.item.inventory.observer.InventoryEventArgs;
 import org.spongepowered.common.text.translation.SpongeTranslation;
-import org.spongepowered.common.util.observer.Observer;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -48,7 +47,7 @@ import java.util.Optional;
 /**
  * Bottom type / empty results set for inventory queries.
  */
-public class EmptyInventoryImpl implements EmptyInventory, Observer<InventoryEventArgs> {
+public class EmptyInventoryImpl implements EmptyInventory {
 
     public static final Translation EMPTY_NAME = new SpongeTranslation("inventory.empty.title");
 
@@ -188,50 +187,8 @@ public class EmptyInventoryImpl implements EmptyInventory, Observer<InventoryEve
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends Inventory> T query(Class<?>... types) {
-        return (T)this;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T extends Inventory> T query(ItemType... types) {
-        return (T)this;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T extends Inventory> T query(ItemStack... types) {
-        return (T)this;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T extends Inventory> T queryAny(ItemStack... types) {
-        return (T)this;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T extends Inventory> T query(InventoryProperty<?, ?>... props) {
-        return (T)this;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T extends Inventory> T query(Translation... names) {
-        return (T)this;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T extends Inventory> T query(String... names) {
-        return (T)this;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T extends Inventory> T query(Object... args) {
-        return (T)this;
+    public <T extends Inventory> T query(QueryOperation<?>... operations) {
+        return (T) this;
     }
 
     @Override
@@ -283,10 +240,6 @@ public class EmptyInventoryImpl implements EmptyInventory, Observer<InventoryEve
     @Override
     public Translation getName() {
         return EmptyInventoryImpl.EMPTY_NAME;
-    }
-
-    @Override
-    public void notify(Object source, InventoryEventArgs eventArgs) {
     }
 
     @Override

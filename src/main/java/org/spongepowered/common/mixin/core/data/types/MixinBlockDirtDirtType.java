@@ -26,19 +26,25 @@ package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.block.BlockDirt;
 import org.spongepowered.api.data.type.DirtType;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.common.text.translation.SpongeTranslation;
+
+import javax.annotation.Nullable;
 
 @Mixin(BlockDirt.DirtType.class)
 @Implements(@Interface(iface = DirtType.class, prefix = "dirt$"))
 public abstract class MixinBlockDirtDirtType {
 
     @Shadow public abstract String shadow$getName();
-    @Shadow public abstract String shadow$getUnlocalizedName();
+    @Shadow public abstract String shadow$getTranslationKey();
+
+    @Nullable private Translation translation;
 
     @Unique
     public String dirt$getId() {
@@ -47,6 +53,14 @@ public abstract class MixinBlockDirtDirtType {
 
     @Intrinsic
     public String dirt$getName() {
-        return shadow$getUnlocalizedName();
+        return shadow$getTranslationKey();
     }
+
+    public Translation dirt$getTranslation() {
+        if (this.translation == null) {
+            this.translation = new SpongeTranslation("tile.dirt." + shadow$getTranslationKey() + ".name");
+        }
+        return this.translation;
+    }
+
 }

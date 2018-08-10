@@ -33,6 +33,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.inject.Singleton;
+import net.minecraft.entity.player.EntityPlayer;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandCallable;
@@ -43,6 +44,7 @@ import org.spongepowered.api.command.CommandPermissionException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.InvocationCommandException;
+import org.spongepowered.api.command.args.ArgumentParseException;
 import org.spongepowered.api.command.dispatcher.Disambiguator;
 import org.spongepowered.api.command.dispatcher.SimpleDispatcher;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
@@ -56,8 +58,10 @@ import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.util.TextMessageException;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.phase.general.CommandPhaseContext;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
+import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -292,32 +296,36 @@ public class SpongeCommandManager implements CommandManager {
     @Override
     public CommandResult process(CommandSource source, String commandLine) {
         final String[] argSplit = commandLine.split(" ", 2);
-        Sponge.getCauseStackManager().pushCause(source);
-        final SendCommandEvent event = SpongeEventFactory.createSendCommandEvent(Sponge.getCauseStackManager().getCurrentCause(),
-            argSplit.length > 1 ? argSplit[1] : "", argSplit[0], CommandResult.empty());
-        Sponge.getGame().getEventManager().post(event);
-        Sponge.getCauseStackManager().popCause();
-        if (event.isCancelled()) {
-            return event.getResult();
-        }
+        if (ShouldFire.SEND_COMMAND_EVENT) {
+            Sponge.getCauseStackManager().pushCause(source);
+            final SendCommandEvent event = SpongeEventFactory.createSendCommandEvent(Sponge.getCauseStackManager().getCurrentCause(),
+                argSplit.length > 1 ? argSplit[1] : "", argSplit[0], CommandResult.empty());
+            Sponge.getGame().getEventManager().post(event);
+            Sponge.getCauseStackManager().popCause();
+            if (event.isCancelled()) {
+                return event.getResult();
+            }
 
-        // Only the first part of argSplit is used at the moment, do the other in the future if needed.
-        argSplit[0] = event.getCommand();
+            // Only the first part of argSplit is used at the moment, do the other in the future if needed.
+            argSplit[0] = event.getCommand();
 
-        commandLine = event.getCommand();
-        if (!event.getArguments().isEmpty()) {
-            commandLine = commandLine + ' ' + event.getArguments();
+            commandLine = event.getCommand();
+            if (!event.getArguments().isEmpty()) {
+                commandLine = commandLine + ' ' + event.getArguments();
+            }
         }
 
         try {
-            try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
-                 // Since we know we are in the main thread, this is safe to do without a thread check
+            try (// Since we know we are in the main thread, this is safe to do without a thread check
                  CommandPhaseContext context = GeneralPhase.State.COMMAND.createPhaseContext()
                          .source(source)
                          .addCaptures()
-                         .addEntityDropCaptures()
-                         .buildAndSwitch()) {
-                Sponge.getCauseStackManager().pushCause(source);
+                         .addEntityDropCaptures()) {
+                context.buildAndSwitch();
+                if (source instanceof EntityPlayer) {
+                    // Enable player inventory capture
+                    ((IMixinInventoryPlayer) ((EntityPlayer) source).inventory).setCapture(true);
+                }
                 final CommandResult result = this.dispatcher.process(source, commandLine);
                 return result;
             } catch (InvocationCommandException ex) {
@@ -338,7 +346,14 @@ public class SpongeCommandManager implements CommandManager {
                 if (ex.shouldIncludeUsage()) {
                     final Optional<CommandMapping> mapping = this.dispatcher.get(argSplit[0], source);
                     if (mapping.isPresent()) {
-                        source.sendMessage(error(t("Usage: /%s %s", argSplit[0], mapping.get().getCallable().getUsage(source))));
+                        Text usage;
+                        if (ex instanceof ArgumentParseException.WithUsage) {
+                            usage = ((ArgumentParseException.WithUsage) ex).getUsage();
+                        } else {
+                            usage = mapping.get().getCallable().getUsage(source);
+                        }
+
+                        source.sendMessage(error(t("Usage: /%s %s", argSplit[0], usage)));
                     }
                 }
             }
@@ -383,11 +398,10 @@ public class SpongeCommandManager implements CommandManager {
                 return ImmutableList.of();
             }
             return ImmutableList.copyOf(event.getTabCompletions());
+        } catch (CommandException e) {
+            src.sendMessage(error(t("Error getting suggestions: %s", e.getText())));
+            return Collections.emptyList();
         } catch (Exception e) {
-            if (e instanceof CommandException) {
-                src.sendMessage(error(t("Error getting suggestions: %s", ((CommandException) e).getText())));
-                return Collections.emptyList();
-            }
             throw new RuntimeException(String.format("Error occured while tab completing '%s'", arguments), e);
         }
     }

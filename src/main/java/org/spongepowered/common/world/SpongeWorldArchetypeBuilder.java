@@ -54,6 +54,8 @@ import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
 import org.spongepowered.common.registry.type.world.WorldArchetypeRegistryModule;
 import org.spongepowered.common.registry.type.world.WorldGeneratorModifierRegistryModule;
 
+import javax.annotation.Nullable;
+
 public class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder {
 
     private DimensionType dimensionType;
@@ -66,6 +68,7 @@ public class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder {
     private boolean hardcore;
     private boolean worldEnabled;
     private boolean loadOnStartup;
+    @Nullable
     private Boolean keepSpawnLoaded;
     private boolean generateSpawnOnLoad;
     private boolean pvpEnabled;
@@ -248,6 +251,7 @@ public class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder {
         return this;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public WorldArchetype build(String id, String name) throws IllegalArgumentException, CatalogTypeAlreadyRegisteredException {
         WorldArchetypeRegistryModule.getInstance().getById(id).ifPresent(w -> {

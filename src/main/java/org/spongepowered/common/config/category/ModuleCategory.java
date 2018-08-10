@@ -36,15 +36,12 @@ public class ModuleCategory extends ConfigCategory {
     @Setting(value = "entity-activation-range")
     private boolean pluginEntityActivation = true;
 
-    @Setting(value = "tileentity-activation", comment = "Controls block range and tick rate of tileentities.\n"
-            + "Use with caution as this can break intended functionality.")
+    @Setting(value = "tileentity-activation", comment = "Controls block range and tick rate of tileentities. \n"
+                                                      + "Use with caution as this can break intended functionality.")
     private boolean pluginTileEntityActivation = false;
 
     @Setting(value = "entity-collisions")
     private boolean pluginEntityCollisions = true;
-
-    @Setting(value = "block-capturing-control")
-    private boolean blockCapturing = true;
 
     @Setting("timings")
     private boolean pluginTimings = true;
@@ -58,14 +55,18 @@ public class ModuleCategory extends ConfigCategory {
     @Setting("tracking")
     private boolean tracking = true;
 
-    @Setting("game-fixes")
-    private boolean gameFixes = false;
-
     @Setting(value = "realtime", comment = "Use real (wall) time instead of ticks as much as possible")
     private boolean pluginRealTime = false;
 
     @Setting(value = "movement-checks", comment = "Allows configuring Vanilla movement and speed checks")
     private boolean movementChecks = false;
+
+    @Setting(value = "broken-mod", comment = "Enables experimental fixes for broken mods")
+    private boolean brokenMods = false;
+
+    public boolean useBrokenMods() {
+        return this.brokenMods;
+    }
 
     public boolean usePluginBungeeCord() {
         return this.pluginBungeeCord;
@@ -81,10 +82,6 @@ public class ModuleCategory extends ConfigCategory {
 
     public boolean usePluginTileEntityActivation() {
         return this.pluginTileEntityActivation;
-    }
-
-    public boolean usesBlockCapturing() {
-        return this.blockCapturing;
     }
 
     public void setPluginEntityActivation(boolean state) {
@@ -127,16 +124,8 @@ public class ModuleCategory extends ConfigCategory {
         this.tracking = tracking;
     }
 
-    public boolean applyGameFixes() {
-        return this.gameFixes;
-    }
-
     public boolean useMovementChecks() {
         return this.movementChecks;
-    }
-
-    public void setGameFixes(boolean gameFixes) {
-        this.gameFixes = gameFixes;
     }
 
     public boolean usePluginRealTime() {

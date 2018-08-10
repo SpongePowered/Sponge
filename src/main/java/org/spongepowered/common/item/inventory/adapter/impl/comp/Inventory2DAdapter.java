@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.item.inventory.adapter.impl.comp;
 
-import net.minecraft.inventory.IInventory;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.Slot;
@@ -41,22 +40,22 @@ import java.util.Optional;
 
 public class Inventory2DAdapter extends OrderedInventoryAdapter implements Inventory2D {
 
-    protected Inventory2DLens<IInventory, net.minecraft.item.ItemStack> lens2d;
+    protected Inventory2DLens lens2d;
 
-    public Inventory2DAdapter(Fabric<IInventory> inventory, Inventory2DLens<IInventory, net.minecraft.item.ItemStack> root) {
+    public Inventory2DAdapter(Fabric inventory, Inventory2DLens root) {
         this(inventory, root, null);
     }
 
-    public Inventory2DAdapter(Fabric<IInventory> inventory, Inventory2DLens<IInventory, net.minecraft.item.ItemStack> root, Inventory parent) {
+    public Inventory2DAdapter(Fabric inventory, Inventory2DLens root, Inventory parent) {
         super(inventory, root, parent);
         this.lens2d = root;
     }
     
-    protected SlotLens<IInventory, net.minecraft.item.ItemStack> getSlotLens(int x, int y) {
+    protected SlotLens getSlotLens(int x, int y) {
         return this.getSlotLens(SlotPos.of(x, y));
     }
 
-    protected SlotLens<IInventory, net.minecraft.item.ItemStack> getSlotLens(SlotPos pos) {
+    protected SlotLens getSlotLens(SlotPos pos) {
         try {
             return this.lens2d.getSlot(pos);
         } catch (IndexOutOfBoundsException ex) {

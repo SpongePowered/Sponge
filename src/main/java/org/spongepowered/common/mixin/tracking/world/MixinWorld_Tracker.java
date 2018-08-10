@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.tracking.world;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
-import org.spongepowered.api.util.Identifiable;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -43,12 +42,12 @@ import javax.annotation.Nullable;
 @Mixin(value = net.minecraft.world.World.class, priority = 1111)
 public abstract class MixinWorld_Tracker implements World, IMixinWorld{
 
-    @Shadow public abstract net.minecraft.world.chunk.Chunk getChunkFromBlockCoords(BlockPos pos);
-    @Shadow protected IChunkProvider chunkProvider;
+    @Shadow public abstract net.minecraft.world.chunk.Chunk getChunk(BlockPos pos);
+    @Shadow public abstract IChunkProvider getChunkProvider();
 
     @Override
     public Optional<UUID> getCreator(int x, int y, int z) {
-        final Chunk chunk = ((IMixinChunkProviderServer) this.chunkProvider).getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
+        final Chunk chunk = ((IMixinChunkProviderServer) getChunkProvider()).getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
         if (chunk == null) {
             return Optional.empty();
         }
@@ -61,7 +60,7 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld{
 
     @Override
     public Optional<UUID> getNotifier(int x, int y, int z) {
-        final Chunk chunk = ((IMixinChunkProviderServer) this.chunkProvider).getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
+        final Chunk chunk = ((IMixinChunkProviderServer) getChunkProvider()).getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
         if (chunk == null) {
             return Optional.empty();
         }
@@ -74,7 +73,7 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld{
 
     @Override
     public void setCreator(int x, int y, int z, @Nullable UUID uuid) {
-        final Chunk chunk = ((IMixinChunkProviderServer) this.chunkProvider).getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
+        final Chunk chunk = ((IMixinChunkProviderServer) getChunkProvider()).getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
         if (chunk == null) {
             return;
         }
@@ -85,7 +84,7 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld{
 
     @Override
     public void setNotifier(int x, int y, int z, @Nullable UUID uuid) {
-        final Chunk chunk = ((IMixinChunkProviderServer) this.chunkProvider).getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
+        final Chunk chunk = ((IMixinChunkProviderServer) getChunkProvider()).getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
         if (chunk == null) {
             return;
         }

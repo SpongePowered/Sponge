@@ -34,9 +34,11 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableStoneData;
 import org.spongepowered.api.data.type.StoneType;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeStoneData;
+import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Optional;
 
@@ -73,5 +75,10 @@ public abstract class MixinBlockStone extends MixinBlock {
 
     private ImmutableStoneData getStoneTypeFor(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeStoneData.class, (StoneType) (Object) blockState.getValue(BlockStone.VARIANT));
+    }
+
+    @Override
+    public Translation getTranslation() {
+        return new SpongeTranslation(getTranslationKey() +  "." + BlockStone.EnumType.STONE.getTranslationKey() + ".name");
     }
 }

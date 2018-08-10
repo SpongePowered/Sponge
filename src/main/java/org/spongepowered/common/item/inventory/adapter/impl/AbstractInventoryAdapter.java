@@ -26,7 +26,6 @@ package org.spongepowered.common.item.inventory.adapter.impl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.EmptyInventory;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -42,7 +41,6 @@ import org.spongepowered.common.item.inventory.lens.impl.DefaultEmptyLens;
 import org.spongepowered.common.item.inventory.lens.impl.DefaultIndexedLens;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
-import org.spongepowered.common.item.inventory.observer.InventoryEventArgs;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.ArrayList;
@@ -53,50 +51,47 @@ import javax.annotation.Nullable;
 
 /**
  * Base Adapter implementation for {@link ItemStack} based Inventories.
- *
- * @param <TInventory> the Inventory Type
  */
-public class AbstractInventoryAdapter<TInventory> implements MinecraftInventoryAdapter<TInventory> {
+public class AbstractInventoryAdapter implements MinecraftInventoryAdapter {
 
     public static final Translation DEFAULT_NAME = new SpongeTranslation("inventory.default.title");
 
+
+    protected final Fabric inventory;
+    protected final SlotCollection slots;
+    protected final Lens lens;
+    protected final List<Inventory> children = new ArrayList<>();
     /**
      * All inventories have their own empty inventory with themselves as the
      * parent. This empty inventory is initialised on-demand but returned for
      * every query which fails. This saves us from creating a new empty
      * inventory with this inventory as the parent for every failed query.
      */
-    private EmptyInventory empty;
-
-    @Nullable
+    @Nullable private EmptyInventory empty;
     protected Inventory parent;
-    protected Inventory next;
+    @Nullable protected Inventory next;
+    @Nullable private Iterable<Slot> slotIterator;
 
-    protected final Fabric<TInventory> inventory;
-    protected final SlotCollection<TInventory> slots;
-    protected final Lens<TInventory, ItemStack> lens;
-    protected final List<Inventory> children = new ArrayList<>();
-    protected Iterable<Slot> slotIterator;
-
-    public AbstractInventoryAdapter(Fabric<TInventory> inventory) {
+    public AbstractInventoryAdapter(Fabric inventory) {
         this(inventory, null, null);
     }
 
-    public AbstractInventoryAdapter(Fabric<TInventory> inventory, @Nullable Lens<TInventory, ItemStack> root, @Nullable Inventory parent) {
+    public AbstractInventoryAdapter(Fabric inventory, @Nullable Lens root, @Nullable Inventory parent) {
         this.inventory = inventory;
         this.parent = parent == null ? this : parent;
         this.slots = this.initSlots(inventory, parent);
         this.lens = root != null ? root : checkNotNull(this.initRootLens(), "root lens");
     }
 
-    protected SlotCollection<TInventory> initSlots(Fabric<TInventory> inventory, @Nullable Inventory parent) {
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private SlotCollection initSlots(Fabric inventory, @Nullable Inventory parent) {
         if (parent instanceof MinecraftInventoryAdapter) {
-            SlotProvider<IInventory, ItemStack> sp = ((MinecraftInventoryAdapter) parent).getSlotProvider();
+            SlotProvider sp = ((MinecraftInventoryAdapter) parent).getSlotProvider();
             if (sp instanceof SlotCollection) {
                 return ((SlotCollection) sp);
             }
         }
-        return new SlotCollection<>(inventory.getSize());
+        return new SlotCollection(inventory.getSize());
     }
 
     @Override
@@ -125,29 +120,29 @@ public class AbstractInventoryAdapter<TInventory> implements MinecraftInventoryA
 //    }
 
     @SuppressWarnings("unchecked")
-    protected Lens<TInventory, ItemStack> initRootLens() {
+    protected Lens initRootLens() {
         if (this instanceof LensProvider) {
-            return ((LensProvider<TInventory, ItemStack>) this).rootLens(this.inventory, this);
+            return ((LensProvider) this).rootLens(this.inventory, this);
         }
         int size = this.inventory.getSize();
         if (size == 0) {
-            return new DefaultEmptyLens<>(this);
+            return new DefaultEmptyLens(this);
         }
-        return new DefaultIndexedLens<>(0, size, this, this.slots);
+        return new DefaultIndexedLens(0, size, this, this.slots);
     }
 
     @Override
-    public SlotProvider<TInventory, ItemStack> getSlotProvider() {
+    public SlotProvider getSlotProvider() {
         return this.slots;
     }
 
     @Override
-    public Lens<TInventory, ItemStack> getRootLens() {
+    public Lens getRootLens() {
         return this.lens;
     }
 
     @Override
-    public Fabric<TInventory> getFabric() {
+    public Fabric getFabric() {
         return this.inventory;
     }
 
@@ -168,16 +163,12 @@ public class AbstractInventoryAdapter<TInventory> implements MinecraftInventoryA
     }
 
     @Override
-    public Inventory getChild(Lens<TInventory, ItemStack> lens) {
+    public Inventory getChild(Lens lens) {
         // TODO Auto-generated method stub
         return null;
     }
 
-    @Override
-    public void notify(Object source, InventoryEventArgs eventArgs) {
-    }
-
-    protected final EmptyInventory emptyInventory() {
+    private EmptyInventory emptyInventory() {
         if (this.empty == null) {
             this.empty = new EmptyInventoryImpl(this);
         }
@@ -198,7 +189,7 @@ public class AbstractInventoryAdapter<TInventory> implements MinecraftInventoryA
         this.slots().forEach(Inventory::clear);
     }
 
-    public static Optional<Slot> forSlot(Fabric<IInventory> inv, SlotLens<IInventory, ItemStack> slotLens, Inventory parent) {
+    public static Optional<Slot> forSlot(Fabric inv, SlotLens slotLens, Inventory parent) {
         return slotLens == null ? Optional.<Slot>empty() : Optional.<Slot>ofNullable((Slot) slotLens.getAdapter(inv, parent));
     }
 
@@ -207,6 +198,6 @@ public class AbstractInventoryAdapter<TInventory> implements MinecraftInventoryA
         if (this.parent != this) {
             return this.parent.getPlugin();
         }
-        return null;
+        return null; // TODO - this should never return null.
     }
 }

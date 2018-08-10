@@ -47,7 +47,6 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.util.AABB;
@@ -408,12 +407,14 @@ public class ExtentViewDownsize implements DefaultedExtent {
 
     @Override
     public boolean spawnEntity(Entity entity) {
+        checkNotNull(entity, "The entity cannot be null!");
         final Location<World> location = entity.getLocation();
         checkBlockRange(location.getX(), location.getY(), location.getZ());
         return this.extent.spawnEntity(entity);
     }
 
-    @Override public boolean spawnEntities(Iterable<? extends Entity> entities) {
+    @Override
+    public Collection<Entity> spawnEntities(Iterable<? extends Entity> entities) {
         return this.extent.spawnEntities(entities);
     }
 

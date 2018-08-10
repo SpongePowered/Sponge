@@ -45,6 +45,11 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.registry.util.RegistrationDependency;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.config.category.CustomDataRegistrationCategory;
+import org.spongepowered.common.config.type.CustomDataConfig;
 import org.spongepowered.common.data.builder.manipulator.SpongeDataManipulatorBuilder;
 import org.spongepowered.common.data.nbt.NbtDataType;
 import org.spongepowered.common.data.nbt.SpongeNbtProcessorDelegate;
@@ -54,6 +59,8 @@ import org.spongepowered.common.data.util.ComparatorUtil;
 import org.spongepowered.common.data.util.DataFunction;
 import org.spongepowered.common.data.util.DataProcessorDelegate;
 import org.spongepowered.common.data.util.ValueProcessorDelegate;
+import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
+import org.spongepowered.common.registry.type.data.KeyRegistryModule;
 
 import java.lang.reflect.Modifier;
 import java.util.Collection;
@@ -70,7 +77,8 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 @SuppressWarnings({"SuspiciousMethodCalls", "unchecked", "rawtypes"})
-public class SpongeManipulatorRegistry {
+@RegistrationDependency(KeyRegistryModule.class)
+public class SpongeManipulatorRegistry implements SpongeAdditionalCatalogRegistryModule<DataRegistration<?, ?>> {
 
     private static final SpongeManipulatorRegistry INSTANCE = new SpongeManipulatorRegistry();
 
@@ -105,6 +113,32 @@ public class SpongeManipulatorRegistry {
         this.legacyRegistrationIds.put(legacyId, registration);
     }
 
+    @Override
+    public boolean allowsApiRegistration() {
+        return true;
+    }
+
+    @Override
+    public void registerAdditionalCatalog(DataRegistration<?, ?> extraCatalog) {
+        checkArgument(extraCatalog instanceof SpongeDataRegistration);
+        // Technically, if the registration was not registered, well....
+        // it should have already been registered at this point
+        final SpongeDataRegistration registration = (SpongeDataRegistration) extraCatalog;
+        SpongeDataManager.getInstance().registerInternally(registration);
+        SpongeManipulatorRegistry.getInstance().register(registration);
+    }
+
+    @Override
+    public Optional<DataRegistration<?, ?>> getById(String id) {
+        final DataRegistration<?, ?> dataRegistration = this.registrationMap.get(id);
+        return Optional.ofNullable(dataRegistration);
+    }
+
+    @Override
+    public Collection<DataRegistration<?, ?>> getAll() {
+        return this.registrationMap.values();
+    }
+
 
     private static final class TemporaryRegistry {
 
@@ -125,7 +159,7 @@ public class SpongeManipulatorRegistry {
             .concurrencyLevel(4)
             .makeMap();
 
-        private final ConcurrentSkipListSet<DataRegistration<?, ?>> registrations = new ConcurrentSkipListSet<>(
+        private final ConcurrentSkipListSet<SpongeDataRegistration<?, ?>> registrations = new ConcurrentSkipListSet<>(
             Comparator.comparing(DataRegistration::getId));
 
     }
@@ -145,6 +179,13 @@ public class SpongeManipulatorRegistry {
     public DataRegistration<?, ?> getRegistrationFor(DataManipulator<?, ?> manipulator) {
         final DataRegistration<?, ?> dataRegistration = this.manipulatorRegistrationMap.get(manipulator.getClass());
         if (dataRegistration == null) {
+            if (this.tempRegistry != null) {
+                for (SpongeDataRegistration<?, ?> registration : this.tempRegistry.registrations) {
+                    if (registration.getManipulatorClass() == manipulator.getClass()) {
+                        return registration;
+                    }
+                }
+            }
             throw new DataRegistrationNotFoundException("Could not locate a DataRegistration for class " + manipulator.getClass());
         }
         return dataRegistration;
@@ -153,6 +194,13 @@ public class SpongeManipulatorRegistry {
     public DataRegistration<?, ?> getRegistrationFor(ImmutableDataManipulator<?, ?> immutable) {
         final DataRegistration<?, ?> dataRegistration = this.immutableRegistrationMap.get(immutable.getClass());
         if (dataRegistration == null) {
+            if (this.tempRegistry != null) {
+                for (SpongeDataRegistration<?, ?> registration : this.tempRegistry.registrations) {
+                    if (registration.getImmutableManipulatorClass() == immutable.getClass()) {
+                        return registration;
+                    }
+                }
+            }
             throw new DataRegistrationNotFoundException("Could not locate a DataRegistration for class " + immutable.getClass());
         }
         return dataRegistration;
@@ -190,19 +238,13 @@ public class SpongeManipulatorRegistry {
             .collect(Collectors.toList());
     }
 
-    <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> void registerLegacyId(DataRegistration<T, I> registration) {
-        this.legacyRegistrationIds.put(registration.getManipulatorClass().getName(), registration);
-        this.legacyRegistrationIds.put(registration.getImmutableManipulatorClass().getName(), registration);
-
-    }
-
     public Optional<DataRegistration<?, ?>> getRegistrationForLegacyId(String id) {
         return Optional.ofNullable(this.legacyRegistrationIds.get(id));
     }
 
 
     public <M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> DataRegistration<M, I> register(
-        DataRegistration<M, I> registration) {
+        SpongeDataRegistration<M, I> registration) {
         checkState(this.tempRegistry != null);
         if (this.tempRegistry.registrations.contains(registration)) {
             throw new IllegalStateException("Existing DataRegistration exists for id: " + registration);
@@ -263,9 +305,17 @@ public class SpongeManipulatorRegistry {
         if (this.tempRegistry != null) {
             // During soft registrations
             if (DataManipulator.class.isAssignableFrom(mClass)) {
-                return new DataProcessorDelegate(ImmutableList.copyOf(this.tempRegistry.processorMap.get(mClass)));
+                List<DataProcessor<?, ?>> dataProcessors = this.tempRegistry.processorMap.get(mClass);
+                if (dataProcessors == null) {
+                    return null;
+                }
+                return new DataProcessorDelegate(ImmutableList.copyOf(dataProcessors));
             } else {
-                return new DataProcessorDelegate(ImmutableList.copyOf(this.tempRegistry.immutableProcessorMap.get(mClass)));
+                List<DataProcessor<?, ?>> dataProcessors = this.tempRegistry.immutableProcessorMap.get(mClass);
+                if (dataProcessors == null) {
+                    return null;
+                }
+                return new DataProcessorDelegate(ImmutableList.copyOf(dataProcessors));
             }
         }
         return DataManipulator.class.isAssignableFrom(mClass)
@@ -370,7 +420,13 @@ public class SpongeManipulatorRegistry {
         this.tempRegistry.registrations.forEach(registration -> {
                 registrationBuilder.add(registration);
                 manipulatorBuilder.put(registration.getManipulatorClass(), registration);
+                if (!registration.getImplementationClass().equals(registration.getManipulatorClass())) {
+                    manipulatorBuilder.put(registration.getImplementationClass(), registration);
+                }
                 immutableBuilder.put(registration.getImmutableManipulatorClass(), registration);
+                if (!registration.getImmutableImplementationClass().equals(registration.getImmutableManipulatorClass())) {
+                    immutableBuilder.put(registration.getImmutableImplementationClass(), registration);
+                }
                 idBuilder.put(registration.getId(), registration);
                 pluginBuilder.put(registration.getPluginContainer(), registration);
             });
@@ -380,6 +436,12 @@ public class SpongeManipulatorRegistry {
         this.immutableRegistrationMap = immutableBuilder.build();
         this.registrationMap = idBuilder.build();
         this.pluginBasedRegistrations = pluginBuilder.build();
+
+        final SpongeConfig<CustomDataConfig> dataConfig = SpongeImpl.getDataConfig();
+        final CustomDataRegistrationCategory config = dataConfig.getConfig().getDataRegistrationConfig();
+        config.populateRegistrations(this.registrations);
+        // Save the list of registered id's, this way the config can be re-understood.
+        dataConfig.save();
 
         this.tempRegistry = null; // Finalizes the registration by setting the temporary object to null
     }

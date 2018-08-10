@@ -31,17 +31,18 @@ import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.boss.EntityWither;
-import net.minecraft.world.GameRules;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.monster.Wither;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
+import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 import org.spongepowered.common.interfaces.entity.explosive.IMixinFusedExplosive;
 import org.spongepowered.common.mixin.core.entity.monster.MixinEntityMob;
@@ -62,6 +63,7 @@ public abstract class MixinEntityWither extends MixinEntityMob implements Wither
     @Shadow public abstract void setInvulTime(int ticks);
     @Shadow public abstract int getInvulTime();
 
+    @Shadow private int blockBreakCounter;
     private int explosionRadius = DEFAULT_EXPLOSION_RADIUS;
     private int fuseDuration = 220;
 
@@ -85,15 +87,43 @@ public abstract class MixinEntityWither extends MixinEntityMob implements Wither
         }
     }
 
-    @Redirect(method = "updateAITasks", at = @At(value = "INVOKE",
-              target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z"))
-    private boolean onCanGrief(GameRules gameRules, String rule) {
-        return gameRules.getBoolean(rule) && ((IMixinGriefer) this).canGrief();
+    /**
+     * @author gabizou - April 11th, 2018
+     * @reason Due to changes in forge, the gamerule retrieval is now an event
+     * method, which prevents this redirect from working in forge, but will work
+     * in vanilla. As such, redirecting the 3rd field getter for this method allows
+     * us to still perform the boolean comparison. for the sake of comparison...
+     *
+     * @param thisEntity
+     * @return
+     */
+    @Redirect(
+        method = "updateAITasks",
+        slice = @Slice(
+            from = @At(
+                value = "FIELD",
+                target = "Lnet/minecraft/entity/boss/EntityWither;blockBreakCounter:I",
+                opcode = Opcodes.PUTFIELD
+            ),
+            to = @At(
+                value = "INVOKE",
+                target = "Lnet/minecraft/util/math/MathHelper;floor(D)I"
+            )
+        ),
+        at =
+            @At(
+                value = "FIELD",
+                target = "Lnet/minecraft/entity/boss/EntityWither;blockBreakCounter:I",
+                opcode = Opcodes.GETFIELD
+            )
+    )
+    private int onCanGrief(EntityWither thisEntity) {
+        return this.blockBreakCounter == 0 ? ((IMixinGriefer) this).canGrief() ? 0 : -1 : -1;
     }
 
     @ModifyArg(method = "launchWitherSkullToCoords", at = @At(value = "INVOKE",
                target = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z"))
-    protected Entity onSpawnWitherSkull(Entity entity) {
+    private Entity onSpawnWitherSkull(Entity entity) {
         ((IMixinGriefer) entity).setCanGrief(((IMixinGriefer) this).canGrief());
         return entity;
     }
@@ -166,12 +196,12 @@ public abstract class MixinEntityWither extends MixinEntityMob implements Wither
      */
     @Redirect(method = "ignite", at = @At(value = "INVOKE",
               target = "Lnet/minecraft/entity/boss/EntityWither;setInvulTime(I)V"))
-    protected void onSpawnPrime(EntityWither self, int fuseTicks) {
+    private void onSpawnPrime(EntityWither self, int fuseTicks) {
         prime();
     }
 
     @Redirect(method = "updateAITasks", at = @At(value = "INVOKE", target = TARGET_NEW_EXPLOSION))
-    protected net.minecraft.world.Explosion onExplode(net.minecraft.world.World worldObj, Entity self, double x,
+    private net.minecraft.world.Explosion onExplode(net.minecraft.world.World worldObj, Entity self, double x,
                                                       double y, double z, float strength, boolean flaming,
                                                       boolean smoking) {
         return detonate(Explosion.builder()

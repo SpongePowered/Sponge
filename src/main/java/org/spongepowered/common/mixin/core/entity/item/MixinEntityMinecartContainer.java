@@ -32,9 +32,39 @@ import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
+import org.spongepowered.common.item.inventory.lens.Fabric;
+import org.spongepowered.common.item.inventory.lens.Lens;
+import org.spongepowered.common.item.inventory.lens.SlotProvider;
+import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
+import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
+import org.spongepowered.common.item.inventory.lens.impl.fabric.IInventoryFabric;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 @Mixin(EntityMinecartContainer.class)
-@Implements({@Interface(iface = CarriedInventory.class, prefix = "carried$"), @Interface(iface = ContainerMinecart.class, prefix = "container$")})
+@Implements({@Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$"),
+             @Interface(iface = ContainerMinecart.class, prefix = "container$")})
 public abstract class MixinEntityMinecartContainer extends MixinEntityMinecart implements ILockableContainer, ILootContainer {
 
+    protected Fabric fabric = new IInventoryFabric(this);
+    protected SlotCollection slots = new SlotCollection.Builder().add(this.getSizeInventory()).build();
+    protected Lens lens = new OrderedInventoryLensImpl(0, this.getSizeInventory(), 1, this.slots);
+
+    @SuppressWarnings("unchecked")
+    public SlotProvider inventory$getSlotProvider() {
+        return this.slots;
+    }
+
+    public Lens inventory$getRootLens() {
+        return this.lens;
+    }
+
+    public Fabric inventory$getFabric() {
+        return this.fabric;
+    }
+
+    @SuppressWarnings("unchecked")
+    public CarriedInventory<ContainerMinecart> container$getInventory() {
+        return (CarriedInventory<ContainerMinecart>) this;
+    }
 }

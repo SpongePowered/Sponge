@@ -41,6 +41,7 @@ import net.minecraft.entity.projectile.EntityLlamaSpit;
 import net.minecraft.entity.projectile.EntityPotion;
 import net.minecraft.entity.projectile.EntitySmallFireball;
 import net.minecraft.entity.projectile.EntitySnowball;
+import net.minecraft.entity.projectile.EntitySpectralArrow;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.entity.projectile.EntityTippedArrow;
 import net.minecraft.entity.projectile.EntityWitherSkull;
@@ -65,6 +66,8 @@ import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.entity.projectile.Snowball;
 import org.spongepowered.api.entity.projectile.ThrownExpBottle;
 import org.spongepowered.api.entity.projectile.ThrownPotion;
+import org.spongepowered.api.entity.projectile.arrow.Arrow;
+import org.spongepowered.api.entity.projectile.arrow.SpectralArrow;
 import org.spongepowered.api.entity.projectile.arrow.TippedArrow;
 import org.spongepowered.api.entity.projectile.explosive.DragonFireball;
 import org.spongepowered.api.entity.projectile.explosive.WitherSkull;
@@ -76,7 +79,6 @@ import org.spongepowered.api.event.entity.projectile.LaunchProjectileEvent;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 
 import java.util.Map;
@@ -184,6 +186,24 @@ public class ProjectileLauncher {
                 return doLaunch(loc.getExtent(), arrow);
             }
         });
+        registerProjectileLogic(SpectralArrow.class, new SimpleItemLaunchLogic<SpectralArrow>(SpectralArrow.class, Items.SPECTRAL_ARROW) {
+
+            @Override
+            protected Optional<SpectralArrow> createProjectile(EntityLivingBase source, Location<?> loc) {
+                SpectralArrow arrow = (SpectralArrow) new EntitySpectralArrow(source.world, source);
+                ((EntitySpectralArrow) arrow).shoot(source, source.rotationPitch, source.rotationYaw, 0.0F, 3.0F, 0);
+                return doLaunch(loc.getExtent(), arrow);
+            }
+        });
+        registerProjectileLogic(Arrow.class, new SimpleItemLaunchLogic<Arrow>(Arrow.class, Items.ARROW) {
+
+            @Override
+            protected Optional<Arrow> createProjectile(EntityLivingBase source, Location<?> loc) {
+                TippedArrow arrow = (TippedArrow) new EntityTippedArrow(source.world, source);
+                ((EntityTippedArrow) arrow).shoot(source, source.rotationPitch, source.rotationYaw, 0.0F, 3.0F, 0);
+                return doLaunch(loc.getExtent(), arrow);
+            }
+        });
         registerProjectileLogic(Egg.class, new SimpleItemLaunchLogic<Egg>(Egg.class, Items.EGG) {
 
             @Override
@@ -259,11 +279,11 @@ public class ProjectileLauncher {
                 TileEntityDispenser dispenser = (TileEntityDispenser) source;
                 EnumFacing enumfacing = DispenserSourceLogic.getFacing(dispenser);
                 Random random = dispenser.getWorld().rand;
-                double d3 = random.nextGaussian() * 0.05D + enumfacing.getFrontOffsetX();
-                double d4 = random.nextGaussian() * 0.05D + enumfacing.getFrontOffsetY();
-                double d5 = random.nextGaussian() * 0.05D + enumfacing.getFrontOffsetZ();
-                EntityLivingBase thrower = new EntityArmorStand(dispenser.getWorld(), loc.getX() + enumfacing.getFrontOffsetX(),
-                        loc.getY() + enumfacing.getFrontOffsetY(), loc.getZ() + enumfacing.getFrontOffsetZ());
+                double d3 = random.nextGaussian() * 0.05D + enumfacing.getXOffset();
+                double d4 = random.nextGaussian() * 0.05D + enumfacing.getYOffset();
+                double d5 = random.nextGaussian() * 0.05D + enumfacing.getZOffset();
+                EntityLivingBase thrower = new EntityArmorStand(dispenser.getWorld(), loc.getX() + enumfacing.getXOffset(),
+                        loc.getY() + enumfacing.getYOffset(), loc.getZ() + enumfacing.getZOffset());
                 LargeFireball fireball = (LargeFireball) new EntityLargeFireball(dispenser.getWorld(), thrower, d3, d4, d5);
                 return doLaunch(loc.getExtent(), fireball);
             }

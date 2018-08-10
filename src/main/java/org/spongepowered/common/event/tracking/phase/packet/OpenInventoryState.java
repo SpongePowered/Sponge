@@ -44,19 +44,20 @@ public class OpenInventoryState extends BasicInventoryPacketState {
         final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
         final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(lastCursor, newCursor);
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(player);
+            frame.pushCause(player);
             final InteractInventoryEvent.Open event =
-                SpongeEventFactory.createInteractInventoryEventOpen(Sponge.getCauseStackManager().getCurrentCause(), cursorTransaction,
+                SpongeEventFactory.createInteractInventoryEventOpen(frame.getCurrentCause(), cursorTransaction,
                     ContainerUtil.fromNative(player.openContainer));
             SpongeImpl.postEvent(event);
             if (event.isCancelled()) {
                 player.closeScreen();
             } else {
                 // Custom cursor
-                if (!event.getCursorTransaction().isValid()) {
-                    PacketPhaseUtil.handleCustomCursor(player, event.getCursorTransaction().getOriginal());
-                } else if (event.getCursorTransaction().getCustom().isPresent()) {
-                    PacketPhaseUtil.handleCustomCursor(player, event.getCursorTransaction().getFinal());
+                final Transaction<ItemStackSnapshot> transaction = event.getCursorTransaction();
+                if (!transaction.isValid()) {
+                    PacketPhaseUtil.handleCustomCursor(player, transaction.getOriginal());
+                } else if (transaction.getCustom().isPresent()) {
+                    PacketPhaseUtil.handleCustomCursor(player, transaction.getFinal());
                 }
             }
         }

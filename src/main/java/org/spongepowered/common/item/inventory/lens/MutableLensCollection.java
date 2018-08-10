@@ -32,14 +32,11 @@ import java.util.List;
 /**
  * A type of Lens collection whose members are fully mutable and also supports
  * all aspects of the {@link Collection} interface.
- *
- * @param <TInventory>
- * @param <TStack>
  */
-public interface MutableLensCollection<TInventory, TStack> extends List<Lens<TInventory, TStack>>, DynamicLensCollection<TInventory, TStack> {
+public interface MutableLensCollection extends List<Lens>, DynamicLensCollection {
     
-    void add(Lens<TInventory, TStack> lens, InventoryProperty<?, ?>... properties);
+    void add(Lens lens, InventoryProperty<?, ?>... properties);
 
-    void add(int index, Lens<TInventory, TStack> lens, InventoryProperty<?, ?>... properties);
+    void add(int index, Lens lens, InventoryProperty<?, ?>... properties);
 
 }

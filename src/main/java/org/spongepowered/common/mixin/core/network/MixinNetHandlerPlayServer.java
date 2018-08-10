@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.network;
 
 import com.flowpowered.math.vector.Vector3d;
+import io.netty.util.collection.LongObjectHashMap;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -50,14 +51,20 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketThreadUtil;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.play.INetHandlerPlayServer;
+import net.minecraft.network.play.client.CPacketAnimation;
 import net.minecraft.network.play.client.CPacketClickWindow;
 import net.minecraft.network.play.client.CPacketCreativeInventoryAction;
+import net.minecraft.network.play.client.CPacketKeepAlive;
 import net.minecraft.network.play.client.CPacketPlayer;
+import net.minecraft.network.play.client.CPacketPlayerDigging;
+import net.minecraft.network.play.client.CPacketPlayerTryUseItem;
+import net.minecraft.network.play.client.CPacketPlayerTryUseItemOnBlock;
 import net.minecraft.network.play.client.CPacketResourcePackStatus;
 import net.minecraft.network.play.client.CPacketUpdateSign;
 import net.minecraft.network.play.client.CPacketUseEntity;
 import net.minecraft.network.play.client.CPacketVehicleMove;
 import net.minecraft.network.play.server.SPacketEntityAttach;
+import net.minecraft.network.play.server.SPacketKeepAlive;
 import net.minecraft.network.play.server.SPacketMoveVehicle;
 import net.minecraft.network.play.server.SPacketPlayerListItem;
 import net.minecraft.network.play.server.SPacketResourcePackSend;
@@ -82,18 +89,24 @@ import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.tileentity.Sign;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
+import org.spongepowered.api.data.type.HandType;
+import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.entity.Transform;
+import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.block.tileentity.ChangeSignEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
+import org.spongepowered.api.event.entity.living.humanoid.AnimateHandEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.network.PlayerConnection;
+import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.world.Location;
@@ -110,27 +123,31 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.PhaseData;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.PacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.event.tracking.phase.tick.PlayerTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
+import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
+import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
+import org.spongepowered.common.interfaces.inventory.IMixinContainerPlayer;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
 
+import java.lang.ref.WeakReference;
 import java.net.InetSocketAddress;
-import java.util.Deque;
-import java.util.LinkedList;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.Nullable;
 
@@ -141,7 +158,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
 
     @Shadow @Final private static Logger LOGGER;
     @Shadow @Final public NetworkManager netManager;
-    @Shadow @Final private MinecraftServer serverController;
+    @Shadow @Final private MinecraftServer server;
     @Shadow @Final private IntHashMap<Short> pendingTransactions;
     @Shadow public EntityPlayerMP player;
     @Shadow private Entity lowestRiddenEnt;
@@ -166,10 +183,17 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     @Shadow public abstract void setPlayerLocation(double x, double y, double z, float yaw, float pitch);
     @Shadow private static boolean isMovePlayerPacketInvalid(CPacketPlayer packetIn) { return false; } // Shadowed
 
+    @Shadow protected abstract long currentTimeMillis();
+
+    // Appears to be the last keep-alive packet ID. Currently the same as
+    // field_194402_f, but _f is time (which the ID just so happens to match).
+    @Shadow private long field_194404_h;
     private boolean justTeleported = false;
     @Nullable private Location<World> lastMoveLocation = null;
 
-    private final Deque<SPacketResourcePackSend> resourcePackRequests = new LinkedList<>();
+    private final AtomicInteger numResourcePacksInTransit = new AtomicInteger();
+    @Nullable private ResourcePack lastReceivedPack, lastAcceptedPack;
+    private final LongObjectHashMap<Runnable> customKeepAliveCallbacks = new LongObjectHashMap<>();
 
     // Store the last block right-clicked
     @Nullable private Item lastItem;
@@ -177,11 +201,6 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     @Override
     public void captureCurrentPlayerPosition() {
         this.captureCurrentPosition();
-    }
-
-    @Override
-    public Deque<SPacketResourcePackSend> getPendingResourcePackQueue() {
-        return this.resourcePackRequests;
     }
 
     @Override
@@ -211,10 +230,9 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             return;
         }
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
-             PlayerTickContext context = TickPhase.Tick.PLAYER.createPhaseContext()
-                 .source(player)
-                 .buildAndSwitch()) {
-            Sponge.getCauseStackManager().pushCause(player);
+             PlayerTickContext context = TickPhase.Tick.PLAYER.createPhaseContext().source(player)) {
+            context.buildAndSwitch();
+            frame.pushCause(player);
             player.onUpdateEntity();
         }
     }
@@ -229,6 +247,17 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         packet = this.rewritePacket(packet);
         if (packet != null) {
             manager.sendPacket(packet);
+        }
+    }
+
+    @Inject(method = "processKeepAlive", at = @At("HEAD"), cancellable = true)
+    private void checkSpongeKeepAlive(CPacketKeepAlive packetIn, CallbackInfo ci) {
+        Runnable callback = this.customKeepAliveCallbacks.get(packetIn.getKey());
+        if (callback != null) {
+            PacketThreadUtil.checkThreadAndEnqueue(packetIn, (INetHandlerPlayServer) this, this.player.getServerWorld());
+            this.customKeepAliveCallbacks.remove(packetIn.getKey());
+            callback.run();
+            ci.cancel();
         }
     }
 
@@ -247,20 +276,19 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         // Update the tab list data
         if (packetIn instanceof SPacketPlayerListItem) {
             ((SpongeTabList) ((Player) this.player).getTabList()).updateEntriesOnSend((SPacketPlayerListItem) packetIn);
-        }
-        // Store the resource pack for use when processing resource pack statuses
-        else if (packetIn instanceof SPacketResourcePackSend) {
-            SPacketResourcePackSend packet = (SPacketResourcePackSend) packetIn;
-            if (this.resourcePackRequests.isEmpty()) {
-                this.resourcePackRequests.add(packet);
-                return packet;
+        } else if (packetIn instanceof SPacketResourcePackSend) {
+            // Send a custom keep-alive packet that doesn't match vanilla.
+            long now = this.currentTimeMillis() - 1;
+            while (now == this.field_194404_h || this.customKeepAliveCallbacks.containsKey(now)) {
+                now--;
             }
-            if (this.resourcePackRequests.contains(packet)) {
-                // This must be a resend.
-                return packet;
-            }
-            this.resourcePackRequests.add(packet);
-            return null;
+            final ResourcePack resourcePack = ((IMixinPacketResourcePackSend) packetIn).getResourcePack();
+            this.numResourcePacksInTransit.incrementAndGet();
+            this.customKeepAliveCallbacks.put(now, () -> {
+                this.lastReceivedPack = resourcePack; // TODO do something with the old value
+                this.numResourcePacksInTransit.decrementAndGet();
+            });
+            this.netManager.sendPacket(new SPacketKeepAlive(now));
         }
 
         return packetIn;
@@ -347,7 +375,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                 }
             }
 
-            boolean clickedHotbar = packetIn.getSlotId() >= 1 && packetIn.getSlotId() <= 45;
+            boolean clickedInsideNotOutput = packetIn.getSlotId() >= 1 && packetIn.getSlotId() <= 45;
             boolean itemValidCheck = itemstack.isEmpty() || itemstack.getMetadata() >= 0 && itemstack.getCount() <= 64 && !itemstack.isEmpty();
 
             // Sponge start - handle CreativeInventoryEvent
@@ -366,7 +394,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                     }
                 }
 
-                if (clickedHotbar) {
+                if (clickedInsideNotOutput) {
                     if (itemstack.isEmpty()) {
                         this.player.inventoryContainer.putStackInSlot(packetIn.getSlotId(), ItemStack.EMPTY);
                     } else {
@@ -464,18 +492,24 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             if (deltaSquared > ((1f / 16) * (1f / 16)) || deltaAngleSquared > (.15f * .15f)) {
                 Transform<World> fromTransform = player.getTransform().setLocation(from).setRotation(fromrot);
                 Transform<World> toTransform = player.getTransform().setLocation(to).setRotation(torot);
-                Sponge.getCauseStackManager().pushCause(player);
-                MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), fromTransform, toTransform, player);
-                SpongeImpl.postEvent(event);
-                Sponge.getCauseStackManager().popCause();
-                if (event.isCancelled()) {
-                    mixinPlayer.setLocationAndAngles(fromTransform);
-                    this.lastMoveLocation = from;
-                    ((IMixinEntityPlayerMP) this.player).setVelocityOverride(null);
-                    return true;
-                } else if (!event.getToTransform().equals(toTransform)) {
-                    mixinPlayer.setLocationAndAngles(event.getToTransform());
-                    this.lastMoveLocation = event.getToTransform().getLocation();
+                if (ShouldFire.MOVE_ENTITY_EVENT) {
+                    try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                        Sponge.getCauseStackManager().pushCause(player);
+                        MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), fromTransform, toTransform, player);
+                        SpongeImpl.postEvent(event);
+                        Sponge.getCauseStackManager().popCause();
+                        if (event.isCancelled()) {
+                            mixinPlayer.setLocationAndAngles(fromTransform);
+                            this.lastMoveLocation = from;
+                            ((IMixinEntityPlayerMP) this.player).setVelocityOverride(null);
+                            return true;
+                        }
+                        toTransform = event.getToTransform();
+                    }
+                }
+                if (!toTransform.equals(toTransform)) {
+                    mixinPlayer.setLocationAndAngles(toTransform);
+                    this.lastMoveLocation = toTransform.getLocation();
                     ((IMixinEntityPlayerMP) this.player).setVelocityOverride(null);
                     return true;
                 } else if (!from.equals(player.getLocation()) && this.justTeleported) {
@@ -485,7 +519,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                     ((IMixinEntityPlayerMP) this.player).setVelocityOverride(null);
                     return true;
                 } else {
-                    this.lastMoveLocation = event.getToTransform().getLocation();
+                    this.lastMoveLocation = toTransform.getLocation();
                 }
                 this.resendLatestResourcePackRequest();
             }
@@ -595,7 +629,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             int size = stack.getCount();
             item = this.player.dropItem(dropAll);
             // force client itemstack update if drop event was cancelled
-            if (item == null) {
+            if (item == null && ((IMixinEntityPlayer) player).shouldRestoreInventory()) {
                 Slot slot = this.player.openContainer.getSlotFromInventory(this.player.inventory, this.player.inventory.currentItem);
                 int windowId = this.player.openContainer.windowId;
                 stack.setCount(size);
@@ -650,6 +684,58 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         return null;
     }
 
+    @Inject(method = "handleAnimation", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;markPlayerActive()V"), cancellable = true)
+    public void onHandleAnimation(CPacketAnimation packetIn, CallbackInfo ci)
+    {
+        SpongeCommonEventFactory.lastAnimationPacketTick = SpongeImpl.getServer().getTickCounter();
+        SpongeCommonEventFactory.lastAnimationPlayer = new WeakReference<>(this.player);
+        if (ShouldFire.ANIMATE_HAND_EVENT) {
+            HandType handType = packetIn.getHand() == EnumHand.MAIN_HAND ? HandTypes.MAIN_HAND : HandTypes.OFF_HAND;
+            final ItemStack heldItem = this.player.getHeldItem(packetIn.getHand());
+            Sponge.getCauseStackManager().addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(heldItem));
+            AnimateHandEvent event =
+                SpongeEventFactory.createAnimateHandEvent(Sponge.getCauseStackManager().getCurrentCause(), handType, (Humanoid) this.player);
+            if (SpongeImpl.postEvent(event)) {
+                ci.cancel();
+            }
+        }
+    }
+
+    @Inject(method = "processPlayerDigging", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getWorld(I)Lnet/minecraft/world/WorldServer;"))
+    public void onProcessPlayerDigging(CPacketPlayerDigging packetIn, CallbackInfo ci) {
+        SpongeCommonEventFactory.lastPrimaryPacketTick = SpongeImpl.getServer().getTickCounter();
+    }
+
+    @Inject(method = "processPlayerDigging", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;dropItem(Z)Lnet/minecraft/entity/item/EntityItem;"))
+    public void onProcessPlayerDiggingDropItem(CPacketPlayerDigging packetIn, CallbackInfo ci) {
+        final ItemStack stack = this.player.getHeldItemMainhand();
+        if (!stack.isEmpty()) {
+            ((IMixinEntityPlayerMP) this.player).setPacketItem(stack.copy());
+        }
+    }
+
+    @Inject(method = "processTryUseItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getWorld(I)Lnet/minecraft/world/WorldServer;"), cancellable = true)
+    public void onProcessTryUseItem(CPacketPlayerTryUseItem packetIn, CallbackInfo ci) {
+        SpongeCommonEventFactory.lastSecondaryPacketTick = SpongeImpl.getServer().getTickCounter();
+        long packetDiff = System.currentTimeMillis() - SpongeCommonEventFactory.lastTryBlockPacketTimeStamp;
+        // If the time between packets is small enough, use the last result.
+        if (packetDiff < 100) {
+            // Use previous result and avoid firing a second event
+            if (SpongeCommonEventFactory.lastInteractItemOnBlockCancelled) {
+                ci.cancel();
+            }
+        }
+    }
+
+    @Inject(method = "processTryUseItemOnBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getWorld(I)Lnet/minecraft/world/WorldServer;"))
+    public void onProcessTryUseItemOnBlock(CPacketPlayerTryUseItemOnBlock packetIn, CallbackInfo ci) {
+        // InteractItemEvent on block must be handled in PlayerInteractionManager to support item/block results.
+        // Only track the timestamps to support our block animation events
+        SpongeCommonEventFactory.lastTryBlockPacketTimeStamp = System.currentTimeMillis();
+        SpongeCommonEventFactory.lastSecondaryPacketTick = SpongeImpl.getServer().getTickCounter();
+
+    }
+
     /**
      * @author blood - April 5th, 2016
      *
@@ -676,7 +762,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         }
         // Sponge end
 
-        WorldServer worldserver = this.serverController.getWorld(this.player.dimension);
+        WorldServer worldserver = this.server.getWorld(this.player.dimension);
         Entity entity = packetIn.getEntityFromWorld(worldserver);
         this.player.markPlayerActive();
 
@@ -701,48 +787,58 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                 if (packetIn.getAction() == CPacketUseEntity.Action.INTERACT_AT) {
 
                     // Sponge start - Fire interact events
-                    EnumHand hand = packetIn.getHand();
-                    ItemStack itemstack = hand != null ? this.player.getHeldItem(hand) : ItemStack.EMPTY;
-                    Sponge.getCauseStackManager().addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(itemstack));
+                    try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                        EnumHand hand = packetIn.getHand();
+                        ItemStack itemstack = hand != null ? this.player.getHeldItem(hand) : ItemStack.EMPTY;
+                        frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(itemstack));
 
-                    SpongeCommonEventFactory.lastSecondaryPacketTick = this.serverController.getTickCounter();
+                        SpongeCommonEventFactory.lastSecondaryPacketTick = this.server.getTickCounter();
 
-                    // Is interaction allowed with item in hand
-                    if (SpongeCommonEventFactory.callInteractItemEventSecondary(this.player, itemstack, hand, VecHelper.toVector3d(packetIn
-                                    .getHitVec()), entity).isCancelled() || SpongeCommonEventFactory.callInteractEntityEventSecondary(this.player,
-                            entity, hand, VecHelper.toVector3d(packetIn.getHitVec())).isCancelled()) {
-                        // Restore held item in hand
-                        int index = ((IMixinInventoryPlayer) this.player.inventory).getHeldItemIndex(hand);
-                        Slot slot = this.player.openContainer.getSlotFromInventory(this.player.inventory, index);
-                        sendPacket(new SPacketSetSlot(this.player.openContainer.windowId, slot.slotNumber, itemstack));
+                        // Is interaction allowed with item in hand
+                        if (SpongeCommonEventFactory.callInteractItemEventSecondary(this.player, itemstack, hand, VecHelper.toVector3d(packetIn
+                            .getHitVec()), entity).isCancelled() || SpongeCommonEventFactory.callInteractEntityEventSecondary(this.player,
+                            entity, hand, VecHelper.toVector3d(entity.getPositionVector().add(packetIn.getHitVec()))).isCancelled()) {
 
-                        // Handle a few special cases where the client assumes that the interaction is successful,
-                        // which means that we need to force an update
-                        if (itemstack.getItem() == Items.LEAD) {
-                            // Detach entity again
-                            sendPacket(new SPacketEntityAttach(entity, null));
-                        } else {
-                            // Other cases may involve a specific DataParameter of the entity
-                            // We fix the client state by marking it as dirty so it will be updated on the client the next tick
-                            DataParameter<?> parameter = findModifiedEntityInteractDataParameter(itemstack, entity);
-                            if (parameter != null) {
-                                entity.getDataManager().setDirty(parameter);
+                            // Restore held item in hand
+                            int index = ((IMixinInventoryPlayer) this.player.inventory).getHeldItemIndex(hand);
+
+                            if (hand == EnumHand.OFF_HAND) {
+                                // A window id of -2 can be used to set the off hand, even if a container is open.
+                                sendPacket(new SPacketSetSlot(-2, ((IMixinContainerPlayer) this.player.inventoryContainer).getOffHandSlot(), itemstack));
+                            } else {
+                                Slot slot = this.player.openContainer.getSlotFromInventory(this.player.inventory, index);
+                                sendPacket(new SPacketSetSlot(this.player.openContainer.windowId, slot.slotNumber, itemstack));
                             }
+
+
+                            // Handle a few special cases where the client assumes that the interaction is successful,
+                            // which means that we need to force an update
+                            if (itemstack.getItem() == Items.LEAD) {
+                                // Detach entity again
+                                sendPacket(new SPacketEntityAttach(entity, null));
+                            } else {
+                                // Other cases may involve a specific DataParameter of the entity
+                                // We fix the client state by marking it as dirty so it will be updated on the client the next tick
+                                DataParameter<?> parameter = findModifiedEntityInteractDataParameter(itemstack, entity);
+                                if (parameter != null) {
+                                    entity.getDataManager().setDirty(parameter);
+                                }
+                            }
+
+                            return;
                         }
 
-                        return;
-                    }
-
-                    // If INTERACT_AT is not successful, run the INTERACT logic
-                    if (entity.applyPlayerInteraction(this.player, packetIn.getHitVec(), hand) != EnumActionResult.SUCCESS) {
-                        this.player.interactOn(entity, hand);
+                        // If INTERACT_AT is not successful, run the INTERACT logic
+                        if (entity.applyPlayerInteraction(this.player, packetIn.getHitVec(), hand) != EnumActionResult.SUCCESS) {
+                            this.player.interactOn(entity, hand);
+                        }
                     }
                     // Sponge end
                 } else if (packetIn.getAction() == CPacketUseEntity.Action.ATTACK) {
                     // Sponge start - Call interact event
                     EnumHand hand = EnumHand.MAIN_HAND; // Will be null in the packet during ATTACK
                     ItemStack itemstack = this.player.getHeldItem(hand);
-                    SpongeCommonEventFactory.lastPrimaryPacketTick = this.serverController.getTickCounter();
+                    SpongeCommonEventFactory.lastPrimaryPacketTick = this.server.getTickCounter();
 
                     Vector3d hitVec = null;
 
@@ -759,7 +855,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
 
                     if (entity instanceof EntityItem || entity instanceof EntityXPOrb || entity instanceof EntityArrow || entity == this.player) {
                         this.disconnect(new TextComponentTranslation("multiplayer.disconnect.invalid_entity_attacked"));
-                        this.serverController.logWarning("Player " + this.player.getName() + " tried to attack an invalid entity");
+                        this.server.logWarning("Player " + this.player.getName() + " tried to attack an invalid entity");
                         return;
                     }
 
@@ -794,10 +890,28 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
 
     @Override
     public void resendLatestResourcePackRequest() {
-        // The vanilla client doesn't send any resource pack status if the user presses Escape to close the prompt.
-        // If the user moves around, they must have closed the GUI, so resend it to get a real answer.
-        if (!this.resourcePackRequests.isEmpty()) {
-            this.sendPacket(this.resourcePackRequests.peek());
+        ResourcePack pack = this.lastReceivedPack;
+        if (this.numResourcePacksInTransit.get() > 0 || pack == null) {
+            return;
         }
+        this.lastReceivedPack = null;
+        ((Player) this.player).sendResourcePack(pack);
+    }
+
+    @Override
+    public ResourcePack popReceivedResourcePack(boolean markAccepted) {
+        ResourcePack pack = this.lastReceivedPack;
+        this.lastReceivedPack = null;
+        if (markAccepted) {
+            this.lastAcceptedPack = pack; // TODO do something with the old value
+        }
+        return pack;
+    }
+
+    @Override
+    public ResourcePack popAcceptedResourcePack() {
+        ResourcePack pack = this.lastAcceptedPack;
+        this.lastAcceptedPack = null;
+        return pack;
     }
 }

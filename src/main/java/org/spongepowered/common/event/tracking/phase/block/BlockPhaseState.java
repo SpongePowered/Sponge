@@ -24,12 +24,22 @@
  */
 package org.spongepowered.common.event.tracking.phase.block;
 
+import net.minecraft.entity.item.EntityItem;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.common.event.tracking.GeneralizedContext;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 
+import java.util.function.BiConsumer;
+
 public class BlockPhaseState implements IPhaseState<GeneralizedContext> {
+
+    private final BiConsumer<CauseStackManager.StackFrame, GeneralizedContext> BLOCK_MODIFIER =
+        IPhaseState.super.getFrameModifier().andThen((frame, ctx) -> {
+
+
+        });
 
     BlockPhaseState() {
     }
@@ -50,17 +60,31 @@ public class BlockPhaseState implements IPhaseState<GeneralizedContext> {
     }
 
     @Override
+    public BiConsumer<CauseStackManager.StackFrame, GeneralizedContext> getFrameModifier() {
+        return this.BLOCK_MODIFIER;
+    }
+
+    @Override
     public void unwind(GeneralizedContext context) {
 
     }
 
     @Override
     public boolean spawnEntityOrCapture(GeneralizedContext context, Entity entity, int chunkX, int chunkZ) {
-        return context.getCapturedEntities().add(entity);
+        if (entity instanceof EntityItem) {
+            return context.getCapturedItems().add((EntityItem) entity);
+        } else {
+            return context.getCapturedEntities().add(entity);
+        }
     }
 
     @Override
-    public boolean allowEntitySpawns() {
+    public boolean doesCaptureEntitySpawns() {
+        return true;
+    }
+
+    @Override
+    public boolean doesAllowEntitySpawns() {
         return true;
     }
 

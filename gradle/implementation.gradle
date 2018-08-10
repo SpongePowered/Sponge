@@ -99,6 +99,7 @@ shadowJar ext.shadowConfiguration = {
 
         // We need to exclude the test plugins
         exclude project(testPlugins.path)
+        //exclude project(testmods.path)
 
         include dependency('org.spongepowered:plugin-meta')
 
@@ -113,10 +114,10 @@ shadowJar ext.shadowConfiguration = {
         include dependency('com.flowpowered:flow-math')
         include dependency('com.flowpowered:flow-noise')
 
-        include dependency('ninja.leaping.configurate:configurate-core')
-        include dependency('ninja.leaping.configurate:configurate-hocon')
-        include dependency('ninja.leaping.configurate:configurate-gson')
-        include dependency('ninja.leaping.configurate:configurate-yaml')
+        include dependency('org.spongepowered:configurate-core')
+        include dependency('org.spongepowered:configurate-hocon')
+        include dependency('org.spongepowered:configurate-gson')
+        include dependency('org.spongepowered:configurate-yaml')
 
         include dependency('org.yaml:snakeyaml')
 

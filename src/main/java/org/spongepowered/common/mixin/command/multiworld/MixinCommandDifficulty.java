@@ -29,33 +29,26 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.world.WorldManager;
 
 @Mixin(CommandDifficulty.class)
 public abstract class MixinCommandDifficulty {
 
     /**
      * @author Minecrell - September 28, 2016
+     * @author Zidane - January 31, 2018
      * @reason Change difficulty only in the world the command was executed in
+     * @reason Redirect to the WorldManager
      */
     @Redirect(method = "execute", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;"
             + "setDifficultyForAllWorlds(Lnet/minecraft/world/EnumDifficulty;)V"))
     private void onSetDifficulty(MinecraftServer server, EnumDifficulty difficulty, MinecraftServer server2, ICommandSender sender, String[] args) {
         World world = sender.getEntityWorld();
 
-        // Coped from MinecraftServer.setDifficultyForAllWorlds
-        if (world.getWorldInfo().isHardcoreModeEnabled()) {
-            world.getWorldInfo().setDifficulty(EnumDifficulty.HARD);
-            world.setAllowedSpawnTypes(true, true);
-        } else if (server.isSinglePlayer()) {
-            world.getWorldInfo().setDifficulty(difficulty);
-            world.setAllowedSpawnTypes(world.getDifficulty() != EnumDifficulty.PEACEFUL, true);
-        } else {
-            world.getWorldInfo().setDifficulty(difficulty);
-            world.setAllowedSpawnTypes(server.allowSpawnMonsters(), server.getCanSpawnAnimals());
-        }
+        WorldManager.adjustWorldForDifficulty((WorldServer) world, difficulty, true);
     }
-
 }

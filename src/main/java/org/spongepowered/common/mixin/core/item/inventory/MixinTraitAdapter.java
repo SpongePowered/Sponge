@@ -24,11 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.item.inventory;
 
-import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.inventory.InventoryCraftResult;
 import net.minecraft.inventory.InventoryLargeChest;
-import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityLockable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
@@ -53,13 +51,13 @@ import javax.annotation.Nullable;
         InventoryCraftResult.class,
         InventoryLargeChest.class
 }, priority = 999)
-public abstract class MixinTraitAdapter implements MinecraftInventoryAdapter<IInventory> {
+public abstract class MixinTraitAdapter implements MinecraftInventoryAdapter {
 
     @Nullable private ReusableLens<?> reusableLens = null;
-    @Nullable private SlotProvider<IInventory, ItemStack> slots = null;
+    @Nullable private SlotProvider slots = null;
 
     @Override
-    public SlotProvider<IInventory, ItemStack> getSlotProvider() {
+    public SlotProvider getSlotProvider() {
         if (this.slots != null) {
             return this.slots;
         }
@@ -67,18 +65,18 @@ public abstract class MixinTraitAdapter implements MinecraftInventoryAdapter<IIn
     }
 
     @Override
-    public Lens<IInventory, ItemStack> getRootLens() {
+    public Lens getRootLens() {
         return this.getReusableLens().getLens();
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private ReusableLens<?> getReusableLens()
     {
         if (this.reusableLens != null) {
             return this.reusableLens;
         }
         if (this instanceof ReusableLensProvider) {
-            return ((ReusableLensProvider<IInventory, ItemStack>) this).generateLens(this.getFabric(), this);
+            return ((ReusableLensProvider) this).generateLens(this.getFabric(), this);
         }
         if (this instanceof LensProvider) {
             this.slots = ((LensProvider) this).slotProvider(this.getFabric(), this);
@@ -86,9 +84,9 @@ public abstract class MixinTraitAdapter implements MinecraftInventoryAdapter<IIn
             return new ReusableLens<>(this.slots, lens);
         }
         SlotCollection slots = new SlotCollection.Builder().add(this.getFabric().getSize()).build();
-        Lens<IInventory, ItemStack> lens;
+        Lens lens;
         if (this.getFabric().getSize() == 0) {
-            lens = new DefaultEmptyLens<>(this);
+            lens = new DefaultEmptyLens(this);
         } else {
             lens = new OrderedInventoryLensImpl(0, this.getFabric().getSize(), 1, slots);
         }

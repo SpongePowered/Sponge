@@ -55,13 +55,13 @@ public class DespawnDelayValueProcessor extends AbstractSpongeValueProcessor<Ent
 
     @Override
     protected boolean set(EntityItem container, Integer value) {
-        container.setPickupDelay(value);
+        ((IMixinEntityItem) container).setDespawnDelay(value);
         return true;
     }
 
     @Override
     protected Optional<Integer> getVal(EntityItem container) {
-        return Optional.of(((IMixinEntityItem) container).getPickupDelay());
+        return Optional.of(((IMixinEntityItem) container).getDespawnDelay());
     }
 
     @Override

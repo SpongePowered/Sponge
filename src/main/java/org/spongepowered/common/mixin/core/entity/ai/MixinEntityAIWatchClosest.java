@@ -49,7 +49,7 @@ import javax.annotation.Nullable;
 public abstract class MixinEntityAIWatchClosest extends EntityAIBase implements WatchClosestAITask {
 
     @Shadow private Class watchedClass;
-    @Shadow private float maxDistanceForPlayer;
+    @Shadow private float maxDistance;
     @Shadow @Final @Mutable private float chance;
     @Nullable
     private EntityType watchedType;
@@ -70,12 +70,12 @@ public abstract class MixinEntityAIWatchClosest extends EntityAIBase implements 
 
     @Override
     public float getMaxDistance() {
-        return this.maxDistanceForPlayer;
+        return this.maxDistance;
     }
 
     @Override
     public WatchClosestAITask setMaxDistance(float maxDistance) {
-        this.maxDistanceForPlayer = maxDistance;
+        this.maxDistance = maxDistance;
         return this;
     }
 

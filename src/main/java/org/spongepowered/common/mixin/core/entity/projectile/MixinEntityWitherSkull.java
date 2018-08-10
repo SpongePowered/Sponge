@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.entity.projectile;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.EntityWitherSkull;
@@ -64,7 +62,7 @@ public abstract class MixinEntityWitherSkull extends MixinEntityFireball impleme
 
     @ModifyArg(method = "onImpact",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"))
-    protected float onAttackEntityFrom(float amount) {
+    private float onAttackEntityFrom(float amount) {
         return (float) getDamage();
     }
 
@@ -119,15 +117,18 @@ public abstract class MixinEntityWitherSkull extends MixinEntityFireball impleme
         setDead();
     }
 
+    @SuppressWarnings("deprecation")
     @Redirect(method = "onImpact", at = @At(value = "INVOKE", target = EXPLOSION_TARGET))
-    protected net.minecraft.world.Explosion onExplode(net.minecraft.world.World worldObj, Entity self, double x,
-                                                      double y, double z, float strength, boolean flaming,
-                                                      boolean smoking) {
+    @Nullable
+    private net.minecraft.world.Explosion onExplode(net.minecraft.world.World worldObj, Entity self, double x,
+        double y, double z, float strength, boolean flaming,
+        boolean smoking) {
         boolean griefer = ((IMixinGriefer) this).canGrief();
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(this);
-            Sponge.getCauseStackManager().addContext(EventContextKeys.THROWER, getShooter());
-            Sponge.getCauseStackManager().pushCause(getShooter());
+            frame.pushCause(this);
+            frame.addContext(EventContextKeys.THROWER, getShooter()); // TODO - Remove in API 8/1.13
+            frame.addContext(EventContextKeys.PROJECTILE_SOURCE, getShooter());
+            frame.pushCause(getShooter());
             return detonate(Explosion.builder()
                 .location(new Location<>((World) worldObj, new Vector3d(x, y, z)))
                 .sourceExplosive(this)

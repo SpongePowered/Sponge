@@ -33,17 +33,33 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.world.WorldManager;
 
+import javax.annotation.Nullable;
+
 @Mixin(ItemMap.class)
 public class MixinItemMap extends ItemMapBase {
 
 
     @Redirect(method = "setupNewMap", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getUniqueDataId(Ljava/lang/String;)I"))
     private static int onCreateMap(World worldIn, String key) {
+        if (worldIn.isRemote) {
+            return worldIn.getUniqueDataId(key);
+        }
         return WorldManager.getWorldByDimensionId(0).get().getUniqueDataId(key);
     }
 
+    @Redirect(method = "setupNewMap", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;"
+        + "setData(Ljava/lang/String;Lnet/minecraft/world/storage/WorldSavedData;)V"))
+    private static void onSetupNewMapSetOverworldMapData(World worldIn, String dataId, WorldSavedData data) {
+        if (worldIn.isRemote) {
+            worldIn.setData(dataId, data);
+        } else {
+            WorldManager.getWorldByDimensionId(0).get().setData(dataId, data);
+        }
+    }
+
+    @Nullable
     @Redirect(method = "getMapData", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;"
-            + "loadData(Ljava/lang/Class;Ljava/lang/String;)Lnet/minecraft/world/storage/WorldSavedData;"))
+        + "loadData(Ljava/lang/Class;Ljava/lang/String;)Lnet/minecraft/world/storage/WorldSavedData;"))
     private WorldSavedData loadOverworldMapData(World worldIn, Class<? extends WorldSavedData> clazz, String dataId) {
         if (worldIn.isRemote) {
             return worldIn.loadData(clazz, dataId);
@@ -53,33 +69,46 @@ public class MixinItemMap extends ItemMapBase {
 
     @Redirect(method = "getMapData", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getUniqueDataId(Ljava/lang/String;)I"))
     private int getOverworldUniqueDataId(World worldIn, String key) {
+        // The caller already has remote check
         return WorldManager.getWorldByDimensionId(0).get().getUniqueDataId(key);
     }
 
     @Redirect(method = "getMapData", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;"
-            + "setData(Ljava/lang/String;Lnet/minecraft/world/storage/WorldSavedData;)V"))
+        + "setData(Ljava/lang/String;Lnet/minecraft/world/storage/WorldSavedData;)V"))
     private void setOverworldMapData(World worldIn, String dataId, WorldSavedData data) {
+        // The caller already has remote check
         WorldManager.getWorldByDimensionId(0).get().setData(dataId, data);
     }
 
-    // TODO This redirect no longer exists in onCreated...
-//    @Redirect(method = "onCreated", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getUniqueDataId(Ljava/lang/String;)I"))
-//    private int onCreatedGetOverworldUniqueDataId(World worldIn, String key) {
-//        if (worldIn.isRemote) {
-//            return worldIn.getUniqueDataId(key);
-//        }
-//        return WorldManager.getWorldByDimensionId(0).get().getUniqueDataId(key);
-//
-//    }
-
-    @Redirect(method = "enableMapTracking", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getUniqueDataId(Ljava/lang/String;)I"))
-    private static int onCreatedGetOverworldUniqueDataId2(World worldIn, String key) {
+    @Redirect(method = "scaleMap", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getUniqueDataId(Ljava/lang/String;)I"))
+    private static int onScaleMapGetOverworldUniqueDataId(World worldIn, String key) {
+        if (worldIn.isRemote) {
+            return worldIn.getUniqueDataId(key);
+        }
         return WorldManager.getWorldByDimensionId(0).get().getUniqueDataId(key);
     }
 
     @Redirect(method = "scaleMap", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;"
-            + "setData(Ljava/lang/String;Lnet/minecraft/world/storage/WorldSavedData;)V"))
-    private static void onCreatedSetOverworldMapData(World worldIn, String dataId, WorldSavedData data) {
+        + "setData(Ljava/lang/String;Lnet/minecraft/world/storage/WorldSavedData;)V"))
+    private static void onScaleMapSetOverworldMapData(World worldIn, String dataId, WorldSavedData data) {
+        if (worldIn.isRemote) {
+            worldIn.setData(dataId, data);
+        } else {
+            WorldManager.getWorldByDimensionId(0).get().setData(dataId, data);
+        }
+    }
+
+    @Redirect(method = "enableMapTracking", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getUniqueDataId(Ljava/lang/String;)I"))
+    private static int onEnableMapTrackingGetOverworldUniqueDataId(World worldIn, String key) {
+        if (worldIn.isRemote) {
+            return worldIn.getUniqueDataId(key);
+        }
+        return WorldManager.getWorldByDimensionId(0).get().getUniqueDataId(key);
+    }
+
+    @Redirect(method = "enableMapTracking", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;"
+        + "setData(Ljava/lang/String;Lnet/minecraft/world/storage/WorldSavedData;)V"))
+    private static void onEnableMapTrackingSetOverworldMapData(World worldIn, String dataId, WorldSavedData data) {
         if (worldIn.isRemote) {
             worldIn.setData(dataId, data);
         } else {

@@ -42,7 +42,7 @@ public class IndirectlyPoweredPropertyStore extends AbstractSpongePropertyStore<
     @Override
     public Optional<IndirectlyPoweredProperty> getFor(Location<World> location) {
         final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
-        final boolean powered = world.isBlockIndirectlyGettingPowered(VecHelper.toBlockPos(location)) > 0;
+        final boolean powered = world.getRedstonePowerFromNeighbors(VecHelper.toBlockPos(location)) > 0;
         return Optional.of(powered ? TRUE : FALSE);
     }
 

@@ -27,12 +27,9 @@ package org.spongepowered.common.event.tracking.phase.tick;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 
 import java.util.ArrayList;
@@ -50,14 +47,10 @@ class WeatherTickPhaseState extends TickPhaseState<TickContext.General> {
     @Override
     public void unwind(TickContext.General phaseContext) {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
             phaseContext.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> {
-                final SpawnEntityEvent spawnEntityEvent =
-                        SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
-                SpongeImpl.postEvent(spawnEntityEvent);
-                for (Entity entity : spawnEntityEvent.getEntities()) {
-                    EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
-                }
+                SpongeCommonEventFactory.callSpawnEntity(entities, phaseContext);
+
             });
             phaseContext.getCapturedBlockSupplier().acceptAndClearIfNotEmpty(blockSnapshots -> {
                 TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext);
@@ -68,19 +61,15 @@ class WeatherTickPhaseState extends TickPhaseState<TickContext.General> {
     @Override
     public boolean spawnEntityOrCapture(TickContext.General context, Entity entity, int chunkX, int chunkZ) {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
-            final ArrayList<Entity> capturedEntities = new ArrayList<>();
-            capturedEntities.add(entity);
-            final SpawnEntityEvent spawnEntityEvent =
-                    SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), capturedEntities);
-            SpongeImpl.postEvent(spawnEntityEvent);
-            if (!spawnEntityEvent.isCancelled()) {
-                for (Entity anEntity : spawnEntityEvent.getEntities()) {
-                    EntityUtil.getMixinWorld(anEntity).forceSpawnEntity(anEntity);
-                }
-                return true;
-            }
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
+            final ArrayList<Entity> entities = new ArrayList<>();
+            entities.add(entity);
+            return SpongeCommonEventFactory.callSpawnEntity(entities, context);
         }
+    }
+
+    @Override
+    public boolean doesCaptureEntitySpawns() {
         return false;
     }
 

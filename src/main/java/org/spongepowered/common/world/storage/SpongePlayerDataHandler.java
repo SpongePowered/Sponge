@@ -90,6 +90,8 @@ public final class SpongePlayerDataHandler {
 
                     try (final InputStream stream = Files.newInputStream(playerFile)) {
                         compound = CompressedStreamTools.readCompressed(stream);
+                    } catch (Exception e) {
+                        throw new RuntimeException("Failed to decompress playerdata for playerfile " + playerFile, e);
                     }
 
                     // TODO Hard exception? Logger entry?
@@ -134,6 +136,8 @@ public final class SpongePlayerDataHandler {
         try {
             final Path newDatPath = instance.playerDir.resolve(id + ".dat.tmp");
             if (Files.notExists(newDatPath)) {
+                // Ensure that where we want to put this at ALWAYS exists
+                Files.createDirectories(newDatPath.getParent());
                 Files.createFile(newDatPath);
             }
 

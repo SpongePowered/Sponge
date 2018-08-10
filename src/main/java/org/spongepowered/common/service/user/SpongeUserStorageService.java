@@ -43,6 +43,7 @@ import java.util.concurrent.ExecutionException;
 public class SpongeUserStorageService implements UserStorageService {
 
     public static final UUID FAKEPLAYER_UUID = UUID.fromString("41C82C87-7AfB-4024-BA57-13D2C99CAE77");
+    public static final GameProfile FAKEPLAYER_PROFILE = (GameProfile) new com.mojang.authlib.GameProfile(FAKEPLAYER_UUID, null);
 
     @Override
     public Optional<User> get(UUID uniqueId) {
@@ -56,7 +57,7 @@ public class SpongeUserStorageService implements UserStorageService {
     @Override
     public Optional<User> get(String lastKnownName) {
         checkNotNull(lastKnownName, "lastKnownName");
-        checkArgument(lastKnownName.length() >= 3 && lastKnownName.length() <= 16, "Invalid username %s", lastKnownName);
+        checkArgument(lastKnownName.length() > 0 && lastKnownName.length() <= 16, "Invalid username %s", lastKnownName);
         checkState(Sponge.isServerAvailable(), "Server is not available!");
         return Optional.ofNullable(UserDiscoverer.findByUsername(lastKnownName));
     }
@@ -79,6 +80,10 @@ public class SpongeUserStorageService implements UserStorageService {
             return user.get();
         }
         return UserDiscoverer.create((com.mojang.authlib.GameProfile) profile);
+    }
+
+    public User forceRecreateUser(GameProfile profile) {
+        return UserDiscoverer.forceRecreate((com.mojang.authlib.GameProfile) profile);
     }
 
     @Override

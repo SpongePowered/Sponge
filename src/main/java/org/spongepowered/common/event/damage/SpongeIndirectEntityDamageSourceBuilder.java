@@ -77,6 +77,9 @@ public class SpongeIndirectEntityDamageSourceBuilder extends AbstractDamageSourc
         if (this.explosion) {
             damageSource.setExplosion();
         }
+        if (this.exhaustion != null) {
+            damageSource.hungerDamage = this.exhaustion.floatValue();
+        }
         return (IndirectEntityDamageSource) damageSource;
     }
 

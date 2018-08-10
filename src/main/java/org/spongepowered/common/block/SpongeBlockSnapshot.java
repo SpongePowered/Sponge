@@ -63,9 +63,8 @@ import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -104,12 +103,6 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     private SpongeBlockChangeFlag changeFlag;
     public BlockChange blockChange; // used for post event
 
-    // Internal use for restores
-    public SpongeBlockSnapshot(SpongeBlockSnapshotBuilder builder, SpongeBlockChangeFlag flag) {
-        this(builder);
-        this.changeFlag = flag;
-    }
-
     public SpongeBlockSnapshot(SpongeBlockSnapshotBuilder builder) {
         this.blockState = checkNotNull(builder.blockState, "The block state was null!");
         this.extendedState = builder.extendedState;
@@ -131,7 +124,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         this.keyValueMap = tileBuilder.build();
         this.valueSet = this.keyValueMap.isEmpty() ? ImmutableSet.of() : ImmutableSet.copyOf(this.keyValueMap.values());
         this.compound = builder.compound == null ? null : builder.compound.copy();
-        this.changeFlag = (SpongeBlockChangeFlag) BlockChangeFlags.ALL;
+        this.changeFlag = builder.flag;
     }
 
     @Override
@@ -174,21 +167,21 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
 
     @Override
     public boolean restore(boolean force, BlockChangeFlag flag) {
-        if (!SpongeImpl.getGame().getServer().getWorld(this.worldUniqueId).isPresent()) {
+        final Optional<World> optionalWorld = SpongeImpl.getGame().getServer().getWorld(this.worldUniqueId);
+        if (!optionalWorld.isPresent()) {
             return false;
         }
 
-        WorldServer world = (WorldServer) SpongeImpl.getGame().getServer().getWorld(this.worldUniqueId).get();
+        WorldServer world = (WorldServer) optionalWorld.get();
         final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) world;
-        PhaseTracker phaseTracker = PhaseTracker.getInstance();
-        final IPhaseState<?> currentState = phaseTracker.getCurrentState();
         // We need to deterministically define the context as nullable if we don't need to enter.
         // this way we guarantee an exit.
-        try (PhaseContext<?> context = !currentState.tracksBlockRestores()
-            ? null
-            : BlockPhase.State.RESTORING_BLOCKS.createPhaseContext().buildAndSwitch()) {
-
+        try (PhaseContext<?> context = BlockPhase.State.RESTORING_BLOCKS.createPhaseContext()) {
+            context.buildAndSwitch();
             BlockPos pos = VecHelper.toBlockPos(this.pos);
+            if (!world.isValid(pos)) { // Invalid position. Inline this check
+                return false;
+            }
             IBlockState current = world.getBlockState(pos);
             IBlockState replaced = (IBlockState) this.blockState;
             if (!force && (current.getBlock() != replaced.getBlock() || current.getBlock().getMetaFromState(current) != replaced.getBlock()
@@ -200,7 +193,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
             if (current.getBlock().getClass() == BlockShulkerBox.class) {
                 world.removeTileEntity(pos);
             }
-            mixinWorldServer.setBlockState(pos, replaced, flag);
+            PhaseTracker.getInstance().setBlockState(mixinWorldServer, pos, replaced, flag);
             world.getPlayerChunkMap().markBlockForUpdate(pos);
             if (this.compound != null) {
                 final TileEntity te = world.getTileEntity(pos);

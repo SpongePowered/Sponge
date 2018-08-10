@@ -38,7 +38,6 @@ import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import org.spongepowered.common.interfaces.item.IMixinItem;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.SpongeGameDictionaryEntry;
@@ -54,10 +53,10 @@ public abstract class MixinItem implements ItemType, IMixinItem, SpongeGameDicti
 
     public Optional<BlockType> blockType = Optional.empty();
 
-    @Shadow private String unlocalizedName;
+    @Shadow private String translationKey;
 
     @Shadow public abstract int getItemStackLimit();
-    @Shadow public abstract String getUnlocalizedName();
+    @Shadow public abstract String getTranslationKey();
 
     // A item stack used to retrieve properties
     @Nullable private org.spongepowered.api.item.inventory.ItemStack propertyItemStack;
@@ -82,7 +81,7 @@ public abstract class MixinItem implements ItemType, IMixinItem, SpongeGameDicti
 
     @Override
     public Translation getTranslation() {
-        return new SpongeTranslation(getUnlocalizedName() + ".name");
+        return new SpongeTranslation(getTranslationKey() + ".name");
     }
 
     @Override
@@ -121,7 +120,7 @@ public abstract class MixinItem implements ItemType, IMixinItem, SpongeGameDicti
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("Name", this.unlocalizedName)
+                .add("Name", this.translationKey)
                 .toString();
     }
 }

@@ -52,39 +52,39 @@ public abstract class AdapterLogic{
 
     private AdapterLogic() {}
 
-    public static <TInventory> Optional<ItemStack> pollSequential(InventoryAdapter<TInventory, net.minecraft.item.ItemStack> adapter) {
+    public static Optional<ItemStack> pollSequential(InventoryAdapter adapter) {
         return AdapterLogic.pollSequential(adapter.getFabric(), adapter.getRootLens());
     }
 
-    public static <TInventory> Optional<ItemStack> pollSequential(Fabric<TInventory> inv, Lens<TInventory, net.minecraft.item.ItemStack> lens) {
+    public static Optional<ItemStack> pollSequential(Fabric inv, Lens lens) {
         return AdapterLogic.findStack(inv, lens, true);
     }
 
-    public static <TInventory> Optional<ItemStack> pollSequential(InventoryAdapter<TInventory, net.minecraft.item.ItemStack> adapter, int limit) {
+    public static Optional<ItemStack> pollSequential(InventoryAdapter adapter, int limit) {
         return AdapterLogic.pollSequential(adapter.getFabric(), adapter.getRootLens(), limit);
     }
 
-    public static <TInventory> Optional<ItemStack> pollSequential(Fabric<TInventory> inv, Lens<TInventory, net.minecraft.item.ItemStack> lens, int limit) {
+    public static Optional<ItemStack> pollSequential(Fabric inv, Lens lens, int limit) {
         return AdapterLogic.findStacks(inv, lens, limit, true);
     }
 
-    public static <TInventory> Optional<ItemStack> peekSequential(InventoryAdapter<TInventory, net.minecraft.item.ItemStack> adapter) {
+    public static Optional<ItemStack> peekSequential(InventoryAdapter adapter) {
         return AdapterLogic.peekSequential(adapter.getFabric(), adapter.getRootLens());
     }
 
-    public static <TInventory> Optional<ItemStack> peekSequential(Fabric<TInventory> inv, Lens<TInventory, net.minecraft.item.ItemStack> lens) {
+    public static Optional<ItemStack> peekSequential(Fabric inv, Lens lens) {
         return AdapterLogic.findStack(inv, lens, false);
     }
 
-    public static <TInventory> Optional<ItemStack> peekSequential(InventoryAdapter<TInventory, net.minecraft.item.ItemStack> adapter, int limit) {
+    public static Optional<ItemStack> peekSequential(InventoryAdapter adapter, int limit) {
         return AdapterLogic.peekSequential(adapter.getFabric(), adapter.getRootLens(), limit);
     }
 
-    public static <TInventory> Optional<ItemStack> peekSequential(Fabric<TInventory> inv, Lens<TInventory, net.minecraft.item.ItemStack> lens, int limit) {
+    public static Optional<ItemStack> peekSequential(Fabric inv, Lens lens, int limit) {
         return AdapterLogic.findStacks(inv, lens, limit, false);
     }
 
-    private static <TInventory> Optional<ItemStack> findStack(Fabric<TInventory> inv, Lens<TInventory, net.minecraft.item.ItemStack> lens, boolean remove) {
+    private static Optional<ItemStack> findStack(Fabric inv, Lens lens, boolean remove) {
         if (lens == null) {
             return Optional.empty();
         }
@@ -99,7 +99,7 @@ public abstract class AdapterLogic{
         return Optional.empty();
     }
 
-    private static <TInventory> Optional<ItemStack> findStacks(Fabric<TInventory> inv, Lens<TInventory, net.minecraft.item.ItemStack> lens, int limit, boolean remove) {
+    private static Optional<ItemStack> findStacks(Fabric inv, Lens lens, int limit, boolean remove) {
 
         if (lens == null) {
             return Optional.empty();
@@ -135,11 +135,11 @@ public abstract class AdapterLogic{
         return Optional.ofNullable(result);
     }
 
-    public static <TInventory> InventoryTransactionResult insertSequential(InventoryAdapter<TInventory, net.minecraft.item.ItemStack> adapter, ItemStack stack) {
+    public static InventoryTransactionResult insertSequential(InventoryAdapter adapter, ItemStack stack) {
         return AdapterLogic.insertSequential(adapter.getFabric(), adapter.getRootLens(), stack);
     }
 
-    public static <TInventory> InventoryTransactionResult insertSequential(Fabric<TInventory> inv, Lens<TInventory, net.minecraft.item.ItemStack> lens, ItemStack stack) {
+    public static InventoryTransactionResult insertSequential(Fabric inv, Lens lens, ItemStack stack) {
         if (lens == null) {
             return InventoryTransactionResult.builder().type(InventoryTransactionResult.Type.FAILURE).reject(ItemStackUtil.cloneDefensive(stack)).build();
         }
@@ -150,7 +150,7 @@ public abstract class AdapterLogic{
         }
     }
 
-    private static <TInventory> InventoryTransactionResult insertStack(Fabric<TInventory> inv, Lens<TInventory, net.minecraft.item.ItemStack> lens, ItemStack stack) {
+    private static InventoryTransactionResult insertStack(Fabric inv, Lens lens, ItemStack stack) {
         InventoryTransactionResult.Builder result = InventoryTransactionResult.builder().type(InventoryTransactionResult.Type.SUCCESS);
         net.minecraft.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
 
@@ -173,11 +173,11 @@ public abstract class AdapterLogic{
         return result.build();
     }
 
-    public static <TInventory> InventoryTransactionResult appendSequential(InventoryAdapter<TInventory, net.minecraft.item.ItemStack> adapter, ItemStack stack) {
+    public static InventoryTransactionResult appendSequential(InventoryAdapter adapter, ItemStack stack) {
         return AdapterLogic.appendSequential(adapter.getFabric(), adapter.getRootLens(), stack);
     }
 
-    public static <TInventory> InventoryTransactionResult appendSequential(Fabric<TInventory> inv, Lens<TInventory, net.minecraft.item.ItemStack> lens, ItemStack stack) {
+    public static InventoryTransactionResult appendSequential(Fabric inv, Lens lens, ItemStack stack) {
         InventoryTransactionResult.Builder result = InventoryTransactionResult.builder().type(InventoryTransactionResult.Type.SUCCESS);
         net.minecraft.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
 
@@ -206,11 +206,11 @@ public abstract class AdapterLogic{
         return result.build();
     }
 
-    public static <TInventory> int countStacks(InventoryAdapter<TInventory, net.minecraft.item.ItemStack> adapter) {
+    public static int countStacks(InventoryAdapter adapter) {
         return AdapterLogic.countStacks(adapter.getFabric(), adapter.getRootLens());
     }
 
-    public static <TInventory> int countStacks(Fabric<TInventory> inv, Lens<TInventory, net.minecraft.item.ItemStack> lens) {
+    public static int countStacks(Fabric inv, Lens lens) {
         int stacks = 0;
 
         for (int ord = 0; ord < lens.slotCount(); ord++) {
@@ -220,40 +220,40 @@ public abstract class AdapterLogic{
         return stacks;
     }
 
-    public static <TInventory> int countItems(InventoryAdapter<TInventory, net.minecraft.item.ItemStack> adapter) {
+    public static int countItems(InventoryAdapter adapter) {
         return AdapterLogic.countItems(adapter.getFabric(), adapter.getRootLens());
     }
 
-    public static <TInventory> int countItems(Fabric<TInventory> inv, Lens<TInventory, net.minecraft.item.ItemStack> lens) {
+    public static int countItems(Fabric inv, Lens lens) {
         int items = 0;
 
         for (int ord = 0; ord < lens.slotCount(); ord++) {
             net.minecraft.item.ItemStack stack = lens.getStack(inv, ord);
-            items += !stack.isEmpty() ? stack.getCount() : 0;
+            items += stack.getCount();
         }
 
         return items;
     }
 
-    public static <TInventory> int getCapacity(InventoryAdapter<TInventory, net.minecraft.item.ItemStack> adapter) {
+    public static int getCapacity(InventoryAdapter adapter) {
         return AdapterLogic.getCapacity(adapter.getFabric(), adapter.getRootLens());
     }
 
-    public static <TInventory> int getCapacity(Fabric<TInventory> inv, Lens<TInventory, net.minecraft.item.ItemStack> lens) {
+    public static int getCapacity(Fabric inv, Lens lens) {
         return lens.getSlots().size();
     }
 
-    public static <TInventory> Collection<InventoryProperty<?, ?>> getProperties(InventoryAdapter<TInventory, net.minecraft.item.ItemStack> adapter,
+    public static Collection<InventoryProperty<?, ?>> getProperties(InventoryAdapter adapter,
             Inventory child, Class<? extends InventoryProperty<?, ?>> property) {
         return AdapterLogic.getProperties(adapter.getFabric(), adapter.getRootLens(), child, property);
     }
 
-    public static <TInventory> Collection<InventoryProperty<?, ?>> getProperties(Fabric<TInventory> inv, Lens<TInventory, net.minecraft.item.ItemStack> lens,
+    public static Collection<InventoryProperty<?, ?>> getProperties(Fabric inv, Lens lens,
             Inventory child, Class<? extends InventoryProperty<?, ?>> property) {
 
         if (child instanceof InventoryAdapter) {
             checkNotNull(property, "property");
-            int index = lens.getChildren().indexOf(((InventoryAdapter<?, ?>) child).getRootLens());
+            int index = lens.getChildren().indexOf(((InventoryAdapter) child).getRootLens());
             if (index > -1) {
                 return lens.getProperties(index).stream().filter(prop -> property.equals(prop.getClass()))
                         .collect(Collectors.toCollection(ArrayList::new));
@@ -263,7 +263,7 @@ public abstract class AdapterLogic{
         return Collections.emptyList();
     }
 
-    static <TInventory, T extends InventoryProperty<?, ?>> Collection<T> getRootProperties(InventoryAdapter<TInventory, net.minecraft.item.ItemStack> adapter, Class<T> property) {
+    static <T extends InventoryProperty<?, ?>> Collection<T> getRootProperties(InventoryAdapter adapter, Class<T> property) {
         adapter = inventoryRoot(adapter);
         if (adapter instanceof CustomInventory) {
             return ((CustomInventory) adapter).getProperties().values().stream().filter(p -> property.equals(p.getClass()))
@@ -272,10 +272,11 @@ public abstract class AdapterLogic{
         return Streams.stream(findRootProperty(adapter, property)).collect(Collectors.toList());
     }
 
-    static <TInventory, T extends InventoryProperty<?, ?>> Optional<T> getRootProperty(InventoryAdapter<TInventory, net.minecraft.item.ItemStack> adapter, Class<T> property, Object key) {
+    @SuppressWarnings("unchecked")
+    static <T extends InventoryProperty<?, ?>> Optional<T> getRootProperty(InventoryAdapter adapter, Class<T> property, Object key) {
         adapter = inventoryRoot(adapter);
         if (adapter instanceof CustomInventory) {
-            InventoryProperty forKey = ((CustomInventory) adapter).getProperties().get(key);
+            InventoryProperty<?, ?> forKey = ((CustomInventory) adapter).getProperties().get(key);
             if (forKey != null && property.equals(forKey.getClass())) {
                 return Optional.of((T) forKey);
             }
@@ -283,7 +284,8 @@ public abstract class AdapterLogic{
         return findRootProperty(adapter, property);
     }
 
-    private static <TInventory, T extends InventoryProperty<?, ?>> Optional<T> findRootProperty(InventoryAdapter<TInventory, net.minecraft.item.ItemStack> adapter, Class<T> property) {
+    @SuppressWarnings("unchecked")
+    private static <T extends InventoryProperty<?, ?>> Optional<T> findRootProperty(InventoryAdapter adapter, Class<T> property) {
         if (property == InventoryTitle.class) {
             Text text = Text.of(adapter.getFabric().getDisplayName());
             return (Optional<T>) Optional.of(InventoryTitle.of(text));
@@ -292,12 +294,13 @@ public abstract class AdapterLogic{
         return Optional.empty();
     }
 
-    private static <TInventory> InventoryAdapter<TInventory, net.minecraft.item.ItemStack> inventoryRoot(InventoryAdapter<TInventory, net.minecraft.item.ItemStack> adapter) {
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static InventoryAdapter inventoryRoot(InventoryAdapter adapter) {
         // Get Root Inventory
         adapter = ((InventoryAdapter) adapter.root());
         if (adapter instanceof Container) {
             // If Root is a Container get the viewed inventory
-            TInventory first = adapter.getFabric().allInventories().iterator().next();
+            Object first = adapter.getFabric().allInventories().iterator().next();
             if (first instanceof CustomInventory) {
                 // if viewed inventory is a custom inventory get it instead
                 adapter = ((InventoryAdapter) first);
@@ -306,11 +309,11 @@ public abstract class AdapterLogic{
         return adapter;
     }
 
-    public static <TInventory> boolean contains(InventoryAdapter<TInventory, net.minecraft.item.ItemStack> adapter, ItemStack stack) {
+    public static boolean contains(InventoryAdapter adapter, ItemStack stack) {
         return AdapterLogic.contains(adapter.getFabric(), adapter.getRootLens(), stack, stack.getQuantity());
     }
 
-    public static <TInventory> boolean contains(InventoryAdapter<TInventory, net.minecraft.item.ItemStack> adapter, ItemStack stack, int quantity) {
+    public static boolean contains(InventoryAdapter adapter, ItemStack stack, int quantity) {
         return AdapterLogic.contains(adapter.getFabric(), adapter.getRootLens(), stack, quantity);
     }
 
@@ -323,7 +326,7 @@ public abstract class AdapterLogic{
      * @param quantity The quantity to find
      * @return true if at least <code>quantity</code> of given stack has been found in given inventory
      */
-    public static <TInventory> boolean contains(Fabric<TInventory> inv, Lens<TInventory, net.minecraft.item.ItemStack> lens, ItemStack stack, int quantity) {
+    public static boolean contains(Fabric inv, Lens lens, ItemStack stack, int quantity) {
         net.minecraft.item.ItemStack nonNullStack = ItemStackUtil.toNative(stack); // Handle null as empty
         int found = 0;
         for (int ord = 0; ord < lens.slotCount(); ord++) {
@@ -347,11 +350,11 @@ public abstract class AdapterLogic{
         return false;
     }
 
-    public static <TInventory> boolean contains(InventoryAdapter<TInventory, net.minecraft.item.ItemStack> adapter, ItemType type) {
+    public static boolean contains(InventoryAdapter adapter, ItemType type) {
         return AdapterLogic.contains(adapter.getFabric(), adapter.getRootLens(), type);
     }
 
-    public static <TInventory> boolean contains(Fabric<TInventory> inv, Lens<TInventory, net.minecraft.item.ItemStack> lens, ItemType type) {
+    public static boolean contains(Fabric inv, Lens lens, ItemType type) {
         for (int ord = 0; ord < lens.slotCount(); ord++) {
             net.minecraft.item.ItemStack slotStack = lens.getStack(inv, ord);
             if (slotStack.isEmpty()) {

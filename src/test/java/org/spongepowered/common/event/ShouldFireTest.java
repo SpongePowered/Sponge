@@ -31,6 +31,7 @@ import org.mockito.Mockito;
 import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.common.InjectedTest;
@@ -70,43 +71,52 @@ public class ShouldFireTest extends InjectedTest {
         SpawnListener listener = new SpawnListener();
 
         Assert.assertFalse("SPAWN_ENTITY_EVENT is not false!", ShouldFire.SPAWN_ENTITY_EVENT);
-        Assert.assertFalse("SPAWN_ENTITY_EVENT_CHUNKLOAD is not false!", ShouldFire.SPAWN_ENTITY_EVENT_CHUNKLOAD);
+        Assert.assertFalse("SPAWN_ENTITY_EVENT_CHUNK_LOAD is not false!", ShouldFire.SPAWN_ENTITY_EVENT_CHUNK_LOAD);
+        Assert.assertFalse("DROP_ITEM_EVENT_DISPENSE is not false!", ShouldFire.DROP_ITEM_EVENT_DISPENSE);
+
         this.eventManager.registerListeners(this.plugin, listener);
         Assert.assertTrue("SPAWN_ENTITY_EVENT is not true!", ShouldFire.SPAWN_ENTITY_EVENT);
-        Assert.assertFalse("SPAWN_ENTITY_EVENT_CHUNKLOAD is not false!", ShouldFire.SPAWN_ENTITY_EVENT_CHUNKLOAD);
+        Assert.assertTrue("SPAWN_ENTITY_EVENT_CHUNK_LOAD is not true!", ShouldFire.SPAWN_ENTITY_EVENT_CHUNK_LOAD);
+        Assert.assertTrue("DROP_ITEM_EVENT_DISPENSE it not true!", ShouldFire.DROP_ITEM_EVENT_DISPENSE);
 
         this.eventManager.unregisterListeners(listener);
         Assert.assertFalse("SPAWN_ENTITY_EVENT is not false!", ShouldFire.SPAWN_ENTITY_EVENT);
-        Assert.assertFalse("SPAWN_ENTITY_EVENT_CHUNKLOAD is not false!", ShouldFire.SPAWN_ENTITY_EVENT_CHUNKLOAD);
+        Assert.assertFalse("SPAWN_ENTITY_EVENT_CHUNK_LOAD is not false!", ShouldFire.SPAWN_ENTITY_EVENT_CHUNK_LOAD);
+        Assert.assertFalse("DROP_ITEM_EVENT_DISPENSE is not false!", ShouldFire.DROP_ITEM_EVENT_DISPENSE);
     }
 
     @Test
     public void testMultipleListeners() {
-        SpawnListener first = new SpawnListener();
-        SubListener second = new SubListener();
+        SpawnListener spawnBaseListener = new SpawnListener();
+        SubListener spawnCustomListener = new SubListener();
 
         Assert.assertFalse("SPAWN_ENTITY_EVENT is not false!", ShouldFire.SPAWN_ENTITY_EVENT);
         Assert.assertFalse("SPAWN_ENTITY_EVENT_CUSTOM is not false!", ShouldFire.SPAWN_ENTITY_EVENT_CUSTOM);
+        Assert.assertFalse("SPAWN_ENTITY_EVENT_CHUNK_LOAD is not false!", ShouldFire.SPAWN_ENTITY_EVENT_CHUNK_LOAD);
 
-        this.eventManager.registerListeners(this.plugin, first);
-
-        Assert.assertTrue("SPAWN_ENTITY_EVENT is not true!", ShouldFire.SPAWN_ENTITY_EVENT);
-        Assert.assertFalse("SPAWN_ENTITY_EVENT_CUSTOM is not false!", ShouldFire.SPAWN_ENTITY_EVENT_CUSTOM);
-
-        this.eventManager.registerListeners(this.plugin, second);
+        this.eventManager.registerListeners(this.plugin, spawnCustomListener);
 
         Assert.assertTrue("SPAWN_ENTITY_EVENT is not true!", ShouldFire.SPAWN_ENTITY_EVENT);
         Assert.assertTrue("SPAWN_ENTITY_EVENT_CUSTOM is not true!", ShouldFire.SPAWN_ENTITY_EVENT_CUSTOM);
+        Assert.assertFalse("SPAWN_ENTITY_EVENT_CHUNK_LOAD is not false!", ShouldFire.SPAWN_ENTITY_EVENT_CHUNK_LOAD);
 
-        this.eventManager.unregisterListeners(second);
+        this.eventManager.registerListeners(this.plugin, spawnBaseListener);
 
         Assert.assertTrue("SPAWN_ENTITY_EVENT is not true!", ShouldFire.SPAWN_ENTITY_EVENT);
-        Assert.assertFalse("SPAWN_ENTITY_EVENT_CUSTOM is not false!", ShouldFire.SPAWN_ENTITY_EVENT_CUSTOM);
+        Assert.assertTrue("SPAWN_ENTITY_EVENT_CUSTOM is not true!", ShouldFire.SPAWN_ENTITY_EVENT_CUSTOM);
+        Assert.assertTrue("SPAWN_ENTITY_EVENT_CHUNK_LOAD is not true!", ShouldFire.SPAWN_ENTITY_EVENT_CHUNK_LOAD);
 
-        this.eventManager.unregisterListeners(first);
+        this.eventManager.unregisterListeners(spawnCustomListener);
+
+        Assert.assertTrue("SPAWN_ENTITY_EVENT is not true!", ShouldFire.SPAWN_ENTITY_EVENT);
+        Assert.assertTrue("SPAWN_ENTITY_EVENT_CUSTOM is not true!", ShouldFire.SPAWN_ENTITY_EVENT_CUSTOM);
+        Assert.assertTrue("SPAWN_ENTITY_EVENT_CHUNK_LOAD is not true!", ShouldFire.SPAWN_ENTITY_EVENT_CHUNK_LOAD);
+
+        this.eventManager.unregisterListeners(spawnBaseListener);
 
         Assert.assertFalse("SPAWN_ENTITY_EVENT is not false!", ShouldFire.SPAWN_ENTITY_EVENT);
         Assert.assertFalse("SPAWN_ENTITY_EVENT_CUSTOM is not false!", ShouldFire.SPAWN_ENTITY_EVENT_CUSTOM);
+        Assert.assertFalse("SPAWN_ENTITY_EVENT_CHUNK_LOAD is not false!", ShouldFire.SPAWN_ENTITY_EVENT_CHUNK_LOAD);
     }
 
     private static class SpawnListener {

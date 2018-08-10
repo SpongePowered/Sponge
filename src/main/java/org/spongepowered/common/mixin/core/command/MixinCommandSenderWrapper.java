@@ -63,15 +63,15 @@ public abstract class MixinCommandSenderWrapper implements ICommandSender, IMixi
             Boolean sendCommandFeedbackIn, CallbackInfo ci) {
         CommandSource wrappedDelegate = WrapperCommandSource.of(this.delegate);
         Subject subjectDelegate;
-        if (permissionLevel == null) {
+        if (this.permissionLevel == null) {
             subjectDelegate = wrappedDelegate;
         } else {
             subjectDelegate = new AndPermissionLevelSubject(this, wrappedDelegate);
         }
         if (this.positionVector != null || wrappedDelegate instanceof Locatable) {
-            this.sponge = new SpongeProxySource(this, wrappedDelegate, subjectDelegate);
-        } else {
             this.sponge = new SpongeProxySource.Located(this, wrappedDelegate, subjectDelegate);
+        } else {
+            this.sponge = new SpongeProxySource(this, wrappedDelegate, subjectDelegate);
         }
     }
 

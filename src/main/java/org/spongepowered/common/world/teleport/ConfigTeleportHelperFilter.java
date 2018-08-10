@@ -31,7 +31,6 @@ import org.spongepowered.api.world.teleport.TeleportHelperFilter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.category.TeleportHelperCategory;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;

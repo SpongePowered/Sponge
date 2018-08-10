@@ -26,8 +26,8 @@ package org.spongepowered.common.item.inventory.lens;
 
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 
-public interface SlotProvider<TInventory, TStack> {
+public interface SlotProvider {
     
-    SlotLens<TInventory, TStack> getSlot(int index);
+    SlotLens getSlot(int index);
 
 }

@@ -33,8 +33,10 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableJoinData;
 import org.spongepowered.api.data.manipulator.mutable.entity.JoinData;
+import org.spongepowered.api.util.Identifiable;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeJoinData;
-import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
+import org.spongepowered.common.data.processor.common.AbstractMultiDataSingleTargetProcessor;
+import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 
 import java.time.Instant;
@@ -42,20 +44,25 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-public class JoinDataProcessor extends AbstractEntityDataProcessor<EntityPlayer, JoinData, ImmutableJoinData>{
+public class JoinDataProcessor extends AbstractMultiDataSingleTargetProcessor<Identifiable, JoinData, ImmutableJoinData> {
 
     public JoinDataProcessor() {
-        super(EntityPlayer.class);
+        super(Identifiable.class);
     }
 
     @Override
-    protected boolean doesDataExist(EntityPlayer dataHolder) {
+    protected boolean supports(Identifiable dataHolder) {
+        return dataHolder instanceof EntityPlayer || dataHolder instanceof SpongeUser;
+    }
+
+    @Override
+    protected boolean doesDataExist(Identifiable dataHolder) {
         return true;
     }
 
     @Override
-    protected boolean set(EntityPlayer dataHolder, Map<Key<?>, Object> keyValues) {
-        UUID uuid = dataHolder.getUniqueID();
+    protected boolean set(Identifiable dataHolder, Map<Key<?>, Object> keyValues) {
+        UUID uuid = dataHolder.getUniqueId();
         Instant instant = (Instant) keyValues.get(Keys.FIRST_DATE_PLAYED);
         Instant played = (Instant) keyValues.get(Keys.LAST_DATE_PLAYED);
         SpongePlayerDataHandler.setPlayerInfo(uuid, instant, played);
@@ -63,8 +70,8 @@ public class JoinDataProcessor extends AbstractEntityDataProcessor<EntityPlayer,
     }
 
     @Override
-    protected Map<Key<?>, ?> getValues(EntityPlayer dataHolder) {
-        final UUID uuid = dataHolder.getUniqueID();
+    protected Map<Key<?>, ?> getValues(Identifiable dataHolder) {
+        final UUID uuid = dataHolder.getUniqueId();
         Instant first = SpongePlayerDataHandler.getFirstJoined(uuid).get();
         Instant played = SpongePlayerDataHandler.getLastPlayed(uuid).get();
         return ImmutableMap.of(Keys.FIRST_DATE_PLAYED, first, Keys.LAST_DATE_PLAYED, played);

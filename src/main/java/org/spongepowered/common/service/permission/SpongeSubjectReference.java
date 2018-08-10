@@ -48,22 +48,22 @@ public class SpongeSubjectReference implements SubjectReference {
 
     @Override
     public String getCollectionIdentifier() {
-        return collectionId;
+        return this.collectionId;
     }
 
     @Override
     public String getSubjectIdentifier() {
-        return subjectId;
+        return this.subjectId;
     }
 
     @Override
     public synchronized CompletableFuture<Subject> resolve() {
         // lazily load
-        if (cache == null) {
-            cache = service.get(collectionId).get(subjectId);
+        if (this.cache == null) {
+            this.cache = this.service.get(this.collectionId).get(this.subjectId);
         }
 
-        return CompletableFuture.completedFuture(cache);
+        return CompletableFuture.completedFuture(this.cache);
     }
 
 }

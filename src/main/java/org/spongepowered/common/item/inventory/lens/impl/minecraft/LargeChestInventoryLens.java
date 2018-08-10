@@ -24,9 +24,7 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.minecraft;
 
-import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryLargeChest;
-import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityChest;
 import org.spongepowered.api.block.tileentity.carrier.Chest;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
@@ -46,7 +44,7 @@ public class LargeChestInventoryLens extends RealLens {
     private int upperChest;
     private int lowerChest;
 
-    public LargeChestInventoryLens(InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots) {
+    public LargeChestInventoryLens(InventoryAdapter adapter, SlotProvider slots) {
         super(0, adapter.getFabric().getSize(), OrderedInventoryAdapter.class, slots);
         InventoryLargeChest inventory = (InventoryLargeChest) adapter;
         this.upperChest = inventory.upperChest.getSizeInventory();
@@ -54,7 +52,7 @@ public class LargeChestInventoryLens extends RealLens {
         this.initLargeChest(slots);
     }
 
-    public LargeChestInventoryLens(int base, InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots) {
+    public LargeChestInventoryLens(int base, InventoryAdapter adapter, SlotProvider slots) {
         super(base, adapter.getFabric().getSize(), OrderedInventoryAdapter.class, slots);
         InventoryLargeChest inventory = (InventoryLargeChest) adapter.getFabric().get(0);
         this.upperChest = inventory.upperChest.getSizeInventory();
@@ -63,16 +61,17 @@ public class LargeChestInventoryLens extends RealLens {
     }
 
     @Override
-    protected void init(SlotProvider<IInventory, ItemStack> slots) {
+    protected void init(SlotProvider slots) {
         // we add the indexed slots ourselves
     }
 
-    private void initLargeChest(SlotProvider<IInventory, ItemStack> slots) {
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private void initLargeChest(SlotProvider slots) {
         // add grids
         int base = 0;
-        this.addSpanningChild(new GridInventoryLensImpl(base, 9, this.upperChest / 9, 9, (Class)TileEntityChest.class, slots));
+        this.addSpanningChild(new GridInventoryLensImpl(base, 9, this.upperChest / 9, 9, (Class) TileEntityChest.class, slots));
         base += this.upperChest;
-        this.addSpanningChild(new GridInventoryLensImpl(base, 9, this.lowerChest / 9, 9, (Class)TileEntityChest.class, slots));
+        this.addSpanningChild(new GridInventoryLensImpl(base, 9, this.lowerChest / 9, 9, (Class) TileEntityChest.class, slots));
         base += this.lowerChest;
 
         this.addChild(new GridInventoryLensImpl(0, 9, (this.upperChest + this.lowerChest) / 9, 9, slots));

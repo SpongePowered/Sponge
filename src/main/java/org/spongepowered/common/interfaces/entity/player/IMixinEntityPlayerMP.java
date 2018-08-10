@@ -31,6 +31,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.scoreboard.Scoreboard;
+import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.world.border.PlayerOwnBorderListener;
@@ -47,6 +49,8 @@ public interface IMixinEntityPlayerMP extends IMixinEntityPlayer {
 
     User getUserObject();
 
+    void forceRecreateUser();
+
     void setVelocityOverride(@Nullable Vector3d velocity);
 
     void sendBlockChange(BlockPos pos, IBlockState state);
@@ -54,6 +58,10 @@ public interface IMixinEntityPlayerMP extends IMixinEntityPlayer {
     MessageChannel getDeathMessageChannel();
 
     void initScoreboard();
+
+    void removeScoreboardOnRespawn();
+
+    void setScoreboardOnRespawn(Scoreboard scoreboard);
 
     IMixinWorldServer getMixinWorld();
 
@@ -82,4 +90,9 @@ public interface IMixinEntityPlayerMP extends IMixinEntityPlayer {
     void injectScaledHealth(Collection<IAttributeInstance> set, boolean b);
 
     void updateDataManagerForScaledHealth();
+
+    boolean hasForcedGamemodeOverridePermission();
+
+    void setContainerDisplay(Text displayName);
+
 }

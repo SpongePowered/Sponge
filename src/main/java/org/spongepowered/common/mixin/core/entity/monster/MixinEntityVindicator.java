@@ -31,23 +31,35 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.monster.Vindicator;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeJohnnyData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.interfaces.entity.monster.IMixinVindicator;
 
 import java.util.List;
 
 @Mixin(EntityVindicator.class)
-public abstract class MixinEntityVindicator extends MixinEntityMob implements Vindicator {
+public abstract class MixinEntityVindicator extends MixinEntityMob implements IMixinVindicator, Vindicator {
 
     @Shadow private boolean johnny;
 
     @Override
     public Value<Boolean> johnny() {
-        return new SpongeValue<>(Keys.JOHNNY_VINDICATOR, false, this.johnny);
+        return new SpongeValue<>(Keys.IS_JOHNNY, false, this.johnny);
     }
 
     @Override
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
-        // TODO - add vindicatorData
+        manipulators.add(new SpongeJohnnyData(this.johnny));
+    }
+
+    @Override
+    public boolean isJohnny() {
+        return this.johnny;
+    }
+
+    @Override
+    public void setJohnny(boolean value) {
+        this.johnny = value;
     }
 }

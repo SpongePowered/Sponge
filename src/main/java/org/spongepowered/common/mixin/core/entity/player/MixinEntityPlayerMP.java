@@ -26,15 +26,18 @@ package org.spongepowered.common.mixin.core.entity.player;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.Sets;
+import net.minecraft.advancements.PlayerAdvancements;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.IMerchant;
 import net.minecraft.entity.ai.attributes.AttributeMap;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
@@ -47,6 +50,7 @@ import net.minecraft.init.SoundEvents;
 import net.minecraft.inventory.ContainerChest;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
+import net.minecraft.inventory.SlotCrafting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetHandlerPlayServer;
@@ -77,12 +81,16 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.GameType;
 import net.minecraft.world.IInteractionObject;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.advancement.Advancement;
+import org.spongepowered.api.advancement.AdvancementProgress;
+import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.data.key.Keys;
@@ -100,10 +108,12 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.tab.TabList;
+import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.entity.MoveEntityEvent;
+import org.spongepowered.api.event.cause.EventContextKey;
+import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.living.humanoid.ChangeGameModeEvent;
 import org.spongepowered.api.event.entity.living.humanoid.player.PlayerChangeClientSettingsEvent;
 import org.spongepowered.api.event.message.MessageChannelEvent;
@@ -114,6 +124,7 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.entity.Hotbar;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
+import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.network.PlayerConnection;
@@ -129,7 +140,10 @@ import org.spongepowered.api.text.chat.ChatTypes;
 import org.spongepowered.api.text.chat.ChatVisibility;
 import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.util.Tristate;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldBorder;
+import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -150,16 +164,16 @@ import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.effect.record.SpongeRecordType;
 import org.spongepowered.common.effect.sound.SoundEffectHelper;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.entity.player.PlayerKickHelper;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
+import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.interfaces.IMixinContainer;
@@ -167,12 +181,16 @@ import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
 import org.spongepowered.common.interfaces.IMixinServerScoreboard;
 import org.spongepowered.common.interfaces.IMixinSubject;
 import org.spongepowered.common.interfaces.IMixinTeam;
+import org.spongepowered.common.interfaces.advancement.IMixinAdvancement;
+import org.spongepowered.common.interfaces.advancement.IMixinPlayerAdvancements;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.interfaces.text.IMixinTitle;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.service.user.SpongeUserStorageService;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.chat.ChatUtil;
 import org.spongepowered.common.util.BookFaker;
@@ -183,13 +201,16 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.border.PlayerOwnBorderListener;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 
+import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -198,8 +219,9 @@ import javax.annotation.Nullable;
 public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements Player, IMixinSubject, IMixinEntityPlayerMP, IMixinCommandSender,
         IMixinCommandSource {
 
-    @Shadow @Final public MinecraftServer mcServer;
+    @Shadow @Final public MinecraftServer server;
     @Shadow @Final public PlayerInteractionManager interactionManager;
+    @Shadow @Final private PlayerAdvancements advancements;
     @Shadow private String language;
     @Shadow public NetHandlerPlayServer connection;
     @Shadow public int lastExperience;
@@ -224,6 +246,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow public int currentWindowId;
     @Shadow private void getNextWindowId() { }
 
+    @Shadow public abstract void closeContainer();
+
     public int newExperience = 0;
     public int newLevel = 0;
     public int newTotalExperience = 0;
@@ -232,7 +256,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     // Used to restore original item received in a packet after canceling an event
     private ItemStack packetItem;
 
-    private final User user = SpongeImpl.getGame().getServiceManager().provideUnchecked(UserStorageService.class).getOrCreate((GameProfile) getGameProfile());
+    private User user = getUserObject();
 
     private Set<SkinPart> skinParts = Sets.newHashSet();
     private int viewDistance;
@@ -274,6 +298,12 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         }
     }
 
+    private boolean keepInventory = false;
+
+    @Override
+    public boolean keepInventory() {
+        return this.keepInventory;
+    }
 
     /**
      * @author blood - May 12th, 2016
@@ -285,28 +315,26 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Overwrite
     public void onDeath(DamageSource cause) {
         // Sponge start
-        if (!SpongeCommonEventFactory.callDestructEntityEventDeath((EntityPlayerMP) (Object) this, cause)) {
+        final boolean isMainThread = Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
+        Optional<DestructEntityEvent.Death> optEvent = SpongeCommonEventFactory.callDestructEntityEventDeath((EntityPlayerMP) (Object) this, cause, isMainThread);
+        if (optEvent.map(Cancellable::isCancelled).orElse(true)) {
             return;
         }
+        DestructEntityEvent.Death event = optEvent.get();
+
         // Double check that the PhaseTracker is already capturing the Death phase
-        final PhaseTracker phaseTracker;
         final boolean tracksEntityDeaths;
-        if (!this.world.isRemote) {
-            phaseTracker = PhaseTracker.getInstance();
-            final PhaseData peek = phaseTracker.getCurrentPhaseData();
-            final IPhaseState state = peek.state;
+        if (isMainThread && !this.world.isRemote) {
+            final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
+            final IPhaseState<?> state = peek.state;
             tracksEntityDeaths = state.tracksEntityDeaths();
-            if (!tracksEntityDeaths) {
-                ;
-            }
         } else {
-            phaseTracker = null;
             tracksEntityDeaths = false;
         }
-        try (PhaseContext<?> context = tracksEntityDeaths ? EntityPhase.State.DEATH.createPhaseContext()
-            .source(this)
-            .setDamageSource((org.spongepowered.api.event.cause.entity.damage.source.DamageSource) cause)
-            .buildAndSwitch() : null) {
+        try (PhaseContext<?> context = createContextForDeath(cause, tracksEntityDeaths)) {
+            if (context != null) {
+                context.buildAndSwitch();
+            }
             // Sponge end
 
             boolean flag = this.world.getGameRules().getBoolean("showDeathMessages");
@@ -317,18 +345,21 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
                 if (team != null && team.getDeathMessageVisibility() != Team.EnumVisible.ALWAYS) {
                     if (team.getDeathMessageVisibility() == Team.EnumVisible.HIDE_FOR_OTHER_TEAMS) {
-                        this.mcServer.getPlayerList()
+                        this.server.getPlayerList()
                             .sendMessageToAllTeamMembers((EntityPlayerMP) (Object) this, this.getCombatTracker().getDeathMessage());
                     } else if (team.getDeathMessageVisibility() == Team.EnumVisible.HIDE_FOR_OWN_TEAM) {
-                        this.mcServer.getPlayerList()
+                        this.server.getPlayerList()
                             .sendMessageToTeamOrAllPlayers((EntityPlayerMP) (Object) this, this.getCombatTracker().getDeathMessage());
                     }
                 } else {
-                    this.mcServer.getPlayerList().sendMessage(this.getCombatTracker().getDeathMessage());
+                    this.server.getPlayerList().sendMessage(this.getCombatTracker().getDeathMessage());
                 }
             }
 
-            if (!this.world.getGameRules().getBoolean("keepInventory") && !this.isSpectator()) {
+            this.spawnShoulderEntities();
+
+            // Ignore keepInventory GameRule instead use keepInventory from Event
+            if (!event.getKeepInventory() && !this.isSpectator()) {
                 this.destroyVanishingCursedItems();
                 this.inventory.dropAllItems();
             }
@@ -355,7 +386,18 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             this.extinguish();
             this.setFlag(0, false);
             this.getCombatTracker().reset();
+
+            this.keepInventory = event.getKeepInventory();
         } // Sponge - brackets
+    }
+
+    @Nullable
+    private PhaseContext<?> createContextForDeath(DamageSource cause, boolean tracksEntityDeaths) {
+        return !tracksEntityDeaths
+               ? EntityPhase.State.DEATH.createPhaseContext()
+                   .source(this)
+                   .setDamageSource((org.spongepowered.api.event.cause.entity.damage.source.DamageSource) cause)
+               : null;
     }
 
     @Inject(method = "copyFrom", at = @At("HEAD"))
@@ -370,25 +412,41 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         }
     }
 
+    @Redirect(method = "copyFrom", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z"))
+    private boolean keepInventory(GameRules gameRules, String key, EntityPlayerMP corpse, boolean keepEverything) {
+        boolean keep = ((IMixinEntityPlayer) corpse).keepInventory(); // Override Keep Inventory GameRule?
+        if (!keep) {
+            // Copy corpse inventory to respawned player
+            this.inventory.copyInventory(corpse.inventory);
+            // Clear corpse so that mods do not copy from it again
+            corpse.inventory.clear();
+        }
+        return keep;
+    }
+
     @Override
     public IMixinWorldServer getMixinWorld() {
         return ((IMixinWorldServer) this.world);
     }
 
-    /**
+    /* // gabizou comment - Due to forge changes, this is now required to be injected/overwritten
+       // in either SpongeForge or SpongeVanilla respectively due to the signature change from Forge.
+       // The logic is still being processed as normal in vanilla, just the actual method calls are
+       // per project, and not in common.
      * @author blood - May 30th, 2016
      * @author gabizou - May 31st, 2016 - Update for 1.9.4 changes
      *
      * @reason - adjusted to support {@link MoveEntityEvent.Teleport}
      *
      * @param dimensionId The id of target dimension.
-     */
+     *
     @Nullable
     @Override
     @Overwrite
     public Entity changeDimension(int dimensionId) {
         return EntityUtil.teleportPlayerToDimension((EntityPlayerMP)(Object) this, dimensionId);
     }
+    */
 
     @Override
     public GameProfile getProfile() {
@@ -406,8 +464,22 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
+    public void forceRecreateUser() {
+        UserStorageService service = SpongeImpl.getGame().getServiceManager().provideUnchecked(UserStorageService.class);
+        if (!(service instanceof SpongeUserStorageService)) {
+            SpongeImpl.getLogger().error("Not re-creating User object for player {}, as UserStorageServer has been replaced with {}", this.getName(), service);
+        } else {
+            this.user = ((SpongeUserStorageService) service).forceRecreateUser((GameProfile) this.getGameProfile());
+        }
+    }
+
+    @Override
     public User getUserObject() {
-        return this.user;
+        final UserStorageService service = SpongeImpl.getGame().getServiceManager().provideUnchecked(UserStorageService.class);
+        if (this.isFake) { // Fake players are recogizeable through the field set up with isFake.
+            return service.getOrCreate(SpongeUserStorageService.FAKEPLAYER_PROFILE);
+        }
+        return service.getOrCreate((GameProfile) this.getGameProfile());
     }
 
     // Post before the player values are updated
@@ -455,6 +527,10 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Override
     public void sendMessage(ChatType type, Text message) {
+        if (this.isFake) {
+            // Don't bother sending messages to fake players
+            return;
+        }
         checkNotNull(type, "type");
         checkNotNull(message, "message");
 
@@ -477,26 +553,46 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
      */
     @Overwrite
     public void sendMessage(ITextComponent component) {
-        ChatUtil.sendMessage(component, MessageChannel.fixed(this), (CommandSource) this.mcServer, false);
+        if (this.isFake) {
+            // Don't bother sending messages to fake players
+            return;
+        }
+        ChatUtil.sendMessage(component, MessageChannel.fixed(this), (CommandSource) this.server, false);
     }
 
     @Override
     public void sendBookView(BookView bookView) {
+        if (this.isFake) {
+            // Don't bother sending messages to fake players
+            return;
+        }
         BookFaker.fakeBookView(bookView, this);
     }
 
     @Override
     public void sendTitle(Title title) {
+        if (this.isFake) {
+            // Don't bother sending messages to fake players
+            return;
+        }
         ((IMixinTitle) (Object) title).send((EntityPlayerMP) (Object) this);
     }
 
     @Override
     public void spawnParticles(ParticleEffect particleEffect, Vector3d position) {
+        if (this.isFake) {
+            // Don't bother sending messages to fake players
+            return;
+        }
         this.spawnParticles(particleEffect, position, Integer.MAX_VALUE);
     }
 
     @Override
     public void spawnParticles(ParticleEffect particleEffect, Vector3d position, int radius) {
+        if (this.isFake) {
+            // Don't bother sending messages to fake players
+            return;
+        }
         checkNotNull(particleEffect, "The particle effect cannot be null!");
         checkNotNull(position, "The position cannot be null");
         checkArgument(radius > 0, "The radius has to be greater then zero!");
@@ -525,13 +621,6 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Overwrite
     public String getPlayerIP() {
         return NetworkUtil.getHostString(this.connection.netManager.getRemoteAddress());
-    }
-
-    // this needs to be overridden from EntityPlayer so we can force a resend of the experience level
-    @Override
-    public void setLevel(int level) {
-        super.experienceLevel = level;
-        this.lastExperience = -1;
     }
 
     @Override
@@ -589,14 +678,54 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Override
     public Optional<Container> openInventory(Inventory inventory) throws IllegalArgumentException {
-        return Optional.ofNullable((Container) SpongeCommonEventFactory.displayContainer((EntityPlayerMP) (Object) this,
-                inventory));
+        return this.openInventory(inventory, null);
     }
 
+    @SuppressWarnings({"unchecked", "ConstantConditions", "rawtypes"})
+    @Override
+    public Optional<Container> openInventory(Inventory inventory, Text displayName) {
+        if (((IMixinContainer) this.openContainer).isInUse()) {
+            Cause cause = Sponge.getCauseStackManager().getCurrentCause();
+            SpongeImpl.getLogger().warn("This player is currently modifying an open container. This action will be delayed.");
+            Sponge.getScheduler().createTaskBuilder().delayTicks(0).execute(() -> {
+                try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                    cause.all().forEach(frame::pushCause);
+                    cause.getContext().asMap().forEach((key, value) -> frame.addContext(((EventContextKey) key), value));
+                    this.closeInventory(); // Cause close event first. So cursor item is not lost.
+                    this.openInventory(inventory); // Then open the inventory
+                }
+            }).submit(SpongeImpl.getPlugin());
+            return this.getOpenInventory();
+        }
+        return Optional.ofNullable((Container) SpongeCommonEventFactory.displayContainer((EntityPlayerMP) (Object) this, inventory, displayName));
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public boolean closeInventory() throws IllegalArgumentException {
-        ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(this.inventory.getItemStack());
-        return !SpongeCommonEventFactory.callInteractInventoryCloseEvent(this.openContainer, (EntityPlayerMP) (Object) this, cursor, cursor, false).isCancelled();
+        if (((IMixinContainer) this.openContainer).isInUse()) {
+            Cause cause = Sponge.getCauseStackManager().getCurrentCause();
+            SpongeImpl.getLogger().warn("This player is currently modifying an open container. This action will be delayed.");
+            Sponge.getScheduler().createTaskBuilder().delayTicks(0).execute(() -> {
+                try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                    cause.all().forEach(frame::pushCause);
+                    cause.getContext().asMap().forEach((key, value) -> frame.addContext(((EventContextKey) key), value));
+                    closeInventory();
+                }
+            }).submit(SpongeImpl.getPlugin());
+            return false;
+        }
+        // Create Close_Window to capture item drops
+        try (PhaseContext<?> ctx = PacketPhase.General.CLOSE_WINDOW.createPhaseContext()
+                .source(this)
+                .packetPlayer(((EntityPlayerMP)(Object) this))
+                .openContainer(this.openContainer)
+                // intentionally missing the lastCursor to not double throw close event
+                ) {
+            ctx.buildAndSwitch();
+            ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(this.inventory.getItemStack());
+            return !SpongeCommonEventFactory.callInteractInventoryCloseEvent(this.openContainer, (EntityPlayerMP) (Object) this, cursor, cursor, false).isCancelled();
+        }
     }
 
     @Override
@@ -606,12 +735,25 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         }
         ((IMixinServerScoreboard) this.spongeScoreboard).removePlayer((EntityPlayerMP) (Object) this, true);
         this.spongeScoreboard = scoreboard;
-        ((IMixinServerScoreboard) this.spongeScoreboard).addPlayer((EntityPlayerMP) (Object) this);
+        ((IMixinServerScoreboard) this.spongeScoreboard).addPlayer((EntityPlayerMP) (Object) this, true);
     }
 
     @Override
     public void initScoreboard() {
-        ((IMixinServerScoreboard) this.spongeScoreboard).addPlayer((EntityPlayerMP) (Object) this);
+        ((IMixinServerScoreboard) this.spongeScoreboard).addPlayer((EntityPlayerMP) (Object) this, true);
+    }
+
+    @Override
+    public void setScoreboardOnRespawn(Scoreboard scoreboard) {
+        this.spongeScoreboard = scoreboard;
+        ((IMixinServerScoreboard) this.spongeScoreboard).addPlayer((EntityPlayerMP) (Object) this, false);
+    }
+
+    @Override
+    public void removeScoreboardOnRespawn() {
+        ((IMixinServerScoreboard) this.spongeScoreboard).removePlayer((EntityPlayerMP) (Object) this, false);
+        // This player is being removed, so this is fine
+        this.spongeScoreboard = null;
     }
 
     @Override
@@ -783,11 +925,12 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Inject(method = "setGameType(Lnet/minecraft/world/GameType;)V", at = @At("HEAD"), cancellable = true)
+    @SuppressWarnings("unchecked")
     private void onSetGameType(GameType gameType, CallbackInfo ci) {
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(this);
+            frame.pushCause(this);
             ChangeGameModeEvent.TargetPlayer event =
-                    SpongeEventFactory.createChangeGameModeEventTargetPlayer(Sponge.getCauseStackManager().getCurrentCause(),
+                    SpongeEventFactory.createChangeGameModeEventTargetPlayer(frame.getCurrentCause(),
                             (GameMode) (Object) this.interactionManager.getGameType(), (GameMode) (Object) gameType, this);
             SpongeImpl.postEvent(event);
             if (event.isCancelled()) {
@@ -838,6 +981,15 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     public Value<Instant> lastPlayed() {
         return new SpongeValue<>(Keys.LAST_DATE_PLAYED, Instant.EPOCH, Instant.now());
+    }
+
+    @Override
+    public boolean hasPlayedBefore() {
+        final Instant instant = SpongePlayerDataHandler.getFirstJoined(this.getUniqueId()).get();
+        final Instant toTheMinute = instant.truncatedTo(ChronoUnit.MINUTES);
+        final Instant now = Instant.now().truncatedTo(ChronoUnit.MINUTES);
+        final Duration timeSinceFirstJoined = Duration.of(now.minusMillis(toTheMinute.toEpochMilli()).toEpochMilli(), ChronoUnit.MINUTES);
+        return timeSinceFirstJoined.getSeconds() > 0;
     }
 
     // TODO implement with contextual data
@@ -911,9 +1063,12 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         }
 
         // Add SlotTransaction to PlayerContainer
-        org.spongepowered.api.item.inventory.Slot slot = ((Inventory) this.inventoryContainer).query(Hotbar.class).query(SlotIndex.of(this.inventory.currentItem));
+        org.spongepowered.api.item.inventory.Slot slot = ((Inventory) this.inventoryContainer)
+                .query(QueryOperationTypes.INVENTORY_TYPE.of(Hotbar.class))
+                .query(QueryOperationTypes.INVENTORY_PROPERTY.of(SlotIndex.of(this.inventory.currentItem)));
+        final ItemStackSnapshot originalItem = ItemStackUtil.snapshotOf(currentItem);
         ItemStack itemToDrop = this.inventory.decrStackSize(this.inventory.currentItem, dropAll && !currentItem.isEmpty() ? currentItem.getCount() : 1);
-        ((IMixinContainer) this.inventoryContainer).getCapturedTransactions().add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(currentItem), ItemStackUtil.snapshotOf(this.inventory.getCurrentItem())));
+        ((IMixinContainer) this.inventoryContainer).getCapturedTransactions().add(new SlotTransaction(slot, originalItem, ItemStackUtil.snapshotOf(this.inventory.getCurrentItem())));
 
         return this.dropItem(itemToDrop, false, true);
     }
@@ -939,7 +1094,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         if (this.getHealth() > 0.0F) {
             return false;
         }
-        this.connection.player = this.mcServer.getPlayerList().recreatePlayerEntity((EntityPlayerMP) (Object) this, this.dimension, false);
+        this.connection.player = this.server.getPlayerList().recreatePlayerEntity((EntityPlayerMP) (Object) this, this.dimension, false);
         return true;
     }
 
@@ -1023,12 +1178,14 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
 
     /**
-     * @author Faithcaio - 31. 12. 2016
+     * Send SlotCrafting updates to client for custom recipes.
+     *
+     * @author Faithcaio - 31.12.2016
      * @reason Vanilla is not updating the Client when Slot is SlotCrafting - this is an issue when plugins register new recipes
      */
-    @Overwrite
-    public void sendSlotContents(net.minecraft.inventory.Container containerToSend, int slotInd, ItemStack stack) {
-        if (!this.isChangingQuantityOnly) {
+    @Inject(method = "sendSlotContents", at = @At("HEAD"))
+    private void sendSlotContents(net.minecraft.inventory.Container containerToSend, int slotInd, ItemStack stack, CallbackInfo ci) {
+        if (containerToSend.getSlot(slotInd) instanceof SlotCrafting) {
             this.connection.sendPacket(new SPacketSetSlot(containerToSend.windowId, slotInd, stack));
         }
     }
@@ -1154,5 +1311,85 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     public CooldownTracker getCooldownTracker() {
         return (CooldownTracker) shadow$getCooldownTracker();
+    }
+
+    @Redirect(method = "readEntityFromNBT", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getForceGamemode()Z"))
+    private boolean onCheckForcedGameMode(MinecraftServer minecraftServer) {
+        return minecraftServer.getForceGamemode() && !hasForcedGamemodeOverridePermission();
+    }
+
+    @Override
+    public boolean hasForcedGamemodeOverridePermission() {
+        return this.hasPermission(getActiveContexts(), "minecraft.force-gamemode.override");
+    }
+
+    @Override
+    public AdvancementProgress getProgress(Advancement advancement) {
+        checkNotNull(advancement, "advancement");
+        checkState(((IMixinAdvancement) advancement).isRegistered(), "The advancement must be registered");
+        return (AdvancementProgress) this.advancements.getProgress((net.minecraft.advancements.Advancement) advancement);
+    }
+
+    @Override
+    public Collection<AdvancementTree> getUnlockedAdvancementTrees() {
+        return ((IMixinPlayerAdvancements) this.advancements).getAdvancementTrees();
+    }
+
+    @Override
+    public void remove() {
+        throw new UnsupportedOperationException("This is an internal method not intended for use with Players " +
+                "as it causes the player to be placed into an undefined state. " +
+                "Consider putting them through the normal death process instead.");
+    }
+
+    @Override
+    public Optional<UUID> getWorldUniqueId() {
+        return Optional.of(this.getWorld().getUniqueId());
+    }
+
+    @Override
+    public boolean setLocation(Vector3d position, UUID world) {
+        WorldProperties prop = Sponge.getServer().getWorldProperties(world).orElseThrow(() -> new IllegalArgumentException("Invalid World: No world found for UUID"));
+        World loaded = Sponge.getServer().loadWorld(prop).orElseThrow(() -> new IllegalArgumentException("Invalid World: Could not load world for UUID"));
+        return this.setLocation(new Location<>(loaded, position));
+    }
+
+    @Nullable private Text displayName = null;
+
+    @Override
+    public void setContainerDisplay(Text displayName) {
+        this.displayName = displayName;
+    }
+
+    @Redirect(method = "displayGUIChest", at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/IInventory;getDisplayName()Lnet/minecraft/util/text/ITextComponent;"))
+    private ITextComponent onGetDisplayName(IInventory chestInventory) {
+        if (this.displayName == null) {
+            return chestInventory.getDisplayName();
+        }
+        return new TextComponentString(SpongeTexts.toLegacy(this.displayName));
+    }
+
+    @Redirect(method = "displayGui", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/IInteractionObject;getDisplayName()Lnet/minecraft/util/text/ITextComponent;"))
+    private ITextComponent onGetDisplayName2(IInteractionObject guiOwner) {
+        if (this.displayName == null) {
+            return guiOwner.getDisplayName();
+        }
+        return new TextComponentString(SpongeTexts.toLegacy(this.displayName));
+    }
+
+    @Redirect(method = "openGuiHorseInventory", at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/IInventory;getDisplayName()Lnet/minecraft/util/text/ITextComponent;"))
+    private ITextComponent onGetDisplayName3(IInventory inventoryIn) {
+        if (this.displayName == null) {
+            return inventoryIn.getDisplayName();
+        }
+        return new TextComponentString(SpongeTexts.toLegacy(this.displayName));
+    }
+
+    @Redirect(method = "displayVillagerTradeGui", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/IMerchant;getDisplayName()Lnet/minecraft/util/text/ITextComponent;"))
+    private ITextComponent onGetDisplayName4(IMerchant villager) {
+        if (this.displayName == null) {
+            return villager.getDisplayName();
+        }
+        return new TextComponentString(SpongeTexts.toLegacy(this.displayName));
     }
 }

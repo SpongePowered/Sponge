@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking.phase.packet;
 
 import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.common.interfaces.IMixinContainer;
 
 public class InventoryPacketContext extends PacketContext<InventoryPacketContext> {
 
@@ -35,7 +36,7 @@ public class InventoryPacketContext extends PacketContext<InventoryPacketContext
     }
 
     public int getHighlightedSlotId() {
-        return highlightedSlotId;
+        return this.highlightedSlotId;
     }
 
     public InventoryPacketContext setHighlightedSlotId(int highlightedSlotId) {
@@ -44,8 +45,52 @@ public class InventoryPacketContext extends PacketContext<InventoryPacketContext
     }
 
     @Override
-    public PrettyPrinter printCustom(PrettyPrinter printer) {
-        return super.printCustom(printer)
-            .add("    - %s: %s", "HighlightedSlotId", this.highlightedSlotId);
+    public boolean hasCaptures() {
+        if (!((IMixinContainer) this.packetPlayer.openContainer).getPreviewTransactions().isEmpty()) {
+            return true;
+        }
+        if (!((IMixinContainer) this.packetPlayer.openContainer).getCapturedTransactions().isEmpty()) {
+            return true;
+        }
+        if (this.state == PacketPhase.Inventory.DROP_ITEMS) {
+            return true;
+        }
+        if (this.state == PacketPhase.Inventory.DROP_ITEM_OUTSIDE_WINDOW) {
+            return true;
+        }
+        if (this.state == PacketPhase.Inventory.OPEN_INVENTORY) {
+            return true;
+        }
+        if (this.state == PacketPhase.Inventory.PLACE_RECIPE) {
+            return true;
+        }
+        if (this.state == PacketPhase.Inventory.SWAP_HAND_ITEMS) {
+            return true;
+        }
+        if (this.state == PacketPhase.Inventory.SWITCH_HOTBAR_SCROLL) {
+            return true;
+        }
+        // Fire events even without captures
+        if (this.state == PacketPhase.Inventory.PRIMARY_INVENTORY_CLICK
+         || this.state == PacketPhase.Inventory.SECONDARY_INVENTORY_CLICK
+         || this.state == PacketPhase.Inventory.MIDDLE_INVENTORY_CLICK
+         || this.state == PacketPhase.Inventory.DROP_ITEM_WITH_HOTKEY
+         || this.state == PacketPhase.Inventory.PRIMARY_INVENTORY_SHIFT_CLICK
+         || this.state == PacketPhase.Inventory.SECONDARY_INVENTORY_SHIFT_CLICK
+         || this.state == PacketPhase.Inventory.SWITCH_HOTBAR_NUMBER_PRESS
+         || this.state == PacketPhase.Inventory.DROP_ITEM_OUTSIDE_WINDOW_NOOP
+        ) {
+            return true;
+        }
+        ((IMixinContainer) this.packetPlayer.openContainer).setCaptureInventory(false);
+
+        return super.hasCaptures();
+    }
+
+    @Override
+    public PrettyPrinter printCustom(PrettyPrinter printer, int indent) {
+        String s = String.format("%1$"+indent+"s", "");
+        return super.printCustom(printer, indent)
+            .add(s + "- %s: %s", "HighlightedSlotId", this.highlightedSlotId);
     }
 }

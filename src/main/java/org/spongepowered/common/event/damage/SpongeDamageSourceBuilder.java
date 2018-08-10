@@ -53,6 +53,9 @@ public class SpongeDamageSourceBuilder extends AbstractDamageSourceBuilder<Damag
         if (this.explosion) {
             source.setExplosion();
         }
+        if (this.exhaustion != null) {
+            source.hungerDamage = this.exhaustion.floatValue();
+        }
         return (DamageSource) source;
     }
 

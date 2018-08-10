@@ -65,6 +65,8 @@ public abstract class MixinAbstractDamageSource implements DamageSource {
         if (doesAffectCreative()) {
             ((SpongeCommonDamageSource) (Object) this).canHarmInCreative();
         }
+        // Sets exhaustion last as to allow control if the builder specified a custom exhaustion value
+        ((SpongeCommonDamageSource) (Object) this).hungerDamage = (float) getExhaustion();
     }
 
 }

@@ -31,21 +31,30 @@ import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.tracking.GeneralizedContext;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.world.WorldUtil;
 
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 final class BlockDecayPhaseState extends BlockPhaseState {
+
+    public final BiConsumer<StackFrame, GeneralizedContext> BLOCK_DECAY_MODIFIER = super.getFrameModifier().andThen((frame, context) -> {
+        final LocatableBlock locatable = context.getSource(LocatableBlock.class)
+            .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over at a location!", context));
+        frame.pushCause(locatable);
+    });
 
     BlockDecayPhaseState() {
     }
@@ -56,6 +65,11 @@ final class BlockDecayPhaseState extends BlockPhaseState {
             .addCaptures();
     }
 
+    @Override
+    public BiConsumer<StackFrame, GeneralizedContext> getFrameModifier() {
+        return this.BLOCK_DECAY_MODIFIER;
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public void unwind(GeneralizedContext context) {
@@ -64,44 +78,39 @@ final class BlockDecayPhaseState extends BlockPhaseState {
         final Location<World> worldLocation = locatable.getLocation();
         final IMixinWorldServer mixinWorld = ((IMixinWorldServer) worldLocation.getExtent());
 
+        context.getCapturedBlockSupplier()
+            .acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
+
         context.getCapturedItemsSupplier()
-                .acceptAndClearIfNotEmpty(items -> {
-                    // Nothing happens here yet for some reason.
-                });
-        try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(locatable);
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
-            context.addNotifierAndOwnerToCauseStack();
-            context.getCapturedEntitySupplier()
-                    .acceptAndClearIfNotEmpty(entities -> {
-                        final SpawnEntityEvent event =
-                                SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
-                        SpongeImpl.postEvent(event);
-                        if (!event.isCancelled()) {
-                            for (Entity entity : event.getEntities()) {
-                                EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
-                            }
-                        }
-                    });
-            context.getCapturedBlockSupplier()
-                    .acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
-            context.getCapturedItemStackSupplier()
-                    .acceptAndClearIfNotEmpty(drops -> {
-                        final List<EntityItem> items = drops.stream()
-                                .map(drop -> drop.create(mixinWorld.asMinecraftWorld()))
-                                .collect(Collectors.toList());
-                        final List<Entity> entities = (List<Entity>) (List<?>) items;
-                        if (!entities.isEmpty()) {
-                            DropItemEvent.Custom event =
-                                    SpongeEventFactory.createDropItemEventCustom(Sponge.getCauseStackManager().getCurrentCause(), entities);
-                            SpongeImpl.postEvent(event);
-                            if (!event.isCancelled()) {
-                                for (Entity droppedItem : event.getEntities()) {
-                                    mixinWorld.forceSpawnEntity(droppedItem);
-                                }
-                            }
-                        }
-                    });
-        }
+            .acceptAndClearIfNotEmpty(items -> {
+                final List<Entity> entities = items.stream()
+                    .map(EntityUtil::fromNative)
+                    .collect(Collectors.toList());
+                Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+                SpongeCommonEventFactory.callSpawnEntity(entities, context);
+            });
+        context.getCapturedEntitySupplier()
+            .acceptAndClearIfNotEmpty(entities -> {
+                Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+                SpongeCommonEventFactory.callSpawnEntity(entities, context);
+
+            });
+        context.getCapturedItemStackSupplier()
+            .acceptAndClearIfNotEmpty(drops -> {
+                final List<EntityItem> items = drops.stream()
+                    .map(drop -> drop.create(WorldUtil.asNative(mixinWorld)))
+                    .collect(Collectors.toList());
+                final List<Entity> entities = (List<Entity>) (List<?>) items;
+                if (!entities.isEmpty()) {
+                    DropItemEvent.Custom
+                        event =
+                        SpongeEventFactory.createDropItemEventCustom(Sponge.getCauseStackManager().getCurrentCause(), entities);
+                    SpongeImpl.postEvent(event);
+                    if (!event.isCancelled()) {
+                        EntityUtil.processEntitySpawnsFromEvent(context, event);
+                    }
+                }
+            });
+
     }
 }

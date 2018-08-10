@@ -26,19 +26,25 @@ package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.block.BlockQuartz;
 import org.spongepowered.api.data.type.QuartzType;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.text.translation.SpongeTranslation;
+
+import javax.annotation.Nullable;
 
 @Mixin(BlockQuartz.EnumType.class)
 @Implements(@Interface(iface = QuartzType.class, prefix = "quartz$"))
 public abstract class MixinBlockQuartzEnumType {
 
     @Shadow public abstract String shadow$getName();
-    @Shadow @Final private String unlocalizedName;
+    @Shadow @Final private String translationKey;
+
+    @Nullable private Translation translation;
 
     public String quartz$getId() {
         return "minecraft:" + shadow$getName();
@@ -46,6 +52,14 @@ public abstract class MixinBlockQuartzEnumType {
 
     @Intrinsic
     public String quartz$getName() {
-        return this.unlocalizedName;
+        return this.translationKey;
     }
+
+    public Translation quartz$getTranslation() {
+        if (this.translation == null) {
+            this.translation = new SpongeTranslation("tile.quartzBlock." + this.translationKey + ".name");
+        }
+        return this.translation;
+    }
+
 }

@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.core.world.chunk.storage;
 
 import com.flowpowered.math.vector.Vector3d;
-import com.google.common.collect.Maps;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.item.EntityMinecart;
@@ -71,6 +70,7 @@ import org.spongepowered.common.util.QueuedChunk;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -128,13 +128,13 @@ public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
     }
 
     @Inject(method = "readChunkFromNBT", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/NBTTagCompound;getIntArray(Ljava/lang/String;)[I", shift = At.Shift.BEFORE), locals = LocalCapture.CAPTURE_FAILHARD)
-    public void onReadChunkFromNBT(World worldIn, NBTTagCompound compound, CallbackInfoReturnable<net.minecraft.world.chunk.Chunk> ci, int chunkX,
-            int chunkZ, net.minecraft.world.chunk.Chunk chunkIn) {
+    private void onReadChunkFromNBT(World worldIn, NBTTagCompound compound, CallbackInfoReturnable<net.minecraft.world.chunk.Chunk> ci, int chunkX,
+      int chunkZ, net.minecraft.world.chunk.Chunk chunkIn) {
         if (compound.hasKey(NbtDataUtil.SPONGE_DATA)) {
-            Map<Integer, PlayerTracker> trackedIntPlayerPositions = Maps.newHashMap();
-            Map<Short, PlayerTracker> trackedShortPlayerPositions = Maps.newHashMap();
-            NBTTagList positions = compound.getCompoundTag(NbtDataUtil.SPONGE_DATA).getTagList(NbtDataUtil.SPONGE_BLOCK_POS_TABLE, 10);
-            IMixinChunk chunk = (IMixinChunk) chunkIn;
+            final Map<Integer, PlayerTracker> trackedIntPlayerPositions = new HashMap<>();
+            final Map<Short, PlayerTracker> trackedShortPlayerPositions = new HashMap<>();
+            final NBTTagList positions = compound.getCompoundTag(NbtDataUtil.SPONGE_DATA).getTagList(NbtDataUtil.SPONGE_BLOCK_POS_TABLE, 10);
+            final IMixinChunk chunk = (IMixinChunk) chunkIn;
             for (int i = 0; i < positions.tagCount(); i++) {
                 NBTTagCompound valueNbt = positions.getCompoundTagAt(i);
                 boolean isShortPos = valueNbt.hasKey("pos");
@@ -167,10 +167,6 @@ public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
      *         Attempts to redirect EntityList spawning an entity. Forge
      *         rewrites this method to handle it in a different method, so this
      *         will not actually inject in SpongeForge.
-     *
-     * @param compound
-     * @param world
-     * @return
      */
     @Redirect(method = "readChunkEntity", at = @At(value = "INVOKE", target = ENTITY_LIST_CREATE_FROM_NBT), require = 0, expect = 0)
     private static Entity onReadChunkEntity(NBTTagCompound compound, World world, Chunk chunk) {
@@ -193,8 +189,8 @@ public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
         Vector3d rotation = new Vector3d(rotationList.getFloatAt(0), rotationList.getFloatAt(1), 0);
         Transform<org.spongepowered.api.world.World> transform = new Transform<>((org.spongepowered.api.world.World) world, position, rotation);
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.CHUNK_LOAD);
-            ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), type, transform);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.CHUNK_LOAD);
+            ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), type, transform);
             SpongeImpl.postEvent(event);
             if (event.isCancelled()) {
                 return null;

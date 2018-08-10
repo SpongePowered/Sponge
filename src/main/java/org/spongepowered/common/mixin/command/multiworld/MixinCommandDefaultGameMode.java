@@ -33,13 +33,16 @@ import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 
 @Mixin(CommandDefaultGameMode.class)
 public abstract class MixinCommandDefaultGameMode  {
 
     /**
      * @author Minecrell - September 28, 2016
+     * @author dualspiral - December 29, 2017
      * @reason Change game mode only in the world the command was executed in
+     *         Only apply game mode to those without the override permission
      */
     @Redirect(method = "execute", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/CommandDefaultGameMode;"
             + "setDefaultGameType(Lnet/minecraft/world/GameType;Lnet/minecraft/server/MinecraftServer;)V"))
@@ -51,7 +54,9 @@ public abstract class MixinCommandDefaultGameMode  {
 
         if (server.getForceGamemode()) {
             for (EntityPlayer player : world.playerEntities) {
-                player.setGameType(type);
+                if (!((IMixinEntityPlayerMP) player).hasForcedGamemodeOverridePermission()) {
+                    player.setGameType(type);
+                }
             }
         }
     }

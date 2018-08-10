@@ -26,7 +26,9 @@ package org.spongepowered.common;
 
 import static com.google.common.base.Preconditions.checkState;
 import static org.spongepowered.api.Platform.Component.IMPLEMENTATION;
+import static org.spongepowered.common.config.SpongeConfig.Type.CUSTOM_DATA;
 import static org.spongepowered.common.config.SpongeConfig.Type.GLOBAL;
+import static org.spongepowered.common.config.SpongeConfig.Type.TRACKER;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -39,11 +41,13 @@ import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.game.state.GameStateEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.config.SpongeConfigSaveManager;
+import org.spongepowered.common.config.type.CustomDataConfig;
 import org.spongepowered.common.config.type.GlobalConfig;
+import org.spongepowered.common.config.type.TrackerConfig;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import org.spongepowered.common.event.SpongeCauseStackManager;
@@ -80,16 +84,17 @@ public final class SpongeImpl {
 
     // Can't @Inject these because they are referenced before everything is initialized
     @Nullable private static SpongeConfig<GlobalConfig> globalConfig;
+    @Nullable private static SpongeConfig<TrackerConfig> trackerConfig;
+    @Nullable private static SpongeConfig<CustomDataConfig> customDataConfig;
+    @Nullable private static SpongeConfigSaveManager configSaveManager;
     @Nullable private static PluginContainer minecraftPlugin;
 
-    @Inject private static SpongeGame game;
-
-    @Inject private static SpongeGameRegistry registry;
-    @Inject private static SpongeDataManager dataManager;
-    @Inject private static SpongePropertyRegistry propertyRegistry;
-
-    @Inject private static SpongeScheduler scheduler;
-    @Inject private static SpongeCauseStackManager causeStackManager;
+    @Inject @Nullable private static SpongeGame game;
+    @Inject @Nullable private static SpongeGameRegistry registry;
+    @Inject @Nullable private static SpongeDataManager dataManager;
+    @Inject @Nullable private static SpongePropertyRegistry propertyRegistry;
+    @Inject @Nullable private static SpongeScheduler scheduler;
+    @Inject @Nullable private static SpongeCauseStackManager causeStackManager;
 
     private static final List<PluginContainer> internalPlugins = new ArrayList<>();
 
@@ -182,12 +187,34 @@ public final class SpongeImpl {
         return SpongeLaunch.getSpongeConfigDir();
     }
 
+    public static SpongeConfigSaveManager getConfigSaveManager() {
+        if (configSaveManager == null) {
+            configSaveManager = new SpongeConfigSaveManager();
+        }
+
+        return configSaveManager;
+    }
+
     public static SpongeConfig<GlobalConfig> getGlobalConfig() {
         if (globalConfig == null) {
-            globalConfig = new SpongeConfig<>(GLOBAL, getSpongeConfigDir().resolve("global.conf"), ECOSYSTEM_ID);
+            globalConfig = new SpongeConfig<>(GLOBAL, getSpongeConfigDir().resolve("global.conf"), ECOSYSTEM_ID, null);
         }
 
         return globalConfig;
+    }
+
+    public static SpongeConfig<CustomDataConfig> getDataConfig() {
+        if (customDataConfig == null) {
+            customDataConfig = new SpongeConfig<>(CUSTOM_DATA, getSpongeConfigDir().resolve("custom_data.conf"), ECOSYSTEM_ID, null);
+        }
+        return customDataConfig;
+    }
+
+    public static SpongeConfig<TrackerConfig> getTrackerConfig() {
+        if (trackerConfig == null) {
+            trackerConfig = new SpongeConfig<>(TRACKER, getSpongeConfigDir().resolve("tracker.conf"), ECOSYSTEM_ID, null);
+        }
+        return trackerConfig;
     }
 
     public static List<PluginContainer> getInternalPlugins() {
@@ -198,10 +225,18 @@ public final class SpongeImpl {
         return Sponge.getEventManager().post(event);
     }
 
+    public static boolean postEvent(Event event, boolean allowClient) {
+        // TODO quick and dirty fix (cant cast in UnitTest)
+        if (Sponge.getEventManager() instanceof SpongeEventManager) {
+            return ((SpongeEventManager) Sponge.getEventManager()).post(event, allowClient);
+        }
+        return true;
+    }
+
     public static void postState(GameState state, GameStateEvent event) {
         check(game);
         game.setState(state);
-        ((SpongeEventManager) game.getEventManager()).post(event, true);
+        postEvent(event, true);
     }
 
     public static void postShutdownEvents() {
@@ -228,4 +263,5 @@ public final class SpongeImpl {
 
         return containerOptional.get();
     }
+
 }

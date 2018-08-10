@@ -28,10 +28,12 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.profile.GameProfileCache;
+import org.spongepowered.api.profile.ProfileNotFoundException;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 
 public abstract class NameQuery<T> extends Query<T> {
 
@@ -50,7 +52,11 @@ public abstract class NameQuery<T> extends Query<T> {
 
         @Override
         public GameProfile call() throws Exception {
-            return this.fromNames(Collections.singleton(this.name)).get(0);
+            List<GameProfile> profiles = this.fromNames(Collections.singleton(this.name));
+            if (profiles.isEmpty()) {
+                throw new ProfileNotFoundException("Failed to find profile for name " + this.name);
+            }
+            return profiles.get(0);
         }
     }
 

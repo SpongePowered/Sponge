@@ -33,19 +33,20 @@ import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
+import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-public class DefaultEmptyLens<TInventory> extends ObservableLens<TInventory, ItemStack> {
+public class DefaultEmptyLens implements Lens {
 
     private static final IntSet EMPTY_SLOT_SET = IntSets.EMPTY_SET;
     
-    protected final InventoryAdapter<TInventory, ItemStack> adapter;
+    protected final InventoryAdapter adapter;
     
-    public DefaultEmptyLens(InventoryAdapter<TInventory, ItemStack> adapter) {
+    public DefaultEmptyLens(InventoryAdapter adapter) {
         this.adapter = adapter;
     }
 
@@ -55,12 +56,12 @@ public class DefaultEmptyLens<TInventory> extends ObservableLens<TInventory, Ite
     }
 
     @Override
-    public InventoryAdapter<TInventory, ItemStack> getAdapter(Fabric<TInventory> inv, Inventory parent) {
+    public InventoryAdapter getAdapter(Fabric inv, Inventory parent) {
         return this.adapter;
     }
     
     @Override
-    public Translation getName(Fabric<TInventory> inv) {
+    public Translation getName(Fabric inv) {
         return inv.getDisplayName();
     }
 
@@ -70,41 +71,37 @@ public class DefaultEmptyLens<TInventory> extends ObservableLens<TInventory, Ite
     }
 
     @Override
-    public int getRealIndex(Fabric<TInventory> inv, int ordinal) {
+    public int getRealIndex(Fabric inv, int ordinal) {
         return -1;
     }
 
     @Override
-    public ItemStack getStack(Fabric<TInventory> inv, int ordinal) {
+    public ItemStack getStack(Fabric inv, int ordinal) {
         return ItemStack.EMPTY;
     }
     
     @Override
-    public boolean setStack(Fabric<TInventory> inv, int index, ItemStack stack) {
+    public boolean setStack(Fabric inv, int index, ItemStack stack) {
         return false;
     }
 
     @Override
-    public int getMaxStackSize(Fabric<TInventory> inv) {
+    public int getMaxStackSize(Fabric inv) {
         return 0;
     }
 
     @Override
-    public List<Lens<TInventory, ItemStack>> getChildren() {
-        return Collections.<Lens<TInventory, ItemStack>>emptyList();
+    public List<Lens> getChildren() {
+        return Collections.<Lens>emptyList();
     }
 
     @Override
-    public List<Lens<TInventory, ItemStack>> getSpanningChildren() {
-        return Collections.<Lens<TInventory, ItemStack>>emptyList();
+    public List<Lens> getSpanningChildren() {
+        return Collections.<Lens>emptyList();
     }
 
     @Override
-    public void invalidate(Fabric<TInventory> inv) {
-    }
-
-    @Override
-    public Lens<TInventory, ItemStack> getLens(int index) {
+    public Lens getLens(int index) {
         return null;
     }
 
@@ -114,17 +111,17 @@ public class DefaultEmptyLens<TInventory> extends ObservableLens<TInventory, Ite
     }
     
     @Override
-    public Collection<InventoryProperty<?, ?>> getProperties(Lens<TInventory, ItemStack> child) {
+    public Collection<InventoryProperty<?, ?>> getProperties(Lens child) {
         return Collections.<InventoryProperty<?, ?>>emptyList();
     }
 
     @Override
-    public boolean has(Lens<TInventory, ItemStack> lens) {
+    public boolean has(Lens lens) {
         return false;
     }
 
     @Override
-    public boolean isSubsetOf(Collection<Lens<TInventory, ItemStack>> c) {
+    public boolean isSubsetOf(Collection<Lens> c) {
         return true;
     }
     
@@ -139,13 +136,17 @@ public class DefaultEmptyLens<TInventory> extends ObservableLens<TInventory, Ite
     }
     
     @Override
-    public Lens<TInventory, ItemStack> getParent() {
+    public Lens getParent() {
         return null;
     }
 
     @Override
-    public Iterator<Lens<TInventory, ItemStack>> iterator() {
+    public Iterator<Lens> iterator() {
         // TODO 
+        return null;
+    }
+
+    public SlotLens getSlotLens(int ordinal) {
         return null;
     }
 

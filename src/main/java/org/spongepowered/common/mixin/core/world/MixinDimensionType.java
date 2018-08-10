@@ -62,6 +62,7 @@ public abstract class MixinDimensionType implements IMixinDimensionType {
     private SpongeConfig<DimensionConfig> config;
     private volatile Context context;
     private boolean generateSpawnOnLoad;
+    private boolean loadSpawn;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstruct(String enumName, int ordinal, int idIn, String nameIn, String suffixIn, Class <? extends WorldProvider > clazzIn,
@@ -70,8 +71,9 @@ public abstract class MixinDimensionType implements IMixinDimensionType {
         this.enumName = dimName;
         this.modId = SpongeImplHooks.getModIdFromClass(clazzIn);
         this.configPath = SpongeImpl.getSpongeConfigDir().resolve("worlds").resolve(this.modId).resolve(this.enumName);
-        this.config = new SpongeConfig<>(SpongeConfig.Type.DIMENSION, this.configPath.resolve("dimension.conf"), SpongeImpl.ECOSYSTEM_ID);
+        this.config = new SpongeConfig<>(SpongeConfig.Type.DIMENSION, this.configPath.resolve("dimension.conf"), SpongeImpl.ECOSYSTEM_ID, SpongeImpl.getGlobalConfig());
         this.generateSpawnOnLoad = idIn == 0;
+        this.loadSpawn = this.generateSpawnOnLoad;
         this.config.getConfig().getWorld().setGenerateSpawnOnLoad(this.generateSpawnOnLoad);
         this.sanitizedId = this.modId + ":" + dimName;
         String contextId = this.sanitizedId.replace(":", ".");
@@ -84,6 +86,16 @@ public abstract class MixinDimensionType implements IMixinDimensionType {
     @Override
     public boolean shouldGenerateSpawnOnLoad() {
         return this.generateSpawnOnLoad;
+    }
+
+    @Override
+    public boolean shouldLoadSpawn() {
+        return this.loadSpawn;
+    }
+
+    @Override
+    public void setShouldLoadSpawn(boolean keepSpawnLoaded) {
+        this.loadSpawn = keepSpawnLoaded;
     }
 
     public String dimensionType$getId() {

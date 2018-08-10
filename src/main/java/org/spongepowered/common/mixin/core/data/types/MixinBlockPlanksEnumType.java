@@ -42,7 +42,7 @@ import javax.annotation.Nullable;
 public abstract class MixinBlockPlanksEnumType implements TreeType {
 
     @Shadow @Final private String name;
-    @Shadow @Final private String unlocalizedName;
+    @Shadow @Final private String translationKey;
 
     @Nullable private Translation translation;
 
@@ -52,13 +52,13 @@ public abstract class MixinBlockPlanksEnumType implements TreeType {
 
     @Intrinsic
     public String tree$getName() {
-        return this.unlocalizedName;
+        return this.translationKey;
     }
 
     public Translation tree$getTranslation() {
         // Maybe move this to a @Inject at the end of the constructor
         if (this.translation == null) {
-            this.translation = new SpongeTranslation("tile.wood." + this.unlocalizedName + "name");
+            this.translation = new SpongeTranslation("tile.wood." + this.translationKey + ".name");
         }
         return this.translation;
     }

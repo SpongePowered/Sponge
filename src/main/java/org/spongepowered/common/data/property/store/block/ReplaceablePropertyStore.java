@@ -34,6 +34,8 @@ import org.spongepowered.common.util.VecHelper;
 
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 public class ReplaceablePropertyStore extends AbstractBlockPropertyStore<ReplaceableProperty> {
 
     private static final ReplaceableProperty TRUE = new ReplaceableProperty(true);
@@ -44,7 +46,7 @@ public class ReplaceablePropertyStore extends AbstractBlockPropertyStore<Replace
     }
 
     @Override
-    protected Optional<ReplaceableProperty> getForBlock(IBlockState block) {
+    protected Optional<ReplaceableProperty> getForBlock(@Nullable Location<?> location, IBlockState block) {
         return Optional.of(block.getMaterial().isReplaceable() ? TRUE : FALSE);
     }
 

@@ -33,21 +33,22 @@ import org.spongepowered.common.item.inventory.query.Result;
 
 import java.util.Collection;
 
-public interface QueryResult<TInventory, TStack> extends Result<TInventory, TStack> {
+public interface QueryResult extends Result {
     
-    abstract class QueryLens<TInventory, TStack> extends AbstractLens<TInventory, TStack> {
+    abstract class QueryLens extends AbstractLens {
         
-        private final MutableLensSet<TInventory, TStack> resultSet;
+        private final MutableLensSet resultSet;
 
-        public QueryLens(int size, MutableLensSet<TInventory, TStack> resultSet) {
+        public QueryLens(int size, MutableLensSet resultSet) {
             super(0, size, QueryResult.class, null);
             this.resultSet = resultSet;
             this.init(null);
         }
 
+        @SuppressWarnings("rawtypes")
         @Override
-        protected void init(SlotProvider<TInventory, TStack> slots) {
-            for (Lens<TInventory, TStack> result : this.resultSet) {
+        protected void init(SlotProvider slots) {
+            for (Lens result : this.resultSet) {
                 Collection<InventoryProperty<?, ?>> properties = this.resultSet.getProperties(result);
                 this.addSpanningChild(result, properties.toArray(new InventoryProperty[0]));
             }

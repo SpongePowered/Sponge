@@ -33,42 +33,59 @@ import java.io.IOException;
 @ConfigSerializable
 public class OptimizationCategory extends ConfigCategory {
 
-    private static final String PRE_MERGE_COMMENT = "If enabled, block item drops are pre-processed to avoid \n"
-                                                    + "having to spawn extra entities that will be merged post spawning.\n"
-                                                    + "Usually, Sponge is smart enough to determine when to attempt an item pre-merge\n"
-                                                    + "and when not to, however, in certain cases, some mods rely on items not being\n"
-                                                    + "pre-merged and actually spawned, in which case, the items will flow right through\n"
-                                                    + "without being merged.";
+    @Setting(value = "drops-pre-merge", comment = "If 'true', block item drops are pre-processed to avoid \n"
+                                                  + "having to spawn extra entities that will be merged post spawning. \n"
+                                                  + "Usually, Sponge is smart enough to determine when to attempt an item pre-merge \n"
+                                                  + "and when not to, however, in certain cases, some mods rely on items not being \n"
+                                                  + "pre-merged and actually spawned, in which case, the items will flow right through \n"
+                                                  + "without being merged.")
+    private boolean preItemDropMerge = false;
 
-    @Setting(value = "drops-pre-merge", comment = PRE_MERGE_COMMENT)
-    private boolean preItemDropMerge;
-
-    @Setting(value = "cache-tameable-owners", comment = "Caches tameable entities owners to avoid constant lookups against data watchers. If mods cause issue, disable.")
+    @Setting(value = "cache-tameable-owners", comment = "Caches tameable entities owners to avoid constant lookups against data watchers. If mods \n"
+                                                      + "cause issues, disable this.")
     private boolean cacheTameableOwners = true;
 
-    @Setting(value = "structure-saving", comment = "Handles structures that are saved to disk. Certain structures can take up large amounts\n"
-            + "of disk space for very large maps and the data for these structures is only needed while the world\n"
-            + "around them is generating. Disabling saving of these structures can save disk space and time during\n"
-            + "saves if your world is already fully generated.\n"
-            + "Warning: disabling structure saving will break the vanilla locate command.")
+    @Setting(value = "structure-saving", comment = "Handles structures that are saved to disk. Certain structures can take up large amounts \n"
+                                                 + "of disk space for very large maps and the data for these structures is only needed while the \n"
+                                                 + "world around them is generating. Disabling saving of these structures can save disk space and \n"
+                                                 + "time during saves if your world is already fully generated. \n"
+                                                 + "Warning: disabling structure saving will break the vanilla locate command.")
     private StructureSaveCategory structureSaveCategory = new StructureSaveCategory();
 
-    @Setting(value = "async-lighting", comment = "Runs lighting updates async.")
+    @Setting(value = "async-lighting", comment = "Runs lighting updates asynchronously.")
     private AsyncLightingCategory asyncLightingCategory = new AsyncLightingCategory();
 
-    @Setting(value = "panda-redstone", comment = "If enabled, uses Panda4494's Redstone implementation which improves performance.\n"
-            + "See https://bugs.mojang.com/browse/MC-11193 for more information.\n"
-            + "Note: This optimization has a few issues which is explained in the bug report. We are not responsible for any issues this may cause.")
+    @Setting(value = "panda-redstone", comment = "If 'true', uses Panda4494's redstone implementation which improves performance. \n"
+                                               + "See https://bugs.mojang.com/browse/MC-11193 for more information. \n"
+                                               + "Note: This optimization has a few issues which are explained in the bug report.")
     private boolean pandaRedstone = false;
 
+    @Setting(value = "enchantment-helper-leak-fix", comment = "If 'true', provides a fix for possible leaks through\n"
+                                                              + "Minecraft's enchantment helper code that can leak\n"
+                                                              + "entity and world references without much interaction\n"
+                                                              + "Forge native (so when running SpongeForge implementation)\n"
+                                                              + "has a similar patch, but Sponge's patch works a little harder\n"
+                                                              + "at it, but Vanilla (SpongeVanilla implementation) does NOT\n"
+                                                              + "have any of the patch, leading to the recommendation that this\n"
+                                                              + "patch is enabled \"for sure\" when using SpongeVanilla implementation.\n"
+                                                              + "See https://bugs.mojang.com/browse/MC-128547 for more information.\n")
+    private boolean enchantmentLeak = true;
+
+    @Setting(value = "faster-thread-checks", comment = "If 'true', allows for Sponge to make better assumptinos on single threaded\n"
+                                                       + "operations with relation to various checks for server threaded operations.\n"
+                                                       + "This is default to true due to Sponge being able to precisely inject when\n"
+                                                       + "the server thread is available. This should make an already fast operation\n"
+                                                       + "much faster for better thread checks to ensure stability of sponge's systems.")
+    private boolean fasterThreadChecks = true;
+
     public OptimizationCategory() {  
-        try {  
-            // Enabled by default on SpongeVanilla, disabled by default on SpongeForge.  
-            // Because of how early this constructor gets called, we can't use SpongeImplHooks or even Game  
-            this.preItemDropMerge = Launch.classLoader.getClassBytes("net.minecraftforge.common.ForgeVersion") == null;  
-       } catch (IOException e) {  
-          e.printStackTrace();  
-       }  
+        try {
+            // Enabled by default on SpongeVanilla, disabled by default on SpongeForge.
+            // Because of how early this constructor gets called, we can't use SpongeImplHooks or even Game
+            this.preItemDropMerge = Launch.classLoader.getClassBytes("net.minecraftforge.common.ForgeVersion") == null;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }  
 
 
@@ -80,6 +97,15 @@ public class OptimizationCategory extends ConfigCategory {
         return this.structureSaveCategory.isEnabled();
     }
 
+    /**
+     * This defines whether items can be pre-merged as item stacks, prior to spawning an entity. This has the ramification
+     * that some items are simply "dropped" and some other items during particular contexts, say when a mod is performing
+     * drops of their own, cannot be pre-merged as the item entity NEEDS to be created for them. In most cases, this is
+     * perfectly fine to perform in vanilla, but in forge mod environments, it is highly incompatible with a majority of
+     * more "advanced" or "complex" mods.
+     *
+     * @return Whether item pre-merging is enabled
+     */
     public boolean doDropsPreMergeItemDrops() {
         return this.preItemDropMerge;
     }
@@ -98,5 +124,13 @@ public class OptimizationCategory extends ConfigCategory {
 
     public boolean usePandaRedstone() {
         return this.pandaRedstone;
+    }
+
+    public boolean useEnchantmentHelperFix() {
+        return this.enchantmentLeak;
+    }
+
+    public boolean useFastThreadChecks() {
+        return this.fasterThreadChecks;
     }
 }

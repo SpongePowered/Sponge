@@ -24,21 +24,37 @@
  */
 package org.spongepowered.common.mixin.core.item.inventory;
 
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.ClickType;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IContainerListener;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.InventoryCraftResult;
+import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.inventory.Slot;
+import net.minecraft.inventory.SlotCrafting;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.CraftingManager;
+import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.network.play.server.SPacketSetSlot;
 import net.minecraft.util.NonNullList;
+import net.minecraft.world.World;
+import org.spongepowered.api.event.item.inventory.CraftItemEvent;
 import org.spongepowered.api.item.inventory.Carrier;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
+import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
+import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.api.world.Location;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
@@ -46,10 +62,14 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.interfaces.IMixinContainer;
+import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.SlotCollectionIterator;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
@@ -57,29 +77,43 @@ import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
-import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
+import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
+@SuppressWarnings("rawtypes")
 @NonnullByDefault
 @Mixin(value = Container.class, priority = 998)
 @Implements({@Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$")})
 public abstract class MixinContainer implements org.spongepowered.api.item.inventory.Container, IMixinContainer, CarriedInventory<Carrier> {
 
     @Shadow public List<Slot> inventorySlots;
-    @Shadow public NonNullList<ItemStack> inventoryItemStacks ;
+    @Shadow public NonNullList<ItemStack> inventoryItemStacks;
     @Shadow public int windowId;
     @Shadow protected List<IContainerListener> listeners;
     private boolean spectatorChest;
     private boolean dirty = true;
+    private boolean dropCancelled = false;
+
+    @Nullable private ItemStackSnapshot itemStackSnapshot;
+    @Nullable private Slot lastSlotUsed = null;
+    @Nullable private CraftItemEvent.Craft lastCraft = null;
+    private boolean firePreview;
+    @Nullable private Location<org.spongepowered.api.world.World> lastOpenLocation;
+    private boolean inUse = false;
+
+    private boolean captureSuccess = false;
 
     @Shadow
     public abstract NonNullList<ItemStack> getInventory();
@@ -92,11 +126,17 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
         throw new IllegalStateException("Shadowed.");
     }
 
+    @Shadow protected abstract void resetDrag();
+
     private boolean captureInventory = false;
+    private boolean shiftCraft = false;
+    //private boolean postPreCraftEvent = true; // used to prevent multiple craft events to fire when setting multiple slots simultaneously
     private List<SlotTransaction> capturedSlotTransactions = new ArrayList<>();
-    private Fabric<IInventory> fabric;
-    private SlotProvider<IInventory, ItemStack> slots;
-    private Lens<IInventory, ItemStack> lens;
+    private List<SlotTransaction> capturedCraftShiftTransactions = new ArrayList<>();
+    private List<SlotTransaction> capturedCraftPreviewTransactions = new ArrayList<>();
+    private Fabric fabric;
+    private SlotProvider slots;
+    private Lens lens;
     private boolean initialized;
     private Map<Integer, SlotAdapter> adapters = new HashMap<>();
     private InventoryArchetype archetype;
@@ -104,7 +144,17 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     protected Optional<Predicate<EntityPlayer>> canInteractWithPredicate = Optional.empty();
     @Nullable private PluginContainer plugin = null;
 
-    private void init() {
+    private LinkedHashMap<IInventory, Set<Slot>> allInventories = new LinkedHashMap<>();
+
+    /*
+    Named specifically for sponge to avoid potential illegal access errors when a mod container
+    implements an interface that adds a defaulted method. Due to the JVM and compiled bytecode,
+    this could be called in the event the interface with the defaulted method doesn't get
+    overridden in the subclass, and therefor, will call the superclass (this class) method, and
+    then bam... error.
+    More specifically fixes: https://github.com/BuildCraft/BuildCraft/issues/4005
+     */
+    private void spongeInit() {
         if (this.initialized && !this.dirty) {
             return;
         }
@@ -121,15 +171,19 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
 
         // If we know the lens, we can cache the adapters now
         if (this.lens != null) {
-            for (org.spongepowered.api.item.inventory.Slot slot : new SlotCollectionIterator<>(this, this.fabric, this.lens, this.slots)) {
+            for (org.spongepowered.api.item.inventory.Slot slot : new SlotCollectionIterator(this, this.fabric, this.lens, this.slots)) {
                 this.adapters.put(((SlotAdapter) slot).slotNumber, (SlotAdapter) slot);
             }
         }
+
+        this.allInventories.clear();
+        this.inventorySlots.forEach(slot -> this.allInventories.computeIfAbsent(slot.inventory, (i) -> new HashSet<>()).add(slot));
+
     }
 
     @Override
     public InventoryArchetype getArchetype() {
-        this.init();
+        this.spongeInit();
         return this.archetype;
     }
 
@@ -164,11 +218,17 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     @Overwrite
     public void detectAndSendChanges() {
         this.detectAndSendChanges(false);
+        this.captureSuccess = true; // Detect mod overrides
+    }
+
+    @Override
+    public boolean capturePossible() {
+        return this.captureSuccess;
     }
 
     @Override
     public void detectAndSendChanges(boolean captureOnly) {
-        this.init();
+        this.spongeInit();
 
         for (int i = 0; i < this.inventorySlots.size(); ++i) {
             final Slot slot = this.inventorySlots.get(i);
@@ -187,7 +247,20 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
                     org.spongepowered.api.item.inventory.Slot adapter = null;
                     try {
                         adapter = this.getContainerSlot(i);
-                        this.capturedSlotTransactions.add(new SlotTransaction(adapter, originalItem, newItem));
+                        SlotTransaction newTransaction = new SlotTransaction(adapter, originalItem, newItem);
+                        if (this.shiftCraft) {
+                            this.capturedCraftShiftTransactions.add(newTransaction);
+                        } else {
+                            if (!this.capturedCraftPreviewTransactions.isEmpty()) { // Check if Preview transaction is this transaction
+                                SlotTransaction previewTransaction = this.capturedCraftPreviewTransactions.get(0);
+                                if (previewTransaction.equals(newTransaction)) {
+                                    newTransaction = null;
+                                }
+                            }
+                            if (newTransaction != null) {
+                                this.capturedSlotTransactions.add(newTransaction);
+                            }
+                        }
                     } catch (IndexOutOfBoundsException e) {
                         SpongeImpl.getLogger().error("SlotIndex out of LensBounds! Did the Container change after creation?", e);
                     }
@@ -218,7 +291,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     @Inject(method = "putStackInSlot", at = @At(value = "HEAD") )
     public void onPutStackInSlot(int slotId, ItemStack itemstack, CallbackInfo ci) {
         if (this.captureInventory) {
-            this.init();
+            this.spongeInit();
 
             final Slot slot = getSlot(slotId);
             if (slot != null) {
@@ -231,6 +304,181 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
                 this.capturedSlotTransactions.add(new SlotTransaction(adapter, originalItem, newItem));
             }
         }
+    }
+
+    @Redirect(method = "slotClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;dropItem(Lnet/minecraft/item/ItemStack;Z)Lnet/minecraft/entity/item/EntityItem;", ordinal = 0))
+    public EntityItem onDragDrop(EntityPlayer player, ItemStack itemStackIn, boolean unused) {
+        final ItemStackSnapshot original = ItemStackUtil.snapshotOf(itemStackIn);
+        final EntityItem entityItem = player.dropItem(itemStackIn, unused);
+        if (!((IMixinEntityPlayer) player).shouldRestoreInventory()) {
+            return entityItem;
+        }
+        if (entityItem  == null) {
+            this.dropCancelled = true;
+            PacketPhaseUtil.handleCustomCursor((EntityPlayerMP) player, original);
+        }
+        return entityItem;
+    }
+
+    @Redirect(method = "slotClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;dropItem(Lnet/minecraft/item/ItemStack;Z)Lnet/minecraft/entity/item/EntityItem;", ordinal = 1))
+    public EntityItem onDragDropSplit(EntityPlayer player, ItemStack itemStackIn, boolean unused) {
+        final EntityItem entityItem = player.dropItem(itemStackIn, unused);
+        if (!((IMixinEntityPlayer) player).shouldRestoreInventory()) {
+            return entityItem;
+        }
+        if (entityItem  == null) {
+            ItemStack original = null;
+            if (player.inventory.getItemStack().isEmpty()) {
+                original = itemStackIn;
+            } else {
+                player.inventory.getItemStack().grow(1);
+                original = player.inventory.getItemStack();
+            }
+            player.inventory.setItemStack(original);
+            ((EntityPlayerMP) player).connection.sendPacket(new SPacketSetSlot(-1, -1, original));
+        }
+        ((IMixinEntityPlayer) player).shouldRestoreInventory(false);
+        return entityItem;
+    }
+
+    @Redirect(method = "slotClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/InventoryPlayer;setItemStack(Lnet/minecraft/item/ItemStack;)V", ordinal = 1))
+    public void onDragCursorClear(InventoryPlayer inventoryPlayer, ItemStack itemStackIn) {
+        if (!this.dropCancelled || !((IMixinEntityPlayer) inventoryPlayer.player).shouldRestoreInventory()) {
+            inventoryPlayer.setItemStack(itemStackIn);
+        }
+        ((IMixinEntityPlayer) inventoryPlayer.player).shouldRestoreInventory(false);
+        this.dropCancelled = false;
+    }
+
+    @Redirect(method = "slotClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/Slot;canTakeStack(Lnet/minecraft/entity/player/EntityPlayer;)Z", ordinal = 4))
+    public boolean onCanTakeStack(Slot slot, EntityPlayer playerIn) {
+        final boolean result = slot.canTakeStack(playerIn);
+        if (result) {
+            this.itemStackSnapshot = ItemStackUtil.snapshotOf(slot.getStack());
+            this.lastSlotUsed = slot;
+        } else {
+            this.itemStackSnapshot = null;
+            this.lastSlotUsed = null;
+        }
+        return result;
+    }
+
+    @Redirect(method = "slotClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;dropItem(Lnet/minecraft/item/ItemStack;Z)Lnet/minecraft/entity/item/EntityItem;", ordinal = 3))
+    public EntityItem onThrowClick(EntityPlayer player, ItemStack itemStackIn, boolean unused) {
+        final EntityItem entityItem = player.dropItem(itemStackIn, true);
+        if (entityItem == null && ((IMixinEntityPlayer) player).shouldRestoreInventory()) {
+            final ItemStack original = ItemStackUtil.toNative(this.itemStackSnapshot.createStack());
+            this.lastSlotUsed.putStack(original);
+            player.openContainer.detectAndSendChanges();
+            ((EntityPlayerMP) player).isChangingQuantityOnly = false;
+            ((EntityPlayerMP) player).connection.sendPacket(new SPacketSetSlot(player.openContainer.windowId, this.lastSlotUsed.slotNumber, original));
+        }
+        this.itemStackSnapshot = null;
+        this.lastSlotUsed = null;
+        ((IMixinEntityPlayer) player).shouldRestoreInventory(false);
+        return entityItem;
+    }
+
+    @Redirect(method = "slotChangedCraftingGrid",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/InventoryCraftResult;setInventorySlotContents(ILnet/minecraft/item/ItemStack;)V"))
+    private void beforeSlotChangedCraftingGrid(InventoryCraftResult output, int index, ItemStack itemstack)
+    {
+        if (!this.captureInventory) {
+            // Capture Inventory is true when caused by a vanilla inventory packet
+            // This is to prevent infinite loops when a client mod re-requests the recipe result after we modified/cancelled it
+            output.setInventorySlotContents(index, itemstack);
+            return;
+        }
+        this.spongeInit();
+        this.capturedCraftPreviewTransactions.clear();
+
+        ItemStackSnapshot orig = ItemStackUtil.snapshotOf(output.getStackInSlot(index));
+        output.setInventorySlotContents(index, itemstack);
+        ItemStackSnapshot repl = ItemStackUtil.snapshotOf(output.getStackInSlot(index));
+
+        SlotAdapter slot = this.adapters.get(index);
+        this.capturedCraftPreviewTransactions.add(new SlotTransaction(slot, orig, repl));
+    }
+
+    @Inject(method = "slotChangedCraftingGrid", cancellable = true,
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/network/NetHandlerPlayServer;sendPacket(Lnet/minecraft/network/Packet;)V"))
+    private void afterSlotChangedCraftingGrid(World world, EntityPlayer player, InventoryCrafting craftingInventory, InventoryCraftResult output, CallbackInfo ci)
+    {
+        if (this.firePreview && !this.capturedCraftPreviewTransactions.isEmpty()) {
+            Inventory inv = this.query(QueryOperationTypes.INVENTORY_TYPE.of(CraftingInventory.class));
+            if (!(inv instanceof CraftingInventory)) {
+                SpongeImpl.getLogger().warn("Detected crafting but Sponge could not get a CraftingInventory for " + this.getClass().getName());
+                return;
+            }
+            SlotTransaction previewTransaction = this.capturedCraftPreviewTransactions.get(this.capturedCraftPreviewTransactions.size() - 1);
+
+            IRecipe recipe = CraftingManager.findMatchingRecipe(craftingInventory, world);
+            SpongeCommonEventFactory.callCraftEventPre(player, ((CraftingInventory) inv), previewTransaction, ((CraftingRecipe) recipe),
+                    ((Container)(Object) this), this.capturedCraftPreviewTransactions);
+            this.capturedCraftPreviewTransactions.clear();
+        }
+    }
+
+    private ItemStack previousCursor;
+
+    @Override
+    public ItemStack getPreviousCursor() {
+        return this.previousCursor;
+    }
+
+    @Inject(method = "slotClick",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;grow(I)V", ordinal = 1))
+    private void beforeOnTakeClickWithItem(int slotId, int dragType, ClickType clickTypeIn, EntityPlayer player, CallbackInfoReturnable<Integer> cir) {
+       this.previousCursor = player.inventory.getItemStack().copy(); // capture previous cursor for CraftItemEvent.Craft
+    }
+
+    @Inject(method = "slotClick",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/InventoryPlayer;setItemStack(Lnet/minecraft/item/ItemStack;)V", ordinal = 3))
+    private void beforeOnTakeClick(int slotId, int dragType, ClickType clickTypeIn, EntityPlayer player, CallbackInfoReturnable<Integer> cir) {
+        this.previousCursor = player.inventory.getItemStack().copy(); // capture previous cursor for CraftItemEvent.Craft
+    }
+
+    @Redirect(method = "slotClick",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/Slot;onTake(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/item/ItemStack;)Lnet/minecraft/item/ItemStack;", ordinal = 5))
+    private ItemStack redirectOnTakeThrow(Slot slot, EntityPlayer player, ItemStack stackOnCursor) {
+        this.lastCraft = null;
+        ItemStack result = slot.onTake(player, stackOnCursor);
+        if (this.lastCraft != null) {
+            if (slot instanceof SlotCrafting) {
+                if (this.lastCraft.isCancelled()) {
+                    stackOnCursor.setCount(0); // do not drop crafted item when cancelled
+                }
+            }
+        }
+        return result;
+    }
+
+    @Inject(method = "slotClick", at = @At("RETURN"))
+    private void onReturn(int slotId, int dragType, ClickType clickTypeIn, EntityPlayer player, CallbackInfoReturnable<ItemStack> cir) {
+        // Reset variables needed for CraftItemEvent.Craft
+        this.lastCraft = null;
+        this.previousCursor = null;
+    }
+
+
+    @Redirect(method = "slotClick",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/Container;transferStackInSlot(Lnet/minecraft/entity/player/EntityPlayer;I)Lnet/minecraft/item/ItemStack;"))
+    private ItemStack redirectTransferStackInSlot(Container thisContainer, EntityPlayer player, int slotId) {
+        Slot slot = thisContainer.getSlot(slotId);
+        if (!(slot instanceof SlotCrafting)) {
+            return thisContainer.transferStackInSlot(player, slotId);
+        }
+        this.lastCraft = null;
+        this.shiftCraft = true;
+        ItemStack result = thisContainer.transferStackInSlot(player, slotId);
+        if (this.lastCraft != null) {
+            if (this.lastCraft.isCancelled()) {
+                result = ItemStack.EMPTY; // Return empty to stop shift-crafting
+            }
+        }
+        this.shiftCraft = false;
+
+        return result;
     }
 
     @Override
@@ -253,18 +501,43 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
         return this.capturedSlotTransactions;
     }
 
-    public SlotProvider<IInventory, ItemStack> inventory$getSlotProvider() {
-        this.init();
+    @Override
+    public List<SlotTransaction> getPreviewTransactions() {
+        return this.capturedCraftPreviewTransactions;
+    }
+
+    @Override
+    public void setLastCraft(CraftItemEvent.Craft event) {
+        this.lastCraft = event;
+    }
+
+    @Override
+    public void setFirePreview(boolean firePreview) {
+        this.firePreview = firePreview;
+    }
+
+    @Override
+    public void setShiftCrafting(boolean flag) {
+        this.shiftCraft = flag;
+    }
+
+    @Override
+    public boolean isShiftCrafting() {
+        return this.shiftCraft;
+    }
+
+    public SlotProvider inventory$getSlotProvider() {
+        this.spongeInit();
         return this.slots;
     }
 
-    public Lens<IInventory, ItemStack> inventory$getRootLens() {
-        this.init();
+    public Lens inventory$getRootLens() {
+        this.spongeInit();
         return this.lens;
     }
 
-    public Fabric<IInventory> inventory$getFabric() {
-        this.init();
+    public Fabric inventory$getFabric() {
+        this.spongeInit();
         return this.fabric;
     }
 
@@ -283,6 +556,10 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
         org.spongepowered.api.item.inventory.Slot adapter = this.adapters.get(slot);
         if (adapter == null) // Slot is not in Lens
         {
+            if (slot >= this.inventorySlots.size()) {
+                SpongeImpl.getLogger().warn("Could not find slot #%s in Container %s", slot, getClass().getName());
+                return null;
+            }
             Slot mcSlot = this.inventorySlots.get(slot); // Try falling back to vanilla slot
             if (mcSlot == null)
             {
@@ -297,5 +574,46 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     @Override
     public void setPlugin(PluginContainer plugin) {
         this.plugin = plugin;
+    }
+
+    @Override
+    public Location<org.spongepowered.api.world.World> getOpenLocation() {
+        return this.lastOpenLocation;
+    }
+
+    @Override
+    public void setOpenLocation(Location<org.spongepowered.api.world.World> loc) {
+        this.lastOpenLocation = loc;
+    }
+
+    @Override
+    public void setInUse(boolean inUse) {
+        this.inUse = inUse;
+    }
+
+    @Override
+    public boolean isInUse() {
+        return this.inUse;
+    }
+
+    @Override
+    public boolean isViewedSlot(org.spongepowered.api.item.inventory.Slot slot) {
+        this.spongeInit();
+        if (slot instanceof Slot) {
+            Set<Slot> set = allInventories.get(((Slot) slot).inventory);
+            if (set != null) {
+                if (set.contains(slot)) {
+                    if (allInventories.size() == 1) {
+                        return true;
+                    }
+                    // TODO better detection of viewer inventory - needs tracking of who views a container
+                    // For now assume that a player inventory is always the viewers inventory
+                    if (((Slot) slot).inventory.getClass() != InventoryPlayer.class) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 }

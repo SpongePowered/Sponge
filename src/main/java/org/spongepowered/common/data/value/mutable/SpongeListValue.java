@@ -78,6 +78,11 @@ public class SpongeListValue<E> extends SpongeCollectionValue<E, List<E>, ListVa
     }
 
     @Override
+    public ListValue<E> copy() {
+        return new SpongeListValue<>(getKey(), this.getDefault(), Lists.newArrayList(this.actualValue));
+    }
+
+    @Override
     public E get(int index) {
         return this.actualValue.get(index);
     }

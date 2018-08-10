@@ -44,6 +44,8 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
@@ -52,6 +54,7 @@ import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
+import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 import java.util.Iterator;
 import java.util.List;
@@ -66,11 +69,12 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
     BlockState blockState;
     BlockState extendedState;
     UUID worldUuid;
-    UUID creatorUuid;
-    UUID notifierUuid;
+    @Nullable UUID creatorUuid;
+    @Nullable UUID notifierUuid;
     Vector3i coords;
     @Nullable List<ImmutableDataManipulator<?, ?>> manipulators;
     @Nullable NBTTagCompound compound;
+    SpongeBlockChangeFlag flag = (SpongeBlockChangeFlag) BlockChangeFlags.ALL;
 
 
     public SpongeBlockSnapshotBuilder() {
@@ -129,14 +133,14 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
     }
 
     @Override
-    public BlockSnapshot.Builder creator(UUID uuid) {
-        this.creatorUuid = checkNotNull(uuid);
+    public SpongeBlockSnapshotBuilder creator(UUID uuid) {
+        this.creatorUuid = uuid;
         return this;
     }
 
     @Override
-    public BlockSnapshot.Builder notifier(UUID uuid) {
-        this.notifierUuid = checkNotNull(uuid);
+    public SpongeBlockSnapshotBuilder notifier(UUID uuid) {
+        this.notifierUuid = uuid;
         return this;
     }
 
@@ -167,13 +171,18 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
     }
 
     @Override
-    public <V> BlockSnapshot.Builder add(Key<? extends BaseValue<V>> key, V value) {
+    public <V> SpongeBlockSnapshotBuilder add(Key<? extends BaseValue<V>> key, V value) {
         checkNotNull(key, "key");
         checkState(this.blockState != null);
         this.blockState = this.blockState.with(key, value).orElse(this.blockState);
         if(this.extendedState != null) {
             this.extendedState = this.extendedState.with(key, value).orElse(this.extendedState);
         }
+        return this;
+    }
+
+    public SpongeBlockSnapshotBuilder flag(BlockChangeFlag flag) {
+        this.flag = (SpongeBlockChangeFlag) flag;
         return this;
     }
 

@@ -60,8 +60,8 @@ public class LoadingMap<K, V> extends AbstractMap<K, V> {
     /**
      * Initializes an auto loading map using specified loader and backing map
      *
-     * @param backingMap
-     * @param loader
+     * @param backingMap Map to wrap
+     * @param loader Loader
      */
     public LoadingMap(Map<K, V> backingMap, Function<K, V> loader) {
         this.backingMap = backingMap;
@@ -71,11 +71,11 @@ public class LoadingMap<K, V> extends AbstractMap<K, V> {
     /**
      * Creates a new LoadingMap with the specified map and loader
      *
-     * @param backingMap
-     * @param loader
-     * @param <K>
-     * @param <V>
-     * @return
+     * @param backingMap Actual map being used.
+     * @param loader Loader to use
+     * @param <K> Key Type of the Map
+     * @param <V> Value Type of the Map
+     * @return Map
      */
     public static <K, V> Map<K, V> of(Map<K, V> backingMap, Function<K, V> loader) {
         return new LoadingMap<>(backingMap, loader);
@@ -125,12 +125,13 @@ public class LoadingMap<K, V> extends AbstractMap<K, V> {
     /**
      * @see #newAutoMap
      *
-     *      new Auto initializing map using a HashMap.
-     * @param keyClass
-     * @param valueClass
-     * @param <K>
-     * @param <V>
-     * @return
+     * new Auto initializing map using a HashMap.
+     *
+     * @param keyClass Class used for the K generic
+     * @param valueClass Class used for the V generic
+     * @param <K> Key Type of the Map
+     * @param <V> Value Type of the Map
+     * @return Map that auto instantiates on .get()
      */
     public static <K, V> Map<K, V> newHashAutoMap(final Class<? extends K> keyClass, final Class<? extends V> valueClass) {
         return newAutoMap(new HashMap<>(), keyClass, valueClass);
@@ -139,11 +140,12 @@ public class LoadingMap<K, V> extends AbstractMap<K, V> {
     /**
      * @see #newAutoMap
      *
-     *      new Auto initializing map using a HashMap.
-     * @param valueClass
-     * @param <K>
-     * @param <V>
-     * @return
+     * new Auto initializing map using a HashMap.
+     *
+     * @param valueClass Class used for the V generic
+     * @param <K> Key Type of the Map
+     * @param <V> Value Type of the Map
+     * @return Map that auto instantiates on .get()
      */
     public static <K, V> Map<K, V> newHashAutoMap(final Class<? extends V> valueClass) {
         return newHashAutoMap(null, valueClass);
@@ -152,15 +154,15 @@ public class LoadingMap<K, V> extends AbstractMap<K, V> {
     /**
      * @see #newAutoMap
      *
-     *      new Auto initializing map using a HashMap.
+     * new Auto initializing map using a HashMap.
      *
-     * @param keyClass
-     * @param valueClass
-     * @param initialCapacity
-     * @param loadFactor
-     * @param <K>
-     * @param <V>
-     * @return
+     * @param keyClass Class used for the K generic
+     * @param valueClass Class used for the V generic
+     * @param initialCapacity Initial capacity to use
+     * @param loadFactor Load factor to use
+     * @param <K> Key Type of the Map
+     * @param <V> Value Type of the Map
+     * @return Map that auto instantiates on .get()
      */
     public static <K, V> Map<K, V> newHashAutoMap(final Class<? extends K> keyClass, final Class<? extends V> valueClass, int initialCapacity,
             float loadFactor) {
@@ -172,12 +174,12 @@ public class LoadingMap<K, V> extends AbstractMap<K, V> {
      *
      *      new Auto initializing map using a HashMap.
      *
-     * @param valueClass
-     * @param initialCapacity
-     * @param loadFactor
-     * @param <K>
-     * @param <V>
-     * @return
+     * @param valueClass Class used for the V generic
+     * @param initialCapacity Initial capacity to use
+     * @param loadFactor Load factor to use
+     * @param <K> Key Type of the Map
+     * @param <V> Value Type of the Map
+     * @return  Map that auto instantiates on .get()
      */
     public static <K, V> Map<K, V> newHashAutoMap(final Class<? extends V> valueClass, int initialCapacity, float loadFactor) {
         return newHashAutoMap(null, valueClass, initialCapacity, loadFactor);
@@ -186,10 +188,10 @@ public class LoadingMap<K, V> extends AbstractMap<K, V> {
     /**
      * Initializes an auto loading map using a HashMap
      *
-     * @param loader
-     * @param <K>
-     * @param <V>
-     * @return
+     * @param loader Loader to use
+     * @param <K> Key Type of the Map
+     * @param <V> Value Type of the Map
+     * @return Map
      */
     public static <K, V> Map<K, V> newHashMap(Function<K, V> loader) {
         return new LoadingMap<>(new HashMap<>(), loader);
@@ -198,12 +200,12 @@ public class LoadingMap<K, V> extends AbstractMap<K, V> {
     /**
      * Initializes an auto loading map using a HashMap
      *
-     * @param loader
-     * @param initialCapacity
-     * @param loadFactor
-     * @param <K>
-     * @param <V>
-     * @return
+     * @param loader Loader to use
+     * @param initialCapacity Initial capacity to use
+     * @param loadFactor Load factor to use
+     * @param <K> Key Type of the Map
+     * @param <V> Value Type of the Map
+     * @return Map
      */
     public static <K, V> Map<K, V> newHashMap(Function<K, V> loader, int initialCapacity, float loadFactor) {
         return new LoadingMap<>(new HashMap<>(initialCapacity, loadFactor), loader);
@@ -212,10 +214,10 @@ public class LoadingMap<K, V> extends AbstractMap<K, V> {
     /**
      * Initializes an auto loading map using an Identity HashMap
      *
-     * @param loader
-     * @param <K>
-     * @param <V>
-     * @return
+     * @param loader Loader to use
+     * @param <K> Key Type of the Map
+     * @param <V> Value Type of the Map
+     * @return Map
      */
     public static <K, V> Map<K, V> newIdentityHashMap(Function<K, V> loader) {
         return new LoadingMap<>(new IdentityHashMap<>(), loader);
@@ -224,11 +226,11 @@ public class LoadingMap<K, V> extends AbstractMap<K, V> {
     /**
      * Initializes an auto loading map using an Identity HashMap
      *
-     * @param loader
-     * @param initialCapacity
-     * @param <K>
-     * @param <V>
-     * @return
+     * @param loader Loader to use
+     * @param initialCapacity Initial capacity to use
+     * @param <K> Key Type of the Map
+     * @param <V> Value Type of the Map
+     * @return Map
      */
     public static <K, V> Map<K, V> newIdentityHashMap(Function<K, V> loader, int initialCapacity) {
         return new LoadingMap<>(new IdentityHashMap<>(initialCapacity), loader);
@@ -332,7 +334,7 @@ public class LoadingMap<K, V> extends AbstractMap<K, V> {
                 }
             } catch (NoSuchMethodException e) {
                 throw new IllegalStateException(
-                        valueClass.getName() + " does not have a constructor for " + keyClass.getName());
+                    valueClass.getName() + " does not have a constructor for " + (keyClass != null ? keyClass.getName() : null));
             }
         }
 
@@ -359,9 +361,9 @@ public class LoadingMap<K, V> extends AbstractMap<K, V> {
     /**
      * Due to java stuff, you will need to cast it to (Function) for some cases
      *
-     * @param <T>
+     * @param <T> Type
      */
-    public static abstract class Feeder<T> implements Function<Object, T> {
+    public static abstract class Feeder<T> implements Function<T, T> {
 
         @Override
         @Nullable

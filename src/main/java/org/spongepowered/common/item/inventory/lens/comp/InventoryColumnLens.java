@@ -24,6 +24,6 @@
  */
 package org.spongepowered.common.item.inventory.lens.comp;
 
-public interface InventoryColumnLens<TInventory, TStack> extends Inventory2DLens<TInventory, TStack> {
+public interface InventoryColumnLens extends Inventory2DLens {
 
 }

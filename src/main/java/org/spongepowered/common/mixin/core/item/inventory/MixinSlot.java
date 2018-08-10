@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.item.inventory;
 
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -46,23 +45,34 @@ import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollect
 import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
 
+import javax.annotation.Nullable;
+
+@SuppressWarnings("rawtypes")
 @Mixin(Slot.class)
-public abstract class MixinSlot implements org.spongepowered.api.item.inventory.Slot, IMixinSlot, MinecraftInventoryAdapter<IInventory> {
+public abstract class MixinSlot implements org.spongepowered.api.item.inventory.Slot, IMixinSlot, MinecraftInventoryAdapter {
 
     @Shadow @Final public int slotIndex;
     @Shadow @Final public IInventory inventory;
 
-    protected Fabric<IInventory> fabric;
+    protected Fabric fabric;
     protected SlotCollection slots;
-    protected Lens<IInventory, ItemStack> lens;
+    protected Lens lens;
 
-    private InventoryAdapter<IInventory, ItemStack> parentAdapter;
+    @Nullable private InventoryAdapter parentAdapter;
 
+    @SuppressWarnings("unchecked")
     @Inject(method = "<init>", at = @At("RETURN"))
-    public void onConstructed(CallbackInfo ci) {
+    private void onConstructed(CallbackInfo ci) {
         this.fabric = MinecraftFabric.of(this);
         this.slots = new SlotCollection.Builder().add(1).build();
-        this.lens = new SlotLensImpl(0);
+        try {
+            Lens rootLens = ((InventoryAdapter) this.inventory).getRootLens();
+            this.lens = rootLens.getSlotLens(this.slotIndex);
+        } catch (Exception ignored) {
+            // TODO figure out how to make it always work with existing lenses
+            // this works as a fallback but removes Inventory Property Support completely
+            this.lens = new SlotLensImpl(0);
+        }
     }
 
     @Override
@@ -70,6 +80,7 @@ public abstract class MixinSlot implements org.spongepowered.api.item.inventory.
         return this.slotIndex;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Inventory parent() {
         if (this.inventory instanceof Inventory) {
@@ -92,18 +103,19 @@ public abstract class MixinSlot implements org.spongepowered.api.item.inventory.
         return this.transform(Type.INVENTORY);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public SlotProvider<IInventory, ItemStack> getSlotProvider() {
+    public SlotProvider getSlotProvider() {
         return this.slots;
     }
 
     @Override
-    public Lens<IInventory, ItemStack> getRootLens() {
+    public Lens getRootLens() {
         return this.lens;
     }
 
     @Override
-    public Fabric<IInventory> getFabric() {
+    public Fabric getFabric() {
         return this.fabric;
     }
 }

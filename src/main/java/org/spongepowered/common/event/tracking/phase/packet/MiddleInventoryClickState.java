@@ -39,7 +39,7 @@ import java.util.List;
 final class MiddleInventoryClickState extends BasicInventoryPacketState {
 
     MiddleInventoryClickState() {
-        super(PacketPhase.MODE_CLICK | PacketPhase.MODE_PICKBLOCK | PacketPhase.BUTTON_MIDDLE | PacketPhase.CLICK_INSIDE_WINDOW);
+        super(PacketPhase.MODE_CLICK | PacketPhase.MODE_PICKBLOCK | PacketPhase.BUTTON_MIDDLE | PacketPhase.CLICK_INSIDE_WINDOW | PacketPhase.CLICK_OUTSIDE_WINDOW);
     }
 
     @Override

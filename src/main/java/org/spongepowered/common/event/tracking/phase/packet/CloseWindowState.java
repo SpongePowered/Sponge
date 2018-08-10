@@ -31,20 +31,17 @@ import net.minecraft.network.Packet;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
-import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 final class CloseWindowState extends BasicPacketState {
@@ -60,17 +57,24 @@ final class CloseWindowState extends BasicPacketState {
         final Container container = context.getOpenContainer();
         ItemStackSnapshot lastCursor = context.getCursor();
         ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
-        Sponge.getCauseStackManager().pushCause(player);
-        InteractInventoryEvent.Close event =
-            SpongeCommonEventFactory.callInteractInventoryCloseEvent(container, player, lastCursor, newCursor, true);
-        if (event.isCancelled()) {
+        if (lastCursor != null) {
+            Sponge.getCauseStackManager().pushCause(player);
+            InteractInventoryEvent.Close event =
+                    SpongeCommonEventFactory.callInteractInventoryCloseEvent(container, player, lastCursor, newCursor, true);
+            if (event.isCancelled()) {
+                Sponge.getCauseStackManager().popCause();
+                return;
+            }
             Sponge.getCauseStackManager().popCause();
+        }
+
+        if (context.getCapturedItemsSupplier().isEmpty() && context.getCapturedItemStackSupplier().isEmpty() && context.getCapturedBlockSupplier().isEmpty()) {
             return;
         }
-        Sponge.getCauseStackManager().popCause();
+
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(player);
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);// Non-merged
+            frame.pushCause(player);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
             // items
             context.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(items -> {
                 final List<Entity> entities = items
@@ -78,15 +82,7 @@ final class CloseWindowState extends BasicPacketState {
                     .map(EntityUtil::fromNative)
                     .collect(Collectors.toList());
                 if (!entities.isEmpty()) {
-                    DropItemEvent.Custom drop =
-                        SpongeEventFactory.createDropItemEventCustom(Sponge.getCauseStackManager().getCurrentCause(), entities);
-                    SpongeImpl.postEvent(drop);
-                    if (!drop.isCancelled()) {
-                        for (Entity droppedItem : drop.getEntities()) {
-                            droppedItem.setCreator(player.getUniqueID());
-                            ((IMixinWorldServer) player.getServerWorld()).forceSpawnEntity(droppedItem);
-                        }
-                    }
+                    SpongeCommonEventFactory.callDropItemCustom(entities, context, () -> Optional.of(player.getUniqueID()));
                 }
             });
             // Pre-merged items
@@ -99,20 +95,17 @@ final class CloseWindowState extends BasicPacketState {
                     .map(EntityUtil::fromNative)
                     .collect(Collectors.toList());
                 if (!entities.isEmpty()) {
-                    DropItemEvent.Custom drop =
-                        SpongeEventFactory.createDropItemEventCustom(Sponge.getCauseStackManager().getCurrentCause(), entities);
-                    SpongeImpl.postEvent(drop);
-                    if (!drop.isCancelled()) {
-                        for (Entity droppedItem : drop.getEntities()) {
-                            droppedItem.setCreator(player.getUniqueID());
-                            ((IMixinWorldServer) player.getServerWorld()).forceSpawnEntity(droppedItem);
-                        }
-                    }
+                    SpongeCommonEventFactory.callDropItemCustom(entities, context, () -> Optional.of(player.getUniqueID()));
                 }
             });
         }
         context.getCapturedBlockSupplier()
             .acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
 
+    }
+
+    @Override
+    public boolean doesCaptureEntityDrops(BasicPacketContext context) {
+        return true;
     }
 }

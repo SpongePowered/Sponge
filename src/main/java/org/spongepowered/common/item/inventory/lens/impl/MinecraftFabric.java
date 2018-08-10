@@ -30,7 +30,6 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryLargeChest;
 import net.minecraft.inventory.Slot;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
@@ -40,13 +39,13 @@ import org.spongepowered.common.item.inventory.lens.impl.fabric.ContainerFabric;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.IInventoryFabric;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.SlotFabric;
 
-public abstract class MinecraftFabric implements Fabric<IInventory> {
+public abstract class MinecraftFabric implements Fabric {
 
     @SuppressWarnings("unchecked")
-    public static <TFabric> Fabric<IInventory> of(TFabric target) {
+    public static <TFabric> Fabric of(TFabric target) {
         checkNotNull(target, "Fabric target");
         if (target instanceof Fabric) {
-            return (Fabric<IInventory>) target;
+            return (Fabric) target;
         } else if (target instanceof Slot) {
             Slot slot = (Slot)target;
             if (slot.inventory == null) {
@@ -63,7 +62,8 @@ public abstract class MinecraftFabric implements Fabric<IInventory> {
         throw new UnsupportedFabricException("Container of type %s could not be used as an inventory fabric", target.getClass());
     }
 
-    public static InventoryAdapter<IInventory, ItemStack> getAdapter(Fabric<IInventory> fabric, Inventory parent, int base, Class<? extends Inventory> adapterType) {
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public static InventoryAdapter getAdapter(Fabric fabric, Inventory parent, int base, Class<? extends Inventory> adapterType) {
         IInventory inventory = fabric.get(base);
         if (inventory.getClass() == adapterType) {
             return ((InventoryAdapter) inventory);

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.config.type;
 
-public class DimensionConfig extends ConfigBase {
+public class DimensionConfig extends GeneralConfigBase {
 
     public DimensionConfig() {
         super();

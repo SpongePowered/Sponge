@@ -25,6 +25,14 @@
 package org.spongepowered.common.registry;
 
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.advancement.Advancement;
+import org.spongepowered.api.advancement.AdvancementTree;
+import org.spongepowered.api.advancement.AdvancementType;
+import org.spongepowered.api.advancement.DisplayInfo;
+import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
+import org.spongepowered.api.advancement.criteria.ScoreAdvancementCriterion;
+import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
+import org.spongepowered.api.advancement.criteria.trigger.Trigger;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -83,8 +91,10 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackGenerator;
+import org.spongepowered.api.item.inventory.InventoryTransformation;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.property.GuiId;
+import org.spongepowered.api.item.inventory.query.QueryOperationType;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.item.merchant.TradeOfferGenerator;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
@@ -105,6 +115,7 @@ import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMo
 import org.spongepowered.api.service.economy.transaction.TransactionType;
 import org.spongepowered.api.statistic.Statistic;
 import org.spongepowered.api.statistic.StatisticType;
+import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.chat.ChatVisibility;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextStyle;
@@ -136,12 +147,21 @@ import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.api.world.teleport.TeleportHelperFilter;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.advancement.SpongeAdvancementBuilder;
+import org.spongepowered.common.advancement.SpongeAdvancementTreeBuilder;
+import org.spongepowered.common.advancement.SpongeCriterionBuilder;
+import org.spongepowered.common.advancement.SpongeDisplayInfoBuilder;
+import org.spongepowered.common.advancement.SpongeScoreCriterionBuilder;
+import org.spongepowered.common.advancement.SpongeFilteredTriggerBuilder;
+import org.spongepowered.common.advancement.SpongeTriggerBuilder;
 import org.spongepowered.common.ban.SpongeBanBuilder;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.block.SpongeBlockStateBuilder;
 import org.spongepowered.common.block.SpongeTileEntityArchetypeBuilder;
 import org.spongepowered.common.boss.ServerBossBarBuilder;
 import org.spongepowered.common.data.SpongeDataRegistrationBuilder;
+import org.spongepowered.common.data.SpongeKeyBuilder;
+import org.spongepowered.common.data.SpongeManipulatorRegistry;
 import org.spongepowered.common.item.enchantment.SpongeEnchantmentBuilder;
 import org.spongepowered.common.data.builder.meta.SpongePatternLayerBuilder;
 import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
@@ -161,6 +181,7 @@ import org.spongepowered.common.item.inventory.SpongeInventoryBuilder;
 import org.spongepowered.common.item.inventory.SpongeItemStackBuilder;
 import org.spongepowered.common.item.inventory.archetype.SpongeInventoryArchetypeBuilder;
 import org.spongepowered.common.item.inventory.generation.SpongeItemStackGenerator;
+import org.spongepowered.common.item.inventory.query.SpongeTransformationBuilder;
 import org.spongepowered.common.item.merchant.SpongeTradeOfferBuilder;
 import org.spongepowered.common.item.merchant.SpongeTradeOfferGenerator;
 import org.spongepowered.common.item.recipe.crafting.SpongeCraftingRecipeRegistry;
@@ -171,6 +192,11 @@ import org.spongepowered.common.item.recipe.smelting.SpongeSmeltingRecipeBuilder
 import org.spongepowered.common.registry.factory.ResourcePackFactoryModule;
 import org.spongepowered.common.registry.factory.TimingsFactoryModule;
 import org.spongepowered.common.registry.type.*;
+import org.spongepowered.common.registry.type.advancement.AdvancementRegistryModule;
+import org.spongepowered.common.registry.type.advancement.AdvancementTreeRegistryModule;
+import org.spongepowered.common.registry.type.advancement.AdvancementTypeRegistryModule;
+import org.spongepowered.common.registry.type.advancement.CriterionRegistryModule;
+import org.spongepowered.common.registry.type.advancement.TriggerTypeRegistryModule;
 import org.spongepowered.common.registry.type.block.*;
 import org.spongepowered.common.registry.type.boss.BossBarColorRegistryModule;
 import org.spongepowered.common.registry.type.boss.BossBarOverlayRegistryModule;
@@ -225,6 +251,7 @@ import org.spongepowered.common.world.gen.builders.*;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public final class CommonModuleRegistry {
@@ -328,6 +355,7 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(BiomeGenerationSettings.Builder.class, SpongeBiomeGenerationSettingsBuilder::new)
             .registerBuilderSupplier(InventoryArchetype.Builder.class, SpongeInventoryArchetypeBuilder::new)
             .registerBuilderSupplier(Inventory.Builder.class, SpongeInventoryBuilder::new)
+            .registerBuilderSupplier(InventoryTransformation.Builder.class, SpongeTransformationBuilder::new)
             .registerBuilderSupplier(SoundType.Builder.class, SpongeSoundBuilder::new)
             .registerBuilderSupplier(LocatableBlock.Builder.class, SpongeLocatableBlockBuilder::new)
             .registerBuilderSupplier(Fossil.Builder.class, FossilBuilder::new)
@@ -339,6 +367,14 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(SmeltingRecipe.Builder.class, SpongeSmeltingRecipeBuilder::new)
             .registerBuilderSupplier(EventContextKey.Builder.class, SpongeEventContextKeyBuilder::new)
             .registerBuilderSupplier(Enchantment.Builder.class, SpongeEnchantmentBuilder::new)
+            .registerBuilderSupplier(Key.Builder.class, SpongeKeyBuilder::new)
+            .registerBuilderSupplier(Advancement.Builder.class, SpongeAdvancementBuilder::new)
+            .registerBuilderSupplier(AdvancementTree.Builder.class, SpongeAdvancementTreeBuilder::new)
+            .registerBuilderSupplier(DisplayInfo.Builder.class, SpongeDisplayInfoBuilder::new)
+            .registerBuilderSupplier(AdvancementCriterion.Builder.class, SpongeCriterionBuilder::new)
+            .registerBuilderSupplier(ScoreAdvancementCriterion.Builder.class, SpongeScoreCriterionBuilder::new)
+            .registerBuilderSupplier(FilteredTrigger.Builder.class, SpongeFilteredTriggerBuilder::new)
+            .registerBuilderSupplier(Trigger.Builder.class, SpongeTriggerBuilder::new)
         ;
     }
 
@@ -360,7 +396,7 @@ public final class CommonModuleRegistry {
             .registerModule(BlockType.class, BlockTypeRegistryModule.getInstance())
             .registerModule(BrickType.class, new BrickTypeRegistryModule())
             .registerModule(Career.class, CareerRegistryModule.getInstance())
-            .registerModule(new ChatTypeRegistryModule())
+            .registerModule(ChatType.class, new ChatTypeRegistryModule())
             .registerModule(CoalType.class, new CoalTypeRegistryModule())
             .registerModule(ComparatorType.class, new ComparatorTypeRegistryModule())
             .registerModule(CookedFish.class, new CookedFishRegistryModule())
@@ -370,7 +406,7 @@ public final class CommonModuleRegistry {
             .registerModule(DamageType.class, new DamageTypeRegistryModule())
             .registerModule(DataFormat.class, new DataFormatRegistryModule())
             .registerModule(DataTranslator.class, DataTranslatorRegistryModule.getInstance())
-            .registerModule(Difficulty.class, new DifficultyRegistryModule())
+            .registerModule(Difficulty.class, DifficultyRegistryModule.getInstance())
             .registerModule(DimensionType.class, DimensionTypeRegistryModule.getInstance())
             .registerModule(DirtType.class, new DirtTypeRegistryModule())
             .registerModule(DisguisedBlockType.class, new DisguisedBlockTypeRegistryModule())
@@ -409,6 +445,7 @@ public final class CommonModuleRegistry {
             .registerModule(PrismarineType.class, new PrismarineRegistryModule())
             .registerModule(Profession.class, ProfessionRegistryModule.getInstance())
             .registerModule(QuartzType.class, new QuartzTypeRegistryModule())
+            .registerModule(QueryOperationType.class, new QueryOperationRegistryModule())
             .registerModule(RabbitType.class, new RabbitTypeRegistryModule())
             .registerModule(RailDirection.class, new RailDirectionRegistryModule())
             .registerModule(Rotation.class, RotationRegistryModule.getInstance())
@@ -437,6 +474,7 @@ public final class CommonModuleRegistry {
             .registerModule(StatisticType.class, new StatisticTypeRegistryModule())
             .registerModule(WallType.class, new WallTypeRegistryModule())
             .registerModule(Weather.class, new WeatherRegistryModule())
+            .registerModule(WireAttachmentType.class, new WireAttachmentRegistryModule())
             .registerModule(WorldGeneratorModifier.class, WorldGeneratorModifierRegistryModule.getInstance())
             .registerModule(TransactionType.class, new TransactionTypeRegistryModule())
             .registerModule(ChatVisibility.class, new ChatVisibilityRegistryModule())
@@ -453,6 +491,7 @@ public final class CommonModuleRegistry {
             .registerModule((Class<Key<?>>) (Class<?>) Key.class, KeyRegistryModule.getInstance())
             .registerModule(GuiId.class, GuiIdRegistryModule.getInstance())
             .registerModule(InventoryArchetype.class, InventoryArchetypeRegistryModule.getInstance())
+            .registerModule(TransformationRegistryModule.getInstance())
             .registerModule(StructureMode.class, new StructureModeRegistryModule())
             .registerModule(CraftingRecipe.class, SpongeCraftingRecipeRegistry.getInstance())
             .registerModule(EventContextKey.class, EventContextKeysModule.getInstance())
@@ -460,13 +499,20 @@ public final class CommonModuleRegistry {
             .registerModule(HorseStyle.class, HorseStyleRegistryModule.getInstance())
             .registerModule(HorseColor.class, HorseColorRegistryModule.getInstance())
             .registerModule(InstrumentType.class, InstrumentTypeRegistryModule.getInstance())
+            .registerModule(Advancement.class, AdvancementRegistryModule.getInstance())
+            .registerModule(AdvancementTree.class, AdvancementTreeRegistryModule.getInstance())
+            .registerModule(AdvancementType.class, new AdvancementTypeRegistryModule())
+            .registerModule(Trigger.class, TriggerTypeRegistryModule.getInstance())
+            .registerModule(new CriterionRegistryModule())
+            .registerModule(((Class<DataRegistration<?, ?>>) (Class<?>) DataRegistration.class), SpongeManipulatorRegistry.getInstance())
+            .registerModule(new ItemStackComparatorRegistryModule())
 
             // Miscellaneous Registries
             .registerModule(DungeonMobRegistryModule.getInstance())
             ;
     }
 
-    CommonModuleRegistry() { }
+    private CommonModuleRegistry() { }
 
     private static final class Holder {
 

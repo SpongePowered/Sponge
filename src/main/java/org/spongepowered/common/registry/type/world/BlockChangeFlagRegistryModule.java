@@ -52,6 +52,12 @@ public final class BlockChangeFlagRegistryModule implements RegistryModule {
     }
 
     public static SpongeBlockChangeFlag fromNativeInt(int flag) {
+        if (flag == 3) {
+            return (SpongeBlockChangeFlag) BlockChangeFlags.ALL;
+        }
+        if (flag == 2) {
+            return (SpongeBlockChangeFlag) BlockChangeFlags.PHYSICS_OBSERVER;
+        }
         final SpongeBlockChangeFlag spongeBlockChangeFlag = getInstance().maskedFlags.get(flag);
         if (spongeBlockChangeFlag != null) {
             return spongeBlockChangeFlag;
@@ -118,8 +124,8 @@ public final class BlockChangeFlagRegistryModule implements RegistryModule {
                 register(new SpongeBlockChangeFlag("PHYSICS".toLowerCase(Locale.ENGLISH), i));
             } else if (Flags.OBSERVER == i) {
                 register(new SpongeBlockChangeFlag("OBSERVER".toLowerCase(Locale.ENGLISH), i));
-            } else if (Flags.NEIGHBOR_PHSYICS == i) {
-                register(new SpongeBlockChangeFlag("NEIGHBOR_PHSYICS".toLowerCase(Locale.ENGLISH), i));
+            } else if (Flags.NEIGHBOR_PHYSICS == i) {
+                register(new SpongeBlockChangeFlag("NEIGHBOR_PHYSICS".toLowerCase(Locale.ENGLISH), i));
             } else if (Flags.NEIGHBOR_OBSERVER == i) {
                 register(new SpongeBlockChangeFlag("NEIGHBOR_OBSERVER".toLowerCase(Locale.ENGLISH), i));
                 // Since the next one is already considered as "ALL", it's not switched in
@@ -185,7 +191,7 @@ public final class BlockChangeFlagRegistryModule implements RegistryModule {
         public static final int NEIGHBOR                    = NOTIFY_CLIENTS | NEIGHBOR_MASK | PHYSICS_MASK | OBSERVER_MASK;
         public static final int PHYSICS                     = NOTIFY_CLIENTS | OBSERVER_MASK;
         public static final int OBSERVER                    = NOTIFY_CLIENTS | PHYSICS_MASK;
-        public static final int NEIGHBOR_PHSYICS            = NOTIFY_CLIENTS | NEIGHBOR_MASK | OBSERVER_MASK;
+        public static final int NEIGHBOR_PHYSICS            = NOTIFY_CLIENTS | NEIGHBOR_MASK | OBSERVER_MASK;
         public static final int NEIGHBOR_OBSERVER           = NOTIFY_CLIENTS | NEIGHBOR_MASK | PHYSICS_MASK;
         public static final int NEIGHBOR_PHYSICS_OBSERVER   = NOTIFY_CLIENTS | NEIGHBOR_MASK;
         public static final int PHYSICS_OBSERVER            = NOTIFY_CLIENTS;

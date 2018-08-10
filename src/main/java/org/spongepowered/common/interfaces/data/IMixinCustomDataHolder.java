@@ -70,7 +70,7 @@ public interface IMixinCustomDataHolder {
             final NBTTagCompound spongeData = ((IMixinEntity) this).getSpongeData();
             if (spongeData.hasKey(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_LIST)) {
                 final NBTTagList tagList = spongeData.getTagList(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_COMPOUND);
-                if (!tagList.hasNoTags()) {
+                if (!tagList.isEmpty()) {
                     for (int i = 0; i < tagList.tagCount(); i++) {
                         final NBTTagCompound tag = tagList.getCompoundTagAt(i);
                         final String dataClass = tag.getString("DataClass");

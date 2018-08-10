@@ -33,7 +33,6 @@ import net.minecraft.item.ItemStack;
 import org.spongepowered.api.text.translation.FixedTranslation;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
 
 import java.util.Collection;
@@ -66,7 +65,7 @@ public class ContainerFabric extends MinecraftFabric {
     }
 
     @Override
-    public Collection<IInventory> allInventories() {
+    public Collection<?> allInventories() {
         return this.all;
     }
 

@@ -30,6 +30,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.datafix.FixTypes;
 import net.minecraft.world.storage.SaveHandler;
 import net.minecraft.world.storage.WorldInfo;
+import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -76,28 +77,30 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
     @Shadow @Final private File worldDirectory;
     @Shadow @Final private long initializationTime;
 
+    private Exception capturedException;
+
     @ModifyArg(method = "checkSessionLock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/MinecraftException;<init>(Ljava/lang/String;)V"
             , ordinal = 0, remap = false))
-    public String modifyMinecraftExceptionOutputIfNotInitializationTime(String message) {
+    private String modifyMinecraftExceptionOutputIfNotInitializationTime(String message) {
         return "The save folder for world " + this.worldDirectory + " is being accessed from another location, aborting";
     }
 
     @ModifyArg(method = "checkSessionLock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/MinecraftException;<init>(Ljava/lang/String;)V"
             , ordinal = 1, remap = false))
-    public String modifyMinecraftExceptionOutputIfIOException(String message) {
+    private String modifyMinecraftExceptionOutputIfIOException(String message) {
         return "Failed to check session lock for world " + this.worldDirectory + ", aborting";
     }
 
     @Inject(method = "saveWorldInfoWithPlayer", at = @At(value = "INVOKE", target = NBT_COMPOUND_SET, shift = At.Shift.AFTER),
             locals = LocalCapture.CAPTURE_FAILHARD)
-    public void onSaveWorldInfoWithPlayerAfterTagSet(WorldInfo worldInformation, NBTTagCompound tagCompound, CallbackInfo ci,
-            NBTTagCompound nbttagcompound1, NBTTagCompound nbttagcompound2) {
-        saveDimensionAndOtherData((SaveHandler) (Object) this, worldInformation, nbttagcompound2);
+    private void onSaveWorldInfoWithPlayerAfterTagSet(WorldInfo worldInformation, NBTTagCompound tagCompound, CallbackInfo ci,
+      NBTTagCompound nbttagcompound1, NBTTagCompound nbttagcompound2) {
+        this.saveDimensionAndOtherData((SaveHandler) (Object) this, worldInformation, nbttagcompound2);
     }
 
     @Inject(method = "saveWorldInfoWithPlayer", at = @At("RETURN"))
-    public void onSaveWorldInfoWithPlayerEnd(WorldInfo worldInformation, NBTTagCompound tagCompound, CallbackInfo ci) {
-        saveSpongeDatData(worldInformation);
+    private void onSaveWorldInfoWithPlayerEnd(WorldInfo worldInformation, NBTTagCompound tagCompound, CallbackInfo ci) {
+        this.saveSpongeDatData(worldInformation);
     }
 
     @Override
@@ -106,13 +109,21 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
         final File spongeOldFile = new File(this.worldDirectory, "level_sponge.dat_old");
 
         if (spongeFile.exists() || spongeOldFile.exists()) {
-            final NBTTagCompound compound = CompressedStreamTools.readCompressed(new FileInputStream(spongeFile.exists() ? spongeFile :
-                    spongeOldFile));
-            ((IMixinWorldInfo) info).setSpongeRootLevelNBT(compound);
-            if (compound.hasKey(NbtDataUtil.SPONGE_DATA)) {
-                final NBTTagCompound spongeCompound = compound.getCompoundTag(NbtDataUtil.SPONGE_DATA);
-                DataUtil.spongeDataFixer.process(FixTypes.LEVEL, spongeCompound);
-                ((IMixinWorldInfo) info).readSpongeNbt(spongeCompound);
+            final File actualFile = spongeFile.exists() ? spongeFile : spongeOldFile;
+            try (final FileInputStream stream = new FileInputStream(actualFile)) {
+                final NBTTagCompound compound;
+                try {
+                    compound = CompressedStreamTools.readCompressed(stream);
+                } catch (Exception ex) {
+                    throw new RuntimeException("Attempt failed when reading Sponge level data for [" + info.getWorldName() + "] from file [" +
+                      actualFile.getName() + "]!", ex);
+                }
+                ((IMixinWorldInfo) info).setSpongeRootLevelNBT(compound);
+                if (compound.hasKey(NbtDataUtil.SPONGE_DATA)) {
+                    final NBTTagCompound spongeCompound = compound.getCompoundTag(NbtDataUtil.SPONGE_DATA);
+                    DataUtil.spongeDataFixer.process(FixTypes.LEVEL, spongeCompound);
+                    ((IMixinWorldInfo) info).readSpongeNbt(spongeCompound);
+                }
             }
         }
     }
@@ -122,22 +133,23 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
             final File spongeFile1 = new File(this.worldDirectory, "level_sponge.dat_new");
             final File spongeFile2 = new File(this.worldDirectory, "level_sponge.dat_old");
             final File spongeFile3 = new File(this.worldDirectory, "level_sponge.dat");
-            CompressedStreamTools.writeCompressed(((IMixinWorldInfo) info).getSpongeRootLevelNbt(), new FileOutputStream(spongeFile1));
+            try (final FileOutputStream stream = new FileOutputStream(spongeFile1)) {
+                CompressedStreamTools.writeCompressed(((IMixinWorldInfo) info).getSpongeRootLevelNbt(), stream);
+                if (spongeFile2.exists()) {
+                    spongeFile2.delete();
+                }
 
-            if (spongeFile2.exists()) {
-                spongeFile2.delete();
-            }
+                spongeFile3.renameTo(spongeFile2);
 
-            spongeFile3.renameTo(spongeFile2);
+                if (spongeFile3.exists()) {
+                    spongeFile3.delete();
+                }
 
-            if (spongeFile3.exists()) {
-                spongeFile3.delete();
-            }
+                spongeFile1.renameTo(spongeFile3);
 
-            spongeFile1.renameTo(spongeFile3);
-
-            if (spongeFile1.exists()) {
-                spongeFile1.delete();
+                if (spongeFile1.exists()) {
+                    spongeFile1.delete();
+                }
             }
         } catch (Exception exception) {
             exception.printStackTrace();
@@ -190,7 +202,7 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
      *
      * @param inputStream The input stream to direct to compressed stream tools
      * @return The compound that may be modified
-     * @throws IOException
+     * @throws IOException for reasons
      */
     @Redirect(method = READ_PLAYER_DATA, at = @At(value = "INVOKE", target = COMPRESSED_READ_FILE))
     private NBTTagCompound spongeReadPlayerData(InputStream inputStream) throws IOException {
@@ -225,6 +237,32 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
     @Inject(method = "writePlayerData", at = @At(value = "INVOKE", target = COMPRESSED_WRITE_FILE, shift = At.Shift.AFTER))
     private void onSpongeWrite(EntityPlayer player, CallbackInfo callbackInfo) {
         SpongePlayerDataHandler.savePlayer(player.getUniqueID());
+    }
+
+    @Inject(
+        method = "writePlayerData",
+        at = @At(
+            value = "INVOKE",
+            target = "Lorg/apache/logging/log4j/Logger;warn(Ljava/lang/String;Ljava/lang/Object;)V",
+            remap = false
+        ),
+        locals = LocalCapture.CAPTURE_FAILHARD
+    )
+    private void beforeLogWarning(EntityPlayer player, CallbackInfo ci, Exception exception) {
+        this.capturedException = exception;
+    }
+
+    @Redirect(
+        method = "writePlayerData",
+        at = @At(
+            value = "INVOKE",
+            target = "Lorg/apache/logging/log4j/Logger;warn(Ljava/lang/String;Ljava/lang/Object;)V",
+            remap = false
+        )
+    )
+    private void onWarn(Logger logger, String message, Object param) {
+        logger.warn(message, param, this.capturedException);
+        this.capturedException = null;
     }
 
     // SF overrides getWorldDirectory for mod compatibility.

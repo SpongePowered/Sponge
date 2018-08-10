@@ -36,10 +36,10 @@ import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 @Mixin(ChunkCache.class)
 public class MixinChunkCache {
 
-    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getChunkFromChunkCoords(II)Lnet/minecraft/world/chunk/Chunk;"))
+    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getChunk(II)Lnet/minecraft/world/chunk/Chunk;"))
     private Chunk onConstruct(World worldIn, int chunkX, int chunkZ) {
         if (worldIn.isRemote) {
-            return worldIn.getChunkFromChunkCoords(chunkX, chunkZ);
+            return worldIn.getChunk(chunkX, chunkZ);
         }
 
         final net.minecraft.world.chunk.Chunk chunk =

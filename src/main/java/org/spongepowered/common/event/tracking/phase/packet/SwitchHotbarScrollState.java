@@ -80,20 +80,21 @@ final class SwitchHotbarScrollState extends BasicInventoryPacketState {
 
         ItemStackSnapshot sourceSnapshot = ItemStackUtil.snapshotOf(sourceSlot.getStack());
         ItemStackSnapshot targetSnapshot = ItemStackUtil.snapshotOf(targetSlot.getStack());
-        SlotTransaction sourceTransaction =
-            new SlotTransaction(ContainerUtil.getSlot(inventoryContainer, previousSlot + preHotbarSize), sourceSnapshot, sourceSnapshot);
-        SlotTransaction targetTransaction =
-            new SlotTransaction(ContainerUtil.getSlot(inventoryContainer, itemChange.getSlotId() + preHotbarSize), targetSnapshot, targetSnapshot);
+        org.spongepowered.api.item.inventory.Slot slotPrev = ContainerUtil.getSlot(inventoryContainer, previousSlot + preHotbarSize);
+        SlotTransaction sourceTransaction = new SlotTransaction(slotPrev, sourceSnapshot, sourceSnapshot);
+        org.spongepowered.api.item.inventory.Slot slotNew = ContainerUtil.getSlot(inventoryContainer, itemChange.getSlotId() + preHotbarSize);
+        SlotTransaction targetTransaction = new SlotTransaction(slotNew, targetSnapshot, targetSnapshot);
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(player);
+            frame.pushCause(player);
             ImmutableList<SlotTransaction> transactions =
                 new ImmutableList.Builder<SlotTransaction>().add(sourceTransaction).add(targetTransaction).build();
             final ChangeInventoryEvent.Held changeInventoryEventHeld = SpongeEventFactory
-                .createChangeInventoryEventHeld(Sponge.getCauseStackManager().getCurrentCause(), (Inventory) inventoryContainer, transactions);
+                .createChangeInventoryEventHeld(Sponge.getCauseStackManager().getCurrentCause(), slotNew, slotPrev, (Inventory) inventoryContainer, transactions);
             net.minecraft.inventory.Container openContainer = player.openContainer;
             SpongeImpl.postEvent(changeInventoryEventHeld);
             if (changeInventoryEventHeld.isCancelled() || PacketPhaseUtil.allTransactionsInvalid(changeInventoryEventHeld.getTransactions())) {
                 player.connection.sendPacket(new SPacketHeldItemChange(previousSlot));
+                inventory.currentItem = previousSlot;
             } else {
                 PacketPhaseUtil.handleSlotRestore(player, openContainer, changeInventoryEventHeld.getTransactions(), false);
                 inventory.currentItem = itemChange.getSlotId();

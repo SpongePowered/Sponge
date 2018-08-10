@@ -31,5 +31,4 @@ import org.spongepowered.common.mixin.core.entity.MixinEntityAgeable;
 
 @Mixin(EntityAnimal.class)
 public abstract class MixinEntityAnimal extends MixinEntityAgeable implements Animal {
-
 }

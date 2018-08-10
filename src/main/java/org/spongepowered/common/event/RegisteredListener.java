@@ -42,7 +42,7 @@ public final class RegisteredListener<T extends Event> implements SpongeEventLis
 
     private final PluginContainer plugin;
 
-    private final Class<T> eventClass;
+    private final EventType<T> eventType;
     private final Order order;
 
     private final EventListener<? super T> listener;
@@ -50,9 +50,9 @@ public final class RegisteredListener<T extends Event> implements SpongeEventLis
     private final boolean beforeModifications;
     private Timing listenerTimer;
 
-    RegisteredListener(PluginContainer plugin, Class<T> eventClass, Order order, EventListener<? super T> listener, boolean beforeModifications) {
+    RegisteredListener(PluginContainer plugin, EventType<T> eventType, Order order, EventListener<? super T> listener, boolean beforeModifications) {
         this.plugin = checkNotNull(plugin, "plugin");
-        this.eventClass = checkNotNull(eventClass, "eventClass");
+        this.eventType = checkNotNull(eventType, "eventType");
         this.order = checkNotNull(order, "order");
         this.listener = checkNotNull(listener, "listener");
         this.beforeModifications = beforeModifications;
@@ -62,8 +62,8 @@ public final class RegisteredListener<T extends Event> implements SpongeEventLis
         return this.plugin;
     }
 
-    public Class<T> getEventClass() {
-        return this.eventClass;
+    public EventType<T> getEventType() {
+        return this.eventType;
     }
 
     public Order getOrder() {

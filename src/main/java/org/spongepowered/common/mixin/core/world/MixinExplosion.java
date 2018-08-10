@@ -47,6 +47,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.world.ExplosionEvent;
+import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
@@ -64,6 +65,8 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.interfaces.world.IMixinExplosion;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.util.VecHelper;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -95,8 +98,6 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
     @Shadow public double z;
     @Shadow public Entity exploder;
     @Shadow public float size;
-
-    @Shadow @Nullable public abstract EntityLivingBase getExplosivePlacedBy();
 
     @Inject(method = "<init>*", at = @At("RETURN"))
     public void onConstructed(net.minecraft.world.World world, Entity entity, double originX, double originY,
@@ -247,7 +248,7 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
         this.affectedBlockPositions.clear();
         if (this.shouldBreakBlocks) {
             for (Location<World> worldLocation : detonate.getAffectedLocations()) {
-                this.affectedBlockPositions.add(((IMixinLocation) (Object) worldLocation).getBlockPos());
+                this.affectedBlockPositions.add(VecHelper.toBlockPos(worldLocation));
             }
         }
         list.clear();
@@ -321,7 +322,7 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
         this.world.playSound((EntityPlayer) null, this.x, this.y, this.z, SoundEvents.ENTITY_GENERIC_EXPLODE,
             SoundCategory.BLOCKS, 4.0F, (1.0F + (this.world.rand.nextFloat() - this.world.rand.nextFloat()) * 0.2F) * 0.7F);
 
-        if (this.size >= 2.0F && this.damagesTerrain) {
+        if (this.size >= 2.0F) {
             if (this.world instanceof WorldServer) {
                 ((WorldServer) this.world).spawnParticle(EnumParticleTypes.EXPLOSION_HUGE,
                     this.x, this.y, this.z,
@@ -411,7 +412,18 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
             for (BlockPos blockpos1 : this.affectedBlockPositions) {
                 if (this.world.getBlockState(blockpos1).getMaterial() == Material.AIR && this.world.getBlockState(blockpos1.down()).isFullBlock()
                     && this.random.nextInt(3) == 0) {
-                    this.world.setBlockState(blockpos1, Blocks.FIRE.getDefaultState());
+                    // Sponge Start - Track the block position being destroyed
+                    final PhaseTracker phaseTracker = PhaseTracker.getInstance();
+                    final PhaseData peek = phaseTracker.getCurrentPhaseData();
+                    // We need to capture this block position if necessary
+                    if (peek.state.requiresBlockPosTracking()) {
+                        peek.context.getCaptureBlockPos().setPos(blockpos1);
+                    }
+                    phaseTracker.setBlockState((IMixinWorldServer) this.world, blockpos1, Blocks.FIRE.getDefaultState(), BlockChangeFlags.ALL);
+                    // And then un-set the captured block position
+                    if (peek.state.requiresBlockPosTracking()) {
+                        peek.context.getCaptureBlockPos().setPos(null);
+                    }
                 }
             }
         }

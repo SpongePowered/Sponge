@@ -31,14 +31,14 @@ import org.spongepowered.common.item.inventory.lens.MutableLensSet;
 import java.util.Spliterator;
 import java.util.Spliterators;
 
-public class MutableLensSetImpl<TInventory, TStack> extends MutableLensCollectionImpl<TInventory, TStack> implements MutableLensSet<TInventory, TStack> {
+public class MutableLensSetImpl extends MutableLensCollectionImpl implements MutableLensSet {
 
     public MutableLensSetImpl(boolean allowRemove) {
         super(0, allowRemove);
     }
     
     @Override
-    public void add(Lens<TInventory, TStack> lens, InventoryProperty<?, ?>... properties) {
+    public void add(Lens lens, InventoryProperty<?, ?>... properties) {
         if (this.contains(lens)) {
             return;
         }
@@ -46,7 +46,7 @@ public class MutableLensSetImpl<TInventory, TStack> extends MutableLensCollectio
     }
 
     @Override
-    public void add(int index, Lens<TInventory, TStack> lens, InventoryProperty<?, ?>... properties) {
+    public void add(int index, Lens lens, InventoryProperty<?, ?>... properties) {
         if (this.contains(lens)) {
             return;
         }
@@ -54,7 +54,7 @@ public class MutableLensSetImpl<TInventory, TStack> extends MutableLensCollectio
     }
 
     @Override
-    public Spliterator<Lens<TInventory, TStack>> spliterator() {
+    public Spliterator<Lens> spliterator() {
         return Spliterators.spliterator(this, Spliterator.ORDERED);
     }
     

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.test.inject;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -36,6 +37,7 @@ import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.common.SpongeGame;
 import org.spongepowered.common.SpongePlatform;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.inject.SpongeImplementationModule;
 import org.spongepowered.common.test.TestGame;
 import org.spongepowered.common.test.TestServer;
@@ -50,11 +52,18 @@ public class TestImplementationModule extends SpongeImplementationModule {
 
         this.bind(Server.class).to(TestServer.class);
         this.bind(SpongeGame.class).to(TestGame.class);
-        this.bind(Platform.class).to(SpongePlatform.class);
+        Platform platform = mock(Platform.class);
+        when(platform.getExecutionType()).thenReturn(Platform.Type.SERVER);
+        PluginContainer mock = mock(PluginContainer.class);
+        when(platform.getContainer(any())).thenReturn(mock);
+        this.bind(Platform.class).toInstance(platform);
 
         PluginManager manager = mock(PluginManager.class);
-        when(manager.getPlugin(anyString())).thenReturn(Optional.of(mock(PluginContainer.class)));
+        when(mock.getId()).thenReturn("sponge");
+        when(manager.getPlugin(anyString())).thenReturn(Optional.of(mock));
+        when(manager.fromInstance(any())).thenReturn(Optional.of(mock));
         this.bind(PluginManager.class).toInstance(manager);
+
 
         this.bind(EventManager.class).toInstance(mock(EventManager.class));
         this.bind(ChannelRegistrar.class).toInstance(mock(ChannelRegistrar.class));
