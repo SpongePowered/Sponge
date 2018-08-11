@@ -59,6 +59,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.CPacketClientSettings;
+import net.minecraft.network.play.server.SPacketAnimation;
 import net.minecraft.network.play.server.SPacketBlockChange;
 import net.minecraft.network.play.server.SPacketChat;
 import net.minecraft.network.play.server.SPacketCombatEvent;
@@ -195,6 +196,7 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.phase.entity.BasicEntityContext;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
@@ -509,6 +511,33 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         return EntityUtil.teleportPlayerToDimension((EntityPlayerMP)(Object) this, dimensionId);
     }
     */
+
+    /**
+     * @author Aaron1101 August 11th, 2018
+     * @reason Wrap the method in a try-with-resources for a EntityPhase.State.PLAYER_WAKE_UP
+     */
+    @Override
+    @Overwrite
+    public void wakeUpPlayer(boolean immediately, boolean updateWorldFlag, boolean setSpawn) {
+        // Sponge start - enter phase
+        try (final BasicEntityContext basicEntityContext = EntityPhase.State.PLAYER_WAKE_UP.createPhaseContext()
+                .source(this)
+                .addCaptures()) {
+            basicEntityContext.buildAndSwitch();
+            // Sponge end
+
+            if (this.isPlayerSleeping()) {
+                this.getServerWorld().getEntityTracker()
+                        .sendToTrackingAndSelf((Entity) (Object) this, new SPacketAnimation((Entity) (Object) this, 2)); // Sponge - cast to Entity
+            }
+
+            super.wakeUpPlayer(immediately, updateWorldFlag, setSpawn);
+
+            if (this.connection != null) {
+                this.connection.setPlayerLocation(this.posX, this.posY, this.posZ, this.rotationYaw, this.rotationPitch);
+            }
+        } // Sponge - add bracket to close 'try' block
+    }
 
     @Override
     public GameProfile getProfile() {

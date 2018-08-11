@@ -1589,16 +1589,6 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         updateRotation(entity);
     }
 
-    @Redirect(method = "wakeAllPlayers", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;wakeUpPlayer(ZZZ)V"))
-    private void spongeWakeUpPlayer(EntityPlayer player, boolean immediately, boolean updateWorldFlag, boolean setSpawn) {
-        try (final BasicEntityContext basicEntityContext = EntityPhase.State.PLAYER_WAKE_UP.createPhaseContext()
-                .source(player)
-                .addCaptures()) {
-            basicEntityContext.buildAndSwitch();
-            player.wakeUpPlayer(immediately, updateWorldFlag, setSpawn);
-        }
-    }
-
     /**
      * @author gabizou - May 11th, 2018
      * @reason Due to mods attempting to retrieve spawned entity drops in the world,
