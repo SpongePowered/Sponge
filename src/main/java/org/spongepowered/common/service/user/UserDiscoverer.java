@@ -253,10 +253,25 @@ class UserDiscoverer {
         // want the player entity to be cached.
         final IMixinEntityPlayerMP player = (IMixinEntityPlayerMP) playerList.getPlayerByUUID(uniqueId);
         if (player != null) {
-            final User user = player.getUserObject();
-            userCache.put(uniqueId, user);
-            userByNameCache.put(user.getName(), user);
-            return user;
+            // If we're getting the online player, we want their current user,
+            // rather than something that is recreated and may be out of sync
+            // with the player itself, which is what #getUserObject does and was
+            // the previous call here.
+            //
+            // Note: During initialization of the EntityPlayerMP, this method may
+            // get called to set its User value. If so, the JLS section 4.12.5
+            // states that the field will be null at this point, meaning
+            // this will return an empty optional - rather than calling back into
+            // itself and starting the cycle again. This might happen if a player's
+            // User has dropped out of the cache above and the player is then recreated
+            // through death or world teleport. This will prevent a stack overflow.
+            Optional<User> optional = player.getBackingUser();
+            if (optional.isPresent()) {
+                final User user = optional.get();
+                userCache.put(uniqueId, user);
+                userByNameCache.put(user.getName(), user);
+                return user;
+            }
         }
 
         return null;
