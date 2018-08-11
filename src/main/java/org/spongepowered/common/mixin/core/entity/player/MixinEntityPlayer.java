@@ -159,7 +159,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow public abstract void spawnSweepParticles(); //spawnSweepParticles()
     @Shadow public abstract void takeStat(StatBase stat);
     @Shadow protected abstract void destroyVanishingCursedItems(); // Filter vanishing curse enchanted items
-    @Shadow public abstract void wakeUpPlayer(boolean immediately, boolean updateWorldFlag, boolean setSpawn);
+    @Shadow public void wakeUpPlayer(boolean immediately, boolean updateWorldFlag, boolean setSpawn) {};
     @Shadow public abstract EntityItem dropItem(boolean dropAll);
     @Shadow public abstract FoodStats getFoodStats();
     @Shadow public abstract GameProfile getGameProfile();
