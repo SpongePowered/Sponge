@@ -474,6 +474,12 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
+    public Optional<User> getBackingUser() {
+        // may be null during initialization, mainly used to avoid potential stack overflow with #getUserObject
+        return Optional.ofNullable(this.user);
+    }
+
+    @Override
     public User getUserObject() {
         final UserStorageService service = SpongeImpl.getGame().getServiceManager().provideUnchecked(UserStorageService.class);
         if (this.isFake) { // Fake players are recogizeable through the field set up with isFake.

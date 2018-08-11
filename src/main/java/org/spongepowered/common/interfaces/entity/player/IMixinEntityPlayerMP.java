@@ -38,6 +38,7 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.world.border.PlayerOwnBorderListener;
 
 import java.util.Collection;
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -46,6 +47,8 @@ public interface IMixinEntityPlayerMP extends IMixinEntityPlayer {
     default boolean usesCustomClient() {
         return false;
     }
+
+    Optional<User> getBackingUser();
 
     User getUserObject();
 
