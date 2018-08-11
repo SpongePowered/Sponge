@@ -492,6 +492,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             if (deltaSquared > ((1f / 16) * (1f / 16)) || deltaAngleSquared > (.15f * .15f)) {
                 Transform<World> fromTransform = player.getTransform().setLocation(from).setRotation(fromrot);
                 Transform<World> toTransform = player.getTransform().setLocation(to).setRotation(torot);
+                Transform<World> originalToTransform = toTransform;
                 if (ShouldFire.MOVE_ENTITY_EVENT) {
                     try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                         Sponge.getCauseStackManager().pushCause(player);
@@ -507,7 +508,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                         toTransform = event.getToTransform();
                     }
                 }
-                if (!toTransform.equals(toTransform)) {
+                if (!toTransform.equals(originalToTransform)) {
                     mixinPlayer.setLocationAndAngles(toTransform);
                     this.lastMoveLocation = toTransform.getLocation();
                     ((IMixinEntityPlayerMP) this.player).setVelocityOverride(null);
