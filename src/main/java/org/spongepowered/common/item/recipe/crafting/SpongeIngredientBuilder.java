@@ -100,7 +100,7 @@ public class SpongeIngredientBuilder implements Ingredient.Builder {
 
     @Override
     public Ingredient.Builder with(ItemType... items) {
-        Arrays.stream(items).map(t -> ItemStack.of(t, 1)).forEach(this.matchItems::add);
+        Arrays.stream(items).map(t -> (Predicate<ItemStack>) t::matches).forEach(this.predicates::add);
         return withDisplay(items);
     }
 
