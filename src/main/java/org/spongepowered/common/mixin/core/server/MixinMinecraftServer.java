@@ -610,7 +610,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         TimingsManager.FULL_SERVER_TICK.stopTiming();
     }
 
-    private int dimensionId;
+    @Nullable private Integer dimensionId;
 
     @Redirect(method = "addServerStatsToSnooper", at = @At(value = "FIELD", target = "Lnet/minecraft/world/WorldServer;provider:Lnet/minecraft/world/WorldProvider;", opcode = Opcodes.GETFIELD))
     private WorldProvider onGetWorldProviderForSnooper(WorldServer world) {
@@ -622,8 +622,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         return world.provider;
     }
 
-    @ModifyArg(method = "addServerStatsToSnooper", at = @At(value = "INVOKE", target = "Ljava/lang/Integer;valueOf(I)Ljava/lang/Integer;", ordinal = 5))
-    private int onValueOfInteger(int dimensionId) {
+    @Redirect(method = "addServerStatsToSnooper", at = @At(value = "INVOKE", target = "Ljava/lang/Integer;valueOf(I)Ljava/lang/Integer;", ordinal = 5))
+    @Nullable private Integer onValueOfInteger(int original) {
         return this.dimensionId;
     }
 
