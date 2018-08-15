@@ -1246,7 +1246,7 @@ public final class WorldManager {
         return ((IMixinWorldServer) world).getDimensionId();
     }
 
-    public static int getDimensionId(WorldServer world) {
+    @Nullable public static Integer getDimensionId(WorldServer world) {
         return ((IMixinWorldInfo) world.getWorldInfo()).getDimensionId();
     }
 }
