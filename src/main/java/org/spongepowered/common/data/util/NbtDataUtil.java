@@ -177,6 +177,11 @@ public final class NbtDataUtil {
     public static final String BUKKIT_FIRST_PLAYED = "firstPlayed";
     public static final String BUKKIT_LAST_PLAYED = "lastPlayed";
 
+    // Legacy migration tags from CanaryMod
+    public static final String CANARY = "Canary";
+    public static final String CANARY_FIRST_JOINED = "FirstJoin";
+    public static final String CANARY_LAST_JOINED = "LastJoin";
+
     // These are used by Minecraft's internals for entity spawning
     public static final String ENTITY_TYPE_ID = "id";
     public static final String MINECART_TYPE = "Type";
