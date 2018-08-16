@@ -251,7 +251,7 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge {
     @Redirect(method = "readPlayerData(Lnet/minecraft/entity/player/EntityPlayer;)Lnet/minecraft/nbt/NBTTagCompound;", at = @At(value = "INVOKE", target =
         "Lnet/minecraft/nbt/CompressedStreamTools;readCompressed(Ljava/io/InputStream;)"
             + "Lnet/minecraft/nbt/NBTTagCompound;"))
-    private NBTTagCompound impl$readBukkitDataAndOrSpongeData(final InputStream inputStream) throws IOException {
+    private NBTTagCompound impl$readLegacyDataAndOrSpongeData(final InputStream inputStream) throws IOException {
         Instant creation = this.impl$file == null ? Instant.now() : Files.readAttributes(this.impl$file, BasicFileAttributes.class).creationTime().toInstant();
         final NBTTagCompound compound = CompressedStreamTools.readCompressed(inputStream);
         Instant lastPlayed = Instant.now();
@@ -260,6 +260,12 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge {
             final NBTTagCompound bukkitCompound = compound.getCompoundTag(Constants.Bukkit.BUKKIT);
             creation = Instant.ofEpochMilli(bukkitCompound.getLong(Constants.Bukkit.BUKKIT_FIRST_PLAYED));
             lastPlayed = Instant.ofEpochMilli(bukkitCompound.getLong(Constants.Bukkit.BUKKIT_LAST_PLAYED));
+        }
+        // migrate canary join data
+        if (compound.hasKey(Constants.Canary.ROOT, Constants.NBT.TAG_COMPOUND)) {
+            final NBTTagCompound canaryCompound = compound.getCompoundTag(Constants.Canary.ROOT);
+            creation = Instant.ofEpochMilli(canaryCompound.getLong(Constants.Canary.FIRST_JOINED));
+            lastPlayed = Instant.ofEpochMilli(canaryCompound.getLong(Constants.Canary.LAST_JOINED));
         }
         UUID playerId = null;
         if (compound.hasUniqueId(Constants.UUID)) {

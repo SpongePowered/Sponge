@@ -920,6 +920,14 @@ public final class Constants {
         public static final String BUKKIT_LAST_PLAYED = "lastPlayed";
     }
 
+    public static final class Canary {
+
+        // Legacy migration tags from CanaryMod
+        public static final String ROOT = "Canary";
+        public static final String FIRST_JOINED = "FirstJoin";
+        public static final String LAST_JOINED = "LastJoin";
+    }
+
     public static final class Legacy {
 
         public static final String LEGACY_DIMENSION_ARRAY = "DimensionArray";
