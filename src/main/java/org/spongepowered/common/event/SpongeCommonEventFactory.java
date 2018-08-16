@@ -1326,18 +1326,12 @@ public class SpongeCommonEventFactory {
         if (captureIn == null || inv == null) {
             return;
         }
-        Inventory ordered = inv.query(OrderedInventory.class);
-        if (!(ordered instanceof OrderedInventory) && !(ordered instanceof EmptyInventory)) {
-            ordered = ordered.iterator().next();
-        }
-        if (ordered instanceof OrderedInventory) {
-            Optional<org.spongepowered.api.item.inventory.Slot> slot = ((OrderedInventory) ordered).getSlot(SlotIndex.of(index));
-            if (slot.isPresent()) {
-                SlotTransaction trans = new SlotTransaction(slot.get(),
-                        ItemStackUtil.snapshotOf(originalStack),
-                        ItemStackUtil.snapshotOf(slot.get().peek().orElse(org.spongepowered.api.item.inventory.ItemStack.empty())));
-                captureIn.getCapturedTransactions().add(trans);
-            }
+        Optional<org.spongepowered.api.item.inventory.Slot> slot = ((InventoryAdapter) inv).getSlot(index);
+        if (slot.isPresent()) {
+            SlotTransaction trans = new SlotTransaction(slot.get(),
+                    ItemStackUtil.snapshotOf(originalStack),
+                    ItemStackUtil.snapshotOf(slot.get().peek().orElse(org.spongepowered.api.item.inventory.ItemStack.empty())));
+            captureIn.getCapturedTransactions().add(trans);
         } else {
             SpongeImpl.getLogger().warn("Unable to capture transaction from " + inv.getClass() + " at index " + index);
         }
@@ -1359,25 +1353,18 @@ public class SpongeCommonEventFactory {
             return transaction.get();
         }
 
-        Inventory ordered = inv.query(OrderedInventory.class);
-        if (!(ordered instanceof OrderedInventory) && !(ordered instanceof EmptyInventory)) {
-            ordered = ordered.iterator().next();
-        }
-        if (ordered instanceof OrderedInventory) {
-            Optional<org.spongepowered.api.item.inventory.Slot> slot = ((OrderedInventory) ordered).getSlot(SlotIndex.of(index));
-            if (slot.isPresent()) {
-                ItemStackSnapshot original = slot.get().peek().map(ItemStackUtil::snapshotOf).orElse(ItemStackSnapshot.NONE);
-                ItemStack remaining = transaction.get();
-                if (remaining.isEmpty()) {
-                    ItemStackSnapshot replacement = slot.get().peek().map(ItemStackUtil::snapshotOf).orElse(ItemStackSnapshot.NONE);
-                    captureIn.getCapturedTransactions().add(new SlotTransaction(slot.get(), original, replacement));
-                }
-                return remaining;
-            }
-        } else {
+        Optional<org.spongepowered.api.item.inventory.Slot> slot = ((InventoryAdapter) inv).getSlot(index);
+        if (!slot.isPresent()) {
             SpongeImpl.getLogger().warn("Unable to capture transaction from " + inv.getClass() + " at index " + index);
+            return transaction.get();
         }
-        return transaction.get();
+        ItemStackSnapshot original = slot.get().peek().map(ItemStackUtil::snapshotOf).orElse(ItemStackSnapshot.NONE);
+        ItemStack remaining = transaction.get();
+        if (remaining.isEmpty()) {
+            ItemStackSnapshot replacement = slot.get().peek().map(ItemStackUtil::snapshotOf).orElse(ItemStackSnapshot.NONE);
+            captureIn.getCapturedTransactions().add(new SlotTransaction(slot.get(), original, replacement));
+        }
+        return remaining;
     }
 
     public static SetAITargetEvent callSetAttackTargetEvent(@Nullable Entity target, Agent agent) {

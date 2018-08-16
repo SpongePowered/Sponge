@@ -25,9 +25,14 @@
 package org.spongepowered.common.item.inventory.adapter;
 
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.Slot;
+import org.spongepowered.common.item.inventory.adapter.impl.VanillaAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
+import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
+
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -61,5 +66,10 @@ public interface InventoryAdapter extends Inventory {
 
     @Nullable
     Inventory getChild(Lens lens);
+
+    default Optional<Slot> getSlot(int ordinal) {
+        SlotLens slotLens = this.getRootLens().getSlotLens(ordinal);
+        return VanillaAdapter.forSlot(this.getFabric(), slotLens, this);
+    }
 
 }
