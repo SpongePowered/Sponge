@@ -45,6 +45,7 @@ import net.minecraft.world.chunk.Chunk;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.User;
@@ -79,6 +80,7 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.event.SpawnTypeRegistryModule;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
+import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 import org.spongepowered.common.world.WorldUtil;
 
 import java.io.ByteArrayOutputStream;
@@ -602,10 +604,10 @@ public final class PhaseTracker {
             final IPhaseState<?> state = peek.state;
             ((IPhaseState) state).associateNeighborStateNotifier(peek.context,
                 sourcePos, iblockstate.getBlock(), notifyPos, ((WorldServer) mixinWorld), PlayerTracker.Type.NOTIFIER);
-            final LocatableBlock block = LocatableBlock.builder()
-                .position(VecHelper.toVector3i(sourcePos))
-                .world((World) mixinWorld)
-                .build();
+            final LocatableBlock block = new SpongeLocatableBlockBuilder()
+                .world(mixinWorld)
+                .position(sourcePos.getX(), sourcePos.getY(), sourcePos.getZ())
+                .state((BlockState) iblockstate).build();
             try (final NeighborNotificationContext context = TickPhase.Tick.NEIGHBOR_NOTIFY.createPhaseContext()
                 .source(block)
                 .sourceBlock(sourceBlock)

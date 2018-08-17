@@ -93,6 +93,7 @@ import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
+import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 import org.spongepowered.common.world.WorldUtil;
 
 import java.util.ArrayList;
@@ -254,10 +255,7 @@ public final class TrackingUtil {
             }
         }
 
-        final LocatableBlock locatable = LocatableBlock.builder()
-            .location(new Location<>(apiWorld, pos.getX(), pos.getY(), pos.getZ()))
-            .state((BlockState) state)
-            .build();
+        final LocatableBlock locatable = new SpongeLocatableBlockBuilder().world(apiWorld).position(pos.getX(), pos.getY(), pos.getZ()).state((BlockState)state).build();
         final BlockTickContext phaseContext = TickPhase.Tick.BLOCK.createPhaseContext().source(locatable);
 
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
@@ -296,10 +294,7 @@ public final class TrackingUtil {
             }
         }
 
-        final LocatableBlock locatable = LocatableBlock.builder()
-            .location(new Location<>(apiWorld, pos.getX(), pos.getY(), pos.getZ()))
-            .state((BlockState) state)
-            .build();
+        final LocatableBlock locatable = new SpongeLocatableBlockBuilder().world(apiWorld).position(pos.getX(), pos.getY(), pos.getZ()).state((BlockState) state).build();
         final BlockTickContext phaseContext = TickPhase.Tick.RANDOM_BLOCK.createPhaseContext().source(locatable);
 
         // We have to associate any notifiers in case of scheduled block updates from other sources

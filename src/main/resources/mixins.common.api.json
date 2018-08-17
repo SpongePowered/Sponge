@@ -17,6 +17,7 @@
         "text.MixinTextSelector",
         "text.MixinTextTranslatable",
         "text.title.MixinTitle",
+        "world.MixinLocatableBlock",
         "world.MixinLocation"
     ],
     "injectors": {

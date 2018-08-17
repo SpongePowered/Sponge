@@ -200,6 +200,8 @@ import org.spongepowered.common.registry.type.world.BlockChangeFlagRegistryModul
 import org.spongepowered.common.util.NonNullArrayList;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.SpongeLocatableBlock;
+import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 import org.spongepowered.common.world.WorldManager;
 import org.spongepowered.common.world.WorldUtil;
 import org.spongepowered.common.world.border.PlayerBorderListener;
@@ -935,8 +937,9 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
         final PhaseContext<?> context = currentPhase.context;
 
-        final LocatableBlock locatable = LocatableBlock.builder()
-            .location(new Location<>(this, pos.getX(), pos.getY(), pos.getZ()))
+        final LocatableBlock locatable = new SpongeLocatableBlockBuilder()
+            .world(this)
+            .position(pos.getX(), pos.getY(), pos.getZ())
             .state(this.getBlock(pos.getX(), pos.getY(), pos.getZ()))
             .build();
 

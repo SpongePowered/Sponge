@@ -33,11 +33,13 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -48,6 +50,7 @@ import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 
 import java.util.Random;
 
@@ -86,8 +89,7 @@ public abstract class MixinBlockDynamicLiquid {
         if (!ShouldFire.CHANGE_BLOCK_EVENT_MODIFY) {
             return;
         }
-        Location<org.spongepowered.api.world.World> loc = new Location<>(((org.spongepowered.api.world.World) worldIn), sourcePos.getX(), sourcePos.getY(), sourcePos.getZ());
-        LocatableBlock source = LocatableBlock.builder().location(loc).build();
+        LocatableBlock source = new SpongeLocatableBlockBuilder().world((World) worldIn).position(sourcePos.getX(), sourcePos.getY(), sourcePos.getZ()).state((BlockState) state).build();
         IBlockState newState = Blocks.STONE.getDefaultState();
         ChangeBlockEvent.Modify event = SpongeCommonEventFactory.callChangeBlockEventModifyLiquidMix(worldIn, sourcePos, newState, source);
         Transaction<BlockSnapshot> transaction = event.getTransactions().get(0);
