@@ -137,6 +137,8 @@ import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.SpongeLocatableBlock;
+import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 import org.spongepowered.common.world.WorldUtil;
 
 import java.lang.ref.WeakReference;
@@ -551,7 +553,7 @@ public class SpongeCommonEventFactory {
 
         if (source == null) {
             // If source is null the source is the block itself
-            source = LocatableBlock.builder().state(fromState).world(((World) worldIn)).position(pos.getX(), pos.getY(), pos.getZ()).build();
+            source = new SpongeLocatableBlockBuilder().state(fromState).world((World) worldIn).position(pos.getX(), pos.getY(), pos.getZ()).build();
         }
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(source);
@@ -622,10 +624,7 @@ public class SpongeCommonEventFactory {
         boolean extending = (eventId == 0);
         final IBlockState blockstate = ((net.minecraft.world.World) world).getBlockState(pos);
         EnumFacing direction = blockstate.getValue(BlockDirectional.FACING);
-        final LocatableBlock locatable = LocatableBlock.builder()
-                .location(new Location<>((World) world, pos.getX(), pos.getY(), pos.getZ()))
-                .state((BlockState) blockstate)
-                .build();
+        final LocatableBlock locatable = new SpongeLocatableBlockBuilder().world((World) world).state((BlockState) blockstate).position(pos.getX(), pos.getY(), pos.getZ()).build();
 
         // Sets toss out duplicate values (even though there shouldn't be any)
         HashSet<Location<org.spongepowered.api.world.World>> locations = new HashSet<>();
@@ -677,7 +676,7 @@ public class SpongeCommonEventFactory {
         }
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             final BlockState blockstate = (BlockState) ((net.minecraft.world.World) world).getBlockState(sourcePos);
-            final LocatableBlock locatable = LocatableBlock.builder()
+            final LocatableBlock locatable = new SpongeLocatableBlockBuilder().world(world).position(sourcePos.getX(), sourcePos.getY(), sourcePos.getZ())
                     .location(new Location<>(world, sourcePos.getX(), sourcePos.getY(), sourcePos.getZ()))
                     .state(blockstate)
                     .build();

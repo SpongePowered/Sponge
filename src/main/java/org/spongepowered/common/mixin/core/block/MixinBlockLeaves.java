@@ -62,6 +62,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 
 import java.util.List;
 import java.util.Optional;
@@ -83,8 +84,9 @@ public abstract class MixinBlockLeaves extends MixinBlock {
         final boolean isWorldGen = currentState.isWorldGeneration();
         try (PhaseContext<?> context = isBlockAlready && !isWorldGen
                                        ? BlockPhase.State.BLOCK_DECAY.createPhaseContext()
-                                           .source(LocatableBlock.builder()
-                                               .location(new Location<World>((World) worldIn, pos.getX(), pos.getY(), pos.getZ()))
+                                           .source(new SpongeLocatableBlockBuilder()
+                                               .world((World) worldIn)
+                                               .position(pos.getX(), pos.getY(), pos.getZ())
                                                .state((BlockState) state)
                                                .build())
                                        : null) {
@@ -118,8 +120,9 @@ public abstract class MixinBlockLeaves extends MixinBlock {
             final boolean isWorldGen = currentState.isWorldGeneration();
             final boolean isBlockAlready = phaseTracker.getCurrentState().getPhase() != TrackingPhases.BLOCK;
             try (PhaseContext<?> context = isBlockAlready && !isWorldGen ? BlockPhase.State.BLOCK_DECAY.createPhaseContext()
-                .source(LocatableBlock.builder()
-                    .location(new Location<>((World) worldIn, pos.getX(), pos.getY(), pos.getZ()))
+                .source(new SpongeLocatableBlockBuilder()
+                    .world((World) worldIn)
+                    .position(pos.getX(), pos.getY(), pos.getZ())
                     .state((BlockState) state)
                     .build()) : null) {
                 if (context != null) {

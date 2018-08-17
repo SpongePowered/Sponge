@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.world;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
@@ -49,20 +51,21 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 
+import javax.annotation.Nullable;
+
 public class SpongeLocatableBlock implements LocatableBlock {
 
     private final BlockState blockState;
     private final Vector3i position;
     private final UUID worldId;
     private final WeakReference<World> worldReference;
-    private final Location<World> location;
+    @Nullable private Location<World> location;
 
     SpongeLocatableBlock(SpongeLocatableBlockBuilder builder) {
-        this.blockState = builder.blockState;
-        this.position = builder.position;
-        this.worldId = builder.worldId;
-        this.worldReference = builder.worldReference;
-        this.location = new Location<>(this.worldReference.get(), this.position);
+        this.blockState = checkNotNull(builder.blockState, "blockstate");
+        this.position = checkNotNull(builder.position, "position");
+        this.worldId = checkNotNull(builder.worldId, "worldid");
+        this.worldReference = checkNotNull(builder.worldReference, "reference");
     }
 
     @Override
@@ -72,6 +75,9 @@ public class SpongeLocatableBlock implements LocatableBlock {
 
     @Override
     public Location<World> getLocation() {
+        if (this.location == null) {
+            this.location = new Location<World>(this.worldReference.get(), this.position);
+        }
         return this.location;
     }
 

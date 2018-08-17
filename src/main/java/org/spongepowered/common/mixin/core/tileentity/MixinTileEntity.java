@@ -69,6 +69,8 @@ import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.registry.type.block.TileEntityTypeRegistryModule;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.SpongeLocatableBlock;
+import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 
 import java.lang.ref.WeakReference;
 import java.util.Collection;
@@ -298,10 +300,11 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
             } else {
                 blockState = this.getBlock();
             }
-            this.locatableBlock = LocatableBlock.builder()
-                    .location(new Location<World>((World) this.world, this.pos.getX(), this.pos.getY(), this.pos.getZ()))
-                    .state(blockState)
-                    .build();
+            this.locatableBlock = new SpongeLocatableBlockBuilder()
+                .world((World) this.world)
+                .position(this.pos.getX(), this.pos.getY(), this.pos.getZ())
+                .state(blockState)
+                .build();
         }
 
         return this.locatableBlock;

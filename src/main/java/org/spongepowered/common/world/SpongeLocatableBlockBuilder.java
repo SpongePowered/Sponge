@@ -47,10 +47,10 @@ import javax.annotation.Nullable;
 
 public class SpongeLocatableBlockBuilder extends AbstractDataBuilder<LocatableBlock> implements LocatableBlock.Builder {
 
-    @Nullable public BlockState blockState;
-    @Nullable public Vector3i position;
-    @Nullable public UUID worldId;
-    @Nullable public WeakReference<World> worldReference;
+    @Nullable BlockState blockState;
+    @Nullable Vector3i position;
+    @Nullable UUID worldId;
+    @Nullable WeakReference<World> worldReference;
 
 
     public SpongeLocatableBlockBuilder() {
@@ -58,13 +58,13 @@ public class SpongeLocatableBlockBuilder extends AbstractDataBuilder<LocatableBl
     }
 
     @Override
-    public LocatableBlock.Builder state(BlockState blockState) {
+    public SpongeLocatableBlockBuilder state(BlockState blockState) {
         this.blockState = checkNotNull(blockState, "BlockState cannot be null!");
         return this;
     }
 
     @Override
-    public LocatableBlock.Builder location(Location<World> location) {
+    public SpongeLocatableBlockBuilder location(Location<World> location) {
         checkNotNull(location, "Location cannot be null!");
         this.blockState = location.getBlock();
         this.position = location.getBlockPosition();
@@ -74,19 +74,19 @@ public class SpongeLocatableBlockBuilder extends AbstractDataBuilder<LocatableBl
     }
 
     @Override
-    public LocatableBlock.Builder position(Vector3i position) {
+    public SpongeLocatableBlockBuilder position(Vector3i position) {
         this.position = checkNotNull(position, "Position cannot be null!");
         return this;
     }
 
     @Override
-    public LocatableBlock.Builder position(int x, int y, int z) {
+    public SpongeLocatableBlockBuilder position(int x, int y, int z) {
         this.position = new Vector3i(x, y, z);
         return this;
     }
 
     @Override
-    public LocatableBlock.Builder world(World world) {
+    public SpongeLocatableBlockBuilder world(World world) {
         checkNotNull(world, "World cannot be null!");
         this.worldReference = new WeakReference<World>(world);
         this.worldId = world.getUniqueId();
@@ -94,7 +94,7 @@ public class SpongeLocatableBlockBuilder extends AbstractDataBuilder<LocatableBl
     }
 
     @Override
-    public LocatableBlock.Builder from(LocatableBlock value) {
+    public SpongeLocatableBlockBuilder from(LocatableBlock value) {
         this.position = checkNotNull(value, "LocatableBlock cannot be null!").getPosition();
         this.worldId = value.getLocation().getExtent().getUniqueId();
         this.worldReference = new WeakReference<World>(value.getLocation().getExtent());
@@ -121,6 +121,10 @@ public class SpongeLocatableBlockBuilder extends AbstractDataBuilder<LocatableBl
 
     @Override
     public SpongeLocatableBlockBuilder reset() {
+        this.position = null;
+        this.worldId = null;
+        this.worldReference = null;
+        this.blockState = null;
         return this;
     }
 
