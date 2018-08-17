@@ -48,7 +48,6 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.World;
-import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -772,12 +771,10 @@ public interface IPhaseState<C extends PhaseContext<C>> {
 
 
     default void provideNotifierForNeighbors(C context, NeighborNotificationContext context1) {
-        if (context.owner != null) { // If the owner is set, at least set the owner
-            context1.notifier(context.owner);
-        }
-        // otherwise, set whatever the latest notifier was.
         if (context.notifier != null) {
             context1.notifier(context.notifier);
+        } else if (context.owner != null) { // If the owner is set, at least set the owner
+            context1.notifier(context.owner);
         }
     }
 }
