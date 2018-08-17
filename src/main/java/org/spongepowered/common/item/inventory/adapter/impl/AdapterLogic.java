@@ -300,7 +300,7 @@ public abstract class AdapterLogic{
         adapter = ((InventoryAdapter) adapter.root());
         if (adapter instanceof Container) {
             // If Root is a Container get the viewed inventory
-            Object first = adapter.getFabric().allInventories().iterator().next();
+            Object first = adapter.getFabric().get(0);
             if (first instanceof CustomInventory) {
                 // if viewed inventory is a custom inventory get it instead
                 adapter = ((InventoryAdapter) first);
