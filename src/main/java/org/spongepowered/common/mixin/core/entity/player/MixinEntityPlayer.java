@@ -201,11 +201,9 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
         this.experience = (float) experience / this.xpBarCap();
     }
 
-    /**
-     * {@link EntityPlayer#addExperienceLevel(int)} doesn't update the total
-     * experience. This recalculates it for plugins to properly make use of it.
-     */
-    private void recalculateTotalExperience() {
+
+    @Override
+    public void recalculateTotalExperience() {
         if (!this.dontRecalculateExperience) {
             boolean isInaccurate = ExperienceHolderUtils.getLevelForExp(this.experienceTotal) != this.experienceLevel;
             if (!isInaccurate) {

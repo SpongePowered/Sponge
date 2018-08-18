@@ -69,6 +69,7 @@ import net.minecraft.network.play.server.SPacketKeepAlive;
 import net.minecraft.network.play.server.SPacketMoveVehicle;
 import net.minecraft.network.play.server.SPacketPlayerListItem;
 import net.minecraft.network.play.server.SPacketResourcePackSend;
+import net.minecraft.network.play.server.SPacketSetExperience;
 import net.minecraft.network.play.server.SPacketSetSlot;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerInteractionManager;
@@ -97,8 +98,8 @@ import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.tileentity.ChangeSignEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
@@ -291,6 +292,9 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                 this.numResourcePacksInTransit.decrementAndGet();
             });
             this.netManager.sendPacket(new SPacketKeepAlive(now));
+        } else if (packetIn instanceof SPacketSetExperience) {
+            // Ensures experience is in sync server-side.
+            ((IMixinEntityPlayer) player).recalculateTotalExperience();
         }
 
         return packetIn;

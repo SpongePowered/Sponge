@@ -38,6 +38,12 @@ public interface IMixinEntityPlayer extends IMixinEntity {
 
     boolean isSpawnForced(int dim);
 
+    /**
+     * {@link EntityPlayer#addExperienceLevel(int)} doesn't update the total
+     * experience. This recalculates it for plugins to properly make use of it.
+     */
+    void recalculateTotalExperience();
+
     boolean affectsSpawning();
 
     void setAffectsSpawning(boolean affectsSpawning);
