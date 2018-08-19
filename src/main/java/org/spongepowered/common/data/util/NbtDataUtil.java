@@ -361,6 +361,17 @@ public final class NbtDataUtil {
         return stringList;
     }
 
+    public static List<String> getPlainPagesFromNBT(NBTTagCompound compound) {
+        final NBTTagList list = compound.getTagList(ITEM_BOOK_PAGES, TAG_STRING);
+        List<String> stringList = new ArrayList<>();
+        if (!list.isEmpty()) {
+            for (int i = 0; i < list.tagCount(); i++) {
+                stringList.add(list.getStringTagAt(i));
+            }
+        }
+        return stringList;
+    }
+
     public static void removePagesFromNBT(ItemStack stack) {
         final NBTTagList list = new NBTTagList();
         if (!stack.hasTagCompound()) {
