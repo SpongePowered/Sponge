@@ -35,6 +35,7 @@ import net.minecraft.nbt.NBTTagString;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.serializer.TextParseException;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.common.item.enchantment.SpongeEnchantment;
 import org.spongepowered.common.text.SpongeTexts;
@@ -340,7 +341,13 @@ public final class NbtDataUtil {
         if (list.isEmpty()) {
             return new ArrayList<>();
         }
-        return SpongeTexts.fromNbtLegacy(list);
+        try {
+            // Book text should be in JSON, but there is a chance it might be in
+            // Legacy format.
+            return SpongeTexts.fromNbtJson(list);
+        } catch (TextParseException ignored) {
+            return SpongeTexts.fromNbtLegacy(list);
+        }
     }
 
     public static List<String> getPlainPagesFromNBT(NBTTagCompound compound) {
