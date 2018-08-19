@@ -32,13 +32,10 @@ import static org.spongepowered.api.data.DataQuery.of;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.MapMaker;
 import net.minecraft.entity.Entity;
-import org.spongepowered.api.Sponge;
-import com.google.common.reflect.TypeToken;
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.data.DataQuery;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.util.TypeTokens;
@@ -54,11 +51,9 @@ import org.spongepowered.common.data.datasync.entity.EntityNoGravityConverter;
 import org.spongepowered.common.data.datasync.entity.EntitySilentConverter;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Callable;
@@ -209,6 +204,8 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
         this.register("item_lore", Key.builder().type(TypeTokens.LIST_TEXT_VALUE_TOKEN).key(CatalogKey.sponge("item_lore")).name("Item Lore").query(of("ItemLore")).build());
 
         this.register("book_pages", Key.builder().type(TypeTokens.LIST_TEXT_VALUE_TOKEN).key(CatalogKey.sponge("book_pages")).name("Book Pages").query(of("BookPages")).build());
+
+        this.register("plain_book_pages", Key.builder().type(TypeTokens.LIST_STRING_VALUE_TOKEN).key(CatalogKey.sponge("plain_book_pages")).name("Plain Book Pages").query(of("PlainBookPages")).build());
 
         this.register("golden_apple_type", Key.builder().type(TypeTokens.GOLDEN_APPLE_VALUE_TOKEN).key(CatalogKey.sponge("golden_apple_type")).name("Golden Apple Type").query(of("GoldenAppleType")).build());
 
