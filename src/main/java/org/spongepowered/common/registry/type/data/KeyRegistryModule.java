@@ -210,6 +210,8 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
 
         this.register("book_pages", Key.builder().type(TypeTokens.LIST_TEXT_VALUE_TOKEN).key(CatalogKey.sponge("book_pages")).name("Book Pages").query(of("BookPages")).build());
 
+        this.register("plain_book_pages", Key.builder().type(TypeTokens.LIST_STRING_VALUE_TOKEN).id("plain_book_pages").name("Plain Book Pages").query(of("PlainBookPages")).build());
+
         this.register("golden_apple_type", Key.builder().type(TypeTokens.GOLDEN_APPLE_VALUE_TOKEN).key(CatalogKey.sponge("golden_apple_type")).name("Golden Apple Type").query(of("GoldenAppleType")).build());
 
         this.register("is_flying", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).key(CatalogKey.sponge("is_flying")).name("Is Flying").query(of("IsFlying")).build());

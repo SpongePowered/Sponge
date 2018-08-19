@@ -521,6 +521,9 @@ public class DataRegistrar {
         DataUtil.registerDualProcessor(PagedData.class, SpongePagedData.class, ImmutablePagedData.class, ImmutableSpongePagedData.class,
                 new ItemPagedDataProcessor());
 
+        DataUtil.registerDualProcessor(PlainPagedData.class, SpongePlainPagedData.class, ImmutablePlainPagedData.class,
+                ImmutableSpongePlainPagedData.class, new ItemPlainPagedDataProcessor());
+
         DataUtil.registerDualProcessor(GoldenAppleData.class, SpongeGoldenAppleData.class, ImmutableGoldenAppleData.class,
                 ImmutableSpongeGoldenAppleData.class, new GoldenAppleDataProcessor());
 
