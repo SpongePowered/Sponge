@@ -29,14 +29,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.network.play.server.SPacketEffect;
 import net.minecraft.util.math.BlockPos;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.effect.sound.record.RecordType;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.SpongeCatalogType;
-import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import javax.annotation.Nullable;
 
-public class SpongeRecordType extends SpongeCatalogType.Translatable implements RecordType {
+public class SpongeRecordType extends SpongeCatalogType implements RecordType {
 
     /**
      * This is the effect ID that is used by the Effect packet to play a record effect.
@@ -46,11 +47,13 @@ public class SpongeRecordType extends SpongeCatalogType.Translatable implements 
 
     private final int internalId;
     private final SoundType soundType;
+    private final Translation translation;
 
-    public SpongeRecordType(String id, String translation, int internalId, SoundType soundType) {
-        super(id, new SpongeTranslation(translation));
+    public SpongeRecordType(String id, Translation translation, int internalId, SoundType soundType) {
+        super(CatalogKey.resolve(id), translation.get());
         this.internalId = internalId;
         this.soundType = soundType;
+        this.translation = translation;
     }
 
     public int getInternalId() {
@@ -67,5 +70,10 @@ public class SpongeRecordType extends SpongeCatalogType.Translatable implements 
         final BlockPos pos = new BlockPos(position.getX(), position.getY(), position.getZ());
         return new SPacketEffect(EFFECT_ID, pos, recordType == null ? 0 :
                 ((SpongeRecordType) recordType).getInternalId(), false);
+    }
+
+    @Override
+    public Translation getTranslation() {
+        return this.translation;
     }
 }

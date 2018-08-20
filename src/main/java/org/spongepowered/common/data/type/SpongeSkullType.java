@@ -24,24 +24,22 @@
  */
 package org.spongepowered.common.data.type;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.SkullType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.SpongeCatalogType;
-import org.spongepowered.common.text.translation.SpongeTranslation;
 
-public class SpongeSkullType extends SpongeCatalogType.Translatable implements SkullType {
+public class SpongeSkullType extends SpongeCatalogType implements SkullType {
 
     private final byte dataId;
     private final String name;
-
-    public SpongeSkullType(byte dataId, String id, String name) {
-        this(dataId, id, name, translate(name));
-    }
+    private final Translation translation;
 
     public SpongeSkullType(byte dataId, String id, String name, Translation translation) {
-        super(id, translation);
+        super(CatalogKey.resolve(id), translation.get());
         this.dataId = dataId;
         this.name = name;
+        this.translation = translation;
     }
 
     @Override
@@ -49,26 +47,13 @@ public class SpongeSkullType extends SpongeCatalogType.Translatable implements S
         return this.name;
     }
 
-    protected static Translation translate(String name) {
-        if (name.equalsIgnoreCase("SKELETON")) {
-            return new SpongeTranslation("item.skull.skeleton.name");
-        } else if (name.equalsIgnoreCase("WITHER_SKELETON")) {
-            return new SpongeTranslation("item.skull.wither.name");
-        } else if (name.equalsIgnoreCase("ZOMBIE")) {
-            return new SpongeTranslation("item.skull.zombie.name");
-        } else if (name.equalsIgnoreCase("PLAYER")) {
-            return new SpongeTranslation("item.skull.char.name");
-        } else if (name.equalsIgnoreCase("CREEPER")) {
-            return new SpongeTranslation("item.skull.creeper.name");
-        } else if (name.equalsIgnoreCase("ENDER_DRAGON")) {
-            return new SpongeTranslation("item.skull.dragon.name");
-        } else {
-            throw new IllegalArgumentException("Unsupported Skull Type \"" + name + "\"!");
-        }
-    }
-
     public byte getByteId() {
         return this.dataId;
+    }
+
+    @Override
+    public Translation getTranslation() {
+        return this.translation;
     }
 
 }

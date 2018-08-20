@@ -43,7 +43,7 @@ import java.util.Locale;
 
 import javax.annotation.Nullable;
 
-public class SpongeEntityType extends SpongeCatalogType.Translatable implements EntityType {
+public class SpongeEntityType extends SpongeCatalogType implements EntityType {
 
     public static final EntityType UNKNOWN = new EntityType() {
 
@@ -79,6 +79,7 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
     public final Class<? extends Entity> entityClass;
     private EnumCreatureType creatureType;
     private boolean activationRangeInitialized = false;
+    private final Translation translation;
     // currently not used
     public int trackingRange;
     public int updateFrequency;
@@ -94,12 +95,13 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
     }
 
     public SpongeEntityType(int id, ResourceLocation spongeKey, ResourceLocation minecraftId, Class<? extends Entity> clazz, Translation translation) {
-        super((CatalogKey) (Object) spongeKey, check(translation));
+        super((CatalogKey) (Object) spongeKey, check(translation).get());
         this.entityTypeId = id;
         this.entityName = minecraftId.getPath();
         this.entityClass = clazz;
         this.modId = minecraftId.getNamespace();
         this.initializeTrackerState();
+        this.translation = check(translation);
     }
 
     public SpongeEntityType(int id, String name, String modId, Class<? extends Entity> clazz, Translation translation) {
@@ -177,4 +179,8 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
                 .add("class", this.entityClass.getName());
     }
 
+    @Override
+    public Translation getTranslation() {
+        return this.translation;
+    }
 }

@@ -31,6 +31,7 @@ import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.data.type.SpongeSkinPart;
 import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
+import org.spongepowered.common.text.translation.SpongeTranslation;
 
 @RegisterCatalog(SkinParts.class)
 public final class SkinPartRegistryModule extends AbstractCatalogRegistryModule<SkinPart> implements AlternateCatalogRegistryModule<SkinPart> {
@@ -47,7 +48,7 @@ public final class SkinPartRegistryModule extends AbstractCatalogRegistryModule<
     }
 
     private SkinPart createSkinPart(int ordinal, String id) {
-        return new SpongeSkinPart(ordinal, id);
+        return new SpongeSkinPart(ordinal, id, new SpongeTranslation("options.modelPart." + id));
     }
 
 }

@@ -33,13 +33,15 @@ import org.spongepowered.api.data.type.Fish;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.SpongeCatalogType;
 
-public class SpongeCookedFish extends SpongeCatalogType.Translatable implements CookedFish {
+public class SpongeCookedFish extends SpongeCatalogType implements CookedFish {
 
     public final ItemFishFood.FishType fish;
+    public final Translation translation;
 
     public SpongeCookedFish(CatalogKey key, Translation translation, ItemFishFood.FishType fish) {
-        super(key, translation);
+        super(key, translation.get());
         this.fish = checkNotNull(fish);
+        this.translation = translation;
     }
 
     @Override
@@ -47,4 +49,8 @@ public class SpongeCookedFish extends SpongeCatalogType.Translatable implements 
         return (Fish) (Object) this.fish;
     }
 
+    @Override
+    public Translation getTranslation() {
+        return this.translation;
+    }
 }

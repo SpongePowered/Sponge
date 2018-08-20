@@ -34,6 +34,7 @@ import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.common.effect.record.SpongeRecordType;
 import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
+import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Optional;
 
@@ -61,18 +62,18 @@ public final class RecordTypeRegistryModule extends AbstractCatalogRegistryModul
 
     @Override
     public void registerDefaults() {
-        this.add(new SpongeRecordType("minecraft:thirteen", "item.record.13.desc", 2256, SoundTypes.RECORD_13));
-        this.add(new SpongeRecordType("minecraft:cat", "item.record.cat.desc", 2257, SoundTypes.RECORD_CAT));
-        this.add(new SpongeRecordType("minecraft:blocks", "item.record.blocks.desc", 2258, SoundTypes.RECORD_BLOCKS));
-        this.add(new SpongeRecordType("minecraft:chirp", "item.record.chirp.desc", 2259, SoundTypes.RECORD_CHIRP));
-        this.add(new SpongeRecordType("minecraft:far", "item.record.far.desc", 2260, SoundTypes.RECORD_FAR));
-        this.add(new SpongeRecordType("minecraft:mall", "item.record.mall.desc", 2261, SoundTypes.RECORD_MALL));
-        this.add(new SpongeRecordType("minecraft:mellohi", "item.record.mellohi.desc", 2262, SoundTypes.RECORD_MELLOHI));
-        this.add(new SpongeRecordType("minecraft:stal", "item.record.stal.desc", 2263, SoundTypes.RECORD_STAL));
-        this.add(new SpongeRecordType("minecraft:strad", "item.record.strad.desc", 2264, SoundTypes.RECORD_STRAD));
-        this.add(new SpongeRecordType("minecraft:ward", "item.record.ward.desc", 2265, SoundTypes.RECORD_WARD));
-        this.add(new SpongeRecordType("minecraft:eleven", "item.record.11.desc", 2266, SoundTypes.RECORD_11));
-        this.add(new SpongeRecordType("minecraft:wait", "item.record.wait.desc", 2267, SoundTypes.RECORD_WAIT));
+        this.add(new SpongeRecordType("minecraft:thirteen", new SpongeTranslation("item.record.13.desc"), 2256, SoundTypes.RECORD_13));
+        this.add(new SpongeRecordType("minecraft:cat", new SpongeTranslation("item.record.cat.desc"), 2257, SoundTypes.RECORD_CAT));
+        this.add(new SpongeRecordType("minecraft:blocks", new SpongeTranslation("item.record.blocks.desc"), 2258, SoundTypes.RECORD_BLOCKS));
+        this.add(new SpongeRecordType("minecraft:chirp", new SpongeTranslation("item.record.chirp.desc"), 2259, SoundTypes.RECORD_CHIRP));
+        this.add(new SpongeRecordType("minecraft:far", new SpongeTranslation("item.record.far.desc"), 2260, SoundTypes.RECORD_FAR));
+        this.add(new SpongeRecordType("minecraft:mall", new SpongeTranslation("item.record.mall.desc"), 2261, SoundTypes.RECORD_MALL));
+        this.add(new SpongeRecordType("minecraft:mellohi", new SpongeTranslation("item.record.mellohi.desc"), 2262, SoundTypes.RECORD_MELLOHI));
+        this.add(new SpongeRecordType("minecraft:stal", new SpongeTranslation("item.record.stal.desc"), 2263, SoundTypes.RECORD_STAL));
+        this.add(new SpongeRecordType("minecraft:strad", new SpongeTranslation("item.record.strad.desc"), 2264, SoundTypes.RECORD_STRAD));
+        this.add(new SpongeRecordType("minecraft:ward", new SpongeTranslation("item.record.ward.desc"), 2265, SoundTypes.RECORD_WARD));
+        this.add(new SpongeRecordType("minecraft:eleven", new SpongeTranslation("item.record.11.desc"), 2266, SoundTypes.RECORD_11));
+        this.add(new SpongeRecordType("minecraft:wait", new SpongeTranslation("item.record.wait.desc"), 2267, SoundTypes.RECORD_WAIT));
     }
 
     private static final class Holder {

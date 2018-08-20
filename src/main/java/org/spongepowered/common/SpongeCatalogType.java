@@ -24,12 +24,9 @@
  */
 package org.spongepowered.common;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.google.common.base.MoreObjects;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.CatalogType;
-import org.spongepowered.api.text.translation.Translation;
 
 public abstract class SpongeCatalogType implements CatalogType {
 
@@ -75,40 +72,8 @@ public abstract class SpongeCatalogType implements CatalogType {
 
     protected MoreObjects.ToStringHelper toStringHelper() {
         return MoreObjects.toStringHelper(this)
-                .add("id", getKey().toString())
+                .add("key", getKey().toString())
                 .add("name", getName());
-    }
-
-    public static abstract class Translatable extends SpongeCatalogType implements org.spongepowered.api.text.translation.Translatable {
-
-        private final Translation translation;
-
-        public Translatable(CatalogKey key, Translation translation) {
-            super(key, translation.get());
-            this.translation = checkNotNull(translation, "translation");
-        }
-
-        public Translatable(String id, Translation translation) {
-            super(CatalogKey.resolve(id), translation.get());
-            this.translation = checkNotNull(translation, "translation");
-        }
-
-        @Override
-        public String getName() {
-            return getTranslation().get();
-        }
-
-        @Override
-        public final Translation getTranslation() {
-            return this.translation;
-        }
-
-        @Override
-        protected MoreObjects.ToStringHelper toStringHelper() {
-            return super.toStringHelper()
-                    .add("translation", getTranslation());
-        }
-
     }
 
 }

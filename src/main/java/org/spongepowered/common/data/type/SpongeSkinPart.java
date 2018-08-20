@@ -25,23 +25,31 @@
 package org.spongepowered.common.data.type;
 
 import com.google.common.base.MoreObjects;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.SkinPart;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.SpongeCatalogType;
-import org.spongepowered.common.text.translation.SpongeTranslation;
 
-public final class SpongeSkinPart extends SpongeCatalogType.Translatable implements SkinPart {
+public final class SpongeSkinPart extends SpongeCatalogType implements SkinPart {
 
     private final int ordinal;
     private final int mask;
+    private final Translation translation;
 
-    public SpongeSkinPart(int ordinal, String id) {
-        super("minecraft:" + id, new SpongeTranslation("options.modelPart." + id));
+    public SpongeSkinPart(int ordinal, String id, Translation translation) {
+        super(CatalogKey.resolve("minecraft:" + id), translation.get());
         this.ordinal = ordinal;
         this.mask = 1 << this.ordinal;
+        this.translation = translation;
     }
 
     public boolean test(int flags) {
         return (flags & this.mask) != 0;
+    }
+
+    @Override
+    public Translation getTranslation() {
+        return this.translation;
     }
 
     @Override
