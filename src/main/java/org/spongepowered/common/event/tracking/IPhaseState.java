@@ -773,12 +773,15 @@ public interface IPhaseState<C extends PhaseContext<C>> {
 
 
     default void provideNotifierForNeighbors(C context, NeighborNotificationContext notification) {
-        if (context.owner != null) { // If the owner is set, at least set the owner
-            notification.owner = context.owner;
-        }
-        // otherwise, set whatever the latest notifier was.
         if (context.notifier != null) {
-            notification.notifier = context.notifier;
+            notification.notifier(context.notifier);
+            return;
+        }
+        // At this point, since there's no notifier avilable, we can consider the
+        // owner as one available left (you know, someone placing a redstone block to power
+        // nearby redstone wire, the owner would at least be notifying the next blocks
+        if (context.owner != null) { // If the owner is set, at least set the owner
+            notification.notifier(context.owner);
         }
     }
 }
