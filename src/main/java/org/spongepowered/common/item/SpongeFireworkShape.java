@@ -28,17 +28,17 @@ import org.spongepowered.api.item.FireworkShape;
 
 public class SpongeFireworkShape implements FireworkShape {
 
-    private final byte id;
+    private final String id;
     private final String name;
 
-    public SpongeFireworkShape(byte id, String name) {
+    public SpongeFireworkShape(String id, String name) {
         this.id = id;
         this.name = name;
     }
 
     @Override
     public String getId() {
-        return this.name;
+        return this.id;
     }
 
     @Override
