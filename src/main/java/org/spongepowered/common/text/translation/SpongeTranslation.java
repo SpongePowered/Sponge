@@ -30,15 +30,22 @@ import com.google.common.base.MoreObjects;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 
+import java.util.Collections;
 import java.util.Locale;
 
 @NonnullByDefault
 public class SpongeTranslation implements Translation {
 
     private final String id;
+    private final Object[] args;
 
     public SpongeTranslation(String id) {
+        this(id, Collections.EMPTY_LIST);
+    }
+
+    public SpongeTranslation(String id, Object... args) {
         this.id = checkNotNull(id, "id");
+        this.args = args;
     }
 
     @Override
@@ -49,7 +56,10 @@ public class SpongeTranslation implements Translation {
     @SuppressWarnings("deprecation")
     @Override
     public String get(Locale locale) {
-        return net.minecraft.util.text.translation.I18n.translateToLocal(this.id);
+        if (this.args.length == 0) {
+            return net.minecraft.util.text.translation.I18n.translateToLocal(this.id);
+        }
+        return get(locale, this.args);
     }
 
     @SuppressWarnings("deprecation")
@@ -58,10 +68,15 @@ public class SpongeTranslation implements Translation {
         return net.minecraft.util.text.translation.I18n.translateToLocalFormatted(this.id, args);
     }
 
+    public Object[] getArgs() {
+        return this.args;
+    }
+
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
                 .add("id", this.id)
+                .add("args", this.args)
                 .toString();
     }
 
