@@ -70,6 +70,9 @@ public class ContainerFabric extends MinecraftFabric {
 
     @Override
     public Object get(int index) {
+        if (this.container.inventorySlots.isEmpty()) {
+            return null; // Somehow we got an empty container
+        }
         return this.container.getSlot(index).inventory;
     }
 
