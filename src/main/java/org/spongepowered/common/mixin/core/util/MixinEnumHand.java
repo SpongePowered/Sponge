@@ -51,9 +51,4 @@ public abstract class MixinEnumHand implements HandType {
     public String getName() {
         return ((EnumHand) (Object) this).name();
     }
-
-    @Override
-    public Translation getTranslation() {
-        return null; // Uhh.... what?
-    }
 }

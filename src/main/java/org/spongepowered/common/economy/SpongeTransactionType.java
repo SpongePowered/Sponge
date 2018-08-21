@@ -64,7 +64,7 @@ public class SpongeTransactionType implements TransactionType {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("id", this.getKey())
+                .add("key", this.getKey())
                 .toString();
     }
 }

@@ -82,13 +82,8 @@ public class SpongePopulatorType implements PopulatorType {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("id", this.getKey())
+                .add("key", this.getKey())
                 .add("name", this.populatorName)
                 .toString();
-    }
-
-    @Override
-    public Translation getTranslation() {
-        return null;
     }
 }

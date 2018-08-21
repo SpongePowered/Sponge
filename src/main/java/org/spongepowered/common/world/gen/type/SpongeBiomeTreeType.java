@@ -109,7 +109,7 @@ public class SpongeBiomeTreeType implements BiomeTreeType {
     @Override
     public String toString() {
         ToStringHelper tsh = MoreObjects.toStringHelper(this)
-                .add("id", this.getKey())
+                .add("key", this.getKey())
                 .add("smallObj", this.smallObject.getClass().getName());
         if (this.largeObject != null) {
             tsh.add("largeObj", this.largeObject.getClass().getName());

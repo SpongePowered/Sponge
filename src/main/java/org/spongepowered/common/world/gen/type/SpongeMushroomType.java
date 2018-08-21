@@ -83,7 +83,7 @@ public class SpongeMushroomType implements MushroomType {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("id", this.getKey())
+                .add("key", this.getKey())
                 .add("popobj", this.obj.getClass().getName())
                 .toString();
     }
