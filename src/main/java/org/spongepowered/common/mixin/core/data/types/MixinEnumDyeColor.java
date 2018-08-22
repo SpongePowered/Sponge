@@ -48,7 +48,7 @@ public abstract class MixinEnumDyeColor implements DyeColor {
 
     @Shadow public abstract float[] getColorComponentValues();
 
-    private Translation translation;
+    @Nullable private Translation translation;
     @Nullable private CatalogKey key;
 
     @Intrinsic
@@ -72,7 +72,6 @@ public abstract class MixinEnumDyeColor implements DyeColor {
     }
 
     public Translation dye$getTranslation() {
-        // Maybe move this to a @Inject at the end of the constructor
         if (this.translation == null) {
             this.translation = new SpongeTranslation("item.dyePowder." + this.shadow$getTranslationKey() + ".name");
         }

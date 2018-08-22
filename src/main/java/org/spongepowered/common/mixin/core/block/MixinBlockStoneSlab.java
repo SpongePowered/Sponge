@@ -42,6 +42,7 @@ import org.spongepowered.api.data.type.SlabTypes;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongePortionData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeSlabData;
@@ -140,9 +141,12 @@ public abstract class MixinBlockStoneSlab extends MixinBlock {
 
     @Override
     public Translation getTranslation() {
-        if (getBlockState().getBlock() instanceof BlockStoneSlabNew) {
-            return new SpongeTranslation(getTranslationKey() + ".red_sandstone.name");
+        if (this.translation == null) {
+            if (getBlockState().getBlock() instanceof BlockStoneSlabNew) {
+                this.translation = new SpongeTranslation(getTranslationKey() + ".red_sandstone.name");
+            }
+            this.translation = super.getTranslation();
         }
-        return super.getTranslation();
+        return this.translation;
     }
 }

@@ -32,16 +32,18 @@ import org.spongepowered.api.data.type.CookedFish;
 import org.spongepowered.api.data.type.Fish;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.SpongeCatalogType;
+import org.spongepowered.common.text.translation.SpongeTranslation;
+
+import javax.annotation.Nullable;
 
 public class SpongeCookedFish extends SpongeCatalogType implements CookedFish {
 
     public final ItemFishFood.FishType fish;
-    public final Translation translation;
+    @Nullable private Translation translation;
 
-    public SpongeCookedFish(CatalogKey key, Translation translation, ItemFishFood.FishType fish) {
-        super(key, translation.get());
+    public SpongeCookedFish(CatalogKey key, ItemFishFood.FishType fish) {
+        super(key, new SpongeTranslation("item.fish." + fish.getTranslationKey() + ".cooked.name").get());
         this.fish = checkNotNull(fish);
-        this.translation = translation;
     }
 
     @Override
@@ -51,6 +53,9 @@ public class SpongeCookedFish extends SpongeCatalogType implements CookedFish {
 
     @Override
     public Translation getTranslation() {
+        if (this.translation == null) {
+            this.translation = new SpongeTranslation("item.fish." + this.fish.getTranslationKey() + ".cooked.name");
+        }
         return this.translation;
     }
 }

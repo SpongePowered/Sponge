@@ -98,6 +98,9 @@ public abstract class MixinBlockRedstoneComparator extends MixinBlock {
 
     @Override
     public Translation getTranslation() {
-        return new SpongeTranslation("item.comparator.name");
+        if (this.translation == null) {
+            this.translation = new SpongeTranslation("item.comparator.name");
+        }
+        return this.translation;
     }
 }

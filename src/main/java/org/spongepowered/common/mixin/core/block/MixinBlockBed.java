@@ -84,11 +84,6 @@ public abstract class MixinBlockBed extends MixinBlockHorizontal {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeOccupiedData.class, blockState.getValue(BlockBed.OCCUPIED));
     }
 
-    @Override
-    public Translation getTranslation() {
-        return new SpongeTranslation("item.bed.white.name");
-    }
-
     @Inject(method = "hasRoomForPlayer", at = @At(value = "RETURN"), cancellable = true)
     private static void onHasRoomForPlayer(World world, BlockPos pos, CallbackInfoReturnable<Boolean> ci ) {
         ci.setReturnValue(ci.getReturnValue() && world.getWorldBorder().contains(pos));

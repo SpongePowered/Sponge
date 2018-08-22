@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.stats;
 
+import net.minecraft.entity.EntityList;
 import net.minecraft.item.Item;
 import net.minecraft.stats.StatBase;
 import net.minecraft.stats.StatCrafting;
@@ -34,27 +35,43 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.statistic.SpongeBlockStatistic;
 import org.spongepowered.common.statistic.SpongeEntityStatistic;
+import org.spongepowered.common.statistic.SpongeItemStatistic;
 
 @Mixin(StatList.class)
 public class MixinStatList {
 
-    private static final String CLASS_STAT_BASE = "class=net/minecraft/stats/StatBase";
-
-    @Redirect(method = "initMiningStats", at = @At(value = "NEW", args = "class=net/minecraft/stats/StatCrafting"))
+    @Redirect(method = "initMiningStats", at = @At(value = "NEW", target = "net/minecraft/stats/StatCrafting"))
     private static StatCrafting createBlockStat(String statId, String itemName, ITextComponent statName, Item item) {
         return new SpongeBlockStatistic(statId, itemName, statName, item);
     }
 
-    @Redirect(method = "getStatKillEntity", at = @At(value = "NEW", args = CLASS_STAT_BASE))
-    private static StatBase createKillEntityStat(String statId, ITextComponent statName) {
-        String entityId = statId.substring(statId.lastIndexOf(".") + 1);
-        return new SpongeEntityStatistic(statId, statName, entityId);
+    @Redirect(method = "getStatKillEntity", at = @At(value = "NEW", target = "net/minecraft/stats/StatBase"))
+    private static StatBase createKillEntityStat(String statId, ITextComponent statName, EntityList.EntityEggInfo eggInfo) {
+        return new SpongeEntityStatistic(statId, statName, eggInfo.spawnedID.getPath());
+    }
+    @Redirect(method = "getStatEntityKilledBy", at = @At(value = "NEW", target = "net/minecraft/stats/StatBase"))
+    private static StatBase createKilledByEntityStat(String statId, ITextComponent statName, EntityList.EntityEggInfo eggInfo) {
+        return new SpongeEntityStatistic(statId, statName, eggInfo.spawnedID.getPath());
+    }
+    @Redirect(method = "initCraftableStats", at = @At(value = "NEW", target = "net/minecraft/stats/StatCrafting"))
+    private static StatCrafting createCraftingStat(String statId, String itemName, ITextComponent statName, Item item) {
+        return new SpongeItemStatistic(statId, itemName, statName, item);
+    }
+    @Redirect(method = "initPickedUpAndDroppedStats", at = @At(value = "NEW", target = "net/minecraft/stats/StatCrafting", ordinal = 0))
+    private static StatCrafting createPickStat(String statId, String itemName, ITextComponent statName, Item item) {
+        return new SpongeItemStatistic(statId, itemName, statName, item);
+    }
+    @Redirect(method = "initPickedUpAndDroppedStats", at = @At(value = "NEW", target = "net/minecraft/stats/StatCrafting", ordinal = 1))
+    private static StatCrafting createDropStat(String statId, String itemName, ITextComponent statName, Item item) {
+        return new SpongeItemStatistic(statId, itemName, statName, item);
+    }
+    @Redirect(method = "initItemDepleteStats", at = @At(value = "NEW", target = "net/minecraft/stats/StatCrafting"))
+    private static StatCrafting createBreakStat(String statId, String itemName, ITextComponent statName, Item item) {
+        return new SpongeItemStatistic(statId, itemName, statName, item);
     }
 
-    @Redirect(method = "getStatEntityKilledBy", at = @At(value = "NEW", args = CLASS_STAT_BASE))
-    private static StatBase createKilledByEntityStat(String statId, ITextComponent statName) {
-        String entityId = statId.substring(statId.lastIndexOf(".") + 1);
-        return new SpongeEntityStatistic(statId, statName, entityId);
+    @Redirect(method = "initStats", at = @At(value = "NEW", target = "net/minecraft/stats/StatCrafting"))
+    private static StatCrafting createUseStat(String statId, String itemName, ITextComponent statName, Item item) {
+        return new SpongeItemStatistic(statId, itemName, statName, item);
     }
-
 }

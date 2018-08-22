@@ -43,6 +43,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.interfaces.IMixinEnchantment;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
+import javax.annotation.Nullable;
+
 @NonnullByDefault
 @Mixin(net.minecraft.enchantment.Enchantment.class)
 @Implements(@Interface(iface = EnchantmentType.class, prefix = "enchantment$"))
@@ -61,6 +63,7 @@ public abstract class MixinEnchantment implements IMixinEnchantment, Enchantment
     @Shadow public abstract boolean shadow$isCurse();
 
     private CatalogKey key;
+    @Nullable private Translation translation;
 
     @Inject(method = "registerEnchantments", at = @At("RETURN"))
     private static void onRegister(CallbackInfo ci) {
@@ -121,7 +124,10 @@ public abstract class MixinEnchantment implements IMixinEnchantment, Enchantment
 
     @Override
     public Translation getTranslation() {
-        return new SpongeTranslation(shadow$getName());
+        if (this.translation == null) {
+            this.translation = new SpongeTranslation(shadow$getName());
+        }
+        return this.translation;
     }
 
     @Override

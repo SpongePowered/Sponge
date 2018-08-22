@@ -45,16 +45,16 @@ public class InstrumentTypeRegistryModule extends AbstractPrefixCheckCatalogRegi
 
     @Override
     public void registerDefaults() {
-        register(new SpongeInstrumentType("minecraft:harp", "Harp", 0));
-        register(new SpongeInstrumentType("minecraft:bass_drum", "Bass Drum", 1));
-        register(new SpongeInstrumentType("minecraft:snare", "Snare", 2));
-        register(new SpongeInstrumentType("minecraft:high_hat", "High Hat", 3));
-        register(new SpongeInstrumentType("minecraft:bass_attack", "Bass Attack", 4));
-        register(new SpongeInstrumentType("minecraft:flute", "Flute", 5));
-        register(new SpongeInstrumentType("minecraft:bell", "Bell", 6));
-        register(new SpongeInstrumentType("minecraft:guitar", "Guitar", 7));
-        register(new SpongeInstrumentType("minecraft:chime", "Chime", 8));
-        register(new SpongeInstrumentType("minecraft:xylophone", "Xylophone", 9));
+        register(new SpongeInstrumentType("harp", "Harp", 0));
+        register(new SpongeInstrumentType("bass_drum", "Bass Drum", 1));
+        register(new SpongeInstrumentType("snare", "Snare", 2));
+        register(new SpongeInstrumentType("high_hat", "High Hat", 3));
+        register(new SpongeInstrumentType("bass_attack", "Bass Attack", 4));
+        register(new SpongeInstrumentType("flute", "Flute", 5));
+        register(new SpongeInstrumentType("bell", "Bell", 6));
+        register(new SpongeInstrumentType("guitar", "Guitar", 7));
+        register(new SpongeInstrumentType("chime", "Chime", 8));
+        register(new SpongeInstrumentType("xylophone", "Xylophone", 9));
     }
 
     private static final class Holder {

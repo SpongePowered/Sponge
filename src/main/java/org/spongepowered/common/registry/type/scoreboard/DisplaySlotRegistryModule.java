@@ -60,9 +60,9 @@ public final class DisplaySlotRegistryModule extends AbstractCatalogRegistryModu
         register(CatalogKey.minecraft("below_name"), new SpongeDisplaySlot("below_name", null, 2));
 
         for (Map.Entry<TextFormatting, SpongeTextColor> entry : TextColorRegistryModule.getInstance().enumChatColor.entrySet()) {
-            final String id = entry.getValue().getKey().toString().toLowerCase(Locale.ENGLISH);
-            final SpongeDisplaySlot value = new SpongeDisplaySlot(id, entry.getValue(), entry.getKey().getColorIndex() + 3);
-            register(CatalogKey.minecraft(id), value);
+            final String name = entry.getValue().getName();
+            final SpongeDisplaySlot value = new SpongeDisplaySlot(name, entry.getValue(), entry.getKey().getColorIndex() + 3);
+            register(CatalogKey.minecraft(name), value);
         }
     }
 

@@ -77,6 +77,7 @@ import org.spongepowered.common.interfaces.item.IMixinItem;
 import org.spongepowered.common.interfaces.item.IMixinItemStack;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
+import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.ArrayList;
@@ -93,6 +94,7 @@ import javax.annotation.Nullable;
 public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMixinCustomDataHolder {
 
     private List<DataView> failedData = new ArrayList<>();
+    @Nullable private Translation translation;
 
     @Shadow public abstract int getCount();
     @Shadow public abstract void setCount(int size); // Do not use field directly as Minecraft tracks the empty state
@@ -231,7 +233,10 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
     }
 
     public Translation itemstack$getTranslation() {
-        return new SpongeTranslation(shadow$getItem().getTranslationKey((net.minecraft.item.ItemStack) (Object) this) + ".name");
+        if (this.translation == null) {
+            this.translation = ((ItemType) shadow$getItem()).getTranslation((ItemStack) this);
+        }
+        return this.translation;
     }
 
     public ItemStackSnapshot itemstack$createSnapshot() {

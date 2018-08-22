@@ -45,7 +45,7 @@ public abstract class MixinFishType implements Fish {
     @Shadow @Final private String translationKey;
     @Final @Shadow private boolean cookable;
 
-    private Translation translation;
+    @Nullable private Translation translation;
     @Nullable private CatalogKey key;
 
     @Override
@@ -74,7 +74,6 @@ public abstract class MixinFishType implements Fish {
 
     @Override
     public Translation getTranslation() {
-        // Maybe move this to a @Inject at the end of the constructor
         if (this.translation == null) {
             this.translation = new SpongeTranslation("item.fish." + this.translationKey + ".raw.name");
         }

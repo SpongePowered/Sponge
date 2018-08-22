@@ -63,7 +63,6 @@ public abstract class MixinBlockPlanksEnumType implements TreeType {
     }
 
     public Translation tree$getTranslation() {
-        // Maybe move this to a @Inject at the end of the constructor
         if (this.translation == null) {
             this.translation = new SpongeTranslation("tile.wood." + this.translationKey + ".name");
         }

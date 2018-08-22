@@ -44,7 +44,7 @@ public abstract class MixinBlockTallGrassEnumType implements ShrubType {
 
     @Shadow @Final private String name;
 
-    private Translation translation;
+    @Nullable private Translation translation;
     @Nullable private CatalogKey key;
 
     public CatalogKey shrub$getKey() {
@@ -73,7 +73,6 @@ public abstract class MixinBlockTallGrassEnumType implements ShrubType {
     }
 
     public Translation shrub$getTranslation() {
-        // Maybe move this to a @Inject at the end of the constructor
         if (this.translation == null) {
             this.translation = resolveTranslation();
         }

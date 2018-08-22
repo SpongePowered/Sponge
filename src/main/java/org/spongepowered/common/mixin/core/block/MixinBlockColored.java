@@ -44,6 +44,9 @@ public abstract class MixinBlockColored extends MixinBlock implements IMixinDyea
 
     @Override
     public Translation getTranslation() {
-        return new SpongeTranslation(getTranslationKey() + ".white.name");
+        if (this.translation == null) {
+            this.translation = new SpongeTranslation(getTranslationKey() + ".name");
+        }
+        return this.translation;
     }
 }

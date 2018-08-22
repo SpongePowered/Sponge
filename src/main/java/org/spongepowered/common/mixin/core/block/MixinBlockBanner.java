@@ -77,6 +77,9 @@ public abstract class MixinBlockBanner extends MixinBlock {
 
     @Override
     public Translation getTranslation() {
-        return new SpongeTranslation("item.banner.white.name");
+        if (this.translation == null) {
+            this.translation = new SpongeTranslation("item.banner.white.name");
+        }
+        return this.translation;
     }
 }

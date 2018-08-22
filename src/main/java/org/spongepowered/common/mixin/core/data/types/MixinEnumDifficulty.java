@@ -37,13 +37,15 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
+import javax.annotation.Nullable;
+
 @NonnullByDefault
 @Mixin(EnumDifficulty.class)
 public class MixinEnumDifficulty implements Difficulty {
 
     @Shadow @Final private String translationKey;
 
-    private Translation translation;
+    @Nullable private Translation translation;
     private CatalogKey key;
 
     @Inject(method = "<init>", at = @At(value = "RETURN"))
@@ -63,7 +65,6 @@ public class MixinEnumDifficulty implements Difficulty {
 
     @Override
     public Translation getTranslation() {
-        // Maybe move this to a @Inject at the end of the constructor
         if (this.translation == null) {
             this.translation = new SpongeTranslation(this.translationKey);
         }

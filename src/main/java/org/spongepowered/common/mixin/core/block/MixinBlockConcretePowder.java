@@ -43,6 +43,9 @@ public abstract class MixinBlockConcretePowder extends MixinBlock implements IMi
 
     @Override
     public Translation getTranslation() {
-        return new SpongeTranslation(getTranslationKey() + ".white.name");
+        if (this.translation == null) {
+            this.translation = new SpongeTranslation(getTranslationKey() + ".name");
+        }
+        return this.translation;
     }
 }

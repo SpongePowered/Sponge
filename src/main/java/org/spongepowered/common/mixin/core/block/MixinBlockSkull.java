@@ -95,6 +95,9 @@ public abstract class MixinBlockSkull extends MixinBlock {
 
     @Override
     public Translation getTranslation() {
-        return new SpongeTranslation("item.skull.skeleton.name");
+        if (this.translation == null) {
+            this.translation = new SpongeTranslation("tile.skull.skeleton.name");
+        }
+        return this.translation;
     }
 }

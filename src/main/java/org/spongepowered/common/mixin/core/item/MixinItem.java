@@ -56,11 +56,14 @@ import javax.annotation.Nullable;
 public abstract class MixinItem implements ItemType, IMixinItem, SpongeGameDictionaryEntry {
 
     public Optional<BlockType> blockType = Optional.empty();
+    @Nullable protected Translation translation;
 
     @Shadow private String translationKey;
 
     @Shadow public abstract int getItemStackLimit();
     @Shadow public abstract String getTranslationKey();
+
+    @Shadow public abstract String getTranslationKey(ItemStack stack);
 
     // A item stack used to retrieve properties
     @Nullable private org.spongepowered.api.item.inventory.ItemStack propertyItemStack;
@@ -87,7 +90,15 @@ public abstract class MixinItem implements ItemType, IMixinItem, SpongeGameDicti
 
     @Override
     public Translation getTranslation() {
-        return new SpongeTranslation(getTranslationKey() + ".name");
+        if (this.translation == null) {
+            this.translation = new SpongeTranslation(getTranslationKey() + ".name");
+        }
+        return this.translation;
+    }
+
+    @Override
+    public Translation getTranslation(org.spongepowered.api.item.inventory.ItemStack stack) {
+        return getTranslation();
     }
 
     @Override

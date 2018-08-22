@@ -24,51 +24,44 @@
  */
 package org.spongepowered.common.statistic;
 
-import net.minecraft.stats.StatBase;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.stats.StatCrafting;
 import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.scoreboard.critieria.Criterion;
-import org.spongepowered.api.statistic.EntityStatistic;
+import org.spongepowered.api.statistic.ItemStatistic;
 import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
+import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
-
+import javax.annotation.Nullable;
 import java.util.Optional;
 
-import javax.annotation.Nullable;
+public class SpongeItemStatistic extends StatCrafting implements ItemStatistic, TypedSpongeStatistic {
 
-public final class SpongeEntityStatistic extends StatBase implements EntityStatistic, TypedSpongeStatistic {
-
-    private final String entityId;
     private String spongeId;
     private CatalogKey key;
     @Nullable private Translation translation;
 
-    public SpongeEntityStatistic(String statIdIn, ITextComponent statNameIn, String entityId) {
-        super(statIdIn, statNameIn);
-        this.entityId = entityId;
-    }
-
-    @Override
-    public EntityType getEntityType() {
-        return EntityTypeRegistryModule.getInstance().getById(this.entityId).get();
+    public SpongeItemStatistic(String statId, String itemName, ITextComponent statName, Item item) {
+        super(statId, itemName, statName, item);
     }
 
     @Override
     public Translation getTranslation() {
         if (this.translation == null) {
-            String entity = this.statId.substring(this.statId.lastIndexOf('.') + 1);
-            String id;
-            if (this.statId.startsWith("stat.killEntity")) {
-                id = "stat.entityKills";
-                this.translation = new SpongeTranslation(id, 0, new SpongeTranslation(entity).get());
-            } else if (this.statId.startsWith("stat.entityKilledBy")) {
-                id = "stat.entityKilledBy";
-                this.translation = new SpongeTranslation(id, new SpongeTranslation(entity).get(), 0);
-            }
+            String args = new ItemStack((Item) getItemType()).getDisplayName();
+            int end = "stat.".length() + this.statId.substring("stat.".length()).indexOf('.');
+            this.translation = new SpongeTranslation(this.statId.substring(0, end), args);
         }
         return this.translation;
+    }
+
+    @Override
+    public ItemType getItemType() {
+        return ItemTypeRegistryModule.getInstance().get(
+                CatalogKey.resolve(this.statId.substring(this.statId.lastIndexOf('.') + 1))).get();
     }
 
     @Override
@@ -78,7 +71,7 @@ public final class SpongeEntityStatistic extends StatBase implements EntityStati
 
     @Override
     public CatalogKey getKey() {
-        if (this.key == null) {
+        if (this.key ==  null) {
             this.key = CatalogKey.resolve(TypedSpongeStatistic.super.getId());
         }
         return this.key;
@@ -98,12 +91,11 @@ public final class SpongeEntityStatistic extends StatBase implements EntityStati
     @Override
     public void setSpongeId(String id) {
         this.spongeId = id;
-        this.key = CatalogKey.resolve(this.spongeId);
+        this.key = CatalogKey.resolve(id);
     }
 
     @Override
     public String getMinecraftId() {
         return this.statId;
     }
-
 }

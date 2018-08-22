@@ -48,7 +48,7 @@ public final class SkinPartRegistryModule extends AbstractCatalogRegistryModule<
     }
 
     private SkinPart createSkinPart(int ordinal, String id) {
-        return new SpongeSkinPart(ordinal, id, new SpongeTranslation("options.modelPart." + id));
+        return new SpongeSkinPart(ordinal, id);
     }
 
 }

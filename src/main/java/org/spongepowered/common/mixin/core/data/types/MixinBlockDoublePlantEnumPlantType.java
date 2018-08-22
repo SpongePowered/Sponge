@@ -61,7 +61,6 @@ public abstract class MixinBlockDoublePlantEnumPlantType implements DoublePlantT
     }
 
     public Translation plant$getTranslation() {
-        // Maybe move this to a @Inject at the end of the constructor
         if (this.translation == null) {
             this.translation = new SpongeTranslation("tile.doublePlant." + this.shadow$getTranslationKey() + ".name");
         }

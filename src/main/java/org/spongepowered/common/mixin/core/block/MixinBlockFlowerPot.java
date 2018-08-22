@@ -34,6 +34,9 @@ public abstract class MixinBlockFlowerPot extends MixinBlock {
 
     @Override
     public Translation getTranslation() {
-        return new SpongeTranslation("item.flowerPot.name");
+        if (this.translation == null) {
+            this.translation = new SpongeTranslation("item.flowerPot.name");
+        }
+        return this.translation;
     }
 }

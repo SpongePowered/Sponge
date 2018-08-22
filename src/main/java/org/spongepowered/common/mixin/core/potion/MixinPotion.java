@@ -53,7 +53,7 @@ public abstract class MixinPotion implements PotionEffectType, IMixinPotion {
     @Shadow public abstract String shadow$getName();
     @Shadow public abstract boolean shadow$isInstant();
 
-    private Translation translation;
+    @Nullable private Translation translation;
     @Nullable private CatalogKey key;
 
     public CatalogKey potion$getKey() {
@@ -76,7 +76,6 @@ public abstract class MixinPotion implements PotionEffectType, IMixinPotion {
 
     @Override
     public Translation getTranslation() {
-        // Maybe move this to a @Inject at the end of the constructor
         if (this.translation == null) {
             this.translation = new SpongeTranslation(shadow$getName());
         }

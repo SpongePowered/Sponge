@@ -80,6 +80,9 @@ public abstract class MixinBlockPrismarine extends MixinBlock {
 
     @Override
     public Translation getTranslation() {
-        return new SpongeTranslation(this.getTranslationKey() + "." + BlockPrismarine.EnumType.ROUGH.getTranslationKey() + ".name");
+        if (this.translation == null) {
+            this.translation = new SpongeTranslation(this.getTranslationKey() + "." + BlockPrismarine.EnumType.ROUGH.getTranslationKey() + ".name");
+        }
+        return this.translation;
     }
 }

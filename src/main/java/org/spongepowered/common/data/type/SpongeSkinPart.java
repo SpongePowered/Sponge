@@ -29,18 +29,20 @@ import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.SkinPart;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.SpongeCatalogType;
+import org.spongepowered.common.text.translation.SpongeTranslation;
+
+import javax.annotation.Nullable;
 
 public final class SpongeSkinPart extends SpongeCatalogType implements SkinPart {
 
     private final int ordinal;
     private final int mask;
-    private final Translation translation;
+    @Nullable private Translation translation;
 
-    public SpongeSkinPart(int ordinal, String id, Translation translation) {
-        super(CatalogKey.resolve("minecraft:" + id), translation.get());
+    public SpongeSkinPart(int ordinal, String id) {
+        super(CatalogKey.resolve("minecraft:" + id), new SpongeTranslation("options.modelPart." + id).get());
         this.ordinal = ordinal;
         this.mask = 1 << this.ordinal;
-        this.translation = translation;
     }
 
     public boolean test(int flags) {
@@ -49,6 +51,10 @@ public final class SpongeSkinPart extends SpongeCatalogType implements SkinPart 
 
     @Override
     public Translation getTranslation() {
+        if (this.translation == null) {
+            String id = this.getKey().getValue();
+            this.translation = new SpongeTranslation("options.modelPart." + id);
+        }
         return this.translation;
     }
 

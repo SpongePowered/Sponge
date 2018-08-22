@@ -34,6 +34,9 @@ public abstract class MixinBlockBrewingStand extends MixinBlock {
 
     @Override
     public Translation getTranslation() {
-        return new SpongeTranslation("item.brewingStand.name");
+        if (this.translation == null) {
+            this.translation = new SpongeTranslation("item.brewingStand.name");
+        }
+        return this.translation;
     }
 }

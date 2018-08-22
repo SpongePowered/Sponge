@@ -147,6 +147,9 @@ public abstract class MixinBlockDoor extends MixinBlock {
 
     @Override
     public Translation getTranslation() {
-        return new SpongeTranslation(this.getTranslationKey().replaceAll("tile", "item") + ".name");
+        if (this.translation == null) {
+            this.translation = new SpongeTranslation("item." + this.getTranslationKey().substring("tile.".length()) + ".name");
+        }
+        return this.translation;
     }
 }

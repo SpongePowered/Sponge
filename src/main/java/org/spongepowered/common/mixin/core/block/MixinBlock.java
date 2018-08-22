@@ -119,6 +119,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     private boolean requiresBlockCapture = true;
     private static boolean canCaptureItems = true;
     private Timing timing;
+    @Nullable protected Translation translation;
     // Used by tracker config
     private boolean allowsBlockBulkCapture = true;
     private boolean allowsEntityBulkCapture = true;
@@ -185,22 +186,18 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     @Override
     public CatalogKey getKey() {
-        return (CatalogKey) (Object) Block.REGISTRY.getNameForObject((Block) (Object) this);
+        // This should always succeed when things are working properly,
+        // so we just catch the exception instead of doing a null check.
+        try {
+            return (CatalogKey) (Object) Block.REGISTRY.getNameForObject((Block) (Object) this);
+        } catch (NullPointerException e) {
+            throw new RuntimeException(String.format("Block '%s' (class '%s') is not registered with the block registry! This is likely a bug in the corresponding mod.", this, this.getClass().getName()), e);
+        }
     }
 
     @Override
     public String getName() {
-        return this.getNameFromRegistry();
-    }
-
-    private String getNameFromRegistry() {
-        // This should always succeed when things are working properly,
-        // so we just catch the exception instead of doing a null check.
-        try {
-            return Block.REGISTRY.getNameForObject((Block) (Object) this).toString();
-        } catch (NullPointerException e) {
-            throw new RuntimeException(String.format("Block '%s' (class '%s') is not registered with the block registry! This is likely a bug in the corresponding mod.", this, this.getClass().getName()), e);
-        }
+        return getKey().getValue();
     }
 
     @Override
@@ -225,7 +222,10 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     @Override
     public Translation getTranslation() {
-        return new SpongeTranslation(getTranslationKey() + ".name");
+        if (this.translation == null) {
+            this.translation = new SpongeTranslation(getTranslationKey() + ".name");
+        }
+        return this.translation;
     }
 
     @Intrinsic

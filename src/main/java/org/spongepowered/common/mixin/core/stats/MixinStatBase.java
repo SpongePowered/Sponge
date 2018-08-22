@@ -63,6 +63,8 @@ public abstract class MixinStatBase implements Statistic, SpongeStatistic, IMixi
 
     private String spongeId;
     private CatalogKey key;
+    private Translation translation;
+
 
     @Inject(method = "registerStat()Lnet/minecraft/stats/StatBase;", at = @At("RETURN"))
     public void registerStat(CallbackInfoReturnable<StatBase> ci) {
@@ -71,7 +73,10 @@ public abstract class MixinStatBase implements Statistic, SpongeStatistic, IMixi
 
     @Override
     public Translation getTranslation() {
-        return new SpongeTranslation(this.statId);
+        if (this.translation == null) {
+            this.translation = new SpongeTranslation(this.statId);
+        }
+        return this.translation;
     }
 
     @Override

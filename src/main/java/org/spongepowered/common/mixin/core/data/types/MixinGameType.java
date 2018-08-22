@@ -46,8 +46,8 @@ public abstract class MixinGameType {
 
     @Shadow public abstract String shadow$getName();
 
-    @Nullable private String spongeId;
     @Nullable private CatalogKey key;
+    @Nullable private Translation translation;
 
     public CatalogKey gamemode$getKey() {
         if (this.key == null) {
@@ -63,6 +63,9 @@ public abstract class MixinGameType {
     }
 
     public Translation gamemode$getTranslation() {
-        return new SpongeTranslation("gameMode." + this.shadow$getName().toLowerCase(Locale.ENGLISH));
+        if (this.translation == null) {
+            this.translation = new SpongeTranslation("gameMode." + this.shadow$getName().toLowerCase(Locale.ENGLISH));
+        }
+        return this.translation;
     }
 }

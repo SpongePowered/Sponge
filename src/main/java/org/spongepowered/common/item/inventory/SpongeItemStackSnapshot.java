@@ -78,6 +78,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     private final ImmutableSet<ImmutableValue<?>> values;
     @Nullable private final NBTTagCompound compound;
     @Nullable private Optional<UUID> creatorUniqueId;
+    @Nullable private Translation translation;
 
     public SpongeItemStackSnapshot(ItemStack itemStack) {
         checkNotNull(itemStack);
@@ -157,7 +158,10 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
     @Override
     public Translation getTranslation() {
-        return this.privateStack.getTranslation();
+        if (this.translation == null) {
+            this.translation = this.itemType.getTranslation(this.privateStack);
+        }
+        return this.translation;
     }
 
     @Override

@@ -51,8 +51,7 @@ import javax.annotation.Nullable;
 public abstract class MixinEnumChatVisibility implements ChatVisibility, IMixinEnumChatVisibility {
 
     @Shadow @Final private String resourceKey;
-    private String id;
-    private Translation translation;
+    @Nullable private Translation translation;
     private Set<ChatType> visibleChatTypes;
     private CatalogKey key;
 
@@ -61,7 +60,6 @@ public abstract class MixinEnumChatVisibility implements ChatVisibility, IMixinE
         this.visibleChatTypes = Sets.newHashSet();
 
         this.key = CatalogKey.of(SpongeImplHooks.getModIdFromClass(this.getClass()), ((EntityPlayer.EnumChatVisibility) (Object) this).name().toLowerCase(Locale.ENGLISH));
-        this.translation = new SpongeTranslation(this.resourceKey);
     }
 
     @Override
@@ -82,11 +80,14 @@ public abstract class MixinEnumChatVisibility implements ChatVisibility, IMixinE
 
     @Override
     public String getName() {
-        return this.translation.get();
+        return this.resourceKey;
     }
 
     @Override
     public Translation getTranslation() {
+        if (this.translation == null) {
+            this.translation = new SpongeTranslation(this.resourceKey);
+        }
         return this.translation;
     }
 

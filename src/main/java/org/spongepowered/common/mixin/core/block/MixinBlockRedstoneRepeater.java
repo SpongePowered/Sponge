@@ -81,6 +81,9 @@ public abstract class MixinBlockRedstoneRepeater extends MixinBlock {
 
     @Override
     public Translation getTranslation() {
-        return new SpongeTranslation("item.diode.name");
+        if (this.translation == null) {
+            this.translation = new SpongeTranslation("item.diode.name");
+        }
+        return this.translation;
     }
 }

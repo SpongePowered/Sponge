@@ -25,7 +25,9 @@
 package org.spongepowered.common.statistic;
 
 import com.google.common.base.CaseFormat;
+import net.minecraft.block.Block;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.stats.StatCrafting;
 import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.CatalogKey;
@@ -44,6 +46,7 @@ public final class SpongeBlockStatistic extends StatCrafting implements BlockSta
 
     private String spongeId;
     private CatalogKey key;
+    @Nullable private Translation translation;
 
     public SpongeBlockStatistic(String statId, String itemName, ITextComponent statName, Item item) {
         super(statId, itemName, statName, item);
@@ -51,7 +54,17 @@ public final class SpongeBlockStatistic extends StatCrafting implements BlockSta
 
     @Override
     public Translation getTranslation() {
-        return new SpongeTranslation(this.statId);
+        if (this.translation == null) {
+            String args;
+            if (this.statId.startsWith("stat.mineBlock.")) {
+                args = Block.getBlockFromItem((Item) getItemType()).getLocalizedName();
+            } else {
+                args = new ItemStack((Item) getItemType()).getDisplayName();
+            }
+            int end = "stat.".length() + this.statId.substring("stat.".length()).indexOf('.');
+            this.translation = new SpongeTranslation(this.statId.substring(0, end), args);
+        }
+        return this.translation;
     }
 
     @Override

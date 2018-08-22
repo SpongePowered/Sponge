@@ -29,11 +29,16 @@ import net.minecraft.item.ItemAir;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemBlockSpecial;
 import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.block.BlockUtil;
+import org.spongepowered.common.interfaces.item.IMixinItem;
 
 import java.util.Optional;
 
@@ -47,4 +52,14 @@ public abstract class MixinItemBlock extends MixinItem {
         this.blockType = Optional.of((BlockType) block);
     }
 
+    @Override
+    public Translation getTranslation() {
+        if (this.translation == null) {
+            if ((IMixinItem) this instanceof ItemBlockSpecial) {
+                return super.getTranslation();
+            }
+            this.translation = this.blockType.get().getTranslation();
+        }
+        return this.translation;
+    }
 }
