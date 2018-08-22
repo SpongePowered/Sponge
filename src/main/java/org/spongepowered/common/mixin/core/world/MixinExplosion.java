@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.world;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.Sets;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -43,6 +44,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -63,6 +65,7 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.PhaseData;
+import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
 import org.spongepowered.common.interfaces.world.IMixinExplosion;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -171,9 +174,10 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
         // Sponge Start - If the explosion should not break blocks, don't bother calculating it
         if (this.shouldBreakBlocks) {
             // Sponge End
-            Set<BlockPos> set = Sets.<BlockPos>newHashSet();
+            Set<BlockPos> set = new ObjectOpenHashSet<>(300);
             int i = 16;
 
+            Chunk chunk = null;
             for (int j = 0; j < 16; ++j) {
                 for (int k = 0; k < 16; ++k) {
                     for (int l = 0; l < 16; ++l) {
@@ -192,7 +196,15 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
 
                             for (float f1 = 0.3F; f > 0.0F; f -= 0.22500001F) {
                                 BlockPos blockpos = new BlockPos(d4, d6, d8);
-                                IBlockState iblockstate = this.world.getBlockState(blockpos);
+                                IBlockState iblockstate;
+                                if (((IMixinBlockPos) blockpos).isInvalidYPosition()) {
+                                    iblockstate = Blocks.AIR.getDefaultState();
+                                } else {
+                                    if (chunk == null || !((org.spongepowered.api.world.Chunk) chunk).containsBlock((int) d4, (int) d6, (int) d8)) {
+                                        chunk = this.world.getChunk(((int) d4) >> 4, ((int) d8) >> 4);
+                                    }
+                                    iblockstate = chunk.getBlockState(blockpos);
+                                }
 
                                 if (iblockstate.getMaterial() != Material.AIR) {
                                     float f2 = this.exploder != null
