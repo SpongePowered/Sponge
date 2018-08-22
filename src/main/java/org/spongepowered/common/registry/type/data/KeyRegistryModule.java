@@ -635,9 +635,9 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
     public void registerAdditionalCatalog(Key<?> extraCatalog) {
         checkState(!SpongeDataManager.areRegistrationsComplete(), "Cannot this.register new Keys after Data Registration has completed!");
         checkNotNull(extraCatalog, "Key cannot be null!");
-        final CatalogKey id = extraCatalog.getKey();
-        checkArgument(!id.getNamespace().equals(CatalogKey.SPONGE_NAMESPACE), "A plugin is trying to register custom keys under the sponge id namespace! This is a fake key! " + id);
-        this.keyMap.put(id, extraCatalog);
+        final CatalogKey key = extraCatalog.getKey();
+        checkArgument(!key.getNamespace().equals(CatalogKey.SPONGE_NAMESPACE), "A plugin is trying to register custom keys under the sponge id namespace! This is a fake key! " + key);
+        this.keyMap.put(key, extraCatalog);
     }
 
     @Override

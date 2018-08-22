@@ -37,13 +37,13 @@ import java.util.Optional;
 public class DelegateSpongeCraftingRecipe extends AbstractSpongeCraftingRecipe {
 
     private final CraftingRecipe recipe;
-    private final CatalogKey id;
+    private final CatalogKey key;
 
     public DelegateSpongeCraftingRecipe(CraftingRecipe recipe) {
         Preconditions.checkNotNull(recipe, "recipe");
 
         this.recipe = recipe;
-        this.id = recipe.getKey();
+        this.key = recipe.getKey();
     }
 
     public CraftingRecipe getDelegate() {
@@ -77,7 +77,7 @@ public class DelegateSpongeCraftingRecipe extends AbstractSpongeCraftingRecipe {
 
     @Override
     public CatalogKey getKey() {
-        return this.id;
+        return this.key;
     }
 
     @Override

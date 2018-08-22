@@ -28,16 +28,8 @@ import org.spongepowered.api.data.type.HorseStyle;
 
 public class SpongeHorseStyle extends SpongeEntityMeta implements HorseStyle {
 
-    private final String name;
-
     public SpongeHorseStyle(int style, String id, String name) {
-        super(style, id);
-        this.name = name;
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
+        super(style, id, name);
     }
 
     public int getBitMask() {

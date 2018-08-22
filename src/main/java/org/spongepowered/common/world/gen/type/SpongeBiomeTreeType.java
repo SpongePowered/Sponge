@@ -31,37 +31,25 @@ import com.google.common.base.MoreObjects.ToStringHelper;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.api.world.gen.type.BiomeTreeType;
+import org.spongepowered.common.SpongeCatalogType;
 
 import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-public class SpongeBiomeTreeType implements BiomeTreeType {
+public class SpongeBiomeTreeType extends SpongeCatalogType implements BiomeTreeType {
 
-    private final CatalogKey id;
-    private String name;
     private PopulatorObject smallObject;
     private @Nullable PopulatorObject largeObject;
 
-    public SpongeBiomeTreeType(CatalogKey id, String name, PopulatorObject small) {
-        this.id = id;
-        this.name = name;
+    public SpongeBiomeTreeType(CatalogKey key, String name, PopulatorObject small) {
+        super(key, name);
         this.smallObject = small;
     }
 
-    public SpongeBiomeTreeType(CatalogKey id, String name, PopulatorObject small, @Nullable PopulatorObject large) {
-        this(id, name, small);
+    public SpongeBiomeTreeType(CatalogKey key, String name, PopulatorObject small, @Nullable PopulatorObject large) {
+        this(key, name, small);
         this.largeObject = large;
-    }
-
-    @Override
-    public CatalogKey getKey() {
-        return this.id;
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
     }
 
     @Override
@@ -90,31 +78,12 @@ public class SpongeBiomeTreeType implements BiomeTreeType {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (o == this) {
-            return true;
-        }
-        if (!(o instanceof SpongeBiomeTreeType)) {
-            return false;
-        }
-        SpongeBiomeTreeType b = (SpongeBiomeTreeType) o;
-        return getKey().equals(b.getKey());
-    }
-
-    @Override
-    public int hashCode() {
-        return this.name.hashCode();
-    }
-
-    @Override
-    public String toString() {
-        ToStringHelper tsh = MoreObjects.toStringHelper(this)
-                .add("key", this.getKey())
-                .add("smallObj", this.smallObject.getClass().getName());
+    protected ToStringHelper toStringHelper() {
+        ToStringHelper tsh = super.toStringHelper();
+        tsh.add("smallObj", this.smallObject.getClass().getName());
         if (this.largeObject != null) {
             tsh.add("largeObj", this.largeObject.getClass().getName());
         }
-        return tsh.toString();
+        return tsh;
     }
-
 }

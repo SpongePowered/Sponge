@@ -128,11 +128,11 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Catal
         }
     }
 
-    private void register(IProperty<?> property, CatalogKey id) {
+    private void register(IProperty<?> property, CatalogKey key) {
         checkArgument(!this.propertyIdMap.containsKey(property), "Property is already registered! Property: " + property.getName()
                                                                  + " is registered as : " + this.propertyIdMap.get(property));
-        this.propertyIdMap.put(property, id);
-        this.idPropertyMap.put(id, property);
+        this.propertyIdMap.put(property, key);
+        this.idPropertyMap.put(key, property);
     }
 
     BlockPropertyIdProvider() {

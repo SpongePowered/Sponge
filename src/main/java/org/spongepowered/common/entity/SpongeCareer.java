@@ -37,14 +37,9 @@ public class SpongeCareer extends SpongeEntityMeta implements Career {
     private final Profession profession;
 
     public SpongeCareer(int id, String name, Profession profession, Translation translation) {
-        super(id, name);
+        super(id, name, name);
         this.translation = translation;
         this.profession = profession;
-    }
-
-    @Override
-    public String getName() {
-        return getTranslation().get();
     }
 
     @Override

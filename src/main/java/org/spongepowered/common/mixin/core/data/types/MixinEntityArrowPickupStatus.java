@@ -39,15 +39,13 @@ import javax.annotation.Nullable;
 @Mixin(EntityArrow.PickupStatus.class)
 public class MixinEntityArrowPickupStatus implements PickupRule {
 
-    private String id;
     private String name;
     private CatalogKey key;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void construct(CallbackInfo ci) {
         this.name = ((Enum<?>) (Object) this).name();
-        this.id = this.name.toLowerCase(Locale.ENGLISH);
-        this.key = CatalogKey.resolve(this.id);
+        this.key = CatalogKey.resolve(this.name.toLowerCase(Locale.ENGLISH));
     }
 
     @Override

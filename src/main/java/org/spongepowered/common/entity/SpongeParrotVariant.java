@@ -29,7 +29,7 @@ import org.spongepowered.api.data.type.ParrotVariant;
 public class SpongeParrotVariant extends SpongeEntityMeta implements ParrotVariant {
 
     public SpongeParrotVariant(int type, String name) {
-        super(type, name);
+        super(type, name, name);
     }
 
 }

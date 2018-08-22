@@ -91,7 +91,7 @@ public abstract class MixinStateImplementation extends BlockStateBase implements
     @Nullable private ImmutableList<ImmutableDataManipulator<?, ?>> manipulators;
     @Nullable private ImmutableMap<Key<?>, Object> keyMap;
     @Nullable private ImmutableMap<Class<? extends Property<?, ?>>, Property<?, ?>> dataProperties;
-    @Nullable private CatalogKey id;
+    @Nullable private CatalogKey key;
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
@@ -378,22 +378,22 @@ public abstract class MixinStateImplementation extends BlockStateBase implements
             builder.append(joiner.join(propertyValues));
             builder.append(']');
         }
-        this.id =  CatalogKey.of(nameSpace, builder.toString());
+        this.key =  CatalogKey.of(nameSpace, builder.toString());
     }
 
     @Override
     public CatalogKey getKey() {
-        if (this.id == null) {
+        if (this.key == null) {
             generateId(this.block);
         }
-        return this.id;
+        return this.key;
     }
 
     @Override
     public String getName() {
-        if (this.id == null) {
+        if (this.key == null) {
             generateId(this.block);
         }
-        return this.id.getValue();
+        return this.key.getValue();
     }
 }

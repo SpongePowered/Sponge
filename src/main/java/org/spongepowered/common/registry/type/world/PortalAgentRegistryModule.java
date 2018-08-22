@@ -111,13 +111,13 @@ public final class PortalAgentRegistryModule extends AbstractCatalogRegistryModu
 
         // used for mods only as plugins register in PreInit
         String teleporterName = clazz.getSimpleName().toLowerCase(Locale.ENGLISH);
-        final CatalogKey id = CatalogKey.of(modId, teleporterName);
-        if (this.map.get(id) == null) {
-            portalAgentType = new SpongePortalAgentType(teleporterName, id.toString(), clazz);
-            this.map.put(id, portalAgentType);
+        final CatalogKey key = CatalogKey.of(modId, teleporterName);
+        if (this.map.get(key) == null) {
+            portalAgentType = new SpongePortalAgentType(teleporterName, key.toString(), clazz);
+            this.map.put(key, portalAgentType);
             this.portalAgentClassToTypeMappings.put((Class<? extends PortalAgent>) clazz, portalAgentType);
         }
-        return this.map.get(id);
+        return this.map.get(key);
 
     }
 

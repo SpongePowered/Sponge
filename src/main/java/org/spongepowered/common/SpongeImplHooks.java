@@ -371,8 +371,8 @@ public final class SpongeImplHooks {
         return Optional.of(((CraftingRecipe) recipe));
     }
 
-    public static Optional<CraftingRecipe> getRecipeById(CatalogKey id) {
-        IRecipe recipe = CraftingManager.REGISTRY.getObject((ResourceLocation) (Object) id);
+    public static Optional<CraftingRecipe> getRecipeById(CatalogKey key) {
+        IRecipe recipe = CraftingManager.REGISTRY.getObject((ResourceLocation) (Object) key);
         if (recipe == null) {
             return Optional.empty();
         }

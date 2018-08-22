@@ -70,15 +70,15 @@ public final class BiomeTypeRegistryModule
     }
 
     private void registerBiome(Biome biome) {
-        CatalogKey id = ((BiomeType) biome).getKey();
-        if (id == null) {
+        CatalogKey key = ((BiomeType) biome).getKey();
+        if (key == null) {
             ResourceLocation reg_id = Biome.REGISTRY.getNameForObject(biome);
             ((IMixinBiome) biome).setModId(reg_id.getNamespace());
-            id = (CatalogKey) (Object) reg_id;
-            ((IMixinBiome) biome).setId(id);
+            key = (CatalogKey) (Object) reg_id;
+            ((IMixinBiome) biome).setId(key);
         }
         this.biomeTypes.add((BiomeType) biome);
-        this.map.put(id, (BiomeType) biome);
+        this.map.put(key, (BiomeType) biome);
     }
 
     @AdditionalRegistration

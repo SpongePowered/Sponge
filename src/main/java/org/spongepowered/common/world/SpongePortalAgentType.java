@@ -31,29 +31,16 @@ import net.minecraft.world.Teleporter;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.world.PortalAgent;
 import org.spongepowered.api.world.PortalAgentType;
+import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.interfaces.world.IMixinITeleporter;
 
-public final class SpongePortalAgentType implements PortalAgentType {
+public final class SpongePortalAgentType extends SpongeCatalogType implements PortalAgentType {
 
-    private final String name;
     private final Class<? extends IMixinITeleporter> portalAgentClass;
-    private final CatalogKey key;
 
     public SpongePortalAgentType(String id, String name, Class<? extends IMixinITeleporter> portalAgentClass) {
-        this.name = checkNotNull(name);
+        super(CatalogKey.resolve(id), name);
         this.portalAgentClass = checkNotNull(portalAgentClass, "The class was null! The id was: " + id);
-        this.key = CatalogKey.resolve(id);
-    }
-
-
-    @Override
-    public CatalogKey getKey() {
-        return this.key;
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
     }
 
     @SuppressWarnings("unchecked")
@@ -63,27 +50,8 @@ public final class SpongePortalAgentType implements PortalAgentType {
     }
 
     @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-            .add("id", this.key)
-            .add("name", this.name)
-            .add("class", this.portalAgentClass.getName())
-            .toString();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof PortalAgentType)) {
-            return false;
-        }
-
-        PortalAgentType other = (PortalAgentType) obj;
-        return this.key.equals(other.getKey());
-
-    }
-
-    @Override
-    public int hashCode() {
-        return this.key.hashCode();
+    protected MoreObjects.ToStringHelper toStringHelper() {
+        return super.toStringHelper()
+                .add("class", this.portalAgentClass.getName());
     }
 }

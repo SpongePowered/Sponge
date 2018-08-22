@@ -30,27 +30,15 @@ import com.google.common.base.MoreObjects;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.api.world.gen.type.MushroomType;
+import org.spongepowered.common.SpongeCatalogType;
 
-public class SpongeMushroomType implements MushroomType {
+public class SpongeMushroomType extends SpongeCatalogType implements MushroomType {
 
-    private final CatalogKey key;
-    private final String name;
     private PopulatorObject obj;
 
     public SpongeMushroomType(final CatalogKey key, String name, PopulatorObject o) {
-        this.key = key;
-        this.name = name;
+        super(key, name);
         this.obj = o;
-    }
-
-    @Override
-    public CatalogKey getKey() {
-        return this.key;
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
     }
 
     @Override
@@ -64,28 +52,8 @@ public class SpongeMushroomType implements MushroomType {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (o == this) {
-            return true;
-        }
-        if (!(o instanceof SpongeBiomeTreeType)) {
-            return false;
-        }
-        SpongeBiomeTreeType b = (SpongeBiomeTreeType) o;
-        return getKey().equals(b.getKey());
+    protected MoreObjects.ToStringHelper toStringHelper() {
+        return super.toStringHelper()
+                .add("popobj", this.obj.getClass().getName());
     }
-
-    @Override
-    public int hashCode() {
-        return this.name.hashCode();
-    }
-
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("key", this.getKey())
-                .add("popobj", this.obj.getClass().getName())
-                .toString();
-    }
-
 }

@@ -42,7 +42,7 @@ public class SpongeCookedFish extends SpongeCatalogType implements CookedFish {
     @Nullable private Translation translation;
 
     public SpongeCookedFish(CatalogKey key, ItemFishFood.FishType fish) {
-        super(key, new SpongeTranslation("item.fish." + fish.getTranslationKey() + ".cooked.name").get());
+        super(key, key.getValue());
         this.fish = checkNotNull(fish);
     }
 

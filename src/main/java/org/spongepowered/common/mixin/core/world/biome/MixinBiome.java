@@ -85,7 +85,7 @@ public abstract class MixinBiome implements BiomeType, IMixinBiome {
     @Shadow public IBlockState fillerBlock;
     @Shadow public BiomeDecorator decorator;
 
-    private CatalogKey id;
+    private CatalogKey key;
     private String modId;
 
     @Override
@@ -335,14 +335,14 @@ public abstract class MixinBiome implements BiomeType, IMixinBiome {
 
     @Override
     public CatalogKey getKey() {
-        return this.id;
+        return this.key;
     }
 
     @Override
-    public void setId(CatalogKey id) {
-        checkState(this.id == null, "Attempt made to set ID!");
+    public void setId(CatalogKey key) {
+        checkState(this.key == null, "Attempt made to set Key!");
 
-        this.id = id;
+        this.key = key;
     }
 
     @Override

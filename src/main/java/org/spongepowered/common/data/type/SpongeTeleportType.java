@@ -24,57 +24,13 @@
  */
 package org.spongepowered.common.data.type;
 
-import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.event.cause.entity.teleport.TeleportType;
+import org.spongepowered.common.SpongeCatalogType;
 
-import java.util.Locale;
-
-public class SpongeTeleportType implements TeleportType {
-
-    private String name;
-    private String id;
-    private CatalogKey key;
+public class SpongeTeleportType extends SpongeCatalogType implements TeleportType {
 
     public SpongeTeleportType(String id, String name) {
-        this.name = name;
-        this.id = id.toLowerCase(Locale.ENGLISH);
-        this.key = CatalogKey.resolve(id);
-    }
-
-    @Override
-    public CatalogKey getKey() {
-        return this.key;
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final SpongeTeleportType other = (SpongeTeleportType) obj;
-        return this.id.equals(other.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(this.id, this.name);
-    }
-
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("id", this.id)
-                .add("name", this.name)
-                .toString();
+        super(CatalogKey.resolve(id), name);
     }
 }

@@ -40,7 +40,7 @@ public final class SpongeSkinPart extends SpongeCatalogType implements SkinPart 
     @Nullable private Translation translation;
 
     public SpongeSkinPart(int ordinal, String id) {
-        super(CatalogKey.resolve("minecraft:" + id), new SpongeTranslation("options.modelPart." + id).get());
+        super(CatalogKey.resolve("minecraft:" + id), id);
         this.ordinal = ordinal;
         this.mask = 1 << this.ordinal;
     }

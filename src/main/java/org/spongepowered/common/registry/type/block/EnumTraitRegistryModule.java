@@ -56,10 +56,10 @@ public final class EnumTraitRegistryModule
         this.register(extraCatalog);
     }
 
-    public void registerBlock(CatalogKey id, BlockType block, EnumTrait<?> property) {
-        checkNotNull(id, "Id was null!");
+    public void registerBlock(CatalogKey key, BlockType block, EnumTrait<?> property) {
+        checkNotNull(key, "Key was null!");
         checkNotNull(property, "Property was null!");
-        this.map.put(id, property);
+        this.map.put(key, property);
         final String propertyId = block.getKey().toString().toLowerCase(Locale.ENGLISH) + "_" + property.getName().toLowerCase(Locale.ENGLISH);
         this.map.put(CatalogKey.resolve(propertyId), property);
     }

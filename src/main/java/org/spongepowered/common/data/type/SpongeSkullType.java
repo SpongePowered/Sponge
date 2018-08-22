@@ -32,19 +32,12 @@ import org.spongepowered.common.SpongeCatalogType;
 public class SpongeSkullType extends SpongeCatalogType implements SkullType {
 
     private final byte dataId;
-    private final String name;
     private final Translation translation;
 
     public SpongeSkullType(byte dataId, String id, String name, Translation translation) {
-        super(CatalogKey.resolve(id), translation.get());
+        super(CatalogKey.resolve(id), name);
         this.dataId = dataId;
-        this.name = name;
         this.translation = translation;
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
     }
 
     public byte getByteId() {

@@ -32,21 +32,19 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.biome.BiomeGenerationSettings;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.biome.VirtualBiomeType;
+import org.spongepowered.common.SpongeCatalogType;
 
 import java.util.function.Function;
 
-public class SpongeVirtualBiomeType implements VirtualBiomeType {
+public class SpongeVirtualBiomeType extends SpongeCatalogType implements VirtualBiomeType {
 
-    private final CatalogKey id;
-    private final String name;
     private final double tempterature;
     private final double humidity;
     private final BiomeType persisted;
     private final Function<World, BiomeGenerationSettings> defaultSettings;
 
-    public SpongeVirtualBiomeType(CatalogKey id, String name, double t, double h, BiomeType persist, Function<World, BiomeGenerationSettings> func) {
-        this.id = checkNotNull(id);
-        this.name = checkNotNull(name);
+    public SpongeVirtualBiomeType(CatalogKey key, String name, double t, double h, BiomeType persist, Function<World, BiomeGenerationSettings> func) {
+        super(key, name);
         this.tempterature = t;
         this.humidity = h;
         this.persisted = checkNotNull(persist);
@@ -64,16 +62,6 @@ public class SpongeVirtualBiomeType implements VirtualBiomeType {
     }
 
     @Override
-    public CatalogKey getKey() {
-        return this.id;
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
-    }
-
-    @Override
     public BiomeType getPersistedType() {
         return this.persisted;
     }
@@ -84,28 +72,8 @@ public class SpongeVirtualBiomeType implements VirtualBiomeType {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (o == this) {
-            return true;
-        }
-        if (!(o instanceof VirtualBiomeType)) {
-            return false;
-        }
-        return this.id.equals(((VirtualBiomeType) o).getKey());
+    protected MoreObjects.ToStringHelper toStringHelper() {
+        return super.toStringHelper()
+                .add("persistedBiome", this.persisted);
     }
-
-    @Override
-    public int hashCode() {
-        return this.id.hashCode();
-    }
-
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("id", this.id)
-                .add("name", this.name)
-                .add("persistedBiome", this.persisted)
-                .toString();
-    }
-
 }

@@ -55,10 +55,10 @@ public final class BooleanTraitRegistryModule
         this.map.put(extraCatalog.getKey(), extraCatalog);
     }
 
-    public void registerBlock(CatalogKey id, BlockType block, BooleanTrait property) {
-        checkNotNull(id, "Id was null!");
+    public void registerBlock(CatalogKey key, BlockType block, BooleanTrait property) {
+        checkNotNull(key, "Key was null!");
         checkNotNull(property, "Property was null!");
-        this.map.put(id, property);
+        this.map.put(key, property);
         final String propertyId = block.getKey().toString().toLowerCase(Locale.ENGLISH) + "_" + property.getName().toLowerCase(Locale.ENGLISH);
         this.map.put(CatalogKey.resolve(propertyId), property);
     }

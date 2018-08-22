@@ -38,8 +38,8 @@ public class SpongeEntityMeta extends SpongeCatalogType {
     public static final DataQuery ENTITY_TYPE_NAME = of("name");
     public final int type;
 
-    public SpongeEntityMeta(int type, String name) {
-        super(CatalogKey.resolve(name), name);
+    public SpongeEntityMeta(int type, String id, String name) {
+        super(CatalogKey.resolve(id), name);
         this.type = type;
     }
 

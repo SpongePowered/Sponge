@@ -40,7 +40,7 @@ public class SpongeGuiId extends SpongeCatalogType implements GuiId {
     }
 
     public SpongeGuiId(final CatalogKey key, @Nullable final String internalId) {
-        super(key, RegistryHelper.name(key));
+        super(key, key.getValue());
         this.internalId = internalId;
     }
 

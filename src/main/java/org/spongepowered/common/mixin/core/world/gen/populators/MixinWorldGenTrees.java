@@ -44,7 +44,6 @@ public abstract class MixinWorldGenTrees extends MixinWorldGenAbstractTree imple
 
     @Shadow private int minTreeHeight;
 
-    private String id = "minecraft:oak";
     private String name = "Oak tree";
     private VariableAmount minHeight = VariableAmount.fixed(4);
     private CatalogKey key = CatalogKey.minecraft("oak");

@@ -29,7 +29,7 @@ import org.spongepowered.api.data.type.OcelotType;
 public class SpongeOcelotType extends SpongeEntityMeta implements OcelotType {
 
     public SpongeOcelotType(int type, String name) {
-        super(type, name);
+        super(type, name, name);
     }
 
 }

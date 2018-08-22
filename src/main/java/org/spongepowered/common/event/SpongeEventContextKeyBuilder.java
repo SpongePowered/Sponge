@@ -47,10 +47,9 @@ public final class SpongeEventContextKeyBuilder<T> implements EventContextKey.Bu
     }
 
     @Override
-    public SpongeEventContextKeyBuilder<T> id(CatalogKey id) {
-        checkArgument(id != null, "Id cannot be null for EventContextKey");
-        checkArgument(!id.toString().isEmpty(), "Cannot have an empty string id!");
-        this.key = id;
+    public SpongeEventContextKeyBuilder<T> id(CatalogKey key) {
+        checkArgument(key != null, "Key cannot be null for EventContextKey");
+        this.key = key;
         return this;
     }
 
@@ -65,7 +64,7 @@ public final class SpongeEventContextKeyBuilder<T> implements EventContextKey.Bu
     @Override
     public EventContextKey<T> build() {
         checkState(this.typeClass != null, "Allowed type cannot be null!");
-        checkState(this.key != null, "ID cannot be null!");
+        checkState(this.key != null, "Key cannot be null!");
         checkState(this.name != null, "Name cannot be null for id: " + this.key);
         checkState(!this.name.isEmpty(), "Name cannot be empty for id: " + this.key);
         final SpongeEventContextKey<T> key = new SpongeEventContextKey<>(this);

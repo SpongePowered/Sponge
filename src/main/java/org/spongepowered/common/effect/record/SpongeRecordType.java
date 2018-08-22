@@ -50,7 +50,7 @@ public class SpongeRecordType extends SpongeCatalogType implements RecordType {
     private final Translation translation;
 
     public SpongeRecordType(String id, Translation translation, int internalId, SoundType soundType) {
-        super(CatalogKey.resolve(id), translation.get());
+        super(CatalogKey.resolve(id), CatalogKey.resolve(id).getValue());
         this.internalId = internalId;
         this.soundType = soundType;
         this.translation = translation;

@@ -29,7 +29,7 @@ import org.spongepowered.api.data.type.RabbitType;
 public class SpongeRabbitType extends SpongeEntityMeta implements RabbitType {
 
     public SpongeRabbitType(int type, String name) {
-        super(type, name);
+        super(type, name, name);
     }
 
 }

@@ -24,47 +24,13 @@
  */
 package org.spongepowered.common.economy;
 
-import com.google.common.base.MoreObjects;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.service.economy.transaction.TransactionType;
+import org.spongepowered.common.SpongeCatalogType;
 
-public class SpongeTransactionType implements TransactionType {
-
-    private final String name;
-    private final CatalogKey key;
+public class SpongeTransactionType extends SpongeCatalogType implements TransactionType {
 
     public SpongeTransactionType(String id, String name) {
-        this.name = name;
-        this.key = CatalogKey.resolve(id);
-    }
-
-    @Override
-    public CatalogKey getKey() {
-        return this.key;
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        if (other == null || !(other instanceof TransactionType)) {
-            return false;
-        }
-        return ((TransactionType) other).getKey().equals(this.getKey());
-    }
-
-    @Override
-    public int hashCode() {
-        return java.util.Objects.hash(this.key);
-    }
-
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("key", this.getKey())
-                .toString();
+        super(CatalogKey.resolve(id), name);
     }
 }

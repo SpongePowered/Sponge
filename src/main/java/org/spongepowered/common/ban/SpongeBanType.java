@@ -33,7 +33,7 @@ public final class SpongeBanType extends SpongeEntityMeta implements BanType {
     private Class<? extends Ban> banClass;
 
     public SpongeBanType(int id, String name, Class<? extends Ban> banClass) {
-        super(id, name);
+        super(id, name, name);
         this.banClass = banClass;
     }
 

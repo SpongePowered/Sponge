@@ -28,62 +28,21 @@ import com.google.common.base.MoreObjects;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.common.SpongeCatalogType;
 
 import java.util.Locale;
 
-public class SpongePopulatorType implements PopulatorType {
-
-    public final CatalogKey id;
-    public final String populatorName;
+public class SpongePopulatorType extends SpongeCatalogType implements PopulatorType {
 
     public SpongePopulatorType(String name) {
         this(name.toLowerCase(Locale.ENGLISH), "minecraft");
     }
 
     public SpongePopulatorType(String name, String modId) {
-        this.id = CatalogKey.of(modId, name);
-        this.populatorName = name.toLowerCase(Locale.ENGLISH);
-    }
-
-    @Override
-    public CatalogKey getKey() {
-        return this.id;
-    }
-
-    @Override
-    public String getName() {
-        return this.populatorName;
+        super(CatalogKey.of(modId, name), name.toLowerCase(Locale.ENGLISH));
     }
 
     public String getModId() {
-        return this.id.getNamespace();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final SpongePopulatorType other = (SpongePopulatorType) obj;
-        if (!this.getKey().equals(other.getKey())) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        return this.getKey().hashCode();
-    }
-
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("key", this.getKey())
-                .add("name", this.populatorName)
-                .toString();
+        return getKey().getNamespace();
     }
 }

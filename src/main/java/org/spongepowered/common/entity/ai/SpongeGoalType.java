@@ -28,17 +28,15 @@ import com.google.common.base.MoreObjects;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.entity.ai.Goal;
 import org.spongepowered.api.entity.ai.GoalType;
+import org.spongepowered.common.SpongeCatalogType;
 
-public final class SpongeGoalType implements GoalType {
+public final class SpongeGoalType extends SpongeCatalogType implements GoalType {
 
-    private final CatalogKey key;
-    private final String name;
     private final Class<? extends Goal<?>> goalClass;
 
     public SpongeGoalType(String id, String name, Class<? extends Goal<?>> goalClass) {
-        this.name = name;
+        super(CatalogKey.resolve(id), name);
         this.goalClass = goalClass;
-        this.key = CatalogKey.resolve(id);
     }
 
     @Override
@@ -47,21 +45,8 @@ public final class SpongeGoalType implements GoalType {
     }
 
     @Override
-    public CatalogKey getKey() {
-        return this.key;
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
-    }
-
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-            .addValue(this.key)
-            .addValue(this.name)
-            .add("goalClass", this.goalClass)
-            .toString();
+    protected MoreObjects.ToStringHelper toStringHelper() {
+        return super.toStringHelper()
+                .add("goalClass", this.goalClass);
     }
 }

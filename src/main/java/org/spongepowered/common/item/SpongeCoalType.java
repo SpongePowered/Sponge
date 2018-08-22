@@ -35,13 +35,8 @@ public class SpongeCoalType extends SpongeEntityMeta implements CoalType {
     private final Translation translation;
 
     public SpongeCoalType(int type, String name, Translation translation) {
-        super(type, name);
+        super(type, name, name);
         this.translation = checkNotNull(translation, "translation");
-    }
-
-    @Override
-    public String getName() {
-        return getTranslation().get();
     }
 
     @Override
