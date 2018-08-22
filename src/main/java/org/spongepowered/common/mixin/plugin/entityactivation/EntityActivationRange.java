@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import it.unimi.dsi.fastutil.bytes.Byte2IntOpenHashMap;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
@@ -50,6 +51,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityFireball;
 import net.minecraft.entity.projectile.EntityThrowable;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
@@ -92,7 +94,7 @@ public class EntityActivationRange {
     static AxisAlignedBB aquaticBB = new AxisAlignedBB(0, 0, 0, 0, 0, 0);
     static AxisAlignedBB ambientBB = new AxisAlignedBB(0, 0, 0, 0, 0, 0);
     static AxisAlignedBB tileEntityBB = new AxisAlignedBB(0, 0, 0, 0, 0, 0);
-    static Map<Byte, Integer> maxActivationRanges = Maps.newHashMap();
+    static Map<Byte, Integer> maxActivationRanges = new Byte2IntOpenHashMap();
 
     /**
      * Initializes an entities type on construction to specify what group this
@@ -219,17 +221,19 @@ public class EntityActivationRange {
             return;
         }
 
+        MinecraftServer server = SpongeImpl.getServer();
+
         for (EntityPlayer player : world.playerEntities) {
 
             int maxRange = 0;
-            for (Integer range : maxActivationRanges.values()) {
+            for (int range : maxActivationRanges.values()) {
                 if (range > maxRange) {
                     maxRange = range;
                 }
             }
 
             maxRange = Math.min((((org.spongepowered.api.world.World) world).getViewDistance() << 4) - 8, maxRange);
-            ((IModData_Activation) player).setActivatedTick(SpongeImpl.getServer().getTickCounter());
+            ((IModData_Activation) player).setActivatedTick(server.getTickCounter());
             growBb(maxBB, player.getEntityBoundingBox(), maxRange, 256, maxRange);
 
             int i = MathHelper.floor(maxBB.minX / 16.0D);
@@ -476,11 +480,12 @@ public class EntityActivationRange {
         }
 
         // check max ranges
-        Integer maxRange = maxActivationRanges.get(activationType);
-        if (maxRange == null) {
-            maxActivationRanges.put(activationType, activationRange);
-        } else if (activationRange > maxRange) {
-            maxActivationRanges.put(activationType, activationRange);
+        if (activationRange != null) {
+            if (!maxActivationRanges.containsKey(activationType)) {
+                maxActivationRanges.put(activationType, activationRange);
+            } else if (activationRange > maxActivationRanges.get(activationType)) {
+                maxActivationRanges.put(activationType, activationRange);
+            }
         }
 
         if (autoPopulate && requiresSave) {
