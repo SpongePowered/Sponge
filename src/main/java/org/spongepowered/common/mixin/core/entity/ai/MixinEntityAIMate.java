@@ -106,7 +106,7 @@ public abstract class MixinEntityAIMate {
                 }
             }
         } else {
-            this.spawnEntityResult = true;
+            this.spawnEntityResult = world.spawnEntity(baby);
         }
         return this.spawnEntityResult;
     }
