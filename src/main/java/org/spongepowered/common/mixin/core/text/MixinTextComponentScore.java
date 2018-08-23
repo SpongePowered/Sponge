@@ -25,14 +25,35 @@
 package org.spongepowered.common.mixin.core.text;
 
 import net.minecraft.util.text.TextComponentScore;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.scoreboard.Score;
+import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.serializer.TextSerializers;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+
+import java.util.Optional;
 
 @Mixin(TextComponentScore.class)
 public abstract class MixinTextComponentScore extends MixinTextComponentBase {
 
+    @Shadow @Final private String objective;
+
+    @Shadow @Final private String name;
+
     @Override
     protected Text.Builder createBuilder() {
+        if (Sponge.isServerAvailable()) {
+            Optional<Objective> objective = Sponge.getServer().getServerScoreboard().get().getObjective(this.objective);
+            if (objective.isPresent()) {
+                Optional<Score> score = objective.get().getScore(TextSerializers.LEGACY_FORMATTING_CODE.deserialize(this.name));
+                if (score.isPresent()) {
+                    return Text.builder(score.get());
+                }
+            }
+        }
         return Text.builder();
     }
 

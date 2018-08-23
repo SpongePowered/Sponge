@@ -24,12 +24,18 @@
  */
 package org.spongepowered.common.mixin.api.text;
 
+import net.minecraft.command.ICommandSender;
+import net.minecraft.util.text.TextComponentBase;
+import net.minecraft.util.text.TextComponentScore;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.scoreboard.Score;
 import org.spongepowered.api.text.ScoreText;
+import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
+import java.util.Locale;
 import java.util.Optional;
 
 @Mixin(value = ScoreText.class, remap = false)
@@ -38,12 +44,21 @@ public abstract class MixinTextScore extends MixinText {
     @Shadow @Final protected Score score;
     @Shadow @Final protected Optional<String> override;
 
-    /*@Override
-    protected ChatComponentStyle createComponent(Locale locale) {
-        ChatComponentScore component = new ChatComponentScore(null, null); // TODO
-        if (this.override.isPresent()) {
-            component.setValue(this.override.get());
+    @Shadow public abstract Score getScore();
+
+    @Override
+    protected TextComponentBase createComponent() {
+        TextComponentScore textComponentScore;
+        String name = TextSerializers.LEGACY_FORMATTING_CODE.serialize(this.score.getName());
+        if (score.getObjectives().isEmpty()) {
+            textComponentScore = new TextComponentScore(name, "");
+        } else {
+            textComponentScore = new TextComponentScore(name, score.getObjectives().iterator().next().getName());
+            if (Sponge.isServerAvailable()) {
+                textComponentScore.resolve((ICommandSender) Sponge.getServer());
+            }
         }
-        return component;
-    }*/
+        override.ifPresent(textComponentScore::setValue);
+        return textComponentScore;
+    }
 }
