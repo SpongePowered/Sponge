@@ -29,6 +29,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
 
@@ -54,5 +55,10 @@ public abstract class MixinVec3i implements IMixinBlockPos {
     @Override
     public boolean isInvalidYPosition() {
         return this.y < 0 || this.y >= 256;
+    }
+
+    @Overwrite
+    public int hashCode() {
+        return  (this.x * 211 + this.y) * 97 + this.z;
     }
 }
