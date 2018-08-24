@@ -60,7 +60,7 @@ public interface IMixinTileEntity extends IMixinTrackable {
         final NBTTagCompound data = this.getTileData();
         final NBTTagCompound tag = data.getCompoundTag(NbtDataUtil.SPONGE_DATA);
         if (tag.isEmpty()) {
-            data.setTag(NbtDataUtil.SPONGE_DATA, new NBTTagCompound());
+            data.setTag(NbtDataUtil.SPONGE_DATA, tag);
         }
         return tag;
     }
