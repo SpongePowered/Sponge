@@ -127,6 +127,11 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
     }
 
     @Override
+    public boolean allowsEventListener() {
+        return false;
+    }
+
+    @Override
     public void appendNotifierPreBlockTick(IMixinWorldServer mixinWorld, BlockPos pos, G context, BlockTickContext phaseContext) {
 
     }
