@@ -198,14 +198,17 @@ public abstract class MixinEntity_Tracker implements Entity, IMixinEntity {
             this.userStorageService = SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get();
         }
 
-        // check username cache
-        String username = SpongeUsernameCache.getLastKnownUsername(uuid);
-        if (username != null) {
-            return this.userStorageService.get(GameProfile.of(uuid, username));
-        }
-
         // check mojang cache
         GameProfile profile = this.spongeProfileManager.getCache().getById(uuid).orElse(null);
+
+        if (profile == null) {
+            // check username cache
+            String username = SpongeUsernameCache.getLastKnownUsername(uuid);
+            if (username != null) {
+                profile = GameProfile.of(uuid, username);
+            }
+        }
+
         if (profile != null) {
             return this.userStorageService.get(profile);
         }
