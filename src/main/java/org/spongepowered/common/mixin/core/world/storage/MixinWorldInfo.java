@@ -33,6 +33,10 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonParseException;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectList;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -158,7 +162,8 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     private boolean generateBonusChest;
     private NBTTagCompound spongeRootLevelNbt = new NBTTagCompound(), spongeNbt = new NBTTagCompound();
     private final NBTTagList playerUniqueIdNbt = new NBTTagList();
-    private final BiMap<Integer, UUID> playerUniqueIdMap = HashBiMap.create();
+    private final Object2IntOpenHashMap<UUID> playerIdMap = new Object2IntOpenHashMap<>();
+    private final ObjectList<UUID> playerIdList = new ObjectArrayList<>();
     private final List<UUID> pendingUniqueIds = new ArrayList<>();
     private int trackedUniqueIdCount = 0;
     @Nullable private SpongeConfig<WorldConfig> worldConfig;
@@ -773,19 +778,23 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     @Override
     public int getIndexForUniqueId(UUID uuid) {
-        final Integer index = this.playerUniqueIdMap.inverse().get(uuid);
-        if (index != null) {
-            return index;
+        int i = this.playerIdMap.getInt(uuid);
+        if (i != this.playerIdMap.defaultReturnValue()) {
+            return i;
         }
 
-        this.playerUniqueIdMap.put(this.trackedUniqueIdCount, uuid);
+        this.playerIdMap.put(uuid, this.trackedUniqueIdCount);
+        this.playerIdList.add(uuid);
         this.pendingUniqueIds.add(uuid);
         return this.trackedUniqueIdCount++;
     }
 
     @Override
     public Optional<UUID> getUniqueIdForIndex(int index) {
-        return Optional.ofNullable(this.playerUniqueIdMap.get(index));
+        if (index == -1 || index >= this.playerIdList.size()) {
+            return Optional.empty();
+        }
+        return Optional.of(this.playerIdList.get(index));
     }
 
     @Override
@@ -839,9 +848,10 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
             for (int i = 0; i < playerIdList.tagCount(); i++) {
                 final NBTTagCompound playerId = playerIdList.getCompoundTagAt(i);
                 final UUID playerUuid = playerId.getUniqueId(NbtDataUtil.UUID);
-                final Integer playerIndex = this.playerUniqueIdMap.inverse().get(playerUuid);
-                if (playerIndex == null) {
-                    this.playerUniqueIdMap.put(this.trackedUniqueIdCount++, playerUuid);
+                final int playerIndex = this.playerIdMap.getInt(playerUuid);
+                if (playerIndex == this.playerIdMap.defaultReturnValue()) {
+                    this.playerIdMap.put(playerUuid, this.trackedUniqueIdCount++);
+                    this.playerIdList.add(playerUuid);
                 } else {
                     playerIdList.removeTag(i);
                 }

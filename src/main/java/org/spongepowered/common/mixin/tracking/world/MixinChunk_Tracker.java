@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.tracking.world;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.entity.player.EntityPlayer;
@@ -36,6 +38,7 @@ import net.minecraft.world.WorldServer;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.user.UserStorageService;
@@ -89,8 +92,8 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
 
     @Shadow public abstract ChunkPos getPos();
 
-    private Map<Integer, PlayerTracker> trackedIntBlockPositions = new HashMap<>();
-    private Map<Short, PlayerTracker> trackedShortBlockPositions = new HashMap<>();
+    private Int2ObjectOpenHashMap<PlayerTracker> trackedIntBlockPositions = new Int2ObjectOpenHashMap<>();
+    private Short2ObjectOpenHashMap<PlayerTracker> trackedShortBlockPositions = new Short2ObjectOpenHashMap<>();
 
     @Final // need this constructor to never be overwritten by anything.
     @Inject(method = "<init>(Lnet/minecraft/world/World;II)V", at = @At("RETURN"), remap = false)
@@ -185,17 +188,25 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
 
     @Override
     public Optional<User> getBlockOwner(BlockPos pos) {
-        final int intKey = this.blockPosToInt(pos);
-        final PlayerTracker intTracker = this.trackedIntBlockPositions.get(intKey);
-        if (intTracker != null) {
-            final int notifierIndex = intTracker.ownerIndex;
-            return this.getValidatedUser(intKey, notifierIndex);
-        } else {
+        if (pos.getY() <= 255) {
+            if (this.trackedShortBlockPositions.isEmpty()) {
+                return Optional.empty();
+            }
             final short shortKey = this.blockPosToShort(pos);
             final PlayerTracker shortTracker = this.trackedShortBlockPositions.get(shortKey);
             if (shortTracker != null) {
                 final int notifierIndex = shortTracker.ownerIndex;
                 return this.getValidatedUser(shortKey, notifierIndex);
+            }
+        } else {
+            if (this.trackedIntBlockPositions.isEmpty()) {
+                return Optional.empty();
+            }
+            final int intKey = this.blockPosToInt(pos);
+            final PlayerTracker intTracker = this.trackedIntBlockPositions.get(intKey);
+            if (intTracker != null) {
+                final int notifierIndex = intTracker.ownerIndex;
+                return this.getValidatedUser(intKey, notifierIndex);
             }
         }
 
@@ -204,17 +215,25 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
 
     @Override
     public Optional<UUID> getBlockOwnerUUID(BlockPos pos) {
-        final int key = this.blockPosToInt(pos);
-        final PlayerTracker intTracker = this.trackedIntBlockPositions.get(key);
-        if (intTracker != null) {
-            final int ownerIndex = intTracker.ownerIndex;
-            return this.getValidatedUUID(key, ownerIndex);
-        } else {
+        if (pos.getY() <= 255) {
+            if (this.trackedShortBlockPositions.isEmpty()) {
+                return Optional.empty();
+            }
             final short shortKey = this.blockPosToShort(pos);
             final PlayerTracker shortTracker = this.trackedShortBlockPositions.get(shortKey);
             if (shortTracker != null) {
                 final int ownerIndex = shortTracker.ownerIndex;
                 return this.getValidatedUUID(shortKey, ownerIndex);
+            }
+        } else {
+            if (this.trackedIntBlockPositions.isEmpty()) {
+                return Optional.empty();
+            }
+            final int key = this.blockPosToInt(pos);
+            final PlayerTracker intTracker = this.trackedIntBlockPositions.get(key);
+            if (intTracker != null) {
+                final int ownerIndex = intTracker.ownerIndex;
+                return this.getValidatedUUID(key, ownerIndex);
             }
         }
 
@@ -223,15 +242,23 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
 
     @Override
     public Optional<User> getBlockNotifier(BlockPos pos) {
-        final int intKey = this.blockPosToInt(pos);
-        final PlayerTracker intTracker = this.trackedIntBlockPositions.get(intKey);
-        if (intTracker != null) {
-            return this.getValidatedUser(intKey, intTracker.notifierIndex);
-        } else {
+        if (pos.getY() <= 255) {
+            if (this.trackedShortBlockPositions.isEmpty()) {
+                return Optional.empty();
+            }
             final short shortKey = this.blockPosToShort(pos);
             final PlayerTracker shortTracker = this.trackedShortBlockPositions.get(shortKey);
             if (shortTracker != null) {
                 return this.getValidatedUser(shortKey, shortTracker.notifierIndex);
+            }
+        } else {
+            if (this.trackedIntBlockPositions.isEmpty()) {
+                return Optional.empty();
+            }
+            final int intKey = this.blockPosToInt(pos);
+            final PlayerTracker intTracker = this.trackedIntBlockPositions.get(intKey);
+            if (intTracker != null) {
+                return this.getValidatedUser(intKey, intTracker.notifierIndex);
             }
         }
 
@@ -240,18 +267,41 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
 
     @Override
     public Optional<UUID> getBlockNotifierUUID(BlockPos pos) {
-        final int key = this.blockPosToInt(pos);
-        final PlayerTracker intTracker = this.trackedIntBlockPositions.get(key);
-        if (intTracker != null) {
-            return this.getValidatedUUID(key, intTracker.notifierIndex);
-        } else {
+        if (pos.getY() <= 255) {
+            if (this.trackedShortBlockPositions.isEmpty()) {
+                return Optional.empty();
+            }
             final short shortKey = this.blockPosToShort(pos);
             final PlayerTracker shortTracker = this.trackedShortBlockPositions.get(shortKey);
             if (shortTracker != null) {
                 return this.getValidatedUUID(shortKey, shortTracker.notifierIndex);
             }
+        } else {
+            if (this.trackedIntBlockPositions.isEmpty()) {
+                return Optional.empty();
+            }
+            final int key = this.blockPosToInt(pos);
+            final PlayerTracker intTracker = this.trackedIntBlockPositions.get(key);
+            if (intTracker != null) {
+                return this.getValidatedUUID(key, intTracker.notifierIndex);
+            }
         }
 
+        return Optional.empty();
+    }
+
+    private Optional<User> getValidatedUser(short key, int ownerIndex) {
+        Optional<UUID> uuid = this.getValidatedUUID(key, ownerIndex);
+        if (uuid.isPresent()) {
+            UUID userUniqueId = uuid.get();
+            // get player if online
+            Optional<Player> player = SpongeImpl.getGame().getServer().getPlayer(userUniqueId);
+            if (player.isPresent()) {
+                return Optional.of(player.get());
+            }
+            // player is not online, get or create user from storage
+            return this.getUserFromId(userUniqueId);
+        }
         return Optional.empty();
     }
 
@@ -260,12 +310,26 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
         if (uuid.isPresent()) {
             UUID userUniqueId = uuid.get();
             // get player if online
-            EntityPlayer player = this.world.getPlayerEntityByUUID(userUniqueId);
-            if (player != null) {
-                return Optional.of((User) player);
+            Optional<Player> player = SpongeImpl.getGame().getServer().getPlayer(userUniqueId);
+            if (player.isPresent()) {
+                return Optional.of(player.get());
             }
             // player is not online, get or create user from storage
             return this.getUserFromId(userUniqueId);
+        }
+        return Optional.empty();
+    }
+
+    private Optional<UUID> getValidatedUUID(short key, int ownerIndex) {
+        UUID uuid = (((IMixinWorldInfo) this.world.getWorldInfo()).getUniqueIdForIndex(ownerIndex)).orElse(null);
+        if (uuid != null) {
+            // Verify id is valid and not invalid
+            if (SpongeImpl.getGlobalConfig().getConfig().getWorld().getInvalidLookupUuids().contains(uuid)) {
+                this.trackedShortBlockPositions.remove(key);
+                return Optional.empty();
+            }
+            // player is not online, get or create user from storage
+            return Optional.of(uuid);
         }
         return Optional.empty();
     }
@@ -285,14 +349,17 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
     }
 
     private Optional<User> getUserFromId(UUID uuid) {
-        // check username cache
-        String username = SpongeUsernameCache.getLastKnownUsername(uuid);
-        if (username != null) {
-            return this.userStorageService.get(GameProfile.of(uuid, username));
-        }
-
         // check mojang cache
         GameProfile profile = this.spongeProfileManager.getCache().getById(uuid).orElse(null);
+
+        if (profile == null) {
+            // check username cache
+            String username = SpongeUsernameCache.getLastKnownUsername(uuid);
+            if (username != null) {
+                profile = GameProfile.of(uuid, username);
+            }
+        }
+
         if (profile != null) {
             return this.userStorageService.get(profile);
         }
@@ -354,12 +421,12 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
 
     @Override
     public void setTrackedIntPlayerPositions(Map<Integer, PlayerTracker> trackedPositions) {
-        this.trackedIntBlockPositions = trackedPositions;
+        this.trackedIntBlockPositions = (Int2ObjectOpenHashMap<PlayerTracker>) trackedPositions;
     }
 
     @Override
     public void setTrackedShortPlayerPositions(Map<Short, PlayerTracker> trackedPositions) {
-        this.trackedShortBlockPositions = trackedPositions;
+        this.trackedShortBlockPositions = (Short2ObjectOpenHashMap<PlayerTracker>) trackedPositions;
     }
 
     /**
