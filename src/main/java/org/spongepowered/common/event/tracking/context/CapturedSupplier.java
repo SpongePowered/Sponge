@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.context;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.util.NonNullList;
 
 import java.util.ArrayList;
@@ -67,7 +68,7 @@ public abstract class CapturedSupplier<T> implements Supplier<List<T>>, ICapture
      */
     public final void acceptAndClearIfNotEmpty(Consumer<List<T>> consumer) {
         if (!this.isEmpty()) {
-            final List<T> consumed = new ArrayList<>(this.captured);
+            final List<T> consumed = new ObjectArrayList<>(this.captured);
             this.captured.clear(); // We should be clearing after it is processed. Avoids extraneous issues
             consumer.accept(consumed);
             // with recycling the captured object.
