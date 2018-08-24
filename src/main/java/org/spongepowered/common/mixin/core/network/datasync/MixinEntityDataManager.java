@@ -25,9 +25,12 @@
 package org.spongepowered.common.mixin.core.network.datasync;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.minecraft.crash.CrashReport;
+import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.Entity;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.util.ReportedException;
 import org.apache.commons.lang3.ObjectUtils;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataHolder;
@@ -46,6 +49,7 @@ import org.spongepowered.common.registry.type.data.KeyRegistryModule;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.locks.ReadWriteLock;
 
 @Mixin(EntityDataManager.class)
 public abstract class MixinEntityDataManager {
@@ -58,7 +62,7 @@ public abstract class MixinEntityDataManager {
     @Shadow @Final protected Entity entity;
     @Shadow private boolean dirty;
 
-    @Shadow protected abstract <T> EntityDataManager.DataEntry<T> getEntry(DataParameter<T> key);
+    @Shadow @Final private ReadWriteLock lock;
 
     /**
      * @author gabizou December 27th, 2017
@@ -77,7 +81,7 @@ public abstract class MixinEntityDataManager {
         // Sponge Start - set up the current value, so we don't have to retrieve it multiple times
         final T currentValue = dataentry.getValue();
         final T incomingValue = value;
-        if (ObjectUtils.notEqual(value, currentValue)) { // Sponge - change dataentry.getValue() to use local variable
+        if (!value.equals(currentValue)) { // Sponge - change dataentry.getValue() to use local variable
             // Sponge Start - retrieve the associated key, if available
             // Client side can have an entity, because reasons.......
             // Really silly reasons......
@@ -115,5 +119,23 @@ public abstract class MixinEntityDataManager {
             dataentry.setDirty(true);
             this.dirty = true;
         }
+    }
+
+    @Overwrite
+    private <T> EntityDataManager.DataEntry<T> getEntry(DataParameter<T> key) {
+        this.lock.readLock().lock();
+        EntityDataManager.DataEntry<T> dataentry;
+
+        try {
+            dataentry = (EntityDataManager.DataEntry)((Int2ObjectOpenHashMap) this.entries).get(key.getId());
+        } catch (Throwable throwable) {
+            CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Getting synched entity data");
+            CrashReportCategory crashreportcategory = crashreport.makeCategory("Synched entity data");
+            crashreportcategory.addCrashSection("Data ID", key);
+            throw new ReportedException(crashreport);
+        }
+
+        this.lock.readLock().unlock();
+        return dataentry;
     }
 }
