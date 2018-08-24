@@ -57,6 +57,7 @@ import org.spongepowered.common.event.filter.FilterFactory;
 import org.spongepowered.common.event.gen.DefineableClassLoader;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.phase.plugin.ListenerPhaseContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.util.TypeTokenHelper;
@@ -412,11 +413,12 @@ public class SpongeEventManager implements EventManager {
         TimingsManager.PLUGIN_EVENT_HANDLER.startTimingIfSync();
         for (@SuppressWarnings("rawtypes") RegisteredListener handler : handlers) {
             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
-                 final PhaseContext<?> context = PluginPhase.Listener.GENERAL_LISTENER.createPhaseContext()
-                            .source(handler.getPlugin());
+                 final PhaseContext<?> context = createPluginContext(handler);
                  final Timing timings = handler.getTimingsHandler()) {
                 frame.pushCause(handler.getPlugin());
-                context.buildAndSwitch();
+                if (context != null) {
+                    context.buildAndSwitch();
+                }
                 timings.startTimingIfSync();
                 if (event instanceof AbstractEvent) {
                     ((AbstractEvent) event).currentOrder = handler.getOrder();
@@ -433,6 +435,15 @@ public class SpongeEventManager implements EventManager {
             ((AbstractEvent) event).currentOrder = null;
         }
         return event instanceof Cancellable && ((Cancellable) event).isCancelled();
+    }
+
+    @Nullable
+    private ListenerPhaseContext createPluginContext(RegisteredListener<?> handler) {
+        if (PhaseTracker.getInstance().getCurrentState().allowsEventListener()) {
+            return PluginPhase.Listener.GENERAL_LISTENER.createPhaseContext()
+                .source(handler.getPlugin());
+        }
+        return null;
     }
 
     @Override

@@ -52,6 +52,7 @@ import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
@@ -59,6 +60,8 @@ import org.spongepowered.common.event.tracking.phase.general.PostState;
 import org.spongepowered.common.event.tracking.phase.general.UnwindingPhaseContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
+import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
+import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase.Listener;
 import org.spongepowered.common.event.tracking.phase.tick.BlockTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.NeighborNotificationContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
@@ -783,5 +786,21 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         if (context.owner != null) { // If the owner is set, at least set the owner
             notification.notifier(context.owner);
         }
+    }
+
+    /**
+     * Used in the {@link SpongeEventManager} and mod event manager equivalent for
+     * world generation tasks to avoid event listener state entrance due to listeners
+     * during world generation performing various operations that should not be tracked.
+     *
+     * <p>Refer to spongeforge issue:
+     * https://github.com/SpongePowered/SpongeForge/issues/2407#issuecomment-415850841
+     * for more information and context of why this is needed.
+     * </p>
+     *
+     * @return True if an {@link Listener#GENERAL_LISTENER} is to be entered during this state
+     */
+    default boolean allowsEventListener() {
+        return true;
     }
 }
