@@ -206,6 +206,12 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
             creation = Instant.ofEpochMilli(bukkitCompound.getLong(NbtDataUtil.BUKKIT_FIRST_PLAYED));
             lastPlayed = Instant.ofEpochMilli(bukkitCompound.getLong(NbtDataUtil.BUKKIT_LAST_PLAYED));
         }
+        // migrate canary join data
+        if (compound.hasKey(NbtDataUtil.CANARY, NbtDataUtil.TAG_COMPOUND)) {
+            final NBTTagCompound canaryCompound = compound.getCompoundTag(NbtDataUtil.CANARY);
+            creation = Instant.ofEpochMilli(canaryCompound.getLong(NbtDataUtil.CANARY_FIRST_JOINED));
+            lastPlayed = Instant.ofEpochMilli(canaryCompound.getLong(NbtDataUtil.CANARY_LAST_JOINED));
+        }
         UUID playerId = null;
         if (compound.hasUniqueId(NbtDataUtil.UUID)) {
             playerId = compound.getUniqueId(NbtDataUtil.UUID);
