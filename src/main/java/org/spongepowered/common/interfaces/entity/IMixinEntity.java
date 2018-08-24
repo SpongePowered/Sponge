@@ -90,7 +90,7 @@ public interface IMixinEntity extends org.spongepowered.api.entity.Entity, IMixi
     default NBTTagCompound getSpongeData() {
         final NBTTagCompound data = this.getEntityData();
         final NBTTagCompound tag = data.getCompoundTag(NbtDataUtil.SPONGE_DATA);
-        if (tag.getSize() == 0) {
+        if (tag.isEmpty()) {
             data.setTag(NbtDataUtil.SPONGE_DATA, tag);
         }
         return tag;

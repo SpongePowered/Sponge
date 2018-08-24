@@ -57,11 +57,12 @@ public interface IMixinTileEntity extends IMixinTrackable {
      * @return Gets the tag compound containing various tile data
      */
     default NBTTagCompound getSpongeData() {
-        NBTTagCompound data = this.getTileData();
-        if (!data.hasKey(NbtDataUtil.SPONGE_DATA, NbtDataUtil.TAG_COMPOUND)) {
+        final NBTTagCompound data = this.getTileData();
+        final NBTTagCompound tag = data.getCompoundTag(NbtDataUtil.SPONGE_DATA);
+        if (tag.isEmpty()) {
             data.setTag(NbtDataUtil.SPONGE_DATA, new NBTTagCompound());
         }
-        return data.getCompoundTag(NbtDataUtil.SPONGE_DATA);
+        return tag;
     }
 
     /**
