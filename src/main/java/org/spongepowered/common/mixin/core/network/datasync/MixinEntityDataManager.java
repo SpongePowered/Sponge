@@ -40,6 +40,7 @@ import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.interfaces.network.datasync.IMixinDataParameter;
 import org.spongepowered.common.registry.type.data.KeyRegistryModule;
 
@@ -81,7 +82,7 @@ public abstract class MixinEntityDataManager {
             // Client side can have an entity, because reasons.......
             // Really silly reasons......
             // I don't know, ask Grum....
-            if (this.entity != null && this.entity.world != null && !this.entity.world.isRemote) { // We only want to spam the server world ;)
+            if (ShouldFire.CHANGE_DATA_HOLDER_EVENT_VALUE_CHANGE && this.entity != null && this.entity.world != null && !this.entity.world.isRemote) { // We only want to spam the server world ;)
                 final Optional<DataParameterConverter<T>> converter = ((IMixinDataParameter) key).getConverter();
                 // At this point it is changing
                 if (converter.isPresent()) {

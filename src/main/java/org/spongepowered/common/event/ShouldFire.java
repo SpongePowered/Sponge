@@ -96,4 +96,6 @@ public class ShouldFire {
     public static boolean BREED_ENTITY_EVENT_READY_TO_MATE = false;
     public static boolean BREED_ENTITY_EVENT_FIND_MATE = false;
     public static boolean BREED_ENTITY_EVENT_BREED = false;
+
+    public static boolean CHANGE_DATA_HOLDER_EVENT_VALUE_CHANGE = false;
 }
