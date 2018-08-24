@@ -768,8 +768,10 @@ public final class PhaseTracker {
                     ((IPhaseState) phaseState).associateAdditionalCauses(context, frame);
                     SpongeImpl.postEvent(normalEvent);
                     frame.pushCause(normalEvent); // Because of our contract for post events
-                    final ChangeBlockEvent.Post post = ((IPhaseState) phaseState).createChangeBlockPostEvent(context, transactions);
-                    SpongeImpl.postEvent(post);
+                    if (ShouldFire.CHANGE_BLOCK_EVENT_POST) {
+                        final ChangeBlockEvent.Post post = ((IPhaseState) phaseState).createChangeBlockPostEvent(context, transactions);
+                        SpongeImpl.postEvent(post);
+                    }
                     if (!transaction.isValid()) {
                         transaction.getOriginal().restore(true, BlockChangeFlags.NONE);
                         if (((IPhaseState) phaseState).tracksBlockSpecificDrops(context)) {

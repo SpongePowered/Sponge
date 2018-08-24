@@ -789,7 +789,9 @@ public final class TrackingUtil {
                     }
                 }
                 final ChangeBlockEvent.Post post = ((IPhaseState) state).createChangeBlockPostEvent(context, transactions);
-                SpongeImpl.postEvent(post);
+                if (ShouldFire.CHANGE_BLOCK_EVENT_POST) {
+                    SpongeImpl.postEvent(post);
+                }
                 return post;
             }
         }
