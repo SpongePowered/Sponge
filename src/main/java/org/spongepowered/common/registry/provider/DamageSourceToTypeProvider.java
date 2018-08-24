@@ -76,9 +76,10 @@ public class DamageSourceToTypeProvider implements TypeProvider<String, DamageTy
     }
 
     public DamageType getOrCustom(String key) {
-        final DamageType damageType = this.damageSourceToTypeMappings.get(checkNotNull(key).toLowerCase(Locale.ENGLISH));
+        String k = checkNotNull(key).toLowerCase(Locale.ENGLISH);
+        final DamageType damageType = this.damageSourceToTypeMappings.get(k);
         if (damageType == null) {
-            addCustom(key);
+            this.damageSourceToTypeMappings.put(k, DamageTypes.CUSTOM);
             return DamageTypes.CUSTOM;
         }
         return damageType;
