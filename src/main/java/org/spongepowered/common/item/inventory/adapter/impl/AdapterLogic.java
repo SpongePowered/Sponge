@@ -329,4 +329,28 @@ public abstract class AdapterLogic {
         }
         return false;
     }
+
+    public static boolean canFit(InventoryAdapter adapter, ItemStack stack) {
+
+        Fabric inv = adapter.getFabric();
+        Lens lens = adapter.getRootLens();
+
+        net.minecraft.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
+
+        int maxStackSize = Math.min(lens.getMaxStackSize(inv), nativeStack.getMaxStackSize());
+        int remaining = stack.getQuantity();
+
+        for (int ord = 0; ord < lens.slotCount() && remaining > 0; ord++) {
+            net.minecraft.item.ItemStack old = lens.getStack(inv, ord);
+            int push = Math.min(remaining, maxStackSize);
+            if (old.isEmpty()) {
+                remaining -= push;
+            } else if (ItemStackUtil.compareIgnoreQuantity(old, stack)) {
+                push = Math.max(Math.min(maxStackSize - old.getCount(), remaining), 0); // max() accounts for oversized stacks
+                remaining -= push;
+            }
+        }
+
+        return remaining == 0;
+    }
 }

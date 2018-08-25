@@ -120,6 +120,20 @@ public class SlotAdapter extends BasicInventoryAdapter implements Slot {
     }
 
     @Override
+    public boolean canFit(ItemStack stack) {
+        if (stack.isEmpty()) {
+            return true;
+        }
+        net.minecraft.item.ItemStack old = this.slot.getStack(this.fabric);
+        if (old.isEmpty()) {
+            return this.getMaxStackSize() >= stack.getQuantity();
+        } else if (ItemStackUtil.compareIgnoreQuantity(old, stack)) {
+            return this.getMaxStackSize() - old.getCount() >= stack.getQuantity();
+        }
+        return false;
+    }
+
+    @Override
     public InventoryTransactionResult set(ItemStack stack) {
         InventoryTransactionResult.Builder result = InventoryTransactionResult.builder().type(InventoryTransactionResult.Type.SUCCESS);
         net.minecraft.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);

@@ -98,6 +98,11 @@ public interface MinecraftInventoryAdapter extends InventoryAdapter {
     }
 
     @Override
+    default boolean canFit(ItemStack stack) {
+        return AdapterLogic.canFit(this, stack);
+    }
+
+    @Override
     default InventoryTransactionResult set(ItemStack stack) {
         return AdapterLogic.insertSequential(this, stack);
     }
