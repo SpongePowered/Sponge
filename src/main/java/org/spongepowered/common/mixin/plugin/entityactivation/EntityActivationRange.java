@@ -65,6 +65,7 @@ import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.EntityActivationModCategory;
 import org.spongepowered.common.config.category.EntityActivationRangeCategory;
 import org.spongepowered.common.config.type.GeneralConfigBase;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
@@ -387,9 +388,15 @@ public class EntityActivationRange {
         if (entity.world.isRemote || !entity.addedToChunk || entity instanceof EntityFireworkRocket) {
             return true;
         }
-        final IMixinChunk activeChunk = ((IMixinEntity) entity).getActiveChunk();
-        if (activeChunk == null) {
+
+        IMixinEntity mixinEntity = EntityUtil.toMixin(entity);
+        if (!mixinEntity.isVanilla()) {
             // Should never happen but just in case for mods, always tick
+            return true;
+        }
+
+        final IMixinChunk activeChunk = mixinEntity.getActiveChunk();
+        if (activeChunk == null) {
             return true;
         }
 
