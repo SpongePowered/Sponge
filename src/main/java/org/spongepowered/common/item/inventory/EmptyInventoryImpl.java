@@ -233,6 +233,11 @@ public class EmptyInventoryImpl implements EmptyInventory {
     }
 
     @Override
+    public boolean canFit(ItemStack stack) {
+        return false;
+    }
+
+    @Override
     public InventoryTransactionResult set(ItemStack stack) {
         return InventoryTransactionResult.builder().type(Type.FAILURE).reject(stack).build();
     }
