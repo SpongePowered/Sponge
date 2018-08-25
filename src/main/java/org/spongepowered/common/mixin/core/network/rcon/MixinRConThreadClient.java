@@ -144,6 +144,14 @@ public abstract class MixinRConThreadClient extends RConThreadBase implements Re
 
                 final BufferedInputStream bufferedinputstream = new BufferedInputStream(this.clientSocket.getInputStream());
                 final int i = bufferedinputstream.read(this.buffer, 0, this.buffer.length);
+                /// Sponge: START
+                if (i == -1) {
+                    // We read end of file, which means that this socket should be closed.
+                    // Break to exit the loop. As the read didn't advance anything, it will
+                    // continue to return EOF until we manually exit the loop.
+                    break;
+                }
+                /// Sponge: END
 
                 if (10 <= i) {
                     int j = 0;
