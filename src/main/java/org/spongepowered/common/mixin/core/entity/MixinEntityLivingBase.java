@@ -36,8 +36,10 @@ import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.passive.EntityWolf;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.MobEffects;
 import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
@@ -69,6 +71,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.entity.damage.DamageFunction;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
 import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;
+import org.spongepowered.api.event.entity.ChangeEntityEquipmentEvent;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.item.inventory.UseItemStackEvent;
@@ -105,11 +108,20 @@ import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
+import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
+import org.spongepowered.common.item.inventory.lens.comp.HotbarLens;
+import org.spongepowered.common.item.inventory.lens.impl.fabric.EquipmentSlotFabric;
+import org.spongepowered.common.item.inventory.lens.impl.minecraft.PlayerInventoryLens;
+import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
+import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.event.DamageSourceRegistryModule;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -895,6 +907,59 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         }
     }
 
+    private EquipmentSlotFabric inventory = new EquipmentSlotFabric(this);
+    private EnumMap<EntityEquipmentSlot, SlotLens> slotLens = new EnumMap<>(EntityEquipmentSlot.class);
+
+    @Inject(method = "onUpdate", locals = LocalCapture.CAPTURE_FAILHARD,
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;getItemStackFromSlot(Lnet/minecraft/inventory/EntityEquipmentSlot;)Lnet/minecraft/item/ItemStack;"))
+    private void onGetItemStackFromSlot(CallbackInfo ci, int i, EntityEquipmentSlot[] slots, int j, int k,
+                                        EntityEquipmentSlot entityEquipmentSlot, ItemStack before) {
+        ItemStack after = this.getItemStackFromSlot(entityEquipmentSlot);
+        EntityLivingBase entity = EntityUtil.toNative((IMixinEntityLivingBase) this);
+        if (!ItemStack.areItemStacksEqual(after, before)) {
+            InventoryAdapter slotAdapter;
+            if (entity instanceof EntityPlayerMP) {
+                SlotLens slotLens;
+                IMixinInventoryPlayer inventory = (IMixinInventoryPlayer) ((EntityPlayerMP) entity).inventory;
+                PlayerInventoryLens inventoryLens = (PlayerInventoryLens) inventory.getRootLens();
+                switch (entityEquipmentSlot) {
+                case OFFHAND:
+                    slotLens = inventoryLens.getOffhandLens();
+                    break;
+                case MAINHAND:
+                    HotbarLens hotbarLens = inventoryLens.getMainLens().getHotbar();
+                    slotLens = hotbarLens.getSlot(hotbarLens.getSelectedSlotIndex(inventory.getFabric()));
+                    break;
+                default:
+                    slotLens = inventoryLens.getEquipmentLens().getSlot(entityEquipmentSlot.getIndex());
+                }
+                slotAdapter = slotLens.getAdapter(inventory.getFabric(), inventory);
+            } else {
+                if (this.slotLens.isEmpty()) {
+                    for (EntityEquipmentSlot slot : EntityEquipmentSlot.values()) {
+                        this.slotLens.put(slot, new SlotLensImpl(slot.getSlotIndex()));
+                    }
+                }
+                slotAdapter = this.slotLens.get(entityEquipmentSlot).getAdapter(this.inventory, null);
+            }
+            ChangeEntityEquipmentEvent event = SpongeCommonEventFactory.callChangeEntityEquipmentEvent(entity,
+                    ItemStackUtil.snapshotOf(before), ItemStackUtil.snapshotOf(after), (SlotAdapter) slotAdapter);
+            if (event.isCancelled()) {
+                this.setItemStackToSlot(entityEquipmentSlot, before);
+                return;
+            }
+            Transaction<ItemStackSnapshot> transaction = event.getTransaction();
+            if (!transaction.isValid()) {
+                this.setItemStackToSlot(entityEquipmentSlot, before);
+                return;
+            }
+            Optional<ItemStackSnapshot> optional = transaction.getCustom();
+            if (optional.isPresent()) {
+                ItemStack custom = ItemStackUtil.fromSnapshotToNative(optional.get());
+                this.setItemStackToSlot(entityEquipmentSlot, custom);
+            }
+        }
+    }
 
     @Override
     public void onSpongeDeathUpdate() {
