@@ -1423,19 +1423,22 @@ public class SpongeCommonEventFactory {
 
     public static ChangeEntityEquipmentEvent callChangeEntityEquipmentEvent(EntityLivingBase entity, ItemStackSnapshot before, ItemStackSnapshot after, SlotAdapter slot) {
         ChangeEntityEquipmentEvent event;
-        Cause currentCause = Sponge.getCauseStackManager().getCurrentCause();
-        Transaction<ItemStackSnapshot> transaction = new Transaction<>(before, after);
-        if (entity instanceof EntityPlayerMP) {
-            Player player = EntityUtil.toPlayer((EntityPlayerMP) entity);
-            event = SpongeEventFactory.createChangeEntityEquipmentEventTargetPlayer(currentCause, player, slot, transaction);
-        } else if (entity instanceof Human) {
-            Human humanoid = (Human) entity;
-            event = SpongeEventFactory.createChangeEntityEquipmentEventTargetHumanoid(currentCause, humanoid, slot, transaction);
-        } else {
-            Living living = EntityUtil.fromNativeToLiving(entity);
-            event = SpongeEventFactory.createChangeEntityEquipmentEventTargetLiving(currentCause, living, slot, transaction);
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(entity);
+            Cause cause = frame.getCurrentCause();
+            Transaction<ItemStackSnapshot> transaction = new Transaction<>(before, after);
+            if (entity instanceof EntityPlayerMP) {
+                Player player = EntityUtil.toPlayer((EntityPlayerMP) entity);
+                event = SpongeEventFactory.createChangeEntityEquipmentEventTargetPlayer(cause, player, slot, transaction);
+            } else if (entity instanceof Human) {
+                Human humanoid = (Human) entity;
+                event = SpongeEventFactory.createChangeEntityEquipmentEventTargetHumanoid(cause, humanoid, slot, transaction);
+            } else {
+                Living living = EntityUtil.fromNativeToLiving(entity);
+                event = SpongeEventFactory.createChangeEntityEquipmentEventTargetLiving(cause, living, slot, transaction);
+            }
+            SpongeImpl.postEvent(event);
+            return event;
         }
-        SpongeImpl.postEvent(event);
-        return event;
     }
 }
