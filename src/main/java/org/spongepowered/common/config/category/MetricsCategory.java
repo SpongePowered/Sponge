@@ -33,15 +33,15 @@ import java.util.Map;
 import java.util.Optional;
 
 @ConfigSerializable
-public class StatisticsCategory {
+public class MetricsCategory {
 
     @Setting(value = "default-permission", comment = "Determines whether plugins that are newly added are allowed to perform\n"
-                                        + "data/statistics collection by default. Plugins detected by Sponge will be added "
+                                        + "data/metric collection by default. Plugins detected by Sponge will be added "
                                         + "to the \"plugin-permissions\" section with this value.\n\n"
-                                        + "Set to true to enable stats gathering by default, false otherwise.")
+                                        + "Set to true to enable metric gathering by default, false otherwise.")
     private boolean defaultPermission = false;
 
-    @Setting(value = "plugin-permissions", comment = "Provides (or revokes) permission for stat gathering on a per plugin basis.\n"
+    @Setting(value = "plugin-permissions", comment = "Provides (or revokes) permission for metric gathering on a per plugin basis.\n"
                                                    + "Entries should be in the format \"plugin-id=<true|false>\".\n\n"
                                                    + "Deleting an entry from this list will reset it to the default specified in\n"
                                                    + "\"default-permission\"")

@@ -25,21 +25,19 @@
 package org.spongepowered.common.service.stat;
 
 import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.service.stat.StatsConfigManager;
+import org.spongepowered.api.service.metric.MetricsConfigManager;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.config.category.MetricsCategory;
 
 import javax.inject.Singleton;
 
 @Singleton
-public class SpongeStatsConfigManager implements StatsConfigManager {
+public class SpongeMetricsConfigManager implements MetricsConfigManager {
 
     @Override
-    public boolean areStatsEnabled(PluginContainer container) {
-        return SpongeImpl.getGlobalConfig().getConfig().getStatisticsCategory().getPluginPermission(container).orElseGet(this::areStatsEnabled);
-    }
-
-    private boolean areStatsEnabled() {
-        return SpongeImpl.getGlobalConfig().getConfig().getStatisticsCategory().isGloballyEnabled();
+    public boolean areMetricsEnabled(final PluginContainer container) {
+        final MetricsCategory metrics = SpongeImpl.getGlobalConfig().getConfig().getMetricsCategory();
+        return metrics.getPluginPermission(container).orElseGet(metrics::isGloballyEnabled);
     }
 
 }

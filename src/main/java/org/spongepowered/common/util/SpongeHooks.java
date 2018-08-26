@@ -531,22 +531,22 @@ public class SpongeHooks {
         ConfigTeleportHelperFilter.invalidateCache();
     }
 
-    public static void populatePluginsInStatsConfig() {
-        final boolean globalState = SpongeImpl.getGlobalConfig().getConfig().getStatisticsCategory().isGloballyEnabled();
-        final Map<String, Boolean> entries = SpongeImpl.getGlobalConfig().getConfig().getStatisticsCategory().getPluginPermissions();
+    public static void populatePluginsInMetricsConfig() {
+        final boolean globalState = SpongeImpl.getGlobalConfig().getConfig().getMetricsCategory().isGloballyEnabled();
+        final Map<String, Boolean> entries = SpongeImpl.getGlobalConfig().getConfig().getMetricsCategory().getPluginPermissions();
         Sponge.getPluginManager().getPlugins().stream()
                 .filter(SpongeImplHooks.getPluginFilterPredicate()).forEach(plugin -> entries.putIfAbsent(plugin.getId(), globalState));
 
         try {
-            savePluginsInStatsConfig(entries).get();
+            savePluginsInMetricsConfig(entries).get();
         } catch (InterruptedException | ExecutionException e) {
             SpongeImpl.getLogger().warn("Could not populate the plugin list for stats collection", e);
         }
     }
 
-    public static CompletableFuture<CommentedConfigurationNode> savePluginsInStatsConfig(Map<String, Boolean> entries) {
+    public static CompletableFuture<CommentedConfigurationNode> savePluginsInMetricsConfig(Map<String, Boolean> entries) {
         return SpongeImpl.getGlobalConfig()
-                .updateSetting("statistics-collection.plugin-permissions", entries, new TypeToken<Map<String, Boolean>>() {});
+                .updateSetting("metrics.plugin-permissions", entries, new TypeToken<Map<String, Boolean>>() {});
     }
 
     public static String getFriendlyCauseName(Cause cause) {

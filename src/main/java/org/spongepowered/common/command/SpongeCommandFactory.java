@@ -88,7 +88,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.category.StatisticsCategory;
+import org.spongepowered.common.config.category.MetricsCategory;
 import org.spongepowered.common.config.type.ConfigBase;
 import org.spongepowered.common.config.type.DimensionConfig;
 import org.spongepowered.common.config.type.GlobalConfig;
@@ -915,7 +915,7 @@ public class SpongeCommandFactory {
                 .description(Text.of("Gets or sets permission for statistics plugins to operate."))
                 .executor((source, context) -> {
                     SpongeConfig<GlobalConfig> config = SpongeImpl.getGlobalConfig();
-                    StatisticsCategory category = config.getConfig().getStatisticsCategory();
+                    MetricsCategory category = config.getConfig().getMetricsCategory();
                     if (!context.hasAny(PLUGIN_KEY)) {
                         // No plugins means that we deal with global state
                         if (category.isGloballyEnabled()) {
@@ -988,13 +988,13 @@ public class SpongeCommandFactory {
     }
 
     private static CompletableFuture<CommentedConfigurationNode> setPermissions(
-            StatisticsCategory category,
+            MetricsCategory category,
             PluginContainer container,
             boolean enabled) {
 
         Map<String, Boolean> permissions = category.getPluginPermissions();
         permissions.put(container.getId(), enabled);
-        return SpongeHooks.savePluginsInStatsConfig(permissions);
+        return SpongeHooks.savePluginsInMetricsConfig(permissions);
     }
 
     private static void createMessageTask(final CommandSource source, final Text message) {
