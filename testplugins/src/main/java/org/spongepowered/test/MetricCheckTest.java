@@ -33,21 +33,21 @@ import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
 
 /*
- * Simply checks to see if Sponge indicates that the plugin is entitled to stat checking.
+ * Simply checks to see if Sponge indicates that the plugin is entitled to metric checking.
  */
-@Plugin(id = "statcheck", name = "Stat Check")
-public class StatCheckTest {
+@Plugin(id = "metricheck", name = "Metric Check")
+public class MetricCheckTest {
 
     @Listener
     public void onInit(GameInitializationEvent event) {
         Sponge.getCommandManager()
                 .register(this,
                         CommandSpec.builder().executor((source, context) -> {
-                            source.sendMessage(Text.of("Stats checking for \"stat-check\" is set to: ",
-                                    Sponge.getStatsConfigManager().areStatsEnabled(this)));
+                            source.sendMessage(Text.of("Metrics checking for \"metricheck\" is set to: ",
+                                    Sponge.getMetricsConfigManager().areMetricsEnabled(this)));
                             return CommandResult.success();
                         }).build(),
-                        "statcheck");
+                        "metricheck");
     }
 
 }
