@@ -204,7 +204,7 @@ public class SpongeCommandFactory {
         nonFlagChildren.register(createSpongePluginsCommand(), "plugins");
         nonFlagChildren.register(createSpongeTimingsCommand(), "timings");
         nonFlagChildren.register(createSpongeWhichCommand(), "which");
-        nonFlagChildren.register(createSpongeStatsCommand(), "stats");
+        nonFlagChildren.register(createSpongeMetricsCommand(), "metrics");
         flagChildren.register(createSpongeChunksCommand(), "chunks");
         flagChildren.register(createSpongeTpsCommand(), "tps");
         trackerFlagChildren.register(createSpongeConfigCommand(), "config");
@@ -902,22 +902,22 @@ public class SpongeCommandFactory {
                 }).build();
     }
 
-    private static CommandCallable createSpongeStatsCommand() {
+    private static CommandCallable createSpongeMetricsCommand() {
         return CommandSpec.builder()
                 .arguments(
                         GenericArguments.optional(GenericArguments.onlyOne(GenericArguments.plugin(Text.of(PLUGIN_KEY)))),
                         GenericArguments.optional(GenericArguments.onlyOne(
                                 GenericArguments.choicesInsensitive(Text.of(ENABLED_KEY), ENABLED_CHOICES))))
-                .description(Text.of("Gets or sets permission for statistics plugins to operate."))
+                .description(Text.of("Gets or sets permission for metric plugins to operate."))
                 .executor((source, context) -> {
                     SpongeConfig<GlobalConfig> config = SpongeImpl.getGlobalConfig();
                     MetricsCategory category = config.getConfig().getMetricsCategory();
                     if (!context.hasAny(PLUGIN_KEY)) {
                         // No plugins means that we deal with global state
                         if (category.isGloballyEnabled()) {
-                            source.sendMessage(Text.of("Stats collection default permission is currently ", ENABLED_TEXT));
+                            source.sendMessage(Text.of("Metric collection default permission is currently ", ENABLED_TEXT));
                         } else {
-                            source.sendMessage(Text.of("Stats collection default permission is currently ", DISABLED_TEXT));
+                            source.sendMessage(Text.of("Metric collection default permission is currently ", DISABLED_TEXT));
                         }
                     } else {
                         PluginContainer container = context.requireOne(PLUGIN_KEY);
@@ -930,7 +930,7 @@ public class SpongeCommandFactory {
                                             if (exception == null) {
                                                 createMessageTask(
                                                         source,
-                                                        Text.of("Stats collection for ", container.getName(),
+                                                        Text.of("Metric collection for ", container.getName(),
                                                                 " is now set to the default value (",
                                                                 category.isGloballyEnabled() ? ENABLED_TEXT : DISABLED_TEXT, ")"));
                                             } else {
@@ -946,7 +946,7 @@ public class SpongeCommandFactory {
                                             if (exception == null) {
                                                 createMessageTask(
                                                         source,
-                                                        Text.of("Set stats collection for ", container.getName(), " to ", ENABLED_TEXT));
+                                                        Text.of("Set metric collection for ", container.getName(), " to ", ENABLED_TEXT));
                                             } else {
                                                 createMessageTask(source, FAILED_TEXT);
                                             }
@@ -959,7 +959,7 @@ public class SpongeCommandFactory {
                                             if (exception == null) {
                                                 createMessageTask(
                                                         source,
-                                                        Text.of("Set stats collection for ", container.getName(), " to ", DISABLED_TEXT));
+                                                        Text.of("Set metric collection for ", container.getName(), " to ", DISABLED_TEXT));
                                             } else {
                                                 createMessageTask(source, FAILED_TEXT);
                                             }
@@ -971,9 +971,9 @@ public class SpongeCommandFactory {
                         } else {
                             boolean state = category.getPluginPermission(container).orElseGet(category::isGloballyEnabled);
                             if (state) {
-                                source.sendMessage(Text.of("Stats collection for ", container.getName(), " is currently ", ENABLED_TEXT));
+                                source.sendMessage(Text.of("Metric collection for ", container.getName(), " is currently ", ENABLED_TEXT));
                             } else {
-                                source.sendMessage(Text.of("Stats collection for ", container.getName(), " is currently ", DISABLED_TEXT));
+                                source.sendMessage(Text.of("Metric collection for ", container.getName(), " is currently ", DISABLED_TEXT));
                             }
                         }
                     }
