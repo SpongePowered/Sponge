@@ -22,23 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.property;
+package org.spongepowered.common.data.property.store.entity;
 
-import org.spongepowered.api.item.inventory.property.InventoryCapacity;
-import org.spongepowered.api.util.Coerce;
+import com.flowpowered.math.vector.Vector3d;
+import net.minecraft.entity.Entity;
+import org.spongepowered.common.data.property.store.common.AbstractEntityPropertyStore;
+import org.spongepowered.common.util.VecHelper;
 
-public final class InventoryCapacityImpl extends IntPropertyImpl implements InventoryCapacity {
+import java.util.Optional;
 
-    public InventoryCapacityImpl(int value, Operator operator) {
-        super(Coerce.toInteger(value), operator);
-    }
+public class EyePositionPropertyStore extends AbstractEntityPropertyStore.Generic<Vector3d> {
 
-    public static final class BuilderImpl extends PropertyBuilderImpl<Integer, InventoryCapacity, InventoryCapacity.Builder> implements InventoryCapacity.Builder{
-
-        @Override
-        public InventoryCapacity build() {
-            return new InventoryCapacityImpl(this.value, this.operator);
-        }
+    @Override
+    protected Optional<Vector3d> getForEntity(Entity entity) {
+        final double eyeHeight = entity.getEyeHeight();
+        final Vector3d position = VecHelper.toVector3d(entity.getPositionVector());
+        final Vector3d eyeLocation = position.add(0, eyeHeight, 0);
+        return Optional.of(eyeLocation);
     }
 
 }

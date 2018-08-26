@@ -22,23 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.property.store.item;
+package org.spongepowered.common.item.inventory.query.operation;
 
-import net.minecraft.item.ItemFood;
-import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.property.item.FoodRestorationProperty;
-import org.spongepowered.common.data.property.store.common.AbstractItemStackPropertyStore;
+import org.spongepowered.api.data.property.PropertyMatcher;
+import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
+import org.spongepowered.common.item.inventory.lens.Fabric;
+import org.spongepowered.common.item.inventory.lens.Lens;
+import org.spongepowered.common.item.inventory.query.SpongeQueryOperation;
 
-import java.util.Optional;
+@SuppressWarnings("unchecked")
+public final class InventoryPropertyMatcherQueryOperation extends SpongeQueryOperation<PropertyMatcher<?>> {
 
-public class FoodRestorationPropertyStore extends AbstractItemStackPropertyStore<FoodRestorationProperty> {
+    private final PropertyMatcher propertyMatcher;
+
+    public InventoryPropertyMatcherQueryOperation(PropertyMatcher propertyMatcher) {
+        super(QueryOperationTypes.PROPERTY);
+        this.propertyMatcher = propertyMatcher;
+    }
 
     @Override
-    protected Optional<FoodRestorationProperty> getFor(ItemStack itemStack) {
-        if (itemStack.getItem() instanceof ItemFood) {
-            final int food = ((ItemFood) itemStack.getItem()).getHealAmount(itemStack);
-            return Optional.of(new FoodRestorationProperty(food));
+    public boolean matches(Lens lens, Lens parent, Fabric inventory) {
+        if (parent == null) {
+            return false;
         }
-        return Optional.empty();
+        final Object value = parent.getProperties(lens).get(this.propertyMatcher.getProperty());
+        return this.propertyMatcher.matches(value);
     }
+
 }

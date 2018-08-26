@@ -22,32 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.property;
+package org.spongepowered.common.data.property.store.entity;
 
-import org.spongepowered.api.data.Property;
-import org.spongepowered.api.item.inventory.property.GuiId;
-import org.spongepowered.api.item.inventory.property.GuiIdProperty;
-import org.spongepowered.api.item.inventory.property.Identifiable;
-import org.spongepowered.api.util.Coerce;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.util.EnumHandSide;
+import org.spongepowered.api.data.type.HandPreference;
+import org.spongepowered.common.data.property.store.common.AbstractEntityPropertyStore;
 
-import java.util.UUID;
+import java.util.Optional;
 
-public final class GuiIdPropertyImpl extends AbstractInventoryProperty<String, GuiId> implements GuiIdProperty {
-
-    public GuiIdPropertyImpl(GuiId value, Operator operator) {
-        super(value, operator);
-    }
+public class DominantHandPropertyStore extends AbstractEntityPropertyStore.Generic<HandPreference> {
 
     @Override
-    public int compareTo(Property<?, ?> other) {
-        return getValue().getKey().compareTo(((GuiId) other).getKey());
-    }
-
-    public static final class BuilderImpl extends PropertyBuilderImpl<GuiId, GuiIdProperty, GuiIdProperty.Builder> implements GuiIdProperty.Builder {
-
-        @Override
-        public GuiIdProperty build() {
-            return new GuiIdPropertyImpl(this.value, this.operator);
+    protected Optional<HandPreference> getForEntity(Entity entity) {
+        if (!(entity instanceof EntityLivingBase)) {
+            return Optional.empty();
         }
+        final EnumHandSide handSide = ((EntityLivingBase) entity).getPrimaryHand();
+        return Optional.of((HandPreference) (Object) handSide);
     }
 }

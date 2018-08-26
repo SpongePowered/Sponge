@@ -22,52 +22,55 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.property;
+package org.spongepowered.common.data.property;
 
-import org.spongepowered.api.data.Property;
-import org.spongepowered.api.item.inventory.InventoryProperty;
+import com.google.common.base.MoreObjects;
+import com.google.common.reflect.TypeToken;
+import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.data.property.Property;
 
-public abstract class PropertyBuilderImpl<V, T extends InventoryProperty<?, V>, B extends InventoryProperty.Builder<V, T, B>> implements InventoryProperty.Builder<V, T, B> {
+import java.util.Comparator;
+import java.util.function.BiPredicate;
 
-    protected V value;
-    protected Object key;
-    protected Property.Operator operator;
+public class SpongeProperty<V> implements Property<V> {
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public B value(final V value) {
-        this.value = value;
-        return (B) this;
-    }
+    private final CatalogKey key;
+    private final TypeToken<V> valueType;
+    private final Comparator<V> valueComparator;
+    private final BiPredicate<V, V> includesTester;
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public B key(Object key) {
+    SpongeProperty(CatalogKey key, TypeToken<V> valueType, Comparator<V> valueComparator, BiPredicate<V, V> includesTester) {
         this.key = key;
-        return (B) this;
+        this.valueType = valueType;
+        this.valueComparator = valueComparator;
+        this.includesTester = includesTester;
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public B operator(final Property.Operator operator) {
-        this.operator = operator;
-        return (B) this;
+    public TypeToken<V> getValueType() {
+        return this.valueType;
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public B from(final T value) {
-        this.value = value.getValue();
-        this.operator = value.getOperator();
-        return (B) this;
+    public Comparator<V> getValueComparator() {
+        return this.valueComparator;
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public B reset() {
-        this.value = null;
-        this.operator = null;
-        return (B) this;
+    public BiPredicate<V, V> getValueIncludesTester() {
+        return this.includesTester;
     }
 
+    @Override
+    public CatalogKey getKey() {
+        return this.key;
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("key", this.key)
+                .add("valueType", this.valueType)
+                .toString();
+    }
 }

@@ -25,7 +25,8 @@
 package org.spongepowered.common.data.property.store.block;
 
 import net.minecraft.block.state.IBlockState;
-import org.spongepowered.api.data.property.block.FullBlockSelectionBoxProperty;
+import net.minecraft.util.EnumFacing;
+import org.spongepowered.api.util.OptBool;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.common.data.property.store.common.AbstractBlockPropertyStore;
 
@@ -33,18 +34,14 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-public class FullBlockSelectionBoxPropertyStore extends AbstractBlockPropertyStore<FullBlockSelectionBoxProperty> {
-
-    protected static final Optional<FullBlockSelectionBoxProperty> TRUE = Optional.of(new FullBlockSelectionBoxProperty(true));
-    protected static final Optional<FullBlockSelectionBoxProperty> FALSE = Optional.of(new FullBlockSelectionBoxProperty(false));
+public class FullBlockSelectionBoxPropertyStore extends AbstractBlockPropertyStore.Generic<Boolean> {
 
     public FullBlockSelectionBoxPropertyStore() {
         super(true);
     }
 
     @Override
-    protected Optional<FullBlockSelectionBoxProperty> getForBlock(@Nullable Location<?> location, IBlockState block) {
-        return block.isFullCube() ? TRUE : FALSE;
+    protected Optional<Boolean> getForBlock(@Nullable Location<?> location, IBlockState block, @Nullable EnumFacing facing) {
+        return OptBool.of(block.isFullCube());
     }
-
 }

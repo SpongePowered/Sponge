@@ -22,34 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.property;
+package org.spongepowered.common.data.property.store.entity;
 
-import org.spongepowered.api.data.Property;
-import org.spongepowered.api.item.inventory.property.Identifiable;
-import org.spongepowered.api.util.Coerce;
+import net.minecraft.entity.Entity;
+import org.spongepowered.api.util.OptBool;
+import org.spongepowered.common.data.property.store.common.AbstractEntityPropertyStore;
 
-import java.util.UUID;
+import java.util.Optional;
 
-public final class IdentifiableImpl extends AbstractInventoryProperty<String, UUID> implements Identifiable {
-
-    public IdentifiableImpl(UUID value, Operator operator) {
-        super(value, operator);
-    }
+public class GravityAffectedEntityPropertyStore extends AbstractEntityPropertyStore.Generic<Boolean> {
 
     @Override
-    public int compareTo(Property<?, ?> other) {
-        if (other == null) {
-            return 1;
-        }
-
-        return this.getValue().toString().compareTo(Coerce.toString(other.getValue()));
-    }
-
-    public static final class BuilderImpl extends PropertyBuilderImpl<UUID, Identifiable, Identifiable.Builder> implements Identifiable.Builder {
-
-        @Override
-        public Identifiable build() {
-            return new IdentifiableImpl(this.value, this.operator);
-        }
+    protected Optional<Boolean> getForEntity(Entity entity) {
+        return OptBool.of(entity.hasNoGravity() || entity.isRiding());
     }
 }

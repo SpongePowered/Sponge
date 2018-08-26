@@ -31,7 +31,7 @@ import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.property.block.InstrumentProperty;
+import org.spongepowered.api.data.property.Properties;
 import org.spongepowered.api.data.type.InstrumentType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
@@ -42,6 +42,8 @@ import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
+
+import java.util.Optional;
 
 @SuppressWarnings("ConstantConditions")
 @Plugin(id = "instrumenttest", name = "InstrumentTest", description = "Tests instrument types and properties.", version = "0.0.0")
@@ -93,18 +95,19 @@ public class InstrumentTestPlugin {
         }
         final BlockSnapshot snapshot = event.getTargetBlock();
         if (snapshot.getState().getType().equals(BlockTypes.NOTEBLOCK)) {
-            final InstrumentProperty instrumentProperty = player.getWorld().getBlock(snapshot.getPosition().sub(0, 1, 0)).getProperty(InstrumentProperty.class).orElse(null);
-            if (instrumentProperty != null) {
-                final InstrumentType instrument = instrumentProperty.getValue();
-                player.sendMessage(Text.of(TextColors.DARK_GREEN, "Clicked on a note block with instrument: ", TextColors.GREEN, instrument.getName()));
+            final Optional<InstrumentType> instrumentType = player.getWorld()
+                    .getBlock(snapshot.getPosition().sub(0, 1, 0)).getProperty(Properties.REPRESENTED_INSTRUMENT);
+            if (instrumentType.isPresent()) {
+                player.sendMessage(Text.of(TextColors.DARK_GREEN, "Clicked on a note block with instrument: ",
+                        TextColors.GREEN, instrumentType.get().getName()));
             } else {
                 player.sendMessage(Text.of(TextColors.DARK_GREEN, "Clicked on a note block that strangely did not have any instrument type."));
             }
         } else {
-            final InstrumentProperty instrumentProperty = snapshot.getProperty(InstrumentProperty.class).orElse(null);
-            if (instrumentProperty != null) {
-                final InstrumentType instrument = instrumentProperty.getValue();
-                player.sendMessage(Text.of(TextColors.DARK_GREEN, "Clicked on a block with instrument type: ", TextColors.GREEN, instrument.getName()));
+            final Optional<InstrumentType> instrumentType = snapshot.getProperty(Properties.REPRESENTED_INSTRUMENT);
+            if (instrumentType.isPresent()) {
+                player.sendMessage(Text.of(TextColors.DARK_GREEN, "Clicked on a block with instrument type: ",
+                        TextColors.GREEN, instrumentType.get().getName()));
             } else {
                 player.sendMessage(Text.of(TextColors.DARK_GREEN, "Clicked on a block which had no instrument type."));
             }

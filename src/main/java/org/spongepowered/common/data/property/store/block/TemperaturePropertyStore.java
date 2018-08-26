@@ -24,28 +24,40 @@
  */
 package org.spongepowered.common.data.property.store.block;
 
-import net.minecraft.world.biome.Biome;
-import org.spongepowered.api.data.property.block.TemperatureProperty;
-import org.spongepowered.api.util.Direction;
+import org.spongepowered.api.data.property.Properties;
+import org.spongepowered.api.data.property.PropertyHolder;
+import org.spongepowered.api.data.property.store.DoublePropertyStore;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.data.property.store.common.AbstractSpongePropertyStore;
-import org.spongepowered.common.util.VecHelper;
 
-import java.util.Optional;
+import java.util.OptionalDouble;
 
-public class TemperaturePropertyStore extends AbstractSpongePropertyStore<TemperatureProperty> {
+@SuppressWarnings({"unchecked", "OptionalUsedAsFieldOrParameterType"})
+public class TemperaturePropertyStore implements DoublePropertyStore {
 
     @Override
-    public Optional<TemperatureProperty> getFor(Location<World> location) {
-        final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
-        final Biome biome = world.getBiome(VecHelper.toBlockPos(location));
-        return Optional.of(new TemperatureProperty(biome.getDefaultTemperature())); // TODO: do we want to use pos-sensitive?
+    public OptionalDouble getDoubleFor(PropertyHolder propertyHolder) {
+        if (!(propertyHolder instanceof Location)) {
+            return OptionalDouble.empty();
+        }
+        final Location<World> location = (Location<World>) propertyHolder;
+        final OptionalDouble biomeTemperature = location.getDoubleProperty(Properties.BIOME_TEMPERATURE);
+        final OptionalDouble blockTemperature = location.getDoubleProperty(Properties.BLOCK_TEMPERATURE);
+        final OptionalDouble fluidTemperature = location.getDoubleProperty(Properties.FLUID_TEMPERATURE);
+        double maxTemperature = -Double.MAX_VALUE;
+        maxTemperature = or(maxTemperature, biomeTemperature);
+        maxTemperature = or(maxTemperature, blockTemperature);
+        maxTemperature = or(maxTemperature, fluidTemperature);
+        return maxTemperature == -Double.MAX_VALUE ? OptionalDouble.of(maxTemperature) : OptionalDouble.empty();
     }
 
-    @Override
-    public Optional<TemperatureProperty> getFor(Location<World> location, Direction direction) {
-        // TODO gabziou fix this
-        return Optional.empty();
+    private static double or(double current, OptionalDouble that) {
+        if (that.isPresent()) {
+            final double temperature = that.getAsDouble();
+            if (temperature > current) {
+                return temperature;
+            }
+        }
+        return current;
     }
 }

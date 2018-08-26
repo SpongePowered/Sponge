@@ -27,8 +27,8 @@ package org.spongepowered.common.item.inventory.lens.impl.slots;
 import static com.google.common.base.Preconditions.*;
 
 import net.minecraft.item.ItemStack;
+import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryProperty;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
@@ -42,6 +42,7 @@ import org.spongepowered.common.text.translation.SpongeTranslation;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Base Lens for Slots
@@ -110,8 +111,8 @@ public class SlotLensImpl extends AbstractLens implements SlotLens {
     }
 
     @Override
-    public Collection<InventoryProperty<?, ?>> getProperties(int index) {
-        return Collections.emptyList();
+    public Map<Property<?>, Object> getProperties(int index) {
+        return Collections.emptyMap();
     }
 
     @Override

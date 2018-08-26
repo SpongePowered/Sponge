@@ -24,22 +24,22 @@
  */
 package org.spongepowered.common.data.property.store.item;
 
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.property.item.DamageAbsorptionProperty;
 import org.spongepowered.common.data.property.store.common.AbstractItemStackPropertyStore;
 
-import java.util.Optional;
+import java.util.OptionalDouble;
 
-public class DamageAbsorptionPropertyStore extends AbstractItemStackPropertyStore<DamageAbsorptionProperty> {
+import javax.annotation.Nullable;
+
+public class DamageAbsorptionPropertyStore extends AbstractItemStackPropertyStore.Dbl {
 
     @Override
-    protected Optional<DamageAbsorptionProperty> getFor(ItemStack itemStack) {
-        if (itemStack.getItem() instanceof ItemArmor) {
-            final ItemArmor armor = (ItemArmor) itemStack.getItem();
-            final int reduction = armor.damageReduceAmount;
-            return Optional.of(new DamageAbsorptionProperty(reduction));
+    protected OptionalDouble getDoubleFor(Item item, @Nullable ItemStack itemStack) {
+        if (item instanceof ItemArmor) {
+            return OptionalDouble.of(((ItemArmor) item).damageReduceAmount);
         }
-        return Optional.empty();
+        return OptionalDouble.empty();
     }
 }

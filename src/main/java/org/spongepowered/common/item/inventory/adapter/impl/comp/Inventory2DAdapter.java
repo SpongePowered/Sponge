@@ -27,7 +27,7 @@ package org.spongepowered.common.item.inventory.adapter.impl.comp;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.Slot;
-import org.spongepowered.api.item.inventory.property.SlotPos;
+import com.flowpowered.math.vector.Vector2i;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.item.inventory.type.Inventory2D;
 import org.spongepowered.common.item.inventory.adapter.impl.AdapterLogic;
@@ -48,10 +48,10 @@ public class Inventory2DAdapter extends VanillaAdapter implements Inventory2D {
     }
     
     protected SlotLens getSlotLens(int x, int y) {
-        return this.getSlotLens(SlotPos.of(x, y));
+        return this.getSlotLens(new Vector2i(x, y));
     }
 
-    protected SlotLens getSlotLens(SlotPos pos) {
+    protected SlotLens getSlotLens(Vector2i pos) {
         try {
             return this.lens2d.getSlot(pos);
         } catch (IndexOutOfBoundsException ex) {
@@ -60,32 +60,32 @@ public class Inventory2DAdapter extends VanillaAdapter implements Inventory2D {
     }
 
     @Override
-    public Optional<Slot> getSlot(SlotPos pos) {
+    public Optional<Slot> getSlot(Vector2i pos) {
         return VanillaAdapter.forSlot(this.fabric, this.getSlotLens(pos), this);
     }
 
     @Override
-    public Optional<ItemStack> poll(SlotPos pos) {
+    public Optional<ItemStack> poll(Vector2i pos) {
         return AdapterLogic.pollSequential(this.fabric, this.getSlotLens(pos));
     }
 
     @Override
-    public Optional<ItemStack> poll(SlotPos pos, int limit) {
+    public Optional<ItemStack> poll(Vector2i pos, int limit) {
         return AdapterLogic.pollSequential(this.fabric, this.getSlotLens(pos), limit);
     }
 
     @Override
-    public Optional<ItemStack> peek(SlotPos pos) {
+    public Optional<ItemStack> peek(Vector2i pos) {
         return AdapterLogic.peekSequential(this.fabric, this.getSlotLens(pos));
     }
 
     @Override
-    public Optional<ItemStack> peek(SlotPos pos, int limit) {
+    public Optional<ItemStack> peek(Vector2i pos, int limit) {
         return AdapterLogic.peekSequential(this.fabric, this.getSlotLens(pos), limit);
     }
 
     @Override
-    public InventoryTransactionResult set(SlotPos pos, ItemStack stack) {
+    public InventoryTransactionResult set(Vector2i pos, ItemStack stack) {
         return AdapterLogic.insertSequential(this.fabric, this.getSlotLens(pos), stack);
     }
 

@@ -26,111 +26,80 @@ package org.spongepowered.common.data.property.store.common;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.Streams;
+import org.spongepowered.api.block.tileentity.TileEntity;
+import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.data.property.PropertyHolder;
-import org.spongepowered.api.data.property.PropertyStore;
+import org.spongepowered.api.data.property.store.PropertyStore;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryProperty;
-import org.spongepowered.api.item.inventory.property.InventoryTitle;
+import org.spongepowered.api.item.inventory.InventoryProperties;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.custom.CustomInventory;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.property.AbstractInventoryProperty;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-public class InventoryPropertyStore<T extends InventoryProperty<?, ?>> implements PropertyStore<T> {
+@SuppressWarnings("unchecked")
+public class InventoryPropertyStore<V> implements PropertyStore<V> {
 
-    private Class<T> property;
+    private final Property<V> property;
 
-    public InventoryPropertyStore(Class<T> property) {
+    public InventoryPropertyStore(Property<V> property) {
         this.property = property;
     }
 
     @Override
-    public Optional<T> getFor(PropertyHolder propertyHolder) {
-        if (propertyHolder instanceof Inventory) {
-            Object key = AbstractInventoryProperty.getDefaultKey(this.property);
-            return ((Inventory) propertyHolder).getProperty(this.property, key);
+    public Optional<V> getFor(PropertyHolder propertyHolder) {
+        // Inventories handle their properties differently,
+        // so we can retrieve them from the method
+        if (propertyHolder instanceof Location) {
+            final TileEntity te = ((Location<World>) propertyHolder).getTileEntity().orElse(null);
+            return te instanceof Carrier ? ((Carrier) te).getInventory().getProperty(this.property) : Optional.empty();
+        } else if (propertyHolder instanceof Carrier) {
+            return ((Carrier) propertyHolder).getInventory().getProperty(this.property);
+        } else if (propertyHolder instanceof Inventory) {
+            return propertyHolder.getProperty(this.property);
         }
         return Optional.empty();
     }
 
-    @Override
-    public Optional<T> getFor(Location<World> location) {
-        return location.getTileEntity()
-                .flatMap(te -> (te instanceof Carrier) ? Optional.of(((Carrier) te).getInventory()) : Optional.empty())
-                .flatMap(this::getFor);
+    public static <V> Optional<V> getProperty(InventoryAdapter adapter, Inventory child, Property<V> property) {
+        return getProperty(adapter.getFabric(), adapter.getRootLens(), child, property);
     }
 
-    @Override
-    public Optional<T> getFor(Location<World> location, Direction direction) {
-        // TODO directional access
-        return this.getFor(location);
-    }
-
-    @Override
-    public int getPriority() {
-        return 100;
-    }
-
-    public static Collection<InventoryProperty<?, ?>> getProperties(InventoryAdapter adapter,
-            Inventory child, Class<? extends InventoryProperty<?, ?>> property) {
-        return getProperties(adapter.getFabric(), adapter.getRootLens(), child, property);
-    }
-
-    public static Collection<InventoryProperty<?, ?>> getProperties(Fabric inv, Lens lens,
-            Inventory child, Class<? extends InventoryProperty<?, ?>> property) {
-
+    public static <V> Optional<V> getProperty(Fabric inv, Lens lens, Inventory child, Property<V> property) {
         if (child instanceof InventoryAdapter) {
             checkNotNull(property, "property");
             int index = lens.getChildren().indexOf(((InventoryAdapter) child).getRootLens());
             if (index > -1) {
-                return lens.getProperties(index).stream().filter(prop -> property.isAssignableFrom(prop.getClass()))
-                        .collect(Collectors.toCollection(ArrayList::new));
+                return Optional.ofNullable((V) lens.getProperties(index).get(property));
             }
         }
-
-        return Collections.emptyList();
-    }
-
-    public static <T extends InventoryProperty<?, ?>> Collection<T> getRootProperties(InventoryAdapter adapter, Class<T> property) {
-        adapter = inventoryRoot(adapter);
-        if (adapter instanceof CustomInventory) {
-            return ((CustomInventory) adapter).getProperties().values().stream().filter(p -> property.isAssignableFrom(p.getClass()))
-                    .map(property::cast).collect(Collectors.toList());
-        }
-        return Streams.stream(findRootProperty(adapter, property)).collect(Collectors.toList());
+        return Optional.empty();
     }
 
     @SuppressWarnings("unchecked")
-    public static <T extends InventoryProperty<?, ?>> Optional<T> getRootProperty(InventoryAdapter adapter, Class<T> property, Object key) {
+    public static <V> Optional<V> getRootProperty(InventoryAdapter adapter, Property<V> property) {
         adapter = inventoryRoot(adapter);
         if (adapter instanceof CustomInventory) {
-            InventoryProperty<?, ?> forKey = ((CustomInventory) adapter).getProperties().get(key);
-            if (forKey != null && property.isAssignableFrom(forKey.getClass())) {
-                return Optional.of((T) forKey);
+            final Object value = ((CustomInventory) adapter).getProperties().get(property);
+            if (value != null) {
+                return Optional.of((V) value);
             }
         }
         return findRootProperty(adapter, property);
     }
 
     @SuppressWarnings("unchecked")
-    private static <T extends InventoryProperty<?, ?>> Optional<T> findRootProperty(InventoryAdapter adapter, Class<T> property) {
-        if (property == InventoryTitle.class) {
-            Text text = Text.of(adapter.getFabric().getDisplayName());
-            return (Optional<T>) Optional.of(InventoryTitle.of(text));
+    private static <V> Optional<V> findRootProperty(InventoryAdapter adapter, Property<V> property) {
+        if (property == InventoryProperties.TITLE) {
+            final Text text = Text.of(adapter.getFabric().getDisplayName());
+            return (Optional<V>) Optional.of(text);
         }
         // TODO more properties of top level inventory
         return Optional.empty();
@@ -150,4 +119,5 @@ public class InventoryPropertyStore<T extends InventoryProperty<?, ?>> implement
         }
         return adapter;
     }
+
 }

@@ -24,8 +24,9 @@
  */
 package org.spongepowered.test;
 
-import org.spongepowered.api.data.property.item.RecordProperty;
+import org.spongepowered.api.data.property.Properties;
 import org.spongepowered.api.data.type.HandTypes;
+import org.spongepowered.api.effect.sound.record.RecordType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.filter.cause.Root;
@@ -42,9 +43,9 @@ public class RecordTest {
     @Listener
     public void onPlayerInteract(InteractItemEvent.Secondary event, @Root Player player) {
         final ItemStack itemStack = player.getItemInHand(HandTypes.MAIN_HAND);
-        final Optional<RecordProperty> optRecord = itemStack.getProperty(RecordProperty.class);
+        final Optional<RecordType> optRecord = itemStack.getProperty(Properties.RECORD_TYPE);
         if (optRecord.isPresent()) {
-            player.playRecord(player.getLocation().getPosition().toInt(), optRecord.get().getValue());
+            player.playRecord(player.getLocation().getPosition().toInt(), optRecord.get());
         } else if (itemStack.getType() == ItemTypes.SPONGE) {
             player.stopRecord(player.getLocation().getPosition().toInt());
         }

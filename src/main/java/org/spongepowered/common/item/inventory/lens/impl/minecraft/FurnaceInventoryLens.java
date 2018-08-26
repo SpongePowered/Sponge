@@ -24,8 +24,7 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.minecraft;
 
-import static org.spongepowered.api.data.Property.Operator.DELEGATE;
-
+import org.spongepowered.common.item.inventory.PropertyEntry;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.DefaultIndexedLens;
@@ -33,7 +32,6 @@ import org.spongepowered.common.item.inventory.lens.impl.RealLens;
 import org.spongepowered.common.item.inventory.lens.impl.slots.FuelSlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.slots.InputSlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.slots.OutputSlotLensImpl;
-import org.spongepowered.common.item.inventory.property.SlotIndexImpl;
 
 public class FurnaceInventoryLens extends RealLens {
 
@@ -57,8 +55,8 @@ public class FurnaceInventoryLens extends RealLens {
         this.fuel = new FuelSlotLensImpl(1, (i) -> true, (i) -> true);       // TODO SlotFurnaceFuel
         this.output = new OutputSlotLensImpl(2, (i) -> false, (i) -> false); // SlotFurnaceOutput
 
-        this.addSpanningChild(this.input, new SlotIndexImpl(0, DELEGATE));
-        this.addSpanningChild(this.fuel, new SlotIndexImpl(1, DELEGATE));
-        this.addSpanningChild(this.output, new SlotIndexImpl(2, DELEGATE));
+        this.addSpanningChild(this.input, PropertyEntry.slotIndex(0));
+        this.addSpanningChild(this.fuel, PropertyEntry.slotIndex(1));
+        this.addSpanningChild(this.output, PropertyEntry.slotIndex(2));
     }
 }

@@ -26,32 +26,28 @@ package org.spongepowered.common.data.property.store.block;
 
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
-import org.spongepowered.api.data.property.block.PoweredProperty;
-import org.spongepowered.api.util.Direction;
+import org.spongepowered.api.util.OptBool;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.data.property.store.common.AbstractSpongePropertyStore;
+import org.spongepowered.common.data.property.store.common.AbstractLocationPropertyStore;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.Optional;
 
-public class PoweredPropertyStore extends AbstractSpongePropertyStore<PoweredProperty> {
+import javax.annotation.Nullable;
 
-    private static final PoweredProperty TRUE = new PoweredProperty(true);
-    private static final PoweredProperty FALSE = new PoweredProperty(false);
+public class PoweredPropertyStore extends AbstractLocationPropertyStore.Generic<Boolean> {
 
     @Override
-    public Optional<PoweredProperty> getFor(Location<World> location) {
+    protected Optional<Boolean> getFor(Location<World> location, @Nullable EnumFacing facing) {
         final BlockPos pos = VecHelper.toBlockPos(location);
         final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
-        return Optional.of(world.isBlockPowered(pos) ? TRUE : FALSE);
-    }
-
-    @Override
-    public Optional<PoweredProperty> getFor(Location<World> location, Direction direction) {
-        final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
-        final EnumFacing facing = toEnumFacing(direction);
-        final boolean powered = world.getStrongPower(VecHelper.toBlockPos(location).offset(facing), facing) > 0;
-        return Optional.of(powered ? TRUE : FALSE);
+        final boolean powered;
+        if (facing != null) {
+            powered = world.getStrongPower(pos.offset(facing), facing) > 0;
+        } else {
+            powered = world.isBlockPowered(pos);
+        }
+        return OptBool.of(powered);
     }
 }

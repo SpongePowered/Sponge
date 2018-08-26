@@ -27,9 +27,9 @@ package org.spongepowered.common.item.inventory.lens.impl;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.common.item.inventory.PropertyEntry;
 import org.spongepowered.common.item.inventory.adapter.impl.BasicInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
-import org.spongepowered.common.item.inventory.property.SlotIndexImpl;
 
 /**
  * Lenses for inventory based on slots.
@@ -50,11 +50,7 @@ public abstract class SlotBasedLens extends AbstractLens {
 
     private void init(SlotProvider slots) {
         for (int ord = 0, slot = this.base; ord < this.size; ord++, slot += this.stride) {
-            this.addSpanningChild(slots.getSlotLens(slot), new SlotIndexImpl(ord));
+            addSpanningChild(slots.getSlotLens(slot), PropertyEntry.slotIndex(ord));
         }
     }
-
-
-
-
 }

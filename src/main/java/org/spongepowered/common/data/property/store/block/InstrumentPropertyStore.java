@@ -28,7 +28,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
-import org.spongepowered.api.data.property.block.InstrumentProperty;
+import net.minecraft.util.EnumFacing;
 import org.spongepowered.api.data.type.InstrumentType;
 import org.spongepowered.api.data.type.InstrumentTypes;
 import org.spongepowered.api.world.Location;
@@ -38,15 +38,15 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-public class InstrumentPropertyStore extends AbstractBlockPropertyStore<InstrumentProperty> {
+public class InstrumentPropertyStore extends AbstractBlockPropertyStore.Generic<InstrumentType> {
 
     public InstrumentPropertyStore() {
         super(true);
     }
 
     @Override
-    protected Optional<InstrumentProperty> getForBlock(@Nullable Location<?> location, IBlockState block) {
-        return Optional.of(new InstrumentProperty(getInstrumentType(block)));
+    protected Optional<InstrumentType> getForBlock(@Nullable Location<?> location, IBlockState block, @Nullable EnumFacing facing) {
+        return Optional.of(getInstrumentType(block));
     }
 
     @SuppressWarnings("deprecation")

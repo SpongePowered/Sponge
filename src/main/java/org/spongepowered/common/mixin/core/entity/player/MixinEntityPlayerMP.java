@@ -111,6 +111,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.GameModeData;
 import org.spongepowered.api.data.manipulator.mutable.entity.JoinData;
+import org.spongepowered.api.data.property.PropertyMatcher;
 import org.spongepowered.api.data.type.SkinPart;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
@@ -140,10 +141,11 @@ import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.InventoryProperties;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.entity.Hotbar;
-import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
+import org.spongepowered.api.item.inventory.slot.SlotIndex;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.network.PlayerConnection;
@@ -1147,7 +1149,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         // TODO direct access instead of queries
         org.spongepowered.api.item.inventory.Slot slot = (org.spongepowered.api.item.inventory.Slot)((Inventory) this.inventoryContainer)
                 .query(QueryOperationTypes.INVENTORY_TYPE.of(Hotbar.class))
-                .query(QueryOperationTypes.INVENTORY_PROPERTY.of(SlotIndex.of(this.inventory.currentItem)));
+                .query(PropertyMatcher.of(InventoryProperties.SLOT_INDEX, SlotIndex.of(this.inventory.currentItem)));
         final ItemStackSnapshot originalItem = ItemStackUtil.snapshotOf(currentItem);
         ItemStack itemToDrop = this.inventory.decrStackSize(this.inventory.currentItem, dropAll && !currentItem.isEmpty() ? currentItem.getCount() : 1);
         ((IMixinContainer) this.inventoryContainer).getCapturedTransactions().add(new SlotTransaction(slot, originalItem, ItemStackUtil.snapshotOf(this.inventory.getCurrentItem())));

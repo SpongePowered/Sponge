@@ -29,11 +29,11 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
+import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.world.LocatableBlock;
@@ -42,9 +42,11 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.util.DataQueries;
 
 import java.lang.ref.WeakReference;
-import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
@@ -76,13 +78,23 @@ public class SpongeLocatableBlock implements LocatableBlock {
     }
 
     @Override
-    public <T extends Property<?, ?>> Optional<T> getProperty(Class<T> propertyClass) {
-        return this.blockState.getProperty(propertyClass);
+    public <V> Optional<V> getProperty(Property<V> property) {
+        return this.blockState.getProperty(property);
     }
 
     @Override
-    public Collection<Property<?, ?>> getApplicableProperties() {
-        return this.blockState.getApplicableProperties();
+    public OptionalInt getIntProperty(Property<Integer> property) {
+        return this.blockState.getIntProperty(property);
+    }
+
+    @Override
+    public OptionalDouble getDoubleProperty(Property<Double> property) {
+        return this.blockState.getDoubleProperty(property);
+    }
+
+    @Override
+    public Map<Property<?>, ?> getProperties() {
+        return this.blockState.getProperties();
     }
 
     @Override

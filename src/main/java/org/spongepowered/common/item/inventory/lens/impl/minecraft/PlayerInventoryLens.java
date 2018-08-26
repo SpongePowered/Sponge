@@ -24,17 +24,15 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.minecraft;
 
-import static org.spongepowered.api.data.Property.Operator.DELEGATE;
-
 import net.minecraft.inventory.Container;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.InventoryProperties;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
-import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
-import org.spongepowered.api.item.inventory.property.EquipmentSlotType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
+import org.spongepowered.common.item.inventory.PropertyEntry;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
@@ -46,8 +44,6 @@ import org.spongepowered.common.item.inventory.lens.impl.comp.HeldHandSlotLensIm
 import org.spongepowered.common.item.inventory.lens.impl.comp.PrimaryPlayerInventoryLens;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.ContainerFabric;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
-import org.spongepowered.common.item.inventory.property.EquipmentSlotTypeImpl;
-import org.spongepowered.common.item.inventory.property.SlotIndexImpl;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -86,7 +82,7 @@ public class PlayerInventoryLens extends RealLens {
     protected void init(SlotProvider slots) {
         // Adding slots
         for (int ord = 0, slot = this.base; ord < this.size; ord++, slot++) {
-            this.addChild(slots.getSlotLens(slot), new SlotIndexImpl(ord, DELEGATE));
+            this.addChild(slots.getSlotLens(slot), PropertyEntry.slotIndex(ord));
         }
 
         int base = this.base;
@@ -133,7 +129,7 @@ public class PlayerInventoryLens extends RealLens {
         this.addSpanningChild(this.armor);
         this.addSpanningChild(this.offhand);
         for (Map.Entry<EquipmentType, SlotLens> entry : equipmentLenses.entrySet()) {
-            this.addChild(entry.getValue(), new EquipmentSlotTypeImpl(entry.getKey()));
+            this.addChild(entry.getValue(), PropertyEntry.of(InventoryProperties.EQUIPMENT_TYPE, entry.getKey()));
         }
 
         this.addChild(this.equipment);

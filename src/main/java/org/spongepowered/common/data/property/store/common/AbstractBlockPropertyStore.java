@@ -30,81 +30,135 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
-import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.property.PropertyHolder;
+import org.spongepowered.api.data.property.store.DoublePropertyStore;
+import org.spongepowered.api.data.property.store.IntPropertyStore;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
 import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
 
 import javax.annotation.Nullable;
 
-public abstract class AbstractBlockPropertyStore<T extends Property<?, ?>> extends AbstractSpongePropertyStore<T> {
+public abstract class AbstractBlockPropertyStore<V> extends AbstractSpongePropertyStore<V> {
 
-    private final boolean checksItemStack;
+    final boolean checksItemStack;
 
-    protected AbstractBlockPropertyStore(boolean checksItemStack) {
+    AbstractBlockPropertyStore(boolean checksItemStack) {
         this.checksItemStack = checksItemStack;
     }
 
-    /**
-     * Gets the property for the block, if the block is actually containing a
-     * property in the first place.
-     *
-     *
-     * @param location
-     * @param block The block
-     * @return The property, if available
-     */
-    protected abstract Optional<T> getForBlock(@Nullable Location<?> location, IBlockState block);
+    public abstract static class Generic<V> extends AbstractBlockPropertyStore<V> {
 
-    /**
-     * This is intended for properties that are intentionally for directional
-     * orientations. Typically, this is always absent, only a few properties can
-     * be retrieved for specific directions.
-     *
-     * @param world The world
-     * @param x The x coordinate
-     * @param y The y coordinate
-     * @param z The z coordinate
-     * @param facing The facing direction
-     * @return The property, if available
-     */
-    protected Optional<T> getForDirection(net.minecraft.world.World world, int x, int y, int z, EnumFacing facing) {
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<T> getFor(PropertyHolder propertyHolder) {
-        if (propertyHolder instanceof Location) {
-            final Location<?> location = (Location<?>) propertyHolder;
-            final IBlockState block = (IBlockState) location.getBlock();
-            return getForBlock(location, block);
-        } else if (this.checksItemStack && propertyHolder instanceof ItemStack) {
-            final Item item = ((ItemStack) propertyHolder).getItem();
-            if (item instanceof ItemBlock) {
-                final Block block = ((ItemBlock) item).getBlock();
-                if (block != null) {
-                    return getForBlock(null, block.getDefaultState());
-                }
-            }
-        } else if (propertyHolder instanceof IBlockState) {
-            return getForBlock(null, ((IBlockState) propertyHolder));
-        } else if (propertyHolder instanceof Block) {
-            return getForBlock(null, ((Block) propertyHolder).getDefaultState());
+        protected Generic(boolean checksItemStack) {
+            super(checksItemStack);
         }
-        return Optional.empty();
+
+        /**
+         * Gets the property for the block, if the block is actually containing a
+         * property in the first place.
+         *
+         * @param location The location
+         * @param block The block
+         * @return The property value, if available
+         */
+        protected abstract Optional<V> getForBlock(@Nullable Location<?> location, IBlockState block, @Nullable EnumFacing facing);
+
+        @SuppressWarnings({"unchecked", "ConstantConditions"})
+        @Override
+        public final Optional<V> getFor(PropertyHolder propertyHolder) {
+            if (propertyHolder instanceof Location) {
+                final Location<?> location = (Location<?>) propertyHolder;
+                return getFor((Location<World>) location, Direction.NONE);
+            } else if (this.checksItemStack && propertyHolder instanceof ItemStack) {
+                final Item item = ((ItemStack) propertyHolder).getItem();
+                if (item instanceof ItemBlock) {
+                    final Block block = ((ItemBlock) item).getBlock();
+                    if (block != null) {
+                        return getForBlock(null, block.getDefaultState(), null);
+                    }
+                }
+            } else if (propertyHolder instanceof IBlockState) {
+                return getForBlock(null, ((IBlockState) propertyHolder), null);
+            } else if (propertyHolder instanceof Block) {
+                return getForBlock(null, ((Block) propertyHolder).getDefaultState(), null);
+            }
+            return Optional.empty();
+        }
+
+        @Override
+        public final Optional<V> getFor(Location<World> location, Direction direction) {
+            return getForBlock(location, (IBlockState) location.getBlock(), toEnumFacing(direction).orElse(null));
+        }
     }
 
-    @Override
-    public Optional<T> getFor(Location<World> location) {
-        return getForBlock(location, (IBlockState) location.getBlock());
+    public abstract static class Dbl extends AbstractBlockPropertyStore<Double> implements DoublePropertyStore {
+
+        protected Dbl(boolean checksItemStack) {
+            super(checksItemStack);
+        }
+
+        protected abstract OptionalDouble getForBlock(@Nullable Location<?> location, IBlockState block, @Nullable EnumFacing facing);
+
+        @SuppressWarnings({"unchecked", "ConstantConditions"})
+        @Override
+        public final OptionalDouble getDoubleFor(PropertyHolder propertyHolder) {
+            if (propertyHolder instanceof Location) {
+                final Location<?> location = (Location<?>) propertyHolder;
+                return getDoubleFor((Location<World>) location, Direction.NONE);
+            } else if (this.checksItemStack && propertyHolder instanceof ItemStack) {
+                final Item item = ((ItemStack) propertyHolder).getItem();
+                if (item instanceof ItemBlock) {
+                    final Block block = ((ItemBlock) item).getBlock();
+                    if (block != null) {
+                        return getForBlock(null, block.getDefaultState(), null);
+                    }
+                }
+            } else if (propertyHolder instanceof IBlockState) {
+                return getForBlock(null, ((IBlockState) propertyHolder), null);
+            } else if (propertyHolder instanceof Block) {
+                return getForBlock(null, ((Block) propertyHolder).getDefaultState(), null);
+            }
+            return OptionalDouble.empty();
+        }
+
+        @Override
+        public final OptionalDouble getDoubleFor(Location<World> location, Direction direction) {
+            return getForBlock(location, (IBlockState) location.getBlock(), toEnumFacing(direction).orElse(null));
+        }
+
+        @Override
+        public Optional<Double> getFor(PropertyHolder propertyHolder) {
+            final OptionalDouble optionalDouble = getDoubleFor(propertyHolder);
+            return optionalDouble.isPresent() ? Optional.of(optionalDouble.getAsDouble()) : Optional.empty();
+        }
+
+        @Override
+        public Optional<Double> getFor(Location<World> location, Direction direction) {
+            final OptionalDouble optionalDouble = getDoubleFor(location, direction);
+            return optionalDouble.isPresent() ? Optional.of(optionalDouble.getAsDouble()) : Optional.empty();
+        }
     }
 
-    @Override
-    public Optional<T> getFor(Location<World> location, Direction direction) {
-        return getForDirection(((net.minecraft.world.World) location.getExtent()), location.getBlockX(), location.getBlockY(), location.getBlockZ(),
-                toEnumFacing(direction));
+    public abstract static class IntValue extends AbstractBlockPropertyStore<Integer> implements IntPropertyStore {
+
+        protected IntValue(boolean checksItemStack) {
+            super(checksItemStack);
+        }
+
+        // TODO: Optimize by using optional ints
+
+        @Override
+        public OptionalInt getIntFor(PropertyHolder propertyHolder) {
+            return getFor(propertyHolder).map(OptionalInt::of).orElseGet(OptionalInt::empty);
+        }
+
+        @Override
+        public OptionalInt getIntFor(Location<World> location, Direction direction) {
+            return getFor(location, direction).map(OptionalInt::of).orElseGet(OptionalInt::empty);
+        }
     }
 }

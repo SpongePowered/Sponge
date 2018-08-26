@@ -30,13 +30,14 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.data.Property;
+import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
-import org.spongepowered.api.item.inventory.InventoryProperty;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
 
 import javax.annotation.Nullable;
 
@@ -45,16 +46,11 @@ public class CompositeInventoryArchetype implements InventoryArchetype {
     private final CatalogKey key;
     private final String name;
     private final List<InventoryArchetype> types;
-    private final Map<String, InventoryProperty<String, ?>> properties;
+    private final Map<Property<?>, ?> properties;
     @Nullable private ContainerProvider containerProvider;
 
-    public CompositeInventoryArchetype(String id, String name, List<InventoryArchetype> types, Map<String, InventoryProperty<String, ?>> properties, @Nullable ContainerProvider containerProvider) {
-
-        for (InventoryProperty<String, ?> p : properties.values()) {
-            if (p.getOperator() != Property.Operator.DELEGATE) {
-                throw new IllegalStateException(p.getClass().getSimpleName() + ":" + p.getKey() + " is not a DELEGATE property!");
-            }
-        }
+    public CompositeInventoryArchetype(String id, String name, List<InventoryArchetype> types,
+            Map<Property<?>, ?> properties, @Nullable ContainerProvider containerProvider) {
         this.key = CatalogKey.resolve(id);
         this.name = name;
         this.types = ImmutableList.copyOf(types);
@@ -78,26 +74,24 @@ public class CompositeInventoryArchetype implements InventoryArchetype {
     }
 
     @Override
-    public Optional<InventoryProperty<String, ?>> getProperty(String key) {
-        return Optional.ofNullable(this.properties.get(key));
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T extends InventoryProperty<String, ?>> Optional<T> getProperty(Class<T> type, String key) {
-
-        InventoryProperty<String, ?> property = this.properties.get(key);
-        if (property == null) {
-            return Optional.empty();
-        }
-        if (type.isAssignableFrom(property.getClass())) {
-            return Optional.of((T) property);
-        }
-        return Optional.empty();
+    public <V> Optional<V> getProperty(Property<V> property) {
+        return Optional.ofNullable((V) this.properties.get(property));
     }
 
     @Override
-    public Map<String, InventoryProperty<String, ?>> getProperties() {
+    public OptionalInt getIntProperty(Property<Integer> property) {
+        final Integer value = (Integer) this.properties.get(property);
+        return value == null ? OptionalInt.empty() : OptionalInt.of(value);
+    }
+
+    @Override
+    public OptionalDouble getDoubleProperty(Property<Double> property) {
+        final Double value = (Double) this.properties.get(property);
+        return value == null ? OptionalDouble.empty() : OptionalDouble.of(value);
+    }
+
+    @Override
+    public Map<Property<?>, ?> getProperties() {
         return this.properties;
     }
 

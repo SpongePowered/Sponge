@@ -24,11 +24,10 @@
  */
 package org.spongepowered.common.data.property.store.block;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import org.spongepowered.api.data.property.block.PassableProperty;
+import net.minecraft.util.EnumFacing;
+import org.spongepowered.api.util.OptBool;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.property.store.common.AbstractBlockPropertyStore;
 import org.spongepowered.common.util.VecHelper;
 
@@ -36,25 +35,18 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-public class PassablePropertyStore extends AbstractBlockPropertyStore<PassableProperty> {
-
-    private static final PassableProperty TRUE = new PassableProperty(true);
-    private static final PassableProperty FALSE = new PassableProperty(false);
+public class PassablePropertyStore extends AbstractBlockPropertyStore.Generic<Boolean> {
 
     public PassablePropertyStore() {
         super(false);
     }
 
     @Override
-    protected Optional<PassableProperty> getForBlock(@Nullable Location<?> location, IBlockState block) {
-        return Optional.of(block.getMaterial().blocksMovement() ? FALSE : TRUE);
+    protected Optional<Boolean> getForBlock(@Nullable Location<?> location, IBlockState block, @Nullable EnumFacing facing) {
+        if (location != null) {
+            final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
+            return Optional.of(block.getBlock().isPassable(world, VecHelper.toBlockPos(location)));
+        }
+        return OptBool.of(block.getMaterial().blocksMovement());
     }
-
-    @Override
-    public Optional<PassableProperty> getFor(Location<World> location) {
-        final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
-        final Block block = (Block) location.getBlockType();
-        return Optional.of(block.isPassable(world, VecHelper.toBlockPos(location)) ? TRUE : FALSE);
-    }
-
 }

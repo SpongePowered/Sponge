@@ -25,43 +25,25 @@
 package org.spongepowered.common.data.property.store.block;
 
 import net.minecraft.block.state.IBlockState;
-import org.spongepowered.api.data.property.block.HardnessProperty;
+import net.minecraft.util.EnumFacing;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.data.property.store.common.AbstractBlockPropertyStore;
-import org.spongepowered.common.interfaces.world.IMixinLocation;
+import org.spongepowered.common.data.property.store.common.AbstractLocationPropertyStore;
 import org.spongepowered.common.util.VecHelper;
 
-import java.util.Optional;
+import java.util.OptionalDouble;
 
 import javax.annotation.Nullable;
 
-public class HardnessPropertyStore extends AbstractBlockPropertyStore<HardnessProperty> {
-
-    public HardnessPropertyStore() {
-        super(false);
-    }
+public class HardnessPropertyStore extends AbstractLocationPropertyStore.Dbl {
 
     @Override
-    protected Optional<HardnessProperty> getForBlock(@Nullable Location<?> location, IBlockState block) {
-        final float hardness;
-        if (location != null) {
-            hardness = block.getBlockHardness((net.minecraft.world.World) location.getExtent(), VecHelper.toBlockPos(location));
-            if (hardness > 0) {
-                return Optional.of(new HardnessProperty(hardness));
-            }
-        }
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<HardnessProperty> getFor(Location<World> location) {
+    protected OptionalDouble getDoubleFor(Location<World> location, @Nullable EnumFacing facing) {
         final IBlockState blockState = (IBlockState) location.getBlock();
         final float hardness = blockState.getBlockHardness((net.minecraft.world.World) location.getExtent(), VecHelper.toBlockPos(location));
         if (hardness > 0) {
-            return Optional.of(new HardnessProperty(hardness));
+            return OptionalDouble.of(hardness);
         }
-        return Optional.empty();
+        return OptionalDouble.empty();
     }
-
 }

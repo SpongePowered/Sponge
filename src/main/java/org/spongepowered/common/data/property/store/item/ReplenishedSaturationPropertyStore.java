@@ -22,34 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.property;
+package org.spongepowered.common.data.property.store.item;
 
-import org.spongepowered.api.data.Property;
-import org.spongepowered.api.item.inventory.property.SlotPos;
-import org.spongepowered.api.item.inventory.property.SlotSide;
-import org.spongepowered.api.util.Coerce;
-import org.spongepowered.api.util.Direction;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemFood;
+import net.minecraft.item.ItemStack;
+import org.spongepowered.common.data.property.store.common.AbstractItemStackPropertyStore;
 
-public final class SlotSideImpl extends AbstractInventoryProperty<String, Direction> implements SlotSide {
+import java.util.OptionalDouble;
 
-    public SlotSideImpl(Direction value, Operator operator) {
-        super(Coerce.toEnum(value, Direction.class, Direction.NONE), operator);
-    }
+import javax.annotation.Nullable;
+
+public class ReplenishedSaturationPropertyStore extends AbstractItemStackPropertyStore.Dbl {
 
     @Override
-    public int compareTo(Property<?, ?> other) {
-        if (other == null) {
-            return 1;
+    protected OptionalDouble getDoubleFor(Item item, @Nullable ItemStack itemStack) {
+        if (item instanceof ItemFood) {
+            final ItemFood food = (ItemFood) item;
+            if (itemStack == null) {
+                itemStack = new ItemStack(food);
+            }
+            // Translate's Minecraft's weird internal value to the actual saturation value
+            return OptionalDouble.of(food.getSaturationModifier(itemStack) * food.getHealAmount(itemStack) * 2.0);
         }
-
-        return this.getValue().compareTo(Coerce.toEnum(other.getValue(), Direction.class, Direction.NONE));
-    }
-
-    public static final class BuilderImpl extends PropertyBuilderImpl<Direction, SlotSide, SlotSide.Builder> implements SlotSide.Builder {
-
-        @Override
-        public SlotSide build() {
-            return new SlotSideImpl(this.value, this.operator);
-        }
+        return OptionalDouble.empty();
     }
 }

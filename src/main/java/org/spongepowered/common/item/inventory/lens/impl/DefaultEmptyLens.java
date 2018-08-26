@@ -25,8 +25,8 @@
 package org.spongepowered.common.item.inventory.lens.impl;
 
 import net.minecraft.item.ItemStack;
+import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryProperty;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
@@ -35,8 +35,8 @@ import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 public class DefaultEmptyLens implements Lens {
 
@@ -97,13 +97,13 @@ public class DefaultEmptyLens implements Lens {
     }
 
     @Override
-    public Collection<InventoryProperty<?, ?>> getProperties(int index) {
-        return Collections.<InventoryProperty<?, ?>>emptyList();
+    public Map<Property<?>, Object> getProperties(int index) {
+        return Collections.emptyMap();
     }
-    
+
     @Override
-    public Collection<InventoryProperty<?, ?>> getProperties(Lens child) {
-        return Collections.<InventoryProperty<?, ?>>emptyList();
+    public Map<Property<?>, Object> getProperties(Lens lens) {
+        return Collections.emptyMap();
     }
 
     @Override

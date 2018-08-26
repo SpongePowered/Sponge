@@ -22,25 +22,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.property.store.item;
+package org.spongepowered.common.data.property;
 
-import net.minecraft.item.ItemFood;
-import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.property.item.SaturationProperty;
-import org.spongepowered.common.data.property.store.common.AbstractItemStackPropertyStore;
+import org.spongepowered.api.CatalogKey;
 
-import java.util.Optional;
+public class TestCatalogKey implements CatalogKey {
 
-public class SaturationPropertyStore extends AbstractItemStackPropertyStore<SaturationProperty> {
+    private final String namespace;
+    private final String value;
+
+    public TestCatalogKey(String namespace, String value) {
+        this.namespace = namespace;
+        this.value = value;
+    }
 
     @Override
-    protected Optional<SaturationProperty> getFor(ItemStack itemStack) {
-        if (itemStack.getItem() instanceof ItemFood) {
-            final ItemFood food = (ItemFood) itemStack.getItem();
-            // Translate's Minecraft's weird internal value to the actual saturation value
-            final double saturationModifier = food.getSaturationModifier(itemStack) * food.getHealAmount(itemStack) * 2.0;
-            return Optional.of(new SaturationProperty(saturationModifier));
-        }
-        return Optional.empty();
+    public String getNamespace() {
+        return this.namespace;
+    }
+
+    @Override
+    public String getValue() {
+        return this.value;
+    }
+
+    @Override
+    public int compareTo(CatalogKey o) {
+        return toString().compareTo(o.toString());
+    }
+
+    @Override
+    public String toString() {
+        return getNamespace() + ":" + getValue();
     }
 }

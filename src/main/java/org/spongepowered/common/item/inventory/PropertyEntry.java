@@ -22,29 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.property;
+package org.spongepowered.common.item.inventory;
 
-import org.spongepowered.api.data.Property;
-import org.spongepowered.api.item.inventory.property.IntProperty;
-import org.spongepowered.api.util.Coerce;
+import org.spongepowered.api.data.property.Property;
+import org.spongepowered.api.item.inventory.InventoryProperties;
+import org.spongepowered.api.item.inventory.slot.SlotIndex;
 
-public class IntPropertyImpl extends AbstractInventoryProperty<String, Integer> implements IntProperty {
+public final class PropertyEntry {
 
-    public IntPropertyImpl(Object value, Operator operator) {
-        super(Coerce.toInteger(value), operator);
+    public static PropertyEntry slotIndex(int index) {
+        return of(InventoryProperties.SLOT_INDEX, SlotIndex.of(index));
     }
 
-    @Override
-    public int compareTo(Property<?, ?> other) {
-        return this.getValue().compareTo(other == null ? 1 : Coerce.toInteger(other.getValue()));
+    public static <V> PropertyEntry of(Property<V> property, V value) {
+        return new PropertyEntry(property, value);
     }
 
-    public static final class BuilderImpl extends PropertyBuilderImpl<Integer, IntProperty, IntProperty.Builder> implements IntProperty.Builder {
+    private final Property<?> property;
+    private final Object value;
 
-        @Override
-        public IntProperty build() {
-            return new IntPropertyImpl(this.value, this.operator);
-        }
+    private PropertyEntry(Property<?> property, Object value) {
+        this.property = property;
+        this.value = value;
     }
 
+    public Property<?> getProperty() {
+        return property;
+    }
+
+    public Object getValue() {
+        return value;
+    }
 }

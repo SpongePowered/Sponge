@@ -25,39 +25,24 @@
 package org.spongepowered.common.data.property.store.block;
 
 import net.minecraft.world.EnumSkyBlock;
-import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.data.property.PropertyHolder;
-import org.spongepowered.api.data.property.block.SkyLuminanceProperty;
-import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.property.store.common.AbstractSpongePropertyStore;
 import org.spongepowered.common.util.VecHelper;
 
-import java.util.Optional;
+import java.util.OptionalDouble;
 
-public class SkyLuminancePropertyStore extends AbstractSpongePropertyStore<SkyLuminanceProperty> {
+public class SkyLuminancePropertyStore extends AbstractSpongePropertyStore.Dbl {
 
+    @SuppressWarnings("unchecked")
     @Override
-    public Optional<SkyLuminanceProperty> getFor(PropertyHolder propertyHolder) {
-        if (propertyHolder instanceof Location && ((Location<?>) propertyHolder).getExtent() instanceof Chunk) {
-            final Chunk chunk = (Chunk) ((Location<?>) propertyHolder).getExtent();
-            final float light = chunk.getLightFor(EnumSkyBlock.SKY, VecHelper.toBlockPos((Location<?>) propertyHolder));
-            return Optional.of(new SkyLuminanceProperty(light));
+    public OptionalDouble getDoubleFor(PropertyHolder propertyHolder) {
+        if (!(propertyHolder instanceof Location)) {
+            return OptionalDouble.empty();
         }
-        return super.getFor(propertyHolder);
-    }
-
-    @Override
-    public Optional<SkyLuminanceProperty> getFor(Location<World> location) {
+        final Location<World> location = (Location<World>) propertyHolder;
         final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
-        final float light = world.getLightFor(EnumSkyBlock.SKY, VecHelper.toBlockPos(location));
-        return Optional.of(new SkyLuminanceProperty(light));
-    }
-
-    @Override
-    public Optional<SkyLuminanceProperty> getFor(Location<World> location, Direction direction) {
-        // TODO gabziou fix this
-        return Optional.empty();
+        return OptionalDouble.of(world.getLightFor(EnumSkyBlock.SKY, VecHelper.toBlockPos(location)));
     }
 }

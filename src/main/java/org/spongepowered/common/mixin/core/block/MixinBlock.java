@@ -48,7 +48,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
-import org.apache.logging.log4j.Level;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSoundGroup;
@@ -56,9 +55,9 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.trait.BlockTrait;
-import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Transform;
@@ -82,7 +81,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.config.SpongeConfig;
@@ -100,7 +98,6 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -259,16 +256,14 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     }
 
     @Override
-    public ImmutableMap<Class<? extends Property<?, ?>>, Property<?, ?>> getProperties(IBlockState blockState) {
+    public ImmutableMap<Property<?>, ?> getProperties(IBlockState blockState) {
         return populateSpongeProperties(ImmutableMap.builder(), blockState).build();
     }
 
     @SuppressWarnings("unchecked")
-    protected ImmutableMap.Builder<Class<? extends Property<?, ?>>, Property<?, ?>> populateSpongeProperties(
-        ImmutableMap.Builder<Class<? extends Property<?, ?>>, Property<?, ?>> builder, IBlockState blockState) {
-        for (Property<?, ?> property : SpongeImpl.getPropertyRegistry().getPropertiesFor((BlockState) blockState)) {
-            builder.put((Class<? extends Property<?, ?>>) property.getClass(), property);
-        }
+    protected ImmutableMap.Builder<Property<?>, ?> populateSpongeProperties(
+            ImmutableMap.Builder<Property<?>, Object> builder, IBlockState blockState) {
+        builder.putAll(SpongeImpl.getPropertyRegistry().getPropertiesFor((BlockState) blockState));
         return builder;
     }
 

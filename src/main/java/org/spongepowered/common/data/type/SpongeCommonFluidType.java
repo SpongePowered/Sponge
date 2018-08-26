@@ -26,18 +26,15 @@ package org.spongepowered.common.data.type;
 
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.data.Property;
-import org.spongepowered.api.data.property.PropertyStore;
 import org.spongepowered.api.extra.fluid.FluidType;
 import org.spongepowered.common.SpongeCatalogType;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.data.property.IPropertyHolder;
 
-import java.util.Collection;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-public final class SpongeCommonFluidType extends SpongeCatalogType implements FluidType {
+public final class SpongeCommonFluidType extends SpongeCatalogType implements FluidType, IPropertyHolder {
 
     @Nullable private final BlockType base;
 
@@ -53,19 +50,5 @@ public final class SpongeCommonFluidType extends SpongeCatalogType implements Fl
     @Override
     public Optional<BlockType> getBlockTypeBase() {
         return Optional.ofNullable(this.base);
-    }
-
-    @Override
-    public <T extends Property<?, ?>> Optional<T> getProperty(Class<T> propertyClass) {
-        final Optional<PropertyStore<T>> optional = SpongeImpl.getPropertyRegistry().getStore(propertyClass);
-        if (optional.isPresent()) {
-            return optional.get().getFor(this);
-        }
-        return Optional.empty();
-    }
-
-    @Override
-    public Collection<Property<?, ?>> getApplicableProperties() {
-        return SpongeImpl.getPropertyRegistry().getPropertiesFor(this);
     }
 }

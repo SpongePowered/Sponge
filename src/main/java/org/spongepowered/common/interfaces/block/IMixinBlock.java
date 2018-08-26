@@ -29,14 +29,13 @@ import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.interfaces.IMixinTrackable;
-import org.spongepowered.common.mixin.core.block.state.MixinStateImplementation;
 
 import java.util.List;
 import java.util.Optional;
@@ -139,7 +138,8 @@ public interface IMixinBlock extends IMixinTrackable {
     }
 
     boolean requiresBlockCapture();
-    ImmutableMap<Class<? extends Property<?,?>>,Property<?,?>> getProperties(IBlockState mixinStateImplementation);
+
+    ImmutableMap<Property<?>, ?> getProperties(IBlockState mixinStateImplementation);
 
     void initializeTrackerState();
 }

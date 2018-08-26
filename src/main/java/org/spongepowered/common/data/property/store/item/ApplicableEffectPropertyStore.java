@@ -26,24 +26,22 @@ package org.spongepowered.common.data.property.store.item;
 
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.property.item.ApplicableEffectProperty;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.common.data.property.store.common.AbstractItemStackPropertyStore;
 import org.spongepowered.common.interfaces.item.IMixinItemPotionProvider;
 
+import java.util.Collection;
 import java.util.Optional;
-import java.util.Set;
 
-public class ApplicableEffectPropertyStore extends AbstractItemStackPropertyStore<ApplicableEffectProperty> {
+import javax.annotation.Nullable;
+
+public class ApplicableEffectPropertyStore extends AbstractItemStackPropertyStore.Generic<Collection<PotionEffect>> {
 
     @Override
-    public Optional<ApplicableEffectProperty> getFor(ItemStack propertyHolder) {
-        final Item item = propertyHolder.getItem();
+    protected Optional<Collection<PotionEffect>> getFor(Item item, @Nullable ItemStack itemStack) {
         if (item instanceof IMixinItemPotionProvider) {
-            final Set<PotionEffect> potionEffects = ((IMixinItemPotionProvider) item).getApplicablePotions(propertyHolder);
-            return Optional.of(new ApplicableEffectProperty(potionEffects));
+            return Optional.of(((IMixinItemPotionProvider) item).getApplicablePotions(itemStack));
         }
         return Optional.empty();
     }
-
 }

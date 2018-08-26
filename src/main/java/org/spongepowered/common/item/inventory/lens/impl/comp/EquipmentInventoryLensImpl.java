@@ -26,15 +26,16 @@ package org.spongepowered.common.item.inventory.lens.impl.comp;
 
 import org.spongepowered.api.entity.ArmorEquipable;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.InventoryProperties;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
+import org.spongepowered.common.item.inventory.PropertyEntry;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.EquipmentInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.comp.EquipmentInventoryLens;
 import org.spongepowered.common.item.inventory.lens.impl.RealLens;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
-import org.spongepowered.common.item.inventory.property.EquipmentSlotTypeImpl;
 
 import java.util.Map;
 import java.util.Optional;
@@ -48,7 +49,7 @@ public class EquipmentInventoryLensImpl extends RealLens implements EquipmentInv
 
     private void init(Map<EquipmentType, SlotLens> lenses) {
         for (Map.Entry<EquipmentType, SlotLens> entry : lenses.entrySet()) {
-            this.addSpanningChild(entry.getValue(), new EquipmentSlotTypeImpl(entry.getKey()));
+            this.addSpanningChild(entry.getValue(), PropertyEntry.of(InventoryProperties.EQUIPMENT_TYPE, entry.getKey()));
         }
     }
 

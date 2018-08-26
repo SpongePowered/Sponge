@@ -24,19 +24,17 @@
  */
 package org.spongepowered.common.item.inventory.custom;
 
-import static org.spongepowered.api.data.Property.Operator.DELEGATE;
-
+import com.flowpowered.math.vector.Vector2i;
+import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
-import org.spongepowered.api.item.inventory.InventoryProperty;
-import org.spongepowered.api.item.inventory.property.InventoryCapacity;
-import org.spongepowered.api.item.inventory.property.InventoryDimension;
+import org.spongepowered.api.item.inventory.InventoryProperties;
+import org.spongepowered.common.item.inventory.PropertyEntry;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.DefaultIndexedLens;
 import org.spongepowered.common.item.inventory.lens.impl.RealLens;
 import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
-import org.spongepowered.common.item.inventory.property.SlotIndexImpl;
 
 import java.util.List;
 import java.util.Map;
@@ -45,10 +43,10 @@ import java.util.Optional;
 public class CustomLens extends RealLens {
 
     private InventoryArchetype archetype;
-    private Map<String, InventoryProperty<?, ?>> properties;
+    private Map<Property<?>, ?> properties;
 
     public CustomLens(InventoryAdapter adapter, SlotProvider slots, InventoryArchetype archetype,
-            Map<String, InventoryProperty<?, ?>> properties) {
+            Map<Property<?>, ?> properties) {
         super(0, adapter.getFabric().getSize(), adapter.getClass());
         this.archetype = archetype;
         this.properties = properties;
@@ -58,30 +56,31 @@ public class CustomLens extends RealLens {
     protected void init(SlotProvider slots) {
         // TODO this logic should not be done here (see PR #1010)
         // but for now this will have to do:
-        InventoryProperty<?, ?> size = this.properties.get(CustomInventory.INVENTORY_DIMENSION);
-        if (size == null) {
-            size = this.properties.get(CustomInventory.INVENTORY_CAPACITY);
-        }
+        final Vector2i dimension = (Vector2i) this.properties.get(InventoryProperties.DIMENSION);
+        final Integer capacity = (Integer) this.properties.get(InventoryProperties.CAPACITY);
 
-        if (size != null) {
-            this.addLensFor(size, 0, slots);
+        if (dimension != null) {
+            addLensForDimension(dimension, 0, slots);
+        } else if (capacity != null) {
+            addLensForCapacity(capacity, 0, slots);
         } else {
             this.addLensFor(this.archetype, 0, slots); // recursively get archetype sizes
         }
 
         // Adding slots
         for (int ord = 0, slot = this.base; ord < this.size; ord++, slot++) {
-            this.addChild(slots.getSlotLens(slot), new SlotIndexImpl(ord, DELEGATE));
+            this.addChild(slots.getSlotLens(slot), PropertyEntry.slotIndex(ord));
         }
     }
 
     private int addLensFor(InventoryArchetype archetype, int base, SlotProvider slots) {
-        Optional<InventoryProperty<String, ?>> size = archetype.getProperty(CustomInventory.INVENTORY_DIMENSION);
-        if (!size.isPresent()) {
-            size = archetype.getProperty(CustomInventory.INVENTORY_CAPACITY);
+        final Optional<Vector2i> dimension = archetype.getProperty(InventoryProperties.DIMENSION);
+        if (dimension.isPresent()) {
+            return addLensForDimension(dimension.get(), base, slots);
         }
-        if (size.isPresent()) {
-            return this.addLensFor(size.get(), base, slots);
+        final Optional<Integer> capacity = archetype.getProperty(InventoryProperties.CAPACITY);
+        if (capacity.isPresent()) {
+            return addLensForCapacity(capacity.get(), base, slots);
         }
 
         int slotCount = 0;
@@ -95,25 +94,20 @@ public class CustomLens extends RealLens {
         return slotCount;
     }
 
-    private int addLensFor(InventoryProperty<?, ?> size, int base, SlotProvider slots) {
-        Lens lens;
-        int slotCount;
-        if (size instanceof InventoryDimension) {
-            InventoryDimension dimension = ((InventoryDimension) size);
-            slotCount = dimension.getColumns() * dimension.getRows();
-            if (slotCount == 1) {
-                lens = slots.getSlotLens(base);
-            } else {
-                lens = new GridInventoryLensImpl(base, dimension.getColumns(), dimension.getRows(), slots);
-            }
-        } else if (size instanceof InventoryCapacity) {
-            InventoryCapacity capacity = ((InventoryCapacity) size);
-            slotCount = capacity.getValue();
-            lens = new DefaultIndexedLens(base, capacity.getValue(), slots);
+    private int addLensForCapacity(int capacity, int base, SlotProvider slots) {
+        addSpanningChild(new DefaultIndexedLens(base, capacity, slots));
+        return capacity;
+    }
+
+    private int addLensForDimension(Vector2i dimension, int base, SlotProvider slots) {
+        final int slotCount = dimension.getX() * dimension.getY();
+        final Lens lens;
+        if (slotCount == 1) {
+            lens = slots.getSlotLens(base);
         } else {
-            throw new IllegalStateException("Unknown Inventory Size Property " + size.getClass().getName());
+            lens = new GridInventoryLensImpl(base, dimension.getX(), dimension.getY(), slots);
         }
-        this.addSpanningChild(lens);
+        addSpanningChild(lens);
         return slotCount;
     }
 }

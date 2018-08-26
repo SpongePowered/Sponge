@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.world;
 
+import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.util.EnumFacing;
@@ -33,13 +34,13 @@ import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.api.data.property.PropertyStore;
+import org.spongepowered.api.data.property.Property;
+import org.spongepowered.api.data.property.store.PropertyStore;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
@@ -52,9 +53,11 @@ import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
 import java.util.Set;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
@@ -62,38 +65,72 @@ import java.util.Set;
 public abstract class MixinWorld_Data implements World {
 
     @Override
-    public <T extends Property<?, ?>> Optional<T> getProperty(int x, int y, int z, Class<T> propertyClass) {
-        final Optional<PropertyStore<T>> optional = Sponge.getPropertyRegistry().getStore(propertyClass);
-        return optional.flatMap(tPropertyStore -> tPropertyStore.getFor(new Location<>(this, x, y, z)));
+    public Map<Property<?>, ?> getProperties(Vector3i coords) {
+        return SpongeImpl.getPropertyRegistry().getPropertiesFor(new Location<>(this, coords));
     }
 
     @Override
-    public <T extends Property<?, ?>> Optional<T> getProperty(int x, int y, int z, Direction direction, Class<T> propertyClass) {
-        final Optional<PropertyStore<T>> optional = Sponge.getPropertyRegistry().getStore(propertyClass);
-        return optional.flatMap(tPropertyStore -> tPropertyStore.getFor(new Location<>(this, x, y, z), direction));
+    public Map<Property<?>, ?> getProperties(int x, int y, int z) {
+        return SpongeImpl.getPropertyRegistry().getPropertiesFor(new Location<>(this, x, y, z));
     }
 
     @Override
-    public Collection<Property<?, ?>> getProperties(int x, int y, int z) {
-        return SpongeImpl.getPropertyRegistry().getPropertiesFor(new Location<World>(this, x, y, z));
+    public <V> Optional<V> getProperty(Vector3i coords, Property<V> property) {
+        return SpongeImpl.getPropertyRegistry().getStore(property).getFor(new Location<>(this, coords));
     }
 
     @Override
-    public Collection<Direction> getFacesWithProperty(int x, int y, int z, Class<? extends Property<?, ?>> propertyClass) {
-        final Optional<? extends PropertyStore<? extends Property<?, ?>>> optional = Sponge.getPropertyRegistry().getStore(propertyClass);
-        if (!optional.isPresent()) {
-            return Collections.emptyList();
-        }
-        final PropertyStore<? extends Property<?, ?>> store = optional.get();
-        final Location<World> loc = new Location<>(this, x, y, z);
-        ImmutableList.Builder<Direction> faces = ImmutableList.builder();
+    public <V> Optional<V> getProperty(int x, int y, int z, Property<V> property) {
+        return SpongeImpl.getPropertyRegistry().getStore(property).getFor(new Location<>(this, x, y, z));
+    }
+
+    @Override
+    public <V> Optional<V> getProperty(Vector3i coords, Direction direction, Property<V> property) {
+        return SpongeImpl.getPropertyRegistry().getStore(property).getFor(new Location<>(this, coords), direction);
+    }
+
+    @Override
+    public <V> Optional<V> getProperty(int x, int y, int z, Direction direction, Property<V> property) {
+        return SpongeImpl.getPropertyRegistry().getStore(property).getFor(new Location<>(this, x, y, z), direction);
+    }
+
+    @Override
+    public OptionalDouble getDoubleProperty(Vector3i coords, Property<Double> property) {
+        return SpongeImpl.getPropertyRegistry().getDoubleStore(property).getDoubleFor(new Location<>(this, coords));
+    }
+
+    @Override
+    public OptionalDouble getDoubleProperty(int x, int y, int z, Property<Double> property) {
+        return SpongeImpl.getPropertyRegistry().getDoubleStore(property).getDoubleFor(new Location<>(this, x, y, z));
+    }
+
+    @Override
+    public OptionalInt getIntProperty(Vector3i coords, Property<Integer> property) {
+        return SpongeImpl.getPropertyRegistry().getIntStore(property).getIntFor(new Location<>(this, coords));
+    }
+
+    @Override
+    public OptionalInt getIntProperty(int x, int y, int z, Property<Integer> property) {
+        return SpongeImpl.getPropertyRegistry().getIntStore(property).getIntFor(new Location<>(this, x, y, z));
+    }
+
+    @Override
+    public Collection<Direction> getFacesWithProperty(Vector3i coords, Property<?> property) {
+        final PropertyStore<?> store = Sponge.getPropertyRegistry().getStore(property);
+        final Location<World> loc = new Location<>(this, coords);
+        final ImmutableList.Builder<Direction> faces = ImmutableList.builder();
         for (EnumFacing facing : EnumFacing.values()) {
-            Direction direction = DirectionFacingProvider.getInstance().getKey(facing).get();
+            final Direction direction = DirectionFacingProvider.getInstance().getKey(facing).get();
             if (store.getFor(loc, direction).isPresent()) {
                 faces.add(direction);
             }
         }
         return faces.build();
+    }
+
+    @Override
+    public Collection<Direction> getFacesWithProperty(int x, int y, int z, Property<?> property) {
+        return getFacesWithProperty(new Vector3i(x, y, z), property);
     }
 
     @Override

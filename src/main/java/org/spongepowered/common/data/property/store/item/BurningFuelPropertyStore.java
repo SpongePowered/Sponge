@@ -24,21 +24,22 @@
  */
 package org.spongepowered.common.data.property.store.item;
 
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityFurnace;
-import org.spongepowered.api.data.property.item.BurningFuelProperty;
 import org.spongepowered.common.data.property.store.common.AbstractItemStackPropertyStore;
 
-import java.util.Optional;
+import java.util.OptionalInt;
 
-public class BurningFuelPropertyStore extends AbstractItemStackPropertyStore<BurningFuelProperty> {
+import javax.annotation.Nullable;
+
+public class BurningFuelPropertyStore extends AbstractItemStackPropertyStore.Int {
 
     @Override
-    protected Optional<BurningFuelProperty> getFor(ItemStack itemStack) {
-        final int burnTime = TileEntityFurnace.getItemBurnTime(itemStack);
-        if (burnTime > 0) {
-            return Optional.of(new BurningFuelProperty(burnTime));
+    protected OptionalInt getIntFor(Item item, @Nullable ItemStack itemStack) {
+        if (itemStack == null) {
+            itemStack = new ItemStack(item);
         }
-        return Optional.empty();
+        return OptionalInt.of(TileEntityFurnace.getItemBurnTime(itemStack));
     }
 }

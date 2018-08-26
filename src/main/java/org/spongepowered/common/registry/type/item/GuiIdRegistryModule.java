@@ -24,9 +24,12 @@
  */
 package org.spongepowered.common.registry.type.item;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import com.google.common.collect.ImmutableList;
+import org.spongepowered.api.item.inventory.gui.GuiId;
+import org.spongepowered.api.item.inventory.gui.GuiIds;
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.item.inventory.property.GuiId;
-import org.spongepowered.api.item.inventory.property.GuiIds;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.data.type.SpongeGuiId;

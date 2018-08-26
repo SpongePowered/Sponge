@@ -24,13 +24,15 @@
  */
 package org.spongepowered.common.item.inventory.archetype;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
-import org.spongepowered.api.item.inventory.InventoryProperty;
 import org.spongepowered.common.registry.type.item.InventoryArchetypeRegistryModule;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -40,25 +42,29 @@ import java.util.Set;
 public class SpongeInventoryArchetypeBuilder implements InventoryArchetype.Builder {
 
     private List<InventoryArchetype> types = new ArrayList<>();
-    private Map<String, InventoryProperty<String, ?>> properties = new HashMap<>();
+    private Map<Property<?>, Object> properties = new HashMap<>();
     private Set<Class<? extends InteractInventoryEvent>> events = new HashSet<>();
     private CompositeInventoryArchetype.ContainerProvider containerProvider;
 
     @Override
-    public SpongeInventoryArchetypeBuilder property(InventoryProperty<String, ?> property) {
-        this.properties.put(property.getKey(), property);
+    public <V> SpongeInventoryArchetypeBuilder property(Property<V> property, V value) {
+        checkNotNull(property, "property");
+        checkNotNull(value, "value");
+        this.properties.put(property, value);
         return this;
     }
 
     @Override
     public SpongeInventoryArchetypeBuilder with(InventoryArchetype archetype) {
+        checkNotNull(archetype, "archetype");
         this.types.add(archetype);
         return this;
     }
 
     @Override
     public SpongeInventoryArchetypeBuilder with(InventoryArchetype... archetypes) {
-        Collections.addAll(this.types, archetypes);
+        checkNotNull(archetypes, "archetypes");
+        Arrays.stream(archetypes).forEach(this::with);
         return this;
     }
 

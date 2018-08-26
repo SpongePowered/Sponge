@@ -25,8 +25,8 @@
 package org.spongepowered.common.registry.type.item;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spongepowered.api.data.Property.Operator.DELEGATE;
 
+import com.flowpowered.math.vector.Vector2i;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.entity.IMerchant;
 import net.minecraft.entity.passive.AbstractHorse;
@@ -50,8 +50,9 @@ import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.tileentity.TileEntityHopper;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryArchetypes;
-import org.spongepowered.api.item.inventory.property.GuiIds;
-import org.spongepowered.api.item.inventory.property.InventoryTitle;
+import org.spongepowered.api.item.inventory.InventoryProperties;
+import org.spongepowered.api.item.inventory.gui.GuiIds;
+import org.spongepowered.api.item.inventory.slot.SlotIndex;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
@@ -61,10 +62,6 @@ import org.spongepowered.common.item.inventory.SpongeInventoryBuilder;
 import org.spongepowered.common.item.inventory.archetype.SlotArchetype;
 import org.spongepowered.common.item.inventory.archetype.SpongeInventoryArchetypeBuilder;
 import org.spongepowered.common.item.inventory.custom.CustomInventory;
-import org.spongepowered.common.item.inventory.property.GuiIdPropertyImpl;
-import org.spongepowered.common.item.inventory.property.InventoryDimensionImpl;
-import org.spongepowered.common.item.inventory.property.InventoryTitleImpl;
-import org.spongepowered.common.item.inventory.property.SlotIndexImpl;
 import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.registry.type.text.TextColorRegistryModule;
@@ -94,7 +91,7 @@ public class InventoryArchetypeRegistryModule extends AbstractCatalogRegistryMod
     @SuppressWarnings("rawtypes")
     @Override
     public void registerDefaults() {
-        InventoryArchetype SLOT = new SlotArchetype(ImmutableMap.of(CustomInventory.INVENTORY_DIMENSION, new InventoryDimensionImpl(1, 1)));
+        InventoryArchetype SLOT = new SlotArchetype(ImmutableMap.of(InventoryProperties.DIMENSION, new Vector2i(1, 1)));
         register(SLOT);
         InventoryArchetype MENU_ROW;
         InventoryArchetype MENU_COLUMN;
@@ -121,72 +118,72 @@ public class InventoryArchetypeRegistryModule extends AbstractCatalogRegistryMod
         for (int i = 0; i < 9; i++) {
             builder.with(new SpongeInventoryArchetypeBuilder()
                 .from(SLOT)
-                .property(new SlotIndexImpl(i))
+                .property(InventoryProperties.SLOT_INDEX, SlotIndex.of(i))
                 .build("minecraft:slot" + i, "Slot"));
         }
-        MENU_ROW = builder.property(new InventoryDimensionImpl(9, 1))
+        MENU_ROW = builder.property(InventoryProperties.DIMENSION, new Vector2i(9, 1))
             .build("sponge:menu_row", "Menu Row");
 
-        MENU_COLUMN = builder.property(new InventoryDimensionImpl(9, 1))
+        MENU_COLUMN = builder.property(InventoryProperties.DIMENSION, new Vector2i(9, 1))
             .build("sponge:menu_column", "Menu Column");
 
         MENU_GRID = builder.reset()
             .with(MENU_ROW)
             .with(MENU_ROW)
             .with(MENU_ROW)
-            .property(new InventoryDimensionImpl(9, 3))
+            .property(InventoryProperties.DIMENSION, new Vector2i(9, 3))
             .build("sponge:menu_grid", "Menu Grid");
 
         CHEST = builder.reset()
             .with(MENU_GRID)
-            .property(InventoryTitle.of(Text.of(new SpongeTranslation("container.chest")), DELEGATE))
-            .property(new GuiIdPropertyImpl(GuiIds.CHEST, DELEGATE))
+            .property(InventoryProperties.TITLE, Text.of(new SpongeTranslation("container.chest")))
+            .property(InventoryProperties.GUI_ID, GuiIds.CHEST)
             .container((i, p) -> new ContainerChest(p.inventory, i, p))
             .build("minecraft:chest", "Chest");
 
         DOUBLE_CHEST = builder.reset()
             .with(CHEST)
-            .property(new InventoryDimensionImpl(9, 6))
-            .property(InventoryTitle.of(Text.of(new SpongeTranslation("container.chestDouble")), DELEGATE))
-            .property(new GuiIdPropertyImpl(GuiIds.CHEST, DELEGATE))
+            .property(InventoryProperties.DIMENSION, new Vector2i(9, 6))
+            .property(InventoryProperties.TITLE, Text.of(new SpongeTranslation("container.chestDouble")))
+            .property(InventoryProperties.GUI_ID, GuiIds.CHEST)
             .container((i, p) -> new ContainerChest(p.inventory, i, p))
             .build("minecraft:double_chest", "DoubleChest");
 
         FURNACE = builder.reset()
             .with(new SpongeInventoryArchetypeBuilder()
                 .from(SLOT)
-                .property(new SlotIndexImpl(0, DELEGATE))
+                .property(InventoryProperties.SLOT_INDEX, SlotIndex.of(0))
                 .build("minecraft:furnace_input", "FurnaceInput"))
             .with(new SpongeInventoryArchetypeBuilder()
                 .from(SLOT)
-                .property(new SlotIndexImpl(1, DELEGATE))
+                .property(InventoryProperties.SLOT_INDEX, SlotIndex.of(1))
                 .build("minecraft:furnace_fuel", "FurnaceFuel"))
             .with(new SpongeInventoryArchetypeBuilder()
                 .from(SLOT)
-                .property(new SlotIndexImpl(2, DELEGATE))
+                .property(InventoryProperties.SLOT_INDEX, SlotIndex.of(2))
                 .build("minecraft:furnace_output", "FurnaceOutput"))
-            .property(new InventoryTitleImpl(Text.of(new SpongeTranslation("container.furnace")), DELEGATE))
-            .property(new InventoryDimensionImpl(3, 1))
-            .property(new GuiIdPropertyImpl(GuiIds.FURNACE, DELEGATE))
+            .property(InventoryProperties.TITLE, Text.of(new SpongeTranslation("container.furnace")))
+            .property(InventoryProperties.DIMENSION, new Vector2i(3, 1))
+            .property(InventoryProperties.GUI_ID, GuiIds.FURNACE)
             .container((i, p) -> new ContainerFurnace(p.inventory, i))
             .build("minecraft:furnace", "Furnace");
 
         DISPENSER = builder.reset()
             .with(MENU_GRID)
-            .property(new InventoryDimensionImpl(3, 3))
-            .property(InventoryTitle.of(Text.of(new SpongeTranslation("container.dispenser")), DELEGATE))
-            .property(new GuiIdPropertyImpl(GuiIds.DISPENSER, DELEGATE))
+            .property(InventoryProperties.DIMENSION, new Vector2i(3, 3))
+            .property(InventoryProperties.TITLE, Text.of(new SpongeTranslation("container.dispenser")))
+            .property(InventoryProperties.GUI_ID, GuiIds.DISPENSER)
             .container((i, p) -> new ContainerDispenser(p.inventory, i))
             .build("minecraft:dispenser", "Dispenser");
 
         WORKBENCH = builder.reset()
             .with(new SpongeInventoryArchetypeBuilder()
                 .from(MENU_GRID)
-                .property(new InventoryDimensionImpl(3, 3))
+                .property(InventoryProperties.DIMENSION, new Vector2i(3, 3))
                 .build("minecraft:workbench_grid", "Workbench Grid"))
             .with(SLOT)
-            .property(InventoryTitle.of(Text.of(new SpongeTranslation("container.crafting")), DELEGATE))
-            .property(new GuiIdPropertyImpl(GuiIds.CRAFTING_TABLE, DELEGATE))
+            .property(InventoryProperties.TITLE, Text.of(new SpongeTranslation("container.crafting")))
+            .property(InventoryProperties.GUI_ID, GuiIds.CRAFTING_TABLE)
             .container((i, p) -> {
                 ContainerWorkbench container = new ContainerWorkbench(p.inventory, p.getEntityWorld(), p.getPosition());
                 // Pre-Fills the container input with the items from the inventory
@@ -200,34 +197,34 @@ public class InventoryArchetypeRegistryModule extends AbstractCatalogRegistryMod
 
         BREWING_STAND = builder.reset()
             .with(MENU_ROW)
-            .property(new InventoryDimensionImpl(5, 1))
-            .property(InventoryTitle.of(Text.of(new SpongeTranslation("container.brewing")), DELEGATE))
-            .property(new GuiIdPropertyImpl(GuiIds.BREWING_STAND, DELEGATE))
+            .property(InventoryProperties.DIMENSION, new Vector2i(5, 1))
+            .property(InventoryProperties.TITLE, Text.of(new SpongeTranslation("container.brewing")))
+            .property(InventoryProperties.GUI_ID, GuiIds.BREWING_STAND)
             .container((i, p) -> new ContainerBrewingStand(p.inventory, i))
             .build("minecraft:brewing_stand", "BrewingStand");
 
         HOPPER = builder.reset()
             .with(MENU_ROW)
-            .property(new InventoryDimensionImpl(5, 1))
-            .property(InventoryTitle.of(Text.of(new SpongeTranslation("container.hopper")), DELEGATE))
-            .property(new GuiIdPropertyImpl(GuiIds.HOPPER, DELEGATE))
+            .property(InventoryProperties.DIMENSION, new Vector2i(5, 1))
+            .property(InventoryProperties.TITLE, Text.of(new SpongeTranslation("container.hopper")))
+            .property(InventoryProperties.GUI_ID, GuiIds.HOPPER)
             .container((i, p) -> new ContainerHopper(p.inventory, i, p))
             .build("minecraft:hopper", "Hopper");
 
         BEACON = builder.reset()
             .with(SLOT)
-            .property(new InventoryDimensionImpl(1, 1))
-            .property(InventoryTitle.of(Text.of(new SpongeTranslation("container.beacon")), DELEGATE))
-            .property(new GuiIdPropertyImpl(GuiIds.BEACON, DELEGATE))
+            .property(InventoryProperties.DIMENSION, new Vector2i(1, 1))
+            .property(InventoryProperties.TITLE, Text.of(new SpongeTranslation("container.beacon")))
+            .property(InventoryProperties.GUI_ID, GuiIds.BEACON)
             .container((i, p) -> new ContainerBeacon(p.inventory, i))
             .build("minecraft:beacon", "Beacon");
 
         ENCHANTING_TABLE = builder.reset()
             .with(SLOT)
             .with(SLOT)
-            .property(new InventoryDimensionImpl(2, 1))
-            .property(InventoryTitle.of(Text.of(new SpongeTranslation("container.enchant")), DELEGATE))
-            .property(new GuiIdPropertyImpl(GuiIds.ENCHANTING_TABLE, DELEGATE))
+            .property(InventoryProperties.DIMENSION, new Vector2i(2, 1))
+            .property(InventoryProperties.TITLE, Text.of(new SpongeTranslation("container.enchant")))
+            .property(InventoryProperties.GUI_ID, GuiIds.ENCHANTING_TABLE)
             .container((i, p) -> {
                 ContainerEnchantment container = new ContainerEnchantment(p.inventory, p.getEntityWorld(), p.getPosition());
                 // Pre-Fills the container with the items from the inventory
@@ -243,9 +240,9 @@ public class InventoryArchetypeRegistryModule extends AbstractCatalogRegistryMod
             .with(SLOT)
             .with(SLOT)
             .with(SLOT)
-            .property(new InventoryDimensionImpl(3, 1))
-            .property(InventoryTitle.of(Text.of(new SpongeTranslation("container.repair")), DELEGATE))
-            .property(new GuiIdPropertyImpl(GuiIds.ANVIL, DELEGATE))
+            .property(InventoryProperties.DIMENSION, new Vector2i(3, 1))
+            .property(InventoryProperties.TITLE, Text.of(new SpongeTranslation("container.repair")))
+            .property(InventoryProperties.GUI_ID, GuiIds.ANVIL)
             .container((i, p) -> {
                 ContainerRepair container = new ContainerRepair(p.inventory, p.getEntityWorld(), p.getPosition(), p);
                 // Pre-Fills the container input with the items from the inventory
@@ -261,8 +258,8 @@ public class InventoryArchetypeRegistryModule extends AbstractCatalogRegistryMod
             .with(SLOT)
             .with(SLOT)
             .with(SLOT)
-            .property(new InventoryDimensionImpl(3, 1))
-            .property(new GuiIdPropertyImpl(GuiIds.VILLAGER, DELEGATE))
+            .property(InventoryProperties.DIMENSION, new Vector2i(3, 1))
+            .property(InventoryProperties.GUI_ID, GuiIds.VILLAGER)
                 .container((i, p) -> {
                     if (i instanceof CarriedInventory
                             && ((CarriedInventory) i).getCarrier().isPresent()
@@ -278,8 +275,8 @@ public class InventoryArchetypeRegistryModule extends AbstractCatalogRegistryMod
         HORSE = builder.reset()
             .with(SLOT)
             .with(SLOT)
-            .property(new InventoryDimensionImpl(2, 1))
-            .property(new GuiIdPropertyImpl(GuiIds.HORSE, DELEGATE)) // hardcoded openGuiHorseInventory
+            .property(InventoryProperties.DIMENSION, new Vector2i(2, 1))
+            .property(InventoryProperties.GUI_ID, GuiIds.HORSE) // hardcoded openGuiHorseInventory
                 .container((i, p) -> {
                     if (i instanceof CarriedInventory
                             && ((CarriedInventory) i).getCarrier().isPresent()
@@ -295,10 +292,10 @@ public class InventoryArchetypeRegistryModule extends AbstractCatalogRegistryMod
             .with(HORSE)
             .with(new SpongeInventoryArchetypeBuilder()
                 .from(MENU_GRID)
-                .property(new InventoryDimensionImpl(5,3))
+                .property(InventoryProperties.DIMENSION, new Vector2i(5,3))
                 .build("horse_grid", "HorseGrid"))
             // TODO Size
-            .property(new GuiIdPropertyImpl(GuiIds.HORSE, DELEGATE)) // hardcoded openGuiHorseInventory
+            .property(InventoryProperties.GUI_ID, GuiIds.HORSE) // hardcoded openGuiHorseInventory
             .container((i, p) -> {
                 if (i instanceof CarriedInventory
                         && ((CarriedInventory) i).getCarrier().isPresent()
@@ -315,28 +312,28 @@ public class InventoryArchetypeRegistryModule extends AbstractCatalogRegistryMod
             .with(SLOT)
             .with(new SpongeInventoryArchetypeBuilder()
                 .from(MENU_GRID)
-                .property(new InventoryDimensionImpl(2, 2))
+                .property(InventoryProperties.DIMENSION, new Vector2i(2, 2))
                 .build("minecraft:crafting_grid", "Crafting Grid"))
-            .property(InventoryTitle.of(Text.of(new SpongeTranslation("container.crafting")), DELEGATE))
+            .property(InventoryProperties.TITLE, Text.of(new SpongeTranslation("container.crafting")))
             .build("minecraft:crafting", "Crafting");
 
         PLAYER = builder.reset()
             .with(CRAFTING)
             .with(new SpongeInventoryArchetypeBuilder()
                 .from(MENU_GRID)
-                .property(new InventoryDimensionImpl(1, 4))
+                .property(InventoryProperties.DIMENSION, new Vector2i(1, 4))
                 .build("minecraft:armor", "Armor"))
             .with(new SpongeInventoryArchetypeBuilder()
                 .from(MENU_GRID)
-                .property(new InventoryDimensionImpl(9, 3))
+                .property(InventoryProperties.DIMENSION, new Vector2i(9, 3))
                 .build("minecraft:player_main", "Player Main"))
             .with(new SpongeInventoryArchetypeBuilder()
                 .from(MENU_GRID)
-                .property(new InventoryDimensionImpl(9, 1))
+                .property(InventoryProperties.DIMENSION, new Vector2i(9, 1))
                 .build("minecraft:player_hotbar", "Player Hotbar"))
             .with(new SpongeInventoryArchetypeBuilder()
                 .from(SLOT)
-                .property(new InventoryDimensionImpl(1, 1))
+                .property(InventoryProperties.DIMENSION, new Vector2i(1, 1))
                 .build("minecraft:player_offhand", "Player Offhand"))
             .build("minecraft:player", "Player");
 

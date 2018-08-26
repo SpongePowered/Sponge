@@ -138,7 +138,7 @@ public class BasicInventoryAdapter implements MinecraftInventoryAdapter {
         this.slots().forEach(Inventory::clear);
     }
 
-    public static Optional<Slot> forSlot(Fabric inv, SlotLens slotLens, Inventory parent) {
+    public static Optional<Slot> forSlot(Fabric inv, @Nullable SlotLens slotLens, Inventory parent) {
         return slotLens == null ? Optional.<Slot>empty() : Optional.<Slot>ofNullable((Slot) slotLens.getAdapter(inv, parent));
     }
 

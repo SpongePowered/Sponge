@@ -45,7 +45,6 @@ import org.spongepowered.api.entity.Tamer;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
@@ -63,6 +62,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -415,9 +415,9 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
     private Optional<ItemStack> getEquippedItem(EquipmentType type) {
         if (type instanceof SpongeEquipmentType) {
-            EntityEquipmentSlot[] slots = ((SpongeEquipmentType) type).getSlots();
-            if (slots.length == 1) {
-                net.minecraft.item.ItemStack nmsItem = this.getItemStackFromSlot(slots[0]);
+            List<EntityEquipmentSlot> slots = ((SpongeEquipmentType) type).getSlots();
+            if (slots.size() == 1) {
+                net.minecraft.item.ItemStack nmsItem = this.getItemStackFromSlot(slots.get(0));
                 if (!nmsItem.isEmpty()) {
                     return Optional.of(ItemStackUtil.fromNative(nmsItem));
                 }
@@ -428,7 +428,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
     private void setEquippedItem(EquipmentType type, ItemStack item) {
         if (type instanceof SpongeEquipmentType) {
-            EntityEquipmentSlot[] slots = ((SpongeEquipmentType) type).getSlots();
+            List<EntityEquipmentSlot> slots = ((SpongeEquipmentType) type).getSlots();
             for (EntityEquipmentSlot slot : slots) {
                 this.setItemStackToSlot(slot, ItemStackUtil.toNative(item));
                 // TODO check canequip

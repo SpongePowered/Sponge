@@ -25,32 +25,29 @@
 package org.spongepowered.common.data.property.store.block;
 
 import net.minecraft.util.EnumFacing;
-import org.spongepowered.api.data.property.block.IndirectlyPoweredProperty;
-import org.spongepowered.api.util.Direction;
+import net.minecraft.util.math.BlockPos;
+import org.spongepowered.api.util.OptBool;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.data.property.store.common.AbstractSpongePropertyStore;
+import org.spongepowered.common.data.property.store.common.AbstractLocationPropertyStore;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.Optional;
 
-public class IndirectlyPoweredPropertyStore extends AbstractSpongePropertyStore<IndirectlyPoweredProperty> {
+import javax.annotation.Nullable;
 
-    private static final IndirectlyPoweredProperty TRUE = new IndirectlyPoweredProperty(true);
-    private static final IndirectlyPoweredProperty FALSE = new IndirectlyPoweredProperty(false);
-
-    @Override
-    public Optional<IndirectlyPoweredProperty> getFor(Location<World> location) {
-        final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
-        final boolean powered = world.getRedstonePowerFromNeighbors(VecHelper.toBlockPos(location)) > 0;
-        return Optional.of(powered ? TRUE : FALSE);
-    }
+public class IndirectlyPoweredPropertyStore extends AbstractLocationPropertyStore.Generic<Boolean> {
 
     @Override
-    public Optional<IndirectlyPoweredProperty> getFor(Location<World> location, Direction direction) {
+    protected Optional<Boolean> getFor(Location<World> location, @Nullable EnumFacing facing) {
         final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
-        final EnumFacing facing = toEnumFacing(direction);
-        final boolean powered = world.getRedstonePower(VecHelper.toBlockPos(location).offset(facing), facing) > 0;
-        return Optional.of(powered ? TRUE : FALSE);
+        final BlockPos pos = VecHelper.toBlockPos(location);
+        final boolean powered;
+        if (facing != null) {
+            powered = world.getRedstonePower(pos.offset(facing), facing) > 0;
+        } else {
+            powered = world.getRedstonePowerFromNeighbors(pos) > 0;
+        }
+        return OptBool.of(powered);
     }
 }

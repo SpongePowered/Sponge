@@ -24,17 +24,18 @@
  */
 package org.spongepowered.common.item.inventory;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryArchetypes;
-import org.spongepowered.api.item.inventory.InventoryProperty;
 import org.spongepowered.common.item.inventory.custom.CustomInventory;
-import org.spongepowered.common.item.inventory.property.AbstractInventoryProperty;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,7 +57,7 @@ public class SpongeInventoryBuilder implements Inventory.Builder {
     }
 
     private InventoryArchetype archetype;
-    private Map<String, InventoryProperty<?, ?>> properties = new HashMap<>();
+    private Map<Property<?>, Object> properties = new HashMap<>();
     private Map<Class<? extends InteractInventoryEvent>, List<Consumer<? extends InteractInventoryEvent>>> listeners = new HashMap<>();
     private Carrier carrier;
 
@@ -66,20 +67,16 @@ public class SpongeInventoryBuilder implements Inventory.Builder {
 
     @Override
     public Inventory.Builder of(InventoryArchetype archetype) {
+        checkNotNull(archetype, "archetype");
         this.archetype = archetype;
         return this;
     }
 
     @Override
-    public Inventory.Builder property(String name, InventoryProperty<?, ?> property) {
-        this.properties.put(name, property);
-        return this;
-    }
-
-    @Override
-    public Inventory.Builder property(InventoryProperty<?, ?> property) {
-        Object key = AbstractInventoryProperty.getDefaultKey(property.getClass());
-        this.property(key.toString(), property);
+    public <V> Inventory.Builder property(Property<V> property, V value) {
+        checkNotNull(property, "property");
+        checkNotNull(value, "value");
+        this.properties.put(property, value);
         return this;
     }
 

@@ -24,19 +24,17 @@
  */
 package org.spongepowered.common.item.inventory.adapter.impl.comp;
 
+import org.spongepowered.api.data.property.PropertyMatcher;
 import org.spongepowered.api.entity.Equipable;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.Slot;
+import org.spongepowered.api.item.inventory.*;
 import org.spongepowered.api.item.inventory.equipment.EquipmentInventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
-import org.spongepowered.api.item.inventory.property.EquipmentSlotType;
-import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.common.item.inventory.adapter.impl.BasicInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.comp.EquipmentInventoryLens;
 
+import java.util.List;
 import java.util.Optional;
 
 public class EquipmentInventoryAdapter extends BasicInventoryAdapter implements EquipmentInventory {
@@ -54,70 +52,34 @@ public class EquipmentInventoryAdapter extends BasicInventoryAdapter implements 
     }
 
     @Override
-    public Optional<ItemStack> poll(EquipmentSlotType equipmentType) {
-        Inventory r = this.query(QueryOperationTypes.INVENTORY_PROPERTY.of(equipmentType));
-        return r.capacity() == 0 ? Optional.empty() : Optional.of(r.poll());
-    }
-
-    @Override
-    public Optional<ItemStack> poll(EquipmentSlotType equipmentType, int limit) {
-        Inventory r = this.query(QueryOperationTypes.INVENTORY_PROPERTY.of(equipmentType));
-        return r.capacity() == 0 ? Optional.empty() : Optional.of(r.poll(limit));
-    }
-
-    @Override
     public Optional<ItemStack> poll(EquipmentType equipmentType) {
-        return this.poll(EquipmentSlotType.of(equipmentType));
+        return getSlot(equipmentType).map(Inventory::poll);
     }
 
     @Override
     public Optional<ItemStack> poll(EquipmentType equipmentType, int limit) {
-        return this.poll(EquipmentSlotType.of(equipmentType), limit);
-    }
-
-    @Override
-    public Optional<ItemStack> peek(EquipmentSlotType equipmentType) {
-        Inventory r = this.query(QueryOperationTypes.INVENTORY_PROPERTY.of(equipmentType));
-        return r.capacity() == 0 ? Optional.empty() : Optional.of(r.peek());
-    }
-
-    @Override
-    public Optional<ItemStack> peek(EquipmentSlotType equipmentType, int limit) {
-        Inventory r = this.query(QueryOperationTypes.INVENTORY_PROPERTY.of(equipmentType));
-        return r.capacity() == 0 ? Optional.empty() : Optional.of(r.peek(limit));
+        return getSlot(equipmentType).map(slot -> slot.poll(limit));
     }
 
     @Override
     public Optional<ItemStack> peek(EquipmentType equipmentType) {
-        return this.peek(EquipmentSlotType.of(equipmentType));
+        return getSlot(equipmentType).map(Inventory::peek);
     }
 
     @Override
     public Optional<ItemStack> peek(EquipmentType equipmentType, int limit) {
-        return this.peek(EquipmentSlotType.of(equipmentType), limit);
-    }
-
-    @Override
-    public InventoryTransactionResult set(EquipmentSlotType equipmentType, ItemStack stack) {
-        return this.query(QueryOperationTypes.INVENTORY_PROPERTY.of(equipmentType)).set(stack);
+        return getSlot(equipmentType).map(slot -> slot.peek(limit));
     }
 
     @Override
     public InventoryTransactionResult set(EquipmentType equipmentType, ItemStack stack) {
-        return this.set(EquipmentSlotType.of(equipmentType), stack);
-    }
-
-    @Override
-    public Optional<Slot> getSlot(EquipmentSlotType equipmentType) {
-        Inventory slot = this.query(QueryOperationTypes.INVENTORY_PROPERTY.of(equipmentType));
-        if (slot instanceof Slot) {
-            return Optional.of(((Slot) slot));
-        }
-        return Optional.empty();
+        return getSlot(equipmentType).map(slot -> slot.set(stack)).orElseGet(() ->
+                InventoryTransactionResult.builder().type(InventoryTransactionResult.Type.FAILURE).reject(stack).build());
     }
 
     @Override
     public Optional<Slot> getSlot(EquipmentType equipmentType) {
-        return this.getSlot(EquipmentSlotType.of(equipmentType));
+        final List<Slot> slots = query(PropertyMatcher.of(InventoryProperties.EQUIPMENT_TYPE, equipmentType)).slots();
+        return slots.isEmpty() ? Optional.empty() : Optional.of(slots.get(0));
     }
 }

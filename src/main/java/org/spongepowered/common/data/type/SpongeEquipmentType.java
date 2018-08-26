@@ -24,22 +24,43 @@
  */
 package org.spongepowered.common.data.type;
 
+import com.google.common.collect.ImmutableList;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.common.SpongeCatalogType;
 
+import java.util.List;
+import java.util.function.Predicate;
+
 public class SpongeEquipmentType extends SpongeCatalogType implements EquipmentType {
 
-    private EntityEquipmentSlot[] slots;
+    private final List<EntityEquipmentSlot> slots;
+    private final Predicate<EquipmentType> includesTester;
+
+    public SpongeEquipmentType(String id, Predicate<EquipmentType> includesTester) {
+        super(CatalogKey.minecraft(id), id);
+        this.includesTester = includesTester;
+        this.slots = ImmutableList.of();
+    }
 
     public SpongeEquipmentType(final String id, EntityEquipmentSlot... slots) {
         super(CatalogKey.minecraft(id), id);
-        this.slots = slots;
+        this.slots = ImmutableList.copyOf(slots);
+        this.includesTester = other -> {
+            if (other == this) {
+                return true;
+            }
+            return this.slots.containsAll(((SpongeEquipmentType) other).slots);
+        };
     }
 
-    public EntityEquipmentSlot[] getSlots() {
+    public List<EntityEquipmentSlot> getSlots() {
         return this.slots;
     }
 
+    @Override
+    public boolean includes(EquipmentType other) {
+        return this.includesTester.test(other);
+    }
 }

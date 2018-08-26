@@ -26,20 +26,16 @@ package org.spongepowered.common.data.property.store.item;
 
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.property.item.UseLimitProperty;
 import org.spongepowered.common.data.property.store.common.AbstractItemStackPropertyStore;
 
-import java.util.Optional;
+import java.util.OptionalInt;
 
-public class UseLimitPropertyStore extends AbstractItemStackPropertyStore<UseLimitProperty> {
+import javax.annotation.Nullable;
+
+public class UseLimitPropertyStore extends AbstractItemStackPropertyStore.Int {
 
     @Override
-    protected Optional<UseLimitProperty> getFor(ItemStack itemStack) {
-        final Item item = itemStack.getItem();
-        if (item.isDamageable()) {
-            return Optional.of(new UseLimitProperty(item.getMaxDamage()));
-        }
-        return Optional.empty();
+    protected OptionalInt getIntFor(Item item, @Nullable ItemStack itemStack) {
+        return item.isDamageable() ? OptionalInt.of(item.getMaxDamage()) : OptionalInt.empty();
     }
-
 }

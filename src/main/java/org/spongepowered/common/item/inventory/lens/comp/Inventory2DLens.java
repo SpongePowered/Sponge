@@ -24,9 +24,8 @@
  */
 package org.spongepowered.common.item.inventory.lens.comp;
 
-import org.spongepowered.api.item.inventory.property.SlotPos;
+import com.flowpowered.math.vector.Vector2i;
 import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.lens.impl.AbstractLens;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 
 public interface Inventory2DLens extends Lens {
@@ -37,6 +36,6 @@ public interface Inventory2DLens extends Lens {
 
     int getStride();
 
-    SlotLens getSlot(SlotPos pos);
+    SlotLens getSlot(Vector2i pos);
 
 }

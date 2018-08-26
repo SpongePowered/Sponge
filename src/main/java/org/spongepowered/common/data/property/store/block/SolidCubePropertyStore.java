@@ -24,12 +24,9 @@
  */
 package org.spongepowered.common.data.property.store.block;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import org.spongepowered.api.data.property.block.SolidCubeProperty;
+import org.spongepowered.api.util.OptBool;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.common.data.property.store.common.AbstractBlockPropertyStore;
 
@@ -37,27 +34,14 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-public class SolidCubePropertyStore extends AbstractBlockPropertyStore<SolidCubeProperty> {
-
-    protected static final SolidCubeProperty TRUE = new SolidCubeProperty(true);
-    protected static final SolidCubeProperty FALSE = new SolidCubeProperty(false);
+public class SolidCubePropertyStore extends AbstractBlockPropertyStore.Generic<Boolean> {
 
     public SolidCubePropertyStore() {
         super(true);
     }
 
     @Override
-    protected Optional<SolidCubeProperty> getForBlock(@Nullable Location<?> location, IBlockState block) {
-        return Optional.of(block.getMaterial().isSolid() ? TRUE : FALSE);
+    protected Optional<Boolean> getForBlock(@Nullable Location<?> location, IBlockState block, @Nullable EnumFacing facing) {
+        return OptBool.of(block.getMaterial().isSolid());
     }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    protected Optional<SolidCubeProperty> getForDirection(World world, int x, int y, int z, EnumFacing facing) {
-        BlockPos pos = new BlockPos(x, y, z);
-        IBlockState state = world.getBlockState(pos);
-        Block block = state.getBlock();
-        return Optional.of(block.getMaterial(state).isSolid() ? TRUE : FALSE);
-    }
-
 }

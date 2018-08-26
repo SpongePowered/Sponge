@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.item.inventory.custom;
 
+import com.flowpowered.math.vector.Vector2i;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
@@ -33,27 +34,23 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.IInteractionObject;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
-import org.spongepowered.api.item.inventory.InventoryProperty;
-import org.spongepowered.api.item.inventory.property.GuiId;
-import org.spongepowered.api.item.inventory.property.GuiIdProperty;
-import org.spongepowered.api.item.inventory.property.GuiIds;
-import org.spongepowered.api.item.inventory.property.InventoryCapacity;
-import org.spongepowered.api.item.inventory.property.InventoryDimension;
-import org.spongepowered.api.item.inventory.property.InventoryTitle;
+import org.spongepowered.api.item.inventory.InventoryProperties;
+import org.spongepowered.api.item.inventory.gui.GuiId;
+import org.spongepowered.api.item.inventory.gui.GuiIds;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.TranslatableText;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.common.data.type.SpongeGuiId;
 import org.spongepowered.common.item.inventory.archetype.CompositeInventoryArchetype;
-import org.spongepowered.common.item.inventory.property.AbstractInventoryProperty;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -61,20 +58,16 @@ import java.util.function.Consumer;
 
 public class CustomInventory implements IInventory, IInteractionObject {
 
-    public static final String INVENTORY_CAPACITY = InventoryCapacity.class.getSimpleName().toLowerCase(Locale.ENGLISH);
-    public static final String INVENTORY_DIMENSION = InventoryDimension.class.getSimpleName().toLowerCase(Locale.ENGLISH);
-    public static final String TITLE = InventoryTitle.class.getSimpleName().toLowerCase(Locale.ENGLISH);
-
     private InventoryBasic inv;
     protected InventoryArchetype archetype;
-    private Map<String, InventoryProperty<?, ?>> properties;
+    private Map<Property<?>, Object> properties;
     private Carrier carrier;
     private final boolean isVirtual;
 
     private Set<EntityPlayer> viewers = new HashSet<>();
 
     @SuppressWarnings("deprecation")
-    public CustomInventory(InventoryArchetype archetype, Map<String, InventoryProperty<?, ?>> properties, Carrier carrier,
+    public CustomInventory(InventoryArchetype archetype, Map<Property<?>, Object> properties, Carrier carrier,
             Map<Class<? extends InteractInventoryEvent>, List<Consumer<? extends InteractInventoryEvent>>> listeners, boolean isVirtual,
             PluginContainer plugin) {
         this.archetype = archetype;
@@ -83,20 +76,20 @@ public class CustomInventory implements IInventory, IInteractionObject {
         this.isVirtual = isVirtual;
 
         int count;
-        InventoryDimension size = (InventoryDimension)properties.get(INVENTORY_DIMENSION); // TODO INVENTORY_CAPACITY
+        Vector2i size = (Vector2i) properties.get(InventoryProperties.DIMENSION); // TODO INVENTORY_CAPACITY
         if (size != null) {
-            count = size.getColumns() * size.getRows();
+            count = size.getX() * size.getY();
         } else {
             count = getSlotCount(archetype);
         }
 
-        InventoryTitle titleProperty = (InventoryTitle) properties.getOrDefault(TITLE, archetype.getProperty(TITLE).orElse(null));
-        boolean isCustom = !(titleProperty != null && titleProperty.getValue() instanceof TranslatableText);
+        Text title = (Text) properties.getOrDefault(InventoryProperties.TITLE, archetype.getProperty(InventoryProperties.TITLE).orElse(null));
+        boolean isCustom = !(title instanceof TranslatableText); // TODO: Check minecraft/custom translation
 
-        String title = titleProperty == null ? "" :
-                isCustom ? TextSerializers.LEGACY_FORMATTING_CODE.serialize(titleProperty.getValue())
-                        : ((TranslatableText) titleProperty.getValue()).getTranslation().getId();
-        this.inv = new InventoryBasic(title, isCustom, count);
+        String legacyTitle = title == null ? "" :
+                isCustom ? TextSerializers.LEGACY_FORMATTING_CODE.serialize(title)
+                        : ((TranslatableText) title).getTranslation().getId();
+        this.inv = new InventoryBasic(legacyTitle, isCustom, count);
 
         // Updates the Inventory for all viewers on any change
         this.inv.addInventoryChangeListener(i -> this.viewers.forEach(v -> {
@@ -109,13 +102,13 @@ public class CustomInventory implements IInventory, IInteractionObject {
     }
 
     private static int getSlotCount(InventoryArchetype archetype) {
-        Optional<InventoryDimension> dimension = archetype.getProperty(InventoryDimension.class, INVENTORY_DIMENSION);
+        Optional<Vector2i> dimension = archetype.getProperty(InventoryProperties.DIMENSION);
         if (dimension.isPresent()) {
-            return dimension.get().getColumns() * dimension.get().getRows();
+            return dimension.get().getX() * dimension.get().getY();
         }
-        Optional<InventoryCapacity> capacity = archetype.getProperty(InventoryCapacity.class, INVENTORY_CAPACITY);
+        Optional<Integer> capacity = archetype.getProperty(InventoryProperties.CAPACITY);
         if (capacity.isPresent()) {
-            return capacity.get().getValue();
+            return capacity.get();
         }
 
         int count = 0;
@@ -159,15 +152,14 @@ public class CustomInventory implements IInventory, IInteractionObject {
 
     @Override
     public String getGuiID() {
-        String key = AbstractInventoryProperty.getDefaultKey(GuiIdProperty.class).toString();
-        InventoryProperty<?, ?> property = this.properties.get(key);
-        if (property instanceof GuiIdProperty) {
-            if (property.getValue() instanceof SpongeGuiId) {
-                return ((SpongeGuiId) property.getValue()).getInternalId(); // Handle Vanilla EntityHorse GuiId
+        GuiId guiId = (GuiId) this.properties.get(InventoryProperties.GUI_ID);
+        if (guiId != null) {
+            if (guiId instanceof SpongeGuiId) {
+                return ((SpongeGuiId) guiId).getInternalId(); // Handle Vanilla EntityHorse GuiId
             }
-            return ((GuiIdProperty) property).getValue().getKey().toString();
+            return guiId.getKey().toString();
         }
-        GuiId guiId = this.archetype.getProperty(GuiIdProperty.class, key).map(GuiIdProperty::getValue).orElse(GuiIds.CHEST);
+        guiId = this.archetype.getProperty(InventoryProperties.GUI_ID).orElse(GuiIds.CHEST);
         if (guiId instanceof SpongeGuiId) {
             return ((SpongeGuiId) guiId).getInternalId(); // Handle Vanilla EntityHorse GuiId
         }
@@ -273,7 +265,7 @@ public class CustomInventory implements IInventory, IInteractionObject {
         this.inv.clear();
     }
 
-    public Map<String, InventoryProperty<?, ?>> getProperties() {
+    public Map<Property<?>, ?> getProperties() {
         return this.properties;
     }
 

@@ -26,6 +26,7 @@ package org.spongepowered.test.inventory;
 
 import com.google.common.base.Preconditions;
 import org.slf4j.Logger;
+import org.spongepowered.api.data.property.PropertyMatcher;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.filter.cause.Root;
@@ -33,11 +34,11 @@ import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.InventoryProperties;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.entity.Hotbar;
-import org.spongepowered.api.item.inventory.property.SlotIndex;
-import org.spongepowered.api.item.inventory.property.SlotPos;
 import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
+import org.spongepowered.api.item.inventory.slot.SlotIndex;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.GridInventory;
 import org.spongepowered.api.item.inventory.type.InventoryColumn;
@@ -84,7 +85,7 @@ public class InventorySetOpsTest {
 
     private void testIntersect() {
         Inventory chest = Inventory.builder().build(this);
-        Inventory firstSlots = chest.query(QueryOperationTypes.INVENTORY_PROPERTY.of(SlotIndex.of(0)));
+        Inventory firstSlots = chest.query(PropertyMatcher.of(InventoryProperties.SLOT_INDEX, SlotIndex.of(0)));
         Inventory firstRow = chest.query(QueryOperationTypes.INVENTORY_TYPE.of(InventoryRow.class)).children().get(0);
         Inventory firstCol = chest.query(QueryOperationTypes.INVENTORY_TYPE.of(InventoryColumn.class)).children().get(0);
         Inventory intersection = firstSlots.intersect(firstCol).intersect(firstRow);
@@ -94,7 +95,7 @@ public class InventorySetOpsTest {
     private void testUnion() {
 
         Inventory chest = Inventory.builder().build(this);
-        Inventory firstSlots = chest.query(QueryOperationTypes.INVENTORY_PROPERTY.of(SlotIndex.of(0)));
+        Inventory firstSlots = chest.query(PropertyMatcher.of(InventoryProperties.SLOT_INDEX, SlotIndex.of(0)));
         Inventory firstRow = chest.query(QueryOperationTypes.INVENTORY_TYPE.of(InventoryRow.class)).children().get(0);
         GridInventory grid = (GridInventory) chest.query(QueryOperationTypes.INVENTORY_TYPE.of(GridInventory.class));
         InventoryColumn firstCol = grid.getColumn(0).get();
@@ -125,7 +126,7 @@ public class InventorySetOpsTest {
         stack16 = chest.poll(16);
         Preconditions.checkState(stack16.getQuantity() == 16, "Polled quantity is not 16");
 
-        ItemStack stack14 = SlotIndex.of(2).queryIn(chest).peek();
+        ItemStack stack14 = chest.peek(SlotIndex.of(2)).get();
         Preconditions.checkState(stack14.getQuantity() == 14, "Remaining Diamonds is not 14");
 
         chest.clear();

@@ -24,44 +24,22 @@
  */
 package org.spongepowered.common.data.property.store.block;
 
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.EnumSkyBlock;
-import net.minecraft.world.chunk.Chunk;
-import org.spongepowered.api.data.property.PropertyHolder;
-import org.spongepowered.api.data.property.block.GroundLuminanceProperty;
-import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.data.property.store.common.AbstractSpongePropertyStore;
-import org.spongepowered.common.interfaces.world.IMixinLocation;
+import org.spongepowered.common.data.property.store.common.AbstractLocationPropertyStore;
 import org.spongepowered.common.util.VecHelper;
 
-import java.util.Optional;
+import java.util.OptionalDouble;
 
-public class GroundLuminancePropertyStore extends AbstractSpongePropertyStore<GroundLuminanceProperty> {
+import javax.annotation.Nullable;
 
-    @Override
-    public Optional<GroundLuminanceProperty> getFor(PropertyHolder propertyHolder) {
-        if (propertyHolder instanceof Location) {
-            final Location<?> location = (Location<?>) propertyHolder;
-            if (location.getExtent() instanceof Chunk) {
-                final Chunk chunk = (Chunk) location.getExtent();
-                final float light = chunk.getLightFor(EnumSkyBlock.BLOCK, VecHelper.toBlockPos(location));
-                return Optional.of(new GroundLuminanceProperty(light));
-            }
-        }
-        return super.getFor(propertyHolder);
-    }
+public class BlockLuminancePropertyStore extends AbstractLocationPropertyStore.Dbl {
 
     @Override
-    public Optional<GroundLuminanceProperty> getFor(Location<World> location) {
+    protected OptionalDouble getDoubleFor(Location<World> location, @Nullable EnumFacing facing) {
         final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
-        final float light = world.getLightFor(EnumSkyBlock.BLOCK, VecHelper.toBlockPos(location));
-        return Optional.of(new GroundLuminanceProperty(light));
-    }
-
-    @Override
-    public Optional<GroundLuminanceProperty> getFor(Location<World> location, Direction direction) {
-        // TODO gabizou fix this
-        return Optional.empty();
+        return OptionalDouble.of(world.getLightFor(EnumSkyBlock.BLOCK, VecHelper.toBlockPos(location)));
     }
 }

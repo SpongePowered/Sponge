@@ -24,38 +24,35 @@
  */
 package org.spongepowered.common.data.property.store.item;
 
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.property.item.EquipmentProperty;
+import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.common.data.property.store.common.AbstractItemStackPropertyStore;
 
 import java.util.Optional;
 
-public class EquipmentPropertyStore extends AbstractItemStackPropertyStore<EquipmentProperty> {
+import javax.annotation.Nullable;
+
+public class EquipmentPropertyStore extends AbstractItemStackPropertyStore.Generic<EquipmentType> {
+
+    // TODO: Dynamically register new equipment types?
 
     @Override
-    protected Optional<EquipmentProperty> getFor(ItemStack itemStack) {
-        if (itemStack.getItem() instanceof ItemArmor) {
-            final ItemArmor armor = (ItemArmor) itemStack.getItem();
+    protected Optional<EquipmentType> getFor(Item item, @Nullable ItemStack itemStack) {
+        if (item instanceof ItemArmor) {
+            final ItemArmor armor = (ItemArmor) item;
             switch (armor.armorType) {
-                case FEET: {
-                    return Optional.of(new EquipmentProperty(EquipmentTypes.HEADWEAR));
-                }
-                case LEGS: {
-                    return Optional.of(new EquipmentProperty(EquipmentTypes.CHESTPLATE));
-                }
-                case CHEST: {
-                    return Optional.of(new EquipmentProperty(EquipmentTypes.LEGGINGS));
-                }
-                case HEAD: {
-                    return Optional.of(new EquipmentProperty(EquipmentTypes.BOOTS));
-                }
-                default: {
-                    break;
-                }
+                case FEET:
+                    return Optional.of(EquipmentTypes.HEADWEAR);
+                case LEGS:
+                    return Optional.of(EquipmentTypes.CHESTPLATE);
+                case CHEST:
+                    return Optional.of(EquipmentTypes.LEGGINGS);
+                case HEAD:
+                    return Optional.of(EquipmentTypes.BOOTS);
             }
-
         }
         return Optional.empty();
     }

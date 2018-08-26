@@ -43,6 +43,8 @@ import org.spongepowered.common.data.type.SpongeEquipmentType;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
@@ -64,11 +66,11 @@ public abstract class MixinArmorEquipable extends MixinEntityLivingBase implemen
     @Override
     public Optional<ItemStack> getEquipped(EquipmentType type) {
         if (type instanceof SpongeEquipmentType) {
-            EntityEquipmentSlot[] slots = ((SpongeEquipmentType) type).getSlots();
-            if (slots.length != 1) {
+            List<EntityEquipmentSlot> slots = ((SpongeEquipmentType) type).getSlots();
+            if (slots.size() != 1) {
                 throw new IllegalArgumentException("Only EquipmentTypes for a single Slot are possible");
             }
-            net.minecraft.item.ItemStack nmsItem = this.getItemStackFromSlot(slots[0]);
+            net.minecraft.item.ItemStack nmsItem = this.getItemStackFromSlot(slots.get(0));
             return Optional.of(ItemStackUtil.fromNative(nmsItem));
         }
         return Optional.empty();
@@ -77,9 +79,9 @@ public abstract class MixinArmorEquipable extends MixinEntityLivingBase implemen
     @Override
     public boolean equip(EquipmentType type, @Nullable ItemStack equipment) {
         if (type instanceof SpongeEquipmentType) {
-            EntityEquipmentSlot[] slots = ((SpongeEquipmentType) type).getSlots();
-            if (slots.length == 0) {
-                slots = EntityEquipmentSlot.values();
+            List<EntityEquipmentSlot> slots = ((SpongeEquipmentType) type).getSlots();
+            if (slots.size() == 0) {
+                slots = Arrays.asList(EntityEquipmentSlot.values());
             }
             for (EntityEquipmentSlot slot : slots) {
                 // TODO check if canEquip
