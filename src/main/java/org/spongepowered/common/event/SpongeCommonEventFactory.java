@@ -62,15 +62,13 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataQuery;
-import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.Item;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.Agent;
+import org.spongepowered.api.entity.living.Human;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
@@ -86,6 +84,7 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
+import org.spongepowered.api.event.entity.ChangeEntityEquipmentEvent;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
@@ -137,6 +136,7 @@ import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.custom.CustomInventory;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.InventoryUtil;
@@ -1419,5 +1419,26 @@ public class SpongeCommonEventFactory {
                 new Transaction<>(costs, costs), name, ItemStackUtil.snapshotOf(slot1), transaction, ItemStackUtil.snapshotOf(slot2), (Inventory)anvil);
         SpongeImpl.postEvent(event);
         return event;
+    }
+
+    public static ChangeEntityEquipmentEvent callChangeEntityEquipmentEvent(EntityLivingBase entity, ItemStackSnapshot before, ItemStackSnapshot after, SlotAdapter slot) {
+        ChangeEntityEquipmentEvent event;
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(entity);
+            Cause cause = frame.getCurrentCause();
+            Transaction<ItemStackSnapshot> transaction = new Transaction<>(before, after);
+            if (entity instanceof EntityPlayerMP) {
+                Player player = EntityUtil.toPlayer((EntityPlayerMP) entity);
+                event = SpongeEventFactory.createChangeEntityEquipmentEventTargetPlayer(cause, player, slot, transaction);
+            } else if (entity instanceof Human) {
+                Human humanoid = (Human) entity;
+                event = SpongeEventFactory.createChangeEntityEquipmentEventTargetHumanoid(cause, humanoid, slot, transaction);
+            } else {
+                Living living = EntityUtil.fromNativeToLiving(entity);
+                event = SpongeEventFactory.createChangeEntityEquipmentEventTargetLiving(cause, living, slot, transaction);
+            }
+            SpongeImpl.postEvent(event);
+            return event;
+        }
     }
 }
