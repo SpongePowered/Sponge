@@ -227,7 +227,7 @@ public class SpongeCommandFactory {
                         INDENT, title("plugins"), LONG_INDENT, "List currently installed plugins\n",
                         INDENT, title("which"), LONG_INDENT, "List plugins that own a specific command\n",
                         INDENT, title("tps"), LONG_INDENT, "Provides TPS (ticks per second) data for loaded worlds\n",
-                        INDENT, title("stats"), LONG_INDENT, "Gets or sets permission for statistics plugins to operate\n",
+                        INDENT, title("metrics"), LONG_INDENT, "Gets or sets permission for metric plugins to operate\n",
                         SpongeImplHooks.getAdditionalCommandDescriptions()))
                 .arguments(firstParsing(nonFlagChildren,
                         flags().flag("-global", "g")

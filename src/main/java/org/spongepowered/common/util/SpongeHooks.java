@@ -540,7 +540,7 @@ public class SpongeHooks {
         try {
             savePluginsInMetricsConfig(entries).get();
         } catch (InterruptedException | ExecutionException e) {
-            SpongeImpl.getLogger().warn("Could not populate the plugin list for stats collection", e);
+            SpongeImpl.getLogger().warn("Could not populate the plugin list for metric collection", e);
         }
     }
 
