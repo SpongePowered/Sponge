@@ -136,7 +136,7 @@ public abstract class MixinFurnaceRecipes implements SmeltingRecipeRegistry {
                 ItemStackSnapshot ingredientPrecise = ItemStackUtil.snapshotOf(nativeIngredientPrecise);
                 Predicate<ItemStackSnapshot> ingredientPredicate = new MatchSmeltingVanillaItemStack(ingredientPrecise);
                 double experience = this.experienceList.get(nativeExemplaryResult);
-                SmeltingRecipe recipe = new SpongeSmeltingRecipe(result, ingredientPrecise, ingredientPredicate, experience);
+                SmeltingRecipe recipe = new SpongeSmeltingRecipe(null, null, ingredientPrecise, ingredientPredicate, experience, result);
 
                 return Optional.of(recipe);
             }
@@ -179,7 +179,7 @@ public abstract class MixinFurnaceRecipes implements SmeltingRecipeRegistry {
                 Predicate<ItemStackSnapshot> ingredientPredicate = new MatchSmeltingVanillaItemStack(exemplaryIngredient);
                 double experience = (double) this.experienceList.get(nativeExemplaryResult);
 
-                builder.add(new SpongeSmeltingRecipe(exemplaryResult, exemplaryIngredient, ingredientPredicate, experience));
+                builder.add(new SpongeSmeltingRecipe(null, null, exemplaryIngredient, ingredientPredicate, experience, exemplaryResult));
             }
         }
 

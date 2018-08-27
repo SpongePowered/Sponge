@@ -25,34 +25,29 @@
 package org.spongepowered.common.advancement;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.collect.ImmutableMap;
 import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.Criterion;
-import net.minecraft.advancements.critereon.ImpossibleTrigger;
 import net.minecraft.util.ResourceLocation;
 import org.apache.commons.lang3.StringUtils;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.DisplayInfo;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
-import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.interfaces.advancement.IMixinAdvancement;
 import org.spongepowered.common.registry.type.advancement.AdvancementRegistryModule;
+import org.spongepowered.common.util.SpongeCatalogBuilder;
 
 import java.util.Map;
 
 import javax.annotation.Nullable;
 
-public class SpongeAdvancementBuilder implements Advancement.Builder {
+public class SpongeAdvancementBuilder extends SpongeCatalogBuilder<Advancement, Advancement.Builder> implements Advancement.Builder {
 
     @Nullable private Advancement parent;
     private AdvancementCriterion criterion;
     @Nullable private DisplayInfo displayInfo;
-    private String id;
-    @Nullable private String name;
 
     public SpongeAdvancementBuilder() {
         reset();
@@ -78,26 +73,10 @@ public class SpongeAdvancementBuilder implements Advancement.Builder {
     }
 
     @Override
-    public Advancement.Builder id(String id) {
-        checkNotNull(id, "id");
-        this.id = id;
-        return this;
-    }
-
-    @Override
-    public Advancement.Builder name(String name) {
-        checkNotNull(name, "name");
-        this.name = name;
-        return this;
-    }
-
-    @Override
-    public Advancement build() {
-        checkState(this.id != null, "The id must be set");
-        final PluginContainer plugin = Sponge.getCauseStackManager().getCurrentCause().first(PluginContainer.class).get();
+    protected Advancement build(String pluginId, String id, Translation name) {
         final Tuple<Map<String, Criterion>, String[][]> result = SpongeCriterionHelper.toVanillaCriteriaData(this.criterion);
         final AdvancementRewards rewards = AdvancementRewards.EMPTY;
-        final ResourceLocation resourceLocation = new ResourceLocation(plugin.getId(), this.id);
+        final ResourceLocation resourceLocation = new ResourceLocation(pluginId, this.id);
         final net.minecraft.advancements.DisplayInfo displayInfo = this.displayInfo == null ? null :
                 (net.minecraft.advancements.DisplayInfo) DisplayInfo.builder().from(this.displayInfo).build(); // Create a copy
         net.minecraft.advancements.Advancement parent = (net.minecraft.advancements.Advancement) this.parent;
@@ -107,8 +86,9 @@ public class SpongeAdvancementBuilder implements Advancement.Builder {
         final Advancement advancement = (Advancement) new net.minecraft.advancements.Advancement(
                 resourceLocation, parent, displayInfo, rewards, result.getFirst(), result.getSecond());
         ((IMixinAdvancement) advancement).setCriterion(this.criterion);
-        if (StringUtils.isNotEmpty(this.name)) {
-            ((IMixinAdvancement) advancement).setName(this.name);
+        final String plainName = name.get();
+        if (StringUtils.isNotEmpty(plainName)) {
+            ((IMixinAdvancement) advancement).setName(plainName);
         }
         return advancement;
     }
