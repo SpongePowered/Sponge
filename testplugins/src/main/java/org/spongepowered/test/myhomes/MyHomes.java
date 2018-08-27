@@ -120,9 +120,10 @@ public class MyHomes {
             .dataImplementation(HomeDataImpl.class)
             .immutableImplementation(ImmutableHomeDataImpl.class)
             .builder(new HomeDataBuilder())
-            .dataName("Home Data")
-            .manipulatorId("home")
-            .buildAndRegister(this.container);
+            .name("Home Data")
+            .id("home")
+            .build();
+        event.register(this.homeDataRegistration);
 
         // Friends stuff
         this.friendsDataRegistration = DataRegistration.builder()
@@ -131,9 +132,10 @@ public class MyHomes {
             .dataImplementation(FriendsDataImpl.class)
             .immutableImplementation(ImmutableFriendsDataImpl.class)
             .builder(new FriendsDataBuilder())
-            .dataName("Friends Data")
-            .manipulatorId("friends")
-            .buildAndRegister(this.container);
+            .name("Friends Data")
+            .id("friends")
+            .build();
+        event.register(this.friendsDataRegistration);
     }
 
     @Listener

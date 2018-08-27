@@ -30,14 +30,18 @@ import net.minecraft.item.crafting.ShapedRecipes;
 import net.minecraft.util.NonNullList;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.CatalogType;
+import org.spongepowered.api.text.translation.Translation;
 
 public class SpongeShapedRecipe extends ShapedRecipes implements CatalogType {
 
     private final CatalogKey key;
+    private final Translation name;
 
-    public SpongeShapedRecipe(String id, String groupName, int width, int height, NonNullList<Ingredient> ingredients, ItemStack itemStack) {
+    public SpongeShapedRecipe(CatalogKey key, Translation name, String groupName,
+            int width, int height, NonNullList<Ingredient> ingredients, ItemStack itemStack) {
         super(groupName, width, height, ingredients, itemStack);
-        this.key = CatalogKey.resolve(id);
+        this.key = key;
+        this.name = name;
     }
 
     @Override
@@ -47,7 +51,7 @@ public class SpongeShapedRecipe extends ShapedRecipes implements CatalogType {
 
     @Override
     public String getName() {
-        return this.getKey().toString();
+        return this.name.get();
     }
 
     @Override

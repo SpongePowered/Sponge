@@ -35,40 +35,35 @@ import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.event.EventListener;
 import org.spongepowered.api.event.data.ChangeDataHolderEvent;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.SpongeImpl;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 import javax.annotation.Nullable;
 
 public final class SpongeKey<V extends BaseValue<?>> implements Key<V> {
 
-    private static final Set<String> loggedPlugins = new HashSet<>();
-
     private final TypeToken<V> valueToken;
-    private final CatalogKey id;
-    private final String name;
+    private final CatalogKey key;
+    private final Translation name;
     private final DataQuery query;
     private final TypeToken<?> elementToken;
-    private final PluginContainer parent;
     @Nullable private List<KeyBasedDataListener<?>> listeners;
 
-    SpongeKey(SpongeKeyBuilder<?, V> builder) {
-        this.valueToken = builder.valueToken;
-        this.name = builder.name;
-        this.query = builder.query;
-        this.elementToken = this.valueToken.resolveType(BaseValue.class.getTypeParameters()[0]);
-        this.parent = getCurrentContainer();
-        this.id = builder.id;
+    SpongeKey(CatalogKey key, Translation name, TypeToken<V> valueToken, DataQuery query) {
+        this.valueToken = valueToken;
+        this.name = name;
+        this.query = query;
+        this.elementToken = valueToken.resolveType(BaseValue.class.getTypeParameters()[0]);
+        this.key = key;
     }
 
-    static PluginContainer getCurrentContainer() {
+    private static PluginContainer getCurrentContainer() {
         return Sponge.getCauseStackManager().getCurrentCause().first(PluginContainer.class)
-            .orElse(SpongeImpl.getMinecraftPlugin());
+                .orElse(SpongeImpl.getMinecraftPlugin());
     }
 
     @Override
@@ -96,12 +91,12 @@ public final class SpongeKey<V extends BaseValue<?>> implements Key<V> {
 
     @Override
     public CatalogKey getKey() {
-        return this.id;
+        return this.key;
     }
 
     @Override
     public String getName() {
-        return this.name;
+        return this.name.get();
     }
 
     public void registerListeners() {
@@ -125,7 +120,7 @@ public final class SpongeKey<V extends BaseValue<?>> implements Key<V> {
         }
         final SpongeKey<?> spongeKey = (SpongeKey<?>) o;
         return Objects.equals(this.valueToken, spongeKey.valueToken) &&
-               Objects.equals(this.id, spongeKey.id) &&
+               Objects.equals(this.key, spongeKey.key) &&
                Objects.equals(this.name, spongeKey.name) &&
                Objects.equals(this.query, spongeKey.query) &&
                Objects.equals(this.elementToken, spongeKey.elementToken);
@@ -133,21 +128,17 @@ public final class SpongeKey<V extends BaseValue<?>> implements Key<V> {
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.valueToken, this.id, this.name, this.query, this.elementToken);
+        return Objects.hash(this.valueToken, this.key, this.name, this.query, this.elementToken);
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
             .add("name", this.name)
-            .add("id", this.id)
+            .add("key", this.key)
             .add("valueToken", this.valueToken)
             .add("elementToken", this.elementToken)
             .add("query", this.query)
             .toString();
-    }
-
-    public PluginContainer getParent() {
-        return this.parent;
     }
 }

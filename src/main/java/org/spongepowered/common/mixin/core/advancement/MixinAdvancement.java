@@ -42,6 +42,7 @@ import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.AndCriterion;
 import org.spongepowered.api.advancement.criteria.OrCriterion;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.translation.FixedTranslation;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -134,7 +135,7 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
                 name = this.name;
             }
             path = id.getNamespace() + ':' + path;
-            this.tree = new SpongeAdvancementTree(this, path, name);
+            this.tree = new SpongeAdvancementTree(this, CatalogKey.resolve(path), new FixedTranslation(name));
             AdvancementTreeRegistryModule.getInstance().registerAdditionalCatalog(this.tree);
         } else {
             this.tree = ((org.spongepowered.api.advancement.Advancement) parentIn).getTree().orElse(null);

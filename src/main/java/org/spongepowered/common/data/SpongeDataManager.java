@@ -276,13 +276,13 @@ public final class SpongeDataManager implements DataManager {
     }
 
     <M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> void validateRegistration(
-      SpongeDataRegistrationBuilder<M, I> builder) {
+            DataRegistration<M, I> registration) {
         checkState(allowRegistrations);
-        final Class<M> manipulatorClass = builder.manipulatorClass;
-        final Class<? extends M> implementationClass = builder.implementationData;
-        final Class<I> immutableClass = builder.immutableClass;
-        final Class<? extends I> immutableImplementation = builder.immutableImplementation;
-        final DataManipulatorBuilder<M, I> manipulatorBuilder = builder.manipulatorBuilder;
+        final Class<M> manipulatorClass = registration.getManipulatorClass();
+        final Class<? extends M> implementationClass = registration.getImplementationClass();
+        final Class<I> immutableClass = registration.getImmutableManipulatorClass();
+        final Class<? extends I> immutableImplementation = registration.getImmutableImplementationClass();
+        final DataManipulatorBuilder<M, I> manipulatorBuilder = registration.getDataManipulatorBuilder();
         checkState(!this.builders.containsKey(manipulatorClass), "DataManipulator already registered!");
         checkState(!this.builderMap.containsKey(manipulatorClass), "DataManipulator already registered!");
         checkState(!this.builderMap.containsValue(manipulatorBuilder), "DataManipulatorBuilder already registered!");
@@ -290,11 +290,11 @@ public final class SpongeDataManager implements DataManager {
         checkState(!this.immutableBuilderMap.containsKey(immutableClass), "ImmutableDataManipulator already registered!");
         checkState(!this.immutableBuilderMap.containsValue(manipulatorBuilder), "DataManipulatorBuilder already registered!");
 
-        if (implementationClass != null) {
+        if (implementationClass != manipulatorClass) {
             checkState(!this.builders.containsKey(implementationClass), "DataManipulator implementation already registered!");
             checkState(!this.builderMap.containsKey(implementationClass), "DataManipulator implementation already registered!");
         }
-        if (immutableImplementation != null) {
+        if (immutableImplementation != immutableClass) {
             checkState(!this.builders.containsKey(immutableImplementation), "ImmutableDataManipulator implementation already registered!");
             checkState(!this.immutableBuilderMap.containsKey(immutableImplementation), "ImmutableDataManipulator implementation already registered!");
         }

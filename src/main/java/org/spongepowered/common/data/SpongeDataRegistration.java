@@ -34,10 +34,10 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.text.translation.Translation;
 
 public final class SpongeDataRegistration<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>>
-    implements DataRegistration<M, I>, Comparable<SpongeDataRegistration<?, ?>> {
-
+        implements DataRegistration<M, I>, Comparable<SpongeDataRegistration<?, ?>> {
 
     private final Class<M> manipulatorClass;
     private final Class<? extends M> implementationClass;
@@ -45,18 +45,18 @@ public final class SpongeDataRegistration<M extends DataManipulator<M, I>, I ext
     private final Class<? extends I> immutableImplementationClass;
     private final DataManipulatorBuilder<M, I> manipulatorBuilder;
     private final PluginContainer container;
-    private final CatalogKey id;
-    private final String name;
+    private final CatalogKey key;
+    private final Translation name;
 
-    SpongeDataRegistration(SpongeDataRegistrationBuilder<M, I> builder) {
+    SpongeDataRegistration(CatalogKey key, Translation name, PluginContainer pluginContainer, SpongeDataRegistrationBuilder<M, I> builder) {
         this.manipulatorClass = checkNotNull(builder.manipulatorClass, "DataManipulator class is null!");
         this.immutableClass = checkNotNull(builder.immutableClass, "ImmutableDataManipulator class is null!");
         this.implementationClass = builder.implementationData == null ? this.manipulatorClass : builder.implementationData;
         this.immutableImplementationClass = builder.immutableImplementation == null ? this.immutableClass : builder.immutableImplementation;
         this.manipulatorBuilder = checkNotNull(builder.manipulatorBuilder, "DataManipulatorBuilder is null!");
-        this.container = checkNotNull(builder.container, "PluginContainer is null!");
-        this.id = CatalogKey.of(this.container.getId(), checkNotNull(builder.id, "Data ID is null!"));
-        this.name = checkNotNull(builder.name, "Data name is null!");
+        this.container = pluginContainer;
+        this.key = key;
+        this.name = name;
     }
 
     @Override
@@ -91,12 +91,12 @@ public final class SpongeDataRegistration<M extends DataManipulator<M, I>, I ext
 
     @Override
     public CatalogKey getKey() {
-        return this.id;
+        return this.key;
     }
 
     @Override
     public String getName() {
-        return this.name;
+        return this.name.get();
     }
 
     @Override
@@ -112,19 +112,19 @@ public final class SpongeDataRegistration<M extends DataManipulator<M, I>, I ext
                && Objects.equal(this.immutableClass, that.immutableClass)
                && Objects.equal(this.manipulatorBuilder, that.manipulatorBuilder)
                && Objects.equal(this.container, that.container)
-               && Objects.equal(this.id, that.id);
+               && Objects.equal(this.key, that.key);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(this.manipulatorClass, this.immutableClass, this.manipulatorBuilder, this.container, this.id);
+        return Objects.hashCode(this.manipulatorClass, this.immutableClass, this.manipulatorBuilder, this.container, this.key);
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-            .add("id", this.id)
-            .add("name", this.name)
+            .add("key", this.key)
+            .add("name", this.name.get())
             .add("manipulatorClass", this.manipulatorClass)
             .add("immutableClass", this.immutableClass)
             .add("manipulatorBuilder", this.manipulatorBuilder)
