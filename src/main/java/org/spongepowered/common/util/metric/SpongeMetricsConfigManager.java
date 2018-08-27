@@ -22,10 +22,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.service.stat;
+package org.spongepowered.common.util.metric;
 
 import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.service.metric.MetricsConfigManager;
+import org.spongepowered.api.util.metric.MetricsConfigManager;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.category.MetricsCategory;
 

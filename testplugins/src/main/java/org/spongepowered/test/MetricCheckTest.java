@@ -24,6 +24,7 @@
  */
 package org.spongepowered.test;
 
+import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.spec.CommandSpec;
@@ -31,6 +32,7 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.util.metric.MetricsConfigManager;
 
 /*
  * Simply checks to see if Sponge indicates that the plugin is entitled to metric checking.
@@ -38,13 +40,16 @@ import org.spongepowered.api.text.Text;
 @Plugin(id = "metricheck", name = "Metric Check")
 public class MetricCheckTest {
 
+    @Inject
+    private MetricsConfigManager configManager;
+
     @Listener
     public void onInit(GameInitializationEvent event) {
         Sponge.getCommandManager()
                 .register(this,
                         CommandSpec.builder().executor((source, context) -> {
                             source.sendMessage(Text.of("Metrics checking for \"metricheck\" is set to: ",
-                                    Sponge.getMetricsConfigManager().areMetricsEnabled(this)));
+                                    this.configManager.areMetricsEnabled(this)));
                             return CommandResult.success();
                         }).build(),
                         "metricheck");
