@@ -47,7 +47,7 @@ import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.service.ServiceManager;
 import org.spongepowered.api.service.SimpleServiceManager;
-import org.spongepowered.api.service.metric.MetricsConfigManager;
+import org.spongepowered.api.util.metric.MetricsConfigManager;
 import org.spongepowered.api.world.TeleportHelper;
 import org.spongepowered.common.SpongeBootstrap;
 import org.spongepowered.common.SpongeGame;
@@ -61,7 +61,7 @@ import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import org.spongepowered.common.event.SpongeCauseStackManager;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.scheduler.SpongeScheduler;
-import org.spongepowered.common.service.stat.SpongeMetricsConfigManager;
+import org.spongepowered.common.util.metric.SpongeMetricsConfigManager;
 import org.spongepowered.common.world.teleport.SpongeTeleportHelper;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;

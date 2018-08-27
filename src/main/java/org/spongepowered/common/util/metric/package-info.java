@@ -23,4 +23,4 @@
  * THE SOFTWARE.
  */
 @org.spongepowered.api.util.annotation.NonnullByDefault
-package org.spongepowered.common.service.stat;
+package org.spongepowered.common.util.metric;
