@@ -913,6 +913,7 @@ public class SpongeCommandFactory {
                         GenericArguments.optional(GenericArguments.onlyOne(
                                 GenericArguments.choicesInsensitive(Text.of(ENABLED_KEY), ENABLED_CHOICES))))
                 .description(Text.of("Gets or sets permission for metric plugins to operate."))
+                .permission("sponge.command.metrics")
                 .executor((source, context) -> {
                     SpongeConfig<GlobalConfig> config = SpongeImpl.getGlobalConfig();
                     MetricsCategory category = config.getConfig().getMetricsCategory();
