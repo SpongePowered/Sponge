@@ -24,6 +24,7 @@
  */
 package org.spongepowered.test.myhomes.data.friends.impl;
 
+import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.manipulator.immutable.common.AbstractImmutableListData;
 import org.spongepowered.api.data.value.immutable.ImmutableListValue;
 import org.spongepowered.test.myhomes.MyHomes;
@@ -52,5 +53,10 @@ public class ImmutableFriendsDataImpl extends AbstractImmutableListData<UUID, Im
     @Override
     public int getContentVersion() {
         return FriendsDataBuilder.CONTENT_VERSION;
+    }
+
+    @Override
+    protected DataContainer fillContainer(DataContainer dataContainer) {
+        return dataContainer.set(MyHomes.FRIENDS, this.getValue());
     }
 }
