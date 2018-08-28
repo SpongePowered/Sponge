@@ -411,6 +411,7 @@
         "tileentity.TileEntityPistonMixin",
         "tileentity.TileEntityShulkerBoxMixin",
         "tileentity.TileEntitySign_1Mixin",
+        "tileentity.TileEntitySign_2Mixin",
         "tileentity.TileEntitySignMixin",
         "tileentity.TileEntitySkullAccessor",
         "tileentity.TileEntitySkullMixin",
