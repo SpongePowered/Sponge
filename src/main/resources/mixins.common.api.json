@@ -282,7 +282,7 @@
         "mcp.tileentity.TileEntityNoteMixin_API",
         "mcp.tileentity.TileEntityPistonMixin_API",
         "mcp.tileentity.TileEntityShulkerBoxMixin_API",
-        "mcp.tileentity.TileEntitySign_1Mixin_API",
+        "mcp.tileentity.TileEntitySignCommandSendersMixin_API",
         "mcp.tileentity.TileEntitySignMixin_API",
         "mcp.tileentity.TileEntitySkullMixin_API",
         "mcp.tileentity.TileEntityStructure_ModeMixin_API",

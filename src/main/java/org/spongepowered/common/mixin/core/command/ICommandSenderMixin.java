@@ -37,7 +37,7 @@ import org.spongepowered.common.command.CommandPermissions;
 import org.spongepowered.common.bridge.command.CommandSenderBridge;
 
 @Mixin(value = {EntityPlayerMP.class, MinecraftServer.class, RConConsoleSource.class, CommandBlockBaseLogic.class},
-    targets = "net/minecraft/tileentity/TileEntitySign$1")
+    targets = {"net/minecraft/tileentity/TileEntitySign$1", "net/minecraft/tileentity/TileEntitySign$2"})
 public abstract class ICommandSenderMixin implements ICommandSender {
 
     @Inject(method = "canUseCommand(ILjava/lang/String;)Z", at = @At("HEAD"), cancellable = true)

@@ -31,12 +31,12 @@ import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.command.CommandSenderBridge;
 import org.spongepowered.common.bridge.command.CommandSourceBridge;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
 
 @NonnullByDefault
-@Mixin(value = {TileEntityCommandBlock.class, EntityMinecartCommandBlock.class}, targets = "net/minecraft/tileentity/TileEntitySign$1", priority = 999)
+@Mixin(value = {TileEntityCommandBlock.class, EntityMinecartCommandBlock.class},
+        targets = {"net/minecraft/tileentity/TileEntitySign$1", "net/minecraft/tileentity/TileEntitySign$2"}, priority = 999)
 public abstract class BlockBasedCommandSourceMixin implements CommandSourceBridge, CommandBlockSource, SubjectBridge {
 
     @Override

@@ -39,7 +39,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeInternalListeners;
-import org.spongepowered.common.bridge.command.CommandSenderBridge;
 import org.spongepowered.common.bridge.command.CommandSourceBridge;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
 import org.spongepowered.common.entity.player.SpongeUser;
@@ -56,7 +55,7 @@ import javax.annotation.Nullable;
  */
 @NonnullByDefault
 @Mixin(value = {EntityPlayerMP.class, TileEntityCommandBlock.class, EntityMinecartCommandBlock.class, MinecraftServer.class, RConConsoleSource.class,
-        SpongeUser.class}, targets = "net/minecraft/tileentity/TileEntitySign$1")
+        SpongeUser.class}, targets = {"net/minecraft/tileentity/TileEntitySign$1", "net/minecraft/tileentity/TileEntitySign$2"})
 public abstract class SubjectMixin implements CommandSourceBridge, SubjectBridge {
 
     @Nullable

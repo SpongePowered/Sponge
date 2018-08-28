@@ -22,46 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.tileentity;
+package org.spongepowered.common.mixin.core.tileentity;
 
 import net.minecraft.command.ICommandSender;
-import net.minecraft.tileentity.TileEntitySign;
-import org.spongepowered.api.block.tileentity.Sign;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.source.SignSource;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.command.CommandSenderBridge;
-import org.spongepowered.common.command.WrapperCommandSource;
+import org.spongepowered.common.bridge.command.CommandSourceBridge;
 
-@Mixin(targets = "net/minecraft/tileentity/TileEntitySign$1")
-public abstract class TileEntitySign_1Mixin_API implements SignSource {
+@Mixin(targets = "net/minecraft/tileentity/TileEntitySign$2")
+public abstract class TileEntitySign_2Mixin implements CommandSenderBridge, CommandSourceBridge {
 
-    @Shadow(aliases = {"this$0", "field_174795_a"})
-    @Final
-    private TileEntitySign field_174795_a;
+    @Shadow public abstract String shadow$getName();
 
-    @SuppressWarnings({"ConstantConditions", "RedundantCast"}) // This is an ICommandSender anonymous class
     @Override
-    public CommandSource getOriginalSource() {
-        return WrapperCommandSource.of(((ICommandSender) (Object) this).getCommandSenderEntity());
+    public ICommandSender bridge$asICommandSender() {
+        return (ICommandSender) (Object) this;
     }
 
     @Override
-    public Sign getSign() {
-        return (Sign) this.field_174795_a;
+    public String bridge$getIdentifier() {
+        return this.shadow$getName();
     }
 
     @Override
-    public World getWorld() {
-        return (World) this.field_174795_a.getWorld();
+    public CommandSource bridge$asCommandSource() {
+        return (SignSource) this;
     }
 
-    @Override
-    public Location<World> getLocation() {
-        return ((Sign) this.field_174795_a).getLocation();
-    }
 }
