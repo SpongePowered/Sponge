@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementTree;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.translation.FixedTranslation;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.interfaces.advancement.IMixinAdvancement;
@@ -65,7 +66,7 @@ public class SpongeAdvancementTreeBuilder extends SpongeCatalogBuilder<Advanceme
     }
 
     @Override
-    protected Translation getName() {
+    public Translation getName() {
         if (this.name != null) {
             return this.name;
         }
@@ -73,9 +74,9 @@ public class SpongeAdvancementTreeBuilder extends SpongeCatalogBuilder<Advanceme
     }
 
     @Override
-    protected AdvancementTree build(String pluginId, String id, Translation name) {
+    protected AdvancementTree build(PluginContainer plugin, String id, Translation name) {
         checkState(this.rootAdvancement != null, "The root advancement must be set");
-        final SpongeAdvancementTree advancementTree = new SpongeAdvancementTree(this.rootAdvancement, pluginId + ':' + this.id, name);
+        final SpongeAdvancementTree advancementTree = new SpongeAdvancementTree(this.rootAdvancement, plugin.getId() + ':' + this.id, name);
         ((IMixinDisplayInfo) this.rootAdvancement.getDisplayInfo().get()).setBackground(this.background);
         ((IMixinAdvancement) this.rootAdvancement).setParent(null);
         applyTree(this.rootAdvancement, advancementTree);

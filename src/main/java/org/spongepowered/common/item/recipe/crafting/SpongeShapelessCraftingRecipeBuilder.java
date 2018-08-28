@@ -93,13 +93,13 @@ public class SpongeShapelessCraftingRecipeBuilder extends SpongeCatalogBuilder<S
     }
 
     @Override
-    protected ShapelessCraftingRecipe build(String pluginId, String id, Translation name) {
+    protected ShapelessCraftingRecipe build(PluginContainer plugin, String id, Translation name) {
         checkState(this.exemplaryResult != null && this.exemplaryResult != ItemStackSnapshot.NONE, "The result is not set.");
         checkState(!this.ingredients.isEmpty(), "The ingredients are not set.");
         // Copy the ingredient list
         final NonNullList<Ingredient> ingredients = NonNullList.create();
         ingredients.addAll(this.ingredients);
-        return ((ShapelessCraftingRecipe) new SpongeShapelessRecipe(pluginId + ':' + id, this.groupName,
+        return ((ShapelessCraftingRecipe) new SpongeShapelessRecipe(plugin.getId() + ':' + id, this.groupName,
                 ItemStackUtil.toNative(this.exemplaryResult.createStack()), ingredients));
     }
 

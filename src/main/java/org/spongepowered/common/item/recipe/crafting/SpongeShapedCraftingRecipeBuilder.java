@@ -35,6 +35,7 @@ import net.minecraft.util.NonNullList;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.recipe.crafting.Ingredient;
 import org.spongepowered.api.item.recipe.crafting.ShapedCraftingRecipe;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
@@ -142,7 +143,7 @@ public final class SpongeShapedCraftingRecipeBuilder extends SpongeCatalogBuilde
     }
 
     @Override
-    protected ShapedCraftingRecipe build(String pluginId, String id, Translation name) {
+    protected ShapedCraftingRecipe build(PluginContainer plugin, String id, Translation name) {
         checkState(!this.aisle.isEmpty(), "aisle has not been set");
         checkState(!this.ingredientMap.isEmpty(), "no ingredients set");
         checkState(!this.result.isEmpty(), "no result set");
@@ -170,7 +171,7 @@ public final class SpongeShapedCraftingRecipeBuilder extends SpongeCatalogBuilde
         // Throws JsonException when pattern is not complete or defines unused Ingredients
         NonNullList<net.minecraft.item.crafting.Ingredient> ingredients = ShapedRecipes.deserializeIngredients(keys, ingredientsMap, width, height);
 
-        return ((ShapedCraftingRecipe) new SpongeShapedRecipe(pluginId + ':' + id, this.groupName,
+        return ((ShapedCraftingRecipe) new SpongeShapedRecipe(plugin.getId() + ':' + id, this.groupName,
                 width, height, ingredients, ItemStackUtil.toNative(this.result)));
     }
 

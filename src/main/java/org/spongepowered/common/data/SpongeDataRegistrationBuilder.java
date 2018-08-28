@@ -127,17 +127,17 @@ public final class SpongeDataRegistrationBuilder<M extends DataManipulator<M, I>
     }
 
     @Override
-    protected DataRegistration<M, I> build(String pluginId, String id, Translation name)
+    protected DataRegistration<M, I> build(PluginContainer plugin, String id, Translation name)
             throws IllegalStateException, IllegalArgumentException, DataAlreadyRegisteredException {
         checkState(!SpongeDataManager.areRegistrationsComplete(), "Registrations cannot take place at this time!");
         checkState(this.manipulatorBuilder != null, "ManipulatorBuilder cannot be null!");
         checkState(this.manipulatorClass != null, "DataManipulator class cannot be null!");
         checkState(this.immutableClass != null, "ImmutableDataManipulator class cannot be null!");
-        id = pluginId + ':' + id;
+        id = plugin.getId() + ':' + id;
         SpongeManipulatorRegistry.getInstance().validateRegistrationId(id);
         SpongeDataManager.getInstance().validateRegistration(this);
-        this.container = Sponge.getPluginManager().getPlugin(pluginId)
-                .orElseThrow(() -> new IllegalArgumentException("Unknown plugin id: " + pluginId));
+        this.container = Sponge.getPluginManager().getPlugin(plugin.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Unknown plugin id: " + plugin.getId()));
         final SpongeDataRegistration<M, I> registration = new SpongeDataRegistration<>(id, name, this);
         SpongeDataManager.getInstance().registerInternally(registration);
         SpongeManipulatorRegistry.getInstance().register(registration);

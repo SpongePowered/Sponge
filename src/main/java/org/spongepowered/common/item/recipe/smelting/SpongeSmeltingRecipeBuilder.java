@@ -143,7 +143,7 @@ public class SpongeSmeltingRecipeBuilder extends SpongeCatalogBuilder<SmeltingRe
     }
 
     @Override
-    protected SmeltingRecipe build(String pluginId, String id, Translation name) {
+    protected SmeltingRecipe build(PluginContainer plugin, String id, Translation name) {
         throw new IllegalStateException("Overridden");
     }
 

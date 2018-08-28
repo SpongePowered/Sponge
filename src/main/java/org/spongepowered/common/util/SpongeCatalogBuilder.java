@@ -26,6 +26,7 @@ package org.spongepowered.common.util;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.Sponge;
@@ -49,11 +50,12 @@ public abstract class SpongeCatalogBuilder<C extends CatalogType, B extends Rese
     @Override
     public B name(String name) {
         checkNotNull(name, "name");
+        checkState(!name.isEmpty(), "The name may not be empty");
         this.name = new FixedTranslation(name);
         return (B) this;
     }
 
-    protected Translation getName() {
+    public Translation getName() {
         if (this.name != null) {
             return this.name;
         }
@@ -63,6 +65,8 @@ public abstract class SpongeCatalogBuilder<C extends CatalogType, B extends Rese
     @Override
     public B name(Translation name) {
         checkNotNull(name, "name");
+        checkState(!name.getId().isEmpty(), "The translation id may not be empty");
+        this.name = name;
         return (B) this;
     }
 
@@ -83,10 +87,10 @@ public abstract class SpongeCatalogBuilder<C extends CatalogType, B extends Rese
         if (name == null) {
             name = new FixedTranslation(this.id);
         }
-        return build(plugin.getId(), this.id, name);
+        return build(plugin, this.id, name);
     }
 
-    protected abstract C build(String pluginId, String id, Translation name);
+    protected abstract C build(PluginContainer plugin, String id, Translation name);
 
     @Override
     public B reset() {

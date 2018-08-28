@@ -33,6 +33,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.DisplayInfo;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.interfaces.advancement.IMixinAdvancement;
@@ -73,10 +74,10 @@ public class SpongeAdvancementBuilder extends SpongeCatalogBuilder<Advancement, 
     }
 
     @Override
-    protected Advancement build(String pluginId, String id, Translation name) {
+    protected Advancement build(PluginContainer plugin, String id, Translation name) {
         final Tuple<Map<String, Criterion>, String[][]> result = SpongeCriterionHelper.toVanillaCriteriaData(this.criterion);
         final AdvancementRewards rewards = AdvancementRewards.EMPTY;
-        final ResourceLocation resourceLocation = new ResourceLocation(pluginId, this.id);
+        final ResourceLocation resourceLocation = new ResourceLocation(plugin.getId(), this.id);
         final net.minecraft.advancements.DisplayInfo displayInfo = this.displayInfo == null ? null :
                 (net.minecraft.advancements.DisplayInfo) DisplayInfo.builder().from(this.displayInfo).build(); // Create a copy
         net.minecraft.advancements.Advancement parent = (net.minecraft.advancements.Advancement) this.parent;

@@ -32,16 +32,22 @@ import com.google.common.reflect.TypeToken;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.util.SpongeCatalogBuilder;
 
-import java.util.Locale;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 
-public final class SpongeKeyBuilder<E, V extends BaseValue<E>> implements Key.Builder<E, V> {
+public final class SpongeKeyBuilder<E, V extends BaseValue<E>> extends SpongeCatalogBuilder<Key<V>, Key.Builder<E, V>> implements Key.Builder<E, V> {
+
+    private static final Set<String> loggedPlugins = new HashSet<>();
 
     @Nullable TypeToken<V> valueToken;
-    @Nullable String id;
-    @Nullable String name;
+    @Nullable Translation name;
     @Nullable DataQuery query;
 
     @SuppressWarnings("unchecked")
@@ -52,20 +58,6 @@ public final class SpongeKeyBuilder<E, V extends BaseValue<E>> implements Key.Bu
     }
 
     @Override
-    public Key.Builder<E, V> id(String id) {
-        checkArgument(!checkNotNull(id, "ID cannot be null!").contains(" "), "Id cannot contain spaces!");
-        this.id = id.toLowerCase(Locale.ENGLISH);
-        return this;
-    }
-
-    @Override
-    public Key.Builder<E, V> name(String name) {
-        checkArgument(!checkNotNull(name).isEmpty(), "Name cannot be empty!");
-        this.name = name;
-        return this;
-    }
-
-    @Override
     public Key.Builder<E, V> query(DataQuery query) {
         checkArgument(!query.getParts().isEmpty(), "DataQuery cannot be null!");
         this.query = query;
@@ -73,16 +65,31 @@ public final class SpongeKeyBuilder<E, V extends BaseValue<E>> implements Key.Bu
     }
 
     @Override
-    public Key<V> build() {
-        checkState(this.valueToken != null, "Value Token must be set!");
-        checkState(this.id != null, "Key id must be set!");
-        checkState(this.query != null, "DataQuery not set!");
-        checkState(this.name != null, "Name must be set");
-        return new SpongeKey<>(this);
+    public Key.Builder<E, V> id(String id) {
+        final int index = id.indexOf(':');
+        // Strip the plugin id
+        if (index != -1) {
+            final String pluginId = id.substring(0, index);
+            if (loggedPlugins.add(pluginId)) {
+                SpongeImpl.getLogger().warn(pluginId + ": It is no longer required to include the plugin id when specifying a "
+                        + "Key id through Key.Builder#id. This is deprecated and may be removed later. The plugin id will be retrieved from the "
+                        + "current PluginContainer in the cause stack. Key: " + id);
+            }
+            id = id.substring(index + 1);
+        }
+        return super.id(id);
+    }
+
+    @Override
+    protected Key<V> build(PluginContainer plugin, String id, Translation name) {
+        checkState(this.valueToken != null, "Value token must be set!");
+        checkState(this.query != null, "DataQuery must be set!");
+        return new SpongeKey<>(plugin.getId() + ':' + id, name, this.valueToken, this.query, plugin);
     }
 
     @Override
     public Key.Builder<E, V> reset() {
+        super.reset();
         this.valueToken = null;
         this.id = null;
         this.name = null;
