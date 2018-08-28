@@ -122,7 +122,7 @@ public class WorldCategory extends ConfigCategory {
     private int viewDistance = USE_SERVER_VIEW_DISTANCE;
 
     public WorldCategory() {
-        this.portalAgents.put("minecraft:default_nether", "DIM-1");
+        this.portalAgents.put("minecraft:default_the_nether", "DIM-1");
         this.portalAgents.put("minecraft:default_the_end", "DIM1");
 
         try {
