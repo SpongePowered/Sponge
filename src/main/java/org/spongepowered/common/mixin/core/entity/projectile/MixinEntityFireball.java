@@ -38,24 +38,28 @@ import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
+import javax.annotation.Nullable;
+
 @Mixin(EntityFireball.class)
 public abstract class MixinEntityFireball extends MixinEntity implements Fireball {
 
     @Shadow public EntityLivingBase shootingEntity;
     @Shadow protected abstract void onImpact(RayTraceResult movingObjectPosition);
 
+    @Nullable
     private ProjectileSource projectileSource = null;
 
     @Override
     public ProjectileSource getShooter() {
-        if (this.projectileSource == null || this.projectileSource != this.shootingEntity) {
-            if (this.shootingEntity != null && this.shootingEntity instanceof ProjectileSource) {
-                this.projectileSource = (ProjectileSource) this.shootingEntity;
-            } else {
-                this.projectileSource = ProjectileSource.UNKNOWN;
-            }
+        if (this.shootingEntity instanceof ProjectileSource) {
+            return (ProjectileSource) this.shootingEntity;
         }
-        return this.projectileSource;
+
+        if (this.projectileSource != null) {
+            return this.projectileSource;
+        }
+
+        return ProjectileSource.UNKNOWN;
     }
 
     @Override
