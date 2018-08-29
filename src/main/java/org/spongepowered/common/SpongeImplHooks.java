@@ -110,10 +110,6 @@ import javax.annotation.Nullable;
  */
 public final class SpongeImplHooks {
 
-    public static boolean isVanilla() {
-        return true;
-    }
-
     public static boolean isClientAvailable() {
         return false;
     }
