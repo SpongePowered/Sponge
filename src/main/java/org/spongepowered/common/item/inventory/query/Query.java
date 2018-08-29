@@ -113,6 +113,10 @@ public class Query {
         List<SlotLens> lensSlots = lens.getSlots();
         Set<SlotLens> matchSlots = this.getSlots(matches);
 
+        if (matches.isEmpty()) {
+            return matches;
+        }
+
         if (lensSlots.size() == matchSlots.size() && this.allLensesAreSlots(matches) && matchSlots.containsAll(lensSlots) ) {
             matches.clear();
             matches.add(lens);
