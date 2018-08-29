@@ -70,6 +70,7 @@ import org.spongepowered.common.data.persistence.SerializedDataTransaction;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseData;
@@ -470,7 +471,7 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
                 return builder.result(DataTransactionResult.Type.SUCCESS).build();
             }
         }
-        return DataTransactionResult.failNoData();
+        return DataTransactionResult.failResult(new SpongeValue(key, value).asImmutable());
     }
 
     @Override
