@@ -128,6 +128,10 @@ public class Query {
     }
 
     private MutableLensSet reduce(Lens lens, MutableLensSet matches) {
+        if (matches.isEmpty()) {
+            return matches;
+        }
+
         if (lens.getSlots().equals(this.getSlots(matches)) && this.allLensesAreSlots(matches)) {
             matches.clear();
             matches.add(lens);
