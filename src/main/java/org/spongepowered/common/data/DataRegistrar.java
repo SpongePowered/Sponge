@@ -449,6 +449,9 @@ public class DataRegistrar {
         DataUtil.registerDualProcessor(GriefingData.class, SpongeGriefingData.class, ImmutableGriefingData.class,
                 ImmutableSpongeGriefingData.class, new GriefingDataProcessor());
 
+        DataUtil.registerDualProcessor(TargetedEntityData.class, SpongeTargetedEntityData.class,
+                ImmutableTargetedEntityData.class, ImmutableSpongeTargetedEntityData.class, new EntityTargetedEntityDataProcessor());
+
         DataUtil.registerDualProcessor(TargetedLocationData.class, SpongeTargetedLocationData.class,
                 ImmutableTargetedLocationData.class, ImmutableSpongeTargetedLocationData.class, new EntityTargetedLocationDataProcessor());
 
@@ -479,7 +482,12 @@ public class DataRegistrar {
         DataUtil.registerDualProcessor(DyeableData.class, SpongeDyeableData.class, ImmutableDyeableData.class, ImmutableSpongeDyeableData.class,
                 new SheepDyeColorDataProcessor());
         DataUtil.registerDualProcessor(DyeableData.class, SpongeDyeableData.class, ImmutableDyeableData.class, ImmutableSpongeDyeableData.class,
+                new ShulkerDyeColorDataProcessor());
+        DataUtil.registerDualProcessor(DyeableData.class, SpongeDyeableData.class, ImmutableDyeableData.class, ImmutableSpongeDyeableData.class,
                 new WolfDyeColorDataProcessor());
+
+        DataUtil.registerDualProcessor(DirectionalData.class, SpongeDirectionalData.class, ImmutableDirectionalData.class, ImmutableSpongeDirectionalData.class,
+                new ShulkerDirectionalProcessor());
 
         // Item Processors
 

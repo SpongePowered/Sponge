@@ -142,6 +142,7 @@ public final class DataConstants {
     public static final class Catalog {
 
         public static final DyeColor DEFAULT_SHEEP_COLOR = DyeColors.WHITE;
+        public static final DyeColor DEFAULT_SHULKER_COLOR = DyeColors.PURPLE;
         public static final EntityType DEFAULT_SPAWNER_ENTITY = EntityTypes.PIG;
 
         private Catalog() {}

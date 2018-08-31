@@ -89,6 +89,8 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     @Shadow @Nullable public abstract net.minecraft.entity.Entity getLeashHolder();
     @Shadow protected abstract void initEntityAI();
 
+    @Shadow public abstract void setAttackTarget(@Nullable EntityLivingBase entitylivingbaseIn);
+
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;initEntityAI()V"))
     public void onInitAi(EntityLiving this$0) {
         this.initSpongeAI();
