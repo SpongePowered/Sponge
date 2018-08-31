@@ -32,7 +32,6 @@ import org.spongepowered.api.data.manipulator.mutable.entity.TargetedEntityData;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableOptionalValue;
 import org.spongepowered.api.data.value.mutable.OptionalValue;
-import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeTargetedEntityData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeOptionalValue;
@@ -66,8 +65,8 @@ public final class EntityTargetedEntityDataProcessor extends AbstractEntitySingl
     }
 
     @Override
-    public boolean supports(EntityType entityType) {
-        return IEntityTargetingEntity.class.isAssignableFrom(entityType.getEntityClass());
+    public boolean supports(Entity dataHolder) {
+        return dataHolder instanceof IEntityTargetingEntity;
     }
 
     @Override

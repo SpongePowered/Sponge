@@ -32,7 +32,6 @@ import org.spongepowered.api.data.manipulator.mutable.block.DirectionalData;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeDirectionalData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
@@ -66,8 +65,8 @@ public class ShulkerDirectionalDataProcessor extends AbstractEntitySingleDataPro
     }
 
     @Override
-    public boolean supports(EntityType entityType) {
-        return IMixinShulker.class.isAssignableFrom(entityType.getEntityClass());
+    public boolean supports(EntityShulker dataHolder) {
+        return dataHolder instanceof IMixinShulker;
     }
 
     @Override
