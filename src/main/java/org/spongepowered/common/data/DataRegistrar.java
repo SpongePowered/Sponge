@@ -487,7 +487,7 @@ public class DataRegistrar {
                 new WolfDyeColorDataProcessor());
 
         DataUtil.registerDualProcessor(DirectionalData.class, SpongeDirectionalData.class, ImmutableDirectionalData.class, ImmutableSpongeDirectionalData.class,
-                new ShulkerDirectionalProcessor());
+                new ShulkerDirectionalDataProcessor());
 
         // Item Processors
 

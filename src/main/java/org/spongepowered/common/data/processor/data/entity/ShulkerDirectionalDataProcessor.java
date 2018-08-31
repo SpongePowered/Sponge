@@ -32,6 +32,7 @@ import org.spongepowered.api.data.manipulator.mutable.block.DirectionalData;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeDirectionalData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
@@ -41,36 +42,32 @@ import org.spongepowered.common.interfaces.entity.monster.IMixinShulker;
 
 import java.util.Optional;
 
-public class ShulkerDirectionalProcessor extends AbstractEntitySingleDataProcessor<EntityShulker, Direction, Value<Direction>,
+public class ShulkerDirectionalDataProcessor extends AbstractEntitySingleDataProcessor<EntityShulker, Direction, Value<Direction>,
         DirectionalData, ImmutableDirectionalData> {
 
-    public ShulkerDirectionalProcessor() {
+    public ShulkerDirectionalDataProcessor() {
         super(EntityShulker.class, Keys.DIRECTION);
     }
 
     @Override
     protected boolean set(EntityShulker dataHolder, Direction value) {
-        if (!(dataHolder instanceof IMixinShulker)) {
-            return false;
-        }
-
         ((IMixinShulker) dataHolder).setDirection(value);
-
         return true;
     }
 
     @Override
     protected Optional<Direction> getVal(EntityShulker dataHolder) {
-        if (!(dataHolder instanceof IMixinShulker)) {
-            return Optional.empty();
-        }
-
         return Optional.ofNullable(((IMixinShulker) dataHolder).getDirection());
     }
 
     @Override
     protected ImmutableValue<Direction> constructImmutableValue(Direction value) {
         return new ImmutableSpongeValue<>(Keys.DIRECTION, Direction.NONE, value);
+    }
+
+    @Override
+    public boolean supports(EntityType entityType) {
+        return IMixinShulker.class.isAssignableFrom(entityType.getEntityClass());
     }
 
     @Override

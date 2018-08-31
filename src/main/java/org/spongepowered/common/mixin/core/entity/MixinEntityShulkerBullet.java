@@ -124,7 +124,7 @@ public abstract class MixinEntityShulkerBullet extends MixinEntity implements Sh
     @Override
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
-        manipulators.add(new SpongeTargetedEntityData());
+        manipulators.add(getTargetData());
     }
 
     @Inject(method = "bulletHit", at = @At("HEAD"), cancellable = true)

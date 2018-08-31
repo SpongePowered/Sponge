@@ -32,6 +32,7 @@ import org.spongepowered.api.data.manipulator.mutable.entity.TargetedEntityData;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableOptionalValue;
 import org.spongepowered.api.data.value.mutable.OptionalValue;
+import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeTargetedEntityData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeOptionalValue;
@@ -49,21 +50,12 @@ public final class EntityTargetedEntityDataProcessor extends AbstractEntitySingl
 
     @Override
     protected boolean set(Entity dataHolder, Optional<org.spongepowered.api.entity.Entity> value) {
-        if (!(dataHolder instanceof IEntityTargetingEntity)) {
-            return false;
-        }
-
         ((IEntityTargetingEntity) dataHolder).setTargetedEntity((Entity) value.orElse(null));
-
         return true;
     }
 
     @Override
     protected Optional<Optional<org.spongepowered.api.entity.Entity>> getVal(Entity dataHolder) {
-        if (!(dataHolder instanceof IEntityTargetingEntity)) {
-            return Optional.empty();
-        }
-
         return Optional.of(Optional.ofNullable((org.spongepowered.api.entity.Entity) ((IEntityTargetingEntity) dataHolder).getTargetedEntity()));
     }
 
@@ -71,6 +63,11 @@ public final class EntityTargetedEntityDataProcessor extends AbstractEntitySingl
     protected ImmutableOptionalValue<org.spongepowered.api.entity.Entity> constructImmutableValue(
             Optional<org.spongepowered.api.entity.Entity> value) {
         return new ImmutableSpongeOptionalValue<>(this.key, value);
+    }
+
+    @Override
+    public boolean supports(EntityType entityType) {
+        return IEntityTargetingEntity.class.isAssignableFrom(entityType.getEntityClass());
     }
 
     @Override

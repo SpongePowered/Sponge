@@ -34,6 +34,7 @@ import org.spongepowered.api.data.type.DyeColors;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.common.data.manipulator.mutable.SpongeDyeableData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
@@ -55,26 +56,23 @@ public class ShulkerDyeColorDataProcessor extends AbstractEntitySingleDataProces
 
     @Override
     protected boolean set(EntityShulker container, DyeColor value) {
-        if (!(container instanceof IMixinShulker)) {
-            return false;
-        }
-
         ((IMixinShulker) container).setColor(value);
         return true;
     }
 
     @Override
     protected Optional<DyeColor> getVal(EntityShulker container) {
-        if (!(container instanceof IMixinShulker)) {
-            return Optional.empty();
-        }
-
         return Optional.of(((IMixinShulker) container).getColor());
     }
 
     @Override
     protected ImmutableValue<DyeColor> constructImmutableValue(DyeColor value) {
         return constructValue(value).asImmutable();
+    }
+
+    @Override
+    public boolean supports(EntityType entityType) {
+        return IMixinShulker.class.isAssignableFrom(entityType.getEntityClass());
     }
 
     @Override
