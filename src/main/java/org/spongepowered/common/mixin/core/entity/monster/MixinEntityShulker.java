@@ -28,7 +28,6 @@ import net.minecraft.entity.monster.EntityShulker;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.DyeableData;
@@ -58,8 +57,6 @@ public abstract class MixinEntityShulker extends MixinEntityGolem implements Shu
     @Shadow @Final protected static DataParameter<Byte> COLOR;
 
     @Shadow @Final protected static DataParameter<EnumFacing> ATTACHED_FACE;
-
-    @Shadow @Final protected static DataParameter<com.google.common.base.Optional<BlockPos>> ATTACHED_BLOCK_POS;
 
     @Override
     public DyeColor getColor() {

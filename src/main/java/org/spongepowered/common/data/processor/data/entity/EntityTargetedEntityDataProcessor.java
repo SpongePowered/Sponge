@@ -49,8 +49,9 @@ public final class EntityTargetedEntityDataProcessor extends AbstractEntitySingl
 
     @Override
     protected boolean set(Entity dataHolder, Optional<org.spongepowered.api.entity.Entity> value) {
-        if (!(dataHolder instanceof IEntityTargetingEntity))
+        if (!(dataHolder instanceof IEntityTargetingEntity)) {
             return false;
+        }
 
         ((IEntityTargetingEntity) dataHolder).setTargetedEntity((Entity) value.orElse(null));
 
@@ -59,8 +60,9 @@ public final class EntityTargetedEntityDataProcessor extends AbstractEntitySingl
 
     @Override
     protected Optional<Optional<org.spongepowered.api.entity.Entity>> getVal(Entity dataHolder) {
-        if (!(dataHolder instanceof IEntityTargetingEntity))
+        if (!(dataHolder instanceof IEntityTargetingEntity)) {
             return Optional.empty();
+        }
 
         return Optional.of(Optional.ofNullable((org.spongepowered.api.entity.Entity) ((IEntityTargetingEntity) dataHolder).getTargetedEntity()));
     }

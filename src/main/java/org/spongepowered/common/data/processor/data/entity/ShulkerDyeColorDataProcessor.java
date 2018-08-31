@@ -55,8 +55,9 @@ public class ShulkerDyeColorDataProcessor extends AbstractEntitySingleDataProces
 
     @Override
     protected boolean set(EntityShulker container, DyeColor value) {
-        if (!(container instanceof IMixinShulker))
+        if (!(container instanceof IMixinShulker)) {
             return false;
+        }
 
         ((IMixinShulker) container).setColor(value);
         return true;
@@ -64,8 +65,9 @@ public class ShulkerDyeColorDataProcessor extends AbstractEntitySingleDataProces
 
     @Override
     protected Optional<DyeColor> getVal(EntityShulker container) {
-        if (!(container instanceof IMixinShulker))
+        if (!(container instanceof IMixinShulker)) {
             return Optional.empty();
+        }
 
         return Optional.of(((IMixinShulker) container).getColor());
     }
