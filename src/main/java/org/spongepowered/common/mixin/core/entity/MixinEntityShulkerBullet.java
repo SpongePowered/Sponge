@@ -83,7 +83,7 @@ public abstract class MixinEntityShulkerBullet extends MixinEntity implements Sh
 
     @Override
     public ProjectileSource getShooter() {
-        if (projectileSource != null) {
+        if (this.projectileSource != null) {
             return this.projectileSource;
         }
 
