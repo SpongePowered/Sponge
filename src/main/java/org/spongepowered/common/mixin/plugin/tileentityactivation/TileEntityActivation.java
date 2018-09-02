@@ -227,13 +227,14 @@ public class TileEntityActivation {
 
     public static void addTileEntityToConfig(World world, SpongeTileEntityType type) {
         SpongeConfig<? extends GeneralConfigBase> config = ((IMixinWorldServer) world).getActiveConfig();
-        if (config == null || type == null || !config.getConfig().getTileEntityActivationRange().autoPopulateData()) {
+        SpongeConfig<? extends GeneralConfigBase> globalConfig = SpongeImpl.getGlobalConfig();
+        if (config == null || globalConfig == null || type == null || !config.getConfig().getTileEntityActivationRange().autoPopulateData()) {
             return;
         }
 
         boolean requiresSave = false;
         final String tileModId = type.getModId().toLowerCase();
-        TileEntityActivationCategory activationCategory = config.getConfig().getTileEntityActivationRange();
+        TileEntityActivationCategory activationCategory = globalConfig.getConfig().getTileEntityActivationRange();
         TileEntityActivationModCategory tileEntityMod = activationCategory.getModList().get(tileModId);
         int defaultRange = activationCategory.getDefaultBlockRange();
         int defaultTickRate = activationCategory.getDefaultTickRate();
@@ -269,7 +270,7 @@ public class TileEntityActivation {
         }
 
         if (requiresSave) {
-            config.save();
+            globalConfig.save();
         }
     }
 }

@@ -433,7 +433,8 @@ public class EntityActivationRange {
         checkNotNull(type, "type");
 
         SpongeConfig<? extends GeneralConfigBase> config = ((IMixinWorldServer) world).getActiveConfig();
-        if (config == null || type == null) {
+        SpongeConfig<? extends GeneralConfigBase> globalConfig = SpongeImpl.getGlobalConfig();
+        if (config == null || globalConfig == null || type == null) {
             return;
         }
 
@@ -443,7 +444,7 @@ public class EntityActivationRange {
         entityType = EntityActivationRange.activationTypeMappings.get(activationType);
         final String entityModId = type.getModId().toLowerCase();
         final String entityId = type.getName().toLowerCase();
-        EntityActivationRangeCategory activationCategory = config.getConfig().getEntityActivationRange();
+        EntityActivationRangeCategory activationCategory = globalConfig.getConfig().getEntityActivationRange();
         EntityActivationModCategory entityMod = activationCategory.getModList().get(entityModId);
         Integer defaultActivationRange = activationCategory.getDefaultRanges().get(entityType);
         if (defaultActivationRange == null) {
@@ -484,7 +485,7 @@ public class EntityActivationRange {
         }
 
         if (autoPopulate && requiresSave) {
-            config.save();
+            globalConfig.save();
         }
     }
 }
