@@ -28,6 +28,7 @@ import net.minecraft.block.Block;
 import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.CollisionModCategory;
 import org.spongepowered.common.config.category.EntityCollisionCategory;
@@ -82,7 +83,8 @@ public abstract class MixinBlock_Collisions implements IModData_Collisions {
     @Override
     public void initializeCollisionState(World worldIn) {
         SpongeConfig<? extends GeneralConfigBase> activeConfig = ((IMixinWorldServer) worldIn).getActiveConfig();
-        EntityCollisionCategory collisionCat = activeConfig.getConfig().getEntityCollisionCategory();
+        SpongeConfig<? extends GeneralConfigBase> globalConfig = SpongeImpl.getGlobalConfig();
+        EntityCollisionCategory collisionCat = globalConfig.getConfig().getEntityCollisionCategory();
         this.setMaxCollisions(collisionCat.getMaxEntitiesWithinAABB());
         String[] ids = ((BlockType) this).getId().split(":");
         String modId = ids[0];
@@ -93,7 +95,7 @@ public abstract class MixinBlock_Collisions implements IModData_Collisions {
             collisionCat.getModList().put(modId, collisionMod);
             collisionMod.getBlockList().put(name, this.getMaxCollisions());
             if (activeConfig.getConfig().getEntityCollisionCategory().autoPopulateData()) {
-                activeConfig.save();
+                globalConfig.save();
             }
 
             return;
@@ -122,7 +124,7 @@ public abstract class MixinBlock_Collisions implements IModData_Collisions {
         }
 
         if (activeConfig.getConfig().getEntityCollisionCategory().autoPopulateData()) {
-            activeConfig.save();
+            globalConfig.save();
         }
     }
 }

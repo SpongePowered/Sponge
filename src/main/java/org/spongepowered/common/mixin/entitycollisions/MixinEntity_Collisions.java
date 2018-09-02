@@ -35,6 +35,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.CollisionModCategory;
 import org.spongepowered.common.config.category.EntityCollisionCategory;
@@ -114,7 +115,8 @@ public class MixinEntity_Collisions implements IModData_Collisions {
     @Override
     public void initializeCollisionState(World worldObj) {
         SpongeConfig<? extends GeneralConfigBase> activeConfig = ((IMixinWorldServer) worldObj).getActiveConfig();
-        EntityCollisionCategory collisionCat = activeConfig.getConfig().getEntityCollisionCategory();
+        SpongeConfig<? extends GeneralConfigBase> globalConfig = SpongeImpl.getGlobalConfig();
+        EntityCollisionCategory collisionCat = globalConfig.getConfig().getEntityCollisionCategory();
         this.maxCollisions = collisionCat.getMaxEntitiesWithinAABB();
         boolean requiresSave = false;
         CollisionModCategory collisionMod = collisionCat.getModList().get(this.entityModId);
@@ -122,7 +124,7 @@ public class MixinEntity_Collisions implements IModData_Collisions {
             collisionMod = new CollisionModCategory(this.entityModId);
             collisionCat.getModList().put(this.entityModId, collisionMod);
             collisionMod.getEntityList().put(this.entityName, this.maxCollisions);
-            activeConfig.save();
+            globalConfig.save();
             return;
         } else if (collisionMod != null) {
             if (!collisionMod.isEnabled()) {
@@ -158,7 +160,7 @@ public class MixinEntity_Collisions implements IModData_Collisions {
         }
 
         if (requiresSave && activeConfig.getConfig().getEntityCollisionCategory().autoPopulateData()) {
-            activeConfig.save();
+            globalConfig.save();
         }
         return;
     }
