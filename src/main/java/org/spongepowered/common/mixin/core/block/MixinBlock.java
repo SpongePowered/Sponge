@@ -348,6 +348,15 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
         }
         EntityItem entityitem = new EntityItem(worldIn, xPos, yPos, zPos, stack);
         entityitem.setDefaultPickupDelay();
+        // Sponge Start - Tell the phase state to track this position, and then unset it.
+        final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
+        if (context.allowsBulkEntityCaptures()) {
+            context.getCaptureBlockPos().setPos(pos);
+            worldIn.spawnEntity(entityitem);
+            context.getCaptureBlockPos().setPos(null);
+            return;
+        }
+        // Sponge End - if we're not capturing positions, then just go ahead and proceed as normal
         worldIn.spawnEntity(entityitem);
 
     }
