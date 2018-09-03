@@ -45,7 +45,7 @@ public class GravityAffectedPropertyStore extends AbstractBlockPropertyStore<Gra
 
     @Override
     protected Optional<GravityAffectedProperty> getForBlock(@Nullable Location<?> location, IBlockState block) {
-        return Optional.of(BlockFalling.class.isAssignableFrom(block.getClass()) ? TRUE : FALSE);
+        return Optional.of(block.getBlock() instanceof BlockFalling ? TRUE : FALSE);
     }
 
 }
