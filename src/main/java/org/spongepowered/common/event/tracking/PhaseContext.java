@@ -590,7 +590,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     }
 
     public boolean isCapturingBlockItemDrops() {
-        return this.blockItemDropsSupplier != null;
+        return this.blockItemDropsSupplier != null || this.blockEntitySpawnSupplier != null;
     }
 
     public void printTrace(PrettyPrinter printer) {

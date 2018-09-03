@@ -39,7 +39,6 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.EventContextKey;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
@@ -56,6 +55,7 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IEntitySpecificItemDropsState;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.context.CaptureBlockPos;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.interfaces.IMixinContainer;
@@ -67,6 +67,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -88,6 +89,21 @@ final class InteractionPacketState extends BasicPacketState implements IEntitySp
         }
         context.targetBlock(new Location<>(((Player) playerMP).getWorld(), VecHelper.toVector3d(((CPacketPlayerDigging) packet).getPosition())).createSnapshot());
     }
+
+    public boolean spawnEntityOrCapture(BasicPacketContext context, Entity entity, int chunkX, int chunkZ) {
+        final CaptureBlockPos capturePos = context.getCaptureBlockPos();
+        final Optional<BlockPos> pos = capturePos.getPos();
+        if (pos.isPresent()) {
+            if (entity instanceof EntityItem) {
+                return context.getBlockItemDropSupplier().get().get(pos.get()).add((EntityItem) entity);
+            } else {
+                return context.getPerBlockEntitySpawnSuppplier().get().get(pos.get()).add(EntityUtil.toNative(entity));
+            }
+        }
+        return context.getCapturedEntities().add(entity);
+    }
+
+
 
     @Override
     public boolean shouldCaptureEntity() {
