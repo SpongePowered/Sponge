@@ -484,6 +484,13 @@ public final class WorldManager {
             return false;
         }
 
+        if (SpongeImpl.getGlobalConfig().getConfig().getModules().useOptimizations() &&
+                SpongeImpl.getGlobalConfig().getConfig().getOptimizations().useAsyncLighting()) {
+
+            // The world is unloading - there's no point in running any more lighting tasks
+            ((IMixinWorldServer) worldServer).getLightingExecutor().shutdownNow();
+        }
+
         // Vanilla sometimes doesn't remove player entities from world first
         if (server.isServerRunning()) {
             if (!worldServer.playerEntities.isEmpty()) {
