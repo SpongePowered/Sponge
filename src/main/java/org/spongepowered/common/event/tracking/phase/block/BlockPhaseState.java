@@ -71,11 +71,7 @@ public class BlockPhaseState implements IPhaseState<GeneralizedContext> {
 
     @Override
     public boolean spawnEntityOrCapture(GeneralizedContext context, Entity entity, int chunkX, int chunkZ) {
-        if (entity instanceof EntityItem) {
-            return context.getCapturedItems().add((EntityItem) entity);
-        } else {
-            return context.getCapturedEntities().add(entity);
-        }
+        return context.captureEntity(entity);
     }
 
     @Override
