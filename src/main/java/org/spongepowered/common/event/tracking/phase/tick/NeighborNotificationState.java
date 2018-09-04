@@ -69,8 +69,8 @@ class NeighborNotificationState extends LocationBasedTickPhaseState<NeighborNoti
 
     @Override
     public void appendContextPreExplosion(ExplosionContext explosionContext, NeighborNotificationContext context) {
-        context.getOwner().ifPresent(explosionContext::owner);
-        context.getNotifier().ifPresent(explosionContext::notifier);
+        context.applyNotifierIfAvailable(explosionContext::notifier);
+        context.applyOwnerIfAvailable(explosionContext::owner);
         final LocatableBlock locatableBlock = getLocatableBlockSourceFromContext(context);
         explosionContext.source(locatableBlock);
     }
