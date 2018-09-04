@@ -716,8 +716,7 @@ public final class TrackingUtil {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(newBlockSnapshot);
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-            final Optional<User> notifier = phaseContext.getNotifier();
-            notifier.ifPresent(user -> frame.addContext(EventContextKeys.NOTIFIER, user));
+            phaseContext.applyNotifierIfAvailable(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
             SpongeCommonEventFactory.callDropItemDestruct(itemDrops, phaseContext);
         }
     }
@@ -762,9 +761,7 @@ public final class TrackingUtil {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(oldBlockSnapshot);
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-            if(phaseContext.getNotifier().isPresent()) {
-                frame.addContext(EventContextKeys.NOTIFIER, phaseContext.getNotifier().get());
-            }
+            phaseContext.applyNotifierIfAvailable(notifier ->  frame.addContext(EventContextKeys.NOTIFIER, notifier));
             SpongeCommonEventFactory.callDropItemDestruct(itemDrops, phaseContext);
         }
     }

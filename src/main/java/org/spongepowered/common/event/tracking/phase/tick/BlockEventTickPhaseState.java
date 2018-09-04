@@ -69,11 +69,10 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
     public void associateNeighborStateNotifier(BlockEventTickContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
                                                WorldServer minecraftWorld, PlayerTracker.Type notifier) {
         // If we do not have a notifier at this point then there is no need to attempt to retrieve one from the chunk
-        final User user = context.getNotifier().orElse(null);
-        if (user != null) {
+        context.applyNotifierIfAvailable(user -> {
             final IMixinChunk mixinChunk = (IMixinChunk) minecraftWorld.getChunk(notifyPos);
             mixinChunk.addTrackedBlockPosition(block, notifyPos, user, PlayerTracker.Type.NOTIFIER);
-        }
+        });
     }
 
     @Override

@@ -81,6 +81,7 @@ import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
+import org.spongepowered.api.event.cause.EventContextKey;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.ChangeEntityEquipmentEvent;
@@ -528,9 +529,6 @@ public class SpongeCommonEventFactory {
             }
 
             EntityPlayer player = null;
-            User owner = data.context.getOwner().orElse(null);
-            User notifier = data.context.getNotifier().orElse(null);
-
             frame.pushCause(source);
             if (source instanceof Player) {
                 player = (EntityPlayer) source;
@@ -538,16 +536,13 @@ public class SpongeCommonEventFactory {
                     frame.addContext(EventContextKeys.FAKE_PLAYER, EntityUtil.toPlayer(player));
                 }
             }
+            data.context.applyOwnerIfAvailable(owner -> frame.addContext(EventContextKeys.OWNER, owner));
 
-            if (owner != null) {
-                frame.addContext(EventContextKeys.OWNER, owner);
-            } else if (player != null) {
+            if (player != null) {
                 frame.addContext(EventContextKeys.OWNER, (User) player);
             }
 
-            if (notifier != null) {
-                frame.addContext(EventContextKeys.NOTIFIER, notifier);
-            }
+            data.context.applyNotifierIfAvailable(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
 
             ChangeBlockEvent.Pre event =
                 SpongeEventFactory.createChangeBlockEventPre(frame.getCurrentCause(), locations);
@@ -562,8 +557,6 @@ public class SpongeCommonEventFactory {
 
         BlockState fromState = BlockUtil.fromNative(worldIn.getBlockState(pos));
         BlockState toState = BlockUtil.fromNative(state);
-        User owner = data.context.getOwner().orElse(null);
-        User notifier = data.context.getNotifier().orElse(null);
 
         if (source == null) {
             // If source is null the source is the block itself
@@ -572,12 +565,9 @@ public class SpongeCommonEventFactory {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(source);
             frame.addContext(EventContextKeys.LIQUID_MIX, (World) worldIn);
-            if (owner != null) {
-                frame.addContext(EventContextKeys.OWNER, owner);
-            }
-            if (notifier != null) {
-                frame.addContext(EventContextKeys.NOTIFIER, notifier);
-            }
+
+            data.context.applyOwnerIfAvailable(owner -> frame.addContext(EventContextKeys.OWNER, owner));
+            data.context.applyNotifierIfAvailable(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
 
             WorldProperties world = ((World) worldIn).getProperties();
             Vector3i position = new Vector3i(pos.getX(), pos.getY(), pos.getZ());
@@ -598,8 +588,6 @@ public class SpongeCommonEventFactory {
 
         BlockState fromState = BlockUtil.fromNative(worldIn.getBlockState(pos));
         BlockState toState = BlockUtil.fromNative(state);
-        User owner = data.context.getOwner().orElse(null);
-        User notifier = data.context.getNotifier().orElse(null);
         Object source = data.context.getSource(LocatableBlock.class).orElse(null);
         if (source == null) {
             source = worldIn; // Fallback
@@ -607,12 +595,10 @@ public class SpongeCommonEventFactory {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(source);
             frame.addContext(EventContextKeys.LIQUID_BREAK, (World) worldIn);
-            if (owner != null) {
-                frame.addContext(EventContextKeys.OWNER, owner);
-            }
-            if (notifier != null) {
-                frame.addContext(EventContextKeys.NOTIFIER, notifier);
-            }
+
+            data.context.applyOwnerIfAvailable(owner -> frame.addContext(EventContextKeys.OWNER, owner));
+            data.context.applyNotifierIfAvailable(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
+
             WorldProperties world = ((World) worldIn).getProperties();
             Vector3i position = new Vector3i(pos.getX(), pos.getY(), pos.getZ());
 
@@ -995,14 +981,14 @@ public class SpongeCommonEventFactory {
                 IMixinEntity spongeEntity = (IMixinEntity) entity;
                 if (!pos.equals(spongeEntity.getLastCollidedBlockPos())) {
                     final PhaseData peek = phaseTracker.getCurrentPhaseData();
-                    final User notifier = peek.context.getNotifier().orElse(null);
-                    if (notifier != null) {
+                    peek.context.applyNotifierIfAvailable(notifier -> {
                         IMixinChunk spongeChunk = spongeEntity.getActiveChunk();
                         if (spongeChunk == null) {
                             spongeChunk = (IMixinChunk) world.getChunk(pos);
                         }
                         spongeChunk.addTrackedBlockPosition(block, pos, notifier, PlayerTracker.Type.NOTIFIER);
-                    }
+
+                    });
                 }
             }
             return cancelled;

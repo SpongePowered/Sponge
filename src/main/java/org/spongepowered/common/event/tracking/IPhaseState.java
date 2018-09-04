@@ -693,8 +693,8 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param frame The frame to populate
      */
     default void associateAdditionalCauses(PhaseContext<?> context, CauseStackManager.StackFrame frame) {
-        context.getOwner().ifPresent(owner -> frame.addContext(EventContextKeys.OWNER, owner));
-        context.getNotifier().ifPresent(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
+        context.applyOwnerIfAvailable(owner -> frame.addContext(EventContextKeys.OWNER, owner));
+        context.applyNotifierIfAvailable(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
 
     }
 

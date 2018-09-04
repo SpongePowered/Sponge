@@ -67,6 +67,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
@@ -366,8 +367,20 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         return Optional.ofNullable(this.owner);
     }
 
+    public void applyOwnerIfAvailable(Consumer<User> consumer) {
+        if (this.owner != null) {
+            consumer.accept(this.owner);
+        }
+    }
+
     public Optional<User> getNotifier() {
         return Optional.ofNullable(this.notifier);
+    }
+
+    public void applyNotifierIfAvailable(Consumer<User> consumer) {
+        if (this.notifier != null) {
+            consumer.accept(this.notifier);
+        }
     }
 
     public List<Entity> getCapturedEntities() throws IllegalStateException {
@@ -600,4 +613,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         }
     }
 
+    public boolean allowsBlockPosCapturing() {
+        return this.captureBlockPos != null;
+    }
 }
