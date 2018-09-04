@@ -91,19 +91,8 @@ final class InteractionPacketState extends BasicPacketState implements IEntitySp
     }
 
     public boolean spawnEntityOrCapture(BasicPacketContext context, Entity entity, int chunkX, int chunkZ) {
-        final CaptureBlockPos capturePos = context.getCaptureBlockPos();
-        final Optional<BlockPos> pos = capturePos.getPos();
-        if (pos.isPresent()) {
-            if (entity instanceof EntityItem) {
-                return context.getBlockItemDropSupplier().get().get(pos.get()).add((EntityItem) entity);
-            } else {
-                return context.getPerBlockEntitySpawnSuppplier().get().get(pos.get()).add(EntityUtil.toNative(entity));
-            }
-        }
-        return context.getCapturedEntities().add(entity);
+        return context.captureEntity(entity);
     }
-
-
 
     @Override
     public boolean shouldCaptureEntity() {
@@ -254,7 +243,7 @@ final class InteractionPacketState extends BasicPacketState implements IEntitySp
                 if (!spawnEggs.isEmpty()) {
                     if (ShouldFire.SPAWN_ENTITY_EVENT) {
                         try (CauseStackManager.StackFrame frame2 = Sponge.getCauseStackManager().pushCauseFrame()) {
-                            frame2.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PROJECTILE);
+                            frame2.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.SPAWN_EGG);
                             frame2.pushCause(usedSnapshot);
                             SpongeCommonEventFactory.callSpawnEntity(spawnEggs, phaseContext);
                         }
