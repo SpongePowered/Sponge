@@ -67,8 +67,8 @@ public class MixinBlockStaticLiquid {
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(pos);
             frame.pushCause(this);
-            context.getOwner().ifPresent(owner -> frame.addContext(EventContextKeys.OWNER, owner));
-            context.getNotifier().ifPresent(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
+            context.applyOwnerIfAvailable(owner -> frame.addContext(EventContextKeys.OWNER, owner));
+            context.applyNotifierIfAvailable(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
 
             ChangeBlockEvent.Pre event = SpongeEventFactory.createChangeBlockEventPre(frame.getCurrentCause(), Collections.singletonList(new Location<>((org.spongepowered.api.world.World) world, VecHelper.toVector3i(pos))));
             if (!SpongeImpl.postEvent(event)) {

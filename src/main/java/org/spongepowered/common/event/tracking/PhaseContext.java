@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.Tuple;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -42,6 +41,7 @@ import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.context.BlockItemDropsSupplier;
 import org.spongepowered.common.event.tracking.context.BlockItemEntityDropsSupplier;
 import org.spongepowered.common.event.tracking.context.CaptureBlockPos;
@@ -60,13 +60,13 @@ import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 
-import java.util.ArrayDeque;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
@@ -366,8 +366,20 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         return Optional.ofNullable(this.owner);
     }
 
+    public void applyOwnerIfAvailable(Consumer<User> consumer) {
+        if (this.owner != null) {
+            consumer.accept(this.owner);
+        }
+    }
+
     public Optional<User> getNotifier() {
         return Optional.ofNullable(this.notifier);
+    }
+
+    public void applyNotifierIfAvailable(Consumer<User> consumer) {
+        if (this.notifier != null) {
+            consumer.accept(this.notifier);
+        }
     }
 
     public List<Entity> getCapturedEntities() throws IllegalStateException {
@@ -590,7 +602,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     }
 
     public boolean isCapturingBlockItemDrops() {
-        return this.blockItemDropsSupplier != null;
+        return this.blockItemDropsSupplier != null || this.blockEntitySpawnSupplier != null;
     }
 
     public void printTrace(PrettyPrinter printer) {
@@ -600,4 +612,32 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         }
     }
 
+    public boolean allowsBlockPosCapturing() {
+        return this.captureBlockPos != null;
+    }
+
+    public boolean captureEntity(Entity entity) {
+        // So, first we want to check if we're capturing per block position
+        if (this.captureBlockPos != null && this.blockEntitySpawnSupplier != null) {
+            // If we are, then go ahead and check if we can put it into the desired lists
+            final Optional<BlockPos> pos = this.captureBlockPos.getPos();
+            if (pos.isPresent()) {
+                // Is it an item entity and are we capturing per block entity item spawns?
+                if (entity instanceof EntityItem && this.blockItemEntityDropsSupplier != null) {
+                    return this.blockItemEntityDropsSupplier.get().get(pos.get()).add((EntityItem) entity);
+                }
+                // Otherwise just default to per block entity spawns
+                return this.blockEntitySpawnSupplier.get().get(pos.get()).add(EntityUtil.toNative(entity));
+
+            }
+            // Or check if we're just bulk capturing item entities
+        } else if (entity instanceof EntityItem && this.capturedItemsSupplier != null) {
+            return this.capturedItemsSupplier.get().add((EntityItem) entity);
+            // Or last check of whether entities in general are being captured
+        } else if (this.capturedEntitiesSupplier != null) {
+            return this.capturedEntitiesSupplier.get().add(entity);
+        }
+        // Throw an exception if we're not capturing at all but the state says we do?
+        throw new IllegalStateException("Expected to capture entities, but we aren't capturing them.");
+    }
 }

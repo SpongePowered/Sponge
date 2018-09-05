@@ -540,7 +540,6 @@ public final class EntityUtil {
     }
 
     public static boolean processEntitySpawnsFromEvent(PhaseContext<?> context, SpawnEntityEvent destruct) {
-        final User creator = context.getNotifier().orElse(context.getOwner().orElse(null));
         return processEntitySpawnsFromEvent(destruct, ENTITY_CREATOR_FUNCTION.apply(context));
     }
 

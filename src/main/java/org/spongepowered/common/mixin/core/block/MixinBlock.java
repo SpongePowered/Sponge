@@ -136,7 +136,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Shadow protected boolean enableStats;
 
     @Inject(method = "<init>*", at = @At("RETURN"))
-    public void onConstruction(CallbackInfo ci) {
+    private void onConstruction(CallbackInfo ci) {
         // Determine which blocks can avoid executing un-needed event logic
         // This will allow us to avoid running event logic for blocks that do nothing such as grass collisions
         // -- blood
@@ -257,7 +257,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     }
 
     @SuppressWarnings("unchecked")
-    protected ImmutableMap.Builder<Class<? extends Property<?, ?>>, Property<?, ?>> populateSpongeProperties(
+    private ImmutableMap.Builder<Class<? extends Property<?, ?>>, Property<?, ?>> populateSpongeProperties(
         ImmutableMap.Builder<Class<? extends Property<?, ?>>, Property<?, ?>> builder, IBlockState blockState) {
         for (Property<?, ?> property : SpongeImpl.getPropertyRegistry().getPropertiesFor((BlockState) blockState)) {
             builder.put((Class<? extends Property<?, ?>>) property.getClass(), property);
@@ -281,18 +281,20 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     }
 
     @Inject(method = "harvestBlock", at = @At(value = "HEAD"))
-    public void onHarvestBlockHead(net.minecraft.world.World worldIn, EntityPlayer player, BlockPos pos, IBlockState state, @Nullable TileEntity te, @Nullable ItemStack stack, CallbackInfo ci) {
+    private void onHarvestBlockHead(net.minecraft.world.World worldIn, EntityPlayer player, BlockPos pos, IBlockState state, @Nullable TileEntity te,
+        @Nullable ItemStack stack, CallbackInfo ci) {
         // ExtraUtilities 2 uses a fake player to mine blocks for its Quantum Quarry and captures all block drops.
         // It also expects block drops to trigger an event during the quarry TE tick. As our captures are processed
         // post tick, we must avoid capturing to ensure the quarry can capture items properly.
         // If a fake player is detected with an item in hand, avoid captures
-        if (stack != null && SpongeImplHooks.isFakePlayer(player) && player.getHeldItemMainhand() != null) {
+        if (stack != null && SpongeImplHooks.isFakePlayer(player) && player.getHeldItemMainhand() != null && !player.getHeldItemMainhand().isEmpty()) {
             canCaptureItems = false;
         }
     }
 
     @Inject(method = "harvestBlock", at = @At(value = "RETURN"))
-    public void onHarvestBlockReturn(net.minecraft.world.World worldIn, EntityPlayer player, BlockPos pos, IBlockState state, @Nullable TileEntity te, @Nullable ItemStack stack, CallbackInfo ci) {
+    private void onHarvestBlockReturn(net.minecraft.world.World worldIn, EntityPlayer player, BlockPos pos, IBlockState state,
+        @Nullable TileEntity te, @Nullable ItemStack stack, CallbackInfo ci) {
         canCaptureItems = true;
     }
 
@@ -340,13 +342,24 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
         }
         EntityItem entityitem = new EntityItem(worldIn, xPos, yPos, zPos, stack);
         entityitem.setDefaultPickupDelay();
+        // Sponge Start - Tell the phase state to track this position, and then unset it.
+        final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
+
+        if (context.allowsBulkEntityCaptures() && context.allowsBlockPosCapturing()) {
+            context.getCaptureBlockPos().setPos(pos);
+            worldIn.spawnEntity(entityitem);
+            context.getCaptureBlockPos().setPos(null);
+            return;
+        }
+        // Sponge End - if we're not capturing positions, then just go ahead and proceed as normal
         worldIn.spawnEntity(entityitem);
 
     }
 
     // This method can be called directly by pistons, mods, etc. so the hook must go here
     @Inject(method = "dropBlockAsItemWithChance", at = @At(value = "HEAD"), cancellable = true)
-    public void onDropBlockAsItemWithChanceHead(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, float chance, int fortune, CallbackInfo ci) {
+    private void onDropBlockAsItemWithChanceHead(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, float chance, int fortune,
+        CallbackInfo ci) {
         if (!((IMixinWorld) worldIn).isFake()) {
             if (PhaseTracker.getInstance().getCurrentState() == BlockPhase.State.RESTORING_BLOCKS) {
                 ci.cancel();
@@ -356,20 +369,15 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
             final IMixinWorldServer mixinWorld = (IMixinWorldServer) worldIn;
             final PhaseTracker phaseTracker = PhaseTracker.getInstance();
             final IPhaseState<?> currentState = phaseTracker.getCurrentState();
-            final boolean shouldEnterBlockDropPhase = !phaseTracker.getCurrentContext().isCapturingBlockItemDrops() && !currentState.alreadyProcessingBlockItemDrops() && !currentState.isWorldGeneration();
+            final PhaseContext<?> currentContext = phaseTracker.getCurrentContext();
+            final boolean shouldEnterBlockDropPhase = !currentContext.isCapturingBlockItemDrops() && !currentState.alreadyProcessingBlockItemDrops() && !currentState.isWorldGeneration();
             if (shouldEnterBlockDropPhase) {
                 // TODO: Change source to LocatableBlock
                 PhaseContext<?> context = BlockPhase.State.BLOCK_DROP_ITEMS.createPhaseContext()
                         .source(mixinWorld.createSpongeBlockSnapshot(state, state, pos, BlockChangeFlags.PHYSICS_OBSERVER));
                 // use current notifier and owner if available
-                User notifier = phaseTracker.getCurrentContext().getNotifier().orElse(null);
-                User owner = phaseTracker.getCurrentContext().getOwner().orElse(null);
-                if (notifier != null) {
-                    context.notifier(notifier);
-                }
-                if (owner != null) {
-                    context.owner(owner);
-                }
+                currentContext.applyNotifierIfAvailable(context::notifier);
+                currentContext.applyOwnerIfAvailable(context::owner);
                 context.buildAndSwitch();
             }
         }
