@@ -488,6 +488,8 @@ public class DataRegistrar {
 
         DataUtil.registerDualProcessor(DirectionalData.class, SpongeDirectionalData.class, ImmutableDirectionalData.class, ImmutableSpongeDirectionalData.class,
                 new ShulkerDirectionalDataProcessor());
+        DataUtil.registerDualProcessor(DirectionalData.class, SpongeDirectionalData.class, ImmutableDirectionalData.class, ImmutableSpongeDirectionalData.class,
+                new ShulkerBulletDirectionalDataProcessor());
 
         // Item Processors
 

@@ -28,28 +28,20 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTargetedEntityData;
 import org.spongepowered.api.data.manipulator.mutable.entity.TargetedEntityData;
-import org.spongepowered.api.data.value.mutable.OptionalValue;
+import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeTargetedEntityData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
-import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-import java.util.Optional;
-
-import javax.annotation.Nullable;
-
-public final class SpongeTargetedEntityData extends AbstractSingleData<Optional<Entity>, TargetedEntityData, ImmutableTargetedEntityData>
+public final class SpongeTargetedEntityData extends AbstractSingleData<Entity, TargetedEntityData, ImmutableTargetedEntityData>
         implements TargetedEntityData {
 
     public SpongeTargetedEntityData() {
-        this(Optional.empty());
+        this(null);
     }
 
-    public SpongeTargetedEntityData(@Nullable Entity value) {
-        this(Optional.ofNullable(value));
-    }
-
-    public SpongeTargetedEntityData(Optional<Entity> value) {
+    public SpongeTargetedEntityData(Entity value) {
         super(TargetedEntityData.class, value, Keys.TARGETED_ENTITY);
     }
 
@@ -59,7 +51,7 @@ public final class SpongeTargetedEntityData extends AbstractSingleData<Optional<
     }
 
     @Override
-    protected OptionalValue<?> getValueGetter() {
+    protected Value<?> getValueGetter() {
         return this.value();
     }
 
@@ -69,8 +61,8 @@ public final class SpongeTargetedEntityData extends AbstractSingleData<Optional<
     }
 
     @Override
-    public OptionalValue<Entity> value() {
-        return new SpongeOptionalValue<>(this.usedKey, this.getValue());
+    public Value<Entity> value() {
+        return new SpongeValue<>(this.usedKey, this.getValue());
     }
 
     @Override

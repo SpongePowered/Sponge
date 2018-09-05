@@ -27,32 +27,26 @@ package org.spongepowered.common.data.manipulator.immutable.entity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTargetedEntityData;
 import org.spongepowered.api.data.manipulator.mutable.entity.TargetedEntityData;
-import org.spongepowered.api.data.value.immutable.ImmutableOptionalValue;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeTargetedEntityData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeOptionalValue;
-
-import java.util.Optional;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 import javax.annotation.Nullable;
 
-public final class ImmutableSpongeTargetedEntityData extends AbstractImmutableSingleData<Optional<Entity>, ImmutableTargetedEntityData, TargetedEntityData>
+public final class ImmutableSpongeTargetedEntityData extends AbstractImmutableSingleData<Entity, ImmutableTargetedEntityData, TargetedEntityData>
         implements ImmutableTargetedEntityData {
 
-    private final ImmutableOptionalValue<Entity> immutableValue;
+    private final ImmutableValue<Entity> immutableValue;
 
     public ImmutableSpongeTargetedEntityData(@Nullable Entity value) {
-        this(Optional.ofNullable(value));
-    }
-
-    public ImmutableSpongeTargetedEntityData(Optional<Entity> value) {
         super(ImmutableTargetedEntityData.class, value, Keys.TARGETED_ENTITY);
-        this.immutableValue = new ImmutableSpongeOptionalValue<>(this.usedKey, value);
+        this.immutableValue = new ImmutableSpongeValue<>(this.usedKey, value);
     }
 
     @Override
-    protected ImmutableOptionalValue<Entity> getValueGetter() {
+    protected ImmutableValue<Entity> getValueGetter() {
         return this.value();
     }
 
@@ -62,7 +56,7 @@ public final class ImmutableSpongeTargetedEntityData extends AbstractImmutableSi
     }
 
     @Override
-    public ImmutableOptionalValue<Entity> value() {
+    public ImmutableValue<Entity> value() {
         return this.immutableValue;
     }
 }

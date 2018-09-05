@@ -30,9 +30,8 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.RayTraceResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.mutable.entity.TargetedEntityData;
-import org.spongepowered.api.data.value.mutable.OptionalValue;
-import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.data.manipulator.mutable.block.DirectionalData;
+import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.ShulkerBullet;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
@@ -42,20 +41,20 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeTargetedEntityData;
+import org.spongepowered.common.data.manipulator.mutable.block.SpongeDirectionalData;
 import org.spongepowered.common.data.util.DirectionResolver;
-import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IEntityTargetingEntity;
+import org.spongepowered.common.interfaces.entity.projectile.IMixinShulkerBullet;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
 
 @Mixin(EntityShulkerBullet.class)
-public abstract class MixinEntityShulkerBullet extends MixinEntity implements ShulkerBullet, IEntityTargetingEntity {
+public abstract class MixinEntityShulkerBullet extends MixinEntity implements ShulkerBullet, IEntityTargetingEntity, IMixinShulkerBullet {
 
     @Shadow @Nullable private net.minecraft.entity.Entity target;
     @Shadow @Nullable private EnumFacing direction;
@@ -67,18 +66,27 @@ public abstract class MixinEntityShulkerBullet extends MixinEntity implements Sh
     @Nullable public ProjectileSource projectileSource;
 
     @Override
-    public Direction getDirection() {
+    public Direction getBulletDirection() {
         return this.direction != null ? DirectionResolver.getFor(this.direction) : Direction.NONE;
     }
 
     @Override
-    public TargetedEntityData getTargetData() {
-        return new SpongeTargetedEntityData((Entity) this.target);
+    public void setBulletDirection(Direction direction) {
+        if (direction == Direction.NONE) {
+            this.direction = null;
+        } else {
+            this.direction = DirectionResolver.getFor(direction);
+        }
     }
 
     @Override
-    public OptionalValue<Entity> target() {
-        return new SpongeOptionalValue<>(Keys.TARGETED_ENTITY, Optional.ofNullable((Entity) this.target));
+    public DirectionalData getDirectionalData() {
+        return new SpongeDirectionalData(getBulletDirection());
+    }
+
+    @Override
+    public Value<Direction> direction() {
+        return new SpongeValue<>(Keys.DIRECTION, Direction.NONE, getBulletDirection());
     }
 
     @Override
@@ -125,6 +133,7 @@ public abstract class MixinEntityShulkerBullet extends MixinEntity implements Sh
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         manipulators.add(getTargetData());
+        manipulators.add(getDirectionalData());
     }
 
     @Inject(method = "bulletHit", at = @At("HEAD"), cancellable = true)

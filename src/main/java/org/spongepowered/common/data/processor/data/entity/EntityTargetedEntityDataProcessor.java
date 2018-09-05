@@ -30,38 +30,37 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTargetedEntityData;
 import org.spongepowered.api.data.manipulator.mutable.entity.TargetedEntityData;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableOptionalValue;
-import org.spongepowered.api.data.value.mutable.OptionalValue;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeTargetedEntityData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeOptionalValue;
-import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.interfaces.IEntityTargetingEntity;
 
 import java.util.Optional;
 
-public final class EntityTargetedEntityDataProcessor extends AbstractEntitySingleDataProcessor<Entity, Optional<org.spongepowered.api.entity.Entity>,
-        OptionalValue<org.spongepowered.api.entity.Entity>, TargetedEntityData, ImmutableTargetedEntityData> {
+public final class EntityTargetedEntityDataProcessor extends AbstractEntitySingleDataProcessor<Entity, org.spongepowered.api.entity.Entity,
+        Value<org.spongepowered.api.entity.Entity>, TargetedEntityData, ImmutableTargetedEntityData> {
 
     public EntityTargetedEntityDataProcessor() {
         super(Entity.class, Keys.TARGETED_ENTITY);
     }
 
     @Override
-    protected boolean set(Entity dataHolder, Optional<org.spongepowered.api.entity.Entity> value) {
-        ((IEntityTargetingEntity) dataHolder).setTargetedEntity((Entity) value.orElse(null));
+    protected boolean set(Entity dataHolder, org.spongepowered.api.entity.Entity value) {
+        ((IEntityTargetingEntity) dataHolder).setTargetedEntity((Entity) value);
         return true;
     }
 
     @Override
-    protected Optional<Optional<org.spongepowered.api.entity.Entity>> getVal(Entity dataHolder) {
-        return Optional.of(Optional.ofNullable((org.spongepowered.api.entity.Entity) ((IEntityTargetingEntity) dataHolder).getTargetedEntity()));
+    protected Optional<org.spongepowered.api.entity.Entity> getVal(Entity dataHolder) {
+        return Optional.ofNullable((org.spongepowered.api.entity.Entity) ((IEntityTargetingEntity) dataHolder).getTargetedEntity());
     }
 
     @Override
-    protected ImmutableOptionalValue<org.spongepowered.api.entity.Entity> constructImmutableValue(
-            Optional<org.spongepowered.api.entity.Entity> value) {
-        return new ImmutableSpongeOptionalValue<>(this.key, value);
+    protected ImmutableValue<org.spongepowered.api.entity.Entity> constructImmutableValue(org.spongepowered.api.entity.Entity value) {
+        return new ImmutableSpongeValue<>(this.key, value);
     }
 
     @Override
@@ -70,17 +69,23 @@ public final class EntityTargetedEntityDataProcessor extends AbstractEntitySingl
     }
 
     @Override
-    protected OptionalValue<org.spongepowered.api.entity.Entity> constructValue(Optional<org.spongepowered.api.entity.Entity> actualValue) {
-        return new SpongeOptionalValue<>(this.key, actualValue);
+    protected Value<org.spongepowered.api.entity.Entity> constructValue(org.spongepowered.api.entity.Entity actualValue) {
+        return new SpongeValue<>(this.key, actualValue);
     }
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        return DataTransactionResult.failNoData();
+        Optional<org.spongepowered.api.entity.Entity> maybeTargetedEntity = container.get(Keys.TARGETED_ENTITY);
+        if (maybeTargetedEntity.isPresent()) {
+            ((IEntityTargetingEntity) container).setTargetedEntity(null);
+            return DataTransactionResult.successRemove(new ImmutableSpongeValue<>(Keys.TARGETED_ENTITY, maybeTargetedEntity.get()));
+        }
+
+        return DataTransactionResult.successNoData();
     }
 
     @Override
     protected TargetedEntityData createManipulator() {
-        return new SpongeTargetedEntityData();
+        return new SpongeTargetedEntityData(null);
     }
 }
