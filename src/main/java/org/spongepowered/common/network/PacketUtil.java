@@ -71,13 +71,10 @@ public class PacketUtil {
                 } else {
                     final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(packetPlayer.inventory.getItemStack());
                     IPhaseState<? extends PacketContext<?>> packetState = TrackingPhases.PACKET.getStateForPacket(packetIn);
-                    if (packetState == null) {
-                        throw new IllegalArgumentException("Found a null packet phase for packet: " + packetIn.getClass());
-                    }
                     // At the very least make an unknown packet state case.
-                    PhaseContext<?> context = PacketPhase.General.UNKNOWN.createPhaseContext();
+                    final PacketContext<?> context = packetState.createPhaseContext();
                     if (!TrackingPhases.PACKET.isPacketInvalid(packetIn, packetPlayer, packetState)) {
-                        context = packetState.createPhaseContext()
+                        context
                             .source(packetPlayer)
                             .packetPlayer(packetPlayer)
                             .packet(packetIn)
