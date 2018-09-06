@@ -26,8 +26,10 @@ package org.spongepowered.common.mixin.core.world.chunk;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.BitArray;
 import net.minecraft.world.chunk.BlockStateContainer;
+import net.minecraft.world.chunk.IBlockStatePalette;
 import net.minecraft.world.chunk.NibbleArray;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -90,8 +92,76 @@ public abstract class MixinBlockStateContainer {
      * @return
      */
     @Redirect(method = "getSerializedSize", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/BitArray;size()I"))
-    public int onGetStorageSize$FixVanillaBug(BitArray bits) {
+    private int onGetStorageSize$FixVanillaBug(BitArray bits) {
         return bits.getBackingLongArray().length;
+    }
+
+    @Redirect(method = "write", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/IBlockStatePalette;write(Lnet/minecraft/network/PacketBuffer;)V"))
+    private void onPaletteWrite(IBlockStatePalette palette, PacketBuffer buffer) {
+        final int serializedSize = palette.getSerializedSize();
+        final int index = buffer.writerIndex();
+        try {
+            palette.write(buffer);
+        } catch (Exception e) {
+            throw new RuntimeException("Attempted to serialize a block palette of size: " + serializedSize);
+        }
+        final int newIndex = buffer.writerIndex();
+        if (index + serializedSize != newIndex) {
+            throw new IllegalStateException("Expected to have written " + serializedSize +  " for a block palette, but instead wrote " +  (newIndex - index));
+        }
+    }
+
+    /**
+     * @author gabizou - September 6th, 2018
+     * @reason Instead of allowing the crash to occur usually when the packet buffer is attempting
+     * to write a long array entry that exceeds the maximum capacity, then we should do a better job
+     * at detecting it by performing checks on expected sizes versus actual new sizes. If a long value
+     * ended up causing the whole thing to go kaput, this will find out.
+     *
+     * @param buffer The buffer
+     * @param backingArray The backing array
+     * @return The buffer, if successful.
+     */
+    @Redirect(method = "write", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/PacketBuffer;writeLongArray([J)Lnet/minecraft/network/PacketBuffer;"))
+    private PacketBuffer onSpongeWriteLongArrayPacketBuffer(PacketBuffer buffer, long[] backingArray) {
+        final int expectedSize = PacketBuffer.getVarIntSize(backingArray.length);
+        final int lengthIndex = buffer.writerIndex();
+
+        try {
+            // This is what is written first, the long array length as a var int.
+            buffer.writeVarInt(backingArray.length);
+        } catch (Exception e) { // If there was an exception, at least we'll be making sure it's logged where...
+            throw new RuntimeException("Attempted to serialize the backing long array size but couldn't! Expected writer index("
+                                       + lengthIndex + ") with expected size("+ expectedSize + ") and current writer index(" + buffer.writerIndex() +")");
+        }
+        final int currentIndex = buffer.writerIndex();
+        if (lengthIndex + expectedSize != currentIndex) {
+            throw new IllegalStateException("Attempted to serialize a long array size incorrectly! Expected index to start " + lengthIndex + " with var int size of " + expectedSize + " but got " + (currentIndex - lengthIndex));
+        }
+
+        // Now onto the target of the issue, writing the backing array to the buffer...
+        final int arrayIndex = buffer.writerIndex();
+        final int expectedArraySize = backingArray.length * 8; // this is what the array should be stored as regardless
+
+        for (int i = 0; i < backingArray.length; i++) {
+            final int bufferIndex = buffer.writerIndex();
+            final long value = backingArray[i];
+            try {
+                buffer.writeLong(value);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to serialize chunk data to buffer. Attempted to write entry long[" + i + "]: " + value + "at writer index: " + bufferIndex + " with size " + 8);
+            }
+            final int newIndex = buffer.writerIndex();
+            if (newIndex - bufferIndex != 8) {
+                throw new IllegalStateException("Attempted to write a long to a packet buffer at index: " + bufferIndex + " with expected end of size of 8, however found " + (newIndex - bufferIndex) + " instead.");
+            }
+        }
+        final int postIndex = buffer.writerIndex();
+        final int difference = (arrayIndex + expectedArraySize) - postIndex;
+        if (difference != 0) {
+            throw new IllegalStateException("Potentially leaking or pruning data... Started index at " + arrayIndex + " with expected end being " + arrayIndex + expectedArraySize + " but got " + postIndex + " with a difference of " + difference);
+        }
+        return buffer;
     }
 
 }
