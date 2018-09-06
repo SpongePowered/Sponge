@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.entity.player;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.mojang.authlib.GameProfile;
+import net.minecraft.block.Block;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -55,6 +56,7 @@ import net.minecraft.stats.StatBase;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.CooldownTracker;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.FoodStats;
@@ -102,6 +104,7 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthData;
 import org.spongepowered.common.data.processor.common.ExperienceHolderUtils;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -110,6 +113,7 @@ import org.spongepowered.common.interfaces.ITargetedLocation;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.entity.MixinEntityLivingBase;
 import org.spongepowered.common.registry.type.event.DamageSourceRegistryModule;
@@ -317,7 +321,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     }
 
     @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;isPlayerSleeping()Z"))
-    public boolean onIsPlayerSleeping(EntityPlayer self) {
+    private boolean onSpongeIsPlayerSleeping(EntityPlayer self) {
         if (self.isPlayerSleeping()) {
             if (!((IMixinWorld) this.world).isFake()) {
                 Sponge.getCauseStackManager().pushCause(this);
@@ -337,7 +341,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
      * This prevents sounds from being sent to the server by players who are vanish.
      */
     @Redirect(method = "playSound", at = @At(value = "INVOKE", target = WORLD_PLAY_SOUND_AT))
-    public void playSound(World world, EntityPlayer player, double d1, double d2, double d3, SoundEvent sound, SoundCategory category, float volume, float pitch) {
+    private void spongePlaySound(World world, EntityPlayer player, double d1, double d2, double d3, SoundEvent sound, SoundCategory category, float volume, float pitch) {
         if (!this.isVanished()) {
             this.world.playSound(player, d1, d2, d3, sound, category, volume, pitch);
         }
@@ -364,6 +368,53 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
         if (!((Object) this instanceof EntityPlayerMP)) {
             this.world.setSpawnPoint(VecHelper.toBlockPos(this.targetedLocation));
         }
+    }
+
+    /**
+     * @author gabizou - September 4th, 2018
+     * @reason Bucket placement and other placements can be "detected"
+     * for pre change events prior to them actually processing their logic,
+     * this in effect can prevent item duplication issues when the block
+     * changes are cancelled, but inventory is already modified. It would
+     * be considered that during interaction packets, inventory is monitored,
+     * however, sometimes that isn't enough.
+     *
+     * @param stack The item stack in use
+     * @param block The target block
+     * @param pos The target position
+     * @param facing The facing direction of the player
+     * @param sameStack The very same stack as the first parameter
+     * @return Check if the player is a fake player, if it is, then just do
+     *  the same return, otherwise, throw an event first and then return if the
+     *  event is cancelled, or the stack.canPlaceOn
+     */
+    @Redirect(method = "canPlayerEdit", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;canPlaceOn(Lnet/minecraft/block/Block;)Z"))
+    private boolean canEditSpongeThrowChangePreEvent(ItemStack stack, Block block, BlockPos pos, EnumFacing facing, ItemStack sameStack) {
+        // Lazy evaluation, if the stack isn't placeable anyways, might as well not
+        // call the logic.
+        if (!stack.canPlaceOn(block)) {
+            return false;
+        }
+        // If we're going to throw an event, then do it.
+        // Just sanity checks, if the player is not in a managed world, then don't bother either.
+        // some fake players may exist in pseudo worlds as well, which means we don't want to
+        // process on them since the world is not a valid world to plugins.
+        if (this.world instanceof IMixinWorld && !((IMixinWorld) this.world).isFake() && ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
+            // Note that this can potentially cause phase contexts to auto populate frames
+            // we shouldn't rely so much on them, but sometimes the extra information is provided
+            // through this method.
+            try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                // Go ahead and add the item stack in use, just in the event the current phase contexts don't provide
+                // that information.
+                frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(stack));
+                // Then go ahead and call the event and return if it was cancelled
+                // if it was cancelled, then there should be no changes needed to roll back
+                return !SpongeCommonEventFactory.callChangeBlockEventPre(((IMixinWorldServer) this.world), pos, this).isCancelled();
+            }
+        }
+        // Otherwise, if all else is ignored, or we're not throwing events, we're just going to return the
+        // default value: true.
+        return true;
     }
 
     /**

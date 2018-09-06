@@ -42,9 +42,11 @@ import net.minecraft.item.ItemDoor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.server.SPacketBlockChange;
 import net.minecraft.network.play.server.SPacketCloseWindow;
+import net.minecraft.network.play.server.SPacketSetSlot;
 import net.minecraft.server.management.PlayerInteractionManager;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -61,10 +63,16 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Slice;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerInteractionManager;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 
@@ -76,6 +84,80 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
     @Shadow private GameType gameType;
 
     @Shadow public abstract boolean isCreative();
+
+    /**
+     * @author gabizou - September 5th, 2018
+     * @reason Due to the way that buckets and the like can be handled
+     * on the client, often times we need to cancel the item stack usage
+     * due to server side cancellation logic that may not exist on the client.
+     * Therefor, the cancellation of possible block changes doesn't take
+     * effect, and therefor requires telling the client to set back the item
+     * in hand.
+     *
+     * @param actionResult The action result returned from useItemRightClick, which if
+     *  the result is FAIL, then we should be setting the item in hand back.
+     * @param player The player
+     * @param worldIn The world
+     * @param stack The stack
+     * @param hand The hand
+     * @return The result, but we will inject a "send inventory to player packet" fi it was failed
+     */
+    @Redirect(
+        method = "processRightClick",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/util/ActionResult;getType()Lnet/minecraft/util/EnumActionResult;",
+            ordinal = 0 // We need to target only the first getType, since
+                      // there's technically two getTypes that are being caught by the slice
+
+        ),
+        slice = @Slice(
+            from = @At(
+                value = "INVOKE",
+                target = "Lnet/minecraft/item/ItemStack;getMaxItemUseDuration()I",
+                ordinal = 0 // This targets the first max use duration in the massive if statement.
+            ),
+            to = @At(
+                value = "FIELD",
+                target = "Lnet/minecraft/util/EnumActionResult;FAIL:Lnet/minecraft/util/EnumActionResult;"
+            )
+        )
+    )
+    private EnumActionResult spongeGetResultCheckForFailure(ActionResult<ItemStack> actionResult, EntityPlayer player, net.minecraft.world.World worldIn, ItemStack stack, EnumHand hand) {
+        // Sanity checks on the world being used (hey, i don't know the rules about clients...
+        // and if the world is in fact a responsible server world.
+        final EnumActionResult result = actionResult.getType();
+        if (!(worldIn instanceof IMixinWorld) || ((IMixinWorld) worldIn).isFake()) {
+            return result;
+        }
+
+        // Otherwise, let's find out if it's a failed result
+        if (result == EnumActionResult.FAIL && player instanceof EntityPlayerMP) {
+            // Then, go ahead and tell the client about the change.
+            // A few comments about this:
+            // window id of -2 sets the player's inventory slot instead of the "held cursor"
+            // Then, we need to get the slot index for the held item, which is always
+            // playerMP.inventory.currentItem
+            final EntityPlayerMP playerMP = (EntityPlayerMP) player;
+            final SPacketSetSlot packetToSend;
+            if (hand == EnumHand.MAIN_HAND) {
+                // And here, my friends, is why the offhand slot is so stupid....
+                packetToSend = new SPacketSetSlot(-2, player.inventory.currentItem, actionResult.getResult());
+            } else {
+                // This is the type of stupidity that comes from finding out that offhand slots
+                // are always the last remaining slot index remaining of the player's overall inventory.
+                // And this has to be done to avoid duplications by inadvertently setting the main hand
+                // item.
+                final int offhandSlotIndex = player.inventory.getSizeInventory() - 1;
+                packetToSend = new SPacketSetSlot(-2, offhandSlotIndex, actionResult.getResult());
+            }
+            // And finally, set the packet.
+            playerMP.connection.sendPacket(packetToSend);
+            // this is a full stop re-sync to the client, code above might not actually matter.
+            playerMP.sendContainerToPlayer(player.inventoryContainer);
+        }
+        return result;
+    }
 
     /**
      * @author Aaron1011
