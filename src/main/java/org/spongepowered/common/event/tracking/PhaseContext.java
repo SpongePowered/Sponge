@@ -606,18 +606,16 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
 
     public boolean captureEntity(Entity entity) {
         // So, first we want to check if we're capturing per block position
-        if (this.captureBlockPos != null && this.blockEntitySpawnSupplier != null) {
+        if (this.captureBlockPos != null && this.captureBlockPos.getPos().isPresent() && this.blockEntitySpawnSupplier != null) {
             // If we are, then go ahead and check if we can put it into the desired lists
             final Optional<BlockPos> pos = this.captureBlockPos.getPos();
-            if (pos.isPresent()) {
-                // Is it an item entity and are we capturing per block entity item spawns?
-                if (entity instanceof EntityItem && this.blockItemEntityDropsSupplier != null) {
-                    return this.blockItemEntityDropsSupplier.get().get(pos.get()).add((EntityItem) entity);
-                }
-                // Otherwise just default to per block entity spawns
-                return this.blockEntitySpawnSupplier.get().get(pos.get()).add(EntityUtil.toNative(entity));
-
+            // Is it an item entity and are we capturing per block entity item spawns?
+            if (entity instanceof EntityItem && this.blockItemEntityDropsSupplier != null) {
+                return this.blockItemEntityDropsSupplier.get().get(pos.get()).add((EntityItem) entity);
             }
+            // Otherwise just default to per block entity spawns
+            return this.blockEntitySpawnSupplier.get().get(pos.get()).add(EntityUtil.toNative(entity));
+
             // Or check if we're just bulk capturing item entities
         } else if (entity instanceof EntityItem && this.capturedItemsSupplier != null) {
             return this.capturedItemsSupplier.get().add((EntityItem) entity);
