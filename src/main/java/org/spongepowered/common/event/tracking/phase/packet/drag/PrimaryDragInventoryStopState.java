@@ -33,14 +33,14 @@ import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
+import org.spongepowered.common.event.tracking.phase.packet.PacketConstants;
 
 import java.util.List;
 
 public final class PrimaryDragInventoryStopState extends DragInventoryStopState {
 
     public PrimaryDragInventoryStopState() {
-        super("PRIMARY_DRAG_INVENTORY_STOP", PacketPhase.DRAG_MODE_PRIMARY_BUTTON);
+        super("PRIMARY_DRAG_INVENTORY_STOP", PacketConstants.DRAG_MODE_PRIMARY_BUTTON);
     }
 
     @Override

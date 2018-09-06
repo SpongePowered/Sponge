@@ -22,22 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.packet.drag;
+package org.spongepowered.common.event.tracking.phase.packet.player;
 
-import org.spongepowered.common.event.tracking.phase.packet.inventory.BasicInventoryPacketState;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.Packet;
+import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
+import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
 
-public abstract class NamedInventoryState extends BasicInventoryPacketState {
-
-    private final String name;
-
-    public NamedInventoryState(String name, int stateId, int stateMask) {
-        super(stateId, stateMask);
-        this.name = name;
-    }
+public final class ChatPacketState extends BasicPacketState {
 
     @Override
-    public String toString() {
-        return this.name;
+    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, BasicPacketContext context) {
+//        CPacketChatMessage chatMessage = (CPacketChatMessage) packet;
+        // unused, to be removed and re-located when phase context is cleaned up
+//        if (chatMessage.getMessage().contains("kill")) {
+//            context.add(NamedCause.of(InternalNamedCauses.General.DESTRUCT_ITEM_DROPS, true));
+//        }
     }
-
 }

@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.packet.drag;
+package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
 import net.minecraft.entity.player.EntityPlayerMP;
 import org.spongepowered.api.Sponge;
@@ -37,16 +37,16 @@ import org.spongepowered.common.event.tracking.phase.packet.PacketConstants;
 
 import java.util.List;
 
-public final class MiddleDragInventoryStopState extends DragInventoryStopState {
+public final class SecondaryInventoryShiftClickState extends BasicInventoryPacketState {
 
-    public MiddleDragInventoryStopState() {
-        super("MIDDLE_DRAG_INVENTORY_STOP", PacketConstants.DRAG_MODE_MIDDLE_BUTTON);
+    public SecondaryInventoryShiftClickState() {
+        super(PacketConstants.MODE_SHIFT_CLICK | PacketConstants.BUTTON_SECONDARY, PacketConstants.MASK_NORMAL);
     }
 
     @Override
     public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
             List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, int usedButton) {
-        return SpongeEventFactory.createClickInventoryEventDragMiddle(Sponge.getCauseStackManager().getCurrentCause(), transaction, openContainer, slotTransactions);
-    }
+        return SpongeEventFactory.createClickInventoryEventShiftSecondary(Sponge.getCauseStackManager().getCurrentCause(), transaction, openContainer, slotTransactions);
 
+    }
 }

@@ -45,7 +45,6 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.IEntitySpecificItemDropsState;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
@@ -66,7 +65,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
-final class CommandState extends GeneralState<CommandPhaseContext> implements IEntitySpecificItemDropsState<CommandPhaseContext> {
+final class CommandState extends GeneralState<CommandPhaseContext> {
 
     private final BiConsumer<StackFrame, CommandPhaseContext> COMMAND_MODIFIER = super.getFrameModifier()
         .andThen((frame, ctx) -> {
@@ -203,4 +202,10 @@ final class CommandState extends GeneralState<CommandPhaseContext> implements IE
     public boolean doesCaptureEntitySpawns() {
         return false;
     }
+
+    @Override
+    public boolean tracksEntitySpecificDrops() {
+        return true;
+    }
+
 }

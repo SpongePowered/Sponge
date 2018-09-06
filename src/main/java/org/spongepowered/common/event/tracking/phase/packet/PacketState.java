@@ -64,7 +64,7 @@ public abstract class PacketState<P extends PacketContext<P>> implements IPhaseS
         }
     });
 
-    PacketState() {
+    protected PacketState() {
 
     }
 

@@ -22,13 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.packet.drag;
+package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.Packet;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -37,16 +41,41 @@ import org.spongepowered.common.event.tracking.phase.packet.PacketConstants;
 
 import java.util.List;
 
-public final class MiddleDragInventoryStopState extends DragInventoryStopState {
+public final class DropItemOutsideWindowState extends BasicInventoryPacketState {
 
-    public MiddleDragInventoryStopState() {
-        super("MIDDLE_DRAG_INVENTORY_STOP", PacketConstants.DRAG_MODE_MIDDLE_BUTTON);
+    public DropItemOutsideWindowState() {
+        super(PacketConstants.MODE_CLICK | PacketConstants.BUTTON_PRIMARY | PacketConstants.BUTTON_SECONDARY | PacketConstants.CLICK_OUTSIDE_WINDOW);
+    }
+
+    @Override
+    public boolean doesCaptureEntityDrops(InventoryPacketContext context) {
+        return true;
+    }
+
+    @Override
+    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, InventoryPacketContext context) {
+        super.populateContext(playerMP, packet, context);
     }
 
     @Override
     public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
             List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, int usedButton) {
-        return SpongeEventFactory.createClickInventoryEventDragMiddle(Sponge.getCauseStackManager().getCurrentCause(), transaction, openContainer, slotTransactions);
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+
+            for (Entity currentEntity : capturedEntities) {
+                currentEntity.setCreator(playerMP.getUniqueID());
+            }
+            return usedButton == PacketConstants.PACKET_BUTTON_PRIMARY_ID
+                   ? SpongeEventFactory.createClickInventoryEventDropOutsidePrimary(frame.getCurrentCause(), transaction, capturedEntities,
+                        openContainer, slotTransactions)
+                   : SpongeEventFactory.createClickInventoryEventDropOutsideSecondary(frame.getCurrentCause(), transaction, capturedEntities,
+                        openContainer, slotTransactions);
+        }
     }
 
+    @Override
+    public boolean ignoresItemPreMerging() {
+        return true;
+    }
 }

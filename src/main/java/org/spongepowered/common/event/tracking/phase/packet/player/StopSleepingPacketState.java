@@ -22,22 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.packet.drag;
+package org.spongepowered.common.event.tracking.phase.packet.player;
 
-import org.spongepowered.common.event.tracking.phase.packet.inventory.BasicInventoryPacketState;
+import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
 
-public abstract class NamedInventoryState extends BasicInventoryPacketState {
+public final class StopSleepingPacketState extends BasicPacketState {
 
-    private final String name;
-
-    public NamedInventoryState(String name, int stateId, int stateMask) {
-        super(stateId, stateMask);
-        this.name = name;
-    }
-
-    @Override
-    public String toString() {
-        return this.name;
+    public StopSleepingPacketState() {
     }
 
 }

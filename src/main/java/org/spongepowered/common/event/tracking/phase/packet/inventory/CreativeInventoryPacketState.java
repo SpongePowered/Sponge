@@ -22,31 +22,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.packet.drag;
+package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
 import net.minecraft.entity.player.EntityPlayerMP;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.Transaction;
-import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
-import org.spongepowered.api.item.inventory.Container;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.common.event.tracking.phase.packet.PacketConstants;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
+import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
 
-import java.util.List;
+public final class CreativeInventoryPacketState extends BasicPacketState {
 
-public final class MiddleDragInventoryStopState extends DragInventoryStopState {
-
-    public MiddleDragInventoryStopState() {
-        super("MIDDLE_DRAG_INVENTORY_STOP", PacketConstants.DRAG_MODE_MIDDLE_BUTTON);
+    @Override
+    public boolean ignoresItemPreMerging() {
+        return true;
     }
 
     @Override
-    public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
-            List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, int usedButton) {
-        return SpongeEventFactory.createClickInventoryEventDragMiddle(Sponge.getCauseStackManager().getCurrentCause(), transaction, openContainer, slotTransactions);
+    public boolean doesCaptureEntityDrops(BasicPacketContext context) {
+        // We specifically capture because the entities are already
+        // being captured in a drop event, and therefor will be
+        // spawned manually into the world by the creative event handling.
+        return true;
     }
 
+    @Override
+    public void unwind(BasicPacketContext context) {
+        final EntityPlayerMP player = context.getPacketPlayer();
+        context.getCapturedItemsSupplier()
+            .acceptAndClearIfNotEmpty(items -> {
+                try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                    frame.pushCause(player);
+                    SpongeCommonEventFactory.callDropItemDrop(items, context);
+                }
+            });
+    }
 }

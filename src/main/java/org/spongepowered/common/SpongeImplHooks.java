@@ -45,6 +45,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.network.Packet;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumFacing;
@@ -487,5 +488,10 @@ public final class SpongeImplHooks {
         // that the game is still being loaded. This is needed to support initialization
         // events with cause tracking.
         return !Sponge.isServerAvailable() || Sponge.getServer().isMainThread();
+    }
+
+    // Overridden by MixinPacketUtil for exploit check
+    public static boolean creativeExploitCheck(Packet<?> packetIn, EntityPlayerMP playerMP) {
+        return false;
     }
 }

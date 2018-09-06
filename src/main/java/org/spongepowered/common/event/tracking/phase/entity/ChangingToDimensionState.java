@@ -99,4 +99,10 @@ final class ChangingToDimensionState extends EntityPhaseState<TeleportingContext
         teleportingEntity.world.profiler.endSection();
         return teleportingEntity;
     }
+
+    @Override
+    public boolean tracksEntitySpecificDrops() {
+        return true;
+    }
+
 }

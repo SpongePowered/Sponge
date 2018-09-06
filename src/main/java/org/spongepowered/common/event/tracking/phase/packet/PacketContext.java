@@ -38,14 +38,14 @@ import javax.annotation.Nullable;
 @SuppressWarnings("unchecked")
 public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
 
-    @Nullable EntityPlayerMP packetPlayer;
+    @Nullable protected EntityPlayerMP packetPlayer;
     @Nullable Packet<?> packet;
     @Nullable private ItemStackSnapshot cursor;
     @Nullable private ItemStack itemUsed;
     @Nullable private BlockSnapshot targetBlock;
     private boolean ignoreCreative;
 
-    PacketContext(PacketState<? extends P> state) {
+    protected PacketContext(PacketState<? extends P> state) {
         super(state);
     }
 

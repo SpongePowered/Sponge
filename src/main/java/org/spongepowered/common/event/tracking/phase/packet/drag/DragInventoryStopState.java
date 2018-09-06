@@ -33,8 +33,8 @@ import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.phase.packet.InventoryPacketContext;
-import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
+import org.spongepowered.common.event.tracking.phase.packet.PacketConstants;
+import org.spongepowered.common.event.tracking.phase.packet.inventory.InventoryPacketContext;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.item.recipe.crafting.SpongeCraftingRecipeRegistry;
 
@@ -43,7 +43,7 @@ import java.util.List;
 public abstract class DragInventoryStopState extends NamedInventoryState {
 
     public DragInventoryStopState(String name, int buttonId) {
-        super(name, PacketPhase.MODE_DRAG | buttonId | PacketPhase.DRAG_STATUS_STOPPED | PacketPhase.CLICK_OUTSIDE_WINDOW, PacketPhase.MASK_DRAG);
+        super(name, PacketConstants.MODE_DRAG | buttonId | PacketConstants.DRAG_STATUS_STOPPED | PacketConstants.CLICK_OUTSIDE_WINDOW, PacketConstants.MASK_DRAG);
     }
 
     @Override
