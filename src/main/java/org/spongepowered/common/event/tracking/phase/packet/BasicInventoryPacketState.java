@@ -112,9 +112,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
     @Override
     public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, InventoryPacketContext context) {
         ((IMixinContainer) playerMP.openContainer).setCaptureInventory(true);
-        context.addBlockCaptures()
-               .addEntityCaptures()
-               .addEntityDropCaptures();
+        context.addEntityDropCaptures();
     }
 
     @Override

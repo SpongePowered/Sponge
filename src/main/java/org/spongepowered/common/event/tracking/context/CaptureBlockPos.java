@@ -43,10 +43,6 @@ public final class CaptureBlockPos {
     public CaptureBlockPos() {
     }
 
-    public CaptureBlockPos(@Nullable BlockPos pos) {
-        this.pos = pos;
-    }
-
     public Optional<BlockPos> getPos() {
         return Optional.ofNullable(this.pos);
     }
