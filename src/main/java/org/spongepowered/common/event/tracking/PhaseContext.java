@@ -183,20 +183,8 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
 
     public P addCaptures() {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
-        this.checkBlockSuppliers();
-        checkState(this.capturedItemsSupplier == null, "CapturedItemsSupplier is already set!");
-        checkState(this.capturedEntitiesSupplier == null, "CapturedEntitiesSupplier is already set!");
-        checkState(this.capturedItemStackSupplier == null, "CapturedItemStackSupplier is already set!");
-
-        this.blocksSupplier = new CapturedBlocksSupplier();
-        this.blockItemEntityDropsSupplier = new BlockItemEntityDropsSupplier();
-        this.blockItemDropsSupplier = new BlockItemDropsSupplier();
-        this.capturedItemsSupplier = new CapturedItemsSupplier();
-        this.capturedEntitiesSupplier = new CapturedEntitiesSupplier();
-        this.capturedItemStackSupplier = new CapturedItemStackSupplier();
-
-        this.blockEntitySpawnSupplier = new CapturedBlockEntitySpawnSupplier();
-        this.captureBlockPos = new CaptureBlockPos();
+        addBlockCaptures();
+        addEntityCaptures();
         return (P) this;
     }
 
