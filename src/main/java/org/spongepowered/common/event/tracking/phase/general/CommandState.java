@@ -29,9 +29,12 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -41,17 +44,23 @@ import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.api.util.Identifiable;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhaseState;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
+import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.WorldManager;
 
 import java.util.ArrayList;
@@ -90,6 +99,20 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
     @Override
     public boolean ignoresItemPreMerging() {
         return true;
+    }
+
+    @Override
+    public void postBlockTransactionApplication(BlockChange blockChange, Transaction<BlockSnapshot> transaction, CommandPhaseContext context) {
+        final User user = Sponge.getCauseStackManager().getCurrentCause().first(Player.class).get();
+        final Location<World> location = transaction.getFinal().getLocation().get();
+        final BlockPos pos = VecHelper.toBlockPos(location);
+        final IMixinChunk spongeChunk = (IMixinChunk) ((WorldServer) location.getExtent()).getChunk(pos);
+
+        if (blockChange == BlockChange.PLACE) {
+            spongeChunk.addTrackedBlockPosition((Block) transaction.getFinal().getState().getType(), pos, user, PlayerTracker.Type.OWNER);
+        }
+
+        spongeChunk.addTrackedBlockPosition((Block) transaction.getFinal().getState().getType(), pos, user, PlayerTracker.Type.NOTIFIER);
     }
 
     @Override

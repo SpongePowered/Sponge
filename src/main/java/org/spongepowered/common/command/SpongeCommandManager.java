@@ -47,6 +47,7 @@ import org.spongepowered.api.command.InvocationCommandException;
 import org.spongepowered.api.command.args.ArgumentParseException;
 import org.spongepowered.api.command.dispatcher.Disambiguator;
 import org.spongepowered.api.command.dispatcher.SimpleDispatcher;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.command.SendCommandEvent;
@@ -321,6 +322,10 @@ public class SpongeCommandManager implements CommandManager {
                          .source(source)
                          .addCaptures()
                          .addEntityDropCaptures()) {
+                if (source instanceof User) {
+                    context.owner((User) source);
+                    context.notifier((User) source);
+                }
                 context.buildAndSwitch();
                 if (source instanceof EntityPlayer) {
                     // Enable player inventory capture
