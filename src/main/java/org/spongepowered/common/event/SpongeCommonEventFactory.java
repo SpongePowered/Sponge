@@ -169,7 +169,8 @@ public class SpongeCommonEventFactory {
     // Set if the player's held item changes during InteractBlockEvent.Secondary
     public static boolean playerInteractItemChanged = false;
     // Set if any of the events fired during interaction with a block (open
-    public static boolean interactBlockEventCancelled = false;
+    public static boolean interactBlockLeftClickEventCancelled = false;
+    public static boolean interactBlockRightClickEventCancelled = false;
 
     public static int lastAnimationPacketTick = 0;
     // For animation packet

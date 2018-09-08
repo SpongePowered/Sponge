@@ -611,12 +611,12 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             // Only do a restore if something actually changed. The client does an identity check ('==')
             // to determine if it should continue using an itemstack. If we always resend the itemstack, we end up
             // cancelling item usage (e.g. eating food) that occurs while targeting a block
-            if (!ItemStack.areItemStacksEqual(itemStack, player.getHeldItem(hand)) && SpongeCommonEventFactory.interactBlockEventCancelled) {
+            if (!ItemStack.areItemStacksEqual(itemStack, player.getHeldItem(hand)) && SpongeCommonEventFactory.interactBlockRightClickEventCancelled) {
                 PacketPhaseUtil.handlePlayerSlotRestore((EntityPlayerMP) player, itemStack, hand);
             }
         }
         SpongeCommonEventFactory.playerInteractItemChanged = false;
-        SpongeCommonEventFactory.interactBlockEventCancelled = false;
+        SpongeCommonEventFactory.interactBlockRightClickEventCancelled = false;
         return actionResult;
     }
 

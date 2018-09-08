@@ -64,10 +64,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinContainer;
@@ -236,7 +234,7 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
                 }
             }
 
-            SpongeCommonEventFactory.interactBlockEventCancelled = true;
+            SpongeCommonEventFactory.interactBlockRightClickEventCancelled = true;
             return EnumActionResult.FAIL;
         }
         // Sponge End
@@ -323,7 +321,7 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
                 ((IMixinContainer) player.openContainer).setOpenLocation(blockSnapshot.getLocation().orElse(null));
                 if (!SpongeCommonEventFactory.callInteractInventoryOpenEvent(player)) {
                     result = EnumActionResult.FAIL;
-                    SpongeCommonEventFactory.interactBlockEventCancelled = true;
+                    SpongeCommonEventFactory.interactBlockRightClickEventCancelled = true;
                 }
             }
         }

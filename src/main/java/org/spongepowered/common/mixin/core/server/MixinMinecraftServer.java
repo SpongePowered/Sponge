@@ -587,13 +587,11 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                 }
 
                 Sponge.getCauseStackManager().pushCause(player);
-                if (!player.getHeldItemMainhand().isEmpty()) {
-                    if (SpongeCommonEventFactory.callInteractItemEventPrimary(player, player.getHeldItemMainhand(), EnumHand.MAIN_HAND,
-                            result == null ? null : VecHelper.toVector3d(result.hitVec), blockSnapshot).isCancelled()) {
-                        SpongeCommonEventFactory.lastAnimationPacketTick = 0;
-                        Sponge.getCauseStackManager().popCause();
-                        return;
-                    }
+                if (SpongeCommonEventFactory.callInteractItemEventPrimary(player, player.getHeldItemMainhand(), EnumHand.MAIN_HAND,
+                        result == null ? null : VecHelper.toVector3d(result.hitVec), blockSnapshot).isCancelled()) {
+                    SpongeCommonEventFactory.lastAnimationPacketTick = 0;
+                    Sponge.getCauseStackManager().popCause();
+                    return;
                 }
 
                 if (side != null) {
