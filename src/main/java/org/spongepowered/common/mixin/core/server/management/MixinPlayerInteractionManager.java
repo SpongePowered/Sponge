@@ -35,6 +35,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.inventory.Container;
+import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
@@ -58,6 +59,7 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.item.inventory.slot.EquipmentSlot;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
@@ -208,7 +210,7 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
             SpongeCommonEventFactory.playerInteractItemChanged = true;
         }
 
-        SpongeCommonEventFactory.lastInteractItemOnBlockCancelled = event.getUseItemResult() == Tristate.FALSE;
+        SpongeCommonEventFactory.lastInteractItemOnBlockCancelled = event.isCancelled() || event.getUseItemResult() == Tristate.FALSE;
 
         if (event.isCancelled()) {
             final IBlockState state = (IBlockState) currentSnapshot.getState();
@@ -235,6 +237,8 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
             }
 
             SpongeCommonEventFactory.interactBlockRightClickEventCancelled = true;
+
+            ((EntityPlayerMP) player).sendContainerToPlayer(player.inventoryContainer);
             return EnumActionResult.FAIL;
         }
         // Sponge End
