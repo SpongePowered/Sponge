@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.item.inventory.util;
 
-import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.inventory.InventoryLargeChest;
 import net.minecraft.tileentity.TileEntity;

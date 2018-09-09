@@ -33,12 +33,15 @@ import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 public class MutableLensCollectionImpl extends AbstractList<Lens> implements MutableLensCollection {
 
     protected final List<LensHandle> lenses;
+    private Map<Lens, LensHandle> handleMap = new HashMap<>();
     
     private final boolean allowRemove;
     
@@ -52,12 +55,14 @@ public class MutableLensCollectionImpl extends AbstractList<Lens> implements Mut
     
     @Override
     public void add(Lens lens, InventoryProperty<?, ?>... properties) {
-        int idx = this.indexOf(lens);
-        if (idx == -1) {
-            this.lenses.add(new LensHandle(lens, properties));
+        LensHandle handle = handleMap.get(lens);
+        if (handle == null) {
+            handle = new LensHandle(lens, properties);
+            this.lenses.add(handle);
+            handleMap.put(lens, handle);
         } else {
             for (InventoryProperty<?, ?> property : properties) {
-                this.getHandle(idx).setProperty(property);
+                handle.setProperty(property);
             }
         }
     }
