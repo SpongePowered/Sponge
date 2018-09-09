@@ -50,7 +50,7 @@ public class MutableLensCollection implements LensCollection {
      * @param properties The properties to add.
      */
     public void add(Lens lens, InventoryProperty<?, ?>... properties) {
-        if (!this.lenses.contains(lens)) {
+        if (!this.handles.containsKey(lens)) {
             this.lenses.add(lens);
         }
         LensHandle handle = this.handles.computeIfAbsent(lens, l -> new LensHandle(lens));
