@@ -76,6 +76,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.living.humanoid.player.RespawnPlayerEvent;
@@ -273,22 +274,25 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         Player player = (Player) playerIn;
         Transform<World> fromTransform = player.getTransform().setExtent((World) worldServer);
 
-        Sponge.getCauseStackManager().pushCause(player);
-        ClientConnectionEvent.Login loginEvent = SpongeEventFactory.createClientConnectionEventLogin(
-                Sponge.getCauseStackManager().getCurrentCause(), fromTransform, fromTransform, (RemoteConnection) netManager,
+        final ClientConnectionEvent.Login loginEvent;
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(user);
+            loginEvent = SpongeEventFactory.createClientConnectionEventLogin(
+                frame.getCurrentCause(), fromTransform, fromTransform, (RemoteConnection) netManager,
                 new MessageEvent.MessageFormatter(disconnectMessage), (org.spongepowered.api.profile.GameProfile) gameprofile, player, false
-        );
+            );
 
-        if (kickReason != null) {
-            loginEvent.setCancelled(true);
-        }
+            if (kickReason != null) {
+                loginEvent.setCancelled(true);
+            }
 
-        if (SpongeImpl.postEvent(loginEvent)) {
-            Sponge.getCauseStackManager().popCause();
-            this.disconnectClient(netManager, loginEvent.isMessageCancelled() ? Optional.empty() : Optional.of(loginEvent.getMessage()), gameprofile);
-            return;
+            if (SpongeImpl.postEvent(loginEvent)) {
+                Sponge.getCauseStackManager().popCause();
+                final Optional<Text> message = loginEvent.isMessageCancelled() ? Optional.empty() : Optional.of(loginEvent.getMessage());
+                this.disconnectClient(netManager, message, gameprofile);
+                return;
+            }
         }
-        Sponge.getCauseStackManager().popCause();
 
         // Sponge end
 
