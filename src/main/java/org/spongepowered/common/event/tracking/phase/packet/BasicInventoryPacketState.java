@@ -166,6 +166,9 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
             final ClickInventoryEvent inventoryEvent;
 
             if (slotTransactions.isEmpty() && packetIn.getSlotId() >= 0) {
+                if (player.openContainer.windowId != packetIn.getWindowId()) {
+                    return; // Container mismatch - ignore this.
+                }
                 if (!mixinContainer.capturePossible()) {
                     // TODO When this happens a mod probably overrides Container#detectAndSendChanges
                     // We are currently unable to detect changes in this case.
