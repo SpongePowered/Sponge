@@ -34,6 +34,7 @@ import net.minecraft.inventory.SlotCrafting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.network.play.server.SPacketSetSlot;
+import net.minecraft.util.NonNullList;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.item.inventory.CraftItemEvent;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -49,6 +50,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
@@ -115,6 +117,14 @@ public abstract class MixinSlotCrafting extends Slot {
         stack.shrink(1);
     }
 
+    @Redirect(method = "onTake", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/crafting/CraftingManager;getRemainingItems(Lnet/minecraft/inventory/InventoryCrafting;Lnet/minecraft/world/World;)Lnet/minecraft/util/NonNullList;"))
+    private NonNullList<ItemStack> onGetRemainingItems(InventoryCrafting craftMatrix, net.minecraft.world.World worldIn) {
+        if (this.lastRecipe == null) {
+            return NonNullList.withSize(craftMatrix.getSizeInventory(), ItemStack.EMPTY);
+        }
+        return CraftingManager.getRemainingItems(craftMatrix, worldIn);
+    }
+
     /**
      * Create CraftItemEvent.Post result is also handled by
      * {@link MixinContainer#redirectTransferStackInSlot} or
@@ -172,12 +182,18 @@ public abstract class MixinSlotCrafting extends Slot {
         ((IMixinContainer) container).setFirePreview(true);
         this.craftedStack = null;
 
-
-        SlotTransaction last = new SlotTransaction(craftingInventory.getResult(), ItemStackSnapshot.NONE, ItemStackUtil.snapshotOf(this.getStack()));
-
         List<SlotTransaction> previewTransactions = ((IMixinContainer) container).getPreviewTransactions();
+        if (this.craftMatrix.isEmpty()) {
+            return; // CraftMatrix is empty and/or no transaction present. Do not fire Preview.
+        }
+
+        SlotTransaction last = previewTransactions.isEmpty()
+                ? new SlotTransaction(craftingInventory.getResult(), ItemStackSnapshot.NONE, ItemStackUtil.snapshotOf(this.getStack()))
+                : previewTransactions.get(0);
+
         CraftingRecipe newRecipe = Sponge.getRegistry().getCraftingRecipeRegistry()
                 .findMatchingRecipe(craftingInventory.getCraftingGrid(), ((World) player.world)).orElse(null);
+
         SpongeCommonEventFactory.callCraftEventPre(thePlayer, craftingInventory, last, newRecipe, container, previewTransactions);
         previewTransactions.clear();
 
