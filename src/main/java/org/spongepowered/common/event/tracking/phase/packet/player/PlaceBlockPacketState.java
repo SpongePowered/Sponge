@@ -128,14 +128,15 @@ public final class PlaceBlockPacketState extends BasicPacketState {
         context.getCapturedBlockSupplier()
             .acceptAndClearIfNotEmpty(
                 originalBlocks -> {
-                    Sponge.getCauseStackManager().pushCause(player);
-                    boolean success = TrackingUtil.processBlockCaptures(originalBlocks, this, context);
-                    if (!success && snapshot != ItemTypeRegistryModule.NONE_SNAPSHOT) {
-                        Sponge.getCauseStackManager().pushCause(player);
-                        EnumHand hand = ((CPacketPlayerTryUseItemOnBlock) packet).getHand();
-                        PacketPhaseUtil.handlePlayerSlotRestore(player, (net.minecraft.item.ItemStack) itemStack, hand);
+                    try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                        frame.pushCause(player);
+                        boolean success = TrackingUtil.processBlockCaptures(originalBlocks, this, context);
+                        if (!success && snapshot != ItemTypeRegistryModule.NONE_SNAPSHOT) {
+                            frame.pushCause(player);
+                            EnumHand hand = ((CPacketPlayerTryUseItemOnBlock) packet).getHand();
+                            PacketPhaseUtil.handlePlayerSlotRestore(player, (net.minecraft.item.ItemStack) itemStack, hand);
+                        }
                     }
-                    Sponge.getCauseStackManager().popCause();
                 });
         context.getCapturedItemStackSupplier().acceptAndClearIfNotEmpty(drops -> {
             final List<Entity> entities =

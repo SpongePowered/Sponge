@@ -103,17 +103,23 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
 
     @Override
     public void postBlockTransactionApplication(BlockChange blockChange, Transaction<BlockSnapshot> transaction, CommandPhaseContext context) {
-        final User user = Sponge.getCauseStackManager().getCurrentCause().first(Player.class).get();
-        final Location<World> location = transaction.getFinal().getLocation().get();
-        final BlockPos pos = VecHelper.toBlockPos(location);
-        final IMixinChunk spongeChunk = (IMixinChunk) ((WorldServer) location.getExtent()).getChunk(pos);
+        // We want to investigate if there is a user on the cause stack
+        // and if possible, associate the notiifer/owner based on the change flag
+        // We have to check if there is a player, because command blocks can be triggered
+        // without player interaction.
+        // Fixes https://github.com/SpongePowered/SpongeForge/issues/2442
+        Sponge.getCauseStackManager().getCurrentCause().first(User.class).ifPresent(user -> {
+            final Location<World> location = transaction.getFinal().getLocation().get();
+            final BlockPos pos = VecHelper.toBlockPos(location);
+            final IMixinChunk spongeChunk = (IMixinChunk) ((WorldServer) location.getExtent()).getChunk(pos);
 
-        if (blockChange == BlockChange.PLACE) {
-            spongeChunk.addTrackedBlockPosition((Block) transaction.getFinal().getState().getType(), pos, user, PlayerTracker.Type.OWNER);
-        }
+            if (blockChange == BlockChange.PLACE) {
+                spongeChunk.addTrackedBlockPosition((Block) transaction.getFinal().getState().getType(), pos, user, PlayerTracker.Type.OWNER);
+            }
 
-        spongeChunk.addTrackedBlockPosition((Block) transaction.getFinal().getState().getType(), pos, user, PlayerTracker.Type.NOTIFIER);
-    }
+            spongeChunk.addTrackedBlockPosition((Block) transaction.getFinal().getState().getType(), pos, user, PlayerTracker.Type.NOTIFIER);
+        });
+   }
 
     @Override
     public void associateNeighborStateNotifier(CommandPhaseContext context, BlockPos sourcePos, Block block, BlockPos notifyPos,
