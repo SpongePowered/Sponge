@@ -237,7 +237,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     private static final String PROFILER_ESS = "Lnet/minecraft/profiler/Profiler;endStartSection(Ljava/lang/String;)V";
 
     private static final Vector3i BLOCK_MIN = new Vector3i(-30000000, 0, -30000000);
-    private static final Vector3i BLOCK_MAX = new Vector3i(30000000, 256, 30000000).sub(1, 1, 1);
+    private static final Vector3i BLOCK_MAX = new Vector3i(30000000, 256, 30000000);
 
     private static final EnumSet<EnumFacing> NOTIFY_DIRECTIONS = EnumSet.of(EnumFacing.WEST, EnumFacing.EAST, EnumFacing.DOWN, EnumFacing.UP, EnumFacing.NORTH, EnumFacing.SOUTH);
 
