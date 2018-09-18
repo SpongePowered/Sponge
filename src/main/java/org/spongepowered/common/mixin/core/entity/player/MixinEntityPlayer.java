@@ -207,9 +207,17 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
      */
     private void recalculateTotalExperience() {
         if (!this.dontRecalculateExperience) {
-            int newExperienceInLevel = (int) (this.experience * this.xpBarCap());
-            this.experienceTotal = ExperienceHolderUtils.xpAtLevel(this.experienceLevel) + newExperienceInLevel;
-            this.experience = (float) newExperienceInLevel / this.xpBarCap();
+            boolean isInaccurate = ExperienceHolderUtils.getLevelForExp(this.experienceTotal) != this.experienceLevel;
+            if (!isInaccurate) {
+                float experienceLess = (this.getExperienceSinceLevel() - 0.5f) / this.xpBarCap();
+                float experienceMore = (this.getExperienceSinceLevel() + 0.5f) / this.xpBarCap();
+                isInaccurate = this.experience < experienceLess || this.experience > experienceMore;
+            }
+            if (isInaccurate) {
+                int newExperienceInLevel = (int) (this.experience * this.xpBarCap());
+                this.experienceTotal = ExperienceHolderUtils.xpAtLevel(this.experienceLevel) + newExperienceInLevel;
+                this.experience = (float) newExperienceInLevel / this.xpBarCap();
+            }
         }
     }
 
