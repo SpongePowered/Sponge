@@ -56,9 +56,15 @@ public final class WorldGenConstants {
                 // use it as a generation populator directly then we would lose the custom logic of the
                 // extending class so we wrap it instead so that the provideChunk method is called.
                 if(mixind.isInstance(cp)) {
-                    // TODO We could do a check here to see if the chunk provider directly implements
-                    // GenerationPopulator despite extending a vanilla chunk provider so that a mod could
-                    // implement our genpop interface and use the vanilla provider.
+                    // This checks that if the custom generator in fact does directly implement our interface,
+                    // with the assurance (according to Reflection API) that the target class is actually
+                    // extending the api type interface. This allows for mods that use our api and extend
+                    // a mixed in type target to still implement our interface.
+                    for (Class<?> anInterface : cp.getClass().getInterfaces()) {
+                        if (api_type.equals(anInterface)) {
+                            return true;
+                        }
+                    }
                     return false;
                 }
             }

@@ -60,7 +60,9 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.world.gen.IChunkProviderOverworld;
 import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
 import org.spongepowered.common.util.VecHelper;
@@ -248,16 +250,76 @@ public abstract class MixinChunkGeneratorOverworld implements IChunkProvider, Ge
      * @author gabizou - February 1st, 2016
      * @author blood - February 6th, 2017 - Only redirect if vanilla generator. 
      *   This fixes the FuturePack mod as it extends the ChunkProviderOverworld generator.
+     * @author gabizou - September 18th, 2018 - Updated modification to redirect for vanilla
+     *   generators would re-apply the same modified math for the x and z values.
      *
      * Redirects this method call to just simply return the current biomes, as
      * necessitated by @Deamon's changes. This avoids an overwrite entirely.
+     *
+     * @param provider The provider
+     * @param biomes The biomes field
+     * @param x The modified x position (the x is already multiplied by 4 subtracted by 2)
+     * @param z The modified z position (the z is already multiplied by 4 subtracted by 2)
+     * @param width The defined width (already 10)
+     * @param height The defined height (already 10)
      */
     @Redirect(method = "setBlocksInChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/biome/BiomeProvider;getBiomesForGeneration([Lnet/minecraft/world/biome/Biome;IIII)[Lnet/minecraft/world/biome/Biome;"))
-    private Biome[] onSetBlocksGetBiomesIgnore(BiomeProvider manager, Biome[] biomes, int x, int z, int width, int height) {
+    private Biome[] onSetBlocksGetBiomesIgnore(BiomeProvider provider, Biome[] biomes, int x, int z, int width, int height) {
         if (this.isVanilla) {
             return biomes;
         }
-        return this.world.getBiomeProvider().getBiomesForGeneration(this.biomesForGeneration, x * 4 - 2, z * 4 - 2, 10, 10);
+        // Re-use the same values passed in since the biomes parameter
+        return provider.getBiomesForGeneration(biomes, x, z, width, height);
+    }
+
+    /**
+     * @author gabizou - September 18th, 2018
+     * @reason An attempt at isolating an NPE that is occurring with
+     * {@link WoodlandMansion.Start#create(net.minecraft.world.World, ChunkGeneratorOverworld, Random, int, int)}
+     * and the subsequent
+     * {@link ChunkGeneratorOverworld#setBlocksInChunk(int, int, ChunkPrimer)}.
+     * Since line numbers cannot be trusted between the crash reports and the targeted bytecode,
+     * I've elected to mitigate the issue entirely by redirecting the biome for generation array usage
+     * to eliminate possible null values stored in the array during said world generation. The issue is
+     * that since the biome array is constructed in the redirect above, or other places (sponge world gen),
+     * it is not quite clear to determine from the stacktraces alone whether the chunk generator is vanilla,
+     * not vanilla, extended, sponge managed, mod modified, or simply something else in the massive target method
+     * that is producing an NPE.
+     * {@see https://github.com/SpongePowered/SpongeForge/issues/1946}
+     *
+     * @param array The biome array being accessed (equivalent to this.biomesForGeneration)
+     * @param index The index calculated for the biome in search
+     * @return The biome, guaranteed not to be null
+     */
+    @Redirect(
+        method = "generateHeightmap",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/world/gen/ChunkGeneratorOverworld;biomesForGeneration:[Lnet/minecraft/world/biome/Biome;",
+            args = "array=get",
+            ordinal = 0
+        ),
+        slice = @Slice(
+            from = @At( // Target the upper most field modification that isn't duplicated (like maxnoisewhatever)
+                value = "FIELD",
+                target = "Lnet/minecraft/world/gen/ChunkGeneratorSettings;heightScale:F"
+            ),
+            to = @At(
+                value = "FIELD", // And then target the second field access right after the second array access that we encounter.
+                target = "Lnet/minecraft/world/gen/ChunkGeneratorSettings;biomeDepthOffSet:F"
+            )
+        )
+    )
+    private Biome onGetBiomeDuringHeightmapCalculation(Biome[] array, int index) {
+        Biome biome = array[index];
+        if (biome == null) {
+            // TODO - maybe log the issue to better find out who is storing nulls?
+            // Only problem with this being set like this is the possibility of setting different biomes
+            // than the biomes for the neighboring blocks. Of course, that point is invalidated by the fact that
+            // the biome retrieved from the generated biome array is null.
+            biome = array[index] = Biomes.PLAINS; // At the very least, avoid future nullability issues, strange world generation modifications that are occuring if this is reached.
+        }
+        return biome;
     }
 
 }
