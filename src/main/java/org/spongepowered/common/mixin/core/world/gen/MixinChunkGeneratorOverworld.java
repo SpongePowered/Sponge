@@ -266,6 +266,10 @@ public abstract class MixinChunkGeneratorOverworld implements IChunkProvider, Ge
     @Redirect(method = "setBlocksInChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/biome/BiomeProvider;getBiomesForGeneration([Lnet/minecraft/world/biome/Biome;IIII)[Lnet/minecraft/world/biome/Biome;"))
     private Biome[] onSetBlocksGetBiomesIgnore(BiomeProvider provider, Biome[] biomes, int x, int z, int width, int height) {
         if (this.isVanilla) {
+            if (biomes == null) {
+                // construct the biomes array according to the method above, allows api biome pops to be used
+                return getBiomesFromGenerator((x + 2) / 4, (z + 2) / 4); // Undo the math modification
+            }
             return biomes;
         }
         // Re-use the same values passed in since the biomes parameter
@@ -296,8 +300,7 @@ public abstract class MixinChunkGeneratorOverworld implements IChunkProvider, Ge
         at = @At(
             value = "FIELD",
             target = "Lnet/minecraft/world/gen/ChunkGeneratorOverworld;biomesForGeneration:[Lnet/minecraft/world/biome/Biome;",
-            args = "array=get",
-            ordinal = 0
+            args = "array=get"
         ),
         slice = @Slice(
             from = @At( // Target the upper most field modification that isn't duplicated (like maxnoisewhatever)
