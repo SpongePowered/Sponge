@@ -146,6 +146,14 @@ public final class SpongeCauseStackManager implements CauseStackManager {
         enforceMainThread();
         checkNotNull(obj, "obj");
         this.cached_cause = null;
+        if (this.cause.peek() == obj) {
+            // We don't want to be pushing duplicate objects
+            // to the root and secondary entry of the cause.
+            // This avoids some odd corner cases of the phase tracking system pushing
+            // objects without being able to definitively say if the object is already pushed
+            // without generating cause frames forcibly.
+            return this;
+        }
         this.cause.push(obj);
         return this;
     }

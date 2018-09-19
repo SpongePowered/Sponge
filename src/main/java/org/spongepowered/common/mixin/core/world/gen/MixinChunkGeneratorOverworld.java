@@ -31,10 +31,10 @@ import net.minecraft.init.Blocks;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.chunk.ChunkPrimer;
-import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.ChunkGeneratorOverworld;
 import net.minecraft.world.gen.ChunkGeneratorSettings;
+import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.gen.MapGenBase;
 import net.minecraft.world.gen.structure.MapGenMineshaft;
 import net.minecraft.world.gen.structure.MapGenScatteredFeature;
@@ -62,7 +62,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.world.gen.IChunkProviderOverworld;
 import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
 import org.spongepowered.common.util.VecHelper;
@@ -78,7 +77,6 @@ import java.util.Random;
 @Mixin(ChunkGeneratorOverworld.class)
 public abstract class MixinChunkGeneratorOverworld implements IChunkProvider, GenerationPopulator, IPopulatorProvider, IChunkProviderOverworld {
 
-    @Shadow @Final private double[] heightMap;
     @Shadow @Final private boolean mapFeaturesEnabled;
     @Shadow @Final private net.minecraft.world.World world;
     @Shadow private ChunkGeneratorSettings settings;
