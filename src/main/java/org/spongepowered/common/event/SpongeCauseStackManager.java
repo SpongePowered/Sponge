@@ -44,6 +44,7 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.util.ThreadUtil;
 
 import java.util.ArrayDeque;
+import java.util.Arrays;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -65,6 +66,7 @@ public final class SpongeCauseStackManager implements CauseStackManager {
     private Map<EventContextKey<?>, Object> ctx = Maps.newHashMap();
 
     private int min_depth = 0;
+    private int[] duplicateCauses = new int[100];
     @Nullable private Cause cached_cause;
     @Nullable private EventContext cached_ctx;
     private boolean pendingProviders = false;
@@ -152,6 +154,15 @@ public final class SpongeCauseStackManager implements CauseStackManager {
             // This avoids some odd corner cases of the phase tracking system pushing
             // objects without being able to definitively say if the object is already pushed
             // without generating cause frames forcibly.
+            // BUT, we do want to at least mark the index of the duplicated object for later popping (if some consumer is doing manual push and pops)
+            final int dupedIndex = this.cause.size();
+            if (this.duplicateCauses.length <= dupedIndex) {
+                // Make sure that we have enough space. If not, increase by 50%
+                this.duplicateCauses = Arrays.copyOf(this.duplicateCauses, (int) (dupedIndex * 1.5));
+            }
+            // Increase the value by 1 since we've obviously reached a new duplicate. This is to allow for
+            // additional duplicates to be "popped" with proper indexing.
+            this.duplicateCauses[dupedIndex] = this.duplicateCauses[dupedIndex] + 1;
             return this;
         }
         this.cause.push(obj);
@@ -161,9 +172,18 @@ public final class SpongeCauseStackManager implements CauseStackManager {
     @Override
     public Object popCause() {
         enforceMainThread();
-        if (this.cause.size() <= this.min_depth) {
+        final int size = this.cause.size();
+        // First, check for duplicate causes. If there are duplicates,
+        // we can artificially "pop" by just peeking.
+        final int dupeCause = this.duplicateCauses[size];
+        if (dupeCause > 0) {
+            // Make sure to just decrement the duplicate causes.
+            this.duplicateCauses[size] = dupeCause - 1;
+            return checkNotNull(this.cause.peek());
+        }
+        if (size <= this.min_depth) {
             throw new IllegalStateException("Cause stack corruption, tried to pop more objects off than were pushed since last frame (Size was "
-                    + this.cause.size() + " but mid depth is " + this.min_depth + ")");
+                                            + size + " but mid depth is " + this.min_depth + ")");
         }
         this.cached_cause = null;
         return this.cause.pop();
@@ -186,9 +206,14 @@ public final class SpongeCauseStackManager implements CauseStackManager {
     @Override
     public StackFrame pushCauseFrame() {
         enforceMainThread();
-        CauseStackFrameImpl frame = new CauseStackFrameImpl(this.min_depth);
+        // Ensure duplicate causes will be correctly sized.
+        int size = this.cause.size();
+        if (this.duplicateCauses.length < size) {
+            this.duplicateCauses = Arrays.copyOf(this.duplicateCauses, (int) (size * 1.5));
+        }
+        CauseStackFrameImpl frame = new CauseStackFrameImpl(this.min_depth, this.duplicateCauses[size]);
         this.frames.push(frame);
-        this.min_depth = this.cause.size();
+        this.min_depth = size;
         if (DEBUG_CAUSE_FRAMES) {
             // Attach an exception to the frame so that if there is any frame
             // corruption we can print out the stack trace of when the frames
@@ -279,12 +304,26 @@ public final class SpongeCauseStackManager implements CauseStackManager {
         }
         // If there were any objects left on the stack then we pop them off
         while (this.cause.size() > this.min_depth) {
+            int index = this.cause.size();
+
+            // Then, only pop the potential duplicate causes (if any) if and only if
+            // there was a duplicate cause pushed prior to the frame being popped.
+            if (this.duplicateCauses.length > index) {
+                // At this point, we now need to "clean" the duplicate causes array of duplicates
+                // to avoid potentially pruning earlier frame's potentially duplicate causes.
+                // And of course, reset the number of duplicates in the entry.
+                this.duplicateCauses[index] = 0;
+            }
             this.cause.pop();
 
             // and clear the cached causes
             this.cached_cause = null;
         }
         this.min_depth = frame.old_min_depth;
+        if (this.duplicateCauses.length > frame.old_min_depth) {
+            // Then set the last cause index to whatever the size of the entry was at the time.
+            this.duplicateCauses[frame.old_min_depth] = frame.lastCauseSize;
+        }
     }
 
     @Override
@@ -369,11 +408,13 @@ public final class SpongeCauseStackManager implements CauseStackManager {
         @Nullable private Map<EventContextKey<?>, Object> stored_ctx_values;
         @Nullable private Set<EventContextKey<?>> new_ctx_values;
         public int old_min_depth;
+        int lastCauseSize;
 
         public Exception stack_debug = null;
 
-        public CauseStackFrameImpl(int old_depth) {
+        public CauseStackFrameImpl(int old_depth, int size) {
             this.old_min_depth = old_depth;
+            this.lastCauseSize = size;
         }
 
         public boolean isStored(EventContextKey<?> key) {

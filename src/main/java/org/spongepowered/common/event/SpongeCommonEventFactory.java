@@ -460,30 +460,25 @@ public class SpongeCommonEventFactory {
             List<net.minecraft.entity.Entity> entities) {
 
         PhaseTracker phaseTracker = PhaseTracker.getInstance();
+        final PhaseContext<?> currentContext = phaseTracker.getCurrentContext();
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             if (sourceEntity != null) {
-                frame.pushCause(sourceEntity);
+                // We only want to push the source entity if it's not the current entity being ticked or "sourced". They will be already pushed.
+                if (currentContext.getSource() != sourceEntity) {
+                    frame.pushCause(sourceEntity);
+                }
             } else {
-                PhaseContext<?> context = phaseTracker.getCurrentContext();
-
-                final Optional<LocatableBlock> currentTickingBlock = context.getSource(LocatableBlock.class);
-                if (currentTickingBlock.isPresent()) {
-                    frame.pushCause(currentTickingBlock.get());
-                } else {
-                    final Optional<TileEntity> currentTickingTileEntity = context.getSource(TileEntity.class);
-                    if (currentTickingTileEntity.isPresent()) {
-                        frame.pushCause(currentTickingTileEntity.get());
-                    } else {
-                        final Optional<Entity> currentTickingEntity = context.getSource(Entity.class);
-                        if (currentTickingEntity.isPresent()) {
-                            frame.pushCause(currentTickingEntity.get());
-                        } else {
-                            return null;
-                        }
-                    }
+                // If there is no source, then... well... find one and push it.
+                final Object source = currentContext.getSource();
+                if (source instanceof LocatableBlock) {
+                    frame.pushCause(source);
+                } else if (source instanceof TileEntity) {
+                    frame.pushCause(source);
+                } else if (source instanceof Entity) {
+                    frame.pushCause(source);
                 }
             }
-            phaseTracker.getCurrentPhaseData().context.addNotifierAndOwnerToCauseStack(frame);
+            currentContext.addNotifierAndOwnerToCauseStack(frame);
 
             List<Entity> spEntities = (List<Entity>) (List<?>) entities;
             CollideEntityEvent event =
@@ -500,6 +495,7 @@ public class SpongeCommonEventFactory {
     public static ChangeBlockEvent.Pre callChangeBlockEventPre(IMixinWorldServer worldIn, BlockPos pos, Object source) {
         return callChangeBlockEventPre(worldIn, ImmutableList.of(new Location<>((World) worldIn, pos.getX(), pos.getY(), pos.getZ())), source);
     }
+
 
     /**
      * Processes pre block event data then fires event.
