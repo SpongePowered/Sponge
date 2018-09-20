@@ -85,7 +85,19 @@ abstract class LocationBasedTickPhaseState<T extends LocationBasedTickContext<T>
             final BlockPos changedBlockPos = VecHelper.toBlockPos(changedLocation);
             final IMixinChunk changedMixinChunk = (IMixinChunk) ((WorldServer) changedLocation.getExtent()).getChunk(changedBlockPos);
             changedMixinChunk.addTrackedBlockPosition(block, changedBlockPos, user, PlayerTracker.Type.NOTIFIER);
-
+            // and check for owner, if it's available, only if the block change was placement
+            // We don't want to set owners on modify because that would mean the current context owner
+            // would be setting itself onto potentially other owner's blocks, which since it is a modification, it's considered a
+            // notification for a block change so to speak (this is how you can avoid blocks changing colors and being re-branded for
+            // ownership to whoever triggered some redstone devices that caused a color change). Only block placements will be considered
+            // to have new owners, which we can gather from the context.
+            if (blockChange == BlockChange.PLACE) {
+                context.applyOwnerIfAvailable(owner -> {
+                    // We can do this when we check for notifiers because owners will always have a notifier set
+                    // if not, well, file a bug report and find out the corner case that owners are set but not notifiers with block changes.
+                    changedMixinChunk.addTrackedBlockPosition(block, changedBlockPos, owner, PlayerTracker.Type.OWNER);
+                });
+            }
         });
     }
 
