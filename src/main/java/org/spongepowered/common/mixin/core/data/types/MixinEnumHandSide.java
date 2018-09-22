@@ -47,11 +47,11 @@ public abstract class MixinEnumHandSide implements HandPreference {
     private String name;
     @Nullable private Translation translation;
 
-    @Inject(method = "<init>(Lnet/minecraft/util/text/ITextComponent;)V", at = @At("RETURN"))
+    @Inject(method = "<init>", at = @At("RETURN"))
     public void onInit(CallbackInfo ci) {
         // Could mods make this non-translatable?
-        this.key = ((TextComponentTranslation) this.handName).getKey();
-        this.name = this.key.replace("options.mainHand.", "");
+        this.key = ((TextComponentTranslation) this.handName).getKey().replace("options.mainHand.", "");
+        this.name = this.key;
     }
 
     @Override
@@ -67,7 +67,7 @@ public abstract class MixinEnumHandSide implements HandPreference {
     @Override
     public Translation getTranslation() {
         if (this.translation == null) {
-            this.translation = new SpongeTranslation(this.key);
+            this.translation = new SpongeTranslation(((TextComponentTranslation) this.handName).getKey());
         }
         return this.translation;
     }
