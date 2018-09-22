@@ -61,13 +61,7 @@ public class AbstractInventoryAdapter implements MinecraftInventoryAdapter {
     protected final SlotCollection slots;
     protected final Lens lens;
     protected final List<Inventory> children = new ArrayList<>();
-    /**
-     * All inventories have their own empty inventory with themselves as the
-     * parent. This empty inventory is initialised on-demand but returned for
-     * every query which fails. This saves us from creating a new empty
-     * inventory with this inventory as the parent for every failed query.
-     */
-    @Nullable private EmptyInventory empty;
+
     protected Inventory parent;
     @Nullable protected Inventory next;
     @Nullable private Iterable<Slot> slotIterator;
@@ -98,26 +92,6 @@ public class AbstractInventoryAdapter implements MinecraftInventoryAdapter {
     public Inventory parent() {
         return this.parent;
     }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T extends Inventory> T first() {
-        return (T) this.iterator().next();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T extends Inventory> T next() {
-        return (T) this.emptyInventory(); // TODO implement me
-    }
-
-//    protected Inventory generateParent(Lens<IInventory, net.minecraft.item.ItemStack> root) {
-//        Lens<IInventory, net.minecraft.item.ItemStack> parentLens = root.getParent();
-//        if (parentLens == null) {
-//            return this;
-//        }
-//        return parentLens.getAdapter(this.inventory);
-//    }
 
     @SuppressWarnings("unchecked")
     protected Lens initRootLens() {
@@ -166,13 +140,6 @@ public class AbstractInventoryAdapter implements MinecraftInventoryAdapter {
     public Inventory getChild(Lens lens) {
         // TODO Auto-generated method stub
         return null;
-    }
-
-    private EmptyInventory emptyInventory() {
-        if (this.empty == null) {
-            this.empty = new EmptyInventoryImpl(this);
-        }
-        return this.empty;
     }
 
     @SuppressWarnings("unchecked")

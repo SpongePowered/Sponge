@@ -35,6 +35,7 @@ import org.spongepowered.api.item.inventory.property.AbstractInventoryProperty;
 import org.spongepowered.api.item.inventory.query.QueryOperation;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.common.item.inventory.EmptyInventoryImpl;
 import org.spongepowered.common.item.inventory.InventoryIterator;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.CompoundSlotProvider;
@@ -196,6 +197,20 @@ public interface MinecraftInventoryAdapter extends InventoryAdapter {
     @Override
     default Iterator<Inventory> iterator() {
         return new InventoryIterator(this.getRootLens(), this.getFabric(), this);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    @Deprecated
+    default <T extends Inventory> T first() {
+        return (T) this.iterator().next();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    @Deprecated
+    default <T extends Inventory> T next() {
+        return (T) new EmptyInventoryImpl(this);
     }
 
     @SuppressWarnings("unchecked")

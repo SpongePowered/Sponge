@@ -30,9 +30,15 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
+import org.spongepowered.api.item.inventory.type.CarriedInventory;
+import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.interfaces.IMixinInventory;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.CraftingGridInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
@@ -120,5 +126,39 @@ public final class InventoryUtil {
             return ((IMixinInventory) toCapture);
         }
         return null;
+    }
+
+    public static PluginContainer getPluginContainer(Object inventory) {
+        PluginContainer container;
+
+        if (inventory instanceof CarriedInventory) {
+            final Optional<?> carrier = ((CarriedInventory<?>) inventory).getCarrier();
+            if (carrier.isPresent()) {
+                inventory = carrier.get();
+            }
+        }
+
+        final Object base = inventory;
+
+        if (base instanceof org.spongepowered.api.block.tileentity.TileEntity) {
+            final String id = ((org.spongepowered.api.block.tileentity.TileEntity) base).getBlock().getType().getId();
+            final String pluginId = id.substring(0, id.indexOf(":"));
+            container = Sponge.getPluginManager().getPlugin(pluginId)
+                    .orElseThrow(() -> new AssertionError("Missing plugin " + pluginId + " for block " + id));
+        } else if (base instanceof Entity) {
+            final String id = ((Entity) base).getType().getId();
+            final String pluginId = id.substring(0, id.indexOf(":"));
+            container = Sponge.getPluginManager().getPlugin(pluginId)
+                    .orElseThrow(() -> new AssertionError("Missing plugin " + pluginId + " for entity " + id + " (" + base.getClass().getName() +
+                            ")"));
+        } else if (base instanceof SpongeUser) {
+            container = SpongeImpl.getMinecraftPlugin();
+        } else {
+            container = Sponge.getPluginManager().getPlugin(SpongeImplHooks.getModIdFromClass(base.getClass())).orElseGet(() -> {
+                SpongeImpl.getLogger().warn("Unknown plugin for " + base);
+                return SpongeImpl.getMinecraftPlugin();
+            });
+        }
+        return container;
     }
 }
