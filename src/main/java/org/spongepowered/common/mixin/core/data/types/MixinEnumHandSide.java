@@ -27,26 +27,30 @@ package org.spongepowered.common.mixin.core.data.types;
 import net.minecraft.util.EnumHandSide;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
-import org.spongepowered.api.data.type.HandSide;
+import org.spongepowered.api.data.type.HandPreference;
 import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
-@Mixin(EnumHandSide.class)
-public abstract class MixinEnumHandSide implements HandSide {
+import javax.annotation.Nullable;
 
+@Mixin(EnumHandSide.class)
+public abstract class MixinEnumHandSide implements HandPreference {
+
+    @Shadow @Final private ITextComponent handName;
     private String key;
-    private Translation translation;
     private String name;
+    @Nullable private Translation translation;
 
     @Inject(method = "<init>(Lnet/minecraft/util/text/ITextComponent;)V", at = @At("RETURN"))
-    public void onInit(ITextComponent nameIn, CallbackInfo ci) {
+    public void onInit(CallbackInfo ci) {
         // Could mods make this non-translatable?
-        this.key = ((TextComponentTranslation) nameIn).getKey();
-        this.translation = new SpongeTranslation(key);
+        this.key = ((TextComponentTranslation) this.handName).getKey();
         this.name = this.key.replace("options.mainHand.", "");
     }
 
@@ -62,6 +66,9 @@ public abstract class MixinEnumHandSide implements HandSide {
 
     @Override
     public Translation getTranslation() {
+        if (this.translation == null) {
+            this.translation = new SpongeTranslation(this.key);
+        }
         return this.translation;
     }
 }

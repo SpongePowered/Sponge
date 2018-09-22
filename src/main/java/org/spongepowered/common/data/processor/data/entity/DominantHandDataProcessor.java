@@ -31,8 +31,8 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableDominantHandData;
 import org.spongepowered.api.data.manipulator.mutable.entity.DominantHandData;
-import org.spongepowered.api.data.type.HandSide;
-import org.spongepowered.api.data.type.HandSides;
+import org.spongepowered.api.data.type.HandPreference;
+import org.spongepowered.api.data.type.HandPreferences;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
@@ -43,31 +43,31 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public class DominantHandDataProcessor extends AbstractEntitySingleDataProcessor<EntityLiving, HandSide, Value<HandSide>, DominantHandData, ImmutableDominantHandData> {
+public class DominantHandDataProcessor extends AbstractEntitySingleDataProcessor<EntityLiving, HandPreference, Value<HandPreference>, DominantHandData, ImmutableDominantHandData> {
 
     public DominantHandDataProcessor() {
         super(EntityLiving.class, Keys.DOMINANT_HAND);
     }
 
     @Override
-    protected boolean set(EntityLiving dataHolder, HandSide value) {
+    protected boolean set(EntityLiving dataHolder, HandPreference value) {
         // What happens with custom EnumHandSide?
-        dataHolder.setLeftHanded(value.equals(HandSides.LEFT));
+        dataHolder.setLeftHanded(value.equals(HandPreferences.LEFT));
         return true;
     }
 
     @Override
-    protected Optional<HandSide> getVal(EntityLiving dataHolder) {
-        return Optional.of((HandSide) (Object) dataHolder.getPrimaryHand());
+    protected Optional<HandPreference> getVal(EntityLiving dataHolder) {
+        return Optional.of((HandPreference) (Object) dataHolder.getPrimaryHand());
     }
 
     @Override
-    protected ImmutableValue<HandSide> constructImmutableValue(HandSide value) {
+    protected ImmutableValue<HandPreference> constructImmutableValue(HandPreference value) {
         return ImmutableSpongeValue.cachedOf(Keys.DOMINANT_HAND, DEFAULT_HAND, value);
     }
 
     @Override
-    protected Value<HandSide> constructValue(HandSide actualValue) {
+    protected Value<HandPreference> constructValue(HandPreference actualValue) {
         return new SpongeValue<>(Keys.DOMINANT_HAND,DEFAULT_HAND, actualValue);
     }
 

@@ -27,20 +27,20 @@ package org.spongepowered.common.data.manipulator.immutable.entity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableDominantHandData;
 import org.spongepowered.api.data.manipulator.mutable.entity.DominantHandData;
-import org.spongepowered.api.data.type.HandSide;
+import org.spongepowered.api.data.type.HandPreference;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleCatalogData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeDominantHandData;
 import org.spongepowered.common.data.util.DataConstants;
 
-public class ImmutableSpongeDominantHandData extends AbstractImmutableSingleCatalogData<HandSide, ImmutableDominantHandData, DominantHandData> implements ImmutableDominantHandData {
+public class ImmutableSpongeDominantHandData extends AbstractImmutableSingleCatalogData<HandPreference, ImmutableDominantHandData, DominantHandData> implements ImmutableDominantHandData {
 
-    public ImmutableSpongeDominantHandData(HandSide type) {
+    public ImmutableSpongeDominantHandData(HandPreference type) {
         super(ImmutableDominantHandData.class, type, DataConstants.Catalog.DEFAULT_HAND, Keys.DOMINANT_HAND, SpongeDominantHandData.class);
     }
 
     @Override
-    public ImmutableValue<HandSide> dominantHand() {
+    public ImmutableValue<HandPreference> dominantHand() {
         return this.type();
     }
 }

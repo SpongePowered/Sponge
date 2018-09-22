@@ -195,6 +195,7 @@
         "data.types.MixinEnumChatVisibility",
         "data.types.MixinEnumDifficulty",
         "data.types.MixinEnumDyeColor",
+        "data.types.MixinEnumHandSide",
         "data.types.MixinEnumLogAxis",
         "data.types.MixinFishType",
         "data.types.MixinGameType",

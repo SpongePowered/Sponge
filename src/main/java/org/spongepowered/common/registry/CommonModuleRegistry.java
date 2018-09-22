@@ -202,6 +202,7 @@ import org.spongepowered.common.registry.type.boss.BossBarColorRegistryModule;
 import org.spongepowered.common.registry.type.boss.BossBarOverlayRegistryModule;
 import org.spongepowered.common.registry.type.data.DataFormatRegistryModule;
 import org.spongepowered.common.registry.type.data.DataTranslatorRegistryModule;
+import org.spongepowered.common.registry.type.data.HandPreferenceRegistryModule;
 import org.spongepowered.common.registry.type.data.HandTypeRegistryModule;
 import org.spongepowered.common.registry.type.data.InstrumentTypeRegistryModule;
 import org.spongepowered.common.registry.type.data.KeyRegistryModule;
@@ -506,7 +507,7 @@ public final class CommonModuleRegistry {
                 .registerModule(new CriterionRegistryModule())
                 .registerModule(((Class<DataRegistration<?, ?>>) (Class<?>) DataRegistration.class), SpongeManipulatorRegistry.getInstance())
                 .registerModule(new ItemStackComparatorRegistryModule())
-                .registerModule(HandSide.class, HandSideRegistryModule.getInstance())
+                .registerModule(HandPreference.class, HandPreferenceRegistryModule.getInstance())
 
                 // Miscellaneous Registries
                 .registerModule(DungeonMobRegistryModule.getInstance())

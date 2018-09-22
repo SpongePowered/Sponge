@@ -29,7 +29,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import net.minecraft.util.EnumHandSide;
-import org.spongepowered.api.data.type.HandSide;
+import org.spongepowered.api.data.type.HandPreference;
+import org.spongepowered.api.data.type.HandPreferences;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 
@@ -37,37 +38,35 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
-public class HandSideRegistryModule implements CatalogRegistryModule<HandSide> {
+public class HandPreferenceRegistryModule implements CatalogRegistryModule<HandPreference> {
 
-
-    public static HandSideRegistryModule getInstance() {
+    public static HandPreferenceRegistryModule getInstance() {
         return Holder.INSTANCE;
     }
 
-    @RegisterCatalog(HandSide.class)
-    public final Map<String, HandSide> handSideMap = Maps.newHashMap();
+    @RegisterCatalog(HandPreferences.class)
+    public final Map<String, HandPreference> handSideMap = Maps.newHashMap();
 
     @Override
     public void registerDefaults() {
-
-        this.handSideMap.put("left", (HandSide) (Object) EnumHandSide.LEFT);
-        this.handSideMap.put("right", (HandSide) (Object) EnumHandSide.RIGHT);
+        this.handSideMap.put("left", (HandPreference) (Object) EnumHandSide.LEFT);
+        this.handSideMap.put("right", (HandPreference) (Object) EnumHandSide.RIGHT);
     }
 
     @Override
-    public Optional<HandSide> getById(String id) {
+    public Optional<HandPreference> getById(String id) {
         return Optional.ofNullable(this.handSideMap.get(checkNotNull(id, "id").toLowerCase()));
     }
 
     @Override
-    public Collection<HandSide> getAll() {
+    public Collection<HandPreference> getAll() {
         return ImmutableSet.copyOf(this.handSideMap.values());
     }
 
-    HandSideRegistryModule() {
+    HandPreferenceRegistryModule() {
     }
 
     static final class Holder {
-        static final HandSideRegistryModule INSTANCE = new HandSideRegistryModule();
+        static final HandPreferenceRegistryModule INSTANCE = new HandPreferenceRegistryModule();
     }
 }
