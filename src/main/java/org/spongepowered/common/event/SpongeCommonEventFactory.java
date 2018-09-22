@@ -1296,7 +1296,7 @@ public class SpongeCommonEventFactory {
             setSlots(event.getTransactions(), SlotTransaction::getOriginal);
         } else {
             // handle custom inventory transaction result
-            setSlots(event.getTransactions(), SlotTransaction::getFinal);
+            event.getTransactions().stream().filter(t -> !t.isValid() || t.getCustom().isPresent()).forEach(t -> t.getSlot().set(t.getFinal().createStack()));
         }
 
         captureSource.getCapturedTransactions().clear();
