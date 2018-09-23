@@ -24,47 +24,62 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
-import net.minecraft.block.BlockDispenser;
+import static org.spongepowered.common.event.SpongeCommonEventFactory.toInventory;
+
 import net.minecraft.block.BlockDropper;
 import net.minecraft.block.BlockSourceImpl;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityDispenser;
-import net.minecraft.tileentity.TileEntityHopper;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.Slot;
+import org.spongepowered.api.item.inventory.property.SlotIndex;
+import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinInventory;
+import org.spongepowered.common.item.inventory.util.InventoryUtil;
+
+import java.util.List;
+import java.util.Optional;
 
 @Mixin(BlockDropper.class)
 public abstract class MixinBlockDropper {
 
-    @Inject(method = "dispense", cancellable = true, locals = LocalCapture.CAPTURE_FAILEXCEPTION,
-            at = @At(value = "INVOKE",
+    @Inject(method = "dispense", locals = LocalCapture.CAPTURE_FAILEXCEPTION,
+            at = @At(value = "INVOKE_ASSIGN",
                     target = "Lnet/minecraft/tileentity/TileEntityDispenser;setInventorySlotContents(ILnet/minecraft/item/ItemStack;)V"))
     private void afterDispense(World worldIn, BlockPos pos, CallbackInfo callbackInfo,
             BlockSourceImpl blocksourceimpl, TileEntityDispenser tileentitydispenser, int i, ItemStack itemstack,
-            EnumFacing enumfacing, BlockPos blockpos, IInventory iinventory, ItemStack itemstack1) {
-        // after setInventorySlotContents
-        tileentitydispenser.setInventorySlotContents(i, itemstack1);
+            EnumFacing enumfacing, BlockPos blockpos, IInventory iInventory, ItemStack itemstack1) {
         // Transfer worked if remainder is one less than the original stack
         if (itemstack1.getCount() == itemstack.getCount() - 1) {
-            IMixinInventory capture = forCapture(tileentitydispenser);
-            Inventory sourceInv = toInventory(tileentitydispenser);
-            SpongeCommonEventFactory.captureTransaction(capture, sourceInv, i, itemstack);
-            SpongeCommonEventFactory.callTransferPost(capture, sourceInv, toInventory(iinventory));
+            ItemStack insertStack = itemstack.copy();
+            insertStack.setCount(1);
+
+
+            List<SlotTransaction> list = InventoryUtil.forCapture(this).getCapturedTransactions();
+            if (!list.isEmpty()) {
+                Slot dSlot = list.get(0).getSlot();
+                list.clear();
+                Inventory sInv = toInventory(tileentitydispenser);
+                Optional<Slot> sSlot = sInv.getSlot(SlotIndex.of(i));
+                if (sSlot.isPresent()) {
+                    Inventory dInv = toInventory(iInventory);
+                    SpongeCommonEventFactory.callTransferPost(sInv, dInv, sSlot.get(), dSlot, insertStack);
+                }
+            }
         }
-        callbackInfo.cancel();
     }
 
+    /* Vanilla should work with the above already
     @Surrogate
     private void afterDispense(World worldIn, BlockPos pos, CallbackInfo callbackInfo,
             BlockSourceImpl blocksourceimpl, TileEntityDispenser tileentitydispenser, int i, ItemStack itemstack,
@@ -83,6 +98,7 @@ public abstract class MixinBlockDropper {
         }
         callbackInfo.cancel();
     }
+    */
 
     @Inject(method = "dispense", cancellable = true, locals = LocalCapture.CAPTURE_FAILEXCEPTION,
             at = @At(value = "INVOKE",

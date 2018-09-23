@@ -29,10 +29,9 @@ import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
-import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
+import org.spongepowered.api.event.item.inventory.TransferInventoryEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.query.QueryOperation;
 import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.plugin.Plugin;
 
@@ -64,7 +63,7 @@ public class TransferEventTest {
 
         @SuppressWarnings("deprecation")
         @Listener
-        public void onPreTransferEvent(ChangeInventoryEvent.Transfer.Pre event) {
+        public void onPreTransferEvent(TransferInventoryEvent.Pre event) {
             if (event.getSourceInventory().query(QueryOperationTypes.ITEM_STACK_IGNORE_QUANTITY.of(ItemStack.of(ItemTypes.BEDROCK, 1)))
                     .capacity() != 0) {
                 event.setCancelled(true);
