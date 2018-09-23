@@ -73,8 +73,8 @@ public class ShouldFire {
 
     public static boolean SET_A_I_TARGET_EVENT = false;
 
-    public static boolean CHANGE_INVENTORY_EVENT_TRANSFER_PRE = false;
-    public static boolean CHANGE_INVENTORY_EVENT_TRANSFER_POST = false;
+    public static boolean TRANSFER_INVENTORY_EVENT_PRE = false;
+    public static boolean TRANSFER_INVENTORY_EVENT_POST = false;
 
     public static boolean UPDATE_ANVIL_EVENT = false;
 

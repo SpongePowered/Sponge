@@ -91,8 +91,8 @@ import org.spongepowered.api.event.entity.ai.SetAITargetEvent;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.CraftItemEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
-import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.event.item.inventory.InteractItemEvent;
+import org.spongepowered.api.event.item.inventory.TransferInventoryEvent;
 import org.spongepowered.api.event.item.inventory.UpdateAnvilEvent;
 import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.event.item.inventory.container.InteractContainerEvent;
@@ -153,7 +153,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -1283,41 +1282,29 @@ public class SpongeCommonEventFactory {
         return true;
     }
 
-    public static ChangeInventoryEvent.Transfer.Pre callTransferPre(Inventory source, Inventory destination) {
+    public static TransferInventoryEvent.Pre callTransferPre(Inventory source, Inventory destination) {
         Sponge.getCauseStackManager().pushCause(source);
-        ChangeInventoryEvent.Transfer.Pre event = SpongeEventFactory.createChangeInventoryEventTransferPre(
+        TransferInventoryEvent.Pre event = SpongeEventFactory.createTransferInventoryEventPre(
                 Sponge.getCauseStackManager().getCurrentCause(), source, destination);
         SpongeImpl.postEvent(event);
         Sponge.getCauseStackManager().popCause();
         return event;
     }
 
-    public static boolean callTransferPost(IMixinInventory captureSource, Inventory source, Inventory destination) {
+    @Nullable
+    public static void callTransferPost(Inventory source, Inventory destination, org.spongepowered.api.item.inventory.Slot src, org.spongepowered.api.item.inventory.Slot dst, ItemStack insertStack) {
         // TODO make sure we never got null
-        if (captureSource == null || source == null || destination == null) {
-            return true;
+        if (src == null || dst == null || source == null || destination == null) {
+            return;
         }
         Sponge.getCauseStackManager().pushCause(source);
-        ChangeInventoryEvent.Transfer.Post event =
-                SpongeEventFactory.createChangeInventoryEventTransferPost(Sponge.getCauseStackManager().getCurrentCause(),
-                        source, destination, captureSource.getCapturedTransactions());
+
+        Cause cause = Sponge.getCauseStackManager().getCurrentCause();
+
+        TransferInventoryEvent.Post event =
+                SpongeEventFactory.createTransferInventoryEventPost(cause, source, src, destination, dst, ItemStackUtil.snapshotOf(insertStack));
         SpongeImpl.postEvent(event);
-        if (event.isCancelled()) {
-            // restore inventories
-            setSlots(event.getTransactions(), SlotTransaction::getOriginal);
-        } else {
-            // handle custom inventory transaction result
-            event.getTransactions().stream().filter(t -> !t.isValid() || t.getCustom().isPresent()).forEach(t -> t.getSlot().set(t.getFinal().createStack()));
-        }
-
-        captureSource.getCapturedTransactions().clear();
         Sponge.getCauseStackManager().popCause();
-
-        return event.isCancelled();
-    }
-
-    public static void setSlots(List<SlotTransaction> transactions, Function<SlotTransaction, ItemStackSnapshot> func) {
-        transactions.forEach(t -> t.getSlot().set(func.apply(t).createStack()));
     }
 
     /**
