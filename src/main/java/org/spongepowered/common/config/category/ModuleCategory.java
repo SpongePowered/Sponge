@@ -46,7 +46,10 @@ public class ModuleCategory extends ConfigCategory {
     @Setting("timings")
     private boolean pluginTimings = true;
 
-    @Setting("exploits")
+    @Setting(value = "exploits", comment = "Controls whether any exploit patches are applied.\n"
+                                           + "If there are issues with any specific exploits, please\n"
+                                           + "test in the exploit category first, before disabling all\n"
+                                           + "exploits with this toggle.")
     private boolean enableExploitPatches = true;
 
     @Setting("optimizations")
