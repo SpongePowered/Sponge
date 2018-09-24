@@ -490,7 +490,7 @@ public final class SpongeImplHooks {
         return !Sponge.isServerAvailable() || Sponge.getServer().isMainThread();
     }
 
-    // Overridden by MixinPacketUtil for exploit check
+    // Overridden by MixinSpongeImplHooks_ItemNameOverflowPrevention for exploit check
     public static boolean creativeExploitCheck(Packet<?> packetIn, EntityPlayerMP playerMP) {
         return false;
     }

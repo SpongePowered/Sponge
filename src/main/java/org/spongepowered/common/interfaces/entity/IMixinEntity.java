@@ -65,6 +65,21 @@ public interface IMixinEntity extends org.spongepowered.api.entity.Entity, IMixi
      */
     boolean isImmuneToFireForIgniteEvent();
 
+    /**
+     * Gets whether this entity has been added to a World's tracked entity lists
+     * @return True if this entity is being tracked in a world's chunk lists.
+     */
+    boolean isTrackedInWorld();
+
+    /**
+     * Sets an entity to be tracked or untracked. Specifically used in
+     * {@link net.minecraft.world.World#onEntityAdded(Entity)} and
+     * {@link net.minecraft.world.World#onEntityRemoved(Entity)}.
+     *
+     * @param tracked Tracked
+     */
+    void setTrackedInWorld(boolean tracked);
+
     boolean isTeleporting();
 
     void setIsTeleporting(boolean teleporting);

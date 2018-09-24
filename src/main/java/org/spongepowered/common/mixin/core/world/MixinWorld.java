@@ -80,7 +80,6 @@ import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -560,6 +559,20 @@ public abstract class MixinWorld implements World, IMixinWorld {
             }
         }
         return Optional.empty();
+    }
+
+    @Inject(method = "onEntityAdded", at = @At("TAIL"))
+    private void onEntityAddedToWorldMarkAsTracked(net.minecraft.entity.Entity entityIn, CallbackInfo ci) {
+        if (!this.isFake()) { // Only set the value if the entity is not fake
+            EntityUtil.toMixin(entityIn).setTrackedInWorld(true);
+        }
+    }
+
+    @Inject(method = "onEntityRemoved", at = @At("TAIL"))
+    private void onEntityRemovedFromWorldMarkAsUntracked(net.minecraft.entity.Entity entityIn, CallbackInfo ci) {
+        if (!this.isFake() || EntityUtil.toMixin(entityIn).isTrackedInWorld()) {
+            EntityUtil.toMixin(entityIn).setTrackedInWorld(false);
+        }
     }
 
     @SuppressWarnings({"unchecked"})

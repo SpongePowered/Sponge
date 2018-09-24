@@ -59,6 +59,7 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
                 new PrettyPrinter(50).add("Could not find function for optimization patch").centre().hr()
                         .add("Missing function for class: " + mixinClassName)
                         .trace();
+                return false;
             }
             return optimizationCategoryBooleanFunction.apply(globalConfig.getOptimizations());
         }

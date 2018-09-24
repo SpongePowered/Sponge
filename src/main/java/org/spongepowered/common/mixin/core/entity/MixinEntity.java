@@ -184,6 +184,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
     private boolean allowsEntityBulkCapture = true;
     private boolean allowsBlockEventCreation = true;
     private boolean allowsEntityEventCreation = true;
+    private boolean trackedInWorld = false;
 
     @Shadow public net.minecraft.entity.Entity ridingEntity;
     @Shadow @Final private List<net.minecraft.entity.Entity> riddenByEntities;
@@ -300,6 +301,16 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
     @Override
     public void firePostConstructEvents() {
         this.isConstructing = false;
+    }
+
+    @Override
+    public boolean isTrackedInWorld() {
+        return this.trackedInWorld;
+    }
+
+    @Override
+    public void setTrackedInWorld(boolean tracked) {
+        this.trackedInWorld = tracked;
     }
 
     @Inject(method = "startRiding(Lnet/minecraft/entity/Entity;Z)Z", at = @At(value = "FIELD", target = RIDING_ENTITY_FIELD, ordinal = 0),
