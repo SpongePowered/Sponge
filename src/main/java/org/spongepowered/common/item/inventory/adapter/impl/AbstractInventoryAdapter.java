@@ -27,18 +27,17 @@ package org.spongepowered.common.item.inventory.adapter.impl;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.item.inventory.EmptyInventory;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.common.item.inventory.EmptyInventoryImpl;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.LensProvider;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.DefaultEmptyLens;
 import org.spongepowered.common.item.inventory.lens.impl.DefaultIndexedLens;
+import org.spongepowered.common.item.inventory.lens.impl.ReusableLens;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 import org.spongepowered.common.text.translation.SpongeTranslation;
@@ -68,6 +67,21 @@ public class AbstractInventoryAdapter implements MinecraftInventoryAdapter {
 
     public AbstractInventoryAdapter(Fabric inventory) {
         this(inventory, null, null);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends Lens> AbstractInventoryAdapter(Fabric inventory, Class<T> lensType) {
+        this.inventory = inventory;
+        this.parent = this;
+        if (inventory.getSize() == 0) {
+            this.slots = new SlotCollection(0);
+            this.lens = new DefaultEmptyLens(this);
+        } else {
+            ReusableLens<T> lens = ReusableLens.getLens(lensType, this, () -> this.initSlots(inventory, parent),
+                    (slots) -> (T) new DefaultIndexedLens(0, inventory.getSize(), this, ((SlotCollection) slots)));
+            this.slots = ((SlotCollection) lens.getSlots());
+            this.lens = lens.getLens();
+        }
     }
 
     public AbstractInventoryAdapter(Fabric inventory, @Nullable Lens root, @Nullable Inventory parent) {
