@@ -38,6 +38,7 @@ import org.spongepowered.common.item.inventory.lens.LensProvider;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.DefaultEmptyLens;
 import org.spongepowered.common.item.inventory.lens.impl.DefaultIndexedLens;
+import org.spongepowered.common.item.inventory.lens.impl.ReusableLens;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotLensCollection;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 
@@ -66,6 +67,21 @@ public class BasicInventoryAdapter implements MinecraftInventoryAdapter {
         this.parent = parent == null ? this : parent;
         this.slots = this.initSlots(fabric, parent);
         this.lens = root != null ? root : checkNotNull(this.initRootLens(), "root lens");
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends Lens> BasicInventoryAdapter(Fabric fabric, Class<T> lensType) {
+        this.fabric = fabric;
+        this.parent = this;
+        if (fabric.getSize() == 0) {
+            this.slots = new SlotLensCollection(0);
+            this.lens = new DefaultEmptyLens(this);
+        } else {
+            ReusableLens<T> lens = ReusableLens.getLens(lensType, this, () -> this.initSlots(fabric, parent),
+                    (slots) -> (T) new DefaultIndexedLens(0, fabric.getSize(), slots));
+            this.slots = ((SlotLensCollection) lens.getSlots());
+            this.lens = lens.getLens();
+        }
     }
 
     private SlotLensCollection initSlots(Fabric inventory, @Nullable Inventory parent) {
