@@ -142,7 +142,7 @@ public final class SpongeParticleHelper {
         // Special cases
         if (internal == null) {
             if (type == ParticleTypes.FIREWORKS) {
-                final List<FireworkEffect> effects = type.getDefaultOption(ParticleOptions.FIREWORK_EFFECTS).get();
+                final List<FireworkEffect> effects = effect.getOption(ParticleOptions.FIREWORK_EFFECTS).orElse(type.getDefaultOption(ParticleOptions.FIREWORK_EFFECTS).get());
                 if (effects.isEmpty()) {
                     return EmptyCachedPacket.INSTANCE;
                 }
