@@ -804,7 +804,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
                 viewer.connection.sendPacket(noSpecificViewerPacket);
             }
 
-            if (((Player) player).canSee((Player) viewer)) {
+            if (player == viewer || ((Player) player).canSee((Player) viewer)) {
                 player.connection.sendPacket(new SPacketPlayerListItem(SPacketPlayerListItem.Action.ADD_PLAYER, viewer));
             }
         }
