@@ -34,6 +34,7 @@ import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IEntityOwnable;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityThrowable;
@@ -832,6 +833,10 @@ public final class PhaseTracker {
     @SuppressWarnings("rawtypes")
     public boolean spawnEntity(World world, Entity entity) {
         checkNotNull(entity, "Entity cannot be null!");
+        // Forge requires checking if we're restoring in a world to avoid spawning item drops.
+        if (entity instanceof EntityItem && SpongeImplHooks.isRestoringBlocks((net.minecraft.world.World) world)) {
+            return false;
+        }
 
         // Sponge Start - handle construction phases
         if (((IMixinEntity) entity).isInConstructPhase()) {

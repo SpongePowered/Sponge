@@ -312,12 +312,18 @@ public final class SpongeImplHooks {
         block.onExplosionDestroy(world, blockpos, explosion);
     }
 
+    /**
+     * A method for forge compatibility when mods tend to set the flag
+     * to true to mark a world restoring so entity item drops don't
+     * get spawned (other entities do get spawned).
+     *
+     * @param world The world to check
+     * @return True if the current phase state is restoring, or the world is restoring in forge.
+     */
+    @SuppressWarnings("unused") // overridden to be used in MixinSpongeImplHooks.
     public static boolean isRestoringBlocks(World world) {
-        if (PhaseTracker.getInstance().getCurrentState() == BlockPhase.State.RESTORING_BLOCKS) {
-            return true;
-        }
+        return PhaseTracker.getInstance().getCurrentState() == BlockPhase.State.RESTORING_BLOCKS;
 
-        return false;
     }
 
     public static void onTileEntityChunkUnload(net.minecraft.tileentity.TileEntity tileEntity) {

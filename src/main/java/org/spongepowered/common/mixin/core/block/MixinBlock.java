@@ -313,7 +313,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
         // Sponge Start - short circuit up top to reduce indentation as necessary
         final boolean doTileDrops = worldIn.getGameRules().getBoolean("doTileDrops");
 
-        if (worldIn.isRemote || !SpongeImplHooks.isMainThread() || stack.isEmpty() || !doTileDrops) {
+        if (worldIn.isRemote || !SpongeImplHooks.isMainThread() || stack.isEmpty() || !doTileDrops || SpongeImplHooks.isRestoringBlocks(worldIn)) {
             return;
         }
         // Double check we aren't performing drops during restores.
@@ -360,7 +360,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Inject(method = "dropBlockAsItemWithChance", at = @At(value = "HEAD"), cancellable = true)
     private void onDropBlockAsItemWithChanceHead(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, float chance, int fortune,
         CallbackInfo ci) {
-        if (!((IMixinWorld) worldIn).isFake()) {
+        if (!((IMixinWorld) worldIn).isFake() && !SpongeImplHooks.isRestoringBlocks(worldIn)) {
             if (PhaseTracker.getInstance().getCurrentState() == BlockPhase.State.RESTORING_BLOCKS) {
                 ci.cancel();
                 return;
@@ -388,7 +388,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Inject(method = "dropBlockAsItemWithChance", at = @At(value = "RETURN"), cancellable = true)
     private void onDropBlockAsItemWithChanceReturn(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, float chance, int fortune,
         CallbackInfo ci) {
-        if (!((IMixinWorld) worldIn).isFake()) {
+        if (!((IMixinWorld) worldIn).isFake() && !SpongeImplHooks.isRestoringBlocks(worldIn)) {
             if (this.data == null) {
                 // means that we didn't need to capture before
                 return;
