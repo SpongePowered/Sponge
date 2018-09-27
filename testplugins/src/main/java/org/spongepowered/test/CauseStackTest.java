@@ -49,25 +49,24 @@ public class CauseStackTest {
         
         // old_min_depth: 0 (Gets incremented to 2 after creating StackFrame).
         // lastCauseSize: 0.
-        try (CauseStackManager.StackFrame stackFrameFirst = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (CauseStackManager.StackFrame stackFrame = Sponge.getCauseStackManager().pushCauseFrame()) {
             // These have to be the same in order to increase the duplicateCauses count.
             String duplicateCause = "Duplicate Cause Test";
             
             // Initial Cause
-            stackFrameFirst.pushCause(duplicateCause);
+            stackFrame.pushCause(duplicateCause);
             
             // Duplicate Causes
-            stackFrameFirst.pushCause(duplicateCause);
-            stackFrameFirst.pushCause(duplicateCause);
-            stackFrameFirst.pushCause(duplicateCause);
-            stackFrameFirst.pushCause(duplicateCause);
-            stackFrameFirst.pushCause(duplicateCause);
+            stackFrame.pushCause(duplicateCause);
+            stackFrame.pushCause(duplicateCause);
+            stackFrame.pushCause(duplicateCause);
+            stackFrame.pushCause(duplicateCause);
+            stackFrame.pushCause(duplicateCause);
             
             // old_min_depth: 2 (Plugin, UUID) (Gets incremented to 3 after creating StackFrame).
             // lastCauseSize: 5.
-            try (CauseStackManager.StackFrame stackFrameSecond = Sponge.getCauseStackManager().pushCauseFrame()) {
-                // This will result in index 2 (Which will be our randomUUID) of the duplicateCauses in the SpongeCauseStackManager to be set to 5.
-            }
+            // This will result in index 2 (Which will be our randomUUID) of the duplicateCauses in the SpongeCauseStackManager to be set to 5.
+            Sponge.getCauseStackManager().pushCauseFrame().close();
         }
         
         // Pop initial push.
