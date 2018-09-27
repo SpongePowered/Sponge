@@ -35,6 +35,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.CollisionModCategory;
 import org.spongepowered.common.config.category.EntityCollisionCategory;
@@ -114,53 +115,59 @@ public class MixinEntity_Collisions implements IModData_Collisions {
     @Override
     public void initializeCollisionState(World worldObj) {
         SpongeConfig<? extends GeneralConfigBase> activeConfig = ((IMixinWorldServer) worldObj).getActiveConfig();
-        EntityCollisionCategory collisionCat = activeConfig.getConfig().getEntityCollisionCategory();
-        this.maxCollisions = collisionCat.getMaxEntitiesWithinAABB();
+        SpongeConfig<? extends GeneralConfigBase> globalConfig = SpongeImpl.getGlobalConfig();
+        EntityCollisionCategory activeCollCat = activeConfig.getConfig().getEntityCollisionCategory();
+        EntityCollisionCategory globalCollCat = globalConfig.getConfig().getEntityCollisionCategory();
+
+        this.setMaxCollisions(activeCollCat.getMaxEntitiesWithinAABB());
+
         boolean requiresSave = false;
-        CollisionModCategory collisionMod = collisionCat.getModList().get(this.entityModId);
-        if (collisionMod == null && activeConfig.getConfig().getEntityCollisionCategory().autoPopulateData()) {
-            collisionMod = new CollisionModCategory(this.entityModId);
-            collisionCat.getModList().put(this.entityModId, collisionMod);
-            collisionMod.getEntityList().put(this.entityName, this.maxCollisions);
-            activeConfig.save();
+        CollisionModCategory activeCollMod = activeCollCat.getModList().get(this.getModDataId());
+        CollisionModCategory globalCollMod = globalCollCat.getModList().get(this.getModDataId());
+        if (activeCollMod == null && activeCollCat.autoPopulateData()) {
+            globalCollMod = new CollisionModCategory(this.getModDataId());
+            globalCollCat.getModList().put(this.getModDataId(), globalCollMod);
+            globalCollMod.getEntityList().put(this.getModDataName(), this.getMaxCollisions());
+            globalConfig.save();
             return;
-        } else if (collisionMod != null) {
-            if (!collisionMod.isEnabled()) {
-                this.maxCollisions = -1;
+        } else if (activeCollMod != null) {
+            if (!activeCollMod.isEnabled()) {
+                this.setMaxCollisions(-1);
                 return;
             }
             // check mod overrides
-            Integer modCollisionMax = collisionMod.getDefaultMaxCollisions().get("entities");
+            Integer modCollisionMax = activeCollMod.getDefaultMaxCollisions().get("entities");
             if (modCollisionMax != null) {
-                this.maxCollisions = modCollisionMax;
+                this.setMaxCollisions(modCollisionMax);
             }
 
             Integer entityMaxCollision = null;
             if ((Object) this instanceof EntityItem) {
                 // check if all items are overridden
-                entityMaxCollision = collisionMod.getEntityList().get(this.spongeEntityType.getName());
+                entityMaxCollision = activeCollMod.getEntityList().get(this.getModDataName());
             }
 
             if (entityMaxCollision == null) {
-                entityMaxCollision = collisionMod.getEntityList().get(this.entityName);
+                entityMaxCollision = activeCollMod.getEntityList().get(this.getModDataName());
             }
+
             // entity overrides
-            if (entityMaxCollision == null && activeConfig.getConfig().getEntityCollisionCategory().autoPopulateData()) {
-                collisionMod.getEntityList().put(this.entityName, this.maxCollisions);
+            if (entityMaxCollision == null && activeCollCat.autoPopulateData()) {
+                globalCollMod.getEntityList().put(this.getModDataName(), this.getMaxCollisions());
                 requiresSave = true;
             } else if (entityMaxCollision != null) {
-                this.maxCollisions = entityMaxCollision;
+                this.setMaxCollisions(entityMaxCollision);
             }
         }
 
-        if (this.maxCollisions <= 0) {
+        // don't bother saving for negative values
+        if (this.getMaxCollisions() <= 0) {
             return;
         }
 
-        if (requiresSave && activeConfig.getConfig().getEntityCollisionCategory().autoPopulateData()) {
-            activeConfig.save();
+        if (requiresSave) {
+            globalConfig.save();
         }
-        return;
     }
 
     @Override
