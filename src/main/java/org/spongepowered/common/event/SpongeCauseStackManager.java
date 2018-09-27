@@ -320,9 +320,10 @@ public final class SpongeCauseStackManager implements CauseStackManager {
             this.cached_cause = null;
         }
         this.min_depth = frame.old_min_depth;
-        if (this.duplicateCauses.length > frame.old_min_depth) {
+        int size = this.cause.size();
+        if (this.duplicateCauses.length > size) {
             // Then set the last cause index to whatever the size of the entry was at the time.
-            this.duplicateCauses[frame.old_min_depth] = frame.lastCauseSize;
+            this.duplicateCauses[size] = frame.lastCauseSize;
         }
     }
 
