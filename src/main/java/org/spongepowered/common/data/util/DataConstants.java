@@ -160,6 +160,7 @@ public final class DataConstants {
         public static final BlockState DEFAULT_BLOCK_STATE = BlockTypes.STONE.getDefaultState();
         public static final Art DEFAULT_ART = Arts.KEBAB;
         public static final PickupRule DEFAULT_PICKUP_RULE = PickupRules.ALLOWED;
+        public static final HandPreference DEFAULT_HAND = HandPreferences.RIGHT;
     }
 
     public static final class Entity {
