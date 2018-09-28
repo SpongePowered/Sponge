@@ -32,9 +32,11 @@ import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
+import org.spongepowered.api.world.gamerule.DefaultGameRules;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 
 import java.util.ArrayList;
 import java.util.function.BiConsumer;
@@ -112,8 +114,23 @@ final class EntityDeathState extends EntityPhaseState<EntityDeathContext> {
         if (!hasCaptures) {
             final ArrayList<Entity> entities = new ArrayList<>();
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+            boolean keepInventoryRule = false;
 
+            if (entityPlayer != null) {
+                if (((IMixinEntityPlayerMP) entityPlayer).keepInventory()) {
+                    keepInventoryRule = entityPlayer.world.getGameRules().getBoolean(DefaultGameRules.KEEP_INVENTORY);
+                    // Set global keep-inventory gamerule so mods do not drop items
+                    entityPlayer.world.getGameRules().setOrCreateGameRule(DefaultGameRules.KEEP_INVENTORY, "true");
+                }
+            }
             SpongeCommonEventFactory.callDropItemDestruct(entities, context);
+
+            if (entityPlayer != null) {
+                if (((IMixinEntityPlayerMP) entityPlayer).keepInventory()) {
+                    // Restore global keep-inventory gamerule
+                    entityPlayer.world.getGameRules().setOrCreateGameRule(DefaultGameRules.KEEP_INVENTORY, String.valueOf(keepInventoryRule));
+                }
+            }
         }
 
         // Note that this is only used if and when item pre-merging is enabled. Which is never enabled in forge.
