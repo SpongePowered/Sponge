@@ -35,6 +35,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.common.SpongeImpl;
 
 import javax.annotation.Nullable;
 
@@ -146,10 +148,46 @@ public abstract class MixinBlockStateContainer {
         for (int i = 0; i < backingArray.length; i++) {
             final int bufferIndex = buffer.writerIndex();
             final long value = backingArray[i];
+            if (bufferIndex + 8 > buffer.writableBytes()) {
+                switch (buffer.ensureWritable(8, true)) {
+                    case 0: // Capacity matches and has enough bytes.
+                        break;
+                    case 1: // Can't fit enough bytes, capacity is unchanged
+                        // We can't fit any more data period.
+                        new PrettyPrinter(60).add("Unable to resize Buffer for SPackeetChunkData").centre().hr()
+                            .addWrapped(60, "Sponge is attempting to recover from a potentially fatal issue"
+                                            + " with sending chunk packets. Because the cause of the issue is very difficult"
+                                            + " to find, Sponge is attempting to recover the buffer before it crashes. Since"
+                                            + " the buffer appears to be maxed out, no more data can be written to the buffer"
+                                            + " and therefor it must be returned.")
+                            .add()
+                            .add("Please refer to the SpongeForge issue if this warning has been printed on yoru server, or the side effects of this warning.")
+                            .trace();
+                        throw new ArrayIndexOutOfBoundsException("Unable to resize packet buffer to fit more data. Current ");
+                    case 2: // Buffer has enough and capacity increased to a new maximum
+                        SpongeImpl.getLogger().warn("Sponge is attempting to prevent a crash for sending chunk data to clients. Managed to increase the buffer size. Refer to SpongeForge Issue #2405");
+                        break;
+                        // cool, nothing happens
+                    case 3: // Buffer does not have enough space, but capacity increased.
+                        // Cool, nothing happens
+                        new PrettyPrinter(60).add("Unable to resize Buffer for SPackeetChunkData").centre().hr()
+                            .addWrapped(60, "Sponge is attempting to recover from a potentially fatal issue"
+                                            + " with sending chunk packets. Because the cause of the issue is very difficult"
+                                            + " to find, Sponge is attempting to recover the buffer before it crashes. Since"
+                                            + " the buffer appears to be maxed out, no more data can be written to the buffer"
+                                            + " and therefor it must be returned.")
+                            .add()
+                            .add("Please refer to the SpongeForge issue if this warning has been printed on yoru server, or the side effects of this warning.")
+                            .trace();
+                        SpongeImpl.getLogger().error("Unable to increase the size of the buffer to fit enough data.");
+                        // We can't fit any more data.
+                        return buffer;
+                }
+            }
             try {
                 buffer.writeLong(value);
             } catch (Exception e) {
-                throw new RuntimeException("Failed to serialize chunk data to buffer. Attempted to write entry long[" + i + "]: " + value + "at writer index: " + bufferIndex + " with size " + 8);
+                throw new RuntimeException("Failed to serialize chunk data to buffer. Attempted to write entry long[" + i + "]: " + value + " at writer index: " + bufferIndex + " with size " + 8, e);
             }
             final int newIndex = buffer.writerIndex();
             if (newIndex - bufferIndex != 8) {
