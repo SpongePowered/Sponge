@@ -160,6 +160,10 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
         for (EntityItem entityItem : context.getCapturedItems()) {
             capturedItems.add(EntityUtil.fromNative(entityItem));
         }
+        if (!context.getCapturedEntities().isEmpty()) {
+            capturedItems.addAll(context.getCapturedEntities());
+            context.getCapturedEntities().clear();
+        }
         context.getCapturedItems().clear();
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(openContainer);

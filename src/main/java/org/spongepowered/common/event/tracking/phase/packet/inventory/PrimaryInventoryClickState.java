@@ -29,6 +29,8 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -46,6 +48,10 @@ public final class PrimaryInventoryClickState extends BasicInventoryPacketState 
     @Override
     public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
             List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, int usedButton) {
+        if (!capturedEntities.isEmpty()) {
+            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DISPENSE);
+            return SpongeEventFactory.createClickInventoryEventDropOutsidePrimary(Sponge.getCauseStackManager().getCurrentCause(), transaction, capturedEntities, openContainer, slotTransactions);
+        }
         return SpongeEventFactory.createClickInventoryEventPrimary(Sponge.getCauseStackManager().getCurrentCause(), transaction, openContainer, slotTransactions);
     }
 
