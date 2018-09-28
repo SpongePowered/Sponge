@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.chunk;
+package org.spongepowered.common.interfaces;
 
 import net.minecraft.util.BitArray;
 import net.minecraft.world.chunk.BlockStateContainer;
@@ -30,12 +30,10 @@ import net.minecraft.world.chunk.IBlockStatePalette;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(BlockStateContainer.class)
 public interface IMixinBlockStateContainer {
 
-    @Accessor int getBits();
-
-    @Accessor IBlockStatePalette getPalette();
-    @Accessor BitArray getStorage();
+    int getBits();
+    IBlockStatePalette getPalette();
+    BitArray getStorage();
 
 }

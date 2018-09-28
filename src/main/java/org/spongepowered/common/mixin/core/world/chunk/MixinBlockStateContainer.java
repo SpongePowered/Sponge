@@ -37,13 +37,35 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.interfaces.IMixinBlockStateContainer;
 
 import javax.annotation.Nullable;
 
 @Mixin(BlockStateContainer.class)
-public abstract class MixinBlockStateContainer {
+public abstract class MixinBlockStateContainer implements IMixinBlockStateContainer {
 
     @Shadow protected abstract void set(int index, IBlockState state);
+
+    @Shadow private int bits;
+
+    @Shadow protected IBlockStatePalette palette;
+
+    @Shadow protected BitArray storage;
+
+    @Override
+    public int getBits() {
+        return this.bits;
+    }
+
+    @Override
+    public IBlockStatePalette getPalette() {
+        return this.palette;
+    }
+
+    @Override
+    public BitArray getStorage() {
+        return this.storage;
+    }
 
     /**
      * @author barteks2x

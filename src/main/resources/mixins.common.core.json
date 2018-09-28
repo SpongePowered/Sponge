@@ -518,7 +518,6 @@
         "world.biome.MixinBiomeTaiga",
         "world.biome.MixinBiomeSwamp",
         "world.biome.MixinBiomeProvider",
-        "world.chunk.IMixinBlockStateContainer",
         "world.chunk.MixinBlockStateContainer",
         "world.chunk.storage.MixinAnvilChunkLoader",
         "world.end.MixinDragonFightManager",
