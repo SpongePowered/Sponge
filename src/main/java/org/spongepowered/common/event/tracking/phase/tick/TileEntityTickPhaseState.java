@@ -45,8 +45,14 @@ import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 
 class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTickContext> {
+    private final BiConsumer<StackFrame, TileEntityTickContext> TILE_ENTITY_MODIFIER =
+        super.getFrameModifier().andThen((frame, context) ->
+            context.getSource(TileEntity.class)
+                .ifPresent(frame::pushCause)
+        );
 
     private String name;
 
@@ -60,6 +66,11 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
                 .addEntityCaptures()
                 .addEntityDropCaptures()
                 .addBlockCaptures();
+    }
+
+    @Override
+    public BiConsumer<StackFrame, TileEntityTickContext> getFrameModifier() {
+        return this.TILE_ENTITY_MODIFIER;
     }
 
     @Override

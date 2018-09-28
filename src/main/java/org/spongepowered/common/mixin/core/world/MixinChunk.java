@@ -658,7 +658,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         {
             if (!this.world.isRemote) {
                 // Sponge - Forge adds this change for block changes to only fire events when necessary
-                if (currentState.getBlock() != newState.getBlock()) {
+                if (currentBlock != newBlock) {
                     currentBlock.breakBlock(this.world, pos, currentState);
                 }
                 // Sponge - Add several tile entity hook checks. Mainly for forge added hooks, but these

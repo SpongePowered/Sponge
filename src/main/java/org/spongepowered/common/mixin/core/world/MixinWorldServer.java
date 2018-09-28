@@ -1772,7 +1772,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         if (notifier.isPresent()) {
             this.builder.notifier(notifier.get());
         }
-        if (state.getBlock() instanceof ITileEntityProvider) {
+        if (SpongeImplHooks.hasBlockTileEntity(state.getBlock(), state)) {
             // We MUST only check to see if a TE exists to avoid creating a new one.
             final net.minecraft.tileentity.TileEntity te = this.getChunk(pos).getTileEntity(pos, net.minecraft.world.chunk.Chunk.EnumCreateEntityType.CHECK);
             if (te != null) {

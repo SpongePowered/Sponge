@@ -35,11 +35,13 @@ import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.BlockShulkerBox;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
+import org.apache.logging.log4j.Level;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -58,6 +60,7 @@ import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
@@ -75,6 +78,7 @@ import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -123,7 +127,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         }
         this.keyValueMap = tileBuilder.build();
         this.valueSet = this.keyValueMap.isEmpty() ? ImmutableSet.of() : ImmutableSet.copyOf(this.keyValueMap.values());
-        this.compound = builder.compound == null ? null : builder.compound.copy();
+        this.compound = builder.compound;
         this.changeFlag = builder.flag;
     }
 
@@ -190,17 +194,55 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
             }
 
             // Prevent Shulker Boxes from dropping when restoring BlockSnapshot
-            if (current.getBlock().getClass() == BlockShulkerBox.class) {
-                world.removeTileEntity(pos);
-            }
+//            if (current.getBlock().getClass() == BlockShulkerBox.class) {
+//                world.removeTileEntity(pos);
+//            }
+            world.removeTileEntity(pos);
             PhaseTracker.getInstance().setBlockState(mixinWorldServer, pos, replaced, flag);
             world.getPlayerChunkMap().markBlockForUpdate(pos);
             if (this.compound != null) {
-                final TileEntity te = world.getTileEntity(pos);
+                TileEntity te = world.getTileEntity(pos);
                 if (te != null) {
                     te.readFromNBT(this.compound);
+                }
+                if (te == null) {
+                    // Because, some mods will "unintentionally" only obey some of the rules but not all.
+                    // In cases like this, we need to directly just say "fuck it" and deserialize from the compound directly.
+                    try {
+                        te = TileEntity.create(world, this.compound);
+                        if (te != null) {
+                            world.getChunk(pos).addTileEntity(te);
+                        }
+                    } catch (Exception e) {
+                        // Seriously? The mod should be broken then.
+                        final PrettyPrinter printer = new PrettyPrinter(60).add("Unable to restore").centre().hr()
+                            .add("A mod is not correctly deserializing a TileEntity that is being restored. ")
+                            .addWrapped(60, "Note that this is not the fault of Sponge. Sponge is understanding that "
+                                            + "a block is supposed to have a TileEntity, but the mod is breaking the contract"
+                                            + "on how to re-create the tile entity. Please open an issue with the offending mod.")
+                            .add("Here's the provided compound:");
+                        printer.add();
+                        try {
+                            printer.addWrapped(80, "%s : %s", "This compound", this.compound);
+                        } catch (Throwable error) {
+                            printer.addWrapped(80, "Unable to get the string of this compound. Printing out some of the entries to better assist");
+
+                        }
+                        printer.add()
+                            .add("Desired World: " + this.worldUniqueId)
+                            .add("Position: " + this.pos)
+                            .add("Desired BlockState: " + this.blockState);
+                        printer.add();
+                        printer.log(SpongeImpl.getLogger(), Level.ERROR);
+                        return true; // I mean, I guess. the block was set up, but not the tile entity.
+                    }
+
+                }
+
+                if (te != null) {
                     te.markDirty();
                 }
+
             }
             return true;
         }

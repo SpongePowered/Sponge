@@ -788,7 +788,7 @@ public final class PhaseTracker {
             }
         }
         // Sponge End - continue with vanilla mechanics
-        final IBlockState iblockstate = ((IMixinChunk) chunk).setBlockState(pos, newState, chunk.getBlockState(pos), null, flag);
+        final IBlockState iblockstate = ((IMixinChunk) chunk).setBlockState(pos, newState, currentState, null, flag);
 
         if (iblockstate == null) {
             return false;
