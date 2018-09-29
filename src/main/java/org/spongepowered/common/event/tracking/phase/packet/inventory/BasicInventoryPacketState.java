@@ -143,12 +143,11 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
         // See MixinNetHandlerPlayServer processClickWindow redirect for rest of fix.
         // --bloodmc
         final IMixinContainer mixinContainer = ContainerUtil.toMixin(player.openContainer);
-        if (!mixinContainer.capturingInventory()) {
+        if (!mixinContainer.capturingInventory() && !context.hasCaptures()) {
             mixinContainer.getCapturedTransactions().clear();
             return;
         }
 
-        // TODO clear this shit out of the context
         final CPacketClickWindow packetIn = context.getPacket();
         final Transaction<ItemStackSnapshot> cursorTransaction = this.getCursorTransaction(context, player);
 
@@ -157,20 +156,18 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
 
         final int usedButton = packetIn.getUsedButton();
         final List<Entity> capturedItems = new ArrayList<>();
-        for (EntityItem entityItem : context.getCapturedItems()) {
-            capturedItems.add(EntityUtil.fromNative(entityItem));
-        }
-        if (!context.getCapturedEntities().isEmpty()) {
-            capturedItems.addAll(context.getCapturedEntities());
-            context.getCapturedEntities().clear();
-        }
-        context.getCapturedItems().clear();
+        context.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(items -> items.stream().map(EntityUtil::fromNative).forEach(capturedItems::add));
+        context.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(capturedItems::addAll);
+
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(openContainer);
             Sponge.getCauseStackManager().pushCause(player);
             final ClickInventoryEvent inventoryEvent;
 
-            if (slotTransactions.isEmpty() && packetIn.getSlotId() >= 0) {
+            // We can only proceed with normal if and only if there are no entities spawned,
+            // slot transactions exist, and or the slot id being touched is greater than
+            // 0, avoiding idiotic negative slot id's.
+            if (slotTransactions.isEmpty() && packetIn.getSlotId() >= 0 && capturedItems.isEmpty()) {
                 if (player.openContainer.windowId != packetIn.getWindowId()) {
                     return; // Container mismatch - ignore this.
                 }

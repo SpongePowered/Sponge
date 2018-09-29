@@ -89,6 +89,7 @@ public final class InteractionPacketState extends BasicPacketState {
         context.targetBlock(new Location<>(((Player) playerMP).getWorld(), VecHelper.toVector3d(((CPacketPlayerDigging) packet).getPosition())).createSnapshot());
     }
 
+    @Override
     public boolean spawnEntityOrCapture(BasicPacketContext context, Entity entity, int chunkX, int chunkZ) {
         return context.captureEntity(entity);
     }
