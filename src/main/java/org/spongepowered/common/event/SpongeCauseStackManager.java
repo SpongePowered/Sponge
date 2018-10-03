@@ -208,7 +208,7 @@ public final class SpongeCauseStackManager implements CauseStackManager {
         enforceMainThread();
         // Ensure duplicate causes will be correctly sized.
         int size = this.cause.size();
-        if (this.duplicateCauses.length < size) {
+        if (this.duplicateCauses.length <= size) {
             this.duplicateCauses = Arrays.copyOf(this.duplicateCauses, (int) (size * 1.5));
         }
         CauseStackFrameImpl frame = new CauseStackFrameImpl(this.min_depth, this.duplicateCauses[size]);
