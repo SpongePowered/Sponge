@@ -1450,6 +1450,13 @@ public abstract class MixinWorld implements World, IMixinWorld {
         }
     }
 
+    @Inject(method = "onEntityRemoved", at = @At(value = "HEAD"))
+    private void onEntityRemoved(net.minecraft.entity.Entity entity, CallbackInfo ci) {
+        if (!this.isRemote) {
+            ((IMixinEntity) entity).onEntityRemoved();
+        }
+    }
+
 
     /*********************** TIMINGS ***********************/
 

@@ -34,6 +34,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityList;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.EntityTrackerEntry;
@@ -85,10 +86,13 @@ import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.dismount.DismountType;
 import org.spongepowered.api.event.cause.entity.dismount.DismountTypes;
 import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
+import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.IgniteEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
+import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.util.Direction;
@@ -124,6 +128,7 @@ import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.event.damage.MinecraftBlockDamageSource;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
@@ -185,6 +190,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
     private boolean allowsBlockEventCreation = true;
     private boolean allowsEntityEventCreation = true;
     private boolean trackedInWorld = false;
+    @Nullable private DestructEntityEvent destructEvent;
 
     @Shadow public net.minecraft.entity.Entity ridingEntity;
     @Shadow @Final private List<net.minecraft.entity.Entity> riddenByEntities;
@@ -1461,4 +1467,31 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
         }
     }
 
+    @Inject(method = "setDead", at = @At(value = "RETURN"))
+    private void onSetDead(CallbackInfo ci) {
+        if (ShouldFire.DESTRUCT_ENTITY_EVENT && !this.world.isRemote && !(EntityUtil.toNative(this) instanceof EntityLiving)) {
+            MessageChannel originalChannel = MessageChannel.TO_NONE;
+            try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                frame.pushCause(this);
+                Object source = PhaseTracker.getInstance().getCurrentContext().getSource();
+                if (source != null) {
+                    frame.pushCause(source);
+                }
+                DestructEntityEvent event = SpongeEventFactory.createDestructEntityEvent(
+                        frame.getCurrentCause(), originalChannel, Optional.of(originalChannel),
+                        new MessageEvent.MessageFormatter(), this, true
+                );
+
+                this.destructEvent = event;
+            }
+        }
+    }
+
+    @Override
+    public void onEntityRemoved() {
+        if (this.destructEvent != null) {
+            SpongeImpl.postEvent(this.destructEvent);
+        }
+        this.destructEvent = null;
+    }
 }

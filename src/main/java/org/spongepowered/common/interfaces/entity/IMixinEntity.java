@@ -192,4 +192,6 @@ public interface IMixinEntity extends org.spongepowered.api.entity.Entity, IMixi
     default void onCancelledBlockChange(EntityTickContext phaseContext) {
 
     }
+
+    void onEntityRemoved();
 }
