@@ -72,7 +72,7 @@ public abstract class MixinEntity_Tracker implements Entity, IMixinEntity {
         } else {
             final NBTTagCompound compoundTag = spongeData.getCompoundTag(nbtKey);
             if (uuid == null) {
-                compoundTag.removeTag(NbtDataUtil.UUID);
+                spongeData.removeTag(nbtKey);
             } else {
                 compoundTag.setUniqueId(NbtDataUtil.UUID, uuid);
             }
