@@ -138,7 +138,6 @@ public interface IMixinBlock extends IMixinTrackable {
         return false;
     }
 
-    boolean requiresBlockCapture();
     ImmutableMap<Class<? extends Property<?,?>>,Property<?,?>> getProperties(IBlockState mixinStateImplementation);
 
     void initializeTrackerState();

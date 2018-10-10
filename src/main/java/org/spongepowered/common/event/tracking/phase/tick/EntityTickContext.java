@@ -24,10 +24,19 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
+import net.minecraft.entity.Entity;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 
 public class EntityTickContext extends TickContext<EntityTickContext> {
+
+    double posX;
+    double posY;
+    double posZ;
+    public double prevX;
+    public double prevY;
+    public double prevZ;
+
 
     EntityTickContext(IPhaseState<EntityTickContext> phaseState) {
         super(phaseState);
@@ -43,7 +52,17 @@ public class EntityTickContext extends TickContext<EntityTickContext> {
             setBulkEntityCaptures(mixinEntity.allowsEntityBulkCapture());
             setEntitySpawnEvents(mixinEntity.allowsEntityEventCreation());
         }
+        this.populateEntityPosition((Entity) owner);
         return super.source(owner);
     }
 
+    public void populateEntityPosition(Entity entity) {
+        this.posX = entity.posX;
+        this.posY = entity.posY;
+        this.posZ = entity.posZ;
+        this.prevX = entity.lastTickPosX;
+        this.prevY = entity.lastTickPosY;
+        this.prevZ = entity.lastTickPosZ;
+
+    }
 }

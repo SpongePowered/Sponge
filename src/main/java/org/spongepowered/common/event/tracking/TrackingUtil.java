@@ -51,7 +51,6 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.ExperienceOrb;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
@@ -88,7 +87,6 @@ import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
-import org.spongepowered.common.registry.type.event.SpawnTypeRegistryModule;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
@@ -99,7 +97,6 @@ import org.spongepowered.common.world.WorldUtil;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -151,7 +148,6 @@ public final class TrackingUtil {
         try (final EntityTickContext context = tickContext;
              final Timing entityTiming = mixinEntity.getTimingsHandler()
         ) {
-
             mixinEntity.getNotifierUser()
                     .ifPresent(context::notifier);
             mixinEntity.getCreatorUser()
@@ -160,7 +156,7 @@ public final class TrackingUtil {
             entityTiming.startTiming();
             entity.onUpdate();
             if (ShouldFire.MOVE_ENTITY_EVENT) {
-                SpongeCommonEventFactory.callMoveEntityEvent(entity);
+                SpongeCommonEventFactory.callMoveEntityEvent(entity, context);
             }
         } catch (Exception | NoClassDefFoundError e) {
             PhaseTracker.getInstance().printExceptionFromPhase(e, tickContext);
@@ -188,7 +184,7 @@ public final class TrackingUtil {
             context.buildAndSwitch();
             entity.updateRidden();
             if (ShouldFire.MOVE_ENTITY_EVENT) {
-                SpongeCommonEventFactory.callMoveEntityEvent(entity);
+                SpongeCommonEventFactory.callMoveEntityEvent(entity, context);
             }
         } catch (Exception | NoClassDefFoundError e) {
             PhaseTracker.getInstance().printExceptionFromPhase(e, tickContext);

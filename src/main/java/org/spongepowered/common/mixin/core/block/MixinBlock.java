@@ -59,7 +59,6 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Transform;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
@@ -111,8 +110,6 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     private final boolean isVanilla = getClass().getName().startsWith("net.minecraft.");
     private boolean hasCollideLogic;
     private boolean hasCollideWithStateLogic;
-    // Only needed for blocks that do not fire ChangeBlockEvent.Pre
-    private boolean requiresBlockCapture = true;
     private static boolean canCaptureItems = true;
     private Timing timing;
     // Used by tracker config
@@ -134,45 +131,6 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Shadow public abstract BlockStateContainer getBlockState();
 
     @Shadow protected boolean enableStats;
-
-    @Inject(method = "<init>*", at = @At("RETURN"))
-    private void onConstruction(CallbackInfo ci) {
-        // Determine which blocks can avoid executing un-needed event logic
-        // This will allow us to avoid running event logic for blocks that do nothing such as grass collisions
-        // -- blood
-
-        this.hasCollideLogic = true;
-        this.hasCollideWithStateLogic = true;
-
-        // onEntityCollidedWithBlock
-        try {
-            String mapping = SpongeImplHooks.isDeobfuscatedEnvironment() ? "onEntityWalk" : "func_176199_a";
-            Class<?>[] argTypes = { net.minecraft.world.World.class, BlockPos.class, Entity.class };
-            Class<?> clazz = this.getClass().getMethod(mapping, argTypes).getDeclaringClass();
-            if (clazz.equals(Block.class)) {
-                this.hasCollideLogic = false;
-            }
-        } catch (Throwable ex) {
-            // ignore
-        }
-
-        // onEntityCollision (IBlockState)
-        try {
-            String mapping = SpongeImplHooks.isDeobfuscatedEnvironment() ? "onEntityCollision" : "func_180634_a";
-            Class<?>[] argTypes = { net.minecraft.world.World.class, BlockPos.class, IBlockState.class, Entity.class };
-            Class<?> clazz = this.getClass().getMethod(mapping, argTypes).getDeclaringClass();
-            if (clazz.equals(Block.class)) {
-                this.hasCollideWithStateLogic = false;
-            }
-        } catch (Throwable ex) {
-            // ignore
-        }
-
-        Block block = (Block) (Object) this;
-        if (block instanceof BlockLeaves || block instanceof BlockLog || block instanceof BlockGrass || block instanceof BlockLiquid) {
-            this.requiresBlockCapture = false;
-        }
-    }
 
     @Inject(method = "registerBlock(ILnet/minecraft/util/ResourceLocation;Lnet/minecraft/block/Block;)V", at = @At("RETURN"))
     private static void onRegisterBlock(int id, ResourceLocation location, Block block, CallbackInfo ci) {
@@ -433,11 +391,6 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     }
 
     @Override
-    public boolean requiresBlockCapture() {
-        return this.requiresBlockCapture;
-    }
-
-    @Override
     public BlockSoundGroup getSoundGroup() {
         return (BlockSoundGroup) this.blockSoundType;
     }
@@ -499,6 +452,41 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
         if (modCapturing == null) {
             modCapturing = new BlockTrackerModCategory();
             blockTracker.getModMappings().put(modId, modCapturing);
+        }
+
+        // Determine which blocks can avoid executing un-needed event logic
+        // This will allow us to avoid running event logic for blocks that do nothing such as grass collisions
+        // -- blood
+        // @author gabizou - October 9th, 2018
+        // @reason Due to early class initialization and object instantiation, a lot of the reflection access
+        // logic can be delayed until actual type registration with sponge. This will at the very least allow
+        // mod type registrations to go through without getting the overall cost of reflection during object construction.
+
+        this.hasCollideLogic = true;
+        this.hasCollideWithStateLogic = true;
+
+        // onEntityCollidedWithBlock
+        try {
+            String mapping = SpongeImplHooks.isDeobfuscatedEnvironment() ? "onEntityWalk" : "func_176199_a";
+            Class<?>[] argTypes = { net.minecraft.world.World.class, BlockPos.class, Entity.class };
+            Class<?> clazz = this.getClass().getMethod(mapping, argTypes).getDeclaringClass();
+            if (clazz.equals(Block.class)) {
+                this.hasCollideLogic = false;
+            }
+        } catch (Throwable ex) {
+            // ignore
+        }
+
+        // onEntityCollision (IBlockState)
+        try {
+            String mapping = SpongeImplHooks.isDeobfuscatedEnvironment() ? "onEntityCollision" : "func_180634_a";
+            Class<?>[] argTypes = { net.minecraft.world.World.class, BlockPos.class, IBlockState.class, Entity.class };
+            Class<?> clazz = this.getClass().getMethod(mapping, argTypes).getDeclaringClass();
+            if (clazz.equals(Block.class)) {
+                this.hasCollideWithStateLogic = false;
+            }
+        } catch (Throwable ex) {
+            // ignore
         }
 
         if (!modCapturing.isEnabled()) {

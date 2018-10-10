@@ -80,7 +80,6 @@ import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
-import org.spongepowered.api.event.cause.EventContextKey;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
@@ -96,16 +95,13 @@ import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.event.item.inventory.InteractItemEvent;
 import org.spongepowered.api.event.message.MessageEvent;
-import org.spongepowered.api.item.inventory.EmptyInventory;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
-import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
-import org.spongepowered.api.item.inventory.type.OrderedInventory;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
@@ -126,6 +122,7 @@ import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase.State;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
+import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinInventory;
@@ -141,7 +138,6 @@ import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.common.world.SpongeLocatableBlock;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 import org.spongepowered.common.world.WorldUtil;
 
@@ -819,18 +815,23 @@ public class SpongeCommonEventFactory {
         }
     }
 
-    public static MoveEntityEvent callMoveEntityEvent(net.minecraft.entity.Entity entity) {
+    @Nullable
+    public static MoveEntityEvent callMoveEntityEvent(net.minecraft.entity.Entity entity,
+        EntityTickContext context) {
         // Ignore movement event if entity is dead, a projectile, or item.
         // Note: Projectiles are handled with CollideBlockEvent.Impact
         if (entity.isDead || entity instanceof IProjectile || entity instanceof EntityItem) {
             return null;
         }
 
-        Entity spongeEntity = (Entity) entity;
+        final Entity spongeEntity = (Entity) entity;
+        double deltaX = context.prevX - entity.posX;
+        double deltaY = context.prevY - entity.posY;
+        double deltaZ = context.prevZ - entity.posZ;
+        final double deltaChange = Math.pow(deltaX, 2) + Math.pow(deltaY, 2) + Math.pow(deltaZ, 2);
 
-        if (entity.lastTickPosX != entity.posX
-            || entity.lastTickPosY != entity.posY
-            || entity.lastTickPosZ != entity.posZ
+
+        if (deltaChange > 1f / 256 // Micro-optimization, avoids almost negligible position movement from floating point differences.
             || entity.rotationPitch != entity.prevRotationPitch
             || entity.rotationYaw != entity.prevRotationYaw) {
             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
@@ -840,21 +841,22 @@ public class SpongeCommonEventFactory {
                 final double currentPosY = entity.posY;
                 final double currentPosZ = entity.posZ;
     
-                final Vector3d oldPositionVector = new Vector3d(entity.lastTickPosX, entity.lastTickPosY, entity.lastTickPosZ);
+                final Vector3d oldPositionVector = new Vector3d(context.prevX, context.prevY, context.prevZ);
                 final Vector3d currentPositionVector = new Vector3d(currentPosX, currentPosY, currentPosZ);
     
-                Vector3d oldRotationVector = new Vector3d(entity.prevRotationPitch, entity.prevRotationYaw, 0);
-                Vector3d currentRotationVector = new Vector3d(entity.rotationPitch, entity.rotationYaw, 0);
-                final Transform<World> oldTransform = new Transform<>(spongeEntity.getWorld(), oldPositionVector, oldRotationVector,
-                        spongeEntity.getScale());
-                final Transform<World> newTransform = new Transform<>(spongeEntity.getWorld(), currentPositionVector, currentRotationVector,
-                        spongeEntity.getScale());
-                final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), oldTransform, newTransform, spongeEntity);
+                final Vector3d oldRotationVector = new Vector3d(entity.prevRotationPitch, entity.prevRotationYaw, 0);
+                final Vector3d currentRotationVector = new Vector3d(entity.rotationPitch, entity.rotationYaw, 0);
+
+                final World world = spongeEntity.getWorld();
+
+                final Transform<World> oldTransform = new Transform<>(world, oldPositionVector, oldRotationVector, spongeEntity.getScale());
+                final Transform<World> newTransform = new Transform<>(world, currentPositionVector, currentRotationVector, spongeEntity.getScale());
+                final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(frame.getCurrentCause(), oldTransform, newTransform, spongeEntity);
     
-                if (SpongeImpl.postEvent(event)) {
-                    entity.posX = entity.lastTickPosX;
-                    entity.posY = entity.lastTickPosY;
-                    entity.posZ = entity.lastTickPosZ;
+                if (SpongeImpl.postEvent(event)) { // Cancelled event, reset positions to previous position.
+                    entity.posX = context.prevX;
+                    entity.posY = context.prevY;
+                    entity.posZ = context.prevZ;
                     entity.rotationPitch = entity.prevRotationPitch;
                     entity.rotationYaw = entity.prevRotationYaw;
                 } else {
@@ -868,18 +870,6 @@ public class SpongeCommonEventFactory {
                         entity.rotationPitch = (float) currentRotationVector.getX();
                         entity.rotationYaw = (float) currentRotationVector.getY();
                     }
-                    //entity.setPositionWithRotation(position.getX(), position.getY(), position.getZ(), rotation.getFloorX(), rotation.getFloorY());
-                        /*
-                        Some thoughts from gabizou: The interesting thing here is that while this is only called
-                        in World.updateEntityWithOptionalForce, by default, it supposedly handles updating the rider entity
-                        of the entity being handled here. The interesting issue is that since we are setting the transform,
-                        the rider entity (and the rest of the rider entities) are being updated as well with the new position
-                        and potentially world, which results in a dirty world usage (since the world transfer is handled by
-                        us). Now, the thing is, the previous position is not updated either, and likewise, the current position
-                        is being set by us as well. So, there's some issue I'm sure that is bound to happen with this
-                        logic.
-                         */
-                    //((Entity) entity).setTransform(event.getToTransform());
                 }
                 return event;
             }
