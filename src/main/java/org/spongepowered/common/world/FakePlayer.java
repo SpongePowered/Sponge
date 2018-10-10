@@ -47,7 +47,7 @@ import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.util.VecHelper;
@@ -55,6 +55,7 @@ import org.spongepowered.common.util.VecHelper;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
 
 /**
  * A marker to state that this is a fake player.
@@ -75,6 +76,12 @@ public interface FakePlayer {
             return player;
         }
 
+        //TODO: call this from world unload.
+        public void unloadWorld(World world) {
+            players.entrySet().stream()
+                    .filter(kv -> kv.getValue().world == world)
+                    .map(kv -> players.remove(kv.getKey()));
+        }
     }
 
     public static class Controller {
@@ -85,7 +92,7 @@ public interface FakePlayer {
             this.factory = factory;
         }
 
-        private EntityPlayerMP setUpPlayer(GameProfile profile, World world, int x, int y, int z, ItemStack itemInHand) {
+        private <T> T setUpPlayer(GameProfile profile, World world, int x, int y, int z, ItemStack itemInHand, Function<FakePlayer, T> consumer) {
             EntityPlayerMP player = factory.getPlayer((WorldServer) world, (com.mojang.authlib.GameProfile) profile);
             player.world = (WorldServer) world;
             player.interactionManager.setWorld((WorldServer) world);
@@ -101,32 +108,25 @@ public interface FakePlayer {
             player.inventory.mainInventory.set(player.inventory.currentItem, stack);
 
             // Set up cause capture
-            PluginPhase.State.FAKE_PLAYER.createPhaseContext()
+
+            try(BasicPluginContext basicPluginContext = PluginPhase.State.FAKE_PLAYER.createPhaseContext()
                     .addCaptures()
-                    .buildAndSwitch();
-            Sponge.getCauseStackManager().addContext(EventContextKeys.PLAYER_SIMULATED, profile);
-            return player;
-        }
-
-        private static void tearDownPlayer(EntityPlayerMP player) {
-            // Tear down cause capture
-            PhaseTracker.getInstance().completePhase(PhaseTracker.getInstance().getCurrentState());
-
-            player.inventory.clear();
-            player.world = null;
-            player.interactionManager.setWorld(null);
+                    .buildAndSwitch()) {
+                Sponge.getCauseStackManager().addContext(EventContextKeys.PLAYER_SIMULATED, profile);
+                return consumer.apply((FakePlayer) player);
+            }
         }
 
         public boolean hit(World world, int x, int y, int z, Direction side, GameProfile profile) {
-            EntityPlayerMP player = setUpPlayer(profile, world, x, y, z, null);
-            EnumFacing facing = DirectionFacingProvider.directionMap.get(side);
-            boolean result = onBlockClicked(player, new BlockPos(x, y, z), facing);
-            tearDownPlayer(player);
-            return result;
+            return setUpPlayer(profile, world, x, y, z, null, player -> {
+                EnumFacing facing = DirectionFacingProvider.directionMap.get(side);
+                return onBlockClicked(player, new BlockPos(x, y, z), facing);
+            });
         }
 
         // Partial copy of PlayerInteractionManager#onBlockClicked
-        private boolean onBlockClicked(EntityPlayerMP player, BlockPos pos, EnumFacing side) {
+        private boolean onBlockClicked(FakePlayer fakePlayer, BlockPos pos, EnumFacing side) {
+            EntityPlayerMP player = (EntityPlayerMP) fakePlayer;
             InteractBlockEvent.Primary event = SpongeEventFactory.createInteractBlockEventPrimaryMainHand(
                     Sponge.getCauseStackManager().getCurrentCause(), HandTypes.MAIN_HAND, Optional.empty(),
                     ((World) player.world).createSnapshot(VecHelper.toVector3i(pos)), DirectionFacingProvider.directionMap.inverse().get(side));
@@ -146,16 +146,19 @@ public interface FakePlayer {
         }
 
         public boolean interact(World world, int x, int y, int z, ItemStack itemStack, Direction side, GameProfile profile) {
-            EntityPlayerMP player = setUpPlayer(profile, world, x, y, z, itemStack);
-            if (itemStack == null) {
-                itemStack = (ItemStack) net.minecraft.item.ItemStack.EMPTY;
-            }
-            EnumFacing facing = DirectionFacingProvider.directionMap.get(side);
-            EnumActionResult result =
-                    player.interactionManager.processRightClickBlock(player, player.world, (net.minecraft.item.ItemStack) itemStack,
-                            EnumHand.MAIN_HAND, new BlockPos(x, y, z), facing, 0, 0, 0);
-            tearDownPlayer(player);
-            return result != EnumActionResult.FAIL;
+            return setUpPlayer(profile, world, x, y, z, itemStack, fakePlayer -> {
+                final EntityPlayerMP player = (EntityPlayerMP) fakePlayer;
+                final net.minecraft.item.ItemStack item = (itemStack == null)
+                                ? net.minecraft.item.ItemStack.EMPTY
+                                : (net.minecraft.item.ItemStack) itemStack;
+
+                EnumFacing facing = DirectionFacingProvider.directionMap.get(side);
+                EnumActionResult result =
+                        player.interactionManager.processRightClickBlock(player, player.world, item,
+                                EnumHand.MAIN_HAND, new BlockPos(x, y, z), facing, 0, 0, 0
+                        );
+                return result != EnumActionResult.FAIL;
+            });
         }
 
         public boolean place(World world, int x, int y, int z, BlockState block, Direction side, GameProfile profile) {
@@ -165,29 +168,31 @@ public interface FakePlayer {
             }
             net.minecraft.item.ItemStack stack = new net.minecraft.item.ItemStack(item, 1, ((Block) block.getType())
                     .getMetaFromState((IBlockState) block));
-            EntityPlayerMP player = setUpPlayer(profile, world, x, y, z, (ItemStack) stack);
-            EnumFacing facing = DirectionFacingProvider.directionMap.get(side);
-            EnumActionResult result = stack.onItemUse(player, player.world, new BlockPos(x, y, z), EnumHand.MAIN_HAND, facing, 0, 0, 0);
-            tearDownPlayer(player);
-            return result != EnumActionResult.FAIL;
+            return setUpPlayer(profile, world, x, y, z, (ItemStack) stack, fakePlayer -> {
+                EntityPlayerMP player = (EntityPlayerMP) fakePlayer;
+                EnumFacing facing = DirectionFacingProvider.directionMap.get(side);
+                EnumActionResult result = stack.onItemUse(player, player.world, new BlockPos(x, y, z), EnumHand.MAIN_HAND, facing, 0, 0, 0);
+                return result != EnumActionResult.FAIL;
+            });
         }
 
-        public boolean dig(World world, int x, int y, int z, org.spongepowered.api.item.inventory.ItemStack itemStack, GameProfile profile) {
-            EntityPlayerMP player = setUpPlayer(profile, world, x, y, z, itemStack);
-            boolean result = player.interactionManager.tryHarvestBlock(new BlockPos(x, y, z));
-            tearDownPlayer(player);
-            return result;
+        public boolean dig(World world, int x, int y, int z, ItemStack itemStack, GameProfile profile) {
+            return setUpPlayer(profile, world, x, y, z, itemStack, fakePlayer -> {
+                EntityPlayerMP player = (EntityPlayerMP) fakePlayer;
+                return player.interactionManager.tryHarvestBlock(new BlockPos(x, y, z));
+            });
         }
 
-        public int digTime(World world, int x, int y, int z, org.spongepowered.api.item.inventory.ItemStack itemStack, GameProfile profile) {
-            EntityPlayerMP player = setUpPlayer(profile, world, x, y, z, itemStack);
-            BlockPos pos = new BlockPos(x, y, z);
-            net.minecraft.world.World w = player.world;
-            // A value from 0.0 to 1.0 representing the percentage of the block
-            // broken in one tick. We return the inverse.
-            float percentagePerTick = w.getBlockState(pos).getPlayerRelativeBlockHardness(player, w, pos);
-            tearDownPlayer(player);
-            return MathHelper.ceil(1 / percentagePerTick);
+        public int digTime(World world, int x, int y, int z, ItemStack itemStack, GameProfile profile) {
+            return setUpPlayer(profile, world, x, y, z, itemStack, fakePlayer -> {
+                EntityPlayerMP player = (EntityPlayerMP) fakePlayer;
+                BlockPos pos = new BlockPos(x, y, z);
+                net.minecraft.world.World w = player.world;
+                // A value from 0.0 to 1.0 representing the percentage of the block
+                // broken in one tick. We return the inverse.
+                float percentagePerTick = w.getBlockState(pos).getPlayerRelativeBlockHardness(player, w, pos);
+                return MathHelper.ceil(1 / percentagePerTick);
+            });
         }
 
     }
