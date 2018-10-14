@@ -1472,7 +1472,6 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
         if (ShouldFire.DESTRUCT_ENTITY_EVENT && !this.world.isRemote && !(EntityUtil.toNative(this) instanceof EntityLiving)) {
             MessageChannel originalChannel = MessageChannel.TO_NONE;
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                frame.pushCause(this);
                 Object source = PhaseTracker.getInstance().getCurrentContext().getSource();
                 if (source != null) {
                     frame.pushCause(source);
