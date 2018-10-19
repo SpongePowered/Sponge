@@ -117,11 +117,6 @@ public final class SpongeImpl {
                 internalPlugins.add(((SpongePlatform) platform).getCommon());
             }
         }
-
-        final PrettyPrinter printer = new PrettyPrinter(60).add("InternalPlugins").centre().hr()
-            .add("Listing plugins:");
-        internalPlugins.forEach(plugin -> printer.add(" - " + plugin.getId() + " : " + plugin.getVersion().orElse("")));
-        printer.trace();
     }
 
     private static <T> T check(@Nullable T instance) {
