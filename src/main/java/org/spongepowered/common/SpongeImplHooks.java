@@ -500,4 +500,8 @@ public final class SpongeImplHooks {
     public static boolean creativeExploitCheck(Packet<?> packetIn, EntityPlayerMP playerMP) {
         return false;
     }
+
+    public static String getImplementationId() {
+        throw new UnsupportedOperationException("SpongeCommon does not have it's own ecosystem, this needs to be mixed into for implementations depending on SpongeCommon");
+    }
 }

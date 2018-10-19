@@ -37,15 +37,23 @@ apply plugin: 'org.spongepowered.meta'
 generateMetadata {
     dependsOn common.resolveApiRevision
 }
-
+ext {
+    implementationVersion = (common.isImplRC ? common.apiSuffix + '.' + common.recommendedVersion - '-SNAPSHOT' + "-RC$buildNumber" : common.apiSuffix + '.' + common.recommendedVersion)
+}
 sponge {
     plugin {
-        id = 'sponge'
+        id = project.ext.implementationId
+        version = project.version
+        meta {
+            inherit project
+        }
         meta.dependencies {
             spongeapi {
                 forceVersion {common.apiVersion}
             }
-
+            sponge {
+                forceVersion {common.version}
+            }
             minecraft {
                 forceVersion project.minecraft.version
             }
@@ -57,6 +65,21 @@ sponge {
             meta {
                 inherit api
                 version = {common.apiVersion}
+            }
+        }
+        sponge {
+            meta {
+                inherit common
+                name = "Sponge"
+                version = common.version
+                dependencies {
+                    spongeapi {
+                        forceVersion {common.apiVersion}
+                    }
+                    minecraft {
+                        forceVersion project.minecraft.version
+                    }
+                }
             }
         }
     }

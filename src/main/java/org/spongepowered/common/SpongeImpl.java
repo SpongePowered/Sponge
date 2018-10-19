@@ -43,6 +43,7 @@ import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.game.state.GameStateEvent;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.SpongeConfigSaveManager;
 import org.spongepowered.common.config.type.CustomDataConfig;
@@ -73,7 +74,7 @@ public final class SpongeImpl {
 
     public static final String API_NAME = "SpongeAPI";
 
-    public static final String ECOSYSTEM_ID = "sponge";
+    public static final String ECOSYSTEM_ID = "sponge"; // This is different from the id used by the actual implementation
     public static final String ECOSYSTEM_NAME = "Sponge";
 
     // TODO: Keep up to date
@@ -88,6 +89,7 @@ public final class SpongeImpl {
     @Nullable private static SpongeConfig<CustomDataConfig> customDataConfig;
     @Nullable private static SpongeConfigSaveManager configSaveManager;
     @Nullable private static PluginContainer minecraftPlugin;
+    @Nullable private static PluginContainer spongecommon;
 
     @Inject @Nullable private static SpongeGame game;
     @Inject @Nullable private static SpongeGameRegistry registry;
@@ -107,8 +109,13 @@ public final class SpongeImpl {
             minecraftPlugin = platform.getContainer(Platform.Component.GAME);
         }
 
+
         for (Platform.Component component : Platform.Component.values()) {
             internalPlugins.add(platform.getContainer(component));
+            if (component == Platform.Component.API && platform instanceof SpongePlatform) {
+                // We want to set up the common version after the api.
+                internalPlugins.add(((SpongePlatform) platform).getCommon());
+            }
         }
     }
 
@@ -169,6 +176,16 @@ public final class SpongeImpl {
     public static void setMinecraftPlugin(PluginContainer minecraft) {
         checkState(minecraftPlugin == null, "Minecraft plugin container is already initialized");
         minecraftPlugin = minecraft;
+    }
+
+    public static void setSpongePlugin(PluginContainer common) {
+        checkState(spongecommon == null);
+        spongecommon = common;
+    }
+
+    public static PluginContainer getSpongePlugin() {
+        checkState(spongecommon != null, "SpongeCommon plugin container is not initialized");
+        return spongecommon;
     }
 
     public static Path getGameDir() {

@@ -33,8 +33,23 @@ ext.common = project
 apply from: 'gradle/minecraft.gradle'
 
 // Inherit SpongeCommon version from SpongeAPI
-version = api.version
-ext.apiVersion = version
+ext {
+    isSnapshot = api.version.contains('-SNAPSHOT')
+    isImplRC = common.recommendedVersion.contains('-SNAPSHOT')
+    trimmedApiVersion = api.version.toString().replace("-SNAPSHOT", "")
+    apiSplitVersion = trimmedApiVersion.split("\\.")
+    // This is to determine if the split api version has at the least a minimum version.
+    apiMinor = apiSplitVersion.length > 1 ? apiSplitVersion[1] : (apiSplitVersion.length > 0 ? apiSplitVersion.last : '0')
+    correctedMinorVersion = Math.max(Integer.parseInt(apiMinor) - 1, 0)
+    // And then here, we determine if the api version still has a patch version, to just ignore it.
+    apiReleaseVersion = apiSplitVersion.length > 2 ? apiSplitVersion[0] + '.' + apiSplitVersion[1] : trimmedApiVersion
+    apiSuffix = isSnapshot ? ext.apiSplitVersion[0] + '.' + correctedMinorVersion : apiReleaseVersion
+    fixedApiVersionWithDecreasedMinor = apiSplitVersion.length > 2 ? apiSplitVersion[0] + '.' + correctedMinorVersion + '.' + apiSplitVersion[2] : apiSplitVersion[0] + '.' + correctedMinorVersion
+}
+version = minecraftVersion + '-' + ext.apiSuffix + '.' + common.recommendedVersion
+
+ext.apiVersion = isSnapshot ? ext.fixedApiVersionWithDecreasedMinor : ext.apiReleaseVersion
+
 
 dependencies {
     compile(api) {

@@ -42,6 +42,7 @@ import java.util.Map;
 public class SpongePlatform implements Platform {
 
     private final PluginContainer api;
+    private final PluginContainer common;
     private final PluginContainer impl;
     private final PluginContainer minecraft;
     private final MinecraftVersion minecraftVersion;
@@ -59,12 +60,13 @@ public class SpongePlatform implements Platform {
 
     @Inject
     public SpongePlatform(PluginManager manager, MinecraftVersion minecraftVersion) {
-        this(manager, manager.getPlugin(SpongeImpl.ECOSYSTEM_ID).get(), minecraftVersion);
+        this(manager, manager.getPlugin(SpongeImplHooks.getImplementationId()).get(), minecraftVersion);
     }
 
     // For SpongeForge (implementation container isn't registered when SpongePlatform is initialized)
-    protected SpongePlatform(PluginManager manager, PluginContainer impl, MinecraftVersion minecraftVersion) {
+    protected SpongePlatform(PluginManager manager,  PluginContainer impl, MinecraftVersion minecraftVersion) {
         this.api = manager.getPlugin(Platform.API_ID).get();
+        this.common = manager.getPlugin(SpongeImpl.ECOSYSTEM_ID).get();
         this.impl = checkNotNull(impl, "impl");
         this.minecraft = manager.getPlugin(SpongeImpl.GAME_ID).get();
         this.minecraftVersion = checkNotNull(minecraftVersion, "minecraftVersion");
@@ -72,6 +74,8 @@ public class SpongePlatform implements Platform {
         this.platformMap.put("Type", this.getType());
         this.platformMap.put("ApiName", this.api.getName());
         this.platformMap.put("ApiVersion", this.api.getVersion());
+        this.platformMap.put("CommonName", this.common.getName());
+        this.platformMap.put("CommonVersion", this.common.getVersion());
         this.platformMap.put("ImplementationName", this.impl.getName());
         this.platformMap.put("ImplementationVersion", this.impl.getVersion());
         this.platformMap.put("MinecraftVersion", this.getMinecraftVersion());
@@ -79,6 +83,10 @@ public class SpongePlatform implements Platform {
 
     // For SpongeCommon we assume that we are always on the server
     // SpongeForge overrides this to return CLIENT when running in a client environment
+
+    public PluginContainer getCommon() {
+        return this.common;
+    }
 
     @Override
     public Type getType() {

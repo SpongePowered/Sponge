@@ -36,6 +36,7 @@ import org.spongepowered.api.network.ChannelRegistrar;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.common.SpongeGame;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongePlatform;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.inject.SpongeImplementationModule;
@@ -63,8 +64,8 @@ public class TestImplementationModule extends SpongeImplementationModule {
         when(manager.getPlugin(anyString())).thenReturn(Optional.of(mock));
         when(manager.fromInstance(any())).thenReturn(Optional.of(mock));
         this.bind(PluginManager.class).toInstance(manager);
-
-
+        PluginContainer common = mock(PluginContainer.class);
+        SpongeImpl.setSpongePlugin(common);
         this.bind(EventManager.class).toInstance(mock(EventManager.class));
         this.bind(ChannelRegistrar.class).toInstance(mock(ChannelRegistrar.class));
     }
