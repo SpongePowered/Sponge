@@ -33,11 +33,15 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.profile.GameProfile;
+import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.text.Text;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 /*
  * Tests getting a user from a string, ensuring that an empty optional one time is an empty optional all the time.
@@ -65,6 +69,17 @@ public class GetUserTest {
                         "getuser"
                 );
 
+        // for testing tab completion
+        Sponge.getCommandManager()
+                .register(this, CommandSpec.builder()
+                                .arguments(GenericArguments.user(Text.of("name")))
+                                .executor((source, context) -> {
+                                    source.sendMessage(Text.of("Name: ", context.<User>requireOne("name").getName()));
+                                    return CommandResult.success();
+                                }).build(),
+                        "getuserusingarg"
+                );
+
         Sponge.getCommandManager()
                 .register(this, CommandSpec.builder()
                                 .arguments(GenericArguments.string(Text.of("name")))
@@ -83,6 +98,29 @@ public class GetUserTest {
                                     return CommandResult.success();
                                 }).build(),
                         "getorcreateuser"
+                );
+
+        Sponge.getCommandManager()
+                .register(this, CommandSpec.builder()
+                                .executor((source, context) -> {
+                                    long starttimestamp = System.currentTimeMillis();
+                                    Collection<GameProfile> profiles = Sponge.getServiceManager().provideUnchecked(UserStorageService.class).getAll();
+                                    long endtimestamp = System.currentTimeMillis();
+                                    int size = profiles.size();
+
+                                    List<Text> profileNames =
+                                            profiles.stream()
+                                                    .map(x -> Text.of(x.getName().orElse(x.getUniqueId().toString())))
+                                                    .collect(Collectors.toList());
+
+                                    Sponge.getServiceManager().provideUnchecked(PaginationService.class)
+                                            .builder()
+                                            .title(Text.of("Users: ", size, " - Time to run: ", endtimestamp - starttimestamp, "ms"))
+                                            .contents(profileNames)
+                                            .sendTo(source);
+                                    return CommandResult.success();
+                                }).build(),
+                        "getallusers"
                 );
     }
 }

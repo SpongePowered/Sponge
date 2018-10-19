@@ -78,6 +78,7 @@ import javax.annotation.Nullable;
 public abstract class SaveHandlerMixin implements SaveHandlerBridge {
 
     @Shadow @Final private File worldDirectory;
+    @Shadow @Final private File playersDirectory;
 
     @Shadow protected abstract void shadow$setSessionLock();
 
@@ -428,6 +429,11 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge {
     @Override
     public File bridge$getSpongeWorldDirectory() {
         return this.worldDirectory;
+    }
+
+    @Override
+    public File bridge$getPlayersDirectory() {
+        return this.playersDirectory;
     }
 
     private boolean impl$loadSpongeDatFile(final WorldInfo info, final File file, boolean isCurrent) {

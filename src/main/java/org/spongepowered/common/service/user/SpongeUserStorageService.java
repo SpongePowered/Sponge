@@ -45,6 +45,10 @@ public class SpongeUserStorageService implements UserStorageService {
     public static final UUID FAKEPLAYER_UUID = UUID.fromString("41C82C87-7AfB-4024-BA57-13D2C99CAE77");
     public static final GameProfile FAKEPLAYER_PROFILE = (GameProfile) new com.mojang.authlib.GameProfile(FAKEPLAYER_UUID, null);
 
+    public void init() {
+        UserDiscoverer.init();
+    }
+
     @Override
     public Optional<User> get(UUID uniqueId) {
         try {

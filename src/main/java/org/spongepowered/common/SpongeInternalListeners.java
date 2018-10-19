@@ -29,9 +29,12 @@ import com.google.common.collect.Multimap;
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.game.state.GameStartingServerEvent;
 import org.spongepowered.api.event.service.ChangeServiceProviderEvent;
 import org.spongepowered.api.event.world.SaveWorldEvent;
 import org.spongepowered.common.bridge.server.management.PlayerProfileCacheBridge;
+import org.spongepowered.api.service.user.UserStorageService;
+import org.spongepowered.common.service.user.SpongeUserStorageService;
 import org.spongepowered.common.util.SpongeUsernameCache;
 
 import java.util.Iterator;
@@ -56,6 +59,14 @@ public class SpongeInternalListeners {
             callback.accept(o);
             return true;
         });
+    }
+
+    @Listener
+    public void onServerStarting(GameStartingServerEvent event) {
+        // if we have the SpongeUserService, we start init now async (this is a filesystem scan).
+        Sponge.getServiceManager().provide(UserStorageService.class)
+                .filter(x -> x instanceof SpongeUserStorageService)
+                .ifPresent(x -> ((SpongeUserStorageService) x).init());
     }
 
     @Listener
