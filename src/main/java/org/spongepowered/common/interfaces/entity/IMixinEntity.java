@@ -193,5 +193,10 @@ public interface IMixinEntity extends org.spongepowered.api.entity.Entity, IMixi
 
     }
 
+    /**
+     * Called when the entity is being removed.
+     * Usually because it was marked as dead the previous tick.
+     *
+     */
     void onEntityRemoved();
 }
