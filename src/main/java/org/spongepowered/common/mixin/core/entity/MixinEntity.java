@@ -1473,9 +1473,8 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
             MessageChannel originalChannel = MessageChannel.TO_NONE;
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 Object source = PhaseTracker.getInstance().getCurrentContext().getSource();
-                if (source != null) {
-                    frame.pushCause(source);
-                }
+                frame.pushCause(source);
+
                 DestructEntityEvent event = SpongeEventFactory.createDestructEntityEvent(
                         frame.getCurrentCause(), originalChannel, Optional.of(originalChannel),
                         new MessageEvent.MessageFormatter(), this, true
