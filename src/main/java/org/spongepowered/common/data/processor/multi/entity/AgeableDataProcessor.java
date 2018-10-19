@@ -37,6 +37,7 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableAgeableD
 import org.spongepowered.api.data.manipulator.mutable.entity.AgeableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAgeableData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
+import org.spongepowered.common.data.util.DataConstants;
 
 import java.util.Map;
 import java.util.Optional;
@@ -49,7 +50,7 @@ public class AgeableDataProcessor extends AbstractEntityDataProcessor<EntityAgea
 
     @Override
     protected AgeableData createManipulator() {
-        return new SpongeAgeableData(0, true);
+        return new SpongeAgeableData(DataConstants.ADULT, true);
     }
 
     @Override
@@ -68,9 +69,9 @@ public class AgeableDataProcessor extends AbstractEntityDataProcessor<EntityAgea
         }
 
         if (adult) {
-            entity.setGrowingAge(Integer.MAX_VALUE);
+            entity.setGrowingAge(DataConstants.ADULT);
         } else {
-            entity.setGrowingAge(Integer.MIN_VALUE);
+            entity.setGrowingAge(DataConstants.CHILD);
         }
         return true;
 
@@ -78,7 +79,7 @@ public class AgeableDataProcessor extends AbstractEntityDataProcessor<EntityAgea
 
     @Override
     protected Map<Key<?>, ?> getValues(EntityAgeable entity) {
-        return ImmutableMap.<Key<?>, Object>of(Keys.AGE, entity.getIdleTime(), Keys.IS_ADULT, entity.isChild());
+        return ImmutableMap.<Key<?>, Object>of(Keys.AGE, entity.getIdleTime(), Keys.IS_ADULT, !entity.isChild());
     }
 
     @Override

@@ -32,6 +32,7 @@ import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeAgeableData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
+import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
@@ -44,11 +45,11 @@ public class SpongeAgeableData extends AbstractData<AgeableData, ImmutableAgeabl
         super(AgeableData.class);
         this.age = age;
         this.adult = adult;
-        registerGettersAndSetters();
+        this.registerGettersAndSetters();
     }
 
     public SpongeAgeableData() {
-        this(1, true);
+        this(DataConstants.ADULT, true);
     }
 
     @Override
@@ -64,9 +65,9 @@ public class SpongeAgeableData extends AbstractData<AgeableData, ImmutableAgeabl
     @Override
     public MutableBoundedValue<Integer> age() {
         return SpongeValueFactory.boundedBuilder(Keys.AGE)
-                .minimum(Integer.MIN_VALUE)
-                .maximum(Integer.MAX_VALUE)
-                .defaultValue(0)
+                .minimum(DataConstants.CHILD)
+                .maximum(DataConstants.ADULT)
+                .defaultValue(DataConstants.ADULT)
                 .actualValue(this.age)
                 .build();
     }
@@ -78,13 +79,13 @@ public class SpongeAgeableData extends AbstractData<AgeableData, ImmutableAgeabl
 
     @Override
     protected void registerGettersAndSetters() {
-        registerFieldGetter(Keys.AGE, SpongeAgeableData.this::getAge);
-        registerFieldSetter(Keys.AGE, SpongeAgeableData.this::setAge);
-        registerKeyValue(Keys.AGE, SpongeAgeableData.this::age);
+        this.registerFieldGetter(Keys.AGE, SpongeAgeableData.this::getAge);
+        this.registerFieldSetter(Keys.AGE, SpongeAgeableData.this::setAge);
+        this.registerKeyValue(Keys.AGE, SpongeAgeableData.this::age);
 
-        registerFieldGetter(Keys.IS_ADULT, SpongeAgeableData.this::isAdult);
-        registerFieldSetter(Keys.IS_ADULT, SpongeAgeableData.this::setAdult);
-        registerKeyValue(Keys.IS_ADULT, SpongeAgeableData.this::adult);
+        this.registerFieldGetter(Keys.IS_ADULT, SpongeAgeableData.this::isAdult);
+        this.registerFieldSetter(Keys.IS_ADULT, SpongeAgeableData.this::setAdult);
+        this.registerKeyValue(Keys.IS_ADULT, SpongeAgeableData.this::adult);
     }
 
     @Override

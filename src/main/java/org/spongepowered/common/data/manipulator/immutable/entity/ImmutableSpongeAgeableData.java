@@ -32,6 +32,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAgeableData;
+import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
@@ -49,12 +50,12 @@ public class ImmutableSpongeAgeableData extends AbstractImmutableData<ImmutableA
 
         this.ageValue = SpongeValueFactory.boundedBuilder(Keys.AGE)
                 .actualValue(this.age)
-                .defaultValue(0)
-                .minimum(Integer.MIN_VALUE)
-                .maximum(Integer.MAX_VALUE)
+                .defaultValue(DataConstants.ADULT)
+                .minimum(DataConstants.CHILD)
+                .maximum(DataConstants.ADULT)
                 .build().asImmutable();
 
-        registerGetters();
+        this.registerGetters();
     }
 
     @Override
@@ -81,11 +82,11 @@ public class ImmutableSpongeAgeableData extends AbstractImmutableData<ImmutableA
 
     @Override
     protected void registerGetters() {
-        registerFieldGetter(Keys.AGE, ImmutableSpongeAgeableData.this::getAge);
-        registerKeyValue(Keys.AGE, ImmutableSpongeAgeableData.this::age);
+        this.registerFieldGetter(Keys.AGE, ImmutableSpongeAgeableData.this::getAge);
+        this.registerKeyValue(Keys.AGE, ImmutableSpongeAgeableData.this::age);
 
-        registerFieldGetter(Keys.IS_ADULT, ImmutableSpongeAgeableData.this::isAdult);
-        registerKeyValue(Keys.IS_ADULT, ImmutableSpongeAgeableData.this::adult);
+        this.registerFieldGetter(Keys.IS_ADULT, ImmutableSpongeAgeableData.this::isAdult);
+        this.registerKeyValue(Keys.IS_ADULT, ImmutableSpongeAgeableData.this::adult);
     }
 
     public int getAge() {
