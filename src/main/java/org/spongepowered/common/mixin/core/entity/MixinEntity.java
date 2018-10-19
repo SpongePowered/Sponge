@@ -1469,7 +1469,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
 
     @Inject(method = "setDead", at = @At(value = "RETURN"))
     private void onSetDead(CallbackInfo ci) {
-        if (ShouldFire.DESTRUCT_ENTITY_EVENT && !this.world.isRemote && !(EntityUtil.toNative(this) instanceof EntityLiving)) {
+        if (ShouldFire.DESTRUCT_ENTITY_EVENT && !((IMixinWorld) this.world).isFake() && !(EntityUtil.toNative(this) instanceof EntityLiving)) {
             MessageChannel originalChannel = MessageChannel.TO_NONE;
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
 
