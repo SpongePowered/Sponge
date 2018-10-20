@@ -132,6 +132,10 @@ public abstract class AdapterLogic{
             }
         }
 
+        if (remove && result != null && !result.isEmpty()) {
+            inv.markDirty();
+        }
+
         return Optional.ofNullable(result);
     }
 
@@ -170,6 +174,8 @@ public abstract class AdapterLogic{
             result.reject(ItemStackUtil.cloneDefensive(nativeStack, remaining));
         }
 
+        inv.markDirty();
+
         return result.build();
     }
 
@@ -201,6 +207,7 @@ public abstract class AdapterLogic{
             result.type(InventoryTransactionResult.Type.FAILURE).reject(ItemStackUtil.cloneDefensive(nativeStack));
         } else {
             stack.setQuantity(remaining);
+            inv.markDirty();
         }
 
         return result.build();

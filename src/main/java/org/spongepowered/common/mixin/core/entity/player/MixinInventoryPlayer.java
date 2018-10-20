@@ -84,6 +84,8 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
     @Shadow @Final public NonNullList<ItemStack> offHandInventory;
     @Shadow @Final public List<NonNullList<ItemStack>> allInventories;
 
+    private int lastTimesChanged = this.timesChanged;
+
     @Shadow public abstract int getInventoryStackLimit();
 
     @Shadow public abstract int getSizeInventory();
@@ -96,6 +98,7 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
         throw new AbstractMethodError("Shadow");
     }
 
+    @Shadow private int timesChanged;
     private List<SlotTransaction> capturedTransactions = new ArrayList<>();
     private boolean doCapture = false;
 
@@ -313,5 +316,15 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
         }
         return this.addResource(index, stack);
 
+    }
+
+    public void cleanupDirty() {
+        if (this.timesChanged != this.lastTimesChanged) {
+            this.player.openContainer.detectAndSendChanges();
+        }
+    }
+
+    public void markClean() {
+        this.lastTimesChanged = this.timesChanged;
     }
 }

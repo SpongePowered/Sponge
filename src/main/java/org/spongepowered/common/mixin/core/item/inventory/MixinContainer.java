@@ -281,6 +281,10 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
                 }
             }
         }
+        this.markClean();
+    }
+
+    protected void markClean() {
     }
 
     @Inject(method = "addSlotToContainer", at = @At(value = "HEAD"))
