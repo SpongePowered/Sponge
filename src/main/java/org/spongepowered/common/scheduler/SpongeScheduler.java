@@ -30,6 +30,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import net.minecraft.entity.player.EntityPlayer;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.api.scheduler.Scheduler;
@@ -37,6 +40,7 @@ import org.spongepowered.api.scheduler.SpongeExecutorService;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.util.Functional;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 
 import java.util.Iterator;
 import java.util.Optional;
@@ -183,6 +187,13 @@ public class SpongeScheduler implements Scheduler {
      */
     public void tickSyncScheduler() {
         this.syncScheduler.tick();
+
+        for (Player player : Sponge.getServer().getOnlinePlayers()) {
+            if (player instanceof EntityPlayer) {
+                // Detect Changes on PlayerInventories marked as dirty.
+                ((IMixinInventoryPlayer) ((EntityPlayer) player).inventory).cleanupDirty();
+            }
+        }
     }
 
     public <T> CompletableFuture<T> submitAsyncTask(Callable<T> callable) {

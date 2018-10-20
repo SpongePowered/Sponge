@@ -49,4 +49,14 @@ public interface IMixinInventoryPlayer extends MinecraftInventoryAdapter, IMixin
     void setCapture(boolean enable);
 
     boolean capturesTransactions();
+
+    /**
+     * Cleanup dirty Inventory State. E.g. after changes made through a scheduled task.
+     */
+    void cleanupDirty();
+
+    /**
+     * Removes dirty Inventory State. Used after detectAndSendChanges.
+     */
+    void markClean();
 }

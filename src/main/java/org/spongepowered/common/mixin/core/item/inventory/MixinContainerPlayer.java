@@ -24,9 +24,13 @@
  */
 package org.spongepowered.common.mixin.core.item.inventory;
 
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ContainerPlayer;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 import org.spongepowered.common.interfaces.inventory.IMixinContainerPlayer;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.CraftingOutputAdapter;
@@ -42,6 +46,8 @@ import org.spongepowered.common.item.inventory.lens.impl.slots.EquipmentSlotLens
 
 @Mixin(ContainerPlayer.class)
 public abstract class MixinContainerPlayer extends MixinContainer implements IMixinContainerPlayer, LensProvider {
+
+    @Shadow @Final public EntityPlayer player;
 
     @Override
     public Lens rootLens(Fabric fabric, InventoryAdapter adapter) {
@@ -76,5 +82,10 @@ public abstract class MixinContainerPlayer extends MixinContainer implements IMi
 
         builder.add(this.inventorySlots.size() - 46); // Add additional slots (e.g. from mods)
         return builder.build();
+    }
+
+    @Override
+    protected void markClean() {
+        ((IMixinInventoryPlayer) this.player.inventory).markClean();
     }
 }
