@@ -221,14 +221,13 @@ public class SpongeManipulatorRegistry implements SpongeAdditionalCatalogRegistr
         return Optional.ofNullable((DataRegistration<M, I>) dataRegistration);
     }
 
-    <M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> void validateRegistration(SpongeDataRegistrationBuilder<M, I> builder) {
+    <M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> void validateRegistrationId(String id) {
         checkState(this.tempRegistry != null);
-        final String dataId = builder.id;
         this.tempRegistry.registrations.stream()
-            .filter(registration -> registration.getId().equalsIgnoreCase(dataId))
+            .filter(registration -> registration.getId().equalsIgnoreCase(id))
             .findFirst()
             .ifPresent(registration -> {
-                throw new IllegalStateException("Existing DataRegistration exists for id: " + dataId);
+                throw new IllegalStateException("Existing DataRegistration exists for id: " + id);
             });
     }
 

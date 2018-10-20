@@ -33,6 +33,7 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.text.translation.Translation;
 
 public final class SpongeDataRegistration<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>>
     implements DataRegistration<M, I>, Comparable<SpongeDataRegistration<?, ?>> {
@@ -45,17 +46,17 @@ public final class SpongeDataRegistration<M extends DataManipulator<M, I>, I ext
     private final DataManipulatorBuilder<M, I> manipulatorBuilder;
     private final PluginContainer container;
     private final String id;
-    private final String name;
+    private final Translation name;
 
-    SpongeDataRegistration(SpongeDataRegistrationBuilder<M, I> builder) {
+    SpongeDataRegistration(String id, Translation name, SpongeDataRegistrationBuilder<M, I> builder) {
         this.manipulatorClass = checkNotNull(builder.manipulatorClass, "DataManipulator class is null!");
         this.immutableClass = checkNotNull(builder.immutableClass, "ImmutableDataManipulator class is null!");
         this.implementationClass = builder.implementationData == null ? this.manipulatorClass : builder.implementationData;
         this.immutableImplementationClass = builder.immutableImplementation == null ? this.immutableClass : builder.immutableImplementation;
         this.manipulatorBuilder = checkNotNull(builder.manipulatorBuilder, "DataManipulatorBuilder is null!");
         this.container = checkNotNull(builder.container, "PluginContainer is null!");
-        this.id = this.container.getId() + ":" + checkNotNull(builder.id, "Data ID is null!");
-        this.name = checkNotNull(builder.name, "Data name is null!");
+        this.id = id;
+        this.name = name;
     }
 
     @Override
@@ -95,7 +96,7 @@ public final class SpongeDataRegistration<M extends DataManipulator<M, I>, I ext
 
     @Override
     public String getName() {
-        return this.name;
+        return this.name.get();
     }
 
     @Override

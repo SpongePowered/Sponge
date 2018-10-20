@@ -34,13 +34,17 @@ import net.minecraft.util.NonNullList;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.recipe.crafting.ShapelessCraftingRecipe;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.util.SpongeCatalogBuilder;
 
 import javax.annotation.Nullable;
 
-
-public class SpongeShapelessCraftingRecipeBuilder implements ShapelessCraftingRecipe.Builder.EndStep, ShapelessCraftingRecipe.Builder.ResultStep {
+@NonnullByDefault
+public class SpongeShapelessCraftingRecipeBuilder extends SpongeCatalogBuilder<ShapelessCraftingRecipe, ShapelessCraftingRecipe.Builder>
+        implements ShapelessCraftingRecipe.Builder.EndStep, ShapelessCraftingRecipe.Builder.ResultStep {
 
     private ItemStackSnapshot exemplaryResult = ItemStackSnapshot.NONE;
     private NonNullList<Ingredient> ingredients = NonNullList.create();
@@ -49,10 +53,25 @@ public class SpongeShapelessCraftingRecipeBuilder implements ShapelessCraftingRe
     @Override
     public EndStep group(@Nullable String name) {
         this.groupName = name == null ? "" : name;
-
         return this;
     }
 
+    @Override
+    public EndStep name(Translation name) {
+        return (EndStep) super.name(name);
+    }
+
+    @Override
+    public EndStep name(String name) {
+        return (EndStep) super.name(name);
+    }
+
+    @Override
+    public EndStep id(String id) {
+        return (EndStep) super.id(id);
+    }
+
+    @Deprecated
     @Override
     public ShapelessCraftingRecipe.Builder from(ShapelessCraftingRecipe value) {
         this.exemplaryResult = value.getExemplaryResult();
@@ -69,16 +88,27 @@ public class SpongeShapelessCraftingRecipeBuilder implements ShapelessCraftingRe
             this.groupName = ((ShapelessRecipes) value).group;
         }
 
-
+        super.reset();
         return this;
     }
 
     @Override
+    protected ShapelessCraftingRecipe build(PluginContainer plugin, String id, Translation name) {
+        checkState(this.exemplaryResult != null && this.exemplaryResult != ItemStackSnapshot.NONE, "The result is not set.");
+        checkState(!this.ingredients.isEmpty(), "The ingredients are not set.");
+        // Copy the ingredient list
+        final NonNullList<Ingredient> ingredients = NonNullList.create();
+        ingredients.addAll(this.ingredients);
+        return ((ShapelessCraftingRecipe) new SpongeShapelessRecipe(plugin.getId() + ':' + id, this.groupName,
+                ItemStackUtil.toNative(this.exemplaryResult.createStack()), ingredients));
+    }
+
+    @Override
     public ShapelessCraftingRecipe.Builder reset() {
+        super.reset();
         this.exemplaryResult = ItemStackSnapshot.NONE;
         this.ingredients.clear();
         this.groupName = "";
-
         return this;
     }
 
@@ -86,7 +116,6 @@ public class SpongeShapelessCraftingRecipeBuilder implements ShapelessCraftingRe
     public ResultStep addIngredient(org.spongepowered.api.item.recipe.crafting.Ingredient ingredient) {
         checkNotNull(ingredient, "ingredient");
         this.ingredients.add(IngredientUtil.toNative(ingredient));
-
         return this;
     }
 
@@ -95,9 +124,7 @@ public class SpongeShapelessCraftingRecipeBuilder implements ShapelessCraftingRe
     public EndStep result(ItemStackSnapshot result) {
         checkNotNull(result, "result");
         checkArgument(result != ItemStackSnapshot.NONE, "The result must not be `ItemStackSnapshot.NONE`.");
-
         this.exemplaryResult = result;
-
         return this;
     }
 

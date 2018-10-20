@@ -34,50 +34,37 @@ import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.event.EventListener;
 import org.spongepowered.api.event.data.ChangeDataHolderEvent;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.SpongeImpl;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 import javax.annotation.Nullable;
 
 public final class SpongeKey<V extends BaseValue<?>> implements Key<V> {
 
-    private static final Set<String> loggedPlugins = new HashSet<>();
-
     private final TypeToken<V> valueToken;
     private final String id;
-    private final String name;
+    private final Translation name;
     private final DataQuery query;
     private final TypeToken<?> elementToken;
     private final PluginContainer parent;
     @Nullable private List<KeyBasedDataListener<?>> listeners;
 
-    SpongeKey(SpongeKeyBuilder<?, V> builder) {
-        this.valueToken = builder.valueToken;
-        this.name = builder.name;
-        this.query = builder.query;
+    SpongeKey(String id, Translation name, TypeToken<V> valueToken, DataQuery query, PluginContainer plugin) {
+        this.id = id;
+        this.name = name;
+        this.valueToken = valueToken;
+        this.query = query;
         this.elementToken = this.valueToken.resolveType(BaseValue.class.getTypeParameters()[0]);
-        this.parent = getCurrentContainer();
-        final String id = builder.id;
-        if (id.indexOf(':') == -1) {
-            this.id = this.parent.getId() + ':' + id;
-        } else {
-            this.id = id;
-            if (loggedPlugins.add(this.parent.getId())) {
-                SpongeImpl.getLogger().warn(this.parent.getId() + ": It is no longer required to include the plugin id when specifying a "
-                        + "Key id through Key.Builder#id. This is deprecated and may be removed later. The plugin id will be retrieved from the "
-                        + "current PluginContainer in the cause stack. Key: " + this);
-            }
-        }
+        this.parent = plugin;
     }
 
     private static PluginContainer getCurrentContainer() {
         return Sponge.getCauseStackManager().getCurrentCause().first(PluginContainer.class)
-            .orElse(SpongeImpl.getMinecraftPlugin());
+                .orElse(SpongeImpl.getMinecraftPlugin());
     }
 
     @Override
@@ -110,7 +97,7 @@ public final class SpongeKey<V extends BaseValue<?>> implements Key<V> {
 
     @Override
     public String getName() {
-        return this.name;
+        return this.name.get();
     }
 
     public void registerListeners() {

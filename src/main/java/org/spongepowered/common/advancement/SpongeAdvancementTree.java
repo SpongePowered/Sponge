@@ -27,6 +27,7 @@ package org.spongepowered.common.advancement;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.advancement.DisplayInfo;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.interfaces.advancement.IMixinDisplayInfo;
 
 import java.util.Optional;
@@ -35,9 +36,9 @@ public class SpongeAdvancementTree implements AdvancementTree {
 
     private final Advancement rootAdvancement;
     private final String id;
-    private final String name;
+    private final Translation name;
 
-    public SpongeAdvancementTree(Advancement rootAdvancement, String id, String name) {
+    public SpongeAdvancementTree(Advancement rootAdvancement, String id, Translation name) {
         this.rootAdvancement = rootAdvancement;
         this.name = name;
         this.id = id;
@@ -50,7 +51,7 @@ public class SpongeAdvancementTree implements AdvancementTree {
 
     @Override
     public String getName() {
-        return this.name;
+        return this.name.get();
     }
 
     @Override
