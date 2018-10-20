@@ -22,27 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.item.data;
+package org.spongepowered.common.data.manipulator.mutable.item;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemWritableBook;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.mutable.item.AuthorData;
-import org.spongepowered.api.data.manipulator.mutable.item.PagedData;
+import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.immutable.item.ImmutablePlainPagedData;
 import org.spongepowered.api.data.manipulator.mutable.item.PlainPagedData;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.mixin.core.item.MixinItem;
+import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongePlainPagedData;
+import org.spongepowered.common.data.manipulator.mutable.common.AbstractListData;
 
+import java.util.ArrayList;
 import java.util.List;
 
-@Mixin(ItemWritableBook.class)
-public abstract class MixinItemWritableBook extends MixinItem {
+public class SpongePlainPagedData extends AbstractListData<String, PlainPagedData, ImmutablePlainPagedData> implements PlainPagedData {
+
+    public SpongePlainPagedData() {
+        this(new ArrayList<>());
+    }
+
+    public SpongePlainPagedData(List<String> pages) {
+        super(PlainPagedData.class, pages, Keys.PLAIN_BOOK_PAGES, ImmutableSpongePlainPagedData.class);
+    }
 
     @Override
-    public void getManipulatorsFor(ItemStack itemStack, List<DataManipulator<?, ?>> list) {
-        super.getManipulatorsFor(itemStack, list);
-        ((org.spongepowered.api.item.inventory.ItemStack) itemStack).get(AuthorData.class).ifPresent(list::add);
-        ((org.spongepowered.api.item.inventory.ItemStack) itemStack).get(PlainPagedData.class).ifPresent(list::add);
+    public DataContainer toContainer() {
+        return super.toContainer()
+            .set(Keys.PLAIN_BOOK_PAGES.getQuery(), getValue());
     }
 
 }
