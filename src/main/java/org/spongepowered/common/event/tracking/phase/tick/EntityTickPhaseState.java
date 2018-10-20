@@ -55,6 +55,7 @@ import org.spongepowered.common.world.BlockChange;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
@@ -193,6 +194,31 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
                     frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
                     SpongeCommonEventFactory.callDropItemCustom(items, phaseContext);
                 });
+
+        // Some entities (DynamicTrees) can tell blocks to break themselves while they're ticking, and
+        // specifically having removed the block but not performed the drops until the entity is ticking.
+        phaseContext.getPerBlockEntitySpawnSuppplier()
+            .acceptAndClearIfNotEmpty(blockDrops -> blockDrops.asMap().forEach((pos, drops) -> {
+                final List<Entity> items = drops.stream()
+                    .filter(entity -> entity instanceof EntityItem)
+                    .map(EntityUtil::fromNative)
+                    .collect(Collectors.toList());
+                final BlockSnapshot snapshot = tickingEntity.getWorld().createSnapshot(VecHelper.toVector3i(pos));
+                frame.pushCause(snapshot);
+                if (!items.isEmpty()) {
+                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+                    SpongeCommonEventFactory.callDropItemCustom(items, phaseContext);
+                }
+                final List<Entity> nonItems = drops.stream()
+                    .filter(entity -> !(entity instanceof EntityItem))
+                    .map(EntityUtil::fromNative)
+                    .collect(Collectors.toList());
+                if (!nonItems.isEmpty()) {
+                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
+                    SpongeCommonEventFactory.callSpawnEntityCustom(nonItems, phaseContext);
+                }
+            }));
+
     }
 
     private void appendContextOfPossibleEntityDeath(Entity tickingEntity, CauseStackManager.StackFrame frame) {
