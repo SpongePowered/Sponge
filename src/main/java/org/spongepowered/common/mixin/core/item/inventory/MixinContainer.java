@@ -109,7 +109,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     @Nullable private ItemStackSnapshot itemStackSnapshot;
     @Nullable private Slot lastSlotUsed = null;
     @Nullable private CraftItemEvent.Craft lastCraft = null;
-    private boolean firePreview;
+    private boolean firePreview = true;
     @Nullable private Location<org.spongepowered.api.world.World> lastOpenLocation;
     private boolean inUse = false;
 
