@@ -30,6 +30,7 @@ import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockAir;
 import net.minecraft.block.BlockGrass;
 import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.BlockLiquid;
@@ -52,6 +53,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSoundGroup;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.trait.BlockTrait;
 import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.key.Key;
@@ -63,6 +65,7 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.BlockChangeFlags;
@@ -170,6 +173,9 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     @Override
     public Optional<ItemType> getItem() {
+        if (this == BlockTypes.AIR) {
+            return Optional.of(ItemTypes.AIR);
+        }
         ItemType itemType = (ItemType) Item.getItemFromBlock((Block) (Object) this);
         return Items.AIR.equals(itemType) ? Optional.empty() : Optional.of(itemType);
     }
