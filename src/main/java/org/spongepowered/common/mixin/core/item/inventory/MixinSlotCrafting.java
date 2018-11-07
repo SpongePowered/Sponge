@@ -164,12 +164,7 @@ public abstract class MixinSlotCrafting extends Slot {
             capturedTransactions.add(first);
             craftedItem = first.getOriginal().copy();
         } else {
-            if (stack.isEmpty()) {
-                // if stack is empty this was probably shift-crafting so we use the captured itemstack instead
-                craftedItem = ItemStackUtil.snapshotOf(this.craftedStack);
-            } else {
-                craftedItem = ItemStackUtil.snapshotOf(stack);
-            }
+            craftedItem = ItemStackUtil.snapshotOf(this.craftedStack);
         }
 
         CraftingInventory craftingInventory = (CraftingInventory) craftInv;
