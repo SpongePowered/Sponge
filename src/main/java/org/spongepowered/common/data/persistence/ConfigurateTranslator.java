@@ -31,12 +31,16 @@ import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.SimpleConfigurationNode;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
 
 /**
  * A translator for translating {@link DataView}s into {@link ConfigurationNode}
@@ -68,19 +72,33 @@ public class ConfigurateTranslator implements DataTranslator<ConfigurationNode> 
     private static DataContainer translateFromNode(ConfigurationNode node) {
         checkNotNull(node, "node");
         DataContainer dataContainer = DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED);
-        ConfigurateTranslator.instance().addTo(node, dataContainer);
+        populateView(dataContainer, node);
         return dataContainer;
     }
 
-    @SuppressWarnings("unchecked")
-    private static void translateMapOrList(ConfigurationNode node, DataView container) {
-        Object value = node.getValue();
-        if (value instanceof Map) {
-            for (Map.Entry<Object, Object> entry : ((Map<Object, Object>) value).entrySet()) {
-                container.set(of('.', entry.getKey().toString()), entry.getValue());
+    private static void populateView(DataView view, ConfigurationNode node) {
+        for (Map.Entry<?, ? extends ConfigurationNode> entry : node.getChildrenMap().entrySet()) {
+            DataQuery key = of(entry.getKey().toString());
+            if (entry.getValue().hasMapChildren()) {
+                populateView(view.createView(key), entry.getValue());
+            } else {
+                Object value = getObjectFromNode(entry.getValue());
+                if (value != null) {
+                    view.set(key, value);
+                }
             }
-        } else if (value != null) {
-            container.set(of(node.getKey().toString()), value);
+        }
+    }
+
+    @Nullable
+    private static Object getObjectFromNode(ConfigurationNode node) {
+        if (node.hasListChildren()) {
+            return node.getChildrenList().stream().map(ConfigurateTranslator::getObjectFromNode)
+                    .filter(Objects::nonNull).collect(Collectors.toList());
+        } else if (node.hasMapChildren()) {
+            return translateFromNode(node);
+        } else {
+            return node.getValue();
         }
     }
 
@@ -117,15 +135,9 @@ public class ConfigurateTranslator implements DataTranslator<ConfigurationNode> 
 
     @Override
     public DataView addTo(ConfigurationNode node, DataView dataView) {
-        Object value = node.getValue();
-        Object key = node.getKey();
-        if (value != null) {
-            if (key == null || value instanceof Map || value instanceof List) {
-                translateMapOrList(node, dataView);
-            } else {
-                dataView.set(of('.', key.toString()), value);
-            }
-        }
+        checkNotNull(node, "node");
+        checkNotNull(dataView, "dataView");
+        populateView(dataView, node);
         return dataView;
     }
 
