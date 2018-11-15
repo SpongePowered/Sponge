@@ -42,6 +42,8 @@ import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 /**
@@ -274,9 +276,21 @@ public class SlotAdapter extends AbstractInventoryAdapter implements Slot {
         return this.transform(Type.INVENTORY);
     }
 
-    //    @Override
-//    public Iterator<Inventory> iterator() {
-//        // TODO
-//        return super.iterator();
-//    }
+    @Override
+    public Iterator<Inventory> iterator() {
+        return new Iterator<Inventory>() {
+            private boolean iterated = false;
+            @Override
+            public boolean hasNext() {
+                return !iterated;
+            }
+
+            @Override
+            public Inventory next() {
+                if (iterated) throw new NoSuchElementException();
+                iterated = true;
+                return SlotAdapter.this;
+            }
+        };
+    }
 }
