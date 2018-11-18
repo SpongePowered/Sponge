@@ -169,7 +169,7 @@ public final class ContainerUtil {
 
                     while (!itemStack.isEmpty())
                     {
-                        int i = RANDOM.nextInt(21) + 10;
+                        int i = RANDOM.nextInt(itemStack.getMaxStackSize()/3) + 10;
 
                         EntityItem entityitem = new EntityItem(worldServer, x + f, y + f1, z + f2, itemStack.splitStack(i));
 
