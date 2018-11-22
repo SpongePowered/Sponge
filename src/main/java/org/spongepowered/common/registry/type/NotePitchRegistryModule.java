@@ -31,8 +31,8 @@ import org.spongepowered.api.data.type.NotePitch;
 import org.spongepowered.api.data.type.NotePitches;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.data.processor.common.NoteUtils;
 import org.spongepowered.common.data.type.SpongeNotePitch;
-import org.spongepowered.common.registry.RegistryHelper;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -57,10 +57,8 @@ public final class NotePitchRegistryModule implements CatalogRegistryModule<Note
 
     @Override
     public void registerDefaults() {
-        RegistryHelper.mapFields(NotePitches.class, input -> {
-            NotePitch pitch = new SpongeNotePitch((byte) this.notePitchMap.size(), input);
-            this.notePitchMap.put(input.toLowerCase(Locale.ENGLISH), pitch);
-            return pitch;
-        });
+        for (SpongeNotePitch pitch : NoteUtils.pitchMappings.values()) {
+            notePitchMap.put(pitch.getId().toLowerCase(Locale.ENGLISH), pitch);
+        }
     }
 }
