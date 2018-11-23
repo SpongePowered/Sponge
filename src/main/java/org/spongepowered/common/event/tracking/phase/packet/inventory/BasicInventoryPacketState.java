@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
-import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.CPacketClickWindow;
@@ -214,11 +213,9 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
                 if (!inventoryEvent.isCancelled()) {
                     if (inventoryEvent instanceof SpawnEntityEvent) {
                         processSpawnedEntities(player, (SpawnEntityEvent) inventoryEvent);
-                    } else {
-                        context.getCapturedEntitySupplier().acceptAndClearIfNotEmpty((entities -> {
-                            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
-                            SpongeCommonEventFactory.callSpawnEntity(entities, context);
-                        }));
+                    } else if (!capturedItems.isEmpty()) {
+                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
+                        SpongeCommonEventFactory.callSpawnEntity(capturedItems, context);
                     }
                 } else if (inventoryEvent instanceof ClickInventoryEvent.Drop) {
                     capturedItems.clear();
