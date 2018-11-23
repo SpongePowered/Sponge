@@ -188,10 +188,12 @@ public class SpongeScheduler implements Scheduler {
     public void tickSyncScheduler() {
         this.syncScheduler.tick();
 
-        for (Player player : Sponge.getServer().getOnlinePlayers()) {
-            if (player instanceof EntityPlayer) {
-                // Detect Changes on PlayerInventories marked as dirty.
-                ((IMixinInventoryPlayer) ((EntityPlayer) player).inventory).cleanupDirty();
+        if (Sponge.isServerAvailable()) {
+            for (Player player : Sponge.getServer().getOnlinePlayers()) {
+                if (player instanceof EntityPlayer) {
+                    // Detect Changes on PlayerInventories marked as dirty.
+                    ((IMixinInventoryPlayer) ((EntityPlayer) player).inventory).cleanupDirty();
+                }
             }
         }
     }
