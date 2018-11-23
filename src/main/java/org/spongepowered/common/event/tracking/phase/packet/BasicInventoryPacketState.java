@@ -37,7 +37,6 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.item.inventory.Container;
-import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
@@ -160,6 +159,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
             capturedItems.add(EntityUtil.fromNative(entityItem));
         }
         context.getCapturedItems().clear();
+        context.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(capturedItems::addAll);
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(openContainer);
             Sponge.getCauseStackManager().pushCause(player);
@@ -210,11 +210,9 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
                 if (!inventoryEvent.isCancelled()) {
                     if (inventoryEvent instanceof SpawnEntityEvent) {
                         processSpawnedEntities(player, (SpawnEntityEvent) inventoryEvent);
-                    } else {
-                        context.getCapturedEntitySupplier().acceptAndClearIfNotEmpty((entities -> {
-                            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
-                            SpongeCommonEventFactory.callSpawnEntity(entities, context);
-                        }));
+                    } else if (!capturedItems.isEmpty()) {
+                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
+                        SpongeCommonEventFactory.callSpawnEntity(capturedItems, context);
                     }
                 } else if (inventoryEvent instanceof ClickInventoryEvent.Drop) {
                     capturedItems.clear();
