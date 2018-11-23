@@ -24,25 +24,22 @@
  */
 package org.spongepowered.common.registry.type;
 
-import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.NotePitch;
 import org.spongepowered.api.data.type.NotePitches;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.data.processor.common.NoteUtils;
 import org.spongepowered.common.data.type.SpongeNotePitch;
 import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 import org.spongepowered.common.registry.RegistryHelper;
-
-import java.util.Locale;
 
 @RegisterCatalog(NotePitches.class)
 public final class NotePitchRegistryModule extends AbstractCatalogRegistryModule<NotePitch> {
 
     @Override
     public void registerDefaults() {
-        RegistryHelper.mapFields(NotePitches.class, input -> {
-            NotePitch pitch = new SpongeNotePitch((byte) this.map.size(), input);
-            this.map.put(CatalogKey.minecraft(input.toLowerCase(Locale.ENGLISH)), pitch);
-            return pitch;
-        });
+        for (SpongeNotePitch pitch : NoteUtils.pitchMappings.values()) {
+            this.register(pitch);
+        }
+        RegistryHelper.mapFields(NotePitches.class, x -> this.getById(x).get());
     }
 }
