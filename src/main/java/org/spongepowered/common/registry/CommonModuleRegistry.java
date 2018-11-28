@@ -252,7 +252,6 @@ import org.spongepowered.common.world.gen.builders.*;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 public final class CommonModuleRegistry {

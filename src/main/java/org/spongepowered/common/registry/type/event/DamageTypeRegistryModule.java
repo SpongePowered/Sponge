@@ -27,25 +27,19 @@ package org.spongepowered.common.registry.type.event;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.event.damage.SpongeDamageType;
 import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
 
-import java.util.Collection;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
 
-@RegisterCatalog(DamageType.class)
+@RegisterCatalog(DamageTypes.class)
 public final class DamageTypeRegistryModule extends AbstractPrefixAlternateCatalogTypeRegistryModule<DamageType> implements AdditionalCatalogRegistryModule<DamageType> {
 
-    protected DamageTypeRegistryModule() {
+    public DamageTypeRegistryModule() {
         super("minecraft");
     }
 
