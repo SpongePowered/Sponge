@@ -24,49 +24,59 @@
  */
 package org.spongepowered.common.registry.type.event;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
+import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.event.damage.SpongeDamageType;
+import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
 
 import java.util.Collection;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 
-public final class DamageTypeRegistryModule implements CatalogRegistryModule<DamageType> {
+@RegisterCatalog(DamageType.class)
+public final class DamageTypeRegistryModule extends AbstractPrefixAlternateCatalogTypeRegistryModule<DamageType> implements AdditionalCatalogRegistryModule<DamageType> {
 
-    @RegisterCatalog(DamageTypes.class)
-    private final ImmutableMap<String, DamageType> damageTypeMappings = new ImmutableMap.Builder<String, DamageType>()
-        .put("attack", new SpongeDamageType("attack"))
-        .put("contact", new SpongeDamageType("contact"))
-        .put("custom", new SpongeDamageType("custom"))
-        .put("drown", new SpongeDamageType("drown"))
-        .put("explosive", new SpongeDamageType("explosive"))
-        .put("fall", new SpongeDamageType("fall"))
-        .put("fire", new SpongeDamageType("fire"))
-        .put("generic", new SpongeDamageType("generic"))
-        .put("hunger", new SpongeDamageType("hunger"))
-        .put("magic", new SpongeDamageType("magic"))
-        .put("projectile", new SpongeDamageType("projectile"))
-        .put("suffocate", new SpongeDamageType("suffocate"))
-        .put("void", new SpongeDamageType("void"))
-            .put("sweeping_attack", new SpongeDamageType("sweeping_attack"))
-            .put("magma", new SpongeDamageType("magma"))
-        .build();
-
-    @Override
-    public Optional<DamageType> getById(String id) {
-        return Optional.ofNullable(this.damageTypeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
+    protected DamageTypeRegistryModule() {
+        super("minecraft");
     }
 
     @Override
-    public Collection<DamageType> getAll() {
-        return ImmutableList.copyOf(this.damageTypeMappings.values());
+    public void registerAdditionalCatalog(DamageType extraCatalog) {
+        final String id = checkNotNull(extraCatalog).getId();
+        final String key = id.toLowerCase(Locale.ENGLISH);
+        checkArgument(!key.contains("sponge:"), "Cannot register spoofed Damage Type!");
+        checkArgument(!key.contains("minecraft:"), "Cannot register spoofed Damage Type!");
+        checkArgument(!this.catalogTypeMap.containsKey(key), "Cannot register an already registered EventContextKey: %s", key);
+        this.catalogTypeMap.put(key, extraCatalog);
     }
 
+    @Override
+    public void registerDefaults() {
+
+        register(new SpongeDamageType("minecraft:attack", "attack"));
+        register(new SpongeDamageType("minecraft:contact", "contact"));
+        register(new SpongeDamageType("minecraft:custom", "custom"));
+        register(new SpongeDamageType("minecraft:drown", "drown"));
+        register(new SpongeDamageType("minecraft:explosive", "explosive"));
+        register(new SpongeDamageType("minecraft:fall", "fall"));
+        register(new SpongeDamageType("minecraft:fire", "fire"));
+        register(new SpongeDamageType("minecraft:generic", "generic"));
+        register(new SpongeDamageType("minecraft:hunger", "hunger"));
+        register(new SpongeDamageType("minecraft:magic", "magic"));
+        register(new SpongeDamageType("minecraft:projectile", "projectile"));
+        register(new SpongeDamageType("minecraft:suffocate", "suffocate"));
+        register(new SpongeDamageType("minecraft:void", "void"));
+        register(new SpongeDamageType("minecraft:sweeping_attack", "sweeping_attack"));
+        register(new SpongeDamageType("minecraft:magma", "magma"));
+
+    }
 }
