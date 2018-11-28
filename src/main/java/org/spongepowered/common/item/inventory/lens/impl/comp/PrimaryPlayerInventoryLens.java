@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.comp;
 
+import net.minecraft.entity.player.InventoryPlayer;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.PrimaryPlayerInventoryAdapter;
@@ -58,10 +59,12 @@ public class PrimaryPlayerInventoryLens extends RealLens {
     private void init(SlotProvider slots) {
         int base = this.base;
 
+        int hotbarSize = InventoryPlayer.getHotbarSize();
+
         if (this.isContainer) {
             this.mainGrid = new GridInventoryLensImpl(base, INVENTORY_WIDTH, MAIN_INVENTORY_HEIGHT, slots);
             base += INVENTORY_WIDTH * 3;
-            this.hotbar = new HotbarLensImpl(base, INVENTORY_WIDTH, slots);
+            this.hotbar = new HotbarLensImpl(base - (hotbarSize - INVENTORY_WIDTH), hotbarSize, slots);
             /*
             1 |G|G|G|G|G|G|G|G|G|
             2 |G|G|G|G|G|G|G|G|G|
@@ -76,7 +79,7 @@ public class PrimaryPlayerInventoryLens extends RealLens {
             this.addChild(fullGrid);
 
         } else {
-            this.hotbar = new HotbarLensImpl(base, INVENTORY_WIDTH, slots);
+            this.hotbar = new HotbarLensImpl(base, hotbarSize, slots);
             base += INVENTORY_WIDTH;
             this.mainGrid = new GridInventoryLensImpl(base, INVENTORY_WIDTH, MAIN_INVENTORY_HEIGHT, slots);
 
