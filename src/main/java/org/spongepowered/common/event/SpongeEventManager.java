@@ -59,6 +59,8 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.interfaces.IMixinContainer;
+import org.spongepowered.common.item.inventory.custom.CustomInventory;
+import org.spongepowered.common.item.inventory.custom.CustomInventoryListener;
 import org.spongepowered.common.util.TypeTokenHelper;
 
 import java.lang.reflect.Field;
@@ -367,7 +369,12 @@ public class SpongeEventManager implements EventManager {
     @Override
     public void unregisterListeners(final Object listener) {
         checkNotNull(listener, "listener");
-        unregister(handler -> listener.equals(handler.getHandle()));
+
+        if (listener instanceof CustomInventory) {
+            unregister(handler -> handler.getHandle() instanceof CustomInventoryListener && ((CustomInventoryListener) handler.getHandle()).getInventory().equals(listener));
+        } else {
+            unregister(handler -> listener.equals(handler.getHandle()));
+        }
     }
 
     @Override

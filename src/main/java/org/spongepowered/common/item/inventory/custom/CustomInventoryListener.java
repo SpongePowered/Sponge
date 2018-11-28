@@ -57,4 +57,8 @@ public class CustomInventoryListener implements EventListener<InteractInventoryE
             }
         }
     }
+
+    public Inventory getInventory() {
+        return inventory;
+    }
 }
