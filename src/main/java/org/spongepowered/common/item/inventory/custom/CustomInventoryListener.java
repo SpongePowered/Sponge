@@ -25,22 +25,24 @@
 package org.spongepowered.common.item.inventory.custom;
 
 import com.google.common.collect.ImmutableList;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.EventListener;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.function.Consumer;
 
 public class CustomInventoryListener implements EventListener<InteractInventoryEvent> {
 
-    private Inventory inventory;
+    private WeakReference<Inventory> inventory;
     List<Consumer<InteractInventoryEvent>> consumers;
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public CustomInventoryListener(Inventory inventory, List<Consumer<? extends InteractInventoryEvent>> consumers) {
-        this.inventory = inventory;
+        this.inventory = new WeakReference<>(inventory);
         this.consumers = (List) ImmutableList.copyOf(consumers);
     }
 
@@ -48,17 +50,24 @@ public class CustomInventoryListener implements EventListener<InteractInventoryE
     public void handle(InteractInventoryEvent event) throws Exception {
         net.minecraft.inventory.Container nativeContainer = ContainerUtil.toNative(event.getTargetInventory());
         for (net.minecraft.inventory.Slot slot : nativeContainer.inventorySlots) {
-            if (slot.inventory == this.inventory) {
-                // This container does contain our inventory
-                for (Consumer<InteractInventoryEvent> consumer: this.consumers) {
-                    consumer.accept(event);
+            Inventory inventory = this.inventory.get();
+            if (inventory != null) {
+                if (slot.inventory == inventory) {
+                    // This container does contain our inventory
+                    for (Consumer<InteractInventoryEvent> consumer: this.consumers) {
+                        consumer.accept(event);
+                    }
+                    break;
                 }
-                break;
+            } else {
+                // Remove the listeners if the inventory is no longer in use
+                Sponge.getEventManager().unregisterListeners(this);
             }
+
         }
     }
 
     public Inventory getInventory() {
-        return inventory;
+        return this.inventory.get();
     }
 }
