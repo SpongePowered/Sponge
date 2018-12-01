@@ -371,7 +371,7 @@ public class SpongeEventManager implements EventManager {
         checkNotNull(listener, "listener");
 
         if (listener instanceof CustomInventory) {
-            unregister(handler -> handler.getHandle() instanceof CustomInventoryListener && ((CustomInventoryListener) handler.getHandle()).getInventory().equals(listener));
+            unregister(handler -> handler.getHandle() instanceof CustomInventoryListener && listener.equals(((CustomInventoryListener) handler.getHandle()).getInventory()));
         } else {
             unregister(handler -> listener.equals(handler.getHandle()));
         }

@@ -35,6 +35,8 @@ import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.function.Consumer;
 
+import javax.annotation.Nullable;
+
 public class CustomInventoryListener implements EventListener<InteractInventoryEvent> {
 
     private WeakReference<Inventory> inventory;
@@ -49,8 +51,8 @@ public class CustomInventoryListener implements EventListener<InteractInventoryE
     @Override
     public void handle(InteractInventoryEvent event) throws Exception {
         net.minecraft.inventory.Container nativeContainer = ContainerUtil.toNative(event.getTargetInventory());
+        Inventory inventory = this.inventory.get();
         for (net.minecraft.inventory.Slot slot : nativeContainer.inventorySlots) {
-            Inventory inventory = this.inventory.get();
             if (inventory != null) {
                 if (slot.inventory == inventory) {
                     // This container does contain our inventory
@@ -67,6 +69,7 @@ public class CustomInventoryListener implements EventListener<InteractInventoryE
         }
     }
 
+    @Nullable
     public Inventory getInventory() {
         return this.inventory.get();
     }
