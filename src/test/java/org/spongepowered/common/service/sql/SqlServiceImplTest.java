@@ -40,7 +40,8 @@ public class SqlServiceImplTest {
         assertEquals("zml", subject.getUser());
         assertEquals("totallymypassword", subject.getPassword());
         assertEquals("jdbc:mysql://localhost/sponge", subject.getAuthlessUrl());
-        assertEquals("org.mariadb.jdbc.Driver", subject.getDriverClassName());
+        //assertEquals("org.mariadb.jdbc.Driver", subject.getDriverClassName());
+        assertEquals("com.mysql.cj.jdbc.Driver", subject.getDriverClassName());
     }
 
     @Test

@@ -85,8 +85,8 @@ public class SqlServiceImpl implements SqlService, Closeable {
         mySqlProps.setProperty("useConfigs",
                 "maxPerformance"); // Config options based on http://assets.en.oreilly
                 // .com/1/event/21/Connector_J%20Performance%20Gems%20Presentation.pdf
-        build.put("com.mysql.jdbc.Driver", mySqlProps);
-        build.put("org.mariadb.jdbc.Driver", mySqlProps);
+        build.put("com.mysql.cj.jdbc.Driver", mySqlProps);
+        //build.put("org.mariadb.jdbc.Driver", mySqlProps);
 
         PROTOCOL_SPECIFIC_PROPS = build.build();
         PATH_CANONICALIZERS = ImmutableMap.of("h2", (plugin, orig) -> {
