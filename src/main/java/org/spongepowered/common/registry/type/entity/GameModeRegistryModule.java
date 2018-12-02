@@ -45,13 +45,4 @@ public final class GameModeRegistryModule extends MinecraftEnumBasedCatalogTypeM
         }
     }
 
-    public static GameType toGameType(GameMode gamemode) {
-        for (GameType gameType : GameType.values()) {
-            if (gameType.getName().equalsIgnoreCase(gamemode.getId())) {
-                return gameType;
-            }
-        }
-        return GameType.SURVIVAL;
-    }
-
 }
