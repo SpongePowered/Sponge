@@ -134,7 +134,11 @@ public class SqlServiceImpl implements SqlService, Closeable {
                     if (driverSpecificProperties != null) {
                         config.setDataSourceProperties(driverSpecificProperties);
                     }
-                    config.setJdbcUrl(key.getAuthlessUrl());
+                    if (key.getDriverClassName().equals("com.mysql.cj.jdbc.Driver")) {
+                        config.setJdbcUrl(key.getAuthlessUrl() + "?disableMariaDbDriver");
+                    } else {
+                        config.setJdbcUrl(key.getAuthlessUrl());
+                    }
                     return new HikariDataSource(config);
                 }
             });
@@ -268,13 +272,11 @@ public class SqlServiceImpl implements SqlService, Closeable {
             }
             final String unauthedUrl = "jdbc:" + protocol + (hasSlashes ? "://" : ":") + serverDatabaseSpecifier;
             final String driverClass = DriverManager.getDriver(unauthedUrl).getClass().getCanonicalName();
-            final String modifiedUnauthedUrl;
             if (protocol.equals("mysql")) {
-                modifiedUnauthedUrl = unauthedUrl + "?disableMariaDbDriver";
+                return new ConnectionInfo(user, pass, driverClass, unauthedUrl + "?disableMariaDbDriver", fullUrl);
             } else {
-                modifiedUnauthedUrl = unauthedUrl;
+                return new ConnectionInfo(user, pass, driverClass, unauthedUrl, fullUrl);
             }
-            return new ConnectionInfo(user, pass, driverClass, modifiedUnauthedUrl, fullUrl);
         }
     }
 
