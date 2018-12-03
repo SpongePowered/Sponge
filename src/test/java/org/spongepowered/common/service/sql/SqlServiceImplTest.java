@@ -39,7 +39,18 @@ public class SqlServiceImplTest {
 
         assertEquals("zml", subject.getUser());
         assertEquals("totallymypassword", subject.getPassword());
-        assertEquals("jdbc:mysql://localhost/sponge", subject.getAuthlessUrl());
+        assertEquals("jdbc:mysql://localhost/sponge?disableMariaDbDriver", subject.getAuthlessUrl());
+        assertEquals("com.mysql.cj.jdbc.Driver", subject.getDriverClassName());
+    }
+
+    @Test
+    public void testMariaDbConnectionInfo() throws SQLException {
+        final String jdbcUrl = "jdbc:mariadb://zml:totallymypassword@localhost/sponge";
+        final SqlServiceImpl.ConnectionInfo subject = SqlServiceImpl.ConnectionInfo.fromUrl(null, jdbcUrl);
+
+        assertEquals("zml", subject.getUser());
+        assertEquals("totallymypassword", subject.getPassword());
+        assertEquals("jdbc:mariadb://localhost/sponge", subject.getAuthlessUrl());
         assertEquals("org.mariadb.jdbc.Driver", subject.getDriverClassName());
     }
 

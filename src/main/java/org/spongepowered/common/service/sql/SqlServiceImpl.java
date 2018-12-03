@@ -85,7 +85,7 @@ public class SqlServiceImpl implements SqlService, Closeable {
         mySqlProps.setProperty("useConfigs",
                 "maxPerformance"); // Config options based on http://assets.en.oreilly
                 // .com/1/event/21/Connector_J%20Performance%20Gems%20Presentation.pdf
-        build.put("com.mysql.jdbc.Driver", mySqlProps);
+        build.put("com.mysql.cj.jdbc.Driver", mySqlProps);
         build.put("org.mariadb.jdbc.Driver", mySqlProps);
 
         PROTOCOL_SPECIFIC_PROPS = build.build();
@@ -268,7 +268,13 @@ public class SqlServiceImpl implements SqlService, Closeable {
             }
             final String unauthedUrl = "jdbc:" + protocol + (hasSlashes ? "://" : ":") + serverDatabaseSpecifier;
             final String driverClass = DriverManager.getDriver(unauthedUrl).getClass().getCanonicalName();
-            return new ConnectionInfo(user, pass, driverClass, unauthedUrl, fullUrl);
+            final String modifiedUnauthedUrl;
+            if (protocol.equals("mysql")) {
+                modifiedUnauthedUrl = unauthedUrl + "?disableMariaDbDriver";
+            } else {
+                modifiedUnauthedUrl = unauthedUrl;
+            }
+            return new ConnectionInfo(user, pass, driverClass, modifiedUnauthedUrl, fullUrl);
         }
     }
 
