@@ -134,11 +134,7 @@ public class SqlServiceImpl implements SqlService, Closeable {
                     if (driverSpecificProperties != null) {
                         config.setDataSourceProperties(driverSpecificProperties);
                     }
-                    if (key.getDriverClassName().equals("com.mysql.cj.jdbc.Driver")) {
-                        config.setJdbcUrl(key.getAuthlessUrl() + "?disableMariaDbDriver");
-                    } else {
-                        config.setJdbcUrl(key.getAuthlessUrl());
-                    }
+                    config.setJdbcUrl(key.getAuthlessUrl());
                     return new HikariDataSource(config);
                 }
             });
