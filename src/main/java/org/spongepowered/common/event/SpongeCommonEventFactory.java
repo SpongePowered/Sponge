@@ -237,6 +237,17 @@ public class SpongeCommonEventFactory {
         }
     }
 
+    public static void callDropItemClose(List<Entity> items, PhaseContext<?> context, Supplier<Optional<UUID>> supplier) {
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.getCurrentContext().require(EventContextKeys.SPAWN_TYPE);
+            final DropItemEvent.Close event = SpongeEventFactory.createDropItemEventClose(frame.getCurrentCause(), items);
+            SpongeImpl.postEvent(event);
+            if (!event.isCancelled()) {
+                EntityUtil.processEntitySpawnsFromEvent(event, supplier);
+            }
+        }
+    }
+
     public static boolean callSpawnEntitySpawner(List<Entity> entities, PhaseContext<?> context) {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WORLD_SPAWNER);
