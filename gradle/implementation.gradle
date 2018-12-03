@@ -146,6 +146,7 @@ shadowJar ext.shadowConfiguration = {
 
         include dependency('com.zaxxer:HikariCP')
 
+        include dependency('mysql:mysql-connector-java')
         include dependency('org.mariadb.jdbc:mariadb-java-client')
         include dependency('com.h2database:h2')
         include dependency('org.xerial:sqlite-jdbc')
