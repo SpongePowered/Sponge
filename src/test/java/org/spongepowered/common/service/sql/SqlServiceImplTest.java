@@ -76,6 +76,7 @@ public class SqlServiceImplTest {
 
         assertNull(subject.getUser());
         assertNull(subject.getPassword());
+        assertEquals("", subject.getOptions());
         assertEquals(jdbcUrl, subject.getAuthlessUrl());
         assertEquals("org.h2.Driver", subject.getDriverClassName());
     }

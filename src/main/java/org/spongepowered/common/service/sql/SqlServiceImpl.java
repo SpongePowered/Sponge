@@ -81,8 +81,11 @@ import javax.sql.DataSource;
 @NonnullByDefault
 public class SqlServiceImpl implements SqlService, Closeable {
 
-    static final Map<String, Properties> PROTOCOL_SPECIFIC_PROPS;
-    static final Map<String, BiFunction<PluginContainer, String, String>> PATH_CANONICALIZERS;
+    private static final Map<String, Properties> PROTOCOL_SPECIFIC_PROPS;
+    private static final Map<String, BiFunction<PluginContainer, String, String>> PATH_CANONICALIZERS;
+
+    private static final String MYSQL_DRIVER_CLASS_NAME = "com.mysql.cj.jdbc.Driver";
+    private static final String MARIADB_DRIVER_CLASS_NAME = "org.mariadb.jdbc.Driver";
 
     static {
         ImmutableMap.Builder<String, Properties> build = ImmutableMap.builder();
@@ -90,8 +93,8 @@ public class SqlServiceImpl implements SqlService, Closeable {
         mySqlProps.setProperty("useConfigs",
                 "maxPerformance"); // Config options based on http://assets.en.oreilly
                 // .com/1/event/21/Connector_J%20Performance%20Gems%20Presentation.pdf
-        build.put("com.mysql.cj.jdbc.Driver", mySqlProps);
-        build.put("org.mariadb.jdbc.Driver", mySqlProps);
+        build.put(MYSQL_DRIVER_CLASS_NAME, mySqlProps);
+        build.put(MARIADB_DRIVER_CLASS_NAME, mySqlProps);
 
         PROTOCOL_SPECIFIC_PROPS = build.build();
         PATH_CANONICALIZERS = ImmutableMap.of("h2", (plugin, orig) -> {
@@ -183,7 +186,7 @@ public class SqlServiceImpl implements SqlService, Closeable {
         private static final Pattern URL_REGEX = Pattern.compile("(?:jdbc:)?([^:]+):(//)?(?:([^:]+)(?::([^@]+))?@)?([^?]+)(?:(\\?)(?=.)(.+))?");
         @Nullable private final String user;
         @Nullable private final String password;
-        @Nullable private final String options;
+        private final String options;
         private final String driverClassName;
         private final String authlessUrl;
         private final String fullUrl;
@@ -215,7 +218,6 @@ public class SqlServiceImpl implements SqlService, Closeable {
             return this.password;
         }
 
-        @Nullable
         public String getOptions() {
             return options;
         }
@@ -280,12 +282,14 @@ public class SqlServiceImpl implements SqlService, Closeable {
             }
             final boolean hasOptions = match.group(6) != null;
             final Set<String> rawOptions = hasOptions ? Sets.newHashSet(match.group(7).split("&")) : Collections.EMPTY_SET;
-            if (protocol.equals("mysql")) {
-                rawOptions.add("disableMariaDbDriver");
-            }
             final String options = !rawOptions.isEmpty() ? "?" + String.join("&", rawOptions) : "";
             final String unauthedUrl = "jdbc:" + protocol + (hasSlashes ? "://" : ":") + serverDatabaseSpecifier;
-            final String driverClass = DriverManager.getDriver(unauthedUrl).getClass().getCanonicalName();
+            final String driverClass;
+            if (protocol.equals("mysql")) {
+                driverClass = MYSQL_DRIVER_CLASS_NAME;
+            } else {
+                driverClass = DriverManager.getDriver(unauthedUrl).getClass().getCanonicalName();
+            }
             return new ConnectionInfo(user, pass, options, driverClass, unauthedUrl, fullUrl);
         }
     }
