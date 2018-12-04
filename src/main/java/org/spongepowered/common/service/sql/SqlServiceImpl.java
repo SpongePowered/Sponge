@@ -33,6 +33,7 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.spongepowered.api.Sponge;
@@ -49,10 +50,12 @@ import java.nio.file.Paths;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.function.BiFunction;
 import java.util.regex.Matcher;
@@ -136,7 +139,7 @@ public class SqlServiceImpl implements SqlService, Closeable {
                     if (driverSpecificProperties != null) {
                         config.setDataSourceProperties(driverSpecificProperties);
                     }
-                    config.setJdbcUrl(key.getAuthlessUrl());
+                    config.setJdbcUrl(key.getAuthlessUrl() + key.getOptions());
                     return new HikariDataSource(config);
                 }
             });
@@ -180,7 +183,7 @@ public class SqlServiceImpl implements SqlService, Closeable {
         private static final Pattern URL_REGEX = Pattern.compile("(?:jdbc:)?([^:]+):(//)?(?:([^:]+)(?::([^@]+))?@)?([^?]+)(?:(\\?)(?=.)(.+))?");
         @Nullable private final String user;
         @Nullable private final String password;
-        @Nullable private final String[] options;
+        @Nullable private final String options;
         private final String driverClassName;
         private final String authlessUrl;
         private final String fullUrl;
@@ -193,7 +196,7 @@ public class SqlServiceImpl implements SqlService, Closeable {
          * @param authlessUrl A JDBC url for this driver not containing authentication information
          * @param fullUrl The full jdbc url containing user, password, and database info
          */
-        public ConnectionInfo(@Nullable String user, @Nullable String password, String[] options, String driverClassName, String authlessUrl, String fullUrl) {
+        public ConnectionInfo(@Nullable String user, @Nullable String password, String options, String driverClassName, String authlessUrl, String fullUrl) {
             this.user = user;
             this.password = password;
             this.options = options;
@@ -213,7 +216,7 @@ public class SqlServiceImpl implements SqlService, Closeable {
         }
 
         @Nullable
-        public String[] getOptions() {
+        public String getOptions() {
             return options;
         }
 
@@ -276,8 +279,12 @@ public class SqlServiceImpl implements SqlService, Closeable {
                 serverDatabaseSpecifier = derelativizer.apply(container, serverDatabaseSpecifier);
             }
             final boolean hasOptions = match.group(6) != null;
-            final String[] options = hasOptions ? match.group(7).split("&") : new String[0];
-            final String unauthedUrl = hasOptions ? "jdbc:" + protocol + (hasSlashes ? "://" : ":") + serverDatabaseSpecifier + "?" + match.group(7) : "jdbc:" + protocol + (hasSlashes ? "://" : ":") + serverDatabaseSpecifier;;
+            final Set<String> rawOptions = hasOptions ? Sets.newHashSet(match.group(7).split("&")) : Collections.EMPTY_SET;
+            if (protocol.equals("mysql")) {
+                rawOptions.add("disableMariaDbDriver");
+            }
+            final String options = !rawOptions.isEmpty() ? "?" + String.join("&", rawOptions) : "";
+            final String unauthedUrl = "jdbc:" + protocol + (hasSlashes ? "://" : ":") + serverDatabaseSpecifier;
             final String driverClass = DriverManager.getDriver(unauthedUrl).getClass().getCanonicalName();
             return new ConnectionInfo(user, pass, options, driverClass, unauthedUrl, fullUrl);
         }

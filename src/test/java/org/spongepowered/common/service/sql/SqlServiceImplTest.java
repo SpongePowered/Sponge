@@ -40,9 +40,21 @@ public class SqlServiceImplTest {
 
         assertEquals("zml", subject.getUser());
         assertEquals("totallymypassword", subject.getPassword());
-        assertEquals("jdbc:mysql://localhost/sponge?disableMariaDbDriver&useSSL=true", subject.getAuthlessUrl());
+        assertEquals("?disableMariaDbDriver&useSSL=true", subject.getOptions());
+        assertEquals("jdbc:mysql://localhost/sponge", subject.getAuthlessUrl());
         assertEquals("com.mysql.cj.jdbc.Driver", subject.getDriverClassName());
-        assertArrayEquals(new String[]{ "disableMariaDbDriver", "useSSL=true" }, subject.getOptions());
+    }
+
+    @Test
+    public void testMysqlCompatConnectionInfo() throws SQLException {
+        final String jdbcUrl = "jdbc:mysql://zml:totallymypassword@localhost/sponge?useSSL=true";
+        final SqlServiceImpl.ConnectionInfo subject = SqlServiceImpl.ConnectionInfo.fromUrl(null, jdbcUrl);
+
+        assertEquals("zml", subject.getUser());
+        assertEquals("totallymypassword", subject.getPassword());
+        assertEquals("?disableMariaDbDriver&useSSL=true", subject.getOptions());
+        assertEquals("jdbc:mysql://localhost/sponge", subject.getAuthlessUrl());
+        assertEquals("com.mysql.cj.jdbc.Driver", subject.getDriverClassName());
     }
 
     @Test
@@ -52,9 +64,9 @@ public class SqlServiceImplTest {
 
         assertEquals("zml", subject.getUser());
         assertEquals("totallymypassword", subject.getPassword());
-        assertEquals("jdbc:mariadb://localhost/sponge?useSSL=false", subject.getAuthlessUrl());
+        assertEquals("?useSSL=false", subject.getOptions());
+        assertEquals("jdbc:mariadb://localhost/sponge", subject.getAuthlessUrl());
         assertEquals("org.mariadb.jdbc.Driver", subject.getDriverClassName());
-        assertArrayEquals(new String[]{ "useSSL=false" }, subject.getOptions());
     }
 
     @Test
