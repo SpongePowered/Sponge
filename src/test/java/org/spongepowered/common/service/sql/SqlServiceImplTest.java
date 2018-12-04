@@ -46,18 +46,6 @@ public class SqlServiceImplTest {
     }
 
     @Test
-    public void testMysqlCompatConnectionInfo() throws SQLException {
-        final String jdbcUrl = "jdbc:mysql://zml:totallymypassword@localhost/sponge?useSSL=true";
-        final SqlServiceImpl.ConnectionInfo subject = SqlServiceImpl.ConnectionInfo.fromUrl(null, jdbcUrl);
-
-        assertEquals("zml", subject.getUser());
-        assertEquals("totallymypassword", subject.getPassword());
-        assertEquals("?disableMariaDbDriver&useSSL=true", subject.getOptions());
-        assertEquals("jdbc:mysql://localhost/sponge", subject.getAuthlessUrl());
-        assertEquals("com.mysql.cj.jdbc.Driver", subject.getDriverClassName());
-    }
-
-    @Test
     public void testMariaDbConnectionInfo() throws SQLException {
         final String jdbcUrl = "jdbc:mariadb://zml:totallymypassword@localhost/sponge?useSSL=false";
         final SqlServiceImpl.ConnectionInfo subject = SqlServiceImpl.ConnectionInfo.fromUrl(null, jdbcUrl);
