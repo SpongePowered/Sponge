@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.service.sql;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
@@ -34,24 +35,26 @@ import java.sql.SQLException;
 public class SqlServiceImplTest {
     @Test
     public void testMysqlConnectionInfo() throws SQLException {
-        final String jdbcUrl = "jdbc:mysql://zml:totallymypassword@localhost/sponge";
+        final String jdbcUrl = "jdbc:mysql://zml:totallymypassword@localhost/sponge?disableMariaDbDriver&useSSL=true";
         final SqlServiceImpl.ConnectionInfo subject = SqlServiceImpl.ConnectionInfo.fromUrl(null, jdbcUrl);
 
         assertEquals("zml", subject.getUser());
         assertEquals("totallymypassword", subject.getPassword());
-        assertEquals("jdbc:mysql://localhost/sponge?disableMariaDbDriver", subject.getAuthlessUrl());
+        assertEquals("jdbc:mysql://localhost/sponge?disableMariaDbDriver&useSSL=true", subject.getAuthlessUrl());
         assertEquals("com.mysql.cj.jdbc.Driver", subject.getDriverClassName());
+        assertArrayEquals(new String[]{ "disableMariaDbDriver", "useSSL=true" }, subject.getOptions());
     }
 
     @Test
     public void testMariaDbConnectionInfo() throws SQLException {
-        final String jdbcUrl = "jdbc:mariadb://zml:totallymypassword@localhost/sponge";
+        final String jdbcUrl = "jdbc:mariadb://zml:totallymypassword@localhost/sponge?useSSL=false";
         final SqlServiceImpl.ConnectionInfo subject = SqlServiceImpl.ConnectionInfo.fromUrl(null, jdbcUrl);
 
         assertEquals("zml", subject.getUser());
         assertEquals("totallymypassword", subject.getPassword());
-        assertEquals("jdbc:mariadb://localhost/sponge", subject.getAuthlessUrl());
+        assertEquals("jdbc:mariadb://localhost/sponge?useSSL=false", subject.getAuthlessUrl());
         assertEquals("org.mariadb.jdbc.Driver", subject.getDriverClassName());
+        assertArrayEquals(new String[]{ "useSSL=false" }, subject.getOptions());
     }
 
     @Test

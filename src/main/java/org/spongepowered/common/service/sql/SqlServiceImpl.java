@@ -48,6 +48,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
@@ -175,9 +177,10 @@ public class SqlServiceImpl implements SqlService, Closeable {
 
     public static class ConnectionInfo {
 
-        private static final Pattern URL_REGEX = Pattern.compile("(?:jdbc:)?([^:]+):(//)?(?:([^:]+)(?::([^@]+))?@)?(.*)");
+        private static final Pattern URL_REGEX = Pattern.compile("(?:jdbc:)?([^:]+):(//)?(?:([^:]+)(?::([^@]+))?@)?([^?]+)(?:(\\?)(?=.)(.+))?");
         @Nullable private final String user;
         @Nullable private final String password;
+        @Nullable private final String[] options;
         private final String driverClassName;
         private final String authlessUrl;
         private final String fullUrl;
@@ -190,9 +193,10 @@ public class SqlServiceImpl implements SqlService, Closeable {
          * @param authlessUrl A JDBC url for this driver not containing authentication information
          * @param fullUrl The full jdbc url containing user, password, and database info
          */
-        public ConnectionInfo(@Nullable String user, @Nullable String password, String driverClassName, String authlessUrl, String fullUrl) {
+        public ConnectionInfo(@Nullable String user, @Nullable String password, String[] options, String driverClassName, String authlessUrl, String fullUrl) {
             this.user = user;
             this.password = password;
+            this.options = options;
             this.driverClassName = driverClassName;
             this.authlessUrl = authlessUrl;
             this.fullUrl = fullUrl;
@@ -206,6 +210,11 @@ public class SqlServiceImpl implements SqlService, Closeable {
         @Nullable
         public String getPassword() {
             return this.password;
+        }
+
+        @Nullable
+        public String[] getOptions() {
+            return options;
         }
 
         public String getDriverClassName() {
@@ -266,13 +275,11 @@ public class SqlServiceImpl implements SqlService, Closeable {
             if (container != null && derelativizer != null) {
                 serverDatabaseSpecifier = derelativizer.apply(container, serverDatabaseSpecifier);
             }
-            final String unauthedUrl = "jdbc:" + protocol + (hasSlashes ? "://" : ":") + serverDatabaseSpecifier;
+            final boolean hasOptions = match.group(6) != null;
+            final String[] options = hasOptions ? match.group(7).split("&") : new String[0];
+            final String unauthedUrl = hasOptions ? "jdbc:" + protocol + (hasSlashes ? "://" : ":") + serverDatabaseSpecifier + "?" + match.group(7) : "jdbc:" + protocol + (hasSlashes ? "://" : ":") + serverDatabaseSpecifier;;
             final String driverClass = DriverManager.getDriver(unauthedUrl).getClass().getCanonicalName();
-            if (protocol.equals("mysql")) {
-                return new ConnectionInfo(user, pass, driverClass, unauthedUrl + "?disableMariaDbDriver", fullUrl);
-            } else {
-                return new ConnectionInfo(user, pass, driverClass, unauthedUrl, fullUrl);
-            }
+            return new ConnectionInfo(user, pass, options, driverClass, unauthedUrl, fullUrl);
         }
     }
 
