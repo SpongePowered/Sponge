@@ -24,14 +24,11 @@
  */
 package org.spongepowered.common.service.sql;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.google.common.base.Objects;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalListener;
-import com.google.common.cache.RemovalNotification;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import com.zaxxer.hikari.HikariConfig;
@@ -43,15 +40,16 @@ import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfigManager;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.sql.DataSource;
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
@@ -61,9 +59,7 @@ import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.sql.DataSource;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 
 /**
@@ -246,6 +242,7 @@ public class SqlServiceImpl implements SqlService, Closeable {
             ConnectionInfo that = (ConnectionInfo) o;
             return Objects.equal(this.user, that.user)
                     && Objects.equal(this.password, that.password)
+                    && Objects.equal(this.options, that.options)
                     && Objects.equal(this.driverClassName, that.driverClassName)
                     && Objects.equal(this.authlessUrl, that.authlessUrl)
                     && Objects.equal(this.fullUrl, that.fullUrl);
@@ -253,7 +250,7 @@ public class SqlServiceImpl implements SqlService, Closeable {
 
         @Override
         public int hashCode() {
-            return Objects.hashCode(this.user, this.password, this.driverClassName, this.authlessUrl, this.fullUrl);
+            return Objects.hashCode(this.user, this.password, this.options, this.driverClassName, this.authlessUrl, this.fullUrl);
         }
 
         /**
@@ -282,6 +279,7 @@ public class SqlServiceImpl implements SqlService, Closeable {
             }
             final boolean hasOptions = match.group(6) != null;
             final Set<String> rawOptions = hasOptions ? Sets.newHashSet(match.group(7).split("&")) : Collections.EMPTY_SET;
+            // Potential to modify flags here.
             final String options = !rawOptions.isEmpty() ? "?" + String.join("&", rawOptions) : "";
             final String unauthedUrl = "jdbc:" + protocol + (hasSlashes ? "://" : ":") + serverDatabaseSpecifier;
             final String driverClass;
