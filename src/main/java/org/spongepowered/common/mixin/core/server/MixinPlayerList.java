@@ -49,6 +49,7 @@ import net.minecraft.network.play.server.SPacketSetExperience;
 import net.minecraft.network.play.server.SPacketSpawnPosition;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.management.DemoPlayerInteractionManager;
 import net.minecraft.server.management.PlayerInteractionManager;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.server.management.PlayerProfileCache;
@@ -67,7 +68,6 @@ import net.minecraft.world.WorldProviderHell;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
-import net.minecraft.server.management.DemoPlayerInteractionManager;
 import net.minecraft.world.storage.IPlayerFileData;
 import net.minecraft.world.storage.WorldInfo;
 import org.apache.logging.log4j.Logger;
@@ -327,6 +327,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
             handler = new NetHandlerPlayServer(this.server, netManager, playerIn);
         }
         playerIn.connection = handler;
+        SpongeImplHooks.fireServerConnectionEvent(netManager);
         // Sponge end
 
         // Support vanilla clients logging into custom dimensions
