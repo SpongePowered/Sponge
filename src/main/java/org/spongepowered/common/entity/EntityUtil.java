@@ -193,8 +193,10 @@ public final class EntityUtil {
         final Vector3d toPosition = toTransform.getPosition();
         entity.setLocationAndAngles(toPosition.getX(), toPosition.getY(), toPosition.getZ(), (float) toTransform.getYaw(), (float) toTransform.getPitch());
         entity.world = toWorld;
-        toWorld.spawnEntity(entity);
-        toWorld.updateEntityWithOptionalForce(entity, false);
+        try (PhaseContext<?> ignored = EntityPhase.State.CHANGING_DIMENSION.createPhaseContext().setTargetWorld(toWorld).buildAndSwitch()) {
+            toWorld.spawnEntity(entity);
+            toWorld.updateEntityWithOptionalForce(entity, false);
+        }
         entity.world.profiler.endSection();
 
         entity.world.profiler.endSection();
