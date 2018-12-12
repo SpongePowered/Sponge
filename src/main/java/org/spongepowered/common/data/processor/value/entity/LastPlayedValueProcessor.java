@@ -32,16 +32,23 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeImmutableValue;
 import org.spongepowered.common.data.value.SpongeMutableValue;
+import org.spongepowered.api.util.Identifiable;
+import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
-public class LastPlayedValueProcessor extends AbstractSpongeValueProcessor<EntityPlayer, Instant> {
+public class LastPlayedValueProcessor extends AbstractSpongeValueProcessor<Identifiable, Instant> {
 
     public LastPlayedValueProcessor() {
-        super(EntityPlayer.class, Keys.LAST_DATE_PLAYED);
+        super(Identifiable.class, Keys.LAST_DATE_PLAYED);
+    }
+
+    @Override
+    protected boolean supports(Identifiable dataHolder) {
+        return dataHolder instanceof EntityPlayer || dataHolder instanceof SpongeUser;
     }
 
     @Override
@@ -50,16 +57,16 @@ public class LastPlayedValueProcessor extends AbstractSpongeValueProcessor<Entit
     }
 
     @Override
-    protected boolean set(EntityPlayer container, Instant value) {
-        final UUID id = container.getUniqueID();
+    protected boolean set(Identifiable container, Instant value) {
+        final UUID id = container.getUniqueId();
         final Instant played = SpongePlayerDataHandler.getFirstJoined(id).get();
         SpongePlayerDataHandler.setPlayerInfo(id, played, value);
         return true;
     }
 
     @Override
-    protected Optional<Instant> getVal(EntityPlayer container) {
-        return SpongePlayerDataHandler.getLastPlayed(container.getUniqueID());
+    protected Optional<Instant> getVal(Identifiable container) {
+        return SpongePlayerDataHandler.getLastPlayed(container.getUniqueId());
     }
 
     @Override
