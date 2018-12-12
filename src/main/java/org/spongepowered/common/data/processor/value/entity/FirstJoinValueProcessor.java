@@ -30,19 +30,26 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.util.Identifiable;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
-public class FirstJoinValueProcessor extends AbstractSpongeValueProcessor<EntityPlayer, Instant, Value<Instant>> {
+public class FirstJoinValueProcessor extends AbstractSpongeValueProcessor<Identifiable, Instant, Value<Instant>> {
 
     public FirstJoinValueProcessor() {
-        super(EntityPlayer.class, Keys.FIRST_DATE_PLAYED);
+        super(Identifiable.class, Keys.FIRST_DATE_PLAYED);
+    }
+
+    @Override
+    protected boolean supports(Identifiable dataHolder) {
+        return dataHolder instanceof EntityPlayer || dataHolder instanceof SpongeUser;
     }
 
     @Override
@@ -51,21 +58,21 @@ public class FirstJoinValueProcessor extends AbstractSpongeValueProcessor<Entity
     }
 
     @Override
-    protected boolean set(EntityPlayer container, Instant value) {
-        final UUID id = container.getUniqueID();
+    protected boolean set(Identifiable container, Instant value) {
+        final UUID id = container.getUniqueId();
         final Instant played = SpongePlayerDataHandler.getLastPlayed(id).orElse(Instant.now());
         SpongePlayerDataHandler.setPlayerInfo(id, value, played);
         return true;
     }
 
     @Override
-    protected Optional<Instant> getVal(EntityPlayer container) {
-        return SpongePlayerDataHandler.getFirstJoined(container.getUniqueID());
+    protected Optional<Instant> getVal(Identifiable container) {
+        return SpongePlayerDataHandler.getFirstJoined(container.getUniqueId());
     }
 
     @Override
     protected ImmutableValue<Instant> constructImmutableValue(Instant value) {
-        return new ImmutableSpongeValue<Instant>(Keys.FIRST_DATE_PLAYED, Instant.now(), value);
+        return new ImmutableSpongeValue<>(Keys.FIRST_DATE_PLAYED, Instant.now(), value);
     }
 
     @Override
