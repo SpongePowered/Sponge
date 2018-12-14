@@ -31,12 +31,15 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.spongepowered.api.text.action.TextActions.insertText;
 
+import java.util.Optional;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.spongepowered.api.text.LiteralText;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.common.text.impl.TextImpl;
 import org.spongepowered.lwts.runner.LaunchWrapperTestRunner;
 
 @RunWith(LaunchWrapperTestRunner.class)
@@ -109,4 +112,47 @@ public class TextTest {
         throw new AssertionError(); // Should never happen
     }
 
+    @Test
+    public void testCompactedTextOf() {
+        Text text = Text.ofCompacted("Hello", " ", "there");
+        assertThat(text.toPlain(), is("Hello there"));
+    }
+
+    @Test
+    public void testCompactedComposite() {
+        Text text = Text.ofCompacted(Text.of("Yay "), Text.of("for "), Text.of("compacted"));
+        assertThat(text.toPlain(), is("Yay for compacted"));
+    }
+
+    @Test
+    public void testAppendCompactedEmpty() {
+        Text baseText = Text.of("This is some text");
+        Text text = baseText.toBuilder().setCompact(true).append(Text.empty()).build();
+        assertThat(text, is(baseText));
+    }
+
+    @Test
+    public void noChildrenCompact() {
+        Text text = Text.of(TextColors.RED, "Foo");
+        assertThat(text.compact(), is(text));
+    }
+
+    @Test
+    public void mergeableSameFormat() {
+        Optional<TextImpl> merged = ((TextImpl)Text.of(TextColors.RED, "Foo")).merge(Text.of(TextColors.RED, "Bar"));
+        assertTrue(merged.isPresent());
+        assertThat(merged.get(), is(Text.of(TextColors.RED, "FooBar")));
+    }
+
+    @Test
+    public void singleChildCompacted() {
+        Text text = Text.of(TextColors.RED, "Foo", Text.of(TextColors.RED, "Bar"));
+        assertThat(text.compact(), is(Text.of(TextColors.RED, "FooBar")));
+    }
+
+    @Test
+    public void twoChildCompacted() {
+        Text text = Text.of(TextColors.RED, Text.of("Foo"), Text.of("Bar")).compact();
+        assertThat(text, is(Text.of(TextColors.RED, "FooBar")));
+    }
 }

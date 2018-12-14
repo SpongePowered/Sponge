@@ -42,6 +42,7 @@ import org.spongepowered.api.text.format.TextStyle;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Objects;
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -78,6 +79,34 @@ public final class LiteralTextImpl extends TextImpl implements LiteralText {
     @Override
     public Builder toBuilder() {
         return new Builder(this);
+    }
+
+    @Override
+    public Optional<TextImpl> merge(Text other) {
+        if(this.isEmpty()) {
+            return Optional.of((TextImpl)other);
+        }
+        else if(other.isEmpty()) {
+            return Optional.of(this);
+        }
+        else if(other instanceof LiteralTextImpl) {
+            LiteralTextImpl otherLit = (LiteralTextImpl)other;
+            if(otherLit.format.equals(this.format) && otherLit.shiftClickAction.equals(this.shiftClickAction)
+                    && otherLit.clickAction.equals(this.clickAction) && otherLit.hoverAction.equals(this.hoverAction)) {
+
+                Builder builder = this.toBuilder();
+                if(this.children.isEmpty()) {
+                    builder.content(this.content + otherLit.content).append(otherLit.children);
+                    return Optional.of((TextImpl)builder.build());
+                }
+                else if(otherLit.children.isEmpty()) {
+                    builder.append(new LiteralTextImpl(otherLit.content));
+                    return Optional.of((TextImpl)builder.build());
+                }
+            }
+        }
+
+        return Optional.empty();
     }
 
     @Override
