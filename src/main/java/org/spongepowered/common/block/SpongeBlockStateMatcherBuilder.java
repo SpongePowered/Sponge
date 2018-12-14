@@ -111,8 +111,7 @@ public class SpongeBlockStateMatcherBuilder extends AbstractDataBuilder<BlockSta
 
             if (obj instanceof Comparable) {
                 blockType.getTrait(traitId).ifPresent(t -> trait((BlockTrait)t, (Comparable)obj));
-            }
-            else {
+            } else {
                 throw new InvalidDataException("Invalid trait value");
             }
         }
