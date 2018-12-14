@@ -56,30 +56,30 @@ public final class TextFactoryImpl implements TextFactory {
         return ofBase(Text.builder(), objects);
     }
 
-	@Override
-	public Text ofCompacted(Object... objects) {
-		return ofBase(Text.builder().setCompact(true), objects);
-	}
+    @Override
+    public Text ofCompacted(Object... objects) {
+        return ofBase(Text.builder().setCompact(true), objects);
+    }
 
-	private Text ofBase(Text.Builder builder, Object... objects) {
-		// Shortcut for lonely TextRepresentables
-		if (objects.length == 1 && objects[0] instanceof TextRepresentable) {
-			return ((TextRepresentable) objects[0]).toText();
-		}
+    private Text ofBase(Text.Builder builder, Object... objects) {
+        // Shortcut for lonely TextRepresentables
+        if (objects.length == 1 && objects[0] instanceof TextRepresentable) {
+            return ((TextRepresentable) objects[0]).toText();
+        }
 
-		TextFormat format = TextFormat.of();
-		HoverAction<?> hoverAction = null;
-		ClickAction<?> clickAction = null;
-		ShiftClickAction<?> shiftClickAction = null;
-		boolean changedFormat = false;
+        TextFormat format = TextFormat.of();
+        HoverAction<?> hoverAction = null;
+        ClickAction<?> clickAction = null;
+        ShiftClickAction<?> shiftClickAction = null;
+        boolean changedFormat = false;
 
-		for (final Object obj : objects) {
-			// Text formatting + actions
-			if (obj instanceof TextFormat) {
-				changedFormat = true;
-				format = (TextFormat) obj;
-			} else if (obj instanceof TextColor) {
-				changedFormat = true;
+        for (final Object obj : objects) {
+            // Text formatting + actions
+            if (obj instanceof TextFormat) {
+                changedFormat = true;
+                format = (TextFormat) obj;
+            } else if (obj instanceof TextColor) {
+                changedFormat = true;
 				format = format.color((TextColor) obj);
 			} else if (obj instanceof TextStyle) {
 				changedFormat = true;
@@ -87,94 +87,94 @@ public final class TextFactoryImpl implements TextFactory {
 			} else if (obj instanceof TextAction) {
 				changedFormat = true;
 				if (obj instanceof HoverAction) {
-					hoverAction = (HoverAction<?>) obj;
-				} else if (obj instanceof ClickAction) {
-					clickAction = (ClickAction<?>) obj;
-				} else if (obj instanceof ShiftClickAction) {
-					shiftClickAction = (ShiftClickAction<?>) obj;
-				} else {
-					// Unsupported TextAction
-				}
+                    hoverAction = (HoverAction<?>) obj;
+                } else if (obj instanceof ClickAction) {
+                    clickAction = (ClickAction<?>) obj;
+                } else if (obj instanceof ShiftClickAction) {
+                    shiftClickAction = (ShiftClickAction<?>) obj;
+                } else {
+                    // Unsupported TextAction
+                }
 
-			} else if (obj instanceof TextRepresentable) {
-				// Special content
-				changedFormat = false;
-				final Text.Builder childBuilder = ((TextRepresentable) obj).toText().toBuilder();
+            } else if (obj instanceof TextRepresentable) {
+                // Special content
+                changedFormat = false;
+                final Text.Builder childBuilder = ((TextRepresentable) obj).toText().toBuilder();
 
-				// Merge format (existing format has priority)
-				childBuilder.format(format.merge(childBuilder.getFormat()));
+                // Merge format (existing format has priority)
+                childBuilder.format(format.merge(childBuilder.getFormat()));
 
-				// Overwrite text actions if *NOT* present
-				if (!childBuilder.getClickAction().isPresent()) {
-					childBuilder.onClick(clickAction);
-				}
-				if (!childBuilder.getHoverAction().isPresent()) {
-					childBuilder.onHover(hoverAction);
-				}
-				if (!childBuilder.getShiftClickAction().isPresent()) {
-					childBuilder.onShiftClick(shiftClickAction);
-				}
+                // Overwrite text actions if *NOT* present
+                if (!childBuilder.getClickAction().isPresent()) {
+                    childBuilder.onClick(clickAction);
+                }
+                if (!childBuilder.getHoverAction().isPresent()) {
+                    childBuilder.onHover(hoverAction);
+                }
+                if (!childBuilder.getShiftClickAction().isPresent()) {
+                    childBuilder.onShiftClick(shiftClickAction);
+                }
 
-				builder.append(childBuilder.build());
+                builder.append(childBuilder.build());
 
-			} else {
-				// Simple content
-				changedFormat = false;
-				final Text.Builder childBuilder;
+            } else {
+                // Simple content
+                changedFormat = false;
+                final Text.Builder childBuilder;
 
-				if (obj instanceof String) {
-					childBuilder = Text.builder((String) obj);
-				} else if (obj instanceof Translation) {
-					childBuilder = Text.builder((Translation) obj);
-				} else if (obj instanceof Translatable) {
-					childBuilder = Text.builder(((Translatable) obj).getTranslation());
-				} else if (obj instanceof Selector) {
-					childBuilder = Text.builder((Selector) obj);
-				} else if (obj instanceof Score) {
-					childBuilder = Text.builder((Score) obj);
-				} else {
-					childBuilder = Text.builder(String.valueOf(obj));
-				}
+                if (obj instanceof String) {
+                    childBuilder = Text.builder((String) obj);
+                } else if (obj instanceof Translation) {
+                    childBuilder = Text.builder((Translation) obj);
+                } else if (obj instanceof Translatable) {
+                    childBuilder = Text.builder(((Translatable) obj).getTranslation());
+                } else if (obj instanceof Selector) {
+                    childBuilder = Text.builder((Selector) obj);
+                } else if (obj instanceof Score) {
+                    childBuilder = Text.builder((Score) obj);
+                } else {
+                    childBuilder = Text.builder(String.valueOf(obj));
+                }
 
-				if (hoverAction != null) {
-					childBuilder.onHover(hoverAction);
-				}
-				if (clickAction != null) {
-					childBuilder.onClick(clickAction);
-				}
-				if (shiftClickAction != null) {
-					childBuilder.onShiftClick(shiftClickAction);
-				}
+                if (hoverAction != null) {
+                    childBuilder.onHover(hoverAction);
+                }
+                if (clickAction != null) {
+                    childBuilder.onClick(clickAction);
+                }
+                if (shiftClickAction != null) {
+                    childBuilder.onShiftClick(shiftClickAction);
+                }
 
-				builder.append(childBuilder.format(format).build());
-			}
-		}
+                builder.append(childBuilder.format(format).build());
+            }
+        }
 
-		if (changedFormat) {
-			// Did the formatting change without being applied to something?
-			// Then just append an empty text with that formatting
-			final Text.Builder childBuilder = Text.builder();
-			if (hoverAction != null) {
-				childBuilder.onHover(hoverAction);
-			}
-			if (clickAction != null) {
-				childBuilder.onClick(clickAction);
-			}
-			if (shiftClickAction != null) {
-				childBuilder.onShiftClick(shiftClickAction);
-			}
-			builder.append(childBuilder.format(format).build());
-		}
+        if (changedFormat) {
+            // Did the formatting change without being applied to something?
+            // Then just append an empty text with that formatting
+            final Text.Builder childBuilder = Text.builder();
+            if (hoverAction != null) {
+                childBuilder.onHover(hoverAction);
+            }
+            if (clickAction != null) {
+                childBuilder.onClick(clickAction);
+            }
+            if (shiftClickAction != null) {
+                childBuilder.onShiftClick(shiftClickAction);
+            }
+            builder.append(childBuilder.format(format).build());
+        }
 
-		if (builder.getChildren().size() == 1) {
-			// Single content, reduce Text depth
-			return builder.getChildren().get(0);
-		}
+        if (builder.getChildren().size() == 1) {
+            // Single content, reduce Text depth
+            return builder.getChildren().get(0);
+        }
 
-		return builder.build();
-	}
+        return builder.build();
+    }
 
-	@Override
+    @Override
     public Text joinWith(final Text separator, final Text... texts) {
         switch (texts.length) {
             case 0:

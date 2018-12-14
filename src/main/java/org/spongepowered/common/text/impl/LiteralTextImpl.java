@@ -83,23 +83,20 @@ public final class LiteralTextImpl extends TextImpl implements LiteralText {
 
     @Override
     public Optional<TextImpl> merge(Text other) {
-        if(this.isEmpty()) {
+        if (this.isEmpty()) {
             return Optional.of((TextImpl)other);
-        }
-        else if(other.isEmpty()) {
+        } else if (other.isEmpty()) {
             return Optional.of(this);
-        }
-        else if(other instanceof LiteralTextImpl) {
+        } else if (other instanceof LiteralTextImpl) {
             LiteralTextImpl otherLit = (LiteralTextImpl)other;
-            if(otherLit.format.equals(this.format) && otherLit.shiftClickAction.equals(this.shiftClickAction)
+            if (otherLit.format.equals(this.format) && otherLit.shiftClickAction.equals(this.shiftClickAction)
                     && otherLit.clickAction.equals(this.clickAction) && otherLit.hoverAction.equals(this.hoverAction)) {
 
                 Builder builder = this.toBuilder();
-                if(this.children.isEmpty()) {
+                if (this.children.isEmpty()) {
                     builder.content(this.content + otherLit.content).append(otherLit.children);
                     return Optional.of((TextImpl)builder.build());
-                }
-                else if(otherLit.children.isEmpty()) {
+                } else if (otherLit.children.isEmpty()) {
                     builder.append(new LiteralTextImpl(otherLit.content));
                     return Optional.of((TextImpl)builder.build());
                 }
@@ -174,9 +171,9 @@ public final class LiteralTextImpl extends TextImpl implements LiteralText {
         public LiteralText build() {
             // Special case for empty builder
             if (this.format.isEmpty()
-                && this.children.isEmpty()
-                && this.clickAction == null
-                && this.hoverAction == null
+                    && this.children.isEmpty()
+                    && this.clickAction == null
+                    && this.hoverAction == null
                     && this.shiftClickAction == null) {
                 if (this.content.isEmpty()) {
                     return EMPTY;

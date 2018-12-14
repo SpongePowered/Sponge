@@ -180,14 +180,12 @@ public abstract class TextImpl implements Text {
         //It also helps uncover Texts that serve no other purpose than having children
         //There are cases here where I don't know if calling compact is needed, but it's currently
         //working, and don't want to break that, so for now it stays like that.
-        if(this.children.isEmpty()) {
+        if (this.children.isEmpty()) {
             return this;
-        }
-        else if(this.children.size() == 1) {
+        } else if (this.children.size() == 1) {
             Text single = this.children.get(0);
             return this.withoutChildren().merge(single.compact()).map(Text::compact).orElse(this);
-        }
-        else {
+        } else {
             int childIdx = 2;
             TextImpl current = (TextImpl)children.get(0).compact();
             TextImpl next = (TextImpl)children.get(1).compact();
@@ -196,9 +194,9 @@ public abstract class TextImpl implements Text {
 
             while (true) {
                 Optional<TextImpl> mergeRes = current.merge(next);
-                if(mergeRes.isPresent()) {
+                if (mergeRes.isPresent()) {
                     TextImpl merged = mergeRes.get();
-                    if(children.size() == childIdx) {
+                    if (children.size() == childIdx) {
                         newChildren.add(merged);
                         break;
                     }
@@ -206,9 +204,8 @@ public abstract class TextImpl implements Text {
                     current = (TextImpl)merged.compact();
                     next = (TextImpl)children.get(childIdx).compact();
                     childIdx++;
-                }
-                else {
-                    if(children.size() == childIdx) {
+                } else {
+                    if (children.size() == childIdx) {
                         newChildren.add(current);
                         newChildren.add(next);
                         break;
@@ -239,8 +236,8 @@ public abstract class TextImpl implements Text {
 
     /**
      * Tries to merge two {@link Text}s together while preserving styling.
-	 * This is not a commutative operation. Both texts can't have children
-	 * for this to work.
+     * This is not a commutative operation. Both texts can't have children
+     * for this to work.
      *
      * @param other The text to combine with.
      * @return Present if the combination was successful, empty otherwise
@@ -398,7 +395,7 @@ public abstract class TextImpl implements Text {
             this.shiftClickAction = text.getShiftClickAction().orElse(null);
         }
 
-		@Override
+        @Override
         public final TextFormat getFormat() {
             return this.format;
         }
@@ -470,90 +467,90 @@ public abstract class TextImpl implements Text {
             return Collections.unmodifiableList(this.children);
         }
 
-		@Override
-		public boolean shouldCompact() {
-			return this.compact;
-		}
+        @Override
+        public boolean shouldCompact() {
+            return this.compact;
+        }
 
-		@Override
-		public Builder setCompact(boolean compact) {
-			this.compact = compact;
-			return this;
-		}
+        @Override
+        public Builder setCompact(boolean compact) {
+            this.compact = compact;
+            return this;
+        }
 
-		/**
-		 * Appends the specified {@link Text} to the end of this Text,
-		 * making sure to compact if possible.
-		 *
-		 * @param child The text to append
-		 */
-		private void appendCompacted(Text child) {
-			if (!child.isEmpty()) {
-				if (!this.children.isEmpty()) {
-					int lastIndex = this.children.size() - 1;
-					TextImpl last = (TextImpl)this.children.get(lastIndex);
-					Optional<TextImpl> mergeRes = last.merge(child);
+        /**
+         * Appends the specified {@link Text} to the end of this Text,
+         * making sure to compact if possible.
+         *
+         * @param child The text to append
+         */
+        private void appendCompacted(Text child) {
+            if (!child.isEmpty()) {
+                if (!this.children.isEmpty()) {
+                    int lastIndex = this.children.size() - 1;
+                    TextImpl last = (TextImpl)this.children.get(lastIndex);
+                    Optional<TextImpl> mergeRes = last.merge(child);
 
-					if (mergeRes.isPresent()) {
-						this.children.set(lastIndex, mergeRes.get());
-					} else {
-						this.children.add(child);
-					}
-				} else {
-					this.children.add(child);
-				}
-			}
-		}
+                    if (mergeRes.isPresent()) {
+                        this.children.set(lastIndex, mergeRes.get());
+                    } else {
+                        this.children.add(child);
+                    }
+                } else {
+                    this.children.add(child);
+                }
+            }
+        }
 
         @Override
         public Builder append(final Text... children) {
-			if (this.compact) {
-				for (Text child : children) {
-					appendCompacted(child);
-				}
-			} else {
-				Collections.addAll(this.children, children);
-			}
+            if (this.compact) {
+                for (Text child : children) {
+                    appendCompacted(child);
+                }
+            } else {
+                Collections.addAll(this.children, children);
+            }
             return this;
         }
 
         @Override
         public Builder append(final Collection<? extends Text> children) {
-			if (this.compact) {
-				for (Text child : children) {
-					appendCompacted(child);
-				}
-			} else {
-				this.children.addAll(children);
-			}
+            if (this.compact) {
+                for (Text child : children) {
+                    appendCompacted(child);
+                }
+            } else {
+                this.children.addAll(children);
+            }
             return this;
         }
 
         @Override
         public Builder append(final Iterable<? extends Text> children) {
-			if (this.compact) {
-				for (Text child : children) {
-					appendCompacted(child);
-				}
-			} else {
-				for (final Text child : children) {
-					this.children.add(child);
-				}
-			}
+            if (this.compact) {
+                for (Text child : children) {
+                    appendCompacted(child);
+                }
+            } else {
+                for (final Text child : children) {
+                    this.children.add(child);
+                }
+            }
             return this;
         }
 
         @Override
         public Builder append(final Iterator<? extends Text> children) {
-			if (this.compact) {
-				while (children.hasNext()) {
-					appendCompacted(children.next());
-				}
-			} else {
-				while (children.hasNext()) {
-					this.children.add(children.next());
-				}
-			}
+            if (this.compact) {
+                while (children.hasNext()) {
+                    appendCompacted(children.next());
+                }
+            } else {
+                while (children.hasNext()) {
+                    this.children.add(children.next());
+                }
+            }
             return this;
         }
 
