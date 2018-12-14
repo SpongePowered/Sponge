@@ -80,13 +80,13 @@ public final class TextFactoryImpl implements TextFactory {
                 format = (TextFormat) obj;
             } else if (obj instanceof TextColor) {
                 changedFormat = true;
-				format = format.color((TextColor) obj);
-			} else if (obj instanceof TextStyle) {
-				changedFormat = true;
-				format = format.style(obj.equals(TextStyles.RESET) ? TextStyles.NONE : format.getStyle().and((TextStyle) obj));
-			} else if (obj instanceof TextAction) {
-				changedFormat = true;
-				if (obj instanceof HoverAction) {
+                format = format.color((TextColor) obj);
+            } else if (obj instanceof TextStyle) {
+                changedFormat = true;
+                format = format.style(obj.equals(TextStyles.RESET) ? TextStyles.NONE : format.getStyle().and((TextStyle) obj));
+            } else if (obj instanceof TextAction) {
+                changedFormat = true;
+                if (obj instanceof HoverAction) {
                     hoverAction = (HoverAction<?>) obj;
                 } else if (obj instanceof ClickAction) {
                     clickAction = (ClickAction<?>) obj;
