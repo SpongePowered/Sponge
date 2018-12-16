@@ -28,11 +28,10 @@ import com.flowpowered.math.vector.Vector3i;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.WorldServer;
-import net.minecraft.world.WorldServerMulti;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.chunk.storage.IChunkLoader;
 import net.minecraft.world.gen.ChunkProviderServer;
+import net.minecraft.world.gen.IChunkGenerator;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.api.world.storage.ChunkDataStream;
@@ -52,8 +51,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.GeneralConfigBase;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
@@ -125,6 +124,11 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
     @Override
     public CompletableFuture<Boolean> doesChunkExist(Vector3i chunkCoords) {
         return WorldStorageUtil.doesChunkExist(this.world, this.chunkLoader, chunkCoords);
+    }
+
+    @Override
+    public CompletableFuture<Boolean> doesChunkExistSync(Vector3i chunkCoords) {
+        return WorldStorageUtil.doesChunkExistSync(this.world, this.chunkLoader, chunkCoords);
     }
 
     @Override
@@ -336,4 +340,5 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
             ci.cancel();
         }
     }
+
 }

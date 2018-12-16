@@ -26,10 +26,15 @@ package org.spongepowered.common.interfaces.world.gen;
 
 import javax.annotation.Nullable;
 
+import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 
+import java.util.concurrent.CompletableFuture;
+
 public interface IMixinChunkProviderServer {
+
+    CompletableFuture<Boolean> doesChunkExistSync(Vector3i chunkCoords);
 
     boolean getForceChunkRequests();
 

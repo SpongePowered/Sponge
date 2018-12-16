@@ -33,6 +33,7 @@ import net.minecraft.world.chunk.storage.IChunkLoader;
 import net.minecraft.world.chunk.storage.RegionFile;
 import net.minecraft.world.chunk.storage.RegionFileCache;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.util.Functional;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -46,17 +47,28 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 public class WorldStorageUtil {
 
     public static CompletableFuture<Boolean> doesChunkExist(WorldServer world, IChunkLoader chunkLoader, Vector3i chunkCoords) {
+        return doesChunkExist(world, chunkLoader, chunkCoords, SpongeImpl.getScheduler()::submitAsyncTask);
+    }
+
+    public static CompletableFuture<Boolean> doesChunkExistSync(WorldServer world, IChunkLoader chunkLoader, Vector3i chunkCoords) {
+        return doesChunkExist(world, chunkLoader, chunkCoords, Functional::failableFuture);
+    }
+
+    public static CompletableFuture<Boolean> doesChunkExist(WorldServer world, IChunkLoader chunkLoader, Vector3i chunkCoords,
+            Function<Callable<Boolean>, CompletableFuture<Boolean>> completableFutureProvider) {
         int x = chunkCoords.getX();
         int z = chunkCoords.getZ();
         if (!(chunkLoader instanceof IMixinAnvilChunkLoader) || !SpongeChunkLayout.instance.isValidChunk(x, chunkCoords.getY(), z)) {
             return CompletableFuture.completedFuture(false);
         }
-        return SpongeImpl.getScheduler().submitAsyncTask(() -> ((IMixinAnvilChunkLoader) chunkLoader).chunkExists(world, x, z));
+        return completableFutureProvider.apply(() -> ((IMixinAnvilChunkLoader) chunkLoader).chunkExists(world, x, z));
     }
 
     public static CompletableFuture<Optional<DataContainer>> getChunkData(WorldServer world, IChunkLoader chunkLoader, Vector3i chunkCoords) {

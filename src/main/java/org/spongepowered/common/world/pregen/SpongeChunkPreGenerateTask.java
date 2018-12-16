@@ -43,7 +43,8 @@ import org.spongepowered.api.world.ChunkPreGenerate;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.storage.WorldProperties;
-import org.spongepowered.common.interfaces.world.IMixinAnvilChunkLoader;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 import java.time.Duration;
@@ -51,6 +52,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -114,9 +117,8 @@ public class SpongeChunkPreGenerateTask implements ChunkPreGenerate, Consumer<Ta
         // This results in a extremely noticeable speed improvement.
         //
         // This also allows us to catch non Anvil file formats too.
-        if (world.getWorldStorage() instanceof IMixinAnvilChunkLoader) {
-            this.doesChunkExistCheck = v -> ((IMixinAnvilChunkLoader) world.getWorldStorage())
-                    .chunkExists((net.minecraft.world.World) this.world, v.getX(), v.getZ());
+        if (world.getWorldStorage() instanceof IMixinChunkProviderServer) {
+            this.doesChunkExistCheck = this::checkChunkExistsAnvil;
         } else {
             this.doesChunkExistCheck = v -> false;
         }
@@ -350,6 +352,18 @@ public class SpongeChunkPreGenerateTask implements ChunkPreGenerate, Consumer<Ta
         return this.tickPercent <= 0 || tickTime < this.tickTimeLimit;
     }
 
+    private boolean checkChunkExistsAnvil(Vector3i v) {
+        CompletableFuture<Boolean> ret = ((IMixinChunkProviderServer) world.getWorldStorage()).doesChunkExistSync(v);
+        try {
+            return ret.get();
+        } catch (InterruptedException | ExecutionException e) {
+            SpongeImpl.getLogger().error(
+                    "Could not determine chunk's existence on world {}: {} {}. Assuming false.",
+                    world.getName(), v.getX(), v.getZ());
+            return false;
+        }
+    }
+
     public static class Builder implements ChunkPreGenerate.Builder {
 
         private static final String TIME_FORMAT = "s's 'S'ms'";
@@ -466,4 +480,5 @@ public class SpongeChunkPreGenerateTask implements ChunkPreGenerate, Consumer<Ta
             return this;
         }
     }
+
 }
