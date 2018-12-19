@@ -79,7 +79,6 @@ import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.event.SpawnTypeRegistryModule;
-import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 import org.spongepowered.common.world.WorldUtil;
@@ -761,7 +760,8 @@ public final class PhaseTracker {
                 final List<BlockSnapshot> capturedSnapshots = new ArrayList<>(1); // only need tone
                 final Block newBlock = newState.getBlock();
 
-                TrackingUtil.associateBlockChangeWithSnapshot(phaseState, newBlock, currentState, originalBlockSnapshot, capturedSnapshots);
+                TrackingUtil.associateBlockChangeWithSnapshot(phaseState, newBlock, currentState, originalBlockSnapshot);
+                capturedSnapshots.add(originalBlockSnapshot);
                 final IMixinChunk mixinChunk = (IMixinChunk) chunk;
                 final IBlockState originalBlockState = mixinChunk.setBlockState(pos, newState, currentState, originalBlockSnapshot, BlockChangeFlags.ALL);
                 if (originalBlockState == null) {

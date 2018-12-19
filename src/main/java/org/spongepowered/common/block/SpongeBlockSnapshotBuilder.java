@@ -219,7 +219,7 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
     }
 
     @Override
-    public BlockSnapshot build() {
+    public SpongeBlockSnapshot build() {
         checkState(this.blockState != null);
         if (this.extendedState == null) {
             this.extendedState = this.blockState;

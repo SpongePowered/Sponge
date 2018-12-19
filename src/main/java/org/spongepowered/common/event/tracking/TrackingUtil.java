@@ -350,7 +350,8 @@ public final class TrackingUtil {
             final List<BlockSnapshot> capturedSnapshots = phaseContext.getCapturedBlocks();
             final Block newBlock = newState.getBlock();
 
-            associateBlockChangeWithSnapshot(phaseState, newBlock, currentState, originalBlockSnapshot, capturedSnapshots);
+            associateBlockChangeWithSnapshot(phaseState, newBlock, currentState, originalBlockSnapshot);
+            capturedSnapshots.add(originalBlockSnapshot);
             final IMixinChunk mixinChunk = (IMixinChunk) chunk;
             final IBlockState originalBlockState = mixinChunk.setBlockState(pos, newState, currentState, originalBlockSnapshot, BlockChangeFlags.ALL);
             if (originalBlockState == null) {
@@ -377,23 +378,18 @@ public final class TrackingUtil {
         return true;
     }
 
-    static void associateBlockChangeWithSnapshot(IPhaseState<?> phaseState, Block newBlock, IBlockState currentState, SpongeBlockSnapshot snapshot,
-        List<BlockSnapshot> capturedSnapshots) {
+    public static void associateBlockChangeWithSnapshot(IPhaseState<?> phaseState, Block newBlock, IBlockState currentState, SpongeBlockSnapshot snapshot) {
         Block originalBlock = currentState.getBlock();
         if (phaseState == BlockPhase.State.BLOCK_DECAY) {
             if (newBlock == Blocks.AIR) {
                 snapshot.blockChange = BlockChange.DECAY;
-                capturedSnapshots.add(snapshot);
             }
         } else if (newBlock == Blocks.AIR) {
             snapshot.blockChange = BlockChange.BREAK;
-            capturedSnapshots.add(snapshot);
         } else if (newBlock != originalBlock && !forceModify(originalBlock, newBlock)) {
             snapshot.blockChange = BlockChange.PLACE;
-            capturedSnapshots.add(snapshot);
         } else {
             snapshot.blockChange = BlockChange.MODIFY;
-            capturedSnapshots.add(snapshot);
         }
     }
 

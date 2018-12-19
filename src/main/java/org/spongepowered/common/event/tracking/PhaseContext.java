@@ -41,12 +41,13 @@ import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.context.BlockItemDropsSupplier;
 import org.spongepowered.common.event.tracking.context.BlockItemEntityDropsSupplier;
+import org.spongepowered.common.event.tracking.context.BlockPosMultiMap;
 import org.spongepowered.common.event.tracking.context.CaptureBlockPos;
 import org.spongepowered.common.event.tracking.context.CapturedBlockEntitySpawnSupplier;
-import org.spongepowered.common.event.tracking.context.CapturedBlocksSupplier;
 import org.spongepowered.common.event.tracking.context.CapturedEntitiesSupplier;
 import org.spongepowered.common.event.tracking.context.CapturedItemStackSupplier;
 import org.spongepowered.common.event.tracking.context.CapturedItemsSupplier;
@@ -100,7 +101,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     @Nullable private StackTraceElement[] stackTrace;
 
     // Single type bulk captures
-    @Nullable private CapturedBlocksSupplier blocksSupplier;
+    @Nullable private BlockPosMultiMap blocksSupplier;
     @Nullable private CapturedItemsSupplier capturedItemsSupplier;
     @Nullable private CapturedEntitiesSupplier capturedEntitiesSupplier;
     @Nullable private CapturedItemStackSupplier capturedItemStackSupplier;
@@ -173,7 +174,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
         this.checkBlockSuppliers();
 
-        this.blocksSupplier = new CapturedBlocksSupplier();
+        this.blocksSupplier = new BlockPosMultiMap();
         this.blockItemEntityDropsSupplier = new BlockItemEntityDropsSupplier();
         this.blockItemDropsSupplier = new BlockItemDropsSupplier();
         this.blockEntitySpawnSupplier = new CapturedBlockEntitySpawnSupplier();
@@ -414,14 +415,21 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         return this.capturedItemsSupplier;
     }
 
-    public List<BlockSnapshot> getCapturedBlocks() throws IllegalStateException {
+    /**
+     * Gets the {@link List} of the <b>first</b> {@link BlockSnapshot}s that originally
+     * existed at their set {@link BlockPos block position} such that this list is not
+     * self updating and a copy of the parsed list. The reason for
+     * @return
+     * @throws IllegalStateException
+     */
+    public List<SpongeBlockSnapshot> getCapturedBlocks() throws IllegalStateException {
         if (this.blocksSupplier == null) {
             throw TrackingUtil.throwWithContext("Expected to be capturing blocks, but we're not capturing them!", this).get();
         }
-        return this.blocksSupplier.get();
+        return this.blocksSupplier.orEmptyList();
     }
 
-    public CapturedSupplier<BlockSnapshot> getCapturedBlockSupplier() throws IllegalStateException {
+    public BlockPosMultiMap getCapturedBlockSupplier() throws IllegalStateException {
         if (this.blocksSupplier == null) {
             throw TrackingUtil.throwWithContext("Expected to be capturing blocks, but we're not capturing them!", this).get();
         }
