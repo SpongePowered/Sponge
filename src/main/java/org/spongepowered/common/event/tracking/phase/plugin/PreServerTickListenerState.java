@@ -46,9 +46,9 @@ final class PreServerTickListenerState extends ListenerPhaseState {
         final Object listener = phaseContext.getSource(Object.class)
             .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a ServerTickEvent listener!", phaseContext));
 
-        phaseContext.getCapturedBlockSupplier().acceptAndClearIfNotEmpty(blocks -> {
-            TrackingUtil.processBlockCaptures(blocks, this, phaseContext);
-        });
+        // TODO - Determine if we need to pass the supplier or perform some parameterized
+        //  process if not empty method on the capture object.
+        TrackingUtil.processBlockCaptures(phaseContext.getCapturedBlockSupplier(), this, phaseContext);
     }
 
     @Override

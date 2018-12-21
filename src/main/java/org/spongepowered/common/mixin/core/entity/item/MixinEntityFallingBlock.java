@@ -31,9 +31,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 import org.spongepowered.api.entity.FallingBlock;
-import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -78,7 +76,7 @@ public abstract class MixinEntityFallingBlock extends MixinEntity implements Fal
         final PhaseData currentPhaseData = PhaseTracker.getInstance().getCurrentPhaseData();
         this.world.setBlockToAir(pos);
         // By this point, we should have one captured block at least.
-        if (!TrackingUtil.processBlockCaptures(currentPhaseData.context.getCapturedBlocks(), currentPhaseData.state, currentPhaseData.context)) {
+        if (!TrackingUtil.processBlockCaptures(currentPhaseData.context.getCapturedBlockSupplier(), currentPhaseData.state, currentPhaseData.context)) {
             // So, it's been cancelled, we want to absolutely remove this entity.
             // And we want to stop the entity update at this point.
             this.setDead();

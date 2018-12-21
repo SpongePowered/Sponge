@@ -91,11 +91,9 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
         final Location<World> worldLocation = blockSnapshot.getLocation().get();
         final IMixinWorldServer mixinWorld = ((IMixinWorldServer) worldLocation.getExtent());
 
-        context.getCapturedBlockSupplier()
-            .acceptAndClearIfNotEmpty(blocks -> {
-                TrackingUtil.processBlockCaptures(blocks, this, context);
-                Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-            });
+        // TODO - Determine if we need to pass the supplier or perform some parameterized
+        //  process if not empty method on the capture object.
+        TrackingUtil.processBlockCaptures(context.getCapturedBlockSupplier(), this, context);
         context.getCapturedItemStackSupplier()
             .acceptAndClearIfNotEmpty(drops -> {
                 final List<EntityItem> items = drops.stream()

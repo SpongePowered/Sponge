@@ -136,8 +136,9 @@ final class EntityDeathState extends EntityPhaseState<EntityDeathContext> {
         // Note that this is only used if and when item pre-merging is enabled. Which is never enabled in forge.
         EntityDropPhaseState.processPerItemDrop(context, dyingEntity, isPlayer, entityPlayer);
 
-        context.getCapturedBlockSupplier()
-            .acceptAndClearIfNotEmpty(snapshots -> TrackingUtil.processBlockCaptures(snapshots, this, context));
+        // TODO - Determine if we need to pass the supplier or perform some parameterized
+        //  process if not empty method on the capture object.
+        TrackingUtil.processBlockCaptures(context.getCapturedBlockSupplier(), this, context);
 
     }
 

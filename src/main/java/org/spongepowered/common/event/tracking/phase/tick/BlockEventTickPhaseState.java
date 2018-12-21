@@ -111,8 +111,9 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
     public void unwind(BlockEventTickContext context) {
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.CUSTOM);
-            context.getCapturedBlockSupplier()
-                    .acceptAndClearIfNotEmpty(blockSnapshots -> TrackingUtil.processBlockCaptures(blockSnapshots, this, context));
+            // TODO - Determine if we need to pass the supplier or perform some parameterized
+            //  process if not empty method on the capture object.
+            TrackingUtil.processBlockCaptures(context.getCapturedBlockSupplier(), this, context);
             context.getCapturedItemsSupplier()
                     .acceptAndClearIfNotEmpty(items -> {
                         final ArrayList<Entity> capturedEntities = new ArrayList<>();

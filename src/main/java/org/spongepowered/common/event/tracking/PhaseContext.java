@@ -119,7 +119,6 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     // General
     @Nullable protected User owner;
     @Nullable protected User notifier;
-    private boolean processImmediately;
     private boolean allowsBlockEvents = true; // Defaults to allow block events
     private boolean allowsEntityEvents = true;
     private boolean allowsBulkBlockCaptures = true; // Defaults to allow block captures
@@ -321,15 +320,6 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         return supplier != null && !supplier.isEmpty();
     }
 
-
-    public boolean shouldProcessImmediately() {
-        return this.processImmediately;
-    }
-
-    public void setProcessImmediately(boolean state) {
-        this.processImmediately = state;
-    }
-
     @SuppressWarnings("unchecked")
     public <T> Optional<T> getSource(Class<T> sourceClass) {
         if (this.source == null) {
@@ -422,7 +412,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
      * @return
      * @throws IllegalStateException
      */
-    public List<SpongeBlockSnapshot> getCapturedBlocks() throws IllegalStateException {
+    public List<SpongeBlockSnapshot> getCapturedOriginalBlocksChanged() throws IllegalStateException {
         if (this.blocksSupplier == null) {
             throw TrackingUtil.throwWithContext("Expected to be capturing blocks, but we're not capturing them!", this).get();
         }
@@ -600,10 +590,6 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         }
     }
 
-
-    public List<BlockSnapshot> getCapturedBlocksOrEmptyList() {
-        return this.blocksSupplier != null ? this.blocksSupplier.orEmptyList() : Collections.emptyList();
-    }
 
     public List<Entity> getCapturedEntitiesOrEmptyList() {
         return this.capturedEntitiesSupplier != null ? this.capturedEntitiesSupplier.orEmptyList() : Collections.emptyList();

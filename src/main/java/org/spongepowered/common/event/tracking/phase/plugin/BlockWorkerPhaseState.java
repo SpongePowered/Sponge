@@ -42,10 +42,9 @@ public class BlockWorkerPhaseState extends BasicPluginState {
         phaseContext.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(items -> {
 
         });
-        phaseContext.getCapturedBlockSupplier()
-            .acceptAndClearIfNotEmpty(snapshots ->
-                TrackingUtil.processBlockCaptures(snapshots, this, phaseContext)
-            );
+        // TODO - Determine if we need to pass the supplier or perform some parameterized
+        //  process if not empty method on the capture object.
+        TrackingUtil.processBlockCaptures(phaseContext.getCapturedBlockSupplier(), this, phaseContext);
     }
 
     @Override

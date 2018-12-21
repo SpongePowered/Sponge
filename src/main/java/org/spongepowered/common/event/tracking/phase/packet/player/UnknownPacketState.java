@@ -72,7 +72,9 @@ public final class UnknownPacketState extends BasicPacketState {
         try (CauseStackManager.StackFrame frame1 = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame1.pushCause(player);
             frame1.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
-            context.getCapturedBlockSupplier().acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
+            // TODO - Determine if we need to pass the supplier or perform some parameterized
+            //  process if not empty method on the capture object.
+            TrackingUtil.processBlockCaptures(context.getCapturedBlockSupplier(), this, context);
             context.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> {
                 SpongeCommonEventFactory.callSpawnEntity(entities, context);
             });

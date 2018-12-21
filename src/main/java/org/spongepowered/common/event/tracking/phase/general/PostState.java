@@ -30,13 +30,14 @@ import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.context.CapturedSupplier;
+import org.spongepowered.common.event.tracking.context.BlockPosMultiMap;
 import org.spongepowered.common.world.BlockChange;
 
 import java.util.ArrayList;
@@ -49,7 +50,7 @@ public final class PostState extends GeneralState<UnwindingPhaseContext> {
 
     @SuppressWarnings("unchecked")
     private static void postBlockAddedSpawns(UnwindingPhaseContext postContext, IPhaseState<?> unwindingState, PhaseContext<?> unwindingPhaseContext,
-        CapturedSupplier<BlockSnapshot> capturedBlockSupplier, int depth) {
+        BlockPosMultiMap capturedBlockSupplier, int depth) {
         if (PhaseTracker.checkMaxBlockProcessingDepth(GeneralPhase.Post.UNWINDING, postContext, depth)) {
             return;
         }
@@ -58,10 +59,7 @@ public final class PostState extends GeneralState<UnwindingPhaseContext> {
             final ArrayList<Entity> capturedEntities = new ArrayList<>(entities);
             ((IPhaseState) unwindingState).postProcessSpawns(unwindingPhaseContext, capturedEntities);
         });
-        capturedBlockSupplier.acceptAndClearIfNotEmpty(blocks -> {
-            final List<BlockSnapshot> blockSnapshots = new ArrayList<>(blocks);
-            TrackingUtil.processBlockCaptures(blockSnapshots, GeneralPhase.Post.UNWINDING, postContext, depth);
-        });
+        TrackingUtil.processBlockCaptures(capturedBlockSupplier, GeneralPhase.Post.UNWINDING, postContext, depth);
     }
 
     @Override
@@ -161,16 +159,13 @@ public final class PostState extends GeneralState<UnwindingPhaseContext> {
      */
     @SuppressWarnings("unchecked")
     private void postDispatch(IPhaseState<?> unwindingState, PhaseContext<?> unwindingContext, UnwindingPhaseContext postContext) {
-        final List<BlockSnapshot> contextBlocks = postContext.getCapturedBlocksOrEmptyList();
         final List<Entity> contextEntities = postContext.getCapturedEntitiesOrEmptyList();
         final List<Entity> contextItems = (List<Entity>) (List<?>) postContext.getCapturedItemsOrEmptyList();
-        if (contextBlocks.isEmpty() && contextEntities.isEmpty() && contextItems.isEmpty()) {
+        if (postContext.getCapturedBlockSupplier().isEmpty() && contextEntities.isEmpty() && contextItems.isEmpty()) {
             return;
         }
-        if (!contextBlocks.isEmpty()) {
-            final List<BlockSnapshot> blockSnapshots = new ArrayList<>(contextBlocks);
-            contextBlocks.clear();
-            TrackingUtil.processBlockCaptures(blockSnapshots, this, postContext);
+        if (!postContext.getCapturedBlockSupplier().isEmpty()) {
+            TrackingUtil.processBlockCaptures(postContext.getCapturedBlockSupplier(), this, postContext);
         }
         if (!contextEntities.isEmpty()) {
             final ArrayList<Entity> entities = new ArrayList<>(contextEntities);
@@ -206,12 +201,8 @@ public final class PostState extends GeneralState<UnwindingPhaseContext> {
             return;
         }
         context.setBulkBlockCaptures(false);
-        final CapturedSupplier<BlockSnapshot> capturedBlockSupplier = context.getCapturedBlockSupplier();
-        capturedBlockSupplier.acceptAndClearIfNotEmpty(blocks -> {
-            final List<BlockSnapshot> blockSnapshots = new ArrayList<>(blocks);
-            blocks.clear();
-            TrackingUtil.processBlockCaptures(blockSnapshots, this, context, depth);
-        });
+        TrackingUtil.processBlockCaptures(context.getCapturedBlockSupplier(), this, context, depth);
+
     }
 
     @Override

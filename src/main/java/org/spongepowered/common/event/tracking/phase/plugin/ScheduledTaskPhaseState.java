@@ -48,8 +48,8 @@ public class ScheduledTaskPhaseState extends BasicPluginState {
 
     @Override
     public void unwind(BasicPluginContext phaseContext) {
-        phaseContext.getCapturedBlockSupplier().acceptAndClearIfNotEmpty(blocks -> {
-            TrackingUtil.processBlockCaptures(blocks, this, phaseContext);
-        });
+        // TODO - Determine if we need to pass the supplier or perform some parameterized
+        //  process if not empty method on the capture object.
+        TrackingUtil.processBlockCaptures(phaseContext.getCapturedBlockSupplier(), this, phaseContext);
     }
 }

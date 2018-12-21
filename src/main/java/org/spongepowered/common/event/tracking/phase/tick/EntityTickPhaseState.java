@@ -45,6 +45,7 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
+import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -55,7 +56,6 @@ import org.spongepowered.common.world.BlockChange;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
@@ -98,12 +98,11 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
         phaseContext.addNotifierAndOwnerToCauseStack(frame);
         // If we're doing bulk captures for blocks, go ahead and do them. otherwise continue with entity checks
         if (phaseContext.allowsBulkBlockCaptures()) {
-            phaseContext.getCapturedBlockSupplier()
-                .acceptAndClearIfNotEmpty(blockSnapshots -> {
-                    if (!TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext)) {
-                        EntityUtil.toMixin(tickingEntity).onCancelledBlockChange(phaseContext);
-                    }
-                });
+            // TODO - Determine if we need to pass the supplier or perform some parameterized
+            //  process if not empty method on the capture object.
+            if (!TrackingUtil.processBlockCaptures(phaseContext.getCapturedBlockSupplier(), this, phaseContext)) {
+                EntityUtil.toMixin(tickingEntity).onCancelledBlockChange(phaseContext);
+            }
         }
         // And finally, if we're not capturing entities, there's nothing left for us to do.
         if (!phaseContext.allowsBulkEntityCaptures()) {
@@ -170,9 +169,9 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
         // Would depend on whether entity captures are done.
         phaseContext.getBlockItemDropSupplier()
             .acceptAndClearIfNotEmpty(map -> {
-                final List<BlockSnapshot> capturedBlocks = phaseContext.getCapturedBlocks();
-                for (BlockSnapshot snapshot : capturedBlocks) {
-                    final BlockPos blockPos = VecHelper.toBlockPos(snapshot.getLocation().get());
+                final List<SpongeBlockSnapshot> capturedBlocks = phaseContext.getCapturedOriginalBlocksChanged();
+                for (SpongeBlockSnapshot snapshot : capturedBlocks) {
+                    final BlockPos blockPos = snapshot.getBlockPos();
                     final Collection<EntityItem> entityItems = map.get(blockPos);
                     if (!entityItems.isEmpty()) {
                         frame.pushCause(snapshot);

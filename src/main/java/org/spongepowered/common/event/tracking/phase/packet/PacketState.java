@@ -92,8 +92,9 @@ public abstract class PacketState<P extends PacketContext<P>> implements IPhaseS
 
     @Override
     public void unwind(P phaseContext) {
-        phaseContext.getCapturedBlockSupplier()
-                .acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, phaseContext));
+        // TODO - Determine if we need to pass the supplier or perform some parameterized
+        //  process if not empty method on the capture object.
+        TrackingUtil.processBlockCaptures(phaseContext.getCapturedBlockSupplier(), this, phaseContext);
     }
 
     public boolean matches(int packetState) {

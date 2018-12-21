@@ -95,8 +95,9 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
 
     @Override
     public void unwind(ExplosionContext context) {
-        context.getCapturedBlockSupplier()
-            .acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
+        // TODO - Determine if we need to pass the supplier or perform some parameterized
+        //  process if not empty method on the capture object.
+        TrackingUtil.processBlockCaptures(context.getCapturedBlockSupplier(), this, context);
         context.getCapturedEntitySupplier()
             .acceptAndClearIfNotEmpty(entities -> {
                 try (CauseStackManager.StackFrame smaller = Sponge.getCauseStackManager().pushCauseFrame()) {

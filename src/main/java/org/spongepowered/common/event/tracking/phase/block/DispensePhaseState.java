@@ -48,8 +48,9 @@ final class DispensePhaseState extends BlockPhaseState {
 
     @Override
     public void unwind(GeneralizedContext phaseContext) {
-        phaseContext.getCapturedBlockSupplier()
-            .acceptAndClearIfNotEmpty(blockSnapshots -> TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext));
+        // TODO - Determine if we need to pass the supplier or perform some parameterized
+        //  process if not empty method on the capture object.
+        TrackingUtil.processBlockCaptures(phaseContext.getCapturedBlockSupplier(), this, phaseContext);
         phaseContext.getCapturedItemsSupplier()
             .acceptAndClearIfNotEmpty(items -> {
                 Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DISPENSE);

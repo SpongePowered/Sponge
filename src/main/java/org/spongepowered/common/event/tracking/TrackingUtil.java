@@ -74,6 +74,7 @@ import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.context.BlockPosMultiMap;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.tick.BlockTickContext;
@@ -347,15 +348,14 @@ public final class TrackingUtil {
         if (((IPhaseState) phaseState).shouldCaptureBlockChangeOrSkip(phaseContext, pos)) {
             //final IBlockState actualState = currentState.getActualState(world, pos);
             originalBlockSnapshot = mixinWorld.createSpongeBlockSnapshot(currentState, currentState, pos, flags);
-            final List<BlockSnapshot> capturedSnapshots = phaseContext.getCapturedBlocks();
             final Block newBlock = newState.getBlock();
 
             associateBlockChangeWithSnapshot(phaseState, newBlock, currentState, originalBlockSnapshot);
-            capturedSnapshots.add(originalBlockSnapshot);
+            phaseContext.getCapturedBlockSupplier().put(originalBlockSnapshot, newState);
             final IMixinChunk mixinChunk = (IMixinChunk) chunk;
             final IBlockState originalBlockState = mixinChunk.setBlockState(pos, newState, currentState, originalBlockSnapshot, BlockChangeFlags.ALL);
             if (originalBlockState == null) {
-                capturedSnapshots.remove(originalBlockSnapshot);
+                phaseContext.getCapturedBlockSupplier().prune(originalBlockSnapshot);
                 return false;
             }
             ((IPhaseState) phaseState).postTrackBlock(originalBlockSnapshot, phaseContext);
@@ -438,8 +438,8 @@ public final class TrackingUtil {
         };
     }
 
-    public static boolean processBlockCaptures(List<BlockSnapshot> snapshots, IPhaseState<?> state, PhaseContext<?> context) {
-        return processBlockCaptures(snapshots, state, context, 0);
+    public static boolean processBlockCaptures(BlockPosMultiMap capturedBlocks, IPhaseState<?> state, PhaseContext<?> context) {
+        return processBlockCaptures(capturedBlocks, state, context, 0);
     }
 
     /**
@@ -456,7 +456,7 @@ public final class TrackingUtil {
      * @return True if no events or transactions were cancelled
      */
     @SuppressWarnings({"unchecked", "ConstantConditions", "rawtypes"})
-    public static boolean processBlockCaptures(List<BlockSnapshot> snapshots, IPhaseState<?> state, PhaseContext<?> context, int currentDepth) {
+    public static boolean processBlockCaptures(BlockPosMultiMap snapshots, IPhaseState<?> state, PhaseContext<?> context, int currentDepth) {
         if (snapshots.isEmpty()) {
             return false;
         }
@@ -468,10 +468,10 @@ public final class TrackingUtil {
             transactionBuilders[i] = new ImmutableList.Builder<>();
         }
 
-        createTransactionLists(snapshots, transactionArrays, transactionBuilders);
+        createTransactionLists(snapshots.orEmptyList(), transactionArrays, transactionBuilders);
 
         // Clear captured snapshots after processing them
-        context.getCapturedBlocksOrEmptyList().clear();
+        context.getCapturedOriginalBlocksChanged().clear();
 
         final ChangeBlockEvent[] mainEvents = new ChangeBlockEvent[BlockChange.values().length];
         // This likely needs to delegate to the phase in the event we don't use the source object as the main object causing the block changes
@@ -513,7 +513,7 @@ public final class TrackingUtil {
         }
     }
 
-    private static void createTransactionLists(List<BlockSnapshot> snapshots, ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays,
+    private static void createTransactionLists(List<? extends BlockSnapshot> snapshots, ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays,
         ImmutableList.Builder<Transaction<BlockSnapshot>>[] transactionBuilders) {
         for (BlockSnapshot snapshot : snapshots) {
             // This processes each snapshot to assign them to the correct event in the next area, with the

@@ -115,8 +115,9 @@ public final class AttackEntityPacketState extends BasicPacketState {
                 printer.add(new Exception("Stack trace"));
                 printer.trace(System.err, SpongeImpl.getLogger(), Level.TRACE);
             });
-        context.getCapturedBlockSupplier()
-            .acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
+        // TODO - Determine if we need to pass the supplier or perform some parameterized
+        //  process if not empty method on the capture object.
+        TrackingUtil.processBlockCaptures(context.getCapturedBlockSupplier(), this, context);
         context.getPerEntityItemDropSupplier().acceptAndClearIfNotEmpty(map -> {
             for (Map.Entry<UUID, Collection<ItemDropData>> entry : map.asMap().entrySet()) {
                 final UUID key = entry.getKey();

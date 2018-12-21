@@ -47,9 +47,9 @@ final class EventListenerPhaseState extends ListenerPhaseState {
 
     @Override
     public void unwind(ListenerPhaseContext phaseContext) {
-        phaseContext.getCapturedBlockSupplier().acceptAndClearIfNotEmpty(blocks -> {
-            TrackingUtil.processBlockCaptures(blocks, this, phaseContext);
-        });
+        // TODO - Determine if we need to pass the supplier or perform some parameterized
+        //  process if not empty method on the capture object.
+        TrackingUtil.processBlockCaptures(phaseContext.getCapturedBlockSupplier(), this, phaseContext);
 
         // TODO - determine if entities are needed to be captured.
         phaseContext.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities ->  {

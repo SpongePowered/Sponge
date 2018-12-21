@@ -101,8 +101,9 @@ public final class CloseWindowState extends BasicPacketState {
                 }
             });
         }
-        context.getCapturedBlockSupplier()
-            .acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
+        // TODO - Determine if we need to pass the supplier or perform some parameterized
+        //  process if not empty method on the capture object.
+        TrackingUtil.processBlockCaptures(context.getCapturedBlockSupplier(), this, context);
 
     }
 

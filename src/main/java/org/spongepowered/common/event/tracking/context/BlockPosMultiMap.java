@@ -26,16 +26,20 @@ package org.spongepowered.common.event.tracking.context;
 
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
+import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
+import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.world.BlockChange;
@@ -165,19 +169,41 @@ public final class BlockPosMultiMap implements ICaptureSupplier {
     }
 
     /**
-     * Gets a copied {@link List} of the first {@link BlockSnapshot}s for each
-     * {@link BlockPos} changed. The nature of this is that each individual
-     * {@link BlockPos} being changed will have an "original" snapshot to compare
-     * to what currently exists within a {@link World}. This list is intended not
-     * to be added to and will result in unmodifiable exceptions.
-     * @return
+     * Gets an <b>unmodifiable</b> {@link List} of the original
+     * {@link BlockSnapshot}s being changed for their respective
+     * {@link BlockPos Block Positions}. The list is self updating
+     * and the {@link BlockSnapshot}s themselves are self updating
+     * based on the current processes within the PhaseTracker's
+     * {@link IPhaseState} the game is processing. The reasons for
+     * this list to be unmodifiable except by this object are as follows:
+     * <ul>
+     *     <li>Submitted {@link BlockSnapshot}s are to be added by the
+     *     {@link #put(BlockSnapshot, IBlockState)} method.</li>
+     *     <li>Adding multiple {@link BlockSnapshot}s per {@link BlockPos}
+     *     results in an internal restructuring of storage such that a
+     *     {@link Multimap} is created to keep track of intermediary
+     *     {@link BlockSnapshot}s. By this nature, the list cannot be modified
+     *     except by this capture object.</li>
+     *     <li>Removing a {@link BlockSnapshot} is only applicable via
+     *     {@link #prune(BlockSnapshot)} or {@link #clear()}. This is to
+     *     allow sanity checking for multimap purposes and garbage cleanup
+     *     when necessary.</li>
+     *     <li>The creation of {@link ChangeBlockEvent}s requires a
+     *     {@link Transaction} to be created, and plugins are only
+     *     exposed the {@link Transaction#getOriginal()} as the first
+     *     {@link BlockSnapshot} that would exist in this list. Intermediary
+     *     {@link BlockSnapshot} changes for that postiion are internally
+     *     utilized to process physics, but are not exposed to the event.</li>
+     * </ul>
+     *
+     * @return An unmodifiable list of first block originals being changed
      */
     public final List<SpongeBlockSnapshot> get() {
         return Collections.unmodifiableList(this.snapshots == null ? Collections.emptyList() : this.snapshots);
     }
 
     public final void prune(BlockSnapshot snapshot) {
-
+        // TODO - We need to not only prune the snapshot from the list of snapshots, but may also need to revert the multimap usage.
     }
 
     /**
@@ -187,7 +213,7 @@ public final class BlockPosMultiMap implements ICaptureSupplier {
      */
     @Override
     public final boolean isEmpty() {
-        return this.multimap == null || this.multimap.isEmpty();
+        return this.snapshots != null && !this.snapshots.isEmpty();
     }
 
     /**
@@ -242,7 +268,7 @@ public final class BlockPosMultiMap implements ICaptureSupplier {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(this.multimap);
+        return Objects.hashCode(this.snapshots);
     }
 
     @Override
@@ -265,4 +291,27 @@ public final class BlockPosMultiMap implements ICaptureSupplier {
             .toString();
     }
 
+    public void clear() {
+        this.hasMulti = false;
+        if (this.multimap != null) {
+            this.multimap.clear();
+            this.multimap = null;
+        }
+        if (this.snapshots != null) {
+            this.snapshots.clear();
+            this.snapshots = null;
+        }
+        if (this.usedBlocks != null) {
+            this.usedBlocks.clear();
+        }
+    }
+
+    public void restoreOriginals() {
+        if (this.snapshots != null && !this.snapshots.isEmpty()) {
+            for (SpongeBlockSnapshot original : Lists.reverse(this.snapshots)) {
+                original.restore(true, BlockChangeFlags.NONE);
+            }
+            this.clear();
+        }
+    }
 }

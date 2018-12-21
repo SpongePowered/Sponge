@@ -77,9 +77,9 @@ final class BlockDecayPhaseState extends BlockPhaseState {
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over at a location!", context));
         final Location<World> worldLocation = locatable.getLocation();
         final IMixinWorldServer mixinWorld = ((IMixinWorldServer) worldLocation.getExtent());
-
-        context.getCapturedBlockSupplier()
-            .acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
+        // TODO - Determine if we need to pass the supplier or perform some parameterized
+        //  process if not empty method on the capture object.
+        TrackingUtil.processBlockCaptures(context.getCapturedBlockSupplier(), this, context);
 
         context.getCapturedItemsSupplier()
             .acceptAndClearIfNotEmpty(items -> {

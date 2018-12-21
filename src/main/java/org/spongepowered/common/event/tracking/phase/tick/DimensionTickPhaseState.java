@@ -59,10 +59,9 @@ class DimensionTickPhaseState extends TickPhaseState<DimensionContext> {
     public void unwind(DimensionContext phaseContext) {
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
-            phaseContext.getCapturedBlockSupplier()
-                    .acceptAndClearIfNotEmpty(blockSnapshots ->
-                        TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext)
-                    );
+            // TODO - Determine if we need to pass the supplier or perform some parameterized
+            //  process if not empty method on the capture object.
+            TrackingUtil.processBlockCaptures(phaseContext.getCapturedBlockSupplier(), this, phaseContext);
     
             phaseContext.getCapturedEntitySupplier()
                     .acceptAndClearIfNotEmpty(entities ->

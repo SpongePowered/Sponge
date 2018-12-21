@@ -125,19 +125,17 @@ public final class PlaceBlockPacketState extends BasicPacketState {
                     SpongeCommonEventFactory.callSpawnEntity(entities, context);
                 }
             });
-        context.getCapturedBlockSupplier()
-            .acceptAndClearIfNotEmpty(
-                originalBlocks -> {
-                    try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                        frame.pushCause(player);
-                        boolean success = TrackingUtil.processBlockCaptures(originalBlocks, this, context);
-                        if (!success && snapshot != ItemTypeRegistryModule.NONE_SNAPSHOT) {
-                            frame.pushCause(player);
-                            EnumHand hand = ((CPacketPlayerTryUseItemOnBlock) packet).getHand();
-                            PacketPhaseUtil.handlePlayerSlotRestore(player, (net.minecraft.item.ItemStack) itemStack, hand);
-                        }
-                    }
-                });
+        if (!context.getCapturedBlockSupplier().isEmpty()) {
+            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                frame.pushCause(player);
+                if (!TrackingUtil.processBlockCaptures(context.getCapturedBlockSupplier(), this, context) && snapshot != ItemTypeRegistryModule.NONE_SNAPSHOT) {
+                    frame.pushCause(player);
+                    EnumHand hand = ((CPacketPlayerTryUseItemOnBlock) packet).getHand();
+                    PacketPhaseUtil.handlePlayerSlotRestore(player, ItemStackUtil.toNative(itemStack), hand);
+
+                }
+            }
+        }
         context.getCapturedItemStackSupplier().acceptAndClearIfNotEmpty(drops -> {
             final List<Entity> entities =
                 drops.stream().map(drop -> drop.create(player.getServerWorld())).map(EntityUtil::fromNative)
