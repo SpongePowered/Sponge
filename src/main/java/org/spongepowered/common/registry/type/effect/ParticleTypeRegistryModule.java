@@ -47,24 +47,22 @@ import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.effect.particle.SpongeParticleType;
 import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
-import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
+import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
 import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 import org.spongepowered.common.registry.type.NotePitchRegistryModule;
 import org.spongepowered.common.registry.type.item.FireworkShapeRegistryModule;
 
-import java.util.Collections;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 import javax.annotation.Nullable;
 
 @RegisterCatalog(ParticleTypes.class)
 @RegistrationDependency({ ParticleOptionRegistryModule.class, NotePitchRegistryModule.class, BlockTypeRegistryModule.class,
         ItemTypeRegistryModule.class, PotionEffectTypeRegistryModule.class, FireworkShapeRegistryModule.class })
-public final class ParticleRegistryModule extends AbstractCatalogRegistryModule<ParticleType> implements CatalogRegistryModule<ParticleType> {
+public final class ParticleTypeRegistryModule extends AbstractPrefixAlternateCatalogTypeRegistryModule<ParticleType> implements CatalogRegistryModule<ParticleType> {
 
-    public static ParticleRegistryModule getInstance() {
+    public static ParticleTypeRegistryModule getInstance() {
         return Holder.INSTANCE;
     }
 
@@ -176,10 +174,11 @@ public final class ParticleRegistryModule extends AbstractCatalogRegistryModule<
         this.particleByName.put(particleType.getKey().toString().toLowerCase(Locale.ENGLISH), particleType);
     }
 
-    ParticleRegistryModule() {
+    ParticleTypeRegistryModule() {
+        super("minecraft");
     }
 
     private static class Holder {
-        static final ParticleRegistryModule INSTANCE = new ParticleRegistryModule();
+        static final ParticleTypeRegistryModule INSTANCE = new ParticleTypeRegistryModule();
     }
 }

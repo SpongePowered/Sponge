@@ -245,7 +245,7 @@ import org.spongepowered.common.registry.type.data.InstrumentTypeRegistryModule;
 import org.spongepowered.common.registry.type.data.KeyRegistryModule;
 import org.spongepowered.common.registry.type.economy.TransactionTypeRegistryModule;
 import org.spongepowered.common.registry.type.effect.ParticleOptionRegistryModule;
-import org.spongepowered.common.registry.type.effect.ParticleRegistryModule;
+import org.spongepowered.common.registry.type.effect.ParticleTypeRegistryModule;
 import org.spongepowered.common.registry.type.effect.PotionEffectTypeRegistryModule;
 import org.spongepowered.common.registry.type.effect.RecordTypeRegistryModule;
 import org.spongepowered.common.registry.type.effect.SoundCategoryRegistryModule;
@@ -514,7 +514,7 @@ public final class CommonModuleRegistry {
             .registerModule(ObjectiveDisplayMode.class, new ObjectiveDisplayModeRegistryModule())
             .registerModule(OcelotType.class, new OcelotTypeRegistryModule())
             .registerModule(ParrotVariant.class, new ParrotVariantRegistryModule())
-            .registerModule(ParticleType.class, ParticleRegistryModule.getInstance())
+            .registerModule(ParticleType.class, ParticleTypeRegistryModule.getInstance())
             .registerModule((Class<ParticleOption<?>>) (Class<?>) ParticleOption.class, new ParticleOptionRegistryModule())
             .registerModule(PistonType.class, new PistonTypeRegistryModule())
             .registerModule(PlantType.class, new PlantTypeModuleRegistry())
