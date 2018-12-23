@@ -41,13 +41,13 @@ import org.spongepowered.api.effect.potion.PotionEffectTypes;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.FireworkShapes;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.effect.particle.SpongeParticleType;
 import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
+import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
 import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 import org.spongepowered.common.registry.type.NotePitchRegistryModule;
@@ -63,9 +63,10 @@ import javax.annotation.Nullable;
 
 @RegistrationDependency({ ParticleOptionRegistryModule.class, NotePitchRegistryModule.class, BlockTypeRegistryModule.class,
         ItemTypeRegistryModule.class, PotionEffectTypeRegistryModule.class, FireworkShapeRegistryModule.class })
-public final class ParticleRegistryModule implements CatalogRegistryModule<ParticleType> {
+public final class ParticleTypeRegistryModule extends
+    AbstractPrefixAlternateCatalogTypeRegistryModule<ParticleType> {
 
-    public static ParticleRegistryModule getInstance() {
+    public static ParticleTypeRegistryModule getInstance() {
         return Holder.INSTANCE;
     }
 
@@ -76,7 +77,7 @@ public final class ParticleRegistryModule implements CatalogRegistryModule<Parti
 
     @Override
     public Optional<ParticleType> getById(String id) {
-        return Optional.ofNullable(this.particleByName.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
+        return Optional.ofNullable(this.particleByName.get(defaultModIdToPrepend + ":" + checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
@@ -189,10 +190,11 @@ public final class ParticleRegistryModule implements CatalogRegistryModule<Parti
         this.particleByName.put(particleType.getId().toLowerCase(Locale.ENGLISH), particleType);
     }
 
-    private ParticleRegistryModule() {
+    private ParticleTypeRegistryModule() {
+        super("minecraft");
     }
 
     private static class Holder {
-        static final ParticleRegistryModule INSTANCE = new ParticleRegistryModule();
+        static final ParticleTypeRegistryModule INSTANCE = new ParticleTypeRegistryModule();
     }
 }
