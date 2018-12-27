@@ -923,15 +923,15 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                 IMixinInventoryPlayer inventory = (IMixinInventoryPlayer) ((EntityPlayerMP) entity).inventory;
                 PlayerInventoryLens inventoryLens = (PlayerInventoryLens) inventory.getRootLens();
                 switch (entityEquipmentSlot) {
-                case OFFHAND:
-                    slotLens = inventoryLens.getOffhandLens();
-                    break;
-                case MAINHAND:
-                    HotbarLens hotbarLens = inventoryLens.getMainLens().getHotbar();
-                    slotLens = hotbarLens.getSlot(hotbarLens.getSelectedSlotIndex(inventory.getFabric()));
-                    break;
-                default:
-                    slotLens = inventoryLens.getEquipmentLens().getSlot(entityEquipmentSlot.getIndex());
+                    case OFFHAND:
+                        slotLens = inventoryLens.getOffhandLens();
+                        break;
+                    case MAINHAND:
+                        HotbarLens hotbarLens = inventoryLens.getMainLens().getHotbar();
+                        slotLens = hotbarLens.getSlot(hotbarLens.getSelectedSlotIndex(inventory.getFabric()));
+                        break;
+                    default:
+                        slotLens = inventoryLens.getEquipmentLens().getSlot(entityEquipmentSlot.getIndex());
                 }
                 slotAdapter = slotLens.getAdapter(inventory.getFabric(), inventory);
             } else {
