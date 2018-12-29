@@ -63,10 +63,12 @@ import org.spongepowered.api.data.value.OptionalValue;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.Living;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.damage.DamageFunction;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
 import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;
@@ -1070,15 +1072,18 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             return;
         }
 
-        Sponge.getCauseStackManager().pushCause(this);
-        UseItemStackEvent.Start event = SpongeEventFactory.createUseItemStackEventStart(Sponge.getCauseStackManager().getCurrentCause(),
-                stack.getUseDuration(), stack.getUseDuration(), ItemStackUtil.snapshotOf(stack));
+        UseItemStackEvent.Start event;
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            this.addSelfToFrame(frame);
+            event = SpongeEventFactory.createUseItemStackEventStart(Sponge.getCauseStackManager().getCurrentCause(),
+                    stack.getUseDuration(), stack.getUseDuration(), ItemStackUtil.snapshotOf(stack));
+        }
+
         if (SpongeImpl.postEvent(event)) {
             ci.cancel();
         } else {
             this.activeItemStackUseCount = event.getRemainingDuration();
         }
-        Sponge.getCauseStackManager().popCause();
     }
 
     @Redirect(method = "setActiveHand", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/EntityLivingBase;activeItemStackUseCount:I"))
@@ -1089,6 +1094,17 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         // If we're on the server, do nothing, since we already set this field on onSetActiveItemStack
     }
 
+    // A helper method for firing UseItemStackEvent sub-events
+    // This ensures that the cause and context for these events
+    // always have OWNER and NOTIFIER set (if possible)
+    private void addSelfToFrame(CauseStackManager.StackFrame frame) {
+        frame.pushCause(this);
+        if (this instanceof User) {
+            frame.addContext(EventContextKeys.OWNER, (User) this);
+            frame.addContext(EventContextKeys.NOTIFIER, (User) this);
+        }
+    }
+
     @Redirect(method = "updateActiveHand",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;getItemInUseCount()I", ordinal = 0))
     private int onGetRemainingItemDuration(EntityLivingBase self) {
@@ -1096,11 +1112,13 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             return self.getItemInUseCount();
         }
 
-        Sponge.getCauseStackManager().pushCause(this);
-        UseItemStackEvent.Tick event = SpongeEventFactory.createUseItemStackEventTick(Sponge.getCauseStackManager().getCurrentCause(),
-                this.activeItemStackUseCount, this.activeItemStackUseCount, ItemStackUtil.snapshotOf(this.activeItemStack));
-        SpongeImpl.postEvent(event);
-        Sponge.getCauseStackManager().popCause();
+        UseItemStackEvent.Tick event;
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            this.addSelfToFrame(frame);
+            event = SpongeEventFactory.createUseItemStackEventTick(Sponge.getCauseStackManager().getCurrentCause(),
+                    this.activeItemStackUseCount, this.activeItemStackUseCount, ItemStackUtil.snapshotOf(this.activeItemStack));
+            SpongeImpl.postEvent(event);
+        }
         // Because the item usage will only finish if activeItemStackUseCount == 0 and decrements it first, it should be >= 1
         this.activeItemStackUseCount = Math.max(event.getRemainingDuration(), 1);
 
@@ -1121,11 +1139,14 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             return;
         }
 
-        Sponge.getCauseStackManager().pushCause(this);
-        UseItemStackEvent.Finish event = SpongeEventFactory.createUseItemStackEventFinish(Sponge.getCauseStackManager().getCurrentCause(),
-                this.activeItemStackUseCount, this.activeItemStackUseCount, ItemStackUtil.snapshotOf(this.activeItemStack));
+
+        UseItemStackEvent.Finish event;
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            this.addSelfToFrame(frame);
+            event = SpongeEventFactory.createUseItemStackEventFinish(Sponge.getCauseStackManager().getCurrentCause(),
+                    this.activeItemStackUseCount, this.activeItemStackUseCount, ItemStackUtil.snapshotOf(this.activeItemStack));
+        }
         SpongeImpl.postEvent(event);
-        Sponge.getCauseStackManager().popCause();
         if (event.getRemainingDuration() > 0) {
             this.activeItemStackUseCount = event.getRemainingDuration();
             ci.cancel();
@@ -1153,17 +1174,19 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         // modified if an ItemFood is being used.
 
         ItemStackSnapshot activeItemStackSnapshot = ItemStackUtil.snapshotOf(this.activeItemStackCopy);
-        Sponge.getCauseStackManager().pushCause(this);
-        UseItemStackEvent.Replace event = SpongeEventFactory.createUseItemStackEventReplace(Sponge.getCauseStackManager().getCurrentCause(),
-                this.activeItemStackUseCount, this.activeItemStackUseCount, activeItemStackSnapshot,
-                new Transaction<>((org.spongepowered.api.item.inventory.ItemStack) (Object) this.activeItemStackCopy, ItemStackUtil.snapshotOf(stack)));
+
+        UseItemStackEvent.Replace event;
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            this.addSelfToFrame(frame);
+            event = SpongeEventFactory.createUseItemStackEventReplace(Sponge.getCauseStackManager().getCurrentCause(),
+                    this.activeItemStackUseCount, this.activeItemStackUseCount, activeItemStackSnapshot,
+                    new Transaction<>((org.spongepowered.api.item.inventory.ItemStack) this.activeItemStackCopy, ItemStackUtil.snapshotOf(stack)));
+        }
 
         if (SpongeImpl.postEvent(event)) {
-            Sponge.getCauseStackManager().popCause();
             this.setHeldItem(hand, this.activeItemStackCopy.copy());
             return;
         }
-        Sponge.getCauseStackManager().popCause();
 
         if (!event.getItemStackResult().isValid()) {
             this.setHeldItem(hand, this.activeItemStackCopy.copy());
@@ -1180,12 +1203,13 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             stack.onPlayerStoppedUsing(world, self, duration);
             return;
         }
-        Sponge.getCauseStackManager().pushCause(this);
-        if (!SpongeImpl.postEvent(SpongeEventFactory.createUseItemStackEventStop(Sponge.getCauseStackManager().getCurrentCause(),
-                duration, duration, ItemStackUtil.snapshotOf(stack)))) {
-            stack.onPlayerStoppedUsing(world, self, duration);
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            this.addSelfToFrame(frame);
+            if (!SpongeImpl.postEvent(SpongeEventFactory.createUseItemStackEventStop(Sponge.getCauseStackManager().getCurrentCause(),
+                    duration, duration, ItemStackUtil.snapshotOf(stack)))) {
+                stack.onPlayerStoppedUsing(world, self, duration);
+            }
         }
-        Sponge.getCauseStackManager().popCause();
     }
 
     @Inject(method = "resetActiveHand", at = @At("HEAD"))
@@ -1198,11 +1222,11 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         // However, if a player stopped using an item early, activeItemStackCopy will not be set
         ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(this.activeItemStackCopy != null ? this.activeItemStackCopy : this.activeItemStack);
 
-        Sponge.getCauseStackManager().pushCause(this);
-        SpongeImpl.postEvent(SpongeEventFactory.createUseItemStackEventReset(Sponge.getCauseStackManager().getCurrentCause(),
-                this.activeItemStackUseCount, this.activeItemStackUseCount, snapshot));
-        Sponge.getCauseStackManager().popCause();
-
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            this.addSelfToFrame(frame);
+            SpongeImpl.postEvent(SpongeEventFactory.createUseItemStackEventReset(Sponge.getCauseStackManager().getCurrentCause(),
+                    this.activeItemStackUseCount, this.activeItemStackUseCount, snapshot));
+        }
         this.activeItemStackCopy = null;
     }
 
