@@ -401,6 +401,13 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     }
 
     @Override
+    public double getTemperature(int x, int y, int z) {
+        checkBiomeBounds(x, y, z);
+        return getBiome(new BlockPos(x, y, z), this.world.getBiomeProvider())
+                .getTemperature(new BlockPos(this.biomeMin.getX() + x, this.biomeMin.getY() + y, this.biomeMin.getZ() + z));
+    }
+
+    @Override
     public BlockState getBlock(int x, int y, int z) {
         checkBlockBounds(x, y, z);
         return (BlockState) getBlockState(new BlockPos(x, y, z));

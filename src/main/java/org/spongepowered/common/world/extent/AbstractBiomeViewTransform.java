@@ -82,6 +82,12 @@ public abstract class AbstractBiomeViewTransform<V extends BiomeVolume> implemen
     }
 
     @Override
+    public double getTemperature(int x, int y, int z) {
+        return this.volume.getTemperature(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z),
+                this.inverseTransform.transformZ(x, y, z));
+    }
+
+    @Override
     public MutableBiomeVolume getBiomeCopy(StorageType type) {
         switch (type) {
             case STANDARD:

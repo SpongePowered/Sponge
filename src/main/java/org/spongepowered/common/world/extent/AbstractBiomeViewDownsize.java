@@ -84,6 +84,12 @@ public abstract class AbstractBiomeViewDownsize<V extends BiomeVolume> implement
     }
 
     @Override
+    public double getTemperature(int x, int y, int z) {
+        checkRange(x, y, z);
+        return this.volume.getTemperature(x, y, z);
+    }
+
+    @Override
     public MutableBiomeVolume getBiomeCopy(StorageType type) {
         switch (type) {
             case STANDARD:

@@ -419,6 +419,13 @@ public abstract class MixinWorld implements World, IMixinWorld {
         ((Chunk) getChunk(x >> 4, z >> 4)).setBiome(x, y, z, biome);
     }
 
+    @Override
+    public double getTemperature(int x, int y, int z) {
+        checkBiomeBounds(x, y, z);
+        BlockPos pos = new BlockPos(x, y, z);
+        return this.getBiome(pos).getTemperature(pos);
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public Collection<Entity> getEntities() {

@@ -28,7 +28,11 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.MoreObjects;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.biome.Biome;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
+import org.spongepowered.api.world.biome.BiomeType;
+import org.spongepowered.api.world.biome.VirtualBiomeType;
 import org.spongepowered.api.world.extent.BiomeVolume;
 import org.spongepowered.common.util.VecHelper;
 
@@ -81,6 +85,15 @@ public abstract class AbstractBiomeBuffer implements BiomeVolume {
     @Override
     public boolean containsBiome(int x, int y, int z) {
         return VecHelper.inBounds(x, y, z, this.start, this.end);
+    }
+
+    @Override
+    public double getTemperature(int x, int y, int z) {
+        BiomeType type = this.getBiome(x, y, z);
+        if (type instanceof VirtualBiomeType) {
+            type = ((VirtualBiomeType) type).getPersistedType(); // TODO this ignores custom temperatures
+        }
+        return ((Biome) type).getTemperature(new BlockPos(x, y, z));
     }
 
     @Override
