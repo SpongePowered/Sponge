@@ -37,7 +37,7 @@ import org.spongepowered.api.text.format.TextStyles;
 @Plugin(id = "change-experience-event-test", name = "Change experience event test", version = "0.0.0")
 public class ChangeExperienceEventTest {
 
-    private boolean enabled = true;
+    private boolean enabled = false;
 
     @Listener
     public void onExperience(ChangeEntityExperienceEvent event) {
