@@ -55,7 +55,6 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.DataSerializableTypeSerializer;
 import org.spongepowered.common.data.builder.manipulator.SpongeDataManipulatorBuilder;
 import org.spongepowered.common.data.builder.manipulator.SpongeImmutableDataManipulatorBuilder;
-import org.spongepowered.common.data.persistence.DataTranslatorTypeSerializer;
 import org.spongepowered.common.data.util.ComparatorUtil;
 import org.spongepowered.common.registry.type.data.DataTranslatorRegistryModule;
 import org.spongepowered.common.registry.type.data.KeyRegistryModule;
@@ -97,7 +96,6 @@ public final class SpongeDataManager implements DataManager {
     private final Map<Class<? extends ImmutableDataHolder<?>>, ImmutableDataBuilder<?, ?>> immutableDataBuilderMap = new MapMaker()
         .concurrencyLevel(4)
         .makeMap();
-    private final Map<Class<?>, DataTranslator<?>> dataSerializerMap = new MapMaker().concurrencyLevel(4).makeMap();
     // Content updaters
     private final Map<Class<? extends DataSerializable>, List<DataContentUpdater>> updatersMap = new IdentityHashMap<>();
 
@@ -239,27 +237,19 @@ public final class SpongeDataManager implements DataManager {
         return Optional.ofNullable((DataManipulatorBuilder<T, I>) this.immutableBuilderMap.get(checkNotNull(immutableManipulatorClass)));
     }
 
+    @Deprecated
     @Override
     public <T> void registerTranslator(Class<T> objectClass, DataTranslator<T> translator) {
         checkState(allowRegistrations, "Registrations are no longer allowed");
-        checkNotNull(objectClass, "Target object class cannot be null!");
-        checkNotNull(translator, "DataTranslator for : " + objectClass + " cannot be null!");
-        checkArgument(translator.getToken().isSupertypeOf(objectClass), "DataTranslator is not compatible with the target object class: " + objectClass);
-        if (!this.dataSerializerMap.containsKey(checkNotNull(objectClass, "Target class cannot be null!"))) {
-            this.dataSerializerMap.put(objectClass, translator);
-            DataTranslatorRegistryModule.getInstance().registerAdditionalCatalog(translator);
-        } else {
-            throw new IllegalStateException("Already registered the DataTranslator for " + objectClass.getCanonicalName());
-        }
-        if (TypeSerializers.getDefaultSerializers().get(translator.getToken()) == null) {
-            TypeSerializers.getDefaultSerializers().registerType(translator.getToken(), DataTranslatorTypeSerializer.from(translator));
-        }
+        checkArgument(translator.getToken().isSupertypeOf(objectClass),
+                "DataTranslator is not compatible with the target object class: %s", objectClass);
+        DataTranslatorRegistryModule.getInstance().registerAdditionalCatalog(translator);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T> Optional<DataTranslator<T>> getTranslator(Class<T> objectclass) {
-        return Optional.ofNullable((DataTranslator<T>) this.dataSerializerMap.get(checkNotNull(objectclass, "Target class cannot be null!")));
+    public <T> Optional<DataTranslator<T>> getTranslator(Class<T> objectClass) {
+        return DataTranslatorRegistryModule.getInstance().getByClass(objectClass);
     }
 
     @Override
