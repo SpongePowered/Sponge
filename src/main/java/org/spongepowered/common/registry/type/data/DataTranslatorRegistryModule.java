@@ -31,8 +31,10 @@ import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.persistence.DataTranslator;
+import org.spongepowered.api.data.persistence.DataTranslators;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
+import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.data.persistence.ConfigurateTranslator;
 import org.spongepowered.common.data.persistence.DataSerializers;
 import org.spongepowered.common.data.persistence.DataTranslatorTypeSerializer;
@@ -44,6 +46,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+@RegisterCatalog(DataTranslators.class)
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class DataTranslatorRegistryModule extends AbstractCatalogRegistryModule<DataTranslator> implements
         AlternateCatalogRegistryModule<DataTranslator>, AdditionalCatalogRegistryModule<DataTranslator> {
