@@ -706,6 +706,9 @@ public class SpongeCommonEventFactory {
             event = SpongeEventFactory.createInteractEntityEventPrimaryOffHand(
                     Sponge.getCauseStackManager().getCurrentCause(), HandTypes.OFF_HAND, Optional.ofNullable(hitVec), EntityUtil.fromNative(entity));
         }
+        if (entity instanceof Player && !((World) player.world).getProperties().isPVPEnabled()) {
+            event.setCancelled(true); // if PvP is disabled for world, cancel
+        }
         SpongeImpl.postEvent(event);
         return event;
     }
