@@ -879,10 +879,6 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                     }
 
                     // Sponge start
-                    if (entity instanceof Player && !((World) this.player.world).getProperties().isPVPEnabled()) {
-                        return; // PVP is disabled, ignore
-                    }
-
                     if (SpongeCommonEventFactory.callInteractEntityEventPrimary(this.player, entity, hand, hitVec).isCancelled()) {
                         ((IMixinEntityPlayerMP) this.player).restorePacketItem(hand);
                         return;
