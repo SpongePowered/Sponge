@@ -261,7 +261,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
     @Override
     public void appendContextPreExplosion(ExplosionContext explosionContext, EntityTickContext context) {
         context.applyOwnerIfAvailable(explosionContext::owner);
-        context.applyNotifierIfAvailable(explosionContext::owner);
+        context.applyNotifierIfAvailable(explosionContext::notifier);
         final Entity tickingEntity = context.getSource(Entity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be processing over a ticking entity!", context));
         Sponge.getCauseStackManager().pushCause(tickingEntity);
