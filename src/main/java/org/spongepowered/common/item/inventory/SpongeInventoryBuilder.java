@@ -126,6 +126,7 @@ public class SpongeInventoryBuilder implements Inventory.Builder {
     public Inventory.Builder reset() {
         this.archetype = InventoryArchetypes.CHEST;
         this.properties = new HashMap<>();
+        this.listeners.clear();
         return this;
     }
 
