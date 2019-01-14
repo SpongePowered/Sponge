@@ -134,6 +134,7 @@ public class SpongeInventoryBuilder implements Inventory.Builder {
         this.archetype = InventoryArchetypes.CHEST;
         this.properties = new HashMap<>();
         this.isVirtual = false;
+        this.listeners.clear();
         return this;
     }
 
