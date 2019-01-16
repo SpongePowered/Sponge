@@ -83,6 +83,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.asm.util.PrettyPrinter;
@@ -908,9 +909,15 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     private EquipmentSlotsFabric inventory = new EquipmentSlotsFabric(this);
     private EnumMap<EntityEquipmentSlot, SlotLens> slotLens = new EnumMap<>(EntityEquipmentSlot.class);
 
+    @Surrogate
+    private void onGetItemStackFromSlot(CallbackInfo ci, EntityEquipmentSlot[] slots, int j, int k,
+            EntityEquipmentSlot entityEquipmentSlot, ItemStack before) {
+        this.onGetItemStackFromSlot(ci, 0, slots, j, k, entityEquipmentSlot, before);
+    }
+
     @Inject(method = "tick", locals = LocalCapture.CAPTURE_FAILHARD,
             at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;getItemStackFromSlot(Lnet/minecraft/inventory/EntityEquipmentSlot;)Lnet/minecraft/item/ItemStack;"))
-    private void onGetItemStackFromSlot(CallbackInfo ci, int i, EntityEquipmentSlot[] slots, int j, int k,
+    private void onGetItemStackFromSlot(CallbackInfo ci, int i_unused, EntityEquipmentSlot[] slots, int j, int k,
                                         EntityEquipmentSlot entityEquipmentSlot, ItemStack before) {
         if (this.ticksExisted == 1 && (Object)this instanceof EntityPlayer) {
             return; // Ignore Equipment on player spawn/respawn
