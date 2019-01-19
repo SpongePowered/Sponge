@@ -41,7 +41,7 @@ import java.util.UUID;
 public class FriendsDataImpl extends AbstractListData<UUID, FriendsData, ImmutableFriendsData> implements FriendsData {
 
     public FriendsDataImpl(List<UUID> value) {
-        super(value, MyHomes.FRIENDS);
+        super(MyHomes.FRIENDS, value);
     }
 
     public FriendsDataImpl() {
