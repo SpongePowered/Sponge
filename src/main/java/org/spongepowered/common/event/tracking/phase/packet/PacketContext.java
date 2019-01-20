@@ -44,6 +44,7 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
     @Nullable private ItemStack itemUsed;
     @Nullable private BlockSnapshot targetBlock;
     private boolean ignoreCreative;
+    private boolean interactItemChanged;
 
     protected PacketContext(PacketState<? extends P> state) {
         super(state);
@@ -105,6 +106,15 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
 
     public ItemStack getItemUsed() {
         return this.itemUsed;
+    }
+
+    public P interactItemChanged(boolean changed) {
+        this.interactItemChanged = changed;
+        return (P) this;
+    }
+
+    public boolean getInteractItemChanged() {
+        return this.interactItemChanged;
     }
 
     @Override
