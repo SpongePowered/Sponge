@@ -48,7 +48,7 @@ final class PreServerTickListenerState extends ListenerPhaseState {
 
         // TODO - Determine if we need to pass the supplier or perform some parameterized
         //  process if not empty method on the capture object.
-        TrackingUtil.processBlockCaptures(phaseContext.getCapturedBlockSupplier(), this, phaseContext);
+        TrackingUtil.processBlockCaptures(this, phaseContext);
     }
 
     @Override

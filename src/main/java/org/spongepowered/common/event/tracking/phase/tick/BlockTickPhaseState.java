@@ -67,7 +67,7 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
     public void unwind(BlockTickContext context) {
         // TODO - Determine if we need to pass the supplier or perform some parameterized
         //  process if not empty method on the capture object.
-        TrackingUtil.processBlockCaptures(context.getCapturedBlockSupplier(), this, context);
+        TrackingUtil.processBlockCaptures(this, context);
             context.getCapturedItemsSupplier()
                     .acceptAndClearIfNotEmpty(items -> {
                         Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
@@ -117,10 +117,6 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
 
     @Override
     public void postTrackBlock(BlockSnapshot snapshot, BlockTickContext context) {
-        if (false) {
-            TrackingUtil.processBlockCaptures(context.getCapturedBlockSupplier(), this, context);
-            context.getCapturedBlockSupplier().prune(snapshot);
-        }
     }
 
     /**

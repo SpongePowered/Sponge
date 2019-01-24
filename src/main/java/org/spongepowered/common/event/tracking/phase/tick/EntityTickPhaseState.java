@@ -100,7 +100,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
         if (phaseContext.allowsBulkBlockCaptures()) {
             // TODO - Determine if we need to pass the supplier or perform some parameterized
             //  process if not empty method on the capture object.
-            if (!TrackingUtil.processBlockCaptures(phaseContext.getCapturedBlockSupplier(), this, phaseContext)) {
+            if (!TrackingUtil.processBlockCaptures(this, phaseContext)) {
                 EntityUtil.toMixin(tickingEntity).onCancelledBlockChange(phaseContext);
             }
         }

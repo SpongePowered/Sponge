@@ -76,7 +76,7 @@ public abstract class MixinEntityFallingBlock extends MixinEntity implements Fal
         final PhaseData currentPhaseData = PhaseTracker.getInstance().getCurrentPhaseData();
         this.world.setBlockToAir(pos);
         // By this point, we should have one captured block at least.
-        if (!TrackingUtil.processBlockCaptures(currentPhaseData.context.getCapturedBlockSupplier(), currentPhaseData.state, currentPhaseData.context)) {
+        if (!TrackingUtil.processBlockCaptures(currentPhaseData.state, currentPhaseData.context)) {
             // So, it's been cancelled, we want to absolutely remove this entity.
             // And we want to stop the entity update at this point.
             this.setDead();

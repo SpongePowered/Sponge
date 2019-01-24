@@ -63,6 +63,7 @@ public final class VecHelper {
     }
 
     // === SpongeAPI Location --> BlockPos ===
+    @SuppressWarnings("ConstantConditions")
     public static BlockPos toBlockPos(Location<?> location) {
         if (location == null) {
             return null;

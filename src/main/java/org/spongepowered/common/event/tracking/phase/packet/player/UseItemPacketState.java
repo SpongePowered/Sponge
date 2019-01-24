@@ -98,7 +98,7 @@ public final class UseItemPacketState extends BasicPacketState {
             if (!context.getCapturedBlockSupplier().isEmpty()) {
                 // TODO - Determine if we need to pass the supplier or perform some parameterized
                 //  process if not empty method on the capture object.
-                boolean success = TrackingUtil.processBlockCaptures(context.getCapturedBlockSupplier(), this, context);
+                boolean success = TrackingUtil.processBlockCaptures(this, context);
                 if (!success && snapshot != ItemTypeRegistryModule.NONE_SNAPSHOT) {
                     Sponge.getCauseStackManager().pushCause(player);
                     EnumHand hand = ((CPacketPlayerTryUseItem) context.getPacket()).getHand();

@@ -113,7 +113,7 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.CUSTOM);
             // TODO - Determine if we need to pass the supplier or perform some parameterized
             //  process if not empty method on the capture object.
-            TrackingUtil.processBlockCaptures(context.getCapturedBlockSupplier(), this, context);
+            TrackingUtil.processBlockCaptures(this, context);
             context.getCapturedItemsSupplier()
                     .acceptAndClearIfNotEmpty(items -> {
                         final ArrayList<Entity> capturedEntities = new ArrayList<>();

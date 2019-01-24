@@ -140,7 +140,7 @@ public final class InteractionPacketState extends BasicPacketState {
             final List<SpongeBlockSnapshot> capturedBlcoks = phaseContext.getCapturedOriginalBlocksChanged();
             final @Nullable BlockSnapshot firstBlockChange = hasBlocks ? capturedBlcoks.get(0) : null;
             if (hasBlocks) {
-                if (!TrackingUtil.processBlockCaptures(phaseContext.getCapturedBlockSupplier(), this, phaseContext)) {
+                if (!TrackingUtil.processBlockCaptures(this, phaseContext)) {
                     // Stop entities like XP from being spawned
                     phaseContext.getBlockItemDropSupplier().get().clear();
                     phaseContext.getCapturedItems().clear();

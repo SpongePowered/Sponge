@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.context;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
@@ -31,10 +32,12 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.world.BlockChangeFlags;
+import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
@@ -42,11 +45,14 @@ import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,14 +62,14 @@ import java.util.function.BiConsumer;
 
 import javax.annotation.Nullable;
 
-public final class BlockPosMultiMap implements ICaptureSupplier {
+public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
 
     @Nullable private ListMultimap<BlockPos, SpongeBlockSnapshot> multimap;
     @Nullable private List<SpongeBlockSnapshot> snapshots;
     @Nullable private Set<BlockPos> usedBlocks;
     private boolean hasMulti = false;
 
-    public BlockPosMultiMap() {
+    public MultiBlockCaptureSupplier() {
     }
 
     /**
@@ -84,12 +90,7 @@ public final class BlockPosMultiMap implements ICaptureSupplier {
      */
     public boolean put(BlockSnapshot snapshot, IBlockState newState) {
         // Start by figuring out the backing snapshot. In all likelyhood, we could just cast, but we want to be safe
-        final SpongeBlockSnapshot backingSnapshot;
-        if (!(snapshot instanceof SpongeBlockSnapshot)) {
-            backingSnapshot = new SpongeBlockSnapshotBuilder().from(snapshot).build();
-        } else {
-            backingSnapshot = (SpongeBlockSnapshot) snapshot;
-        }
+        final SpongeBlockSnapshot backingSnapshot = getBackingSnapshot(snapshot);
         // Get the key of the block position, we know this is a pure block pos and not a mutable one too.
         final BlockPos blockPos = backingSnapshot.getBlockPos();
         if (this.usedBlocks == null) { // Means we have a first usage. All three fields are null
@@ -120,11 +121,7 @@ public final class BlockPosMultiMap implements ICaptureSupplier {
             // If the position is duplicated, we need to update the original snapshot of the now incoming block change
             // in relation to the original state (so if a block was set to air, then afterwards set to piston head, it should go from break to modify)
             if (!added) {
-                final List<SpongeBlockSnapshot> list = this.multimap.get(blockPos);
-                if (list != null && !list.isEmpty()) {
-                    final SpongeBlockSnapshot originalSnapshot = list.get(0);
-                    TrackingUtil.associateBlockChangeWithSnapshot(PhaseTracker.getInstance().getCurrentState(), newState.getBlock(), BlockUtil.toNative(originalSnapshot.getState()), originalSnapshot );
-                }
+                associateBlockChangeForPosition(newState, blockPos);
             }
             return added;
         }
@@ -145,11 +142,7 @@ public final class BlockPosMultiMap implements ICaptureSupplier {
             // Now we can re-evaluate the modified block position
             // If the position is duplicated, we need to update the original snapshot of the now incoming block change
             // in relation to the original state (so if a block was set to air, then afterwards set to piston head, it should go from break to modify)
-            final List<SpongeBlockSnapshot> list = this.multimap.get(blockPos);
-            if (list != null && !list.isEmpty()) {
-                final SpongeBlockSnapshot originalSnapshot = list.get(0);
-                TrackingUtil.associateBlockChangeWithSnapshot(PhaseTracker.getInstance().getCurrentState(), newState.getBlock(), BlockUtil.toNative(originalSnapshot.getState()), originalSnapshot );
-            }
+            associateBlockChangeForPosition(newState, blockPos);
             // Flip the boolean to have fasts for next entry
             this.hasMulti = true;
             return false;
@@ -162,6 +155,26 @@ public final class BlockPosMultiMap implements ICaptureSupplier {
         this.snapshots.add(backingSnapshot);
         // And this is the only time that we return true, if we have not caught multiple transactions per position before.
         return true;
+    }
+
+    /**
+     * Associates the desired block state {@link BlockChange} in comparison to the
+     * already guaranteed original {@link SpongeBlockSnapshot} for proper event
+     * creation when multiple block changes exist for the provided {@link BlockPos}.
+     *
+     * <p>Note: This method <strong>requires</strong> that {@link #hasMulti} is {@code true},
+     * otherwise the state of {@link #multimap} may be {@code null} and cause an NPE.</p>
+     *
+     * @param newState The incoming block change to compare to change
+     * @param blockPos The block position to get the backing list from the multimap
+     */
+    private void associateBlockChangeForPosition(IBlockState newState, BlockPos blockPos) {
+        final List<SpongeBlockSnapshot> list = this.multimap.get(blockPos);
+        if (list != null && !list.isEmpty()) {
+            final SpongeBlockSnapshot originalSnapshot = list.get(0);
+            TrackingUtil.associateBlockChangeWithSnapshot(PhaseTracker.getInstance().getCurrentState(), newState.getBlock(),
+                BlockUtil.toNative(originalSnapshot.getState()), originalSnapshot);
+        }
     }
 
     public boolean hasMultiChanges() {
@@ -199,11 +212,71 @@ public final class BlockPosMultiMap implements ICaptureSupplier {
      * @return An unmodifiable list of first block originals being changed
      */
     public final List<SpongeBlockSnapshot> get() {
-        return Collections.unmodifiableList(this.snapshots == null ? Collections.emptyList() : this.snapshots);
+        return this.snapshots == null ? Collections.emptyList() : Collections.unmodifiableList(this.snapshots);
     }
 
     public final void prune(BlockSnapshot snapshot) {
+        if (this.isEmpty()) {
+            throw new IllegalStateException("Unexpected pruning on an empty capture object for position " + snapshot.getPosition());
+        }
+        // Start by figuring out the backing snapshot. In all likelyhood, we could just cast, but we want to be safe
+        final SpongeBlockSnapshot backingSnapshot = getBackingSnapshot(snapshot);
+        // Get the key of the block position, we know this is a pure block pos and not a mutable one too.
+        final BlockPos blockPos = backingSnapshot.getBlockPos();
+        // Check if we have a multi-pos
+        if (this.hasMulti) {
+            pruneFromMulti(backingSnapshot, blockPos);
+            return;
+        }
+        pruneSingle(backingSnapshot, blockPos);
         // TODO - We need to not only prune the snapshot from the list of snapshots, but may also need to revert the multimap usage.
+    }
+
+    private void pruneSingle(final SpongeBlockSnapshot backingSnapshot, final BlockPos blockPos) {
+
+    }
+
+    private void pruneFromMulti(final SpongeBlockSnapshot backingSnapshot, final BlockPos blockPos) {
+        final List<SpongeBlockSnapshot> snapshots = this.multimap.get(blockPos);
+        if (snapshots != null) {
+            for (final Iterator<SpongeBlockSnapshot> iterator = snapshots.iterator(); iterator.hasNext(); ) {
+                final SpongeBlockSnapshot next = iterator.next();
+                if (next.getState().equals(backingSnapshot.getState())) {
+                    iterator.remove();
+                    break;
+                }
+            }
+            // If the list view is now empty, we need to prune the position from the multimap
+            if (snapshots.isEmpty()) {
+                this.multimap.removeAll(blockPos);
+                // And then prune the snapshot from the list of firsts
+                for (final Iterator<SpongeBlockSnapshot> firsts = this.snapshots.iterator(); firsts.hasNext(); ) {
+                    final SpongeBlockSnapshot next = firsts.next();
+                    if (next.equals(backingSnapshot)) {
+                        firsts.remove();
+                        // And if it's been found, remove the position from the used blocks as well.
+                        this.usedBlocks.remove(blockPos);
+                        break;
+                    }
+                }
+                if (this.snapshots.isEmpty()) {
+                    this.multimap = null;
+
+                }
+            }
+            this.sna
+        }
+    }
+
+
+    private SpongeBlockSnapshot getBackingSnapshot(BlockSnapshot snapshot) {
+        SpongeBlockSnapshot backingSnapshot;
+        if (!(snapshot instanceof SpongeBlockSnapshot)) {
+            backingSnapshot = new SpongeBlockSnapshotBuilder().from(snapshot).build();
+        } else {
+            backingSnapshot = (SpongeBlockSnapshot) snapshot;
+        }
+        return backingSnapshot;
     }
 
     /**
@@ -248,24 +321,6 @@ public final class BlockPosMultiMap implements ICaptureSupplier {
         }
     }
 
-    /**
-     * Similar to {@link #get()}, but instead of creating the underlying collections,
-     * this will fail fast. Utilize for checks when lists are needed regardless whether
-     * they are empty or not.
-     *
-     * @return
-     */
-    @SuppressWarnings("unchecked")
-    public List<SpongeBlockSnapshot> orEmptyList() {
-        if (this.snapshots == null) {
-            return Collections.emptyList();
-        }
-        if (this.snapshots.isEmpty()) {
-            return Collections.emptyList();
-        }
-        return get();
-    }
-
     @Override
     public int hashCode() {
         return Objects.hashCode(this.snapshots);
@@ -279,7 +334,7 @@ public final class BlockPosMultiMap implements ICaptureSupplier {
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        final BlockPosMultiMap other = (BlockPosMultiMap) obj;
+        final MultiBlockCaptureSupplier other = (MultiBlockCaptureSupplier) obj;
         return Objects.equals(this.multimap, other.multimap);
     }
 
@@ -313,5 +368,28 @@ public final class BlockPosMultiMap implements ICaptureSupplier {
             }
             this.clear();
         }
+    }
+
+    public Transaction<BlockSnapshot> createTransaction(SpongeBlockSnapshot snapshot) {
+        final Location<World> originalLocation = snapshot.getLocation().get();
+        final WorldServer worldServer = (WorldServer) originalLocation.getExtent();
+        final BlockPos blockPos = VecHelper.toBlockPos(originalLocation);
+        final IBlockState newState = worldServer.getBlockState(blockPos);
+        final IBlockState newActualState = newState.getActualState(worldServer, blockPos);
+        final BlockSnapshot
+            newSnapshot =
+            ((IMixinWorldServer) worldServer).createSpongeBlockSnapshot(newState, newActualState, blockPos, BlockChangeFlags.NONE);
+        // Up until this point, we can create a default Transaction
+        if (this.hasMulti) { // But we need to check if there's any intermediary block changes...
+            // And because multi is true, we can be sure the multimap is populated at least somewhere.
+            final List<SpongeBlockSnapshot> intermediary = this.multimap.get(blockPos);
+            if (!intermediary.isEmpty()) {
+                // We need to make a carbon copy of the list since it's technically a key view list
+                // within the multimap, so, if the multimap is cleared, at the very least, the list will
+                // not be cleared.
+                return new Transaction<>(snapshot, newSnapshot, ImmutableList.copyOf(intermediary));
+            }
+        }
+        return new Transaction<>(snapshot, newSnapshot);
     }
 }

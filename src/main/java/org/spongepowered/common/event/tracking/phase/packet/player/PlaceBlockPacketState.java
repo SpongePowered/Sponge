@@ -58,7 +58,6 @@ import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
-import org.spongepowered.common.mixin.optimization.world.MixinWorldServer_Async_Lighting;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
@@ -128,7 +127,7 @@ public final class PlaceBlockPacketState extends BasicPacketState {
         if (!context.getCapturedBlockSupplier().isEmpty()) {
             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(player);
-                if (!TrackingUtil.processBlockCaptures(context.getCapturedBlockSupplier(), this, context) && snapshot != ItemTypeRegistryModule.NONE_SNAPSHOT) {
+                if (!TrackingUtil.processBlockCaptures(this, context) && snapshot != ItemTypeRegistryModule.NONE_SNAPSHOT) {
                     frame.pushCause(player);
                     EnumHand hand = ((CPacketPlayerTryUseItemOnBlock) packet).getHand();
                     PacketPhaseUtil.handlePlayerSlotRestore(player, ItemStackUtil.toNative(itemStack), hand);

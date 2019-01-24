@@ -44,7 +44,6 @@ import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.api.util.Identifiable;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
@@ -52,7 +51,6 @@ import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhaseState;
@@ -149,7 +147,7 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a Command Sender, but none found!", phaseContext));
         // TODO - Determine if we need to pass the supplier or perform some parameterized
         //  process if not empty method on the capture object.
-        TrackingUtil.processBlockCaptures(phaseContext.getCapturedBlockSupplier(), this, phaseContext);
+        TrackingUtil.processBlockCaptures(this, phaseContext);
         phaseContext.getCapturedEntitySupplier()
             .acceptAndClearIfNotEmpty(entities ->
             {

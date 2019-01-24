@@ -74,7 +74,7 @@ import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.context.BlockPosMultiMap;
+import org.spongepowered.common.event.tracking.context.MultiBlockCaptureSupplier;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.tick.BlockTickContext;
@@ -438,8 +438,8 @@ public final class TrackingUtil {
         };
     }
 
-    public static boolean processBlockCaptures(BlockPosMultiMap capturedBlocks, IPhaseState<?> state, PhaseContext<?> context) {
-        return processBlockCaptures(capturedBlocks, state, context, 0);
+    public static boolean processBlockCaptures(IPhaseState<?> state, PhaseContext<?> context) {
+        return processBlockCaptures(state, context, 0);
     }
 
     /**
@@ -449,14 +449,15 @@ public final class TrackingUtil {
      * returns {@code false} to signify a transaction was cancelled. This return value
      * is used for portal creation.
      *
-     * @param snapshots The snapshots to process
      * @param state The phase state that is being processed, used to handle marking notifiers
      *  and block owners
      * @param context The phase context, only used by the phase for handling processes.
      * @return True if no events or transactions were cancelled
      */
     @SuppressWarnings({"unchecked", "ConstantConditions", "rawtypes"})
-    public static boolean processBlockCaptures(BlockPosMultiMap snapshots, IPhaseState<?> state, PhaseContext<?> context, int currentDepth) {
+    public static boolean processBlockCaptures(IPhaseState<?> state, PhaseContext<?> context, int currentDepth) {
+        final MultiBlockCaptureSupplier snapshots = context.getCapturedBlockSupplier();
+        // Fail fast and check if it's empty.
         if (snapshots.isEmpty()) {
             return false;
         }
@@ -468,10 +469,12 @@ public final class TrackingUtil {
             transactionBuilders[i] = new ImmutableList.Builder<>();
         }
 
-        createTransactionLists(snapshots.orEmptyList(), transactionArrays, transactionBuilders);
+        createTransactionLists(snapshots, transactionArrays, transactionBuilders);
 
-        // Clear captured snapshots after processing them
-        context.getCapturedOriginalBlocksChanged().clear();
+        // Clear captured snapshots after creating the transactions. The transactions at this point will be dictating what blcoks are handled
+        // and when at this point, the capture object will be recycled in cases of being in Post State where we re-enter to unwind
+        // consistently
+        snapshots.clear();
 
         final ChangeBlockEvent[] mainEvents = new ChangeBlockEvent[BlockChange.values().length];
         // This likely needs to delegate to the phase in the event we don't use the source object as the main object causing the block changes
@@ -513,12 +516,13 @@ public final class TrackingUtil {
         }
     }
 
-    private static void createTransactionLists(List<? extends BlockSnapshot> snapshots, ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays,
+    private static void createTransactionLists(MultiBlockCaptureSupplier snapshots, ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays,
         ImmutableList.Builder<Transaction<BlockSnapshot>>[] transactionBuilders) {
-        for (BlockSnapshot snapshot : snapshots) {
+        for (SpongeBlockSnapshot snapshot : snapshots.get()) {
             // This processes each snapshot to assign them to the correct event in the next area, with the
             // correct builder array entry.
-            TRANSACTION_PROCESSOR.apply(transactionBuilders).accept(TRANSACTION_CREATION.apply(snapshot));
+            ;
+            TRANSACTION_PROCESSOR.apply(transactionBuilders).accept(snapshots.createTransaction(snapshot));
         }
         for (int i = 0; i < EVENT_COUNT; i++) {
             // Build each event array
@@ -636,6 +640,8 @@ public final class TrackingUtil {
         // Handle custom replacements - these need to get actually set onto the chunk, but ignored as far as tracking
         // goes.
         if (transaction.getCustom().isPresent()) {
+            // Custom replacements should not trigger any physics or notifications, except for sending the notification to
+            // a client. Meaning the intermediary block changes will also be ignored.
             transaction.getFinal().restore(true, BlockChangeFlags.NONE);
         }
 

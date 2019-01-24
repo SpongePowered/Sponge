@@ -28,7 +28,6 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.CPacketUseEntity;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
@@ -99,7 +98,7 @@ public final class InteractEntityPacketState extends BasicPacketState {
 
         // TODO - Determine if we need to pass the supplier or perform some parameterized
         //  process if not empty method on the capture object.
-        TrackingUtil.processBlockCaptures(phaseContext.getCapturedBlockSupplier(), this, phaseContext);
+        TrackingUtil.processBlockCaptures(this, phaseContext);
         phaseContext.getCapturedEntitySupplier()
             .acceptAndClearIfNotEmpty(entities -> {
                 final PrettyPrinter printer = new PrettyPrinter(80);
@@ -135,7 +134,7 @@ public final class InteractEntityPacketState extends BasicPacketState {
 
         // TODO - Determine if we need to pass the supplier or perform some parameterized
         //  process if not empty method on the capture object.
-        TrackingUtil.processBlockCaptures(phaseContext.getCapturedBlockSupplier(), this, phaseContext);
+        TrackingUtil.processBlockCaptures(this, phaseContext);
     }
 
     @Override

@@ -27,6 +27,7 @@ package org.spongepowered.common.event.tracking;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
@@ -45,7 +46,7 @@ import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.context.BlockItemDropsSupplier;
 import org.spongepowered.common.event.tracking.context.BlockItemEntityDropsSupplier;
-import org.spongepowered.common.event.tracking.context.BlockPosMultiMap;
+import org.spongepowered.common.event.tracking.context.MultiBlockCaptureSupplier;
 import org.spongepowered.common.event.tracking.context.CaptureBlockPos;
 import org.spongepowered.common.event.tracking.context.CapturedBlockEntitySpawnSupplier;
 import org.spongepowered.common.event.tracking.context.CapturedEntitiesSupplier;
@@ -60,6 +61,7 @@ import org.spongepowered.common.event.tracking.context.ICaptureSupplier;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
+import org.spongepowered.common.world.BlockChange;
 
 import java.util.Collections;
 import java.util.Deque;
@@ -67,6 +69,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -101,7 +104,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     @Nullable private StackTraceElement[] stackTrace;
 
     // Single type bulk captures
-    @Nullable private BlockPosMultiMap blocksSupplier;
+    @Nullable private MultiBlockCaptureSupplier blocksSupplier;
     @Nullable private CapturedItemsSupplier capturedItemsSupplier;
     @Nullable private CapturedEntitiesSupplier capturedEntitiesSupplier;
     @Nullable private CapturedItemStackSupplier capturedItemStackSupplier;
@@ -173,7 +176,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
         this.checkBlockSuppliers();
 
-        this.blocksSupplier = new BlockPosMultiMap();
+        this.blocksSupplier = new MultiBlockCaptureSupplier();
         this.blockItemEntityDropsSupplier = new BlockItemEntityDropsSupplier();
         this.blockItemDropsSupplier = new BlockItemDropsSupplier();
         this.blockEntitySpawnSupplier = new CapturedBlockEntitySpawnSupplier();
@@ -408,18 +411,48 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     /**
      * Gets the {@link List} of the <b>first</b> {@link BlockSnapshot}s that originally
      * existed at their set {@link BlockPos block position} such that this list is not
-     * self updating and a copy of the parsed list. The reason for
-     * @return
-     * @throws IllegalStateException
+     * self updating and a copy of the parsed list. The reason for this to return
+     * a list of {@link SpongeBlockSnapshot}s is to handle the ability for
+     * {@link BlockChange} being ensured to be correct according to this context's
+     * {@link MultiBlockCaptureSupplier}. It is intended that the returned list is not
+     * self updating, nor is it to be used as to "remove" blocks from being captured.
+     *
+     * <p>To mutate entries presented in the returned list, use {@link #getCapturedBlockSupplier()}
+     * and methods available in {@link MultiBlockCaptureSupplier} such as:
+     * <ul>
+     *     <li>{@link MultiBlockCaptureSupplier#clear()} - To clear the captured lists</li>
+     *     <li>{@link MultiBlockCaptureSupplier#put(BlockSnapshot, IBlockState)} to add a new snapshot/change</li>
+     *     <li>{@link MultiBlockCaptureSupplier#prune(BlockSnapshot)} to remove a block snapshot change</li>
+     *     <li>{@link MultiBlockCaptureSupplier#acceptAndClearIfNotEmpty(BiConsumer)} To process the lists and captured intermediary snapshots if multi is used</li>
+     * </ul>
+     * Provided functionality through the supplier is aimed for common manipulation in
+     * {@link IPhaseState}s and for the obvious reasons of capturing block changes, as long
+     * as {@link IPhaseState#shouldCaptureBlockChangeOrSkip(PhaseContext, BlockPos)} returns
+     * {@code true}.
+     * </p>
+     *
+     * <p>If post phase processing requires constant updating of the list and/or intermediary
+     * {@link SpongeBlockSnapshot} changes to be pruned, it is advised to utilize
+     * {@link MultiBlockCaptureSupplier#acceptAndClearIfNotEmpty(BiConsumer)} to avoid having
+     * to recreate functionality already provided by the supplier.</p>
+     *
+     * @return A list of original block snapshots that are now changed
+     * @throws IllegalStateException If there is no capture supplier set up for this context
      */
     public List<SpongeBlockSnapshot> getCapturedOriginalBlocksChanged() throws IllegalStateException {
         if (this.blocksSupplier == null) {
             throw TrackingUtil.throwWithContext("Expected to be capturing blocks, but we're not capturing them!", this).get();
         }
-        return this.blocksSupplier.orEmptyList();
+        return this.blocksSupplier.get();
     }
 
-    public BlockPosMultiMap getCapturedBlockSupplier() throws IllegalStateException {
+    /**
+     * Gets the {@link MultiBlockCaptureSupplier} object from this context. Note that
+     * accessing
+     * @return
+     * @throws IllegalStateException
+     */
+    public MultiBlockCaptureSupplier getCapturedBlockSupplier() throws IllegalStateException {
         if (this.blocksSupplier == null) {
             throw TrackingUtil.throwWithContext("Expected to be capturing blocks, but we're not capturing them!", this).get();
         }

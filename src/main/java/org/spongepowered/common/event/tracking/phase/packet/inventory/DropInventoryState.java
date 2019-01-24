@@ -57,7 +57,7 @@ public final class DropInventoryState extends BasicInventoryPacketState {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
             // TODO - Determine if we need to pass the supplier or perform some parameterized
             //  process if not empty method on the capture object.
-            TrackingUtil.processBlockCaptures(context.getCapturedBlockSupplier(), this, context);
+            TrackingUtil.processBlockCaptures(this, context);
             context.getCapturedItemsSupplier()
                 .acceptAndClearIfNotEmpty(items -> {
 

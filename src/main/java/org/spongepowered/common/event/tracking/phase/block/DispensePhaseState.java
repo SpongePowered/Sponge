@@ -25,8 +25,6 @@
 package org.spongepowered.common.event.tracking.phase.block;
 
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -50,7 +48,7 @@ final class DispensePhaseState extends BlockPhaseState {
     public void unwind(GeneralizedContext phaseContext) {
         // TODO - Determine if we need to pass the supplier or perform some parameterized
         //  process if not empty method on the capture object.
-        TrackingUtil.processBlockCaptures(phaseContext.getCapturedBlockSupplier(), this, phaseContext);
+        TrackingUtil.processBlockCaptures(this, phaseContext);
         phaseContext.getCapturedItemsSupplier()
             .acceptAndClearIfNotEmpty(items -> {
                 Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DISPENSE);

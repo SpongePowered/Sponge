@@ -61,7 +61,7 @@ class DimensionTickPhaseState extends TickPhaseState<DimensionContext> {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
             // TODO - Determine if we need to pass the supplier or perform some parameterized
             //  process if not empty method on the capture object.
-            TrackingUtil.processBlockCaptures(phaseContext.getCapturedBlockSupplier(), this, phaseContext);
+            TrackingUtil.processBlockCaptures(this, phaseContext);
     
             phaseContext.getCapturedEntitySupplier()
                     .acceptAndClearIfNotEmpty(entities ->

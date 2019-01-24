@@ -30,14 +30,13 @@ import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.context.BlockPosMultiMap;
+import org.spongepowered.common.event.tracking.context.MultiBlockCaptureSupplier;
 import org.spongepowered.common.world.BlockChange;
 
 import java.util.ArrayList;
@@ -50,7 +49,7 @@ public final class PostState extends GeneralState<UnwindingPhaseContext> {
 
     @SuppressWarnings("unchecked")
     private static void postBlockAddedSpawns(UnwindingPhaseContext postContext, IPhaseState<?> unwindingState, PhaseContext<?> unwindingPhaseContext,
-        BlockPosMultiMap capturedBlockSupplier, int depth) {
+        MultiBlockCaptureSupplier capturedBlockSupplier, int depth) {
         if (PhaseTracker.checkMaxBlockProcessingDepth(GeneralPhase.Post.UNWINDING, postContext, depth)) {
             return;
         }
@@ -59,7 +58,7 @@ public final class PostState extends GeneralState<UnwindingPhaseContext> {
             final ArrayList<Entity> capturedEntities = new ArrayList<>(entities);
             ((IPhaseState) unwindingState).postProcessSpawns(unwindingPhaseContext, capturedEntities);
         });
-        TrackingUtil.processBlockCaptures(capturedBlockSupplier, GeneralPhase.Post.UNWINDING, postContext, depth);
+        TrackingUtil.processBlockCaptures(GeneralPhase.Post.UNWINDING, postContext, depth);
     }
 
     @Override
@@ -165,7 +164,7 @@ public final class PostState extends GeneralState<UnwindingPhaseContext> {
             return;
         }
         if (!postContext.getCapturedBlockSupplier().isEmpty()) {
-            TrackingUtil.processBlockCaptures(postContext.getCapturedBlockSupplier(), this, postContext);
+            TrackingUtil.processBlockCaptures(this, postContext);
         }
         if (!contextEntities.isEmpty()) {
             final ArrayList<Entity> entities = new ArrayList<>(contextEntities);
@@ -201,7 +200,7 @@ public final class PostState extends GeneralState<UnwindingPhaseContext> {
             return;
         }
         context.setBulkBlockCaptures(false);
-        TrackingUtil.processBlockCaptures(context.getCapturedBlockSupplier(), this, context, depth);
+        TrackingUtil.processBlockCaptures(this, context, depth);
 
     }
 

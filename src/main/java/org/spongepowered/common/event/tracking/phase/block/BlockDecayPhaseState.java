@@ -38,7 +38,6 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -79,7 +78,7 @@ final class BlockDecayPhaseState extends BlockPhaseState {
         final IMixinWorldServer mixinWorld = ((IMixinWorldServer) worldLocation.getExtent());
         // TODO - Determine if we need to pass the supplier or perform some parameterized
         //  process if not empty method on the capture object.
-        TrackingUtil.processBlockCaptures(context.getCapturedBlockSupplier(), this, context);
+        TrackingUtil.processBlockCaptures(this, context);
 
         context.getCapturedItemsSupplier()
             .acceptAndClearIfNotEmpty(items -> {

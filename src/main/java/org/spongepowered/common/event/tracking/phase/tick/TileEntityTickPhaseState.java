@@ -99,7 +99,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
 
             // TODO - Determine if we need to pass the supplier or perform some parameterized
             //  process if not empty method on the capture object.
-            TrackingUtil.processBlockCaptures(context.getCapturedBlockSupplier(), this, context);
+            TrackingUtil.processBlockCaptures(this, context);
             frame.pushCause(tickingTile.getLocatableBlock());
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
             context.getCapturedItemsSupplier()
