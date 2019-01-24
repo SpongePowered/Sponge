@@ -1655,15 +1655,16 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                         list.add((T) entity);
                     }
                 }
-            }
-            if (((IPhaseState) state).doesBulkBlockCapture(context)) {
-                for (net.minecraft.entity.Entity entity : context.getPerBlockEntitySpawnSuppplier().get().values()) {
-                    // We can ignore the type check because we're already checking the instance class of the entity.
-                    if (clazz.isInstance(entity) && entity.getEntityBoundingBox().intersects(aabb) && (filter == null || filter.apply((T) entity))) {
-                        list.add((T) entity);
+                if (((IPhaseState) state).doesBulkBlockCapture(context)) {
+                    for (net.minecraft.entity.Entity entity : context.getPerBlockEntitySpawnSuppplier().get().values()) {
+                        // We can ignore the type check because we're already checking the instance class of the entity.
+                        if (clazz.isInstance(entity) && entity.getEntityBoundingBox().intersects(aabb) && (filter == null || filter.apply((T) entity))) {
+                            list.add((T) entity);
+                        }
                     }
                 }
             }
+
         }
         // Sponge End
         return list;
