@@ -354,20 +354,36 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         return Optional.ofNullable(this.owner);
     }
 
-    public void applyOwnerIfAvailable(Consumer<User> consumer) {
+    /**
+     * Applies the owner to the provided {@link Consumer} if available.
+     *
+     * @param consumer The consumer consuming the owner that isn't null
+     * @return True if the consumer was called
+     */
+    public boolean applyOwnerIfAvailable(Consumer<User> consumer) {
         if (this.owner != null) {
             consumer.accept(this.owner);
+            return true;
         }
+        return false;
     }
 
     public Optional<User> getNotifier() {
         return Optional.ofNullable(this.notifier);
     }
 
-    public void applyNotifierIfAvailable(Consumer<User> consumer) {
+    /**
+     * Applies the notifier to the provided {@link Consumer} if available.
+     *
+     * @param consumer The consumer consuming the notifier that isn't null
+     * @return True if the consumer was called
+     */
+    public boolean applyNotifierIfAvailable(Consumer<User> consumer) {
         if (this.notifier != null) {
             consumer.accept(this.notifier);
+            return true;
         }
+        return false;
     }
 
     public List<Entity> getCapturedEntities() throws IllegalStateException {
