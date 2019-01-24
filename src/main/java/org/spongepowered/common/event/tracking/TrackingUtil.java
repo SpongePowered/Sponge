@@ -437,6 +437,7 @@ public final class TrackingUtil {
         return () -> {
             final PrettyPrinter printer = new PrettyPrinter(60);
             printer.add("Exception trying to process over a phase!").centre().hr();
+            printer.addWrapped(40, "%s : %s", "State", phaseContext.state);
             printer.addWrapped(40, "%s :", "PhaseContext");
             PhaseTracker.CONTEXT_PRINTER.accept(printer, phaseContext);
             printer.add("Stacktrace:");
