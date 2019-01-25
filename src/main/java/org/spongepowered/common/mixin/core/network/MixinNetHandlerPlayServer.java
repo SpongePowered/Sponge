@@ -751,7 +751,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         }
     }
 
-    @Inject(method = "processTryUseItemOnBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getWorld(I)Lnet/minecraft/world/WorldServer;"))
+    @Inject(method = "processTryUseItemOnBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getWorld(I)Lnet/minecraft/world/WorldServer;"), cancellable = true)
     public void onProcessTryUseItemOnBlock(CPacketPlayerTryUseItemOnBlock packetIn, CallbackInfo ci) {
         SpongeCommonEventFactory.lastSecondaryPacketTick = SpongeImpl.getServer().getTickCounter();
         long packetDiff = System.currentTimeMillis() - SpongeCommonEventFactory.lastTryItemOnBlockPacketTimeStamp;
