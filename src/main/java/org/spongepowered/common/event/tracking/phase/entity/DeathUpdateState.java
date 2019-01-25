@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.entity;
 
+import net.minecraft.entity.item.EntityItem;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.ExperienceOrb;
@@ -41,6 +42,7 @@ import org.spongepowered.common.registry.type.event.SpawnTypeRegistryModule;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -68,7 +70,7 @@ final class DeathUpdateState extends EntityPhaseState<BasicEntityContext> {
                         if (damageSource != null) {
                             frame.pushCause(damageSource);
                         }
-                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DISPENSE);
+                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
                         frame.pushCause(dyingEntity);
                         SpongeCommonEventFactory.callDropItemCustom((List<Entity>) (List) items, context);
                     }
@@ -99,21 +101,34 @@ final class DeathUpdateState extends EntityPhaseState<BasicEntityContext> {
                     }
 
                 });
-        context.getPerEntityItemDropSupplier().acceptAndClearIfNotEmpty(map -> {
-            if (map.isEmpty()) {
-                return;
-            }
-            final PrettyPrinter printer = new PrettyPrinter(80);
-            printer.add("Processing Entity Death Updates Spawning").centre().hr();
-            printer.add("Entity Dying: " + dyingEntity);
-            printer.add("The item stacks captured are: ");
-            for (Map.Entry<UUID, Collection<ItemDropData>> entry : map.asMap().entrySet()) {
-                printer.add("  - Entity with UUID: %s", entry.getKey());
-                for (ItemDropData stack : entry.getValue()) {
-                    printer.add("    - %s", stack);
+        context.getPerEntityItemEntityDropSupplier().acceptAndClearIfNotEmpty((map) -> {
+            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                final DamageSource damageSource = context.getDamageSource();
+                if (damageSource != null) {
+                    frame.pushCause(damageSource);
+                }
+                frame.pushCause(dyingEntity);
+                for (Map.Entry<UUID, Collection<EntityItem>> entry : map.asMap().entrySet()) {
+                    if (entry.getKey().equals(dyingEntity.getUniqueId())) {
+
+                            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+                            SpongeCommonEventFactory.callDropItemCustom((List<Entity>) (List) entry.getValue(), context);
+                            frame.popCause();
+                            continue;
+                    }
+                    Optional<Entity> otherSource = dyingEntity.getWorld().getEntity(entry.getKey());
+                    otherSource.ifPresent(other -> {
+                        frame.pushCause(other);
+                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+                        SpongeCommonEventFactory.callDropItemCustom((List<Entity>) (List) entry.getValue(), context);
+                        frame.popCause(); // Pop because other entities may be spawning things as well
+                    });
                 }
             }
-            printer.trace(System.err);
+
+        });
+        context.getPerEntityItemDropSupplier().acceptAndClearIfNotEmpty(map -> {
+            // Unused, ItemDropData needs to be reinvented or reintroduced, maybe for 1.13
         });
         context.getCapturedBlockSupplier()
                 .acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
