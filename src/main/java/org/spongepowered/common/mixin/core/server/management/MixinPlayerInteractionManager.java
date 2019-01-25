@@ -240,7 +240,7 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
             ((PacketContext<?>) peek.context).interactItemChanged(true);
         }
 
-        SpongeCommonEventFactory.lastInteractItemOnBlockCancelled = event.isCancelled() || event.getUseItemResult() == Tristate.FALSE;
+        SpongeCommonEventFactory.lastInteractBlockCancelled = event.isCancelled() || event.getUseItemResult() == Tristate.FALSE;
 
         if (event.isCancelled()) {
             final IBlockState state = (IBlockState) currentSnapshot.getState();
@@ -378,7 +378,7 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
             ((PacketContext<?>) peek.context).interactItemChanged(true);
         }
 
-        SpongeCommonEventFactory.lastInteractItemOnBlockCancelled = event.isCancelled(); //|| event.getUseItemResult() == Tristate.FALSE;
+        SpongeCommonEventFactory.lastInteractItemCancelled = event.isCancelled(); //|| event.getUseItemResult() == Tristate.FALSE;
 
         if (event.isCancelled()) {
             SpongeCommonEventFactory.interactBlockRightClickEventCancelled = true;
