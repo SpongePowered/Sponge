@@ -633,11 +633,6 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         if (loadOnStartup == null) {
            loadOnStartup = ((IMixinDimensionType) this.dimensionType).shouldGenerateSpawnOnLoad();
            this.setLoadOnStartup(loadOnStartup);
-        } else if (this.isMod && !loadOnStartup) { // If disabled and a mod dimension, validate
-            if (this.dimensionId == ((net.minecraft.world.DimensionType)(Object) this.dimensionType).getId()) {
-                loadOnStartup = ((IMixinDimensionType) this.dimensionType).shouldGenerateSpawnOnLoad();
-                this.setLoadOnStartup(loadOnStartup);
-            }
         }
         return loadOnStartup;
     }
@@ -653,6 +648,11 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         Boolean keepSpawnLoaded = this.getOrCreateWorldConfig().getConfig().getWorld().getKeepSpawnLoaded();
         if (keepSpawnLoaded == null) {
             keepSpawnLoaded = ((IMixinDimensionType) this.dimensionType).shouldLoadSpawn();
+        } else if (this.isMod && !keepSpawnLoaded) { // If disabled and a mod dimension, validate
+            if (this.dimensionId == ((net.minecraft.world.DimensionType)(Object) this.dimensionType).getId()) {
+                keepSpawnLoaded = ((IMixinDimensionType) this.dimensionType).shouldKeepSpawnLoaded();
+                this.setKeepSpawnLoaded(keepSpawnLoaded);
+            }
         }
         return keepSpawnLoaded;
     }

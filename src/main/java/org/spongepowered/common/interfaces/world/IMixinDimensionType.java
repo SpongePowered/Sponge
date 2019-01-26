@@ -46,5 +46,7 @@ public interface IMixinDimensionType {
 
     boolean shouldLoadSpawn();
 
+    boolean shouldKeepSpawnLoaded();
+
     void setShouldLoadSpawn(boolean keepSpawnLoaded);
 }

@@ -317,7 +317,6 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             }
         }
 
-        // Turn on capturing
         this.updateWorldGenerator();
         // Need to set the active config before we call it.
         this.chunkGCLoadThreshold = SpongeHooks.getActiveConfig((WorldServer) (Object) this).getConfig().getWorld().getChunkLoadThreadhold();

@@ -384,9 +384,6 @@ public final class SpongeCauseStackManager implements CauseStackManager {
     public void popFrameMutator(PhaseContext<?> context) {
         final Tuple<PhaseContext<?>, BiConsumer<StackFrame, PhaseContext<?>>> peek = this.phaseContextProviders.peek();
         if (peek == null) {
-            new PrettyPrinter(60).add("???Null context???").centre().hr()
-                .add(new Exception())
-                .trace(System.err);
             return;
         }
         if (peek.getFirst() != context) {
