@@ -52,10 +52,10 @@ public class WorldCategory extends ConfigCategory {
     private boolean worldEnabled = true;
 
     @Setting(value = "load-on-startup", comment = "If 'true', this world will load on startup.")
-    private Boolean loadOnStartup = true;
+    private Boolean loadOnStartup = false;
 
     @Setting(value = "generate-spawn-on-load", comment = "If 'true', this world will generate its spawn the moment its loaded.")
-    private Boolean generateSpawnOnLoad;
+    private Boolean generateSpawnOnLoad = false;
 
     @Setting(value = "keep-spawn-loaded", comment = "If 'true', this worlds spawn will remain loaded with no players.")
     private Boolean keepSpawnLoaded = true;
