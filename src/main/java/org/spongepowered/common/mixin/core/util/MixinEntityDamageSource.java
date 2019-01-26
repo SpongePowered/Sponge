@@ -30,10 +30,12 @@ import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
+import javax.annotation.Nullable;
+
 @Mixin(value = net.minecraft.util.EntityDamageSource.class, priority = 991)
 public abstract class MixinEntityDamageSource extends MixinDamageSource implements EntityDamageSource {
 
-    @Shadow protected net.minecraft.entity.Entity damageSourceEntity;
+    @Shadow @Nullable protected net.minecraft.entity.Entity damageSourceEntity;
 
     @Override
     public Entity getSource() {
