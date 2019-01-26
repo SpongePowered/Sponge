@@ -66,7 +66,7 @@ public class CraftingInventoryLensImpl extends OrderedInventoryLensImpl implemen
     }
 
     private void initOther() {
-        this.addSpanningChild(this.outputSlot);
+        this.addSpanningChild(this.outputSlot, new SlotIndex(0));
         this.addSpanningChild(this.craftingGrid);
         this.cache();
     }

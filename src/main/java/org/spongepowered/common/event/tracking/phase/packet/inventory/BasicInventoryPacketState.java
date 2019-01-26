@@ -102,7 +102,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
 
     @Nullable
     public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
-            List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, int usedButton) {
+            List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, int usedButton, @Nullable Slot slot) {
         return null;
     }
 
@@ -158,6 +158,11 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
         context.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(items -> items.stream().map(EntityUtil::fromNative).forEach(capturedItems::add));
         context.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(capturedItems::addAll);
 
+        Slot slot = null;
+        if (packetIn.getSlotId() >= 0) {
+            slot = mixinContainer.getContainerSlot(packetIn.getSlotId());
+        }
+        // else TODO slot for ClickInventoryEvent.Drag
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(openContainer);
             Sponge.getCauseStackManager().pushCause(player);
@@ -177,7 +182,6 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
                     return;
                 }
                 // No SlotTransaction was captured. So we add the clicked slot as a transaction
-                Slot slot = mixinContainer.getContainerSlot(packetIn.getSlotId());
                 if (slot != null) {
                     ItemStackSnapshot item = slot.peek().map(ItemStack::createSnapshot).orElse(ItemStackSnapshot.NONE);
                     slotTransactions.add(new SlotTransaction(slot, item, item));
@@ -185,8 +189,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
             }
 
             inventoryEvent = this.createInventoryEvent(player, ContainerUtil.fromNative(openContainer), cursorTransaction,
-                        new ArrayList<>(slotTransactions),
-                        capturedItems, usedButton);
+                        new ArrayList<>(slotTransactions), capturedItems, usedButton, slot);
 
             if (inventoryEvent != null) {
 
