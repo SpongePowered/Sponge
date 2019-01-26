@@ -610,6 +610,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         org.spongepowered.api.entity.Entity spongeEntity = (org.spongepowered.api.entity.Entity) newPlayer;
         ((org.spongepowered.api.world.World) worldServer).spawnEntity(spongeEntity);
         this.players.add(newPlayer);
+        newPlayer.connection.sendPacket(new SPacketPlayerListItem(SPacketPlayerListItem.Action.UPDATE_GAME_MODE, newPlayer));
         this.uuidToPlayerMap.put(newPlayer.getUniqueID(), newPlayer);
         newPlayer.addSelfToInternalCraftingInventory();
 
