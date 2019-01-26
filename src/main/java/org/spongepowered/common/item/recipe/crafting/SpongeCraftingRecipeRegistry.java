@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.item.recipe.crafting;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.item.crafting.CraftingManager;
@@ -32,86 +31,42 @@ import net.minecraft.item.crafting.IRecipe;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipeRegistry;
-import org.spongepowered.api.item.recipe.crafting.CraftingRecipes;
 import org.spongepowered.api.item.recipe.crafting.Ingredient;
-import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.registry.RegistryHelper;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 /**
  * Implementation of the CraftingRecipeRegistry.
  * Proxy for {@link CraftingManager}
  */
-public class SpongeCraftingRecipeRegistry implements CraftingRecipeRegistry, SpongeAdditionalCatalogRegistryModule<CraftingRecipe> {
+public class SpongeCraftingRecipeRegistry implements CraftingRecipeRegistry, SpongeAdditionalCatalogRegistryModule<CraftingRecipe>,
+        AlternateCatalogRegistryModule<CraftingRecipe> {
 
     public static SpongeCraftingRecipeRegistry getInstance() {
         return Holder.INSTANCE;
     }
-
-    @RegisterCatalog(CraftingRecipes.class)
-    private final Map<String, CraftingRecipe> recipeMappings = new HashMap<>();
-
-    private boolean registrationsComplete = false;
-    private List<CraftingRecipe> customRecipes = new ArrayList<>();
 
     private SpongeCraftingRecipeRegistry() {
     }
 
     @Override
     public void register(CraftingRecipe recipe) {
-        checkNotNull(recipe, "recipe");
-        this.registerAdditionalCatalog(recipe);
+        registerAdditionalCatalog(recipe);
     }
 
     @Override
     public Collection<CraftingRecipe> getRecipes() {
-        return SpongeImplHooks.getCraftingRecipes();
-    }
-
-    @Override
-    public Optional<CraftingRecipe> findMatchingRecipe(CraftingGridInventory inventory, World world) {
-        return SpongeImplHooks.findMatchingRecipe(inventory, world);
-
-    }
-
-    @Override
-    public boolean allowsApiRegistration() {
-        return !this.registrationsComplete;
-    }
-
-    public void disableRegistrations() {
-        this.registrationsComplete = true;
-        registerCustomWithVanilla();
-    }
-
-    @Override
-    public void registerDefaults() {
-        for (IRecipe iRecipe : CraftingManager.REGISTRY) {
-            CraftingRecipe recipe = (CraftingRecipe) iRecipe;
-            this.recipeMappings.put(recipe.getId(), recipe);
-        }
-
-        RegistryHelper.setFinalStatic(Ingredient.class, "NONE", net.minecraft.item.crafting.Ingredient.EMPTY);
-    }
-
-    @Override
-    public void registerAdditionalCatalog(CraftingRecipe recipe) {
-        checkState(!this.registrationsComplete, "Cannot register additional Recipes at this time! Recipes can only be registered before Initialization!");
-        if (!(recipe instanceof IRecipe)) { // Handle custom implemented Recipe Interfaces
-            recipe = new DelegateSpongeCraftingRecipe(recipe);
-        }
-        this.recipeMappings.put(recipe.getId(), recipe);
-        this.customRecipes.add(recipe);
+        return getAll();
     }
 
     @Override
@@ -121,17 +76,55 @@ public class SpongeCraftingRecipeRegistry implements CraftingRecipeRegistry, Spo
 
     @Override
     public Collection<CraftingRecipe> getAll() {
-        return this.getRecipes();
+        return SpongeImplHooks.getCraftingRecipes().stream()
+                .map(recipe -> {
+                    // Unwrap delegate recipes
+                    if (recipe instanceof DelegateSpongeCraftingRecipe) {
+                        return ((DelegateSpongeCraftingRecipe) recipe).getDelegate();
+                    }
+                    return recipe;
+                })
+                .collect(Collectors.toList());
     }
 
-    public List<CraftingRecipe> getCustomRecipes() {
-        return customRecipes;
-    }
-
-    public void registerCustomWithVanilla() {
-        for (CraftingRecipe customRecipe : this.customRecipes) {
-            SpongeImplHooks.onCraftingRecipeRegister(customRecipe);
+    @Override
+    public Map<String, CraftingRecipe> provideCatalogMap() {
+        final Collection<CraftingRecipe> recipes = getAll();
+        final Map<String, CraftingRecipe> mappings = new HashMap<>();
+        for (CraftingRecipe recipe : recipes) {
+            final String id = recipe.getId();
+            final int index = id.indexOf(':');
+            if (index != -1 && id.substring(0, index).equals("minecraft")) {
+                mappings.put(id.substring(index + 1), recipe);
+            }
         }
+        return mappings;
+    }
+
+    @Override
+    public Optional<CraftingRecipe> findMatchingRecipe(CraftingGridInventory inventory, World world) {
+        return SpongeImplHooks.findMatchingRecipe(inventory, world);
+    }
+
+    @Override
+    public boolean allowsApiRegistration() {
+        // Only allow the SpongeGameRegistryRegisterEvent be automatically called in vanilla,
+        // a custom event is thrown in the forge environment.
+        return SpongeImplHooks.isVanilla();
+    }
+
+    @Override
+    public void registerDefaults() {
+        RegistryHelper.setFinalStatic(Ingredient.class, "NONE", net.minecraft.item.crafting.Ingredient.EMPTY);
+    }
+
+    @Override
+    public void registerAdditionalCatalog(CraftingRecipe recipe) {
+        checkState(SpongeImplHooks.isVanilla()); // Should only be called in vanilla
+        if (!(recipe instanceof IRecipe)) {
+            recipe = new DelegateSpongeCraftingRecipe(recipe);
+        }
+        CraftingManager.register(recipe.getId(), (IRecipe) recipe);
     }
 
     private static final class Holder {

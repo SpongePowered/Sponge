@@ -28,24 +28,30 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.recipe.smelting.SmeltingRecipe;
 import org.spongepowered.api.item.recipe.smelting.SmeltingRecipeRegistry;
 import org.spongepowered.api.item.recipe.smelting.SmeltingResult;
+import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.text.translation.FixedTranslation;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.item.recipe.smelting.MatchSmeltingVanillaItemStack;
 import org.spongepowered.common.item.recipe.smelting.SpongeSmeltingRecipe;
+import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,14 +59,16 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 @Mixin(FurnaceRecipes.class)
-public abstract class MixinFurnaceRecipes implements SmeltingRecipeRegistry {
+public abstract class MixinFurnaceRecipes implements SmeltingRecipeRegistry, SpongeAdditionalCatalogRegistryModule<SmeltingRecipe> {
 
     @Shadow @Final private Map<ItemStack, ItemStack> smeltingList;
     @Shadow @Final private Map<ItemStack, Float> experienceList;
 
-    private final List<SmeltingRecipe> customRecipes = Lists.newArrayList();
+    private final Map<String, SmeltingRecipe> recipesById = new HashMap<>();
+
+    private final List<SmeltingRecipe> customRecipes = new ArrayList<>();
+    private final List<SmeltingRecipe> notCustomRecipes = new ArrayList<>();
     // No IdentityHashBiMap implementation exists
-    private final Map<SmeltingRecipe, ItemStack> customRecipeToNativeIngredient = new IdentityHashMap<>();
     private final Map<ItemStack, SmeltingRecipe> nativeIngredientToCustomRecipe = new IdentityHashMap<>();
 
     @Shadow public abstract ItemStack getSmeltingResult(ItemStack stack);
@@ -76,9 +84,7 @@ public abstract class MixinFurnaceRecipes implements SmeltingRecipeRegistry {
 
         if (result.isPresent()) {
             ItemStack nativeResult = ItemStackUtil.fromSnapshotToNative(result.get().getResult());
-
             cir.setReturnValue(nativeResult);
-
         } else {
             for (ItemStack nativeIngredient : this.nativeIngredientToCustomRecipe.keySet()) {
                 if (this.compareItemStacks(nativeIngredient, stack)) {
@@ -114,7 +120,6 @@ public abstract class MixinFurnaceRecipes implements SmeltingRecipeRegistry {
 
         return Optional.empty();
     }
-
     @Override
     public Optional<SmeltingRecipe> findMatchingRecipe(ItemStackSnapshot ingredient) {
         checkNotNull(ingredient, "ingredient");
@@ -125,19 +130,8 @@ public abstract class MixinFurnaceRecipes implements SmeltingRecipeRegistry {
             }
         }
 
-        ItemStack nativeIngredient = ItemStackUtil.fromSnapshotToNative(ingredient);
-
-        for (Map.Entry<ItemStack, ItemStack> entry : this.smeltingList.entrySet()) {
-            ItemStack nativeIngredientPrecise = entry.getKey();
-
-            if (compareItemStacks(nativeIngredient, nativeIngredientPrecise)) {
-                ItemStack nativeExemplaryResult = entry.getValue();
-                ItemStackSnapshot result = ItemStackUtil.snapshotOf(nativeExemplaryResult);
-                ItemStackSnapshot ingredientPrecise = ItemStackUtil.snapshotOf(nativeIngredientPrecise);
-                Predicate<ItemStackSnapshot> ingredientPredicate = new MatchSmeltingVanillaItemStack(ingredientPrecise);
-                double experience = this.experienceList.get(nativeExemplaryResult);
-                SmeltingRecipe recipe = new SpongeSmeltingRecipe(null, null, ingredientPrecise, ingredientPredicate, experience, result);
-
+        for (SmeltingRecipe recipe : this.notCustomRecipes) {
+            if (recipe.isValid(ingredient)) {
                 return Optional.of(recipe);
             }
         }
@@ -145,46 +139,69 @@ public abstract class MixinFurnaceRecipes implements SmeltingRecipeRegistry {
         return Optional.empty();
     }
 
+    @Inject(method = "addSmeltingRecipe(Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemStack;F)V", at = @At("RETURN"))
+    private void onAddSmeltingRecipe(ItemStack input, ItemStack stack, float experience, CallbackInfo ci) {
+        final ItemStackSnapshot result = ItemStackUtil.snapshotOf(stack);
+        final ItemStackSnapshot ingredient = ItemStackUtil.snapshotOf(input);
+        final Predicate<ItemStackSnapshot> ingredientPredicate = new MatchSmeltingVanillaItemStack(ingredient);
+
+        final PluginContainer activeModContainer = SpongeImplHooks.getActiveModContainer();
+        final String namespace = activeModContainer == null ? "minecraft" : activeModContainer.getId();
+
+        String resultId = result.getType().getId();
+        int index = resultId.indexOf(':');
+        resultId = index == -1 ? resultId : resultId.substring(index + 1);
+
+        String ingredientId = ingredient.getType().getId();
+        index = ingredientId.indexOf(':');
+        ingredientId = index == -1 ? ingredientId : ingredientId.substring(index + 1);
+
+        final String name = resultId + "_to_" + ingredientId;
+        final String id = namespace + ':' + name;
+
+        final SmeltingRecipe recipe = new SpongeSmeltingRecipe(id, new FixedTranslation(name),
+                ingredient, ingredientPredicate, experience, result);
+        this.recipesById.put(id, recipe);
+        this.notCustomRecipes.add(recipe);
+    }
+
     @Override
     public void register(SmeltingRecipe recipe) {
-        checkNotNull(recipe, "recipe");
-        checkArgument(!this.customRecipeToNativeIngredient.containsKey(recipe),
-                "This recipe has already been registered!");
+        registerAdditionalCatalog(recipe);
+    }
 
-        ItemStackSnapshot exemplaryIngredient = recipe.getExemplaryIngredient();
-        ItemStack nativeExemplaryIngredient = ItemStackUtil.fromSnapshotToNative(exemplaryIngredient);
-        ItemStack nativeExemplaryResult = ItemStackUtil.fromSnapshotToNative(recipe.getExemplaryResult());
-        float nativeExemplaryExperience = (float) recipe.getResult(exemplaryIngredient)
+    @Override
+    public void registerAdditionalCatalog(SmeltingRecipe recipe) {
+        checkNotNull(recipe, "recipe");
+        checkArgument(!this.recipesById.containsKey(recipe.getId()),
+                "Duplicate id: %s", recipe.getId());
+
+        final ItemStackSnapshot exemplaryIngredient = recipe.getExemplaryIngredient();
+        final ItemStack nativeExemplaryIngredient = ItemStackUtil.fromSnapshotToNative(exemplaryIngredient);
+        final ItemStack nativeExemplaryResult = ItemStackUtil.fromSnapshotToNative(recipe.getExemplaryResult());
+        final float nativeExemplaryExperience = (float) recipe.getResult(exemplaryIngredient)
                 .orElseThrow(() -> new IllegalStateException("Could not get the result for the exemplary ingredient.")).getExperience();
 
         this.smeltingList.put(nativeExemplaryIngredient, nativeExemplaryResult);
         this.experienceList.put(nativeExemplaryResult, nativeExemplaryExperience);
-        this.customRecipeToNativeIngredient.put(recipe, nativeExemplaryIngredient);
         this.nativeIngredientToCustomRecipe.put(nativeExemplaryIngredient, recipe);
         this.customRecipes.add(recipe);
+        this.recipesById.put(recipe.getId(), recipe);
     }
 
     @Override
-    public Collection<SmeltingRecipe> getRecipes() {
-        ImmutableList.Builder<SmeltingRecipe> builder = ImmutableList.builder();
+    public Optional<SmeltingRecipe> getById(String id) {
+        checkNotNull(id, "id");
+        return Optional.ofNullable(this.recipesById.get(id));
+    }
 
-        for (Map.Entry<ItemStack, ItemStack> smeltingEntry : this.smeltingList.entrySet()) {
-            ItemStack nativeIngredient = smeltingEntry.getKey();
+    @Override
+    public Collection<SmeltingRecipe> getAll() {
+        return ImmutableList.copyOf(this.recipesById.values());
+    }
 
-            // If not a custom recipe, add first
-            if (!this.nativeIngredientToCustomRecipe.containsKey(nativeIngredient)) {
-                ItemStack nativeExemplaryResult = smeltingEntry.getValue();
-                ItemStackSnapshot exemplaryResult = ItemStackUtil.snapshotOf(nativeExemplaryResult);
-                ItemStackSnapshot exemplaryIngredient = ItemStackUtil.snapshotOf(nativeIngredient);
-                Predicate<ItemStackSnapshot> ingredientPredicate = new MatchSmeltingVanillaItemStack(exemplaryIngredient);
-                double experience = (double) this.experienceList.get(nativeExemplaryResult);
-
-                builder.add(new SpongeSmeltingRecipe(null, null, exemplaryIngredient, ingredientPredicate, experience, exemplaryResult));
-            }
-        }
-
-        builder.addAll(this.customRecipes);
-
-        return builder.build();
+    @Override
+    public boolean allowsApiRegistration() {
+        return true;
     }
 }

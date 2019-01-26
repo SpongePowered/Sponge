@@ -360,11 +360,6 @@ public final class SpongeImplHooks {
         }
     }
 
-    public static void onCraftingRecipeRegister(CraftingRecipe recipe) {
-        // Overridden in SF
-        CraftingManager.register(recipe.getId(), ((IRecipe) recipe));
-    }
-
     public static Optional<CraftingRecipe> findMatchingRecipe(CraftingGridInventory inventory, org.spongepowered.api.world.World world) {
         IRecipe recipe = CraftingManager.findMatchingRecipe(InventoryUtil.toNativeInventory(inventory), ((net.minecraft.world.World) world));
         return Optional.ofNullable(((CraftingRecipe) recipe));
@@ -380,6 +375,11 @@ public final class SpongeImplHooks {
             return Optional.empty();
         }
         return Optional.of(((CraftingRecipe) recipe));
+    }
+
+    @Nullable
+    public static PluginContainer getActiveModContainer() {
+        return null;
     }
 
     public static Text getAdditionalCommandDescriptions() {
