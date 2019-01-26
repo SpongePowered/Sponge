@@ -511,7 +511,8 @@ public final class PhaseTracker {
         }
     }
 
-    private void printUnexpectedBlockChange() {
+    private void printUnexpectedBlockChange(IMixinWorldServer mixinWorld, BlockPos pos, IBlockState currentState,
+        IBlockState newState) {
         if (!SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().isVerbose()) {
             return;
         }
@@ -521,6 +522,12 @@ public final class PhaseTracker {
                  + "where Sponge does not know of changes that mods may perform.\n"
                  + "In cases like this, it is best to report to Sponge to get this\n"
                  + "change tracked correctly and accurately.").hr()
+            .add()
+            .add("%s : %s", "World", mixinWorld)
+            .add("%s : %s", "Position", pos)
+            .add("%s : %s", "Current State", currentState)
+            .add("%s : %s", "New State", newState)
+            .add()
             .add("StackTrace:")
             .add(new Exception())
             .trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
@@ -539,7 +546,7 @@ public final class PhaseTracker {
         this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
         printer.add("Stacktrace:");
         printer.add(e);
-        printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
+        printer.log(SpongeImpl.getLogger(), Level.ERROR);
         if (!SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().isVerbose()) {
             this.printedExceptionsForEntities.add(context.state);
         }
@@ -696,7 +703,7 @@ public final class PhaseTracker {
         if (isComplete && SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().isVerbose()) { // Fail fast.
             // The random occurrence that we're told to complete a phase
             // while a world is being changed unknowingly.
-            this.printUnexpectedBlockChange();
+            this.printUnexpectedBlockChange(mixinWorld, pos, currentState, newState);
         }
         if (((IPhaseState) phaseState).doesBulkBlockCapture(context)) {
             try {
