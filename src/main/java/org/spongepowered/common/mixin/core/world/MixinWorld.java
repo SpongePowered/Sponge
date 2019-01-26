@@ -170,7 +170,7 @@ import javax.annotation.Nullable;
 public abstract class MixinWorld implements World, IMixinWorld {
 
     private static final Vector3i BLOCK_MIN = new Vector3i(-30000000, 0, -30000000);
-    private static final Vector3i BLOCK_MAX = new Vector3i(30000000, 256, 30000000);
+    private static final Vector3i BLOCK_MAX = new Vector3i(30000000, 256, 30000000).sub(Vector3i.ONE);
     private static final Vector3i BLOCK_SIZE = BLOCK_MAX.sub(BLOCK_MIN).add(Vector3i.ONE);
     private static final Vector3i BIOME_MIN = new Vector3i(BLOCK_MIN.getX(), 0, BLOCK_MIN.getZ());
     private static final Vector3i BIOME_MAX = new Vector3i(BLOCK_MAX.getX(), 256, BLOCK_MAX.getZ());
