@@ -34,10 +34,14 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.event.tracking.phase.packet.PacketConstants;
 
 import java.util.List;
+import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 public final class PrimaryInventoryClickState extends BasicInventoryPacketState {
 
@@ -47,12 +51,14 @@ public final class PrimaryInventoryClickState extends BasicInventoryPacketState 
 
     @Override
     public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
-            List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, int usedButton) {
+            List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, int usedButton, @Nullable Slot slot) {
         if (!capturedEntities.isEmpty()) {
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DISPENSE);
-            return SpongeEventFactory.createClickInventoryEventDropOutsidePrimary(Sponge.getCauseStackManager().getCurrentCause(), transaction, capturedEntities, openContainer, slotTransactions);
+            return SpongeEventFactory.createClickInventoryEventDropOutsidePrimary(Sponge.getCauseStackManager().getCurrentCause(),
+                    transaction, capturedEntities, Optional.ofNullable(slot), openContainer, slotTransactions);
         }
-        return SpongeEventFactory.createClickInventoryEventPrimary(Sponge.getCauseStackManager().getCurrentCause(), transaction, openContainer, slotTransactions);
+        return SpongeEventFactory.createClickInventoryEventPrimary(Sponge.getCauseStackManager().getCurrentCause(),
+                transaction, Optional.ofNullable(slot), openContainer, slotTransactions);
     }
 
 }

@@ -37,7 +37,9 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.AffectEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
+import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
@@ -49,6 +51,8 @@ import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.annotation.Nullable;
 
 public final class EnchantItemPacketState extends BasicInventoryPacketState {
 
@@ -95,12 +99,10 @@ public final class EnchantItemPacketState extends BasicInventoryPacketState {
             Sponge.getCauseStackManager().pushCause(player);
             Sponge.getCauseStackManager().pushCause(openContainer);
             final ClickInventoryEvent inventoryEvent;
-            inventoryEvent =
-                this
-                    .createInventoryEvent(player, ContainerUtil.fromNative(openContainer), transaction,
+            inventoryEvent = this.createInventoryEvent(player, ContainerUtil.fromNative(openContainer), transaction,
                         Lists.newArrayList(slotTransactions),
                         capturedItems,
-                        usedButton);
+                        usedButton, null);
 
             // Some mods may override container detectAndSendChanges method and prevent captures
             // If this happens and we captured no entities, avoid firing events
@@ -154,5 +156,8 @@ public final class EnchantItemPacketState extends BasicInventoryPacketState {
             }
         }
         slotTransactions.clear();
-        mixinContainer.setCaptureInventory(false);    }
+        mixinContainer.setCaptureInventory(false);
+    }
+
+    // TODO EnchantItemEvent
 }

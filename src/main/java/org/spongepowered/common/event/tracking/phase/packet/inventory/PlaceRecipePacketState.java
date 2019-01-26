@@ -38,6 +38,7 @@ import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingOutput;
 import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
@@ -52,6 +53,7 @@ import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
 import java.util.List;
+import java.util.Optional;
 
 public final class PlaceRecipePacketState extends BasicInventoryPacketState {
 
@@ -97,12 +99,13 @@ public final class PlaceRecipePacketState extends BasicInventoryPacketState {
             ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
             Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(cursor, cursor);
             ClickInventoryEvent event;
+
             if (shift) {
                 event = SpongeEventFactory.createClickInventoryEventRecipeAll(frame.getCurrentCause(),
-                        cursorTransaction, (Recipe) recipe, ((Container) player.openContainer), transactions);
+                        cursorTransaction, (Recipe) recipe, Optional.empty(),((Container) player.openContainer), transactions);
             } else {
                 event = SpongeEventFactory.createClickInventoryEventRecipeSingle(frame.getCurrentCause(),
-                        cursorTransaction, (Recipe) recipe, ((Container) player.openContainer), transactions);
+                        cursorTransaction, (Recipe) recipe, Optional.empty(), ((Container) player.openContainer), transactions);
             }
             SpongeImpl.postEvent(event);
             if (event.isCancelled() || !event.getCursorTransaction().isValid()) {

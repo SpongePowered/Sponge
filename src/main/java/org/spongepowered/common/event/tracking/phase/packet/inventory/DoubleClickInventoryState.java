@@ -33,12 +33,16 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.event.tracking.phase.packet.PacketConstants;
 import org.spongepowered.common.event.tracking.phase.packet.drag.DragInventoryStopState;
 import org.spongepowered.common.interfaces.IMixinContainer;
 
 import java.util.List;
+import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 public final class DoubleClickInventoryState extends BasicInventoryPacketState {
 
@@ -48,8 +52,9 @@ public final class DoubleClickInventoryState extends BasicInventoryPacketState {
 
     @Override
     public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
-            List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, int usedButton) {
-        return SpongeEventFactory.createClickInventoryEventDouble(Sponge.getCauseStackManager().getCurrentCause(), transaction, openContainer, slotTransactions);
+            List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, int usedButton, @Nullable Slot slot) {
+        return SpongeEventFactory.createClickInventoryEventDouble(Sponge.getCauseStackManager().getCurrentCause(), transaction,
+                Optional.ofNullable(slot), openContainer, slotTransactions);
     }
 
     @Override

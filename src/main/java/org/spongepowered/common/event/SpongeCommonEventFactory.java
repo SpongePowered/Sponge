@@ -1048,9 +1048,10 @@ public class SpongeCommonEventFactory {
             // Creative doesn't inform server of cursor status so there is no way of knowing what the final stack is
             // Due to this, we can only send the original item that was clicked in slot
             Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(ItemStackSnapshot.NONE, ItemStackSnapshot.NONE);
+            org.spongepowered.api.item.inventory.Slot slot = null;
             if (((IMixinContainer) player.openContainer).getCapturedTransactions().isEmpty() && packetIn.getSlotId() >= 0
                     && packetIn.getSlotId() < player.openContainer.inventorySlots.size()) {
-                org.spongepowered.api.item.inventory.Slot slot = ((IMixinContainer)player.openContainer).getContainerSlot(packetIn.getSlotId());
+                slot = ((IMixinContainer)player.openContainer).getContainerSlot(packetIn.getSlotId());
                 if (slot != null) {
                     ItemStackSnapshot clickedItem = ItemStackUtil.snapshotOf(slot.peek().orElse(org.spongepowered.api.item.inventory.ItemStack.empty()));
                     ItemStackSnapshot replacement = ItemStackUtil.snapshotOf(packetIn.getStack());
@@ -1060,7 +1061,7 @@ public class SpongeCommonEventFactory {
             }
             ClickInventoryEvent.Creative event =
                 SpongeEventFactory.createClickInventoryEventCreative(frame.getCurrentCause(), cursorTransaction,
-                    (org.spongepowered.api.item.inventory.Container) player.openContainer,
+                    Optional.ofNullable(slot), (org.spongepowered.api.item.inventory.Container) player.openContainer,
                     new ArrayList<>(((IMixinContainer) player.openContainer).getCapturedTransactions()));
             ((IMixinContainer) player.openContainer).getCapturedTransactions().clear();
             ((IMixinContainer) player.openContainer).setCaptureInventory(false);
@@ -1399,9 +1400,9 @@ public class SpongeCommonEventFactory {
             previousCursor = player.inventory.getItemStack(); // or get the current one
         }
         Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(ItemStackUtil.snapshotOf(previousCursor), ItemStackUtil.snapshotOf(player.inventory.getItemStack()));
-        CraftItemEvent.Craft event = SpongeEventFactory
-                .createCraftItemEventCraft(Sponge.getCauseStackManager().getCurrentCause(), result, inventory,
-                        cursorTransaction, Optional.ofNullable(recipe), ((org.spongepowered.api.item.inventory.Container) container), transactions);
+        org.spongepowered.api.item.inventory.Slot slot = inventory.getResult();
+        CraftItemEvent.Craft event = SpongeEventFactory.createCraftItemEventCraft(Sponge.getCauseStackManager().getCurrentCause(), result, inventory,
+                        cursorTransaction, Optional.ofNullable(recipe), Optional.of(slot), ((org.spongepowered.api.item.inventory.Container) container), transactions);
         SpongeImpl.postEvent(event);
 
         ((IMixinContainer) container).setCaptureInventory(false);

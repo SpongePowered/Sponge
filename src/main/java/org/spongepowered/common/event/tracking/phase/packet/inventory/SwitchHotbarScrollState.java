@@ -49,6 +49,9 @@ import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
 import java.util.List;
+import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 public final class SwitchHotbarScrollState extends BasicInventoryPacketState {
 
@@ -63,9 +66,9 @@ public final class SwitchHotbarScrollState extends BasicInventoryPacketState {
 
     @Override
     public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
-            List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, int usedButton) {
-        return SpongeEventFactory.createClickInventoryEventNumberPress(Sponge.getCauseStackManager().getCurrentCause(), transaction, openContainer,
-                slotTransactions, usedButton);
+            List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, int usedButton, @Nullable org.spongepowered.api.item.inventory.Slot slot) {
+        return SpongeEventFactory.createClickInventoryEventNumberPress(Sponge.getCauseStackManager().getCurrentCause(), transaction,
+                Optional.ofNullable(slot), openContainer, slotTransactions, usedButton);
     }
 
     @Override
