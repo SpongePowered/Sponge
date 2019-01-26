@@ -31,8 +31,10 @@ import net.minecraft.item.crafting.IRecipe;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipeRegistry;
+import org.spongepowered.api.item.recipe.crafting.CraftingRecipes;
 import org.spongepowered.api.item.recipe.crafting.Ingredient;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
+import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.registry.RegistryHelper;
@@ -49,6 +51,7 @@ import java.util.stream.Collectors;
  * Implementation of the CraftingRecipeRegistry.
  * Proxy for {@link CraftingManager}
  */
+@RegisterCatalog(CraftingRecipes.class)
 public class SpongeCraftingRecipeRegistry implements CraftingRecipeRegistry, SpongeAdditionalCatalogRegistryModule<CraftingRecipe>,
         AlternateCatalogRegistryModule<CraftingRecipe> {
 
