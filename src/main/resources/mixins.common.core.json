@@ -401,6 +401,7 @@
         "network.datasync.IMixinEntityDataManager",
         "network.datasync.MixinEntityDataManager",
         "potion.MixinPotion",
+        "potion.MixinPotionType",
         "potion.MixinPotionEffect",
         "scoreboard.MixinCollisionRule",
         "scoreboard.MixinCriterion",

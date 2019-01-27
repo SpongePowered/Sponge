@@ -117,6 +117,8 @@ public final class NbtDataUtil {
 
     public static final String ITEM_HIDE_FLAGS = "HideFlags";
 
+    public static final String ITEM_POTION_TYPE = "Potion";
+
     public static final String CUSTOM_POTION_EFFECTS = "CustomPotionEffects";
 
     public static final String USER_SPAWN_X = "SpawnX";

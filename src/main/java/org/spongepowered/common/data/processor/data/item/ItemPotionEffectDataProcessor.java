@@ -48,9 +48,9 @@ import org.spongepowered.common.data.value.mutable.SpongeListValue;
 import java.util.List;
 import java.util.Optional;
 
-public class ItemPotionDataProcessor extends AbstractItemSingleDataProcessor<List<PotionEffect>, ListValue<PotionEffect>, PotionEffectData, ImmutablePotionEffectData> {
+public class ItemPotionEffectDataProcessor extends AbstractItemSingleDataProcessor<List<PotionEffect>, ListValue<PotionEffect>, PotionEffectData, ImmutablePotionEffectData> {
 
-    public ItemPotionDataProcessor() {
+    public ItemPotionEffectDataProcessor() {
         super(itemStack -> itemStack.getItem() == Items.POTIONITEM || itemStack.getItem() == Items.SPLASH_POTION ||
                 itemStack.getItem() == Items.LINGERING_POTION || itemStack.getItem() == Items.TIPPED_ARROW, Keys.POTION_EFFECTS);
     }

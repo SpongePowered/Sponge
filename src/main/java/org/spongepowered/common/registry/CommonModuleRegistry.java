@@ -49,6 +49,7 @@ import org.spongepowered.api.boss.BossBarOverlay;
 import org.spongepowered.api.boss.ServerBossBar;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.item.potion.PotionType;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.persistence.DataFormat;
@@ -59,7 +60,6 @@ import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.api.effect.sound.SoundCategory;
 import org.spongepowered.api.effect.sound.SoundType;
-import org.spongepowered.api.effect.sound.record.RecordType;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
@@ -523,6 +523,7 @@ public final class CommonModuleRegistry {
             .registerModule(PopulatorObject.class, new PopulatorObjectRegistryModule())
             .registerModule(PopulatorType.class, PopulatorTypeRegistryModule.getInstance())
             .registerModule(PortionType.class, new PortionTypeRegistryModule())
+            .registerModule(PotionType.class, PotionTypeRegistryModule.getInstance())
             .registerModule(PotionEffectType.class, PotionEffectTypeRegistryModule.getInstance())
             .registerModule(PrismarineType.class, new PrismarineRegistryModule())
             .registerModule(Profession.class, ProfessionRegistryModule.getInstance())

@@ -449,6 +449,8 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
 
         this.register("hide_miscellaneous", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).key(CatalogKey.sponge("hide_miscellaneous")).name("Hide Miscellaneous").query(of("HideMiscellaneous")).build());
 
+        this.register("potion_type", Key.builder().type(TypeTokens.POTION_VALUE_TOKEN).id("potion_type").name("Potion Type").query(of("PotionType")).build());
+
         this.register("potion_effects", Key.builder().type(TypeTokens.LIST_POTION_VALUE_TOKEN).key(CatalogKey.sponge("potion_effects")).name("Potion Effects").query(of("PotionEffects")).build());
 
         this.register("body_rotations", Key.builder().type(TypeTokens.MAP_BODY_VECTOR3D_VALUE_TOKEN).key(CatalogKey.sponge("body_rotations")).name("Body Rotations").query(of("BodyRotations")).build());
