@@ -45,7 +45,7 @@ import org.spongepowered.api.text.selector.Selector;
 
 import javax.inject.Inject;
 
-@Plugin(id = "selectortexttest", name = "Selector Text test", description = "A plugin to test selector texts")
+@Plugin(id = "selectortexttest", name = "Selector Text test", description = "A plugin to test selector texts", version = "0.0.0")
 public class SelectorTextTest {
 
     private static final LiteralText ERROR_PLAYER = Text.of("Must be ran by player");
