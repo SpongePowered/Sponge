@@ -62,6 +62,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.EnumDifficulty;
+import net.minecraft.world.EnumLightType;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.GameType;
@@ -217,7 +218,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Shadow protected int updateLCG;
     @Shadow public abstract net.minecraft.world.border.WorldBorder shadow$getWorldBorder();
-    @Shadow public abstract EnumDifficulty shadow$getDifficulty();
 
     @Shadow protected abstract void tickPlayers();
 
@@ -229,12 +229,12 @@ public abstract class MixinWorld implements World, IMixinWorld {
     // To be overridden in MixinWorldServer_Lighting
     @Shadow public abstract int getLight(BlockPos pos);
     @Shadow public abstract int getLight(BlockPos pos, boolean checkNeighbors);
-    @Shadow public abstract int getRawLight(BlockPos pos, EnumSkyBlock lightType);
+    @Shadow public abstract int getRawLight(BlockPos pos, EnumLightType lightType);
     @Shadow public abstract int getSkylightSubtracted();
     @Shadow public abstract net.minecraft.world.chunk.Chunk getChunk(BlockPos pos);
     @Shadow public abstract WorldInfo getWorldInfo();
     @Shadow public abstract boolean checkLight(BlockPos pos);
-    @Shadow public abstract boolean checkLightFor(EnumSkyBlock lightType, BlockPos pos);
+    @Shadow public abstract boolean checkLightFor(EnumLightType lightType, BlockPos pos);
     @Shadow public abstract boolean addTileEntity(net.minecraft.tileentity.TileEntity tile);
     @Shadow public abstract void onEntityAdded(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract boolean isAreaLoaded(BlockPos from, BlockPos to);
@@ -247,7 +247,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
    // @Shadow public abstract List<Entity> getEntitiesInAABBexcluding(@Nullable net.minecraft.entity.Entity entityIn, AxisAlignedBB boundingBox, @Nullable Predicate <? super net.minecraft.entity.Entity > predicate);
     @Shadow public abstract boolean addWeatherEffect(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract Biome getBiome(BlockPos pos);
-    @Shadow public abstract BiomeProvider getBiomeProvider();
     @Shadow public abstract boolean isBlockPowered(BlockPos pos);
     @Shadow public abstract net.minecraft.world.chunk.Chunk getChunk(int chunkX, int chunkZ);
     @Shadow public abstract net.minecraft.world.Explosion newExplosion(@Nullable net.minecraft.entity.Entity entityIn, double x, double y, double z, float strength,
