@@ -9,6 +9,7 @@ buildscript {
             name = 'sponge'
             url = 'https://repo.spongepowered.org/maven'
         }
+        mavenLocal()
         maven {
             name = 'forge'
             url = 'http://files.minecraftforge.net/maven'
@@ -16,12 +17,9 @@ buildscript {
     }
 
     dependencies {
-        // VanillaGradle contains a custom ForgeGradle extension for SpongeCommon (see below)
-        classpath 'gradle.plugin.net.minecrell:vanillagradle:2.2-5'
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
-        classpath 'gradle.plugin.net.minecrell:licenser:0.3'
-        classpath 'gradle.plugin.org.spongepowered:spongegradle:0.8.1'
-        classpath 'org.spongepowered:mixingradle:0.4-SNAPSHOT'
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+        classpath 'org.spongepowered:spongegradle:0.8.2-SNAPSHOT'
+        classpath 'gradle.plugin.net.minecrell:licenser:0.4'
     }
 }
 
@@ -44,9 +42,6 @@ dependencies {
         exclude module: 'spongeapi'
     }
     compile 'org.ow2.asm:asm-debug-all:5.2'
-    compile('org.spongepowered:mixin:0.7.11-SNAPSHOT') {
-        exclude module: 'launchwrapper'
-    }
 
     // log4j2 slf4j implementation
     runtime 'org.apache.logging.log4j:log4j-slf4j-impl:2.8.1'
@@ -56,10 +51,6 @@ dependencies {
     runtime 'org.mariadb.jdbc:mariadb-java-client:2.0.3'
     compile 'com.h2database:h2:1.4.196'
     runtime 'org.xerial:sqlite-jdbc:3.20.0'
-
-    forgeGradleMcDeps('net.minecraft:launchwrapper:1.11') {
-        transitive = false
-    }
 
     // Taken from https://stackoverflow.com/a/7969292
     testCompile api.sourceSets.test.output

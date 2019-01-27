@@ -10,23 +10,16 @@ evaluationDependsOn api.path
 apply from: api.file('gradle/sponge.gradle')
 
 // Apply ForgeGradle plugin
-apply plugin: forgeGradlePlugin
-
-// Apply MixinGradle plugin to project
-apply plugin: 'org.spongepowered.mixin'
+apply plugin: "net.minecraftforge.gradle"
 
 dependencies {
     testCompile 'org.spongepowered:lwts:1.0.0'
+    minecraft 'net.minecraft:joined:1.13.1'
 }
 
 minecraft {
-    version = minecraftVersion
-    mappings = common.mcpMappings
+    mappings channel: 'snapshot', version: '20190126-1.13.1'
 
-    runDir = 'run'
-
-    // We don't use the obfuscated dev jar currently
-    makeObfSourceJar = false
 }
 
 // Mixins
@@ -51,11 +44,6 @@ compileJava6Java {
     targetCompatibility = '1.6'
 }
 
-// ForgeGradle 2 fails to apply transformer rules for classes it doesn't know of by default
-// We use the access transformer to make the catalogs in the API accessible
-deobfMcMCP { failOnAtError = false }
-deobfMcSRG { failOnAtError = false }
-
 // The access transformers we use
 ext.ats = ['common_at.cfg']
 
@@ -76,9 +64,6 @@ jar {
         )
     }
 }
-
-// Don't upload temp jar to Maven repository
-configurations.archives.artifacts.removeAll { it.archiveTask.is jar }
 
 task devJar(type: Jar) {
     classifier = 'dev'
