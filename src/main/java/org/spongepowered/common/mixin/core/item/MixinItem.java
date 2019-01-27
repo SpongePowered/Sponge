@@ -24,9 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.item;
 
+import static com.google.common.base.Preconditions.checkState;
+
 import com.google.common.base.MoreObjects;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -63,7 +66,9 @@ public abstract class MixinItem implements ItemType, IMixinItem, SpongeGameDicti
 
     @Override
     public String getId() {
-        return Item.REGISTRY.getNameForObject((Item) (Object) this).toString();
+        final ResourceLocation resourceLocation = Item.REGISTRY.getNameForObject((Item) (Object) this);
+        checkState(resourceLocation != null, "Attempted to access the id before the Item is registered.");
+        return resourceLocation.toString();
     }
 
     @Override
