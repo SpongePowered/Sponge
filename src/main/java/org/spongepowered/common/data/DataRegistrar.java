@@ -559,7 +559,10 @@ public class DataRegistrar {
                 ImmutableSpongeFluidItemData.class, new FluidItemDataProcessor());
 
         DataUtil.registerDualProcessor(PotionEffectData.class, SpongePotionEffectData.class, ImmutablePotionEffectData.class,
-                ImmutableSpongePotionEffectData.class, new ItemPotionDataProcessor());
+                ImmutableSpongePotionEffectData.class, new ItemPotionEffectDataProcessor());
+
+        DataUtil.registerDualProcessor(PotionTypeData.class, SpongePotionTypeData.class, ImmutablePotionTypeData.class,
+                ImmutableSpongePotionTypeData.class, new ItemPotionTypeDataProcessor());
 
         DataUtil.registerDataProcessorAndImpl(HideData.class, SpongeHideData.class, ImmutableHideData.class, ImmutableSpongeHideData.class,
                 new HideDataProcessor());
