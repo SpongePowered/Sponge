@@ -10,6 +10,19 @@ apply from: common.file('gradle/minecraft.gradle')
 
 ext.apiSuffix = (api.version - '-SNAPSHOT') + '-BETA'
 
+minecraft {
+    mappings = common.minecraft.mappings
+    setAccessTransformers(common.minecraft.getAccessTransformers())
+    runs {
+        client = {
+            workingDirectory project.file('run').canonicalPath
+            source sourceSets.main
+        }
+        server = {
+            workingDirectory project.file('run').canonicalPath
+        }
+    }
+}
 dependencies {
     compile common
     compile common.sourceSets.java6.output
@@ -26,11 +39,6 @@ configurations.compile {
     exclude module: 'asm-tree'
 }
 
-// Add Common access transformers
-minecraft {
-    atSource common.sourceSets.main
-}
-
 // Generate mcmod.info file for implementation
 apply plugin: 'org.spongepowered.meta'
 
@@ -44,10 +52,6 @@ sponge {
         meta.dependencies {
             spongeapi {
                 forceVersion {common.apiVersion}
-            }
-
-            minecraft {
-                forceVersion project.minecraft.version
             }
         }
     }
@@ -75,15 +79,17 @@ shadowJar {
     mainSpec.sourcePaths.clear()
 
     // Make sure SpongeCommon was actually reobfuscated before shading it
-    dependsOn reobfJar
-    dependsOn common.tasks.reobfJar
+    // tODO - figure out how to get reobf jar
+//    dependsOn task('reobfJar')
+//    dependsOn common.tasks.reobfJar
 
     classifier = ''
 
     // Wait for reobf task to be fully configured
     afterEvaluate {
         // Include obfuscated classes
-        from zipTree(reobfJar.jar)
+        // Figure out how to get reobfjars
+//        from zipTree(reobfJar.jar)
     }
 }
 

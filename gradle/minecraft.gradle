@@ -12,14 +12,13 @@ apply from: api.file('gradle/sponge.gradle')
 // Apply ForgeGradle plugin
 apply plugin: "net.minecraftforge.gradle"
 
-dependencies {
-    testCompile 'org.spongepowered:lwts:1.0.0'
-    minecraft 'net.minecraft:joined:1.13.1'
+// Common has Minecraft Server, implementations deal with their own dependencies, FG limits to one MC dependency
+common.dependencies {
+    minecraft 'net.minecraft:server:1.13'
 }
-
 minecraft {
-    mappings channel: 'snapshot', version: '20190126-1.13.1'
-
+    mappings channel: 'snapshot', version: '20181008-1.13'
+    accessTransformer = file(sourceSets.main.resources.srcDirs.getAt(0).path + "/META-INF/common_at.cfg")
 }
 
 // Mixins
