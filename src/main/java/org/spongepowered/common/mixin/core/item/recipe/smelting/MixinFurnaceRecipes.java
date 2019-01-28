@@ -43,6 +43,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.item.recipe.smelting.MatchSmeltingVanillaItemStack;
@@ -143,10 +144,23 @@ public abstract class MixinFurnaceRecipes implements SmeltingRecipeRegistry, Spo
     private void onAddSmeltingRecipe(ItemStack input, ItemStack stack, float experience, CallbackInfo ci) {
         final ItemStackSnapshot result = ItemStackUtil.snapshotOf(stack);
         final ItemStackSnapshot ingredient = ItemStackUtil.snapshotOf(input);
-        final Predicate<ItemStackSnapshot> ingredientPredicate = new MatchSmeltingVanillaItemStack(ingredient);
 
         final PluginContainer activeModContainer = SpongeImplHooks.getActiveModContainer();
         final String namespace = activeModContainer == null ? "minecraft" : activeModContainer.getId();
+
+        // Some mods are doing things wrongly which causes their recipes to be broken,
+        // just log the problem and don't register them. Crashing the server is not an
+        // option either.
+        if (result.isEmpty() || ingredient.isEmpty()) {
+            SpongeImpl.getLogger().error("Invalid smelting recipe registration!\n" +
+                            "The mod \"" + namespace + "\" is registering a smelting recipe wrongly which causes the resulting recipe to be " +
+                            "invalid.\nA common cause which makes smelting recipes invalid occurs when registering those recipes before " +
+                            "the used blocks are\nregistered, it's recommend to register them when the items are finished registering.\n",
+                    new IllegalStateException("Invalid smelting recipe registered by the mod \"" + namespace + "\"!"));
+            return;
+        }
+
+        final Predicate<ItemStackSnapshot> ingredientPredicate = new MatchSmeltingVanillaItemStack(ingredient);
 
         String resultId = result.getType().getId();
         int index = resultId.indexOf(':');
