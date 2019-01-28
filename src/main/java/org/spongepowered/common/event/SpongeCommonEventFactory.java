@@ -41,6 +41,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.ContainerPlayer;
+import net.minecraft.inventory.ContainerRepair;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
@@ -67,6 +68,7 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.Item;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.Agent;
+import org.spongepowered.api.entity.living.Human;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
@@ -82,6 +84,7 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
+import org.spongepowered.api.event.entity.ChangeEntityEquipmentEvent;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
@@ -94,6 +97,7 @@ import org.spongepowered.api.event.item.inventory.CraftItemEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.event.item.inventory.InteractItemEvent;
+import org.spongepowered.api.event.item.inventory.UpdateAnvilEvent;
 import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
@@ -118,6 +122,7 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.inventory.UpdateAnvilEventCost;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -130,6 +135,7 @@ import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.custom.CustomInventory;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.InventoryUtil;
@@ -220,6 +226,17 @@ public class SpongeCommonEventFactory {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.getCurrentContext().require(EventContextKeys.SPAWN_TYPE);
             final DropItemEvent.Custom event = SpongeEventFactory.createDropItemEventCustom(frame.getCurrentCause(), items);
+            SpongeImpl.postEvent(event);
+            if (!event.isCancelled()) {
+                EntityUtil.processEntitySpawnsFromEvent(event, supplier);
+            }
+        }
+    }
+
+    public static void callDropItemClose(List<Entity> items, PhaseContext<?> context, Supplier<Optional<UUID>> supplier) {
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.getCurrentContext().require(EventContextKeys.SPAWN_TYPE);
+            final DropItemEvent.Close event = SpongeEventFactory.createDropItemEventClose(frame.getCurrentCause(), items);
             SpongeImpl.postEvent(event);
             if (!event.isCancelled()) {
                 EntityUtil.processEntitySpawnsFromEvent(event, supplier);
@@ -1428,5 +1445,26 @@ public class SpongeCommonEventFactory {
     public static void callPostPlayerRespawnEvent(EntityPlayerMP playerMP, boolean conqueredEnd) {
         // We overwrite this method in SpongeForge, in order to fire
         // Forge's PlayerRespawnEvent
+    }
+
+    public static UpdateAnvilEvent callUpdateAnvilEvent(ContainerRepair anvil, ItemStack slot1, ItemStack slot2, ItemStack result, String name, int levelCost, int materialCost) {
+        Transaction<ItemStackSnapshot> transaction = new Transaction<>(ItemStackSnapshot.NONE, ItemStackUtil.snapshotOf(result));
+        UpdateAnvilEventCost costs = new UpdateAnvilEventCost(levelCost, materialCost);
+        UpdateAnvilEvent event = SpongeEventFactory.createUpdateAnvilEvent(Sponge.getCauseStackManager().getCurrentCause(),
+                new Transaction<>(costs, costs), name, ItemStackUtil.snapshotOf(slot1), transaction, ItemStackUtil.snapshotOf(slot2), (Inventory)anvil);
+        SpongeImpl.postEvent(event);
+        return event;
+    }
+
+    public static ChangeEntityEquipmentEvent callChangeEntityEquipmentEvent(EntityLivingBase entity, ItemStackSnapshot before, ItemStackSnapshot after, SlotAdapter slot) {
+        ChangeEntityEquipmentEvent event;
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(entity);
+            Cause cause = frame.getCurrentCause();
+            Transaction<ItemStackSnapshot> transaction = new Transaction<>(before, after);
+            event = SpongeEventFactory.createChangeEntityEquipmentEvent(cause, EntityUtil.fromNativeToLiving(entity), slot, transaction);
+            SpongeImpl.postEvent(event);
+            return event;
+        }
     }
 }

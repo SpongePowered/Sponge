@@ -27,23 +27,18 @@ package org.spongepowered.common.advancement;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import org.apache.commons.lang3.StringUtils;
-import org.spongepowered.api.Sponge;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementTree;
-import org.spongepowered.api.advancement.DisplayInfo;
-import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.translation.FixedTranslation;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.interfaces.advancement.IMixinAdvancement;
 import org.spongepowered.common.interfaces.advancement.IMixinDisplayInfo;
-
-import javax.annotation.Nullable;
+import org.spongepowered.common.util.SpongeCatalogBuilder;
 
 @SuppressWarnings("ConstantConditions")
-public class SpongeAdvancementTreeBuilder implements AdvancementTree.Builder {
+public class SpongeAdvancementTreeBuilder extends SpongeCatalogBuilder<AdvancementTree, AdvancementTree.Builder> implements AdvancementTree.Builder {
 
-    private String id;
-    @Nullable private String name;
     private Advancement rootAdvancement;
     private String background;
 
@@ -71,27 +66,19 @@ public class SpongeAdvancementTreeBuilder implements AdvancementTree.Builder {
     }
 
     @Override
-    public AdvancementTree.Builder id(String id) {
-        checkNotNull(id, "id");
-        this.id = id;
-        return this;
+    public Translation getName() {
+        if (this.name != null) {
+            return this.name;
+        }
+        return new FixedTranslation(this.rootAdvancement.getDisplayInfo()
+                .map(info -> info.getTitle().toPlain())
+                .orElse(this.key.getValue()));
     }
 
     @Override
-    public AdvancementTree.Builder name(String name) {
-        checkNotNull(name, "name");
-        this.name = name;
-        return this;
-    }
-
-    @Override
-    public AdvancementTree build() {
-        checkState(this.id != null, "The id must be set");
+    protected AdvancementTree build(CatalogKey key, Translation name) {
         checkState(this.rootAdvancement != null, "The root advancement must be set");
-        final PluginContainer plugin = Sponge.getCauseStackManager().getCurrentCause().first(PluginContainer.class).get();
-        final String name = StringUtils.isEmpty(this.name) ? this.rootAdvancement.getDisplayInfo()
-                .map(DisplayInfo::getTitle).map(Text::toPlain).orElse(this.id) : this.name;
-        final SpongeAdvancementTree advancementTree = new SpongeAdvancementTree(this.rootAdvancement, plugin.getId() + ':' + this.id, name);
+        final SpongeAdvancementTree advancementTree = new SpongeAdvancementTree(this.rootAdvancement, key, name);
         ((IMixinDisplayInfo) this.rootAdvancement.getDisplayInfo().get()).setBackground(this.background);
         ((IMixinAdvancement) this.rootAdvancement).setParent(null);
         applyTree(this.rootAdvancement, advancementTree);
@@ -109,8 +96,7 @@ public class SpongeAdvancementTreeBuilder implements AdvancementTree.Builder {
     public AdvancementTree.Builder reset() {
         this.background = "minecraft:textures/gui/advancements/backgrounds/stone.png";
         this.rootAdvancement = null;
-        this.name = null;
-        this.id = null;
+        super.reset();
         return this;
     }
 }

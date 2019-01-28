@@ -31,6 +31,7 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.serializer.TextParseException;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.common.interfaces.text.IMixinTextComponent;
 import org.spongepowered.common.text.impl.TextImpl;
@@ -130,6 +131,14 @@ public final class SpongeTexts {
         List<Text> list = Lists.newArrayList();
         for (String line : json) {
            list.add(TextSerializers.JSON.deserialize(line));
+        }
+        return list;
+    }
+
+    public static List<Text> fromNbtJson(NBTTagList legacy) throws TextParseException {
+        List<Text> list = Lists.newArrayList();
+        for (int i = 0; i < legacy.tagCount(); i++) {
+            list.add(TextSerializers.JSON.deserialize(legacy.getStringTagAt(i)));
         }
         return list;
     }

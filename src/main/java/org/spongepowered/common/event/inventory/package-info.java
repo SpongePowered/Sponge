@@ -22,41 +22,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.test.myhomes.data.friends.impl;
-
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.manipulator.immutable.common.AbstractImmutableListData;
-import org.spongepowered.api.data.value.immutable.ImmutableListValue;
-import org.spongepowered.test.myhomes.MyHomes;
-import org.spongepowered.test.myhomes.data.friends.FriendsData;
-import org.spongepowered.test.myhomes.data.friends.ImmutableFriendsData;
-
-import java.util.List;
-import java.util.UUID;
-
-public class ImmutableFriendsDataImpl extends AbstractImmutableListData<UUID, ImmutableFriendsData, FriendsData> implements ImmutableFriendsData {
-
-    public ImmutableFriendsDataImpl(List<UUID> value) {
-        super(MyHomes.FRIENDS, value);
-    }
-
-    @Override
-    public ImmutableListValue<UUID> friends() {
-        return getListValue();
-    }
-
-    @Override
-    public FriendsDataImpl asMutable() {
-        return new FriendsDataImpl(getValue());
-    }
-
-    @Override
-    public int getContentVersion() {
-        return FriendsDataBuilder.CONTENT_VERSION;
-    }
-
-    @Override
-    protected DataContainer fillContainer(DataContainer dataContainer) {
-        return dataContainer.set(MyHomes.FRIENDS, this.getValue());
-    }
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault
+package org.spongepowered.common.event.inventory;

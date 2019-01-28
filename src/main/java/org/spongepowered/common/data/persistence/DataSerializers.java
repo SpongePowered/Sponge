@@ -43,13 +43,13 @@ import com.flowpowered.math.vector.Vector4l;
 import com.google.common.reflect.TypeToken;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.registry.type.data.DataTranslatorRegistryModule;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -1200,30 +1200,30 @@ public final class DataSerializers {
         };
     }
 
-    public static void registerSerializers(DataManager dataManager) {
-        dataManager.registerTranslator(UUID.class, UUID_DATA_SERIALIZER);
-        dataManager.registerTranslator(Vector2d.class, VECTOR_2_D_DATA_SERIALIZER);
-        dataManager.registerTranslator(Vector2f.class, VECTOR_2_F_DATA_SERIALIZER);
-        dataManager.registerTranslator(Vector2i.class, VECTOR_2_I_DATA_SERIALIZER);
-        dataManager.registerTranslator(Vector2l.class, VECTOR_2_L_DATA_SERIALIZER);
-        dataManager.registerTranslator(Vector3d.class, VECTOR_3_D_DATA_SERIALIZER);
-        dataManager.registerTranslator(Vector3f.class, VECTOR_3_F_DATA_SERIALIZER);
-        dataManager.registerTranslator(Vector3i.class, VECTOR_3_I_DATA_SERIALIZER);
-        dataManager.registerTranslator(Vector3l.class, VECTOR_3_L_DATA_SERIALIZER);
-        dataManager.registerTranslator(Vector4d.class, VECTOR_4_D_DATA_SERIALIZER);
-        dataManager.registerTranslator(Vector4f.class, VECTOR_4_F_DATA_SERIALIZER);
-        dataManager.registerTranslator(Vector4i.class, VECTOR_4_I_DATA_SERIALIZER);
-        dataManager.registerTranslator(Vector4l.class, VECTOR_4_L_DATA_SERIALIZER);
-        dataManager.registerTranslator(Complexd.class, COMPLEXD_DATA_SERIALIZER);
-        dataManager.registerTranslator(Complexf.class, COMPLEXF_DATA_SERIALIZER);
-        dataManager.registerTranslator(Quaterniond.class, QUATERNIOND_DATA_SERIALIZER);
-        dataManager.registerTranslator(Quaternionf.class, QUATERNIONF_DATA_SERIALIZER);
-        dataManager.registerTranslator(Month.class, MONTH_DATA_SERIALIZER);
-        dataManager.registerTranslator(LocalTime.class, LOCAL_TIME_DATA_SERIALIZER);
-        dataManager.registerTranslator(LocalDate.class, LOCAL_DATE_DATA_SERIALIZER);
-        dataManager.registerTranslator(LocalDateTime.class, LOCAL_DATE_TIME_DATA_SERIALIZER);
-        dataManager.registerTranslator(ZonedDateTime.class, ZONED_DATE_TIME_DATA_SERIALIZER);
-        dataManager.registerTranslator(Instant.class, INSTANT_DATA_SERIALIZER);
+    public static void registerSerializers(DataTranslatorRegistryModule registry) {
+        registry.registerAdditionalCatalog(UUID_DATA_SERIALIZER);
+        registry.registerAdditionalCatalog(VECTOR_2_D_DATA_SERIALIZER);
+        registry.registerAdditionalCatalog(VECTOR_2_F_DATA_SERIALIZER);
+        registry.registerAdditionalCatalog(VECTOR_2_I_DATA_SERIALIZER);
+        registry.registerAdditionalCatalog(VECTOR_2_L_DATA_SERIALIZER);
+        registry.registerAdditionalCatalog(VECTOR_3_D_DATA_SERIALIZER);
+        registry.registerAdditionalCatalog(VECTOR_3_F_DATA_SERIALIZER);
+        registry.registerAdditionalCatalog(VECTOR_3_I_DATA_SERIALIZER);
+        registry.registerAdditionalCatalog(VECTOR_3_L_DATA_SERIALIZER);
+        registry.registerAdditionalCatalog(VECTOR_4_D_DATA_SERIALIZER);
+        registry.registerAdditionalCatalog(VECTOR_4_F_DATA_SERIALIZER);
+        registry.registerAdditionalCatalog(VECTOR_4_I_DATA_SERIALIZER);
+        registry.registerAdditionalCatalog(VECTOR_4_L_DATA_SERIALIZER);
+        registry.registerAdditionalCatalog(COMPLEXD_DATA_SERIALIZER);
+        registry.registerAdditionalCatalog(COMPLEXF_DATA_SERIALIZER);
+        registry.registerAdditionalCatalog(QUATERNIOND_DATA_SERIALIZER);
+        registry.registerAdditionalCatalog(QUATERNIONF_DATA_SERIALIZER);
+        registry.registerAdditionalCatalog(MONTH_DATA_SERIALIZER);
+        registry.registerAdditionalCatalog(LOCAL_TIME_DATA_SERIALIZER);
+        registry.registerAdditionalCatalog(LOCAL_DATE_DATA_SERIALIZER);
+        registry.registerAdditionalCatalog(LOCAL_DATE_TIME_DATA_SERIALIZER);
+        registry.registerAdditionalCatalog(ZONED_DATE_TIME_DATA_SERIALIZER);
+        registry.registerAdditionalCatalog(INSTANT_DATA_SERIALIZER);
     }
 
 }

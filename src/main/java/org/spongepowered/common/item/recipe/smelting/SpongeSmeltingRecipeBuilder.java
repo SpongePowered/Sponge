@@ -28,12 +28,18 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.recipe.smelting.SmeltingRecipe;
+import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.common.util.SpongeCatalogBuilder;
 
 import java.util.function.Predicate;
 
-public class SpongeSmeltingRecipeBuilder implements SmeltingRecipe.Builder.ResultStep, SmeltingRecipe.Builder.EndStep {
+@NonnullByDefault
+public class SpongeSmeltingRecipeBuilder extends SpongeCatalogBuilder<SmeltingRecipe, SmeltingRecipe.Builder>
+        implements SmeltingRecipe.Builder.ResultStep, SmeltingRecipe.Builder.EndStep {
 
     private ItemStackSnapshot exemplaryResult;
     private ItemStackSnapshot exemplaryIngredient;
@@ -41,22 +47,11 @@ public class SpongeSmeltingRecipeBuilder implements SmeltingRecipe.Builder.Resul
     private double experience;
 
     @Override
-    public SmeltingRecipe.Builder from(SmeltingRecipe value) {
-        checkNotNull(value, "value");
-
-        this.exemplaryResult = value.getExemplaryResult();
-        this.exemplaryIngredient = value.getExemplaryIngredient();
-        this.experience = 0;
-
-        return this;
-    }
-
-    @Override
     public SmeltingRecipe.Builder reset() {
+        super.reset();
         this.exemplaryResult = null;
         this.exemplaryIngredient = null;
         this.experience = 0;
-
         return this;
     }
 
@@ -65,9 +60,7 @@ public class SpongeSmeltingRecipeBuilder implements SmeltingRecipe.Builder.Resul
     public EndStep result(ItemStackSnapshot result) {
         checkNotNull(result, "result");
         checkArgument(result != ItemStackSnapshot.NONE, "The result must not be ItemStackSnapshot.NONE.");
-
         this.exemplaryResult = result;
-
         return this;
     }
 
@@ -78,32 +71,46 @@ public class SpongeSmeltingRecipeBuilder implements SmeltingRecipe.Builder.Resul
         checkNotNull(exemplaryIngredient, "exemplaryIngredient");
         checkArgument(exemplaryIngredient != ItemStackSnapshot.NONE, "The ingredient must not be ItemStackSnapshot.NONE.");
         checkState(ingredientPredicate.test(exemplaryIngredient), "The ingredient predicate does not allow the specified exemplary ingredient.");
-
         this.ingredientPredicate = ingredientPredicate;
         this.exemplaryIngredient = exemplaryIngredient;
-
         return this;
     }
 
     @Override
     public ResultStep ingredient(ItemStackSnapshot ingredient) {
         checkNotNull(ingredient, "ingredient");
-
         return ingredient(new MatchSmeltingVanillaItemStack(ingredient), ingredient);
     }
 
     @Override
     public EndStep experience(double experience) {
         checkState(experience >= 0, "The experience must be non-negative.");
-
         this.experience = experience;
-
         return this;
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Override
-    public SmeltingRecipe build() {
+    public EndStep name(String name) {
+        return (EndStep) super.name(name);
+    }
+
+    @Override
+    public EndStep name(Translation name) {
+        return (EndStep) super.name(name);
+    }
+
+    @Override
+    public EndStep id(String id) {
+        return (EndStep) super.id(id);
+    }
+
+    @Override
+    public EndStep key(CatalogKey key) {
+        return (EndStep) super.key(key);
+    }
+
+    @Override
+    protected SmeltingRecipe build(CatalogKey key, Translation name) {
         checkState(this.exemplaryResult != null && this.exemplaryResult != ItemStackSnapshot.NONE,
                 "The result must be specified.");
         checkState(this.exemplaryIngredient != null && this.exemplaryIngredient != ItemStackSnapshot.NONE,
@@ -112,7 +119,7 @@ public class SpongeSmeltingRecipeBuilder implements SmeltingRecipe.Builder.Resul
         checkState(this.ingredientPredicate.test(this.exemplaryIngredient), "The ingredient predicate does not allow the specified exemplary ingredient.");
         checkState(this.experience >= 0, "The experience must be non-negative.");
 
-        return new SpongeSmeltingRecipe(this.exemplaryResult, this.exemplaryIngredient, this.ingredientPredicate, this.experience);
+        return new SpongeSmeltingRecipe(key, name, this.exemplaryIngredient,
+                this.ingredientPredicate, this.experience, this.exemplaryResult);
     }
-
 }

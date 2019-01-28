@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.registry;
 
+import net.minecraft.item.crafting.FurnaceRecipes;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.Advancement;
@@ -116,6 +117,7 @@ import org.spongepowered.api.item.recipe.crafting.Ingredient;
 import org.spongepowered.api.item.recipe.crafting.ShapedCraftingRecipe;
 import org.spongepowered.api.item.recipe.crafting.ShapelessCraftingRecipe;
 import org.spongepowered.api.item.recipe.smelting.SmeltingRecipe;
+import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.FactoryRegistry;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.scoreboard.CollisionRule;
@@ -574,6 +576,7 @@ public final class CommonModuleRegistry {
             .registerModule(TransformationRegistryModule.getInstance())
             .registerModule(StructureMode.class, new StructureModeRegistryModule())
             .registerModule(CraftingRecipe.class, SpongeCraftingRecipeRegistry.getInstance())
+            .registerModule(SmeltingRecipe.class, (CatalogRegistryModule<SmeltingRecipe>) FurnaceRecipes.instance())
             .registerModule(EventContextKey.class, EventContextKeysModule.getInstance())
             .registerModule(RecordType.class, RecordTypeRegistryModule.getInstance())
             .registerModule(HorseStyle.class, HorseStyleRegistryModule.getInstance())

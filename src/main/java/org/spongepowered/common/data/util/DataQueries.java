@@ -188,6 +188,10 @@ public final class DataQueries {
     public static final DataQuery ZONE_TIME_ID = of("ZoneDateTimeId");
     public static final DataQuery FORGE_DATA = of(NbtDataUtil.FORGE_DATA);
 
+    // UpdateAnvilEventCost
+    public static final DataQuery MATERIALCOST = DataQuery.of("materialcost");
+    public static final DataQuery LEVELCOST = DataQuery.of("levelcost");
+
     private DataQueries() {
     }
 

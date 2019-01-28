@@ -62,8 +62,7 @@ public class SpongeBlockStateMatcherBuilder implements BlockStateMatcher.Builder
     @Override
     public SpongeBlockStateMatcher build() throws IllegalStateException {
         checkState(this.type != null, "BlockType cannot be null!");
-        final int size = this.traits.size() == 0 ? 0 : this.traits.size() - 1;
-        return new SpongeBlockStateMatcher(this.type, this.traits.toArray(new BlockTrait<?>[size]), this.values.toArray());
+        return new SpongeBlockStateMatcher(this.type, this.traits.toArray(new BlockTrait<?>[0]), this.values.toArray());
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})

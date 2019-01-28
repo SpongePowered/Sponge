@@ -27,9 +27,11 @@ package org.spongepowered.common.item.recipe.smelting;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.recipe.smelting.SmeltingRecipe;
 import org.spongepowered.api.item.recipe.smelting.SmeltingResult;
+import org.spongepowered.api.text.translation.Translation;
 
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -37,14 +39,19 @@ import java.util.function.Predicate;
 import javax.annotation.Nonnull;
 
 public class SpongeSmeltingRecipe implements SmeltingRecipe {
+
     private final ItemStackSnapshot exemplaryResult;
     private final ItemStackSnapshot exemplaryIngredient;
     private final Predicate<ItemStackSnapshot> ingredientPredicate;
     private final double experience;
 
+    private final CatalogKey key;
+    private final Translation name;
+
     @SuppressWarnings("ConstantConditions")
-    public SpongeSmeltingRecipe(ItemStackSnapshot exemplaryResult, ItemStackSnapshot exemplaryIngredient,
-                                Predicate<ItemStackSnapshot> ingredientPredicate, double experience) {
+    public SpongeSmeltingRecipe(CatalogKey key, Translation name,
+            ItemStackSnapshot exemplaryIngredient, Predicate<ItemStackSnapshot> ingredientPredicate,
+            double experience, ItemStackSnapshot exemplaryResult) {
         checkNotNull(exemplaryResult, "exemplaryResult");
         checkArgument(exemplaryResult != ItemStackSnapshot.NONE, "The result must not be ItemStackSnapshot.NONE.");
         checkNotNull(exemplaryIngredient, "exemplaryIngredient");
@@ -53,10 +60,22 @@ public class SpongeSmeltingRecipe implements SmeltingRecipe {
         checkArgument(ingredientPredicate.test(exemplaryIngredient), "The ingredient predicate does not allow the specified exemplary ingredient.");
         checkArgument(experience >= 0, "The experience must be non-negative.");
 
+        this.key = key;
+        this.name = name;
         this.exemplaryResult = exemplaryResult;
         this.exemplaryIngredient = exemplaryIngredient;
         this.ingredientPredicate = ingredientPredicate;
         this.experience = experience;
+    }
+
+    @Override
+    public CatalogKey getKey() {
+        return this.key;
+    }
+
+    @Override
+    public String getName() {
+        return this.name.get();
     }
 
     @Override

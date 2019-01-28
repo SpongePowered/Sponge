@@ -31,9 +31,11 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagDouble;
 import net.minecraft.nbt.NBTTagFloat;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.NBTTagString;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.serializer.TextParseException;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.common.item.enchantment.SpongeEnchantment;
 import org.spongepowered.common.text.SpongeTexts;
@@ -339,7 +341,24 @@ public final class NbtDataUtil {
         if (list.isEmpty()) {
             return new ArrayList<>();
         }
-        return SpongeTexts.fromNbtLegacy(list);
+        try {
+            // Book text should be in JSON, but there is a chance it might be in
+            // Legacy format.
+            return SpongeTexts.fromNbtJson(list);
+        } catch (TextParseException ignored) {
+            return SpongeTexts.fromNbtLegacy(list);
+        }
+    }
+
+    public static List<String> getPlainPagesFromNBT(NBTTagCompound compound) {
+        final NBTTagList list = compound.getTagList(ITEM_BOOK_PAGES, TAG_STRING);
+        List<String> stringList = new ArrayList<>();
+        if (!list.isEmpty()) {
+            for (int i = 0; i < list.tagCount(); i++) {
+                stringList.add(list.getStringTagAt(i));
+            }
+        }
+        return stringList;
     }
 
     public static void removePagesFromNBT(ItemStack stack) {
@@ -350,8 +369,19 @@ public final class NbtDataUtil {
         stack.getTagCompound().setTag(ITEM_BOOK_PAGES, list);
     }
 
-    public static void setPagesToNBT(ItemStack stack, List<Text> pages){
-        final NBTTagList list = SpongeTexts.asJsonNBT(pages);
+    public static void setPagesToNBT(ItemStack stack, List<Text> pages) {
+        setPagesToNBT(stack, SpongeTexts.asJsonNBT(pages));
+    }
+
+    public static void setPlainPagesToNBT(ItemStack stack, List<String> pages) {
+        final NBTTagList list = new NBTTagList();
+        for (String page : pages) {
+            list.appendTag(new NBTTagString(page));
+        }
+        setPagesToNBT(stack, list);
+    }
+
+    private static void setPagesToNBT(ItemStack stack, NBTTagList list) {
         final NBTTagCompound compound = getOrCreateCompound(stack);
         compound.setTag(ITEM_BOOK_PAGES, list);
         if (!compound.hasKey(ITEM_BOOK_TITLE)) {

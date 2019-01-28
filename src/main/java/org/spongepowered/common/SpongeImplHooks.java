@@ -45,6 +45,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.network.NetworkManager;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumFacing;
@@ -58,7 +59,6 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.GameType;
 import net.minecraft.world.IBlockAccess;
-import net.minecraft.world.Teleporter;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
@@ -90,7 +90,6 @@ import org.spongepowered.common.interfaces.world.IMixinITeleporter;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
-import org.spongepowered.common.mixin.core.world.MixinWorldServer;
 import org.spongepowered.common.registry.type.entity.ProfessionRegistryModule;
 import org.spongepowered.common.util.SpawnerSpawnType;
 import org.spongepowered.common.world.WorldManager;
@@ -142,6 +141,10 @@ public final class SpongeImplHooks {
 
     public static boolean isFakePlayer(Entity entity) {
         return false;
+    }
+
+    public static void fireServerConnectionEvent(NetworkManager netManager) {
+        // Implemented in SF
     }
 
     public static void firePlayerJoinSpawnEvent(EntityPlayerMP playerMP) {
@@ -351,11 +354,6 @@ public final class SpongeImplHooks {
         }
     }
 
-    public static void onCraftingRecipeRegister(CraftingRecipe recipe) {
-        // Overridden in SF
-        CraftingManager.register(recipe.getKey().toString(), ((IRecipe) recipe));
-    }
-
     public static Optional<CraftingRecipe> findMatchingRecipe(CraftingGridInventory inventory, org.spongepowered.api.world.World world) {
         IRecipe recipe = CraftingManager.findMatchingRecipe(InventoryUtil.toNativeInventory(inventory), ((net.minecraft.world.World) world));
         return Optional.ofNullable(((CraftingRecipe) recipe));
@@ -379,6 +377,11 @@ public final class SpongeImplHooks {
             return Optional.empty();
         }
         return Optional.of(((CraftingRecipe) recipe));
+    }
+
+    @Nullable
+    public static PluginContainer getActiveModContainer() {
+        return null;
     }
 
     public static Text getAdditionalCommandDescriptions() {

@@ -30,16 +30,19 @@ import net.minecraft.item.crafting.ShapelessRecipes;
 import net.minecraft.util.NonNullList;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.CatalogType;
+import org.spongepowered.api.text.translation.Translation;
 
 public class SpongeShapelessRecipe extends ShapelessRecipes implements CatalogType {
 
     private final CatalogKey key;
+    private final Translation name;
 
-    public SpongeShapelessRecipe(String id, String groupName, ItemStack itemStack, NonNullList<Ingredient> ingredients) {
+    public SpongeShapelessRecipe(CatalogKey key, Translation name, String groupName,
+            ItemStack itemStack, NonNullList<Ingredient> ingredients) {
         super(groupName, itemStack, ingredients);
-        this.key = CatalogKey.resolve(id);
+        this.key = key;
+        this.name = name;
     }
-
 
     @Override
     public CatalogKey getKey() {
@@ -48,7 +51,7 @@ public class SpongeShapelessRecipe extends ShapelessRecipes implements CatalogTy
 
     @Override
     public String getName() {
-        return this.getKey().toString();
+        return this.name.get();
     }
 
     @Override

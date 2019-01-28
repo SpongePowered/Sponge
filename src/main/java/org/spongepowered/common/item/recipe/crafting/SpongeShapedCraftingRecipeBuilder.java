@@ -27,18 +27,19 @@ package org.spongepowered.common.item.recipe.crafting;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.chars.Char2ObjectArrayMap;
 import net.minecraft.item.crafting.ShapedRecipes;
 import net.minecraft.util.NonNullList;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.recipe.crafting.Ingredient;
 import org.spongepowered.api.item.recipe.crafting.ShapedCraftingRecipe;
-import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.util.SpongeCatalogBuilder;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -48,7 +49,9 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
-public final class SpongeShapedCraftingRecipeBuilder implements ShapedCraftingRecipe.Builder, ShapedCraftingRecipe.Builder.AisleStep.ResultStep,
+@NonnullByDefault
+public final class SpongeShapedCraftingRecipeBuilder extends SpongeCatalogBuilder<ShapedCraftingRecipe, ShapedCraftingRecipe.Builder> implements
+        ShapedCraftingRecipe.Builder, ShapedCraftingRecipe.Builder.AisleStep.ResultStep,
         ShapedCraftingRecipe.Builder.RowsStep.ResultStep, ShapedCraftingRecipe.Builder.EndStep {
 
     private final List<String> aisle = Lists.newArrayList();
@@ -60,6 +63,26 @@ public final class SpongeShapedCraftingRecipeBuilder implements ShapedCraftingRe
     public EndStep group(@Nullable String name) {
         this.groupName = Strings.nullToEmpty(name);
         return this;
+    }
+
+    @Override
+    public EndStep key(CatalogKey key) {
+        return (EndStep) super.key(key);
+    }
+
+    @Override
+    public EndStep id(String id) {
+        return (EndStep) super.id(id);
+    }
+
+    @Override
+    public EndStep name(String name) {
+        return (EndStep) super.name(name);
+    }
+
+    @Override
+    public EndStep name(Translation name) {
+        return (EndStep) super.name(name);
     }
 
     @Override
@@ -76,7 +99,6 @@ public final class SpongeShapedCraftingRecipeBuilder implements ShapedCraftingRe
         if (this.aisle.stream().noneMatch(row -> row.indexOf(symbol) >= 0)) {
             throw new IllegalArgumentException("The symbol '" + symbol + "' is not defined in the aisle pattern.");
         }
-
         this.ingredientMap.put(symbol, ingredient == null ? Ingredient.NONE : ingredient);
         return this;
     }
@@ -120,26 +142,16 @@ public final class SpongeShapedCraftingRecipeBuilder implements ShapedCraftingRe
 
     @Override
     public EndStep result(ItemStack result) {
-        Preconditions.checkNotNull(result, "result");
-
+        checkNotNull(result, "result");
         this.result = result.copy();
-
         return this;
     }
 
     @Override
-    public ShapedCraftingRecipe build(String id, Object plugin) {
+    protected ShapedCraftingRecipe build(CatalogKey key, Translation name) {
         checkState(!this.aisle.isEmpty(), "aisle has not been set");
         checkState(!this.ingredientMap.isEmpty(), "no ingredients set");
         checkState(!this.result.isEmpty(), "no result set");
-        checkNotNull(id, "id");
-        checkNotNull(id, "plugin");
-
-        PluginContainer container = SpongeImpl.getPluginContainer(plugin);
-
-        if (!id.startsWith(container.getId() + ":")) {
-            id = container.getId() + ":" + id;
-        }
 
         Iterator<String> aisleIterator = this.aisle.iterator();
         String aisleRow = aisleIterator.next();
@@ -164,48 +176,17 @@ public final class SpongeShapedCraftingRecipeBuilder implements ShapedCraftingRe
         // Throws JsonException when pattern is not complete or defines unused Ingredients
         NonNullList<net.minecraft.item.crafting.Ingredient> ingredients = ShapedRecipes.deserializeIngredients(keys, ingredientsMap, width, height);
 
-        return ((ShapedCraftingRecipe) new SpongeShapedRecipe(id, this.groupName, width, height, ingredients, ItemStackUtil.toNative(this.result)));
-    }
-
-    @Override
-    public ShapedCraftingRecipe.Builder from(ShapedCraftingRecipe value) {
-        this.aisle.clear();
-        this.ingredientMap.clear();
-        this.groupName = "";
-        if (value instanceof ShapedRecipes) {
-            this.groupName = ((ShapedRecipes) value).group;
-        }
-
-        if (value != null) {
-            for (int y = 0; y < value.getHeight(); y++) {
-                String row = "";
-
-                for (int x = 0; x < value.getWidth(); x++) {
-                    char symbol = (char) ('a' + x + y * value.getWidth());
-                    row += symbol;
-                    Ingredient ingredient = value.getIngredient(x, y);
-
-                    this.ingredientMap.put(symbol, ingredient);
-                }
-
-                this.aisle.add(row);
-            }
-
-            this.result = value.getExemplaryResult().createStack();
-        } else {
-            this.result = null;
-        }
-
-        return this;
+        return ((ShapedCraftingRecipe) new SpongeShapedRecipe(key, name, this.groupName,
+                width, height, ingredients, ItemStackUtil.toNative(this.result)));
     }
 
     @Override
     public ShapedCraftingRecipe.Builder reset() {
+        super.reset();
         this.aisle.clear();
         this.ingredientMap.clear();
         this.result = ItemStack.empty();
         this.groupName = "";
-
         return this;
     }
 

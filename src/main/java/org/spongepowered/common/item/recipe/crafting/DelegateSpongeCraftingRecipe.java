@@ -46,6 +46,10 @@ public class DelegateSpongeCraftingRecipe extends AbstractSpongeCraftingRecipe {
         this.id = recipe.getKey();
     }
 
+    public CraftingRecipe getDelegate() {
+        return this.recipe;
+    }
+
     @Override
     public ItemStackSnapshot getExemplaryResult() {
         return this.recipe.getExemplaryResult();

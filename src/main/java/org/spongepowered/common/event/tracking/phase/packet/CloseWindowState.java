@@ -82,7 +82,7 @@ final class CloseWindowState extends BasicPacketState {
                     .map(EntityUtil::fromNative)
                     .collect(Collectors.toList());
                 if (!entities.isEmpty()) {
-                    SpongeCommonEventFactory.callDropItemCustom(entities, context, () -> Optional.of(player.getUniqueID()));
+                    SpongeCommonEventFactory.callDropItemClose(entities, context, () -> Optional.of(player.getUniqueID()));
                 }
             });
             // Pre-merged items

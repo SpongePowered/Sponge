@@ -22,41 +22,48 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.test.myhomes.data.friends.impl;
+package org.spongepowered.common.event.inventory;
 
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.manipulator.immutable.common.AbstractImmutableListData;
-import org.spongepowered.api.data.value.immutable.ImmutableListValue;
-import org.spongepowered.test.myhomes.MyHomes;
-import org.spongepowered.test.myhomes.data.friends.FriendsData;
-import org.spongepowered.test.myhomes.data.friends.ImmutableFriendsData;
+import org.spongepowered.api.data.Queries;
+import org.spongepowered.api.item.inventory.AnvilCost;
+import org.spongepowered.common.data.util.DataQueries;
 
-import java.util.List;
-import java.util.UUID;
+public class UpdateAnvilEventCost implements AnvilCost {
 
-public class ImmutableFriendsDataImpl extends AbstractImmutableListData<UUID, ImmutableFriendsData, FriendsData> implements ImmutableFriendsData {
+    private final int levelCost;
+    private final int materialCost;
 
-    public ImmutableFriendsDataImpl(List<UUID> value) {
-        super(MyHomes.FRIENDS, value);
+    public UpdateAnvilEventCost(int levelCost, int materialCost) {
+        this.levelCost = levelCost;
+        this.materialCost = materialCost;
     }
 
-    @Override
-    public ImmutableListValue<UUID> friends() {
-        return getListValue();
+    public int getLevelCost() {
+        return this.levelCost;
     }
 
-    @Override
-    public FriendsDataImpl asMutable() {
-        return new FriendsDataImpl(getValue());
+    public int getMaterialCost() {
+        return this.materialCost;
+    }
+
+    public AnvilCost withLevelCost(int levelCost) {
+        return new UpdateAnvilEventCost(levelCost, this.materialCost);
+    }
+
+    public AnvilCost withMaterialCost(int materialCost) {
+        return new UpdateAnvilEventCost(this.levelCost, materialCost);
     }
 
     @Override
     public int getContentVersion() {
-        return FriendsDataBuilder.CONTENT_VERSION;
+        return 1;
     }
 
     @Override
-    protected DataContainer fillContainer(DataContainer dataContainer) {
-        return dataContainer.set(MyHomes.FRIENDS, this.getValue());
+    public DataContainer toContainer() {
+        return DataContainer.createNew().set(Queries.CONTENT_VERSION, this.getContentVersion())
+                .set(DataQueries.MATERIALCOST, this.getMaterialCost())
+                .set(DataQueries.LEVELCOST, this.getLevelCost());
     }
 }

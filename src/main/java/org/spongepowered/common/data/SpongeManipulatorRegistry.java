@@ -122,8 +122,10 @@ public class SpongeManipulatorRegistry implements SpongeAdditionalCatalogRegistr
     @Override
     public void registerAdditionalCatalog(DataRegistration<?, ?> extraCatalog) {
         checkArgument(extraCatalog instanceof SpongeDataRegistration);
-        // Technically, if the registration was not registered, well....
-        // it should have already been registered at this point
+
+        SpongeManipulatorRegistry.getInstance().validateRegistrationKey(extraCatalog.getKey());
+        SpongeDataManager.getInstance().validateRegistration(extraCatalog);
+
         final SpongeDataRegistration registration = (SpongeDataRegistration) extraCatalog;
         SpongeDataManager.getInstance().registerInternally(registration);
         SpongeManipulatorRegistry.getInstance().register(registration);
@@ -229,14 +231,13 @@ public class SpongeManipulatorRegistry implements SpongeAdditionalCatalogRegistr
         return Optional.ofNullable((DataRegistration<M, I>) dataRegistration);
     }
 
-    <M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> void validateRegistration(SpongeDataRegistrationBuilder<M, I> builder) {
+    <M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> void validateRegistrationKey(CatalogKey key) {
         checkState(this.tempRegistry != null);
-        final CatalogKey dataId = builder.catalogKey;
         this.tempRegistry.registrations.stream()
-            .filter(registration -> registration.getKey().equals(dataId))
+            .filter(registration -> registration.getKey().equals(key))
             .findFirst()
             .ifPresent(registration -> {
-                throw new IllegalStateException("Existing DataRegistration exists for id: " + dataId);
+                throw new IllegalStateException("Existing DataRegistration exists for id: " + key);
             });
     }
 
@@ -252,7 +253,7 @@ public class SpongeManipulatorRegistry implements SpongeAdditionalCatalogRegistr
 
 
     public <M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> DataRegistration<M, I> register(
-        SpongeDataRegistration<M, I> registration) {
+            SpongeDataRegistration<M, I> registration) {
         checkState(this.tempRegistry != null);
         if (this.tempRegistry.registrations.contains(registration)) {
             throw new IllegalStateException("Existing DataRegistration exists for id: " + registration);
