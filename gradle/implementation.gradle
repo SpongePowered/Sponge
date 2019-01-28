@@ -10,21 +10,13 @@ apply from: common.file('gradle/minecraft.gradle')
 
 ext.apiSuffix = (api.version - '-SNAPSHOT') + '-BETA'
 
-minecraft {
-    mappings = common.minecraft.mappings
-    setAccessTransformers(common.minecraft.getAccessTransformers())
-    runs {
-        client = {
-            workingDirectory project.file('run').canonicalPath
-            source sourceSets.main
-        }
-        server = {
-            workingDirectory project.file('run').canonicalPath
-        }
-    }
-}
 dependencies {
-    compile common
+    compile(common) {
+        // ForgeGradle needs to be told to ignore the vanilla dependency
+        // otherwise the virtual repositories will try generating the vanilla dependency
+        // without using common's virtual repositories
+        exclude group: 'net.minecraft'
+    }
     compile common.sourceSets.java6.output
 }
 
@@ -104,7 +96,7 @@ shadowJar ext.shadowConfiguration = {
         include dependency('org.spongepowered:event-gen-core')
 
         // We need to exclude the test plugins
-        exclude project(testPlugins.path)
+//        exclude project(testPlugins.path)
         //exclude project(testmods.path)
 
         include dependency('org.spongepowered:plugin-meta')

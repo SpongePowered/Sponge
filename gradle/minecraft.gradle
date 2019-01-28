@@ -10,15 +10,30 @@ evaluationDependsOn api.path
 apply from: api.file('gradle/sponge.gradle')
 
 // Apply ForgeGradle plugin
-apply plugin: "net.minecraftforge.gradle"
+apply plugin: 'java'
+apply plugin: 'net.minecraftforge.gradle'
 
-// Common has Minecraft Server, implementations deal with their own dependencies, FG limits to one MC dependency
-common.dependencies {
-    minecraft 'net.minecraft:server:1.13'
+dependencies {
+    minecraft "$rootGroup:$rootMinecraft:$rootVersion"
+    testCompile 'org.spongepowered:lwts:1.0.0'
 }
+
 minecraft {
-    mappings channel: 'snapshot', version: '20181008-1.13'
-    accessTransformer = file(sourceSets.main.resources.srcDirs.getAt(0).path + "/META-INF/common_at.cfg")
+    mappings channel: common.mcpType, version: common.mcpMappings
+    accessTransformer(common.file('common_at.cfg'))
+    runs {
+        if (project.isClient) {
+            client = {
+                workingDirectory project.rootProject.file('run').canonicalPath
+                source sourceSets.main
+            }
+
+        }
+        server = {
+            workingDirectory project.rootProject.file('run').canonicalPath
+            source(sourceSets.main)
+        }
+    }
 }
 
 // Mixins
@@ -115,7 +130,7 @@ uploadArchives.repositories.mavenDeployer.pom.whenConfigured {
 
 configure([jar, devJar]) {
     // Append API revision to the SpongeAPI version
-    dependsOn common.resolveApiRevision
+//    dependsOn common.resolveApiRevision
 }
 
 test {

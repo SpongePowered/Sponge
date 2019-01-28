@@ -28,6 +28,10 @@ apply from: 'api-revision.gradle'
 
 // Apply shared ForgeGradle configuration
 ext.common = project
+ext.isClient = false
+ext.rootGroup = "net.minecraft"
+ext.rootMinecraft = "server"
+ext.rootVersion = "$minecraftVersion"
 apply from: 'gradle/minecraft.gradle'
 
 // Inherit SpongeCommon version from SpongeAPI
