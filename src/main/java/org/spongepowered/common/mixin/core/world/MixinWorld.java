@@ -1554,11 +1554,13 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
             if (entity2.isDead) {
                 // Sponge start - use cached chunk
-                // int l1 = entity2.chunkCoordX;
-                // int i2 = entity2.chunkCoordZ;
+                int l1 = entity2.chunkCoordX;
+                int i2 = entity2.chunkCoordZ;
 
                 final net.minecraft.world.chunk.Chunk activeChunk = (net.minecraft.world.chunk.Chunk) ((IMixinEntity) entity2).getActiveChunk();
-                if (activeChunk != null) {
+                if (activeChunk == null) {
+                    this.getChunk(l1, i2).removeEntity(entity2);
+                } else {
                     activeChunk.removeEntity(entity2);
                 }
                 // Sponge end
