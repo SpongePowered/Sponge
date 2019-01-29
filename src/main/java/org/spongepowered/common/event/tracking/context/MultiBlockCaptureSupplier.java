@@ -264,7 +264,6 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
 
                 }
             }
-            this.sna
         }
     }
 

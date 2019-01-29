@@ -663,6 +663,33 @@ public final class TrackingUtil {
         final SpongeBlockChangeFlag changeFlag = oldBlockSnapshot.getChangeFlag();
         final IBlockState originalState = (IBlockState) oldBlockSnapshot.getState();
         final IBlockState newState = (IBlockState) newBlockSnapshot.getState();
+        // Time to pause, because while the new state is the "final", we need to check if there were any intermediary block changes
+        // that were associated with the transaction, if and only if the custom replacement was not set
+        if (!transaction.getCustom().isPresent()) {
+            final List<SpongeBlockSnapshot> intermediary = (List<SpongeBlockSnapshot>) transaction.getIntermediary();
+            if (!intermediary.isEmpty()) {
+                for (SpongeBlockSnapshot spongeBlockSnapshot : intermediary) {
+                    final IBlockState intermediaryState = BlockUtil.toNative(spongeBlockSnapshot.getState());
+                    final Block intermediaryBlock = intermediaryState.getBlock();
+                    if (originalState.getBlock() != intermediaryBlock && changeFlag.performBlockPhysics() && !SpongeImplHooks.hasBlockTileEntity(intermediaryBlock, intermediaryState)) {
+                        intermediaryBlock.onBlockAdded(world, pos, intermediaryState);
+                        ((IPhaseState) phaseState).performOnBlockAddedSpawns(phaseContext, currentDepth + 1);
+                    }
+                    // Normally, we'd do a post transaction application, but that will be done on the final placement.
+                    // Likewise, since this is an intermediary state, we don't wnat to notify clients or event listeners,
+                    // because they'd be spammed too much, they'll be notified at the end of this transaction process,
+                    // not during intermediary processing.
+                    if (changeFlag.updateNeighbors()) { // Notify neighbors only if the change flag allowed it.
+                        mixinWorld.spongeNotifyNeighborsPostBlockChange(pos, originalState, intermediaryState, changeFlag);
+                    } else if (changeFlag.notifyObservers()) {
+                        world.updateObservingBlocksAt(pos, intermediaryBlock);
+                    }
+
+                    ((IPhaseState) phaseState).performPostBlockNotificationsAndNeighborUpdates(phaseContext, currentDepth + 1);
+                }
+            }
+
+        }
 
         // We call onBlockAdded here for blocks without a TileEntity.
         // MixinChunk#setBlockState will call onBlockAdded for blocks
