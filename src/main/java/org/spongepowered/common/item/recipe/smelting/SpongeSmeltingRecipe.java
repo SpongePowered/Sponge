@@ -43,8 +43,6 @@ import javax.annotation.Nullable;
 
 public class SpongeSmeltingRecipe implements SmeltingRecipe {
 
-    private final static AtomicInteger recipeCounter = new AtomicInteger();
-
     private final ItemStackSnapshot exemplaryResult;
     private final ItemStackSnapshot exemplaryIngredient;
     private final Predicate<ItemStackSnapshot> ingredientPredicate;
@@ -64,7 +62,7 @@ public class SpongeSmeltingRecipe implements SmeltingRecipe {
     }
 
     @SuppressWarnings("ConstantConditions")
-    public SpongeSmeltingRecipe(@Nullable String id, @Nullable Translation name,
+    public SpongeSmeltingRecipe(String id, Translation name,
             ItemStackSnapshot exemplaryIngredient, Predicate<ItemStackSnapshot> ingredientPredicate,
             double experience, ItemStackSnapshot exemplaryResult) {
         checkNotNull(exemplaryResult, "exemplaryResult");
@@ -73,25 +71,13 @@ public class SpongeSmeltingRecipe implements SmeltingRecipe {
         checkArgument(exemplaryIngredient != ItemStackSnapshot.NONE, "The ingredient must not be ItemStackSnapshot.NONE.");
         checkNotNull(ingredientPredicate, "ingredientPredicate");
         checkArgument(ingredientPredicate.test(exemplaryIngredient), "The ingredient predicate does not allow the specified exemplary ingredient.");
-        checkArgument(experience >= 0, "The experience must be non-negative.");
-
-
-        if (id == null) {
-            id = exemplaryIngredient.getType().getId() + "_to_" + exemplaryResult.getType().getId() + "_" + recipeCounter.getAndIncrement();
-            if (name == null) {
-                name = new FixedTranslation(((ItemStack) exemplaryIngredient.createStack()).getDisplayName() +
-                        " to " + ((ItemStack) exemplaryResult.createStack()).getDisplayName());
-            }
-        } else if (name == null) {
-            name = new FixedTranslation(id);
-        }
 
         this.id = id;
         this.name = name;
         this.exemplaryResult = exemplaryResult;
         this.exemplaryIngredient = exemplaryIngredient;
         this.ingredientPredicate = ingredientPredicate;
-        this.experience = experience;
+        this.experience = Math.max(0, experience);
     }
 
     @Override
