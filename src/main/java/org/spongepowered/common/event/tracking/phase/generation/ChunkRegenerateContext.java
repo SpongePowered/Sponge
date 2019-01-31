@@ -22,33 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world.gen;
+package org.spongepowered.common.event.tracking.phase.generation;
 
-import javax.annotation.Nullable;
+import org.spongepowered.api.world.Chunk;
+import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.common.event.tracking.IPhaseState;
 
-import com.flowpowered.math.vector.Vector3i;
-import net.minecraft.world.WorldServer;
-import net.minecraft.world.chunk.Chunk;
+public class ChunkRegenerateContext extends GenerationContext<ChunkRegenerateContext> {
 
-import java.util.concurrent.CompletableFuture;
+    private Chunk chunk;
 
-public interface IMixinChunkProviderServer {
+    public ChunkRegenerateContext(IPhaseState<? extends ChunkRegenerateContext> state) {
+        super(state);
+    }
 
-    CompletableFuture<Boolean> doesChunkExistSync(Vector3i chunkCoords);
+    @SuppressWarnings("unchecked")
+    public ChunkRegenerateContext chunk(net.minecraft.world.chunk.Chunk chunk) {
+        this.chunk = (Chunk) chunk;
+        return this;
+    }
 
-    boolean getForceChunkRequests();
+    public final org.spongepowered.api.world.Chunk getChunk() {
+        return this.chunk;
+    }
 
-    void setMaxChunkUnloads(int maxUnloads);
-
-    void setDenyChunkRequests(boolean flag);
-
-    void setForceChunkRequests(boolean flag);
-
-    void unloadChunkAndSave(Chunk chunk);
-
-    @Nullable Chunk getLoadedChunkWithoutMarkingActive(int x, int z);
-
-    long getChunkUnloadDelay();
-
-    WorldServer getWorld();
+    @Override
+    public PrettyPrinter printCustom(PrettyPrinter printer, int indent) {
+        String s = String.format("%1$"+indent+"s", "");
+        return super.printCustom(printer, indent)
+            .add(s + "- %s: %s", "Chunk", this.chunk);
+    }
 }

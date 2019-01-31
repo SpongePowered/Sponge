@@ -52,13 +52,17 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.play.server.SPacketBlockChange;
+import net.minecraft.network.play.server.SPacketChunkData;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.management.PlayerChunkMapEntry;
+import net.minecraft.util.ClassInheritanceMultiMap;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.EnumDifficulty;
@@ -74,6 +78,7 @@ import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.chunk.IChunkProvider;
+import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
@@ -101,6 +106,7 @@ import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.ChunkPreGenerate;
+import org.spongepowered.api.world.ChunkRegenerateFlag;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -129,6 +135,7 @@ import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
+import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
@@ -377,6 +384,86 @@ public abstract class MixinWorld implements World, IMixinWorld {
             return Optional.ofNullable((Chunk) worldserver.getChunkProvider().loadChunk(x, z));
         }
         return Optional.ofNullable((Chunk) worldserver.getChunkProvider().provideChunk(x, z));
+    }
+
+    @Override
+    public Optional<Chunk> regenerateChunk(int cx, int cy, int cz, ChunkRegenerateFlag flag) {
+        // Before unloading the chunk, we copy its entities then clear.
+        // This ensures that they don't get unloaded when we unload the chunk,
+        // since we want to keep them.
+        //
+        // We explicitly do *not* clear any tileentity-related things - we
+        // want those to be saved and unloaded, since the new chunk
+        // will have completely different blocks
+        List<EntityPlayerMP> playerList = new ArrayList<>();
+        List<net.minecraft.entity.Entity> entityList = new ArrayList<>();
+        Chunk spongeChunk = this.loadChunk(cx, cy, cz, false).orElse(null);
+        if (spongeChunk == null) {
+            if (!flag.create()) {
+                return Optional.empty();
+            }
+            // This should generate a chunk so there won't be a need to regenerate one
+            return this.loadChunk(cx, cy, cz, true);
+        }
+
+        final net.minecraft.world.chunk.Chunk chunk = (net.minecraft.world.chunk.Chunk) spongeChunk;
+        final boolean keepEntities = flag.entities();
+        try (PhaseContext<?> context = GenerationPhase.State.CHUNK_REGENERATING.createPhaseContext()
+                .chunk(chunk)) {
+            context.buildAndSwitch();
+            // If we reached this point, an existing chunk was found so we need to regen
+            for (ClassInheritanceMultiMap<net.minecraft.entity.Entity> multiEntityList : chunk.getEntityLists()) {
+                for (net.minecraft.entity.Entity entity : multiEntityList) {
+                    if (entity instanceof EntityPlayerMP) {
+                        playerList.add((EntityPlayerMP) entity);
+                        entityList.add(entity);
+                    } else if (keepEntities) {
+                        entityList.add(entity);
+                    }
+                }
+            }
+
+            for (net.minecraft.entity.Entity entity : entityList) {
+                chunk.removeEntity(entity);
+            }
+
+            final ChunkProviderServer chunkProviderServer = (ChunkProviderServer) chunk.getWorld().getChunkProvider();
+            ((IMixinChunkProviderServer) chunkProviderServer).unloadChunkAndSave(chunk);
+            net.minecraft.world.chunk.Chunk newChunk = chunkProviderServer.chunkGenerator.generateChunk(cx, cz);
+            PlayerChunkMapEntry playerChunk = ((WorldServer) chunk.getWorld()).getPlayerChunkMap().getEntry(cx, cz);
+            if (playerChunk != null) {
+                playerChunk.chunk = newChunk;
+            }
+    
+            if (newChunk != null) {
+                WorldServer world = (WorldServer) newChunk.getWorld();
+                world.getChunkProvider().loadedChunks.put(ChunkPos.asLong(cx, cz), newChunk);
+                newChunk.onLoad();
+                newChunk.populate(world.getChunkProvider(), world.getChunkProvider().chunkGenerator);
+                for (net.minecraft.entity.Entity entity: entityList) {
+                    newChunk.addEntity(entity);
+                }
+
+                if (((IMixinChunkProviderServer) chunkProviderServer).getLoadedChunkWithoutMarkingActive(cx, cz) == null) {
+                    return Optional.of((org.spongepowered.api.world.Chunk) newChunk);
+                }
+
+                List<EntityPlayerMP> chunkPlayers = ((WorldServer) newChunk.getWorld()).getPlayerChunkMap().getEntry(cx, cz).players;
+
+                // We deliberately send two packets, to avoid sending a 'fullChunk' packet
+                // (a changedSectionFilter of 65535). fullChunk packets cause the client to
+                // completely overwrite its current chunk with a new chunk instance. This causes
+                // weird issues, such as making any entities in that chunk invisible (until they leave it
+                // for a new chunk)
+                // - Aaron1011
+                for (EntityPlayerMP playerMP: chunkPlayers) {
+                    playerMP.connection.sendPacket(new SPacketChunkData(newChunk, 65534));
+                    playerMP.connection.sendPacket(new SPacketChunkData(newChunk, 1));
+                }
+            }
+    
+            return Optional.ofNullable((org.spongepowered.api.world.Chunk) newChunk);
+        }
     }
 
     @Override

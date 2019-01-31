@@ -386,6 +386,7 @@ public final class CommonModuleRegistry {
     protected void registerCommonModules(SpongeGameRegistry registry) {
         registry.registerModule(new ArgumentRegistryModule())
                 .registerModule(BlockChangeFlagRegistryModule.getInstance())
+                .registerModule(ChunkRegenerateFlagRegistryModule.getInstance())
                 .registerModule(AITaskType.class, AITaskTypeModule.getInstance())
                 .registerModule(ArmorType.class, new ArmorTypeRegistryModule())
                 .registerModule(Art.class, new ArtRegistryModule())

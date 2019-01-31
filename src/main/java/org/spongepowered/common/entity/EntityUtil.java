@@ -47,11 +47,15 @@ import net.minecraft.network.play.server.SPacketDestroyEntities;
 import net.minecraft.network.play.server.SPacketEffect;
 import net.minecraft.network.play.server.SPacketEntityEffect;
 import net.minecraft.network.play.server.SPacketEntityStatus;
+import net.minecraft.network.play.server.SPacketPlayerPosLook;
 import net.minecraft.network.play.server.SPacketRespawn;
 import net.minecraft.network.play.server.SPacketServerDifficulty;
+import net.minecraft.network.play.server.SPacketSetExperience;
 import net.minecraft.network.play.server.SPacketSpawnPainting;
+import net.minecraft.network.play.server.SPacketSpawnPosition;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.management.PlayerList;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
@@ -120,6 +124,7 @@ import org.spongepowered.common.world.VirtualPortalAgent;
 import org.spongepowered.common.world.WorldManager;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -1284,5 +1289,30 @@ public final class EntityUtil {
     // I'm lazy, but this is better than using the convenience method
     public static EntityArchetype archetype(EntityType type) {
         return new SpongeEntityArchetypeBuilder().type(type).build();
+    }
+
+    public static void fakeRespawn(EntityPlayerMP player) {
+        WorldServer worldServer = player.getServerWorld();
+        final int dimensionId = player.dimension;
+        PlayerList playerList = worldServer.getMinecraftServer().getPlayerList();
+
+        player.connection.sendPacket(new SPacketRespawn(dimensionId, worldServer.getDifficulty(), worldServer
+                .getWorldInfo().getTerrainType(), player.interactionManager.getGameType()));
+        player.connection.sendPacket(new SPacketServerDifficulty(worldServer.getDifficulty(), worldServer.getWorldInfo().isDifficultyLocked()));
+        player.connection.sendPacket(new SPacketPlayerPosLook(player.posX, player.posY, player.posZ, player.rotationYaw, player.rotationPitch, Collections.emptySet(), -1));
+
+        final BlockPos spawnLocation = worldServer.getSpawnPoint();
+        player.connection.sendPacket(new SPacketSpawnPosition(spawnLocation));
+        player.connection.sendPacket(new SPacketSetExperience(player.experience, player.experienceTotal, player.experienceLevel));
+        playerList.updateTimeAndWeatherForPlayer(player, worldServer);
+        playerList.updatePermissionLevel(player);
+        playerList.syncPlayerInventory(player);
+        // Update reducedDebugInfo game rule
+        player.connection.sendPacket(new SPacketEntityStatus(player, worldServer.getGameRules().getBoolean(DefaultGameRules.REDUCED_DEBUG_INFO) ? (byte) 22 : 23));
+        player.sendPlayerAbilities();
+        for (Object potioneffect : player.getActivePotionEffects()) {
+            player.connection.sendPacket(new SPacketEntityEffect(player.getEntityId(), (PotionEffect) potioneffect));
+        }
+        ((IMixinEntityPlayerMP) player).refreshScaledHealth();
     }
 }

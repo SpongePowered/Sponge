@@ -74,6 +74,7 @@ import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.WorldGenerator;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
@@ -334,7 +335,13 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
 
         Sponge.getGame().getEventManager().post(SpongeEventFactory.createPopulateChunkEventPre(Sponge.getCauseStackManager().getCurrentCause(), populators, chunk));
         List<String> flags = Lists.newArrayList();
-        Vector3i min = new Vector3i(chunkX * 16 + 8, 0, chunkZ * 16 + 8);
+        final IPhaseState<?> currentState = phaseTracker.getCurrentState();
+        Vector3i min = null;
+        if (currentState == GenerationPhase.State.CHUNK_REGENERATING) {
+            min = chunk.getBlockMin();
+        } else {
+            min = new Vector3i(chunkX * 16 + 8, 0, chunkZ * 16 + 8);
+        }
         org.spongepowered.api.world.World spongeWorld = (org.spongepowered.api.world.World) this.world;
         Extent volume = new SoftBufferExtentViewDownsize(chunk.getWorld(), min, min.add(15, 255, 15), min.sub(8, 0, 8), min.add(23, 255, 23));
         for (Populator populator : populators) {

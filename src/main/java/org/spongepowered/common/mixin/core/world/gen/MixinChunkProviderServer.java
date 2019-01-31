@@ -341,4 +341,20 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
         }
     }
 
+    @Override
+    public void unloadChunkAndSave(Chunk chunk) {
+        boolean saveChunk = false;
+        if (chunk.needsSaving(true)) {
+            saveChunk = true;
+        }
+
+        chunk.onUnload();
+
+        if (saveChunk) {
+            this.saveChunkData(chunk);
+        }
+
+        this.loadedChunks.remove(ChunkPos.asLong(chunk.x, chunk.z));
+        ((IMixinChunk) chunk).setScheduledForUnload(-1);
+    }
 }

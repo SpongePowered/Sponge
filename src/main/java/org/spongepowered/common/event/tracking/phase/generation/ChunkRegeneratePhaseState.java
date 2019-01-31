@@ -22,33 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world.gen;
+package org.spongepowered.common.event.tracking.phase.generation;
 
-import javax.annotation.Nullable;
+import org.spongepowered.api.event.CauseStackManager;
 
-import com.flowpowered.math.vector.Vector3i;
-import net.minecraft.world.WorldServer;
-import net.minecraft.world.chunk.Chunk;
+import java.util.function.BiConsumer;
 
-import java.util.concurrent.CompletableFuture;
+public final class ChunkRegeneratePhaseState extends GeneralGenerationPhaseState<ChunkRegenerateContext> {
 
-public interface IMixinChunkProviderServer {
+    private final BiConsumer<CauseStackManager.StackFrame, ChunkRegenerateContext> CHUNK_REGENERATE_MODIFIER =
+        super.getFrameModifier().andThen((frame, context) -> {
+            frame.pushCause(context.getChunk());
+        });
 
-    CompletableFuture<Boolean> doesChunkExistSync(Vector3i chunkCoords);
+    public ChunkRegeneratePhaseState() {
+        super("CHUNK_REGENERATE");
+    }
 
-    boolean getForceChunkRequests();
+    @Override
+    public ChunkRegenerateContext createPhaseContext() {
+        return new ChunkRegenerateContext(this);
+    }
 
-    void setMaxChunkUnloads(int maxUnloads);
-
-    void setDenyChunkRequests(boolean flag);
-
-    void setForceChunkRequests(boolean flag);
-
-    void unloadChunkAndSave(Chunk chunk);
-
-    @Nullable Chunk getLoadedChunkWithoutMarkingActive(int x, int z);
-
-    long getChunkUnloadDelay();
-
-    WorldServer getWorld();
+    @Override
+    public BiConsumer<CauseStackManager.StackFrame, ChunkRegenerateContext> getFrameModifier() {
+        return this.CHUNK_REGENERATE_MODIFIER;
+    }
 }
