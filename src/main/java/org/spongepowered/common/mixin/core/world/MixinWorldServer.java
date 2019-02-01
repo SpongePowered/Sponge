@@ -170,6 +170,8 @@ import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
+import org.spongepowered.common.event.tracking.phase.entity.BasicEntityContext;
+import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
@@ -222,6 +224,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
+import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
@@ -1227,38 +1230,49 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     public void triggerExplosion(org.spongepowered.api.world.explosion.Explosion explosion) {
         checkNotNull(explosion, "explosion");
-        Location<org.spongepowered.api.world.World> origin = explosion.getLocation();
-        checkNotNull(origin, "location");
+        triggerInternalExplosion(explosion, e -> GeneralPhase.State.EXPLOSION.createPhaseContext().explosion(e));
+    }
 
-        try (final PhaseContext<?> phaseContext = GeneralPhase.State.EXPLOSION.createPhaseContext()
-                .explosion((Explosion) explosion)) {
-            phaseContext.buildAndSwitch();
-            final Explosion mcExplosion;
-            try {
-                // Since we already have the API created implementation Explosion, let's use it.
-                mcExplosion = (Explosion) explosion;
-            } catch (Exception e) {
-                new PrettyPrinter(60).add("Explosion not compatible with this implementation").centre().hr()
+    /**
+     * Based off {@link WorldServer#newExplosion(net.minecraft.entity.Entity, double, double, double, float, boolean, boolean)}.
+     */
+    @Override
+    public Explosion triggerInternalExplosion(org.spongepowered.api.world.explosion.Explosion explosion,
+            Function<Explosion, PhaseContext<?>> contextCreator) {
+        // Sponge start
+        this.processingExplosion = true;
+        final Explosion originalExplosion = (Explosion) explosion;
+        // Set up the pre event
+        final ExplosionEvent.Pre
+                event =
+                SpongeEventFactory.createExplosionEventPre(Sponge.getCauseStackManager().getCurrentCause(),
+                        explosion, this);
+        if (SpongeImpl.postEvent(event)) {
+            this.processingExplosion = false;
+            return (Explosion) explosion;
+        }
+        explosion = event.getExplosion();
+        final Explosion mcExplosion;
+        try {
+            // Since we already have the API created implementation Explosion, let's use it.
+            mcExplosion = (Explosion) explosion;
+        } catch (Exception e) {
+            new PrettyPrinter(60).add("Explosion not compatible with this implementation").centre().hr()
                     .add("An explosion that was expected to be used for this implementation does not")
                     .add("originate from this implementation.")
                     .add(e)
                     .trace();
-                return;
-            }
+            return originalExplosion;
+        }
+
+        try (final PhaseContext<?> ignored = contextCreator.apply(mcExplosion)
+                .source(((Optional) explosion.getSourceExplosive()).orElse(this))
+                .buildAndSwitch()) {
             final double x = mcExplosion.x;
             final double y = mcExplosion.y;
             final double z = mcExplosion.z;
             final boolean damagesTerrain = explosion.shouldBreakBlocks();
             final float strength = explosion.getRadius();
-
-            // Set up the pre event
-            final ExplosionEvent.Pre
-                event =
-                SpongeEventFactory.createExplosionEventPre(Sponge.getCauseStackManager().getCurrentCause(), explosion, this);
-            if (SpongeImpl.postEvent(event)) {
-                this.processingExplosion = false;
-                return;
-            }
             // Sponge End
 
             mcExplosion.doExplosionA();
@@ -1280,17 +1294,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             this.processingExplosion = false;
         }
         // Sponge End
-    }
-
-    @Override
-    public void triggerInternalExplosion(org.spongepowered.api.world.explosion.Explosion explosion) {
-        checkNotNull(explosion, "explosion");
-        Location<org.spongepowered.api.world.World> origin = explosion.getLocation();
-        checkNotNull(origin, "location");
-        newExplosion(EntityUtil.toNullableNative(explosion.getSourceExplosive().orElse(null)), origin.getX(),
-                origin.getY(), origin.getZ(), explosion.getRadius(), explosion.canCauseFire(),
-                explosion.shouldBreakBlocks()
-        );
+        return mcExplosion;
     }
 
     // ------------------------- Start Cause Tracking overrides of Minecraft World methods ----------
@@ -1806,52 +1810,17 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      * @return The explosion
      */
     @Overwrite
-    @Override
     public Explosion newExplosion(@Nullable net.minecraft.entity.Entity entityIn, double x, double y, double z, float strength, boolean isFlaming,
             boolean isSmoking) {
-        final Explosion explosion = new Explosion((WorldServer) (Object) this, entityIn, x, y, z, strength, isFlaming, isSmoking);
+        Explosion explosion = new Explosion((WorldServer) (Object) this, entityIn, x, y, z, strength, isFlaming, isSmoking);
 
-        // Sponge Start - Cause tracking
-        try (final ExplosionContext context = GeneralPhase.State.EXPLOSION.createPhaseContext()
-                .potentialExplosionSource((WorldServer) (Object) this, entityIn)
-                .explosion(explosion)) {
-            context.buildAndSwitch();
-            this.processingExplosion = true;
-            // Sponge End
-
-
-            // Sponge Start - More cause tracking
-            // Set up the pre event
-            if (ShouldFire.EXPLOSION_EVENT_PRE) {
-                final ExplosionEvent.Pre event = SpongeEventFactory.createExplosionEventPre(Sponge.getCauseStackManager().getCurrentCause(),
-                    (org.spongepowered.api.world.explosion.Explosion) explosion, this);
-                if (SpongeImpl.postEvent(event)) {
-                    this.processingExplosion = false;
-                    return explosion;
-                }
-            }
-            // Sponge End
-
-            explosion.doExplosionA();
-            explosion.doExplosionB(false);
-
-            if (!isSmoking) {
-                explosion.clearAffectedBlockPositions();
-            }
-
-            for (EntityPlayer entityplayer : this.playerEntities) {
-                if (entityplayer.getDistanceSq(x, y, z) < 4096.0D) {
-                    ((EntityPlayerMP) entityplayer).connection
-                        .sendPacket(new SPacketExplosion(x, y, z, strength, explosion.getAffectedBlockPositions(),
-                            explosion.getPlayerKnockbackMap().get(entityplayer)));
-                }
-            }
-
-            // Sponge Start - end processing
-            this.processingExplosion = false;
-            // Sponge End
-            return explosion;
-        } // Sponge - brackets
+        // Sponge Start - all the remaining behavior is in triggerInternalExplosion().
+        explosion = triggerInternalExplosion((org.spongepowered.api.world.explosion.Explosion) explosion, e -> GeneralPhase.State.EXPLOSION
+                .createPhaseContext()
+                .explosion(e)
+                .potentialExplosionSource((WorldServer) (Object) this, entityIn));
+        // Sponge End
+        return explosion;
     }
 
     /**

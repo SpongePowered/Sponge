@@ -249,8 +249,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract BiomeProvider getBiomeProvider();
     @Shadow public abstract boolean isBlockPowered(BlockPos pos);
     @Shadow public abstract net.minecraft.world.chunk.Chunk getChunk(int chunkX, int chunkZ);
-    @Shadow public abstract net.minecraft.world.Explosion newExplosion(@Nullable net.minecraft.entity.Entity entityIn, double x, double y, double z, float strength,
-            boolean isFlaming, boolean isSmoking);
     @Shadow public abstract List<net.minecraft.entity.Entity> getEntities(Class<net.minecraft.entity.Entity> entityType,
             com.google.common.base.Predicate<net.minecraft.entity.Entity> filter);
     @Shadow public abstract <T extends net.minecraft.entity.Entity> List<T> getEntitiesWithinAABB(Class <? extends T > clazz, AxisAlignedBB aabb,
@@ -715,12 +713,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public void triggerExplosion(Explosion explosion) {
         checkNotNull(explosion, "explosion");
-        Location<World> origin = explosion.getLocation();
-        checkNotNull(origin, "location");
-        newExplosion(EntityUtil.toNullableNative(explosion.getSourceExplosive().orElse(null)), origin.getX(),
-                origin.getY(), origin.getZ(), explosion.getRadius(), explosion.canCauseFire(),
-                explosion.shouldBreakBlocks()
-        );
+        ((net.minecraft.world.Explosion) explosion).doExplosionA();
+        ((net.minecraft.world.Explosion) explosion).doExplosionB(true);
     }
 
     @Override
