@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
+import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
@@ -52,7 +54,7 @@ public class WalkingSpeedValueProcessor extends AbstractSpongeValueProcessor<Ent
 
     @Override
     protected boolean set(EntityPlayer container, Double value) {
-        container.abilities.walkSpeed = value.floatValue();
+        setWalkSpeed(container, value);
         container.sendPlayerAbilities();
         return true;
     }
@@ -65,5 +67,11 @@ public class WalkingSpeedValueProcessor extends AbstractSpongeValueProcessor<Ent
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
+    }
+
+    public static void setWalkSpeed(EntityPlayer container, double value) {
+        container.capabilities.walkSpeed = (float) value;
+        final IAttributeInstance attribute = container.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED);
+        attribute.setBaseValue(value);
     }
 }
