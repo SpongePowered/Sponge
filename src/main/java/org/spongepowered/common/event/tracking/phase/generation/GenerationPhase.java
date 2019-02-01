@@ -27,6 +27,7 @@ package org.spongepowered.common.event.tracking.phase.generation;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
+import org.spongepowered.common.event.tracking.phase.block.BlockPhaseState;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 
 /**
@@ -51,7 +52,7 @@ public final class GenerationPhase extends TrackingPhase {
 
         public static final IPhaseState<ChunkLoadContext> CHUNK_LOADING = new ChunkLoadPhaseState().bake();
 
-        public static final IPhaseState<ChunkRegenerateContext> CHUNK_REGENERATING = new ChunkRegeneratePhaseState().bake();
+        public static final IPhaseState<ChunkRegenerateContext> CHUNK_REGENERATING = new ChunkRegeneratePhaseState();
 
         public static final IPhaseState<GenericGenerationContext> WORLD_SPAWNER_SPAWNING = new WorldSpawnerPhaseState().bake();
 
@@ -74,6 +75,14 @@ public final class GenerationPhase extends TrackingPhase {
                     .addCompatibleState(BlockPhase.State.RESTORING_BLOCKS)
                     .addCompatibleState(GenerationPhase.State.POPULATOR_RUNNING)
                     .addCompatibleState(GenerationPhase.State.WORLD_SPAWNER_SPAWNING)
+                    .addCompatibleState(GeneralPhase.Post.UNWINDING)
+                    .bake();
+            ((GeneralGenerationPhaseState<?>) CHUNK_REGENERATING)
+                    .addCompatibleState(BlockPhase.State.BLOCK_DECAY)
+                    .addCompatibleState(BlockPhase.State.BLOCK_DROP_ITEMS)
+                    .addCompatibleState(BlockPhase.State.RESTORING_BLOCKS)
+                    .addCompatibleState(State.WORLD_SPAWNER_SPAWNING)
+                    .addCompatibleState(State.POPULATOR_RUNNING)
                     .addCompatibleState(GeneralPhase.Post.UNWINDING)
                     .bake();
         }

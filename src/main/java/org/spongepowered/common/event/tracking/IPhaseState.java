@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking;
 
+import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.Block;
@@ -48,6 +49,7 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.PlayerTracker;
@@ -802,5 +804,19 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      */
     default boolean allowsEventListener() {
         return true;
+    }
+
+    /**
+     * Gets the populator offset for the given {@link Chunk} that will be passed to
+     * {@link Populator}s. Normally, during any sort of world generation, the offset
+     * is 8, but sometimes, for chunk regeneration, we don't want to use an offset.
+     *
+     * @param chunk The chunk
+     * @param chunkX the x position
+     * @param chunkZ the z position
+     * @return The chunk populator offset
+     */
+    default Vector3i getChunkPopulatorOffset(org.spongepowered.api.world.Chunk chunk, int chunkX, int chunkZ) {
+        return  new Vector3i(chunkX * 16 + 8, 0, chunkZ * 16 + 8);
     }
 }
