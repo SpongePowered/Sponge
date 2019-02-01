@@ -31,12 +31,16 @@ import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.boss.EntityWither;
+import net.minecraft.world.BossInfoServer;
+import net.minecraft.world.GameRules;
+import org.spongepowered.api.boss.ServerBossBar;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.monster.Wither;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.asm.lib.Opcodes;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -58,6 +62,7 @@ public abstract class MixinEntityWither extends MixinEntityMob implements Wither
             + "(Lnet/minecraft/entity/Entity;DDDFZZ)Lnet/minecraft/world/Explosion;";
     private static final int DEFAULT_EXPLOSION_RADIUS = 7;
 
+    @Final @Shadow private BossInfoServer bossInfo;
     @Shadow public abstract int getWatchedTargetId(int p_82203_1_);
     @Shadow public abstract void updateWatchedTargetId(int targetOffset, int newId);
     @Shadow public abstract void setInvulTime(int ticks);
@@ -119,6 +124,11 @@ public abstract class MixinEntityWither extends MixinEntityMob implements Wither
     )
     private int onCanGrief(EntityWither thisEntity) {
         return this.blockBreakCounter == 0 ? ((IMixinGriefer) this).canGrief() ? 0 : -1 : -1;
+    }
+
+    @Override
+    public ServerBossBar getBossBar() {
+        return (ServerBossBar) this.bossInfo;
     }
 
     @ModifyArg(method = "launchWitherSkullToCoords", at = @At(value = "INVOKE",

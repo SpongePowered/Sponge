@@ -37,10 +37,13 @@ import net.minecraft.entity.item.EntityEnderCrystal;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameRules;
+import net.minecraft.world.end.DragonFightManager;
+import org.spongepowered.api.boss.ServerBossBar;
 import org.spongepowered.api.entity.EnderCrystal;
 import org.spongepowered.api.entity.living.complex.EnderDragon;
 import org.spongepowered.api.entity.living.complex.EnderDragonPart;
 import org.spongepowered.asm.lib.Opcodes;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -59,6 +62,7 @@ public abstract class MixinEntityDragon extends MixinEntityLiving implements End
 
     @Shadow public MultiPartEntityPart[] dragonPartArray;
     @Shadow public EntityEnderCrystal healingEnderCrystal;
+    @Final @Shadow private DragonFightManager fightManager;
 
     @Override
     public Set<EnderDragonPart> getParts() {
@@ -119,5 +123,10 @@ public abstract class MixinEntityDragon extends MixinEntityLiving implements End
             return null; // Skips the movement code
         }
         return target;
+    }
+
+    @Override
+    public ServerBossBar getBossBar() {
+        return (ServerBossBar) this.fightManager.bossInfo;
     }
 }
