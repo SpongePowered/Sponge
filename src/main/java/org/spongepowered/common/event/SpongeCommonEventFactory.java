@@ -797,6 +797,7 @@ public class SpongeCommonEventFactory {
         } else {
             direction = Direction.NONE;
         }
+        Sponge.getCauseStackManager().addContext(EventContextKeys.BLOCK_HIT, blockSnapshot);
         if (!heldItem.isEmpty()) {
             Sponge.getCauseStackManager().addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(heldItem));
         }
@@ -822,6 +823,7 @@ public class SpongeCommonEventFactory {
             Direction targetSide, EnumHand hand) {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             InteractBlockEvent.Secondary event;
+            Sponge.getCauseStackManager().addContext(EventContextKeys.BLOCK_HIT, targetBlock);
             if (!heldItem.isEmpty()) {
                 frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(heldItem));
             }
