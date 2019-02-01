@@ -199,8 +199,9 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
         this.coords = holder.getPosition();
         this.manipulators = Lists.newArrayList(holder.getManipulators());
         if (holder instanceof SpongeBlockSnapshot) {
-            if (((SpongeBlockSnapshot) holder).compound != null) {
-                this.compound = ((SpongeBlockSnapshot) holder).compound.copy();
+            final NBTTagCompound compound = ((SpongeBlockSnapshot) holder).compound;
+            if (compound != null) {
+                this.compound = compound.copy();
             }
         }
         return this;

@@ -25,26 +25,39 @@
 package org.spongepowered.common.event.tracking.phase.tick;
 
 import com.flowpowered.math.vector.Vector3d;
+import com.google.common.collect.ListMultimap;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockEventData;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
+import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
+import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.block.BlockUtil;
+import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 
@@ -66,6 +79,27 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
     }
 
     @Override
+    public boolean capturesNeighborNotifications(BlockEventTickContext context, IMixinWorldServer mixinWorld, BlockPos notifyPos, Block sourceBlock,
+        BlockPos sourcePos) {
+        context.captureNeighborNotification(mixinWorld, notifyPos, sourceBlock, sourcePos);
+        return true;
+    }
+
+    @Override
+    public boolean shouldCaptureBlockChangeOrSkip(BlockEventTickContext phaseContext, BlockPos pos,
+        IBlockState currentState, IBlockState newState,
+        BlockChangeFlag flags) {
+
+        return true;
+    }
+
+    @Override
+    public void notifyCapturedBlockChange(BlockEventTickContext phaseContext, BlockPos pos, SpongeBlockSnapshot originalBlockSnapshot,
+        IBlockState newState, TileEntity tileEntity) {
+        phaseContext.logBlockChange(originalBlockSnapshot);
+    }
+
+    @Override
     public void associateNeighborStateNotifier(BlockEventTickContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
                                                WorldServer minecraftWorld, PlayerTracker.Type notifier) {
         // If we do not have a notifier at this point then there is no need to attempt to retrieve one from the chunk
@@ -84,6 +118,11 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
             entities.add(entity);
             return SpongeCommonEventFactory.callSpawnEntity(entities, context);
         }
+    }
+
+    @Override
+    public boolean doesBulkBlockCapture(BlockEventTickContext context) {
+        return true;
     }
 
     @Override
@@ -111,8 +150,6 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
     public void unwind(BlockEventTickContext context) {
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.CUSTOM);
-            // TODO - Determine if we need to pass the supplier or perform some parameterized
-            //  process if not empty method on the capture object.
             TrackingUtil.processBlockCaptures(this, context);
             context.getCapturedItemsSupplier()
                     .acceptAndClearIfNotEmpty(items -> {
@@ -123,6 +160,33 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
                         SpongeCommonEventFactory.callSpawnEntity(capturedEntities, context);
                     });
         }
+    }
+
+    @Override
+    public boolean verifyCancelledBlockChanges(BlockEventTickContext context, List<ChangeBlockEvent> blockEvents, ChangeBlockEvent.Post postEvent,
+        ListMultimap<BlockPos, BlockEventData> scheduledEvents, boolean noCancelledTransactions) {
+        if (!(context.getSource() instanceof TileEntity)) {
+            // we have a LocatableBlock.
+            final LocatableBlock source = (LocatableBlock) context.getSource();
+            // Basically, if the source was a tile entity, and during the block event, it changed?
+            // and if any of the transaction cancelled, the whole thing should be cancelled.
+            if (SpongeImplHooks.hasBlockTileEntity(BlockUtil.toBlock(source.getBlockState()), BlockUtil.toNative(source.getBlockState()))) {
+                return !noCancelledTransactions;
+            }
+            return false;
+        }
+        if (!noCancelledTransactions && !postEvent.getTransactions().isEmpty()) {
+            final Transaction<BlockSnapshot> first = postEvent.getTransactions().get(0);
+            final BlockState state = first.getOriginal().getState();
+            final BlockType type = state.getType();
+            return SpongeImplHooks.hasBlockTileEntity((Block) type, BlockUtil.toNative(state));
+        }
+        return noCancelledTransactions;
+    }
+
+    @Override
+    public void performPostBlockNotificationsAndNeighborUpdates(BlockEventTickContext context, int currentDepth) {
+
     }
 
     @Override

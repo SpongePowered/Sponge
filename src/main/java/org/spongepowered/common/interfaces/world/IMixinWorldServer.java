@@ -26,6 +26,7 @@ package org.spongepowered.common.interfaces.world;
 
 import org.spongepowered.common.relocate.co.aikar.timings.WorldTimingsHandler;
 import com.flowpowered.math.vector.Vector3d;
+import net.minecraft.block.BlockEventData;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -109,4 +110,5 @@ public interface IMixinWorldServer extends IMixinWorld {
 
     void doChunkGC();
 
+    void addPostEventBlockEvents(List<BlockEventData> events);
 }

@@ -30,6 +30,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import co.aikar.timings.Timing;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
@@ -88,6 +89,7 @@ import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.mixin.optimization.world.MixinWorldServer_Async_Lighting;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
@@ -97,6 +99,7 @@ import org.spongepowered.common.world.WorldUtil;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Consumer;
@@ -228,12 +231,12 @@ public final class TrackingUtil {
             try (Timing timing = mixinTileEntity.getTimingsHandler().startTiming()) {
                 tile.update();
             }
-            // We delay clearing active chunk if TE is invalidated during tick so we must remove it after
-            if (tileEntity.isInvalid()) {
-                mixinTileEntity.setActiveChunk(null);
-            }
         } catch (Exception e) {
             PhaseTracker.getInstance().printExceptionFromPhase(e, context);
+        }
+        // We delay clearing active chunk if TE is invalidated during tick so we must remove it after
+        if (tileEntity.isInvalid()) {
+            mixinTileEntity.setActiveChunk(null);
         }
         mixinTileEntity.setIsTicking(false);
     }
@@ -345,12 +348,20 @@ public final class TrackingUtil {
         IBlockState newState, BlockPos pos, BlockChangeFlag flags, PhaseContext<?> phaseContext, IPhaseState<?> phaseState) {
         final SpongeBlockSnapshot originalBlockSnapshot;
         final WorldServer world = WorldUtil.asNative(mixinWorld);
-        if (((IPhaseState) phaseState).shouldCaptureBlockChangeOrSkip(phaseContext, pos)) {
+        if (((IPhaseState) phaseState).shouldCaptureBlockChangeOrSkip(phaseContext, pos, currentState, newState, flags)) {
             //final IBlockState actualState = currentState.getActualState(world, pos);
             originalBlockSnapshot = mixinWorld.createSpongeBlockSnapshot(currentState, currentState, pos, flags);
+            // Mark the tile entity as captured so when it is being removed during the chunk setting, it won't be
+            // re-captured again.
+            final net.minecraft.tileentity.TileEntity tileEntity = ((WorldServer) mixinWorld).getTileEntity(pos);
+            if (tileEntity != null) {
+                ((IMixinTileEntity) tileEntity).setCaptured(true);
+            }
             final Block newBlock = newState.getBlock();
 
             associateBlockChangeWithSnapshot(phaseState, newBlock, currentState, originalBlockSnapshot);
+            // Make sure the phase state is aware it is capturing the block change
+            phaseState.notifyCapturedBlockChange(phaseContext, pos, originalBlockSnapshot, newState, tileEntity);
             phaseContext.getCapturedBlockSupplier().put(originalBlockSnapshot, newState);
             final IMixinChunk mixinChunk = (IMixinChunk) chunk;
             final IBlockState originalBlockState = mixinChunk.setBlockState(pos, newState, currentState, originalBlockSnapshot, BlockChangeFlags.ALL);
@@ -383,8 +394,10 @@ public final class TrackingUtil {
         if (phaseState == BlockPhase.State.BLOCK_DECAY) {
             if (newBlock == Blocks.AIR) {
                 snapshot.blockChange = BlockChange.DECAY;
+                return;
             }
-        } else if (newBlock == Blocks.AIR) {
+        }
+        if (newBlock == Blocks.AIR) {
             snapshot.blockChange = BlockChange.BREAK;
         } else if (newBlock != originalBlock && !forceModify(originalBlock, newBlock)) {
             snapshot.blockChange = BlockChange.PLACE;
@@ -470,6 +483,7 @@ public final class TrackingUtil {
         }
 
         createTransactionLists(snapshots, transactionArrays, transactionBuilders);
+        ListMultimap<BlockPos, BlockEventData> scheduledEvents = snapshots.getScheduledEvents();
 
         // Clear captured snapshots after creating the transactions. The transactions at this point will be dictating what blcoks are handled
         // and when at this point, the capture object will be recycled in cases of being in Post State where we re-enter to unwind
@@ -499,7 +513,7 @@ public final class TrackingUtil {
 
             // Iterate through the block events to mark any transactions as invalid to accumilate after (since the post event contains all
             // transactions of the preceeding block events)
-            boolean noCancelledTransactions = checkCancelledEvents(blockEvents, postEvent);
+            boolean noCancelledTransactions = checkCancelledEvents(blockEvents, postEvent, scheduledEvents, state, context);
 
             // Now we can gather the invalid transactions that either were marked as invalid from an event listener - OR - cancelled.
             // Because after, we will restore all the invalid transactions in reverse order.
@@ -512,7 +526,7 @@ public final class TrackingUtil {
                 invalid.clear(); // Clear because we might re-enter for some reasons yet to be determined.
 
             }
-            return performBlockAdditions(postEvent.getTransactions(), state, context, noCancelledTransactions, currentDepth);
+            return performBlockAdditions(postEvent.getTransactions(), state, context, noCancelledTransactions, scheduledEvents, currentDepth);
         }
     }
 
@@ -530,13 +544,15 @@ public final class TrackingUtil {
         }
     }
 
-    private static boolean checkCancelledEvents(List<ChangeBlockEvent> blockEvents, ChangeBlockEvent.Post postEvent) {
+    private static boolean checkCancelledEvents(List<ChangeBlockEvent> blockEvents, ChangeBlockEvent.Post postEvent,
+        ListMultimap<BlockPos, BlockEventData> scheduledEvents, IPhaseState<?> state, PhaseContext<?> context) {
         boolean noCancelledTransactions = true;
         for (ChangeBlockEvent blockEvent : blockEvents) { // Need to only check if the event is cancelled, If it is, restore
             if (blockEvent.isCancelled()) {
                 noCancelledTransactions = false;
                 // Don't restore the transactions just yet, since we're just marking them as invalid for now
                 for (Transaction<BlockSnapshot> transaction : Lists.reverse(blockEvent.getTransactions())) {
+                    scheduledEvents.removeAll(VecHelper.toBlockPos(transaction.getOriginal().getPosition()));
                     transaction.setValid(false);
                 }
             }
@@ -545,9 +561,19 @@ public final class TrackingUtil {
             // Of course, if post is cancelled, just mark all transactions as invalid.
             noCancelledTransactions = false;
             for (Transaction<BlockSnapshot> transaction : postEvent.getTransactions()) {
+                scheduledEvents.removeAll(VecHelper.toBlockPos(transaction.getOriginal().getPosition()));
                 transaction.setValid(false);
             }
         }
+        // Now to check, if any of the transactions being cancelled means cancelling the entire event.
+        boolean cancelAll = ((IPhaseState) state).verifyCancelledBlockChanges(context, blockEvents, postEvent, scheduledEvents, noCancelledTransactions);
+        if (cancelAll) {
+            for (Transaction<BlockSnapshot> transaction : postEvent.getTransactions()) {
+                scheduledEvents.removeAll(VecHelper.toBlockPos(transaction.getOriginal().getPosition()));
+                transaction.setValid(false);
+            }
+        }
+
         return noCancelledTransactions;
     }
 
@@ -608,11 +634,19 @@ public final class TrackingUtil {
     }
 
     private static boolean performBlockAdditions(List<Transaction<BlockSnapshot>> transactions, IPhaseState<?> phaseState,
-                                                PhaseContext<?> phaseContext, boolean noCancelledTransactions, int currentDepth) {
+        PhaseContext<?> phaseContext, boolean noCancelledTransactions,
+        ListMultimap<BlockPos, BlockEventData> scheduledEvents,
+        int currentDepth) {
         // We have to use a proxy so that our pending changes are notified such that any accessors from block
         // classes do not fail on getting the incorrect block state from the IBlockAccess
+        boolean hasEvents = false;
+        if (!scheduledEvents.isEmpty()) {
+            hasEvents = true;
+        }
         for (Transaction<BlockSnapshot> transaction : transactions) {
-            noCancelledTransactions = performTransactionProcess(transaction, phaseState, phaseContext, noCancelledTransactions, currentDepth);
+            final BlockPos pos = hasEvents ? VecHelper.toBlockPos(transaction.getOriginal().getPosition()) : null;
+            final List<BlockEventData> events =  hasEvents ? scheduledEvents.get(pos) : Collections.emptyList();
+            noCancelledTransactions = performTransactionProcess(transaction, phaseState, phaseContext, events, noCancelledTransactions, currentDepth);
         }
         return noCancelledTransactions;
     }
@@ -630,13 +664,14 @@ public final class TrackingUtil {
      * @param transaction The transaction to perform
      * @param phaseState The currently working phase state
      * @param phaseContext The currently working phase context
+     * @param events
      * @param noCancelledTransactions Whether there's any cancelled transactions
      * @param currentDepth The current processing depth, to avoid stack overflows
      * @return True if the block transaction was successful
      */
     @SuppressWarnings("rawtypes")
     static boolean performTransactionProcess(Transaction<BlockSnapshot> transaction, IPhaseState<?> phaseState, PhaseContext<?> phaseContext,
-        boolean noCancelledTransactions, int currentDepth) {
+        List<BlockEventData> events, boolean noCancelledTransactions, int currentDepth) {
         // Handle custom replacements - these need to get actually set onto the chunk, but ignored as far as tracking
         // goes.
         if (transaction.getCustom().isPresent()) {
@@ -701,6 +736,9 @@ public final class TrackingUtil {
         }
 
         ((IPhaseState) phaseState).postBlockTransactionApplication(oldBlockSnapshot.blockChange, transaction, phaseContext);
+
+        // Now we can apply the block events on the world
+        mixinWorld.addPostEventBlockEvents(events);
 
         if (changeFlag.isNotifyClients()) { // Always try to notify clients of the change.
             world.notifyBlockUpdate(pos, originalState, newState, changeFlag.getRawFlag());

@@ -24,12 +24,14 @@
  */
 package org.spongepowered.common.event.tracking.context;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
+import net.minecraft.block.BlockEventData;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
@@ -65,6 +67,7 @@ import javax.annotation.Nullable;
 public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
 
     @Nullable private ListMultimap<BlockPos, SpongeBlockSnapshot> multimap;
+    @Nullable private ListMultimap<BlockPos, BlockEventData> scheduledEvents;
     @Nullable private List<SpongeBlockSnapshot> snapshots;
     @Nullable private Set<BlockPos> usedBlocks;
     private boolean hasMulti = false;
@@ -285,7 +288,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
      */
     @Override
     public final boolean isEmpty() {
-        return this.snapshots != null && !this.snapshots.isEmpty();
+        return this.snapshots == null || this.snapshots.isEmpty();
     }
 
     /**
@@ -341,7 +344,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
     @Override
     public String toString() {
         return com.google.common.base.MoreObjects.toStringHelper(this)
-            .add("Captured", this.multimap == null ? 0 : this.multimap.size())
+            .add("Captured", this.snapshots == null ? 0 : this.snapshots.size())
             .toString();
     }
 
@@ -357,6 +360,9 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
         }
         if (this.usedBlocks != null) {
             this.usedBlocks.clear();
+        }
+        if (this.scheduledEvents != null) {
+            this.scheduledEvents.clear();
         }
     }
 
@@ -390,5 +396,24 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
             }
         }
         return new Transaction<>(snapshot, newSnapshot);
+    }
+
+    public boolean trackEvent(BlockPos pos, BlockEventData blockEventData) {
+        if (this.usedBlocks != null && this.usedBlocks.contains(pos)) {
+            if (this.scheduledEvents == null) {
+                this.scheduledEvents = LinkedListMultimap.create();
+            }
+            this.scheduledEvents.put(pos.toImmutable(), blockEventData);
+            return true;
+        }
+        return false;
+    }
+
+    public ListMultimap<BlockPos, BlockEventData> getScheduledEvents() {
+        return this.scheduledEvents == null ? ArrayListMultimap.create(4, 4) : ArrayListMultimap.create(this.scheduledEvents);
+    }
+
+    public boolean hasCapturedRemovedTileEntity(BlockPos pos) {
+        return this.usedBlocks != null && this.usedBlocks.contains(pos);
     }
 }

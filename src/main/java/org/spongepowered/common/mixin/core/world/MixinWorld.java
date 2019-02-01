@@ -661,6 +661,23 @@ public abstract class MixinWorld implements World, IMixinWorld {
         }
     }
 
+    /**
+     * @author gabizou - January 29th, 2019
+     * @reason During block events, or other random cases, a TileEntity
+     * may be removed/invalidated without the block itself being changed.
+     * This can cause issues when cancelling events caused by block events
+     * such that the tile entity is no longer processing on valid information,
+     * so, we need to soft capture the block snapshot as a modify for later
+     * possible restoration. Note that this is only overridden in worldserver.
+     *
+     * @param pos The position of the tile entity being removed
+     */
+    @Nullable
+    @Redirect(method = "removeTileEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getTileEntity(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/tileentity/TileEntity;"))
+    protected net.minecraft.tileentity.TileEntity getTileEntityForRemoval(net.minecraft.world.World world, BlockPos pos) {
+        return world.getTileEntity(pos); // Overridden in MixinWorldServer
+    }
+
     @SuppressWarnings({"unchecked"})
     @Override
     public Iterable<Chunk> getLoadedChunks() {

@@ -297,7 +297,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         if (this.blockEntitySpawnSupplier != null && !this.blockEntitySpawnSupplier.isEmpty()) {
             printer.add(s + "- %s: %s", "BlockEntitySpawns", this.blockEntitySpawnSupplier);
         }
-        if (this.captureBlockPos != null) {
+        if (this.captureBlockPos != null && this.captureBlockPos.getPos().isPresent()) {
             printer.add(s + "- %s: %s", "CapturedBlockPosition", this.captureBlockPos);
         }
         return printer;
@@ -427,7 +427,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
      * </ul>
      * Provided functionality through the supplier is aimed for common manipulation in
      * {@link IPhaseState}s and for the obvious reasons of capturing block changes, as long
-     * as {@link IPhaseState#shouldCaptureBlockChangeOrSkip(PhaseContext, BlockPos)} returns
+     * as {@link IPhaseState#shouldCaptureBlockChangeOrSkip(PhaseContext, BlockPos, IBlockState, IBlockState, org.spongepowered.api.world.BlockChangeFlag)} returns
      * {@code true}.
      * </p>
      *

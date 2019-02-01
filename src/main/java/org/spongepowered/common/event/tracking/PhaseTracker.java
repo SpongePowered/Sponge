@@ -38,6 +38,7 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityThrowable;
+import net.minecraft.init.Blocks;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -86,6 +87,7 @@ import org.spongepowered.common.world.WorldUtil;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -605,10 +607,20 @@ public final class PhaseTracker {
         }
         final IBlockState iblockstate = ((WorldServer) mixinWorld).getBlockState(notifyPos);
 
+        if (iblockstate.getBlock() == Blocks.AIR) {
+            // Super fasts. Air doesn't do anything about neighbor notifications
+            return;
+        }
         try {
             // Sponge start - prepare notification
             final PhaseData peek = this.stack.peek();
             final IPhaseState<?> state = peek.state;
+            // If the phase state does not want to allow neighbor notifications to leak while processing,
+            // it needs to be able to do so. It will replay the notifications in the order in which they were received,
+            // such that the notification will be sent out in the same order as the block changes that may have taken place.
+            if (((IPhaseState) state).capturesNeighborNotifications(peek.context, mixinWorld, notifyPos, sourceBlock, sourcePos)) {
+                return;
+            }
             ((IPhaseState) state).associateNeighborStateNotifier(peek.context,
                 sourcePos, iblockstate.getBlock(), notifyPos, ((WorldServer) mixinWorld), PlayerTracker.Type.NOTIFIER);
             final LocatableBlock block = new SpongeLocatableBlockBuilder()
@@ -787,7 +799,7 @@ public final class PhaseTracker {
                     }
                     // And now, proceed as normal.
                     // If we've gotten this far, the transaction wasn't cancelled, so pass 'noCancelledTransactions' as 'true'
-                    return TrackingUtil.performTransactionProcess(transaction, phaseState, context, true, 0);
+                    return TrackingUtil.performTransactionProcess(transaction, phaseState, context, Collections.emptyList(), true, 0);
                 }
             } catch (Exception | NoClassDefFoundError e) {
                 this.printBlockTrackingException(phaseData, phaseState, e);

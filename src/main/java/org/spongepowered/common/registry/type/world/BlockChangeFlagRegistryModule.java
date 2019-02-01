@@ -187,7 +187,7 @@ public final class BlockChangeFlagRegistryModule implements RegistryModule {
         // with the opposite OR.
         // Example: If we DO want physics, we don't include the physics flag, if we DON'T want physics, we | it in.
         public static final int ALL                         = NOTIFY_CLIENTS | NEIGHBOR_MASK;
-        public static final int NONE                        = NOTIFY_CLIENTS | OBSERVER_MASK | PHYSICS_MASK;
+        public static final int NONE                        = NOTIFY_CLIENTS | OBSERVER_MASK | PHYSICS_MASK | FORCE_RE_RENDER;
         public static final int NEIGHBOR                    = NOTIFY_CLIENTS | NEIGHBOR_MASK | PHYSICS_MASK | OBSERVER_MASK;
         public static final int PHYSICS                     = NOTIFY_CLIENTS | OBSERVER_MASK;
         public static final int OBSERVER                    = NOTIFY_CLIENTS | PHYSICS_MASK;

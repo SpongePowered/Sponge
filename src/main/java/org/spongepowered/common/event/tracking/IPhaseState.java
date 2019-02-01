@@ -27,11 +27,14 @@ package org.spongepowered.common.event.tracking;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ListMultimap;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockEventData;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -48,10 +51,12 @@ import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.SpongeEventManager;
@@ -62,7 +67,6 @@ import org.spongepowered.common.event.tracking.phase.general.PostState;
 import org.spongepowered.common.event.tracking.phase.general.UnwindingPhaseContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
-import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase.Listener;
 import org.spongepowered.common.event.tracking.phase.tick.BlockTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.NeighborNotificationContext;
@@ -347,7 +351,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     /**
      * Performs any necessary custom logic after the provided {@link BlockSnapshot}
      * {@link Transaction} has taken place. The provided {@link BlockChange} is usually
-     * provided from either {@link TrackingUtil#performTransactionProcess(Transaction, IPhaseState, PhaseContext, boolean, int)}
+     * provided from either {@link TrackingUtil#performTransactionProcess(Transaction, IPhaseState, PhaseContext, List, boolean, int)}
      * or {@link PostState#postBlockTransactionApplication(BlockChange, Transaction, UnwindingPhaseContext)} due to
      * delegation to the underlying context during post processing of reactionary
      * side effects (like water spread from a bucket).
@@ -599,9 +603,13 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      *
      * @param phaseContext
      * @param pos
+     * @param currentState
+     * @param newState
+     * @param flags
      * @return
      */
-    default boolean shouldCaptureBlockChangeOrSkip(C phaseContext, BlockPos pos) {
+    default boolean shouldCaptureBlockChangeOrSkip(C phaseContext, BlockPos pos, IBlockState currentState,
+        IBlockState newState, BlockChangeFlag flags) {
         return true;
     }
 
@@ -822,5 +830,17 @@ public interface IPhaseState<C extends PhaseContext<C>> {
 
     default boolean isRegeneration() {
         return false;
+    }
+
+    default boolean verifyCancelledBlockChanges(C context, List<ChangeBlockEvent> blockEvents, ChangeBlockEvent.Post postEvent, ListMultimap<BlockPos, BlockEventData> scheduledEvents, boolean noCancelledTransactions) {
+        return false;
+    }
+
+    default boolean capturesNeighborNotifications(C context, IMixinWorldServer mixinWorld, BlockPos notifyPos, Block sourceBlock, BlockPos sourcePos) {
+        return false;
+    }
+    default void notifyCapturedBlockChange(C phaseContext, BlockPos pos, SpongeBlockSnapshot originalBlockSnapshot, IBlockState newState,
+        TileEntity tileEntity) {
+
     }
 }

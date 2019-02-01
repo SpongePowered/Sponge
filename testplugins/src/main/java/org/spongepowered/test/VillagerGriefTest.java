@@ -36,12 +36,12 @@ public class VillagerGriefTest {
 
     private boolean canGrief = false;
 
-    @Listener
+//    @Listener
     public void villagerPlant(ChangeBlockEvent event, @Root Villager villager) {
         event.setCancelled(true);
     }
 
-    @Listener
+//    @Listener
     public void endermanCancel(ChangeBlockEvent event, @Root Enderman enderman) {
         event.setCancelled(true);
     }

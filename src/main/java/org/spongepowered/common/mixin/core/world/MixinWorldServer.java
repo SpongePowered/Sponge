@@ -151,6 +151,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.WorldCategory;
@@ -925,7 +926,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         final PhaseData currentPhase = phaseTracker.getCurrentPhaseData();
         final IPhaseState phaseState = currentPhase.state;
         if (phaseState.ignoresBlockEvent()) {
-            return list.add((BlockEventData) obj);
+            return list.add(blockEventData);
         }
         final PhaseContext<?> context = currentPhase.context;
 
@@ -937,7 +938,16 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
         blockEvent.setTickBlock(locatable);
         phaseState.appendNotifierToBlockEvent(context, this, pos, blockEvent);
-        return list.add((BlockEventData) obj);
+        // If we are capturing block positions, we need to check if the block position has any scheduled events
+        // so they will be properly added after the fact.
+        if (phaseState.doesBulkBlockCapture(currentPhase.context)) {
+            if (!context.getCapturedBlockSupplier().trackEvent(pos, blockEventData)) {
+                return list.add(blockEventData);
+            }
+            return true;
+        } else {
+            return list.add(blockEventData);
+        }
     }
 
     // special handling for Pistons since they use their own event system
@@ -950,6 +960,32 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             return fireBlockEvent(event);
         }
         return TrackingUtil.fireMinecraftBlockEvent(worldIn, event);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    @Nullable
+    protected net.minecraft.tileentity.TileEntity getTileEntityForRemoval(World thisWorld, BlockPos pos) {
+        if (this.isFake()) {
+            return super.getTileEntityForRemoval(thisWorld, pos); // do nothing if we're not a sponge managed world
+        }
+        final PhaseTracker tracker = PhaseTracker.getInstance();
+        final IPhaseState<?> currentState = tracker.getCurrentState();
+        final PhaseContext<?> currentContext = tracker.getCurrentContext();
+        final net.minecraft.tileentity.TileEntity tileEntity = getTileEntity(pos);
+        final IBlockState state = getBlockState(pos);
+        if (tileEntity != null && !((IMixinTileEntity) tileEntity).isCaptured() && ((IPhaseState) currentState).doesBulkBlockCapture(currentContext)) {
+            ((IMixinTileEntity) tileEntity).setCaptured(true);
+            final SpongeBlockSnapshot snapshot = createSpongeBlockSnapshot(state, state, pos, BlockChangeFlags.NONE);
+            TrackingUtil.associateBlockChangeWithSnapshot(currentState, state.getBlock(), state, snapshot);
+            currentContext.getCapturedBlockSupplier().put(snapshot, BlockUtil.toNative(snapshot.getState()));
+        }
+        return tileEntity;
+    }
+
+    @Override
+    public void addPostEventBlockEvents(List<BlockEventData> events) {
+        events.forEach(this.blockEventQueue[this.blockEventCacheIndex]::add);
     }
 
     // Chunk GC
