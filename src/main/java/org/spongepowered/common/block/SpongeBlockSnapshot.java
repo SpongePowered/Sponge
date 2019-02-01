@@ -110,7 +110,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     public SpongeBlockSnapshot(SpongeBlockSnapshotBuilder builder) {
         this.blockState = checkNotNull(builder.blockState, "The block state was null!");
         this.extendedState = builder.extendedState;
-        this.worldUniqueId = checkNotNull(builder.worldUuid);
+        this.worldUniqueId = checkNotNull(builder.worldUuid, "The world UUID was null");
         this.creatorUniqueId = builder.creatorUuid;
         this.notifierUniqueId = builder.notifierUuid;
         this.pos = checkNotNull(builder.coords);
