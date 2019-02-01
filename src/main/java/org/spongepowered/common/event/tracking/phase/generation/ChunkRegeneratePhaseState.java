@@ -55,4 +55,9 @@ public final class ChunkRegeneratePhaseState extends GeneralGenerationPhaseState
     public Vector3i getChunkPopulatorOffset(Chunk chunk, int chunkX, int chunkZ) {
         return chunk.getBlockMin();
     }
+
+    @Override
+    public boolean isRegeneration() {
+        return true;
+    }
 }

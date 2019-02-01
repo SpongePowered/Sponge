@@ -819,4 +819,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     default Vector3i getChunkPopulatorOffset(org.spongepowered.api.world.Chunk chunk, int chunkX, int chunkZ) {
         return  new Vector3i(chunkX * 16 + 8, 0, chunkZ * 16 + 8);
     }
+    default boolean isRegeneration() {
+        return true;
+    }
 }
