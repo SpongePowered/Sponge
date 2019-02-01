@@ -25,37 +25,58 @@
 package org.spongepowered.test;
 
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.util.stream.Collectors;
 
-@Plugin(id = "witherspawntest", name = "Wither Spawn Test", description = "Log Wither Skele Spawn and generation")
+@Plugin(id = "witherspawntest", name = "Wither Spawn Test", description = "Log Wither Skele Spawn and generation", version = "0.0.0")
 public class WitherSpawnTest {
 
-    final boolean chatSpawns = false;
+    private final SpawnListener listener = new SpawnListener();
+    private boolean enabled = false;
 
     @Listener
-    public void onSpawn(SpawnEntityEvent event) {
-        if(!chatSpawns) return;
-        final String entities = event.getEntities().stream()
-                .map(entity -> entity.getType().getId())
-                .collect(Collectors.joining(", "));
-        Sponge.getServer().getBroadcastChannel().send(
-                Text.of(TextColors.GREEN, "Spawning: ", entities, " ", TextColors.WHITE, event.getCause().toString())
+    public void onInit(GameInitializationEvent event) {
+        Sponge.getCommandManager().register(this,
+                CommandSpec.builder().executor((src, args) -> {
+                    this.enabled = !this.enabled;
+                    src.sendMessage(Text.of("Enabled: ", this.enabled));
+                    if (this.enabled) {
+                        Sponge.getEventManager().registerListeners(this, this.listener);
+                    } else {
+                        Sponge.getEventManager().unregisterListeners(this.listener);
+                    }
+                    return CommandResult.success();
+                }).build(),
+                "toggle-spawn-logging"
         );
     }
 
-    @Listener
-    public void onConstruct(ConstructEntityEvent.Post event) {
-        if(!chatSpawns) return;
-        final String entity = event.getTargetType().getId().toString();
-        Sponge.getServer().getBroadcastChannel().send(
-                Text.of(TextColors.RED, "Constructing: ", TextColors.WHITE, entity)
-        );
+    public static class SpawnListener {
+        @Listener
+        public void onSpawn(SpawnEntityEvent event) {
+            final String entities = event.getEntities().stream()
+                    .map(entity -> entity.getType().getId())
+                    .collect(Collectors.joining(", "));
+            Sponge.getServer().getBroadcastChannel().send(
+                    Text.of(TextColors.GREEN, "Spawning: ", entities, " ", TextColors.WHITE, event.getCause())
+            );
+        }
+
+        @Listener
+        public void onConstruct(ConstructEntityEvent.Post event) {
+            final String entity = event.getTargetType().getId();
+            Sponge.getServer().getBroadcastChannel().send(
+                    Text.of(TextColors.RED, "Constructing: ", TextColors.WHITE, entity)
+            );
+        }
     }
 }
