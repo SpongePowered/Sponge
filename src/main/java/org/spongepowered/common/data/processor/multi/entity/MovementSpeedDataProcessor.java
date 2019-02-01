@@ -37,6 +37,7 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableMovement
 import org.spongepowered.api.data.manipulator.mutable.entity.MovementSpeedData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeMovementSpeedData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
+import org.spongepowered.common.data.processor.value.entity.WalkingSpeedValueProcessor;
 
 import java.util.Map;
 import java.util.Optional;
@@ -54,7 +55,7 @@ public class MovementSpeedDataProcessor extends AbstractEntityDataProcessor<Enti
 
     @Override
     protected boolean set(EntityPlayer entity, Map<Key<?>, Object> keyValues) {
-        entity.capabilities.walkSpeed = ((Double) keyValues.get(Keys.WALKING_SPEED)).floatValue();
+        WalkingSpeedValueProcessor.setWalkSpeed(entity, (Double) keyValues.get(Keys.WALKING_SPEED));
         entity.capabilities.flySpeed = ((Double) keyValues.get(Keys.FLYING_SPEED)).floatValue();
         entity.sendPlayerAbilities();
         return true;
