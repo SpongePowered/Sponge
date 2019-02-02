@@ -31,8 +31,6 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
-import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
-import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;

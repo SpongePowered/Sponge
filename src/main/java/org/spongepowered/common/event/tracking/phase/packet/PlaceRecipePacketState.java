@@ -36,7 +36,6 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingOutput;
@@ -64,7 +63,7 @@ public class PlaceRecipePacketState extends BasicInventoryPacketState {
     @Override
     public void unwind(InventoryPacketContext context) {
         CPacketPlaceRecipe packet = context.getPacket();
-        boolean shift = packet.func_194319_c();
+        boolean shift = packet.shouldPlaceAll();
         IRecipe recipe = packet.func_194317_b();
 
         final EntityPlayerMP player = context.getPacketPlayer();

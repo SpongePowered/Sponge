@@ -53,22 +53,16 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-final class SwitchHotbarScrollState extends BasicInventoryPacketState {
+final class SwitchHotbarScrollState extends SimpleInventoryPacketState {
 
     SwitchHotbarScrollState() {
+        super(SpongeEventFactory::createClickContainerEventNumberPress);
     }
 
     @Override
     public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, InventoryPacketContext context) {
         super.populateContext(playerMP, packet, context);
         context.setHighlightedSlotId(playerMP.inventory.currentItem);
-    }
-
-    @Override
-    public ClickContainerEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
-            List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, int usedButton, @Nullable org.spongepowered.api.item.inventory.Slot slot) {
-        return SpongeEventFactory.createClickContainerEventNumberPress(Sponge.getCauseStackManager().getCurrentCause(), openContainer, transaction,
-                openContainer, Optional.ofNullable(slot), slotTransactions, usedButton);
     }
 
     @Override
@@ -94,7 +88,7 @@ final class SwitchHotbarScrollState extends BasicInventoryPacketState {
             ImmutableList<SlotTransaction> transactions =
                 new ImmutableList.Builder<SlotTransaction>().add(sourceTransaction).add(targetTransaction).build();
             final ChangeInventoryEvent.Held changeInventoryEventHeld = SpongeEventFactory
-                .createChangeInventoryEventHeld(Sponge.getCauseStackManager().getCurrentCause(), slotNew, slotPrev, (Inventory) inventoryContainer, transactions);
+                .createChangeInventoryEventHeld(Sponge.getCauseStackManager().getCurrentCause(), slotNew, (Inventory) inventoryContainer, slotPrev, transactions);
             net.minecraft.inventory.Container openContainer = player.openContainer;
             SpongeImpl.postEvent(changeInventoryEventHeld);
             if (changeInventoryEventHeld.isCancelled() || PacketPhaseUtil.allTransactionsInvalid(changeInventoryEventHeld.getTransactions())) {

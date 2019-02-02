@@ -29,7 +29,8 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
+import org.spongepowered.api.event.item.inventory.container.InteractContainerEvent;
+import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
@@ -45,9 +46,9 @@ public class OpenInventoryState extends BasicInventoryPacketState {
         final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(lastCursor, newCursor);
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(player);
-            final InteractInventoryEvent.Open event =
-                SpongeEventFactory.createInteractInventoryEventOpen(frame.getCurrentCause(), cursorTransaction,
-                    ContainerUtil.fromNative(player.openContainer));
+            Container openContainer = ContainerUtil.fromNative(player.openContainer);
+            final InteractContainerEvent.Open event =
+                SpongeEventFactory.createInteractContainerEventOpen(frame.getCurrentCause(), openContainer, cursorTransaction);
             SpongeImpl.postEvent(event);
             if (event.isCancelled()) {
                 player.closeScreen();

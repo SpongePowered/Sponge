@@ -44,17 +44,10 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-final class DoubleClickInventoryState extends BasicInventoryPacketState {
+final class DoubleClickInventoryState extends SimpleInventoryPacketState {
 
     DoubleClickInventoryState() {
-        super(PacketPhase.MODE_DOUBLE_CLICK | PacketPhase.BUTTON_PRIMARY | PacketPhase.BUTTON_SECONDARY, PacketPhase.MASK_MODE | PacketPhase.MASK_BUTTON);
-    }
-
-    @Override
-    public ClickContainerEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
-            List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, int usedButton, @Nullable Slot slot) {
-        return SpongeEventFactory.createClickContainerEventDouble(Sponge.getCauseStackManager().getCurrentCause(), openContainer, transaction,
-                openContainer, Optional.ofNullable(slot), slotTransactions);
+        super(SpongeEventFactory::createClickContainerEventDouble, PacketPhase.MODE_DOUBLE_CLICK | PacketPhase.BUTTON_PRIMARY | PacketPhase.BUTTON_SECONDARY, PacketPhase.MASK_MODE | PacketPhase.MASK_BUTTON);
     }
 
     @Override

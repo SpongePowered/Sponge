@@ -42,7 +42,6 @@ import org.spongepowered.api.event.filter.Getter;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
-import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
