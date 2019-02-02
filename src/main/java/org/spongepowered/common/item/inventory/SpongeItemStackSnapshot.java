@@ -55,7 +55,6 @@ import org.spongepowered.common.data.util.DataVersions;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
-import org.spongepowered.common.registry.SpongeGameDictionaryEntry;
 
 import java.util.Collection;
 import java.util.List;

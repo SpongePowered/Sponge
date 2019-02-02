@@ -26,21 +26,20 @@ package org.spongepowered.common.mixin.core.entity;
 
 import net.minecraft.entity.IEntityMultiPart;
 import net.minecraft.entity.MultiPartEntityPart;
-import org.spongepowered.api.entity.living.complex.EnderDragon;
-import org.spongepowered.api.entity.living.complex.EnderDragonPart;
+import org.spongepowered.api.entity.living.complex.ComplexLiving;
+import org.spongepowered.api.entity.living.complex.ComplexLivingPart;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
 @Mixin(MultiPartEntityPart.class)
-public abstract class MixinMultiPartEntityPart extends MixinEntity implements EnderDragonPart {
+public abstract class MixinMultiPartEntityPart extends MixinEntity implements ComplexLivingPart {
 
     @Shadow @Final public IEntityMultiPart parent;
 
     @Override
-    public EnderDragon getParent() {
-        return (EnderDragon) this.parent;
+    public ComplexLiving getParent() {
+        return (ComplexLiving) this.parent;
     }
 
 }

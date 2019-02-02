@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.interfaces;
 
-import net.minecraft.command.ICommandSender;
+import net.minecraft.command.ICommandSource;
 
 public interface IMixinCommandSource {
 
     String getIdentifier();
 
-    ICommandSender asICommandSender();
+    ICommandSource asICommandSender();
 }

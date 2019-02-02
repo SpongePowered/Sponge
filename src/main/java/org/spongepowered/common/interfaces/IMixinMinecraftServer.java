@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.interfaces;
 
-import net.minecraft.util.datafix.DataFixer;
+import com.mojang.datafixers.DataFixer;
 import net.minecraft.world.WorldServer;
 
 public interface IMixinMinecraftServer {

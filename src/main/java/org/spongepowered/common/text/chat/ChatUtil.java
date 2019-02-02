@@ -49,7 +49,7 @@ public final class ChatUtil {
     public static void sendMessage(ITextComponent component, MessageChannel channel, CommandSource source, boolean isChat) {
         Text raw = SpongeTexts.toText(component);
         MessageFormatter formatter = new MessageEvent.MessageFormatter(raw);
-        final boolean isMainThread = Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
+        final boolean isMainThread = Sponge.isServerAvailable() && Sponge.getServer().onMainThread();
         Cause cause = isMainThread ? Sponge.getCauseStackManager().getCurrentCause() : Cause.of(EventContext.empty(), source);
         MessageChannelEvent event;
         if (isChat) {

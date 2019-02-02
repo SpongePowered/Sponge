@@ -38,21 +38,19 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.datafix.FixTypes;
-import net.minecraft.world.DimensionType;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.GameType;
-import net.minecraft.world.MinecraftException;
 import net.minecraft.world.ServerWorldEventHandler;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.chunk.storage.AnvilSaveHandler;
 import net.minecraft.world.dimension.Dimension;
+import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.SaveHandler;
+import net.minecraft.world.storage.SessionLockException;
 import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.GameState;
@@ -239,7 +237,7 @@ public final class WorldManager {
         return Optional.ofNullable(dimensionTypeByTypeId.get(dimensionTypeId));
     }
 
-    public static Optional<DimensionType> getDimensionType(Class<? extends WorldProvider> providerClass) {
+    public static Optional<DimensionType> getDimensionType(Class<? extends Dimension> providerClass) {
         checkNotNull(providerClass);
         for (Object rawDimensionType : dimensionTypeByTypeId.values()) {
             final DimensionType dimensionType = (DimensionType) rawDimensionType;
@@ -402,7 +400,7 @@ public final class WorldManager {
             return optWorldProperties.get();
         }
 
-        final ISaveHandler saveHandler = new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), folderName, true, SpongeImpl
+        final ISaveHandler saveHandler = new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), folderName, SpongeImpl.getServer(), SpongeImpl
                 .getDataFixer());
         WorldInfo worldInfo = saveHandler.loadWorldInfo();
 
@@ -450,7 +448,7 @@ public final class WorldManager {
             worldServer.getSaveHandler().saveWorldInfo((WorldInfo) properties);
             worldServer.getSaveHandler().loadWorldInfo();
         } else {
-            new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), properties.getWorldName(), true, SpongeImpl
+            new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), properties.getWorldName(), SpongeImpl.getServer(), SpongeImpl
                     .getDataFixer()).saveWorldInfo((WorldInfo) properties);
         }
         ((IMixinWorldInfo) properties).getOrCreateWorldConfig().save();
@@ -519,7 +517,7 @@ public final class WorldManager {
                 }
 
                 mixinWorldServer.getActiveConfig().save();
-            } catch (MinecraftException e) {
+            } catch (SessionLockException e) {
                 e.printStackTrace();
             } finally {
                 worldByDimensionId.remove(dimensionId);
@@ -532,10 +530,10 @@ public final class WorldManager {
         return true;
     }
 
-    public static void saveWorld(WorldServer worldServer, boolean flush) throws MinecraftException {
+    public static void saveWorld(WorldServer worldServer, boolean flush) throws SessionLockException {
         worldServer.saveAllChunks(true, null);
         if (flush) {
-            worldServer.flush();
+            worldServer.getSaveHandler().flush();
         }
     }
 
@@ -586,7 +584,7 @@ public final class WorldManager {
             return Optional.empty();
         }
 
-        final ISaveHandler saveHandler = new AnvilSaveHandler(currentSavesDir.toFile(), worldName, true, SpongeImpl.getDataFixer());
+        final ISaveHandler saveHandler = new AnvilSaveHandler(currentSavesDir.toFile(), worldName, SpongeImpl.getServer(), SpongeImpl.getDataFixer());
 
         // We weren't given a properties, see if one is cached
         if (properties == null) {
@@ -697,7 +695,7 @@ public final class WorldManager {
             if (dimensionId == 0) {
                 saveHandler = server.getActiveAnvilConverter().getSaveLoader(server.getFolderName(), true);
             } else {
-                saveHandler = new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), worldFolderName, true,
+                saveHandler = new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), worldFolderName, SpongeImpl.getServer(),
                         SpongeImpl.getDataFixer());
             }
 
@@ -924,7 +922,7 @@ public final class WorldManager {
                     continue;
                 }
 
-                NBTTagCompound spongeDataCompound = compound.getCompoundTag(NbtDataUtil.SPONGE_DATA);
+                NBTTagCompound spongeDataCompound = compound.getCompound(NbtDataUtil.SPONGE_DATA);
 
                 if (!compound.hasKey(NbtDataUtil.SPONGE_DATA)) {
                     SpongeImpl.getLogger()
@@ -939,7 +937,7 @@ public final class WorldManager {
                     continue;
                 }
 
-                int dimensionId = spongeDataCompound.getInteger(NbtDataUtil.DIMENSION_ID);
+                int dimensionId = spongeDataCompound.getInt(NbtDataUtil.DIMENSION_ID);
 
                 if (dimensionId == Integer.MIN_VALUE) {
                     // temporary fix for existing worlds created with wrong dimension id
@@ -1012,7 +1010,7 @@ public final class WorldManager {
         if (worldServer != null) {
             try {
                 saveWorld(worldServer, true);
-            } catch (MinecraftException e) {
+            } catch (SessionLockException e) {
                 throw new RuntimeException(e);
             }
 
@@ -1056,7 +1054,7 @@ public final class WorldManager {
         }
 
         ((IMixinWorldInfo) info).createWorldConfig();
-        new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), newName, true, SpongeImpl.getDataFixer())
+        new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), newName, SpongeImpl.getServer(), SpongeImpl.getDataFixer())
                 .saveWorldInfo(info);
         registerWorldProperties((WorldProperties) info);
         return Optional.of((WorldProperties) info);
@@ -1086,7 +1084,7 @@ public final class WorldManager {
     public static void adjustWorldForDifficulty(WorldServer worldServer, EnumDifficulty difficulty, boolean isCustom) {
         final MinecraftServer server = SpongeImpl.getServer();
 
-        if (worldServer.getWorldInfo().isHardcoreModeEnabled()) {
+        if (worldServer.getWorldInfo().isHardcore()) {
             difficulty = EnumDifficulty.HARD;
             worldServer.setAllowedSpawnTypes(true, true);
         } else if (SpongeImpl.getServer().isSinglePlayer()) {
@@ -1149,7 +1147,7 @@ public final class WorldManager {
             ((IMixinWorldInfo) info).setUniqueId(UUID.randomUUID());
             ((IMixinWorldInfo) info).createWorldConfig();
             registerWorldProperties((WorldProperties) info);
-            new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), this.newName, true, SpongeImpl.getDataFixer())
+            new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), this.newName, SpongeImpl.getServer(), SpongeImpl.getDataFixer())
                     .saveWorldInfo(info);
             return Optional.of((WorldProperties) info);
         }
@@ -1234,7 +1232,7 @@ public final class WorldManager {
 
     public static int getClientDimensionId(EntityPlayerMP player, World world) {
         if (!((IMixinEntityPlayerMP) player).usesCustomClient()) {
-            DimensionType type = world.provider.getDimensionType();
+            DimensionType type = world.dimension.getType();
             if (type == DimensionType.OVERWORLD) {
                 return 0;
             } else if (type == DimensionType.NETHER) {

@@ -44,7 +44,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.item.IMixinItem;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
-import org.spongepowered.common.registry.SpongeGameDictionaryEntry;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.List;
@@ -53,7 +52,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 @Mixin(Item.class)
-public abstract class MixinItem implements ItemType, IMixinItem, SpongeGameDictionaryEntry {
+public abstract class MixinItem implements ItemType, IMixinItem {
 
     public Optional<BlockType> blockType = Optional.empty();
 
@@ -72,7 +71,7 @@ public abstract class MixinItem implements ItemType, IMixinItem, SpongeGameDicti
 
     @Override
     public CatalogKey getKey() {
-        final ResourceLocation resourceLocation = Item.REGISTRY.getNameForObject((Item) (Object) this);
+        final ResourceLocation resourceLocation = Item.REGISTRY.getKey((Item) (Object) this);
         checkState(resourceLocation != null, "Attempted to access the id before the Item is registered.");
         return (CatalogKey) (Object) resourceLocation;
     }
@@ -102,12 +101,12 @@ public abstract class MixinItem implements ItemType, IMixinItem, SpongeGameDicti
 
     @Override
     public void getManipulatorsFor(ItemStack itemStack, List<DataManipulator<?, ?>> list) {
-        if (!itemStack.hasTagCompound()) {
+        if (!itemStack.hasTag()) {
             return;
         }
 
-        org.spongepowered.api.item.inventory.ItemStack spongeStack = ((org.spongepowered.api.item.inventory.ItemStack) itemStack);
-        if (itemStack.isItemEnchanted()) {
+        org.spongepowered.api.item.inventory.ItemStack spongeStack = (org.spongepowered.api.item.inventory.ItemStack) (Object) itemStack;
+        if (itemStack.isEnchanted()) {
             list.add(getData(itemStack, EnchantmentData.class));
         }
         spongeStack.get(DisplayNameData.class).ifPresent(list::add);
@@ -115,12 +114,7 @@ public abstract class MixinItem implements ItemType, IMixinItem, SpongeGameDicti
     }
 
     protected final <T extends DataManipulator<T, ?>> T getData(ItemStack itemStack, Class<T> manipulatorClass) {
-        return ((org.spongepowered.api.item.inventory.ItemStack) itemStack).get(manipulatorClass).get();
-    }
-
-    @Override
-    public ItemStack createDictionaryStack(int wildcardValue) {
-        return new ItemStack((Item) (Object) this, 1, wildcardValue);
+        return ((org.spongepowered.api.item.inventory.ItemStack) (Object) itemStack).get(manipulatorClass).get();
     }
 
     @Override

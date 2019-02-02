@@ -30,8 +30,10 @@ import static com.google.common.base.Preconditions.checkState;
 import co.aikar.timings.TimingsManager;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.mojang.datafixers.DataFixer;
 import net.minecraft.command.ICommandManager;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.command.ICommandSource;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.profiler.Profiler;
@@ -39,18 +41,18 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.datafix.DataFixer;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.GameType;
-import net.minecraft.world.MinecraftException;
-import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldType;
+import net.minecraft.world.dimension.Dimension;
 import net.minecraft.world.storage.ISaveHandler;
+import net.minecraft.world.storage.SessionLockException;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
@@ -290,7 +292,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     }
 
     @Override
-    public ICommandSender asICommandSender() {
+    public ICommandSource asICommandSender() {
         return (MinecraftServer) (Object) this;
     }
 
@@ -365,10 +367,10 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             this.setUserMessage("menu.generatingTerrain");
             LOGGER.info("Preparing start region for level {} ({})", ((IMixinWorldServer) worldServer).getDimensionId(), ((World) worldServer).getName());
             BlockPos blockpos = worldServer.getSpawnPoint();
-            long j = MinecraftServer.getCurrentTimeMillis();
+            long j = Util.milliTime();
             for (int k = -192; k <= 192 && this.isServerRunning(); k += 16) {
                 for (int l = -192; l <= 192 && this.isServerRunning(); l += 16) {
-                    long i1 = MinecraftServer.getCurrentTimeMillis();
+                    long i1 = Util.milliTime();
 
                     if (i1 - j > 1000L) {
                         this.outputPercentRemaining("Preparing spawn area", i * 100 / 625);
@@ -608,9 +610,9 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     private int dimensionId;
 
     @Redirect(method = "addServerStatsToSnooper", at = @At(value = "FIELD", target = "Lnet/minecraft/world/WorldServer;provider:Lnet/minecraft/world/WorldProvider;", opcode = Opcodes.GETFIELD))
-    private WorldProvider onGetWorldProviderForSnooper(WorldServer world) {
+    private Dimension onGetWorldProviderForSnooper(WorldServer world) {
         this.dimensionId = WorldManager.getDimensionId(world);
-        return world.provider;
+        return world.dimension;
     }
 
     @ModifyArg(method = "addServerStatsToSnooper", at = @At(value = "INVOKE", target = "Ljava/lang/Integer;valueOf(I)Ljava/lang/Integer;", ordinal = 5))
@@ -671,16 +673,16 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                     }
                     if (logAutoSave) {
                         LOGGER.info("Auto-saving chunks for level \'" + worldserver.getWorldInfo().getWorldName() + "\'/"
-                                + worldserver.provider.getDimensionType().getName());
+                                + worldserver.dimension.getType().getName());
                     }
                 } else if (!dontLog) {
                     LOGGER.info("Saving chunks for level \'" + worldserver.getWorldInfo().getWorldName() + "\'/"
-                            + worldserver.provider.getDimensionType().getName());
+                            + worldserver.dimension.getType().getName());
                 }
                 // Sponge end
                 try {
                     WorldManager.saveWorld(worldserver, false);
-                } catch (MinecraftException ex) {
+                } catch (SessionLockException ex) {
                     ex.printStackTrace();
                 }
             }
@@ -691,7 +693,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     public void onStopServer(CallbackInfo ci) {
         // If the server is already stopping, don't allow stopServer to be called off the main thread
         // (from the shutdown handler thread in MinecraftServer)
-        if ((Sponge.isServerAvailable() && !((MinecraftServer) Sponge.getServer()).isServerRunning() && !Sponge.getServer().isMainThread())) {
+        if ((Sponge.isServerAvailable() && !((MinecraftServer) Sponge.getServer()).isServerRunning() && !Sponge.getServer().onMainThread())) {
             ci.cancel();
         }
     }

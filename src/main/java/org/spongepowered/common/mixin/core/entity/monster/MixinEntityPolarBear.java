@@ -22,27 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.util.datafix;
+package org.spongepowered.common.mixin.core.entity.monster;
 
-import net.minecraft.util.datafix.DataFixer;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.entity.monster.EntityPolarBear;
+import org.spongepowered.api.entity.living.animal.PolarBear;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.Constant;
-import org.spongepowered.asm.mixin.injection.ModifyConstant;
 
-@Mixin(DataFixer.class)
-public abstract class MixinDataFixer {
-
-    @Shadow @Final public int version;
-
-    // TODO this version needs to be updated every version
-    @ModifyConstant(
-            method = "process(Lnet/minecraft/util/datafix/IFixType;Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/nbt/NBTTagCompound;",
-            constant = @Constant(intValue = 1343)
-    )
-    private int modifyVersion(int versionComingIn) {
-        return this.version;
-    }
+@Mixin(EntityPolarBear.class)
+public abstract class MixinEntityPolarBear implements PolarBear {
 
 }

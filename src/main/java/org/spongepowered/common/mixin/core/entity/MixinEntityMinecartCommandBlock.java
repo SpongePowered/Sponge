@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.entity;
 
-import net.minecraft.command.ICommandSender;
+import net.minecraft.command.ICommandSource;
 import net.minecraft.entity.item.EntityMinecartCommandBlock;
 import net.minecraft.tileentity.CommandBlockBaseLogic;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -43,7 +43,7 @@ public abstract class MixinEntityMinecartCommandBlock extends MixinEntityMinecar
     @Shadow @Final private CommandBlockBaseLogic commandBlockLogic;
 
     @Override
-    public ICommandSender asICommandSender() {
+    public ICommandSource asICommandSender() {
         return this.commandBlockLogic;
     }
 
