@@ -60,7 +60,9 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.source.ConsoleSource;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.command.TabCompleteEvent;
 import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.api.resourcepack.ResourcePack;
@@ -584,7 +586,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                 }
 
                 Sponge.getCauseStackManager().pushCause(player);
-
+                Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, (User) player);
+                Sponge.getCauseStackManager().addContext(EventContextKeys.NOTIFIER, (User) player);
                 if (!player.getHeldItemMainhand().isEmpty() && SpongeCommonEventFactory.callInteractItemEventPrimary(player, player.getHeldItemMainhand(), EnumHand.MAIN_HAND, null, blockSnapshot).isCancelled()) {
                     SpongeCommonEventFactory.lastAnimationPacketTick = 0;
                     Sponge.getCauseStackManager().popCause();
