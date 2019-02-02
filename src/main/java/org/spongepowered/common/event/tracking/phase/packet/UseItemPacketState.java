@@ -99,7 +99,7 @@ class UseItemPacketState extends BasicPacketState {
                         if (!success && snapshot != ItemTypeRegistryModule.NONE_SNAPSHOT) {
                             Sponge.getCauseStackManager().pushCause(player);
                             EnumHand hand = ((CPacketPlayerTryUseItem) context.getPacket()).getHand();
-                            PacketPhaseUtil.handlePlayerSlotRestore(player, (net.minecraft.item.ItemStack) itemStack, hand);
+                            PacketPhaseUtil.handlePlayerSlotRestore(player, ItemStackUtil.toNative(itemStack), hand);
                         }
                     });
         }

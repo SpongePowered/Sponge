@@ -207,24 +207,19 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
                 SpongeImpl.postEvent(inventoryEvent);
 
                 // Handle cursor
-                if (inventoryEvent.isCancelled() || !inventoryEvent.getCursorTransaction().isValid()) {
-                    PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.getCursorTransaction().getOriginal());
-                } else if (inventoryEvent.getCursorTransaction().getCustom().isPresent()){
-                    PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.getCursorTransaction().getFinal());
-                }
-
+                PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.getCursorTransaction(), inventoryEvent.isCancelled());
                 // Handle slots
                 PacketPhaseUtil.handleSlotRestore(player, openContainer, inventoryEvent.getTransactions(), inventoryEvent.isCancelled());
 
-                if (!inventoryEvent.isCancelled()) {
-                    if (inventoryEvent instanceof SpawnEntityEvent) {
-                        processSpawnedEntities(player, (SpawnEntityEvent) inventoryEvent);
-                    } else if (!capturedItems.isEmpty()) {
-                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
-                        SpongeCommonEventFactory.callSpawnEntity(capturedItems, context);
+                if (inventoryEvent.isCancelled()) {
+                    if (inventoryEvent instanceof ClickContainerEvent.Drop) {
+                        capturedItems.clear();
                     }
-                } else if (inventoryEvent instanceof ClickContainerEvent.Drop) {
-                    capturedItems.clear();
+                } else if (inventoryEvent instanceof SpawnEntityEvent) {
+                    processSpawnedEntities(player, (SpawnEntityEvent) inventoryEvent);
+                } else if (!capturedItems.isEmpty()) {
+                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
+                    SpongeCommonEventFactory.callSpawnEntity(capturedItems, context);
                 }
 
             }

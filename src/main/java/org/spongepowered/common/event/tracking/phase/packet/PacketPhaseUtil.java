@@ -32,6 +32,7 @@ import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.server.SPacketSetSlot;
 import net.minecraft.util.EnumHand;
+import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.interfaces.IMixinContainer;
@@ -85,11 +86,21 @@ public final class PacketPhaseUtil {
         player.connection.sendPacket(new SPacketSetSlot(-1, -1, cursor));
     }
 
+    public static void handleCustomCursor(EntityPlayerMP player, Transaction<ItemStackSnapshot> transaction, boolean cancelled) {
+        if (cancelled || !transaction.isValid() || transaction.getCustom().isPresent()) {
+            ItemStackSnapshot cursorItem = cancelled || !transaction.isValid() ? transaction.getOriginal() : transaction.getFinal();
+            ItemStack cursor = ItemStackUtil.fromSnapshotToNative(cursorItem);
+            player.inventory.setItemStack(cursor);
+            player.connection.sendPacket(new SPacketSetSlot(-1, -1, cursor));
+        }
+        // else cursor was not modified
+    }
+
     public static void validateCapturedTransactions(int slotId, Container openContainer, List<SlotTransaction> capturedTransactions) {
         if (capturedTransactions.size() == 0 && slotId >= 0 && slotId < openContainer.inventorySlots.size()) {
             final Slot slot = openContainer.getSlot(slotId);
             if (slot != null) {
-                ItemStackSnapshot snapshot = slot.getHasStack() ? ((org.spongepowered.api.item.inventory.ItemStack) slot.getStack()).createSnapshot() : ItemStackSnapshot.NONE;
+                ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(slot.getStack());
                 final SlotTransaction slotTransaction = new SlotTransaction(ContainerUtil.getSlot(openContainer, slotId), snapshot, snapshot);
                 capturedTransactions.add(slotTransaction);
             }

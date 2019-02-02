@@ -105,11 +105,7 @@ public class PlaceRecipePacketState extends BasicInventoryPacketState {
                         cursorTransaction, openContainer, (Recipe) recipe, Optional.empty(), transactions);
             }
             SpongeImpl.postEvent(event);
-            if (event.isCancelled() || !event.getCursorTransaction().isValid()) {
-                PacketPhaseUtil.handleCustomCursor(player, event.getCursorTransaction().getOriginal());
-            } else {
-                PacketPhaseUtil.handleCustomCursor(player, event.getCursorTransaction().getFinal());
-            }
+            PacketPhaseUtil.handleCustomCursor(player, event.getCursorTransaction(), event.isCancelled());
             PacketPhaseUtil.handleSlotRestore(player, player.openContainer, event.getTransactions(), event.isCancelled());
             event.getTransactions().clear();
         }

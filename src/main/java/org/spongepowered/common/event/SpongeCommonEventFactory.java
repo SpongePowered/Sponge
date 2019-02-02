@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.event;
 
-import static org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil.handleCustomCursor;
-
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableList;
@@ -68,7 +66,6 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.Item;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.Agent;
-import org.spongepowered.api.entity.living.Human;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
@@ -92,19 +89,19 @@ import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.entity.ai.SetAITargetEvent;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
-import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.event.item.inventory.CraftItemEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.event.item.inventory.InteractItemEvent;
 import org.spongepowered.api.event.item.inventory.UpdateAnvilEvent;
+import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
+import org.spongepowered.api.event.item.inventory.container.InteractContainerEvent;
 import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
-import org.spongepowered.api.item.inventory.crafting.CraftingOutput;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
@@ -1064,41 +1061,42 @@ public class SpongeCommonEventFactory {
         }
     }
 
-    public static ClickInventoryEvent.Creative callCreativeClickInventoryEvent(EntityPlayerMP player, CPacketCreativeInventoryAction packetIn) {
-        try (CauseStackManager.StackFrame frame =Sponge.getCauseStackManager().pushCauseFrame()) {
+    public static ClickContainerEvent.Creative callCreativeClickInventoryEvent(EntityPlayerMP player, CPacketCreativeInventoryAction packetIn) {
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(player);
-        // Creative doesn't inform server of cursor status so there is no way of knowing what the final stack is
-        // Due to this, we can only send the original item that was clicked in slot
-        Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(ItemStackSnapshot.NONE, ItemStackSnapshot.NONE);
-        org.spongepowered.api.item.inventory.Slot slot = null;
-        if (((IMixinContainer) player.openContainer).getCapturedTransactions().isEmpty() && packetIn.getSlotId() >= 0
-                && packetIn.getSlotId() < player.openContainer.inventorySlots.size()) {
-            slot = ((IMixinContainer) player.openContainer).getContainerSlot(packetIn.getSlotId());
-            if (slot != null) {
-                ItemStackSnapshot clickedItem = slot.peek().createSnapshot();
-                SlotTransaction slotTransaction = new SlotTransaction(slot, clickedItem, ItemStackSnapshot.NONE);
-                ((IMixinContainer) player.openContainer).getCapturedTransactions().add(slotTransaction);
+            // Creative doesn't inform server of cursor status so there is no way of knowing what the final stack is
+            // Due to this, we can only send the original item that was clicked in slot
+            Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(ItemStackSnapshot.NONE, ItemStackSnapshot.NONE);
+            org.spongepowered.api.item.inventory.Slot slot = null;
+            IMixinContainer mixinContainer = (IMixinContainer) player.openContainer;
+            if (mixinContainer.getCapturedTransactions().isEmpty() && packetIn.getSlotId() >= 0
+                    && packetIn.getSlotId() < player.openContainer.inventorySlots.size()) {
+                slot = mixinContainer.getContainerSlot(packetIn.getSlotId());
+                if (slot != null) {
+                    ItemStackSnapshot clickedItem = slot.peek().createSnapshot();
+                    SlotTransaction slotTransaction = new SlotTransaction(slot, clickedItem, ItemStackSnapshot.NONE);
+                    mixinContainer.getCapturedTransactions().add(slotTransaction);
+                }
             }
+            ClickContainerEvent.Creative event =
+                    SpongeEventFactory.createClickContainerEventCreative(frame.getCurrentCause(), ContainerUtil.fromNative(player.openContainer), cursorTransaction,
+                            ContainerUtil.fromNative(player.openContainer), Optional.ofNullable(slot),
+                            new ArrayList<>(mixinContainer.getCapturedTransactions()));
+            mixinContainer.getCapturedTransactions().clear();
+            mixinContainer.setCaptureInventory(false);
+            SpongeImpl.postEvent(event);
+            frame.popCause();
+            return event;
         }
-        ClickInventoryEvent.Creative event =
-                SpongeEventFactory.createClickInventoryEventCreative(frame.getCurrentCause(), cursorTransaction,
-                        Optional.ofNullable(slot), (org.spongepowered.api.item.inventory.Container) player.openContainer,
-                        new ArrayList<>(((IMixinContainer) player.openContainer).getCapturedTransactions()));
-        ((IMixinContainer) player.openContainer).getCapturedTransactions().clear();
-        ((IMixinContainer) player.openContainer).setCaptureInventory(false);
-        SpongeImpl.postEvent(event);
-        frame.popCause();
-        return event;}
     }
 
     public static boolean callInteractInventoryOpenEvent(EntityPlayerMP player) {
-        ItemStackSnapshot newCursor =
-                player.inventory.getItemStack().isEmpty() ? ItemStackSnapshot.NONE
-                        : ((org.spongepowered.api.item.inventory.ItemStack) player.inventory.getItemStack()).createSnapshot();
+
+        ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
         Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(ItemStackSnapshot.NONE, newCursor);
-        InteractInventoryEvent.Open event =
-                SpongeEventFactory.createInteractInventoryEventOpen(Sponge.getCauseStackManager().getCurrentCause(), cursorTransaction,
-                        (org.spongepowered.api.item.inventory.Container) player.openContainer);
+        InteractContainerEvent.Open event =
+                SpongeEventFactory.createInteractContainerEventOpen(Sponge.getCauseStackManager().getCurrentCause(),
+                        (org.spongepowered.api.item.inventory.Container) player.openContainer, cursorTransaction);
         SpongeImpl.postEvent(event);
         if (event.isCancelled()) {
             player.closeScreen();
@@ -1107,17 +1105,15 @@ public class SpongeCommonEventFactory {
         // TODO - determine if/how we want to fire inventory events outside of click packet handlers
         //((IMixinContainer) player.openContainer).setCaptureInventory(true);
         // Custom cursor
-        if (event.getCursorTransaction().getCustom().isPresent()) {
-            handleCustomCursor(player, event.getCursorTransaction().getFinal());
-        }
+        PacketPhaseUtil.handleCustomCursor(player, event.getCursorTransaction(), event.isCancelled());
         return true;
     }
 
-    public static InteractInventoryEvent.Close callInteractInventoryCloseEvent(Container container, EntityPlayerMP player,
+    public static InteractContainerEvent.Close callInteractInventoryCloseEvent(Container container, EntityPlayerMP player,
             ItemStackSnapshot lastCursor, ItemStackSnapshot newCursor, boolean clientSource) {
         Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(lastCursor, newCursor);
-        final InteractInventoryEvent.Close event =
-                SpongeEventFactory.createInteractInventoryEventClose(Sponge.getCauseStackManager().getCurrentCause(), cursorTransaction, ContainerUtil.fromNative(container));
+        final InteractContainerEvent.Close event =
+                SpongeEventFactory.createInteractContainerEventClose(Sponge.getCauseStackManager().getCurrentCause(), ContainerUtil.fromNative(container), cursorTransaction);
         SpongeImpl.postEvent(event);
         if (event.isCancelled()) {
             if (clientSource && container.getSlot(0) != null) {
@@ -1148,19 +1144,15 @@ public class SpongeCommonEventFactory {
                 }
             }
             // Handle cursor
-            if (!event.getCursorTransaction().isValid()) {
-                handleCustomCursor(player, event.getCursorTransaction().getOriginal());
-            }
+            PacketPhaseUtil.handleCustomCursor(player, event.getCursorTransaction(), event.isCancelled());
         } else {
             IMixinContainer mixinContainer = (IMixinContainer) player.openContainer;
             mixinContainer.getCapturedTransactions().clear();
             mixinContainer.setCaptureInventory(false);
+
             // Handle cursor
-            if (!event.getCursorTransaction().isValid()) {
-                handleCustomCursor(player, event.getCursorTransaction().getOriginal());
-            } else if (event.getCursorTransaction().getCustom().isPresent()) {
-                handleCustomCursor(player, event.getCursorTransaction().getFinal());
-            }
+            PacketPhaseUtil.handleCustomCursor(player, event.getCursorTransaction(), event.isCancelled());
+
             if (!clientSource && player.openContainer != null && player.connection != null) {
                 player.closeScreen();
             }
