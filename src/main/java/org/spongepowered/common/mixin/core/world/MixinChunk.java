@@ -267,6 +267,17 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         tileEntityIn.invalidate();
     }
 
+    @Inject(method = "onLoad", at = @At("HEAD"), cancellable = true)
+    public void onLoadHead(CallbackInfo ci) {
+        if (!this.world.isRemote) {
+            if (PhaseTracker.getInstance().getCurrentState() == GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING) {
+                // If we are loading an existing chunk for the sole purpose of 
+                // regenerating, we can skip loading TE's and Entities into the world
+                ci.cancel();
+            }
+        }
+    }
+
     @Inject(method = "onLoad", at = @At("RETURN"))
     public void onLoadReturn(CallbackInfo ci) {
         for (Direction direction : CARDINAL_DIRECTIONS) {

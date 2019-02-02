@@ -393,6 +393,9 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
                     ;
                 return;
             }
+            if (PhaseTracker.getInstance().getCurrentState() == GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING) {
+                return;
+            }
             GenerationPhase.State.CHUNK_LOADING.createPhaseContext()
                     .source(this)
                     .world(this.world)
@@ -404,6 +407,9 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
     @Inject(method = "onLoad", at = @At("RETURN"))
     private void endLoad(CallbackInfo callbackInfo) {
         if (!((IMixinWorld) this.world).isFake() && SpongeImplHooks.isMainThread()) {
+            if (PhaseTracker.getInstance().getCurrentState() == GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING) {
+                return;
+            }
             // IF we're not on the main thread,
             PhaseTracker.getInstance().getCurrentContext().close();
         }

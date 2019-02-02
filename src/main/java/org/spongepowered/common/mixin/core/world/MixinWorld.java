@@ -388,16 +388,15 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public Optional<Chunk> regenerateChunk(int cx, int cy, int cz, ChunkRegenerateFlag flag) {
-        // Before unloading the chunk, we copy its entities then clear.
-        // This ensures that they don't get unloaded when we unload the chunk,
-        // since we want to keep them.
-        //
-        // We explicitly do *not* clear any tileentity-related things - we
-        // want those to be saved and unloaded, since the new chunk
-        // will have completely different blocks
         List<EntityPlayerMP> playerList = new ArrayList<>();
         List<net.minecraft.entity.Entity> entityList = new ArrayList<>();
-        Chunk spongeChunk = this.loadChunk(cx, cy, cz, false).orElse(null);
+        Chunk spongeChunk = null;
+        try (PhaseContext<?> context = GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING.createPhaseContext()
+                .world((net.minecraft.world.World)(Object) this)) {
+            context.buildAndSwitch();
+            spongeChunk = this.loadChunk(cx, cy, cz, false).orElse(null);
+        }
+
         if (spongeChunk == null) {
             if (!flag.create()) {
                 return Optional.empty();
@@ -439,7 +438,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 WorldServer world = (WorldServer) newChunk.getWorld();
                 world.getChunkProvider().loadedChunks.put(ChunkPos.asLong(cx, cz), newChunk);
                 newChunk.onLoad();
-                newChunk.populate(world.getChunkProvider(), world.getChunkProvider().chunkGenerator);
+                newChunk.populate(world.getChunkProvider().chunkGenerator);
                 for (net.minecraft.entity.Entity entity: entityList) {
                     newChunk.addEntity(entity);
                 }
@@ -448,20 +447,22 @@ public abstract class MixinWorld implements World, IMixinWorld {
                     return Optional.of((org.spongepowered.api.world.Chunk) newChunk);
                 }
 
-                List<EntityPlayerMP> chunkPlayers = ((WorldServer) newChunk.getWorld()).getPlayerChunkMap().getEntry(cx, cz).players;
-
-                // We deliberately send two packets, to avoid sending a 'fullChunk' packet
-                // (a changedSectionFilter of 65535). fullChunk packets cause the client to
-                // completely overwrite its current chunk with a new chunk instance. This causes
-                // weird issues, such as making any entities in that chunk invisible (until they leave it
-                // for a new chunk)
-                // - Aaron1011
-                for (EntityPlayerMP playerMP: chunkPlayers) {
-                    playerMP.connection.sendPacket(new SPacketChunkData(newChunk, 65534));
-                    playerMP.connection.sendPacket(new SPacketChunkData(newChunk, 1));
+                final PlayerChunkMapEntry playerChunkMapEntry = ((WorldServer) newChunk.getWorld()).getPlayerChunkMap().getEntry(cx, cz);
+                if (playerChunkMapEntry != null) {
+                    List<EntityPlayerMP> chunkPlayers = playerChunkMapEntry.players;
+                    // We deliberately send two packets, to avoid sending a 'fullChunk' packet
+                    // (a changedSectionFilter of 65535). fullChunk packets cause the client to
+                    // completely overwrite its current chunk with a new chunk instance. This causes
+                    // weird issues, such as making any entities in that chunk invisible (until they leave it
+                    // for a new chunk)
+                    // - Aaron1011
+                    for (EntityPlayerMP playerMP: chunkPlayers) {
+                        playerMP.connection.sendPacket(new SPacketChunkData(newChunk, 65534));
+                        playerMP.connection.sendPacket(new SPacketChunkData(newChunk, 1));
+                    }
                 }
             }
-    
+
             return Optional.ofNullable((org.spongepowered.api.world.Chunk) newChunk);
         }
     }
