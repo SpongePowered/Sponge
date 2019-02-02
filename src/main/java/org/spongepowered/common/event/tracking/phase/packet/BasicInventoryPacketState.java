@@ -35,7 +35,8 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
+import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
+import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
@@ -98,8 +99,8 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
     }
 
     @Nullable
-    public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
-            List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, int usedButton) {
+    public ClickContainerEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
+            List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, int usedButton, @Nullable Slot slot) {
         return null;
     }
 
@@ -160,10 +161,17 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
         }
         context.getCapturedItems().clear();
         context.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(capturedItems::addAll);
+
+        Slot slot = null;
+        if (packetIn.getSlotId() >= 0) {
+            slot = mixinContainer.getContainerSlot(packetIn.getSlotId());
+        }
+        // else TODO slot for ClickInventoryEvent.Drag
+
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(openContainer);
             Sponge.getCauseStackManager().pushCause(player);
-            final ClickInventoryEvent inventoryEvent;
+            final ClickContainerEvent inventoryEvent;
 
             if (slotTransactions.isEmpty() && packetIn.getSlotId() >= 0) {
                 if (player.openContainer.windowId != packetIn.getWindowId()) {
@@ -176,14 +184,15 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
                     return;
                 }
                 // No SlotTransaction was captured. So we add the clicked slot as a transaction
-                Slot slot = mixinContainer.getContainerSlot(packetIn.getSlotId());
-                ItemStackSnapshot item = slot.peek().createSnapshot();
-                slotTransactions.add(new SlotTransaction(slot, item, item));
+                if (slot != null) {
+                    ItemStackSnapshot item = slot.peek().createSnapshot();
+                    slotTransactions.add(new SlotTransaction(slot, item, item));
+                }
+
             }
 
             inventoryEvent = this.createInventoryEvent(player, ContainerUtil.fromNative(openContainer), cursorTransaction,
-                        new ArrayList<>(slotTransactions),
-                        capturedItems, usedButton);
+                        new ArrayList<>(slotTransactions), capturedItems, usedButton, slot);
 
             if (inventoryEvent != null) {
 
@@ -191,7 +200,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
                 // we only care about the last one.
                 // Therefore, we never add any 'fake' transactions, as the final
                 // packet has everything we want.
-                if (!(inventoryEvent instanceof ClickInventoryEvent.Drag)) {
+                if (!(inventoryEvent instanceof ClickContainerEvent.Drag)) {
                     PacketPhaseUtil.validateCapturedTransactions(packetIn.getSlotId(), openContainer, inventoryEvent.getTransactions());
                 }
 
@@ -214,7 +223,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
                         frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
                         SpongeCommonEventFactory.callSpawnEntity(capturedItems, context);
                     }
-                } else if (inventoryEvent instanceof ClickInventoryEvent.Drop) {
+                } else if (inventoryEvent instanceof ClickContainerEvent.Drop) {
                     capturedItems.clear();
                 }
 

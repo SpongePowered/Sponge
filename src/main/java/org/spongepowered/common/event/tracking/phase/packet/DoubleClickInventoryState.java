@@ -30,14 +30,19 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
+import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
+import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.event.tracking.phase.packet.drag.DragInventoryStopState;
 import org.spongepowered.common.interfaces.IMixinContainer;
 
 import java.util.List;
+import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 final class DoubleClickInventoryState extends BasicInventoryPacketState {
 
@@ -46,9 +51,10 @@ final class DoubleClickInventoryState extends BasicInventoryPacketState {
     }
 
     @Override
-    public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
-            List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, int usedButton) {
-        return SpongeEventFactory.createClickInventoryEventDouble(Sponge.getCauseStackManager().getCurrentCause(), transaction, openContainer, slotTransactions);
+    public ClickContainerEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
+            List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, int usedButton, @Nullable Slot slot) {
+        return SpongeEventFactory.createClickContainerEventDouble(Sponge.getCauseStackManager().getCurrentCause(), openContainer, transaction,
+                openContainer, Optional.ofNullable(slot), slotTransactions);
     }
 
     @Override

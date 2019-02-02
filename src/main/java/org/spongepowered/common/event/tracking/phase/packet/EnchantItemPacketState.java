@@ -36,7 +36,7 @@ import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.AffectEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
+import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeImpl;
@@ -93,13 +93,9 @@ public class EnchantItemPacketState extends BasicInventoryPacketState {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(player);
             Sponge.getCauseStackManager().pushCause(openContainer);
-            final ClickInventoryEvent inventoryEvent;
-            inventoryEvent =
-                this
-                    .createInventoryEvent(player, ContainerUtil.fromNative(openContainer), transaction,
-                        Lists.newArrayList(slotTransactions),
-                        capturedItems,
-                        usedButton);
+            final ClickContainerEvent inventoryEvent;
+            inventoryEvent = this.createInventoryEvent(player, ContainerUtil.fromNative(openContainer), transaction,
+                        Lists.newArrayList(slotTransactions), capturedItems, usedButton, null);
 
             // Some mods may override container detectAndSendChanges method and prevent captures
             // If this happens and we captured no entities, avoid firing events
@@ -119,13 +115,13 @@ public class EnchantItemPacketState extends BasicInventoryPacketState {
                 // only care about the last one.
                 // Therefore, we never add any 'fake' transactions, as the final
                 // packet has everything we want.
-                if (!(inventoryEvent instanceof ClickInventoryEvent.Drag)) {
+                if (!(inventoryEvent instanceof ClickContainerEvent.Drag)) {
                     PacketPhaseUtil.validateCapturedTransactions(packetIn.getWindowId(), openContainer, inventoryEvent.getTransactions());
                 }
 
                 SpongeImpl.postEvent(inventoryEvent);
                 if (inventoryEvent.isCancelled() || PacketPhaseUtil.allTransactionsInvalid(inventoryEvent.getTransactions())) {
-                    if (inventoryEvent instanceof ClickInventoryEvent.Drop) {
+                    if (inventoryEvent instanceof ClickContainerEvent.Drop) {
                         capturedItems.clear();
                     }
 
@@ -153,5 +149,6 @@ public class EnchantItemPacketState extends BasicInventoryPacketState {
             }
         }
         slotTransactions.clear();
-        mixinContainer.setCaptureInventory(false);    }
+        mixinContainer.setCaptureInventory(false);
+    }
 }

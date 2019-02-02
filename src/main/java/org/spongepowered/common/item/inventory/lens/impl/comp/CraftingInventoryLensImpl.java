@@ -35,6 +35,7 @@ import org.spongepowered.common.item.inventory.lens.comp.CraftingInventoryLens;
 import org.spongepowered.common.item.inventory.lens.impl.DefaultIndexedLens;
 import org.spongepowered.common.item.inventory.lens.impl.RealLens;
 import org.spongepowered.common.item.inventory.lens.slots.CraftingOutputSlotLens;
+import org.spongepowered.common.item.inventory.property.SlotIndexImpl;
 
 public class CraftingInventoryLensImpl extends RealLens implements CraftingInventoryLens {
 
@@ -59,7 +60,7 @@ public class CraftingInventoryLensImpl extends RealLens implements CraftingInven
 
     private void init(SlotProvider slots) {
 
-        this.addSpanningChild(this.outputSlot);
+        this.addSpanningChild(this.outputSlot, new SlotIndexImpl(0));
         this.addSpanningChild(this.craftingGrid);
         this.addChild(new DefaultIndexedLens(0, this.size, slots));
     }
