@@ -63,6 +63,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.dimension.Dimension;
 import net.minecraft.world.storage.MapStorage;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.CatalogKey;
@@ -226,15 +227,15 @@ public final class SpongeImplHooks {
 
     // World provider
 
-    public static boolean canDoLightning(WorldProvider provider, net.minecraft.world.chunk.Chunk chunk) {
+    public static boolean canDoLightning(Dimension provider, net.minecraft.world.chunk.Chunk chunk) {
         return true;
     }
 
-    public static boolean canDoRainSnowIce(WorldProvider provider, net.minecraft.world.chunk.Chunk chunk) {
+    public static boolean canDoRainSnowIce(Dimension provider, net.minecraft.world.chunk.Chunk chunk) {
         return true;
     }
 
-    public static int getRespawnDimension(WorldProvider targetDimension, EntityPlayerMP player) {
+    public static int getRespawnDimension(Dimension targetDimension, EntityPlayerMP player) {
         return 0;
     }
 
@@ -242,7 +243,7 @@ public final class SpongeImplHooks {
         BlockPos ret = world.getSpawnPoint();
 
         boolean isAdventure = world.getWorldInfo().getGameType() == GameType.ADVENTURE;
-        int spawnFuzz = Math.max(0, world.getMinecraftServer().getSpawnRadius(world));
+        int spawnFuzz = Math.max(0, world.getServer().getSpawnRadius(world));
         int border = MathHelper.floor(world.getWorldBorder().getClosestDistance(ret.getX(), ret.getZ()));
         if (border < spawnFuzz) {
             spawnFuzz = border;

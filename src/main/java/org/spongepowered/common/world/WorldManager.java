@@ -50,6 +50,7 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.chunk.storage.AnvilSaveHandler;
+import net.minecraft.world.dimension.Dimension;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.SaveHandler;
 import net.minecraft.world.storage.WorldInfo;
@@ -1182,7 +1183,7 @@ public final class WorldManager {
 
     }
 
-    public static void sendDimensionRegistration(EntityPlayerMP playerMP, WorldProvider provider) {
+    public static void sendDimensionRegistration(EntityPlayerMP playerMP, Dimension provider) {
         // Do nothing in Common
     }
 

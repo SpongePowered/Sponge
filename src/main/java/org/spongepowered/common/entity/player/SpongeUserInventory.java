@@ -39,6 +39,8 @@ import net.minecraft.util.text.TextComponentTranslation;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 public class SpongeUserInventory implements IInventory {
 
     // sourced from InventoryPlayer
@@ -141,8 +143,8 @@ public class SpongeUserInventory implements IInventory {
             if (!this.mainInventory.get(i).isEmpty()) {
                 NBTTagCompound nbttagcompound = new NBTTagCompound();
                 nbttagcompound.setByte("Slot", (byte) i);
-                this.mainInventory.get(i).writeToNBT(nbttagcompound);
-                nbtTagListIn.appendTag(nbttagcompound);
+                this.mainInventory.get(i).write(nbttagcompound);
+                nbtTagListIn.add(nbttagcompound);
             }
         }
 
@@ -150,8 +152,8 @@ public class SpongeUserInventory implements IInventory {
             if (!this.armorInventory.get(j).isEmpty()) {
                 NBTTagCompound nbttagcompound1 = new NBTTagCompound();
                 nbttagcompound1.setByte("Slot", (byte) (j + 100));
-                this.armorInventory.get(j).writeToNBT(nbttagcompound1);
-                nbtTagListIn.appendTag(nbttagcompound1);
+                this.armorInventory.get(j).write(nbttagcompound1);
+                nbtTagListIn.add(nbttagcompound1);
             }
         }
 
@@ -159,8 +161,8 @@ public class SpongeUserInventory implements IInventory {
             if (!this.offHandInventory.get(k).isEmpty()) {
                 NBTTagCompound nbttagcompound2 = new NBTTagCompound();
                 nbttagcompound2.setByte("Slot", (byte) (k + 150));
-                this.offHandInventory.get(k).writeToNBT(nbttagcompound2);
-                nbtTagListIn.appendTag(nbttagcompound2);
+                this.offHandInventory.get(k).write(nbttagcompound2);
+                nbtTagListIn.add(nbttagcompound2);
             }
         }
 
@@ -177,8 +179,8 @@ public class SpongeUserInventory implements IInventory {
         this.armorInventory.clear();
         this.offHandInventory.clear();
 
-        for (int i = 0; i < nbtTagListIn.tagCount(); ++i) {
-            NBTTagCompound nbttagcompound = nbtTagListIn.getCompoundTagAt(i);
+        for (int i = 0; i < nbtTagListIn.size(); ++i) {
+            NBTTagCompound nbttagcompound = nbtTagListIn.getCompound(i);
             int j = nbttagcompound.getByte("Slot") & 255;
             ItemStack itemstack = new ItemStack(nbttagcompound);
 
@@ -248,8 +250,8 @@ public class SpongeUserInventory implements IInventory {
      * Get the name of this object. For players this returns their username
      */
     @Override
-    public String getName() {
-        return "container.inventory";
+    public ITextComponent getName() {
+        return new TextComponentTranslation("container.inventory");
     }
 
     /**
@@ -260,12 +262,10 @@ public class SpongeUserInventory implements IInventory {
         return false;
     }
 
-    /**
-     * Get the formatted ChatComponent that will be used for the sender's username in chat
-     */
+    @Nullable
     @Override
-    public ITextComponent getDisplayName() {
-        return this.hasCustomName() ? new TextComponentString(this.getName()) : new TextComponentTranslation(this.getName());
+    public ITextComponent getCustomName() {
+        return null;
     }
 
     /**

@@ -25,9 +25,9 @@
 package org.spongepowered.common.entity.projectile;
 
 import net.minecraft.block.BlockDispenser;
-import net.minecraft.block.BlockSourceImpl;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.dispenser.BehaviorDefaultDispenseItem;
+import net.minecraft.dispenser.BlockSourceImpl;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -62,7 +62,7 @@ public class DispenserSourceLogic implements ProjectileSourceLogic<Dispenser> {
 
     public static EnumFacing getFacing(TileEntityDispenser dispenser) {
         IBlockState state = dispenser.getWorld().getBlockState(dispenser.getPos());
-        return state.getValue(BlockDispenser.FACING);
+        return state.get(BlockDispenser.FACING);
     }
 
     @SuppressWarnings("unchecked")

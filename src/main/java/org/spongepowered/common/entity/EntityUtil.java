@@ -28,8 +28,6 @@ import static net.minecraft.util.EntitySelectors.NOT_SPECTATING;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.minecraft.entity.Entity;
@@ -39,6 +37,7 @@ import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.EntityTrackerEntry;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityPainting;
+import net.minecraft.entity.item.PaintingType;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -64,6 +63,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldProviderEnd;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.dimension.EndDimension;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.type.Profession;
@@ -123,6 +123,7 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -150,8 +151,7 @@ public final class EntityUtil {
     private EntityUtil() {
     }
 
-    private static final Predicate<Entity> TRACEABLE = Predicates.and(NOT_SPECTATING,
-      entity -> entity != null && entity.canBeCollidedWith());
+    private static final Predicate<Entity> TRACEABLE = NOT_SPECTATING.and(entity -> entity != null && entity.canBeCollidedWith());
 
     public static final Function<Humanoid, EntityPlayer> HUMANOID_TO_PLAYER = (humanoid) -> humanoid instanceof EntityPlayer ? (EntityPlayer) humanoid : null;
 
@@ -179,9 +179,9 @@ public final class EntityUtil {
         entity.world.profiler.startSection("changeDimension");
         // use the world from event
         final Transform<World> toTransform = event.getToTransform();
-        WorldServer toWorld = (WorldServer) toTransform.getExtent();
+        WorldServer toWorld = (WorldServer) toTransform.getWorld();
         entity.world.removeEntity(entity);
-        entity.isDead = false;
+        entity.removed = false;
         entity.world.profiler.startSection("reposition");
 
         final Vector3i toChunkPosition = toTransform.getLocation().getChunkPosition();
@@ -192,7 +192,7 @@ public final class EntityUtil {
         entity.world = toWorld;
         try (PhaseContext<?> ignored = EntityPhase.State.CHANGING_DIMENSION.createPhaseContext().setTargetWorld(toWorld).buildAndSwitch()) {
             toWorld.spawnEntity(entity);
-            toWorld.updateEntityWithOptionalForce(entity, false);
+            toWorld.tickEntity(entity, false);
         }
         entity.world.profiler.endSection();
 
@@ -225,8 +225,8 @@ public final class EntityUtil {
         boolean sameDimension = entityPlayerMP.dimension == suggestedDimensionId;
         // If leaving The End via End's Portal
         // Sponge Start - Check the provider, not the world's dimension
-        final WorldServer fromWorldServer = (WorldServer) event.getFromTransform().getExtent();
-        if (fromWorldServer.provider instanceof WorldProviderEnd && suggestedDimensionId == 1) { // if (this.dimension == 1 && dimensionIn == 1)
+        final WorldServer fromWorldServer = (WorldServer) event.getFromTransform().getWorld();
+        if (fromWorldServer.dimension instanceof EndDimension && suggestedDimensionId == 1) { // if (this.dimension == 1 && dimensionIn == 1)
             // Sponge End
             fromWorldServer.removeEntity(entityPlayerMP);
             if (!entityPlayerMP.queuedEndExit) {
@@ -237,7 +237,7 @@ public final class EntityUtil {
             return entityPlayerMP;
         } // else { // Sponge - Remove unecessary
 
-        final WorldServer toWorldServer = (WorldServer) event.getToTransform().getExtent();
+        final WorldServer toWorldServer = (WorldServer) event.getToTransform().getWorld();
         // If we attempted to travel a new dimension but were denied due to some reason such as world
         // not being loaded then short-circuit to prevent unnecessary logic from running
         if (!sameDimension && fromWorldServer == toWorldServer) {
@@ -260,8 +260,8 @@ public final class EntityUtil {
     // Used by PlayerList#transferPlayerToDimension and EntityPlayerMP#changeDimension.
     // This method should NOT fire a teleport event as that should always be handled by the caller.
     public static void transferPlayerToDimension(MoveEntityEvent.Teleport.Portal event, EntityPlayerMP playerIn) {
-        WorldServer fromWorld = (WorldServer) event.getFromTransform().getExtent();
-        WorldServer toWorld = (WorldServer) event.getToTransform().getExtent();
+        WorldServer fromWorld = (WorldServer) event.getFromTransform().getWorld();
+        WorldServer toWorld = (WorldServer) event.getToTransform().getWorld();
         playerIn.dimension = WorldManager.getClientDimensionId(playerIn, toWorld);
         toWorld.getChunkProvider().loadChunk(event.getToTransform().getLocation().getChunkPosition().getX(), event.getToTransform().getLocation().getChunkPosition().getZ());
         // Support vanilla clients teleporting to custom dimensions
@@ -269,10 +269,10 @@ public final class EntityUtil {
 
         // Send dimension registration
         if (((IMixinEntityPlayerMP) playerIn).usesCustomClient()) {
-            WorldManager.sendDimensionRegistration(playerIn, toWorld.provider);
+            WorldManager.sendDimensionRegistration(playerIn, toWorld.dimension);
         } else {
             // Force vanilla client to refresh its chunk cache if same dimension type
-            if (fromWorld != toWorld && fromWorld.provider.getDimensionType() == toWorld.provider.getDimensionType()) {
+            if (fromWorld != toWorld && fromWorld.dimension.getType() == toWorld.dimension.getType()) {
                 playerIn.connection.sendPacket(new SPacketRespawn((dimensionId >= 0 ? -1 : 0), toWorld.getDifficulty(), toWorld.getWorldInfo().getTerrainType(), playerIn.interactionManager.getGameType()));
             }
         }
@@ -285,12 +285,12 @@ public final class EntityUtil {
         ((IMixinEntity) playerIn).setLocationAndAngles(event.getToTransform());
         playerIn.setWorld(toWorld);
         toWorld.spawnEntity(playerIn);
-        toWorld.updateEntityWithOptionalForce(playerIn, false);
+        toWorld.tickEntity(playerIn, false);
         SpongeImpl.getServer().getPlayerList().preparePlayer(playerIn, fromWorld);
         playerIn.connection.setPlayerLocation(playerIn.posX, playerIn.posY, playerIn.posZ, playerIn.rotationYaw, playerIn.rotationPitch);
         playerIn.interactionManager.setWorld(toWorld);
-        SpongeImpl.getServer().getPlayerList().updateTimeAndWeatherForPlayer(playerIn, toWorld);
-        SpongeImpl.getServer().getPlayerList().syncPlayerInventory(playerIn);
+        SpongeImpl.getServer().getPlayerList().sendWorldInfo(playerIn, toWorld);
+        SpongeImpl.getServer().getPlayerList().sendInventory(playerIn);
 
         // Update reducedDebugInfo game rule
         playerIn.connection.sendPacket(new SPacketEntityStatus(playerIn,
@@ -313,7 +313,7 @@ public final class EntityUtil {
             EntityLivingBase base = (EntityLivingBase) entity;
             return base.getHealth() <= 0 || base.deathTime > 0 || base.dead;
         }
-        return entity.isDead;
+        return entity.removed;
     }
 
     public static MoveEntityEvent.Teleport handleDisplaceEntityTeleportEvent(Entity entityIn, Location<World> location) {
@@ -354,7 +354,7 @@ public final class EntityUtil {
         final IMixinWorldServer fromMixinWorld = (IMixinWorldServer) fromWorld;
         boolean sameDimension = entityIn.dimension == targetDimensionId;
         // handle the end
-        if (targetDimensionId == 1 && fromWorld.provider instanceof WorldProviderEnd) {
+        if (targetDimensionId == 1 && fromWorld.dimension instanceof EndDimension) {
             targetDimensionId = 0;
         }
         WorldServer toWorld = mcServer.getWorld(targetDimensionId);
@@ -369,7 +369,7 @@ public final class EntityUtil {
 
         // Check if we're to use a different teleporter for this world
         if (teleporter.getClass().getName().equals("net.minecraft.world.Teleporter")) {
-            worldName = portalAgents.get("minecraft:default_" + toWorld.provider.getDimensionType().getName().toLowerCase(Locale.ENGLISH));
+            worldName = portalAgents.get("minecraft:default_" + toWorld.dimension.getType().getName().toLowerCase(Locale.ENGLISH));
         } else { // custom
             worldName = portalAgents.get("minecraft:" + teleporter.getClass().getSimpleName());
         }
@@ -382,7 +382,7 @@ public final class EntityUtil {
                         toWorld = (WorldServer) spongeWorld.get();
                         teleporter = (IMixinITeleporter) toWorld.getDefaultTeleporter();
                         if (teleporter instanceof IMixinTeleporter) {
-                            if ((fromWorld.provider.isNether() || toWorld.provider.isNether())) {
+                            if ((fromWorld.dimension.isNether() || toWorld.dimension.isNether())) {
                                 ((IMixinTeleporter) teleporter).setNetherPortalType(true);
                             } else {
                                 ((IMixinTeleporter) teleporter).setNetherPortalType(false);
@@ -405,14 +405,14 @@ public final class EntityUtil {
             frame.addContext(EventContextKeys.TELEPORT_TYPE, TeleportTypes.PORTAL);
 
 
-            if (entityIn.isEntityAlive() && (teleporter instanceof IMixinTeleporter && !(fromWorld.provider instanceof WorldProviderEnd))) {
+            if (entityIn.isAlive() && (teleporter instanceof IMixinTeleporter && !(fromWorld.dimension instanceof EndDimension))) {
                 fromWorld.profiler.startSection("placing");
                 // Only place entity in portal if one of the following are true :
                 // 1. The teleporter is custom. (not vanilla)
                 // 2. The last known portal vec is known. (Usually set after block collision)
                 // 3. The entity is traveling to end from a non-end world.
                 // Note: We must always use placeInPortal to support mods.
-                if (!teleporter.isVanilla() || entityIn.getLastPortalVec() != null || (!(fromWorld.provider instanceof WorldProviderEnd) && toWorld.provider instanceof WorldProviderEnd)) {
+                if (!teleporter.isVanilla() || entityIn.getLastPortalVec() != null || (!(fromWorld.dimension instanceof EndDimension) && toWorld.dimension instanceof EndDimension)) {
                     // In Forge, the entity dimension is already set by this point.
                     // To maintain compatibility with Forge mods, we temporarily
                     // set the entity's dimension to the current target dimension
@@ -485,7 +485,7 @@ public final class EntityUtil {
                     return event;
                 }
             } else {
-                if (toWorld.provider instanceof WorldProviderEnd) {
+                if (toWorld.dimension instanceof EndDimension) {
                     BlockPos blockpos = entityIn.world.getTopSolidOrLiquidBlock(toWorld.getSpawnPoint());
                     entityIn.moveToBlockPosAndAngles(blockpos, entityIn.rotationYaw, entityIn.rotationPitch);
                 }
@@ -615,7 +615,7 @@ public final class EntityUtil {
         Vec3d traceEnd = traceStart.add(lookDir);
 
         for (final Entity entity : EntityUtil.getTraceEntities(source, traceDistance, lookDir, EntityUtil.TRACEABLE)) {
-            AxisAlignedBB entityBB = entity.getEntityBoundingBox().grow(entity.getCollisionBorderSize());
+            AxisAlignedBB entityBB = entity.getBoundingBox().grow(entity.getCollisionBorderSize());
             RayTraceResult entityRay = entityBB.calculateIntercept(traceStart, traceEnd);
 
             if (entityBB.contains(traceStart)) {
@@ -651,7 +651,7 @@ public final class EntityUtil {
     }
 
     private static List<Entity> getTraceEntities(Entity source, double traceDistance, Vec3d dir, Predicate<Entity> filter) {
-        AxisAlignedBB boundingBox = source.getEntityBoundingBox();
+        AxisAlignedBB boundingBox = source.getBoundingBox();
         AxisAlignedBB traceBox = boundingBox.expand(dir.x, dir.y, dir.z);
         List<Entity> entities = source.world.getEntitiesInAABBexcluding(source, traceBox.grow(1.0F, 1.0F, 1.0F), filter);
         return entities;
@@ -678,8 +678,8 @@ public final class EntityUtil {
         return new Vec3d(interpX, interpY, interpZ);
     }
 
-    public static boolean refreshPainting(EntityPainting painting, EntityPainting.EnumArt art) {
-        EntityPainting.EnumArt oldArt = painting.art;
+    public static boolean refreshPainting(EntityPainting painting, PaintingType art) {
+        PaintingType oldArt = painting.art;
         painting.art = art;
         painting.updateFacingWithBoundingBox(painting.facingDirection);
         if (!painting.onValidSurface()) {
@@ -762,13 +762,13 @@ public final class EntityUtil {
             return location;
         }
 
-        final Dimension targetDimension = (Dimension) targetWorld.provider;
+        final Dimension targetDimension = (Dimension) targetWorld.dimension;
         int targetDimensionId = ((IMixinWorldServer) targetWorld).getDimensionId();
         // Cannot respawn in requested world, use the fallback dimension for
         // that world. (Usually overworld unless a mod says otherwise).
         if (!targetDimension.allowsPlayerRespawns()) {
-            targetDimensionId = SpongeImplHooks.getRespawnDimension((WorldProvider) targetDimension, playerIn);
-            targetWorld = targetWorld.getMinecraftServer().getWorld(targetDimensionId);
+            targetDimensionId = SpongeImplHooks.getRespawnDimension((net.minecraft.world.dimension.Dimension) targetDimension, playerIn);
+            targetWorld = targetWorld.getServer().getWorld(targetDimensionId);
         }
 
         Vector3d targetSpawnVec = VecHelper.toVector3d(targetWorld.getSpawnPoint());
@@ -889,10 +889,10 @@ public final class EntityUtil {
 
         entity.dismountRidingEntity();
         entity.world.removeEntityDangerously(entity);
-        entity.isDead = false;
+        entity.removed = false;
         entity.dimension = targetDim;
         entity.setPositionAndRotation(location.getX(), location.getY(), location.getZ(), 0, 0);
-        while (!toWorld.getCollisionBoxes(entity, entity.getEntityBoundingBox()).isEmpty() && entity.posY < 256.0D) {
+        while (!toWorld.getCollisionBoxes(entity, entity.getBoundingBox()).isEmpty() && entity.posY < 256.0D) {
             entity.setPosition(entity.posX, entity.posY + 1.0D, entity.posZ);
         }
 
@@ -903,10 +903,10 @@ public final class EntityUtil {
             // Support vanilla clients going into custom dimensions
             final int toDimensionId = WorldManager.getClientDimensionId(entityPlayerMP, toWorld);
             if (((IMixinEntityPlayerMP) entityPlayerMP).usesCustomClient()) {
-                WorldManager.sendDimensionRegistration(entityPlayerMP, toWorld.provider);
+                WorldManager.sendDimensionRegistration(entityPlayerMP, toWorld.dimension);
             } else {
                 // Force vanilla client to refresh its chunk cache if same dimension type
-                if (fromWorld != toWorld && fromWorld.provider.getDimensionType() == toWorld.provider.getDimensionType()) {
+                if (fromWorld != toWorld && fromWorld.dimension.getType() == toWorld.dimension.getType()) {
                     entityPlayerMP.connection.sendPacket(
                             new SPacketRespawn(toDimensionId >= 0 ? -1 : 0, toWorld.getDifficulty(),
                                     toWorld.getWorldInfo().getTerrainType(), entityPlayerMP.interactionManager.getGameType()));
@@ -926,7 +926,7 @@ public final class EntityUtil {
             entityPlayerMP.connection.setPlayerLocation(entityPlayerMP.posX, entityPlayerMP.posY, entityPlayerMP.posZ,
                     entityPlayerMP.rotationYaw, entityPlayerMP.rotationPitch);
             entityPlayerMP.setSneaking(false);
-            mcServer.getPlayerList().updateTimeAndWeatherForPlayer(entityPlayerMP, toWorld);
+            mcServer.getPlayerList().sendWorldInfo(entityPlayerMP, toWorld);
             toWorld.getPlayerChunkMap().addPlayer(entityPlayerMP);
             toWorld.spawnEntity(entityPlayerMP);
             mcServer.getPlayerList().getPlayers().add(entityPlayerMP);
@@ -954,8 +954,8 @@ public final class EntityUtil {
 
     private static void adjustEntityPostionForTeleport(IMixinPlayerList playerList, Entity entity, WorldServer fromWorld, WorldServer toWorld) {
         fromWorld.profiler.startSection("moving");
-        WorldProvider pOld = fromWorld.provider;
-        WorldProvider pNew = toWorld.provider;
+        net.minecraft.world.dimension.Dimension pOld = fromWorld.dimension;
+        net.minecraft.world.dimension.Dimension pNew = toWorld.dimension;
         double moveFactor = playerList.getMovementFactor(pOld) / playerList.getMovementFactor(pNew);
         double x = entity.posX * moveFactor;
         double y = entity.posY;
@@ -970,7 +970,7 @@ public final class EntityUtil {
         if (pNew instanceof WorldProviderEnd) {
             BlockPos blockpos;
 
-            if (pOld instanceof WorldProviderEnd) {
+            if (pOld instanceof EndDimension) {
                 blockpos = toWorld.getSpawnPoint();
             } else {
                 blockpos = toWorld.getSpawnCoordinate();
@@ -987,14 +987,14 @@ public final class EntityUtil {
             x = MathHelper.clamp((int)x, -29999872, 29999872);
             z = MathHelper.clamp((int)z, -29999872, 29999872);
 
-            if (entity.isEntityAlive()) {
+            if (entity.isAlive()) {
                 entity.setLocationAndAngles(x, y, z, entity.rotationYaw, entity.rotationPitch);
             }
             fromWorld.profiler.endSection();
         }
 
-        if (entity.isEntityAlive()) {
-            fromWorld.updateEntityWithOptionalForce(entity, false);
+        if (entity.isAlive()) {
+            fromWorld.tickEntity(entity, false);
         }
 
         fromWorld.profiler.endSection();

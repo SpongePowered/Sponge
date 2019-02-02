@@ -30,7 +30,8 @@ import net.minecraft.entity.passive.EntitySheep;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemArmor;
-import net.minecraft.item.ItemArmor.ArmorMaterial;
+import net.minecraft.item.ArmorMaterial;
+import net.minecraft.item.ItemArmorDyeable;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.type.DyeColor;
@@ -44,12 +45,12 @@ public final class ColorUtil {
     public static Optional<Color> getItemStackColor(ItemStack stack) {
         // Special case for armor: it has a special method
         final Item item = stack.getItem();
-        if (item instanceof ItemArmor) {
-            final NBTTagCompound tagCompound = stack.getTagCompound();
+        if (item instanceof ItemArmorDyeable) {
+            final NBTTagCompound tagCompound = stack.getTag();
             if (tagCompound == null || !tagCompound.hasKey(NbtDataUtil.ARMOR_COLOR_DISPLAY_TAG)) {
                 return Optional.empty();
             }
-            final int color = ((ItemArmor) item).getColor(stack);
+            final int color = ((ItemArmorDyeable) item).getColor(stack);
             return color == -1 ? Optional.empty() : Optional.of(Color.ofRgb(color));
         }
         return NbtDataUtil.getItemCompound(stack).flatMap(NbtDataUtil::getColorFromNBT);

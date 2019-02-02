@@ -40,8 +40,8 @@ import org.spongepowered.common.interfaces.world.IMixinLocation;
 
 public final class VecHelper {
 
-    public static Location<World> toLocation(net.minecraft.world.World world, BlockPos pos) {
-        return new Location<World>((World) world, toVector3i(pos));
+    public static Location toLocation(net.minecraft.world.World world, BlockPos pos) {
+        return new Location((World) world, toVector3i(pos));
     }
 
     // === Flow Vector3d --> BlockPos ===
@@ -63,7 +63,7 @@ public final class VecHelper {
     }
 
     // === SpongeAPI Location --> BlockPos ===
-    public static BlockPos toBlockPos(Location<?> location) {
+    public static BlockPos toBlockPos(Location location) {
         if (location == null) {
             return null;
         }

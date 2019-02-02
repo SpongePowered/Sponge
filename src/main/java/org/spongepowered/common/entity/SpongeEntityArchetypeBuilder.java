@@ -110,7 +110,7 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
         this.entityType = checkNotNull(entity.getType(), "Entity is returning a null EntityType!");
         final net.minecraft.entity.Entity minecraftEntity = EntityUtil.toNative(entity);
         final NBTTagCompound compound = new NBTTagCompound();
-        minecraftEntity.writeToNBT(compound);
+        minecraftEntity.writeWithoutTypeId(compound);
         compound.removeTag(NbtDataUtil.UUID);
         this.entityData = NbtTranslator.getInstance().translate(compound);
         return this;

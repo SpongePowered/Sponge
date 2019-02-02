@@ -61,7 +61,7 @@ public class BookFaker {
         // Next we tell the client to open the Book GUI
         PacketBuffer packetbuffer = new PacketBuffer(Unpooled.buffer());
         packetbuffer.writeEnumValue(EnumHand.MAIN_HAND);
-        receiver.sendPacket(new SPacketCustomPayload("MC|BOpen", packetbuffer));
+        receiver.sendPacket(new SPacketCustomPayload(SPacketCustomPayload.BOOK_OPEN, packetbuffer));
 
         // Now we can remove the fake Book since it's contents will have already
         // been transferred to the GUI

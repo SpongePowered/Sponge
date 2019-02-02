@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.scoreboard;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.scoreboard.Team;
@@ -41,11 +42,8 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.interfaces.IMixinTeam;
-import org.spongepowered.common.registry.type.text.TextColorRegistryModule;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.format.SpongeTextColor;
 
@@ -60,22 +58,22 @@ public abstract class MixinScorePlayerTeam extends net.minecraft.scoreboard.Team
     @Shadow public Scoreboard scoreboard;
     @Shadow public String name;
     @Shadow public Set<String> membershipSet;
-    @Shadow public String displayName;
-    @Shadow public TextFormatting color;
-    @Shadow public String prefix;
-    @Shadow public String suffix;
+    @Shadow public ITextComponent displayName;
+    @Shadow public ITextComponent prefix;
+    @Shadow public ITextComponent suffix;
     @Shadow public boolean allowFriendlyFire;
     @Shadow public boolean canSeeFriendlyInvisibles;
     @Shadow public net.minecraft.scoreboard.Team.EnumVisible nameTagVisibility;
     @Shadow public net.minecraft.scoreboard.Team.EnumVisible deathMessageVisibility;
+    @Shadow public TextFormatting color;
     @Shadow public net.minecraft.scoreboard.Team.CollisionRule collisionRule;
 
     @Shadow public abstract void setAllowFriendlyFire(boolean friendlyFire);
 
-    private Text spongeDisplayName;
-    private Text spongePrefix;
-    private Text spongeSuffix;
-    private TextColor spongeColor;
+//    private Text spongeDisplayName;
+//    private Text spongePrefix;
+//    private Text spongeSuffix;
+//    private TextColor spongeColor;
 
     private static final String TEAM_UPDATE_SIGNATURE = "Lnet/minecraft/scoreboard/Scoreboard;broadcastTeamInfoUpdate(Lnet/minecraft/scoreboard/ScorePlayerTeam;)V";
 
@@ -87,71 +85,46 @@ public abstract class MixinScorePlayerTeam extends net.minecraft.scoreboard.Team
         }
     }
 
-    @Inject(method = "<init>", at = @At("RETURN"))
-    public void onInit(CallbackInfo ci) {
-        // Initialize cached values
-        this.spongeDisplayName = SpongeTexts.fromLegacy(this.displayName);
-        this.spongePrefix = SpongeTexts.fromLegacy(this.prefix);
-        this.spongeSuffix = SpongeTexts.fromLegacy(this.suffix);
-        this.spongeColor = TextColorRegistryModule.getInstance().enumChatColor.get(this.color);
-    }
-
     public String team$getName() {
         return this.name;
     }
 
     public Text team$getDisplayName() {
-        return this.spongeDisplayName;
+        return SpongeTexts.toText(this.displayName);
     }
 
     public void team$setDisplayName(Text text) {
-        String newText = SpongeTexts.toLegacy(text);
-        if (newText.length() > 32) {
-            throw new IllegalArgumentException(String.format("Display name is %s characters long! It must be at most 32.", newText.length()));
-        }
-        this.spongeDisplayName = text;
-        this.displayName = newText;
+        this.displayName = SpongeTexts.toComponent(text);
         this.doTeamUpdate();
     }
 
     public TextColor team$getColor() {
-        return this.spongeColor;
+        return SpongeTextColor.of(this.color);
     }
 
     public void team$setColor(TextColor color) {
         if (color.equals(TextColors.NONE)) {
             color = TextColors.RESET;
         }
-        this.spongeColor = color;
         this.color = ((SpongeTextColor) color).getHandle();
         this.doTeamUpdate();
     }
 
     public Text team$getPrefix() {
-        return this.spongePrefix;
+        return SpongeTexts.toText(this.prefix);
     }
 
     public void team$setPrefix(Text prefix) {
-        String newPrefix = SpongeTexts.toLegacy(prefix);
-        if (newPrefix.length() > 16) {
-            throw new IllegalArgumentException(String.format("Prefix is %s characters long! It must be at most 16.", newPrefix.length()));
-        }
-        this.spongePrefix = prefix;
-        this.prefix = newPrefix;
+        this.prefix = SpongeTexts.toComponent(prefix);
         this.doTeamUpdate();
     }
 
     public Text team$getSuffix() {
-        return this.spongeSuffix;
+        return SpongeTexts.toText(this.suffix);
     }
 
     public void team$setSuffix(Text suffix) {
-        String newSuffix = SpongeTexts.toLegacy(suffix);
-        if (newSuffix.length() > 16) {
-            throw new IllegalArgumentException(String.format("Suffix is %s characters long! It must be at most 16.", newSuffix.length()));
-        }
-        this.spongeSuffix = suffix;
-        this.suffix = newSuffix;
+        this.suffix = SpongeTexts.toComponent(suffix);
         this.doTeamUpdate();
     }
 
@@ -210,7 +183,7 @@ public abstract class MixinScorePlayerTeam extends net.minecraft.scoreboard.Team
             throw new IllegalArgumentException(String.format("Member is %s characters long! It must be at most 40.", legacyName.length()));
         }
         if (this.scoreboard != null) {
-            this.scoreboard.addPlayerToTeam(legacyName, this.name);
+            this.scoreboard.addPlayerToTeam(legacyName, (ScorePlayerTeam) (Object) this);
         } else {
             this.membershipSet.add(legacyName); // this is normally done by addPlayerToTeam
         }
@@ -249,35 +222,14 @@ public abstract class MixinScorePlayerTeam extends net.minecraft.scoreboard.Team
         this.doTeamUpdate();
     }
 
-    @Inject(method = "setDisplayName", at = @At("HEAD"))
-    public void onSetTeamName(String name, CallbackInfo ci) {
-        if (name != null) {
-            this.spongeDisplayName = SpongeTexts.fromLegacy(name);
-        }
-    }
-
     @Redirect(method = "setPrefix", at = @At(value = "INVOKE", target = TEAM_UPDATE_SIGNATURE))
     private void onSetNamePrefix(Scoreboard scoreboard, ScorePlayerTeam team) {
         this.doTeamUpdate();
     }
 
-    @Inject(method = "setPrefix", at = @At("HEAD"))
-    public void onSetNamePrefix(String prefix, CallbackInfo ci) {
-        if (prefix != null) {
-            this.spongePrefix = SpongeTexts.fromLegacy(prefix);
-        }
-    }
-
     @Redirect(method = "setSuffix", at = @At(value = "INVOKE", target = TEAM_UPDATE_SIGNATURE))
     private void onSetNameSuffix(Scoreboard scoreboard, ScorePlayerTeam team) {
         this.doTeamUpdate();
-    }
-
-    @Inject(method = "setSuffix", at = @At("HEAD"))
-    public void onSetNameSuffix(String suffix, CallbackInfo ci) {
-        if (suffix != null) {
-            this.spongeSuffix = SpongeTexts.fromLegacy(suffix);
-        }
     }
 
     @Redirect(method = "setAllowFriendlyFire", at = @At(value = "INVOKE", target = TEAM_UPDATE_SIGNATURE))
@@ -300,10 +252,8 @@ public abstract class MixinScorePlayerTeam extends net.minecraft.scoreboard.Team
         this.doTeamUpdate();
     }
 
-    @Inject(method = "setColor", at = @At("RETURN"))
-    private void onSetChatFormat(TextFormatting format, CallbackInfo ci) {
-        this.spongeColor = TextColorRegistryModule.getInstance().enumChatColor.get(format);
-        // This isn't called by Vanilla, so we inject the call ourselves.
+    @Redirect(method = "setColor", at = @At(value = "INVOKE", target = TEAM_UPDATE_SIGNATURE))
+    private void onSetColor(final Scoreboard scoreboard, final ScorePlayerTeam team) {
         this.doTeamUpdate();
     }
 

@@ -113,13 +113,13 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
     }
 
     @Override
-    protected void applyEntityAttributes() {
-        super.applyEntityAttributes();
+    protected void registerAttributes() {
+        super.registerAttributes();
         this.getAttributeMap().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(1.0D);
     }
 
     @Override
-    protected void entityInit() {
+    protected void registerData() {
         // EntityLivingBase
         this.dataManager.register(HAND_STATES, Byte.valueOf((byte)0));
         this.dataManager.register(POTION_EFFECTS, Integer.valueOf(0));
@@ -170,13 +170,13 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
     }
 
     @Override
-    public void readEntityFromNBT(NBTTagCompound tagCompund) {
-        super.readEntityFromNBT(tagCompund);
+    public void readAdditional(NBTTagCompound tagCompund) {
+        super.readAdditional(tagCompund);
         if (!((IMixinEntity) this).getSpongeData().hasKey("skinProperty")) {
             return;
         }
 
-        NBTTagCompound skinData = ((IMixinEntity) this).getSpongeData().getCompoundTag("skinProperty");
+        NBTTagCompound skinData = ((IMixinEntity) this).getSpongeData().getCompound("skinProperty");
         DataBuilder<ProfileProperty> builder = Sponge.getDataManager().getBuilder(ProfileProperty.class).get();
 
         ProfileProperty skinProperty = builder.build(NbtTranslator.getInstance().translate(skinData)).get();
@@ -184,8 +184,8 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
     }
 
     @Override
-    public void writeEntityToNBT(NBTTagCompound tagCompound) {
-        super.writeEntityToNBT(tagCompound);
+    public void writeAdditional(NBTTagCompound tagCompound) {
+        super.writeAdditional(tagCompound);
         NBTTagCompound spongeData = ((IMixinEntity) this).getSpongeData();
         if (this.skinProperty != null) {
             spongeData.setTag("skinProperty", NbtTranslator.getInstance().translateData(this.skinProperty.toContainer()));
@@ -195,8 +195,8 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
     }
 
     @Override
-    public void onLivingUpdate() {
-        super.onLivingUpdate();
+    public void livingTick() {
+        super.livingTick();
         this.updateArmSwingProgress();
     }
 
@@ -261,7 +261,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
 
     @Override
     public float getAIMoveSpeed() {
-        return (float) this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue();
+        return (float) this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getValue();
     }
 
     @Override
@@ -298,7 +298,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
     public boolean attackEntityAsMob(Entity entityIn) {
         super.attackEntityAsMob(entityIn);
         this.swingArm(EnumHand.MAIN_HAND);
-        float f = (float) this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue();
+        float f = (float) this.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getValue();
         int i = 0;
 
         if (entityIn instanceof EntityLivingBase) {
@@ -398,7 +398,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
     }
 
     private boolean isAliveAndInWorld() {
-        return this.world.getEntityByID(this.getEntityId()) == this && !this.isDead;
+        return this.world.getEntityByID(this.getEntityId()) == this && !this.removed;
     }
 
     private void respawnOnClient() {
@@ -518,7 +518,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
         // TODO Figure out how to API this out
         final EntityTippedArrow entitytippedarrow = new EntityTippedArrow(this.world, this);
         double d0 = target.posX - this.posX;
-        double d1 = target.getEntityBoundingBox().minY + target.height / 3.0F - entitytippedarrow.posY;
+        double d1 = target.getBoundingBox().minY + target.height / 3.0F - entitytippedarrow.posY;
         double d2 = target.posZ - this.posZ;
         double d3 = MathHelper.sqrt(d0 * d0 + d2 * d2);
         entitytippedarrow.shoot(d0, d1 + d3 * 0.20000000298023224D, d2, 1.6F, 14 - this.world.getDifficulty().getId() * 4);

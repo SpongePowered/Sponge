@@ -122,7 +122,7 @@ public final class SpongeTexts {
     public static NBTTagList asJsonNBT(List<Text> list) {
         final NBTTagList legacy = new NBTTagList();
         for (Text line : list) {
-            legacy.appendTag(new NBTTagString(TextSerializers.JSON.serialize(line)));
+            legacy.add(new NBTTagString(TextSerializers.JSON.serialize(line)));
         }
         return legacy;
     }
@@ -137,16 +137,16 @@ public final class SpongeTexts {
 
     public static List<Text> fromNbtJson(NBTTagList legacy) throws TextParseException {
         List<Text> list = Lists.newArrayList();
-        for (int i = 0; i < legacy.tagCount(); i++) {
-            list.add(TextSerializers.JSON.deserialize(legacy.getStringTagAt(i)));
+        for (int i = 0; i < legacy.size(); i++) {
+            list.add(TextSerializers.JSON.deserialize(legacy.getString(i)));
         }
         return list;
     }
 
     public static List<Text> fromNbtLegacy(NBTTagList legacy) {
         List<Text> list = Lists.newArrayList();
-        for (int i = 0; i < legacy.tagCount(); i++) {
-            list.add(SpongeTexts.fromLegacy(legacy.getStringTagAt(i)));
+        for (int i = 0; i < legacy.size(); i++) {
+            list.add(SpongeTexts.fromLegacy(legacy.getString(i)));
         }
         return list;
     }
@@ -154,7 +154,7 @@ public final class SpongeTexts {
     public static NBTTagList asLegacy(List<Text> list) {
         final NBTTagList legacy = new NBTTagList();
         for (Text line : list) {
-            legacy.appendTag(new NBTTagString(toLegacy(line)));
+            legacy.add(new NBTTagString(toLegacy(line)));
         }
         return legacy;
     }

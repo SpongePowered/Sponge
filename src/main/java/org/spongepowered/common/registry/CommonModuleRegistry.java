@@ -479,7 +479,6 @@ public final class CommonModuleRegistry {
             .registerModule(BrickType.class, new BrickTypeRegistryModule())
             .registerModule(Career.class, CareerRegistryModule.getInstance())
             .registerModule(new ChatTypeRegistryModule())
-            .registerModule(CoalType.class, new CoalTypeRegistryModule())
             .registerModule(ComparatorType.class, new ComparatorTypeRegistryModule())
             .registerModule(CookedFish.class, new CookedFishRegistryModule())
             .registerModule(Criterion.class, new CriteriaRegistryModule())

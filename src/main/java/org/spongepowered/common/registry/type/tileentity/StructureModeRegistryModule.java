@@ -39,15 +39,15 @@ public final class StructureModeRegistryModule extends AbstractCatalogRegistryMo
 
     @Override
     public void registerDefaults() {
-        this.register(CatalogKey.minecraft("corner"), (StructureMode) (Object) TileEntityStructure.Mode.CORNER);
-        this.register(CatalogKey.minecraft("data"), (StructureMode) (Object) TileEntityStructure.Mode.DATA);
-        this.register(CatalogKey.minecraft("load"), (StructureMode) (Object) TileEntityStructure.Mode.LOAD);
-        this.register(CatalogKey.minecraft("save"), (StructureMode) (Object) TileEntityStructure.Mode.SAVE);
+        this.register(CatalogKey.minecraft("corner"), (StructureMode) (Object) net.minecraft.state.properties.StructureMode.CORNER);
+        this.register(CatalogKey.minecraft("data"), (StructureMode) (Object) net.minecraft.state.properties.StructureMode.DATA);
+        this.register(CatalogKey.minecraft("load"), (StructureMode) (Object) net.minecraft.state.properties.StructureMode.LOAD);
+        this.register(CatalogKey.minecraft("save"), (StructureMode) (Object) net.minecraft.state.properties.StructureMode.SAVE);
     }
 
     @AdditionalRegistration
     public void customRegistration() {
-        for (TileEntityStructure.Mode mode : TileEntityStructure.Mode.values()) {
+        for (net.minecraft.state.properties.StructureMode mode : net.minecraft.state.properties.StructureMode.values()) {
             String name = mode.name().toLowerCase(Locale.ENGLISH);
             if (!this.map.containsKey(name)) {
                 this.map.put(CatalogKey.resolve(name), (StructureMode) (Object) mode);
