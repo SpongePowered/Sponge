@@ -36,16 +36,17 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(PhaseManager.class)
 public abstract class MixinPhaseManager implements EnderDragonPhaseManager {
 
-    @Shadow public abstract IPhase getCurrentPhase();
     @Shadow public abstract void setPhase(PhaseList<?> phaseIn);
+    @Shadow private IPhase phase;
 
     @Override
     public EnderDragonPhase getPhase() {
-        return (EnderDragonPhase) this.getCurrentPhase();
+        return (EnderDragonPhase) this.phase;
     }
 
     @Override
-    public void setPhase(EnderDragonPhaseType phase) {
+    public EnderDragonPhase setPhase(EnderDragonPhaseType phase) {
         this.setPhase((PhaseList<?>) phase);
+        return (EnderDragonPhase) this.phase;
     }
 }
