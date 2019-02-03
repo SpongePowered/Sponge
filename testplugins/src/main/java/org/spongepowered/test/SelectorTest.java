@@ -60,7 +60,7 @@ import javax.annotation.Nullable;
  * the number of entities detected along with their positions and distance
  * from the selector origin
  */
-@Plugin(id = "selector-test", name = "Selector Test")
+@Plugin(id = "selector-test", name = "Selector Test", description = "Selector Test", version = "0.0.0")
 public class SelectorTest {
 
     private static final String RAW_KEY = "raw";

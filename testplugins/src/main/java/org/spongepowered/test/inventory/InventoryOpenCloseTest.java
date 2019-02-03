@@ -31,6 +31,8 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
+import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
+import org.spongepowered.api.event.item.inventory.container.InteractContainerEvent;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
@@ -63,26 +65,26 @@ public class InventoryOpenCloseTest {
     public class InventoryListener {
 
         @Listener
-        public void onInventoryPrimary(ClickInventoryEvent.Primary event, @First Player player) {
+        public void onInventoryPrimary(ClickContainerEvent.Primary event, @First Player player) {
             Inventory inv = Inventory.builder().build(InventoryOpenCloseTest.this);
             // This will open the inventory the next tick
             player.openInventory(inv);
         }
 
         @Listener
-        public void onInventorySecondary(ClickInventoryEvent.Secondary event, @First Player player) {
+        public void onInventorySecondary(ClickContainerEvent.Secondary event, @First Player player) {
             // This will close the inventory the next tick
             player.closeInventory();
         }
 
         @Listener
-        public void onInventoryClose(InteractInventoryEvent.Close event, @First Player player) {
+        public void onInventoryClose(InteractContainerEvent.Close event, @First Player player) {
             Optional<PluginContainer> pc = event.getCause().first(PluginContainer.class);
             player.sendMessage(Text.of("Inventory closed by " + pc.map(PluginContainer::getId).orElse(player.getName())));
         }
 
         @Listener
-        public void onInventoryOpen(InteractInventoryEvent.Open event, @First Player player) {
+        public void onInventoryOpen(InteractContainerEvent.Open event, @First Player player) {
             Optional<PluginContainer> pc = event.getCause().first(PluginContainer.class);
             player.sendMessage(Text.of("Inventory opened by " + pc.map(PluginContainer::getId).orElse(player.getName())));
         }

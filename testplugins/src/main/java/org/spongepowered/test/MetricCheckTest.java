@@ -37,7 +37,7 @@ import org.spongepowered.api.util.metric.MetricsConfigManager;
 /*
  * Simply checks to see if Sponge indicates that the plugin is entitled to metric checking.
  */
-@Plugin(id = "metricheck", name = "Metric Check")
+@Plugin(id = "metricheck", name = "Metric Check", description = "Metric check", version = "0.0.0")
 public class MetricCheckTest {
 
     @Inject

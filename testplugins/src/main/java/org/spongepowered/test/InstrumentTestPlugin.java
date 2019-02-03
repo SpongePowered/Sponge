@@ -91,8 +91,8 @@ public class InstrumentTestPlugin {
         if (!enabled || !player.get(Keys.IS_SNEAKING).get()) {
             return;
         }
-        final BlockSnapshot snapshot = event.getTargetBlock();
-        if (snapshot.getState().getType().equals(BlockTypes.NOTEBLOCK)) {
+        final BlockSnapshot snapshot = event.getBlock();
+        if (snapshot.getState().getType().equals(BlockTypes.NOTE_BLOCK)) {
             final InstrumentProperty instrumentProperty = player.getWorld().getBlock(snapshot.getPosition().sub(0, 1, 0)).getProperty(InstrumentProperty.class).orElse(null);
             if (instrumentProperty != null) {
                 final InstrumentType instrument = instrumentProperty.getValue();

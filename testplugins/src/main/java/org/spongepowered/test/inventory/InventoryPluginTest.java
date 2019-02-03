@@ -32,7 +32,7 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.entity.ai.SetAITargetEvent;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
-import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
+import org.spongepowered.api.event.item.inventory.container.InteractContainerEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
 
@@ -60,8 +60,8 @@ public class InventoryPluginTest {
     public static class InventoryPluginListener {
 
         @Listener
-        public void onInventoryClose(InteractInventoryEvent.Close event, @First Player player) {
-            player.sendMessage(Text.of("This inventory was brought to you by ", event.getTargetInventory().getPlugin().getName(), "."));
+        public void onInventoryClose(InteractContainerEvent.Close event, @First Player player) {
+            player.sendMessage(Text.of("This inventory was brought to you by ", event.getContainer().getPlugin().getName(), "."));
         }
     }
 }

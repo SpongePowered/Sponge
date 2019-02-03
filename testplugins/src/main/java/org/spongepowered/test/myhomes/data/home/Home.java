@@ -39,11 +39,11 @@ public class Home implements DataSerializable {
     public static final DataQuery ROTATION_QUERY = DataQuery.of("Rotation");
     public static final DataQuery NAME_QUERY = DataQuery.of("Name");
 
-    private Transform<World> transform;
+    private Transform transform;
 
     private String name;
 
-    public Home(Transform<World> transform, String name) {
+    public Home(Transform transform, String name) {
         this.transform = transform;
         this.name = name;
     }
@@ -53,18 +53,18 @@ public class Home implements DataSerializable {
         return HomeBuilder.CONTENT_VERSION;
     }
 
-    public Transform<World> getTransform() {
+    public Transform getTransform() {
         return this.transform;
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     @Override
     public DataContainer toContainer() {
         return DataContainer.createNew()
-                .set(WORLD_QUERY, this.transform.getExtent().getUniqueId())
+                .set(WORLD_QUERY, this.transform.getWorld().getUniqueId())
                 .set(POSITION_QUERY, this.transform.getPosition())
                 .set(ROTATION_QUERY, this.transform.getRotation())
                 .set(NAME_QUERY, this.name)

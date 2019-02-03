@@ -40,6 +40,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.entity.Hotbar;
 import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
@@ -81,7 +82,8 @@ public class OfflineInventoryTest {
     public void onDisconnect(ClientConnectionEvent.Disconnect event, @Root Player player) {
         UUID uuid = player.getUniqueId();
         if (this.receiveDiamonds.remove(uuid)) {
-            Sponge.getScheduler().createTaskBuilder().delayTicks(20).execute(() -> this.run(uuid)).submit(this);
+            Task t = Task.builder().delayTicks(20).execute(() -> this.run(uuid)).plugin(this).build();
+            Sponge.getServer().getScheduler().submit(t);
         }
     }
 

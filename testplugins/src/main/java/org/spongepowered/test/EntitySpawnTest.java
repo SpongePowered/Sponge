@@ -72,7 +72,7 @@ public final class EntitySpawnTest {
                                 final EntityType type = types.get(0);
                                 final Entity entity = location.createEntity(type);
                                 try {
-                                    if (location.getExtent().spawnEntity(entity)) {
+                                    if (location.getWorld().spawnEntity(entity)) {
                                         src.sendMessage(Text.of(TextColors.GOLD, "You have successfully spawned a ",
                                                 TextColors.DARK_GREEN, entity.getTranslation()));
                                     } else {
@@ -86,7 +86,7 @@ public final class EntitySpawnTest {
                                 }
                             } else {
                                 src.sendMessage(Text.of(TextColors.GOLD, "You have spawned the following entities:"));
-                                location.getExtent()
+                                location.getWorld()
                                         .spawnEntities(types.stream().map(location::createEntity).collect(Collectors.toList()))
                                         .forEach(e -> src.sendMessage(Text.of(TextColors.DARK_GREEN, e.getTranslation())));
                             }

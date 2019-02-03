@@ -55,8 +55,8 @@ public class HumanAITest {
 
     @Listener
     public void onInteractEntity(InteractEntityEvent.Secondary.MainHand event, @Root Player player) {
-        if (event.getTargetEntity() instanceof Human) {
-            event.getTargetEntity().addPassenger(player);
+        if (event.getEntity() instanceof Human) {
+            event.getEntity().addPassenger(player);
         }
     }
 
@@ -84,7 +84,7 @@ public class HumanAITest {
             if (agent != null) {
                 agent.setRotation(new Vector3d(player.getRotation().getX() * 0.5f, player.getRotation().getY(), player.getRotation().getZ()));
                 Vector3d position = player.getLocation().getPosition().add(new Vector3d(1f, 0f, 1f));
-                agent.setTransform(new Transform<>(new Location<>(agent.getWorld(), position.getX(), agent.getLocation().getY(), position.getZ())));
+                agent.setTransform(new Transform(new Location(agent.getWorld(), position.getX(), agent.getLocation().getY(), position.getZ())));
             }
         }
 

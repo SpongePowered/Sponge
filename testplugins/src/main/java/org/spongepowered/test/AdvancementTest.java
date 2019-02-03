@@ -136,7 +136,7 @@ public class AdvancementTest {
                     final float value = random.nextFloat();
                     final float chance = triggerEvent.getTrigger().getConfiguration().chance;
                     triggerEvent.setResult(value < chance);
-                    triggerEvent.getTargetEntity().sendMessage(Text.of(value + " < " + chance + " -> " + triggerEvent.getResult()));
+                    triggerEvent.getPlayer().sendMessage(Text.of(value + " < " + chance + " -> " + triggerEvent.getResult()));
                 })
                 .id("my_trigger")
                 .build();
@@ -221,7 +221,7 @@ public class AdvancementTest {
 
     @Listener
     public void onPlayerJoin(ClientConnectionEvent.Join event) {
-        event.getTargetEntity().getProgress(this.rootAdvancement).grant();
+        event.getPlayer().getProgress(this.rootAdvancement).grant();
     }
 
     @Listener
@@ -274,8 +274,8 @@ public class AdvancementTest {
                             transaction.getOriginal().getState().getType() == BlockTypes.GRASS)) {
                 player.getProgress(this.breakDirtAdvancement).get(this.breakDirtCriterion).get().add(1);
             } else if (transaction.getFinal().getState().getType() == BlockTypes.AIR &&
-                    (transaction.getOriginal().getState().getType() == BlockTypes.LEAVES ||
-                            transaction.getOriginal().getState().getType() == BlockTypes.LEAVES2)) {
+                    (transaction.getOriginal().getState().getType() == BlockTypes.ACACIA_LEAVES ||
+                            transaction.getOriginal().getState().getType() == BlockTypes.OAK_LEAVES)) {
                 this.trigger.trigger(player);
             }
         }
@@ -320,11 +320,11 @@ public class AdvancementTest {
 
     @Listener
     public void onCriterionGrant(CriterionEvent.Grant event) {
-        event.getTargetEntity().sendMessage(Text.of(TextColors.GREEN, "Congratulations on achieving criterion " + event.getCriterion().getName()));
+        event.getPlayer().sendMessage(Text.of(TextColors.GREEN, "Congratulations on achieving criterion " + event.getCriterion().getName()));
     }
 
     @Listener
     public void onAdvancementGrant(AdvancementEvent.Grant event) {
-        event.getTargetEntity().sendMessage(Text.of(TextColors.BLUE, "You achieved advancement " + event.getAdvancement().getName()));
+        event.getPlayer().sendMessage(Text.of(TextColors.BLUE, "You achieved advancement " + event.getAdvancement().getName()));
     }
 }

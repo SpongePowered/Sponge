@@ -67,14 +67,14 @@ public class HomeTranslator implements DataTranslator<Home> {
         Vector3d rotation = content.getObject(Home.ROTATION_QUERY, Vector3d.class).get();
         String name = content.getString(Home.NAME_QUERY).get();
 
-        Transform<World> transform = new Transform<>(world, position, rotation);
+        Transform transform = new Transform(world, position, rotation);
         return new Home(transform, name);
     }
 
     @Override
     public DataContainer translate(Home home) throws InvalidDataException {
         return DataContainer.createNew()
-                .set(Home.WORLD_QUERY, home.getTransform().getExtent().getUniqueId())
+                .set(Home.WORLD_QUERY, home.getTransform().getWorld().getUniqueId())
                 .set(Home.POSITION_QUERY, home.getTransform().getPosition())
                 .set(Home.ROTATION_QUERY, home.getTransform().getRotation())
                 .set(Home.NAME_QUERY, home.getName())

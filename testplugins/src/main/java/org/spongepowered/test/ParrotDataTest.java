@@ -65,7 +65,7 @@ public class ParrotDataTest {
 
     @Listener
     public void onEntityInteract(InteractEntityEvent event, @Root Player player) {
-        final Entity entity = event.getTargetEntity();
+        final Entity entity = event.getEntity();
         if (entity.getType().equals(EntityTypes.PARROT) && this.parrotVariant != null) {
             entity.offer(Keys.PARROT_VARIANT, this.parrotVariant);
             player.sendMessage(Text.of(TextColors.GOLD, "The selected parrot has been turned to the variant: ",

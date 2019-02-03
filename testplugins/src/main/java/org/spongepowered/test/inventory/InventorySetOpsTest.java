@@ -68,7 +68,7 @@ public class InventorySetOpsTest {
     @Listener
     public void onMidas(ChangeInventoryEvent.Held event, @Root Player player) {
         // Checks if Slots are contained in the hotbar then may transform iron to gold
-        Inventory hotbar = event.getTargetInventory().query(QueryOperationTypes.INVENTORY_TYPE.of(Hotbar.class));
+        Inventory hotbar = event.getInventory().query(QueryOperationTypes.INVENTORY_TYPE.of(Hotbar.class));
         boolean nugget = false;
         for (SlotTransaction transaction : event.getTransactions()) {
             if (hotbar.containsInventory(transaction.getSlot())) {

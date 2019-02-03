@@ -59,7 +59,7 @@ public class BoatTypeTest {
                                 return CommandResult.empty();
                             }
                             Player player = (Player) src;
-                            Boat boat = (Boat) player.getLocation().getExtent().createEntity(EntityTypes.BOAT, player.getLocation().getPosition());
+                            Boat boat = (Boat) player.getLocation().getWorld().createEntity(EntityTypes.BOAT, player.getLocation().getPosition());
                             boat.offer(Keys.TREE_TYPE, args.<TreeType>getOne("tree").orElse(TreeTypes.OAK));
                             player.getWorld().spawnEntity(boat);
                             return CommandResult.success();

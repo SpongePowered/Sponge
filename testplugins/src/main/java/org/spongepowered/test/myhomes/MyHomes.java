@@ -140,7 +140,7 @@ public class MyHomes {
 
     @Listener
     public void onClientConnectionJoin(ClientConnectionEvent.Join event) {
-        Player player = event.getTargetEntity();
+        Player player = event.getPlayer();
         player.get(DEFAULT_HOME).ifPresent(home -> {
             player.setTransform(home.getTransform());
             player.sendMessage(ChatTypes.ACTION_BAR,

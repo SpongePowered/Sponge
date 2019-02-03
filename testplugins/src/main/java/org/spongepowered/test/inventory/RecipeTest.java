@@ -24,12 +24,6 @@
  */
 package org.spongepowered.test.inventory;
 
-import static org.spongepowered.api.item.ItemTypes.BED;
-import static org.spongepowered.api.item.ItemTypes.BEDROCK;
-import static org.spongepowered.api.item.ItemTypes.COAL;
-import static org.spongepowered.api.item.ItemTypes.STONE;
-import static org.spongepowered.api.item.ItemTypes.WOOL;
-
 import org.slf4j.Logger;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -39,6 +33,7 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.game.GameRegistryEvent;
 import org.spongepowered.api.event.item.inventory.CraftItemEvent;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -77,9 +72,9 @@ public class RecipeTest {
 
     @Listener
     public void onRegisterCraftingRecipes(GameRegistryEvent.Register<CraftingRecipe> event) {
-        final Ingredient s = Ingredient.of(STONE);
-        final Ingredient b = Ingredient.of(BED, WOOL);
-        final ItemStack item = ItemStack.of(BEDROCK, 1);
+        final Ingredient s = Ingredient.of(ItemTypes.STONE);
+        final Ingredient b = Ingredient.of(ItemTypes.WHITE_BED, ItemTypes.WHITE_WOOL);
+        final ItemStack item = ItemStack.of(ItemTypes.BEDROCK, 1);
         final DataTransactionResult trans = item.offer(Keys.ITEM_ENCHANTMENTS, Collections.singletonList(Enchantment.of(EnchantmentTypes.UNBREAKING, 1)));
         if (trans.getType() != DataTransactionResult.Type.SUCCESS) {
             this.logger.error("Could not build recipe output!");
@@ -100,8 +95,8 @@ public class RecipeTest {
 
     @Listener
     public void onRegisterSmeltingRecipes(GameRegistryEvent.Register<SmeltingRecipe> event) {
-        final ItemStack in = ItemStack.of(COAL, 1);
-        final ItemStack out = ItemStack.of(COAL, 1);
+        final ItemStack in = ItemStack.of(ItemTypes.COAL, 1);
+        final ItemStack out = ItemStack.of(ItemTypes.COAL, 1);
         out.offer(Keys.DISPLAY_NAME, Text.of("Hot Coal"));
 
         event.register(SmeltingRecipe.builder()
@@ -119,7 +114,7 @@ public class RecipeTest {
     @Listener
     public void onCraftPreview(CraftItemEvent.Preview event) {
         if (event.getRecipe().isPresent()) {
-            if (event.getRecipe().get().getExemplaryResult().getType() == BEDROCK) {
+            if (event.getRecipe().get().getExemplaryResult().getType() == ItemTypes.BEDROCK) {
                 ItemStackSnapshot item = event.getPreview().getFinal();
                 List<Text> lore = Collections.singletonList(Text.of("Uncraftable"));
                 item = item.with(Keys.ITEM_LORE, lore).get();
@@ -131,7 +126,7 @@ public class RecipeTest {
     @Listener
     public void onCraft(CraftItemEvent.Craft event, @First Player player) {
         if (event.getRecipe().isPresent()) {
-            if (event.getRecipe().get().getExemplaryResult().getType() == BEDROCK) {
+            if (event.getRecipe().get().getExemplaryResult().getType() == ItemTypes.BEDROCK) {
                 player.sendMessage(Text.of("You tried to craft Bedrock!"));
                 event.setCancelled(true);
             }

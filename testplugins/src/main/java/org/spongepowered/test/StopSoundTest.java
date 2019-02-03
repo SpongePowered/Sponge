@@ -25,6 +25,7 @@
 package org.spongepowered.test;
 
 import com.google.inject.Inject;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.effect.sound.SoundCategories;
 import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.entity.living.player.Player;
@@ -61,12 +62,14 @@ public class StopSoundTest {
         if (event.getItemStack().getType() != ItemTypes.END_ROD) {
             return;
         }
-        player.playSound(SoundTypes.ENTITY_ENDERMEN_DEATH, SoundCategories.MASTER, player.getLocation().getPosition(), 1.0);
+        player.playSound(SoundTypes.ENTITY_ENDERMAN_DEATH, SoundCategories.MASTER, player.getLocation().getPosition(), 1.0);
         if (event instanceof InteractItemEvent.Secondary) {
-            Task.builder()
+            Task t = Task.builder()
                     .delayTicks(5)
-                    .execute(() -> player.stopSounds(SoundTypes.ENTITY_ENDERMEN_DEATH, SoundCategories.MASTER))
-                    .submit(this.pluginContainer);
+                    .execute(() -> player.stopSounds(SoundTypes.ENTITY_ENDERMAN_DEATH, SoundCategories.MASTER))
+                    .plugin(this.pluginContainer)
+                    .build();
+            Sponge.getServer().getScheduler().submit(t);
         }
     }
 }

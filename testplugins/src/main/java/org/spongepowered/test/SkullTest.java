@@ -34,7 +34,6 @@ import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.type.SkullType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
@@ -50,7 +49,6 @@ import java.util.function.BiFunction;
 @Plugin(id = "skulltest", name = "Skull Test", description = "A plugin to test Skulls", version = "0.0.0")
 public class SkullTest {
 
-    final static Text SKULL = Text.of("skulltype");
     private static final Text PLAYER = Text.of("player");
 
     @Listener
@@ -70,23 +68,10 @@ public class SkullTest {
                         .executor(giveSkull(SkullTest::blazeHead))
                         .build(),
                 "skullblaze");
-
-        Sponge.getCommandManager().register(this,
-                CommandSpec.builder()
-                        .description(Text.of("Gives you a monster head"))
-                        .arguments(
-                                playerOrSource(PLAYER),
-                                catalogedElement(SKULL, SkullType.class)
-                        )
-                        .executor(giveSkull(SkullTest::mobHead))
-                        .build(),
-                "skullmob");
     }
 
     private static ItemStack.Builder playerHead(CommandContext commandContext, ItemStack.Builder builder) {
-        return builder.add(
-                Keys.REPRESENTED_PLAYER, commandContext.<Player>getOne(PLAYER).get().getProfile()
-        );
+        return builder.add(Keys.REPRESENTED_PLAYER, commandContext.<Player>getOne(PLAYER).get().getProfile());
     }
 
     private static ItemStack.Builder blazeHead(CommandContext commandContext, ItemStack.Builder builder) {
@@ -95,16 +80,12 @@ public class SkullTest {
         );
     }
 
-    private static ItemStack.Builder mobHead(CommandContext ctx, ItemStack.Builder builder) {
-        return builder.add(Keys.SKULL_TYPE, ctx.<SkullType>getOne(SKULL).get());
-    }
-
     private static CommandExecutor giveSkull(final BiFunction<CommandContext, ItemStack.Builder, ItemStack.Builder> profile) {
         return (commandSource, commandContext) -> {
             if (!(commandSource instanceof Player)) {
                 throw new CommandException(Text.of("CommandSource must be a player"));
             }
-            ItemStack.Builder builder = ItemStack.builder().itemType(ItemTypes.SKULL);
+            ItemStack.Builder builder = ItemStack.builder().itemType(ItemTypes.PLAYER_HEAD);
             profile.apply(commandContext, builder);
             ((Player) commandSource).getInventory().offer(builder.build());
             return CommandResult.success();

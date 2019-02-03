@@ -122,7 +122,7 @@ public final class CooldownTrackerTest {
 
     @Listener(order = Order.LAST)
     public void onSetCooldown(final CooldownEvent.Set event) {
-        final Player player = event.getTargetEntity();
+        final Player player = event.getPlayer();
         if (this.enabled.contains(player.getUniqueId())) {
             event.setNewCooldown(event.getOriginalNewCooldown() * 2);
             player.sendMessage(Text.of(TextColors.GOLD, event.getItemType().getKey().toString() + " are now on cooldown for you for "
@@ -132,7 +132,7 @@ public final class CooldownTrackerTest {
 
     @Listener(order = Order.LAST)
     public void onCooldownEnd(final CooldownEvent.End event) {
-        final Player player = event.getTargetEntity();
+        final Player player = event.getPlayer();
         if (this.enabled.contains(player.getUniqueId())) {
             player.sendMessage(Text.of(TextColors.GOLD, event.getItemType().getKey().toString() + " are no longer on cooldown for you!"));
         }

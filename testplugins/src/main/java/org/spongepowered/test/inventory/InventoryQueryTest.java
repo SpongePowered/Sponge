@@ -74,7 +74,7 @@ public class InventoryQueryTest {
         CommandSpec itemStackGeneral = CommandSpec.builder()
                 .executor((src, args) -> {
                     Inventory inventory = getPlayerInventory(src);
-                    ItemStack lapis = ItemStack.of(ItemTypes.DYE, 4);
+                    ItemStack lapis = ItemStack.of(ItemTypes.LAPIS_LAZULI, 4);
                     lapis.offer(Keys.DYE_COLOR, DyeColors.BLUE);
                     Inventory lapisItems = inventory.query(QueryOperationTypes.ITEM_STACK_IGNORE_QUANTITY.of(lapis));
                     src.sendMessage(Text.of("You have ", lapisItems.totalItems(), " lapis lazuli in your inventory."));
@@ -84,7 +84,7 @@ public class InventoryQueryTest {
         CommandSpec itemStackSpecific = CommandSpec.builder()
                 .executor((src, args) -> {
                     Inventory inventory = getPlayerInventory(src);
-                    ItemStack lapis = ItemStack.of(ItemTypes.DYE, 4);
+                    ItemStack lapis = ItemStack.of(ItemTypes.LAPIS_LAZULI, 4);
                     lapis.offer(Keys.DYE_COLOR, DyeColors.BLUE);
                     Inventory lapisItems = inventory.query(QueryOperationTypes.ITEM_STACK_EXACT.of(lapis));
                     src.sendMessage(Text.of("You have ", lapisItems.size(), " stacks of 4 lapis lazuli in your inventory."));
@@ -149,7 +149,7 @@ public class InventoryQueryTest {
 
     @Listener
     public void onPlayerJoin(ClientConnectionEvent.Join event) {
-        Player joined = event.getTargetEntity();
+        Player joined = event.getPlayer();
         Inventory inventory = joined.getInventory();
 
         Inventory chestPlate = EquipmentSlotType.of(EquipmentTypes.CHESTPLATE).queryIn(inventory);

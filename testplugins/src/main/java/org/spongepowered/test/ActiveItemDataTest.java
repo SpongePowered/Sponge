@@ -32,6 +32,7 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 
@@ -42,7 +43,7 @@ import javax.annotation.Nullable;
 @Plugin(id = "activeitemdatatest", name = "ActiveItemDataTEst", description = "Testing some nice active item data.", version = "0.0.0")
 public final class ActiveItemDataTest {
 
-    @Nullable private Task task;
+    @Nullable private ScheduledTask task;
 
     @Listener
     public void onPreInit(final GamePreInitializationEvent event) {
@@ -50,20 +51,23 @@ public final class ActiveItemDataTest {
                 .executor((src, args) -> {
                     if (this.task != null) {
                         this.task.cancel();
+                        this.task = null;
                         src.sendMessage(Text.of("Active item task cancelled."));
                     } else {
-                        Task.builder()
+                        Task t = Task.builder()
                                 .interval(5, TimeUnit.SECONDS)
                                 .name("activeitemtask")
                                 .execute(() -> {
                                     Sponge.getServer().getOnlinePlayers().forEach(p -> {
                                         p.sendMessage(Text.of(Text.of("Your active item is " +
-                                                p.get(Keys.ACTIVE_ITEM).orElse(ItemStackSnapshot.NONE).getType().getId())));
+                                                p.get(Keys.ACTIVE_ITEM).orElse(ItemStackSnapshot.NONE).getType().getKey())));
                                         p.offer(Keys.ACTIVE_ITEM, ItemStackSnapshot.NONE);
                                     });
                                 })
                                 .delay(5, TimeUnit.SECONDS)
-                                .submit(this);
+                                .plugin(this)
+                                .build();
+                        this.task = Sponge.getServer().getScheduler().submit(t);
 
                         src.sendMessage(Text.of("Active item task set."));
                     }

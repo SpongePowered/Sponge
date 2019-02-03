@@ -57,7 +57,7 @@ public class HomeBuilder extends AbstractDataBuilder<Home> {
         Vector3d rotation = content.getObject(Home.ROTATION_QUERY, Vector3d.class).get();
         String name = content.getString(Home.NAME_QUERY).get();
 
-        Transform<World> transform = new Transform<>(world, position, rotation);
+        Transform transform = new Transform(world, position, rotation);
         return Optional.of(new Home(transform, name));
     }
 

@@ -52,7 +52,6 @@ import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.BlockChangeFlags;
-import org.spongepowered.api.world.extent.ArchetypeVolume;
 import org.spongepowered.api.world.schematic.BlockPaletteTypes;
 import org.spongepowered.api.world.schematic.Schematic;
 
@@ -228,9 +227,9 @@ public class CopyPasta {
     @Listener
     public void onInteract(InteractBlockEvent.Secondary.MainHand event, @Root Player player) {
         ItemStack item = player.getItemInHand(HandTypes.MAIN_HAND);
-        if (item.getType().equals(ItemTypes.WOODEN_AXE) && event.getTargetBlock() != BlockSnapshot.NONE) {
-            get(player).setPos2(event.getTargetBlock().getPosition());
-            player.sendMessage(Text.of(TextColors.LIGHT_PURPLE, "Position 2 set to " + event.getTargetBlock().getPosition()));
+        if (item.getType().equals(ItemTypes.WOODEN_AXE) && event.getBlock() != BlockSnapshot.NONE) {
+            get(player).setPos2(event.getBlock().getPosition());
+            player.sendMessage(Text.of(TextColors.LIGHT_PURPLE, "Position 2 set to " + event.getBlock().getPosition()));
             event.setCancelled(true);
         }
     }
@@ -239,8 +238,8 @@ public class CopyPasta {
     public void onInteract(InteractBlockEvent.Primary.MainHand event, @Root Player player) {
         ItemStack item = player.getItemInHand(HandTypes.MAIN_HAND);
         if (item.getType().equals(ItemTypes.WOODEN_AXE)) {
-            get(player).setPos1(event.getTargetBlock().getPosition());
-            player.sendMessage(Text.of(TextColors.LIGHT_PURPLE, "Position 1 set to " + event.getTargetBlock().getPosition()));
+            get(player).setPos1(event.getBlock().getPosition());
+            player.sendMessage(Text.of(TextColors.LIGHT_PURPLE, "Position 1 set to " + event.getBlock().getPosition()));
             event.setCancelled(true);
         }
     }
