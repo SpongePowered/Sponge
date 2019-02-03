@@ -102,7 +102,7 @@ import org.spongepowered.api.item.inventory.InventoryTransformation;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackGenerator;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
-import org.spongepowered.api.item.inventory.gui.GuiId;
+import org.spongepowered.api.item.inventory.gui.ContainerType;
 import org.spongepowered.api.item.inventory.query.QueryOperationType;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.item.merchant.TradeOffer;
@@ -521,7 +521,7 @@ public final class CommonModuleRegistry {
             .registerModule(CollisionRule.class, new CollisionRuleRegistryModule())
             .registerModule(DismountType.class, new DismountTypeRegistryModule())
             .registerModule((Class<Key<?>>) (Class<?>) Key.class, KeyRegistryModule.getInstance())
-            .registerModule(GuiId.class, GuiIdRegistryModule.getInstance())
+            .registerModule(ContainerType.class, GuiIdRegistryModule.getInstance())
             .registerModule(InventoryArchetype.class, InventoryArchetypeRegistryModule.getInstance())
             .registerModule(TransformationRegistryModule.getInstance())
             .registerModule(StructureMode.class, new StructureModeRegistryModule())

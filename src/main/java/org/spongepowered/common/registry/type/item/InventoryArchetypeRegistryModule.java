@@ -51,7 +51,7 @@ import net.minecraft.tileentity.TileEntityHopper;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.item.inventory.InventoryProperties;
-import org.spongepowered.api.item.inventory.gui.GuiIds;
+import org.spongepowered.api.item.inventory.gui.ContainerTypes;
 import org.spongepowered.api.item.inventory.slot.SlotIndex;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;

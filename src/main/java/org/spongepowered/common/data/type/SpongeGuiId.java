@@ -25,13 +25,13 @@
 package org.spongepowered.common.data.type;
 
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.item.inventory.gui.GuiId;
+import org.spongepowered.api.item.inventory.gui.ContainerType;
 import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.registry.RegistryHelper;
 
 import javax.annotation.Nullable;
 
-public class SpongeGuiId extends SpongeCatalogType implements GuiId {
+public class SpongeGuiId extends SpongeCatalogType implements ContainerType {
 
     @Nullable private final String internalId;
 

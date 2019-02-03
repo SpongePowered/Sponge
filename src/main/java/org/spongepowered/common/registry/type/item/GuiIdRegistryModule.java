@@ -30,13 +30,15 @@ import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.item.inventory.gui.GuiId;
 import org.spongepowered.api.item.inventory.gui.GuiIds;
 import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.item.inventory.property.ContainerType;
+import org.spongepowered.api.item.inventory.property.ContainerTypes;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.data.type.SpongeGuiId;
 import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 
-@RegisterCatalog(GuiIds.class)
-public class GuiIdRegistryModule extends AbstractCatalogRegistryModule<GuiId> implements AdditionalCatalogRegistryModule<GuiId> {
+@RegisterCatalog(ContainerTypes.class)
+public class GuiIdRegistryModule extends AbstractCatalogRegistryModule<ContainerType> implements AdditionalCatalogRegistryModule<ContainerType> {
 
     public static GuiIdRegistryModule getInstance() {
         return Holder.INSTANCE;
@@ -67,7 +69,7 @@ public class GuiIdRegistryModule extends AbstractCatalogRegistryModule<GuiId> im
     }
 
     @Override
-    public void registerAdditionalCatalog(GuiId guiId) {
+    public void registerAdditionalCatalog(ContainerType guiId) {
         if (this.map.containsKey(guiId.getKey())) {
             throw new IllegalArgumentException("GuiId is already registered");
         }
