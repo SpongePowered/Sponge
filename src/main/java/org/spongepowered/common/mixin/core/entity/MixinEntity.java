@@ -1410,7 +1410,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
 
     @Override
     public void refreshCache() {
-        if (this.entityType != null) {
+        if (this.entityType instanceof SpongeEntityType) {
             this.allowsBlockBulkCapture = ((SpongeEntityType) this.entityType).allowsBlockBulkCapture;
             this.allowsEntityBulkCapture = ((SpongeEntityType) this.entityType).allowsEntityBulkCapture;
             this.allowsBlockEventCreation = ((SpongeEntityType) this.entityType).allowsBlockEventCreation;
