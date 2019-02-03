@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.registry.type.tileentity;
 
-import net.minecraft.tileentity.TileEntityStructure;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.StructureMode;
 import org.spongepowered.api.data.type.StructureModes;

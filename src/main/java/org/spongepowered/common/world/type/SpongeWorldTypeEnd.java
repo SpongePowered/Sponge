@@ -27,8 +27,8 @@ package org.spongepowered.common.world.type;
 import net.minecraft.init.Biomes;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.biome.BiomeProviderSingle;
+import net.minecraft.world.biome.provider.BiomeProvider;
 import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.gen.ChunkGeneratorEnd;
 

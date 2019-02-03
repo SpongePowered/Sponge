@@ -45,7 +45,7 @@ public final class DimensionTypeRegistryModule extends AbstractCatalogRegistryMo
     @Override
     public void registerDefaults() {
         WorldManager.registerVanillaTypesAndDimensions();
-        for (net.minecraft.world.DimensionType dimensionType : WorldManager.getDimensionTypes()) {
+        for (net.minecraft.world.dimension.DimensionType dimensionType : WorldManager.getDimensionTypes()) {
             final DimensionType apiDimensionType = (DimensionType) (Object) dimensionType;
             this.map.put(apiDimensionType.getKey(), apiDimensionType);
         }
@@ -59,7 +59,7 @@ public final class DimensionTypeRegistryModule extends AbstractCatalogRegistryMo
     @Override
     public void registerAdditionalCatalog(DimensionType dimType) {
         this.map.put(dimType.getKey(), dimType);
-        WorldManager.registerDimensionType((net.minecraft.world.DimensionType) (Object) dimType);
+        WorldManager.registerDimensionType((net.minecraft.world.dimension.DimensionType) (Object) dimType);
     }
 
 

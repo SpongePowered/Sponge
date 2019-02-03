@@ -64,12 +64,12 @@ public class SpongeLocatableBlockBuilder extends AbstractDataBuilder<LocatableBl
     }
 
     @Override
-    public LocatableBlock.Builder location(Location<World> location) {
+    public LocatableBlock.Builder location(Location location) {
         checkNotNull(location, "Location cannot be null!");
         this.blockState = location.getBlock();
         this.position = location.getBlockPosition();
-        this.worldId = location.getExtent().getUniqueId();
-        this.worldReference = new WeakReference<>(location.getExtent());
+        this.worldId = location.getWorld().getUniqueId();
+        this.worldReference = new WeakReference<>(location.getWorld());
         return this;
     }
 
@@ -96,8 +96,8 @@ public class SpongeLocatableBlockBuilder extends AbstractDataBuilder<LocatableBl
     @Override
     public LocatableBlock.Builder from(LocatableBlock value) {
         this.position = checkNotNull(value, "LocatableBlock cannot be null!").getPosition();
-        this.worldId = value.getLocation().getExtent().getUniqueId();
-        this.worldReference = new WeakReference<World>(value.getLocation().getExtent());
+        this.worldId = value.getLocation().getWorld().getUniqueId();
+        this.worldReference = new WeakReference<>(value.getLocation().getWorld());
         return this;
     }
 
@@ -112,7 +112,7 @@ public class SpongeLocatableBlockBuilder extends AbstractDataBuilder<LocatableBl
             } else {
                 final Optional<World> world = Sponge.getServer().getWorld(this.worldId);
                 checkArgument(world.isPresent(), "World is not available by the UUID: " + this.worldId);
-                this.worldReference = new WeakReference<World>(world.get());
+                this.worldReference = new WeakReference<>(world.get());
                 this.blockState = this.worldReference.get().getBlock(this.position);
             }
         }

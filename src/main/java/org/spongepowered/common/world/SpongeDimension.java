@@ -24,61 +24,60 @@
  */
 package org.spongepowered.common.world;
 
-import net.minecraft.world.WorldProvider;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.DimensionType;
-import org.spongepowered.api.world.GeneratorType;
+import org.spongepowered.api.world.gen.GeneratorType;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
 
 public class SpongeDimension implements Dimension {
 
-    private final WorldProvider worldProvider;
+    private final net.minecraft.world.dimension.Dimension dimension;
 
-    public SpongeDimension(WorldProvider worldProvider) {
-        this.worldProvider = worldProvider;
+    public SpongeDimension(final net.minecraft.world.dimension.Dimension dimension) {
+        this.dimension = dimension;
     }
 
     @Override
     public DimensionType getType() {
-        return (DimensionType) (Object) this.worldProvider.getDimensionType();
+        return (DimensionType) (Object) this.dimension.getType();
     }
 
     @Override
     public GeneratorType getGeneratorType() {
-        return (GeneratorType) this.worldProvider.terrainType;
+        return (GeneratorType) this.dimension.terrainType;
     }
 
     @Override
     public boolean allowsPlayerRespawns() {
-        return this.worldProvider.canRespawnHere();
+        return this.dimension.canRespawnHere();
     }
 
     @Override
     public int getMinimumSpawnHeight() {
-        return this.worldProvider.getAverageGroundLevel();
+        return this.dimension.getAverageGroundLevel();
     }
 
     @Override
     public boolean doesWaterEvaporate() {
-        return this.worldProvider.doesWaterVaporize();
+        return this.dimension.doesWaterVaporize();
     }
 
     @Override
     public boolean hasSky() {
-        return !this.worldProvider.isNether();
+        return !this.dimension.isNether();
     }
 
     @Override
     public Context getContext() {
-        return ((IMixinDimensionType) (Object) this.worldProvider.getDimensionType()).getContext();
+        return ((IMixinDimensionType) (Object) this.dimension.getType()).getContext();
     }
 
     // These methods are overwritten in SpongeForge
 
     @Override
     public int getHeight() {
-        return this.worldProvider.isNether() ? 128 : 256;
+        return this.dimension.isNether() ? 128 : 256;
     }
 
     @Override

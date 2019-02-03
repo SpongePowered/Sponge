@@ -32,6 +32,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.EnumLightType;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
@@ -75,12 +76,12 @@ public class SpongeEmptyChunk extends Chunk {
     }
 
     @Override
-    public int getLightFor(EnumSkyBlock p_177413_1_, BlockPos pos) {
+    public int getLightFor(EnumLightType p_177413_1_, BlockPos pos) {
         return p_177413_1_.defaultLightValue;
     }
 
     @Override
-    public void setLightFor(EnumSkyBlock p_177431_1_, BlockPos pos, int value) {
+    public void setLightFor(EnumLightType p_177431_1_, BlockPos pos, int value) {
     }
 
     @Override

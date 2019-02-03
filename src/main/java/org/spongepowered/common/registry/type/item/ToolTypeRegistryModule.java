@@ -24,9 +24,7 @@
  */
 package org.spongepowered.common.registry.type.item;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import net.minecraft.item.Item;
+import net.minecraft.item.ItemTier;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.ToolType;
 import org.spongepowered.api.data.type.ToolTypes;
@@ -35,26 +33,21 @@ import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 
 @RegisterCatalog(ToolTypes.class)
 public class ToolTypeRegistryModule extends AbstractCatalogRegistryModule<ToolType> implements CatalogRegistryModule<ToolType> {
 
     @Override
     public void registerDefaults() {
-        for (Item.ToolMaterial toolMaterial : Item.ToolMaterial.values()) {
-            if (toolMaterial == Item.ToolMaterial.DIAMOND) {
-                this.map.put(CatalogKey.minecraft("diamond"), (ToolType) (Object) toolMaterial);
-            }
-            this.map.put(CatalogKey.resolve(toolMaterial.name().toLowerCase(Locale.ENGLISH)), (ToolType) (Object) toolMaterial);
+        for (ItemTier tier : ItemTier.values()) {
+            this.map.put(CatalogKey.resolve(tier.name().toLowerCase(Locale.ENGLISH)), (ToolType) (Object) tier);
         }
     }
 
     @AdditionalRegistration
     public void customRegistration() {
-        for (Item.ToolMaterial toolMaterial : Item.ToolMaterial.values()) {
+        for (ItemTier toolMaterial : ItemTier.values()) {
             final CatalogKey key = ((ToolType) (Object) toolMaterial).getKey();
             if (!this.map.containsKey(key)) {
                 register((ToolType) (Object) toolMaterial);

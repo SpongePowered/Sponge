@@ -37,7 +37,7 @@ import org.spongepowered.common.interfaces.world.IMixinExplosion;
 
 public class SpongeExplosionBuilder implements Explosion.Builder {
 
-    private Location<World> location;
+    private Location location;
     private Explosive sourceExplosive;
     private float radius;
     private boolean canCauseFire;
@@ -62,7 +62,7 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
     }
 
     @Override
-    public Explosion.Builder location(Location<World> location) {
+    public Explosion.Builder location(Location location) {
         this.location = checkNotNull(location, "location");
         return this;
     }
@@ -120,7 +120,7 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
         // TODO Check coordinates and if world is loaded here.
         checkState(this.location != null, "Location is null!");
 
-        World world = this.location.getExtent();
+        World world = this.location.getWorld();
         Vector3d origin = this.location.getPosition();
         final net.minecraft.world.Explosion explosion = new net.minecraft.world.Explosion((net.minecraft.world.World) world,
                 (Entity) this.sourceExplosive, origin.getX(), origin.getY(), origin.getZ(), this.radius,

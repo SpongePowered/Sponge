@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.registry;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.ImmutableList;
@@ -34,10 +33,8 @@ import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public abstract class AbstractCatalogRegistryModule<C extends CatalogType> implements AlternateCatalogRegistryModule<C> {
 
@@ -75,18 +72,6 @@ public abstract class AbstractCatalogRegistryModule<C extends CatalogType> imple
     @Override
     public final Optional<C> get(final CatalogKey key) {
         return this.map.getOptional(key);
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public final Optional<C> getById(final String id) {
-        // Here we can check for default prefixes.
-        final String key = checkNotNull(id).toLowerCase(Locale.ENGLISH);
-        if (!key.contains(":")) {
-            return get(CatalogKey.of(this.defaultModIdToPrepend, id));
-        }
-        return this.map.getOptional(CatalogKey.resolve(id));
-
     }
 
     @Override

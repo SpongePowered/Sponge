@@ -29,7 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.CaseFormat;
 import net.minecraft.block.*;
-import net.minecraft.block.properties.IProperty;
+import net.minecraft.state.IProperty;
 import org.apache.logging.log4j.LogManager;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.common.registry.TypeProvider;
@@ -136,12 +136,10 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Catal
     }
 
     BlockPropertyIdProvider() {
-        register(BlockHorizontal.FACING, CatalogKey.minecraft("horizontal_facing"));
+        register(BlockHorizontal.HORIZONTAL_FACING, CatalogKey.minecraft("horizontal_facing"));
         register(BlockRotatedPillar.AXIS, CatalogKey.minecraft("pillar_axis"));
         register(BlockDirectional.FACING, CatalogKey.minecraft("directional_facing"));
-        register(BlockLog.LOG_AXIS, CatalogKey.minecraft("log_axis"));
-        register(BlockNewLog.VARIANT, CatalogKey.minecraft("new_log_variant"));
-        register(BlockOldLog.VARIANT, CatalogKey.minecraft("log_variant"));
+        register(BlockLog.AXIS, CatalogKey.minecraft("log_axis"));
         register(BlockFarmland.MOISTURE, CatalogKey.minecraft("farmland_moisture"));
         register(BlockPistonBase.EXTENDED, CatalogKey.minecraft("piston_extended"));
         register(BlockVine.NORTH, CatalogKey.minecraft("vine_north"));
@@ -158,10 +156,7 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Catal
         register(BlockDirt.SNOWY, CatalogKey.minecraft("dirt_snowy"));
         register(BlockDirt.VARIANT, CatalogKey.minecraft("dirt_variant"));
         register(BlockEndPortalFrame.EYE, CatalogKey.minecraft("end_portal_eye"));
-        register(BlockCarpet.COLOR, CatalogKey.minecraft("carpet_color"));
-        register(BlockStone.VARIANT, CatalogKey.minecraft("stone_variant"));
-        register(BlockHugeMushroom.VARIANT, CatalogKey.minecraft("huge_mushroom_variant"));
-        register(BlockSnow.LAYERS, CatalogKey.minecraft("snow_layer"));
+        register(BlockSnowLayer.LAYERS, CatalogKey.minecraft("snow_layer"));
         register(BlockWall.UP, CatalogKey.minecraft("wall_up"));
         register(BlockWall.NORTH, CatalogKey.minecraft("wall_north"));
         register(BlockWall.EAST, CatalogKey.minecraft("wall_east"));
@@ -205,8 +200,6 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Catal
         register(BlockRailDetector.SHAPE, CatalogKey.minecraft("detector_rail_shape"));
         register(BlockLeaves.DECAYABLE, CatalogKey.minecraft("leaves_decay"));
         register(BlockLeaves.CHECK_DECAY, CatalogKey.minecraft("leaves_check_decay"));
-        register(BlockOldLeaf.VARIANT, CatalogKey.minecraft("old_leaves_variant"));
-        register(BlockNewLeaf.VARIANT, CatalogKey.minecraft("new_leaves_variant"));
         register(BlockGrass.SNOWY, CatalogKey.minecraft("grass_snowy"));
         register(BlockCauldron.LEVEL, CatalogKey.minecraft("cauldron_level"));
         register(BlockBanner.ROTATION, CatalogKey.minecraft("banner_rotation"));
@@ -222,7 +215,6 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Catal
         register(BlockDaylightDetector.POWER, CatalogKey.minecraft("daylight_detector_power"));
         register(BlockDispenser.TRIGGERED, CatalogKey.minecraft("dispenser_triggered"));
         register(BlockJukebox.HAS_RECORD, CatalogKey.minecraft("jukebox_has_record"));
-        register(BlockSand.VARIANT, CatalogKey.minecraft("sand_variant"));
         register(BlockAnvil.DAMAGE, CatalogKey.minecraft("anvil_damage"));
         register(BlockCake.BITES, CatalogKey.minecraft("cake_bites"));
         register(BlockFire.AGE, CatalogKey.minecraft("fire_age"));
@@ -274,7 +266,6 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Catal
         register(BlockTrapDoor.HALF, CatalogKey.minecraft("trap_door_half"));
         register(BlockRedstoneRepeater.DELAY, CatalogKey.minecraft("redstone_repeater_delay"));
         register(BlockRedstoneRepeater.LOCKED, CatalogKey.minecraft("redstone_repeater_locked"));
-        register(BlockConcretePowder.COLOR, CatalogKey.minecraft("concrete_powder_color"));
     }
 
     private static final class Holder {

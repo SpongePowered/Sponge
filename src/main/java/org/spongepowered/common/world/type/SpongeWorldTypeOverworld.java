@@ -25,9 +25,9 @@
 package org.spongepowered.common.world.type;
 
 import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeProvider;
-import net.minecraft.world.gen.IChunkGenerator;
+import net.minecraft.world.biome.provider.BiomeProvider;
 import net.minecraft.world.gen.ChunkGeneratorOverworld;
+import net.minecraft.world.gen.IChunkGenerator;
 
 public class SpongeWorldTypeOverworld extends SpongeWorldType {
 
