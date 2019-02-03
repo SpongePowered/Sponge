@@ -56,6 +56,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeTileEntityArchetypeBuilder;
 import org.spongepowered.common.data.nbt.CustomDataNbtUtil;
 import org.spongepowered.common.data.persistence.NbtTranslator;
@@ -81,7 +82,7 @@ import javax.annotation.Nullable;
 @Implements(@Interface(iface = IMixinTileEntity.class, prefix = "tile$"))
 public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
 
-    private final TileEntityType tileType = SpongeImpl.getRegistry().getTranslated(this.getClass(), TileEntityType.class);
+    private final TileEntityType tileType = SpongeImplHooks.getTileEntityType(this.getClass());
     // uses different name to not clash with SpongeForge
     private final boolean isTileVanilla = getClass().getName().startsWith("net.minecraft.");
     @Nullable private Timing timing;

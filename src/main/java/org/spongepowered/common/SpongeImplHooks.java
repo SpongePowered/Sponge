@@ -68,6 +68,7 @@ import net.minecraft.world.storage.MapStorage;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.command.args.ChildCommandElementExecutor;
 import org.spongepowered.api.data.type.Profession;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -85,12 +86,15 @@ import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
+import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.world.IMixinITeleporter;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.mixin.core.tileentity.MixinTileEntity;
+import org.spongepowered.common.mixin.core.world.MixinWorldServer;
 import org.spongepowered.common.registry.type.entity.ProfessionRegistryModule;
 import org.spongepowered.common.util.SpawnerSpawnType;
 import org.spongepowered.common.world.WorldManager;
@@ -497,5 +501,9 @@ public final class SpongeImplHooks {
         // that the game is still being loaded. This is needed to support initialization
         // events with cause tracking.
         return !Sponge.isServerAvailable() || Sponge.getServer().isMainThread();
+    }
+
+    public static TileEntityType getTileEntityType(Class<? extends IMixinTileEntity> aClass) {
+        return SpongeImpl.getRegistry().getTranslated(aClass, TileEntityType.class);
     }
 }
