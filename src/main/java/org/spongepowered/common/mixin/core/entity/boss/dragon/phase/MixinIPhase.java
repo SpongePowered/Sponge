@@ -26,8 +26,12 @@ package org.spongepowered.common.mixin.core.entity.boss.dragon.phase;
 
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.boss.dragon.phase.IPhase;
+import net.minecraft.entity.boss.dragon.phase.PhaseList;
 import net.minecraft.util.math.Vec3d;
 import org.spongepowered.api.entity.living.complex.dragon.phase.EnderDragonPhase;
+import org.spongepowered.api.entity.living.complex.dragon.phase.EnderDragonPhaseType;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.VecHelper;
@@ -35,13 +39,19 @@ import org.spongepowered.common.util.VecHelper;
 import java.util.Optional;
 
 @Mixin(IPhase.class)
-public interface MixinIPhase extends EnderDragonPhase {
+@Implements(@Interface(iface = EnderDragonPhase.class, prefix = "phase$"))
+public interface MixinIPhase {
 
     @Shadow Vec3d getTargetLocation();
+    @Shadow PhaseList<? extends IPhase> getType();
 
-    @Override
-    default Optional<Vector3d> getTargetPosition() {
+    default EnderDragonPhaseType phase$getType() {
+        return (EnderDragonPhaseType) getType();
+    }
+
+    default Optional<Vector3d> phase$getTargetPosition() {
         final Vec3d vec = this.getTargetLocation();
         return vec == null ? Optional.empty() : Optional.of(VecHelper.toVector3d(vec));
     }
+
 }

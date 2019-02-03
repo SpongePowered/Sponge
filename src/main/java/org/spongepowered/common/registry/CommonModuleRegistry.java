@@ -47,6 +47,7 @@ import org.spongepowered.api.boss.BossBarOverlay;
 import org.spongepowered.api.boss.ServerBossBar;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.entity.living.complex.dragon.phase.EnderDragonPhaseType;
 import org.spongepowered.api.item.potion.PotionType;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.data.meta.PatternLayer;
@@ -417,6 +418,7 @@ public final class CommonModuleRegistry {
                 .registerModule(DoublePlantType.class, new DoublePlantTypeRegistryModule())
                 .registerModule(DyeColor.class, DyeColorRegistryModule.getInstance())
                 .registerModule(EnchantmentType.class, EnchantmentRegistryModule.getInstance())
+                .registerModule(EnderDragonPhaseType.class, EnderDragonPhaseTypeRegistryModule.getInstance())
                 .registerModule((Class<EnumTrait<?>>) (Class) EnumTrait.class, EnumTraitRegistryModule.getInstance())
                 .registerModule(EntityType.class, EntityTypeRegistryModule.getInstance())
                 .registerModule(EquipmentType.class, new EquipmentTypeRegistryModule())

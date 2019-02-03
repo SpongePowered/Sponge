@@ -24,11 +24,31 @@
  */
 package org.spongepowered.common.mixin.core.entity.boss.dragon.phase;
 
+import com.google.common.base.CaseFormat;
 import net.minecraft.entity.boss.dragon.phase.PhaseList;
 import org.spongepowered.api.entity.living.complex.dragon.phase.EnderDragonPhaseType;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+
+import java.util.Locale;
 
 @Mixin(PhaseList.class)
 public class MixinPhaseList implements EnderDragonPhaseType {
 
+    private String spongeId;
+    @Shadow @Final private String name;
+
+    @Override
+    public String getId() {
+        if (this.spongeId == null) {
+            this.spongeId = "minecraft:" + CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, this.name).toLowerCase(Locale.ENGLISH);
+        }
+        return this.spongeId;
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
+    }
 }
