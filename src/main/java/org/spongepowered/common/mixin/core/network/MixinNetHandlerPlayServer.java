@@ -373,7 +373,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             }
 
             boolean clickedInsideNotOutput = packetIn.getSlotId() >= 1 && packetIn.getSlotId() <= 45;
-            boolean itemValidCheck = itemstack.isEmpty() || itemstack.getDamage() >= 0 && itemstack.getCount() <= 64 && !itemstack.isEmpty();
+            boolean itemValidCheck = itemstack.isEmpty() || itemstack.getDamage() >= 0 && itemstack.getCount() <= itemstack.getMaxStackSize() && !itemstack.isEmpty();
 
             // Sponge start - handle CreativeInventoryEvent
             final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
