@@ -44,8 +44,8 @@ public class MixinCarrierContainerWorkbench implements IMixinSingleBlockCarrier 
     @Shadow @Final private BlockPos pos;
 
     @Override
-    public Location<World> getLocation() {
-        return new Location<>(((World) this.world), new Vector3d(this.pos.getX(), this.pos.getY(), this.pos.getZ()));
+    public Location getLocation() {
+        return new Location(((World) this.world), new Vector3d(this.pos.getX(), this.pos.getY(), this.pos.getZ()));
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})

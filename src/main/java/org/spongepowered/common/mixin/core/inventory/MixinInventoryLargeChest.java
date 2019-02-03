@@ -79,8 +79,8 @@ public abstract class MixinInventoryLargeChest implements MinecraftInventoryAdap
     }
 
     @Override
-    public List<Location<World>> getLocations() {
-        List<Location<World>> list = new ArrayList<>();
+    public List<Location> getLocations() {
+        List<Location> list = new ArrayList<>();
         if (this.upperChest instanceof TileEntity) {
             list.add(((TileEntity) this.upperChest).getLocation());
         }

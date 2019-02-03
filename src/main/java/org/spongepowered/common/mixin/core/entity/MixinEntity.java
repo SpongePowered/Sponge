@@ -331,7 +331,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
     @Overwrite
     public void dismountRidingEntity() {
         if (this.ridingEntity != null) {
-            if (this.getRidingEntity().isDead) {
+            if (this.getRidingEntity().removed) {
                 this.dismountRidingEntity(DismountTypes.DEATH);
             } else {
                 this.dismountRidingEntity(DismountTypes.PLAYER);
@@ -396,7 +396,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
         }
         try {
             AxisAlignedBB bb = this.getEntityBoundingBox().grow(-0.10000000149011612D, -0.4000000059604645D, -0.10000000149011612D);
-            Location<World> location = DamageEventHandler.findFirstMatchingBlock((net.minecraft.entity.Entity) (Object) this, bb, block ->
+            Location location = DamageEventHandler.findFirstMatchingBlock((net.minecraft.entity.Entity) (Object) this, bb, block ->
                     block.getMaterial() == Material.LAVA);
             DamageSource.LAVA = new MinecraftBlockDamageSource(CatalogKey.minecraft("lava"), location).setFireDamage();
             return entity.attackEntityFrom(DamageSource.LAVA, damage);
@@ -419,7 +419,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
         }
         try {
             AxisAlignedBB bb = this.getEntityBoundingBox().grow(-0.001D, -0.001D, -0.001D);
-            Location<World> location = DamageEventHandler.findFirstMatchingBlock((net.minecraft.entity.Entity) (Object) this, bb, block ->
+            Location location = DamageEventHandler.findFirstMatchingBlock((net.minecraft.entity.Entity) (Object) this, bb, block ->
                     block.getBlock() == Blocks.FIRE || block.getBlock() == Blocks.FLOWING_LAVA || block.getBlock() == Blocks.LAVA);
             DamageSource.IN_FIRE = new MinecraftBlockDamageSource(CatalogKey.minecraft("inFire"), location).setFireDamage();
             return entity.attackEntityFrom(DamageSource.IN_FIRE, damage);
@@ -467,12 +467,12 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
     }
 
     @Override
-    public Location<World> getLocation() {
+    public Location getLocation() {
         return new Location<>((World) this.world, getPosition());
     }
 
     @Override
-    public boolean setLocationAndRotation(Location<World> location, Vector3d rotation) {
+    public boolean setLocationAndRotation(Location location, Vector3d rotation) {
         boolean result = setLocation(location);
         if (result) {
             setRotation(rotation);
@@ -483,7 +483,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
     }
 
     @Override
-    public boolean setLocation(Location<World> location) {
+    public boolean setLocation(Location location) {
         checkNotNull(location, "The location was null!");
         if (isRemoved()) {
             return false;
@@ -517,8 +517,8 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
 
             boolean isTeleporting = true;
 
-            if (location.getExtent().getUniqueId() != ((World) this.world).getUniqueId()) {
-                final net.minecraft.world.World nmsWorld = (net.minecraft.world.World) location.getExtent();
+            if (location.getWorld().getUniqueId() != ((World) this.world).getUniqueId()) {
+                final net.minecraft.world.World nmsWorld = (net.minecraft.world.World) location.getWorld();
                 if ((net.minecraft.entity.Entity) (Object) this instanceof EntityPlayerMP) {
                     // Close open containers
                     final EntityPlayerMP entityPlayerMP = (EntityPlayerMP) (Object) this;
@@ -545,7 +545,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
                             ((Player) entityPlayerMP).closeInventory(); // Call API method to make sure we capture it
                         }
 
-                        ((WorldServer) location.getExtent()).getChunkProvider()
+                        ((WorldServer) location.getWorld()).getChunkProvider()
                                 .loadChunk(location.getChunkPosition().getX(), location.getChunkPosition().getZ());
                     }
                     entityPlayerMP.connection
@@ -572,19 +572,19 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
     // always use these methods internally when setting locations from a transform or location
     // to avoid firing a DisplaceEntityEvent.Teleport
     @Override
-    public void setLocationAndAngles(Location<World> location) {
+    public void setLocationAndAngles(Location location) {
         if (((Entity) this) instanceof EntityPlayerMP) {
             ((EntityPlayerMP) (Object) this).connection.setPlayerLocation(location.getX(), location.getY(), location.getZ(), this.rotationYaw, this.rotationPitch);
         } else {
             this.setPosition(location.getX(), location.getY(), location.getZ());
         }
-        if (this.world != location.getExtent()) {
-            this.world = (net.minecraft.world.World) location.getExtent();
+        if (this.world != location.getWorld()) {
+            this.world = (net.minecraft.world.World) location.getWorld();
         }
     }
 
     @Override
-    public void setLocationAndAngles(Transform<World> transform) {
+    public void setLocationAndAngles(Transform transform) {
         Vector3d position = transform.getPosition();
         EntityPlayerMP player = null;
         if (((Entity) this) instanceof EntityPlayerMP) {
@@ -595,13 +595,13 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
         } else {
             this.setLocationAndAngles(position.getX(), position.getY(), position.getZ(), (float) transform.getYaw(), (float) transform.getPitch());
         }
-        if (this.world != transform.getExtent()) {
-            this.world = (net.minecraft.world.World) transform.getExtent();
+        if (this.world != transform.getWorld()) {
+            this.world = (net.minecraft.world.World) transform.getWorld();
         }
     }
 
     @Override
-    public boolean setLocationAndRotation(Location<World> location, Vector3d rotation, EnumSet<RelativePositions> relativePositions) {
+    public boolean setLocationAndRotation(Location location, Vector3d rotation, EnumSet<RelativePositions> relativePositions) {
         boolean relocated = true;
 
         if (relativePositions.isEmpty()) {
@@ -636,7 +636,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
                 ((EntityPlayerMP) (Entity) this).connection.setPlayerLocation(location.getPosition().getX(), location.getPosition()
                         .getY(), location.getPosition().getZ(), (float) rotation.getY(), (float) rotation.getX(), relativeFlags);
             } else {
-                Location<World> resultantLocation = getLocation();
+                Location resultantLocation = getLocation();
                 Vector3d resultantRotation = getRotation();
 
                 if (relativePositions.contains(RelativePositions.X)) {
@@ -897,7 +897,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
             throw new IllegalArgumentException(String.format("Cannot remove entity %s, because it is not a passenger of %s ", entity, this));
         }
 
-        ((net.minecraft.entity.Entity) entity).dismountRidingEntity();
+        ((net.minecraft.entity.Entity) entity).stopRiding();
     }
 
     @Override
@@ -1025,7 +1025,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
         final DataContainer container = DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, getContentVersion())
                 .set(DataQueries.ENTITY_CLASS, this.getClass().getName())
-                .set(Queries.WORLD_ID, transform.getExtent().getUniqueId().toString())
+                .set(Queries.WORLD_ID, transform.getWorld().getUniqueId().toString())
                 .createView(DataQueries.SNAPSHOT_WORLD_POSITION)
                 .set(Queries.POSITION_X, transform.getPosition().getX())
                 .set(Queries.POSITION_Y, transform.getPosition().getY())
@@ -1070,7 +1070,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
             writeToNBT(compound);
             net.minecraft.entity.Entity entity = EntityList.createEntityByIDFromName((ResourceLocation) (Object) this.entityType.getKey(), this.world);
             compound.setUniqueId(NbtDataUtil.UUID, entity.getUniqueID());
-            entity.readFromNBT(compound);
+            entity.read(compound);
             return (Entity) entity;
         } catch (Exception e) {
             throw new IllegalArgumentException("Could not copy the entity:", e);
@@ -1445,7 +1445,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
         if (this.fire < 1 && !this.isImmuneToFireForIgniteEvent()) {
             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
 
-                frame.pushCause(this.getLocation().getExtent());
+                frame.pushCause(this.getLocation().getWorld());
                 IgniteEntityEvent event = SpongeEventFactory.
                         createIgniteEntityEvent(frame.getCurrentCause(), ticks, ticks, this);
 

@@ -133,7 +133,7 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
                 // Moved from below
                 LootContext.Builder lootcontext$builder = new LootContext.Builder((WorldServer) this.world);
                 lootcontext$builder.withLuck(this.luck + this.angler.getLuck());
-                transactions = this.world.getLootTableManager().getLootTableFromLocation(LootTableList.GAMEPLAY_FISHING)
+                transactions = this.world.getServer().getLootTableManager().getLootTableFromLocation(LootTableList.GAMEPLAY_FISHING)
                         .generateLootForPools(this.rand, lootcontext$builder.build())
                         .stream()
                         .map(s -> {

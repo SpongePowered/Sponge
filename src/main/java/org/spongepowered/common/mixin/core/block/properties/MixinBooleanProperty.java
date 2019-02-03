@@ -24,11 +24,10 @@
  */
 package org.spongepowered.common.mixin.core.block.properties;
 
-import net.minecraft.block.properties.PropertyEnum;
-import org.spongepowered.api.block.trait.EnumTrait;
+import net.minecraft.state.BooleanProperty;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(value = PropertyEnum.class)
-public abstract class MixinPropertyEnum<E extends Enum<E>> extends MixinPropertyHelper<E> implements EnumTrait<E> {
+@Mixin(value = BooleanProperty.class)
+public abstract class MixinBooleanProperty extends MixinAbstractProperty<Boolean> implements BooleanTrait {
 
 }

@@ -141,9 +141,9 @@ public interface IMixinEntity extends org.spongepowered.api.entity.Entity, IMixi
 
     void setDestructCause(Cause cause);
 
-    void setLocationAndAngles(Location<World> location);
+    void setLocationAndAngles(Location location);
 
-    void setLocationAndAngles(Transform<World> transform);
+    void setLocationAndAngles(Transform transform);
 
     void createForgeCapabilities();
 

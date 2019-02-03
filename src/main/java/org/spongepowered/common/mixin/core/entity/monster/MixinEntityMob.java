@@ -36,7 +36,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.EnumSkyBlock;
+import net.minecraft.world.EnumLightType;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.monster.Monster;
@@ -77,7 +77,7 @@ public abstract class MixinEntityMob extends MixinEntityCreature implements Mons
     public boolean attackEntityAsMob(Entity targetEntity) {
         // Sponge Start - Prepare our event values
         // float baseDamage = this.getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue();
-        final double originalBaseDamage = this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue();
+        final double originalBaseDamage = this.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getValue();
         final List<DamageFunction> originalFunctions = new ArrayList<>();
         // Sponge End
         int knockbackModifier = 0;
@@ -154,7 +154,7 @@ public abstract class MixinEntityMob extends MixinEntityCreature implements Mons
             return false;
         }
 
-        if (this.world.getLightFor(EnumSkyBlock.SKY, blockpos) > this.rand.nextInt(32))
+        if (this.world.getLightFor(EnumLightType.SKY, blockpos) > this.rand.nextInt(32))
         {
             return false;
         } 

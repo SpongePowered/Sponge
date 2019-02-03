@@ -35,11 +35,11 @@ import org.spongepowered.api.world.World;
 
 public class SpongeBlockDamageSourceBuilder extends AbstractDamageSourceBuilder<BlockDamageSource, BlockDamageSource.Builder> implements BlockDamageSource.Builder {
 
-    private Location<World> location;
+    private Location location;
     private BlockSnapshot blockSnapshot;
 
     @Override
-    public BlockDamageSource.Builder block(Location<World> location) {
+    public BlockDamageSource.Builder block(Location location) {
         this.location = location;
         return this;
     }

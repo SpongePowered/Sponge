@@ -36,6 +36,7 @@ import com.google.common.collect.Sets;
 import net.minecraft.advancements.PlayerAdvancements;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.command.ICommandSource;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
@@ -358,7 +359,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Overwrite
     public void onDeath(DamageSource cause) {
         // Sponge start
-        final boolean isMainThread = Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
+        final boolean isMainThread = Sponge.isServerAvailable() && Sponge.getServer().onMainThread();
         Optional<DestructEntityEvent.Death> optEvent = SpongeCommonEventFactory.callDestructEntityEventDeath((EntityPlayerMP) (Object) this, cause, isMainThread);
         if (optEvent.map(Cancellable::isCancelled).orElse(true)) {
             return;
@@ -450,7 +451,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         IMixinEntity oldEntity = (IMixinEntity) oldPlayer;
         NBTTagCompound old = oldEntity.getEntityData();
         if (old.hasKey(NbtDataUtil.SPONGE_DATA)) {
-            this.getEntityData().setTag(NbtDataUtil.SPONGE_DATA, old.getCompoundTag(NbtDataUtil.SPONGE_DATA));
+            this.getEntityData().setTag(NbtDataUtil.SPONGE_DATA, old.getCompound(NbtDataUtil.SPONGE_DATA));
             this.readFromNbt(this.getSpongeData());
         }
         // Copy overworld spawn pos
@@ -966,8 +967,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
-    public ICommandSender asICommandSender() {
-        return (ICommandSender) this;
+    public ICommandSource asICommandSender() {
+        return (ICommandSource) this;
     }
 
     @Override
@@ -1111,8 +1112,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     public void sendBlockChange(BlockPos pos, IBlockState state) {
         final SPacketBlockChange packet = new SPacketBlockChange();
-        packet.blockPosition = pos;
-        packet.blockState = state;
+        packet.pos = pos;
+        packet.state = state;
         this.connection.sendPacket(packet);
     }
 
@@ -1761,7 +1762,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         WorldServer worldServer = this.getServerWorld();
         final int dimensionId = WorldManager.getClientDimensionId((EntityPlayerMP) (Object) this, worldServer);
         PlayerList playerList = SpongeImpl.getServer().getPlayerList();
-        Transform<World> transform = this.getTransform();
+        Transform transform = this.getTransform();
 
         this.connection.sendPacket(new SPacketRespawn(dimensionId, worldServer.getDifficulty(), worldServer
                 .getWorldInfo().getTerrainType(), this.interactionManager.getGameType()));
@@ -1773,9 +1774,9 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         this.connection.sendPacket(new SPacketSpawnPosition(spawnLocation));
         this.connection.sendPacket(new SPacketSetExperience(this.experience, this.experienceTotal,
                 this.experienceLevel));
-        playerList.updateTimeAndWeatherForPlayer((EntityPlayerMP) (Object) this, worldServer);
+        playerList.sendWorldInfo((EntityPlayerMP) (Object) this, worldServer);
         playerList.updatePermissionLevel((EntityPlayerMP) (Object) this);
-        playerList.syncPlayerInventory((EntityPlayerMP) (Object) this);
+        playerList.sendInventory((EntityPlayerMP) (Object) this);
         //worldServer.getPlayerChunkMap().addPlayer(this);
         //org.spongepowered.api.entity.Entity spongeEntity = (org.spongepowered.api.entity.Entity) this;
         //((org.spongepowered.api.world.World) worldServer).spawnEntity(spongeEntity);

@@ -185,7 +185,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow public abstract void setRotationYawHead(float rotation);
     @Shadow public abstract Collection getActivePotionEffects();
     @Shadow @Nullable public abstract EntityLivingBase getLastAttackedEntity();
-    @Shadow public abstract IAttributeInstance getEntityAttribute(IAttribute attribute);
+    @Shadow public abstract IAttributeInstance getAttribute(IAttribute attribute);
     @Shadow public abstract ItemStack getItemStackFromSlot(EntityEquipmentSlot slotIn);
     @Shadow protected abstract void applyEntityAttributes();
     @Shadow protected abstract void playHurtSound(net.minecraft.util.DamageSource p_184581_1_);
@@ -259,14 +259,14 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     public void readFromNbt(NBTTagCompound compound) {
         super.readFromNbt(compound);
         if (compound.hasKey("maxAir")) {
-            this.maxAir = compound.getInteger("maxAir");
+            this.maxAir = compound.getInt("maxAir");
         }
     }
 
     @Override
     public void writeToNbt(NBTTagCompound compound) {
         super.writeToNbt(compound);
-        compound.setInteger("maxAir", this.maxAir);
+        compound.setInt("maxAir", this.maxAir);
     }
 
     @Override
@@ -289,7 +289,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     public void onDeath(DamageSource cause) {
         // Sponge Start - Call our event, and forge's event
         // This will transitively call the forge event
-        final boolean isMainThread = !((IMixinWorld) this.world).isFake() || Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
+        final boolean isMainThread = !((IMixinWorld) this.world).isFake() || Sponge.isServerAvailable() && Sponge.getServer().onMainThread();
         if (!this.isDead) { // isDead should be set later on in this method so we aren't re-throwing the events.
             if (isMainThread && this.deathEventsPosted <= MAX_DEATH_EVENTS_BEFORE_GIVING_UP) {
                 // ignore because some moron is not resetting the entity.
@@ -599,7 +599,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                 if (!flag) // Sponge - remove 'amount > 0.0F'
                 {
                     this.lastDamageSource = source;
-                    this.lastDamageStamp = this.world.getTotalWorldTime();
+                    this.lastDamageStamp = this.world.getGameTime();
                 }
 
                 return !flag; // Sponge - remove 'amount > 0.0F'
@@ -775,8 +775,8 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             {
                 // Sponge start
                 if (!world.isRemote) {
-                    Transform<org.spongepowered.api.world.World> fromTransform = this.getTransform().setPosition(new Vector3d(d0, d1, d2));
-                    Transform<org.spongepowered.api.world.World> toTransform = this.getTransform().setPosition(new Vector3d(this.posX, this.posY, this.posZ));
+                    Transform fromTransform = this.getTransform().setPosition(new Vector3d(d0, d1, d2));
+                    Transform toTransform = this.getTransform().setPosition(new Vector3d(this.posX, this.posY, this.posZ));
 
                     MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent((Entity) (Object) this, fromTransform, toTransform);
                     if (event.isCancelled()) {
@@ -805,7 +805,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         {
             // Sponge start - this is technically a teleport, since it sends packets to players and calls 'updateEntityWithOptionalForce' - even though it doesn't really move the entity at all
             if (!world.isRemote) {
-                Transform<org.spongepowered.api.world.World> transform = this.getTransform().setPosition(new Vector3d(d0, d1, d2));
+                Transform transform = this.getTransform().setPosition(new Vector3d(d0, d1, d2));
                 MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent((Entity) (Object) this, transform, transform);
                 if (event.isCancelled()) {
                     return false;
@@ -1074,7 +1074,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
         Sponge.getCauseStackManager().pushCause(this);
         UseItemStackEvent.Start event = SpongeEventFactory.createUseItemStackEventStart(Sponge.getCauseStackManager().getCurrentCause(),
-                stack.getMaxItemUseDuration(), stack.getMaxItemUseDuration(), ItemStackUtil.snapshotOf(stack));
+                stack.getUseDuration(), stack.getUseDuration(), ItemStackUtil.snapshotOf(stack));
         if (SpongeImpl.postEvent(event)) {
             ci.cancel();
         } else {

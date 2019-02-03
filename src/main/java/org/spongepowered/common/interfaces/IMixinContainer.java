@@ -31,7 +31,6 @@ import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -65,8 +64,8 @@ public interface IMixinContainer extends IMixinInventory {
 
     List<SlotTransaction> getPreviewTransactions();
 
-    @Nullable Location<World> getOpenLocation();
-    void setOpenLocation(@Nullable Location<World> loc);
+    @Nullable Location getOpenLocation();
+    void setOpenLocation(@Nullable Location loc);
 
     void setInUse(boolean inUse);
     boolean isInUse();

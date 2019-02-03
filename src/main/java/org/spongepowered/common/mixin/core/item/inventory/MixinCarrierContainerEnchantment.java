@@ -43,8 +43,8 @@ public class MixinCarrierContainerEnchantment implements IMixinSingleBlockCarrie
     @Shadow @Final public BlockPos position;
 
     @Override
-    public Location<World> getLocation() {
-        return new Location<>(((World) this.world), new Vector3d(this.position.getX(), this.position.getY(), this.position.getZ()));
+    public Location getLocation() {
+        return new Location(((World) this.world), new Vector3d(this.position.getX(), this.position.getY(), this.position.getZ()));
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})

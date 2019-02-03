@@ -71,7 +71,7 @@ public abstract class MixinItemFishingRod extends Item {
         EntityFishHook fishHook = new EntityFishHook(world, player);
         Sponge.getCauseStackManager().pushCause(player);
         if (SpongeImpl.postEvent(SpongeEventFactory.createFishingEventStart(Sponge.getCauseStackManager().getCurrentCause(), (FishHook) fishHook))) {
-            fishHook.setDead(); // Bye
+            fishHook.remove(); // Bye
             cir.setReturnValue(new ActionResult<>(EnumActionResult.SUCCESS, player.getHeldItem(hand)));
         } else {
             this.fishHook = fishHook;

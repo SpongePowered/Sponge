@@ -25,13 +25,12 @@
 package org.spongepowered.common.mixin.core.block.properties;
 
 import net.minecraft.block.properties.IProperty;
-import net.minecraft.block.properties.PropertyHelper;
+import net.minecraft.state.AbstractProperty;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.block.trait.BlockTrait;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.interfaces.block.IMixinPropertyHolder;
 import org.spongepowered.common.registry.provider.BlockPropertyIdProvider;
-import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
 
 import java.util.Optional;
 
@@ -41,8 +40,8 @@ import java.util.Optional;
  *
  * @param <T> The type of comparable
  */
-@Mixin(value = PropertyHelper.class)
-public abstract class MixinPropertyHelper<T extends Comparable<T>> implements BlockTrait<T>, IMixinPropertyHolder {
+@Mixin(value = AbstractProperty.class)
+public abstract class MixinAbstractProperty<T extends Comparable<T>> implements BlockTrait<T>, IMixinPropertyHolder {
 
     private CatalogKey key;
 

@@ -82,7 +82,7 @@ public abstract class MixinEntityFireball extends MixinEntity implements Firebal
 
     @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/projectile/EntityFireball;onImpact(Lnet/minecraft/util/math/RayTraceResult;)V"))
     public void onProjectileImpact(EntityFireball projectile, RayTraceResult movingObjectPosition) {
-        if (this.world.isRemote || movingObjectPosition.typeOfHit == RayTraceResult.Type.MISS) {
+        if (this.world.isRemote || movingObjectPosition.type == RayTraceResult.Type.MISS) {
             this.onImpact(movingObjectPosition);
             return;
         }

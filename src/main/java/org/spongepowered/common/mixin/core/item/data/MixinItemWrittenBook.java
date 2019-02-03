@@ -44,7 +44,7 @@ public abstract class MixinItemWrittenBook extends MixinItem {
     @Override
     public void getManipulatorsFor(ItemStack itemStack, List<DataManipulator<?, ?>> list) {
         super.getManipulatorsFor(itemStack, list);
-        org.spongepowered.api.item.inventory.ItemStack spongeStack = (org.spongepowered.api.item.inventory.ItemStack) itemStack;
+        org.spongepowered.api.item.inventory.ItemStack spongeStack = (org.spongepowered.api.item.inventory.ItemStack) (Object) itemStack;
 
         spongeStack.get(AuthorData.class).ifPresent(list::add);
         spongeStack.get(PagedData.class).ifPresent(list::add);

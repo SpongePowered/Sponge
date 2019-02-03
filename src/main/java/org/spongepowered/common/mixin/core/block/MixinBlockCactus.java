@@ -63,7 +63,7 @@ public abstract class MixinBlockCactus extends MixinBlock {
             return entity.attackEntityFrom(source, damage);
         }
         try {
-            Location<World> location = new Location<>((World) world, pos.getX(), pos.getY(), pos.getZ());
+            Location location = new Location((World) world, pos.getX(), pos.getY(), pos.getZ());
             DamageSource.CACTUS = new MinecraftBlockDamageSource(CatalogKey.minecraft("cactus"), location);
             return entity.attackEntityFrom(DamageSource.CACTUS, damage);
         } finally {
@@ -85,7 +85,7 @@ public abstract class MixinBlockCactus extends MixinBlock {
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableGrowthData) {
             int growth = ((ImmutableGrowthData) manipulator).growthStage().get();
-            return Optional.of((BlockState) blockState.withProperty(BlockCactus.AGE, growth));
+            return Optional.of((BlockState) blockState.with(BlockCactus.AGE, growth));
         }
         return super.getStateWithData(blockState, manipulator);
     }
@@ -94,13 +94,13 @@ public abstract class MixinBlockCactus extends MixinBlock {
     public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends BaseValue<E>> key, E value) {
         if (key.equals(Keys.GROWTH_STAGE)) {
             int growth = (Integer) value;
-            return Optional.of((BlockState) blockState.withProperty(BlockCactus.AGE, growth));
+            return Optional.of((BlockState) blockState.with(BlockCactus.AGE, growth));
         }
         return super.getStateWithValue(blockState, key, value);
     }
 
     private ImmutableGrowthData getGrowthData(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.getValue(BlockCactus.AGE), 0, 15);
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.get(BlockCactus.AGE), 0, 15);
     }
 
 }

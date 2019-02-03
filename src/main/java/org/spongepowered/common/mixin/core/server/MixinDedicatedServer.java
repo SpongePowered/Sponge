@@ -58,7 +58,7 @@ public abstract class MixinDedicatedServer extends MinecraftServer implements Se
     @Shadow private boolean guiIsEnabled;
 
     public MixinDedicatedServer() {
-        super(null, null, null, null, null, null, null);
+        super(null, null, null, null, null, null, null, null);
     }
 
     @Override

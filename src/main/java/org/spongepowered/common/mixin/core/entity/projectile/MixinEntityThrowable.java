@@ -90,7 +90,7 @@ public abstract class MixinEntityThrowable extends MixinEntity implements Projec
 
     @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/projectile/EntityThrowable;onImpact(Lnet/minecraft/util/math/RayTraceResult;)V"))
     public void onProjectileImpact(EntityThrowable projectile, RayTraceResult movingObjectPosition) {
-        if (this.world.isRemote || movingObjectPosition.typeOfHit == RayTraceResult.Type.MISS) {
+        if (this.world.isRemote || movingObjectPosition.type == RayTraceResult.Type.MISS) {
             this.onImpact(movingObjectPosition);
             return;
         }

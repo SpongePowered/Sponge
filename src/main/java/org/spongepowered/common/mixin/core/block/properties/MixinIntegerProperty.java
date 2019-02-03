@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.block.properties;
 
-import net.minecraft.block.properties.PropertyInteger;
+import net.minecraft.state.IntegerProperty;
 import org.spongepowered.api.block.trait.IntegerTrait;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(value = PropertyInteger.class)
-public abstract class MixinPropertyInteger extends MixinPropertyHelper<Integer> implements IntegerTrait {
+@Mixin(value = IntegerProperty.class)
+public abstract class MixinIntegerProperty extends MixinAbstractProperty<Integer> implements IntegerTrait {
 
 }

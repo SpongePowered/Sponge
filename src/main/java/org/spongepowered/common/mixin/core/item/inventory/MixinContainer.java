@@ -114,7 +114,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     @Nullable private Slot lastSlotUsed = null;
     @Nullable private CraftItemEvent.Craft lastCraft = null;
     private boolean firePreview = true;
-    @Nullable private Location<org.spongepowered.api.world.World> lastOpenLocation;
+    @Nullable private Location lastOpenLocation;
     private boolean inUse = false;
 
     private boolean captureSuccess = false;
@@ -578,12 +578,12 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     }
 
     @Override
-    public Location<org.spongepowered.api.world.World> getOpenLocation() {
+    public Location getOpenLocation() {
         return this.lastOpenLocation;
     }
 
     @Override
-    public void setOpenLocation(Location<org.spongepowered.api.world.World> loc) {
+    public void setOpenLocation(Location loc) {
         this.lastOpenLocation = loc;
     }
 
