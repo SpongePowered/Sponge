@@ -33,6 +33,7 @@ import net.minecraft.entity.MultiPartEntityPart;
 import net.minecraft.entity.boss.EntityDragon;
 import net.minecraft.entity.boss.dragon.phase.IPhase;
 import net.minecraft.entity.boss.dragon.phase.PhaseHover;
+import net.minecraft.entity.boss.dragon.phase.PhaseManager;
 import net.minecraft.entity.item.EntityEnderCrystal;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.Vec3d;
@@ -43,6 +44,7 @@ import org.spongepowered.api.entity.EnderCrystal;
 import org.spongepowered.api.entity.living.complex.EnderDragon;
 import org.spongepowered.api.entity.living.complex.EnderDragonPart;
 import org.spongepowered.asm.lib.Opcodes;
+import org.spongepowered.api.entity.living.complex.dragon.phase.EnderDragonPhaseManager;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -63,6 +65,7 @@ public abstract class MixinEntityDragon extends MixinEntityLiving implements End
     @Shadow public MultiPartEntityPart[] dragonPartArray;
     @Shadow public EntityEnderCrystal healingEnderCrystal;
     @Final @Shadow private DragonFightManager fightManager;
+    @Shadow @Final private PhaseManager phaseManager;
 
     @Override
     public Set<EnderDragonPart> getParts() {
@@ -128,5 +131,10 @@ public abstract class MixinEntityDragon extends MixinEntityLiving implements End
     @Override
     public ServerBossBar getBossBar() {
         return (ServerBossBar) this.fightManager.bossInfo;
+    }
+
+    @Override
+    public EnderDragonPhaseManager getPhaseManager() {
+        return (EnderDragonPhaseManager) this.phaseManager;
     }
 }
