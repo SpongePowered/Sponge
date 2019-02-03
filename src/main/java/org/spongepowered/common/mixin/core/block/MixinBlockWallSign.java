@@ -46,7 +46,7 @@ import java.util.Optional;
 public abstract class MixinBlockWallSign extends MixinBlockSign {
 
     public ImmutableDirectionalData getDirectionalData(IBlockState blockState) {
-        final EnumFacing facing = blockState.getValue(BlockWallSign.FACING);
+        final EnumFacing facing = blockState.get(BlockWallSign.FACING);
         final Direction direction = DirectionResolver.getFor(facing);
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class, direction);
     }
@@ -61,7 +61,7 @@ public abstract class MixinBlockWallSign extends MixinBlockSign {
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction direction = ((ImmutableDirectionalData) manipulator).direction().get();
             final EnumFacing facing = DirectionResolver.getFor(direction);
-            return Optional.of((BlockState) blockState.withProperty(BlockWallSign.FACING, facing));
+            return Optional.of((BlockState) blockState.with(BlockWallSign.FACING, facing));
         }
         return super.getStateWithData(blockState, manipulator);
     }
@@ -71,7 +71,7 @@ public abstract class MixinBlockWallSign extends MixinBlockSign {
         if (key.equals(Keys.DIRECTION)) {
             final Direction direction = (Direction) value;
             final EnumFacing facing = DirectionResolver.getFor(direction);
-            return Optional.of((BlockState) blockState.withProperty(BlockWallSign.FACING, facing));
+            return Optional.of((BlockState) blockState.with(BlockWallSign.FACING, facing));
         }
         return super.getStateWithValue(blockState, key, value);
     }

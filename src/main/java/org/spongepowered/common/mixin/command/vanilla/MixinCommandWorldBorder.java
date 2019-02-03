@@ -25,9 +25,9 @@
 package org.spongepowered.common.mixin.command.vanilla;
 
 import net.minecraft.command.CommandWorldBorder;
-import net.minecraft.world.WorldProviderHell;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.border.WorldBorder;
+import net.minecraft.world.dimension.NetherDimension;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -46,7 +46,7 @@ public abstract class MixinCommandWorldBorder {
     @Redirect(method = "execute", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/border/WorldBorder;setCenter(DD)V"))
     private void onSetCenter(WorldBorder border, double x, double z) {
         for (WorldServer world : SpongeImpl.getServer().worlds) {
-            if (world.provider instanceof WorldProviderHell) {
+            if (world.dimension instanceof NetherDimension) {
                 // Unlike Vanilla, Sponge uses separate world borders per world.
                 // Because of that, Vanilla stores the world border center as overworld coordinates.
                 // We store the nether world border as nether coordinates, therefore we need to

@@ -66,10 +66,10 @@ public abstract class MixinBlockFenceGate extends MixinBlockHorizontal {
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableOpenData) {
             final boolean isOpen = ((ImmutableOpenData) manipulator).open().get();
-            return Optional.of((BlockState) blockState.withProperty(BlockFenceGate.OPEN, isOpen));
+            return Optional.of((BlockState) blockState.with(BlockFenceGate.OPEN, isOpen));
         }
         if (manipulator instanceof ImmutablePoweredData) {
-            return Optional.of((BlockState) blockState.withProperty(BlockFenceGate.POWERED, ((ImmutablePoweredData) manipulator).powered().get()));
+            return Optional.of((BlockState) blockState.with(BlockFenceGate.POWERED, ((ImmutablePoweredData) manipulator).powered().get()));
         }
         if (manipulator instanceof ImmutableInWallData) {
             return Optional.of((BlockState) blockState);
@@ -81,10 +81,10 @@ public abstract class MixinBlockFenceGate extends MixinBlockHorizontal {
     public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends BaseValue<E>> key, E value) {
         if (key.equals(Keys.OPEN)) {
             final boolean isOpen = (Boolean) value;
-            return Optional.of((BlockState) blockState.withProperty(BlockFenceGate.OPEN, isOpen));
+            return Optional.of((BlockState) blockState.with(BlockFenceGate.OPEN, isOpen));
         }
         if (key.equals(Keys.POWERED)) {
-            return Optional.of((BlockState) blockState.withProperty(BlockFenceGate.POWERED, (Boolean) value));
+            return Optional.of((BlockState) blockState.with(BlockFenceGate.POWERED, (Boolean) value));
         }
         if (key.equals(Keys.IN_WALL)) {
             return Optional.of((BlockState) blockState);
@@ -93,14 +93,14 @@ public abstract class MixinBlockFenceGate extends MixinBlockHorizontal {
     }
 
     private ImmutableOpenData getIsOpenFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeOpenData.class, blockState.getValue(BlockFenceGate.OPEN));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeOpenData.class, blockState.get(BlockFenceGate.OPEN));
     }
 
     private ImmutablePoweredData getIsPoweredFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class, blockState.getValue(BlockFenceGate.POWERED));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class, blockState.get(BlockFenceGate.POWERED));
     }
 
     private ImmutableInWallData getInWallFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeInWallData.class, blockState.getValue(BlockFenceGate.IN_WALL));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeInWallData.class, blockState.get(BlockFenceGate.IN_WALL));
     }
 }

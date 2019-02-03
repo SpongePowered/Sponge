@@ -59,7 +59,7 @@ public abstract class MixinBlockHay extends MixinBlock {
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableAxisData) {
             final Axis axis = ((ImmutableAxisData) manipulator).axis().get();
-            return Optional.of((BlockState) blockState.withProperty(BlockRotatedPillar.AXIS, DirectionChecker.convertAxisToMinecraft(axis)));
+            return Optional.of((BlockState) blockState.with(BlockRotatedPillar.AXIS, DirectionChecker.convertAxisToMinecraft(axis)));
         }
         return super.getStateWithData(blockState, manipulator);
     }
@@ -68,13 +68,13 @@ public abstract class MixinBlockHay extends MixinBlock {
     public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends BaseValue<E>> key, E value) {
         if (key.equals(Keys.AXIS)) {
             final Axis axis = (Axis) value;
-            return Optional.of((BlockState) blockState.withProperty(BlockRotatedPillar.AXIS, DirectionChecker.convertAxisToMinecraft(axis)));
+            return Optional.of((BlockState) blockState.with(BlockRotatedPillar.AXIS, DirectionChecker.convertAxisToMinecraft(axis)));
         }
         return super.getStateWithValue(blockState, key, value);
     }
 
     public ImmutableAxisData getAxisData(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeAxisData.class,
-                DirectionChecker.convertAxisToSponge(blockState.getValue(BlockRotatedPillar.AXIS)));
+                DirectionChecker.convertAxisToSponge(blockState.get(BlockRotatedPillar.AXIS)));
     }
 }

@@ -60,8 +60,6 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.WorldProvider;
-import net.minecraft.world.WorldProviderEnd;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.dimension.EndDimension;
 import org.spongepowered.api.Sponge;
@@ -954,9 +952,9 @@ public final class EntityUtil {
 
     private static void adjustEntityPostionForTeleport(IMixinPlayerList playerList, Entity entity, WorldServer fromWorld, WorldServer toWorld) {
         fromWorld.profiler.startSection("moving");
-        net.minecraft.world.dimension.Dimension pOld = fromWorld.dimension;
-        net.minecraft.world.dimension.Dimension pNew = toWorld.dimension;
-        double moveFactor = playerList.getMovementFactor(pOld) / playerList.getMovementFactor(pNew);
+        net.minecraft.world.dimension.Dimension dOld = fromWorld.dimension;
+        net.minecraft.world.dimension.Dimension dNew = toWorld.dimension;
+        double moveFactor = playerList.getMovementFactor(dOld) / playerList.getMovementFactor(dNew);
         double x = entity.posX * moveFactor;
         double y = entity.posY;
         double z = entity.posZ * moveFactor;
@@ -967,10 +965,10 @@ public final class EntityUtil {
 //            entityIn.setLocationAndAngles(x, entityIn.posY, z, entityIn.rotationYaw, entityIn.rotationPitch);
 //        }
 
-        if (pNew instanceof WorldProviderEnd) {
+        if (dNew instanceof EndDimension) {
             BlockPos blockpos;
 
-            if (pOld instanceof EndDimension) {
+            if (dOld instanceof EndDimension) {
                 blockpos = toWorld.getSpawnPoint();
             } else {
                 blockpos = toWorld.getSpawnCoordinate();
@@ -982,7 +980,7 @@ public final class EntityUtil {
             entity.setLocationAndAngles(x, y, z, 90.0F, 0.0F);
         }
 
-        if (!(pOld instanceof WorldProviderEnd)) {
+        if (!(dOld instanceof EndDimension)) {
             fromWorld.profiler.startSection("placing");
             x = MathHelper.clamp((int)x, -29999872, 29999872);
             z = MathHelper.clamp((int)z, -29999872, 29999872);

@@ -62,12 +62,12 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.Teleporter;
-import net.minecraft.world.WorldProvider;
-import net.minecraft.world.WorldProviderEnd;
-import net.minecraft.world.WorldProviderHell;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
+import net.minecraft.world.dimension.Dimension;
+import net.minecraft.world.dimension.EndDimension;
+import net.minecraft.world.dimension.NetherDimension;
 import net.minecraft.world.storage.IPlayerFileData;
 import net.minecraft.world.storage.WorldInfo;
 import org.apache.logging.log4j.Logger;
@@ -658,9 +658,9 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
     @Override
     public void prepareEntityForPortal(Entity entityIn, WorldServer oldWorldIn, WorldServer toWorldIn) {
         oldWorldIn.profiler.startSection("moving");
-        WorldProvider pOld = oldWorldIn.provider;
-        WorldProvider pNew = toWorldIn.provider;
-        double moveFactor = getMovementFactor(pOld) / getMovementFactor(pNew);
+        Dimension dOld = oldWorldIn.dimension;
+        Dimension dNew = toWorldIn.dimension;
+        double moveFactor = getMovementFactor(dOld) / getMovementFactor(dNew);
         double x = entityIn.posX * moveFactor;
         double y = entityIn.posY;
         double z = entityIn.posZ * moveFactor;
@@ -671,10 +671,10 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
 //            entityIn.setLocationAndAngles(x, entityIn.posY, z, entityIn.rotationYaw, entityIn.rotationPitch);
 //        }
 
-        if (pNew instanceof WorldProviderEnd) {
+        if (dNew instanceof EndDimension) {
             BlockPos blockpos;
 
-            if (pOld instanceof WorldProviderEnd) {
+            if (dOld instanceof EndDimension) {
                 blockpos = toWorldIn.getSpawnPoint();
             } else {
                 blockpos = toWorldIn.getSpawnCoordinate();
@@ -686,19 +686,19 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
             entityIn.setLocationAndAngles(x, y, z, 90.0F, 0.0F);
         }
 
-        if (!(pOld instanceof WorldProviderEnd)) {
+        if (!(dOld instanceof EndDimension)) {
             oldWorldIn.profiler.startSection("placing");
             x = MathHelper.clamp((int)x, -29999872, 29999872);
             z = MathHelper.clamp((int)z, -29999872, 29999872);
 
-            if (entityIn.isEntityAlive()) {
+            if (entityIn.isAlive()) {
                 entityIn.setLocationAndAngles(x, y, z, entityIn.rotationYaw, entityIn.rotationPitch);
             }
             oldWorldIn.profiler.endSection();
         }
 
-        if (entityIn.isEntityAlive()) {
-            oldWorldIn.updateEntityWithOptionalForce(entityIn, false);
+        if (entityIn.isAlive()) {
+            oldWorldIn.tickEntity(entityIn, false);
         }
 
         oldWorldIn.profiler.endSection();
@@ -736,14 +736,14 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
 
         entityIn.setLocationAndAngles(event.getToTransform().getPosition().getX(), event.getToTransform().getPosition().getY(), event.getToTransform().getPosition().getZ(), (float) event.getToTransform().getYaw(), (float) event.getToTransform().getPitch());
         toWorld.spawnEntity(entityIn);
-        toWorld.updateEntityWithOptionalForce(entityIn, false);
+        toWorld.tickEntity(entityIn, false);
         entityIn.setWorld(toWorld);
     }
 
     // forge utility method
     @Override
-    public double getMovementFactor(WorldProvider provider) {
-        if (provider instanceof WorldProviderHell) {
+    public double getMovementFactor(Dimension dimension) {
+        if (dimension instanceof NetherDimension) {
             return 8.0;
         }
         return 1.0;
@@ -767,7 +767,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
     @Redirect(method = "updateTimeAndWeatherForPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/NetHandlerPlayServer;sendPacket"
             + "(Lnet/minecraft/network/Packet;)V", ordinal = 0))
     public void onWorldBorderInitializePacket(NetHandlerPlayServer invoker, Packet<?> packet, EntityPlayerMP playerMP, WorldServer worldServer) {
-        if (worldServer.provider instanceof WorldProviderHell) {
+        if (worldServer.dimension instanceof NetherDimension) {
             ((IMixinSPacketWorldBorder) packet).netherifyCenterCoordinates();
         }
 

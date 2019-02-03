@@ -26,7 +26,7 @@ package org.spongepowered.common.interfaces.world;
 
 import net.minecraft.world.border.WorldBorder;
 
-public interface IMixinWorldProvider {
+public interface IMixinDimension {
 
     WorldBorder createServerWorldBorder();
 

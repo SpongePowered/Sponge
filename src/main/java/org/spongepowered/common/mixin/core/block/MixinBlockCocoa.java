@@ -62,7 +62,7 @@ public abstract class MixinBlockCocoa extends MixinBlockHorizontal {
             if (growth > 2) {
                 growth = 2;
             }
-            return Optional.of((BlockState) blockState.withProperty(BlockCocoa.AGE, growth));
+            return Optional.of((BlockState) blockState.with(BlockCocoa.AGE, growth));
         }
         return super.getStateWithData(blockState, manipulator);
     }
@@ -74,13 +74,13 @@ public abstract class MixinBlockCocoa extends MixinBlockHorizontal {
             if (growth > 2) {
                 growth = 2;
             }
-            return Optional.of((BlockState) blockState.withProperty(BlockCocoa.AGE, growth));
+            return Optional.of((BlockState) blockState.with(BlockCocoa.AGE, growth));
         }
         return super.getStateWithValue(blockState, key, value);
     }
 
     private ImmutableGrowthData getGrowthData(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.getValue(BlockCocoa.AGE), 0, 2);
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.get(BlockCocoa.AGE), 0, 2);
     }
 
 }

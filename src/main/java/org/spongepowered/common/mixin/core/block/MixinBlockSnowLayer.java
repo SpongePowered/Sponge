@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.BlockSnow;
+import net.minecraft.block.BlockSnowLayer;
 import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
@@ -39,8 +39,8 @@ import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSponge
 
 import java.util.Optional;
 
-@Mixin(BlockSnow.class)
-public abstract class MixinBlockSnow extends MixinBlock {
+@Mixin(BlockSnowLayer.class)
+public abstract class MixinBlockSnowLayer extends MixinBlock {
 
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
@@ -59,7 +59,7 @@ public abstract class MixinBlockSnow extends MixinBlock {
             if (layers < 1) {
                 layers = 1;
             }
-            return Optional.of((BlockState) blockState.withProperty(BlockSnow.LAYERS, layers));
+            return Optional.of((BlockState) blockState.with(BlockSnowLayer.LAYERS, layers));
         }
         return super.getStateWithData(blockState, manipulator);
     }
@@ -71,13 +71,13 @@ public abstract class MixinBlockSnow extends MixinBlock {
             if (layers < 1) {
                 layers = 1;
             }
-            return Optional.of((BlockState) blockState.withProperty(BlockSnow.LAYERS, layers));
+            return Optional.of((BlockState) blockState.with(BlockSnowLayer.LAYERS, layers));
         }
         return super.getStateWithValue(blockState, key, value);
     }
 
     private ImmutableLayeredData getLayerData(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeLayeredData.class, blockState.getValue(BlockSnow.LAYERS), 1, 8);
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeLayeredData.class, blockState.get(BlockSnowLayer.LAYERS), 1, 8);
     }
 
 }

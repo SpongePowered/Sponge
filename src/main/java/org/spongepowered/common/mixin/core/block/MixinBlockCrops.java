@@ -26,8 +26,8 @@ package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockCrops;
-import net.minecraft.block.properties.PropertyInteger;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.state.IntegerProperty;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -44,7 +44,7 @@ import java.util.Optional;
 @Mixin(BlockCrops.class)
 public abstract class MixinBlockCrops extends MixinBlock {
 
-    @Shadow protected abstract PropertyInteger getAgeProperty();
+    @Shadow protected abstract IntegerProperty getAgeProperty();
     @Shadow public abstract int getMaxAge();
 
     @Override
@@ -64,7 +64,7 @@ public abstract class MixinBlockCrops extends MixinBlock {
             if (growth > getMaxAge()) {
                 growth = getMaxAge();
             }
-            return Optional.of((BlockState) blockState.withProperty(getAgeProperty(), growth));
+            return Optional.of((BlockState) blockState.with(getAgeProperty(), growth));
         }
         return super.getStateWithData(blockState, manipulator);
     }
@@ -76,13 +76,13 @@ public abstract class MixinBlockCrops extends MixinBlock {
             if (growth > getMaxAge()) {
                 growth = getMaxAge();
             }
-            return Optional.of((BlockState) blockState.withProperty(getAgeProperty(), growth));
+            return Optional.of((BlockState) blockState.with(getAgeProperty(), growth));
         }
         return super.getStateWithValue(blockState, key, value);
     }
 
     private ImmutableGrowthData getGrowthData(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.getValue(getAgeProperty()), 0, getMaxAge());
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.get(getAgeProperty()), 0, getMaxAge());
     }
 
 }

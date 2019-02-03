@@ -73,7 +73,7 @@ public abstract class MixinBlockFarmland extends MixinBlock {
             if (moisture > 7) {
                 moisture = 7;
             }
-            return Optional.of((BlockState) blockState.withProperty(BlockFarmland.MOISTURE, moisture));
+            return Optional.of((BlockState) blockState.with(BlockFarmland.MOISTURE, moisture));
         }
         return super.getStateWithData(blockState, manipulator);
     }
@@ -85,13 +85,13 @@ public abstract class MixinBlockFarmland extends MixinBlock {
             if (moisture > 7) {
                 moisture = 7;
             }
-            return Optional.of((BlockState) blockState.withProperty(BlockFarmland.MOISTURE, moisture));
+            return Optional.of((BlockState) blockState.with(BlockFarmland.MOISTURE, moisture));
         }
         return super.getStateWithValue(blockState, key, value);
     }
 
     private ImmutableMoistureData getMoistureData(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeMoistureData.class, blockState.getValue(BlockFarmland.MOISTURE), 0, 7);
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeMoistureData.class, blockState.get(BlockFarmland.MOISTURE), 0, 7);
     }
 
     @Inject(method = "onFallenUpon", at = @At(value = "HEAD"))

@@ -68,13 +68,13 @@ public abstract class MixinBlockTripWire extends MixinBlock {
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableDisarmedData) {
             final boolean disarmed = ((ImmutableDisarmedData) manipulator).disarmed().get();
-            return Optional.of((BlockState) blockState.withProperty(BlockTripWire.DISARMED, disarmed));
+            return Optional.of((BlockState) blockState.with(BlockTripWire.DISARMED, disarmed));
         }
         if (manipulator instanceof ImmutableAttachedData) {
             return Optional.of((BlockState) blockState);
         }
         if (manipulator instanceof ImmutablePoweredData) {
-            return Optional.of((BlockState) blockState.withProperty(BlockTripWire.POWERED, ((ImmutablePoweredData) manipulator).powered().get()));
+            return Optional.of((BlockState) blockState.with(BlockTripWire.POWERED, ((ImmutablePoweredData) manipulator).powered().get()));
         }
         if (manipulator instanceof ImmutableConnectedDirectionData) {
             return Optional.of((BlockState) blockState);
@@ -86,7 +86,7 @@ public abstract class MixinBlockTripWire extends MixinBlock {
     public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends BaseValue<E>> key, E value) {
         if (key.equals(Keys.DISARMED)) {
             final boolean disarmed = (Boolean) value;
-            return Optional.of((BlockState) blockState.withProperty(BlockTripWire.DISARMED, disarmed));
+            return Optional.of((BlockState) blockState.with(BlockTripWire.DISARMED, disarmed));
         }
         if (key.equals(Keys.SUSPENDED)) {
             return Optional.of((BlockState) blockState);
@@ -95,7 +95,7 @@ public abstract class MixinBlockTripWire extends MixinBlock {
             return Optional.of((BlockState) blockState);
         }
         if (key.equals(Keys.POWERED)) {
-            return Optional.of((BlockState) blockState.withProperty(BlockTripWire.POWERED, (Boolean) value));
+            return Optional.of((BlockState) blockState.with(BlockTripWire.POWERED, (Boolean) value));
         }
         if (key.equals(Keys.CONNECTED_DIRECTIONS) || key.equals(Keys.CONNECTED_EAST) || key.equals(Keys.CONNECTED_NORTH)
                 || key.equals(Keys.CONNECTED_SOUTH) || key.equals(Keys.CONNECTED_WEST)) {
@@ -105,23 +105,23 @@ public abstract class MixinBlockTripWire extends MixinBlock {
     }
 
     private ImmutableDisarmedData getIsDisarmedFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDisarmedData.class, blockState.getValue(BlockTripWire.DISARMED));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDisarmedData.class, blockState.get(BlockTripWire.DISARMED));
     }
 
     private ImmutableAttachedData getIsAttachedFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeAttachedData.class, blockState.getValue(BlockTripWire.ATTACHED));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeAttachedData.class, blockState.get(BlockTripWire.ATTACHED));
     }
 
     private ImmutablePoweredData getIsPoweredFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class, blockState.getValue(BlockTripWire.POWERED));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class, blockState.get(BlockTripWire.POWERED));
     }
 
     private ImmutableConnectedDirectionData getConnectedDirectionData(IBlockState blockState) {
         final Set<Direction> directions = new HashSet<>();
-        final Boolean north = blockState.getValue(BlockTripWire.NORTH);
-        final Boolean east = blockState.getValue(BlockTripWire.EAST);
-        final Boolean west = blockState.getValue(BlockTripWire.WEST);
-        final Boolean south = blockState.getValue(BlockTripWire.SOUTH);
+        final Boolean north = blockState.get(BlockTripWire.NORTH);
+        final Boolean east = blockState.get(BlockTripWire.EAST);
+        final Boolean west = blockState.get(BlockTripWire.WEST);
+        final Boolean south = blockState.get(BlockTripWire.SOUTH);
         if (north) {
             directions.add(Direction.NORTH);
         }

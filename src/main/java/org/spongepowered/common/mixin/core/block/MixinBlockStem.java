@@ -64,11 +64,11 @@ public abstract class MixinBlockStem extends MixinBlock {
             if (growth > 7) {
                 growth = 7;
             }
-            return Optional.of((BlockState) blockState.withProperty(BlockStem.AGE, growth));
+            return Optional.of((BlockState) blockState.with(BlockStem.AGE, growth));
         }
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction dir = DirectionChecker.checkDirectionNotDown(((ImmutableDirectionalData) manipulator).direction().get());
-            return Optional.of((BlockState) blockState.withProperty(BlockStem.FACING, DirectionResolver.getFor(dir)));
+            return Optional.of((BlockState) blockState.with(BlockStem.FACING, DirectionResolver.getFor(dir)));
         }
         return super.getStateWithData(blockState, manipulator);
     }
@@ -80,11 +80,11 @@ public abstract class MixinBlockStem extends MixinBlock {
             if (growth > 7) {
                 growth = 7;
             }
-            return Optional.of((BlockState) blockState.withProperty(BlockStem.AGE, growth));
+            return Optional.of((BlockState) blockState.with(BlockStem.AGE, growth));
         }
         if (key.equals(Keys.DIRECTION)) {
             final Direction dir = DirectionChecker.checkDirectionNotDown((Direction) value);
-            return Optional.of((BlockState) blockState.withProperty(BlockStem.FACING, DirectionResolver.getFor(dir)));
+            return Optional.of((BlockState) blockState.with(BlockStem.FACING, DirectionResolver.getFor(dir)));
         }
         return super.getStateWithValue(blockState, key, value);
     }
@@ -95,7 +95,7 @@ public abstract class MixinBlockStem extends MixinBlock {
 
     private ImmutableDirectionalData getDirectionalData(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                DirectionResolver.getFor(blockState.getValue(BlockStem.FACING)));
+                DirectionResolver.getFor(blockState.get(BlockStem.FACING)));
     }
 
 }

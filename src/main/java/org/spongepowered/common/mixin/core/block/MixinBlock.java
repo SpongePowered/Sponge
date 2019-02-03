@@ -55,7 +55,6 @@ import org.spongepowered.api.block.BlockSoundGroup;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.block.trait.BlockTrait;
 import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
@@ -68,6 +67,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.api.state.StateProperty;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.BlockChangeFlags;
@@ -278,12 +278,12 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     }
 
     @Override
-    public Collection<BlockTrait<?>> getTraits() {
+    public Collection<StateProperty<?>> getTraits() {
         return getDefaultBlockState().getTraits();
     }
 
     @Override
-    public Optional<BlockTrait<?>> getTrait(String blockTrait) {
+    public Optional<StateProperty<?>> getTrait(String blockTrait) {
         return getDefaultBlockState().getTrait(blockTrait);
     }
 

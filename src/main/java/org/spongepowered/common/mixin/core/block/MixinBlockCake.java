@@ -59,7 +59,7 @@ public abstract class MixinBlockCake extends MixinBlock {
             if (layers > 6) {
                 layers = 6;
             }
-            return Optional.of((BlockState) blockState.withProperty(BlockCake.BITES, layers));
+            return Optional.of((BlockState) blockState.with(BlockCake.BITES, layers));
         }
         return super.getStateWithData(blockState, manipulator);
     }
@@ -71,13 +71,13 @@ public abstract class MixinBlockCake extends MixinBlock {
             if (layers > 6) {
                 layers = 6;
             }
-            return Optional.of((BlockState) blockState.withProperty(BlockCake.BITES, layers));
+            return Optional.of((BlockState) blockState.with(BlockCake.BITES, layers));
         }
         return super.getStateWithValue(blockState, key, value);
     }
 
     private ImmutableLayeredData getLayerData(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeLayeredData.class, blockState.getValue(BlockCake.BITES), 0, 6);
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeLayeredData.class, blockState.get(BlockCake.BITES), 0, 6);
     }
 
 }

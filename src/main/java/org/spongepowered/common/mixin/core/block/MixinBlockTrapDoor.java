@@ -67,15 +67,15 @@ public abstract class MixinBlockTrapDoor extends MixinBlock {
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutablePortionData) {
             final PortionType portionType = ((ImmutablePortionData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.withProperty(BlockTrapDoor.HALF, convertType((BlockSlab.EnumBlockHalf) (Object) portionType)));
+            return Optional.of((BlockState) blockState.with(BlockTrapDoor.HALF, convertType((BlockSlab.EnumBlockHalf) (Object) portionType)));
         }
         if (manipulator instanceof ImmutableOpenData) {
             final boolean isOpen = ((ImmutableOpenData) manipulator).open().get();
-            return Optional.of((BlockState) blockState.withProperty(BlockTrapDoor.OPEN, isOpen));
+            return Optional.of((BlockState) blockState.with(BlockTrapDoor.OPEN, isOpen));
         }
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction dir = DirectionChecker.checkDirectionToHorizontal(((ImmutableDirectionalData) manipulator).direction().get());
-            return Optional.of((BlockState) blockState.withProperty(BlockTrapDoor.FACING, DirectionResolver.getFor(dir)));
+            return Optional.of((BlockState) blockState.with(BlockTrapDoor.FACING, DirectionResolver.getFor(dir)));
         }
         return super.getStateWithData(blockState, manipulator);
     }
@@ -83,31 +83,31 @@ public abstract class MixinBlockTrapDoor extends MixinBlock {
     @Override
     public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends BaseValue<E>> key, E value) {
         if (key.equals(Keys.PORTION_TYPE)) {
-            return Optional.of((BlockState) blockState.withProperty(BlockTrapDoor.HALF, convertType((BlockSlab.EnumBlockHalf) value)));
+            return Optional.of((BlockState) blockState.with(BlockTrapDoor.HALF, convertType((BlockSlab.EnumBlockHalf) value)));
         }
         if (key.equals(Keys.OPEN)) {
             final boolean isOpen = (Boolean) value;
-            return Optional.of((BlockState) blockState.withProperty(BlockTrapDoor.OPEN, isOpen));
+            return Optional.of((BlockState) blockState.with(BlockTrapDoor.OPEN, isOpen));
         }
         if (key.equals(Keys.DIRECTION)) {
             final Direction dir = DirectionChecker.checkDirectionToHorizontal((Direction) value);
-            return Optional.of((BlockState) blockState.withProperty(BlockTrapDoor.FACING, DirectionResolver.getFor(dir)));
+            return Optional.of((BlockState) blockState.with(BlockTrapDoor.FACING, DirectionResolver.getFor(dir)));
         }
         return super.getStateWithValue(blockState, key, value);
     }
 
     private ImmutablePortionData getPortionTypeFor(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePortionData.class,
-                convertType(blockState.getValue(BlockTrapDoor.HALF)));
+                convertType(blockState.get(BlockTrapDoor.HALF)));
     }
 
     private ImmutableOpenData getIsOpenFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeOpenData.class, blockState.getValue(BlockTrapDoor.OPEN));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeOpenData.class, blockState.get(BlockTrapDoor.OPEN));
     }
 
     private ImmutableDirectionalData getDirectionalData(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                DirectionResolver.getFor(blockState.getValue(BlockTrapDoor.FACING)));
+                DirectionResolver.getFor(blockState.get(BlockTrapDoor.FACING)));
     }
 
     private PortionType convertType(BlockTrapDoor.DoorHalf type) {

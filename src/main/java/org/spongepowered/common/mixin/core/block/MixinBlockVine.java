@@ -74,11 +74,11 @@ public abstract class MixinBlockVine extends MixinBlock {
 
     private ImmutableConnectedDirectionData getConnectedDirectionData(IBlockState blockState) {
         final Set<Direction> directions = new HashSet<>();
-        final Boolean north = blockState.getValue(BlockVine.NORTH);
-        final Boolean east = blockState.getValue(BlockVine.EAST);
-        final Boolean west = blockState.getValue(BlockVine.WEST);
-        final Boolean south = blockState.getValue(BlockVine.SOUTH);
-        final Boolean up = blockState.getValue(BlockVine.UP);
+        final Boolean north = blockState.get(BlockVine.NORTH);
+        final Boolean east = blockState.get(BlockVine.EAST);
+        final Boolean west = blockState.get(BlockVine.WEST);
+        final Boolean south = blockState.get(BlockVine.SOUTH);
+        final Boolean up = blockState.get(BlockVine.UP);
         if (north) {
             directions.add(Direction.NORTH);
         }

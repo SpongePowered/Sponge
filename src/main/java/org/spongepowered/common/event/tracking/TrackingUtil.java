@@ -41,9 +41,9 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.dimension.Dimension;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -316,11 +316,11 @@ public final class TrackingUtil {
     }
 
 
-    public static void tickWorldProvider(IMixinWorldServer worldServer) {
-        final WorldProvider worldProvider = ((WorldServer) worldServer).provider;
-        try (DimensionContext context = TickPhase.Tick.DIMENSION.createPhaseContext().source(worldProvider)) {
+    public static void tickDimension(IMixinWorldServer worldServer) {
+        final Dimension dimension = ((WorldServer) worldServer).dimension;
+        try (DimensionContext context = TickPhase.Tick.DIMENSION.createPhaseContext().source(dimension)) {
             context.buildAndSwitch();
-            worldProvider.onWorldUpdateEntities();
+            dimension.tick();
         }
     }
 

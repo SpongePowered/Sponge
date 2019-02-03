@@ -26,12 +26,12 @@ package org.spongepowered.common.interfaces;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.dimension.Dimension;
 
 public interface IMixinPlayerList {
 
-    double getMovementFactor(WorldProvider worldProvider);
+    double getMovementFactor(Dimension dimension);
 
     void prepareEntityForPortal(Entity entityIn, WorldServer oldWorldIn, WorldServer toWorldIn);
 

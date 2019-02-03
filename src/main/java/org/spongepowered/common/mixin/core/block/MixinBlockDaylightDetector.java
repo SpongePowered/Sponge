@@ -69,6 +69,6 @@ public abstract class MixinBlockDaylightDetector extends MixinBlock {
     }
 
     private ImmutableRedstonePoweredData getPowerFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRedstonePoweredData.class, blockState.getValue(BlockDaylightDetector.POWER));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRedstonePoweredData.class, blockState.get(BlockDaylightDetector.POWER));
     }
 }

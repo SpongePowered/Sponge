@@ -61,14 +61,12 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.DifficultyInstance;
-import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.EnumLightType;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.GameType;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.IWorldEventListener;
-import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
@@ -139,7 +137,7 @@ import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
-import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
+import org.spongepowered.common.interfaces.world.IMixinDimension;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.mixin.tileentityactivation.MixinWorldServer_TileEntityActivation;
@@ -193,7 +191,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     // @formatter:off
     @Shadow @Final public boolean isRemote;
-    @Shadow @Final public WorldProvider provider;
+    @Shadow @Final public net.minecraft.world.dimension.Dimension dimension;
     @Shadow @Final public Random rand;
     @Shadow @Final public Profiler profiler;
     @Shadow @Final public List<EntityPlayer> playerEntities;
@@ -301,16 +299,16 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Inject(method = "<init>", at = @At(value = "RETURN"))
     public void onInit(CallbackInfo ci) {
-        this.spongeDimensionWrapper = new SpongeDimension(this.provider);
+        this.spongeDimensionWrapper = new SpongeDimension(this.dimension);
     }
 
-    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldProvider;"
+    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/dimension/Dimension;"
                                                                      + "createWorldBorder()Lnet/minecraft/world/border/WorldBorder;"))
-    private net.minecraft.world.border.WorldBorder onCreateWorldBorder(WorldProvider provider) {
+    private net.minecraft.world.border.WorldBorder onCreateWorldBorder(net.minecraft.world.dimension.Dimension dimension) {
         if (this.isFake()) {
-            return provider.createWorldBorder();
+            return dimension.createWorldBorder();
         }
-        return ((IMixinWorldProvider) provider).createServerWorldBorder();
+        return ((IMixinDimension) dimension).createServerWorldBorder();
     }
 
     @SuppressWarnings("rawtypes")

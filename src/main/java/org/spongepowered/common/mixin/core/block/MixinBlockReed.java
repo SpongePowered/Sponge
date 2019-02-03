@@ -56,7 +56,7 @@ public abstract class MixinBlockReed extends MixinBlock {
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableGrowthData) {
             int growth = ((ImmutableGrowthData) manipulator).growthStage().get();
-            return Optional.of((BlockState) blockState.withProperty(BlockReed.AGE, growth));
+            return Optional.of((BlockState) blockState.with(BlockReed.AGE, growth));
         }
         return super.getStateWithData(blockState, manipulator);
     }
@@ -65,13 +65,13 @@ public abstract class MixinBlockReed extends MixinBlock {
     public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends BaseValue<E>> key, E value) {
         if (key.equals(Keys.GROWTH_STAGE)) {
             int growth = (Integer) value;
-            return Optional.of((BlockState) blockState.withProperty(BlockReed.AGE, growth));
+            return Optional.of((BlockState) blockState.with(BlockReed.AGE, growth));
         }
         return super.getStateWithValue(blockState, key, value);
     }
 
     private ImmutableGrowthData getGrowthData(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.getValue(BlockReed.AGE), 0, 15);
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.get(BlockReed.AGE), 0, 15);
     }
 
 }

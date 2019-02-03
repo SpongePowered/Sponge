@@ -55,7 +55,7 @@ public abstract class MixinBlockHorizontal extends MixinBlock {
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction direction = ((ImmutableDirectionalData) manipulator).direction().get();
             final EnumFacing facing = DirectionResolver.getFor(direction);
-            return Optional.of((BlockState) blockState.withProperty(BlockHorizontal.FACING, facing));
+            return Optional.of((BlockState) blockState.with(BlockHorizontal.HORIZONTAL_FACING, facing));
         }
         return super.getStateWithData(blockState, manipulator);
     }
@@ -65,7 +65,7 @@ public abstract class MixinBlockHorizontal extends MixinBlock {
         if (key.equals(Keys.DIRECTION)) {
             final Direction direction = (Direction) value;
             final EnumFacing facing = DirectionResolver.getFor(direction);
-            return Optional.of((BlockState) blockState.withProperty(BlockHorizontal.FACING, facing));
+            return Optional.of((BlockState) blockState.with(BlockHorizontal.HORIZONTAL_FACING, facing));
         }
         return super.getStateWithValue(blockState, key, value);
     }
@@ -74,7 +74,7 @@ public abstract class MixinBlockHorizontal extends MixinBlock {
     public List<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>builder()
                 .addAll(super.getManipulators(blockState))
-                .add(new ImmutableSpongeDirectionalData(DirectionResolver.getFor(blockState.getValue(BlockHorizontal.FACING))))
+                .add(new ImmutableSpongeDirectionalData(DirectionResolver.getFor(blockState.get(BlockHorizontal.HORIZONTAL_FACING))))
                 .build();
     }
 }

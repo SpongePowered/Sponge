@@ -38,12 +38,12 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
-import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
+import org.spongepowered.common.interfaces.world.IMixinDimension;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 @NonnullByDefault
 @Mixin(WorldProvider.class)
-public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvider {
+public abstract class MixinWorldProvider implements Dimension, IMixinDimension {
 
     @Shadow public WorldType terrainType;
     @Shadow protected World world;

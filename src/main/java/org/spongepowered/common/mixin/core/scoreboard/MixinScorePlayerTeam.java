@@ -70,11 +70,6 @@ public abstract class MixinScorePlayerTeam extends net.minecraft.scoreboard.Team
 
     @Shadow public abstract void setAllowFriendlyFire(boolean friendlyFire);
 
-//    private Text spongeDisplayName;
-//    private Text spongePrefix;
-//    private Text spongeSuffix;
-//    private TextColor spongeColor;
-
     private static final String TEAM_UPDATE_SIGNATURE = "Lnet/minecraft/scoreboard/Scoreboard;broadcastTeamInfoUpdate(Lnet/minecraft/scoreboard/ScorePlayerTeam;)V";
 
     // Minecraft doesn't do a null check on scoreboard, so we redirect

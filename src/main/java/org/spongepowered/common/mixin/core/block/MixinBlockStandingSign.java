@@ -44,7 +44,7 @@ import java.util.Optional;
 public abstract class MixinBlockStandingSign extends MixinBlockSign {
 
     public ImmutableDirectionalData getDirectionalData(IBlockState blockState) {
-        final int intDir = blockState.getValue(BlockStandingSign.ROTATION);
+        final int intDir = blockState.get(BlockStandingSign.ROTATION);
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class, Direction.values()[(intDir + 8) % 16]);
     }
 
@@ -58,7 +58,7 @@ public abstract class MixinBlockStandingSign extends MixinBlockSign {
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction direction = ((ImmutableDirectionalData) manipulator).direction().get();
             final int intDirection = (direction.ordinal() + 8) % 16;
-            return Optional.of((BlockState) blockState.withProperty(BlockStandingSign.ROTATION, intDirection));
+            return Optional.of((BlockState) blockState.with(BlockStandingSign.ROTATION, intDirection));
         }
         return super.getStateWithData(blockState, manipulator);
     }
@@ -68,7 +68,7 @@ public abstract class MixinBlockStandingSign extends MixinBlockSign {
         if (key.equals(Keys.DIRECTION)) {
             final Direction direction = (Direction) value;
             final int intDirection = (direction.ordinal() + 8) % 16;
-            return Optional.of((BlockState) blockState.withProperty(BlockStandingSign.ROTATION, intDirection));
+            return Optional.of((BlockState) blockState.with(BlockStandingSign.ROTATION, intDirection));
         }
         return super.getStateWithValue(blockState, key, value);
     }

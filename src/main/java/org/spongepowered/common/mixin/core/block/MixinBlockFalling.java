@@ -60,7 +60,7 @@ public class MixinBlockFalling {
                 try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                     frame.pushCause(snapshot);
                     frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.FALLING_BLOCK);
-                    Transform<org.spongepowered.api.world.World> worldTransform = new Transform<>((org.spongepowered.api.world.World) world, position);
+                    Transform worldTransform = new Transform((org.spongepowered.api.world.World) world, position);
                     ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(),
                             fallingBlock, worldTransform);
                     SpongeImpl.postEvent(event);

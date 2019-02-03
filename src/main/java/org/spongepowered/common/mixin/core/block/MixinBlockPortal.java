@@ -61,7 +61,7 @@ public abstract class MixinBlockPortal extends MixinBlock {
             if (axis == Axis.Y) {
                 return Optional.of((BlockState) blockState);
             }
-            return Optional.of((BlockState) blockState.withProperty(BlockPortal.AXIS, DirectionChecker.convertAxisToMinecraft(axis)));
+            return Optional.of((BlockState) blockState.with(BlockPortal.AXIS, DirectionChecker.convertAxisToMinecraft(axis)));
         }
         return super.getStateWithData(blockState, manipulator);
     }
@@ -73,13 +73,13 @@ public abstract class MixinBlockPortal extends MixinBlock {
             if (axis == Axis.Y) {
                 return Optional.of((BlockState) blockState);
             }
-            return Optional.of((BlockState) blockState.withProperty(BlockPortal.AXIS, DirectionChecker.convertAxisToMinecraft(axis)));
+            return Optional.of((BlockState) blockState.with(BlockPortal.AXIS, DirectionChecker.convertAxisToMinecraft(axis)));
         }
         return super.getStateWithValue(blockState, key, value);
     }
 
     public ImmutableAxisData getAxisData(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeAxisData.class,
-                DirectionChecker.convertAxisToSponge(blockState.getValue(BlockPortal.AXIS)));
+                DirectionChecker.convertAxisToSponge(blockState.get(BlockPortal.AXIS)));
     }
 }

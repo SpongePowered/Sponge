@@ -69,6 +69,6 @@ public abstract class MixinBlockMycelium extends MixinBlock {
     }
 
     private ImmutableSnowedData getIsSnowedFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSnowedData.class, blockState.getValue(BlockMycelium.SNOWY));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSnowedData.class, blockState.get(BlockMycelium.SNOWY));
     }
 }

@@ -27,7 +27,6 @@ package org.spongepowered.common.interfaces.world;
 import net.minecraft.entity.Entity;
 import net.minecraft.world.Teleporter;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldProvider;
 import org.spongepowered.api.world.PortalAgentType;
 
 /**

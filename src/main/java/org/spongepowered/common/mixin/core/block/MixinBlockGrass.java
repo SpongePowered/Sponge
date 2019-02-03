@@ -69,6 +69,6 @@ public abstract class MixinBlockGrass extends MixinBlock {
     }
 
     private ImmutableSnowedData getIsSnowedFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSnowedData.class, blockState.getValue(BlockGrass.SNOWY));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSnowedData.class, blockState.get(BlockGrass.SNOWY));
     }
 }

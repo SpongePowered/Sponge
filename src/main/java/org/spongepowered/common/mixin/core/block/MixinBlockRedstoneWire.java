@@ -93,15 +93,15 @@ public abstract class MixinBlockRedstoneWire extends MixinBlock {
     }
 
     private ImmutableRedstonePoweredData getPowerFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRedstonePoweredData.class, blockState.getValue(BlockRedstoneWire.POWER));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRedstonePoweredData.class, blockState.get(BlockRedstoneWire.POWER));
     }
 
     private ImmutableConnectedDirectionData getConnectedDirectionData(IBlockState blockState) {
         final Set<Direction> directions = new HashSet<>();
-        final IStringSerializable north = blockState.getValue(BlockRedstoneWire.NORTH);
-        final IStringSerializable east = blockState.getValue(BlockRedstoneWire.EAST);
-        final IStringSerializable west = blockState.getValue(BlockRedstoneWire.WEST);
-        final IStringSerializable south = blockState.getValue(BlockRedstoneWire.SOUTH);
+        final IStringSerializable north = blockState.get(BlockRedstoneWire.NORTH);
+        final IStringSerializable east = blockState.get(BlockRedstoneWire.EAST);
+        final IStringSerializable west = blockState.get(BlockRedstoneWire.WEST);
+        final IStringSerializable south = blockState.get(BlockRedstoneWire.SOUTH);
         if (!north.getName().matches("none")) {
             directions.add(Direction.NORTH);
         }
@@ -119,10 +119,10 @@ public abstract class MixinBlockRedstoneWire extends MixinBlock {
 
     private ImmutableWireAttachmentData getWireAttachmentData(IBlockState blockState) {
         Map<Direction, WireAttachmentType> data = new HashMap<>();
-        data.put(Direction.NORTH, (WireAttachmentType) (Object) blockState.getValue(BlockRedstoneWire.NORTH));
-        data.put(Direction.SOUTH, (WireAttachmentType) (Object) blockState.getValue(BlockRedstoneWire.SOUTH));
-        data.put(Direction.EAST, (WireAttachmentType) (Object) blockState.getValue(BlockRedstoneWire.EAST));
-        data.put(Direction.WEST, (WireAttachmentType) (Object) blockState.getValue(BlockRedstoneWire.WEST));
+        data.put(Direction.NORTH, (WireAttachmentType) (Object) blockState.get(BlockRedstoneWire.NORTH));
+        data.put(Direction.SOUTH, (WireAttachmentType) (Object) blockState.get(BlockRedstoneWire.SOUTH));
+        data.put(Direction.EAST, (WireAttachmentType) (Object) blockState.get(BlockRedstoneWire.EAST));
+        data.put(Direction.WEST, (WireAttachmentType) (Object) blockState.get(BlockRedstoneWire.WEST));
         return new ImmutableSpongeWireAttachmentData(data);
     }
 }

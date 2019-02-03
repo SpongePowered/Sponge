@@ -58,7 +58,7 @@ public abstract class MixinBlockRailPowered extends MixinBlockRailBase {
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutablePoweredData) {
-            return Optional.of((BlockState) blockState.withProperty(BlockRailPowered.POWERED, ((ImmutablePoweredData) manipulator).powered().get()));
+            return Optional.of((BlockState) blockState.with(BlockRailPowered.POWERED, ((ImmutablePoweredData) manipulator).powered().get()));
         }
         return super.getStateWithData(blockState, manipulator);
     }
@@ -66,12 +66,12 @@ public abstract class MixinBlockRailPowered extends MixinBlockRailBase {
     @Override
     public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends BaseValue<E>> key, E value) {
         if (key.equals(Keys.POWERED)) {
-            return Optional.of((BlockState) blockState.withProperty(BlockRailPowered.POWERED, (Boolean) value));
+            return Optional.of((BlockState) blockState.with(BlockRailPowered.POWERED, (Boolean) value));
         }
         return super.getStateWithValue(blockState, key, value);
     }
 
     private ImmutablePoweredData getIsPoweredFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class, blockState.getValue(BlockRailPowered.POWERED));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class, blockState.get(BlockRailPowered.POWERED));
     }
 }

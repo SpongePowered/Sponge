@@ -170,8 +170,6 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.phase.entity.BasicEntityContext;
-import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
@@ -189,7 +187,7 @@ import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMa
 import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
 import org.spongepowered.common.interfaces.world.IMixinServerWorldEventHandler;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
-import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
+import org.spongepowered.common.interfaces.world.IMixinDimension;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
@@ -377,7 +375,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         GeneratorType generatorType = (GeneratorType) settings.getTerrainType();
 
         // Allow bonus chest generation for non-Overworld worlds
-        if (!this.provider.canRespawnHere() && this.getProperties().doesGenerateBonusChest()) {
+        if (!this.dimension.canRespawnHere() && this.getProperties().doesGenerateBonusChest()) {
             this.createBonusChest();
         }
 
@@ -538,7 +536,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                 chunkGenerator = currentGenerator;
             } else {
                 final WorldProvider worldProvider = worldServer.provider;
-                ((IMixinWorldProvider) worldProvider).setGeneratorSettings(settings);
+                ((IMixinDimension) worldProvider).setGeneratorSettings(settings);
                 chunkGenerator = worldProvider.createChunkGenerator();
             }
             biomeProvider = worldServer.provider.biomeProvider;
@@ -610,7 +608,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             this.timings.updateBlocksThunder.startTiming();
 
             //if (this.provider.canDoLightning(chunk) && flag && flag1 && this.rand.nextInt(100000) == 0) // Sponge - Add SpongeImplHooks for forge
-            if (this.weatherThunderEnabled && SpongeImplHooks.canDoLightning(this.provider, chunk) && flag && flag1 && this.rand.nextInt(100000) == 0)
+            if (this.weatherThunderEnabled && SpongeImplHooks.canDoLightning(this.dimension, chunk) && flag && flag1 && this.rand.nextInt(100000) == 0)
             {
                 try (final PhaseContext<?> context = TickPhase.Tick.WEATHER.createPhaseContext().source(this)) {
                     context.buildAndSwitch();
@@ -693,7 +691,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             // this.profiler.endStartSection("iceandsnow"); // Sponge - don't use the profiler
 
             // if (this.rand.nextInt(16) == 0) // Sponge - Rewrite to use our boolean, and forge hook
-            if (this.weatherIceAndSnowEnabled && SpongeImplHooks.canDoRainSnowIce(this.provider, chunk) && this.rand.nextInt(16) == 0)
+            if (this.weatherIceAndSnowEnabled && SpongeImplHooks.canDoRainSnowIce(this.dimension, chunk) && this.rand.nextInt(16) == 0)
             {
                 // Sponge Start - Enter weather phase for snow and ice and flooding.
                 try (final PhaseContext<?> context = TickPhase.Tick.WEATHER.createPhaseContext()
@@ -884,7 +882,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             this.resetUpdateEntityTick();
         }*/
 
-        TrackingUtil.tickWorldProvider(this);
+        TrackingUtil.tickDimension(this);
         // Sponge end
         super.updateEntities();
     }
@@ -981,7 +979,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
         for (net.minecraft.world.chunk.Chunk chunk : chunkProviderServer.getLoadedChunks()) {
             IMixinChunk spongeChunk = (IMixinChunk) chunk;
-            if (chunk.unloadQueued || spongeChunk.isPersistedChunk() || !this.provider.canDropChunk(chunk.x, chunk.z)) {
+            if (chunk.unloadQueued || spongeChunk.isPersistedChunk() || !this.dimension.canDropChunk(chunk.x, chunk.z)) {
                 continue;
             }
 
@@ -2566,8 +2564,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         return MoreObjects.toStringHelper(this)
                 .add("Name", this.worldInfo.getWorldName())
                 .add("DimensionId", ((IMixinWorldServer) this).getDimensionId())
-                .add("DimensionType", ((org.spongepowered.api.world.DimensionType) (Object) this.provider.getDimensionType()).getKey())
-                .add("DimensionTypeId", this.provider.getDimensionType().getId())
+                .add("DimensionType", ((org.spongepowered.api.world.DimensionType) (Object) this.dimension.getDimensionType()).getKey())
+                .add("DimensionTypeId", this.dimension.getDimensionType().getId())
                 .toString();
     }
 }

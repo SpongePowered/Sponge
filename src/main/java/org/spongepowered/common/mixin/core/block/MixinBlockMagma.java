@@ -47,7 +47,7 @@ public abstract class MixinBlockMagma extends MixinBlock {
             BlockPos pos, Entity original) {
         if (!world.isRemote) {
             DamageSource.HOT_FLOOR =
-                    new MinecraftBlockDamageSource(CatalogKey.minecraft("hotFloor"), new Location<>((World) world, VecHelper.toVector3i(pos))).setFireDamage();
+                    new MinecraftBlockDamageSource(CatalogKey.minecraft("hotFloor"), new Location((World) world, VecHelper.toVector3i(pos))).setFireDamage();
             boolean result = entity.attackEntityFrom(DamageSource.HOT_FLOOR, damage);
             DamageSource.HOT_FLOOR = originalDamageSource;
             return result;

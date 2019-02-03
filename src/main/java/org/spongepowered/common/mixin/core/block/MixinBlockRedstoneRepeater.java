@@ -61,7 +61,7 @@ public abstract class MixinBlockRedstoneRepeater extends MixinBlock {
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableDelayableData) {
             final int delay = ((ImmutableDelayableData) manipulator).delay().get();
-            return Optional.of((BlockState) blockState.withProperty(BlockRedstoneRepeater.DELAY, delay));
+            return Optional.of((BlockState) blockState.with(BlockRedstoneRepeater.DELAY, delay));
         }
         return super.getStateWithData(blockState, manipulator);
     }
@@ -70,13 +70,13 @@ public abstract class MixinBlockRedstoneRepeater extends MixinBlock {
     public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends BaseValue<E>> key, E value) {
         if (key.equals(Keys.DELAY)) {
             final int delay = (Integer) value;
-            return Optional.of((BlockState) blockState.withProperty(BlockRedstoneRepeater.DELAY, delay));
+            return Optional.of((BlockState) blockState.with(BlockRedstoneRepeater.DELAY, delay));
         }
         return super.getStateWithValue(blockState, key, value);
     }
 
     private ImmutableDelayableData getDelayableData(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDelayableData.class, blockState.getValue(BlockRedstoneRepeater.DELAY));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDelayableData.class, blockState.get(BlockRedstoneRepeater.DELAY));
     }
 
     @Override
