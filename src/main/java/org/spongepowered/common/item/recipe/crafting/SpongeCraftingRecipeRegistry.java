@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.item.recipe.crafting;
 
-import static com.google.common.base.Preconditions.checkState;
-
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
@@ -123,7 +121,6 @@ public class SpongeCraftingRecipeRegistry implements CraftingRecipeRegistry, Spo
 
     @Override
     public void registerAdditionalCatalog(CraftingRecipe recipe) {
-        checkState(SpongeImplHooks.isVanilla()); // Should only be called in vanilla
         if (!(recipe instanceof IRecipe)) {
             recipe = new DelegateSpongeCraftingRecipe(recipe);
         }
