@@ -33,5 +33,7 @@ public interface IMixinCriterionProgress {
 
     AdvancementProgress getAdvancementProgress();
 
+    void setAdvancementProgress(net.minecraft.advancements.AdvancementProgress advancementProgress);
+
     boolean isCriterionAvailable();
 }

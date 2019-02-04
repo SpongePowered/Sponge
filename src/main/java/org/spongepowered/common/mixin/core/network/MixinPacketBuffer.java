@@ -348,8 +348,18 @@ public abstract class MixinPacketBuffer extends ByteBuf {
         return (ChannelBuf) this;
     }
 
+    public ChannelBuf cbuf$writeLongLE(long data) {
+        this.writeLongLE(data);
+        return (ChannelBuf) this;
+    }
+
     public ChannelBuf cbuf$setLong(int index, long data) {
         this.setLong(index, data);
+        return (ChannelBuf) this;
+    }
+
+    public ChannelBuf cbuf$setLongLE(int index, long data) {
+        this.setLongLE(index, data);
         return (ChannelBuf) this;
     }
 

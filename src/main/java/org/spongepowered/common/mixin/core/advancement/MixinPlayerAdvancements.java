@@ -76,7 +76,7 @@ public class MixinPlayerAdvancements implements IMixinPlayerAdvancements {
     @Inject(method = "startProgress", at = @At("HEAD"))
     private void onStartProgress(Advancement advancement, AdvancementProgress progress, CallbackInfo ci) {
         final IMixinAdvancementProgress advancementProgress = (IMixinAdvancementProgress) progress;
-        advancementProgress.setAdvancement(((org.spongepowered.api.advancement.Advancement) advancement).getKey().toString());
+        advancementProgress.setAdvancement(((org.spongepowered.api.advancement.Advancement) advancement).getKey());
         advancementProgress.setPlayerAdvancements((PlayerAdvancements) (Object) this);
     }
 

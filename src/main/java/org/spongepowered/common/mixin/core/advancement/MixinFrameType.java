@@ -47,7 +47,6 @@ public class MixinFrameType {
     @Shadow @Final private String name;
     @Shadow @Final private TextFormatting format;
 
-    @Nullable private String id;
     @Nullable private String spongeName;
     @Nullable private TextFormat textFormat;
     @Nullable private CatalogKey key;

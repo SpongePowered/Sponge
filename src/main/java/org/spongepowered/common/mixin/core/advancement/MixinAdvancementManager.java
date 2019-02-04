@@ -31,13 +31,11 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.IMixinPlayerList;
-import org.spongepowered.common.registry.type.advancement.AdvancementRegistryModule;
-import org.spongepowered.common.registry.type.advancement.AdvancementTreeRegistryModule;
 
 @Mixin(AdvancementManager.class)
 public class MixinAdvancementManager {
 
-    @Inject(method = "reload", at = @At("RETURN"))
+    @Inject(method = "onResourceManagerReload", at = @At("RETURN"))
     private void onReloadReturn(CallbackInfo ci) {
         ((IMixinPlayerList) SpongeImpl.getServer().getPlayerList()).reloadAdvancementProgress();
     }

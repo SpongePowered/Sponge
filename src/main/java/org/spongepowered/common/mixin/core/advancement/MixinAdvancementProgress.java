@@ -81,7 +81,7 @@ public class MixinAdvancementProgress implements org.spongepowered.api.advanceme
     @Shadow @Final private Map<String, net.minecraft.advancements.CriterionProgress> criteria;
 
     @Nullable private Map<AdvancementCriterion, ICriterionProgress> progressMap;
-    @Nullable private String advancement;
+    @Nullable private CatalogKey advancement;
     @Nullable private PlayerAdvancements playerAdvancements;
 
     private void checkServer() {
@@ -141,12 +141,14 @@ public class MixinAdvancementProgress implements org.spongepowered.api.advanceme
             final SpongeScoreCriterion scoreCriterion = (SpongeScoreCriterion) criterion;
             for (AdvancementCriterion internalCriterion : scoreCriterion.internalCriteria) {
                 final IMixinCriterionProgress progress = (IMixinCriterionProgress) this.criteria.get(internalCriterion.getName());
+                progress.setAdvancementProgress((AdvancementProgress) (Object) this);
                 progress.setCriterion(internalCriterion);
                 progressMap.put(internalCriterion, (ICriterionProgress) progress);
             }
             progressMap.put(scoreCriterion, new SpongeScoreCriterionProgress(this, scoreCriterion));
         } else if (criterion != SpongeEmptyCriterion.INSTANCE) {
             final IMixinCriterionProgress progress = (IMixinCriterionProgress) this.criteria.get(criterion.getName());
+            progress.setAdvancementProgress((AdvancementProgress) (Object) this);
             progress.setCriterion(criterion);
             progressMap.put(criterion, (ICriterionProgress) progress);
         }
@@ -292,7 +294,7 @@ public class MixinAdvancementProgress implements org.spongepowered.api.advanceme
     }
 
     @Override
-    public void setAdvancement(String advancement) {
+    public void setAdvancement(CatalogKey advancement) {
         checkServer();
         this.advancement = advancement;
     }
@@ -316,7 +318,7 @@ public class MixinAdvancementProgress implements org.spongepowered.api.advanceme
     private Optional<Advancement> getOptionalAdvancement() {
         checkServer();
         checkState(this.advancement != null, "The advancement is not yet initialized");
-        return AdvancementRegistryModule.getInstance().getById(this.advancement);
+        return AdvancementRegistryModule.getInstance().get(this.advancement);
     }
 
     @Override

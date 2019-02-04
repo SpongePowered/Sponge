@@ -30,7 +30,6 @@ import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.CriterionProgress;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -50,20 +49,25 @@ import javax.annotation.Nullable;
 @Mixin(CriterionProgress.class)
 public abstract class MixinCriterionProgress implements ICriterionProgress, IMixinCriterionProgress {
 
-    @Shadow public abstract void obtain();
     @Shadow public abstract void reset();
-    @Shadow @Final private AdvancementProgress advancementProgress;
     @Shadow @Nullable private Date obtained;
 
+    @Nullable private AdvancementProgress advancementProgress;
     @Nullable private AdvancementCriterion criterion;
 
     @Inject(method = "obtain", at = @At("RETURN"))
     private void onObtain(CallbackInfo ci) {
+        if (this.advancementProgress == null) {
+            return;
+        }
         ((IMixinAdvancementProgress) this.advancementProgress).invalidateAchievedState();
     }
 
     @Inject(method = "reset", at = @At("RETURN"))
     private void onReset(CallbackInfo ci) {
+        if (this.advancementProgress == null) {
+            return;
+        }
         ((IMixinAdvancementProgress) this.advancementProgress).invalidateAchievedState();
     }
 
@@ -73,7 +77,13 @@ public abstract class MixinCriterionProgress implements ICriterionProgress, IMix
     }
 
     @Override
+    public void setAdvancementProgress(AdvancementProgress advancementProgress) {
+        this.advancementProgress = advancementProgress;
+    }
+
+    @Override
     public org.spongepowered.api.advancement.AdvancementProgress getAdvancementProgress() {
+        checkState(this.advancementProgress != null, "Advancement progress is not available.");
         return (org.spongepowered.api.advancement.AdvancementProgress) this.advancementProgress;
     }
 
@@ -100,6 +110,7 @@ public abstract class MixinCriterionProgress implements ICriterionProgress, IMix
 
     @Override
     public Instant grant() {
+        checkState(this.advancementProgress != null, "Advancement progress is not available.");
         if (this.obtained != null) {
             return this.obtained.toInstant();
         }
@@ -112,6 +123,7 @@ public abstract class MixinCriterionProgress implements ICriterionProgress, IMix
 
     @Override
     public Optional<Instant> revoke() {
+        checkState(this.advancementProgress != null, "Advancement progress is not available.");
         if (this.obtained == null) {
             return Optional.empty();
         }
