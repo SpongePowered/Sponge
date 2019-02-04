@@ -22,12 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.mutable.tileentity;
+package org.spongepowered.common.data.manipulator.mutable.block;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableNoteData;
-import org.spongepowered.api.data.manipulator.mutable.tileentity.NoteData;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableNoteData;
+import org.spongepowered.api.data.manipulator.mutable.block.NoteData;
 import org.spongepowered.api.data.type.NotePitch;
 import org.spongepowered.api.data.type.NotePitches;
 import org.spongepowered.api.data.value.mutable.Value;
