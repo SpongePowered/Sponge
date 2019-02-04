@@ -25,27 +25,26 @@
 package org.spongepowered.common.data.property;
 
 import com.google.common.collect.ImmutableList;
-import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.property.PropertyHolder;
-import org.spongepowered.api.data.property.PropertyStore;
+import org.spongepowered.api.data.property.store.PropertyStore;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
 import java.util.Optional;
 
-public class PropertyStoreDelegate<T extends Property<?, ?>> implements PropertyStore<T> {
+public class PropertyStoreDelegate<V> implements PropertyStore<V> {
 
-    private final ImmutableList<PropertyStore<T>> propertyStores;
+    final ImmutableList<PropertyStore<V>> propertyStores;
 
-    public PropertyStoreDelegate(ImmutableList<PropertyStore<T>> propertyStores) {
+    PropertyStoreDelegate(ImmutableList<PropertyStore<V>> propertyStores) {
         this.propertyStores = propertyStores;
     }
 
     @Override
-    public Optional<T> getFor(PropertyHolder propertyHolder) {
-        for (PropertyStore<T> propertyStore : this.propertyStores) {
-            final Optional<T> optional = propertyStore.getFor(propertyHolder);
+    public Optional<V> getFor(PropertyHolder propertyHolder) {
+        for (PropertyStore<V> propertyStore : this.propertyStores) {
+            final Optional<V> optional = propertyStore.getFor(propertyHolder);
             if (optional.isPresent()) {
                 return optional;
             }
@@ -54,20 +53,9 @@ public class PropertyStoreDelegate<T extends Property<?, ?>> implements Property
     }
 
     @Override
-    public Optional<T> getFor(Location<World> location) {
-        for (PropertyStore<T> propertyStore : this.propertyStores) {
-            final Optional<T> optional = propertyStore.getFor(location);
-            if (optional.isPresent()) {
-                return optional;
-            }
-        }
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<T> getFor(Location<World> location, Direction direction) {
-        for (PropertyStore<T> propertyStore : this.propertyStores) {
-            final Optional<T> optional = propertyStore.getFor(location, direction);
+    public Optional<V> getFor(Location<World> location, Direction direction) {
+        for (PropertyStore<V> propertyStore : this.propertyStores) {
+            final Optional<V> optional = propertyStore.getFor(location, direction);
             if (optional.isPresent()) {
                 return optional;
             }

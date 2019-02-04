@@ -31,6 +31,7 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockStateMatcher;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.trait.BlockTrait;
+import org.spongepowered.api.data.property.PropertyMatcher;
 
 import java.util.List;
 import java.util.Optional;
@@ -41,11 +42,14 @@ public class SpongeBlockStateMatcher implements BlockStateMatcher {
     final BlockType type;
     final BlockTrait<?>[] traits;
     final Object[] values;
+    final List<PropertyMatcher<?>> propertyMatchers;
     @Nullable private ImmutableList<BlockState> compatibleStates; // Lazily constructed
 
-    SpongeBlockStateMatcher(BlockType type, BlockTrait<?>[] traits, Object[] values) {
+    SpongeBlockStateMatcher(BlockType type, BlockTrait<?>[] traits, Object[] values,
+            List<PropertyMatcher<?>> propertyMatchers) {
         this.type = type;
         this.traits = new BlockTrait<?>[traits.length];
+        this.propertyMatchers = propertyMatchers;
         System.arraycopy(traits, 0, this.traits, 0, traits.length);
         this.values = new Object[values.length];
         System.arraycopy(values, 0, this.values, 0, values.length);
@@ -58,6 +62,7 @@ public class SpongeBlockStateMatcher implements BlockStateMatcher {
                 .collect(ImmutableList.toImmutableList());
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public boolean matches(BlockState state) {
         if (this.type != state.getType()) {
@@ -72,6 +77,12 @@ public class SpongeBlockStateMatcher implements BlockStateMatcher {
             }
             final Object o = traitValue.get();
             if (!value.equals(o)) {
+                return false;
+            }
+        }
+        for (PropertyMatcher propertyMatcher : this.propertyMatchers) {
+            final Object value = state.getProperty(propertyMatcher.getProperty()).orElse(null);
+            if (!propertyMatcher.matches(value)) {
                 return false;
             }
         }

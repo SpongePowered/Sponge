@@ -27,10 +27,12 @@ package org.spongepowered.common.interfaces.item;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.effect.potion.PotionEffect;
 
-import java.util.Set;
+import java.util.List;
+
+import javax.annotation.Nullable;
 
 public interface IMixinItemPotionProvider {
 
-    Set<PotionEffect> getApplicablePotions(ItemStack itemStack);
+    List<PotionEffect> getApplicablePotions(@Nullable ItemStack itemStack);
 
 }

@@ -24,13 +24,14 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.minecraft.container;
 
+import org.spongepowered.api.item.inventory.InventoryProperties;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
+import org.spongepowered.common.item.inventory.PropertyEntry;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.comp.CraftingInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.minecraft.PlayerInventoryLens;
-import org.spongepowered.common.item.inventory.property.EquipmentSlotTypeImpl;
 
 import java.util.Arrays;
 import java.util.List;
@@ -59,10 +60,10 @@ public class ContainerPlayerInventoryLens extends ContainerLens {
     protected void init(SlotProvider slots) {
         super.init(slots);
 
-        this.addChild(slots.getSlotLens(base + 0), new EquipmentSlotTypeImpl(EquipmentTypes.HEADWEAR));
-        this.addChild(slots.getSlotLens(base + 1), new EquipmentSlotTypeImpl(EquipmentTypes.CHESTPLATE));
-        this.addChild(slots.getSlotLens(base + 2), new EquipmentSlotTypeImpl(EquipmentTypes.LEGGINGS));
-        this.addChild(slots.getSlotLens(base + 3), new EquipmentSlotTypeImpl(EquipmentTypes.BOOTS));
-        this.addChild(slots.getSlotLens(base + 4 + 4 * 9), new EquipmentSlotTypeImpl(EquipmentTypes.OFF_HAND));
+        this.addChild(slots.getSlotLens(base + 0), PropertyEntry.of(InventoryProperties.EQUIPMENT_TYPE, EquipmentTypes.HEADWEAR));
+        this.addChild(slots.getSlotLens(base + 1), PropertyEntry.of(InventoryProperties.EQUIPMENT_TYPE, EquipmentTypes.CHESTPLATE));
+        this.addChild(slots.getSlotLens(base + 2), PropertyEntry.of(InventoryProperties.EQUIPMENT_TYPE, EquipmentTypes.LEGGINGS));
+        this.addChild(slots.getSlotLens(base + 3), PropertyEntry.of(InventoryProperties.EQUIPMENT_TYPE, EquipmentTypes.BOOTS));
+        this.addChild(slots.getSlotLens(base + 4 + 4 * 9), PropertyEntry.of(InventoryProperties.EQUIPMENT_TYPE, EquipmentTypes.OFF_HAND));
     }
 }

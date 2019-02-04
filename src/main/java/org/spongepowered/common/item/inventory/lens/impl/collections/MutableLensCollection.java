@@ -24,7 +24,8 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.collections;
 
-import org.spongepowered.api.item.inventory.InventoryProperty;
+import org.spongepowered.api.data.property.Property;
+import org.spongepowered.common.item.inventory.PropertyEntry;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.LensCollection;
 import org.spongepowered.common.item.inventory.lens.impl.struct.LensHandle;
@@ -49,7 +50,7 @@ public class MutableLensCollection implements LensCollection {
      * @param lens The lens to add.
      * @param properties The properties to add.
      */
-    public void add(Lens lens, InventoryProperty<?, ?>... properties) {
+    public void add(Lens lens, PropertyEntry... properties) {
         if (!this.handles.containsKey(lens)) {
             this.lenses.add(lens);
         }
@@ -71,15 +72,15 @@ public class MutableLensCollection implements LensCollection {
     }
 
     @Override
-    public Collection<InventoryProperty<?, ?>> getProperties(int index) {
+    public Map<Property<?>, Object> getProperties(int index) {
         this.checkIndex(index);
         return this.getHandle(index).getProperties();
     }
     
     @Override
-    public Collection<InventoryProperty<?, ?>> getProperties(Lens child) {
+    public Map<Property<?>, Object> getProperties(Lens child) {
         LensHandle handle = this.handles.get(child);
-        return handle == null ? Collections.emptyList() : handle.getProperties();
+        return handle == null ? Collections.emptyMap() : handle.getProperties();
     }
 
     @Override

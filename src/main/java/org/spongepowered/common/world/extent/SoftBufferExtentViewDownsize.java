@@ -37,11 +37,11 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.persistence.InvalidDataException;
+import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.entity.Entity;
@@ -62,7 +62,10 @@ import org.spongepowered.common.util.VecHelper;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
@@ -248,27 +251,51 @@ public class SoftBufferExtentViewDownsize implements DefaultedExtent {
     }
 
     @Override
-    public <T extends Property<?, ?>> Optional<T> getProperty(int x, int y, int z, Class<T> propertyClass) {
-        checkBlockRange(x, y, z);
-        return this.extent.getProperty(x, y, z, propertyClass);
-    }
-
-    @Override
-    public <T extends Property<?, ?>> Optional<T> getProperty(int x, int y, int z, Direction direction, Class<T> propertyClass) {
-        checkBlockRange(x, y, z);
-        return this.extent.getProperty(x, y, z, direction, propertyClass);
-    }
-
-    @Override
-    public Collection<Property<?, ?>> getProperties(int x, int y, int z) {
+    public Map<Property<?>, ?> getProperties(int x, int y, int z) {
         checkBlockRange(x, y, z);
         return this.extent.getProperties(x, y, z);
     }
 
     @Override
-    public Collection<Direction> getFacesWithProperty(int x, int y, int z, Class<? extends Property<?, ?>> propertyClass) {
+    public <V> Optional<V> getProperty(int x, int y, int z, Property<V> property) {
         checkBlockRange(x, y, z);
-        return this.extent.getFacesWithProperty(x, y, z, propertyClass);
+        return this.extent.getProperty(x, y, z, property);
+    }
+
+    @Override
+    public <V> Optional<V> getProperty(int x, int y, int z, Direction direction, Property<V> property) {
+        checkBlockRange(x, y, z);
+        return this.extent.getProperty(x, y, z, direction, property);
+    }
+
+    @Override
+    public OptionalDouble getDoubleProperty(int x, int y, int z, Property<Double> property) {
+        checkBlockRange(x, y, z);
+        return this.extent.getDoubleProperty(x, y, z, property);
+    }
+
+    @Override
+    public OptionalInt getIntProperty(int x, int y, int z, Property<Integer> property) {
+        checkBlockRange(x, y, z);
+        return this.extent.getIntProperty(x, y, z, property);
+    }
+
+    @Override
+    public OptionalDouble getDoubleProperty(int x, int y, int z, Direction direction, Property<Double> property) {
+        checkBlockRange(x, y, z);
+        return this.extent.getDoubleProperty(x, y, z, direction, property);
+    }
+
+    @Override
+    public OptionalInt getIntProperty(int x, int y, int z, Direction direction, Property<Integer> property) {
+        checkBlockRange(x, y, z);
+        return this.extent.getIntProperty(x, y, z, direction, property);
+    }
+
+    @Override
+    public Collection<Direction> getFacesWithProperty(int x, int y, int z, Property<?> property) {
+        checkBlockRange(x, y, z);
+        return this.extent.getFacesWithProperty(x, y, z, property);
     }
 
     @Override

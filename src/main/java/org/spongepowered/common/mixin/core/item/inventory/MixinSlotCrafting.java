@@ -37,10 +37,11 @@ import net.minecraft.network.play.server.SPacketSetSlot;
 import net.minecraft.util.NonNullList;
 import org.spongepowered.api.event.item.inventory.CraftItemEvent;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.InventoryProperties;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
-import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
+import org.spongepowered.api.item.inventory.slot.SlotIndex;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.asm.mixin.Final;
@@ -149,8 +150,8 @@ public abstract class MixinSlotCrafting extends Slot {
         List<SlotTransaction> capturedTransactions = ((IMixinContainer) container).getCapturedTransactions();
         for (Iterator<SlotTransaction> iterator = capturedTransactions.iterator(); iterator.hasNext(); ) {
             SlotTransaction trans = iterator.next();
-            Optional<SlotIndex> slotIndex = trans.getSlot().getProperty(SlotIndex.class);
-            if (slotIndex.isPresent() && slotIndex.get().getValue() == 0) {
+            Optional<SlotIndex> slotIndex = trans.getSlot().getProperty(InventoryProperties.SLOT_INDEX);
+            if (slotIndex.isPresent() && slotIndex.get().getIndex() == 0) {
                 iterator.remove();
                 if (first == null) {
                     first = trans;

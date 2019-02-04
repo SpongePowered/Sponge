@@ -27,8 +27,8 @@ package org.spongepowered.common.data.property.store.block;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
-import org.spongepowered.api.data.property.block.MatterProperty;
-import org.spongepowered.api.data.property.block.MatterProperty.Matter;
+import net.minecraft.util.EnumFacing;
+import org.spongepowered.api.data.type.Matter;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.common.data.property.store.common.AbstractBlockPropertyStore;
 
@@ -38,25 +38,25 @@ import javax.annotation.Nullable;
 
 // This is just for basic matter properties. Forge compatibles are provided by the
 // sponge implementation.
-public class MatterPropertyStore extends AbstractBlockPropertyStore<MatterProperty> {
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+public class MatterPropertyStore extends AbstractBlockPropertyStore.Generic<Matter> {
 
-    private static final MatterProperty SOLID = new MatterProperty(Matter.SOLID);
-    private static final MatterProperty LIQUID = new MatterProperty(Matter.LIQUID);
-    private static final MatterProperty GAS = new MatterProperty(Matter.GAS);
+    protected static final Optional<Matter> SOLID = Optional.of(Matter.SOLID);
+    protected static final Optional<Matter> LIQUID = Optional.of(Matter.LIQUID);
+    protected static final Optional<Matter> GAS = Optional.of(Matter.GAS);
 
     public MatterPropertyStore() {
         super(true);
     }
 
     @Override
-    protected Optional<MatterProperty> getForBlock(@Nullable Location<?> location, IBlockState block) {
+    protected Optional<Matter> getForBlock(@Nullable Location<?> location, IBlockState block, @Nullable EnumFacing facing) {
         if (block.getBlock() instanceof BlockLiquid) {
-            return Optional.of(LIQUID);
+            return LIQUID;
         } else if (block.getMaterial() == Material.AIR) {
-            return Optional.of(GAS);
+            return GAS;
         } else {
-            return Optional.of(SOLID);
+            return SOLID;
         }
     }
-
 }

@@ -36,7 +36,6 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
@@ -48,6 +47,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.ValueProcessor;
+import org.spongepowered.common.data.property.IPropertyHolder;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
@@ -59,7 +59,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Mixin(value = {TileEntity.class, Entity.class, ItemStack.class, SpongeUser.class}, priority = 999)
-public abstract class MixinDataHolder implements DataHolder {
+public abstract class MixinDataHolder implements DataHolder, IPropertyHolder {
 
     @SuppressWarnings("unchecked")
     @Override
@@ -401,16 +401,6 @@ public abstract class MixinDataHolder implements DataHolder {
     @Override
     public DataContainer toContainer() {
         return DataContainer.createNew();
-    }
-
-    @Override
-    public <T extends Property<?, ?>> Optional<T> getProperty(Class<T> propertyClass) {
-        return Optional.empty();
-    }
-
-    @Override
-    public Collection<Property<?, ?>> getApplicableProperties() {
-        return Collections.emptyList();
     }
 
     @Override

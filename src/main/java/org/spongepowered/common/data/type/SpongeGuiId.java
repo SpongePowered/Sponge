@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.type;
 
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.item.inventory.property.GuiId;
+import org.spongepowered.api.item.inventory.gui.GuiId;
 import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.registry.RegistryHelper;
 

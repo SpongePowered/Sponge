@@ -24,11 +24,11 @@
  */
 package org.spongepowered.test.inventory;
 
+import com.flowpowered.math.vector.Vector2i;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.spec.CommandSpec;
-import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.living.animal.Horse;
 import org.spongepowered.api.entity.living.animal.Llama;
@@ -47,20 +47,18 @@ import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetypes;
+import org.spongepowered.api.item.inventory.InventoryProperties;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.Slot;
-import org.spongepowered.api.item.inventory.property.GuiIdProperty;
-import org.spongepowered.api.item.inventory.property.GuiIds;
-import org.spongepowered.api.item.inventory.property.Identifiable;
-import org.spongepowered.api.item.inventory.property.InventoryDimension;
-import org.spongepowered.api.item.inventory.property.InventoryTitle;
-import org.spongepowered.api.item.inventory.property.SlotIndex;
+import org.spongepowered.api.item.inventory.gui.GuiIds;
+import org.spongepowered.api.item.inventory.slot.SlotIndex;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
+
+import java.util.UUID;
 
 /**
  * When trying to break an Inventory TE while sneaking you open a custom Version of it instead.
@@ -94,8 +92,8 @@ public class CustomInventoryTest {
             } else {
                 builder = Inventory.builder().of(InventoryArchetypes.HORSE_WITH_CHEST);
             }
-            Inventory inventory = builder.property(InventoryTitle.of(Text.of("Custom Mule"), Property.Operator.DELEGATE))
-                    .withCarrier(((Horse) event.getEntity()))
+            Inventory inventory = builder.property(InventoryProperties.TITLE, Text.of("Custom Mule"))
+                    .withCarrier((Horse) event.getEntity())
                     .build(this);
             int i = 1;
             for (Inventory slot : inventory.slots()) {
@@ -112,8 +110,8 @@ public class CustomInventoryTest {
             } else {
                 builder = Inventory.builder().of(InventoryArchetypes.HORSE_WITH_CHEST);
             }
-            Inventory inventory = builder.property(InventoryTitle.of(Text.of("Custom Llama"), Property.Operator.DELEGATE))
-                    .withCarrier(((Horse) event.getEntity()))
+            Inventory inventory = builder.property(InventoryProperties.TITLE, Text.of("Custom Llama"))
+                    .withCarrier((Horse) event.getEntity())
                     .build(this);
             int i = 1;
             for (Inventory slot : inventory.slots()) {
@@ -125,7 +123,7 @@ public class CustomInventoryTest {
             event.setCancelled(true);
         } else if (event.getEntity() instanceof Horse) {
             Inventory inventory = Inventory.builder().of(InventoryArchetypes.HORSE)
-                    .property(InventoryTitle.of(Text.of("Custom Horse"), Property.Operator.DELEGATE))
+                    .property(InventoryProperties.TITLE, Text.of("Custom Horse"))
                     .withCarrier(((Horse) event.getEntity()))
                     .build(this);
             int i = 1;
@@ -139,10 +137,10 @@ public class CustomInventoryTest {
         }
         if (event.getEntity() instanceof Slime) {
             Inventory inventory = Inventory.builder().of(InventoryArchetypes.MENU_GRID)
-                    .property(InventoryDimension.of(1, 9))
-                    .property(InventoryTitle.of(Text.of("Slime Content"), Property.Operator.DELEGATE))
-                    .property(Identifiable.random())
-                    .property(GuiIdProperty.builder().value(GuiIds.DISPENSER).operator(Property.Operator.DELEGATE).build())
+                    .property(InventoryProperties.DIMENSION, new Vector2i(1, 9))
+                    .property(InventoryProperties.TITLE, Text.of("Slime Content"))
+                    .property(InventoryProperties.UNIQUE_ID, UUID.randomUUID())
+                    .property(InventoryProperties.GUI_ID, GuiIds.DISPENSER)
                     .build(this);
             ItemStack flard = ItemStack.of(ItemTypes.SLIME_BALL, 1);
             flard.offer(Keys.DISPLAY_NAME, Text.of("Flard?"));
@@ -158,7 +156,7 @@ public class CustomInventoryTest {
     private void interactOtherBlock(InteractBlockEvent.Primary event, Player player, Location loc) {
         if (loc.getBlock().getType() == BlockTypes.CRAFTING_TABLE) {
             Inventory inventory = Inventory.builder().of(InventoryArchetypes.WORKBENCH)
-                    .property(InventoryTitle.of(Text.of("Custom Workbench"), Property.Operator.DELEGATE))
+                    .property(InventoryProperties.TITLE, Text.of("Custom Workbench"))
                     .build(this);
             for (Inventory slot : inventory.slots()) {
                 slot.set(ItemStack.of(ItemTypes.IRON_NUGGET, 1));
@@ -176,7 +174,7 @@ public class CustomInventoryTest {
             if (te instanceof Carrier) {
                 BasicCarrier myCarrier = new BasicCarrier();
                 Inventory custom = Inventory.builder().from(((Carrier) te).getInventory())
-                        .property(InventoryTitle.of(Text.of("Custom ", ((Carrier) te).getInventory().getName()), Property.Operator.DELEGATE))
+                        .property(InventoryProperties.TITLE, Text.of("Custom ", ((Carrier) te).getInventory().getName()))
                         .withCarrier(myCarrier)
                         .build(this);
                 myCarrier.init(custom);
@@ -210,11 +208,11 @@ public class CustomInventoryTest {
 
         @Listener
         public void onInventoryClick(ClickContainerEvent event, @First Player player, @Getter("getTargetInventory") CarriedInventory<?> container) {
-            container.getProperty(Identifiable.class).ifPresent(i -> player.sendMessage(Text.of("Identifiable Inventory: ", i.getValue())));
+            container.getProperty(InventoryProperties.UNIQUE_ID).ifPresent(uuid -> player.sendMessage(Text.of("Identifiable Inventory: ", uuid)));
             for (SlotTransaction trans : event.getTransactions()) {
                 Slot slot = trans.getSlot();
                 Slot realSlot = slot.viewedSlot();
-                Integer slotClicked = slot.getProperty(SlotIndex.class, "slotindex").map(SlotIndex::getValue).orElse(-1);
+                int slotClicked = slot.getProperty(InventoryProperties.SLOT_INDEX).map(SlotIndex::getIndex).orElse(-1);
                 player.sendMessage(Text.of("You clicked Slot ", slotClicked, " in ", container.getName(), "/", realSlot.parent().getName()));
             }
         }

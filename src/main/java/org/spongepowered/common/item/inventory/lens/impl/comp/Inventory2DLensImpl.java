@@ -26,9 +26,10 @@ package org.spongepowered.common.item.inventory.lens.impl.comp;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import org.spongepowered.api.data.Property.Operator;
+import com.flowpowered.math.vector.Vector2i;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.property.SlotPos;
+import org.spongepowered.api.item.inventory.InventoryProperties;
+import org.spongepowered.common.item.inventory.PropertyEntry;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.Inventory2DAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
@@ -36,7 +37,6 @@ import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.comp.Inventory2DLens;
 import org.spongepowered.common.item.inventory.lens.impl.SlotBasedLens;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
-import org.spongepowered.common.item.inventory.property.SlotPosImpl;
 
 public class Inventory2DLensImpl extends SlotBasedLens implements Inventory2DLens {
 
@@ -72,7 +72,7 @@ public class Inventory2DLensImpl extends SlotBasedLens implements Inventory2DLen
         for (int y = 0, slot = this.base; y < this.height; y++) {
             for (int x = 0; x < this.width; x++, slot += stride) {
                 SlotLens slotLens = slots.getSlotLens(slot);
-                this.addSpanningChild(slotLens, new SlotPosImpl(this.xBase + x, this.yBase + y));
+                this.addSpanningChild(slotLens, PropertyEntry.of(InventoryProperties.SLOT_POSITION, new Vector2i(this.xBase + x, this.yBase + y)));
             }
         }
     }
@@ -88,11 +88,7 @@ public class Inventory2DLensImpl extends SlotBasedLens implements Inventory2DLen
     }
 
     @Override
-    public SlotLens getSlot(SlotPos pos) {
-        if (pos.getOperator() != Operator.EQUAL) {
-            return null;
-        }
-
+    public SlotLens getSlot(Vector2i pos) {
         return (SlotLens) this.spanningChildren.get((pos.getY() - this.yBase) * this.width + (pos.getX() - this.xBase)).lens;
     }
 

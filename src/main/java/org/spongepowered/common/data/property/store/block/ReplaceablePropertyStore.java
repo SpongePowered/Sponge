@@ -24,11 +24,10 @@
  */
 package org.spongepowered.common.data.property.store.block;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import org.spongepowered.api.data.property.block.ReplaceableProperty;
+import net.minecraft.util.EnumFacing;
+import org.spongepowered.api.util.OptBool;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.property.store.common.AbstractBlockPropertyStore;
 import org.spongepowered.common.util.VecHelper;
 
@@ -36,24 +35,18 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-public class ReplaceablePropertyStore extends AbstractBlockPropertyStore<ReplaceableProperty> {
-
-    private static final ReplaceableProperty TRUE = new ReplaceableProperty(true);
-    private static final ReplaceableProperty FALSE = new ReplaceableProperty(false);
+public class ReplaceablePropertyStore extends AbstractBlockPropertyStore.Generic<Boolean> {
 
     public ReplaceablePropertyStore() {
         super(false);
     }
 
     @Override
-    protected Optional<ReplaceableProperty> getForBlock(@Nullable Location<?> location, IBlockState block) {
-        return Optional.of(block.getMaterial().isReplaceable() ? TRUE : FALSE);
-    }
-
-    @Override
-    public Optional<ReplaceableProperty> getFor(Location<World> location) {
-        final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
-        final Block block = (Block) location.getBlockType();
-        return Optional.of(block.isReplaceable(world, VecHelper.toBlockPos(location)) ? TRUE : FALSE);
+    protected Optional<Boolean> getForBlock(@Nullable Location<?> location, IBlockState block, @Nullable EnumFacing facing) {
+        if (location != null) {
+            final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
+            return OptBool.of(block.getBlock().isReplaceable(world, VecHelper.toBlockPos(location)));
+        }
+        return OptBool.of(block.getMaterial().isReplaceable());
     }
 }

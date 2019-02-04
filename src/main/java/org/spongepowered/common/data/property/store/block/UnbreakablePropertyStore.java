@@ -25,44 +25,24 @@
 package org.spongepowered.common.data.property.store.block;
 
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.math.BlockPos;
-import org.spongepowered.api.data.property.block.UnbreakableProperty;
+import net.minecraft.util.EnumFacing;
+import org.spongepowered.api.util.OptBool;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.data.property.store.common.AbstractBlockPropertyStore;
-import org.spongepowered.common.interfaces.world.IMixinLocation;
+import org.spongepowered.common.data.property.store.common.AbstractLocationPropertyStore;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-public class UnbreakablePropertyStore extends AbstractBlockPropertyStore<UnbreakableProperty> {
-
-    private static final UnbreakableProperty TRUE = new UnbreakableProperty(true);
-    private static final UnbreakableProperty FALSE = new UnbreakableProperty(false);
-
-    public UnbreakablePropertyStore() {
-        super(false);
-    }
+public class UnbreakablePropertyStore extends AbstractLocationPropertyStore.Generic<Boolean> {
 
     @Override
-    protected Optional<UnbreakableProperty> getForBlock(@Nullable Location<?> location, IBlockState block) {
-        if (location == null) {
-            return Optional.empty();
-        }
-        final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
-        final BlockPos blockPos = VecHelper.toBlockPos(location);
-        final float blockHardness = block.getBlockHardness(world, blockPos);
-        return Optional.of(blockHardness < 0 ? TRUE : FALSE);
-    }
-
-    @Override
-    public Optional<UnbreakableProperty> getFor(Location<World> location) {
+    protected Optional<Boolean> getFor(Location<World> location, @Nullable EnumFacing facing) {
         final IBlockState blockState = (IBlockState) location.getBlock();
         final net.minecraft.world.World extent = (net.minecraft.world.World) location.getExtent();
         final float hardness = blockState.getBlockHardness(extent, VecHelper.toBlockPos(location));
-        return Optional.of(hardness < 0 ? TRUE : FALSE);
+        return OptBool.of(hardness < 0);
     }
-
 }

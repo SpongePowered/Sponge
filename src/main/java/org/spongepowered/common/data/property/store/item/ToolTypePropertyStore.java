@@ -29,28 +29,23 @@ import net.minecraft.item.ItemHoe;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
 import net.minecraft.item.ItemTool;
-import org.spongepowered.api.data.property.item.ToolTypeProperty;
 import org.spongepowered.api.data.type.ToolType;
 import org.spongepowered.common.data.property.store.common.AbstractItemStackPropertyStore;
 
 import java.util.Optional;
 
-public class ToolTypePropertyStore extends AbstractItemStackPropertyStore<ToolTypeProperty> {
+import javax.annotation.Nullable;
+
+public class ToolTypePropertyStore extends AbstractItemStackPropertyStore.Generic<ToolType> {
 
     @Override
-    protected Optional<ToolTypeProperty> getFor(ItemStack itemStack) {
-        if (itemStack.getItem() instanceof ItemTool) {
-            final ItemTool tool = (ItemTool) itemStack.getItem();
-            final Item.ToolMaterial toolMaterial = tool.toolMaterial;
-            return Optional.of(new ToolTypeProperty((ToolType) (Object) toolMaterial));
-        } else if (itemStack.getItem() instanceof ItemSword) {
-            final ItemSword itemSword = (ItemSword) itemStack.getItem();
-            final Item.ToolMaterial swordMaterial = itemSword.material;
-            return Optional.of(new ToolTypeProperty((ToolType) (Object) swordMaterial));
-        } else if (itemStack.getItem() instanceof ItemHoe) {
-            final ItemHoe itemHoe = (ItemHoe) itemStack.getItem();
-            final Item.ToolMaterial hoeMaterial = itemHoe.toolMaterial;
-            return Optional.of(new ToolTypeProperty((ToolType) (Object) hoeMaterial));
+    protected Optional<ToolType> getFor(Item item, @Nullable ItemStack itemStack) {
+        if (item instanceof ItemTool) {
+            return Optional.of((ToolType) (Object) ((ItemTool) item).toolMaterial);
+        } else if (item instanceof ItemSword) {
+            return Optional.of((ToolType) (Object) ((ItemSword) item).material);
+        } else if (item instanceof ItemHoe) {
+            return Optional.of((ToolType) (Object) ((ItemHoe) item).toolMaterial);
         }
         return Optional.empty();
     }

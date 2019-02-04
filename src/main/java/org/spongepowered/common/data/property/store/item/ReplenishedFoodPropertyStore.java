@@ -22,27 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.property;
+package org.spongepowered.common.data.property.store.item;
 
-import org.spongepowered.api.item.inventory.property.SlotIndex;
-import org.spongepowered.api.util.Coerce;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemFood;
+import net.minecraft.item.ItemStack;
+import org.spongepowered.common.data.property.store.common.AbstractItemStackPropertyStore;
 
-public final class SlotIndexImpl extends IntPropertyImpl implements SlotIndex {
+import java.util.OptionalDouble;
 
-    public SlotIndexImpl(int value, Operator operator) {
-        super(value, operator);
-    }
+import javax.annotation.Nullable;
 
-    public SlotIndexImpl(int value) {
-        this(value, Operator.DELEGATE);
-    }
+public class ReplenishedFoodPropertyStore extends AbstractItemStackPropertyStore.Dbl {
 
-    public static final class BuilderImpl extends PropertyBuilderImpl<Integer, SlotIndex, SlotIndex.Builder> implements SlotIndex.Builder{
-
-        @Override
-        public SlotIndex build() {
-            return new SlotIndexImpl(this.value, this.operator);
+    @Override
+    protected OptionalDouble getDoubleFor(Item item, @Nullable ItemStack itemStack) {
+        if (item instanceof ItemFood) {
+            if (itemStack == null) {
+                itemStack = new ItemStack(item);
+            }
+            return OptionalDouble.of(((ItemFood) item).getHealAmount(itemStack));
         }
+        return OptionalDouble.empty();
     }
-
 }

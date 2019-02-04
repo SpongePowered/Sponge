@@ -22,34 +22,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.query.operation;
+package org.spongepowered.common.data.property;
 
-import org.spongepowered.api.item.inventory.InventoryProperty;
-import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
-import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.query.SpongeQueryOperation;
+import org.spongepowered.api.data.property.Property;
+import org.spongepowered.api.data.property.PropertyHolder;
+import org.spongepowered.common.SpongeImpl;
 
-public final class InventoryPropertyQueryOperation extends SpongeQueryOperation<InventoryProperty<?, ?>> {
+import java.util.Map;
+import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
 
-    private final InventoryProperty<?, ?> property;
+public interface IPropertyHolder extends PropertyHolder {
 
-    public InventoryPropertyQueryOperation(InventoryProperty<?, ?> property) {
-        super(QueryOperationTypes.INVENTORY_PROPERTY);
-        this.property = property;
+    @Override
+    default <V> Optional<V> getProperty(Property<V> property) {
+        return SpongeImpl.getPropertyRegistry().getStore(property).getFor(this);
     }
 
     @Override
-    public boolean matches(Lens lens, Lens parent, Fabric inventory) {
-        if (parent == null) {
-            return false;
-        }
-        for (InventoryProperty<?, ?> lensProperty : parent.getProperties(lens)) {
-            if (this.property.matches(lensProperty)) {
-                return true;
-            }
-        }
-        return false;
+    default OptionalInt getIntProperty(Property<Integer> property) {
+        return SpongeImpl.getPropertyRegistry().getIntStore(property).getIntFor(this);
     }
 
+    @Override
+    default OptionalDouble getDoubleProperty(Property<Double> property) {
+        return SpongeImpl.getPropertyRegistry().getDoubleStore(property).getDoubleFor(this);
+    }
+
+    @Override
+    default Map<Property<?>, ?> getProperties() {
+        return SpongeImpl.getPropertyRegistry().getPropertiesFor(this);
+    }
 }

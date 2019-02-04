@@ -25,9 +25,9 @@
 package org.spongepowered.common.item.inventory.lens.impl.comp;
 
 import net.minecraft.entity.player.InventoryPlayer;
+import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryProperty;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
@@ -42,8 +42,8 @@ import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
@@ -144,13 +144,13 @@ public class HeldHandSlotLensImpl implements EquipmentSlotLens {
     }
 
     @Override
-    public Collection<InventoryProperty<?, ?>> getProperties(int index) {
-        return Collections.emptyList();
+    public Map<Property<?>, Object> getProperties(int index) {
+        return Collections.emptyMap();
     }
 
     @Override
-    public Collection<InventoryProperty<?, ?>> getProperties(Lens lens) {
-        return Collections.emptyList();
+    public Map<Property<?>, Object> getProperties(Lens lens) {
+        return Collections.emptyMap();
     }
 
     @Override

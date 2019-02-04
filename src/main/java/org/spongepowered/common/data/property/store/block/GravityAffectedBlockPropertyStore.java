@@ -26,7 +26,8 @@ package org.spongepowered.common.data.property.store.block;
 
 import net.minecraft.block.BlockFalling;
 import net.minecraft.block.state.IBlockState;
-import org.spongepowered.api.data.property.block.GravityAffectedProperty;
+import net.minecraft.util.EnumFacing;
+import org.spongepowered.api.util.OptBool;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.common.data.property.store.common.AbstractBlockPropertyStore;
 
@@ -34,18 +35,14 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-public class GravityAffectedPropertyStore extends AbstractBlockPropertyStore<GravityAffectedProperty> {
+public class GravityAffectedBlockPropertyStore extends AbstractBlockPropertyStore.Generic<Boolean> {
 
-    private static final GravityAffectedProperty TRUE = new GravityAffectedProperty(true);
-    private static final GravityAffectedProperty FALSE = new GravityAffectedProperty(false);
-
-    public GravityAffectedPropertyStore() {
+    public GravityAffectedBlockPropertyStore() {
         super(false);
     }
 
     @Override
-    protected Optional<GravityAffectedProperty> getForBlock(@Nullable Location<?> location, IBlockState block) {
-        return Optional.of(block.getBlock() instanceof BlockFalling ? TRUE : FALSE);
+    protected Optional<Boolean> getForBlock(@Nullable Location<?> location, IBlockState block, @Nullable EnumFacing facing) {
+        return OptBool.of(block.getBlock() instanceof BlockFalling);
     }
-
 }

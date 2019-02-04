@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.item.inventory.archetype;
 
-import org.spongepowered.api.item.inventory.InventoryProperty;
+import org.spongepowered.api.data.property.Property;
 
 import java.util.Collections;
 import java.util.Map;
@@ -34,7 +34,7 @@ import java.util.Map;
  */
 public class SlotArchetype extends CompositeInventoryArchetype {
 
-    public SlotArchetype(Map<String, InventoryProperty<String, ?>> properties) {
+    public SlotArchetype(Map<Property<?>, ?> properties) {
         super("minecraft:slot", "Slot", Collections.emptyList(), properties, null);
     }
 }

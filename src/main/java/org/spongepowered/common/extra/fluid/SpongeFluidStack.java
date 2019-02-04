@@ -26,18 +26,19 @@ package org.spongepowered.common.extra.fluid;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import com.google.common.collect.ImmutableMap;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.persistence.InvalidDataException;
+import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.extra.fluid.FluidStack;
@@ -47,7 +48,10 @@ import org.spongepowered.common.data.util.DataQueries;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
 import java.util.Set;
 
 import javax.annotation.Nullable;
@@ -182,16 +186,6 @@ public class SpongeFluidStack implements FluidStack {
     }
 
     @Override
-    public <T extends Property<?, ?>> Optional<T> getProperty(Class<T> propertyClass) {
-        return Optional.empty();
-    }
-
-    @Override
-    public Collection<Property<?, ?>> getApplicableProperties() {
-        return Collections.emptyList();
-    }
-
-    @Override
     public <E> Optional<E> get(Key<? extends BaseValue<E>> key) {
         return Optional.empty();
     }
@@ -219,5 +213,25 @@ public class SpongeFluidStack implements FluidStack {
     @Override
     public Set<ImmutableValue<?>> getValues() {
         return Collections.emptySet();
+    }
+
+    @Override
+    public <V> Optional<V> getProperty(Property<V> property) {
+        return Optional.empty();
+    }
+
+    @Override
+    public OptionalInt getIntProperty(Property<Integer> property) {
+        return OptionalInt.empty();
+    }
+
+    @Override
+    public OptionalDouble getDoubleProperty(Property<Double> property) {
+        return OptionalDouble.empty();
+    }
+
+    @Override
+    public Map<Property<?>, ?> getProperties() {
+        return ImmutableMap.of();
     }
 }

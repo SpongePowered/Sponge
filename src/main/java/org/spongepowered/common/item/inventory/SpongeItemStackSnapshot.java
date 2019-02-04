@@ -35,12 +35,12 @@ import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.GameDictionary;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
+import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.item.ItemType;
@@ -56,9 +56,11 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
-import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
@@ -338,21 +340,30 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     }
 
     @Override
+    public <V> Optional<V> getProperty(Property<V> property) {
+        return this.privateStack.getProperty(property);
+    }
+
+    @Override
+    public OptionalInt getIntProperty(Property<Integer> property) {
+        return this.privateStack.getIntProperty(property);
+    }
+
+    @Override
+    public OptionalDouble getDoubleProperty(Property<Double> property) {
+        return this.privateStack.getDoubleProperty(property);
+    }
+
+    @Override public Map<Property<?>, ?> getProperties() {
+        return this.privateStack.getProperties();
+    }
+
+    @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
                 .add("itemType", this.itemType.getKey())
                 .add("quantity", this.quantity)
                 .toString();
-    }
-
-    @Override
-    public <T extends Property<?, ?>> Optional<T> getProperty(Class<T> propertyClass) {
-        return this.privateStack.getProperty(propertyClass);
-    }
-
-    @Override
-    public Collection<Property<?, ?>> getApplicableProperties() {
-        return this.privateStack.getApplicableProperties();
     }
 
     public int getDamageValue() {
@@ -401,5 +412,4 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     public int hashCode() {
         return Objects.hashCode(this.itemType, this.quantity, this.damageValue, this.compound, this.creatorUniqueId);
     }
-
 }

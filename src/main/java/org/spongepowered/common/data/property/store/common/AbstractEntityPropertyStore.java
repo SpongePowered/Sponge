@@ -25,33 +25,52 @@
 package org.spongepowered.common.data.property.store.common;
 
 import net.minecraft.entity.Entity;
-import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.property.PropertyHolder;
-import org.spongepowered.api.util.Direction;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.data.property.store.DoublePropertyStore;
+import org.spongepowered.api.data.property.store.IntPropertyStore;
 
 import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
 
-public abstract class AbstractEntityPropertyStore<T extends Property<?, ?>> extends AbstractSpongePropertyStore<T> {
+public abstract class AbstractEntityPropertyStore<V> extends AbstractSpongePropertyStore<V> {
 
-    protected abstract Optional<T> getForEntity(Entity entity);
+    public static abstract class Generic<V> extends AbstractEntityPropertyStore<V> {
 
-    @Override
-    public Optional<T> getFor(PropertyHolder propertyHolder) {
-        if (propertyHolder instanceof Entity) {
-            return getForEntity((Entity) propertyHolder);
+        protected abstract Optional<V> getForEntity(Entity entity);
+
+        @Override
+        public Optional<V> getFor(PropertyHolder propertyHolder) {
+            if (propertyHolder instanceof Entity) {
+                return getForEntity((Entity) propertyHolder);
+            }
+            return Optional.empty();
         }
-        return Optional.empty();
     }
 
-    @Override
-    public final Optional<T> getFor(Location<World> location) {
-        return Optional.empty();
+    public static abstract class Int extends AbstractEntityPropertyStore<Integer> implements IntPropertyStore {
+
+        protected abstract OptionalInt getIntForEntity(Entity entity);
+
+        @Override
+        public OptionalInt getIntFor(PropertyHolder propertyHolder) {
+            if (propertyHolder instanceof Entity) {
+                return getIntForEntity((Entity) propertyHolder);
+            }
+            return OptionalInt.empty();
+        }
     }
 
-    @Override
-    public final Optional<T> getFor(Location<World> location, Direction direction) {
-        return Optional.empty();
+    public static abstract class Dbl extends AbstractEntityPropertyStore<Double> implements DoublePropertyStore {
+
+        protected abstract OptionalDouble getDoubleForEntity(Entity entity);
+
+        @Override
+        public OptionalDouble getDoubleFor(PropertyHolder propertyHolder) {
+            if (propertyHolder instanceof Entity) {
+                return getDoubleForEntity((Entity) propertyHolder);
+            }
+            return OptionalDouble.empty();
+        }
     }
 }

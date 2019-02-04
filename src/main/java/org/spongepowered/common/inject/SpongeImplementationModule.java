@@ -82,7 +82,8 @@ public class SpongeImplementationModule extends PrivateModule {
         this.bindAndExpose(CommandManager.class).to(SpongeCommandManager.class);
         this.bindAndExpose(DataManager.class).to(SpongeDataManager.class);
         this.bindAndExpose(ConfigManager.class).to(SpongeConfigManager.class);
-        this.bindAndExpose(PropertyRegistry.class).to(SpongePropertyRegistry.class);
+        this.bindAndExpose(PropertyRegistry.class).toInstance(SpongePropertyRegistry.getInstance());
+        this.bindAndExpose(SpongePropertyRegistry.class).toInstance(SpongePropertyRegistry.getInstance());
         this.bindAndExpose(CauseStackManager.class).to(SpongeCauseStackManager.class);
         this.bindAndExpose(MetricsConfigManager.class).to(SpongeMetricsConfigManager.class);
 

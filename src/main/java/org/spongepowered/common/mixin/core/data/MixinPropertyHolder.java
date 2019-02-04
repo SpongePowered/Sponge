@@ -25,30 +25,13 @@
 package org.spongepowered.common.mixin.core.data;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import org.spongepowered.api.data.Property;
-import org.spongepowered.api.data.property.PropertyHolder;
-import org.spongepowered.api.data.property.PropertyStore;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.SpongeImpl;
-
-import java.util.Collection;
-import java.util.Optional;
+import org.spongepowered.common.data.property.IPropertyHolder;
 
 @Mixin({Block.class, Entity.class, TileEntity.class, ItemStack.class})
-public abstract class MixinPropertyHolder implements PropertyHolder {
+public abstract class MixinPropertyHolder implements IPropertyHolder {
 
-    @Override
-    public <T extends Property<?, ?>> Optional<T> getProperty(Class<T> propertyClass) {
-        return SpongeImpl.getPropertyRegistry().getStore(propertyClass).flatMap(p -> p.getFor(this));
-    }
-
-    @Override
-    public Collection<Property<?, ?>> getApplicableProperties() {
-        return SpongeImpl.getPropertyRegistry().getPropertiesFor(this);
-
-    }
 }

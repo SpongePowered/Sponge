@@ -57,7 +57,7 @@ import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.property.SlotIndex;
+import org.spongepowered.api.item.inventory.InventoryProperties;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.plugin.Plugin;
@@ -299,7 +299,7 @@ public class AdvancementTest {
             return;
         }
         for (SlotTransaction transaction : event.getTransactions()) {
-            if (transaction.getSlot().getProperty(SlotIndex.class).get().getValue() == 0) {
+            if (transaction.getSlot().getProperty(InventoryProperties.SLOT_INDEX).get().getIndex() == 0) {
                 if (transaction.getFinal().getType() == ItemTypes.DIRT) {
                     player.getProgress(this.cookDirtAdvancement).grant();
                 } else if (this.suicidalAdvancement != null && (transaction.getFinal().getType() == ItemTypes.TNT ||

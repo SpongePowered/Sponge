@@ -30,8 +30,8 @@ import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.spec.CommandSpec;
-import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.property.PropertyMatcher;
 import org.spongepowered.api.data.type.DyeColors;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
@@ -39,14 +39,14 @@ import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.InventoryProperties;
 import org.spongepowered.api.item.inventory.InventoryTransformations;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.entity.Hotbar;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
-import org.spongepowered.api.item.inventory.property.EquipmentSlotType;
-import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
+import org.spongepowered.api.item.inventory.slot.SlotIndex;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
 
@@ -104,7 +104,7 @@ public class InventoryQueryTest {
                 .executor((src, args) -> {
                     Inventory inventory = getPlayerInventory(src);
                     Inventory slots = ((PlayerInventory) inventory).getHotbar()
-                            .query(QueryOperationTypes.INVENTORY_PROPERTY.of(SlotIndex.builder().value(3).operator(Property.Operator.LESS).build()));
+                            .query(PropertyMatcher.of(InventoryProperties.SLOT_INDEX, SlotIndex.of(3), PropertyMatcher.Operator.LESS));
                     src.sendMessage(Text.of("You have ", slots.totalItems(), " items in the first 3 slots of your hotbar."));
                     return CommandResult.success();
                 }).build();
@@ -152,14 +152,16 @@ public class InventoryQueryTest {
         Player joined = event.getPlayer();
         Inventory inventory = joined.getInventory();
 
-        Inventory chestPlate = EquipmentSlotType.of(EquipmentTypes.CHESTPLATE).queryIn(inventory);
+        Inventory chestPlate = inventory.query(PropertyMatcher.of(InventoryProperties.EQUIPMENT_TYPE, EquipmentTypes.CHESTPLATE));
         Preconditions.checkState(chestPlate.capacity() == 1, "ChestPlate Slot should be 1 but is " + chestPlate.capacity());
 
-        Inventory wornSlots = EquipmentSlotType.of(EquipmentTypes.WORN).queryIn(inventory);
+        Inventory wornSlots = inventory.query(PropertyMatcher.of(
+                InventoryProperties.EQUIPMENT_TYPE, EquipmentTypes.WORN, PropertyMatcher.Operator.INCLUDES));
         // 4 armor slots
         Preconditions.checkState(wornSlots.capacity() == 4, "Worn Slots should be 4 but is " + wornSlots.capacity());
 
-        Inventory equipped = EquipmentSlotType.of(EquipmentTypes.EQUIPPED).queryIn(inventory);
+        Inventory equipped = inventory.query(PropertyMatcher.of(
+                InventoryProperties.EQUIPMENT_TYPE, EquipmentTypes.EQUIPPED, PropertyMatcher.Operator.INCLUDES));
         // 4 armor slots + OFF_HAND + MAIN_HAND
         Preconditions.checkState(equipped.capacity() == 6, "Equipped Slots should be 6 but is " + equipped.capacity());
     }

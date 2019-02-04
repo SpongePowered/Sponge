@@ -29,9 +29,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
+import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryProperty;
 import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.common.item.inventory.PropertyEntry;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
@@ -43,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
@@ -78,19 +80,19 @@ public abstract class AbstractLens implements Lens {
         this.spanningChildren = new ArrayList<>();
     }
 
-    protected void addChild(Lens lens, InventoryProperty<?, ?>... properties) {
+    protected void addChild(Lens lens, PropertyEntry... properties) {
         checkNotNull(lens, "Attempted to register a null lens");
         this.children.add(lens, properties);
     }
     
-    protected void addSpanningChild(Lens lens, InventoryProperty<?, ?>... properties) {
+    protected void addSpanningChild(Lens lens, PropertyEntry... properties) {
         this.addChild(lens, properties);
 
         for (LensHandle spanningChild : this.spanningChildren) {
             if (spanningChild.lens == lens) { // Spanning Child already exists
-                for (InventoryProperty<?, ?> property : properties) {
+                for (PropertyEntry entry : properties) {
                     // Just add properties
-                    spanningChild.setProperty(property);
+                    spanningChild.setProperty(entry);
                 }
                 return;
             }
@@ -207,12 +209,12 @@ public abstract class AbstractLens implements Lens {
     }
 
     @Override
-    public Collection<InventoryProperty<?, ?>> getProperties(int index) {
+    public Map<Property<?>, Object> getProperties(int index) {
         return this.children.getProperties(index);
     }
     
     @Override
-    public Collection<InventoryProperty<?, ?>> getProperties(Lens child) {
+    public Map<Property<?>, Object> getProperties(Lens child) {
         if (!this.children.has(child)) {
             throw new NoSuchElementException("Specified child lens is not a direct descendant this lens");
         }

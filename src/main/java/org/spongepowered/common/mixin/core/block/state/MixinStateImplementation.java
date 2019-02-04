@@ -32,7 +32,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.Block;
 import net.minecraft.block.properties.IProperty;
-import net.minecraft.block.state.BlockStateBase;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -40,18 +40,21 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
+import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.util.Cycleable;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
@@ -62,10 +65,11 @@ import org.spongepowered.common.interfaces.block.IMixinBlockState;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -75,11 +79,11 @@ import javax.annotation.Nullable;
  * This shares implementation with {@link IMixinBlockState}, since this
  * all relies on Data API implementations.
  */
+@Implements(@Interface(iface = BlockState.class, prefix = "blockState$"))
 @Mixin(net.minecraft.block.state.BlockStateContainer.StateImplementation.class)
-public abstract class MixinStateImplementation extends BlockStateBase implements BlockState, IMixinBlockState {
+public abstract class MixinStateImplementation implements BlockState, IMixinBlockState {
 
     @Shadow @Final private Block block;
-    @Shadow @Final private ImmutableMap<IProperty<?>, Comparable<?>> properties;
 
     // All of these fields are lazily evaluated either at startup or the first time
     // they are accessed by a plugin, depending on how much of an impact the
@@ -90,7 +94,7 @@ public abstract class MixinStateImplementation extends BlockStateBase implements
     @Nullable private ImmutableSet<Key<?>> keys;
     @Nullable private ImmutableList<ImmutableDataManipulator<?, ?>> manipulators;
     @Nullable private ImmutableMap<Key<?>, Object> keyMap;
-    @Nullable private ImmutableMap<Class<? extends Property<?, ?>>, Property<?, ?>> dataProperties;
+    @Nullable private ImmutableMap<Property<?>, ?> dataProperties;
     @Nullable private CatalogKey id;
 
     @SuppressWarnings({"rawtypes", "unchecked"})
@@ -146,7 +150,7 @@ public abstract class MixinStateImplementation extends BlockStateBase implements
 
     private ImmutableList<ImmutableDataManipulator<?, ?>> lazyLoadManipulatorsAndKeys() {
         if (this.manipulators == null) {
-            this.manipulators = ImmutableList.copyOf(((IMixinBlock) this.block).getManipulators(this));
+            this.manipulators = ImmutableList.copyOf(((IMixinBlock) this.block).getManipulators((IBlockState) this));
         }
         if (this.keyMap == null) {
             ImmutableMap.Builder<Key<?>, Object> builder = ImmutableMap.builder();
@@ -205,7 +209,7 @@ public abstract class MixinStateImplementation extends BlockStateBase implements
         if (!supports(key)) {
             return Optional.empty();
         }
-        return ((IMixinBlock) this.block).getStateWithValue(this, key, value);
+        return ((IMixinBlock) this.block).getStateWithValue((IBlockState) this, key, value);
     }
 
     @SuppressWarnings("unchecked")
@@ -218,7 +222,7 @@ public abstract class MixinStateImplementation extends BlockStateBase implements
     @Override
     public Optional<BlockState> with(ImmutableDataManipulator<?, ?> valueContainer) {
         if (supports((Class<ImmutableDataManipulator<?, ?>>) valueContainer.getClass())) {
-            return ((IMixinBlock) this.block).getStateWithData(this, valueContainer);
+            return ((IMixinBlock) this.block).getStateWithData((IBlockState) this, valueContainer);
         }
         return Optional.empty();
     }
@@ -277,20 +281,45 @@ public abstract class MixinStateImplementation extends BlockStateBase implements
         return temp;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public <T extends Property<?, ?>> Optional<T> getProperty(Class<T> propertyClass) {
-        return Optional.ofNullable((T) this.getSpongeInternalProperties().get(propertyClass));
+    public <V> Optional<V> getProperty(Property<V> property) {
+        checkNotNull(property, "property");
+        return Optional.ofNullable((V) getSpongeInternalProperties().get(property));
     }
 
     @Override
-    public Collection<Property<?, ?>> getApplicableProperties() {
-        return this.getSpongeInternalProperties().values();
+    public <V> Optional<V> getProperty(Direction direction, Property<V> property) {
+        return getProperty(property);
     }
 
-    private ImmutableMap<Class<? extends Property<?, ?>>, Property<?, ?>> getSpongeInternalProperties() {
+    @Override
+    public OptionalInt getIntProperty(Property<Integer> property) {
+        return getProperty(property).map(OptionalInt::of).orElse(OptionalInt.empty());
+    }
+
+    @Override
+    public OptionalInt getIntProperty(Direction direction, Property<Integer> property) {
+        return getIntProperty(property);
+    }
+
+    @Override
+    public OptionalDouble getDoubleProperty(Property<Double> property) {
+        return getProperty(property).map(OptionalDouble::of).orElse(OptionalDouble.empty());
+    }
+
+    @Override
+    public OptionalDouble getDoubleProperty(Direction direction, Property<Double> property) {
+        return getDoubleProperty(property);
+    }
+
+    @Override
+    public Map<Property<?>, ?> getProperties() {
+        return getSpongeInternalProperties();
+    }
+
+    private ImmutableMap<Property<?>, ?> getSpongeInternalProperties() {
         if (this.dataProperties == null) {
-            this.dataProperties = ((IMixinBlock) this.block).getProperties(this);
+            this.dataProperties = ((IMixinBlock) this.block).getProperties((IBlockState) this);
         }
         return this.dataProperties;
     }
@@ -358,7 +387,7 @@ public abstract class MixinStateImplementation extends BlockStateBase implements
 
     @Override
     public int getStateMeta() {
-        return this.block.getMetaFromState(this);
+        return this.block.getMetaFromState((IBlockState) this);
     }
 
     @Override
@@ -367,7 +396,7 @@ public abstract class MixinStateImplementation extends BlockStateBase implements
         StringBuilder builder = new StringBuilder();
         builder.append(((BlockType) block).getKey().getValue());
 
-        final ImmutableMap<IProperty<?>, Comparable<?>> properties = this.getProperties();
+        final ImmutableMap<IProperty<?>, Comparable<?>> properties = ((IBlockState) this).getProperties();
         if (!properties.isEmpty()) {
             builder.append('[');
             Joiner joiner = Joiner.on(',');

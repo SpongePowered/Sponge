@@ -24,10 +24,29 @@
  */
 package org.spongepowered.common.mixin.core.item.data;
 
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemPotion;
+import net.minecraft.item.ItemStack;
+import net.minecraft.potion.PotionUtils;
+import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.interfaces.item.IMixinItemPotionProvider;
 import org.spongepowered.common.mixin.core.item.MixinItem;
 
+import java.util.Collections;
+import java.util.List;
+
+import javax.annotation.Nullable;
+
 @Mixin(ItemPotion.class)
-public abstract class MixinItemPotion extends MixinItem {
+public abstract class MixinItemPotion extends MixinItem implements IMixinItemPotionProvider {
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<PotionEffect> getApplicablePotions(@Nullable ItemStack itemStack) {
+        if (itemStack == null) {
+            itemStack = new ItemStack((Item) (Object) this, 1);
+        }
+        return Collections.unmodifiableList((List) PotionUtils.getEffectsFromStack(itemStack));
+    }
 }

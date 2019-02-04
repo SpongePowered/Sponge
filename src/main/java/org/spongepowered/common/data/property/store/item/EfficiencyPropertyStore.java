@@ -24,21 +24,22 @@
  */
 package org.spongepowered.common.data.property.store.item;
 
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemTool;
-import org.spongepowered.api.data.property.item.EfficiencyProperty;
 import org.spongepowered.common.data.property.store.common.AbstractItemStackPropertyStore;
 
-import java.util.Optional;
+import java.util.OptionalDouble;
 
-public class EfficiencyPropertyStore extends AbstractItemStackPropertyStore<EfficiencyProperty> {
+import javax.annotation.Nullable;
+
+public class EfficiencyPropertyStore extends AbstractItemStackPropertyStore.Dbl {
 
     @Override
-    protected Optional<EfficiencyProperty> getFor(ItemStack itemStack) {
-        if (itemStack.getItem() instanceof ItemTool) {
-            final ItemTool tool = (ItemTool) itemStack.getItem();
-            return Optional.of(new EfficiencyProperty(tool.efficiency));
+    protected OptionalDouble getDoubleFor(Item item, @Nullable ItemStack itemStack) {
+        if (item instanceof ItemTool) {
+            return OptionalDouble.of(((ItemTool) item).efficiency);
         }
-        return Optional.empty();
+        return OptionalDouble.empty();
     }
 }

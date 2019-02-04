@@ -25,7 +25,8 @@
 package org.spongepowered.common.data.property.store.block;
 
 import net.minecraft.block.state.IBlockState;
-import org.spongepowered.api.data.property.block.StatisticsTrackedProperty;
+import net.minecraft.util.EnumFacing;
+import org.spongepowered.api.util.OptBool;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.common.data.property.store.common.AbstractBlockPropertyStore;
 
@@ -33,18 +34,14 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-public class StatisticsTrackedPropertyStore extends AbstractBlockPropertyStore<StatisticsTrackedProperty> {
-
-    private static final StatisticsTrackedProperty TRUE = new StatisticsTrackedProperty(true);
-    private static final StatisticsTrackedProperty FALSE = new StatisticsTrackedProperty(false);
+public class StatisticsTrackedPropertyStore extends AbstractBlockPropertyStore.Generic<Boolean> {
 
     public StatisticsTrackedPropertyStore() {
         super(true);
     }
 
     @Override
-    protected Optional<StatisticsTrackedProperty> getForBlock(@Nullable Location<?> location, IBlockState block) {
-        return Optional.of(block.getBlock().getEnableStats() ? TRUE : FALSE);
+    protected Optional<Boolean> getForBlock(@Nullable Location<?> location, IBlockState block, @Nullable EnumFacing facing) {
+        return OptBool.of(block.getBlock().getEnableStats());
     }
-
 }

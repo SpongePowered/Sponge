@@ -24,16 +24,14 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl;
 
-import static org.spongepowered.api.data.Property.Operator.DELEGATE;
-
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.common.item.inventory.PropertyEntry;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.VanillaAdapter;
 import org.spongepowered.common.item.inventory.lens.CompoundSlotProvider;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
-import org.spongepowered.common.item.inventory.property.SlotIndexImpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +56,7 @@ public class CompoundLens extends SlotBasedLens {
         // Adding slots
         for (int ord = 0, slot = this.base; ord < this.size; ord++, slot++) {
             if (!this.children.has(slots.getSlotLens(slot))) {
-                this.addSpanningChild(slots.getSlotLens(slot), new SlotIndexImpl(ord, DELEGATE));
+                this.addSpanningChild(slots.getSlotLens(slot), PropertyEntry.slotIndex(ord));
             }
         }
     }

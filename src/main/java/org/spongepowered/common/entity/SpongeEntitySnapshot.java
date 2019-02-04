@@ -35,7 +35,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
@@ -56,13 +55,13 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.common.data.property.IPropertyHolder;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 
 import java.lang.ref.WeakReference;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -71,7 +70,7 @@ import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
-public class SpongeEntitySnapshot implements EntitySnapshot {
+public class SpongeEntitySnapshot implements EntitySnapshot, IPropertyHolder {
 
     @Nullable private final UUID entityUuid;
     private final UUID worldUuid;
@@ -443,16 +442,6 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
             }
         }
         return Optional.empty();
-    }
-
-    @Override
-    public <T extends Property<?, ?>> Optional<T> getProperty(Class<T> propertyClass) {
-        return Optional.empty();
-    }
-
-    @Override
-    public Collection<Property<?, ?>> getApplicableProperties() {
-        return ImmutableList.of();
     }
 
     @Override

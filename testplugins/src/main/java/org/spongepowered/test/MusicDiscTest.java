@@ -24,8 +24,9 @@
  */
 package org.spongepowered.test;
 
-import org.spongepowered.api.data.property.item.MusicDiscProperty;
+import org.spongepowered.api.data.property.Properties;
 import org.spongepowered.api.data.type.HandTypes;
+import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.filter.cause.Root;
@@ -37,14 +38,14 @@ import org.spongepowered.api.plugin.Plugin;
 import java.util.Optional;
 
 @Plugin(id = "record_test", name = "Record Test", description = "Right click to start/stop a record at a position.", version = "0.0.0")
-public class RecordTest {
+public class MusicDiscTest {
 
     @Listener
     public void onPlayerInteract(InteractItemEvent.Secondary event, @Root Player player) {
         final ItemStack itemStack = player.getItemInHand(HandTypes.MAIN_HAND);
-        final Optional<MusicDiscProperty> optMusic = itemStack.getProperty(MusicDiscProperty.class);
-        if (optMusic.isPresent()) {
-            player.playMusicDisc(player.getLocation().getPosition().toInt(), optMusic.get().getValue());
+        final Optional<MusicDisc> optMusicDisc = itemStack.getProperty(Properties.MUSIC_DISC);
+        if (optMusicDisc.isPresent()) {
+            player.playMusicDisc(player.getLocation().getPosition().toInt(), optMusicDisc.get());
         } else if (itemStack.getType() == ItemTypes.SPONGE) {
             player.stopMusicDisc(player.getLocation().getPosition().toInt());
         }

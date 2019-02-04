@@ -26,7 +26,7 @@ package org.spongepowered.common.data.util;
 
 import com.google.common.collect.ComparisonChain;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
-import org.spongepowered.api.data.property.PropertyStore;
+import org.spongepowered.api.data.property.store.PropertyStore;
 import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.ValueProcessor;
 import org.spongepowered.common.data.nbt.data.NbtDataProcessor;

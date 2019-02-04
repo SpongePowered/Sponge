@@ -54,6 +54,8 @@ import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.persistence.DataFormat;
 import org.spongepowered.api.data.persistence.DataTranslator;
+import org.spongepowered.api.data.property.Property;
+import org.spongepowered.api.data.property.PropertyMatcher;
 import org.spongepowered.api.data.type.*;
 import org.spongepowered.api.effect.particle.*;
 import org.spongepowered.api.effect.potion.PotionEffect;
@@ -65,13 +67,13 @@ import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.ai.GoalType;
 import org.spongepowered.api.entity.ai.task.AITaskType;
+import org.spongepowered.api.entity.ai.task.builtin.LookIdleAITask;
 import org.spongepowered.api.entity.ai.task.builtin.SwimmingAITask;
+import org.spongepowered.api.entity.ai.task.builtin.WatchClosestAITask;
 import org.spongepowered.api.entity.ai.task.builtin.creature.AttackLivingAITask;
 import org.spongepowered.api.entity.ai.task.builtin.creature.AvoidEntityAITask;
-import org.spongepowered.api.entity.ai.task.builtin.LookIdleAITask;
 import org.spongepowered.api.entity.ai.task.builtin.creature.RangeAgentAITask;
 import org.spongepowered.api.entity.ai.task.builtin.creature.WanderAITask;
-import org.spongepowered.api.entity.ai.task.builtin.WatchClosestAITask;
 import org.spongepowered.api.entity.ai.task.builtin.creature.horse.RunAroundLikeCrazyAITask;
 import org.spongepowered.api.entity.ai.task.builtin.creature.target.FindNearestAttackableTargetAITask;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
@@ -79,35 +81,29 @@ import org.spongepowered.api.entity.living.player.tab.TabListEntry;
 import org.spongepowered.api.event.cause.EventContextKey;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifierType;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
-import org.spongepowered.api.event.cause.entity.damage.source.*;
+import org.spongepowered.api.event.cause.entity.damage.source.BlockDamageSource;
+import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
+import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
+import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;
+import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
 import org.spongepowered.api.event.cause.entity.dismount.DismountType;
-import org.spongepowered.api.event.cause.entity.spawn.*;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
 import org.spongepowered.api.event.cause.entity.teleport.TeleportType;
 import org.spongepowered.api.extra.fluid.FluidStack;
 import org.spongepowered.api.extra.fluid.FluidStackSnapshot;
 import org.spongepowered.api.extra.fluid.FluidType;
-import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.item.enchantment.Enchantment;
+import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
+import org.spongepowered.api.item.inventory.InventoryTransformation;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackGenerator;
-import org.spongepowered.api.item.inventory.InventoryTransformation;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
-import org.spongepowered.api.item.inventory.property.EquipmentSlotType;
-import org.spongepowered.api.item.inventory.property.GuiId;
-import org.spongepowered.api.item.inventory.property.GuiIdProperty;
-import org.spongepowered.api.item.inventory.property.Identifiable;
-import org.spongepowered.api.item.inventory.property.IntProperty;
-import org.spongepowered.api.item.inventory.property.InventoryCapacity;
-import org.spongepowered.api.item.inventory.property.InventoryDimension;
-import org.spongepowered.api.item.inventory.property.InventoryTitle;
-import org.spongepowered.api.item.inventory.property.SlotIndex;
-import org.spongepowered.api.item.inventory.property.SlotPos;
-import org.spongepowered.api.item.inventory.property.SlotSide;
-import org.spongepowered.api.item.inventory.property.StringProperty;
+import org.spongepowered.api.item.inventory.gui.GuiId;
 import org.spongepowered.api.item.inventory.query.QueryOperationType;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.item.merchant.TradeOffer;
@@ -153,10 +149,10 @@ import org.spongepowered.api.util.rotation.Rotation;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.LocatableBlock;
+import org.spongepowered.api.world.PortalAgentType;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.WorldBorder;
-import org.spongepowered.api.world.PortalAgentType;
 import org.spongepowered.api.world.biome.BiomeGenerationSettings;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.biome.VirtualBiomeType;
@@ -177,8 +173,8 @@ import org.spongepowered.common.advancement.SpongeAdvancementBuilder;
 import org.spongepowered.common.advancement.SpongeAdvancementTreeBuilder;
 import org.spongepowered.common.advancement.SpongeCriterionBuilder;
 import org.spongepowered.common.advancement.SpongeDisplayInfoBuilder;
-import org.spongepowered.common.advancement.SpongeScoreCriterionBuilder;
 import org.spongepowered.common.advancement.SpongeFilteredTriggerBuilder;
+import org.spongepowered.common.advancement.SpongeScoreCriterionBuilder;
 import org.spongepowered.common.advancement.SpongeTriggerBuilder;
 import org.spongepowered.common.ban.SpongeBanBuilder;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
@@ -190,8 +186,8 @@ import org.spongepowered.common.data.SpongeDataRegistrationBuilder;
 import org.spongepowered.common.data.SpongeKeyBuilder;
 import org.spongepowered.common.data.SpongeManipulatorRegistry;
 import org.spongepowered.common.data.builder.CatalogKeyBuilder;
-import org.spongepowered.common.item.enchantment.SpongeEnchantmentBuilder;
 import org.spongepowered.common.data.builder.meta.SpongePatternLayerBuilder;
+import org.spongepowered.common.data.property.*;
 import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
 import org.spongepowered.common.effect.potion.SpongePotionBuilder;
 import org.spongepowered.common.effect.sound.SpongeSoundBuilder;
@@ -201,26 +197,20 @@ import org.spongepowered.common.entity.ai.*;
 import org.spongepowered.common.entity.ai.target.SpongeFindNearestAttackableTargetAIBuilder;
 import org.spongepowered.common.entity.player.tab.TabListEntryBuilder;
 import org.spongepowered.common.event.SpongeEventContextKeyBuilder;
-import org.spongepowered.common.event.damage.*;
+import org.spongepowered.common.event.damage.SpongeBlockDamageSourceBuilder;
+import org.spongepowered.common.event.damage.SpongeDamageSourceBuilder;
+import org.spongepowered.common.event.damage.SpongeEntityDamageSourceBuilder;
+import org.spongepowered.common.event.damage.SpongeFallingBlockDamgeSourceBuilder;
+import org.spongepowered.common.event.damage.SpongeIndirectEntityDamageSourceBuilder;
 import org.spongepowered.common.extra.fluid.SpongeFluidStackBuilder;
 import org.spongepowered.common.extra.fluid.SpongeFluidStackSnapshotBuilder;
 import org.spongepowered.common.item.SpongeFireworkEffectBuilder;
+import org.spongepowered.common.item.enchantment.SpongeEnchantmentBuilder;
 import org.spongepowered.common.item.inventory.InventoryTransactionResultImpl;
 import org.spongepowered.common.item.inventory.SpongeInventoryBuilder;
 import org.spongepowered.common.item.inventory.SpongeItemStackBuilder;
 import org.spongepowered.common.item.inventory.archetype.SpongeInventoryArchetypeBuilder;
 import org.spongepowered.common.item.inventory.generation.SpongeItemStackGenerator;
-import org.spongepowered.common.item.inventory.property.EquipmentSlotTypeImpl;
-import org.spongepowered.common.item.inventory.property.GuiIdPropertyImpl;
-import org.spongepowered.common.item.inventory.property.IdentifiableImpl;
-import org.spongepowered.common.item.inventory.property.IntPropertyImpl;
-import org.spongepowered.common.item.inventory.property.InventoryCapacityImpl;
-import org.spongepowered.common.item.inventory.property.InventoryDimensionImpl;
-import org.spongepowered.common.item.inventory.property.InventoryTitleImpl;
-import org.spongepowered.common.item.inventory.property.SlotIndexImpl;
-import org.spongepowered.common.item.inventory.property.SlotPosImpl;
-import org.spongepowered.common.item.inventory.property.SlotSideImpl;
-import org.spongepowered.common.item.inventory.property.StringPropertyImpl;
 import org.spongepowered.common.item.inventory.query.SpongeTransformationBuilder;
 import org.spongepowered.common.item.merchant.SpongeTradeOfferBuilder;
 import org.spongepowered.common.item.merchant.SpongeTradeOfferGenerator;
@@ -443,20 +433,11 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(ScoreAdvancementCriterion.Builder.class, SpongeScoreCriterionBuilder::new)
             .registerBuilderSupplier(FilteredTrigger.Builder.class, SpongeFilteredTriggerBuilder::new)
             .registerBuilderSupplier(Trigger.Builder.class, SpongeTriggerBuilder::new)
-            .registerBuilderSupplier(SlotPos.Builder.class, SlotPosImpl.BuilderImpl::new)
-            .registerBuilderSupplier(SlotSide.Builder.class, SlotSideImpl.BuilderImpl::new)
-            .registerBuilderSupplier(StringProperty.Builder.class, StringPropertyImpl.BuilderImpl::new)
-            .registerBuilderSupplier(IntProperty.Builder.class, IntPropertyImpl.BuilderImpl::new)
-            .registerBuilderSupplier(SlotIndex.Builder.class, SlotIndexImpl.BuilderImpl::new)
-            .registerBuilderSupplier(InventoryCapacity.Builder.class, InventoryCapacityImpl.BuilderImpl::new)
-            .registerBuilderSupplier(Identifiable.Builder.class, IdentifiableImpl.BuilderImpl::new)
-            .registerBuilderSupplier(GuiIdProperty.Builder.class, GuiIdPropertyImpl.BuilderImpl::new)
-            .registerBuilderSupplier(EquipmentSlotType.Builder.class, EquipmentSlotTypeImpl.BuilderImpl::new)
-            .registerBuilderSupplier(InventoryDimension.Builder.class, InventoryDimensionImpl.BuilderImpl::new)
-            .registerBuilderSupplier(InventoryTitle.Builder.class, InventoryTitleImpl.BuilderImpl::new)
-            .registerBuilderSupplier(InventoryTransactionResult.Builder.class, InventoryTransactionResultImpl.Builder::new)
             .registerBuilderSupplier(CatalogKey.Builder.class, CatalogKeyBuilder::new)
+            .registerBuilderSupplier(InventoryTransactionResult.Builder.class, InventoryTransactionResultImpl.Builder::new)
             .registerBuilderSupplier(TextTemplate.Arg.Builder.class, TextTemplateImpl.ArgImpl.BuilderImpl::new)
+            .registerBuilderSupplier(Property.Builder.class, SpongePropertyBuilder::new)
+            .registerBuilderSupplier(PropertyMatcher.Builder.class, SpongePropertyMatcherBuilder::new)
         ;
     }
 
@@ -587,6 +568,7 @@ public final class CommonModuleRegistry {
             .registerModule(new CriterionRegistryModule())
             .registerModule(((Class<DataRegistration<?, ?>>) (Class<?>) DataRegistration.class), SpongeManipulatorRegistry.getInstance())
             .registerModule(new ItemStackComparatorRegistryModule())
+            .registerModule(Property.class, (CatalogRegistryModule) SpongePropertyRegistry.getInstance())
 
             // Miscellaneous Registries
             .registerModule(DungeonMobRegistryModule.getInstance())

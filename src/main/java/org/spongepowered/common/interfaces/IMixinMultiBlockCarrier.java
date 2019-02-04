@@ -24,17 +24,11 @@
  */
 package org.spongepowered.common.interfaces;
 
-import net.minecraft.inventory.ISidedInventory;
-import net.minecraft.util.EnumFacing;
-import org.spongepowered.api.item.inventory.EmptyInventory;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.MultiBlockCarrier;
-import org.spongepowered.api.item.inventory.SingleBlockCarrier;
-import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 
 import java.util.Optional;
 

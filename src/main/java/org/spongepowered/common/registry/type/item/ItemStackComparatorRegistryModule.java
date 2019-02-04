@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.registry.type.item;
 
-import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.DamageableData;
+import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackComparators;
 import org.spongepowered.api.registry.RegistrationPhase;
@@ -36,9 +36,9 @@ import org.spongepowered.api.registry.util.RegisterCatalog;
 
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 @SuppressWarnings("unchecked")
@@ -71,11 +71,11 @@ public final class ItemStackComparatorRegistryModule implements RegistryModule {
 
         @Override
         public int compare(ItemStack o1, ItemStack o2) {
-            Set<Property<?, ?>> properties = new HashSet<>(o2.getApplicableProperties());
-            for (Property<?, ?> property : o1.getApplicableProperties()) {
-                if (properties.contains(property)) {
-                    properties.remove(property);
-                } else {
+            final Map<Property<?>, Object> properties = new HashMap<>(o1.getProperties());
+            for (Map.Entry<Property<?>, ?> entry : o2.getProperties().entrySet()) {
+                final Object value1 = properties.remove(entry.getKey());
+                final Object value2 = entry.getValue();
+                if (!Objects.equals(value1, value2)) {
                     return -1;
                 }
             }

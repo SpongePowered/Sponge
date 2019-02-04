@@ -39,6 +39,8 @@ import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 public abstract class AdapterLogic {
 
     private AdapterLogic() {
@@ -48,7 +50,7 @@ public abstract class AdapterLogic {
         return AdapterLogic.pollSequential(adapter.getFabric(), adapter.getRootLens());
     }
 
-    public static Optional<ItemStack> pollSequential(Fabric inv, Lens lens) {
+    public static Optional<ItemStack> pollSequential(Fabric inv, @Nullable Lens lens) {
         return AdapterLogic.findStack(inv, lens, true);
     }
 
@@ -56,7 +58,7 @@ public abstract class AdapterLogic {
         return AdapterLogic.pollSequential(adapter.getFabric(), adapter.getRootLens(), limit);
     }
 
-    public static Optional<ItemStack> pollSequential(Fabric inv, Lens lens, int limit) {
+    public static Optional<ItemStack> pollSequential(Fabric inv, @Nullable Lens lens, int limit) {
         return AdapterLogic.findStacks(inv, lens, limit, true);
     }
 
@@ -64,7 +66,7 @@ public abstract class AdapterLogic {
         return AdapterLogic.peekSequential(adapter.getFabric(), adapter.getRootLens());
     }
 
-    public static Optional<ItemStack> peekSequential(Fabric inv, Lens lens) {
+    public static Optional<ItemStack> peekSequential(Fabric inv, @Nullable Lens lens) {
         return AdapterLogic.findStack(inv, lens, false);
     }
 
@@ -72,11 +74,11 @@ public abstract class AdapterLogic {
         return AdapterLogic.peekSequential(adapter.getFabric(), adapter.getRootLens(), limit);
     }
 
-    public static Optional<ItemStack> peekSequential(Fabric inv, Lens lens, int limit) {
+    public static Optional<ItemStack> peekSequential(Fabric inv, @Nullable Lens lens, int limit) {
         return AdapterLogic.findStacks(inv, lens, limit, false);
     }
 
-    private static Optional<ItemStack> findStack(Fabric inv, Lens lens, boolean remove) {
+    private static Optional<ItemStack> findStack(Fabric inv, @Nullable Lens lens, boolean remove) {
         if (lens == null) {
             return Optional.empty();
         }
@@ -95,7 +97,7 @@ public abstract class AdapterLogic {
         return Optional.empty();
     }
 
-    private static Optional<ItemStack> findStacks(Fabric inv, Lens lens, int limit, boolean remove) {
+    private static Optional<ItemStack> findStacks(Fabric inv, @Nullable Lens lens, int limit, boolean remove) {
 
         if (lens == null) {
             return Optional.empty();
@@ -143,7 +145,7 @@ public abstract class AdapterLogic {
         return AdapterLogic.insertSequential(adapter.getFabric(), adapter.getRootLens(), stack);
     }
 
-    public static InventoryTransactionResult insertSequential(Fabric inv, Lens lens, ItemStack stack) {
+    public static InventoryTransactionResult insertSequential(Fabric inv, @Nullable Lens lens, ItemStack stack) {
         if (lens == null) {
             return InventoryTransactionResult.builder().type(InventoryTransactionResult.Type.FAILURE).reject(ItemStackUtil.cloneDefensive(stack))
                     .build();
@@ -192,7 +194,7 @@ public abstract class AdapterLogic {
         return AdapterLogic.appendSequential(adapter.getFabric(), adapter.getRootLens(), stack);
     }
 
-    public static InventoryTransactionResult appendSequential(Fabric inv, Lens lens, ItemStack stack) {
+    public static InventoryTransactionResult appendSequential(Fabric inv, @Nullable Lens lens, ItemStack stack) {
         if (lens == null) {
             return InventoryTransactionResult.builder().type(InventoryTransactionResult.Type.FAILURE).reject(ItemStackUtil.cloneDefensive(stack)).build();
         }

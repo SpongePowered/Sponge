@@ -24,14 +24,13 @@
  */
 package org.spongepowered.common.registry.type.item;
 
-import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.item.inventory.query.QueryOperationType;
 import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.item.inventory.query.SpongeQueryOperationType;
 import org.spongepowered.common.item.inventory.query.SpongeQueryOperationTypes;
-import org.spongepowered.common.item.inventory.query.operation.InventoryPropertyQueryOperation;
+import org.spongepowered.common.item.inventory.query.operation.InventoryPropertyMatcherQueryOperation;
 import org.spongepowered.common.item.inventory.query.operation.InventoryTranslationQueryOperation;
 import org.spongepowered.common.item.inventory.query.operation.InventoryTypeQueryOperation;
 import org.spongepowered.common.item.inventory.query.operation.ItemStackCustomOperation;
@@ -40,11 +39,6 @@ import org.spongepowered.common.item.inventory.query.operation.ItemStackIgnoreQu
 import org.spongepowered.common.item.inventory.query.operation.ItemTypeQueryOperation;
 import org.spongepowered.common.item.inventory.query.operation.TypeQueryOperation;
 import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 @RegisterCatalog(QueryOperationTypes.class)
@@ -59,7 +53,7 @@ public final class QueryOperationRegistryModule extends AbstractCatalogRegistryM
         register(new SpongeQueryOperationType<>("item_stack_ignore_quantity", ItemStackIgnoreQuantityOperation::new));
         register(new SpongeQueryOperationType<>("item_stack_exact", ItemStackExactQueryOperation::new));
         register(new SpongeQueryOperationType<>("item_stack_custom", ItemStackCustomOperation::new));
-        register(new SpongeQueryOperationType<>("inventory_property", InventoryPropertyQueryOperation::new));
+        register(new SpongeQueryOperationType<>("property", InventoryPropertyMatcherQueryOperation::new));
         register(new SpongeQueryOperationType<>("inventory_translation", InventoryTranslationQueryOperation::new));
 
         register(SpongeQueryOperationTypes.LENS);

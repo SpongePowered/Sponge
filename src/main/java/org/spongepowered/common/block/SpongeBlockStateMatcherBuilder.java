@@ -28,9 +28,11 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.block.BlockStateMatcher;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.trait.BlockTrait;
+import org.spongepowered.api.data.property.PropertyMatcher;
 
 import java.util.ArrayList;
 
@@ -41,6 +43,7 @@ public class SpongeBlockStateMatcherBuilder implements BlockStateMatcher.Builder
     @Nullable private BlockType type;
     private ArrayList<BlockTrait<?>> traits = new ArrayList<>();
     private ArrayList<Object> values = new ArrayList<>();
+    private ArrayList<PropertyMatcher<?>> propertyMatchers = new ArrayList<>();
 
     @Override
     public SpongeBlockStateMatcherBuilder type(BlockType type) {
@@ -60,9 +63,17 @@ public class SpongeBlockStateMatcherBuilder implements BlockStateMatcher.Builder
     }
 
     @Override
+    public BlockStateMatcher.Builder property(PropertyMatcher<?> propertyMatcher) {
+        checkNotNull(propertyMatcher, "PropertyMatcher cannot be null!");
+        this.propertyMatchers.add(propertyMatcher);
+        return this;
+    }
+
+    @Override
     public SpongeBlockStateMatcher build() throws IllegalStateException {
         checkState(this.type != null, "BlockType cannot be null!");
-        return new SpongeBlockStateMatcher(this.type, this.traits.toArray(new BlockTrait<?>[0]), this.values.toArray());
+        return new SpongeBlockStateMatcher(this.type, this.traits.toArray(new BlockTrait<?>[0]), this.values.toArray(),
+                ImmutableList.copyOf(this.propertyMatchers));
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -74,6 +85,8 @@ public class SpongeBlockStateMatcherBuilder implements BlockStateMatcher.Builder
         for (int i = 0; i < other.traits.length; i++) {
             trait((BlockTrait) other.traits[i], (Comparable) other.values[i]);
         }
+        this.propertyMatchers.clear();
+        this.propertyMatchers.addAll(other.propertyMatchers);
         return this;
     }
 
@@ -82,6 +95,7 @@ public class SpongeBlockStateMatcherBuilder implements BlockStateMatcher.Builder
         this.type = null;
         this.traits.clear();
         this.values.clear();
+        this.propertyMatchers.clear();
         return this;
     }
 }

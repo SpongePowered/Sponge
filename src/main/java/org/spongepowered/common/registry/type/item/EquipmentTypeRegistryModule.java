@@ -28,6 +28,8 @@ import net.minecraft.inventory.EntityEquipmentSlot;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
+import org.spongepowered.api.item.inventory.equipment.HeldEquipmentType;
+import org.spongepowered.api.item.inventory.equipment.WornEquipmentType;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.data.type.SpongeEquipmentType;
@@ -35,13 +37,15 @@ import org.spongepowered.common.data.type.SpongeHeldEquipmentType;
 import org.spongepowered.common.data.type.SpongeWornEquipmentType;
 import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 
+import java.util.function.Predicate;
+
 @RegisterCatalog(EquipmentTypes.class)
 public class EquipmentTypeRegistryModule extends AbstractCatalogRegistryModule<EquipmentType> implements CatalogRegistryModule<EquipmentType> {
 
     @Override
     public void registerDefaults() {
-        this.registerType("any");
-        this.registerType("equipped");
+        this.registerType("any", other -> true);
+        this.registerType("equipped", other -> other instanceof WornEquipmentType || other instanceof HeldEquipmentType);
 
         final SpongeWornEquipmentType head = this.registerWornType("head", EntityEquipmentSlot.HEAD);
         this.map.put(CatalogKey.minecraft("headwear"), head);
@@ -55,8 +59,8 @@ public class EquipmentTypeRegistryModule extends AbstractCatalogRegistryModule<E
         this.registerHeldType("held", EntityEquipmentSlot.MAINHAND, EntityEquipmentSlot.OFFHAND);
     }
 
-    private void registerType(String id) {
-        this.map.put(CatalogKey.minecraft(id), new SpongeEquipmentType(id));
+    private void registerType(String id, Predicate<EquipmentType> includesTester) {
+        this.map.put(CatalogKey.minecraft(id), new SpongeEquipmentType(id, includesTester));
     }
 
     private SpongeWornEquipmentType registerWornType(String id, EntityEquipmentSlot... types) {

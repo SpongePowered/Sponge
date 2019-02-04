@@ -25,17 +25,16 @@
 package org.spongepowered.common.item.inventory.adapter.impl;
 
 import com.google.common.collect.ImmutableSet;
-import org.spongepowered.api.data.Property;
+import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryArchetypes;
-import org.spongepowered.api.item.inventory.InventoryProperty;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.Slot;
-import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.api.item.inventory.query.QueryOperation;
 import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
+import org.spongepowered.api.item.inventory.slot.SlotIndex;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.api.text.translation.Translation;
@@ -45,17 +44,19 @@ import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.CompoundSlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.CompoundLens;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.CompoundFabric;
-import org.spongepowered.common.item.inventory.lens.impl.fabric.MinecraftFabric;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
-import org.spongepowered.common.item.inventory.property.AbstractInventoryProperty;
 import org.spongepowered.common.item.inventory.query.Query;
 import org.spongepowered.common.item.inventory.query.operation.LensQueryOperation;
 import org.spongepowered.common.item.inventory.query.operation.SlotLensQueryOperation;
 
-import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
 import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
 
 public interface MinecraftInventoryAdapter extends InventoryAdapter {
 
@@ -152,51 +153,31 @@ public interface MinecraftInventoryAdapter extends InventoryAdapter {
         throw new UnsupportedOperationException("This inventory does not support stack limit adjustment");
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    default <T extends InventoryProperty<?, ?>> Collection<T> getProperties(Inventory child, Class<T> property) {
-        return (Collection<T>) InventoryPropertyStore.getProperties(this, child, property);
+    default OptionalDouble getDoubleProperty(Property<Double> property) {
+        return getProperty(property).map(OptionalDouble::of).orElse(OptionalDouble.empty());
     }
 
     @Override
-    default <T extends InventoryProperty<?, ?>> Collection<T> getProperties(Class<T> property) {
-        if (this.parent() == this) {
-            return InventoryPropertyStore.getRootProperties(this, property);
+    default OptionalInt getIntProperty(Property<Integer> property) {
+        return getProperty(property).map(OptionalInt::of).orElse(OptionalInt.empty());
+    }
+
+    @Override
+    default <V> Optional<V> getProperty(Inventory child, Property<V> property) {
+        return InventoryPropertyStore.getProperty(this, child, property);
+    }
+
+    @Override
+    default <V> Optional<V> getProperty(Property<V> property) {
+        if (parent() == this) {
+            return InventoryPropertyStore.getRootProperty(this, property);
         }
-        return this.parent().getProperties(this, property);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    default <T extends InventoryProperty<?, ?>> Optional<T> getProperty(Inventory child, Class<T> property, Object key) {
-        for (InventoryProperty<?, ?> prop : InventoryPropertyStore.getProperties(this, child, property)) {
-            if (key.equals(prop.getKey())) {
-                return Optional.of((T)prop);
-            }
-        }
-        return Optional.empty();
+        return parent().getProperty(this, property);
     }
 
     @Override
-    default <T extends InventoryProperty<?, ?>> Optional<T> getProperty(Class<T> property, Object key) {
-        if (this.parent() == this) {
-            return InventoryPropertyStore.getRootProperty(this, property, key);
-        }
-        return this.parent().getProperty(this, property, key);
-    }
-
-    default <T extends InventoryProperty<?, ?>> Optional<T> getProperty(Inventory child, Class<T> property) {
-        Object key = AbstractInventoryProperty.getDefaultKey(property);
-        return this.getProperty(child, property, key);
-    }
-
-    @Override
-    default <T extends Property<?, ?>> Optional<T> getProperty(Class<T> property) {
-        return SpongeImpl.getPropertyRegistry().getStore(property).flatMap(p -> p.getFor(this));
-    }
-
-    @Override
-    default Collection<Property<?, ?>> getApplicableProperties() {
+    default Map<Property<?>, ?> getProperties() {
         return SpongeImpl.getPropertyRegistry().getPropertiesFor(this);
     }
 
@@ -265,9 +246,9 @@ public interface MinecraftInventoryAdapter extends InventoryAdapter {
         return Optional.empty();
     }
 
+    @Nullable
     default SlotLens getSlotLens(SlotIndex index) {
-        int idx = index.getValue().intValue();
-        return this.getRootLens().getSlot(idx);
+        return this.getRootLens().getSlot(index.getIndex());
     }
 
     @Override

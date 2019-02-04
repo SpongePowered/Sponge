@@ -24,34 +24,65 @@
  */
 package org.spongepowered.common.data.property.store.common;
 
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.property.PropertyHolder;
-import org.spongepowered.api.util.Direction;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.data.property.store.DoublePropertyStore;
+import org.spongepowered.api.data.property.store.IntPropertyStore;
 
 import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
 
-public abstract class AbstractItemStackPropertyStore<T extends Property<?, ?>> extends AbstractSpongePropertyStore<T> {
+import javax.annotation.Nullable;
 
-    protected abstract Optional<T> getFor(ItemStack itemStack);
+public abstract class AbstractItemStackPropertyStore<V> extends AbstractSpongePropertyStore<V> {
 
-    @Override
-    public Optional<T> getFor(PropertyHolder propertyHolder) {
-        if (propertyHolder instanceof ItemStack) {
-            return getFor((ItemStack) propertyHolder);
+    public static abstract class Generic<V> extends AbstractItemStackPropertyStore<V> {
+
+        protected abstract Optional<V> getFor(Item item, @Nullable ItemStack itemStack);
+
+        @Override
+        public Optional<V> getFor(PropertyHolder propertyHolder) {
+            if (propertyHolder instanceof ItemStack) {
+                final ItemStack itemStack = (ItemStack) propertyHolder;
+                return getFor(itemStack.getItem(), itemStack);
+            } else if (propertyHolder instanceof Item) {
+                return getFor((Item) propertyHolder, null);
+            }
+            return Optional.empty();
         }
-        return Optional.empty();
     }
 
-    @Override
-    public final Optional<T> getFor(Location<World> location) {
-        return Optional.empty();
+    public static abstract class Int extends AbstractItemStackPropertyStore<Integer> implements IntPropertyStore {
+
+        protected abstract OptionalInt getIntFor(Item item, @Nullable ItemStack itemStack);
+
+        @Override
+        public OptionalInt getIntFor(PropertyHolder propertyHolder) {
+            if (propertyHolder instanceof ItemStack) {
+                final ItemStack itemStack = (ItemStack) propertyHolder;
+                return getIntFor(itemStack.getItem(), itemStack);
+            } else if (propertyHolder instanceof Item) {
+                return getIntFor((Item) propertyHolder, null);
+            }
+            return OptionalInt.empty();
+        }
     }
 
-    @Override
-    public final Optional<T> getFor(Location<World> location, Direction direction) {
-        return Optional.empty();
+    public static abstract class Dbl extends AbstractItemStackPropertyStore<Double> implements DoublePropertyStore {
+
+        protected abstract OptionalDouble getDoubleFor(Item item, @Nullable ItemStack itemStack);
+
+        @Override
+        public OptionalDouble getDoubleFor(PropertyHolder propertyHolder) {
+            if (propertyHolder instanceof ItemStack) {
+                final ItemStack itemStack = (ItemStack) propertyHolder;
+                return getDoubleFor(itemStack.getItem(), itemStack);
+            } else if (propertyHolder instanceof Item) {
+                return getDoubleFor((Item) propertyHolder, null);
+            }
+            return OptionalDouble.empty();
+        }
     }
 }

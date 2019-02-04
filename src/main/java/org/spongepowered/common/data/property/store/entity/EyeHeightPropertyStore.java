@@ -25,17 +25,14 @@
 package org.spongepowered.common.data.property.store.entity;
 
 import net.minecraft.entity.Entity;
-import org.spongepowered.api.data.property.entity.EyeHeightProperty;
 import org.spongepowered.common.data.property.store.common.AbstractEntityPropertyStore;
 
-import java.util.Optional;
+import java.util.OptionalDouble;
 
-public class EyeHeightPropertyStore extends AbstractEntityPropertyStore<EyeHeightProperty> {
+public class EyeHeightPropertyStore extends AbstractEntityPropertyStore.Dbl {
 
     @Override
-    protected Optional<EyeHeightProperty> getForEntity(Entity entity) {
-        final double eyeHeight = entity.getEyeHeight();
-        return Optional.of(new EyeHeightProperty(eyeHeight));
+    protected OptionalDouble getDoubleForEntity(Entity entity) {
+        return OptionalDouble.of(entity.getEyeHeight());
     }
-
 }

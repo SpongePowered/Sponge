@@ -22,18 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.property.store.item;
+package org.spongepowered.common.data.property.store.block;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.FurnaceRecipes;
-import org.spongepowered.api.data.property.item.SmeltableProperty;
-import org.spongepowered.common.data.property.store.common.AbstractItemStackPropertyStore;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.world.biome.Biome;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
+import org.spongepowered.common.data.property.store.common.AbstractLocationPropertyStore;
+import org.spongepowered.common.util.VecHelper;
 
-import java.util.Optional;
-public class SmeltablePropertyStore extends AbstractItemStackPropertyStore<SmeltableProperty> {
+import java.util.OptionalDouble;
+
+import javax.annotation.Nullable;
+
+public class BiomeTemperaturePropertyStore extends AbstractLocationPropertyStore.Dbl {
 
     @Override
-    protected Optional<SmeltableProperty> getFor(ItemStack itemStack) {
-        return Optional.of(new SmeltableProperty(!FurnaceRecipes.instance().getSmeltingResult(itemStack).isEmpty()));
+    protected OptionalDouble getDoubleFor(Location<World> location, @Nullable EnumFacing facing) {
+        final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
+        final Biome biome = world.getBiome(VecHelper.toBlockPos(location));
+        return OptionalDouble.of(biome.getDefaultTemperature()); // TODO: do we want to use pos-sensitive?
     }
 }
