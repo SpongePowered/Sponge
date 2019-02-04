@@ -40,7 +40,6 @@ import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeConnectedDirectionData;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeWallData;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.HashSet;

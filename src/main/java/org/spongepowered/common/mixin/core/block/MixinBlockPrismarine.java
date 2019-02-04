@@ -37,7 +37,6 @@ import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongePrismarineData;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Optional;

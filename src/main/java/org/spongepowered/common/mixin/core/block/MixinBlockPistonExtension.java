@@ -40,7 +40,6 @@ import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirectionalData;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongePistonData;
 import org.spongepowered.common.data.util.DirectionResolver;
 
 import java.util.Optional;

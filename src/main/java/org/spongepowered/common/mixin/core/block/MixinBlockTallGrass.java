@@ -36,7 +36,6 @@ import org.spongepowered.api.data.type.ShrubType;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeShrubData;
 
 import java.util.List;
 import java.util.Optional;

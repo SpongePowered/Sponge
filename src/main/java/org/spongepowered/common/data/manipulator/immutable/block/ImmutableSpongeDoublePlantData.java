@@ -29,7 +29,6 @@ import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDoublePla
 import org.spongepowered.api.data.manipulator.mutable.block.DoublePlantData;
 import org.spongepowered.api.data.type.DoublePlantType;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleCatalogData;
-import org.spongepowered.common.data.manipulator.mutable.block.SpongeDoublePlantData;
 import org.spongepowered.common.data.util.DataConstants;
 
 public class ImmutableSpongeDoublePlantData extends AbstractImmutableSingleCatalogData<DoublePlantType, ImmutableDoublePlantData,

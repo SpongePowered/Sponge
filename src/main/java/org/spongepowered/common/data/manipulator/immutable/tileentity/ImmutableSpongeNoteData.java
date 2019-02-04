@@ -26,13 +26,13 @@ package org.spongepowered.common.data.manipulator.immutable.tileentity;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableNoteData;
-import org.spongepowered.api.data.manipulator.mutable.tileentity.NoteData;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableNoteData;
+import org.spongepowered.api.data.manipulator.mutable.block.NoteData;
 import org.spongepowered.api.data.type.NotePitch;
 import org.spongepowered.api.data.type.NotePitches;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleData;
-import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeNoteData;
+import org.spongepowered.common.data.manipulator.mutable.block.SpongeNoteData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 public class ImmutableSpongeNoteData extends AbstractImmutableSingleData<NotePitch, ImmutableNoteData, NoteData> implements ImmutableNoteData {

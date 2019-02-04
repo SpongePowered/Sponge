@@ -47,9 +47,9 @@ import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntitySnapshot;
-import org.spongepowered.api.extra.fluid.FluidStackSnapshot;
-import org.spongepowered.api.extra.fluid.data.manipulator.immutable.ImmutableFluidItemData;
-import org.spongepowered.api.extra.fluid.data.manipulator.mutable.FluidItemData;
+import org.spongepowered.api.fluid.FluidStackSnapshot;
+import org.spongepowered.api.fluid.data.manipulator.immutable.ImmutableFluidItemData;
+import org.spongepowered.api.fluid.data.manipulator.mutable.FluidItemData;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.inventory.*;
@@ -146,9 +146,8 @@ public class DataRegistrar {
         dataManager.registerBuilder(Furnace.class, new SpongeFurnaceBuilder());
         dataManager.registerBuilder(Hopper.class, new SpongeHopperBuilder());
         dataManager.registerBuilder(MobSpawner.class, new SpongeMobSpawnerBuilder());
-        dataManager.registerBuilder(Note.class, new SpongeNoteBuilder());
         dataManager.registerBuilder(Sign.class, new SpongeSignBuilder());
-        dataManager.registerBuilder(Skull.class, new SpongeSkullBuilder());
+        dataManager.registerBuilder(PlayerHead.class, new SpongePlayerHeadBuilder());
         dataManager.registerBuilder(Beacon.class, new SpongeBeaconBuilder());
         dataManager.registerBuilder(LocatableBlock.class, new SpongeLocatableBlockBuilder());
 
@@ -484,9 +483,6 @@ public class DataRegistrar {
         DataUtil.registerDualProcessor(FireworkRocketData.class, SpongeFireworkRocketData.class,
                 ImmutableFireworkRocketData.class, ImmutableSpongeFireworkRocketData.class, new ItemFireworkRocketDataProcessor());
 
-        DataUtil.registerDualProcessor(SkullData.class, SpongeSkullData.class, ImmutableSkullData.class,
-                ImmutableSpongeSkullData.class, new ItemSkullDataProcessor());
-
         DataUtil.registerDualProcessor(SignData.class, SpongeSignData.class,
                 ImmutableSignData.class, ImmutableSpongeSignData.class, new ItemSignDataProcessor());
 
@@ -508,9 +504,6 @@ public class DataRegistrar {
         DataUtil.registerDualProcessor(PlainPagedData.class, SpongePlainPagedData.class, ImmutablePlainPagedData.class,
                 ImmutableSpongePlainPagedData.class, new ItemPlainPagedDataProcessor());
 
-        DataUtil.registerDualProcessor(GoldenAppleData.class, SpongeGoldenAppleData.class, ImmutableGoldenAppleData.class,
-                ImmutableSpongeGoldenAppleData.class, new GoldenAppleDataProcessor());
-
         DataUtil.registerDualProcessor(AuthorData.class, SpongeAuthorData.class, ImmutableAuthorData.class,
                 ImmutableSpongeAuthorData.class, new ItemAuthorDataProcessor());
 
@@ -519,15 +512,6 @@ public class DataRegistrar {
 
         DataUtil.registerDualProcessor(PlaceableData.class, SpongePlaceableData.class, ImmutablePlaceableData.class,
                 ImmutableSpongePlaceableData.class, new PlaceableDataProcessor());
-
-        DataUtil.registerDualProcessor(CoalData.class, SpongeCoalData.class, ImmutableCoalData.class,
-                ImmutableSpongeCoalData.class, new CoalDataProcessor());
-
-        DataUtil.registerDualProcessor(CookedFishData.class, SpongeCookedFishData.class, ImmutableCookedFishData.class,
-                ImmutableSpongeCookedFishData.class, new CookedFishDataProcessor());
-
-        DataUtil.registerDualProcessor(FishData.class, SpongeFishData.class, ImmutableFishData.class,
-                ImmutableSpongeFishData.class, new FishDataProcessor());
 
         DataUtil.registerDualProcessor(RepresentedPlayerData.class, SpongeRepresentedPlayerData.class, ImmutableRepresentedPlayerData.class,
                 ImmutableSpongeRepresentedPlayerData.class, new ItemSkullRepresentedPlayerDataProcessor());
@@ -567,44 +551,11 @@ public class DataRegistrar {
 
         // Block Processors
 
-        DataUtil.registerDualProcessor(DirtData.class, SpongeDirtData.class, ImmutableDirtData.class,
-                ImmutableSpongeDirtData.class, new DirtDataProcessor());
-
-        DataUtil.registerDualProcessor(StoneData.class, SpongeStoneData.class, ImmutableStoneData.class,
-                ImmutableSpongeStoneData.class, new StoneDataProcessor());
-
-        DataUtil.registerDualProcessor(PrismarineData.class, SpongePrismarineData.class, ImmutablePrismarineData.class,
-                ImmutableSpongePrismarineData.class, new PrismarineDataProcessor());
-
-        DataUtil.registerDualProcessor(BrickData.class, SpongeBrickData.class, ImmutableBrickData.class,
-                ImmutableSpongeBrickData.class, new BrickDataProcessor());
-
-        DataUtil.registerDualProcessor(QuartzData.class, SpongeQuartzData.class, ImmutableQuartzData.class,
-                ImmutableSpongeQuartzData.class, new QuartzDataProcessor());
-
-        DataUtil.registerDualProcessor(SandData.class, SpongeSandData.class, ImmutableSandData.class,
-                ImmutableSpongeSandData.class, new SandDataProcessor());
-
-        DataUtil.registerDualProcessor(SlabData.class, SpongeSlabData.class, ImmutableSlabData.class,
-                ImmutableSpongeSlabData.class, new SlabDataProcessor());
-
-        DataUtil.registerDualProcessor(SandstoneData.class, SpongeSandstoneData.class, ImmutableSandstoneData.class,
-                ImmutableSpongeSandstoneData.class, new SandstoneDataProcessor());
-
         DataUtil.registerDualProcessor(ComparatorData.class, SpongeComparatorData.class, ImmutableComparatorData.class,
                 ImmutableSpongeComparatorData.class, new ComparatorDataProcessor());
 
-        DataUtil.registerDualProcessor(TreeData.class, SpongeTreeData.class, ImmutableTreeData.class,
-                ImmutableSpongeTreeData.class, new TreeDataProcessor());
-
-        DataUtil.registerDualProcessor(DisguisedBlockData.class, SpongeDisguisedBlockData.class, ImmutableDisguisedBlockData.class,
-                ImmutableSpongeDisguisedBlockData.class, new DisguisedBlockDataProcessor());
-
         DataUtil.registerDualProcessor(HingeData.class, SpongeHingeData.class, ImmutableHingeData.class,
                 ImmutableSpongeHingeData.class, new HingeDataProcessor());
-
-        DataUtil.registerDualProcessor(PistonData.class, SpongePistonData.class, ImmutablePistonData.class,
-                ImmutableSpongePistonData.class, new PistonDataProcessor());
 
         DataUtil.registerDualProcessor(PortionData.class, SpongePortionData.class, ImmutablePortionData.class,
                 ImmutableSpongePortionData.class, new PortionDataProcessor());
@@ -614,21 +565,6 @@ public class DataRegistrar {
 
         DataUtil.registerDualProcessor(StairShapeData.class, SpongeStairShapeData.class, ImmutableStairShapeData.class,
                 ImmutableSpongeStairShapeData.class, new StairShapeDataProcessor());
-
-        DataUtil.registerDualProcessor(WallData.class, SpongeWallData.class, ImmutableWallData.class,
-                ImmutableSpongeWallData.class, new WallDataProcessor());
-
-        DataUtil.registerDualProcessor(ShrubData.class, SpongeShrubData.class, ImmutableShrubData.class,
-                ImmutableSpongeShrubData.class, new ShrubDataProcessor());
-
-        DataUtil.registerDualProcessor(PlantData.class, SpongePlantData.class, ImmutablePlantData.class,
-                ImmutableSpongePlantData.class, new PlantDataProcessor());
-
-        DataUtil.registerDualProcessor(DoublePlantData.class, SpongeDoublePlantData.class, ImmutableDoublePlantData.class,
-                ImmutableSpongeDoublePlantData.class, new DoublePlantDataProcessor());
-
-        DataUtil.registerDualProcessor(BigMushroomData.class, SpongeBigMushroomData.class, ImmutableBigMushroomData.class,
-                ImmutableSpongeBigMushroomData.class, new BigMushroomDataProcessor());
 
         DataUtil.registerDualProcessor(AttachedData.class, SpongeAttachedData.class, ImmutableAttachedData.class,
                 ImmutableSpongeAttachedData.class, new AttachedDataProcessor());
@@ -660,9 +596,6 @@ public class DataRegistrar {
         DataUtil.registerDualProcessor(RedstonePoweredData.class, SpongeRedstonePoweredData.class, ImmutableRedstonePoweredData.class,
                 ImmutableSpongeRedstonePoweredData.class, new RedstonePoweredDataProcessor());
 
-        DataUtil.registerDualProcessor(SeamlessData.class, SpongeSeamlessData.class, ImmutableSeamlessData.class,
-                ImmutableSpongeSeamlessData.class, new SeamlessDataProcessor());
-
         DataUtil.registerDualProcessor(SnowedData.class, SpongeSnowedData.class, ImmutableSnowedData.class,
                 ImmutableSpongeSnowedData.class, new SnowedDataProcessor());
 
@@ -690,10 +623,10 @@ public class DataRegistrar {
         DataUtil.registerDataProcessorAndImpl(WireAttachmentData.class, SpongeWireAttachmentData.class, ImmutableWireAttachmentData.class,
                 ImmutableSpongeWireAttachmentData.class, new WireAttachmentDataProcessor());
 
-        // TileEntity Processors
+        DataUtil.registerDualProcessor(NoteData.class, SpongeNoteData.class, ImmutableNoteData.class,
+                ImmutableSpongeNoteData.class, new NoteDataProcessor());
 
-        DataUtil.registerDualProcessor(SkullData.class, SpongeSkullData.class, ImmutableSkullData.class,
-                ImmutableSpongeSkullData.class, new TileEntitySkullDataProcessor());
+        // TileEntity Processors
 
         DataUtil.registerDualProcessor(RepresentedPlayerData.class, SpongeRepresentedPlayerData.class, ImmutableRepresentedPlayerData.class,
                 ImmutableSpongeRepresentedPlayerData.class, new SkullRepresentedPlayerDataProcessor());
@@ -712,9 +645,6 @@ public class DataRegistrar {
 
         DataUtil.registerDualProcessor(CooldownData.class, SpongeCooldownData.class, ImmutableCooldownData.class,
                 ImmutableSpongeCooldownData.class, new CooldownDataProcessor());
-
-        DataUtil.registerDualProcessor(NoteData.class, SpongeNoteData.class, ImmutableNoteData.class,
-                ImmutableSpongeNoteData.class, new NoteDataProcessor());
 
         DataUtil.registerDualProcessor(LockableData.class, SpongeLockableData.class,
                 ImmutableLockableData.class, ImmutableSpongeLockableData.class, new TileEntityLockableDataProcessor());

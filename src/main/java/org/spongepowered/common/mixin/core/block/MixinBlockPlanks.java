@@ -36,7 +36,6 @@ import org.spongepowered.api.data.type.TreeType;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
 
 import java.util.Optional;
 

@@ -38,8 +38,6 @@ import org.spongepowered.api.data.type.SlabTypes;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeSeamlessData;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeSlabData;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 @Mixin(value = {BlockDoubleStoneSlabNew.class, BlockDoubleStoneSlab.class})

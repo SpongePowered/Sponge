@@ -44,7 +44,6 @@ import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongePortionData;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeSlabData;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Optional;

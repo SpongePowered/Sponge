@@ -22,25 +22,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.mutable.block;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+package org.spongepowered.common.data.processor.data.block;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableSandData;
-import org.spongepowered.api.data.manipulator.mutable.block.SandData;
-import org.spongepowered.api.data.type.SandType;
-import org.spongepowered.api.data.type.SandTypes;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeSandData;
-import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableNoteData;
+import org.spongepowered.api.data.manipulator.mutable.block.NoteData;
+import org.spongepowered.api.data.type.NotePitch;
+import org.spongepowered.api.data.type.NotePitches;
+import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.common.data.manipulator.mutable.block.SpongeNoteData;
+import org.spongepowered.common.data.processor.common.AbstractBlockOnlyDataProcessor;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-public class SpongeSandData extends AbstractSingleCatalogData<SandType, SandData, ImmutableSandData> implements SandData {
+public class NoteDataProcessor extends AbstractBlockOnlyDataProcessor<NotePitch, Value<NotePitch>, NoteData, ImmutableNoteData> {
 
-    public SpongeSandData(SandType variant) {
-        super(SandData.class, checkNotNull(variant), Keys.SAND_TYPE, ImmutableSpongeSandData.class);
+    public NoteDataProcessor() {
+        super(Keys.NOTE_PITCH);
     }
 
-    public SpongeSandData() {
-        this(SandTypes.NORMAL);
+    @Override
+    protected NotePitch getDefaultValue() {
+        return NotePitches.F_SHARP0;
+    }
+
+    @Override
+    protected Value<NotePitch> constructValue(NotePitch actualValue) {
+        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
+    }
+
+    @Override
+    protected NoteData createManipulator() {
+        return new SpongeNoteData();
     }
 }

@@ -148,12 +148,7 @@ public final class DataConstants {
 
         private Catalog() {}
 
-        public static final BigMushroomType DEFAULT_BIG_MUSHROOM_TYPE = BigMushroomTypes.ALL_OUTSIDE;
-        public static final BrickType DEFAULT_BRICK_TYPE = BrickTypes.DEFAULT;
         public static final ComparatorType DEFAULT_COMPARATOR_TYPE = ComparatorTypes.COMPARE;
-        public static final DirtType DEFAULT_DIRT_TYPE = DirtTypes.DIRT;
-        public static final DisguisedBlockType DEFAULT_DISGUISED_BLOCK = DisguisedBlockTypes.STONE;
-        public static final DoublePlantType DEFAULT_DOUBLE_PLANT = DoublePlantTypes.GRASS;
         public static final DyeColor DEFAULT_BANNER_BASE = DyeColors.BLACK;
         public static final OcelotType DEFAULT_OCELOT = OcelotTypes.WILD_OCELOT;
         public static final Career CAREER_DEFAULT = Careers.FARMER;
