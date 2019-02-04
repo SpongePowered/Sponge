@@ -28,7 +28,6 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.util.OptBool;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.property.store.common.AbstractLocationPropertyStore;
 import org.spongepowered.common.util.VecHelper;
 
@@ -39,9 +38,9 @@ import javax.annotation.Nullable;
 public class PoweredPropertyStore extends AbstractLocationPropertyStore.Generic<Boolean> {
 
     @Override
-    protected Optional<Boolean> getFor(Location<World> location, @Nullable EnumFacing facing) {
+    protected Optional<Boolean> getFor(Location location, @Nullable EnumFacing facing) {
         final BlockPos pos = VecHelper.toBlockPos(location);
-        final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
+        final net.minecraft.world.World world = (net.minecraft.world.World) location.getWorld();
         final boolean powered;
         if (facing != null) {
             powered = world.getStrongPower(pos.offset(facing), facing) > 0;

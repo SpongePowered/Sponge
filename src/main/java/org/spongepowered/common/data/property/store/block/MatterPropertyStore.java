@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.property.store.block;
 
-import net.minecraft.block.BlockLiquid;
+import net.minecraft.block.BlockFlowingFluid;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
@@ -50,8 +50,8 @@ public class MatterPropertyStore extends AbstractBlockPropertyStore.Generic<Matt
     }
 
     @Override
-    protected Optional<Matter> getForBlock(@Nullable Location<?> location, IBlockState block, @Nullable EnumFacing facing) {
-        if (block.getBlock() instanceof BlockLiquid) {
+    protected Optional<Matter> getForBlock(@Nullable Location location, IBlockState block, @Nullable EnumFacing facing) {
+        if (block.getBlock() instanceof BlockFlowingFluid) {
             return LIQUID;
         } else if (block.getMaterial() == Material.AIR) {
             return GAS;

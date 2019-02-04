@@ -24,10 +24,9 @@
  */
 package org.spongepowered.common.data.property.store.block;
 
-import net.minecraft.world.EnumSkyBlock;
+import net.minecraft.world.EnumLightType;
 import org.spongepowered.api.data.property.PropertyHolder;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.property.store.common.AbstractSpongePropertyStore;
 import org.spongepowered.common.util.VecHelper;
 
@@ -41,8 +40,8 @@ public class SkyLuminancePropertyStore extends AbstractSpongePropertyStore.Dbl {
         if (!(propertyHolder instanceof Location)) {
             return OptionalDouble.empty();
         }
-        final Location<World> location = (Location<World>) propertyHolder;
-        final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
-        return OptionalDouble.of(world.getLightFor(EnumSkyBlock.SKY, VecHelper.toBlockPos(location)));
+        final Location location = (Location) propertyHolder;
+        final net.minecraft.world.World world = (net.minecraft.world.World) location.getWorld();
+        return OptionalDouble.of(world.getLightFor(EnumLightType.SKY, VecHelper.toBlockPos(location)));
     }
 }

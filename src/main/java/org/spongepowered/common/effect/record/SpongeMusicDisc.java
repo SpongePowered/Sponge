@@ -30,13 +30,13 @@ import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.network.play.server.SPacketEffect;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.effect.sound.SoundType;
-import org.spongepowered.api.effect.sound.record.RecordType;
+import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import javax.annotation.Nullable;
 
-public class SpongeRecordType extends SpongeCatalogType.Translatable implements RecordType {
+public class SpongeMusicDisc extends SpongeCatalogType.Translatable implements MusicDisc {
 
     /**
      * This is the effect ID that is used by the Effect packet to play a record effect.
@@ -47,7 +47,7 @@ public class SpongeRecordType extends SpongeCatalogType.Translatable implements 
     private final int internalId;
     private final SoundType soundType;
 
-    public SpongeRecordType(String id, String translation, int internalId, SoundType soundType) {
+    public SpongeMusicDisc(String id, String translation, int internalId, SoundType soundType) {
         super(id, new SpongeTranslation(translation));
         this.internalId = internalId;
         this.soundType = soundType;
@@ -62,10 +62,10 @@ public class SpongeRecordType extends SpongeCatalogType.Translatable implements 
         return this.soundType;
     }
 
-    public static SPacketEffect createPacket(Vector3i position, @Nullable RecordType recordType) {
+    public static SPacketEffect createPacket(Vector3i position, @Nullable MusicDisc musicDisc) {
         checkNotNull(position, "position");
         final BlockPos pos = new BlockPos(position.getX(), position.getY(), position.getZ());
-        return new SPacketEffect(EFFECT_ID, pos, recordType == null ? 0 :
-                ((SpongeRecordType) recordType).getInternalId(), false);
+        return new SPacketEffect(EFFECT_ID, pos, musicDisc == null ? 0 :
+                ((SpongeMusicDisc) musicDisc).getInternalId(), false);
     }
 }

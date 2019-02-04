@@ -95,7 +95,6 @@ import org.spongepowered.api.extra.fluid.FluidType;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.item.ItemType;
-import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
@@ -239,7 +238,7 @@ import org.spongepowered.common.registry.type.economy.TransactionTypeRegistryMod
 import org.spongepowered.common.registry.type.effect.ParticleOptionRegistryModule;
 import org.spongepowered.common.registry.type.effect.ParticleRegistryModule;
 import org.spongepowered.common.registry.type.effect.PotionEffectTypeRegistryModule;
-import org.spongepowered.common.registry.type.effect.RecordTypeRegistryModule;
+import org.spongepowered.common.registry.type.effect.MusicDiscRegistryModule;
 import org.spongepowered.common.registry.type.effect.SoundCategoryRegistryModule;
 import org.spongepowered.common.registry.type.effect.SoundRegistryModule;
 import org.spongepowered.common.registry.type.entity.*;
@@ -557,7 +556,7 @@ public final class CommonModuleRegistry {
             .registerModule(CraftingRecipe.class, SpongeCraftingRecipeRegistry.getInstance())
             .registerModule(SmeltingRecipe.class, (CatalogRegistryModule<SmeltingRecipe>) FurnaceRecipes.instance())
             .registerModule(EventContextKey.class, EventContextKeysModule.getInstance())
-            .registerModule(RecordType.class, RecordTypeRegistryModule.getInstance())
+            .registerModule(RecordType.class, MusicDiscRegistryModule.getInstance())
             .registerModule(HorseStyle.class, HorseStyleRegistryModule.getInstance())
             .registerModule(HorseColor.class, HorseColorRegistryModule.getInstance())
             .registerModule(InstrumentType.class, InstrumentTypeRegistryModule.getInstance())

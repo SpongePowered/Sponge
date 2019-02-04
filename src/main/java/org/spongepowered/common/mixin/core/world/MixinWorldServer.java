@@ -160,7 +160,7 @@ import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
-import org.spongepowered.common.effect.record.SpongeRecordType;
+import org.spongepowered.common.effect.record.SpongeMusicDisc;
 import org.spongepowered.common.effect.sound.SoundEffectHelper;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
@@ -2420,7 +2420,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     private void playRecord0(Vector3i position, @Nullable RecordType recordType) {
         this.server.getPlayerList().sendPacketToAllPlayersInDimension(
-                SpongeRecordType.createPacket(position, recordType), getDimensionId());
+                SpongeMusicDisc.createPacket(position, recordType), getDimensionId());
     }
 
     @Override

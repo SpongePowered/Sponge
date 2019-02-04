@@ -28,7 +28,6 @@ import org.spongepowered.api.data.property.Properties;
 import org.spongepowered.api.data.property.PropertyHolder;
 import org.spongepowered.api.data.property.store.DoublePropertyStore;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 
 import java.util.OptionalDouble;
 
@@ -40,7 +39,7 @@ public class TemperaturePropertyStore implements DoublePropertyStore {
         if (!(propertyHolder instanceof Location)) {
             return OptionalDouble.empty();
         }
-        final Location<World> location = (Location<World>) propertyHolder;
+        final Location location = (Location) propertyHolder;
         final OptionalDouble biomeTemperature = location.getDoubleProperty(Properties.BIOME_TEMPERATURE);
         final OptionalDouble blockTemperature = location.getDoubleProperty(Properties.BLOCK_TEMPERATURE);
         final OptionalDouble fluidTemperature = location.getDoubleProperty(Properties.FLUID_TEMPERATURE);

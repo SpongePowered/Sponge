@@ -40,7 +40,7 @@ public class BlastResistancePropertyStore extends AbstractBlockPropertyStore.Dbl
     }
 
     @Override
-    protected OptionalDouble getForBlock(@Nullable Location<?> location, IBlockState block, @Nullable EnumFacing facing) {
-        return OptionalDouble.of(block.getBlock().getExplosionResistance(null));
+    protected OptionalDouble getForBlock(@Nullable Location location, IBlockState block, @Nullable EnumFacing facing) {
+        return OptionalDouble.of(block.getBlock().getExplosionResistance());
     }
 }

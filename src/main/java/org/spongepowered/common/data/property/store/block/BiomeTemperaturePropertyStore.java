@@ -38,8 +38,8 @@ import javax.annotation.Nullable;
 public class BiomeTemperaturePropertyStore extends AbstractLocationPropertyStore.Dbl {
 
     @Override
-    protected OptionalDouble getDoubleFor(Location<World> location, @Nullable EnumFacing facing) {
-        final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
+    protected OptionalDouble getDoubleFor(Location location, @Nullable EnumFacing facing) {
+        final net.minecraft.world.World world = (net.minecraft.world.World) location.getWorld();
         final Biome biome = world.getBiome(VecHelper.toBlockPos(location));
         return OptionalDouble.of(biome.getDefaultTemperature()); // TODO: do we want to use pos-sensitive?
     }

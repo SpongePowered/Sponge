@@ -27,55 +27,55 @@ package org.spongepowered.common.registry.type.effect;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import org.spongepowered.api.effect.sound.SoundTypes;
-import org.spongepowered.api.effect.sound.record.RecordType;
-import org.spongepowered.api.effect.sound.record.RecordTypes;
+import org.spongepowered.api.effect.sound.music.MusicDisc;
+import org.spongepowered.api.effect.sound.music.MusicDiscs;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.registry.util.RegistrationDependency;
-import org.spongepowered.common.effect.record.SpongeRecordType;
+import org.spongepowered.common.effect.record.SpongeMusicDisc;
 import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 
 import java.util.Optional;
 
-@RegisterCatalog(RecordTypes.class)
+@RegisterCatalog(MusicDiscs.class)
 @RegistrationDependency(SoundRegistryModule.class)
-public final class RecordTypeRegistryModule extends AbstractCatalogRegistryModule<RecordType> implements CatalogRegistryModule<RecordType> {
+public final class MusicDiscRegistryModule extends AbstractCatalogRegistryModule<MusicDisc> implements CatalogRegistryModule<MusicDisc> {
 
-    public static RecordTypeRegistryModule getInstance() {
+    public static MusicDiscRegistryModule getInstance() {
         return Holder.INSTANCE;
     }
 
-    private final Int2ObjectMap<RecordType> byInternalId = new Int2ObjectOpenHashMap<>();
+    private final Int2ObjectMap<MusicDisc> byInternalId = new Int2ObjectOpenHashMap<>();
 
-    RecordTypeRegistryModule() {
+    MusicDiscRegistryModule() {
     }
 
-    public Optional<RecordType> getByInternalId(int internalId) {
+    public Optional<MusicDisc> getByInternalId(int internalId) {
         return Optional.ofNullable(this.byInternalId.get(internalId));
     }
 
-    private void add(SpongeRecordType recordType) {
+    private void add(SpongeMusicDisc recordType) {
         register(recordType);
         this.byInternalId.put(recordType.getInternalId(), recordType);
     }
 
     @Override
     public void registerDefaults() {
-        this.add(new SpongeRecordType("minecraft:thirteen", "item.record.13.desc", 2256, SoundTypes.RECORD_13));
-        this.add(new SpongeRecordType("minecraft:cat", "item.record.cat.desc", 2257, SoundTypes.RECORD_CAT));
-        this.add(new SpongeRecordType("minecraft:blocks", "item.record.blocks.desc", 2258, SoundTypes.RECORD_BLOCKS));
-        this.add(new SpongeRecordType("minecraft:chirp", "item.record.chirp.desc", 2259, SoundTypes.RECORD_CHIRP));
-        this.add(new SpongeRecordType("minecraft:far", "item.record.far.desc", 2260, SoundTypes.RECORD_FAR));
-        this.add(new SpongeRecordType("minecraft:mall", "item.record.mall.desc", 2261, SoundTypes.RECORD_MALL));
-        this.add(new SpongeRecordType("minecraft:mellohi", "item.record.mellohi.desc", 2262, SoundTypes.RECORD_MELLOHI));
-        this.add(new SpongeRecordType("minecraft:stal", "item.record.stal.desc", 2263, SoundTypes.RECORD_STAL));
-        this.add(new SpongeRecordType("minecraft:strad", "item.record.strad.desc", 2264, SoundTypes.RECORD_STRAD));
-        this.add(new SpongeRecordType("minecraft:ward", "item.record.ward.desc", 2265, SoundTypes.RECORD_WARD));
-        this.add(new SpongeRecordType("minecraft:eleven", "item.record.11.desc", 2266, SoundTypes.RECORD_11));
-        this.add(new SpongeRecordType("minecraft:wait", "item.record.wait.desc", 2267, SoundTypes.RECORD_WAIT));
+        this.add(new SpongeMusicDisc("minecraft:thirteen", "item.record.13.desc", 2256, SoundTypes.MUSIC_DISC_13));
+        this.add(new SpongeMusicDisc("minecraft:cat", "item.record.cat.desc", 2257, SoundTypes.MUSIC_DISC_CAT));
+        this.add(new SpongeMusicDisc("minecraft:blocks", "item.record.blocks.desc", 2258, SoundTypes.MUSIC_DISC_BLOCKS));
+        this.add(new SpongeMusicDisc("minecraft:chirp", "item.record.chirp.desc", 2259, SoundTypes.MUSIC_DISC_CHIRP));
+        this.add(new SpongeMusicDisc("minecraft:far", "item.record.far.desc", 2260, SoundTypes.MUSIC_DISC_FAR));
+        this.add(new SpongeMusicDisc("minecraft:mall", "item.record.mall.desc", 2261, SoundTypes.MUSIC_DISC_MALL));
+        this.add(new SpongeMusicDisc("minecraft:mellohi", "item.record.mellohi.desc", 2262, SoundTypes.MUSIC_DISC_MELLOHI));
+        this.add(new SpongeMusicDisc("minecraft:stal", "item.record.stal.desc", 2263, SoundTypes.MUSIC_DISC_STAL));
+        this.add(new SpongeMusicDisc("minecraft:strad", "item.record.strad.desc", 2264, SoundTypes.MUSIC_DISC_STRAD));
+        this.add(new SpongeMusicDisc("minecraft:ward", "item.record.ward.desc", 2265, SoundTypes.MUSIC_DISC_WARD));
+        this.add(new SpongeMusicDisc("minecraft:eleven", "item.record.11.desc", 2266, SoundTypes.MUSIC_DISC_11));
+        this.add(new SpongeMusicDisc("minecraft:wait", "item.record.wait.desc", 2267, SoundTypes.MUSIC_DISC_WAIT));
     }
 
     private static final class Holder {
-        final static RecordTypeRegistryModule INSTANCE = new RecordTypeRegistryModule();
+        final static MusicDiscRegistryModule INSTANCE = new MusicDiscRegistryModule();
     }
 }

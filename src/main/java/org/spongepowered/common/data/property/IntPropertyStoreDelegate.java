@@ -60,7 +60,7 @@ public class IntPropertyStoreDelegate extends PropertyStoreDelegate<Integer> imp
     }
 
     @Override
-    public OptionalInt getIntFor(Location<World> location, Direction direction) {
+    public OptionalInt getIntFor(Location location, Direction direction) {
         for (PropertyStore<Integer> propertyStore : this.propertyStores) {
             if (propertyStore instanceof IntPropertyStore) {
                 final OptionalInt optional = ((IntPropertyStore) propertyStore).getIntFor(location, direction);

@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.property.store.block;
 
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.pathfinding.PathType;
 import net.minecraft.util.EnumFacing;
 import org.spongepowered.api.util.OptBool;
 import org.spongepowered.api.world.Location;
@@ -42,10 +43,16 @@ public class PassablePropertyStore extends AbstractBlockPropertyStore.Generic<Bo
     }
 
     @Override
-    protected Optional<Boolean> getForBlock(@Nullable Location<?> location, IBlockState block, @Nullable EnumFacing facing) {
+    protected Optional<Boolean> getForBlock(@Nullable Location location, IBlockState block, @Nullable EnumFacing facing) {
         if (location != null) {
-            final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
-            return Optional.of(block.getBlock().isPassable(world, VecHelper.toBlockPos(location)));
+            final net.minecraft.world.World world = (net.minecraft.world.World) location.getWorld();
+            // TODO: Is this good?
+            if (block.allowsMovement(world, VecHelper.toBlockPos(location), PathType.LAND) ||
+                    block.allowsMovement(world, VecHelper.toBlockPos(location), PathType.AIR) ||
+                    block.allowsMovement(world, VecHelper.toBlockPos(location), PathType.WATER)) {
+                return OptBool.TRUE;
+            }
+            return OptBool.FALSE;
         }
         return OptBool.of(block.getMaterial().blocksMovement());
     }

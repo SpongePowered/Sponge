@@ -41,7 +41,7 @@ public class SolidCubePropertyStore extends AbstractBlockPropertyStore.Generic<B
     }
 
     @Override
-    protected Optional<Boolean> getForBlock(@Nullable Location<?> location, IBlockState block, @Nullable EnumFacing facing) {
+    protected Optional<Boolean> getForBlock(@Nullable Location location, IBlockState block, @Nullable EnumFacing facing) {
         return OptBool.of(block.getMaterial().isSolid());
     }
 }

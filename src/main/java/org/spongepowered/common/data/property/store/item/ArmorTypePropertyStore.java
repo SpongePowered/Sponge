@@ -39,7 +39,7 @@ public class ArmorTypePropertyStore extends AbstractItemStackPropertyStore.Gener
     @Override
     protected Optional<ArmorType> getFor(Item item, @Nullable ItemStack itemStack) {
         if (item instanceof ItemArmor) {
-            return Optional.of((ArmorType) (Object) ((ItemArmor) item).getArmorMaterial());
+            return Optional.of((ArmorType) ((ItemArmor) item).getArmorMaterial());
         }
         return Optional.empty();
     }

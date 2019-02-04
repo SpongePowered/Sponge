@@ -27,7 +27,6 @@ package org.spongepowered.common.data.property.store.block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.property.store.common.AbstractLocationPropertyStore;
 import org.spongepowered.common.util.VecHelper;
 
@@ -38,9 +37,9 @@ import javax.annotation.Nullable;
 public class HardnessPropertyStore extends AbstractLocationPropertyStore.Dbl {
 
     @Override
-    protected OptionalDouble getDoubleFor(Location<World> location, @Nullable EnumFacing facing) {
+    protected OptionalDouble getDoubleFor(Location location, @Nullable EnumFacing facing) {
         final IBlockState blockState = (IBlockState) location.getBlock();
-        final float hardness = blockState.getBlockHardness((net.minecraft.world.World) location.getExtent(), VecHelper.toBlockPos(location));
+        final float hardness = blockState.getBlockHardness((net.minecraft.world.World) location.getWorld(), VecHelper.toBlockPos(location));
         if (hardness > 0) {
             return OptionalDouble.of(hardness);
         }

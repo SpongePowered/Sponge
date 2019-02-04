@@ -28,7 +28,6 @@ import org.spongepowered.api.data.property.Properties;
 import org.spongepowered.api.data.property.PropertyHolder;
 import org.spongepowered.api.data.property.store.DoublePropertyStore;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 
 import java.util.OptionalDouble;
 
@@ -40,7 +39,7 @@ public class LuminancePropertyStore implements DoublePropertyStore {
         if (!(propertyHolder instanceof Location)) {
             return OptionalDouble.empty();
         }
-        final Location<World> location = (Location<World>) propertyHolder;
+        final Location location = (Location) propertyHolder;
         final OptionalDouble blockLuminance = location.getDoubleProperty(Properties.SKY_LUMINANCE);
         final OptionalDouble skyLuminance = location.getDoubleProperty(Properties.BLOCK_LUMINANCE);
         double maxLuminance = -Double.MAX_VALUE;

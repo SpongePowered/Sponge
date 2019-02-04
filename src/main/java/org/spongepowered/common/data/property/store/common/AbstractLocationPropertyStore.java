@@ -43,54 +43,54 @@ public abstract class AbstractLocationPropertyStore<V> extends AbstractSpongePro
 
     public static abstract class Generic<V> extends AbstractLocationPropertyStore<V> {
 
-        protected abstract Optional<V> getFor(Location<World> location, @Nullable EnumFacing facing);
+        protected abstract Optional<V> getFor(Location location, @Nullable EnumFacing facing);
 
         @Override
         public Optional<V> getFor(PropertyHolder propertyHolder) {
             if (propertyHolder instanceof Location) {
-                return getFor((Location<World>) propertyHolder, (EnumFacing) null);
+                return getFor((Location) propertyHolder, (EnumFacing) null);
             }
             return Optional.empty();
         }
 
         @Override
-        public Optional<V> getFor(Location<World> location, Direction direction) {
+        public Optional<V> getFor(Location location, Direction direction) {
             return getFor(location, toEnumFacing(direction).orElse(null));
         }
     }
 
     public static abstract class Dbl extends AbstractLocationPropertyStore<Double> implements DoublePropertyStore {
 
-        protected abstract OptionalDouble getDoubleFor(Location<World> location, @Nullable EnumFacing facing);
+        protected abstract OptionalDouble getDoubleFor(Location location, @Nullable EnumFacing facing);
 
         @Override
         public OptionalDouble getDoubleFor(PropertyHolder propertyHolder) {
             if (propertyHolder instanceof Location) {
-                return getDoubleFor((Location<World>) propertyHolder, (EnumFacing) null);
+                return getDoubleFor((Location) propertyHolder, (EnumFacing) null);
             }
             return OptionalDouble.empty();
         }
 
         @Override
-        public OptionalDouble getDoubleFor(Location<World> location, Direction direction) {
+        public OptionalDouble getDoubleFor(Location location, Direction direction) {
             return getDoubleFor(location, toEnumFacing(direction).orElse(null));
         }
     }
 
     public static abstract class Int extends AbstractLocationPropertyStore<Integer> implements IntPropertyStore {
 
-        protected abstract OptionalInt getIntFor(Location<World> location, @Nullable EnumFacing facing);
+        protected abstract OptionalInt getIntFor(Location location, @Nullable EnumFacing facing);
 
         @Override
         public OptionalInt getIntFor(PropertyHolder propertyHolder) {
             if (propertyHolder instanceof Location) {
-                return getIntFor((Location<World>) propertyHolder, (EnumFacing) null);
+                return getIntFor((Location) propertyHolder, (EnumFacing) null);
             }
             return OptionalInt.empty();
         }
 
         @Override
-        public OptionalInt getIntFor(Location<World> location, Direction direction) {
+        public OptionalInt getIntFor(Location location, Direction direction) {
             return getIntFor(location, toEnumFacing(direction).orElse(null));
         }
     }

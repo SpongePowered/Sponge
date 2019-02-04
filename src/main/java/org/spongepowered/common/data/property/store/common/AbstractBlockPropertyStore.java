@@ -65,16 +65,16 @@ public abstract class AbstractBlockPropertyStore<V> extends AbstractSpongeProper
          * @param block The block
          * @return The property value, if available
          */
-        protected abstract Optional<V> getForBlock(@Nullable Location<?> location, IBlockState block, @Nullable EnumFacing facing);
+        protected abstract Optional<V> getForBlock(@Nullable Location location, IBlockState block, @Nullable EnumFacing facing);
 
         @SuppressWarnings({"unchecked", "ConstantConditions"})
         @Override
         public final Optional<V> getFor(PropertyHolder propertyHolder) {
             if (propertyHolder instanceof Location) {
-                final Location<?> location = (Location<?>) propertyHolder;
-                return getFor((Location<World>) location, Direction.NONE);
-            } else if (this.checksItemStack && propertyHolder instanceof ItemStack) {
-                final Item item = ((ItemStack) propertyHolder).getItem();
+                final Location location = (Location) propertyHolder;
+                return getFor(location, Direction.NONE);
+            } else if (this.checksItemStack && (Object) propertyHolder instanceof ItemStack) {
+                final Item item = ((ItemStack)  (Object) propertyHolder).getItem();
                 if (item instanceof ItemBlock) {
                     final Block block = ((ItemBlock) item).getBlock();
                     if (block != null) {
@@ -90,7 +90,7 @@ public abstract class AbstractBlockPropertyStore<V> extends AbstractSpongeProper
         }
 
         @Override
-        public final Optional<V> getFor(Location<World> location, Direction direction) {
+        public final Optional<V> getFor(Location location, Direction direction) {
             return getForBlock(location, (IBlockState) location.getBlock(), toEnumFacing(direction).orElse(null));
         }
     }
@@ -101,16 +101,16 @@ public abstract class AbstractBlockPropertyStore<V> extends AbstractSpongeProper
             super(checksItemStack);
         }
 
-        protected abstract OptionalDouble getForBlock(@Nullable Location<?> location, IBlockState block, @Nullable EnumFacing facing);
+        protected abstract OptionalDouble getForBlock(@Nullable Location location, IBlockState block, @Nullable EnumFacing facing);
 
         @SuppressWarnings({"unchecked", "ConstantConditions"})
         @Override
         public final OptionalDouble getDoubleFor(PropertyHolder propertyHolder) {
             if (propertyHolder instanceof Location) {
-                final Location<?> location = (Location<?>) propertyHolder;
-                return getDoubleFor((Location<World>) location, Direction.NONE);
-            } else if (this.checksItemStack && propertyHolder instanceof ItemStack) {
-                final Item item = ((ItemStack) propertyHolder).getItem();
+                final Location location = (Location) propertyHolder;
+                return getDoubleFor(location, Direction.NONE);
+            } else if (this.checksItemStack &&  (Object) propertyHolder instanceof ItemStack) {
+                final Item item = ((ItemStack)  (Object) propertyHolder).getItem();
                 if (item instanceof ItemBlock) {
                     final Block block = ((ItemBlock) item).getBlock();
                     if (block != null) {
@@ -126,7 +126,7 @@ public abstract class AbstractBlockPropertyStore<V> extends AbstractSpongeProper
         }
 
         @Override
-        public final OptionalDouble getDoubleFor(Location<World> location, Direction direction) {
+        public final OptionalDouble getDoubleFor(Location location, Direction direction) {
             return getForBlock(location, (IBlockState) location.getBlock(), toEnumFacing(direction).orElse(null));
         }
 
@@ -137,7 +137,7 @@ public abstract class AbstractBlockPropertyStore<V> extends AbstractSpongeProper
         }
 
         @Override
-        public Optional<Double> getFor(Location<World> location, Direction direction) {
+        public Optional<Double> getFor(Location location, Direction direction) {
             final OptionalDouble optionalDouble = getDoubleFor(location, direction);
             return optionalDouble.isPresent() ? Optional.of(optionalDouble.getAsDouble()) : Optional.empty();
         }
@@ -157,7 +157,7 @@ public abstract class AbstractBlockPropertyStore<V> extends AbstractSpongeProper
         }
 
         @Override
-        public OptionalInt getIntFor(Location<World> location, Direction direction) {
+        public OptionalInt getIntFor(Location location, Direction direction) {
             return getFor(location, direction).map(OptionalInt::of).orElseGet(OptionalInt::empty);
         }
     }

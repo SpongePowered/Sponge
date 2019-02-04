@@ -28,6 +28,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.util.EnumFacing;
 import org.spongepowered.api.data.type.InstrumentType;
 import org.spongepowered.api.data.type.InstrumentTypes;
@@ -45,7 +46,7 @@ public class InstrumentPropertyStore extends AbstractBlockPropertyStore.Generic<
     }
 
     @Override
-    protected Optional<InstrumentType> getForBlock(@Nullable Location<?> location, IBlockState block, @Nullable EnumFacing facing) {
+    protected Optional<InstrumentType> getForBlock(@Nullable Location location, IBlockState block, @Nullable EnumFacing facing) {
         return Optional.of(getInstrumentType(block));
     }
 
@@ -56,12 +57,12 @@ public class InstrumentPropertyStore extends AbstractBlockPropertyStore.Generic<
             return InstrumentTypes.FLUTE;
         } else if (blockType == Blocks.GOLD_BLOCK) {
             return InstrumentTypes.BELL;
-        } else if (blockType == Blocks.WOOL) {
-            return InstrumentTypes.GUITAR;
         } else if (blockType == Blocks.PACKED_ICE) {
             return InstrumentTypes.CHIME;
         } else if (blockType == Blocks.BONE_BLOCK) {
             return InstrumentTypes.XYLOPHONE;
+        } else if (BlockTags.WOOL.contains(blockType)) {
+            return InstrumentTypes.GUITAR;
         }
         final Material material = block.getBlock().getMaterial(block);
         if (material == Material.ROCK) {

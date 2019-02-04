@@ -44,8 +44,8 @@ public abstract class AbstractItemStackPropertyStore<V> extends AbstractSpongePr
 
         @Override
         public Optional<V> getFor(PropertyHolder propertyHolder) {
-            if (propertyHolder instanceof ItemStack) {
-                final ItemStack itemStack = (ItemStack) propertyHolder;
+            if ( (Object) propertyHolder instanceof ItemStack) {
+                final ItemStack itemStack = (ItemStack) (Object) propertyHolder;
                 return getFor(itemStack.getItem(), itemStack);
             } else if (propertyHolder instanceof Item) {
                 return getFor((Item) propertyHolder, null);
@@ -60,8 +60,8 @@ public abstract class AbstractItemStackPropertyStore<V> extends AbstractSpongePr
 
         @Override
         public OptionalInt getIntFor(PropertyHolder propertyHolder) {
-            if (propertyHolder instanceof ItemStack) {
-                final ItemStack itemStack = (ItemStack) propertyHolder;
+            if ( (Object) propertyHolder instanceof ItemStack) {
+                final ItemStack itemStack = (ItemStack) (Object) propertyHolder;
                 return getIntFor(itemStack.getItem(), itemStack);
             } else if (propertyHolder instanceof Item) {
                 return getIntFor((Item) propertyHolder, null);
@@ -76,8 +76,8 @@ public abstract class AbstractItemStackPropertyStore<V> extends AbstractSpongePr
 
         @Override
         public OptionalDouble getDoubleFor(PropertyHolder propertyHolder) {
-            if (propertyHolder instanceof ItemStack) {
-                final ItemStack itemStack = (ItemStack) propertyHolder;
+            if ((Object) propertyHolder instanceof ItemStack) {
+                final ItemStack itemStack = (ItemStack) (Object) propertyHolder;
                 return getDoubleFor(itemStack.getItem(), itemStack);
             } else if (propertyHolder instanceof Item) {
                 return getDoubleFor((Item) propertyHolder, null);

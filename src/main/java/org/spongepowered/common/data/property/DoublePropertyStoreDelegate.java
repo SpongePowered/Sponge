@@ -60,7 +60,7 @@ public class DoublePropertyStoreDelegate extends PropertyStoreDelegate<Double> i
     }
 
     @Override
-    public OptionalDouble getDoubleFor(Location<World> location, Direction direction) {
+    public OptionalDouble getDoubleFor(Location location, Direction direction) {
         for (PropertyStore<Double> propertyStore : this.propertyStores) {
             if (propertyStore instanceof DoublePropertyStore) {
                 final OptionalDouble optional = ((DoublePropertyStore) propertyStore).getDoubleFor(location, direction);

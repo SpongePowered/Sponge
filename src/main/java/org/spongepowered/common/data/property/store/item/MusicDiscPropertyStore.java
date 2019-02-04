@@ -26,18 +26,18 @@ package org.spongepowered.common.data.property.store.item;
 
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.effect.sound.record.RecordType;
+import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.common.data.property.store.common.AbstractItemStackPropertyStore;
-import org.spongepowered.common.registry.type.effect.RecordTypeRegistryModule;
+import org.spongepowered.common.registry.type.effect.MusicDiscRegistryModule;
 
 import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-public class RecordPropertyStore extends AbstractItemStackPropertyStore.Generic<RecordType> {
+public class MusicDiscPropertyStore extends AbstractItemStackPropertyStore.Generic<MusicDisc> {
 
     @Override
-    protected Optional<RecordType> getFor(Item item, @Nullable ItemStack itemStack) {
-        return RecordTypeRegistryModule.getInstance().getByInternalId(Item.getIdFromItem(item));
+    protected Optional<MusicDisc> getFor(Item item, @Nullable ItemStack itemStack) {
+        return MusicDiscRegistryModule.getInstance().getByInternalId(Item.getIdFromItem(item));
     }
 }

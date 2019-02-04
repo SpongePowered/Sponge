@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.property.store.block;
 
+import net.minecraft.block.BlockFire;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
@@ -46,12 +47,12 @@ public class FlammablePropertyStore extends AbstractBlockPropertyStore.Generic<B
     }
 
     @Override
-    protected Optional<Boolean> getForBlock(@Nullable Location<?> location, IBlockState block, @Nullable EnumFacing targetFacing) {
+    protected Optional<Boolean> getForBlock(@Nullable Location location, IBlockState block, @Nullable EnumFacing targetFacing) {
         if (location == null) {
-            return OptBool.of(Blocks.FIRE.getFlammability(block.getBlock()) > 0);
+            return OptBool.of(BlockFire.FIRE.getFlammability(block.getBlock()) > 0);
         }
         final BlockPos pos = VecHelper.toBlockPos(location);
-        final World world = (World) location.getExtent();
+        final World world = (World) location.getWorld();
         if (targetFacing != null) {
             return OptBool.of(SpongeImplHooks.isBlockFlammable(block.getBlock(), world, pos, targetFacing));
         }

@@ -42,7 +42,7 @@ public class SurrogateBlockPropertyStore extends AbstractBlockPropertyStore.Gene
     }
 
     @Override
-    protected Optional<Boolean> getForBlock(@Nullable Location<?> location, IBlockState block, @Nullable EnumFacing facing) {
+    protected Optional<Boolean> getForBlock(@Nullable Location location, IBlockState block, @Nullable EnumFacing facing) {
         return OptBool.of(((IMixinBlock) block.getBlock()).isDummy());
     }
 }

@@ -28,7 +28,6 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import org.spongepowered.api.util.OptBool;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.property.store.common.AbstractLocationPropertyStore;
 import org.spongepowered.common.util.VecHelper;
 
@@ -39,9 +38,9 @@ import javax.annotation.Nullable;
 public class UnbreakablePropertyStore extends AbstractLocationPropertyStore.Generic<Boolean> {
 
     @Override
-    protected Optional<Boolean> getFor(Location<World> location, @Nullable EnumFacing facing) {
+    protected Optional<Boolean> getFor(Location location, @Nullable EnumFacing facing) {
         final IBlockState blockState = (IBlockState) location.getBlock();
-        final net.minecraft.world.World extent = (net.minecraft.world.World) location.getExtent();
+        final net.minecraft.world.World extent = (net.minecraft.world.World) location.getWorld();
         final float hardness = blockState.getBlockHardness(extent, VecHelper.toBlockPos(location));
         return OptBool.of(hardness < 0);
     }

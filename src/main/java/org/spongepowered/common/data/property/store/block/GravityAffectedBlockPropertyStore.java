@@ -42,7 +42,7 @@ public class GravityAffectedBlockPropertyStore extends AbstractBlockPropertyStor
     }
 
     @Override
-    protected Optional<Boolean> getForBlock(@Nullable Location<?> location, IBlockState block, @Nullable EnumFacing facing) {
+    protected Optional<Boolean> getForBlock(@Nullable Location location, IBlockState block, @Nullable EnumFacing facing) {
         return OptBool.of(block.getBlock() instanceof BlockFalling);
     }
 }

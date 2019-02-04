@@ -34,6 +34,6 @@ public class GravityAffectedEntityPropertyStore extends AbstractEntityPropertySt
 
     @Override
     protected Optional<Boolean> getForEntity(Entity entity) {
-        return OptBool.of(entity.hasNoGravity() || entity.isRiding());
+        return OptBool.of(entity.hasNoGravity() || entity.getRidingEntity() != null);
     }
 }

@@ -916,7 +916,7 @@ public class DataRegistrar {
         propertyRegistry.register(Properties.USE_LIMIT, new UseLimitPropertyStore());
         propertyRegistry.register(Properties.TOOL_TYPE, new ToolTypePropertyStore());
         propertyRegistry.register(Properties.ARMOR_TYPE, new ArmorTypePropertyStore());
-        propertyRegistry.register(Properties.RECORD_TYPE, new RecordPropertyStore());
+        propertyRegistry.register(Properties.MUSIC_DISC, new MusicDiscPropertyStore());
 
         // Entities
         propertyRegistry.register(Properties.EYE_POSITION, new EyePositionPropertyStore());

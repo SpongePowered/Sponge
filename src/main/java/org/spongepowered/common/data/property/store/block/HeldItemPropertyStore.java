@@ -43,7 +43,7 @@ public class HeldItemPropertyStore extends AbstractBlockPropertyStore.Generic<It
     }
 
     @Override
-    protected Optional<ItemType> getForBlock(@Nullable Location<?> location, IBlockState block, @Nullable EnumFacing facing) {
+    protected Optional<ItemType> getForBlock(@Nullable Location location, IBlockState block, @Nullable EnumFacing facing) {
         final Item item = Item.getItemFromBlock(block.getBlock());
         if (item instanceof ItemBlock) {
             return Optional.of((ItemType) item);

@@ -41,7 +41,7 @@ public class FullBlockSelectionBoxPropertyStore extends AbstractBlockPropertySto
     }
 
     @Override
-    protected Optional<Boolean> getForBlock(@Nullable Location<?> location, IBlockState block, @Nullable EnumFacing facing) {
+    protected Optional<Boolean> getForBlock(@Nullable Location location, IBlockState block, @Nullable EnumFacing facing) {
         return OptBool.of(block.isFullCube());
     }
 }

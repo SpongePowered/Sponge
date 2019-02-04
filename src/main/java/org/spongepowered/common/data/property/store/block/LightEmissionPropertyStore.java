@@ -40,7 +40,7 @@ public class LightEmissionPropertyStore extends AbstractBlockPropertyStore.Dbl {
     }
 
     @Override
-    protected OptionalDouble getForBlock(@Nullable Location<?> location, IBlockState block, @Nullable EnumFacing facing) {
+    protected OptionalDouble getForBlock(@Nullable Location location, IBlockState block, @Nullable EnumFacing facing) {
         return OptionalDouble.of(block.getLightValue());
     }
 }
