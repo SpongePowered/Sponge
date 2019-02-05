@@ -172,10 +172,6 @@ public final class EntityTypeRegistryModule extends AbstractCatalogRegistryModul
         this.register("fishing_bobber", "fishing_hook");
         this.register("trident");
 
-        // TODO(kashike): why the hell do we even have these as entity types in the API? They definitely should not be.
-        register(CatalogKey.minecraft("weather"), new SpongeEntityType(-4, new ResourceLocation("Weather"), EntityWeatherEffect.class, new SpongeTranslation("soundCategory.weather")));
-        register(CatalogKey.minecraft("complex_part"), new SpongeEntityType(-6, new ResourceLocation("complex_part"), new ResourceLocation("ComplexPart"), MultiPartEntityPart.class, null));
-
         register(CatalogKey.sponge("human"), createHumanEntityType()); // TODO: Figure out what id to use, as negative ids no longer work
         //this.entityClassToTypeMappings.put("human", new SpongeEntityType(-6))
 
