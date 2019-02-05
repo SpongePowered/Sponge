@@ -33,7 +33,6 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -88,8 +87,8 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
             .acceptAndClearIfNotEmpty(entities -> SpongeCommonEventFactory.callSpawnEntity(entities, context));
         final BlockSnapshot blockSnapshot = context.getSource(BlockSnapshot.class)
             .orElseThrow(TrackingUtil.throwWithContext("Could not find a block dropping items!", context));
-        final Location<World> worldLocation = blockSnapshot.getLocation().get();
-        final IMixinWorldServer mixinWorld = ((IMixinWorldServer) worldLocation.getExtent());
+        final Location worldLocation = blockSnapshot.getLocation().get();
+        final IMixinWorldServer mixinWorld = ((IMixinWorldServer) worldLocation.getWorld());
 
         context.getCapturedBlockSupplier()
             .acceptAndClearIfNotEmpty(blocks -> {

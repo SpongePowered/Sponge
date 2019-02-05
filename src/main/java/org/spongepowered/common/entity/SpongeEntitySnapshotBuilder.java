@@ -134,7 +134,7 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
             addManipulator(manipulator.asImmutable());
         }
         this.compound = new NBTTagCompound();
-        ((net.minecraft.entity.Entity) entity).writeToNBT(this.compound);
+        ((net.minecraft.entity.Entity) entity).writeWithoutTypeId(this.compound);
         return this;
     }
 
@@ -195,7 +195,7 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
             this.entityId = holder.getUniqueId().get();
         }
         this.position = holder.getPosition().toDouble();
-        final Optional<Transform<World>> optional = holder.getTransform();
+        final Optional<Transform> optional = holder.getTransform();
         if (optional.isPresent()) {
             this.position = optional.get().getPosition();
             this.rotation = optional.get().getRotation();
@@ -215,7 +215,7 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
         this.entityType = ((Entity) minecraftEntity).getType();
         this.worldId = ((Entity) minecraftEntity).getWorld().getUniqueId();
         this.entityId = minecraftEntity.getUniqueID();
-        final Transform<World> transform = ((Entity) minecraftEntity).getTransform();
+        final Transform transform = ((Entity) minecraftEntity).getTransform();
         this.position = transform.getPosition();
         this.rotation = transform.getRotation();
         this.scale = transform.getScale();
@@ -224,7 +224,7 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
             addManipulator(manipulator.asImmutable());
         }
         this.compound = new NBTTagCompound();
-        minecraftEntity.writeToNBT(this.compound);
+        minecraftEntity.writeWithoutTypeId(this.compound);
         return this;
     }
 

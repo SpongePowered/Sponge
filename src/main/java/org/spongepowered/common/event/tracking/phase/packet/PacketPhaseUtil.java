@@ -58,7 +58,7 @@ public final class PacketPhaseUtil {
             ItemStackSnapshot snapshot = eventCancelled || !slotTransaction.isValid() ? slotTransaction.getOriginal() : slotTransaction.getCustom().get();
             final ItemStack originalStack = ItemStackUtil.fromSnapshotToNative(snapshot);
             if (openContainer == null) {
-                slot.set(((org.spongepowered.api.item.inventory.ItemStack) originalStack));
+                slot.set(((org.spongepowered.api.item.inventory.ItemStack) (Object) originalStack));
             } else {
                 final int slotNumber = slot.getOrdinal();
                 final Slot nmsSlot = openContainer.getSlot(slotNumber);
@@ -108,7 +108,7 @@ public final class PacketPhaseUtil {
     }
 
     public static void handlePlayerSlotRestore(EntityPlayerMP player, ItemStack itemStack, EnumHand hand) {
-        if (itemStack.isEmpty() || itemStack == ItemTypeRegistryModule.NONE) {
+        if (itemStack.isEmpty() || (Object) itemStack == ItemTypeRegistryModule.NONE) {
             return;
         }
 

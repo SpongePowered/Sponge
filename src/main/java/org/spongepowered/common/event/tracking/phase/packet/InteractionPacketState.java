@@ -29,6 +29,7 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityThrowable;
+import net.minecraft.item.ItemSpawnEgg;
 import net.minecraft.network.Packet;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.Sponge;
@@ -136,7 +137,7 @@ final class InteractionPacketState extends BasicPacketState implements IEntitySp
                     if (ShouldFire.DROP_ITEM_EVENT_DESTRUCT) {
 
                         for (BlockSnapshot blockChange : capturedBlcoks) {
-                            final Location<World> location = blockChange.getLocation().get();
+                            final Location location = blockChange.getLocation().get();
                             final Vector3d position = location.getPosition();
                             final BlockPos blockPos = VecHelper.toBlockPos(position);
                             final Collection<EntityItem> entityItems = map.get(blockPos);
@@ -152,7 +153,7 @@ final class InteractionPacketState extends BasicPacketState implements IEntitySp
                         }
                     } else {
                         for (BlockSnapshot blockChange : capturedBlcoks) {
-                            final Location<World> location = blockChange.getLocation().get();
+                            final Location location = blockChange.getLocation().get();
                             final Vector3d position = location.getPosition();
                             final BlockPos blockPos = VecHelper.toBlockPos(position);
                             final Collection<EntityItem> entityItems = map.get(blockPos);
@@ -203,7 +204,7 @@ final class InteractionPacketState extends BasicPacketState implements IEntitySp
                 for (Entity entity : entities) {
                     if (entity instanceof Projectile || entity instanceof EntityThrowable) {
                         projectiles.add(entity);
-                    } else if (usedSnapshot.getType() == ItemTypes.SPAWN_EGG) {
+                    } else if (usedSnapshot.getType() instanceof ItemSpawnEgg) {
                         spawnEggs.add(entity);
                     } else if (entity instanceof EntityItem) {
                         items.add(entity);

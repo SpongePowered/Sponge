@@ -223,10 +223,10 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
             for (EntityHanging entityHanging : EntityUtil.findHangingEntities(EntityUtil.getMinecraftWorld(tickingEntity), blockPos)) {
                 if (entityHanging instanceof EntityItemFrame) {
                     final EntityItemFrame itemFrame = (EntityItemFrame) entityHanging;
-                    if (!itemFrame.isDead) {
+                    if (!itemFrame.removed) {
                         itemFrame.dropItemOrSelf(EntityUtil.toNative(tickingEntity), true);
                     }
-                    itemFrame.setDead();
+                    itemFrame.remove();
                 }
             }
         }

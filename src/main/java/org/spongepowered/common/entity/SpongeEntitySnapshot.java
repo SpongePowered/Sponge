@@ -133,13 +133,13 @@ public class SpongeEntitySnapshot implements EntitySnapshot, IPropertyHolder {
     }
 
     @Override
-    public Optional<Transform<World>> getTransform() {
+    public Optional<Transform> getTransform() {
         if (this.worldUuid == null) {
             return Optional.empty();
         }
         Optional<World> optional = SpongeImpl.getGame().getServer().getWorld(this.worldUuid);
         if (optional.isPresent()) {
-            final Transform<World> transform = new Transform<>(optional.get(), this.position, this.rotation);
+            final Transform transform = new Transform(optional.get(), this.position, this.rotation);
             return Optional.of(transform);
         }
         return Optional.empty();
@@ -151,13 +151,13 @@ public class SpongeEntitySnapshot implements EntitySnapshot, IPropertyHolder {
     }
 
     @Override
-    public Optional<Location<World>> getLocation() {
+    public Optional<Location> getLocation() {
         if (this.worldUuid == null) {
             return Optional.empty();
         }
         Optional<World> optional = SpongeImpl.getGame().getServer().getWorld(this.worldUuid);
         if (optional.isPresent()) {
-            final Location<World> location = new Location<>(optional.get(), this.position);
+            final Location location = new Location(optional.get(), this.position);
             return Optional.of(location);
         }
         return Optional.empty();
@@ -382,13 +382,13 @@ public class SpongeEntitySnapshot implements EntitySnapshot, IPropertyHolder {
     }
 
     @Override
-    public EntitySnapshot withLocation(Location<World> location) {
+    public EntitySnapshot withLocation(Location location) {
         checkNotNull(location, "location");
         final SpongeEntitySnapshotBuilder builder = createBuilder();
         builder.position = location.getPosition();
-        builder.worldId = location.getExtent().getUniqueId();
+        builder.worldId = location.getWorld().getUniqueId();
         NBTTagCompound newCompound = this.compound.copy();
-        newCompound.setInteger("Dimension", ((IMixinWorldInfo) location.getExtent().getProperties()).getDimensionId());
+        newCompound.setInt("Dimension", ((IMixinWorldInfo) location.getWorld().getProperties()).getDimensionId());
         builder.compound = newCompound;
         return builder.build();
     }
@@ -431,7 +431,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot, IPropertyHolder {
             if (newEntity != null) {
                 net.minecraft.entity.Entity nmsEntity = (net.minecraft.entity.Entity) newEntity;
                 if (this.compound != null) {
-                    nmsEntity.readFromNBT(this.compound);
+                    nmsEntity.read(this.compound);
                 }
     
                 boolean spawnResult = world.get().spawnEntity((Entity) nmsEntity);

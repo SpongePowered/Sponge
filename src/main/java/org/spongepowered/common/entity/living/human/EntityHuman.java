@@ -62,10 +62,12 @@ import net.minecraft.world.World;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.persistence.DataBuilder;
+import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.api.scoreboard.TeamMember;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.IMixinSkinnable;
 import org.spongepowered.common.network.keepalive.SpongeClientWaiter;
@@ -73,6 +75,7 @@ import org.spongepowered.common.network.keepalive.SpongeClientWaiter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
@@ -95,8 +98,8 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
     @Nullable private ProfileProperty skinProperty;
     private boolean aiDisabled = false, leftHanded = false;
 
-    public EntityHuman(World worldIn) {
-        super(worldIn);
+    public EntityHuman(final World world) {
+        super(((SpongeEntityType) EntityTypes.HUMAN).type, world);
         this.fakeProfile = new GameProfile(this.entityUniqueID, "");
         this.setSize(0.6F, 1.8F);
         this.setCanPickUpLoot(true);
@@ -145,7 +148,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
 
     @Override
     public void setCustomName(@Nullable ITextComponent name) {
-        if (this.getCustomName().equals(name)) {
+        if (Objects.equals(this.getCustomName(), name)) {
             return;
         }
 

@@ -26,6 +26,7 @@ package org.spongepowered.common.event.tracking.phase.packet;
 
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.ItemSpawnEgg;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.CPacketPlayerTryUseItem;
 import net.minecraft.util.EnumHand;
@@ -37,7 +38,6 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
-import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.entity.EntityUtil;
@@ -87,7 +87,7 @@ class UseItemPacketState extends BasicPacketState {
             frame.pushCause(player);
             frame.pushCause(snapshot);
             frame.addContext(EventContextKeys.SPAWN_TYPE,
-                itemStack.getType() == ItemTypes.SPAWN_EGG ? SpawnTypes.SPAWN_EGG : SpawnTypes.PLACEMENT);
+                itemStack.getType() instanceof ItemSpawnEgg ? SpawnTypes.SPAWN_EGG : SpawnTypes.PLACEMENT);
             context.getCapturedEntitySupplier()
                 .acceptAndClearIfNotEmpty(entities -> {
                     SpongeCommonEventFactory.callSpawnEntity(entities, context);

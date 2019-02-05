@@ -96,10 +96,10 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
     public void postBlockTransactionApplication(BlockChange blockChange,
         Transaction<BlockSnapshot> snapshotTransaction, BlockEventTickContext context) {
         final Block block = (Block) snapshotTransaction.getOriginal().getState().getType();
-        final Location<World> changedLocation = snapshotTransaction.getOriginal().getLocation().get();
+        final Location changedLocation = snapshotTransaction.getOriginal().getLocation().get();
         final Vector3d changedPosition = changedLocation.getPosition();
         final BlockPos changedBlockPos = VecHelper.toBlockPos(changedPosition);
-        final IMixinChunk changedMixinChunk = (IMixinChunk) ((WorldServer) changedLocation.getExtent()).getChunk(changedBlockPos);
+        final IMixinChunk changedMixinChunk = (IMixinChunk) ((WorldServer) changedLocation.getWorld()).getChunk(changedBlockPos);
         changedMixinChunk.getBlockOwner(changedBlockPos)
                 .ifPresent(owner -> changedMixinChunk.addTrackedBlockPosition(block, changedBlockPos, owner, PlayerTracker.Type.OWNER));
         final User user = TrackingUtil.getNotifierOrOwnerFromBlock(changedLocation);

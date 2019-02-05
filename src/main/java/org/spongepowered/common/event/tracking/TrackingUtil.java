@@ -129,8 +129,8 @@ public final class TrackingUtil {
             ;
     private static final int EVENT_COUNT = 5;
     static final Function<BlockSnapshot, Transaction<BlockSnapshot>> TRANSACTION_CREATION = (blockSnapshot) -> {
-        final Location<World> originalLocation = blockSnapshot.getLocation().get();
-        final WorldServer worldServer = (WorldServer) originalLocation.getExtent();
+        final Location originalLocation = blockSnapshot.getLocation().get();
+        final WorldServer worldServer = (WorldServer) originalLocation.getWorld();
         final BlockPos blockPos = VecHelper.toBlockPos(originalLocation);
         final IBlockState newState = worldServer.getBlockState(blockPos);
         final IBlockState newActualState = newState.getActualState(worldServer, blockPos);
@@ -157,7 +157,7 @@ public final class TrackingUtil {
                     .ifPresent(context::owner);
             context.buildAndSwitch();
             entityTiming.startTiming();
-            entity.onUpdate();
+            entity.tick();
             if (ShouldFire.MOVE_ENTITY_EVENT) {
                 SpongeCommonEventFactory.callMoveEntityEvent(entity);
             }
@@ -228,10 +228,10 @@ public final class TrackingUtil {
 
             mixinTileEntity.setIsTicking(true);
             try (Timing timing = mixinTileEntity.getTimingsHandler().startTiming()) {
-                tile.update();
+                tile.tick();
             }
             // We delay clearing active chunk if TE is invalidated during tick so we must remove it after
-            if (tileEntity.isInvalid()) {
+            if (tileEntity.isRemoved()) {
                 mixinTileEntity.setActiveChunk(null);
             }
         } catch (Exception e) {
@@ -420,9 +420,9 @@ public final class TrackingUtil {
 
     @SuppressWarnings("ConstantConditions")
     @Nullable
-    public static User getNotifierOrOwnerFromBlock(Location<World> location) {
+    public static User getNotifierOrOwnerFromBlock(Location location) {
         final BlockPos blockPos = VecHelper.toBlockPos(location);
-        return getNotifierOrOwnerFromBlock((WorldServer) location.getExtent(), blockPos);
+        return getNotifierOrOwnerFromBlock((WorldServer) location.getWorld(), blockPos);
     }
 
     @Nullable
@@ -565,7 +565,7 @@ public final class TrackingUtil {
             if (!transaction.isValid()) {
                 invalid.add(transaction);
                 // Cancel any block drops performed, avoids any item drops, regardless
-                final Location<World> location = transaction.getOriginal().getLocation().orElse(null);
+                final Location location = transaction.getOriginal().getLocation().orElse(null);
                 if (location != null) {
                     final BlockPos pos = VecHelper.toBlockPos(location);
                     context.getBlockItemDropSupplier().removeAllIfNotEmpty(pos);
@@ -585,7 +585,7 @@ public final class TrackingUtil {
             if (((IPhaseState) state).tracksBlockSpecificDrops(context)) {
                 // Cancel any block drops or harvests for the block change.
                 // This prevents unnecessary spawns.
-                final Location<World> location = transaction.getOriginal().getLocation().orElse(null);
+                final Location location = transaction.getOriginal().getLocation().orElse(null);
                 if (location != null) {
                     final BlockPos pos = VecHelper.toBlockPos(location);
                     context.getBlockDropSupplier().removeAllIfNotEmpty(pos);
@@ -655,12 +655,12 @@ public final class TrackingUtil {
         final SpongeBlockSnapshot newBlockSnapshot = (SpongeBlockSnapshot) transaction.getFinal();
 
         // Handle item drops captured
-        final Location<World> worldLocation = oldBlockSnapshot.getLocation().orElseThrow(() -> {
+        final Location worldLocation = oldBlockSnapshot.getLocation().orElseThrow(() -> {
             final IllegalStateException exception = new IllegalStateException("BlockSnapshot with Invalid Location");
             PhaseTracker.getInstance().printMessageWithCaughtException("BlockSnapshot does not have a valid location object, usually because the world is unloaded!", "", exception);
             return exception;
         });
-        final IMixinWorldServer mixinWorld = (IMixinWorldServer) worldLocation.getExtent();
+        final IMixinWorldServer mixinWorld = (IMixinWorldServer) worldLocation.getWorld();
         final BlockPos pos = VecHelper.toBlockPos(worldLocation);
         performBlockEntitySpawns(phaseState, phaseContext, oldBlockSnapshot, pos);
 
@@ -742,8 +742,8 @@ public final class TrackingUtil {
                 return;
             }
         }
-        Location<World> worldLocation = oldBlockSnapshot.getLocation().get();
-        final World world = worldLocation.getExtent();
+        Location worldLocation = oldBlockSnapshot.getLocation().get();
+        final World world = worldLocation.getWorld();
         final WorldServer worldServer = (WorldServer) world;
         // Now we can spawn the entity items appropriately
         final List<Entity> itemDrops = itemStacks.stream().map(itemStack -> {

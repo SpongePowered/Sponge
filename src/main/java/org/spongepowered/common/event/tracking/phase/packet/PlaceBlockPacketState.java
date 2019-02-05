@@ -81,9 +81,9 @@ class PlaceBlockPacketState extends BasicPacketState {
     public void postBlockTransactionApplication(BlockChange blockChange, Transaction<BlockSnapshot> transaction,
         BasicPacketContext context) {
         final Player player = context.getSpongePlayer();
-        final Location<World> location = transaction.getFinal().getLocation().get();
+        final Location location = transaction.getFinal().getLocation().get();
         BlockPos pos = VecHelper.toBlockPos(location);
-        IMixinChunk spongeChunk = (IMixinChunk) ((WorldServer) location.getExtent()).getChunk(pos);
+        IMixinChunk spongeChunk = (IMixinChunk) ((WorldServer) location.getWorld()).getChunk(pos);
         if (blockChange == BlockChange.PLACE) {
             spongeChunk.addTrackedBlockPosition((Block) transaction.getFinal().getState().getType(), pos, player, PlayerTracker.Type.OWNER);
         }
@@ -93,7 +93,7 @@ class PlaceBlockPacketState extends BasicPacketState {
     @Override
     public void appendNotifierToBlockEvent(BasicPacketContext context, IMixinWorldServer mixinWorldServer, BlockPos pos, IMixinBlockEventData blockEvent) {
         final Player player = context.getSpongePlayer();
-        final Location<World> location = new Location<>(player.getWorld(), pos.getX(), pos.getY(), pos.getZ());
+        final Location location = new Location(player.getWorld(), pos.getX(), pos.getY(), pos.getZ());
         final LocatableBlock locatableBlock = LocatableBlock.builder()
                 .location(location)
                 .state(location.getBlock())

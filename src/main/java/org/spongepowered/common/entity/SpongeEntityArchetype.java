@@ -73,9 +73,8 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
         return NbtTranslator.getInstance().translateFrom(this.data);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public Optional<org.spongepowered.api.entity.Entity> apply(Location<World> location) {
+    public Optional<org.spongepowered.api.entity.Entity> apply(Location location) {
         final Vector3d position = location.getPosition();
         final double x = position.getX();
         final double y = position.getY();
@@ -84,23 +83,13 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
         final World world = location.getWorld();
         final WorldServer worldServer = (WorldServer) world;
 
-        Entity entity = null;
-
-        try {
-            Class<? extends Entity> oclass = (Class<? extends Entity>) this.type.getEntityClass();
-            if (oclass != null) {
-                entity = oclass.getConstructor(net.minecraft.world.World.class).newInstance(world);
-            }
-        } catch (Exception exception) {
-            exception.printStackTrace();
-        }
-
+        final Entity entity = ((SpongeEntityType) this.type).type.create(worldServer);
         if (entity == null) {
             return Optional.empty();
         }
 
         this.data.setTag("Pos", NbtDataUtil.newDoubleNBTList(x, y, z));
-        this.data.setInt("Dimension", ((IMixinWorldInfo) location.getExtent().getProperties()).getDimensionId());
+        this.data.setInt("Dimension", ((IMixinWorldInfo) location.getWorld().getProperties()).getDimensionId());
         entity.read(this.data);
         this.data.removeTag("Pos");
         this.data.removeTag("Dimension");
@@ -117,7 +106,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
             if (entity instanceof EntityLiving) {
                 // This is ok to force spawn since we aren't considering custom items.
                 mixinWorldServer.forceSpawnEntity(EntityUtil.fromNative(entity));
-                ((EntityLiving) entity).onInitialSpawn(worldServer.getDifficultyForLocation(blockPos), null);
+                ((EntityLiving) entity).onInitialSpawn(worldServer.getDifficultyForLocation(blockPos), null, null);
                 ((EntityLiving) entity).spawnExplosionParticle();
             } else {
                 // This is ok to force spawn since we aren't considering custom items.
@@ -129,7 +118,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
     }
 
     @Override
-    public EntitySnapshot toSnapshot(Location<World> location) {
+    public EntitySnapshot toSnapshot(Location location) {
         final SpongeEntitySnapshotBuilder builder = new SpongeEntitySnapshotBuilder();
         builder.entityType = this.type;
         NBTTagCompound newCompound = this.data.copy();

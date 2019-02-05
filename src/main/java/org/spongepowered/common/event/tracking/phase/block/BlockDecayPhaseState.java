@@ -34,11 +34,9 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -75,8 +73,8 @@ final class BlockDecayPhaseState extends BlockPhaseState {
     public void unwind(GeneralizedContext context) {
         final LocatableBlock locatable = context.getSource(LocatableBlock.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over at a location!", context));
-        final Location<World> worldLocation = locatable.getLocation();
-        final IMixinWorldServer mixinWorld = ((IMixinWorldServer) worldLocation.getExtent());
+        final Location worldLocation = locatable.getLocation();
+        final IMixinWorldServer mixinWorld = ((IMixinWorldServer) worldLocation.getWorld());
 
         context.getCapturedBlockSupplier()
             .acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));

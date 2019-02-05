@@ -81,10 +81,10 @@ final class ChangingToDimensionState extends EntityPhaseState<TeleportingContext
 
         teleportingEntity.world.profiler.startSection("changeDimension");
 
-        WorldServer toWorld = (WorldServer) event.getToTransform().getExtent();
+        WorldServer toWorld = (WorldServer) event.getToTransform().getWorld();
 
         teleportingEntity.world.removeEntity(teleportingEntity);
-        teleportingEntity.isDead = false;
+        teleportingEntity.removed = false;
         teleportingEntity.world.profiler.startSection("reposition");
         final Vector3d position = event.getToTransform().getPosition();
         teleportingEntity.setLocationAndAngles(position.getX(), position.getY(), position.getZ(), (float) event.getToTransform().getYaw(),
@@ -92,7 +92,7 @@ final class ChangingToDimensionState extends EntityPhaseState<TeleportingContext
         toWorld.spawnEntity(teleportingEntity);
         teleportingEntity.world = toWorld;
 
-        toWorld.updateEntityWithOptionalForce(teleportingEntity, false);
+        toWorld.tickEntity(teleportingEntity, false);
         teleportingEntity.world.profiler.endStartSection("reloading");
 
         teleportingEntity.world.profiler.endSection();
