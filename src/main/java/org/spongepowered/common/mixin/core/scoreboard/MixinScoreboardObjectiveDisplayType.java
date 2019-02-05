@@ -36,20 +36,20 @@ import javax.annotation.Nullable;
 @Mixin(IScoreCriteria.EnumRenderType.class)
 public abstract class MixinScoreboardObjectiveDisplayType implements ObjectiveDisplayMode {
 
-    @Shadow @Final public String renderType;
+    @Shadow @Final public String field_211840_c; // renderType
     @Nullable private CatalogKey key;
 
     @Override
     public CatalogKey getKey() {
         if (this.key == null) {
-            this.key = CatalogKey.resolve(this.renderType);
+            this.key = CatalogKey.resolve(this.field_211840_c);
         }
         return this.key;
     }
 
     @Override
     public String getName() {
-        return this.renderType;
+        return this.field_211840_c;
     }
 
 }

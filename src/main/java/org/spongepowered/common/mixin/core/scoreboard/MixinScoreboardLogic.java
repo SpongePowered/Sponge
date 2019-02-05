@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.scoreboard;
 
+import com.google.common.collect.Lists;
 import net.minecraft.network.play.server.SPacketDisplayObjective;
 import net.minecraft.network.play.server.SPacketScoreboardObjective;
 import net.minecraft.scoreboard.IScoreCriteria;
@@ -32,6 +33,7 @@ import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.ServerScoreboard;
+import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.critieria.Criterion;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
@@ -50,6 +52,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.IMixinScore;
 import org.spongepowered.common.interfaces.IMixinScoreObjective;
 import org.spongepowered.common.interfaces.IMixinServerScoreboard;
+import org.spongepowered.common.interfaces.text.IMixinTextComponent;
 import org.spongepowered.common.registry.type.scoreboard.DisplaySlotRegistryModule;
 import org.spongepowered.common.scoreboard.SpongeDisplaySlot;
 import org.spongepowered.common.scoreboard.SpongeObjective;
@@ -85,9 +88,10 @@ public abstract class MixinScoreboardLogic extends Scoreboard implements IMixinS
     // Add objective
 
     @Override
-    public ScoreObjective addScoreObjective(String name, IScoreCriteria criteria) {
+    public ScoreObjective addObjective(String name, IScoreCriteria criteria, ITextComponent displayName, IScoreCriteria.EnumRenderType renderType) {
         SpongeObjective objective = new SpongeObjective(name, (Criterion) criteria);
-        objective.setDisplayMode((ObjectiveDisplayMode) (Object) criteria.getRenderType());
+        objective.setDisplayMode((ObjectiveDisplayMode) (Object) renderType);
+        objective.setDisplayName(((IMixinTextComponent) displayName).toText());
         this.scoreboard$addObjective(objective);
         return objective.getObjectiveFor(this);
     }
@@ -98,13 +102,10 @@ public abstract class MixinScoreboardLogic extends Scoreboard implements IMixinS
             throw new IllegalArgumentException("An objective with the name \'" + objective.getName() + "\' already exists!");
         }
         ScoreObjective scoreObjective = ((SpongeObjective) objective).getObjectiveFor(this);
-        List<ScoreObjective> objectives = this.scoreObjectiveCriterias.get(objective.getCriterion());
-        if (objectives == null) {
-            objectives = new ArrayList<>();
-            this.scoreObjectiveCriterias.put((IScoreCriteria) objective.getCriterion(), objectives);
-        }
+        ((List)this.scoreObjectiveCriterias.computeIfAbsent(scoreObjective.getCriteria(), (p_197903_0_) -> {
+            return Lists.newArrayList();
+        })).add(scoreObjective);
 
-        objectives.add(scoreObjective);
         this.scoreObjectives.put(objective.getName(), scoreObjective);
         this.onScoreObjectiveAdded(scoreObjective);
 
@@ -246,7 +247,7 @@ public abstract class MixinScoreboardLogic extends Scoreboard implements IMixinS
         this.teams.put(team.getName(), team);
 
         for (String entry: team.getMembershipCollection()) {
-            this.addPlayerToTeam(entry, team.getName());
+            this.addPlayerToTeam(entry, team);
         }
         this.broadcastTeamCreated(team);
     }

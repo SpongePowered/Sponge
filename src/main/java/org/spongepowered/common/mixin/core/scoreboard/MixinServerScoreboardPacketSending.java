@@ -82,7 +82,7 @@ public abstract class MixinServerScoreboardPacketSending extends Scoreboard impl
         for (ScoreObjective objective: this.getScoreObjectives()) {
             player.connection.sendPacket(new SPacketScoreboardObjective(objective, 0));
             for (Score score: this.getSortedScores(objective)) {
-                player.connection.sendPacket(new SPacketUpdateScore(score));
+                player.connection.sendPacket(new SPacketUpdateScore(ServerScoreboard.Action.CHANGE, score.getObjective().getName(), score.getPlayerName(), score.getScorePoints()));
             }
         }
 
@@ -153,12 +153,14 @@ public abstract class MixinServerScoreboardPacketSending extends Scoreboard impl
         this.sendToPlayers(packet);
     }
 
-    @Redirect(method = "onObjectiveDisplayNameChanged", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
+    // onObjectiveDisplayNameChanged
+    @Redirect(method = "func_199869_b", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
     public void onUpdateObjective(PlayerList manager, Packet<?> packet) {
         this.sendToPlayers(packet);
     }
 
-    @Redirect(method = "onObjectiveDisplayNameChanged", at = @At(value = "INVOKE", target = SET_CONTAINS, remap = false))
+    // onObjectiveDisplayNameChanged
+    @Redirect(method = "func_199869_b", at = @At(value = "INVOKE", target = SET_CONTAINS, remap = false))
     public boolean onUpdateObjective(Set<ScoreObjective> set, Object object) {
         return true;
     }

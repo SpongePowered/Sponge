@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.scoreboard;
 import net.minecraft.scoreboard.IScoreCriteria;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.Scoreboard;
+import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,8 +38,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.IMixinScoreObjective;
 import org.spongepowered.common.interfaces.IMixinScoreboard;
+import org.spongepowered.common.interfaces.text.IMixinTextComponent;
 import org.spongepowered.common.scoreboard.SpongeObjective;
-import org.spongepowered.common.text.SpongeTexts;
 
 @Mixin(ScoreObjective.class)
 public abstract class MixinScoreObjective implements IMixinScoreObjective {
@@ -58,7 +59,7 @@ public abstract class MixinScoreObjective implements IMixinScoreObjective {
     }
 
     @Inject(method = "setDisplayName", at = @At("HEAD"), cancellable = true)
-    public void onSetDisplayName(String name, CallbackInfo ci) {
+    public void onSetDisplayName(ITextComponent name, CallbackInfo ci) {
         if (this.scoreboard != null && ((IMixinScoreboard) this.scoreboard).isClient()) {
             return; // Let the normal logic take over.
         }
@@ -68,7 +69,7 @@ public abstract class MixinScoreObjective implements IMixinScoreObjective {
             ci.cancel();
             return;
         }
-        this.spongeObjective.setDisplayName(SpongeTexts.fromLegacy(name));
+        this.spongeObjective.setDisplayName(((IMixinTextComponent) name).toText());
         ci.cancel();
     }
 
