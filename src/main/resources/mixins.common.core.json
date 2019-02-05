@@ -173,7 +173,7 @@
         "data.types.MixinBlockPlanksEnumType",
         "data.types.MixinBlockPrismarineEnumType",
         "data.types.MixinBlockQuartzEnumType",
-        "data.types.MixinBlockRailBaseEnumRailDirection",
+        "data.types.MixinRailShape",
         "data.types.MixinBlockRedstoneComparatorMode",
         "data.types.MixinBlockRedstoneWireAttachPosition",
         "data.types.MixinBlockSandEnumType",

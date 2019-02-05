@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.data.types;
 
-import net.minecraft.block.BlockRailBase;
+import net.minecraft.state.properties.RailShape;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.RailDirection;
 import org.spongepowered.asm.mixin.Implements;
@@ -35,12 +35,12 @@ import org.spongepowered.asm.mixin.Shadow;
 
 import javax.annotation.Nullable;
 
-@Mixin(BlockRailBase.EnumRailDirection.class)
+@Mixin(RailShape.class)
 @Implements(@Interface(iface = RailDirection.class, prefix = "rail$"))
-public abstract class MixinBlockRailBaseEnumRailDirection implements RailDirection {
+public abstract class MixinRailShape implements RailDirection {
 
     @Shadow public abstract String shadow$getName();
-    @Shadow public abstract int getMetadata();
+    @Shadow public abstract int getMeta();
     @Nullable private CatalogKey key;
 
     public CatalogKey rail$getKey() {
@@ -56,12 +56,12 @@ public abstract class MixinBlockRailBaseEnumRailDirection implements RailDirecti
 
     @Override
     public RailDirection cycleNext() {
-        int meta = getMetadata();
+        int meta = getMeta();
         if (meta == 9) {
             meta = 0;
         } else {
             meta++;
         }
-        return (RailDirection) (Object) BlockRailBase.EnumRailDirection.byMetadata(meta);
+        return (RailDirection) (Object) RailShape.values()[meta];
     }
 }
