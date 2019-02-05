@@ -41,11 +41,11 @@ import net.minecraft.init.MobEffects;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.particles.IParticleData;
 import net.minecraft.potion.Potion;
 import net.minecraft.util.CombatTracker;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -56,7 +56,6 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.mutable.entity.DamageableData;
 import org.spongepowered.api.data.manipulator.mutable.HealthData;
 import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.data.value.OptionalValue;
@@ -174,9 +173,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow protected abstract float getSoundPitch();
     @Shadow protected abstract SoundEvent getHurtSound(DamageSource cause);
     @Shadow public abstract void setHealth(float health);
-    @Shadow public abstract void addPotionEffect(net.minecraft.potion.PotionEffect potionEffect);
     @Shadow protected abstract void markPotionsDirty();
-    @Shadow public abstract void clearActivePotions();
     @Shadow public abstract void setLastAttackedEntity(net.minecraft.entity.Entity entity);
     @Shadow public abstract boolean isPotionActive(Potion potion);
     @Shadow public abstract float getHealth();
@@ -187,7 +184,6 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow @Nullable public abstract EntityLivingBase getLastAttackedEntity();
     @Shadow public abstract IAttributeInstance getAttribute(IAttribute attribute);
     @Shadow public abstract ItemStack getItemStackFromSlot(EntityEquipmentSlot slotIn);
-    @Shadow protected abstract void applyEntityAttributes();
     @Shadow protected abstract void playHurtSound(net.minecraft.util.DamageSource p_184581_1_);
     @Shadow protected abstract void damageShield(float p_184590_1_);
     @Shadow public abstract void setActiveHand(EnumHand hand);
@@ -609,13 +605,14 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
     /**
      * @author gabizou - January 4th, 2016
+     * @author Aaron1011 - February 5h, 2018 - update for 1.13
      * This is necessary for invisibility checks so that vanish players don't actually send the particle stuffs.
      */
-    @Redirect(method = "updateItemUse", at = @At(value = "INVOKE", target = WORLD_SPAWN_PARTICLE))
-    public void spawnItemParticle(World world, EnumParticleTypes particleTypes, double xCoord, double yCoord, double zCoord, double xOffset,
-            double yOffset, double zOffset, int ... p_175688_14_) {
+    @Redirect(method = "func_195062_a", at = @At(value = "INVOKE", target = WORLD_SPAWN_PARTICLE))
+    public void spawnItemParticle(World world, IParticleData particleTypes, double xCoord, double yCoord, double zCoord, double xOffset,
+            double yOffset, double zOffset) {
         if (!this.isVanished()) {
-            this.world.spawnParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset, p_175688_14_);
+            this.world.spawnParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset);
         }
     }
 
@@ -670,7 +667,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 DamageEventHandler.generateCauseFor(damageSource, frame);
 
-                DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(frame.getCurrentCause(), originalFunctions, this, originalDamage);
+                DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(frame.getCurrentCause(), this, originalFunctions, originalDamage);
                 if (damageSource != DamageSourceRegistryModule.IGNORED_DAMAGE_SOURCE) { // Basically, don't throw an event if it's our own damage source
                     Sponge.getEventManager().post(event);
                 }
@@ -885,15 +882,15 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     }
 
     @Redirect(method = "updateFallState", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;spawnParticle(Lnet/minecraft/util/EnumParticleTypes;DDDIDDDD[I)V"))
-    private void spongeSpawnParticleForFallState(WorldServer worldServer, EnumParticleTypes particleTypes, double xCoord, double yCoord,
-            double zCoord, int numberOfParticles, double xOffset, double yOffset, double zOffset, double particleSpeed, int... extraArgs) {
+    private void spongeSpawnParticleForFallState(WorldServer worldServer, IParticleData particleTypes, double xCoord, double yCoord,
+            double zCoord, int numberOfParticles, double xOffset, double yOffset, double zOffset, double particleSpeed) {
         if (!this.isVanished()) {
-            worldServer.spawnParticle(particleTypes, xCoord, yCoord, zCoord, numberOfParticles, xOffset, yOffset, zOffset, particleSpeed, extraArgs);
+            worldServer.spawnParticle(particleTypes, xCoord, yCoord, zCoord, numberOfParticles, xOffset, yOffset, zOffset, particleSpeed);
         }
 
     }
 
-    @Redirect(method = "onEntityUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;onDeathUpdate()V"))
+    @Redirect(method = "baseTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;onDeathUpdate()V"))
     private void causeTrackDeathUpdate(EntityLivingBase entityLivingBase) {
         if (!entityLivingBase.world.isRemote) {
             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
@@ -910,7 +907,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     private EquipmentSlotsFabric inventory = new EquipmentSlotsFabric(this);
     private EnumMap<EntityEquipmentSlot, SlotLens> slotLens = new EnumMap<>(EntityEquipmentSlot.class);
 
-    @Inject(method = "onUpdate", locals = LocalCapture.CAPTURE_FAILHARD,
+    @Inject(method = "tick", locals = LocalCapture.CAPTURE_FAILHARD,
             at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;getItemStackFromSlot(Lnet/minecraft/inventory/EntityEquipmentSlot;)Lnet/minecraft/item/ItemStack;"))
     private void onGetItemStackFromSlot(CallbackInfo ci, int i, EntityEquipmentSlot[] slots, int j, int k,
                                         EntityEquipmentSlot entityEquipmentSlot, ItemStack before) {
@@ -1005,7 +1002,6 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         return SpongeValueFactory.boundedBuilder(Keys.HEALTH)
                 .minimum(0D)
                 .maximum((double) this.getMaxHealth())
-                .defaultValue((double) this.getMaxHealth())
                 .value((double) this.getHealth())
                 .build();
     }
@@ -1015,7 +1011,6 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         return SpongeValueFactory.boundedBuilder(Keys.MAX_HEALTH)
                 .minimum(1D)
                 .maximum((double) Float.MAX_VALUE)
-                .defaultValue(20D)
                 .value((double) this.getMaxHealth())
                 .build();
     }
@@ -1158,7 +1153,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         Sponge.getCauseStackManager().pushCause(this);
         UseItemStackEvent.Replace event = SpongeEventFactory.createUseItemStackEventReplace(Sponge.getCauseStackManager().getCurrentCause(),
                 this.activeItemStackUseCount, this.activeItemStackUseCount, activeItemStackSnapshot,
-                new Transaction<>((org.spongepowered.api.item.inventory.ItemStack) this.activeItemStackCopy, ItemStackUtil.snapshotOf(stack)));
+                new Transaction<>((org.spongepowered.api.item.inventory.ItemStack) (Object) this.activeItemStackCopy, ItemStackUtil.snapshotOf(stack)));
 
         if (SpongeImpl.postEvent(event)) {
             Sponge.getCauseStackManager().popCause();
