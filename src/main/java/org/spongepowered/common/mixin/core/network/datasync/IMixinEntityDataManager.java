@@ -25,14 +25,12 @@
 package org.spongepowered.common.mixin.core.network.datasync;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.network.datasync.EntityDataManager;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import net.minecraft.network.datasync.DataParameter;
 
-@Mixin(EntityDataManager.class)
 public interface IMixinEntityDataManager {
 
-    @Accessor
     Entity getEntity();
+
+    void setDirty(DataParameter<?> param);
 
 }

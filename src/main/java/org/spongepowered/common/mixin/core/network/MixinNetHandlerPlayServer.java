@@ -80,6 +80,7 @@ import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.IntHashMap;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
@@ -142,6 +143,7 @@ import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 import org.spongepowered.common.interfaces.inventory.IMixinContainerPlayer;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.mixin.core.network.datasync.IMixinEntityDataManager;
 import org.spongepowered.common.network.keepalive.SpongeClientWaiter;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
@@ -186,8 +188,6 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     @Shadow public abstract void setPlayerLocation(double x, double y, double z, float yaw, float pitch);
     @Shadow private static boolean isMovePlayerPacketInvalid(CPacketPlayer packetIn) { return false; } // Shadowed
 
-    @Shadow protected abstract long currentTimeMillis();
-
     // Appears to be the last keep-alive packet ID. Currently the same as
     // field_194402_f, but _f is time (which the ID just so happens to match).
     @Shadow private long field_194404_h;
@@ -226,17 +226,17 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         return this.player.ping;
     }
 
-    @Redirect(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;onUpdateEntity()V"))
+    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;playerTick()V"))
     private void onPlayerTick(EntityPlayerMP player) {
         if (player.world.isRemote) {
-            player.onUpdateEntity();
+            player.tick();
             return;
         }
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
                 PlayerTickContext context = TickPhase.Tick.PLAYER.createPhaseContext().source(player)) {
             context.buildAndSwitch();
             frame.pushCause(player);
-            player.onUpdateEntity();
+            player.tick();
         }
     }
 
@@ -281,7 +281,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             ((SpongeTabList) ((Player) this.player).getTabList()).updateEntriesOnSend((SPacketPlayerListItem) packetIn);
         } else if (packetIn instanceof SPacketResourcePackSend) {
             // Send a custom keep-alive packet that doesn't match vanilla.
-            long now = this.currentTimeMillis() - 1;
+            long now = Util.milliTime() - 1;
             while (now == this.field_194404_h || this.customKeepAliveCallbacks.containsKey(now)) {
                 now--;
             }
@@ -360,7 +360,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             NBTTagCompound nbttagcompound = itemstack.getChildTag("BlockEntityTag");
 
             if (!itemstack.isEmpty() && nbttagcompound != null && nbttagcompound.hasKey("x") && nbttagcompound.hasKey("y") && nbttagcompound.hasKey("z")) {
-                BlockPos blockpos = new BlockPos(nbttagcompound.getInteger("x"), nbttagcompound.getInteger("y"), nbttagcompound.getInteger("z"));
+                BlockPos blockpos = new BlockPos(nbttagcompound.getInt("x"), nbttagcompound.getInt("y"), nbttagcompound.getInt("z"));
                 TileEntity tileentity = this.player.world.getTileEntity(blockpos);
 
                 if (tileentity != null) {
@@ -373,7 +373,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             }
 
             boolean clickedInsideNotOutput = packetIn.getSlotId() >= 1 && packetIn.getSlotId() <= 45;
-            boolean itemValidCheck = itemstack.isEmpty() || itemstack.getDamage()` ` >= 0 && itemstack.getCount() <= 64 && !itemstack.isEmpty();
+            boolean itemValidCheck = itemstack.isEmpty() || itemstack.getDamage() >= 0 && itemstack.getCount() <= 64 && !itemstack.isEmpty();
 
             // Sponge start - handle CreativeInventoryEvent
             final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
@@ -464,7 +464,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             }
 
             Vector3d torot = new Vector3d(packetIn.pitch, packetIn.yaw, 0);
-            Location to = new Location<>(player.getWorld(), packetIn.x, packetIn.y, packetIn.z);
+            Location to = new Location(player.getWorld(), packetIn.x, packetIn.y, packetIn.z);
 
             // Minecraft sends a 0, 0, 0 position when rotation only update occurs, this needs to be recognized and corrected
             boolean rotationOnly = !packetIn.moving && packetIn.rotating;
@@ -556,7 +556,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
 
         Location from = spongeEntity.getLocation();
         Vector3d torot = new Vector3d(packetIn.getPitch(), packetIn.getYaw(), 0);
-        Location to = new Location<>(spongeEntity.getWorld(), packetIn.getX(), packetIn.getY(), packetIn.getZ());
+        Location to = new Location(spongeEntity.getWorld(), packetIn.getX(), packetIn.getY(), packetIn.getZ());
         Transform fromTransform = spongeEntity.getTransform().setLocation(from).setRotation(fromrot);
         Transform toTransform = spongeEntity.getTransform().setLocation(to).setRotation(torot);
         MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), fromTransform, toTransform, this.getPlayer());
@@ -740,6 +740,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
 
     /**
      * @author blood - April 5th, 2016
+     * @author Aaron1011 - February 4th, 2018 - Update for 1.13
      *
      * @reason Due to all the changes we now do for this packet, it is much easier
      * to read it all with an overwrite. Information detailing on why each change
@@ -823,7 +824,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                                 // We fix the client state by marking it as dirty so it will be updated on the client the next tick
                                 DataParameter<?> parameter = findModifiedEntityInteractDataParameter(itemstack, entity);
                                 if (parameter != null) {
-                                    entity.getDataManager().setDirty(parameter);
+                                    ((IMixinEntityDataManager) entity.getDataManager()).setDirty(parameter);
                                 }
                             }
 
@@ -856,8 +857,8 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                     // Sponge end
 
                     if (entity instanceof EntityItem || entity instanceof EntityXPOrb || entity instanceof EntityArrow || entity == this.player) {
-                        this.disconnect(new TextComponentTranslation("multiplayer.disconnect.invalid_entity_attacked"));
-                        this.server.logWarning("Player " + this.player.getName() + " tried to attack an invalid entity");
+                        this.disconnect(new TextComponentTranslation("multiplayer.disconnect.invalid_entity_attacked", new Object[0]));
+                        this.server.logWarning("Player " + this.player.getName().getString() + " tried to attack an invalid entity");
                         return;
                     }
 
@@ -879,7 +880,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     }
 
     @Override
-    public void setLastMoveLocation(Location<World> location) {
+    public void setLastMoveLocation(Location location) {
         this.lastMoveLocation = location;
     }
 

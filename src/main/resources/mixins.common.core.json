@@ -397,7 +397,6 @@
         "network.play.server.MixinSPacketPlayerListItem",
         "network.play.server.MixinSPacketWorldBorder",
         "network.datasync.MixinDataParameter",
-        "network.datasync.IMixinEntityDataManager",
         "network.datasync.MixinEntityDataManager",
         "potion.MixinPotion",
         "potion.MixinPotionType",

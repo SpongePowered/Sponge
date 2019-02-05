@@ -41,13 +41,12 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
 import org.spongepowered.common.interfaces.network.datasync.IMixinDataParameter;
-import org.spongepowered.common.registry.type.data.KeyRegistryModule;
 
 import java.util.Map;
 import java.util.Optional;
 
 @Mixin(EntityDataManager.class)
-public abstract class MixinEntityDataManager {
+public abstract class MixinEntityDataManager implements IMixinEntityDataManager {
 
     // This overrides the setter for the entries of the
     // data manager to use a "faster" map.
@@ -114,5 +113,16 @@ public abstract class MixinEntityDataManager {
             dataentry.setDirty(true);
             this.dirty = true;
         }
+    }
+
+    @Override
+    public void setDirty(DataParameter<?> param) {
+        this.dirty = true;
+        this.getEntry(param).setDirty(true);
+    }
+
+    @Override
+    public Entity getEntity() {
+        return this.entity;
     }
 }
