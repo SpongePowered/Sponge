@@ -43,6 +43,7 @@ import net.minecraft.init.Items;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
+import net.minecraft.item.ItemDye;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetHandlerPlayServer;
@@ -191,7 +192,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     // field_194402_f, but _f is time (which the ID just so happens to match).
     @Shadow private long field_194404_h;
     private boolean justTeleported = false;
-    @Nullable private Location<World> lastMoveLocation = null;
+    @Nullable private Location lastMoveLocation = null;
 
     private final AtomicInteger numResourcePacksInTransit = new AtomicInteger();
     @Nullable private ResourcePack lastReceivedPack, lastAcceptedPack;
@@ -232,7 +233,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             return;
         }
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
-             PlayerTickContext context = TickPhase.Tick.PLAYER.createPhaseContext().source(player)) {
+                PlayerTickContext context = TickPhase.Tick.PLAYER.createPhaseContext().source(player)) {
             context.buildAndSwitch();
             frame.pushCause(player);
             player.onUpdateEntity();
@@ -326,7 +327,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         Sponge.getCauseStackManager().pushCause(this.player);
         final ChangeSignEvent event =
                 SpongeEventFactory.createChangeSignEvent(Sponge.getCauseStackManager().getCurrentCause(),
-                    changedSignData.asImmutable(), changedSignData, (Sign) tileentitysign);
+                        changedSignData.asImmutable(), changedSignData, (Sign) tileentitysign);
         if (!SpongeImpl.postEvent(event)) {
             ((Sign) tileentitysign).offer(event.getText());
         } else {
@@ -342,6 +343,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     /**
      * @author blood - June 6th, 2016
      * @author gabizou - June 20th, 2016 - Update for 1.9.4 and minor refactors.
+     * @author Aaron1011 - February 4th, 2018 - Update for 1.13
      * @reason Since mojang handles creative packets different than survival, we need to
      * restructure this method to prevent any packets being sent to client as we will
      * not be able to properly revert them during drops.
@@ -353,37 +355,34 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         PacketThreadUtil.checkThreadAndEnqueue(packetIn, (NetHandlerPlayServer) (Object) this, this.player.getServerWorld());
 
         if (this.player.interactionManager.isCreative()) {
-            final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
-            final PacketContext<?> context = (PacketContext<?>) peek.context;
-            final boolean ignoresCreative = context.getIgnoringCreative();
             boolean clickedOutside = packetIn.getSlotId() < 0;
             ItemStack itemstack = packetIn.getStack();
+            NBTTagCompound nbttagcompound = itemstack.getChildTag("BlockEntityTag");
 
-            if (!itemstack.isEmpty() && itemstack.hasTagCompound() && itemstack.getTagCompound().hasKey("BlockEntityTag", 10)) {
-                NBTTagCompound nbttagcompound = itemstack.getTagCompound().getCompoundTag("BlockEntityTag");
+            if (!itemstack.isEmpty() && nbttagcompound != null && nbttagcompound.hasKey("x") && nbttagcompound.hasKey("y") && nbttagcompound.hasKey("z")) {
+                BlockPos blockpos = new BlockPos(nbttagcompound.getInteger("x"), nbttagcompound.getInteger("y"), nbttagcompound.getInteger("z"));
+                TileEntity tileentity = this.player.world.getTileEntity(blockpos);
 
-                if (nbttagcompound.hasKey("x") && nbttagcompound.hasKey("y") && nbttagcompound.hasKey("z")) {
-                    BlockPos blockpos = new BlockPos(nbttagcompound.getInteger("x"), nbttagcompound.getInteger("y"), nbttagcompound.getInteger("z"));
-                    TileEntity tileentity = this.player.world.getTileEntity(blockpos);
-
-                    if (tileentity != null) {
-                        NBTTagCompound nbttagcompound1 = new NBTTagCompound();
-                        tileentity.writeToNBT(nbttagcompound1);
-                        nbttagcompound1.removeTag("x");
-                        nbttagcompound1.removeTag("y");
-                        nbttagcompound1.removeTag("z");
-                        itemstack.setTagInfo("BlockEntityTag", nbttagcompound1);
-                    }
+                if (tileentity != null) {
+                    NBTTagCompound nbttagcompound1 = tileentity.write(new NBTTagCompound());
+                    nbttagcompound1.removeTag("x");
+                    nbttagcompound1.removeTag("y");
+                    nbttagcompound1.removeTag("z");
+                    itemstack.setTagInfo("BlockEntityTag", nbttagcompound1);
                 }
             }
 
             boolean clickedInsideNotOutput = packetIn.getSlotId() >= 1 && packetIn.getSlotId() <= 45;
-            boolean itemValidCheck = itemstack.isEmpty() || itemstack.getMetadata() >= 0 && itemstack.getCount() <= 64 && !itemstack.isEmpty();
+            boolean itemValidCheck = itemstack.isEmpty() || itemstack.getDamage()` ` >= 0 && itemstack.getCount() <= 64 && !itemstack.isEmpty();
 
             // Sponge start - handle CreativeInventoryEvent
+            final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
+            final PacketContext<?> context = (PacketContext<?>) peek.context;
+            final boolean ignoresCreative = context.getIgnoringCreative();
+
             if (itemValidCheck) {
                 if (!ignoresCreative) {
-                    ClickInventoryEvent.Creative clickEvent = SpongeCommonEventFactory.callCreativeClickInventoryEvent(this.player, packetIn);
+                    ClickContainerEvent.Creative clickEvent = SpongeCommonEventFactory.callCreativeClickInventoryEvent(this.player, packetIn);
                     if (clickEvent.isCancelled()) {
                         // Reset slot on client
                         if (packetIn.getSlotId() >= 0 && packetIn.getSlotId() < this.player.inventoryContainer.inventorySlots.size()) {
@@ -404,6 +403,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                     }
 
                     this.player.inventoryContainer.setCanCraft(this.player, true);
+                    // Sponge end
                 } else if (clickedOutside && this.itemDropThreshold < 200) {
                     this.itemDropThreshold += 20;
                     EntityItem entityitem = this.player.dropItem(itemstack, true);
@@ -414,7 +414,6 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                     }
                 }
             }
-            // Sponge end
         }
     }
 
@@ -459,13 +458,13 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             Vector3d fromrot = player.getRotation();
 
             // If Sponge used the player's current location, the delta might never be triggered which could be exploited
-            Location<World> from = player.getLocation();
+            Location from = player.getLocation();
             if (this.lastMoveLocation != null) {
                 from = this.lastMoveLocation;
             }
 
             Vector3d torot = new Vector3d(packetIn.pitch, packetIn.yaw, 0);
-            Location<World> to = new Location<>(player.getWorld(), packetIn.x, packetIn.y, packetIn.z);
+            Location to = new Location<>(player.getWorld(), packetIn.x, packetIn.y, packetIn.z);
 
             // Minecraft sends a 0, 0, 0 position when rotation only update occurs, this needs to be recognized and corrected
             boolean rotationOnly = !packetIn.moving && packetIn.rotating;
@@ -492,9 +491,9 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             // These magic numbers are sad but help prevent excessive lag from this event.
             // eventually it would be nice to not have them
             if (deltaSquared > ((1f / 16) * (1f / 16)) || deltaAngleSquared > (.15f * .15f)) {
-                Transform<World> fromTransform = player.getTransform().setLocation(from).setRotation(fromrot);
-                Transform<World> toTransform = player.getTransform().setLocation(to).setRotation(torot);
-                Transform<World> originalToTransform = toTransform;
+                Transform fromTransform = player.getTransform().setLocation(from).setRotation(fromrot);
+                Transform toTransform = player.getTransform().setLocation(to).setRotation(torot);
+                Transform originalToTransform = toTransform;
                 if (ShouldFire.MOVE_ENTITY_EVENT) {
                     try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                         frame.pushCause(player);
@@ -555,11 +554,11 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         org.spongepowered.api.entity.Entity spongeEntity = (org.spongepowered.api.entity.Entity) ridingEntity;
         Vector3d fromrot = spongeEntity.getRotation();
 
-        Location<World> from = spongeEntity.getLocation();
+        Location from = spongeEntity.getLocation();
         Vector3d torot = new Vector3d(packetIn.getPitch(), packetIn.getYaw(), 0);
-        Location<World> to = new Location<>(spongeEntity.getWorld(), packetIn.getX(), packetIn.getY(), packetIn.getZ());
-        Transform<World> fromTransform = spongeEntity.getTransform().setLocation(from).setRotation(fromrot);
-        Transform<World> toTransform = spongeEntity.getTransform().setLocation(to).setRotation(torot);
+        Location to = new Location<>(spongeEntity.getWorld(), packetIn.getX(), packetIn.getY(), packetIn.getZ());
+        Transform fromTransform = spongeEntity.getTransform().setLocation(from).setRotation(fromrot);
+        Transform toTransform = spongeEntity.getTransform().setLocation(to).setRotation(torot);
         MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), fromTransform, toTransform, this.getPlayer());
         SpongeImpl.postEvent(event);
         if (event.isCancelled()) {
@@ -655,7 +654,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     private static DataParameter<?> findModifiedEntityInteractDataParameter(ItemStack stack, Entity entity) {
         Item item = stack.getItem();
 
-        if (item == Items.DYE) {
+        if (item instanceof ItemDye) {
             // ItemDye.itemInteractionForEntity
             if (entity instanceof EntitySheep) {
                 return EntitySheep.DYE_COLOR;
@@ -697,7 +696,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             final ItemStack heldItem = this.player.getHeldItem(packetIn.getHand());
             Sponge.getCauseStackManager().addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(heldItem));
             AnimateHandEvent event =
-                SpongeEventFactory.createAnimateHandEvent(Sponge.getCauseStackManager().getCurrentCause(), handType, (Humanoid) this.player);
+                    SpongeEventFactory.createAnimateHandEvent(Sponge.getCauseStackManager().getCurrentCause(), handType, (Humanoid) this.player);
             if (SpongeImpl.postEvent(event)) {
                 ci.cancel();
             }
@@ -799,8 +798,8 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
 
                         // Is interaction allowed with item in hand
                         if (SpongeCommonEventFactory.callInteractItemEventSecondary(this.player, itemstack, hand, VecHelper.toVector3d(packetIn
-                            .getHitVec()), entity).isCancelled() || SpongeCommonEventFactory.callInteractEntityEventSecondary(this.player,
-                            entity, hand, VecHelper.toVector3d(entity.getPositionVector().add(packetIn.getHitVec()))).isCancelled()) {
+                                .getHitVec()), entity).isCancelled() || SpongeCommonEventFactory.callInteractEntityEventSecondary(this.player,
+                                entity, hand, VecHelper.toVector3d(entity.getPositionVector().add(packetIn.getHitVec()))).isCancelled()) {
 
                             // Restore held item in hand
                             int index = ((IMixinInventoryPlayer) this.player.inventory).getHeldItemIndex(hand);
