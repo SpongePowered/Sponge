@@ -59,6 +59,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.GameType;
 import net.minecraft.world.World;
 import org.spongepowered.api.Sponge;
@@ -154,16 +155,19 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
     }
 
     @Override
-    public void setCustomNameTag(String name) {
-        if (name.length() > 16) {
-            // Vanilla restriction
-            name = name.substring(0, 16);
-        }
-        if (this.getCustomNameTag().equals(name)) {
+    public void setCustomName(@Nullable ITextComponent name) {
+        if (this.getCustomName().equals(name)) {
             return;
         }
-        super.setCustomNameTag(name);
-        this.renameProfile(name);
+
+        String rawName = name != null ? name.getFormattedText() : "";
+        if (rawName.length() > 16) {
+            // Vanilla restriction
+            rawName = rawName.substring(0, 16);
+        }
+        this.renameProfile(rawName);
+        super.setCustomName(name);
+
         if (this.isAliveAndInWorld()) {
             this.respawnOnClient();
         }
