@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.type;
 
-import org.spongepowered.api.data.type.SkullType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.text.translation.SpongeTranslation;

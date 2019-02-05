@@ -117,8 +117,6 @@ public final class NbtDataUtil {
 
     public static final String ITEM_HIDE_FLAGS = "HideFlags";
 
-    public static final String ITEM_POTION_TYPE = "Potion";
-
     public static final String CUSTOM_POTION_EFFECTS = "CustomPotionEffects";
 
     public static final String USER_SPAWN_X = "SpawnX";
@@ -174,7 +172,6 @@ public final class NbtDataUtil {
     public static final String UUID_LEAST = "UUIDLeast";
     public static final String INVALID_TITLE = "invalid";
     public static final String IS_MOD = "isMod";
-    public static final String FORGE_ENTITY_TYPE = "entity_name";
 
     // Legacy migration tags from Bukkit
     public static final String BUKKIT = "bukkit";
@@ -209,7 +206,7 @@ public final class NbtDataUtil {
         }
 
         public static final class World {
-
+            public static final String UUID = "UUID";
             public static final String WORLD_UUID_LEAST_1_8 = "uuid_least";
             public static final String WORLD_UUID_MOST_1_8 = "uuid_most";
 
@@ -237,10 +234,7 @@ public final class NbtDataUtil {
      * @return The main compound, if available
      */
     public static Optional<NBTTagCompound> getItemCompound(ItemStack itemStack) {
-        if (itemStack.hasTag()) {
-            return Optional.of(itemStack.getTag());
-        }
-        return Optional.empty();
+        return Optional.ofNullable(itemStack.getTag());
     }
 
     /**

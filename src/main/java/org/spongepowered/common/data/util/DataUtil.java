@@ -32,8 +32,6 @@ import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
-import net.minecraft.util.datafix.DataFixer;
-import net.minecraft.util.datafix.FixTypes;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
@@ -52,15 +50,11 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.util.TypeTokens;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.SpongeManipulatorRegistry;
 import org.spongepowered.common.data.ValueProcessor;
-import org.spongepowered.common.data.fixer.entity.EntityTrackedUser;
-import org.spongepowered.common.data.fixer.entity.player.PlayerRespawnData;
-import org.spongepowered.common.data.fixer.world.SpongeLevelFixer;
 import org.spongepowered.common.data.nbt.NbtDataType;
 import org.spongepowered.common.data.nbt.data.NbtDataProcessor;
 import org.spongepowered.common.data.nbt.validation.DelegateDataValidator;
@@ -88,16 +82,7 @@ import javax.annotation.Nullable;
 @SuppressWarnings("unchecked")
 public final class DataUtil {
 
-    // TODO Bump this when needing to fix sponge added file data
-    public static final int DATA_VERSION = 1;
-    public static final DataFixer spongeDataFixer = new DataFixer(DATA_VERSION);
     private static final Supplier<InvalidDataException> INVALID_DATA_EXCEPTION_SUPPLIER = InvalidDataException::new;
-
-    static {
-        spongeDataFixer.registerFix(FixTypes.LEVEL, new SpongeLevelFixer());
-        spongeDataFixer.registerFix(FixTypes.ENTITY, new EntityTrackedUser());
-        spongeDataFixer.registerFix(FixTypes.PLAYER, new PlayerRespawnData());
-    }
 
     public static DataView checkDataExists(final DataView dataView, final DataQuery query) throws InvalidDataException {
         if (!checkNotNull(dataView).contains(checkNotNull(query))) {
@@ -275,15 +260,15 @@ public final class DataUtil {
         return builder.build();
     }
 
-    public static Location<World> getLocation(DataView view, boolean castToInt) {
+    public static Location getLocation(DataView view, boolean castToInt) {
         final UUID worldUuid = UUID.fromString(view.getString(Queries.WORLD_ID).get());
         final double x = view.getDouble(Queries.POSITION_X).get();
         final double y = view.getDouble(Queries.POSITION_Y).get();
         final double z = view.getDouble(Queries.POSITION_Z).get();
         if (castToInt) {
-            return new Location<>(SpongeImpl.getGame().getServer().getWorld(worldUuid).get(), (int) x, (int) y, (int) z);
+            return new Location(SpongeImpl.getGame().getServer().getWorld(worldUuid).get(), (int) x, (int) y, (int) z);
         }
-        return new Location<>(SpongeImpl.getGame().getServer().getWorld(worldUuid).get(), x, y, z);
+        return new Location(SpongeImpl.getGame().getServer().getWorld(worldUuid).get(), x, y, z);
     }
 
     public static Vector3i getPosition3i(DataView view) {
