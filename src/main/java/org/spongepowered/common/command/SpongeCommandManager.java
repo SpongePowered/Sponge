@@ -47,7 +47,6 @@ import org.spongepowered.api.command.InvocationCommandException;
 import org.spongepowered.api.command.args.ArgumentParseException;
 import org.spongepowered.api.command.dispatcher.Disambiguator;
 import org.spongepowered.api.command.dispatcher.SimpleDispatcher;
-import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.command.SendCommandEvent;
 import org.spongepowered.api.event.command.TabCompleteEvent;

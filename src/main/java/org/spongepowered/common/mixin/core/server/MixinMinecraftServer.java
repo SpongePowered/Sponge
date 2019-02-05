@@ -30,9 +30,8 @@ import static com.google.common.base.Preconditions.checkState;
 import co.aikar.timings.TimingsManager;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.gson.JsonElement;
 import com.mojang.datafixers.DataFixer;
-import net.minecraft.command.ICommandManager;
-import net.minecraft.command.ICommandSender;
 import net.minecraft.command.ICommandSource;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -46,6 +45,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldServer;
@@ -69,11 +69,11 @@ import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.util.Tristate;
-import org.spongepowered.api.world.ChunkTicketManager;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldArchetype;
+import org.spongepowered.api.world.chunk.ChunkTicketManager;
 import org.spongepowered.api.world.storage.ChunkLayout;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.lib.Opcodes;
@@ -153,8 +153,6 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Shadow public abstract PlayerList getPlayerList();
     @Shadow public abstract EnumDifficulty getDifficulty();
     @Shadow public abstract GameType getGameType();
-    @Shadow protected abstract void setUserMessage(String message);
-    @Shadow protected abstract void outputPercentRemaining(String message, int percent);
     @Shadow protected abstract void clearCurrentTask();
     @Shadow protected abstract void convertMapIfNeeded(String worldNameIn);
     @Shadow public abstract void setResourcePackFromWorld(String worldNameIn, ISaveHandler saveHandlerIn);
@@ -163,6 +161,9 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Shadow public abstract void shadow$setPlayerIdleTimeout(int timeout);
     @Shadow public abstract boolean isDedicatedServer();
 
+    @Shadow protected abstract void setUserMessage(ITextComponent p_200245_1_);
+
+    @Shadow protected abstract void setCurrentTaskAndPercentDone(ITextComponent p_200250_1_, int p_200250_2_);
 
     @Nullable private List<String> currentTabCompletionOptions;
     private ResourcePack resourcePack;
@@ -324,11 +325,11 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
      * @reason Add multiworld support
      */
     @Overwrite
-    public void loadAllWorlds(String overworldFolder, String worldName, long seed, WorldType type, String generatorOptions) {
+    public void loadAllWorlds(String overworldFolder, String worldName, long seed, WorldType type, JsonElement generatorOptions) {
         SpongeCommonEventFactory.convertingMapFormat = true;
         this.convertMapIfNeeded(overworldFolder);
         SpongeCommonEventFactory.convertingMapFormat = false;
-        this.setUserMessage("menu.loadingLevel");
+        this.setUserMessage(new TextComponentTranslation("menu.loadingLevel"));
 
         WorldManager.loadAllWorlds(seed, type, generatorOptions);
 
@@ -364,7 +365,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             .world( worldServer)) {
             context.buildAndSwitch();
             int i = 0;
-            this.setUserMessage("menu.generatingTerrain");
+            this.setUserMessage(new TextComponentTranslation("menu.generatingTerrain"));
             LOGGER.info("Preparing start region for level {} ({})", ((IMixinWorldServer) worldServer).getDimensionId(), ((World) worldServer).getName());
             BlockPos blockpos = worldServer.getSpawnPoint();
             long j = Util.milliTime();
@@ -373,7 +374,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                     long i1 = Util.milliTime();
 
                     if (i1 - j > 1000L) {
-                        this.outputPercentRemaining("Preparing spawn area", i * 100 / 625);
+                        this.setCurrentTaskAndPercentDone(new TextComponentTranslation("menu.preparingSpawn"), i * 100 / 625);
                         j = i1;
                     }
 
@@ -525,7 +526,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     }
 
     @Inject(method = "getTabCompletions", at = @At(value = "RETURN", ordinal = 0))
-    private void onTabCompleteChat(ICommandSender sender, String input, BlockPos pos, boolean usingBlock,
+    private void onTabCompleteChat(ICommandSource sender, String input, BlockPos pos, boolean usingBlock,
             CallbackInfoReturnable<List<String>> cir) {
 
         List<String> completions = checkNotNull(this.currentTabCompletionOptions, "currentTabCompletionOptions");
@@ -548,10 +549,10 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     }
 
     @Nullable
-    private static Location<World> getTarget(ICommandSender sender, @Nullable BlockPos pos) {
-        @Nullable Location<World> targetPos = null;
+    private static Location getTarget(ICommandSource sender, @Nullable BlockPos pos) {
+        @Nullable Location targetPos = null;
         if (pos != null) {
-            targetPos = new Location<>((World) sender.getEntityWorld(), VecHelper.toVector3i(pos));
+            targetPos = new Location((World) sender.get(), VecHelper.toVector3i(pos));
         }
         return targetPos;
     }
@@ -662,7 +663,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                             || ((WorldProperties) worldserver.getWorldInfo()).getSerializationBehavior() != SerializationBehaviors.AUTOMATIC) {
                         if (logAutoSave) {
                             LOGGER.warn("Auto-saving has been disabled for level \'" + worldserver.getWorldInfo().getWorldName() + "\'/"
-                                    + worldserver.provider.getDimensionType().getName() + ". "
+                                    + worldserver.getDimension().getType().getName() + ". "
                                     + "No chunk data will be auto-saved - to re-enable auto-saving set 'auto-save-interval' to a value greater than"
                                     + " zero in the corresponding world config.");
                         }
@@ -728,7 +729,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     }
 
     @Override
-    public boolean isMainThread() {
+    public boolean onMainThread() {
         return this.serverThread == Thread.currentThread();
     }
 

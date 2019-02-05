@@ -31,6 +31,7 @@ import static com.google.common.base.Preconditions.checkState;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.MapMaker;
+import com.google.gson.JsonElement;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
@@ -627,7 +628,7 @@ public final class WorldManager {
         return Optional.of(worldServer);
     }
 
-    public static void loadAllWorlds(long defaultSeed, WorldType defaultWorldType, String generatorOptions) {
+    public static void loadAllWorlds(long defaultSeed, WorldType defaultWorldType, JsonElement generatorOptions) {
         final MinecraftServer server = SpongeImpl.getServer();
 
         // We cannot call getCurrentSavesDirectory here as that would generate a savehandler and trigger a session lock.
@@ -770,7 +771,7 @@ public final class WorldManager {
     }
 
     private static WorldInfo createWorldInfoFromSettings(Path currentSaveRoot, org.spongepowered.api.world.DimensionType dimensionType, int
-      dimensionId, String worldFolderName, WorldSettings worldSettings, String generatorOptions) {
+      dimensionId, String worldFolderName, WorldSettings worldSettings, JsonElement generatorOptions) {
 
         worldSettings.setGeneratorOptions(generatorOptions);
 
