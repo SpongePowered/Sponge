@@ -143,10 +143,10 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     }
 
     @Override
-    public BlockSnapshot withLocation(Location<World> location) {
+    public BlockSnapshot withLocation(Location location) {
         return createBuilder()
             .position(location.getBlockPosition())
-            .worldId(location.getExtent().getUniqueId())
+            .worldId(location.getWorld().getUniqueId())
             .build();
     }
 
@@ -198,7 +198,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
             if (this.compound != null) {
                 final TileEntity te = world.getTileEntity(pos);
                 if (te != null) {
-                    te.readFromNBT(this.compound);
+                    te.read(this.compound);
                     te.markDirty();
                 }
             }
