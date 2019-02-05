@@ -51,6 +51,7 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.network.play.server.SPacketDestroyEntities;
 import net.minecraft.network.play.server.SPacketPlayerListItem;
 import net.minecraft.network.play.server.SPacketPlayerPosLook;
+import net.minecraft.particles.IParticleData;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.EnumParticleTypes;
@@ -1066,7 +1067,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
         try {
             final NBTTagCompound compound = new NBTTagCompound();
             writeToNBT(compound);
-            net.minecraft.entity.Entity entity = EntityList.createEntityByIDFromName((ResourceLocation) (Object) this.entityType.getKey(), this.world);
+            net.minecraft.entity.Entity entity = net.minecraft.entity.EntityType.create(this.world, (ResourceLocation) (Object) this.entityType.getKey());
             compound.setUniqueId(NbtDataUtil.UUID, entity.getUniqueID());
             entity.read(compound);
             return (Entity) entity;
@@ -1247,18 +1248,18 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
     }
 
     @Redirect(method = "doWaterSplashEffect", at = @At(value = "INVOKE", target = WORLD_SPAWN_PARTICLE))
-    private void spawnParticle(net.minecraft.world.World world, EnumParticleTypes particleTypes, double xCoord, double yCoord, double zCoord,
-            double xOffset, double yOffset, double zOffset, int... p_175688_14_) {
+    private void spawnParticle(net.minecraft.world.World world, IParticleData particleTypes, double xCoord, double yCoord, double zCoord,
+            double xOffset, double yOffset, double zOffset) {
         if (!this.isVanished) {
-            this.world.spawnParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset, p_175688_14_);
+            this.world.spawnParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset;
         }
     }
 
     @Redirect(method = "createRunningParticles", at = @At(value = "INVOKE", target = WORLD_SPAWN_PARTICLE))
-    private void runningSpawnParticle(net.minecraft.world.World world, EnumParticleTypes particleTypes, double xCoord, double yCoord, double zCoord,
-            double xOffset, double yOffset, double zOffset, int... p_175688_14_) {
+    private void runningSpawnParticle(net.minecraft.world.World world, IParticleData particleTypes, double xCoord, double yCoord, double zCoord,
+            double xOffset, double yOffset, double zOffset) {
         if (!this.isVanished) {
-            this.world.spawnParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset, p_175688_14_);
+            this.world.spawnParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset);
         }
     }
 
