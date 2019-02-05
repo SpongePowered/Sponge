@@ -317,7 +317,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     public void readFromNbt(NBTTagCompound compound) {
         super.readFromNbt(compound);
-        if (compound.hasKey(NbtDataUtil.HEALTH_SCALE)) {
+        if (compound.contains(NbtDataUtil.HEALTH_SCALE, NbtDataUtil.TAG_DOUBLE)) {
             this.healthScaling = true;
             this.healthScale = compound.getDouble(NbtDataUtil.HEALTH_SCALE);
         }
