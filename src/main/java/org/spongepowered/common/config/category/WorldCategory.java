@@ -24,12 +24,9 @@
  */
 package org.spongepowered.common.config.category;
 
-import net.minecraft.launchwrapper.Launch;
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
-import org.spongepowered.api.world.difficulty.Difficulty;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -125,13 +122,9 @@ public class WorldCategory extends ConfigCategory {
         this.portalAgents.put("minecraft:default_nether", "DIM-1");
         this.portalAgents.put("minecraft:default_the_end", "DIM1");
 
-        try {
-            // Enabled by default on SpongeVanilla, disabled by default on SpongeForge.
-            // Because of how early this constructor gets called, we can't use SpongeImplHooks or even Game
-            this.denyChunkRequests = Launch.classLoader.getClassBytes("net.minecraftforge.common.ForgeVersion") == null;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        // Enabled by default on SpongeVanilla, disabled by default on SpongeForge.
+        // Because of how early this constructor gets called, we can't use SpongeImplHooks or even Game
+        this.denyChunkRequests = getClass().getClassLoader().getResource("net/minecraftforge/common/ForgeVersion.class") == null;
     }
 
     public int getAutoSaveInterval() {
