@@ -47,9 +47,10 @@ dependencies {
     compile(api) {
         exclude module: 'asm'
     }
-    compile(testPlugins) {
+    // TODO - re-enable when we have 1.13 impl compiling
+    /*compile(testPlugins) {
         exclude module: 'spongeapi'
-    }
+    }*/
 
     compile 'org.spongepowered:mixin:0.7.+'
     compile 'org.ow2.asm:asm-debug-all:5.2'
