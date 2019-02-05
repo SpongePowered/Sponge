@@ -148,14 +148,14 @@ public abstract class MixinEntityItem extends MixinEntity implements Item, IMixi
         super.readFromNbt(compound);
 
         this.infinitePickupDelay = compound.getBoolean(NbtDataUtil.INFINITE_PICKUP_DELAY);
-        if (compound.hasKey(NbtDataUtil.PREVIOUS_PICKUP_DELAY, NbtDataUtil.TAG_ANY_NUMERIC)) {
-            this.previousPickupDelay = compound.getInteger(NbtDataUtil.PREVIOUS_PICKUP_DELAY);
+        if (compound.contains(NbtDataUtil.PREVIOUS_PICKUP_DELAY, NbtDataUtil.TAG_ANY_NUMERIC)) {
+            this.previousPickupDelay = compound.getInt(NbtDataUtil.PREVIOUS_PICKUP_DELAY);
         } else {
             this.previousPickupDelay = MAGIC_PREVIOUS;
         }
         this.infiniteDespawnDelay = compound.getBoolean(NbtDataUtil.INFINITE_DESPAWN_DELAY);
-        if (compound.hasKey(NbtDataUtil.PREVIOUS_DESPAWN_DELAY, NbtDataUtil.TAG_ANY_NUMERIC)) {
-            this.previousDespawnDelay = compound.getInteger(NbtDataUtil.PREVIOUS_DESPAWN_DELAY);
+        if (compound.contains(NbtDataUtil.PREVIOUS_DESPAWN_DELAY, NbtDataUtil.TAG_ANY_NUMERIC)) {
+            this.previousDespawnDelay = compound.getInt(NbtDataUtil.PREVIOUS_DESPAWN_DELAY);
         } else {
             this.previousDespawnDelay = MAGIC_PREVIOUS;
         }

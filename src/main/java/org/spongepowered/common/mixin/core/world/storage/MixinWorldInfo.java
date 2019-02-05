@@ -761,7 +761,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     public Optional<DataView> getPropertySection(DataQuery path) {
         if (this.spongeRootLevelNbt.hasKey(path.toString())) {
             return Optional
-                    .<DataView>of(NbtTranslator.getInstance().translateFrom(this.spongeRootLevelNbt.getCompoundTag(path.toString())));
+                    .<DataView>of(NbtTranslator.getInstance().translateFrom(this.spongeRootLevelNbt.getCompound(path.toString())));
         }
         return Optional.empty();
     }
@@ -805,7 +805,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     public void setSpongeRootLevelNBT(NBTTagCompound nbt) {
         this.spongeRootLevelNbt = nbt;
         if (nbt.hasKey(NbtDataUtil.SPONGE_DATA)) {
-            this.spongeNbt = nbt.getCompoundTag(NbtDataUtil.SPONGE_DATA);
+            this.spongeNbt = nbt.getCompound(NbtDataUtil.SPONGE_DATA);
         }
     }
 
@@ -816,7 +816,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
             return;
         }
         this.uuid = nbtUniqueId;
-        this.dimensionId = nbt.getInteger(NbtDataUtil.DIMENSION_ID);
+        this.dimensionId = nbt.getInt(NbtDataUtil.DIMENSION_ID);
         final String dimensionTypeId = nbt.getString(NbtDataUtil.DIMENSION_TYPE);
         final DimensionType dimensionType = (org.spongepowered.api.world.DimensionType)(Object) WorldManager.getDimensionType(this.dimensionId).orElse(null);
         this.setDimensionType(dimensionType != null ? dimensionType : DimensionTypeRegistryModule.getInstance().getById(dimensionTypeId)

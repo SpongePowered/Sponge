@@ -951,7 +951,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
      *        to SpongeData)
      * @param ci (Unused) callback info
      */
-    @Inject(method = "Lnet/minecraft/entity/Entity;writeToNBT(Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/nbt/NBTTagCompound;", at = @At("HEAD"))
+    @Inject(method = "Lnet/minecraft/entity/Entity;writeWithoutTypeId(Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/nbt/NBTTagCompound;", at = @At("HEAD"))
     private void onSpongeWriteToNBT(NBTTagCompound compound, CallbackInfoReturnable<NBTTagCompound> ci) {
         this.writeToNbt(this.getSpongeData());
     }
@@ -966,7 +966,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
      *        from SpongeData)
      * @param ci (Unused) callback info
      */
-    @Inject(method = "Lnet/minecraft/entity/Entity;readFromNBT(Lnet/minecraft/nbt/NBTTagCompound;)V", at = @At("RETURN"))
+    @Inject(method = "Lnet/minecraft/entity/Entity;read(Lnet/minecraft/nbt/NBTTagCompound;)V", at = @At("RETURN"))
     private void onSpongeReadFromNBT(NBTTagCompound compound, CallbackInfo ci) {
         if (this.isConstructing) {
             firePostConstructEvents(); // Do this early as possible

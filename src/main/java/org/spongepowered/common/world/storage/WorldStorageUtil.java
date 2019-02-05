@@ -93,11 +93,11 @@ public class WorldStorageUtil {
 
         // Checks are based on AnvilChunkLoader#checkedReadChunkFromNBT
 
-        if (!data.hasKey(NbtDataUtil.CHUNK_DATA_LEVEL, NbtDataUtil.TAG_COMPOUND)) {
+        if (!data.contains(NbtDataUtil.CHUNK_DATA_LEVEL, NbtDataUtil.TAG_COMPOUND)) {
             return null;
         }
-        NBTTagCompound level = data.getCompoundTag(NbtDataUtil.CHUNK_DATA_LEVEL);
-        if (!level.hasKey(NbtDataUtil.CHUNK_DATA_SECTIONS, NbtDataUtil.TAG_LIST)) {
+        NBTTagCompound level = data.getCompound(NbtDataUtil.CHUNK_DATA_LEVEL);
+        if (!level.contains(NbtDataUtil.CHUNK_DATA_SECTIONS, NbtDataUtil.TAG_LIST)) {
             return null;
         }
         return NbtTranslator.getInstance().translateFrom(level);

@@ -121,7 +121,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
     @Override
     protected void registerData() {
         // EntityLivingBase
-        this.dataManager.register(HAND_STATES, Byte.valueOf((byte)0));
+        this.dataManager.register(LIVING_FLAGS, Byte.valueOf((byte)0));
         this.dataManager.register(POTION_EFFECTS, Integer.valueOf(0));
         this.dataManager.register(HIDE_PARTICLES, Boolean.valueOf(false));
         this.dataManager.register(ARROW_COUNT_IN_ENTITY, Integer.valueOf(0));

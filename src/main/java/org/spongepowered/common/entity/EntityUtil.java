@@ -176,7 +176,7 @@ public final class EntityUtil {
 
         entity.world.profiler.startSection("changeDimension");
         // use the world from event
-        final Transform<World> toTransform = event.getToTransform();
+        final Transform toTransform = event.getToTransform();
         WorldServer toWorld = (WorldServer) toTransform.getWorld();
         entity.world.removeEntity(entity);
         entity.removed = false;
@@ -278,7 +278,7 @@ public final class EntityUtil {
         playerIn.connection.sendPacket(new SPacketServerDifficulty(toWorld.getDifficulty(), toWorld.getWorldInfo().isDifficultyLocked()));
         SpongeImpl.getServer().getPlayerList().updatePermissionLevel(playerIn);
         fromWorld.removeEntityDangerously(playerIn);
-        playerIn.isDead = false;
+        playerIn.removed = false;
         // we do not need to call transferEntityToWorld as we already have the correct transform and created the portal in handleDisplaceEntityPortalEvent
         ((IMixinEntity) playerIn).setLocationAndAngles(event.getToTransform());
         playerIn.setWorld(toWorld);
@@ -315,14 +315,14 @@ public final class EntityUtil {
     }
 
     public static MoveEntityEvent.Teleport handleDisplaceEntityTeleportEvent(Entity entityIn, Location<World> location) {
-        Transform<World> fromTransform = ((IMixinEntity) entityIn).getTransform();
-        Transform<World> toTransform = fromTransform.setLocation(location).setRotation(new Vector3d(entityIn.rotationPitch, entityIn.rotationYaw, 0));
+        Transform fromTransform = ((IMixinEntity) entityIn).getTransform();
+        Transform toTransform = fromTransform.setLocation(location).setRotation(new Vector3d(entityIn.rotationPitch, entityIn.rotationYaw, 0));
         return handleDisplaceEntityTeleportEvent(entityIn, fromTransform, toTransform);
     }
 
     public static MoveEntityEvent.Teleport handleDisplaceEntityTeleportEvent(Entity entityIn, double posX, double posY, double posZ, float yaw, float pitch) {
-        Transform<World> fromTransform = ((IMixinEntity) entityIn).getTransform();
-        Transform<World> toTransform = fromTransform.setPosition(new Vector3d(posX, posY, posZ)).setRotation(new Vector3d(pitch, yaw, 0));
+        Transform fromTransform = ((IMixinEntity) entityIn).getTransform();
+        Transform toTransform = fromTransform.setPosition(new Vector3d(posX, posY, posZ)).setRotation(new Vector3d(pitch, yaw, 0));
         return handleDisplaceEntityTeleportEvent(entityIn, fromTransform, toTransform);
     }
 
@@ -347,7 +347,7 @@ public final class EntityUtil {
         final MinecraftServer mcServer = SpongeImpl.getServer();
         final IMixinPlayerList mixinPlayerList = (IMixinPlayerList) mcServer.getPlayerList();
         final IMixinEntity mixinEntity = (IMixinEntity) entityIn;
-        final Transform<World> fromTransform = mixinEntity.getTransform();
+        final Transform fromTransform = mixinEntity.getTransform();
         final WorldServer fromWorld = ((WorldServer) entityIn.world);
         final IMixinWorldServer fromMixinWorld = (IMixinWorldServer) fromWorld;
         boolean sameDimension = entityIn.dimension == targetDimensionId;
@@ -429,7 +429,7 @@ public final class EntityUtil {
             // Complete phases, just because we need to. The phases don't actually do anything, because the processing resides here.
 
             // Grab the exit location of entity after being placed into portal
-            final Transform<World> portalExitTransform = mixinEntity.getTransform().setExtent((World) toWorld);
+            final Transform<World> portalExitTransform = mixinEntity.getTransform().setWorld((World) toWorld);
             // Use setLocationAndAngles to avoid firing MoveEntityEvent to plugins
             mixinEntity.setLocationAndAngles(fromTransform);
             final MoveEntityEvent.Teleport.Portal event = SpongeEventFactory.createMoveEntityEventTeleportPortal(frame.getCurrentCause(), fromTransform, portalExitTransform, (PortalAgent) teleporter, mixinEntity, true);
@@ -441,7 +441,7 @@ public final class EntityUtil {
             if (event.isCancelled()) {
                 // Mods may cancel this event in order to run custom transfer logic
                 // We need to make sure to only restore the location if
-                if (!portalExitTransform.getExtent().getUniqueId().equals(mixinEntity.getLocation().getExtent().getUniqueId())) {
+                if (!portalExitTransform.getWorld().getUniqueId().equals(mixinEntity.getLocation().getWorld().getUniqueId())) {
                     // update cache
                     if (teleporter instanceof IMixinTeleporter) {
                         ((IMixinTeleporter) teleporter).removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
@@ -463,7 +463,7 @@ public final class EntityUtil {
 
             if (!portalExitTransform.equals(toTransform)) {
                 // if plugin set to same world, just set the transform
-                if (((World) fromWorld).getUniqueId().equals(toTransform.getExtent().getUniqueId())) {
+                if (((World) fromWorld).getUniqueId().equals(toTransform.getWorld().getUniqueId())) {
                     // force cancel so we know to skip remaining logic
                     event.setCancelled(true);
 
@@ -753,8 +753,8 @@ public final class EntityUtil {
     public static boolean tempIsBedSpawn = false;
 
     // Internal to MixinPlayerList. has side effects
-    public static Location<World> getPlayerRespawnLocation(EntityPlayerMP playerIn, @Nullable WorldServer targetWorld) {
-        final Location<World> location = ((World) playerIn.world).getSpawnLocation();
+    public static Location getPlayerRespawnLocation(EntityPlayerMP playerIn, @Nullable WorldServer targetWorld) {
+        final Location location = ((World) playerIn.world).getSpawnLocation();
         tempIsBedSpawn = false;
         if (targetWorld == null) { // Target world doesn't exist? Use global
             return location;
@@ -788,7 +788,7 @@ public final class EntityUtil {
             playerIn.setSpawnPoint(bedPos, forceBedSpawn);
             playerIn.dimension = prevDim;
         }
-        return new Location<>((World) targetWorld, targetSpawnVec);
+        return new Location((World) targetWorld, targetSpawnVec);
     }
 
     public static Entity toNative(org.spongepowered.api.entity.Entity tickingEntity) {
@@ -885,7 +885,7 @@ public final class EntityUtil {
             fromWorld.getEntityTracker().untrack(entity);
         }
 
-        entity.dismountRidingEntity();
+        entity.stopRiding();
         entity.world.removeEntityDangerously(entity);
         entity.removed = false;
         entity.dimension = targetDim;

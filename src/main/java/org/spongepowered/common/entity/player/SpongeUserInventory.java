@@ -33,7 +33,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 
 import java.util.Arrays;
@@ -182,7 +181,7 @@ public class SpongeUserInventory implements IInventory {
         for (int i = 0; i < nbtTagListIn.size(); ++i) {
             NBTTagCompound nbttagcompound = nbtTagListIn.getCompound(i);
             int j = nbttagcompound.getByte("Slot") & 255;
-            ItemStack itemstack = new ItemStack(nbttagcompound);
+            ItemStack itemstack = ItemStack.read(nbttagcompound);
 
             if (!itemstack.isEmpty()) {
                 if (j >= 0 && j < this.mainInventory.size()) {

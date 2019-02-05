@@ -113,7 +113,7 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
                     spongeOldFile));
             ((IMixinWorldInfo) info).setSpongeRootLevelNBT(compound);
             if (compound.hasKey(NbtDataUtil.SPONGE_DATA)) {
-                final NBTTagCompound spongeCompound = compound.getCompoundTag(NbtDataUtil.SPONGE_DATA);
+                final NBTTagCompound spongeCompound = compound.getCompound(NbtDataUtil.SPONGE_DATA);
                 DataUtil.spongeDataFixer.process(FixTypes.LEVEL, spongeCompound);
                 ((IMixinWorldInfo) info).readSpongeNbt(spongeCompound);
             }
@@ -201,14 +201,14 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
         NBTTagCompound compound = CompressedStreamTools.readCompressed(inputStream);
         Instant lastPlayed = Instant.now();
         // first try to migrate bukkit join data stuff
-        if (compound.hasKey(NbtDataUtil.BUKKIT, NbtDataUtil.TAG_COMPOUND)) {
-            final NBTTagCompound bukkitCompound = compound.getCompoundTag(NbtDataUtil.BUKKIT);
+        if (compound.contains(NbtDataUtil.BUKKIT, NbtDataUtil.TAG_COMPOUND)) {
+            final NBTTagCompound bukkitCompound = compound.getCompound(NbtDataUtil.BUKKIT);
             creation = Instant.ofEpochMilli(bukkitCompound.getLong(NbtDataUtil.BUKKIT_FIRST_PLAYED));
             lastPlayed = Instant.ofEpochMilli(bukkitCompound.getLong(NbtDataUtil.BUKKIT_LAST_PLAYED));
         }
         // migrate canary join data
-        if (compound.hasKey(NbtDataUtil.CANARY, NbtDataUtil.TAG_COMPOUND)) {
-            final NBTTagCompound canaryCompound = compound.getCompoundTag(NbtDataUtil.CANARY);
+        if (compound.contains(NbtDataUtil.CANARY, NbtDataUtil.TAG_COMPOUND)) {
+            final NBTTagCompound canaryCompound = compound.getCompound(NbtDataUtil.CANARY);
             creation = Instant.ofEpochMilli(canaryCompound.getLong(NbtDataUtil.CANARY_FIRST_JOINED));
             lastPlayed = Instant.ofEpochMilli(canaryCompound.getLong(NbtDataUtil.CANARY_LAST_JOINED));
         }

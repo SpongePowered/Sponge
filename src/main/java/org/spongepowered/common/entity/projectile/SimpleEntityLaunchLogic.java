@@ -29,7 +29,6 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 
 import java.util.Optional;
 
@@ -46,7 +45,7 @@ public class SimpleEntityLaunchLogic<P extends Projectile> implements Projectile
         if (!(source instanceof Entity)) {
             return Optional.empty();
         }
-        Location<World> loc = ((Entity) source).getLocation().add(0, ((net.minecraft.entity.Entity) source).height / 2, 0);
+        Location loc = ((Entity) source).getLocation().add(0, ((net.minecraft.entity.Entity) source).height / 2, 0);
         Optional<P> projectile;
         if (source instanceof EntityLivingBase) {
             projectile = createProjectile((EntityLivingBase) source, loc);
@@ -56,7 +55,7 @@ public class SimpleEntityLaunchLogic<P extends Projectile> implements Projectile
         return projectile;
     }
 
-    protected Optional<P> createProjectile(EntityLivingBase source, Location<?> loc) {
+    protected Optional<P> createProjectile(EntityLivingBase source, Location loc) {
         return createProjectile((ProjectileSource) source, this.projectileClass, loc);
     }
 }

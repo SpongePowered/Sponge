@@ -58,9 +58,9 @@ public abstract class MixinEntityFallingBlock extends MixinEntity implements Fal
     @Shadow public NBTTagCompound tileEntityData;
 
 
-    @Inject(method = "onUpdate",
+    @Inject(method = "tick",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/World;setBlockToAir(Lnet/minecraft/util/math/BlockPos;)Z",
+            target = "Lnet/minecraft/world/World;removeBlock(Lnet/minecraft/util/math/BlockPos;)Z",
             shift = At.Shift.AFTER
         ),
         cancellable = true
@@ -68,7 +68,7 @@ public abstract class MixinEntityFallingBlock extends MixinEntity implements Fal
     private void onWorldSetBlockToAir(CallbackInfo ci) {
         final BlockPos pos = new BlockPos((EntityFallingBlock) (Object) this);
         if (((IMixinWorld) this.world).isFake()) {
-            this.world.setBlockToAir(pos);
+            this.world.removeBlock(pos);
             return;
         }
         // Ideally, at this point we should still be in the EntityTickState and only this block should
@@ -76,7 +76,7 @@ public abstract class MixinEntityFallingBlock extends MixinEntity implements Fal
         // and THEN if this one cancels, we should kill this entity off, unless we want some duplication
         // of falling blocks
         final PhaseData currentPhaseData = PhaseTracker.getInstance().getCurrentPhaseData();
-        this.world.setBlockToAir(pos);
+        this.world.removeBlock(pos);
         // By this point, we should have one captured block at least.
         if (!TrackingUtil.processBlockCaptures(currentPhaseData.context.getCapturedBlocks(), currentPhaseData.state, currentPhaseData.context)) {
             // So, it's been cancelled, we want to absolutely remove this entity.

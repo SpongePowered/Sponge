@@ -70,7 +70,7 @@ public abstract class MixinEntity_Tracker implements Entity, IMixinEntity {
             sourceNbt.setUniqueId(NbtDataUtil.UUID, uuid);
             spongeData.setTag(nbtKey, sourceNbt);
         } else {
-            final NBTTagCompound compoundTag = spongeData.getCompoundTag(nbtKey);
+            final NBTTagCompound compoundTag = spongeData.getCompound(nbtKey);
             if (uuid == null) {
                 compoundTag.removeTag(NbtDataUtil.UUID);
             } else {
@@ -131,7 +131,7 @@ public abstract class MixinEntity_Tracker implements Entity, IMixinEntity {
         if (!nbt.hasKey(nbtKey)) {
             return null;
         }
-        NBTTagCompound creatorNbt = nbt.getCompoundTag(nbtKey);
+        NBTTagCompound creatorNbt = nbt.getCompound(nbtKey);
 
 
         if (!creatorNbt.hasKey(NbtDataUtil.UUID + "Most") && !creatorNbt.hasKey(NbtDataUtil.UUID + "Least")) {

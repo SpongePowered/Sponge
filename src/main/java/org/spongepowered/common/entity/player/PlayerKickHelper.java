@@ -44,15 +44,15 @@ public class PlayerKickHelper {
      * {@link NetHandlerPlayServer#kickPlayerFromServer(String)}. This
      * duplicates the code of that kick implementation pretty much exactly
      *
-     * @param ply The player to kick
+     * @param player The player to kick
      * @param component The kick message
      */
-    public static void kickPlayer(final EntityPlayerMP ply, final ITextComponent component) {
-        ply.connection.getNetworkManager().sendPacket(new SPacketDisconnect(component),
-                future -> ply.connection.getNetworkManager().closeChannel(component));
-        ply.connection.getNetworkManager().disableAutoRead();
+    public static void kickPlayer(final EntityPlayerMP player, final ITextComponent component) {
+        player.connection.getNetworkManager().sendPacket(new SPacketDisconnect(component),
+                future -> player.connection.getNetworkManager().closeChannel(component));
+        player.connection.getNetworkManager().disableAutoRead();
         // fix this getServer.
-        Futures.getUnchecked(ply.getServer().addScheduledTask(() -> ply.connection.getNetworkManager().handleDisconnection()));
+        Futures.getUnchecked(player.getServer().addScheduledTask(() -> player.connection.getNetworkManager().handleDisconnection()));
 
     }
 
