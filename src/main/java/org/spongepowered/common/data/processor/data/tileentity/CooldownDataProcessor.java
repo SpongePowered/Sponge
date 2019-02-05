@@ -29,9 +29,8 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableCooldownData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.CooldownData;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeCooldownData;
 import org.spongepowered.common.data.processor.common.AbstractTileEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
@@ -39,7 +38,7 @@ import org.spongepowered.common.data.value.SpongeValueFactory;
 import java.util.Optional;
 
 public class CooldownDataProcessor
-        extends AbstractTileEntitySingleDataProcessor<TileEntityHopper, Integer, MutableBoundedValue<Integer>, CooldownData, ImmutableCooldownData> {
+        extends AbstractTileEntitySingleDataProcessor<TileEntityHopper, Integer, CooldownData, ImmutableCooldownData> {
 
     public CooldownDataProcessor() {
         super(TileEntityHopper.class, Keys.COOLDOWN);
@@ -60,18 +59,17 @@ public class CooldownDataProcessor
     }
 
     @Override
-    protected MutableBoundedValue<Integer> constructValue(Integer value) {
+    protected Value.Mutable<Integer> constructMutableValue(Integer value) {
         return SpongeValueFactory.boundedBuilder(Keys.COOLDOWN)
                 .minimum(1)
                 .maximum(Integer.MAX_VALUE)
-                .defaultValue(8)
-                .actualValue(value)
+                .value(value)
                 .build();
     }
 
     @Override
-    public ImmutableValue<Integer> constructImmutableValue(Integer value) {
-        return constructValue(value).asImmutable();
+    public Value.Immutable<Integer> constructImmutableValue(Integer value) {
+        return constructMutableValue(value).asImmutable();
     }
 
     @Override

@@ -34,12 +34,12 @@ import org.spongepowered.api.data.manipulator.mutable.tileentity.BannerData;
 import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.type.DyeColors;
-import org.spongepowered.api.data.value.mutable.PatternListValue;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.ListValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeBannerData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
-import org.spongepowered.common.data.value.mutable.SpongePatternListValue;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeMutableListValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -106,12 +106,12 @@ public class SpongeBannerData extends AbstractData<BannerData, ImmutableBannerDa
     }
 
     @Override
-    public Value<DyeColor> baseColor() {
-        return new SpongeValue<>(Keys.BANNER_BASE_COLOR, DyeColors.WHITE, this.base);
+    public Value.Mutable<DyeColor> baseColor() {
+        return new SpongeMutableValue<>(Keys.BANNER_BASE_COLOR, this.base);
     }
 
     @Override
-    public PatternListValue patternsList() {
-        return new SpongePatternListValue(Keys.BANNER_PATTERNS, this.getLayers());
+    public ListValue.Mutable<PatternLayer> patternsList() {
+        return new SpongeMutableListValue<>(Keys.BANNER_PATTERNS, this.getLayers());
     }
 }

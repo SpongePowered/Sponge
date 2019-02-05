@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.immutable.block;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDirectionalData;
 import org.spongepowered.api.data.manipulator.mutable.block.DirectionalData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleEnumData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeDirectionalData;
@@ -40,7 +40,7 @@ public class ImmutableSpongeDirectionalData extends AbstractImmutableSingleEnumD
     }
 
     @Override
-    public ImmutableValue<Direction> direction() {
+    public Value.Immutable<Direction> direction() {
         return type();
     }
 

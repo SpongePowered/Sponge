@@ -38,8 +38,7 @@ import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.Cycleable;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -74,7 +73,7 @@ public interface MixinIBlockState extends BlockState {
     }
 
     @Override
-    default BlockState cycleValue(Key<? extends BaseValue<? extends Cycleable<?>>> key) {
+    default BlockState cycleValue(Key<? extends Value<? extends Cycleable<?>>> key) {
         return this;
     }
 
@@ -197,17 +196,17 @@ public interface MixinIBlockState extends BlockState {
     }
 
     @Override
-    default <E> Optional<BlockState> transform(Key<? extends BaseValue<E>> key, Function<E, E> function) {
+    default <E> Optional<BlockState> transform(Key<? extends Value<E>> key, Function<E, E> function) {
         return Optional.empty();
     }
 
     @Override
-    default <E> Optional<BlockState> with(Key<? extends BaseValue<E>> key, E value) {
+    default <E> Optional<BlockState> with(Key<? extends Value<E>> key, E value) {
         return Optional.empty();
     }
 
     @Override
-    default Optional<BlockState> with(BaseValue<?> value) {
+    default Optional<BlockState> with(Value<?> value) {
         return Optional.empty();
     }
 
@@ -242,12 +241,12 @@ public interface MixinIBlockState extends BlockState {
     }
 
     @Override
-    default <E> Optional<E> get(Key<? extends BaseValue<E>> key) {
+    default <E> Optional<E> get(Key<? extends Value<E>> key) {
         return Optional.empty();
     }
 
     @Override
-    default <E, V extends BaseValue<E>> Optional<V> getValue(Key<V> key) {
+    default <E, V extends Value<E>> Optional<V> getValue(Key<V> key) {
         return Optional.empty();
     }
 
@@ -267,7 +266,7 @@ public interface MixinIBlockState extends BlockState {
     }
 
     @Override
-    default Set<ImmutableValue<?>> getValues() {
+    default Set<Value.Immutable<?>> getValues() {
         return Collections.emptySet();
     }
 }

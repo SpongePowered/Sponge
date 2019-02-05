@@ -29,18 +29,17 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableKnockbackData;
 import org.spongepowered.api.data.manipulator.mutable.entity.KnockbackData;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeKnockbackData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
 
 import java.util.Optional;
 
 public class KnockbackDataProcessor
-        extends AbstractEntitySingleDataProcessor<EntityArrow, Integer, MutableBoundedValue<Integer>, KnockbackData, ImmutableKnockbackData> {
+        extends AbstractEntitySingleDataProcessor<EntityArrow, Integer, KnockbackData, ImmutableKnockbackData> {
 
     public KnockbackDataProcessor() {
         super(EntityArrow.class, Keys.KNOCKBACK_STRENGTH);
@@ -52,12 +51,11 @@ public class KnockbackDataProcessor
     }
 
     @Override
-    protected MutableBoundedValue<Integer> constructValue(Integer actualValue) {
+    protected Value.Mutable<Integer> constructMutableValue(Integer actualValue) {
         return SpongeValueFactory.boundedBuilder(Keys.KNOCKBACK_STRENGTH)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
-                .defaultValue(0)
-                .actualValue(actualValue)
+                .value(actualValue)
                 .build();
     }
 
@@ -73,8 +71,8 @@ public class KnockbackDataProcessor
     }
 
     @Override
-    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
-        return new ImmutableSpongeValue<>(Keys.KNOCKBACK_STRENGTH, value);
+    protected Value.Immutable<Integer> constructImmutableValue(Integer value) {
+        return new SpongeImmutableValue<>(Keys.KNOCKBACK_STRENGTH, value);
     }
 
     @Override

@@ -35,11 +35,10 @@ import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.event.EventListener;
 import org.spongepowered.api.event.data.ChangeDataHolderEvent;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
 import org.spongepowered.lwts.runner.LaunchWrapperTestRunner;
 
 @RunWith(LaunchWrapperTestRunner.class)
@@ -100,14 +99,14 @@ public class ReflectionTest {
 
     @Test
     public void testImmutableValueCache() {
-        final Key<Value<Double>> key = new Key<Value<Double>>() {
+        final Key<Value.Mutable<Double>> key = new Key<Value.Mutable<Double>>() {
 
             private final CatalogKey key = (CatalogKey) (Object) new ResourceLocation("sponge", "test");
             private final TypeToken<Double> type = new TypeToken<Double>() {
                 private static final long serialVersionUID = 2192586007346356478L;
             };
 
-            private final TypeToken<Value<Double>> token = new TypeToken<Value<Double>>() {
+            private final TypeToken<Value.Mutable<Double>> token = new TypeToken<Value.Mutable<Double>>() {
                 private static final long serialVersionUID = -5667097529739857142L;
             };
 
@@ -122,7 +121,7 @@ public class ReflectionTest {
             }
 
             @Override
-            public TypeToken<Value<Double>> getValueToken() {
+            public TypeToken<Value.Mutable<Double>> getValueToken() {
                 return this.token;
             }
 
@@ -142,8 +141,8 @@ public class ReflectionTest {
             }
         };
 
-        final ImmutableValue<Double> myVal = ImmutableSpongeValue.cachedOf(key, 10D, 1D);
-        final ImmutableValue<Double> testVal = ImmutableSpongeValue.cachedOf(key, 10D, 1d);
+        final Value.Immutable<Double> myVal = SpongeImmutableValue.cachedOf(key, 1D);
+        final Value.Immutable<Double> testVal = SpongeImmutableValue.cachedOf(key, 1d);
 
         assert myVal == testVal;
 

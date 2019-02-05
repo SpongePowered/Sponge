@@ -28,13 +28,13 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSkinData;
 import org.spongepowered.api.data.manipulator.mutable.entity.SkinData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeSkinData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.processor.data.entity.SkinDataProcessor;
 import org.spongepowered.common.data.util.DataQueries;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 
 public class SpongeSkinData extends AbstractData<SkinData, ImmutableSkinData> implements SkinData {
 
@@ -81,13 +81,13 @@ public class SpongeSkinData extends AbstractData<SkinData, ImmutableSkinData> im
     }
 
     @Override
-    public Value<ProfileProperty> skin() {
-        return new SpongeValue<>(Keys.SKIN, SkinDataProcessor.EMPTY_SKIN, this.skin);
+    public Value.Mutable<ProfileProperty> skin() {
+        return new SpongeMutableValue<>(Keys.SKIN, this.skin);
     }
 
     @Override
-    public Value<Boolean> updateGameProfile() {
-        return new SpongeValue<>(Keys.UPDATE_GAME_PROFILE, false, this.updateGameProfile);
+    public Value.Mutable<Boolean> updateGameProfile() {
+        return new SpongeMutableValue<>(Keys.UPDATE_GAME_PROFILE, this.updateGameProfile);
     }
 
 }

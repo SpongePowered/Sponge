@@ -28,7 +28,7 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableHideData;
 import org.spongepowered.api.data.manipulator.mutable.item.HideData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeHideData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
@@ -62,33 +62,33 @@ public class SpongeHideData extends AbstractData<HideData, ImmutableHideData> im
     }
 
     @Override
-    public Value<Boolean> hideEnchantments() {
-        return SpongeValueFactory.getInstance().createValue(Keys.HIDE_ENCHANTMENTS, this.enchantments, false);
+    public Value.Mutable<Boolean> hideEnchantments() {
+        return SpongeValueFactory.getInstance().createValue(Keys.HIDE_ENCHANTMENTS, this.enchantments);
     }
 
     @Override
-    public Value<Boolean> hideAttributes() {
-        return SpongeValueFactory.getInstance().createValue(Keys.HIDE_ATTRIBUTES, this.attributes, false);
+    public Value.Mutable<Boolean> hideAttributes() {
+        return SpongeValueFactory.getInstance().createValue(Keys.HIDE_ATTRIBUTES, this.attributes);
     }
 
     @Override
-    public Value<Boolean> hideUnbreakable() {
-        return SpongeValueFactory.getInstance().createValue(Keys.HIDE_UNBREAKABLE, this.unbreakable, false);
+    public Value.Mutable<Boolean> hideUnbreakable() {
+        return SpongeValueFactory.getInstance().createValue(Keys.HIDE_UNBREAKABLE, this.unbreakable);
     }
 
     @Override
-    public Value<Boolean> hideCanDestroy() {
-        return SpongeValueFactory.getInstance().createValue(Keys.HIDE_CAN_DESTROY, this.canDestroy, false);
+    public Value.Mutable<Boolean> hideCanDestroy() {
+        return SpongeValueFactory.getInstance().createValue(Keys.HIDE_CAN_DESTROY, this.canDestroy);
     }
 
     @Override
-    public Value<Boolean> hideCanPlace() {
-        return SpongeValueFactory.getInstance().createValue(Keys.HIDE_CAN_PLACE, this.canPlace, false);
+    public Value.Mutable<Boolean> hideCanPlace() {
+        return SpongeValueFactory.getInstance().createValue(Keys.HIDE_CAN_PLACE, this.canPlace);
     }
 
     @Override
-    public Value<Boolean> hideMiscellaneous() {
-        return SpongeValueFactory.getInstance().createValue(Keys.HIDE_MISCELLANEOUS, this.miscellaneous, false);
+    public Value.Mutable<Boolean> hideMiscellaneous() {
+        return SpongeValueFactory.getInstance().createValue(Keys.HIDE_MISCELLANEOUS, this.miscellaneous);
     }
 
     @Override

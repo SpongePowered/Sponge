@@ -30,20 +30,18 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableGameModeData;
 import org.spongepowered.api.data.manipulator.mutable.entity.GameModeData;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
-import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGameModeData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 
 import java.util.Optional;
 
 public class GameModeDataProcessor extends
-        AbstractEntitySingleDataProcessor<EntityPlayerMP, GameMode, Value<GameMode>, GameModeData, ImmutableGameModeData> {
+        AbstractEntitySingleDataProcessor<EntityPlayerMP, GameMode, GameModeData, ImmutableGameModeData> {
 
     public GameModeDataProcessor() {
         super(EntityPlayerMP.class, Keys.GAME_MODE);
@@ -66,13 +64,13 @@ public class GameModeDataProcessor extends
     }
 
     @Override
-    protected ImmutableValue<GameMode> constructImmutableValue(GameMode value) {
-        return ImmutableSpongeValue.cachedOf(Keys.GAME_MODE, GameModes.SURVIVAL, value);
+    protected Value.Immutable<GameMode> constructImmutableValue(GameMode value) {
+        return SpongeImmutableValue.cachedOf(Keys.GAME_MODE, value);
     }
 
     @Override
-    protected Value<GameMode> constructValue(GameMode actualValue) {
-        return new SpongeValue<>(Keys.GAME_MODE, GameModes.SURVIVAL, actualValue);
+    protected Value.Mutable<GameMode> constructMutableValue(GameMode actualValue) {
+        return new SpongeMutableValue<>(Keys.GAME_MODE, actualValue);
     }
 
     @Override

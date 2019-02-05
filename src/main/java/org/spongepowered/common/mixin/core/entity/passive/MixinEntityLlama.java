@@ -28,8 +28,8 @@ import net.minecraft.entity.passive.EntityLlama;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.LlamaVariant;
 import org.spongepowered.api.data.type.LlamaVariants;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.entity.living.animal.Llama;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -37,7 +37,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 
 @Mixin(EntityLlama.class)
 @Implements(@Interface(iface = Llama.class, prefix = "llama$", unique = true))
@@ -48,7 +48,7 @@ public abstract class MixinEntityLlama extends MixinAbstractHorse implements Lla
     @Shadow public abstract void setVariant(int p_190710_1_);
 
     @Override
-    public Value<LlamaVariant> llamaVariant() {
+    public Value.Mutable<LlamaVariant> llamaVariant() {
         final int i = getVariant();
         final LlamaVariant variant;
         if (i == 0) {
@@ -63,17 +63,15 @@ public abstract class MixinEntityLlama extends MixinAbstractHorse implements Lla
             setVariant(0); // Basically some validation
             variant = LlamaVariants.CREAMY;
         }
-        return new SpongeValue<>(Keys.LLAMA_VARIANT, DataConstants.Llama.DEFAULT_VARIANT, variant);
+        return new SpongeMutableValue<>(Keys.LLAMA_VARIANT, variant);
     }
 
     @Override
-    public MutableBoundedValue<Integer> strength() {
-        return SpongeValueFactory.getInstance()
-                .createBoundedValueBuilder(Keys.LLAMA_STRENGTH)
-                .defaultValue(DataConstants.Llama.DEFAULT_STRENGTH)
+    public BoundedValue.Mutable<Integer> strength() {
+        return SpongeValueFactory.boundedBuilder(Keys.LLAMA_STRENGTH)
                 .minimum(DataConstants.Llama.MINIMUM_STRENGTH)
                 .maximum(DataConstants.Llama.MAXIMUM_STRENGTH)
-                .actualValue(getStrength())
+                .value(getStrength())
                 .build();
     }
 

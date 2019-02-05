@@ -29,13 +29,13 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableDespawnDelayData;
 import org.spongepowered.api.data.manipulator.mutable.entity.DespawnDelayData;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeDespawnDelayData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractIntData;
 import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 
 public final class SpongeDespawnDelayData extends AbstractIntData<DespawnDelayData, ImmutableDespawnDelayData> implements DespawnDelayData {
 
@@ -53,12 +53,11 @@ public final class SpongeDespawnDelayData extends AbstractIntData<DespawnDelayDa
 
 
     @Override
-    public MutableBoundedValue<Integer> delay() {
+    public BoundedValue.Mutable<Integer> delay() {
         return SpongeValueFactory.boundedBuilder(Keys.DESPAWN_DELAY) // this.usedKey does not work here
-                .actualValue(this.getValue())
+                .value(this.getValue())
                 .minimum(DataConstants.Entity.Item.MIN_DESPAWN_DELAY)
                 .maximum(DataConstants.Entity.Item.MAX_DESPAWN_DELAY)
-                .defaultValue(DataConstants.Entity.Item.DEFAULT_DESPAWN_DELAY)
                 .build();
     }
 
@@ -68,8 +67,8 @@ public final class SpongeDespawnDelayData extends AbstractIntData<DespawnDelayDa
     }
 
     @Override
-    public Value<Boolean> infinite() {
-        return new SpongeValue<>(Keys.INFINITE_DESPAWN_DELAY, false, isInfinite());
+    public Value.Mutable<Boolean> infinite() {
+        return new SpongeMutableValue<>(Keys.INFINITE_DESPAWN_DELAY, isInfinite());
     }
 
     private boolean isInfinite() {
@@ -77,7 +76,7 @@ public final class SpongeDespawnDelayData extends AbstractIntData<DespawnDelayDa
     }
 
     @Override
-    protected Value<?> getValueGetter() {
+    protected Value.Mutable<?> getValueGetter() {
         return this.delay();
     }
 

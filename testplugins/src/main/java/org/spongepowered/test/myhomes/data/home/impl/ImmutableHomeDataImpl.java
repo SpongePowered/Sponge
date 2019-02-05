@@ -26,6 +26,8 @@ package org.spongepowered.test.myhomes.data.home.impl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.spongepowered.api.data.value.MapValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.test.myhomes.MyHomes;
 import org.spongepowered.test.myhomes.data.home.Home;
 import org.spongepowered.test.myhomes.data.home.HomeData;
@@ -34,8 +36,6 @@ import com.google.common.collect.ImmutableMap;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.manipulator.immutable.common.AbstractImmutableData;
-import org.spongepowered.api.data.value.immutable.ImmutableMapValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
 
 import java.util.Map;
 
@@ -44,8 +44,8 @@ public class ImmutableHomeDataImpl extends AbstractImmutableData<ImmutableHomeDa
     private final Home defaultHome;
     private final ImmutableMap<String, Home> homes;
 
-    private final ImmutableValue<Home> defaultHomeValue;
-    private final ImmutableMapValue<String, Home> homesValue;
+    private final Value.Immutable<Home> defaultHomeValue;
+    private final MapValue.Immutable<String, Home> homesValue;
 
     public ImmutableHomeDataImpl() {
         this(null, ImmutableMap.of());
@@ -60,19 +60,19 @@ public class ImmutableHomeDataImpl extends AbstractImmutableData<ImmutableHomeDa
                 .asImmutable();
 
         this.homesValue = Sponge.getRegistry().getValueFactory()
-                .createMapValue(MyHomes.HOMES, homes, ImmutableMap.of())
+                .createMapValue(MyHomes.HOMES, homes)
                 .asImmutable();
     }
 
     // Override if you have a separate interface
     @Override
-    public ImmutableValue<Home> defaultHome() {
+    public Value.Immutable<Home> defaultHome() {
         return this.defaultHomeValue;
     }
 
     // Override if you have a separate interface
     @Override
-    public ImmutableMapValue<String, Home> homes() {
+    public MapValue.Immutable<String, Home> homes() {
         return this.homesValue;
     }
 

@@ -28,10 +28,10 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableJoinData;
 import org.spongepowered.api.data.manipulator.mutable.entity.JoinData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeJoinData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
 
 import java.time.Instant;
 
@@ -39,13 +39,13 @@ public class ImmutableSpongeJoinData extends AbstractImmutableData<ImmutableJoin
 
     private final Instant firstJoined;
     private final Instant lastJoined;
-    private final ImmutableSpongeValue<Instant> firstJoinedValue;
-    private final ImmutableSpongeValue<Instant> lastJoinedValue;
+    private final SpongeImmutableValue<Instant> firstJoinedValue;
+    private final SpongeImmutableValue<Instant> lastJoinedValue;
 
     public ImmutableSpongeJoinData(Instant firstJoined, Instant lastJoined) {
         super(ImmutableJoinData.class);
-        this.firstJoinedValue = new ImmutableSpongeValue<>(Keys.FIRST_DATE_PLAYED, Instant.EPOCH, this.firstJoined = firstJoined);
-        this.lastJoinedValue = new ImmutableSpongeValue<>(Keys.LAST_DATE_PLAYED, Instant.EPOCH, this.lastJoined = lastJoined);
+        this.firstJoinedValue = new SpongeImmutableValue<>(Keys.FIRST_DATE_PLAYED, this.firstJoined = firstJoined);
+        this.lastJoinedValue = new SpongeImmutableValue<>(Keys.LAST_DATE_PLAYED, this.lastJoined = lastJoined);
         registerGetters();
     }
 
@@ -59,12 +59,12 @@ public class ImmutableSpongeJoinData extends AbstractImmutableData<ImmutableJoin
     }
 
     @Override
-    public ImmutableValue<Instant> firstPlayed() {
+    public Value.Immutable<Instant> firstPlayed() {
         return this.firstJoinedValue;
     }
 
     @Override
-    public ImmutableValue<Instant> lastPlayed() {
+    public Value.Immutable<Instant> lastPlayed() {
         return this.lastJoinedValue;
     }
 

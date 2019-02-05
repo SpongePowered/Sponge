@@ -27,26 +27,26 @@ package org.spongepowered.common.data.processor.value.tileentity;
 import net.minecraft.tileentity.TileEntityFurnace;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Optional;
 
-public class PassedCookTimeValueProcessor extends AbstractSpongeValueProcessor<TileEntityFurnace, Integer, MutableBoundedValue<Integer>> {
+public class PassedCookTimeValueProcessor extends AbstractSpongeValueProcessor<TileEntityFurnace, Integer> {
 
     public PassedCookTimeValueProcessor() {
         super(TileEntityFurnace.class, Keys.PASSED_COOK_TIME);
     }
 
     @Override
-    protected MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
+    protected BoundedValue.Mutable<Integer> constructMutableValue(Integer defaultValue) {
         return SpongeValueFactory.boundedBuilder(Keys.PASSED_COOK_TIME)
                 .minimum(0)
                 .maximum(200) //TODO
-                .defaultValue(defaultValue)
+                .value(defaultValue)
                 .build();
     }
 
@@ -66,12 +66,11 @@ public class PassedCookTimeValueProcessor extends AbstractSpongeValueProcessor<T
     }
 
     @Override
-    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
+    protected Value.Immutable<Integer> constructImmutableValue(Integer value) {
         return SpongeValueFactory.boundedBuilder(Keys.PASSED_COOK_TIME)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
-                .defaultValue(200)
-                .actualValue(value)
+                .value(value)
                 .build()
                 .asImmutable();
     }

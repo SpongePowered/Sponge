@@ -28,9 +28,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.util.OptBool;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -38,7 +37,7 @@ import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Optional;
 
-public abstract class AbstractHideFlagsValueProcessor extends AbstractSpongeValueProcessor<ItemStack, Boolean, Value<Boolean>> {
+public abstract class AbstractHideFlagsValueProcessor extends AbstractSpongeValueProcessor<ItemStack, Boolean> {
 
     private final int flag;
 
@@ -48,28 +47,25 @@ public abstract class AbstractHideFlagsValueProcessor extends AbstractSpongeValu
     }
 
     @Override
-    protected Value<Boolean> constructValue(Boolean actualValue) {
-        return SpongeValueFactory.getInstance().createValue(this.key, actualValue, false);
+    protected Value.Mutable<Boolean> constructMutableValue(Boolean actualValue) {
+        return SpongeValueFactory.getInstance().createValue(this.key, actualValue);
     }
 
     @Override
     protected boolean set(ItemStack container, Boolean value) {
-        if (!container.hasTagCompound()) {
-            container.setTagCompound(new NBTTagCompound());
+        if (!container.hasTag()) {
+            container.setTag(new NBTTagCompound());
         }
-        if (container.getTagCompound().hasKey(NbtDataUtil.ITEM_HIDE_FLAGS, NbtDataUtil.TAG_INT)) {
-            int flag = container.getTagCompound().getInteger(NbtDataUtil.ITEM_HIDE_FLAGS);
+        if (container.getTag().hasKey(NbtDataUtil.ITEM_HIDE_FLAGS)) {
+            int flag = container.getTag().getInt(NbtDataUtil.ITEM_HIDE_FLAGS);
             if (value) {
-                container.getTagCompound()
-                        .setInteger(NbtDataUtil.ITEM_HIDE_FLAGS, flag | this.flag);
+                container.getTag().setInt(NbtDataUtil.ITEM_HIDE_FLAGS, flag | this.flag);
             } else {
-                container.getTagCompound()
-                        .setInteger(NbtDataUtil.ITEM_HIDE_FLAGS,
-                                flag & ~this.flag);
+                container.getTag().setInt(NbtDataUtil.ITEM_HIDE_FLAGS, flag & ~this.flag);
             }
         } else {
             if (value) {
-                container.getTagCompound().setInteger(NbtDataUtil.ITEM_HIDE_FLAGS, this.flag);
+                container.getTag().setInt(NbtDataUtil.ITEM_HIDE_FLAGS, this.flag);
             }
         }
         return true;
@@ -77,8 +73,8 @@ public abstract class AbstractHideFlagsValueProcessor extends AbstractSpongeValu
 
     @Override
     protected Optional<Boolean> getVal(ItemStack container) {
-        if (container.hasTagCompound() && container.getTagCompound().hasKey(NbtDataUtil.ITEM_HIDE_FLAGS, NbtDataUtil.TAG_INT)) {
-            int flag = container.getTagCompound().getInteger(NbtDataUtil.ITEM_HIDE_FLAGS);
+        if (container.hasTag() && container.getTag().hasKey(NbtDataUtil.ITEM_HIDE_FLAGS)) {
+            int flag = container.getTag().getInt(NbtDataUtil.ITEM_HIDE_FLAGS);
             if ((flag & this.flag) != 0) {
                 return OptBool.TRUE;
             }
@@ -87,8 +83,8 @@ public abstract class AbstractHideFlagsValueProcessor extends AbstractSpongeValu
     }
 
     @Override
-    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
-        return constructValue(value).asImmutable();
+    protected Value.Immutable<Boolean> constructImmutableValue(Boolean value) {
+        return constructMutableValue(value).asImmutable();
     }
 
     @Override

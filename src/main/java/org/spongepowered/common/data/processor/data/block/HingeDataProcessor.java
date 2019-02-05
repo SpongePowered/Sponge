@@ -29,12 +29,12 @@ import org.spongepowered.api.data.manipulator.immutable.block.ImmutableHingeData
 import org.spongepowered.api.data.manipulator.mutable.block.HingeData;
 import org.spongepowered.api.data.type.Hinge;
 import org.spongepowered.api.data.type.Hinges;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeHingeData;
 import org.spongepowered.common.data.processor.common.AbstractBlockOnlyDataProcessor;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 
-public class HingeDataProcessor extends AbstractBlockOnlyDataProcessor<Hinge, Value<Hinge>, HingeData, ImmutableHingeData> {
+public class HingeDataProcessor extends AbstractBlockOnlyDataProcessor<Hinge, HingeData, ImmutableHingeData> {
 
     public HingeDataProcessor() {
         super(Keys.HINGE_POSITION);
@@ -51,8 +51,8 @@ public class HingeDataProcessor extends AbstractBlockOnlyDataProcessor<Hinge, Va
     }
 
     @Override
-    protected Value<Hinge> constructValue(Hinge actualValue) {
-        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
+    protected Value.Mutable<Hinge> constructMutableValue(Hinge actualValue) {
+        return new SpongeMutableValue<>(this.key, actualValue);
     }
 
 }

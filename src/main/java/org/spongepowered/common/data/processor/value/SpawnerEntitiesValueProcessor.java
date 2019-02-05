@@ -26,27 +26,27 @@ package org.spongepowered.common.data.processor.value;
 
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.WeightedCollectionValue;
+import org.spongepowered.api.data.value.WeightedCollectionValue;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.processor.common.SpawnerUtils;
-import org.spongepowered.common.data.value.mutable.SpongeWeightedCollectionValue;
+import org.spongepowered.common.data.value.SpongeMutableWeightedCollectionValue;
 import org.spongepowered.common.interfaces.IMixinMobSpawner;
 
 import java.util.Optional;
 
-public class SpawnerEntitiesValueProcessor extends AbstractSpongeValueProcessor<IMixinMobSpawner, WeightedTable<EntityArchetype>, WeightedCollectionValue<EntityArchetype>> {
+public class SpawnerEntitiesValueProcessor extends AbstractSpongeValueProcessor<IMixinMobSpawner, WeightedTable<EntityArchetype>> {
 
     public SpawnerEntitiesValueProcessor() {
         super(IMixinMobSpawner.class, Keys.SPAWNER_ENTITIES);
     }
 
     @Override
-    protected WeightedCollectionValue<EntityArchetype> constructValue(WeightedTable<EntityArchetype> actualValue) {
-        return new SpongeWeightedCollectionValue<>(this.key, actualValue);
+    protected WeightedCollectionValue.Mutable<EntityArchetype> constructMutableValue(WeightedTable<EntityArchetype> actualValue) {
+        return new SpongeMutableWeightedCollectionValue<>(this.key, actualValue);
     }
 
     @Override
@@ -61,8 +61,8 @@ public class SpawnerEntitiesValueProcessor extends AbstractSpongeValueProcessor<
     }
 
     @Override
-    protected ImmutableValue<WeightedTable<EntityArchetype>> constructImmutableValue(WeightedTable<EntityArchetype> value) {
-        return constructValue(value).asImmutable();
+    protected Value.Immutable<WeightedTable<EntityArchetype>> constructImmutableValue(WeightedTable<EntityArchetype> value) {
+        return constructMutableValue(value).asImmutable();
     }
 
     @Override

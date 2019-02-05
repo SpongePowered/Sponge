@@ -28,9 +28,9 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableAreaEffectCloudData;
 import org.spongepowered.api.data.manipulator.mutable.entity.AreaEffectCloudData;
-import org.spongepowered.api.data.value.mutable.ListValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.ListValue;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.api.effect.particle.ParticleTypes;
 import org.spongepowered.api.effect.potion.PotionEffect;
@@ -39,8 +39,8 @@ import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpong
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.data.value.mutable.SpongeListValue;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeMutableListValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -184,97 +184,89 @@ public class SpongeAreaEffectData extends AbstractData<AreaEffectCloudData, Immu
     }
 
     @Override
-    public Value<Color> color() {
-        return new SpongeValue<>(Keys.AREA_EFFECT_CLOUD_COLOR, Color.WHITE, this.color);
+    public Value.Mutable<Color> color() {
+        return new SpongeMutableValue<>(Keys.AREA_EFFECT_CLOUD_COLOR, this.color);
     }
 
     @Override
-    public MutableBoundedValue<Double> radius() {
+    public BoundedValue.Mutable<Double> radius() {
         return SpongeValueFactory.boundedBuilder(Keys.AREA_EFFECT_CLOUD_RADIUS)
                 .minimum(0D)
                 .maximum((double) Float.MAX_VALUE)
-                .defaultValue(0.5D)
-                .actualValue(this.radius)
+                .value(this.radius)
                 .build();
     }
 
     @Override
-    public Value<ParticleType> particleType() {
-        return new SpongeValue<>(Keys.AREA_EFFECT_CLOUD_PARTICLE_TYPE, ParticleTypes.MOB_SPELL, ParticleTypes.MOB_SPELL);
+    public Value.Mutable<ParticleType> particleType() {
+        return new SpongeMutableValue<>(Keys.AREA_EFFECT_CLOUD_PARTICLE_TYPE, ParticleTypes.MOB_SPELL);
     }
 
     @Override
-    public MutableBoundedValue<Integer> duration() {
+    public BoundedValue.Mutable<Integer> duration() {
         return SpongeValueFactory.boundedBuilder(Keys.AREA_EFFECT_CLOUD_DURATION)
                 .minimum(Integer.MIN_VALUE)
                 .maximum(Integer.MAX_VALUE)
-                .defaultValue(600)
-                .actualValue(this.duration)
+                .value(this.duration)
                 .build();
     }
 
     @Override
-    public MutableBoundedValue<Integer> waitTime() {
+    public BoundedValue.Mutable<Integer> waitTime() {
         return SpongeValueFactory.boundedBuilder(Keys.AREA_EFFECT_CLOUD_WAIT_TIME)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
-                .defaultValue(20)
-                .actualValue(this.waitTime)
+                .value(this.waitTime)
                 .build();
     }
 
     @Override
-    public MutableBoundedValue<Double> radiusOnUse() {
+    public BoundedValue.Mutable<Double> radiusOnUse() {
         return SpongeValueFactory.boundedBuilder(Keys.AREA_EFFECT_CLOUD_RADIUS_ON_USE)
                 .minimum(0.0D)
                 .maximum((double) Float.MAX_VALUE)
-                .defaultValue(0.0D)
-                .actualValue(this.radiusOnUse)
+                .value(this.radiusOnUse)
                 .build();
     }
 
     @Override
-    public MutableBoundedValue<Double> radiusPerTick() {
+    public BoundedValue.Mutable<Double> radiusPerTick() {
         return SpongeValueFactory.boundedBuilder(Keys.AREA_EFFECT_CLOUD_RADIUS_PER_TICK)
                 .minimum(0.0D)
                 .maximum((double) Float.MAX_VALUE)
-                .defaultValue(0.0D)
-                .actualValue(this.radiusPerTick)
+                .value(this.radiusPerTick)
                 .build();
     }
 
     @Override
-    public MutableBoundedValue<Integer> durationOnUse() {
+    public BoundedValue.Mutable<Integer> durationOnUse() {
         return SpongeValueFactory.boundedBuilder(Keys.AREA_EFFECT_CLOUD_DURATION_ON_USE)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
-                .defaultValue(0)
-                .actualValue(this.durationOnUse)
+                .value(this.durationOnUse)
                 .build();
     }
 
     @Override
-    public MutableBoundedValue<Integer> applicationDelay() {
+    public BoundedValue.Mutable<Integer> applicationDelay() {
         return SpongeValueFactory.boundedBuilder(Keys.AREA_EFFECT_CLOUD_REAPPLICATION_DELAY)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
-                .defaultValue(0)
-                .actualValue(this.reapplicationDelay)
+                .value(this.reapplicationDelay)
                 .build();
     }
 
     @Override
-    public ListValue<PotionEffect> effects() {
-        return new SpongeListValue<>(Keys.POTION_EFFECTS, this.potionEffects);
+    public ListValue.Mutable<PotionEffect> effects() {
+        return new SpongeMutableListValue<>(Keys.POTION_EFFECTS, this.potionEffects);
     }
 
     @Override
-    public MutableBoundedValue<Integer> age() {
+    public BoundedValue.Mutable<Integer> age() {
         return SpongeValueFactory.boundedBuilder(Keys.AREA_EFFECT_CLOUD_AGE)
-                .defaultValue(0)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
-                .actualValue(this.age)
+                .value(this.age)
                 .build();
     }
 }

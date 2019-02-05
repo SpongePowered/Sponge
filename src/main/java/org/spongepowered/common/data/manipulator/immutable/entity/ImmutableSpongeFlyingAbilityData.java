@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.immutable.entity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFlyingAbilityData;
 import org.spongepowered.api.data.manipulator.mutable.entity.FlyingAbilityData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFlyingAbilityData;
 
@@ -38,7 +38,7 @@ public class ImmutableSpongeFlyingAbilityData extends AbstractImmutableBooleanDa
     }
 
     @Override
-    public ImmutableValue<Boolean> canFly() {
+    public Value.Immutable<Boolean> canFly() {
         return getValueGetter();
     }
 

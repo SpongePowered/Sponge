@@ -26,7 +26,7 @@ package org.spongepowered.common.data.manipulator.mutable.extra;
 
 import com.google.common.collect.ImmutableMap;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.value.mutable.MapValue;
+import org.spongepowered.api.data.value.MapValue;
 import org.spongepowered.api.extra.fluid.FluidStackSnapshot;
 import org.spongepowered.api.extra.fluid.data.manipulator.immutable.ImmutableFluidTankData;
 import org.spongepowered.api.extra.fluid.data.manipulator.mutable.FluidTankData;
@@ -48,7 +48,7 @@ public class SpongeFluidTankData extends AbstractMappedData<Direction, List<Flui
     }
 
     @Override
-    public MapValue<Direction, List<FluidStackSnapshot>> fluids() {
+    public MapValue.Mutable<Direction, List<FluidStackSnapshot>> fluids() {
         return getValueGetter();
     }
 }

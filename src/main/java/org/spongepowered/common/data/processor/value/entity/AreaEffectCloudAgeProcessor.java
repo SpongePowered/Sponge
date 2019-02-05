@@ -27,27 +27,26 @@ package org.spongepowered.common.data.processor.value.entity;
 import net.minecraft.entity.EntityAreaEffectCloud;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Optional;
 
-public class AreaEffectCloudAgeProcessor extends AbstractSpongeValueProcessor<EntityAreaEffectCloud, Integer, MutableBoundedValue<Integer>> {
+public class AreaEffectCloudAgeProcessor extends AbstractSpongeValueProcessor<EntityAreaEffectCloud, Integer> {
 
     public AreaEffectCloudAgeProcessor() {
         super(EntityAreaEffectCloud.class, Keys.AREA_EFFECT_CLOUD_AGE);
     }
 
     @Override
-    protected MutableBoundedValue<Integer> constructValue(Integer actualValue) {
+    protected BoundedValue.Mutable<Integer> constructMutableValue(Integer actualValue) {
         return SpongeValueFactory.boundedBuilder(Keys.AREA_EFFECT_CLOUD_AGE)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
-                .defaultValue(0)
-                .actualValue(actualValue)
+                .value(actualValue)
                 .build();
     }
 
@@ -63,8 +62,8 @@ public class AreaEffectCloudAgeProcessor extends AbstractSpongeValueProcessor<En
     }
 
     @Override
-    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
-        return constructValue(value).asImmutable();
+    protected Value.Immutable<Integer> constructImmutableValue(Integer value) {
+        return constructMutableValue(value).asImmutable();
     }
 
     @Override

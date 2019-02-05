@@ -30,11 +30,11 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableStructureData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.StructureData;
 import org.spongepowered.api.data.type.StructureMode;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeStructureData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.util.DataConstants;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 
 public final class SpongeStructureData extends AbstractData<StructureData, ImmutableStructureData> implements StructureData {
 
@@ -108,8 +108,8 @@ public final class SpongeStructureData extends AbstractData<StructureData, Immut
     }
 
     @Override
-    public Value<String> author() {
-        return new SpongeValue<>(Keys.STRUCTURE_AUTHOR, DataConstants.DEFAULT_STRUCTURE_AUTHOR, this.author);
+    public Value.Mutable<String> author() {
+        return new SpongeMutableValue<>(Keys.STRUCTURE_AUTHOR, this.author);
     }
 
     private String getAuthor() {
@@ -121,8 +121,8 @@ public final class SpongeStructureData extends AbstractData<StructureData, Immut
     }
 
     @Override
-    public Value<Boolean> ignoreEntities() {
-        return new SpongeValue<>(Keys.STRUCTURE_IGNORE_ENTITIES, DataConstants.DEFAULT_STRUCTURE_IGNORE_ENTITIES, this.ignoreEntities);
+    public Value.Mutable<Boolean> ignoreEntities() {
+        return new SpongeMutableValue<>(Keys.STRUCTURE_IGNORE_ENTITIES, this.ignoreEntities);
     }
 
     private boolean shouldIgnoreEntities() {
@@ -134,8 +134,8 @@ public final class SpongeStructureData extends AbstractData<StructureData, Immut
     }
 
     @Override
-    public Value<Float> integrity() {
-        return new SpongeValue<>(Keys.STRUCTURE_INTEGRITY, DataConstants.DEFAULT_STRUCTURE_INTEGRITY, this.integrity);
+    public Value.Mutable<Float> integrity() {
+        return new SpongeMutableValue<>(Keys.STRUCTURE_INTEGRITY, this.integrity);
     }
 
     private float getIntegrity() {
@@ -147,8 +147,8 @@ public final class SpongeStructureData extends AbstractData<StructureData, Immut
     }
 
     @Override
-    public Value<StructureMode> mode() {
-        return new SpongeValue<>(Keys.STRUCTURE_MODE, DataConstants.DEFAULT_STRUCTURE_MODE, this.mode);
+    public Value.Mutable<StructureMode> mode() {
+        return new SpongeMutableValue<>(Keys.STRUCTURE_MODE, this.mode);
     }
 
     private StructureMode getMode() {
@@ -160,8 +160,8 @@ public final class SpongeStructureData extends AbstractData<StructureData, Immut
     }
 
     @Override
-    public Value<Vector3i> position() {
-        return new SpongeValue<>(Keys.STRUCTURE_POSITION, Vector3i.ONE, this.position);
+    public Value.Mutable<Vector3i> position() {
+        return new SpongeMutableValue<>(Keys.STRUCTURE_POSITION, this.position);
     }
 
     private Vector3i getPosition() {
@@ -173,8 +173,8 @@ public final class SpongeStructureData extends AbstractData<StructureData, Immut
     }
 
     @Override
-    public Value<Boolean> powered() {
-        return new SpongeValue<>(Keys.STRUCTURE_POWERED, DataConstants.DEFAULT_STRUCTURE_POWERED, this.powered);
+    public Value.Mutable<Boolean> powered() {
+        return new SpongeMutableValue<>(Keys.STRUCTURE_POWERED, this.powered);
     }
 
     private boolean isPowered() {
@@ -186,8 +186,8 @@ public final class SpongeStructureData extends AbstractData<StructureData, Immut
     }
 
     @Override
-    public Value<Long> seed() {
-        return new SpongeValue<>(Keys.STRUCTURE_SEED, DataConstants.DEFAULT_STRUCTURE_SEED, this.seed);
+    public Value.Mutable<Long> seed() {
+        return new SpongeMutableValue<>(Keys.STRUCTURE_SEED, this.seed);
     }
 
     private long getSeed() {
@@ -199,8 +199,8 @@ public final class SpongeStructureData extends AbstractData<StructureData, Immut
     }
 
     @Override
-    public Value<Boolean> showAir() {
-        return new SpongeValue<>(Keys.STRUCTURE_SHOW_AIR, DataConstants.DEFAULT_STRUCTURE_SHOW_AIR, this.showAir);
+    public Value.Mutable<Boolean> showAir() {
+        return new SpongeMutableValue<>(Keys.STRUCTURE_SHOW_AIR, this.showAir);
     }
 
     private boolean shouldShowAir() {
@@ -212,8 +212,8 @@ public final class SpongeStructureData extends AbstractData<StructureData, Immut
     }
 
     @Override
-    public Value<Boolean> showBoundingBox() {
-        return new SpongeValue<>(Keys.STRUCTURE_SHOW_BOUNDING_BOX, DataConstants.DEFAULT_STRUCTURE_SHOW_BOUNDING_BOX, this.showBoundingBox);
+    public Value.Mutable<Boolean> showBoundingBox() {
+        return new SpongeMutableValue<>(Keys.STRUCTURE_SHOW_BOUNDING_BOX, this.showBoundingBox);
     }
 
     private boolean shouldShowBoundingBox() {
@@ -225,8 +225,8 @@ public final class SpongeStructureData extends AbstractData<StructureData, Immut
     }
 
     @Override
-    public Value<Vector3i> size() {
-        return new SpongeValue<>(Keys.STRUCTURE_SIZE, Vector3i.ONE, this.size);
+    public Value.Mutable<Vector3i> size() {
+        return new SpongeMutableValue<>(Keys.STRUCTURE_SIZE, this.size);
     }
 
     private Vector3i getSize() {

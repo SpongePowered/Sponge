@@ -32,8 +32,7 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.property.Property;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.interfaces.IMixinTrackable;
 
@@ -45,13 +44,13 @@ import java.util.Optional;
  * acceptable {@link BlockState}s can be created, manipulated, and applied
  * with the safety of using these instance checks of the {@link IMixinBlock}.
  * The advantage of this is that a simple cast from {@link Block} to a
- * particular {@link IMixinBlock} to take advantage of particular {@link Value}
+ * particular {@link IMixinBlock} to take advantage of particular {@link Value.Mutable}
  * types, are really simple to perform.
  *
  * <p>It is important to note that when using this level of implementation,
  * it is already guaranteed that a particular {@link IMixinBlock} is capable
  * of a particular type thanks to {@link Mixin}s. All that is needed to handle
- * a particular type of {@link Value} or {@link ImmutableDataManipulator} is a
+ * a particular type of {@link Value.Mutable} or {@link ImmutableDataManipulator} is a
  * simple cast. This is particularly useful for {@link BlockState}s as
  * they already know the type they need to focus on.</p>
  */
@@ -90,7 +89,7 @@ public interface IMixinBlock extends IMixinTrackable {
      * @param <E> The type of value, for type checking
      * @return The blockstate with the new value, if available and compatible
      */
-    <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends BaseValue<E>> key, E value);
+    <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends Value<E>> key, E value);
 
     /**
      * Again, another delegate method directly to the block, usually not all

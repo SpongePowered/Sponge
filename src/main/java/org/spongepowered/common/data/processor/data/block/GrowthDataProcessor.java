@@ -27,12 +27,12 @@ package org.spongepowered.common.data.processor.data.block;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableGrowthData;
 import org.spongepowered.api.data.manipulator.mutable.block.GrowthData;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeGrowthData;
 import org.spongepowered.common.data.processor.common.AbstractBlockOnlyDataProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 
-public class GrowthDataProcessor extends AbstractBlockOnlyDataProcessor<Integer, MutableBoundedValue<Integer>, GrowthData, ImmutableGrowthData> {
+public class GrowthDataProcessor extends AbstractBlockOnlyDataProcessor<Integer, GrowthData, ImmutableGrowthData> {
 
     public GrowthDataProcessor() {
         super(Keys.GROWTH_STAGE);
@@ -49,12 +49,11 @@ public class GrowthDataProcessor extends AbstractBlockOnlyDataProcessor<Integer,
     }
 
     @Override
-    protected MutableBoundedValue<Integer> constructValue(Integer actualValue) {
+    protected Value.Mutable<Integer> constructMutableValue(Integer actualValue) {
         return SpongeValueFactory.boundedBuilder(this.key)
-                .defaultValue(getDefaultValue())
                 .minimum(0)
                 .maximum(7)
-                .actualValue(actualValue)
+                .value(actualValue)
                 .build();
     }
 

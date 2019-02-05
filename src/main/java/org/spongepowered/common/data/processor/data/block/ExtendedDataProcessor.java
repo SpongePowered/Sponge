@@ -27,12 +27,12 @@ package org.spongepowered.common.data.processor.data.block;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableExtendedData;
 import org.spongepowered.api.data.manipulator.mutable.block.ExtendedData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeExtendedData;
 import org.spongepowered.common.data.processor.common.AbstractBlockOnlyDataProcessor;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 
-public class ExtendedDataProcessor extends AbstractBlockOnlyDataProcessor<Boolean, Value<Boolean>, ExtendedData, ImmutableExtendedData> {
+public class ExtendedDataProcessor extends AbstractBlockOnlyDataProcessor<Boolean, ExtendedData, ImmutableExtendedData> {
 
     public ExtendedDataProcessor() {
         super(Keys.EXTENDED);
@@ -49,8 +49,8 @@ public class ExtendedDataProcessor extends AbstractBlockOnlyDataProcessor<Boolea
     }
 
     @Override
-    protected Value<Boolean> constructValue(Boolean actualValue) {
-        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
+    protected Value.Mutable<Boolean> constructMutableValue(Boolean actualValue) {
+        return new SpongeMutableValue<>(this.key, actualValue);
     }
 
 }

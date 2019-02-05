@@ -29,13 +29,13 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableConnectedDirectionData;
 import org.spongepowered.api.data.manipulator.mutable.block.ConnectedDirectionData;
-import org.spongepowered.api.data.value.immutable.ImmutableSetValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.SetValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeConnectedDirectionData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeSetValue;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableSetValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
 
 import java.util.Set;
 
@@ -43,47 +43,47 @@ public class ImmutableSpongeConnectedDirectionData extends AbstractImmutableData
 
     private final ImmutableSet<Direction> directions;
 
-    private final ImmutableSetValue<Direction> directionsValue;
-    private final ImmutableValue<Boolean> northValue;
-    private final ImmutableValue<Boolean> southValue;
-    private final ImmutableValue<Boolean> eastValue;
-    private final ImmutableValue<Boolean> westValue;
+    private final SetValue.Immutable<Direction> directionsValue;
+    private final Value.Immutable<Boolean> northValue;
+    private final Value.Immutable<Boolean> southValue;
+    private final Value.Immutable<Boolean> eastValue;
+    private final Value.Immutable<Boolean> westValue;
 
     public ImmutableSpongeConnectedDirectionData(Set<Direction> directions) {
         super(ImmutableConnectedDirectionData.class);
         this.directions = ImmutableSet.copyOf(directions);
 
-        this.directionsValue = new ImmutableSpongeSetValue<>(Keys.CONNECTED_DIRECTIONS, this.directions);
-        this.northValue = ImmutableSpongeValue.cachedOf(Keys.CONNECTED_NORTH, false, this.directions.contains(Direction.NORTH));
-        this.southValue = ImmutableSpongeValue.cachedOf(Keys.CONNECTED_SOUTH, false, this.directions.contains(Direction.SOUTH));
-        this.eastValue = ImmutableSpongeValue.cachedOf(Keys.CONNECTED_EAST, false, this.directions.contains(Direction.EAST));
-        this.westValue = ImmutableSpongeValue.cachedOf(Keys.CONNECTED_WEST, false, this.directions.contains(Direction.WEST));
+        this.directionsValue = new SpongeImmutableSetValue<>(Keys.CONNECTED_DIRECTIONS, this.directions);
+        this.northValue = SpongeImmutableValue.cachedOf(Keys.CONNECTED_NORTH, this.directions.contains(Direction.NORTH));
+        this.southValue = SpongeImmutableValue.cachedOf(Keys.CONNECTED_SOUTH, this.directions.contains(Direction.SOUTH));
+        this.eastValue = SpongeImmutableValue.cachedOf(Keys.CONNECTED_EAST, this.directions.contains(Direction.EAST));
+        this.westValue = SpongeImmutableValue.cachedOf(Keys.CONNECTED_WEST, this.directions.contains(Direction.WEST));
 
         registerGetters();
     }
 
     @Override
-    public ImmutableSetValue<Direction> connectedDirections() {
+    public SetValue.Immutable<Direction> connectedDirections() {
         return this.directionsValue;
     }
 
     @Override
-    public ImmutableValue<Boolean> connectedNorth() {
+    public Value.Immutable<Boolean> connectedNorth() {
         return this.northValue;
     }
 
     @Override
-    public ImmutableValue<Boolean> connectedSouth() {
+    public Value.Immutable<Boolean> connectedSouth() {
         return this.southValue;
     }
 
     @Override
-    public ImmutableValue<Boolean> connectedEast() {
+    public Value.Immutable<Boolean> connectedEast() {
         return this.eastValue;
     }
 
     @Override
-    public ImmutableValue<Boolean> connectedWest() {
+    public Value.Immutable<Boolean> connectedWest() {
         return this.westValue;
     }
 

@@ -27,25 +27,24 @@ package org.spongepowered.common.data.processor.value.entity;
 import net.minecraft.entity.EntityAgeable;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.util.OptBool;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 
 import java.util.Optional;
 
-public class IsAdultValueProcessor extends AbstractSpongeValueProcessor<EntityAgeable, Boolean, Value<Boolean>> {
+public class IsAdultValueProcessor extends AbstractSpongeValueProcessor<EntityAgeable, Boolean> {
 
     public IsAdultValueProcessor() {
         super(EntityAgeable.class, Keys.IS_ADULT);
     }
 
     @Override
-    protected Value<Boolean> constructValue(Boolean actualValue) {
-        return new SpongeValue<>(Keys.IS_ADULT, true, actualValue);
+    protected Value.Mutable<Boolean> constructMutableValue(Boolean actualValue) {
+        return new SpongeMutableValue<>(Keys.IS_ADULT, actualValue);
     }
 
     @Override
@@ -60,8 +59,8 @@ public class IsAdultValueProcessor extends AbstractSpongeValueProcessor<EntityAg
     }
 
     @Override
-    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
-        return ImmutableSpongeValue.cachedOf(Keys.IS_ADULT, true, value);
+    protected Value.Immutable<Boolean> constructImmutableValue(Boolean value) {
+        return SpongeImmutableValue.cachedOf(Keys.IS_ADULT, value);
     }
 
     @Override

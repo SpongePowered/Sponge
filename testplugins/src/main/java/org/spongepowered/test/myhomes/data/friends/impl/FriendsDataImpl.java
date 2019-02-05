@@ -29,7 +29,7 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.manipulator.mutable.common.AbstractListData;
 import org.spongepowered.api.data.merge.MergeFunction;
-import org.spongepowered.api.data.value.mutable.ListValue;
+import org.spongepowered.api.data.value.ListValue;
 import org.spongepowered.test.myhomes.MyHomes;
 import org.spongepowered.test.myhomes.data.friends.FriendsData;
 import org.spongepowered.test.myhomes.data.friends.ImmutableFriendsData;
@@ -49,7 +49,7 @@ public class FriendsDataImpl extends AbstractListData<UUID, FriendsData, Immutab
     }
 
     @Override
-    public ListValue<UUID> friends() {
+    public ListValue.Mutable<UUID> friends() {
         return getListValue();
     }
 

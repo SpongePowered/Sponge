@@ -35,7 +35,7 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.common.data.util.DataQueries;
 
@@ -70,7 +70,7 @@ public class SpongeBlockStateBuilder extends AbstractDataBuilder<BlockState> imp
     }
 
     @Override
-    public <V> SpongeBlockStateBuilder add(Key<? extends BaseValue<V>> key, V value) {
+    public <V> SpongeBlockStateBuilder add(Key<? extends Value<V>> key, V value) {
         checkNotNull(key, "key");
         this.blockState = this.blockState.with(key, value).orElse(this.blockState);
         return this;

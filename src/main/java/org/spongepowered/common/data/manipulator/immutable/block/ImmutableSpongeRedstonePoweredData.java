@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.immutable.block;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableRedstonePoweredData;
 import org.spongepowered.api.data.manipulator.mutable.block.RedstonePoweredData;
-import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableIntData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeRedstonePoweredData;
 
@@ -47,7 +47,7 @@ public class ImmutableSpongeRedstonePoweredData extends AbstractImmutableIntData
     }
 
     @Override
-    public ImmutableBoundedValue<Integer> power() {
+    public BoundedValue.Immutable<Integer> power() {
         return getValueGetter();
     }
 

@@ -30,8 +30,7 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.property.Property;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.fluid.FluidStack;
 import org.spongepowered.api.fluid.FluidStackSnapshot;
 import org.spongepowered.api.fluid.FluidType;
@@ -118,17 +117,17 @@ public class SpongeFluidStackSnapshot implements FluidStackSnapshot {
     }
 
     @Override
-    public <E> Optional<FluidStackSnapshot> transform(Key<? extends BaseValue<E>> key, Function<E, E> function) {
+    public <E> Optional<FluidStackSnapshot> transform(Key<? extends Value<E>> key, Function<E, E> function) {
         return Optional.empty();
     }
 
     @Override
-    public <E> Optional<FluidStackSnapshot> with(Key<? extends BaseValue<E>> key, E value) {
+    public <E> Optional<FluidStackSnapshot> with(Key<? extends Value<E>> key, E value) {
         return Optional.empty();
     }
 
     @Override
-    public Optional<FluidStackSnapshot> with(BaseValue<?> value) {
+    public Optional<FluidStackSnapshot> with(Value<?> value) {
         return Optional.empty();
     }
 
@@ -183,12 +182,12 @@ public class SpongeFluidStackSnapshot implements FluidStackSnapshot {
     }
 
     @Override
-    public <E> Optional<E> get(Key<? extends BaseValue<E>> key) {
+    public <E> Optional<E> get(Key<? extends Value<E>> key) {
         return Optional.empty();
     }
 
     @Override
-    public <E, V extends BaseValue<E>> Optional<V> getValue(Key<V> key) {
+    public <E, V extends Value<E>> Optional<V> getValue(Key<V> key) {
         return Optional.empty();
     }
 
@@ -208,7 +207,7 @@ public class SpongeFluidStackSnapshot implements FluidStackSnapshot {
     }
 
     @Override
-    public Set<ImmutableValue<?>> getValues() {
+    public Set<Value.Immutable<?>> getValues() {
         return Collections.emptySet();
     }
 

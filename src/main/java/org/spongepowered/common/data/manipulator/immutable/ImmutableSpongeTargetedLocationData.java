@@ -28,23 +28,23 @@ import com.flowpowered.math.vector.Vector3d;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableTargetedLocationData;
 import org.spongepowered.api.data.manipulator.mutable.TargetedLocationData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeTargetedLocationData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
 
 public final class ImmutableSpongeTargetedLocationData extends AbstractImmutableSingleData<Vector3d, ImmutableTargetedLocationData, TargetedLocationData>
         implements ImmutableTargetedLocationData {
 
-    private final ImmutableValue<Vector3d> immutableValue;
+    private final Value.Immutable<Vector3d> immutableValue;
 
     public ImmutableSpongeTargetedLocationData(Vector3d value) {
         super(ImmutableTargetedLocationData.class, value, Keys.TARGETED_LOCATION);
-        this.immutableValue = new ImmutableSpongeValue<>(this.usedKey, this.value);
+        this.immutableValue = new SpongeImmutableValue<>(this.usedKey, this.value);
     }
 
     @Override
-    protected ImmutableValue<Vector3d> getValueGetter() {
+    protected Value.Immutable<Vector3d> getValueGetter() {
         return this.target();
     }
 
@@ -54,7 +54,7 @@ public final class ImmutableSpongeTargetedLocationData extends AbstractImmutable
     }
 
     @Override
-    public ImmutableValue<Vector3d> target() {
+    public Value.Immutable<Vector3d> target() {
         return this.immutableValue;
     }
 

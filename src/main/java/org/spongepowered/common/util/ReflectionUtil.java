@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.commons.lang3.ClassUtils.isAssignable;
 
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 
@@ -42,7 +42,7 @@ import java.util.List;
 /**
  * A handy utility for doing some neat things with generics and reflection.
  * This is primarily used for {@link ImmutableDataCachingUtil} to create
- * {@link ImmutableDataManipulator}s and {@link ImmutableValue}s for caching.
+ * {@link ImmutableDataManipulator}s and {@link Value.Immutable}s for caching.
  *
  * <p>Note that this utility is not at all safe to create complex objects
  * that require pre-processing, it's always simpler to just call the

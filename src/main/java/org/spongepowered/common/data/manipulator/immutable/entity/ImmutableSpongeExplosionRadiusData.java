@@ -27,10 +27,10 @@ package org.spongepowered.common.data.manipulator.immutable.entity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableExplosionRadiusData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ExplosionRadiusData;
-import org.spongepowered.api.data.value.immutable.ImmutableOptionalValue;
+import org.spongepowered.api.data.value.OptionalValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExplosionRadiusData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeOptionalValue;
+import org.spongepowered.common.data.value.SpongeImmutableOptionalValue;
 
 import java.util.Optional;
 
@@ -38,15 +38,15 @@ public class ImmutableSpongeExplosionRadiusData
         extends AbstractImmutableSingleData<Optional<Integer>, ImmutableExplosionRadiusData, ExplosionRadiusData>
         implements ImmutableExplosionRadiusData {
 
-    private final ImmutableOptionalValue<Integer> value;
+    private final OptionalValue.Immutable<Integer> value;
 
     public ImmutableSpongeExplosionRadiusData(Optional<Integer> explosionRadius) {
         super(ImmutableExplosionRadiusData.class, explosionRadius, Keys.EXPLOSION_RADIUS);
-        this.value = new ImmutableSpongeOptionalValue<>(Keys.EXPLOSION_RADIUS, explosionRadius);
+        this.value = new SpongeImmutableOptionalValue<>(Keys.EXPLOSION_RADIUS, explosionRadius);
     }
 
     @Override
-    protected ImmutableOptionalValue<Integer> getValueGetter() {
+    protected OptionalValue.Immutable<Integer> getValueGetter() {
         return explosionRadius();
     }
 
@@ -56,7 +56,7 @@ public class ImmutableSpongeExplosionRadiusData
     }
 
     @Override
-    public ImmutableOptionalValue<Integer> explosionRadius() {
+    public OptionalValue.Immutable<Integer> explosionRadius() {
         return this.value;
     }
 

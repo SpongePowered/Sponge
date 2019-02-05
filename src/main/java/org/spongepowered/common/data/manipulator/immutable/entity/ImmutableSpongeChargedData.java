@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.immutable.entity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableChargedData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ChargedData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeChargedData;
 
@@ -38,7 +38,7 @@ public class ImmutableSpongeChargedData extends AbstractImmutableBooleanData<Imm
     }
 
     @Override
-    public ImmutableValue<Boolean> charged() {
+    public Value.Immutable<Boolean> charged() {
         return getValueGetter();
     }
 

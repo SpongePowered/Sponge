@@ -22,5 +22,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-@org.spongepowered.api.util.annotation.NonnullByDefault
-package org.spongepowered.common.data.value.immutable;
+package org.spongepowered.common.data.value;
+
+import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.data.value.WeightedCollectionValue;
+import org.spongepowered.api.util.weighted.TableEntry;
+import org.spongepowered.api.util.weighted.WeightedTable;
+
+import java.util.List;
+import java.util.Random;
+
+public class SpongeImmutableWeightedCollectionValue<E> extends SpongeCollectionValue.Immutable<TableEntry<E>, WeightedTable<E>,
+        WeightedCollectionValue.Immutable<E>, WeightedCollectionValue.Mutable<E>> implements WeightedCollectionValue.Immutable<E> {
+
+    public SpongeImmutableWeightedCollectionValue(Key<? extends Value<WeightedTable<E>>> key, WeightedTable<E> value) {
+        super(key, value);
+    }
+
+    @Override
+    protected WeightedCollectionValue.Immutable<E> withValue(WeightedTable<E> value) {
+        return new SpongeImmutableWeightedCollectionValue<>(this.key, value);
+    }
+
+    @Override
+    public List<E> get(Random random) {
+        return this.value.get(random);
+    }
+
+    @Override
+    public WeightedCollectionValue.Mutable<E> asMutable() {
+        return new SpongeMutableWeightedCollectionValue<>(this.key, get());
+    }
+}

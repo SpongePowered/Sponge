@@ -31,13 +31,13 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableConnectedDirectionData;
 import org.spongepowered.api.data.manipulator.mutable.block.ConnectedDirectionData;
-import org.spongepowered.api.data.value.mutable.SetValue;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.SetValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeConnectedDirectionData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
-import org.spongepowered.common.data.value.mutable.SpongeSetValue;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeMutableSetValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 
 import java.util.Set;
 
@@ -57,28 +57,28 @@ public class SpongeConnectedDirectionData extends AbstractData<ConnectedDirectio
     }
 
     @Override
-    public SetValue<Direction> connectedDirections() {
-        return new SpongeSetValue<>(Keys.CONNECTED_DIRECTIONS, this.connectedDirections);
+    public SetValue.Mutable<Direction> connectedDirections() {
+        return new SpongeMutableSetValue<>(Keys.CONNECTED_DIRECTIONS, this.connectedDirections);
     }
 
     @Override
-    public Value<Boolean> connectedNorth() {
-        return new SpongeValue<>(Keys.CONNECTED_NORTH, this.connectedDirections.contains(Direction.NORTH));
+    public Value.Mutable<Boolean> connectedNorth() {
+        return new SpongeMutableValue<>(Keys.CONNECTED_NORTH, this.connectedDirections.contains(Direction.NORTH));
     }
 
     @Override
-    public Value<Boolean> connectedSouth() {
-        return new SpongeValue<>(Keys.CONNECTED_SOUTH, this.connectedDirections.contains(Direction.SOUTH));
+    public Value.Mutable<Boolean> connectedSouth() {
+        return new SpongeMutableValue<>(Keys.CONNECTED_SOUTH, this.connectedDirections.contains(Direction.SOUTH));
     }
 
     @Override
-    public Value<Boolean> connectedEast() {
-        return new SpongeValue<>(Keys.CONNECTED_EAST, this.connectedDirections.contains(Direction.EAST));
+    public Value.Mutable<Boolean> connectedEast() {
+        return new SpongeMutableValue<>(Keys.CONNECTED_EAST, this.connectedDirections.contains(Direction.EAST));
     }
 
     @Override
-    public Value<Boolean> connectedWest() {
-        return new SpongeValue<>(Keys.CONNECTED_WEST, this.connectedDirections.contains(Direction.WEST));
+    public Value.Mutable<Boolean> connectedWest() {
+        return new SpongeMutableValue<>(Keys.CONNECTED_WEST, this.connectedDirections.contains(Direction.WEST));
     }
 
     @Override

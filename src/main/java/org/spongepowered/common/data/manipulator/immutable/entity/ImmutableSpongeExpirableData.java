@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.immutable.entity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableExpirableData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ExpirableData;
-import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableIntData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExpirableData;
 import org.spongepowered.common.data.value.SpongeValueFactory;
@@ -40,12 +40,12 @@ public class ImmutableSpongeExpirableData extends AbstractImmutableIntData<Immut
     }
 
     @Override
-    public ImmutableBoundedValue<Integer> expireTicks() {
+    public BoundedValue.Immutable<Integer> expireTicks() {
         return SpongeValueFactory.boundedBuilder(Keys.EXPIRATION_TICKS)
             .minimum(0)
             .maximum(this.upperBound)
             .defaultValue(this.defaultValue)
-            .actualValue(this.value)
+            .value(this.value)
             .build()
             .asImmutable();
     }

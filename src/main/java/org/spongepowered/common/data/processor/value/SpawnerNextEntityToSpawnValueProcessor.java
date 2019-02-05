@@ -26,30 +26,28 @@ package org.spongepowered.common.data.processor.value;
 
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.util.weighted.WeightedSerializableObject;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.processor.common.SpawnerUtils;
-import org.spongepowered.common.data.util.DataConstants;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 import org.spongepowered.common.interfaces.IMixinMobSpawner;
 
 import java.util.Optional;
 
 public class SpawnerNextEntityToSpawnValueProcessor extends AbstractSpongeValueProcessor<IMixinMobSpawner,
-        WeightedSerializableObject<EntityArchetype>, Value<WeightedSerializableObject<EntityArchetype>>> {
+        WeightedSerializableObject<EntityArchetype>> {
 
     public SpawnerNextEntityToSpawnValueProcessor() {
         super(IMixinMobSpawner.class, Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN);
     }
 
     @Override
-    protected Value<WeightedSerializableObject<EntityArchetype>> constructValue(WeightedSerializableObject<EntityArchetype> actualValue) {
-        return new SpongeValue<>(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN,
-                DataConstants.DEFAULT_SPAWNER_NEXT_ENTITY_TO_SPAWN, actualValue);
+    protected Value.Mutable<WeightedSerializableObject<EntityArchetype>> constructMutableValue(WeightedSerializableObject<EntityArchetype> actualValue) {
+        return new SpongeMutableValue<>(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN,
+                actualValue);
     }
 
     @Override
@@ -64,8 +62,8 @@ public class SpawnerNextEntityToSpawnValueProcessor extends AbstractSpongeValueP
     }
 
     @Override
-    protected ImmutableValue<WeightedSerializableObject<EntityArchetype>> constructImmutableValue(WeightedSerializableObject<EntityArchetype> value) {
-        return constructValue(value).asImmutable();
+    protected Value.Immutable<WeightedSerializableObject<EntityArchetype>> constructImmutableValue(WeightedSerializableObject<EntityArchetype> value) {
+        return constructMutableValue(value).asImmutable();
     }
 
     @Override

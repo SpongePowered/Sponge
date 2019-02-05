@@ -27,9 +27,9 @@ package org.spongepowered.common.data.datasync.entity;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
 
 import java.util.List;
 import java.util.Optional;
@@ -60,28 +60,28 @@ public class EntityFlagsConverter extends DataParameterConverter<Byte> {
         final DataTransactionResult.Builder builder = DataTransactionResult.builder();
         boolean changed = false;
         if (isSneaking != newIsSneaking) {
-            builder.replace(ImmutableSpongeValue.cachedOf(Keys.IS_SNEAKING, false, isSneaking));
-            builder.success(ImmutableSpongeValue.cachedOf(Keys.IS_SNEAKING, false, newIsSneaking));
+            builder.replace(SpongeImmutableValue.cachedOf(Keys.IS_SNEAKING, isSneaking));
+            builder.success(SpongeImmutableValue.cachedOf(Keys.IS_SNEAKING, newIsSneaking));
             changed = true;
         }
         if (sprinting != newSprinting) {
-            builder.replace(ImmutableSpongeValue.cachedOf(Keys.IS_SPRINTING, false, sprinting));
-            builder.success(ImmutableSpongeValue.cachedOf(Keys.IS_SPRINTING, false, newSprinting));
+            builder.replace(SpongeImmutableValue.cachedOf(Keys.IS_SPRINTING, sprinting));
+            builder.success(SpongeImmutableValue.cachedOf(Keys.IS_SPRINTING, newSprinting));
             changed = true;
         }
         if (invisible != newInvisible) {
-            builder.replace(ImmutableSpongeValue.cachedOf(Keys.INVISIBLE, false, invisible));
-            builder.success(ImmutableSpongeValue.cachedOf(Keys.INVISIBLE, false, newInvisible));
+            builder.replace(SpongeImmutableValue.cachedOf(Keys.INVISIBLE, invisible));
+            builder.success(SpongeImmutableValue.cachedOf(Keys.INVISIBLE, newInvisible));
             changed = true;
         }
         if (glowing != newGlowing) {
-            builder.replace(ImmutableSpongeValue.cachedOf(Keys.GLOWING, false, glowing));
-            builder.success(ImmutableSpongeValue.cachedOf(Keys.GLOWING, false, newGlowing));
+            builder.replace(SpongeImmutableValue.cachedOf(Keys.GLOWING, glowing));
+            builder.success(SpongeImmutableValue.cachedOf(Keys.GLOWING, newGlowing));
             changed = true;
         }
         if (elytra != newElytra) {
-            builder.replace(ImmutableSpongeValue.cachedOf(Keys.IS_ELYTRA_FLYING, false, elytra));
-            builder.success(ImmutableSpongeValue.cachedOf(Keys.IS_ELYTRA_FLYING, false, newElytra));
+            builder.replace(SpongeImmutableValue.cachedOf(Keys.IS_ELYTRA_FLYING, elytra));
+            builder.success(SpongeImmutableValue.cachedOf(Keys.IS_ELYTRA_FLYING, newElytra));
             changed = true;
         }
         builder.result(DataTransactionResult.Type.SUCCESS);
@@ -89,7 +89,7 @@ public class EntityFlagsConverter extends DataParameterConverter<Byte> {
     }
 
     @Override
-    public Byte getValueFromEvent(Byte originalValue, List<ImmutableValue<?>> immutableValues) {
+    public Byte getValueFromEvent(Byte originalValue, List<Value.Immutable<?>> immutableValues) {
         if (immutableValues.isEmpty()) {
             // Short circuit when there are no changes.
             return originalValue;
@@ -100,7 +100,7 @@ public class EntityFlagsConverter extends DataParameterConverter<Byte> {
         boolean newInvisible = getFlag(originalValue, INVISIBLE_MASK);
         boolean newGlowing = getFlag(originalValue, GLOWING_MASK);
         boolean newElytra = getFlag(originalValue, FLYING_ELYTRA_MASK);
-        for (ImmutableValue<?> immutableValue : immutableValues) {
+        for (Value.Immutable<?> immutableValue : immutableValues) {
             if (immutableValue.getKey() == Keys.IS_SNEAKING) {
                 newIsSneaking = ((Boolean) immutableValue.get());
             }

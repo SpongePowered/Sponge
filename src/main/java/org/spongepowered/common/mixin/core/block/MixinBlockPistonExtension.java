@@ -35,7 +35,7 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDirectionalData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutablePistonData;
 import org.spongepowered.api.data.type.PistonType;
-import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
@@ -72,7 +72,7 @@ public abstract class MixinBlockPistonExtension extends MixinBlock {
     }
 
     @Override
-    public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends BaseValue<E>> key, E value) {
+    public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends Value<E>> key, E value) {
         if (key.equals(Keys.PISTON_TYPE)) {
             final BlockPistonExtension.EnumPistonType pistonType = (BlockPistonExtension.EnumPistonType) value;
             return Optional.of((BlockState) blockState.withProperty(BlockPistonExtension.TYPE, pistonType));

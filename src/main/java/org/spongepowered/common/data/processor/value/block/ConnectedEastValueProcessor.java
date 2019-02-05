@@ -27,24 +27,23 @@ package org.spongepowered.common.data.processor.value.block;
 import net.minecraft.tileentity.TileEntityChest;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 
 import java.util.Optional;
 
 public class ConnectedEastValueProcessor extends
-        AbstractSpongeValueProcessor<TileEntityChest, Boolean, Value<Boolean>> {
+        AbstractSpongeValueProcessor<TileEntityChest, Boolean> {
 
     public ConnectedEastValueProcessor() {
         super(TileEntityChest.class, Keys.CONNECTED_EAST);
     }
 
     @Override
-    protected Value<Boolean> constructValue(Boolean defaultValue) {
-        return new SpongeValue<>(Keys.CONNECTED_EAST, false, defaultValue);
+    protected Value.Mutable<Boolean> constructMutableValue(Boolean defaultValue) {
+        return new SpongeMutableValue<>(Keys.CONNECTED_EAST, defaultValue);
     }
 
     @Override
@@ -59,8 +58,8 @@ public class ConnectedEastValueProcessor extends
     }
 
     @Override
-    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
-        return constructValue(value).asImmutable();
+    protected Value.Immutable<Boolean> constructImmutableValue(Boolean value) {
+        return constructMutableValue(value).asImmutable();
     }
 
     @Override

@@ -28,21 +28,20 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableActiveItemData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ActiveItemData;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeActiveItemData;
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
 
 import java.util.Optional;
 
 public class ActiveItemDataProcessor extends AbstractSingleDataSingleTargetProcessor<Living, ItemStackSnapshot,
-        Value<ItemStackSnapshot>, ActiveItemData, ImmutableActiveItemData> {
+        ActiveItemData, ImmutableActiveItemData> {
 
     public ActiveItemDataProcessor() {
         super(Keys.ACTIVE_ITEM, Living.class);
@@ -63,13 +62,13 @@ public class ActiveItemDataProcessor extends AbstractSingleDataSingleTargetProce
     }
 
     @Override
-    protected ImmutableValue<ItemStackSnapshot> constructImmutableValue(ItemStackSnapshot value) {
-        return new ImmutableSpongeValue<>(Keys.ACTIVE_ITEM, value);
+    protected Value.Immutable<ItemStackSnapshot> constructImmutableValue(ItemStackSnapshot value) {
+        return new SpongeImmutableValue<>(Keys.ACTIVE_ITEM, value);
     }
 
     @Override
-    protected Value<ItemStackSnapshot> constructValue(ItemStackSnapshot actualValue) {
-        return new SpongeValue<>(Keys.ACTIVE_ITEM, actualValue);
+    protected Value.Mutable<ItemStackSnapshot> constructMutableValue(ItemStackSnapshot actualValue) {
+        return new SpongeMutableValue<>(Keys.ACTIVE_ITEM, actualValue);
     }
 
     @Override

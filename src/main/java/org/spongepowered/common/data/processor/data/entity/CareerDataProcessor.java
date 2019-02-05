@@ -30,20 +30,18 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableCareerData;
 import org.spongepowered.api.data.manipulator.mutable.entity.CareerData;
 import org.spongepowered.api.data.type.Career;
-import org.spongepowered.api.data.type.Careers;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeCareerData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 import org.spongepowered.common.interfaces.entity.IMixinVillager;
 
 import java.util.Optional;
 
 public class CareerDataProcessor
-        extends AbstractEntitySingleDataProcessor<EntityVillager, Career, Value<Career>, CareerData, ImmutableCareerData> {
+        extends AbstractEntitySingleDataProcessor<EntityVillager, Career, CareerData, ImmutableCareerData> {
 
     public CareerDataProcessor() {
         super(EntityVillager.class, Keys.CAREER);
@@ -66,13 +64,13 @@ public class CareerDataProcessor
     }
 
     @Override
-    protected ImmutableValue<Career> constructImmutableValue(Career value) {
-        return ImmutableSpongeValue.cachedOf(Keys.CAREER, Careers.FARMER, value);
+    protected Value.Immutable<Career> constructImmutableValue(Career value) {
+        return SpongeImmutableValue.cachedOf(Keys.CAREER, value);
     }
 
     @Override
-    protected Value<Career> constructValue(Career actualValue) {
-        return new SpongeValue<>(Keys.CAREER, Careers.FARMER, actualValue);
+    protected Value.Mutable<Career> constructMutableValue(Career actualValue) {
+        return new SpongeMutableValue<>(Keys.CAREER, actualValue);
     }
 
     @Override

@@ -37,7 +37,7 @@ import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.ExpirableData;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.weather.Lightning;
 import org.spongepowered.api.event.CauseStackManager;
@@ -55,7 +55,6 @@ import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExpirableData;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLightningBolt;
-import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.List;
@@ -172,12 +171,12 @@ public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect 
     }
 
     @Override
-    public MutableBoundedValue<Integer> expireTicks() {
+    public BoundedValue.Mutable<Integer> expireTicks() {
         return SpongeValueFactory.boundedBuilder(Keys.EXPIRATION_TICKS)
                 .minimum((int) Short.MIN_VALUE)
                 .maximum(2)
                 .defaultValue(2)
-                .actualValue(this.lightningState)
+                .value(this.lightningState)
                 .build();
     }
 

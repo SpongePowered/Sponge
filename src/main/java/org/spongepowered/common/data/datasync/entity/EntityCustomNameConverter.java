@@ -27,10 +27,10 @@ package org.spongepowered.common.data.datasync.entity;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.List;
@@ -48,15 +48,15 @@ public class EntityCustomNameConverter extends DataParameterConverter<String> {
         Text newValue = SpongeTexts.fromLegacy(value);
 
         return Optional.of(DataTransactionResult.builder()
-            .replace(new ImmutableSpongeValue<>(Keys.DISPLAY_NAME, Text.empty(), currentText))
-            .success(new ImmutableSpongeValue<>(Keys.DISPLAY_NAME, Text.empty(), newValue))
+            .replace(new SpongeImmutableValue<>(Keys.DISPLAY_NAME, currentText))
+            .success(new SpongeImmutableValue<>(Keys.DISPLAY_NAME, newValue))
             .result(DataTransactionResult.Type.SUCCESS)
             .build());
     }
 
     @Override
-    public String getValueFromEvent(String originalValue, List<ImmutableValue<?>> immutableValues) {
-        for (ImmutableValue<?> value : immutableValues) {
+    public String getValueFromEvent(String originalValue, List<Value.Immutable<?>> immutableValues) {
+        for (Value.Immutable<?> value : immutableValues) {
             if (value.getKey() == Keys.DISPLAY_NAME) {
                 try {
                     return SpongeTexts.toLegacy((Text) value.get());

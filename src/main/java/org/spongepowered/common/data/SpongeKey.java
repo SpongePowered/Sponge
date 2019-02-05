@@ -31,7 +31,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.event.EventListener;
 import org.spongepowered.api.event.data.ChangeDataHolderEvent;
 import org.spongepowered.api.plugin.PluginContainer;
@@ -44,7 +44,7 @@ import java.util.Objects;
 
 import javax.annotation.Nullable;
 
-public final class SpongeKey<V extends BaseValue<?>> implements Key<V> {
+public final class SpongeKey<V extends Value<?>> implements Key<V> {
 
     private final TypeToken<V> valueToken;
     private final CatalogKey key;
@@ -53,11 +53,13 @@ public final class SpongeKey<V extends BaseValue<?>> implements Key<V> {
     private final TypeToken<?> elementToken;
     @Nullable private List<KeyBasedDataListener<?>> listeners;
 
+    @Nullable private SpongeKey<?> unwrappedOptionalKey;
+
     SpongeKey(CatalogKey key, Translation name, TypeToken<V> valueToken, DataQuery query) {
         this.valueToken = valueToken;
         this.name = name;
         this.query = query;
-        this.elementToken = valueToken.resolveType(BaseValue.class.getTypeParameters()[0]);
+        this.elementToken = valueToken.resolveType(Value.class.getTypeParameters()[0]);
         this.key = key;
     }
 
@@ -140,5 +142,10 @@ public final class SpongeKey<V extends BaseValue<?>> implements Key<V> {
             .add("elementToken", this.elementToken)
             .add("query", this.query)
             .toString();
+    }
+
+    @Nullable
+    public SpongeKey<?> getUnwrappedOptionalKey() {
+        return this.unwrappedOptionalKey;
     }
 }

@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.mutable;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableFireworkRocketData;
 import org.spongepowered.api.data.manipulator.mutable.FireworkRocketData;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeFireworkRocketData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBoundedComparableData;
 import org.spongepowered.common.data.util.ComparatorUtil;
@@ -47,7 +47,7 @@ public class SpongeFireworkRocketData extends AbstractBoundedComparableData<Inte
     }
 
     @Override
-    public MutableBoundedValue<Integer> flightModifier() {
+    public BoundedValue.Mutable<Integer> flightModifier() {
         return getValueGetter();
     }
 }

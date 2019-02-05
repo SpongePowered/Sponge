@@ -27,40 +27,38 @@ package org.spongepowered.common.data.processor.value.entity;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 
 import java.util.Optional;
 
-public class InvulnerableValueProcessor extends AbstractSpongeValueProcessor<Entity, Boolean, Value<Boolean>> {
+public class InvulnerableValueProcessor extends AbstractSpongeValueProcessor<Entity, Boolean> {
 
     public InvulnerableValueProcessor() {
         super(Entity.class, Keys.INVULNERABLE);
     }
 
     @Override
-    protected Value<Boolean> constructValue(Boolean actualValue) {
-        return new SpongeValue<>(Keys.INVULNERABLE, false, actualValue);
+    protected Value.Mutable<Boolean> constructMutableValue(Boolean actualValue) {
+        return new SpongeMutableValue<>(Keys.INVULNERABLE, actualValue);
     }
 
     @Override
     protected boolean set(Entity container, Boolean value) {
-        ((IMixinEntity) container).setInvulnerable(value);
+        container.setInvulnerable(value);
         return true;
     }
 
     @Override
     protected Optional<Boolean> getVal(Entity container) {
-        return Optional.of(container.getIsInvulnerable());
+        return Optional.of(container.isInvulnerable());
     }
 
     @Override
-    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
-        return constructValue(value).asImmutable();
+    protected Value.Immutable<Boolean> constructImmutableValue(Boolean value) {
+        return constructMutableValue(value).asImmutable();
     }
 
     @Override

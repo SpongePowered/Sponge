@@ -30,21 +30,19 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableRabbitData;
 import org.spongepowered.api.data.manipulator.mutable.entity.RabbitData;
 import org.spongepowered.api.data.type.RabbitType;
-import org.spongepowered.api.data.type.RabbitTypes;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeRabbitData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 import org.spongepowered.common.entity.SpongeRabbitType;
 import org.spongepowered.common.registry.type.entity.RabbitTypeRegistryModule;
 
 import java.util.Optional;
 
 public class RabbitDataProcessor
-        extends AbstractEntitySingleDataProcessor<EntityRabbit, RabbitType, Value<RabbitType>, RabbitData, ImmutableRabbitData> {
+        extends AbstractEntitySingleDataProcessor<EntityRabbit, RabbitType, RabbitData, ImmutableRabbitData> {
 
     public RabbitDataProcessor() {
         super(EntityRabbit.class, Keys.RABBIT_TYPE);
@@ -70,13 +68,13 @@ public class RabbitDataProcessor
     }
 
     @Override
-    protected Value<RabbitType> constructValue(RabbitType actualValue) {
-        return new SpongeValue<>(this.key, RabbitTypes.BROWN, actualValue);
+    protected Value.Mutable<RabbitType> constructMutableValue(RabbitType actualValue) {
+        return new SpongeMutableValue<>(this.key, actualValue);
     }
 
     @Override
-    protected ImmutableValue<RabbitType> constructImmutableValue(RabbitType value) {
-        return ImmutableSpongeValue.cachedOf(this.key, RabbitTypes.BROWN, value);
+    protected Value.Immutable<RabbitType> constructImmutableValue(RabbitType value) {
+        return SpongeImmutableValue.cachedOf(this.key, value);
     }
 
     @Override

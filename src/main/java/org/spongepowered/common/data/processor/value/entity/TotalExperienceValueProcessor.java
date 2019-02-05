@@ -27,9 +27,9 @@ package org.spongepowered.common.data.processor.value.entity;
 import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.processor.common.ExperienceHolderUtils;
 import org.spongepowered.common.data.value.SpongeValueFactory;
@@ -37,7 +37,7 @@ import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 
 import java.util.Optional;
 
-public class TotalExperienceValueProcessor extends AbstractSpongeValueProcessor<EntityPlayer, Integer, MutableBoundedValue<Integer>> {
+public class TotalExperienceValueProcessor extends AbstractSpongeValueProcessor<EntityPlayer, Integer> {
 
     public TotalExperienceValueProcessor() {
         super(EntityPlayer.class, Keys.TOTAL_EXPERIENCE);
@@ -49,12 +49,11 @@ public class TotalExperienceValueProcessor extends AbstractSpongeValueProcessor<
     }
 
     @Override
-    public MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
+    public BoundedValue.Mutable<Integer> constructMutableValue(Integer defaultValue) {
         return SpongeValueFactory.boundedBuilder(Keys.TOTAL_EXPERIENCE)
-            .defaultValue(0)
             .minimum(0)
             .maximum(Integer.MAX_VALUE)
-            .actualValue(defaultValue)
+            .value(defaultValue)
             .build();
     }
 
@@ -97,8 +96,8 @@ public class TotalExperienceValueProcessor extends AbstractSpongeValueProcessor<
     }
 
     @Override
-    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
-        return constructValue(value).asImmutable();
+    protected Value.Immutable<Integer> constructImmutableValue(Integer value) {
+        return constructMutableValue(value).asImmutable();
     }
 
 }

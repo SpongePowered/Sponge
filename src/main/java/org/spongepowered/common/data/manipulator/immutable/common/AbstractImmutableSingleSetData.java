@@ -30,9 +30,9 @@ import com.google.common.collect.ImmutableSet;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.immutable.ImmutableSetValue;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeSetValue;
+import org.spongepowered.api.data.value.SetValue;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.common.data.value.SpongeImmutableSetValue;
 import org.spongepowered.common.util.ReflectionUtil;
 
 import java.lang.reflect.Modifier;
@@ -42,20 +42,20 @@ public abstract class AbstractImmutableSingleSetData<E, I extends ImmutableDataM
     extends AbstractImmutableSingleData<Set<E>, I, M> {
 
     private final Class<? extends M> mutableClass;
-    private final ImmutableSetValue<E> setValue;
+    private final SetValue.Immutable<E> setValue;
 
     public AbstractImmutableSingleSetData(Class<I> manipulatorClass, Set<E> value,
-                                          Key<? extends BaseValue<Set<E>>> usedKey,
+                                          Key<? extends Value<Set<E>>> usedKey,
                                           Class<? extends M> mutableClass) {
         super(manipulatorClass, ImmutableSet.copyOf(value), usedKey);
         checkArgument(!Modifier.isAbstract(mutableClass.getModifiers()), "The immutable class cannot be abstract!");
         checkArgument(!Modifier.isInterface(mutableClass.getModifiers()), "The immutable class cannot be an interface!");
         this.mutableClass = mutableClass;
-        this.setValue = new ImmutableSpongeSetValue<>(this.usedKey, ImmutableSet.copyOf(this.value));
+        this.setValue = new SpongeImmutableSetValue<>(this.usedKey, ImmutableSet.copyOf(this.value));
     }
 
     @Override
-    protected ImmutableSetValue<E> getValueGetter() {
+    protected SetValue.Immutable<E> getValueGetter() {
         return this.setValue;
     }
 

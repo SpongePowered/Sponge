@@ -39,9 +39,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableDisplayNameData;
 import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
 import org.spongepowered.api.data.merge.MergeFunction;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
@@ -60,7 +58,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 // TODO Improve this processor
-public class DisplayNameDataProcessor extends AbstractSingleDataProcessor<Text, Value<Text>, DisplayNameData, ImmutableDisplayNameData> {
+public class DisplayNameDataProcessor extends AbstractSingleDataProcessor<Text, DisplayNameData, ImmutableDisplayNameData> {
 
     public DisplayNameDataProcessor() {
         super(Keys.DISPLAY_NAME);
@@ -128,7 +126,7 @@ public class DisplayNameDataProcessor extends AbstractSingleDataProcessor<Text, 
             final Optional<DisplayNameData> old = from(holder);
             final DisplayNameData merged = checkNotNull(function).merge(old.orElse(null), manipulator);
             final Text newValue = merged.displayName().get();
-            final ImmutableValue<Text> immutableValue = merged.displayName().asImmutable();
+            final Value.Immutable<Text> immutableValue = merged.displayName().asImmutable();
             try {
                 ((IMixinEntity) holder).setDisplayName(newValue);
                 if (old.isPresent()) {
@@ -144,7 +142,7 @@ public class DisplayNameDataProcessor extends AbstractSingleDataProcessor<Text, 
             final Optional<DisplayNameData> prevValue = from(holder);
             final DisplayNameData merged = checkNotNull(function).merge(prevValue.orElse(null), manipulator);
             final Text newValue = merged.displayName().get();
-            final ImmutableValue<Text> immutableValue = merged.displayName().asImmutable();
+            final Value.Immutable<Text> immutableValue = merged.displayName().asImmutable();
             ItemStack stack = (ItemStack) holder;
             if (stack.getItem() == Items.WRITTEN_BOOK) {
                 NbtDataUtil.getOrCreateCompound(stack).setString(NbtDataUtil.ITEM_BOOK_TITLE, SpongeTexts.toLegacy(newValue));
@@ -160,7 +158,7 @@ public class DisplayNameDataProcessor extends AbstractSingleDataProcessor<Text, 
     }
 
     @Override
-    public Optional<ImmutableDisplayNameData> with(Key<? extends BaseValue<?>> key, Object value, ImmutableDisplayNameData immutable) {
+    public Optional<ImmutableDisplayNameData> with(Key<? extends Value<?>> key, Object value, ImmutableDisplayNameData immutable) {
         if (key == this.key) {
             return Optional.of(new ImmutableSpongeDisplayNameData((Text) value));
         }

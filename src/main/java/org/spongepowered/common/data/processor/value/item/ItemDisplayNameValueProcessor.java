@@ -29,35 +29,34 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.Optional;
 
-public class ItemDisplayNameValueProcessor extends AbstractSpongeValueProcessor<ItemStack, Text, Value<Text>> {
+public class ItemDisplayNameValueProcessor extends AbstractSpongeValueProcessor<ItemStack, Text> {
 
     public ItemDisplayNameValueProcessor() {
         super(ItemStack.class, Keys.DISPLAY_NAME);
     }
 
     @Override
-    protected Value<Text> constructValue(Text defaultValue) {
-        return new SpongeValue<>(Keys.DISPLAY_NAME, Text.empty(), defaultValue);
+    protected Value.Mutable<Text> constructMutableValue(Text defaultValue) {
+        return new SpongeMutableValue<>(Keys.DISPLAY_NAME, defaultValue);
     }
 
     @Override
     protected boolean set(ItemStack container, Text value) {
         final String legacy = SpongeTexts.toLegacy(value);
         if (container.getItem() == Items.WRITTEN_BOOK) {
-            NbtDataUtil.getOrCreateCompound(container).setString(NbtDataUtil.ITEM_BOOK_TITLE, legacy);
+            NbtDataUtil.getOrCreateCompound(container).setString(NbtDataUtil.ITEM_BOOK_TITLE, SpongeTexts.toLegacy(value));
         } else {
             container.setStackDisplayName(legacy);
         }
@@ -83,8 +82,8 @@ public class ItemDisplayNameValueProcessor extends AbstractSpongeValueProcessor<
     }
 
     @Override
-    protected ImmutableValue<Text> constructImmutableValue(Text value) {
-        return new ImmutableSpongeValue<>(Keys.DISPLAY_NAME, Text.empty(), value);
+    protected Value.Immutable<Text> constructImmutableValue(Text value) {
+        return new SpongeImmutableValue<>(Keys.DISPLAY_NAME, value);
     }
 
     @Override
@@ -95,7 +94,7 @@ public class ItemDisplayNameValueProcessor extends AbstractSpongeValueProcessor<
             if (optional.isPresent()) {
                 try {
                     ((ItemStack) container).clearCustomName();
-                    return builder.replace(new ImmutableSpongeValue<>(Keys.DISPLAY_NAME, optional.get())).result(DataTransactionResult.Type.SUCCESS).build();
+                    return builder.replace(new SpongeImmutableValue<>(Keys.DISPLAY_NAME, optional.get())).result(DataTransactionResult.Type.SUCCESS).build();
                 } catch (Exception e) {
                     SpongeImpl.getLogger().error("There was an issue removing the displayname from an itemstack!", e);
                     return builder.result(DataTransactionResult.Type.ERROR).build();

@@ -39,7 +39,6 @@ import org.spongepowered.api.event.cause.entity.dismount.DismountType;
 import org.spongepowered.api.event.entity.IgniteEntityEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 import org.spongepowered.common.interfaces.IMixinChunk;
@@ -90,10 +89,10 @@ public interface IMixinEntity extends org.spongepowered.api.entity.Entity, IMixi
 
     default NBTTagCompound getSpongeData() {
         final NBTTagCompound data = this.getEntityData();
-        if (!data.hasKey(NbtDataUtil.SPONGE_DATA, NbtDataUtil.TAG_COMPOUND)) {
+        if (!data.hasKey(NbtDataUtil.SPONGE_DATA)) {
             data.setTag(NbtDataUtil.SPONGE_DATA, new NBTTagCompound());
         }
-        return data.getCompoundTag(NbtDataUtil.SPONGE_DATA);
+        return data.getCompound(NbtDataUtil.SPONGE_DATA);
     }
 
     default void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
@@ -159,8 +158,6 @@ public interface IMixinEntity extends org.spongepowered.api.entity.Entity, IMixi
     void setActiveChunk(IMixinChunk chunk);
 
     boolean shouldTick();
-
-    void setInvulnerable(boolean value);
 
     default void clearWrappedCaptureList() {
 

@@ -28,11 +28,11 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableArmorStandData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ArmorStandData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeArmorStandData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 
 public class SpongeArmorStandData extends AbstractData<ArmorStandData, ImmutableArmorStandData> implements ArmorStandData {
 
@@ -75,23 +75,23 @@ public class SpongeArmorStandData extends AbstractData<ArmorStandData, Immutable
     }
 
     @Override
-    public Value<Boolean> marker() {
-        return new SpongeValue<>(Keys.ARMOR_STAND_MARKER, false, this.marker);
+    public Value.Mutable<Boolean> marker() {
+        return new SpongeMutableValue<>(Keys.ARMOR_STAND_MARKER, this.marker);
     }
 
     @Override
-    public Value<Boolean> small() {
-        return new SpongeValue<>(Keys.ARMOR_STAND_IS_SMALL, false, this.small);
+    public Value.Mutable<Boolean> small() {
+        return new SpongeMutableValue<>(Keys.ARMOR_STAND_IS_SMALL, this.small);
     }
 
     @Override
-    public Value<Boolean> arms() {
-        return new SpongeValue<>(Keys.ARMOR_STAND_HAS_ARMS, false, this.arms);
+    public Value.Mutable<Boolean> arms() {
+        return new SpongeMutableValue<>(Keys.ARMOR_STAND_HAS_ARMS, this.arms);
     }
 
     @Override
-    public Value<Boolean> basePlate() {
-        return new SpongeValue<>(Keys.ARMOR_STAND_HAS_BASE_PLATE, true, this.basePlate);
+    public Value.Mutable<Boolean> basePlate() {
+        return new SpongeMutableValue<>(Keys.ARMOR_STAND_HAS_BASE_PLATE, this.basePlate);
     }
 
 

@@ -34,7 +34,7 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
-import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.SpongeImpl;
@@ -192,7 +192,7 @@ public final class DataProcessorDelegate<M extends DataManipulator<M, I>, I exte
     }
 
     @Override
-    public Optional<I> with(Key<? extends BaseValue<?>> key, Object value, I immutable) {
+    public Optional<I> with(Key<? extends Value<?>> key, Object value, I immutable) {
         final boolean callingFromMinecraftThread = SpongeImplHooks.isMainThread();
 
         for (Tuple<DataProcessor<M, I>, Timing> tuple : this.processors) {

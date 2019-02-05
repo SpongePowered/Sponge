@@ -57,7 +57,7 @@ public final class SpongeDataRegistrationBuilder<M extends DataManipulator<M, I>
     // These are used internally, not necessarily refactored yet, but will be used to enhance the DataRegistrar.
     private DataProcessor<M, I> dataProcessor;
     private List<Key<?>> keys = new ArrayList<>();
-    private AbstractSingleDataSingleTargetProcessor<?, ?, ?, M, I> dualProcessor;
+    private AbstractSingleDataSingleTargetProcessor<?, ?, M, I> dualProcessor;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -103,7 +103,7 @@ public final class SpongeDataRegistrationBuilder<M extends DataManipulator<M, I>
         return this;
     }
 
-    public SpongeDataRegistrationBuilder<M, I> dualProcessor(AbstractSingleDataSingleTargetProcessor<?, ?, ?, M, I> processor) {
+    public SpongeDataRegistrationBuilder<M, I> dualProcessor(AbstractSingleDataSingleTargetProcessor<?, ?, M, I> processor) {
         checkState(this.implementationData != null, "Must be called after an implementation class has been set!");
         this.dualProcessor = checkNotNull(processor);
         return this;

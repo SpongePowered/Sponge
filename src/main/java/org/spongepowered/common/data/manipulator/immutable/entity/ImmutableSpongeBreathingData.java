@@ -28,7 +28,7 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableBreathingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.BreathingData;
-import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeBreathingData;
 import org.spongepowered.common.data.value.SpongeValueFactory;
@@ -38,8 +38,8 @@ public class ImmutableSpongeBreathingData extends AbstractImmutableData<Immutabl
     private final int maxAir;
     private final int remainingAir;
 
-    private final ImmutableBoundedValue<Integer> remainingAirValue;
-    private final ImmutableBoundedValue<Integer> maxAirValue;
+    private final BoundedValue.Immutable<Integer> remainingAirValue;
+    private final BoundedValue.Immutable<Integer> maxAirValue;
 
     public ImmutableSpongeBreathingData(int maxAir, int remainingAir) {
         super(ImmutableBreathingData.class);
@@ -47,16 +47,14 @@ public class ImmutableSpongeBreathingData extends AbstractImmutableData<Immutabl
         this.remainingAir = remainingAir;
 
         this.remainingAirValue = SpongeValueFactory.boundedBuilder(Keys.REMAINING_AIR)
-                .actualValue(remainingAir)
-                .defaultValue(this.maxAir)
+                .value(remainingAir)
                 .minimum(-20)
                 .maximum(this.maxAir)
                 .build()
                 .asImmutable();
 
         this.maxAirValue = SpongeValueFactory.boundedBuilder(Keys.MAX_AIR)
-                .actualValue(this.maxAir)
-                .defaultValue(300)
+                .value(this.maxAir)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
                 .build()
@@ -78,13 +76,13 @@ public class ImmutableSpongeBreathingData extends AbstractImmutableData<Immutabl
     }
 
     @Override
-    public ImmutableBoundedValue<Integer> remainingAir() {
+    public BoundedValue.Immutable<Integer> remainingAir() {
 
         return this.remainingAirValue;
     }
 
     @Override
-    public ImmutableBoundedValue<Integer> maxAir() {
+    public BoundedValue.Immutable<Integer> maxAir() {
         return this.maxAirValue;
     }
 

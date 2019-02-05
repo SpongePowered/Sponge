@@ -45,7 +45,7 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -108,7 +108,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
     }
 
     @Override
-    public <V> ItemStack.Builder add(Key<? extends BaseValue<V>> key, V value) throws IllegalArgumentException {
+    public <V> ItemStack.Builder add(Key<? extends Value<V>> key, V value) throws IllegalArgumentException {
         if (this.keyValues == null) {
             this.keyValues = new LinkedHashMap<>();
         }

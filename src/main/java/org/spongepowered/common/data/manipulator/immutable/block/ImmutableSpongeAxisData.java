@@ -29,7 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableAxisData;
 import org.spongepowered.api.data.manipulator.mutable.block.AxisData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleEnumData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeAxisData;
@@ -42,7 +42,7 @@ public class ImmutableSpongeAxisData extends AbstractImmutableSingleEnumData<Axi
     }
 
     @Override
-    public ImmutableValue<Axis> axis() {
+    public Value.Immutable<Axis> axis() {
         return type();
     }
 

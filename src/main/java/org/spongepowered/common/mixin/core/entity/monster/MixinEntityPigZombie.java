@@ -28,7 +28,7 @@ import net.minecraft.entity.monster.EntityPigZombie;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.AngerableData;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.entity.living.monster.ZombiePigman;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -80,9 +80,9 @@ public abstract class MixinEntityPigZombie extends MixinEntityZombie implements 
     }
 
     @Override
-    public MutableBoundedValue<Integer> angerLevel() {
+    public BoundedValue.Mutable<Integer> angerLevel() {
         return SpongeValueFactory.boundedBuilder(Keys.ANGER)
-                .actualValue(this.angerLevel)
+                .value(this.angerLevel)
                 .defaultValue(0)
                 .minimum(Integer.MIN_VALUE)
                 .maximum(Integer.MAX_VALUE)

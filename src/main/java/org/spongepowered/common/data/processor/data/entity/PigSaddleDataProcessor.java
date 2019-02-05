@@ -29,18 +29,17 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutablePigSaddleData;
 import org.spongepowered.api.data.manipulator.mutable.entity.PigSaddleData;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongePigSaddleData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 
 import java.util.Optional;
 
 public class PigSaddleDataProcessor
-        extends AbstractEntitySingleDataProcessor<EntityPig, Boolean, Value<Boolean>, PigSaddleData, ImmutablePigSaddleData> {
+        extends AbstractEntitySingleDataProcessor<EntityPig, Boolean, PigSaddleData, ImmutablePigSaddleData> {
 
     public PigSaddleDataProcessor() {
         super(EntityPig.class, Keys.PIG_SADDLE);
@@ -58,13 +57,13 @@ public class PigSaddleDataProcessor
     }
 
     @Override
-    protected Value<Boolean> constructValue(Boolean actualValue) {
-        return new SpongeValue<>(this.key, false, actualValue);
+    protected Value.Mutable<Boolean> constructMutableValue(Boolean actualValue) {
+        return new SpongeMutableValue<>(this.key, actualValue);
     }
 
     @Override
-    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
-        return ImmutableSpongeValue.cachedOf(this.key, false, value);
+    protected Value.Immutable<Boolean> constructImmutableValue(Boolean value) {
+        return SpongeImmutableValue.cachedOf(this.key, value);
     }
 
     @Override

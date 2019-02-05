@@ -27,26 +27,25 @@ package org.spongepowered.common.data.processor.value.tileentity;
 import net.minecraft.tileentity.TileEntityFurnace;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Optional;
 
-public class PassedBurnTimeValueProcessor extends AbstractSpongeValueProcessor<TileEntityFurnace, Integer, MutableBoundedValue<Integer>> {
+public class PassedBurnTimeValueProcessor extends AbstractSpongeValueProcessor<TileEntityFurnace, Integer> {
 
     public PassedBurnTimeValueProcessor() {
         super(TileEntityFurnace.class, Keys.PASSED_BURN_TIME);
     }
 
     @Override
-    protected MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
+    protected BoundedValue.Mutable<Integer> constructMutableValue(Integer defaultValue) {
         return SpongeValueFactory.boundedBuilder(Keys.PASSED_BURN_TIME)
                 .minimum(0)
                 .maximum(1600)
-                .defaultValue(defaultValue)
                 .build();
     }
 
@@ -65,7 +64,7 @@ public class PassedBurnTimeValueProcessor extends AbstractSpongeValueProcessor<T
     }
 
     @Override
-    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
+    protected Value.Immutable<Integer> constructImmutableValue(Integer value) {
         return SpongeValueFactory.boundedBuilder(Keys.PASSED_BURN_TIME)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)

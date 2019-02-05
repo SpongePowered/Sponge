@@ -27,61 +27,36 @@ package org.spongepowered.common.data.value;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.Value;
 
-import java.util.Optional;
+import java.util.Objects;
 
-public abstract class AbstractBaseValue<E> implements BaseValue<E> {
+public abstract class SpongeValue<E> implements Value<E> {
 
-    private final Key<? extends BaseValue<E>> key;
-    private final E defaultValue;
-    protected E actualValue;
+    protected final Key<? extends Value<E>> key;
+    protected E value;
 
-    public AbstractBaseValue(Key<? extends BaseValue<E>> key, E defaultValue) {
-        this.key = checkNotNull(key);
-        this.defaultValue = checkNotNull(defaultValue);
-        this.actualValue = defaultValue;
-    }
-
-    protected AbstractBaseValue(Key<? extends BaseValue<E>> key, E defaultValue, E actualValue) {
-        this.key = checkNotNull(key);
-        this.defaultValue = checkNotNull(defaultValue);
-        this.actualValue = checkNotNull(actualValue);
+    protected SpongeValue(Key<? extends Value<E>> key, E value) {
+        this.value = checkNotNull(value, "value");
+        this.key = checkNotNull(key, "key");
     }
 
     @Override
     public E get() {
-        return this.actualValue == null ? this.defaultValue : this.actualValue;
+        return this.value;
     }
 
     @Override
-    public boolean exists() {
-        return this.actualValue != null;
-    }
-
-    @Override
-    public E getDefault() {
-        return this.defaultValue;
-    }
-
-    @Override
-    public Optional<E> getDirect() {
-        return Optional.ofNullable(this.actualValue);
-    }
-
-    @Override
-    public Key<? extends BaseValue<E>> getKey() {
+    public Key<? extends Value<E>> getKey() {
         return this.key;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(this.key, this.defaultValue, this.actualValue);
+        return Objects.hash(this.key, this.value);
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -90,18 +65,17 @@ public abstract class AbstractBaseValue<E> implements BaseValue<E> {
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        final AbstractBaseValue other = (AbstractBaseValue) obj;
-        return Objects.equal(this.key, other.key)
-               && Objects.equal(this.defaultValue, other.defaultValue)
-               && Objects.equal(this.actualValue, other.actualValue);
+        final SpongeValue other = (SpongeValue) obj;
+        return Objects.equals(this.key, other.key)
+               && Objects.equals(this.value, other.value);
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
             .add("key", this.key)
-            .add("defaultValue", this.defaultValue)
-            .add("actualValue", this.actualValue)
+            .add("value", this.value)
             .toString();
     }
+
 }

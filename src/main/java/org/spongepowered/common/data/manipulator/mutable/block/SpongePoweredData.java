@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.mutable.block;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutablePoweredData;
 import org.spongepowered.api.data.manipulator.mutable.block.PoweredData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongePoweredData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;
 
@@ -42,7 +42,7 @@ public class SpongePoweredData extends AbstractBooleanData<PoweredData, Immutabl
     }
 
     @Override
-    public Value<Boolean> powered() {
+    public Value.Mutable<Boolean> powered() {
         return getValueGetter();
     }
 }

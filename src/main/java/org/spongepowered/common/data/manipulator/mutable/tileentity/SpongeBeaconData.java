@@ -28,11 +28,11 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableBeaconData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.BeaconData;
-import org.spongepowered.api.data.value.mutable.OptionalValue;
+import org.spongepowered.api.data.value.OptionalValue;
 import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeBeaconData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
-import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
+import org.spongepowered.common.data.value.SpongeMutableOptionalValue;
 
 import java.util.Optional;
 
@@ -76,8 +76,8 @@ public class SpongeBeaconData extends AbstractData<BeaconData, ImmutableBeaconDa
     }
 
     @Override
-    public OptionalValue<PotionEffectType> primaryEffect() {
-        return new SpongeOptionalValue<>(Keys.BEACON_PRIMARY_EFFECT, Optional.ofNullable(this.primaryEffect));
+    public OptionalValue.Mutable<PotionEffectType> primaryEffect() {
+        return new SpongeMutableOptionalValue<>(Keys.BEACON_PRIMARY_EFFECT, Optional.ofNullable(this.primaryEffect));
     }
 
     public Optional<PotionEffectType> getSecondaryEffect() {
@@ -89,8 +89,8 @@ public class SpongeBeaconData extends AbstractData<BeaconData, ImmutableBeaconDa
     }
 
     @Override
-    public OptionalValue<PotionEffectType> secondaryEffect() {
-        return new SpongeOptionalValue<>(Keys.BEACON_SECONDARY_EFFECT, Optional.ofNullable(this.secondaryEffect));
+    public OptionalValue.Mutable<PotionEffectType> secondaryEffect() {
+        return new SpongeMutableOptionalValue<>(Keys.BEACON_SECONDARY_EFFECT, Optional.ofNullable(this.secondaryEffect));
     }
 
     @Override

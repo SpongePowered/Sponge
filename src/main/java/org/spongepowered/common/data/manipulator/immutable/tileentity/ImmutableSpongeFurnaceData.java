@@ -28,7 +28,7 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableFurnaceData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.FurnaceData;
-import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeFurnaceData;
 import org.spongepowered.common.data.value.SpongeValueFactory;
@@ -40,10 +40,10 @@ public class ImmutableSpongeFurnaceData extends AbstractImmutableData<ImmutableF
     private final int passedCookTime; //time (int) the item already cooked
     private final int maxCookTime; //time (int) the item have to cook
 
-    private final ImmutableBoundedValue<Integer> passedBurnTimeValue; // -> see passedBurnTime
-    private final ImmutableBoundedValue<Integer> maxBurnTimeValue; // -> see maxBurnTime
-    private final ImmutableBoundedValue<Integer> passedCookTimeValue; // -> see passedCookTime
-    private final ImmutableBoundedValue<Integer> maxCookTimeValue; // -> see maxCookTime
+    private final BoundedValue.Immutable<Integer> passedBurnTimeValue; // -> see passedBurnTime
+    private final BoundedValue.Immutable<Integer> maxBurnTimeValue; // -> see maxBurnTime
+    private final BoundedValue.Immutable<Integer> passedCookTimeValue; // -> see passedCookTime
+    private final BoundedValue.Immutable<Integer> maxCookTimeValue; // -> see maxCookTime
 
     public ImmutableSpongeFurnaceData(int passedBurnTime, int maxBurnTime, int passedCookTime, int maxCookTime) {
         super(ImmutableFurnaceData.class);
@@ -54,20 +54,20 @@ public class ImmutableSpongeFurnaceData extends AbstractImmutableData<ImmutableF
         this.maxCookTime = maxCookTime;
 
         this.passedBurnTimeValue = SpongeValueFactory.boundedBuilder(Keys.PASSED_BURN_TIME)
-                .minimum(0).maximum(this.maxBurnTime).defaultValue(0)
-                .actualValue(this.passedBurnTime).build().asImmutable();
+                .minimum(0).maximum(this.maxBurnTime)
+                .value(this.passedBurnTime).build().asImmutable();
 
         this.maxBurnTimeValue = SpongeValueFactory.boundedBuilder(Keys.MAX_BURN_TIME)
-                .minimum(0).maximum(Integer.MAX_VALUE).defaultValue(1600)
-                .actualValue(this.maxBurnTime).build().asImmutable();
+                .minimum(0).maximum(Integer.MAX_VALUE)
+                .value(this.maxBurnTime).build().asImmutable();
 
         this.passedCookTimeValue = SpongeValueFactory.boundedBuilder(Keys.PASSED_COOK_TIME)
-                .minimum(0).maximum(this.maxCookTime).defaultValue(0)
-                .actualValue(this.passedCookTime).build().asImmutable();
+                .minimum(0).maximum(this.maxCookTime)
+                .value(this.passedCookTime).build().asImmutable();
 
         this.maxCookTimeValue = SpongeValueFactory.boundedBuilder(Keys.MAX_COOK_TIME)
-                .minimum(0).maximum(Integer.MAX_VALUE).defaultValue(200)
-                .actualValue(this.maxCookTime).build().asImmutable();
+                .minimum(0).maximum(Integer.MAX_VALUE)
+                .value(this.maxCookTime).build().asImmutable();
 
         this.registerGetters();
     }
@@ -88,7 +88,7 @@ public class ImmutableSpongeFurnaceData extends AbstractImmutableData<ImmutableF
     }
 
     @Override
-    public ImmutableBoundedValue<Integer> passedBurnTime() {
+    public BoundedValue.Immutable<Integer> passedBurnTime() {
         return this.passedBurnTimeValue;
     }
 
@@ -97,7 +97,7 @@ public class ImmutableSpongeFurnaceData extends AbstractImmutableData<ImmutableF
     }
 
     @Override
-    public ImmutableBoundedValue<Integer> maxBurnTime() {
+    public BoundedValue.Immutable<Integer> maxBurnTime() {
         return this.maxBurnTimeValue;
     }
 
@@ -106,7 +106,7 @@ public class ImmutableSpongeFurnaceData extends AbstractImmutableData<ImmutableF
     }
 
     @Override
-    public ImmutableBoundedValue<Integer> passedCookTime() {
+    public BoundedValue.Immutable<Integer> passedCookTime() {
         return this.passedCookTimeValue;
     }
 
@@ -115,7 +115,7 @@ public class ImmutableSpongeFurnaceData extends AbstractImmutableData<ImmutableF
     }
 
     @Override
-    public ImmutableBoundedValue<Integer> maxCookTime() {
+    public BoundedValue.Immutable<Integer> maxCookTime() {
         return this.maxCookTimeValue;
     }
 

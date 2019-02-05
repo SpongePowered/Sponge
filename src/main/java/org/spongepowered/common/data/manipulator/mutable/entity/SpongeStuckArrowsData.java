@@ -30,8 +30,8 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableStuckArrowsData;
 import org.spongepowered.api.data.manipulator.mutable.entity.StuckArrowsData;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeStuckArrowsData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractIntData;
 import org.spongepowered.common.data.value.SpongeValueFactory;
@@ -47,17 +47,16 @@ public class SpongeStuckArrowsData extends AbstractIntData<StuckArrowsData, Immu
     }
 
     @Override
-    protected Value<?> getValueGetter() {
+    protected Value.Mutable<?> getValueGetter() {
         return this.stuckArrows();
     }
 
     @Override
-    public MutableBoundedValue<Integer> stuckArrows() {
+    public BoundedValue.Mutable<Integer> stuckArrows() {
         return SpongeValueFactory.boundedBuilder(Keys.STUCK_ARROWS)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
-                .defaultValue(0)
-                .actualValue(this.getValue())
+                .value(this.getValue())
                 .build();
     }
 

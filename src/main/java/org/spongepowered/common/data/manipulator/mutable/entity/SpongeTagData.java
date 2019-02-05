@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.mutable.entity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTagData;
 import org.spongepowered.api.data.manipulator.mutable.entity.TagData;
-import org.spongepowered.api.data.value.mutable.SetValue;
+import org.spongepowered.api.data.value.SetValue;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeTagData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleSetData;
 
@@ -47,8 +47,8 @@ public class SpongeTagData extends AbstractSingleSetData<String, TagData, Immuta
 
     @SuppressWarnings("unchecked")
     @Override
-    public SetValue<String> tags() {
-        return (SetValue<String>) getValueGetter();
+    public SetValue.Mutable<String> tags() {
+        return (SetValue.Mutable<String>) getValueGetter();
     }
 
 }

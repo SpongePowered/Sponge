@@ -29,7 +29,7 @@ import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableLayeredData;
 import org.spongepowered.api.data.manipulator.mutable.block.LayeredData;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeLayeredData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBoundedComparableData;
 
@@ -52,7 +52,7 @@ public class SpongeLayeredData extends AbstractBoundedComparableData<Integer, La
     }
 
     @Override
-    public MutableBoundedValue<Integer> layer() {
+    public BoundedValue.Mutable<Integer> layer() {
         return getValueGetter();
     }
 }

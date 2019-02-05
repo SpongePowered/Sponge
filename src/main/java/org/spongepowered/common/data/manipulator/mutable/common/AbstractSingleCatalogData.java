@@ -32,10 +32,9 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableVariantData;
 import org.spongepowered.api.data.manipulator.mutable.VariantData;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 import org.spongepowered.common.util.ReflectionUtil;
 
 import java.lang.reflect.Modifier;
@@ -45,7 +44,7 @@ public abstract class AbstractSingleCatalogData<T extends CatalogType, M extends
 
     private final Class<? extends I> immutableClass;
 
-    protected AbstractSingleCatalogData(Class<M> manipulatorClass, T value, Key<? extends BaseValue<T>> usedKey, Class<? extends I> immutableClass) {
+    protected AbstractSingleCatalogData(Class<M> manipulatorClass, T value, Key<? extends Value<T>> usedKey, Class<? extends I> immutableClass) {
         super(manipulatorClass, value, usedKey);
         checkArgument(!Modifier.isAbstract(immutableClass.getModifiers()), "The immutable class cannot be abstract!");
         checkArgument(!Modifier.isInterface(immutableClass.getModifiers()), "The immutable class cannot be an interface!");
@@ -59,7 +58,7 @@ public abstract class AbstractSingleCatalogData<T extends CatalogType, M extends
     }
 
     @Override
-    protected Value<?> getValueGetter() {
+    protected Value.Mutable<?> getValueGetter() {
         return type();
     }
 
@@ -69,8 +68,8 @@ public abstract class AbstractSingleCatalogData<T extends CatalogType, M extends
     }
 
     @Override
-    public Value<T> type() {
-        return new SpongeValue<>(this.usedKey, this.getValue(), this.getValue());
+    public Value.Mutable<T> type() {
+        return new SpongeMutableValue<>(this.usedKey, this.getValue());
     }
 
     @Override

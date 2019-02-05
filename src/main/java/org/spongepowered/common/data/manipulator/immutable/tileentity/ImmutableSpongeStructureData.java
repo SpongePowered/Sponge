@@ -30,58 +30,57 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableStructureData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.StructureData;
 import org.spongepowered.api.data.type.StructureMode;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeStructureData;
-import org.spongepowered.common.data.util.DataConstants;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
 
 public final class ImmutableSpongeStructureData extends AbstractImmutableData<ImmutableStructureData, StructureData> implements ImmutableStructureData {
 
     private final String author;
-    private final ImmutableValue<String> authorValue;
+    private final Value.Immutable<String> authorValue;
     private final boolean ignoreEntities;
-    private final ImmutableValue<Boolean> ignoreEntitiesValue;
+    private final Value.Immutable<Boolean> ignoreEntitiesValue;
     private final float integrity;
-    private final ImmutableValue<Float> integrityValue;
+    private final Value.Immutable<Float> integrityValue;
     private final StructureMode mode;
-    private final ImmutableValue<StructureMode> modeValue;
+    private final Value.Immutable<StructureMode> modeValue;
     private final Vector3i position;
-    private final ImmutableValue<Vector3i> positionValue;
+    private final Value.Immutable<Vector3i> positionValue;
     private final boolean powered;
-    private final ImmutableValue<Boolean> poweredValue;
+    private final Value.Immutable<Boolean> poweredValue;
     private final long seed;
-    private final ImmutableValue<Long> seedValue;
+    private final Value.Immutable<Long> seedValue;
     private final boolean showAir;
-    private final ImmutableValue<Boolean> showAirValue;
+    private final Value.Immutable<Boolean> showAirValue;
     private final boolean showBoundingBox;
-    private final ImmutableValue<Boolean> showBoundingBoxValue;
+    private final Value.Immutable<Boolean> showBoundingBoxValue;
     private final Vector3i size;
-    private final ImmutableValue<Vector3i> sizeValue;
+    private final Value.Immutable<Vector3i> sizeValue;
 
     public ImmutableSpongeStructureData(String author, boolean ignoreEntities, float integrity, StructureMode mode, Vector3i position, boolean powered, boolean showAir, boolean showBoundingBox, long seed, Vector3i size) {
         super(ImmutableStructureData.class);
 
         this.author = author;
-        this.authorValue = new ImmutableSpongeValue<>(Keys.STRUCTURE_AUTHOR, DataConstants.DEFAULT_STRUCTURE_AUTHOR, this.author);
+        this.authorValue = new SpongeImmutableValue<>(Keys.STRUCTURE_AUTHOR, this.author);
         this.ignoreEntities = ignoreEntities;
-        this.ignoreEntitiesValue = new ImmutableSpongeValue<>(Keys.STRUCTURE_IGNORE_ENTITIES, DataConstants.DEFAULT_STRUCTURE_IGNORE_ENTITIES, this.ignoreEntities);
+        this.ignoreEntitiesValue = new SpongeImmutableValue<>(Keys.STRUCTURE_IGNORE_ENTITIES, this.ignoreEntities);
         this.integrity = integrity;
-        this.integrityValue = new ImmutableSpongeValue<>(Keys.STRUCTURE_INTEGRITY, DataConstants.DEFAULT_STRUCTURE_INTEGRITY, this.integrity);
+        this.integrityValue = new SpongeImmutableValue<>(Keys.STRUCTURE_INTEGRITY, this.integrity);
         this.mode = mode;
-        this.modeValue = new ImmutableSpongeValue<>(Keys.STRUCTURE_MODE, DataConstants.DEFAULT_STRUCTURE_MODE, this.mode);
+        this.modeValue = new SpongeImmutableValue<>(Keys.STRUCTURE_MODE, this.mode);
         this.position = position;
-        this.positionValue = new ImmutableSpongeValue<>(Keys.STRUCTURE_POSITION, DataConstants.DEFAULT_STRUCTURE_POSITION, this.position);
+        this.positionValue = new SpongeImmutableValue<>(Keys.STRUCTURE_POSITION, this.position);
         this.powered = powered;
-        this.poweredValue = new ImmutableSpongeValue<>(Keys.STRUCTURE_POWERED, DataConstants.DEFAULT_STRUCTURE_POWERED, this.powered);
+        this.poweredValue = new SpongeImmutableValue<>(Keys.STRUCTURE_POWERED, this.powered);
         this.seed = seed;
-        this.seedValue = new ImmutableSpongeValue<>(Keys.STRUCTURE_SEED, DataConstants.DEFAULT_STRUCTURE_SEED, this.seed);
+        this.seedValue = new SpongeImmutableValue<>(Keys.STRUCTURE_SEED, this.seed);
         this.showAir = showAir;
-        this.showAirValue = new ImmutableSpongeValue<>(Keys.STRUCTURE_SHOW_AIR, DataConstants.DEFAULT_STRUCTURE_SHOW_AIR, this.showAir);
+        this.showAirValue = new SpongeImmutableValue<>(Keys.STRUCTURE_SHOW_AIR, this.showAir);
         this.showBoundingBox = showBoundingBox;
-        this.showBoundingBoxValue = new ImmutableSpongeValue<>(Keys.STRUCTURE_SHOW_BOUNDING_BOX, DataConstants.DEFAULT_STRUCTURE_SHOW_BOUNDING_BOX, this.showBoundingBox);
+        this.showBoundingBoxValue = new SpongeImmutableValue<>(Keys.STRUCTURE_SHOW_BOUNDING_BOX, this.showBoundingBox);
         this.size = size;
-        this.sizeValue = new ImmutableSpongeValue<>(Keys.STRUCTURE_SIZE, DataConstants.DEFAULT_STRUCTURE_SIZE, this.size);
+        this.sizeValue = new SpongeImmutableValue<>(Keys.STRUCTURE_SIZE, this.size);
 
         this.registerGetters();
     }
@@ -111,7 +110,7 @@ public final class ImmutableSpongeStructureData extends AbstractImmutableData<Im
     }
 
     @Override
-    public ImmutableValue<String> author() {
+    public Value.Immutable<String> author() {
         return this.authorValue;
     }
 
@@ -120,7 +119,7 @@ public final class ImmutableSpongeStructureData extends AbstractImmutableData<Im
     }
 
     @Override
-    public ImmutableValue<Boolean> ignoreEntities() {
+    public Value.Immutable<Boolean> ignoreEntities() {
         return this.ignoreEntitiesValue;
     }
 
@@ -129,7 +128,7 @@ public final class ImmutableSpongeStructureData extends AbstractImmutableData<Im
     }
 
     @Override
-    public ImmutableValue<Float> integrity() {
+    public Value.Immutable<Float> integrity() {
         return this.integrityValue;
     }
 
@@ -138,7 +137,7 @@ public final class ImmutableSpongeStructureData extends AbstractImmutableData<Im
     }
 
     @Override
-    public ImmutableValue<StructureMode> mode() {
+    public Value.Immutable<StructureMode> mode() {
         return this.modeValue;
     }
 
@@ -147,7 +146,7 @@ public final class ImmutableSpongeStructureData extends AbstractImmutableData<Im
     }
 
     @Override
-    public ImmutableValue<Vector3i> position() {
+    public Value.Immutable<Vector3i> position() {
         return this.positionValue;
     }
 
@@ -156,7 +155,7 @@ public final class ImmutableSpongeStructureData extends AbstractImmutableData<Im
     }
 
     @Override
-    public ImmutableValue<Boolean> powered() {
+    public Value.Immutable<Boolean> powered() {
         return this.poweredValue;
     }
 
@@ -165,7 +164,7 @@ public final class ImmutableSpongeStructureData extends AbstractImmutableData<Im
     }
 
     @Override
-    public ImmutableValue<Long> seed() {
+    public Value.Immutable<Long> seed() {
         return this.seedValue;
     }
 
@@ -174,7 +173,7 @@ public final class ImmutableSpongeStructureData extends AbstractImmutableData<Im
     }
 
     @Override
-    public ImmutableValue<Boolean> showAir() {
+    public Value.Immutable<Boolean> showAir() {
         return this.showAirValue;
     }
 
@@ -183,7 +182,7 @@ public final class ImmutableSpongeStructureData extends AbstractImmutableData<Im
     }
 
     @Override
-    public ImmutableValue<Boolean> showBoundingBox() {
+    public Value.Immutable<Boolean> showBoundingBox() {
         return this.showBoundingBoxValue;
     }
 
@@ -192,7 +191,7 @@ public final class ImmutableSpongeStructureData extends AbstractImmutableData<Im
     }
 
     @Override
-    public ImmutableValue<Vector3i> size() {
+    public Value.Immutable<Vector3i> size() {
         return this.sizeValue;
     }
 

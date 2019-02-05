@@ -30,30 +30,27 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableOcelotData;
 import org.spongepowered.api.data.manipulator.mutable.entity.OcelotData;
 import org.spongepowered.api.data.type.OcelotType;
-import org.spongepowered.api.data.type.OcelotTypes;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeOcelotData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
-import org.spongepowered.common.data.util.DataConstants;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 import org.spongepowered.common.entity.SpongeOcelotType;
 import org.spongepowered.common.registry.type.entity.OcelotTypeRegistryModule;
 
 import java.util.Optional;
 
 public class OcelotDataProcessor extends
-        AbstractEntitySingleDataProcessor<EntityOcelot, OcelotType, Value<OcelotType>, OcelotData, ImmutableOcelotData> {
+        AbstractEntitySingleDataProcessor<EntityOcelot, OcelotType, OcelotData, ImmutableOcelotData> {
 
     public OcelotDataProcessor() {
         super(EntityOcelot.class, Keys.OCELOT_TYPE);
     }
 
     @Override
-    protected Value<OcelotType> constructValue(OcelotType actualValue) {
-        return new SpongeValue<>(Keys.OCELOT_TYPE, DataConstants.Catalog.DEFAULT_OCELOT, actualValue);
+    protected Value.Mutable<OcelotType> constructMutableValue(OcelotType actualValue) {
+        return new SpongeMutableValue<>(Keys.OCELOT_TYPE, actualValue);
     }
 
     @Override
@@ -71,8 +68,8 @@ public class OcelotDataProcessor extends
     }
 
     @Override
-    protected ImmutableValue<OcelotType> constructImmutableValue(OcelotType value) {
-        return ImmutableSpongeValue.cachedOf(Keys.OCELOT_TYPE, OcelotTypes.WILD_OCELOT, value);
+    protected Value.Immutable<OcelotType> constructImmutableValue(OcelotType value) {
+        return SpongeImmutableValue.cachedOf(Keys.OCELOT_TYPE, value);
     }
 
     @Override

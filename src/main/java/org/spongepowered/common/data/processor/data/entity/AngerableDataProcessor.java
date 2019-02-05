@@ -29,28 +29,26 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableAngerableData;
 import org.spongepowered.api.data.manipulator.mutable.entity.AngerableData;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAngerableData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
 
 import java.util.Optional;
 
 public class AngerableDataProcessor extends
-        AbstractEntitySingleDataProcessor<EntityPigZombie, Integer, MutableBoundedValue<Integer>, AngerableData, ImmutableAngerableData> {
+        AbstractEntitySingleDataProcessor<EntityPigZombie, Integer, AngerableData, ImmutableAngerableData> {
 
     public AngerableDataProcessor() {
         super(EntityPigZombie.class, Keys.ANGER);
     }
 
     @Override
-    protected MutableBoundedValue<Integer> constructValue(Integer actualValue) {
+    protected Value.Mutable<Integer> constructMutableValue(Integer actualValue) {
         return SpongeValueFactory.boundedBuilder(Keys.ANGER)
-                .actualValue(actualValue)
-                .defaultValue(0)
+                .value(actualValue)
                 .minimum(Integer.MIN_VALUE)
                 .maximum(Integer.MAX_VALUE)
                 .build();
@@ -68,8 +66,8 @@ public class AngerableDataProcessor extends
     }
 
     @Override
-    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
-        return new ImmutableSpongeValue<Integer>(Keys.ANGER, 0, value);
+    protected Value.Immutable<Integer> constructImmutableValue(Integer value) {
+        return new SpongeImmutableValue<Integer>(Keys.ANGER, value);
     }
 
     @Override

@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.immutable.entity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableScreamingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ScreamingData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeScreamingData;
 
@@ -38,7 +38,7 @@ public class ImmutableSpongeScreamingData extends AbstractImmutableBooleanData<I
     }
 
     @Override
-    public ImmutableValue<Boolean> screaming() {
+    public Value.Immutable<Boolean> screaming() {
         return getValueGetter();
     }
 

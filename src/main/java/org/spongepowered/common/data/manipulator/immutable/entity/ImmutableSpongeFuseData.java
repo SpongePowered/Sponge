@@ -27,10 +27,10 @@ package org.spongepowered.common.data.manipulator.immutable.entity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFuseData;
 import org.spongepowered.api.data.manipulator.mutable.entity.FuseData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFuseData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
 
 public class ImmutableSpongeFuseData extends AbstractImmutableData<ImmutableFuseData, FuseData>
         implements ImmutableFuseData {
@@ -38,15 +38,15 @@ public class ImmutableSpongeFuseData extends AbstractImmutableData<ImmutableFuse
     private final int fuseDuration;
     private final int ticksRemaining;
 
-    private final ImmutableSpongeValue<Integer> fuseDurationValue;
-    private final ImmutableSpongeValue<Integer> ticksRemainingValue;
+    private final SpongeImmutableValue<Integer> fuseDurationValue;
+    private final SpongeImmutableValue<Integer> ticksRemainingValue;
 
     public ImmutableSpongeFuseData(int fuseDuration, int ticksRemaining) {
         super(ImmutableFuseData.class);
         this.fuseDuration = fuseDuration;
-        this.fuseDurationValue = new ImmutableSpongeValue<>(Keys.FUSE_DURATION, fuseDuration);
+        this.fuseDurationValue = new SpongeImmutableValue<>(Keys.FUSE_DURATION, fuseDuration);
         this.ticksRemaining = ticksRemaining;
-        this.ticksRemainingValue = new ImmutableSpongeValue<>(Keys.TICKS_REMAINING, ticksRemaining);
+        this.ticksRemainingValue = new SpongeImmutableValue<>(Keys.TICKS_REMAINING, ticksRemaining);
         registerGetters();
     }
 
@@ -63,12 +63,12 @@ public class ImmutableSpongeFuseData extends AbstractImmutableData<ImmutableFuse
     }
 
     @Override
-    public ImmutableValue<Integer> fuseDuration() {
+    public Value.Immutable<Integer> fuseDuration() {
         return this.fuseDurationValue;
     }
 
     @Override
-    public ImmutableValue<Integer> ticksRemaining() {
+    public Value.Immutable<Integer> ticksRemaining() {
         return this.ticksRemainingValue;
     }
 

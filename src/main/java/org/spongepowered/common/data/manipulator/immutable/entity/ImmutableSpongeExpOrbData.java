@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.immutable.entity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableExpOrbData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ExpOrbData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableIntData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExpOrbData;
 
@@ -42,7 +42,7 @@ public class ImmutableSpongeExpOrbData extends AbstractImmutableIntData<Immutabl
     }
 
     @Override
-    public ImmutableValue<Integer> experience() {
+    public Value.Immutable<Integer> experience() {
         return getValueGetter();
     }
 

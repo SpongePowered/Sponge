@@ -29,28 +29,26 @@ import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
 import net.minecraft.entity.EntityAgeable;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Optional;
 
-public class AgeValueProcessor extends AbstractSpongeValueProcessor<EntityAgeable, Integer, MutableBoundedValue<Integer>> {
+public class AgeValueProcessor extends AbstractSpongeValueProcessor<EntityAgeable, Integer> {
 
     public AgeValueProcessor() {
         super(EntityAgeable.class, Keys.AGE);
     }
 
     @Override
-    public MutableBoundedValue<Integer> constructValue(Integer age) {
+    public BoundedValue.Mutable<Integer> constructMutableValue(Integer age) {
         return SpongeValueFactory.boundedBuilder(Keys.AGE)
                 .comparator(intComparator())
                 .minimum(Integer.MIN_VALUE)
                 .maximum(Integer.MAX_VALUE)
-                .defaultValue(0)
-                .actualValue(age)
+                .value(age)
                 .build();
     }
 
@@ -66,16 +64,16 @@ public class AgeValueProcessor extends AbstractSpongeValueProcessor<EntityAgeabl
     }
 
     @Override
-    protected ImmutableBoundedValue<Integer> constructImmutableValue(Integer value) {
-        return constructValue(value).asImmutable();
+    protected BoundedValue.Immutable<Integer> constructImmutableValue(Integer value) {
+        return constructMutableValue(value).asImmutable();
     }
 
     @Override
-    public Optional<MutableBoundedValue<Integer>> getApiValueFromContainer(ValueContainer<?> container) {
+    public Optional<BoundedValue.Mutable<Integer>> getApiValueFromContainer(ValueContainer<?> container) {
         if (this.supports(container)) {
             Optional<Integer> value = this.getVal((EntityAgeable) container);
             if (value.isPresent()) {
-                return Optional.of(this.constructValue(value.get()));
+                return Optional.of(this.constructMutableValue(value.get()));
             }
         }
         return Optional.empty();
@@ -88,17 +86,17 @@ public class AgeValueProcessor extends AbstractSpongeValueProcessor<EntityAgeabl
 
     @Override
     public DataTransactionResult offerToStore(ValueContainer<?> container, Integer value) {
-        final ImmutableBoundedValue<Integer> proposedValue = constructImmutableValue(value);
+        final BoundedValue.Immutable<Integer> proposedValue = constructImmutableValue(value);
         if (this.supports(container)) {
             final DataTransactionResult.Builder builder = DataTransactionResult.builder();
-            final ImmutableBoundedValue<Integer> newAgeValue = SpongeValueFactory.boundedBuilder(Keys.AGE)
+            final BoundedValue.Immutable<Integer> newAgeValue = SpongeValueFactory.boundedBuilder(Keys.AGE)
                     .defaultValue(0)
                     .minimum(Integer.MIN_VALUE)
                     .maximum(Integer.MAX_VALUE)
-                    .actualValue(value)
+                    .value(value)
                     .build()
                     .asImmutable();
-            final ImmutableBoundedValue<Integer> oldAgeValue = getApiValueFromContainer(container).get().asImmutable();
+            final BoundedValue.Immutable<Integer> oldAgeValue = getApiValueFromContainer(container).get().asImmutable();
             try {
                 ((EntityAgeable) container).setGrowingAge(value);
             } catch (Exception e) {

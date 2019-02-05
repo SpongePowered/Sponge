@@ -27,26 +27,25 @@ package org.spongepowered.common.data.processor.value.entity;
 import net.minecraft.entity.item.EntityFallingBlock;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Optional;
 
-public class FallHurtAmountValueProcessor extends AbstractSpongeValueProcessor<EntityFallingBlock, Double, MutableBoundedValue<Double>> {
+public class FallHurtAmountValueProcessor extends AbstractSpongeValueProcessor<EntityFallingBlock, Double> {
 
     public FallHurtAmountValueProcessor() {
         super(EntityFallingBlock.class, Keys.FALL_DAMAGE_PER_BLOCK);
     }
 
     @Override
-    protected MutableBoundedValue<Double> constructValue(Double value) {
+    protected BoundedValue.Mutable<Double> constructMutableValue(Double value) {
         return SpongeValueFactory.boundedBuilder(Keys.FALL_DAMAGE_PER_BLOCK)
-                .actualValue(value)
-                .defaultValue(DataConstants.DEFAULT_FALLING_BLOCK_FALL_DAMAGE_PER_BLOCK)
+                .value(value)
                 .minimum(0d)
                 .maximum(Double.MAX_VALUE)
                 .build();
@@ -64,8 +63,8 @@ public class FallHurtAmountValueProcessor extends AbstractSpongeValueProcessor<E
     }
 
     @Override
-    protected ImmutableValue<Double> constructImmutableValue(Double value) {
-        return constructValue(value).asImmutable();
+    protected Value.Immutable<Double> constructImmutableValue(Double value) {
+        return constructMutableValue(value).asImmutable();
     }
 
     @Override

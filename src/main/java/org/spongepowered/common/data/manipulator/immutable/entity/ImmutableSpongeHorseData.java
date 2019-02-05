@@ -29,29 +29,27 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableHorseData;
 import org.spongepowered.api.data.manipulator.mutable.entity.HorseData;
 import org.spongepowered.api.data.type.HorseColor;
-import org.spongepowered.api.data.type.HorseColors;
 import org.spongepowered.api.data.type.HorseStyle;
-import org.spongepowered.api.data.type.HorseStyles;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHorseData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
 
 public class ImmutableSpongeHorseData extends AbstractImmutableData<ImmutableHorseData, HorseData> implements ImmutableHorseData {
 
     private final HorseColor horseColor;
     private final HorseStyle horseStyle;
 
-    private final ImmutableValue<HorseColor> colorValue;
-    private final ImmutableValue<HorseStyle> styleValue;
+    private final Value.Immutable<HorseColor> colorValue;
+    private final Value.Immutable<HorseStyle> styleValue;
 
     public ImmutableSpongeHorseData(HorseColor horseColor, HorseStyle horseStyle) {
         super(ImmutableHorseData.class);
         this.horseColor = horseColor;
         this.horseStyle = horseStyle;
 
-        this.colorValue = ImmutableSpongeValue.cachedOf(Keys.HORSE_COLOR, HorseColors.BLACK, this.horseColor);
-        this.styleValue = ImmutableSpongeValue.cachedOf(Keys.HORSE_STYLE, HorseStyles.NONE, this.horseStyle);
+        this.colorValue = SpongeImmutableValue.cachedOf(Keys.HORSE_COLOR, this.horseColor);
+        this.styleValue = SpongeImmutableValue.cachedOf(Keys.HORSE_STYLE, this.horseStyle);
 
         registerGetters();
     }
@@ -67,12 +65,12 @@ public class ImmutableSpongeHorseData extends AbstractImmutableData<ImmutableHor
     }
 
     @Override
-    public ImmutableValue<HorseColor> color() {
+    public Value.Immutable<HorseColor> color() {
         return this.colorValue;
     }
 
     @Override
-    public ImmutableValue<HorseStyle> style() {
+    public Value.Immutable<HorseStyle> style() {
         return this.styleValue;
     }
 

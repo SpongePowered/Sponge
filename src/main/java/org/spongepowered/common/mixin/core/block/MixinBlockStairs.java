@@ -37,7 +37,7 @@ import org.spongepowered.api.data.manipulator.immutable.block.ImmutablePortionDa
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableStairShapeData;
 import org.spongepowered.api.data.type.PortionType;
 import org.spongepowered.api.data.type.StairShape;
-import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
@@ -81,7 +81,7 @@ public abstract class MixinBlockStairs extends MixinBlock {
     }
 
     @Override
-    public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends BaseValue<E>> key, E value) {
+    public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends Value<E>> key, E value) {
         if (key.equals(Keys.STAIR_SHAPE)) {
             final BlockStairs.EnumShape stairShapeType = (BlockStairs.EnumShape) value;
             return Optional.of((BlockState) blockState.withProperty(BlockStairs.SHAPE, stairShapeType));

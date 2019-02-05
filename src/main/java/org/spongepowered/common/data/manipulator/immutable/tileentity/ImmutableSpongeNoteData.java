@@ -30,14 +30,14 @@ import org.spongepowered.api.data.manipulator.immutable.block.ImmutableNoteData;
 import org.spongepowered.api.data.manipulator.mutable.block.NoteData;
 import org.spongepowered.api.data.type.NotePitch;
 import org.spongepowered.api.data.type.NotePitches;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeNoteData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
 
 public class ImmutableSpongeNoteData extends AbstractImmutableSingleData<NotePitch, ImmutableNoteData, NoteData> implements ImmutableNoteData {
 
-    private final ImmutableValue<NotePitch> cachedValue = ImmutableSpongeValue.cachedOf(Keys.NOTE_PITCH, NotePitches.F_SHARP0, this.value);
+    private final Value.Immutable<NotePitch> cachedValue = SpongeImmutableValue.cachedOf(Keys.NOTE_PITCH, this.value);
 
     public ImmutableSpongeNoteData() {
         this(NotePitches.F_SHARP0);
@@ -48,12 +48,12 @@ public class ImmutableSpongeNoteData extends AbstractImmutableSingleData<NotePit
     }
 
     @Override
-    protected ImmutableValue<?> getValueGetter() {
+    protected Value.Immutable<?> getValueGetter() {
         return note();
     }
 
     @Override
-    public ImmutableValue<NotePitch> note() {
+    public Value.Immutable<NotePitch> note() {
         return this.cachedValue;
     }
 

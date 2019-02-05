@@ -31,7 +31,7 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
-import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.EntityType;
 
 import java.util.Optional;
@@ -97,7 +97,7 @@ public interface DataProcessor<M extends DataManipulator<M, I>, I extends Immuta
      */
     DataTransactionResult set(DataHolder dataHolder, M manipulator, MergeFunction function);
 
-    Optional<I> with(Key<? extends BaseValue<?>> key, Object value, I immutable);
+    Optional<I> with(Key<? extends Value<?>> key, Object value, I immutable);
 
     /**
      * Attempts to remove the {@link DataManipulator} type from the given {@link DataHolder}.

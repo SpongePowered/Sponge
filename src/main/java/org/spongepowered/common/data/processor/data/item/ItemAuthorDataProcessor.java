@@ -30,21 +30,20 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableAuthorData;
 import org.spongepowered.api.data.manipulator.mutable.item.AuthorData;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeAuthorData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.Optional;
 
-public class ItemAuthorDataProcessor extends AbstractItemSingleDataProcessor<Text, Value<Text>, AuthorData, ImmutableAuthorData> {
+public class ItemAuthorDataProcessor extends AbstractItemSingleDataProcessor<Text, AuthorData, ImmutableAuthorData> {
 
     public ItemAuthorDataProcessor() {
         super(input -> input.getItem() == Items.WRITABLE_BOOK || input.getItem() == Items.WRITTEN_BOOK, Keys.BOOK_AUTHOR);
@@ -77,13 +76,13 @@ public class ItemAuthorDataProcessor extends AbstractItemSingleDataProcessor<Tex
     }
 
     @Override
-    protected Value<Text> constructValue(Text actualValue) {
-        return new SpongeValue<>(Keys.BOOK_AUTHOR, Text.empty(), actualValue);
+    protected Value.Mutable<Text> constructMutableValue(Text actualValue) {
+        return new SpongeMutableValue<>(Keys.BOOK_AUTHOR, actualValue);
     }
 
     @Override
-    protected ImmutableValue<Text> constructImmutableValue(Text value) {
-        return new ImmutableSpongeValue<>(Keys.BOOK_AUTHOR, Text.empty(), value);
+    protected Value.Immutable<Text> constructImmutableValue(Text value) {
+        return new SpongeImmutableValue<>(Keys.BOOK_AUTHOR, value);
     }
 
 }

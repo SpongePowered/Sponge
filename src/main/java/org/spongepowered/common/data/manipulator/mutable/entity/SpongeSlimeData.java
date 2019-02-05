@@ -29,7 +29,7 @@ import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSlimeData;
 import org.spongepowered.api.data.manipulator.mutable.entity.SlimeData;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeSlimeData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBoundedComparableData;
 
@@ -48,7 +48,7 @@ public class SpongeSlimeData extends AbstractBoundedComparableData<Integer, Slim
     }
 
     @Override
-    public MutableBoundedValue<Integer> size() {
+    public BoundedValue.Mutable<Integer> size() {
         return getValueGetter();
     }
 }

@@ -40,7 +40,7 @@ import org.spongepowered.api.data.manipulator.immutable.block.ImmutablePoweredDa
 import org.spongepowered.api.data.type.Hinge;
 import org.spongepowered.api.data.type.PortionType;
 import org.spongepowered.api.data.type.PortionTypes;
-import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
@@ -96,7 +96,7 @@ public abstract class MixinBlockDoor extends MixinBlock {
     }
 
     @Override
-    public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends BaseValue<E>> key, E value) {
+    public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends Value<E>> key, E value) {
         if (key.equals(Keys.HINGE_POSITION)) {
             final BlockDoor.EnumHingePosition hinge = (BlockDoor.EnumHingePosition) value;
             return Optional.of((BlockState) blockState.withProperty(BlockDoor.HINGE, hinge));

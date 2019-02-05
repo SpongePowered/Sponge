@@ -29,19 +29,18 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableAffectsSpawningData;
 import org.spongepowered.api.data.manipulator.mutable.entity.AffectsSpawningData;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAffectsSpawningData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 
 import java.util.Optional;
 
 public class AffectsSpawningDataProcessor extends
-        AbstractEntitySingleDataProcessor<EntityPlayerMP, Boolean, Value<Boolean>, AffectsSpawningData, ImmutableAffectsSpawningData> {
+        AbstractEntitySingleDataProcessor<EntityPlayerMP, Boolean, AffectsSpawningData, ImmutableAffectsSpawningData> {
 
     public AffectsSpawningDataProcessor() {
         super(EntityPlayerMP.class, Keys.AFFECTS_SPAWNING);
@@ -59,8 +58,8 @@ public class AffectsSpawningDataProcessor extends
     }
 
     @Override
-    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
-        return ImmutableSpongeValue.cachedOf(Keys.AFFECTS_SPAWNING, true, value);
+    protected Value.Immutable<Boolean> constructImmutableValue(Boolean value) {
+        return SpongeImmutableValue.cachedOf(Keys.AFFECTS_SPAWNING, value);
     }
 
     @Override
@@ -69,8 +68,8 @@ public class AffectsSpawningDataProcessor extends
     }
 
     @Override
-    protected Value<Boolean> constructValue(Boolean actualValue) {
-        return new SpongeValue<>(Keys.AFFECTS_SPAWNING, true, actualValue);
+    protected Value.Mutable<Boolean> constructMutableValue(Boolean actualValue) {
+        return new SpongeMutableValue<>(Keys.AFFECTS_SPAWNING, actualValue);
     }
 
     @Override

@@ -47,8 +47,7 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -435,13 +434,13 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public <E> DataTransactionResult offerCustom(Key<? extends BaseValue<E>> key, E value) {
+    public <E> DataTransactionResult offerCustom(Key<? extends Value<E>> key, E value) {
         for (DataManipulator<?, ?> manipulator : this.manipulators) {
             if (manipulator.supports(key)) {
                 final DataTransactionResult.Builder builder = DataTransactionResult.builder();
-                builder.replace(((Value) manipulator.getValue((Key) key).get()).asImmutable());
+                builder.replace(((Value.Mutable) manipulator.getValue((Key) key).get()).asImmutable());
                 manipulator.set(key, value);
-                builder.success(((Value) manipulator.getValue((Key) key).get()).asImmutable());
+                builder.success(((Value.Mutable) manipulator.getValue((Key) key).get()).asImmutable());
                 resyncCustomToTag();
                 return builder.result(DataTransactionResult.Type.SUCCESS).build();
             }
@@ -473,7 +472,7 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
     }
 
     @Override
-    public <E> Optional<E> getCustom(Key<? extends BaseValue<E>> key) {
+    public <E> Optional<E> getCustom(Key<? extends Value<E>> key) {
         return this.manipulators.stream()
                 .filter(manipulator -> manipulator.supports(key))
                 .findFirst()
@@ -481,7 +480,7 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
     }
 
     @Override
-    public <E, V extends BaseValue<E>> Optional<V> getCustomValue(Key<V> key) {
+    public <E, V extends Value<E>> Optional<V> getCustomValue(Key<V> key) {
         return this.manipulators.stream()
                 .filter(manipulator -> manipulator.supports(key))
                 .findFirst()

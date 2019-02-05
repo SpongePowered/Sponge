@@ -29,15 +29,14 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableRespawnLocation;
 import org.spongepowered.api.data.manipulator.mutable.entity.RespawnLocationData;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableMapValue;
-import org.spongepowered.api.data.value.mutable.MapValue;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.util.RespawnLocation;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeRespawnLocationData;
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeMapValue;
-import org.spongepowered.common.data.value.mutable.SpongeMapValue;
+import org.spongepowered.common.data.value.SpongeImmutableMapValue;
+import org.spongepowered.common.data.value.SpongeMutableMapValue;
 import org.spongepowered.common.entity.player.ISpongeUser;
 
 import java.util.Map;
@@ -45,7 +44,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class RespawnLocationDataProcessor extends
-        AbstractSingleDataSingleTargetProcessor<User, Map<UUID, RespawnLocation>, MapValue<UUID, RespawnLocation>, RespawnLocationData, ImmutableRespawnLocation> {
+        AbstractSingleDataSingleTargetProcessor<User, Map<UUID, RespawnLocation>, RespawnLocationData, ImmutableRespawnLocation> {
 
     public RespawnLocationDataProcessor() {
         super(Keys.RESPAWN_LOCATIONS, User.class);
@@ -80,13 +79,13 @@ public class RespawnLocationDataProcessor extends
     }
 
     @Override
-    protected MapValue<UUID, RespawnLocation> constructValue(Map<UUID, RespawnLocation> actualValue) {
-        return new SpongeMapValue<>(Keys.RESPAWN_LOCATIONS, actualValue);
+    protected Value.Mutable<Map<UUID, RespawnLocation>> constructMutableValue(Map<UUID, RespawnLocation> actualValue) {
+        return new SpongeMutableMapValue<>(Keys.RESPAWN_LOCATIONS, actualValue);
     }
 
     @Override
-    protected ImmutableMapValue<UUID, RespawnLocation> constructImmutableValue(Map<UUID, RespawnLocation> value) {
-        return new ImmutableSpongeMapValue<>(Keys.RESPAWN_LOCATIONS, value);
+    protected org.spongepowered.api.data.value.MapValue.Immutable<UUID, RespawnLocation> constructImmutableValue(Map<UUID, RespawnLocation> value) {
+        return new SpongeImmutableMapValue<>(Keys.RESPAWN_LOCATIONS, value);
     }
 
     @Override

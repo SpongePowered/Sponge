@@ -32,8 +32,7 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.SpongeImpl;
 
 import java.util.IdentityHashMap;
@@ -90,8 +89,8 @@ public abstract class AbstractMultiDataSingleTargetProcessor<Holder, T extends D
             final Optional<T> old = from(dataHolder);
             final T merged = checkNotNull(function).merge(old.orElse(null), manipulator);
             final Map<Key<?>, Object> map = new IdentityHashMap<>();
-            final Set<ImmutableValue<?>> newValues = merged.getValues();
-            for (ImmutableValue<?> value : newValues) {
+            final Set<Value.Immutable<?>> newValues = merged.getValues();
+            for (Value.Immutable<?> value : newValues) {
                 map.put(value.getKey(), value.get());
             }
             try {
@@ -114,7 +113,7 @@ public abstract class AbstractMultiDataSingleTargetProcessor<Holder, T extends D
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public Optional<I> with(Key<? extends BaseValue<?>> key, Object value, I immutable) {
+    public Optional<I> with(Key<? extends Value<?>> key, Object value, I immutable) {
         if (immutable.supports(key)) {
             return Optional.of((I) immutable.asMutable().set((Key) key, value).asImmutable());
         }

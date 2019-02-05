@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.immutable.entity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFlammableData;
 import org.spongepowered.api.data.manipulator.mutable.entity.FlammableData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFlammableData;
 
@@ -39,7 +39,7 @@ public final class ImmutableSpongeFlammableData extends AbstractImmutableBoolean
     }
 
     @Override
-    public ImmutableValue<Boolean> flammable() {
+    public Value.Immutable<Boolean> flammable() {
         return this.getValueGetter();
     }
 

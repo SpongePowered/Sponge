@@ -36,7 +36,7 @@ import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDirection
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableOpenData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutablePortionData;
 import org.spongepowered.api.data.type.PortionType;
-import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
@@ -81,7 +81,7 @@ public abstract class MixinBlockTrapDoor extends MixinBlock {
     }
 
     @Override
-    public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends BaseValue<E>> key, E value) {
+    public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends Value<E>> key, E value) {
         if (key.equals(Keys.PORTION_TYPE)) {
             return Optional.of((BlockState) blockState.with(BlockTrapDoor.HALF, convertType((BlockSlab.EnumBlockHalf) value)));
         }

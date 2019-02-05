@@ -27,12 +27,12 @@ package org.spongepowered.common.data.processor.data.block;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableLayeredData;
 import org.spongepowered.api.data.manipulator.mutable.block.LayeredData;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeLayeredData;
 import org.spongepowered.common.data.processor.common.AbstractBlockOnlyDataProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 
-public class LayeredDataProcessor extends AbstractBlockOnlyDataProcessor<Integer, MutableBoundedValue<Integer>, LayeredData, ImmutableLayeredData> {
+public class LayeredDataProcessor extends AbstractBlockOnlyDataProcessor<Integer, LayeredData, ImmutableLayeredData> {
 
     public LayeredDataProcessor() {
         super(Keys.LAYER);
@@ -49,12 +49,11 @@ public class LayeredDataProcessor extends AbstractBlockOnlyDataProcessor<Integer
     }
 
     @Override
-    protected MutableBoundedValue<Integer> constructValue(Integer actualValue) {
+    protected Value.Mutable<Integer> constructMutableValue(Integer actualValue) {
         return SpongeValueFactory.boundedBuilder(this.key)
-                .defaultValue(getDefaultValue())
                 .minimum(0)
                 .maximum(8)
-                .actualValue(actualValue)
+                .value(actualValue)
                 .build();
     }
 

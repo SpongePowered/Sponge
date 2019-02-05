@@ -33,7 +33,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.ParrotData;
 import org.spongepowered.api.data.type.ParrotVariant;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.animal.Parrot;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -44,8 +44,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeParrotData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSittingData;
-import org.spongepowered.common.data.util.DataConstants;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 import org.spongepowered.common.registry.type.entity.ParrotVariantRegistryModule;
 
 import java.util.List;
@@ -79,8 +78,8 @@ public abstract class MixinEntityParrot extends MixinEntityTameable implements P
     }
 
     @Override
-    public Value<ParrotVariant> variant() {
-        return new SpongeValue<>(Keys.PARROT_VARIANT, DataConstants.Parrot.DEFAULT_VARIANT, ParrotVariantRegistryModule.PARROT_VARIANT_IDMAP.get(this.getVariant()));
+    public Value.Mutable<ParrotVariant> variant() {
+        return new SpongeMutableValue<>(Keys.PARROT_VARIANT, ParrotVariantRegistryModule.PARROT_VARIANT_IDMAP.get(this.getVariant()));
     }
 
     @Override

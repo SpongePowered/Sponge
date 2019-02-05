@@ -28,7 +28,7 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableBreathingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.BreathingData;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeBreathingData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.value.SpongeValueFactory;
@@ -67,22 +67,20 @@ public class SpongeBreathingData extends AbstractData<BreathingData, ImmutableBr
     }
 
     @Override
-    public MutableBoundedValue<Integer> remainingAir() {
+    public BoundedValue.Mutable<Integer> remainingAir() {
         return SpongeValueFactory.boundedBuilder(Keys.REMAINING_AIR)
-            .defaultValue(300)
             .minimum(-20)
             .maximum(Integer.MAX_VALUE)
-            .actualValue(this.remainingAir)
+            .value(this.remainingAir)
             .build();
     }
 
     @Override
-    public MutableBoundedValue<Integer> maxAir() {
+    public BoundedValue.Mutable<Integer> maxAir() {
         return SpongeValueFactory.boundedBuilder(Keys.MAX_AIR)
-            .defaultValue(this.maxAir)
             .minimum(0)
             .maximum(Integer.MAX_VALUE)
-            .actualValue(this.maxAir)
+            .value(this.maxAir)
             .build();
     }
 

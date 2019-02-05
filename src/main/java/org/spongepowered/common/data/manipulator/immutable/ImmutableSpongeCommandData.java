@@ -28,15 +28,15 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableCommandData;
 import org.spongepowered.api.data.manipulator.mutable.CommandData;
-import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
-import org.spongepowered.api.data.value.immutable.ImmutableOptionalValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.OptionalValue;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeCommandData;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeOptionalValue;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableOptionalValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
 
 import java.util.Optional;
 
@@ -49,10 +49,10 @@ public class ImmutableSpongeCommandData extends AbstractImmutableData<ImmutableC
     private final boolean tracks;
     @Nullable private final Text lastOutput;
 
-    private final ImmutableValue<String> storedValue;
-    private final ImmutableBoundedValue<Integer> successValue;
-    private final ImmutableValue<Boolean> tracksValue;
-    private final ImmutableOptionalValue<Text> lastOutputValue;
+    private final Value.Immutable<String> storedValue;
+    private final BoundedValue.Immutable<Integer> successValue;
+    private final Value.Immutable<Boolean> tracksValue;
+    private final OptionalValue.Immutable<Text> lastOutputValue;
 
     public ImmutableSpongeCommandData(String storedCommand, int success, boolean tracks, @Nullable Text lastOutput) {
         super(ImmutableCommandData.class);
@@ -61,37 +61,36 @@ public class ImmutableSpongeCommandData extends AbstractImmutableData<ImmutableC
         this.tracks = tracks;
         this.lastOutput = lastOutput;
 
-        this.storedValue = new ImmutableSpongeValue<>(Keys.COMMAND, this.storedCommand);
+        this.storedValue = new SpongeImmutableValue<>(Keys.COMMAND, this.storedCommand);
         this.successValue = SpongeValueFactory.boundedBuilder(Keys.SUCCESS_COUNT)
-                .actualValue(this.success)
-                .defaultValue(0)
+                .value(this.success)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
                 .build()
                 .asImmutable();
-        this.tracksValue = ImmutableSpongeValue.cachedOf(Keys.TRACKS_OUTPUT, false, this.tracks);
-        this.lastOutputValue = new ImmutableSpongeOptionalValue<>(Keys.LAST_COMMAND_OUTPUT, Optional.ofNullable(this.lastOutput));
+        this.tracksValue = SpongeImmutableValue.cachedOf(Keys.TRACKS_OUTPUT, this.tracks);
+        this.lastOutputValue = new SpongeImmutableOptionalValue<>(Keys.LAST_COMMAND_OUTPUT, Optional.ofNullable(this.lastOutput));
 
         registerGetters();
     }
 
     @Override
-    public ImmutableValue<String> storedCommand() {
+    public Value.Immutable<String> storedCommand() {
         return this.storedValue;
     }
 
     @Override
-    public ImmutableBoundedValue<Integer> successCount() {
+    public BoundedValue.Immutable<Integer> successCount() {
         return this.successValue;
     }
 
     @Override
-    public ImmutableValue<Boolean> doesTrackOutput() {
+    public Value.Immutable<Boolean> doesTrackOutput() {
         return this.tracksValue;
     }
 
     @Override
-    public ImmutableOptionalValue<Text> lastOutput() {
+    public OptionalValue.Immutable<Text> lastOutput() {
         return this.lastOutputValue;
     }
 

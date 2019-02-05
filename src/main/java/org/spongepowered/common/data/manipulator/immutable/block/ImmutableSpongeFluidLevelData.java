@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.immutable.block;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableFluidLevelData;
 import org.spongepowered.api.data.manipulator.mutable.block.FluidLevelData;
-import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableIntData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeFluidLevelData;
 
@@ -39,7 +39,7 @@ public class ImmutableSpongeFluidLevelData extends AbstractImmutableIntData<Immu
     }
 
     @Override
-    public ImmutableBoundedValue<Integer> level() {
+    public BoundedValue.Immutable<Integer> level() {
         return getValueGetter();
     }
 }

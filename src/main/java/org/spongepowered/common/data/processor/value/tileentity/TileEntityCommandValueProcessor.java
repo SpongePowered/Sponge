@@ -27,15 +27,14 @@ package org.spongepowered.common.data.processor.value.tileentity;
 import net.minecraft.tileentity.TileEntityCommandBlock;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 
 import java.util.Optional;
 
-public class TileEntityCommandValueProcessor extends AbstractSpongeValueProcessor<TileEntityCommandBlock, String, Value<String>> {
+public class TileEntityCommandValueProcessor extends AbstractSpongeValueProcessor<TileEntityCommandBlock, String> {
 
     public TileEntityCommandValueProcessor() {
         super(TileEntityCommandBlock.class, Keys.COMMAND);
@@ -47,8 +46,8 @@ public class TileEntityCommandValueProcessor extends AbstractSpongeValueProcesso
     }
 
     @Override
-    protected Value<String> constructValue(String actualValue) {
-        return new SpongeValue<>(Keys.COMMAND, actualValue);
+    protected Value.Mutable<String> constructMutableValue(String actualValue) {
+        return new SpongeMutableValue<>(Keys.COMMAND, actualValue);
     }
 
     @Override
@@ -63,8 +62,8 @@ public class TileEntityCommandValueProcessor extends AbstractSpongeValueProcesso
     }
 
     @Override
-    protected ImmutableValue<String> constructImmutableValue(String value) {
-        return constructValue(value).asImmutable();
+    protected Value.Immutable<String> constructImmutableValue(String value) {
+        return constructMutableValue(value).asImmutable();
     }
 
 }

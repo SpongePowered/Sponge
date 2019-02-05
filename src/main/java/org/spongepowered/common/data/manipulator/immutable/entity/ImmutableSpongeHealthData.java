@@ -28,7 +28,7 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableHealthData;
 import org.spongepowered.api.data.manipulator.mutable.entity.HealthData;
-import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthData;
 import org.spongepowered.common.data.value.SpongeValueFactory;
@@ -38,8 +38,8 @@ public class ImmutableSpongeHealthData extends AbstractImmutableData<ImmutableHe
     private final double health;
     private final double maxHealth;
 
-    private final ImmutableBoundedValue<Double> healthValue;
-    private final ImmutableBoundedValue<Double> maxHealthValue;
+    private final BoundedValue.Immutable<Double> healthValue;
+    private final BoundedValue.Immutable<Double> maxHealthValue;
 
     public ImmutableSpongeHealthData(double health, double maxHealth) {
         super(ImmutableHealthData.class);
@@ -47,16 +47,14 @@ public class ImmutableSpongeHealthData extends AbstractImmutableData<ImmutableHe
         this.maxHealth = maxHealth;
 
         this.healthValue = SpongeValueFactory.boundedBuilder(Keys.HEALTH)
-                .actualValue(this.health)
-                .defaultValue(this.maxHealth)
+                .value(this.health)
                 .minimum(0D)
                 .maximum(this.maxHealth)
                 .build()
                 .asImmutable();
 
         this.maxHealthValue = SpongeValueFactory.boundedBuilder(Keys.MAX_HEALTH)
-                .actualValue(this.maxHealth)
-                .defaultValue(20D)
+                .value(this.maxHealth)
                 .minimum(0D)
                 .maximum((double) Float.MAX_VALUE)
                 .build()
@@ -66,12 +64,12 @@ public class ImmutableSpongeHealthData extends AbstractImmutableData<ImmutableHe
     }
 
     @Override
-    public ImmutableBoundedValue<Double> health() {
+    public BoundedValue.Immutable<Double> health() {
         return this.healthValue;
     }
 
     @Override
-    public ImmutableBoundedValue<Double> maxHealth() {
+    public BoundedValue.Immutable<Double> maxHealth() {
         return this.maxHealthValue;
     }
 

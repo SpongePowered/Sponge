@@ -36,7 +36,7 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeVehicleData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
 
 import java.util.Map;
 import java.util.Optional;
@@ -81,7 +81,7 @@ public class VehicleDataProcessor extends AbstractEntityDataProcessor<net.minecr
             if (entity.ridingEntity != null) {
                 final EntitySnapshot previousVehicle = ((Entity) entity.getRidingEntity()).createSnapshot();
                 entity.dismountRidingEntity();
-                return DataTransactionResult.successResult(new ImmutableSpongeValue<>(Keys.VEHICLE, previousVehicle));
+                return DataTransactionResult.successResult(new SpongeImmutableValue<>(Keys.VEHICLE, previousVehicle));
             }
             return DataTransactionResult.builder().result(DataTransactionResult.Type.SUCCESS).build();
         }

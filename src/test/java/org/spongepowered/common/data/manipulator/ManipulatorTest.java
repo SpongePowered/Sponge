@@ -30,7 +30,6 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 import com.google.common.collect.Lists;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -43,8 +42,7 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.event.SpongeEventFactoryTest;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.ClickAction;
@@ -123,8 +121,8 @@ public class ManipulatorTest {
     public void testValueEquals() {
         final DataManipulator<?, ?> manipulator = this.createManipulator();
         final ImmutableDataManipulator<?, ?> immutable = manipulator.asImmutable();
-        final Set<ImmutableValue<?>> manipulatorValues = manipulator.getValues();
-        final Set<ImmutableValue<?>> immutableValues = immutable.getValues();
+        final Set<Value.Immutable<?>> manipulatorValues = manipulator.getValues();
+        final Set<Value.Immutable<?>> immutableValues = immutable.getValues();
         assertThat("The ImmutableDataManipulator is missing values present from the DataManipulator! " + this.dataName,
                 manipulatorValues.containsAll(immutableValues), is(true));
         assertThat("The DataManipulator is missing values present from the ImmutableDataManipulator! " + this.dataName,
@@ -167,7 +165,7 @@ public class ManipulatorTest {
             final DataManipulator<?, ?> manipulator = this.createManipulator();
             final ImmutableDataManipulator<?, ?> immutableDataManipulator = manipulator.asImmutable();
             final Set<Key<?>> keys = manipulator.getKeys();
-            for (Key<? extends BaseValue<?>> key : keys) {
+            for (Key<? extends Value<?>> key : keys) {
                 Optional<?> mutable = manipulator.get((Key) key);
                 Optional<?> immutable = immutableDataManipulator.get((Key) key);
                 assertThat("The DataManipulator failed to retrieve a value that a key was registered for!\n"

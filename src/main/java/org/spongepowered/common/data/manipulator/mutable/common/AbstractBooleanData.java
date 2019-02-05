@@ -31,10 +31,9 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 import org.spongepowered.common.util.ReflectionUtil;
 
 import java.lang.reflect.Modifier;
@@ -45,7 +44,7 @@ public abstract class AbstractBooleanData<M extends DataManipulator<M, I>, I ext
     private final Class<? extends I> immutableClass;
     private final Boolean defaultValue;
 
-    protected AbstractBooleanData(Class<M> manipulatorClass, Boolean value, Key<? extends BaseValue<Boolean>> usedKey, Class<? extends I> immutableClass, Boolean defaultValue) {
+    protected AbstractBooleanData(Class<M> manipulatorClass, Boolean value, Key<? extends Value<Boolean>> usedKey, Class<? extends I> immutableClass, Boolean defaultValue) {
         super(manipulatorClass, value, usedKey);
         checkArgument(!Modifier.isAbstract(immutableClass.getModifiers()), "The immutable class cannot be abstract!");
         checkArgument(!Modifier.isInterface(immutableClass.getModifiers()), "The immutable class cannot be an interface!");
@@ -54,8 +53,8 @@ public abstract class AbstractBooleanData<M extends DataManipulator<M, I>, I ext
     }
 
     @Override
-    protected Value<Boolean> getValueGetter() {
-        return new SpongeValue<>(this.usedKey, this.defaultValue, this.getValue());
+    protected Value.Mutable<Boolean> getValueGetter() {
+        return new SpongeMutableValue<>(this.usedKey, this.getValue());
     }
 
     @Override

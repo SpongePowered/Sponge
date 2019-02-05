@@ -27,25 +27,24 @@ package org.spongepowered.common.data.processor.value.entity;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 
 import java.util.Optional;
 
-public class VanishCollisionValueProcessor extends AbstractSpongeValueProcessor<Entity, Boolean, Value<Boolean>> {
+public class VanishCollisionValueProcessor extends AbstractSpongeValueProcessor<Entity, Boolean> {
 
     public VanishCollisionValueProcessor() {
         super(Entity.class, Keys.VANISH_IGNORES_COLLISION);
     }
 
     @Override
-    protected Value<Boolean> constructValue(Boolean actualValue) {
-        return new SpongeValue<Boolean>(Keys.VANISH_IGNORES_COLLISION, false, actualValue);
+    protected Value.Mutable<Boolean> constructMutableValue(Boolean actualValue) {
+        return new SpongeMutableValue<>(Keys.VANISH_IGNORES_COLLISION, actualValue);
     }
 
     @Override
@@ -66,8 +65,8 @@ public class VanishCollisionValueProcessor extends AbstractSpongeValueProcessor<
     }
 
     @Override
-    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
-        return ImmutableSpongeValue.cachedOf(Keys.VANISH_IGNORES_COLLISION, false, value);
+    protected Value.Immutable<Boolean> constructImmutableValue(Boolean value) {
+        return SpongeImmutableValue.cachedOf(Keys.VANISH_IGNORES_COLLISION, value);
     }
 
     @Override

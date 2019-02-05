@@ -28,27 +28,27 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableLockableData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.LockableData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleData;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeLockableData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
 
 public class ImmutableSpongeLockableData extends AbstractImmutableSingleData<String, ImmutableLockableData, LockableData> implements ImmutableLockableData {
 
-    private final ImmutableValue<String> valueObj;
+    private final Value.Immutable<String> valueObj;
     
     public ImmutableSpongeLockableData(String value) {
         super(ImmutableLockableData.class, value, Keys.LOCK_TOKEN);
-        this.valueObj = new ImmutableSpongeValue<String>(Keys.LOCK_TOKEN, "", this.value);
+        this.valueObj = new SpongeImmutableValue<String>(Keys.LOCK_TOKEN, this.value);
     }
 
     @Override
-    public ImmutableValue<String> lockToken() {
+    public Value.Immutable<String> lockToken() {
         return this.valueObj;
     }
 
     @Override
-    protected ImmutableValue<String> getValueGetter() {
+    protected Value.Immutable<String> getValueGetter() {
         return this.valueObj;
     }
 

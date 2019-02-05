@@ -32,7 +32,7 @@ import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
-import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 
@@ -55,13 +55,13 @@ public interface IMixinCustomDataHolder {
 
     boolean supportsCustom(Key<?> key);
 
-    <E> Optional<E> getCustom(Key<? extends BaseValue<E>> key);
+    <E> Optional<E> getCustom(Key<? extends Value<E>> key);
 
-    <E, V extends BaseValue<E>> Optional<V> getCustomValue(Key<V> key);
+    <E, V extends Value<E>> Optional<V> getCustomValue(Key<V> key);
 
     List<DataManipulator<?, ?>> getCustomManipulators();
 
-    <E> DataTransactionResult offerCustom(Key<? extends BaseValue<E>> key, E value);
+    <E> DataTransactionResult offerCustom(Key<? extends Value<E>> key, E value);
 
     DataTransactionResult removeCustom(Key<?> key);
 

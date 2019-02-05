@@ -28,12 +28,12 @@ import net.minecraft.entity.passive.EntityPig;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.PigSaddleData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.animal.Pig;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongePigSaddleData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 
 import java.util.List;
 
@@ -48,8 +48,8 @@ public abstract class MixinEntityPig extends MixinEntityAnimal implements Pig {
     }
 
     @Override
-    public Value<Boolean> saddled() {
-        return new SpongeValue<>(Keys.PIG_SADDLE, false, this.getSaddled());
+    public Value.Mutable<Boolean> saddled() {
+        return new SpongeMutableValue<>(Keys.PIG_SADDLE, this.getSaddled());
     }
 
     @Override

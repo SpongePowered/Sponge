@@ -30,9 +30,8 @@ import com.google.common.collect.Sets;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.value.mutable.SpongeSetValue;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.common.data.value.SpongeMutableSetValue;
 import org.spongepowered.common.util.ReflectionUtil;
 
 import java.lang.reflect.Modifier;
@@ -44,7 +43,7 @@ public abstract class AbstractSingleSetData<E, M extends DataManipulator<M, I>, 
     private final Class<? extends I> immutableClass;
 
     public AbstractSingleSetData(Class<M> manipulatorClass, Set<E> value,
-                                  Key<? extends BaseValue<Set<E>>> usedKey,
+                                  Key<? extends Value<Set<E>>> usedKey,
                                   Class<? extends I> immutableClass) {
         super(manipulatorClass, Sets.newHashSet(value), usedKey);
         checkArgument(!Modifier.isAbstract(immutableClass.getModifiers()), "The immutable class cannot be abstract!");
@@ -63,8 +62,8 @@ public abstract class AbstractSingleSetData<E, M extends DataManipulator<M, I>, 
     }
 
     @Override
-    protected Value<?> getValueGetter() {
-        return new SpongeSetValue<>(this.usedKey, getValue());
+    protected Value.Mutable<?> getValueGetter() {
+        return new SpongeMutableSetValue<>(this.usedKey, getValue());
     }
 
     @SuppressWarnings("unchecked")

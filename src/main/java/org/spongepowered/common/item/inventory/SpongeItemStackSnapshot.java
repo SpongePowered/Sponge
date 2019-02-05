@@ -41,8 +41,7 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.property.Property;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -76,7 +75,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     private final ImmutableList<ImmutableDataManipulator<?, ?>> manipulators;
     private final transient ItemStack privateStack; // only for internal use since the processors have a huge say
     private final ImmutableSet<Key<?>> keys;
-    private final ImmutableSet<ImmutableValue<?>> values;
+    private final ImmutableSet<Value.Immutable<?>> values;
     @Nullable private final NBTTagCompound compound;
     @Nullable private Optional<UUID> creatorUniqueId;
 
@@ -86,7 +85,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         this.quantity = itemStack.getQuantity();
         ImmutableList.Builder<ImmutableDataManipulator<?, ?>> builder = ImmutableList.builder();
         ImmutableSet.Builder<Key<?>> keyBuilder = ImmutableSet.builder();
-        ImmutableSet.Builder<ImmutableValue<?>> valueBuilder = ImmutableSet.builder();
+        ImmutableSet.Builder<Value.Immutable<?>> valueBuilder = ImmutableSet.builder();
         for (DataManipulator<?, ?> manipulator : ((IMixinCustomDataHolder) itemStack).getCustomManipulators()) {
             builder.add(manipulator.asImmutable());
             keyBuilder.addAll(manipulator.getKeys());
@@ -130,7 +129,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         this.damageValue = damageValue;
         this.privateStack = (ItemStack) new net.minecraft.item.ItemStack((Item) this.itemType, this.quantity, this.damageValue);
         ImmutableSet.Builder<Key<?>> keyBuilder = ImmutableSet.builder();
-        ImmutableSet.Builder<ImmutableValue<?>> valueBuilder = ImmutableSet.builder();
+        ImmutableSet.Builder<Value.Immutable<?>> valueBuilder = ImmutableSet.builder();
         for (ImmutableDataManipulator<?, ?> manipulator : this.manipulators) {
             this.privateStack.offer(manipulator.asMutable());
             keyBuilder.addAll(manipulator.getKeys());
@@ -233,7 +232,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     }
 
     @Override
-    public <E> Optional<ItemStackSnapshot> transform(Key<? extends BaseValue<E>> key, Function<E, E> function) {
+    public <E> Optional<ItemStackSnapshot> transform(Key<? extends Value<E>> key, Function<E, E> function) {
         final ItemStack copy = this.privateStack.copy();
         final DataTransactionResult result = copy.transform(key, function);
         if (result.getType() != DataTransactionResult.Type.SUCCESS) {
@@ -243,7 +242,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     }
 
     @Override
-    public <E> Optional<ItemStackSnapshot> with(Key<? extends BaseValue<E>> key, E value) {
+    public <E> Optional<ItemStackSnapshot> with(Key<? extends Value<E>> key, E value) {
         final ItemStack copy = this.privateStack.copy();
         final DataTransactionResult result = copy.offer(key, value);
         if (result.getType() != DataTransactionResult.Type.SUCCESS) {
@@ -253,8 +252,8 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     }
 
     @Override
-    public Optional<ItemStackSnapshot> with(BaseValue<?> value) {
-        return with((Key<BaseValue<Object>>) value.getKey(), (Object) value.get());
+    public Optional<ItemStackSnapshot> with(Value<?> value) {
+        return with((Key<Value<Object>>) value.getKey(), (Object) value.get());
     }
 
     @Override
@@ -310,12 +309,12 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     }
 
     @Override
-    public <E> Optional<E> get(Key<? extends BaseValue<E>> key) {
+    public <E> Optional<E> get(Key<? extends Value<E>> key) {
         return this.privateStack.get(key);
     }
 
     @Override
-    public <E, V extends BaseValue<E>> Optional<V> getValue(Key<V> key) {
+    public <E, V extends Value<E>> Optional<V> getValue(Key<V> key) {
         return this.privateStack.getValue(key);
     }
 
@@ -335,7 +334,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     }
 
     @Override
-    public Set<ImmutableValue<?>> getValues() {
+    public Set<Value.Immutable<?>> getValues() {
         return this.values;
     }
 

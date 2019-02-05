@@ -33,21 +33,21 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableEnchantmentData;
 import org.spongepowered.api.data.manipulator.mutable.item.EnchantmentData;
+import org.spongepowered.api.data.value.ListValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeEnchantmentData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
-import org.spongepowered.common.data.value.mutable.SpongeListValue;
+import org.spongepowered.common.data.value.SpongeImmutableListValue;
+import org.spongepowered.common.data.value.SpongeMutableListValue;
 
 import java.util.List;
 import java.util.Optional;
 
 public class ItemEnchantmentDataProcessor
-        extends AbstractItemSingleDataProcessor<List<Enchantment>, ListValue<Enchantment>, EnchantmentData, ImmutableEnchantmentData> {
+        extends AbstractItemSingleDataProcessor<List<Enchantment>, EnchantmentData, ImmutableEnchantmentData> {
 
     public ItemEnchantmentDataProcessor() {
         super(input -> true, Keys.ITEM_ENCHANTMENTS);
@@ -73,20 +73,20 @@ public class ItemEnchantmentDataProcessor
     }
 
     @Override
-    protected ListValue<Enchantment> constructValue(List<Enchantment> actualValue) {
-        return new SpongeListValue<>(Keys.ITEM_ENCHANTMENTS, actualValue);
+    protected Value.Mutable<List<Enchantment>> constructMutableValue(List<Enchantment> actualValue) {
+        return new SpongeMutableListValue<>(Keys.ITEM_ENCHANTMENTS, actualValue);
     }
 
     @Override
-    protected ImmutableValue<List<Enchantment>> constructImmutableValue(List<Enchantment> value) {
-        return new ImmutableSpongeListValue<>(Keys.ITEM_ENCHANTMENTS, ImmutableList.copyOf(value));
+    protected Value.Immutable<List<Enchantment>> constructImmutableValue(List<Enchantment> value) {
+        return new SpongeImmutableListValue<>(Keys.ITEM_ENCHANTMENTS, ImmutableList.copyOf(value));
     }
 
     @Override
     public Optional<EnchantmentData> fill(DataContainer container, EnchantmentData enchantmentData) {
         checkDataExists(container, Keys.ITEM_ENCHANTMENTS.getQuery());
         final List<Enchantment> enchantments = container.getSerializableList(Keys.ITEM_ENCHANTMENTS.getQuery(), Enchantment.class).get();
-        final ListValue<Enchantment> existing = enchantmentData.enchantments();
+        final ListValue.Mutable<Enchantment> existing = enchantmentData.enchantments();
         existing.addAll(enchantments);
         enchantmentData.set(existing);
         return Optional.of(enchantmentData);

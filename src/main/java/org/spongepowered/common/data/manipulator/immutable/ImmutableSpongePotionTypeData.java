@@ -28,28 +28,27 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutablePotionTypeData;
 import org.spongepowered.api.data.manipulator.mutable.PotionTypeData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.item.potion.PotionType;
-import org.spongepowered.api.item.potion.PotionTypes;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleData;
 import org.spongepowered.common.data.manipulator.mutable.SpongePotionTypeData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
 
 public class ImmutableSpongePotionTypeData extends AbstractImmutableSingleData<PotionType, ImmutablePotionTypeData, PotionTypeData> implements ImmutablePotionTypeData {
 
-    private final ImmutableValue<PotionType> immutableValue = new ImmutableSpongeValue<>(Keys.POTION_TYPE, PotionTypes.EMPTY, this.value);
+    private final Value.Immutable<PotionType> immutableValue = new SpongeImmutableValue<>(Keys.POTION_TYPE, this.value);
 
     public ImmutableSpongePotionTypeData(PotionType type) {
         super(ImmutablePotionTypeData.class, type, Keys.POTION_TYPE);
     }
 
     @Override
-    public ImmutableValue<PotionType> type() {
+    public Value.Immutable<PotionType> type() {
         return this.immutableValue;
     }
 
     @Override
-    protected ImmutableValue<?> getValueGetter() {
+    protected Value.Immutable<?> getValueGetter() {
         return type();
     }
 

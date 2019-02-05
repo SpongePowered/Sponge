@@ -27,18 +27,18 @@ package org.spongepowered.common.data.manipulator.immutable.entity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutablePersistingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.PersistingData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongePersistingData;
 
 public class ImmutableSpongePersistingData extends AbstractImmutableBooleanData<ImmutablePersistingData, PersistingData> implements ImmutablePersistingData {
 
     public ImmutableSpongePersistingData(Boolean value) {
-        super(ImmutablePersistingData.class, value, Keys.PERSISTS, SpongePersistingData.class, false);
+        super(ImmutablePersistingData.class, value, Keys.PERSISTENT, SpongePersistingData.class, false);
     }
 
     @Override
-    public ImmutableValue<Boolean> persists() {
+    public Value.Immutable<Boolean> persists() {
         return getValueGetter();
     }
 

@@ -26,27 +26,26 @@ package org.spongepowered.common.data.manipulator.immutable.extra;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.extra.fluid.FluidStackSnapshot;
 import org.spongepowered.api.extra.fluid.data.manipulator.immutable.ImmutableFluidItemData;
 import org.spongepowered.api.extra.fluid.data.manipulator.mutable.FluidItemData;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleData;
 import org.spongepowered.common.data.manipulator.mutable.extra.SpongeFluidItemData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.extra.fluid.SpongeFluidStackSnapshot;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
 
 public class ImmutableSpongeFluidItemData extends AbstractImmutableSingleData<FluidStackSnapshot, ImmutableFluidItemData, FluidItemData>
         implements ImmutableFluidItemData {
 
-    private final ImmutableValue<FluidStackSnapshot> immutableValue;
+    private final Value.Immutable<FluidStackSnapshot> immutableValue;
 
     public ImmutableSpongeFluidItemData(FluidStackSnapshot value) {
         super(ImmutableFluidItemData.class, value, Keys.FLUID_ITEM_STACK);
-        this.immutableValue = new ImmutableSpongeValue<>(Keys.FLUID_ITEM_STACK, SpongeFluidStackSnapshot.DEFAULT, this.value);
+        this.immutableValue = new SpongeImmutableValue<>(Keys.FLUID_ITEM_STACK, this.value);
     }
 
     @Override
-    protected ImmutableValue<FluidStackSnapshot> getValueGetter() {
+    protected Value.Immutable<FluidStackSnapshot> getValueGetter() {
         return this.immutableValue;
     }
 
@@ -56,7 +55,7 @@ public class ImmutableSpongeFluidItemData extends AbstractImmutableSingleData<Fl
     }
 
     @Override
-    public ImmutableValue<FluidStackSnapshot> fluid() {
+    public Value.Immutable<FluidStackSnapshot> fluid() {
         return getValueGetter();
     }
 

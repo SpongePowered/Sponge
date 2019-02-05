@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.immutable.entity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableElytraFlyingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ElytraFlyingData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeElytraFlyingData;
 
@@ -38,7 +38,7 @@ public class ImmutableSpongeElytraFlyingData extends AbstractImmutableBooleanDat
     }
 
     @Override
-    public ImmutableValue<Boolean> elytraFlying() {
+    public Value.Immutable<Boolean> elytraFlying() {
         return getValueGetter();
     }
 

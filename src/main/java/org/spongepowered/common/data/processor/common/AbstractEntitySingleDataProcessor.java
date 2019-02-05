@@ -28,13 +28,13 @@ import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.Value;
 
-public abstract class AbstractEntitySingleDataProcessor<E extends Entity, ValueType, ValueClassType extends BaseValue<ValueType>,
-    Manipulator extends DataManipulator<Manipulator, Immutable>, Immutable extends ImmutableDataManipulator<Immutable, Manipulator>>
-    extends AbstractSingleDataSingleTargetProcessor<E, ValueType, ValueClassType, Manipulator, Immutable> {
+public abstract class AbstractEntitySingleDataProcessor<E extends Entity, ValueType,
+        Manipulator extends DataManipulator<Manipulator, Immutable>, Immutable extends ImmutableDataManipulator<Immutable, Manipulator>>
+    extends AbstractSingleDataSingleTargetProcessor<E, ValueType, Manipulator, Immutable> {
 
-    public AbstractEntitySingleDataProcessor(Class<E> entityClass, Key<ValueClassType> key) {
+    public AbstractEntitySingleDataProcessor(Class<E> entityClass, Key<? extends Value<ValueType>> key) {
         super(key, entityClass);
     }
     

@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.immutable.entity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableGravityData;
 import org.spongepowered.api.data.manipulator.mutable.entity.GravityData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGravityData;
 import org.spongepowered.common.data.util.DataConstants;
@@ -39,7 +39,7 @@ public class ImmutableSpongeGravityData extends AbstractImmutableBooleanData<Imm
     }
 
     @Override
-    public ImmutableValue<Boolean> gravity() {
+    public Value.Immutable<Boolean> gravity() {
         return getValueGetter();
     }
 

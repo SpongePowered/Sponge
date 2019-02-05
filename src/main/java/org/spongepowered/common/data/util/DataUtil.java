@@ -47,7 +47,7 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.util.TypeTokens;
@@ -74,14 +74,12 @@ import org.spongepowered.common.util.TypeTokenHelper;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -109,7 +107,7 @@ public final class DataUtil {
     }
 
     @SuppressWarnings("rawtypes")
-    public static <T> T getData(final DataView dataView, final Key<? extends BaseValue<T>> key) throws InvalidDataException {
+    public static <T> T getData(final DataView dataView, final Key<? extends Value<T>> key) throws InvalidDataException {
         checkDataExists(dataView, checkNotNull(key).getQuery());
         final Object object;
         final TypeToken<?> elementToken = key.getElementToken();
@@ -347,9 +345,9 @@ public final class DataUtil {
         SpongeManipulatorRegistry.getInstance().register(manipulatorClass, implClass, immutableDataManipulator, implImClass, processor);
     }
 
-    public static <E, V extends BaseValue<E>, T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> void
+    public static <E, V extends Value<E>, T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> void
     registerDualProcessor(Class<T> manipulatorClass, Class<? extends T> implClass, Class<I> immutableDataManipulator,
-        Class<? extends I> implImClass, AbstractSingleDataSingleTargetProcessor<?, E, V, T, I> processor) {
+        Class<? extends I> implImClass, AbstractSingleDataSingleTargetProcessor<?, E, T, I> processor) {
         registerDataProcessorAndImpl(manipulatorClass, implClass, immutableDataManipulator, implImClass, processor);
         registerValueProcessor(processor.getKey(), processor);
     }
@@ -417,7 +415,7 @@ public final class DataUtil {
     }
 
 
-    public static <E, V extends BaseValue<E>> void registerValueProcessor(Key<V> key, ValueProcessor<E, V> valueProcessor) {
+    public static <E, V extends Value<E>> void registerValueProcessor(Key<V> key, ValueProcessor<E, V> valueProcessor) {
         checkState(!SpongeDataManager.areRegistrationsComplete(), "Registrations are no longer allowed!");
         checkNotNull(valueProcessor);
         checkArgument(!(valueProcessor instanceof ValueProcessorDelegate), "Cannot register ValueProcessorDelegates! READ THE DOCS!");
@@ -425,7 +423,7 @@ public final class DataUtil {
         SpongeManipulatorRegistry.getInstance().registerValueProcessor(key, valueProcessor);
     }
 
-    public static <E, V extends BaseValue<E>> Optional<ValueProcessor<E, V>> getValueProcessor(Key<V> key) {
+    public static <E, V extends Value<E>> Optional<ValueProcessor<E, V>> getValueProcessor(Key<V> key) {
         return Optional.ofNullable((ValueProcessor<E, V>) SpongeManipulatorRegistry.getInstance().getDelegate(key));
     }
 
@@ -433,8 +431,8 @@ public final class DataUtil {
         return Optional.ofNullable(SpongeManipulatorRegistry.getInstance().getDelegate(key));
     }
 
-    public static <E> Optional<ValueProcessor<E, ? extends BaseValue<E>>> getBaseValueProcessor(Key<? extends BaseValue<E>> key) {
-        return Optional.ofNullable((ValueProcessor<E, ? extends BaseValue<E>>) SpongeManipulatorRegistry.getInstance().getDelegate(key));
+    public static <E> Optional<ValueProcessor<E, ? extends Value<E>>> getBaseValueProcessor(Key<? extends Value<E>> key) {
+        return Optional.ofNullable((ValueProcessor<E, ? extends Value<E>>) SpongeManipulatorRegistry.getInstance().getDelegate(key));
     }
 
     public static RawDataValidator getValidators(ValidationType validationType) {
@@ -446,7 +444,7 @@ public final class DataUtil {
         return Optional.ofNullable((NbtDataProcessor<T, I>) SpongeManipulatorRegistry.getInstance().getNbtDelegate(dataType, clazz));
     }
 
-    public static <E, V extends BaseValue<E>> Optional<NbtValueProcessor<E, V>> getNbtProcessor(NbtDataType dataType, Key<V> key) {
+    public static <E, V extends Value<E>> Optional<NbtValueProcessor<E, V>> getNbtProcessor(NbtDataType dataType, Key<V> key) {
         return Optional.ofNullable((NbtValueProcessor<E, V>) SpongeManipulatorRegistry.getInstance().getNbtProcessor(dataType, key));
     }
 

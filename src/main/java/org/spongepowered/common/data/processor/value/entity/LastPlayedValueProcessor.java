@@ -27,27 +27,26 @@ package org.spongepowered.common.data.processor.value.entity;
 import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
-public class LastPlayedValueProcessor extends AbstractSpongeValueProcessor<EntityPlayer, Instant, Value<Instant>> {
+public class LastPlayedValueProcessor extends AbstractSpongeValueProcessor<EntityPlayer, Instant> {
 
     public LastPlayedValueProcessor() {
         super(EntityPlayer.class, Keys.LAST_DATE_PLAYED);
     }
 
     @Override
-    protected Value<Instant> constructValue(Instant actualValue) {
-        return new SpongeValue<>(Keys.LAST_DATE_PLAYED, Instant.now(), actualValue);
+    protected Value.Mutable<Instant> constructMutableValue(Instant actualValue) {
+        return new SpongeMutableValue<>(Keys.LAST_DATE_PLAYED, actualValue);
     }
 
     @Override
@@ -64,8 +63,8 @@ public class LastPlayedValueProcessor extends AbstractSpongeValueProcessor<Entit
     }
 
     @Override
-    protected ImmutableValue<Instant> constructImmutableValue(Instant value) {
-        return new ImmutableSpongeValue<Instant>(Keys.LAST_DATE_PLAYED, Instant.now(), value);
+    protected Value.Immutable<Instant> constructImmutableValue(Instant value) {
+        return new SpongeImmutableValue<>(Keys.LAST_DATE_PLAYED, value);
     }
 
     @Override

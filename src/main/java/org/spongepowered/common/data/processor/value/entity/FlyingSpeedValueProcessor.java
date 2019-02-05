@@ -27,29 +27,27 @@ package org.spongepowered.common.data.processor.value.entity;
 import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.util.DataConstants;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 
 import java.util.Optional;
 
-public class FlyingSpeedValueProcessor extends AbstractSpongeValueProcessor<EntityPlayer, Double, Value<Double>> {
+public class FlyingSpeedValueProcessor extends AbstractSpongeValueProcessor<EntityPlayer, Double> {
 
     public FlyingSpeedValueProcessor() {
         super(EntityPlayer.class, Keys.FLYING_SPEED);
     }
 
     @Override
-    protected Value<Double> constructValue(Double value) {
-        return new SpongeValue<>(Keys.FLYING_SPEED, DataConstants.DEFAULT_FLYING_SPEED, value);
+    protected Value.Mutable<Double> constructMutableValue(Double value) {
+        return new SpongeMutableValue<>(Keys.FLYING_SPEED, value);
     }
 
     @Override
-    protected ImmutableValue<Double> constructImmutableValue(Double value) {
-        return constructValue(value).asImmutable();
+    protected Value.Immutable<Double> constructImmutableValue(Double value) {
+        return constructMutableValue(value).asImmutable();
     }
 
     @Override

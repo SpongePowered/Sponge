@@ -28,39 +28,37 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.ValueProcessor;
 
 import java.util.Optional;
 
-public abstract class AbstractSpongeValueProcessor<C, E, V extends BaseValue<E>> implements ValueProcessor<E, V> {
+public abstract class AbstractSpongeValueProcessor<C, E> implements ValueProcessor<E, Value<E>> {
 
     private final Class<C> containerClass;
-    protected final Key<V> key;
+    protected final Key<? extends Value<E>> key;
 
-    protected AbstractSpongeValueProcessor(Class<C> containerClass, Key<V> key) {
+    protected AbstractSpongeValueProcessor(Class<C> containerClass, Key<? extends Value<E>> key) {
         this.key = checkNotNull(key, "The key is null!");
         this.containerClass = containerClass;
     }
 
     /**
-     * Builds a {@link Value} of the type produced by this processor from an
+     * Builds a {@link Value.Mutable} of the type produced by this processor from an
      * input, actual value.
      *
      * @param actualValue The actual value
-     * @return The constructed {@link Value}
+     * @return The constructed {@link Value.Mutable}
      */
-    protected abstract V constructValue(E actualValue);
+    protected abstract Value.Mutable<E> constructMutableValue(E actualValue);
 
     protected abstract boolean set(C container, E value);
 
     protected abstract Optional<E> getVal(C container);
 
-    protected abstract ImmutableValue<E> constructImmutableValue(E value);
+    protected abstract Value.Immutable<E> constructImmutableValue(E value);
 
     protected boolean supports(C container) {
         return true;
@@ -72,9 +70,8 @@ public abstract class AbstractSpongeValueProcessor<C, E, V extends BaseValue<E>>
         return this.containerClass.isInstance(container) && supports((C) container);
     }
 
-
     @Override
-    public final Key<? extends BaseValue<E>> getKey() {
+    public final Key<? extends Value<E>> getKey() {
         return this.key;
     }
 
@@ -94,10 +91,10 @@ public abstract class AbstractSpongeValueProcessor<C, E, V extends BaseValue<E>>
     }
 
     @Override
-    public Optional<V> getApiValueFromContainer(ValueContainer<?> container) {
+    public Optional<Value<E>> getApiValueFromContainer(ValueContainer<?> container) {
         final Optional<E> optionalValue = getValueFromContainer(container);
         if(optionalValue.isPresent()) {
-            return Optional.of(constructValue(optionalValue.get()));
+            return Optional.of(constructMutableValue(optionalValue.get()));
         }
         return Optional.empty();
     }
@@ -105,7 +102,7 @@ public abstract class AbstractSpongeValueProcessor<C, E, V extends BaseValue<E>>
     @SuppressWarnings("unchecked")
     @Override
     public DataTransactionResult offerToStore(ValueContainer<?> container, E value) {
-        final ImmutableValue<E> newValue = constructImmutableValue(value);
+        final Value.Immutable<E> newValue = constructImmutableValue(value);
         if (supports(container)) {
             final DataTransactionResult.Builder builder = DataTransactionResult.builder();
             final Optional<E> oldVal = getVal((C) container);

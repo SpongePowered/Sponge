@@ -31,9 +31,8 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
 import org.spongepowered.common.util.ReflectionUtil;
 
 import java.lang.reflect.Modifier;
@@ -43,20 +42,20 @@ public abstract class AbstractImmutableBooleanData<I extends ImmutableDataManipu
 
     private final Class<? extends M> mutableClass;
     private final boolean defaultValue;
-    private final ImmutableValue<Boolean> immutableValue;
+    private final Value.Immutable<Boolean> immutableValue;
 
-    public AbstractImmutableBooleanData(Class<I> immutableClass, boolean value, Key<? extends BaseValue<Boolean>> usedKey,
+    public AbstractImmutableBooleanData(Class<I> immutableClass, boolean value, Key<? extends Value<Boolean>> usedKey,
                                         Class<? extends M> mutableClass, boolean defaultValue) {
         super(immutableClass, value, usedKey);
         checkArgument(!Modifier.isAbstract(mutableClass.getModifiers()), "The immutable class cannot be abstract!");
         checkArgument(!Modifier.isInterface(mutableClass.getModifiers()), "The immutable class cannot be an interface!");
         this.mutableClass = checkNotNull(mutableClass);
         this.defaultValue = defaultValue;
-        this.immutableValue = ImmutableSpongeValue.cachedOf(usedKey, defaultValue, value);
+        this.immutableValue = SpongeImmutableValue.cachedOf(usedKey, value);
     }
 
     @Override
-    protected final ImmutableValue<Boolean> getValueGetter() {
+    protected final Value.Immutable<Boolean> getValueGetter() {
         return this.immutableValue;
     }
 

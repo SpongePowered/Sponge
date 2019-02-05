@@ -29,7 +29,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.ExpirableData;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.entity.living.monster.Endermite;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -56,12 +56,12 @@ public abstract class MixinEntityEndermite extends MixinEntityMob implements End
     }
 
     @Override
-    public MutableBoundedValue<Integer> expireTicks() {
+    public BoundedValue.Mutable<Integer> expireTicks() {
         return SpongeValueFactory.boundedBuilder(Keys.EXPIRATION_TICKS)
                 .minimum(0)
                 .maximum(2400)
                 .defaultValue(0)
-                .actualValue(this.lifetime)
+                .value(this.lifetime)
                 .build();
     }
 

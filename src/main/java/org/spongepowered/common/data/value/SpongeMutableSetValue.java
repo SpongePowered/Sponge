@@ -22,5 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-@org.spongepowered.api.util.annotation.NonnullByDefault
-package org.spongepowered.common.data.value.mutable;
+package org.spongepowered.common.data.value;
+
+import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.value.SetValue;
+import org.spongepowered.api.data.value.Value;
+
+import java.util.Set;
+
+public class SpongeMutableSetValue<E> extends SpongeCollectionValue.Mutable<E, Set<E>, SetValue.Mutable<E>, SetValue.Immutable<E>>
+        implements SetValue.Mutable<E> {
+
+    public SpongeMutableSetValue(Key<? extends Value<Set<E>>> key, Set<E> value) {
+        super(key, value);
+    }
+
+    @Override
+    public SetValue.Immutable<E> asImmutable() {
+        return new SpongeImmutableSetValue<>(this.key, CopyHelper.copySet(this.value));
+    }
+
+    @Override
+    public SetValue.Mutable<E> copy() {
+        return new SpongeMutableSetValue<>(this.key, CopyHelper.copySet(this.value));
+    }
+}

@@ -28,26 +28,24 @@ import net.minecraft.tileentity.TileEntityBanner;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.DyeColor;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.util.DataConstants;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 import org.spongepowered.common.interfaces.block.tile.IMixinBanner;
 
 import java.util.Optional;
 
-public class TileBannerBaseColorValueProcessor extends AbstractSpongeValueProcessor<TileEntityBanner, DyeColor, Value<DyeColor>> {
+public class TileBannerBaseColorValueProcessor extends AbstractSpongeValueProcessor<TileEntityBanner, DyeColor> {
 
     public TileBannerBaseColorValueProcessor() {
         super(TileEntityBanner.class, Keys.BANNER_BASE_COLOR);
     }
 
     @Override
-    protected Value<DyeColor> constructValue(DyeColor actualValue) {
-        return new SpongeValue<>(Keys.BANNER_BASE_COLOR, DataConstants.Catalog.DEFAULT_BANNER_BASE, actualValue);
+    protected Value.Mutable<DyeColor> constructMutableValue(DyeColor actualValue) {
+        return new SpongeMutableValue<>(Keys.BANNER_BASE_COLOR, actualValue);
     }
 
     @Override
@@ -65,8 +63,8 @@ public class TileBannerBaseColorValueProcessor extends AbstractSpongeValueProces
     }
 
     @Override
-    protected ImmutableValue<DyeColor> constructImmutableValue(DyeColor value) {
-        return ImmutableSpongeValue.cachedOf(Keys.BANNER_BASE_COLOR, DataConstants.Catalog.DEFAULT_BANNER_BASE, value);
+    protected Value.Immutable<DyeColor> constructImmutableValue(DyeColor value) {
+        return SpongeImmutableValue.cachedOf(Keys.BANNER_BASE_COLOR, value);
     }
 
     @Override

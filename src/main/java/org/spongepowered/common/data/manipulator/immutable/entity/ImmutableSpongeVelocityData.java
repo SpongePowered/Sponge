@@ -30,21 +30,21 @@ import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableVelocityData;
 import org.spongepowered.api.data.manipulator.mutable.entity.VelocityData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeVelocityData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
 
 public class ImmutableSpongeVelocityData extends AbstractImmutableSingleData<Vector3d, ImmutableVelocityData, VelocityData> implements ImmutableVelocityData {
 
-    private final ImmutableSpongeValue<Vector3d> velocityValue = new ImmutableSpongeValue<>(Keys.VELOCITY, Vector3d.ZERO, this.value);
+    private final SpongeImmutableValue<Vector3d> velocityValue = new SpongeImmutableValue<>(Keys.VELOCITY, this.value);
 
     public ImmutableSpongeVelocityData(Vector3d value) {
         super(ImmutableVelocityData.class, value, Keys.VELOCITY);
     }
 
     @Override
-    protected ImmutableValue<Vector3d> getValueGetter() {
+    protected Value.Immutable<Vector3d> getValueGetter() {
         return velocity();
     }
 
@@ -64,7 +64,7 @@ public class ImmutableSpongeVelocityData extends AbstractImmutableSingleData<Vec
     }
 
     @Override
-    public ImmutableValue<Vector3d> velocity() {
+    public Value.Immutable<Vector3d> velocity() {
         return this.velocityValue;
     }
 

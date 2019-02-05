@@ -30,7 +30,7 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableBreakableData;
 import org.spongepowered.api.data.manipulator.mutable.item.BreakableData;
-import org.spongepowered.api.data.value.mutable.SetValue;
+import org.spongepowered.api.data.value.SetValue;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeBreakableData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleSetData;
 
@@ -57,7 +57,7 @@ public class SpongeBreakableData extends AbstractSingleSetData<BlockType, Breaka
 
     @SuppressWarnings("unchecked")
     @Override
-    public SetValue<BlockType> breakable() {
-        return (SetValue<BlockType>) getValueGetter();
+    public SetValue.Mutable<BlockType> breakable() {
+        return (SetValue.Mutable<BlockType>) getValueGetter();
     }
 }

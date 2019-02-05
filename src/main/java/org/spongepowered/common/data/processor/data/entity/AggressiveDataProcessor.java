@@ -28,20 +28,19 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableAggressiveData;
 import org.spongepowered.api.data.manipulator.mutable.entity.AggressiveData;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.util.OptBool;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAggressiveData;
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 import org.spongepowered.common.interfaces.entity.IMixinAggressive;
 
 import java.util.Optional;
 
 public class AggressiveDataProcessor
-        extends AbstractSingleDataSingleTargetProcessor<IMixinAggressive, Boolean, Value<Boolean>, AggressiveData, ImmutableAggressiveData> {
+        extends AbstractSingleDataSingleTargetProcessor<IMixinAggressive, Boolean, AggressiveData, ImmutableAggressiveData> {
 
     public AggressiveDataProcessor() {
         super(Keys.ANGRY, IMixinAggressive.class);
@@ -59,8 +58,8 @@ public class AggressiveDataProcessor
     }
 
     @Override
-    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
-        return ImmutableSpongeValue.cachedOf(Keys.ANGRY, false, value);
+    protected Value.Immutable<Boolean> constructImmutableValue(Boolean value) {
+        return SpongeImmutableValue.cachedOf(Keys.ANGRY, value);
     }
 
     @Override
@@ -69,8 +68,8 @@ public class AggressiveDataProcessor
     }
 
     @Override
-    protected Value<Boolean> constructValue(Boolean actualValue) {
-        return new SpongeValue<>(Keys.ANGRY, false, actualValue);
+    protected Value.Mutable<Boolean> constructMutableValue(Boolean actualValue) {
+        return new SpongeMutableValue<>(Keys.ANGRY, actualValue);
     }
 
     @Override

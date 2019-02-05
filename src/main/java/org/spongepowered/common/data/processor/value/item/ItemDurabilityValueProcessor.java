@@ -27,47 +27,46 @@ package org.spongepowered.common.data.processor.value.item;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Optional;
 
-public class ItemDurabilityValueProcessor extends AbstractSpongeValueProcessor<ItemStack, Integer, MutableBoundedValue<Integer>> {
+public class ItemDurabilityValueProcessor extends AbstractSpongeValueProcessor<ItemStack, Integer> {
 
     public ItemDurabilityValueProcessor() {
         super(ItemStack.class, Keys.ITEM_DURABILITY);
     }
 
     @Override
-    public MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
+    public BoundedValue.Mutable<Integer> constructMutableValue(Integer defaultValue) {
         return SpongeValueFactory.boundedBuilder(Keys.ITEM_DURABILITY)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
-                .defaultValue(60)
-                .actualValue(defaultValue)
+                .value(defaultValue)
                 .build();
     }
 
     @Override
     public boolean set(ItemStack container, Integer value) {
-        container.setItemDamage(container.getMaxDamage() - value);
+        container.setDamage(container.getMaxDamage() - value);
         return true;
     }
 
     @Override
     public Optional<Integer> getVal(ItemStack container) {
         if(container.getItem().isDamageable()) {
-            return Optional.of(container.getMaxDamage() - container.getItemDamage());
+            return Optional.of(container.getMaxDamage() - container.getDamage());
         }
         return Optional.empty();
     }
 
     @Override
-    public ImmutableValue<Integer> constructImmutableValue(Integer value) {
-        return constructValue(value).asImmutable();
+    public Value.Immutable<Integer> constructImmutableValue(Integer value) {
+        return constructMutableValue(value).asImmutable();
     }
 
     @Override

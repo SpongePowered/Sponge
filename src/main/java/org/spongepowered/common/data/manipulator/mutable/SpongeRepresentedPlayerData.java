@@ -29,13 +29,13 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableRepresentedPlayerData;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedPlayerData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeRepresentedPlayerData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
 import org.spongepowered.common.data.util.DataQueries;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -89,8 +89,8 @@ public class SpongeRepresentedPlayerData extends AbstractSingleData<GameProfile,
     }
 
     @Override
-    public Value<GameProfile> owner() {
-        return new SpongeValue<>(this.usedKey, this.getValue());
+    public Value.Mutable<GameProfile> owner() {
+        return new SpongeMutableValue<>(this.usedKey, this.getValue());
     }
 
     @Override
@@ -111,7 +111,7 @@ public class SpongeRepresentedPlayerData extends AbstractSingleData<GameProfile,
     }
 
     @Override
-    protected Value<?> getValueGetter() {
+    protected Value.Mutable<?> getValueGetter() {
         return this.owner();
     }
 

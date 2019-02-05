@@ -35,7 +35,7 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.fluid.FluidStack;
 import org.spongepowered.api.fluid.FluidStackSnapshot;
 import org.spongepowered.api.fluid.FluidType;
@@ -91,7 +91,7 @@ public class SpongeFluidStackSnapshotBuilder extends AbstractDataBuilder<FluidSt
     }
 
     @Override
-    public <V> FluidStackSnapshot.Builder add(Key<? extends BaseValue<V>> key, V value) {
+    public <V> FluidStackSnapshot.Builder add(Key<? extends Value<V>> key, V value) {
         return this;
     }
 

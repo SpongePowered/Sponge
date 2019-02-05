@@ -30,10 +30,10 @@ import org.spongepowered.api.data.manipulator.immutable.block.ImmutableNoteData;
 import org.spongepowered.api.data.manipulator.mutable.block.NoteData;
 import org.spongepowered.api.data.type.NotePitch;
 import org.spongepowered.api.data.type.NotePitches;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeNoteData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 
 public class SpongeNoteData extends AbstractSingleData<NotePitch, NoteData, ImmutableNoteData> implements NoteData {
 
@@ -46,7 +46,7 @@ public class SpongeNoteData extends AbstractSingleData<NotePitch, NoteData, Immu
     }
 
     @Override
-    protected Value<?> getValueGetter() {
+    protected Value.Mutable<?> getValueGetter() {
         return note();
     }
 
@@ -56,8 +56,8 @@ public class SpongeNoteData extends AbstractSingleData<NotePitch, NoteData, Immu
     }
 
     @Override
-    public Value<NotePitch> note() {
-        return new SpongeValue<>(Keys.NOTE_PITCH, NotePitches.F_SHARP0, getValue());
+    public Value.Mutable<NotePitch> note() {
+        return new SpongeMutableValue<>(Keys.NOTE_PITCH, getValue());
     }
 
     @Override

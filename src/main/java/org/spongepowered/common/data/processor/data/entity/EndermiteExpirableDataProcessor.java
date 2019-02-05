@@ -31,9 +31,8 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableExpirableData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ExpirableData;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExpirableData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
@@ -41,7 +40,7 @@ import org.spongepowered.common.data.value.SpongeValueFactory;
 import java.util.Optional;
 
 public class EndermiteExpirableDataProcessor extends
-        AbstractEntitySingleDataProcessor<EntityEndermite, Integer, MutableBoundedValue<Integer>, ExpirableData, ImmutableExpirableData> {
+        AbstractEntitySingleDataProcessor<EntityEndermite, Integer, ExpirableData, ImmutableExpirableData> {
 
     public EndermiteExpirableDataProcessor() {
         super(EntityEndermite.class, Keys.EXPIRATION_TICKS);
@@ -69,17 +68,16 @@ public class EndermiteExpirableDataProcessor extends
     }
 
     @Override
-    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
-        return constructValue(value).asImmutable();
+    protected Value.Immutable<Integer> constructImmutableValue(Integer value) {
+        return constructMutableValue(value).asImmutable();
     }
 
     @Override
-    protected MutableBoundedValue<Integer> constructValue(Integer actualValue) {
+    protected Value.Mutable<Integer> constructMutableValue(Integer actualValue) {
         return SpongeValueFactory.boundedBuilder(Keys.EXPIRATION_TICKS)
                 .minimum(0)
                 .maximum(2400)
-                .defaultValue(0)
-                .actualValue(actualValue)
+                .value(actualValue)
                 .build();
     }
 

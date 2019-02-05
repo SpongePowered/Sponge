@@ -28,26 +28,25 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.explosive.FusedExplosive;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 import org.spongepowered.common.interfaces.entity.explosive.IMixinFusedExplosive;
 
 import java.util.Optional;
 
-public class TicksRemainingValueProcessor extends AbstractSpongeValueProcessor<FusedExplosive, Integer, Value<Integer>> {
+public class TicksRemainingValueProcessor extends AbstractSpongeValueProcessor<FusedExplosive, Integer> {
 
     public TicksRemainingValueProcessor() {
         super(FusedExplosive.class, Keys.TICKS_REMAINING);
     }
 
     @Override
-    protected Value<Integer> constructValue(Integer actualValue) {
-        return new SpongeValue<>(Keys.TICKS_REMAINING, actualValue);
+    protected Value.Mutable<Integer> constructMutableValue(Integer actualValue) {
+        return new SpongeMutableValue<>(Keys.TICKS_REMAINING, actualValue);
     }
 
     @Override
@@ -66,8 +65,8 @@ public class TicksRemainingValueProcessor extends AbstractSpongeValueProcessor<F
     }
 
     @Override
-    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
-        return new ImmutableSpongeValue<>(Keys.TICKS_REMAINING, value);
+    protected Value.Immutable<Integer> constructImmutableValue(Integer value) {
+        return new SpongeImmutableValue<>(Keys.TICKS_REMAINING, value);
     }
 
     @Override

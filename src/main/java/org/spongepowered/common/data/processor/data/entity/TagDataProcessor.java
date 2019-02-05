@@ -29,13 +29,12 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTagData;
 import org.spongepowered.api.data.manipulator.mutable.entity.TagData;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.SetValue;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeTagData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeSetValue;
-import org.spongepowered.common.data.value.mutable.SpongeSetValue;
+import org.spongepowered.common.data.value.SpongeImmutableSetValue;
+import org.spongepowered.common.data.value.SpongeMutableSetValue;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -43,7 +42,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-public class TagDataProcessor extends AbstractEntitySingleDataProcessor<Entity, Set<String>, SetValue<String>, TagData, ImmutableTagData> {
+public class TagDataProcessor extends AbstractEntitySingleDataProcessor<Entity, Set<String>, TagData, ImmutableTagData> {
 
     public TagDataProcessor() {
         super(Entity.class, Keys.TAGS);
@@ -78,13 +77,13 @@ public class TagDataProcessor extends AbstractEntitySingleDataProcessor<Entity, 
     }
 
     @Override
-    protected ImmutableValue<Set<String>> constructImmutableValue(Set<String> value) {
-        return new ImmutableSpongeSetValue<>(Keys.TAGS, value);
+    protected Value.Immutable<Set<String>> constructImmutableValue(Set<String> value) {
+        return new SpongeImmutableSetValue<>(Keys.TAGS, value);
     }
 
     @Override
-    protected SetValue<String> constructValue(Set<String> actualValue) {
-        return new SpongeSetValue<>(Keys.TAGS, actualValue);
+    protected Value.Mutable<Set<String>> constructMutableValue(Set<String> actualValue) {
+        return new SpongeMutableSetValue<>(Keys.TAGS, actualValue);
     }
 
     @Override

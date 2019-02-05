@@ -28,18 +28,19 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableRepresentedPlayerData;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedPlayerData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedPlayerData;
 import org.spongepowered.common.data.util.DataQueries;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
 
 public class ImmutableSpongeRepresentedPlayerData
         extends AbstractImmutableSingleData<GameProfile, ImmutableRepresentedPlayerData, RepresentedPlayerData>
         implements ImmutableRepresentedPlayerData {
 
-    private final ImmutableValue<GameProfile> immutableValue = new ImmutableSpongeValue<>(this.usedKey, SpongeRepresentedPlayerData.NULL_PROFILE, this.value);
+    private final Value.Immutable<GameProfile>
+            immutableValue = new SpongeImmutableValue<>(this.usedKey, this.value);
 
     public ImmutableSpongeRepresentedPlayerData() {
         this(SpongeRepresentedPlayerData.NULL_PROFILE);
@@ -50,7 +51,7 @@ public class ImmutableSpongeRepresentedPlayerData
     }
 
     @Override
-    public ImmutableValue<GameProfile> owner() {
+    public Value.Immutable<GameProfile> owner() {
         return this.immutableValue;
     }
 
@@ -67,7 +68,7 @@ public class ImmutableSpongeRepresentedPlayerData
     }
 
     @Override
-    protected ImmutableValue<?> getValueGetter() {
+    protected Value.Immutable<?> getValueGetter() {
         return this.owner();
     }
 

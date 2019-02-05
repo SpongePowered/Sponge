@@ -27,15 +27,15 @@ package org.spongepowered.common.data.processor.value.entity;
 import net.minecraft.entity.item.EntityMinecartCommandBlock;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Optional;
 
-public class EntitySuccessCountValueProcessor extends AbstractSpongeValueProcessor<EntityMinecartCommandBlock, Integer, MutableBoundedValue<Integer>> {
+public class EntitySuccessCountValueProcessor extends AbstractSpongeValueProcessor<EntityMinecartCommandBlock, Integer> {
 
     public EntitySuccessCountValueProcessor() {
         super(EntityMinecartCommandBlock.class, Keys.SUCCESS_COUNT);
@@ -47,29 +47,28 @@ public class EntitySuccessCountValueProcessor extends AbstractSpongeValueProcess
     }
 
     @Override
-    protected MutableBoundedValue<Integer> constructValue(Integer actualValue) {
+    protected BoundedValue.Mutable<Integer> constructMutableValue(Integer actualValue) {
         return SpongeValueFactory.boundedBuilder(Keys.SUCCESS_COUNT)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
-                .defaultValue(0)
-                .actualValue(actualValue)
+                .value(actualValue)
                 .build();
     }
 
     @Override
     protected boolean set(EntityMinecartCommandBlock container, Integer value) {
-        container.getCommandBlockLogic().successCount = value;
+        container.getCommandBlockLogic().setSuccessCount(value);
         return true;
     }
 
     @Override
     protected Optional<Integer> getVal(EntityMinecartCommandBlock container) {
-        return Optional.of(container.getCommandBlockLogic().successCount);
+        return Optional.of(container.getCommandBlockLogic().getSuccessCount());
     }
 
     @Override
-    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
-        return constructValue(value).asImmutable();
+    protected Value.Immutable<Integer> constructImmutableValue(Integer value) {
+        return constructMutableValue(value).asImmutable();
     }
 
 }

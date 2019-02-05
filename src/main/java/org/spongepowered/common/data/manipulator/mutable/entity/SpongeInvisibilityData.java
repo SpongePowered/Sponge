@@ -28,12 +28,12 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableInvisibilityData;
 import org.spongepowered.api.data.manipulator.mutable.entity.InvisibilityData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeInvisibilityData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.util.DataVersions;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 
 public class SpongeInvisibilityData extends AbstractData<InvisibilityData, ImmutableInvisibilityData> implements InvisibilityData {
 
@@ -56,23 +56,23 @@ public class SpongeInvisibilityData extends AbstractData<InvisibilityData, Immut
     }
 
     @Override
-    public Value<Boolean> invisible() {
-        return new SpongeValue<>(Keys.INVISIBLE, false, this.invisible);
+    public Value.Mutable<Boolean> invisible() {
+        return new SpongeMutableValue<>(Keys.INVISIBLE, this.invisible);
     }
 
     @Override
-    public Value<Boolean> vanish() {
-        return new SpongeValue<>(Keys.VANISH, false, this.vanish);
+    public Value.Mutable<Boolean> vanish() {
+        return new SpongeMutableValue<>(Keys.VANISH, this.vanish);
     }
 
     @Override
-    public Value<Boolean> ignoresCollisionDetection() {
-        return new SpongeValue<>(Keys.VANISH_IGNORES_COLLISION, false, this.collision);
+    public Value.Mutable<Boolean> ignoresCollisionDetection() {
+        return new SpongeMutableValue<>(Keys.VANISH_IGNORES_COLLISION, this.collision);
     }
 
     @Override
-    public Value<Boolean> untargetable() {
-        return new SpongeValue<>(Keys.VANISH_PREVENTS_TARGETING, false, this.untargetable);
+    public Value.Mutable<Boolean> untargetable() {
+        return new SpongeMutableValue<>(Keys.VANISH_PREVENTS_TARGETING, this.untargetable);
     }
 
     @Override

@@ -28,13 +28,11 @@ import net.minecraft.entity.passive.EntityHorse;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.HorseStyle;
-import org.spongepowered.api.data.type.HorseStyles;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.SpongeHorseColor;
 import org.spongepowered.common.entity.SpongeHorseStyle;
@@ -43,15 +41,15 @@ import org.spongepowered.common.registry.type.entity.HorseStyleRegistryModule;
 
 import java.util.Optional;
 
-public class HorseStyleValueProcessor extends AbstractSpongeValueProcessor<EntityHorse, HorseStyle, Value<HorseStyle>> {
+public class HorseStyleValueProcessor extends AbstractSpongeValueProcessor<EntityHorse, HorseStyle> {
 
     public HorseStyleValueProcessor() {
         super(EntityHorse.class, Keys.HORSE_STYLE);
     }
 
     @Override
-    protected Value<HorseStyle> constructValue(HorseStyle defaultValue) {
-        return new SpongeValue<>(Keys.HORSE_STYLE, defaultValue);
+    protected Value.Mutable<HorseStyle> constructMutableValue(HorseStyle defaultValue) {
+        return new SpongeMutableValue<>(Keys.HORSE_STYLE, defaultValue);
     }
 
     @Override
@@ -67,8 +65,8 @@ public class HorseStyleValueProcessor extends AbstractSpongeValueProcessor<Entit
     }
 
     @Override
-    protected ImmutableValue<HorseStyle> constructImmutableValue(HorseStyle value) {
-        return ImmutableSpongeValue.cachedOf(Keys.HORSE_STYLE, HorseStyles.NONE, value);
+    protected Value.Immutable<HorseStyle> constructImmutableValue(HorseStyle value) {
+        return SpongeImmutableValue.cachedOf(Keys.HORSE_STYLE, value);
     }
 
     @Override

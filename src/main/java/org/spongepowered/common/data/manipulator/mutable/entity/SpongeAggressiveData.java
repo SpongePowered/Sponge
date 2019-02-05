@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.mutable.entity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableAggressiveData;
 import org.spongepowered.api.data.manipulator.mutable.entity.AggressiveData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeAggressiveData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;
 
@@ -42,7 +42,7 @@ public class SpongeAggressiveData extends AbstractBooleanData<AggressiveData, Im
     }
 
     @Override
-    public Value<Boolean> aggressive() {
+    public Value.Mutable<Boolean> aggressive() {
         return getValueGetter();
     }
 

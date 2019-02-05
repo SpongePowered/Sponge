@@ -28,20 +28,20 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSkinData;
 import org.spongepowered.api.data.manipulator.mutable.entity.SkinData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSkinData;
 import org.spongepowered.common.data.processor.data.entity.SkinDataProcessor;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
 
 public class ImmutableSpongeSkinData extends AbstractImmutableData<ImmutableSkinData, SkinData> implements ImmutableSkinData {
 
     private ProfileProperty skin;
     private boolean updateTabList;
 
-    private final ImmutableValue<ProfileProperty> skinValue;
-    private final ImmutableValue<Boolean> updateTabListValue;
+    private final Value.Immutable<ProfileProperty> skinValue;
+    private final Value.Immutable<Boolean> updateTabListValue;
 
     public ImmutableSpongeSkinData() {
         this(SkinDataProcessor.EMPTY_SKIN, false);
@@ -51,8 +51,8 @@ public class ImmutableSpongeSkinData extends AbstractImmutableData<ImmutableSkin
         super(ImmutableSkinData.class);
         this.skin = skin;
         this.updateTabList = updateTabList;
-        this.skinValue = new ImmutableSpongeValue<>(Keys.SKIN, SkinDataProcessor.EMPTY_SKIN, skin);
-        this.updateTabListValue = ImmutableSpongeValue.<Boolean>cachedOf(Keys.UPDATE_GAME_PROFILE, false, updateTabList);
+        this.skinValue = new SpongeImmutableValue<>(Keys.SKIN, skin);
+        this.updateTabListValue = SpongeImmutableValue.<Boolean>cachedOf(Keys.UPDATE_GAME_PROFILE, updateTabList);
         this.registerGetters();
     }
 
@@ -78,12 +78,12 @@ public class ImmutableSpongeSkinData extends AbstractImmutableData<ImmutableSkin
     }
 
     @Override
-    public ImmutableValue<ProfileProperty> skin() {
+    public Value.Immutable<ProfileProperty> skin() {
         return this.skinValue;
     }
 
     @Override
-    public ImmutableValue<Boolean> updateGameProfile() {
+    public Value.Immutable<Boolean> updateGameProfile() {
         return this.updateTabListValue;
     }
 }

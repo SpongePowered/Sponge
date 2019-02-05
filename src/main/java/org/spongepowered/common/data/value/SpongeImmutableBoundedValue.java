@@ -22,52 +22,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.value.immutable;
+package org.spongepowered.common.data.value;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.common.data.value.mutable.SpongeItemValue;
+import org.spongepowered.api.data.value.BoundedValue;
+import org.spongepowered.api.data.value.Value;
 
+import java.util.Comparator;
 import java.util.function.Function;
 
-public class ImmutableSpongeItemValue extends ImmutableSpongeValue<ItemStack> {
+public class SpongeImmutableBoundedValue<E> extends SpongeBoundedValue<E> implements BoundedValue.Immutable<E> {
 
-    public ImmutableSpongeItemValue(Key<? extends BaseValue<ItemStack>> key, ItemStack defaultValue) {
-        super(key, defaultValue.copy());
-    }
-
-    public ImmutableSpongeItemValue(Key<? extends BaseValue<ItemStack>> key, ItemStack defaultValue, ItemStack actualValue) {
-        super(key, defaultValue.copy(), actualValue.copy());
+    public SpongeImmutableBoundedValue(Key<? extends Value<E>> key, E value, E min, E max, Comparator<E> comparator) {
+        super(key, value, min, max, comparator);
     }
 
     @Override
-    public ImmutableValue<ItemStack> with(ItemStack value) {
-        return super.with(value.copy());
+    public E get() {
+        return CopyHelper.copy(super.get());
     }
 
     @Override
-    public ImmutableValue<ItemStack> transform(Function<ItemStack, ItemStack> function) {
-        final ItemStack value = checkNotNull(function).apply(get());
-        return new ImmutableSpongeItemValue(this.getKey(), getDefault(), checkNotNull(value));
+    public BoundedValue.Immutable<E> with(E value) {
+        return new SpongeImmutableBoundedValue<>(this.key, CopyHelper.copy(value), this.min, this.max, this.comparator);
     }
 
     @Override
-    public Value<ItemStack> asMutable() {
-        return new SpongeItemValue(getKey(), getDefault(), get());
+    public BoundedValue.Immutable<E> transform(Function<E, E> function) {
+        return with(checkNotNull(function, "function").apply(get()));
     }
 
     @Override
-    public ItemStack get() {
-        return super.get().copy();
-    }
-
-    @Override
-    public ItemStack getDefault() {
-        return super.getDefault().copy();
+    public BoundedValue.Mutable<E> asMutable() {
+        return new SpongeMutableBoundedValue<>(this.key, CopyHelper.copy(value), this.min, this.max, this.comparator);
     }
 }

@@ -33,9 +33,9 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableListData;
 import org.spongepowered.api.data.manipulator.mutable.ListData;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.mutable.ListValue;
-import org.spongepowered.common.data.value.mutable.SpongeListValue;
+import org.spongepowered.api.data.value.ListValue;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.common.data.value.SpongeMutableListValue;
 import org.spongepowered.common.util.ReflectionUtil;
 
 import java.lang.reflect.Modifier;
@@ -52,7 +52,7 @@ public abstract class AbstractListData<E, M extends ListData<E, M, I>, I extends
         extends AbstractSingleData<List<E>, M, I> implements ListData<E, M, I> {
     private final Class<? extends I> immutableClass;
 
-    protected AbstractListData(Class<M> manipulatorClass, List<E> value, Key<? extends BaseValue<List<E>>> usedKey, Class<? extends I> immutableClass) {
+    protected AbstractListData(Class<M> manipulatorClass, List<E> value, Key<? extends Value<List<E>>> usedKey, Class<? extends I> immutableClass) {
         super(manipulatorClass, Lists.newArrayList(value), usedKey);
         checkArgument(!Modifier.isAbstract(immutableClass.getModifiers()), "The immutable class cannot be abstract!");
         checkArgument(!Modifier.isInterface(immutableClass.getModifiers()), "The immutable class cannot be an interface!");
@@ -60,8 +60,8 @@ public abstract class AbstractListData<E, M extends ListData<E, M, I>, I extends
     }
 
     @Override
-    protected ListValue<E> getValueGetter() {
-        return new SpongeListValue<>(this.usedKey, this.getValue());
+    protected ListValue.Mutable<E> getValueGetter() {
+        return new SpongeMutableListValue<>(this.usedKey, this.getValue());
     }
 
     @SuppressWarnings("unchecked")
@@ -107,7 +107,7 @@ public abstract class AbstractListData<E, M extends ListData<E, M, I>, I extends
     }
 
     @Override
-    public ListValue<E> getListValue() {
+    public ListValue.Mutable<E> getListValue() {
         return getValueGetter();
     }
 

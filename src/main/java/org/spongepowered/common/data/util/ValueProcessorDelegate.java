@@ -27,9 +27,8 @@ package org.spongepowered.common.data.util;
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.ValueProcessor;
 
 import java.util.Optional;
@@ -41,7 +40,7 @@ import java.util.Optional;
  * @param <E>
  * @param <V>
  */
-public final class ValueProcessorDelegate<E, V extends BaseValue<E>> implements ValueProcessor<E, V> {
+public final class ValueProcessorDelegate<E, V extends Value<E>> implements ValueProcessor<E, V> {
 
     private final Key<V> key;
     private final ImmutableList<ValueProcessor<E, V>> processors;
@@ -52,7 +51,7 @@ public final class ValueProcessorDelegate<E, V extends BaseValue<E>> implements 
     }
 
     @Override
-    public Key<? extends BaseValue<E>> getKey() {
+    public Key<? extends Value<E>> getKey() {
         return this.key;
     }
 
@@ -112,8 +111,8 @@ public final class ValueProcessorDelegate<E, V extends BaseValue<E>> implements 
                 final Optional<V> optional = processor.getApiValueFromContainer(container);
                 if (optional.isPresent()) {
                     V mutable = optional.get();
-                    ((Value<E>) mutable).set(value);
-                    return DataTransactionResult.failResult(((Value<E>) mutable).asImmutable());
+                    ((Value.Mutable<E>) mutable).set(value);
+                    return DataTransactionResult.failResult(((Value.Mutable<E>) mutable).asImmutable());
                 }
             }
         }

@@ -28,11 +28,11 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableInvisibilityData;
 import org.spongepowered.api.data.manipulator.mutable.entity.InvisibilityData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeInvisibilityData;
 import org.spongepowered.common.data.util.DataVersions;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
 
 public class ImmutableSpongeInvisibilityData extends AbstractImmutableData<ImmutableInvisibilityData, InvisibilityData> implements ImmutableInvisibilityData {
 
@@ -40,10 +40,10 @@ public class ImmutableSpongeInvisibilityData extends AbstractImmutableData<Immut
     private final boolean collision;
     private final boolean untargetable;
     private final boolean invisible;
-    private ImmutableValue<Boolean> invisibleValue;
-    private ImmutableValue<Boolean> vanishValue;
-    private ImmutableValue<Boolean> collisionValue;
-    private ImmutableValue<Boolean> untargetableValue;
+    private Value.Immutable<Boolean> invisibleValue;
+    private Value.Immutable<Boolean> vanishValue;
+    private Value.Immutable<Boolean> collisionValue;
+    private Value.Immutable<Boolean> untargetableValue;
 
     public ImmutableSpongeInvisibilityData(boolean vanish, boolean collision, boolean untargetable, boolean invisible) {
         super(ImmutableInvisibilityData.class);
@@ -51,30 +51,30 @@ public class ImmutableSpongeInvisibilityData extends AbstractImmutableData<Immut
         this.collision = collision;
         this.untargetable = untargetable;
         this.invisible = invisible;
-        this.invisibleValue = ImmutableSpongeValue.cachedOf(Keys.INVISIBLE, false, this.invisible);
-        this.vanishValue = ImmutableSpongeValue.cachedOf(Keys.VANISH, false, this.vanish);
-        this.collisionValue = ImmutableSpongeValue.cachedOf(Keys.VANISH_IGNORES_COLLISION, false, this.collision);
-        this.untargetableValue = ImmutableSpongeValue.cachedOf(Keys.VANISH_PREVENTS_TARGETING, false, this.untargetable);
+        this.invisibleValue = SpongeImmutableValue.cachedOf(Keys.INVISIBLE, this.invisible);
+        this.vanishValue = SpongeImmutableValue.cachedOf(Keys.VANISH, this.vanish);
+        this.collisionValue = SpongeImmutableValue.cachedOf(Keys.VANISH_IGNORES_COLLISION, this.collision);
+        this.untargetableValue = SpongeImmutableValue.cachedOf(Keys.VANISH_PREVENTS_TARGETING, this.untargetable);
         this.registerGetters();
     }
 
     @Override
-    public ImmutableValue<Boolean> invisible() {
+    public Value.Immutable<Boolean> invisible() {
         return this.invisibleValue;
     }
 
     @Override
-    public ImmutableValue<Boolean> vanish() {
+    public Value.Immutable<Boolean> vanish() {
         return this.vanishValue;
     }
 
     @Override
-    public ImmutableValue<Boolean> ignoresCollisionDetection() {
+    public Value.Immutable<Boolean> ignoresCollisionDetection() {
         return this.collisionValue;
     }
 
     @Override
-    public ImmutableValue<Boolean> untargetable() {
+    public Value.Immutable<Boolean> untargetable() {
         return this.untargetableValue;
     }
 

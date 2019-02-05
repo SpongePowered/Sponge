@@ -28,7 +28,7 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFoodData;
 import org.spongepowered.api.data.manipulator.mutable.entity.FoodData;
-import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFoodData;
 import org.spongepowered.common.data.value.SpongeValueFactory;
@@ -39,9 +39,9 @@ public class ImmutableSpongeFoodData extends AbstractImmutableData<ImmutableFood
     private final double foodSaturationLevel;
     private final double foodExhaustionLevel;
 
-    private final ImmutableBoundedValue<Integer> foodLevelValue;
-    private final ImmutableBoundedValue<Double> saturationValue;
-    private final ImmutableBoundedValue<Double> exhaustionValue;
+    private final BoundedValue.Immutable<Integer> foodLevelValue;
+    private final BoundedValue.Immutable<Double> saturationValue;
+    private final BoundedValue.Immutable<Double> exhaustionValue;
 
 
     public ImmutableSpongeFoodData(int foodLevel, double foodSaturationLevel, double foodExhaustionLevel) {
@@ -51,24 +51,21 @@ public class ImmutableSpongeFoodData extends AbstractImmutableData<ImmutableFood
         this.foodExhaustionLevel = foodExhaustionLevel;
 
         this.foodLevelValue = SpongeValueFactory.boundedBuilder(Keys.FOOD_LEVEL)
-                .defaultValue(20)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
-                .actualValue(this.foodLevel)
+                .value(this.foodLevel)
                 .build()
                 .asImmutable();
 
         this.exhaustionValue = SpongeValueFactory.boundedBuilder(Keys.EXHAUSTION)
-                .actualValue(this.foodExhaustionLevel)
-                .defaultValue(0D)
+                .value(this.foodExhaustionLevel)
                 .minimum(0D)
                 .maximum(Double.MAX_VALUE)
                 .build()
                 .asImmutable();
 
         this.saturationValue = SpongeValueFactory.boundedBuilder(Keys.SATURATION)
-                .actualValue(this.foodSaturationLevel)
-                .defaultValue(20D)
+                .value(this.foodSaturationLevel)
                 .minimum(0D)
                 .maximum(Double.MAX_VALUE)
                 .build()
@@ -91,17 +88,17 @@ public class ImmutableSpongeFoodData extends AbstractImmutableData<ImmutableFood
     }
 
     @Override
-    public ImmutableBoundedValue<Integer> foodLevel() {
+    public BoundedValue.Immutable<Integer> foodLevel() {
         return this.foodLevelValue;
     }
 
     @Override
-    public ImmutableBoundedValue<Double> exhaustion() {
+    public BoundedValue.Immutable<Double> exhaustion() {
         return this.exhaustionValue;
     }
 
     @Override
-    public ImmutableBoundedValue<Double> saturation() {
+    public BoundedValue.Immutable<Double> saturation() {
         return this.saturationValue;
     }
 

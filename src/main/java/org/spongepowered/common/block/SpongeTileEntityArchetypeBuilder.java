@@ -40,7 +40,7 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImplHooks;
@@ -145,7 +145,7 @@ public class SpongeTileEntityArchetypeBuilder extends AbstractDataBuilder<TileEn
 
     @SuppressWarnings("unchecked")
     @Override
-    public <E, V extends BaseValue<E>> TileEntityArchetype.Builder set(V value) {
+    public <E, V extends Value<E>> TileEntityArchetype.Builder set(V value) {
         if (this.tileData == null) {
             this.tileData = DataContainer.createNew();
         }
@@ -156,7 +156,7 @@ public class SpongeTileEntityArchetypeBuilder extends AbstractDataBuilder<TileEn
 
     @SuppressWarnings("unchecked")
     @Override
-    public <E, V extends BaseValue<E>> TileEntityArchetype.Builder set(Key<V> key, E value) {
+    public <E, V extends Value<E>> TileEntityArchetype.Builder set(Key<V> key, E value) {
         if (this.tileData == null) {
             this.tileData = DataContainer.createNew();
         }

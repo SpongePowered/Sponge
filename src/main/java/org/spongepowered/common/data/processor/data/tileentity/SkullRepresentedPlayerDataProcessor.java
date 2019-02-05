@@ -30,20 +30,19 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableRepresentedPlayerData;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedPlayerData;
 import org.spongepowered.api.data.type.SkullTypes;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedPlayerData;
 import org.spongepowered.common.data.processor.common.AbstractTileEntitySingleDataProcessor;
 import org.spongepowered.common.data.processor.common.SkullUtils;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 
 import java.util.Optional;
 
 public class SkullRepresentedPlayerDataProcessor extends
-        AbstractTileEntitySingleDataProcessor<TileEntitySkull, GameProfile, Value<GameProfile>, RepresentedPlayerData, ImmutableRepresentedPlayerData> {
+        AbstractTileEntitySingleDataProcessor<TileEntitySkull, GameProfile, RepresentedPlayerData, ImmutableRepresentedPlayerData> {
 
     public SkullRepresentedPlayerDataProcessor() {
         super(TileEntitySkull.class, Keys.REPRESENTED_PLAYER);
@@ -81,13 +80,13 @@ public class SkullRepresentedPlayerDataProcessor extends
     }
 
     @Override
-    protected ImmutableValue<GameProfile> constructImmutableValue(GameProfile value) {
-        return new ImmutableSpongeValue<>(Keys.REPRESENTED_PLAYER, SpongeRepresentedPlayerData.NULL_PROFILE, value);
+    protected Value.Immutable<GameProfile> constructImmutableValue(GameProfile value) {
+        return new SpongeImmutableValue<>(Keys.REPRESENTED_PLAYER, value);
     }
 
     @Override
-    protected Value<GameProfile> constructValue(GameProfile actualValue) {
-        return new SpongeValue<>(Keys.REPRESENTED_PLAYER, SpongeRepresentedPlayerData.NULL_PROFILE, actualValue);
+    protected Value.Mutable<GameProfile> constructMutableValue(GameProfile actualValue) {
+        return new SpongeMutableValue<>(Keys.REPRESENTED_PLAYER, actualValue);
     }
 
     @Override

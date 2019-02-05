@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.immutable.tileentity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableBrewingStandData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.BrewingStandData;
-import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableIntData;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeBrewingStandData;
 
@@ -43,7 +43,7 @@ public class ImmutableSpongeBrewingStandData extends AbstractImmutableIntData<Im
     }
 
     @Override
-    public ImmutableBoundedValue<Integer> remainingBrewTime() {
+    public BoundedValue.Immutable<Integer> remainingBrewTime() {
         return getValueGetter();
     }
 

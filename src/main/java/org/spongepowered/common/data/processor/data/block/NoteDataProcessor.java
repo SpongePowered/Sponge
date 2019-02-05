@@ -29,12 +29,12 @@ import org.spongepowered.api.data.manipulator.immutable.block.ImmutableNoteData;
 import org.spongepowered.api.data.manipulator.mutable.block.NoteData;
 import org.spongepowered.api.data.type.NotePitch;
 import org.spongepowered.api.data.type.NotePitches;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeNoteData;
 import org.spongepowered.common.data.processor.common.AbstractBlockOnlyDataProcessor;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 
-public class NoteDataProcessor extends AbstractBlockOnlyDataProcessor<NotePitch, Value<NotePitch>, NoteData, ImmutableNoteData> {
+public class NoteDataProcessor extends AbstractBlockOnlyDataProcessor<NotePitch, NoteData, ImmutableNoteData> {
 
     public NoteDataProcessor() {
         super(Keys.NOTE_PITCH);
@@ -46,8 +46,8 @@ public class NoteDataProcessor extends AbstractBlockOnlyDataProcessor<NotePitch,
     }
 
     @Override
-    protected Value<NotePitch> constructValue(NotePitch actualValue) {
-        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
+    protected Value.Mutable<NotePitch> constructMutableValue(NotePitch actualValue) {
+        return new SpongeMutableValue<>(this.key, actualValue);
     }
 
     @Override

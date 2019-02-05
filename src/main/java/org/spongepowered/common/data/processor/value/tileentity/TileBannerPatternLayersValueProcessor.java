@@ -28,10 +28,14 @@ import net.minecraft.tileentity.TileEntityBanner;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.meta.PatternLayer;
+import org.spongepowered.api.data.value.ListValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.PatternListValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
+import org.spongepowered.common.data.value.SpongeImmutableBoundedValue;
+import org.spongepowered.common.data.value.SpongeImmutableListValue;
+import org.spongepowered.common.data.value.SpongeMutableListValue;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongePatternListValue;
 import org.spongepowered.common.data.value.mutable.SpongePatternListValue;
 import org.spongepowered.common.interfaces.block.tile.IMixinBanner;
@@ -39,15 +43,15 @@ import org.spongepowered.common.interfaces.block.tile.IMixinBanner;
 import java.util.List;
 import java.util.Optional;
 
-public class TileBannerPatternLayersValueProcessor extends AbstractSpongeValueProcessor<TileEntityBanner, List<PatternLayer>, PatternListValue> {
+public class TileBannerPatternLayersValueProcessor extends AbstractSpongeValueProcessor<TileEntityBanner, List<PatternLayer>> {
 
     public TileBannerPatternLayersValueProcessor() {
         super(TileEntityBanner.class, Keys.BANNER_PATTERNS);
     }
 
     @Override
-    protected PatternListValue constructValue(List<PatternLayer> actualValue) {
-        return new SpongePatternListValue(Keys.BANNER_PATTERNS, actualValue);
+    protected ListValue.Mutable<PatternLayer> constructMutableValue(List<PatternLayer> actualValue) {
+        return new SpongeMutableListValue<>(Keys.BANNER_PATTERNS, actualValue);
     }
 
     @Override
@@ -65,8 +69,8 @@ public class TileBannerPatternLayersValueProcessor extends AbstractSpongeValuePr
     }
 
     @Override
-    protected ImmutableValue<List<PatternLayer>> constructImmutableValue(List<PatternLayer> value) {
-        return new ImmutableSpongePatternListValue(Keys.BANNER_PATTERNS, value);
+    protected Value.Immutable<List<PatternLayer>> constructImmutableValue(List<PatternLayer> value) {
+        return new SpongeImmutableListValue<>(Keys.BANNER_PATTERNS, value);
     }
 
     @Override

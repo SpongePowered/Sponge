@@ -29,7 +29,7 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableCareerDa
 import org.spongepowered.api.data.manipulator.mutable.entity.CareerData;
 import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.data.type.Careers;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleCatalogData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeCareerData;
 
@@ -40,7 +40,7 @@ public class ImmutableSpongeCareerData extends AbstractImmutableSingleCatalogDat
     }
 
     @Override
-    public ImmutableValue<Career> career() {
+    public Value.Immutable<Career> career() {
         return type();
     }
 }

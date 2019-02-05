@@ -34,8 +34,7 @@ import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.mutable.item.LoreData;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.complex.EnderDragon;
 import org.spongepowered.api.entity.living.monster.Slime;
@@ -46,10 +45,10 @@ public final class TypeTokenHelperTest {
     @Test
     public void testA() {
         assertTrue(TypeTokenHelper.isAssignable(
-                new TypeToken<Key<BaseValue<?>>>() {
+                new TypeToken<Key<Value<?>>>() {
                     private static final long serialVersionUID = -2744183853363912523L;
                 },
-                new TypeToken<Key<BaseValue<?>>>() {
+                new TypeToken<Key<Value<?>>>() {
                     private static final long serialVersionUID = 7512706472781562165L;
                 }));
 
@@ -57,75 +56,75 @@ public final class TypeTokenHelperTest {
                 new TypeToken<Key<?>>() {
                     private static final long serialVersionUID = -4715432165291356217L;
                 },
-                new TypeToken<Key<BaseValue<?>>>() {
+                new TypeToken<Key<Value<?>>>() {
                     private static final long serialVersionUID = -9141111645139043586L;
                 }));
 
         assertFalse(TypeTokenHelper.isAssignable(
-                new TypeToken<Key<BaseValue<?>>>() {
+                new TypeToken<Key<Value<?>>>() {
                     private static final long serialVersionUID = -5084770058972215952L;
                 },
-                new TypeToken<Key<BaseValue<CatalogType>>>() {
+                new TypeToken<Key<Value<CatalogType>>>() {
                     private static final long serialVersionUID = 5868333657416959838L;
                 }));
 
         assertFalse(TypeTokenHelper.isAssignable(
-                new TypeToken<Key<BaseValue<?>>>() {
+                new TypeToken<Key<Value<?>>>() {
                     private static final long serialVersionUID = -6063028554691111654L;
                 },
-                new TypeToken<Key<BaseValue<? extends CatalogType>>>() {
+                new TypeToken<Key<Value<? extends CatalogType>>>() {
                     private static final long serialVersionUID = 6475178912364063462L;
                 }));
 
         assertFalse(TypeTokenHelper.isAssignable(
-                new TypeToken<Key<BaseValue<?>>>() {
+                new TypeToken<Key<Value<?>>>() {
                     private static final long serialVersionUID = 4476319679842566087L;
                 },
-                new TypeToken<Key<BaseValue<? extends Advancement>>>() {
+                new TypeToken<Key<Value<? extends Advancement>>>() {
                     private static final long serialVersionUID = -8991894373263296838L;
                 }));
 
         assertFalse(TypeTokenHelper.isAssignable(
-                new TypeToken<Key<BaseValue<Advancement>>>() {
+                new TypeToken<Key<Value<Advancement>>>() {
                     private static final long serialVersionUID = -9127427898214080482L;
                 },
-                new TypeToken<Key<BaseValue<Integer>>>() {
+                new TypeToken<Key<Value<Integer>>>() {
                     private static final long serialVersionUID = 3734740195264045904L;
                 }));
 
         assertFalse(TypeTokenHelper.isAssignable(
-                new TypeToken<Key<BaseValue<Slime>>>() {
+                new TypeToken<Key<Value<Slime>>>() {
                     private static final long serialVersionUID = -776294957769877612L;
                 },
-                new TypeToken<Key<BaseValue<? extends EnderDragon>>>() {
+                new TypeToken<Key<Value<? extends EnderDragon>>>() {
                     private static final long serialVersionUID = -1080598601240787986L;
                 }));
 
         assertTrue(TypeTokenHelper.isAssignable(
-                new TypeToken<Key<BaseValue<EnderDragon>>>() {
+                new TypeToken<Key<Value<EnderDragon>>>() {
                     private static final long serialVersionUID = -1685122921179641087L;
                 },
-                new TypeToken<Key<BaseValue<? extends Living>>>() {
+                new TypeToken<Key<Value<? extends Living>>>() {
                     private static final long serialVersionUID = -7506005421970616703L;
                 }));
 
         assertTrue(TypeTokenHelper.isAssignable(
-                new TypeToken<Key<BaseValue<EnderDragon>>>() {
+                new TypeToken<Key<Value<EnderDragon>>>() {
                     private static final long serialVersionUID = -146766369451278059L;
                 },
-                new TypeToken<Key<BaseValue<Living>>>() {
+                new TypeToken<Key<Value<Living>>>() {
                     private static final long serialVersionUID = 7172322752250029262L;
                 }));
 
         assertTrue(TypeTokenHelper.isAssignable(
-                new TypeToken<Key<BaseValue<? extends Living>>>() {
+                new TypeToken<Key<Value<? extends Living>>>() {
                     private static final long serialVersionUID = -7530165981429256750L;
                 },
                 TypeToken.of(Key.class)));
 
         assertFalse(TypeTokenHelper.isAssignable(
                 TypeToken.of(Key.class),
-                new TypeToken<Key<BaseValue<? extends Living>>>() {
+                new TypeToken<Key<Value<? extends Living>>>() {
                     private static final long serialVersionUID = -1048560465149463858L;
                 }));
 
@@ -173,26 +172,26 @@ public final class TypeTokenHelperTest {
         // Enclosing classes testing
 
         assertTrue(TypeTokenHelper.isAssignable(
-                new TypeToken<A<Object>.B<Value<Double>>>() {
+                new TypeToken<A<Object>.B<Value.Mutable<Double>>>() {
                     private static final long serialVersionUID = -7598875791253244116L;
                 },
-                new TypeToken<A<Object>.B<Value<? extends Number>>>() {
+                new TypeToken<A<Object>.B<Value.Mutable<? extends Number>>>() {
                     private static final long serialVersionUID = -6473792914038707807L;
                 }));
 
         assertFalse(TypeTokenHelper.isAssignable(
-                new TypeToken<A<Key<BaseValue<EnderDragon>>>.B<Value<Double>>>() {
+                new TypeToken<A<Key<Value<EnderDragon>>>.B<Value.Mutable<Double>>>() {
                     private static final long serialVersionUID = -7135507911189558819L;
                 },
-                new TypeToken<A<Key<BaseValue<Slime>>>.B<Value<? extends Number>>>() {
+                new TypeToken<A<Key<Value<Slime>>>.B<Value.Mutable<? extends Number>>>() {
                     private static final long serialVersionUID = -7720256698994675635L;
                 }));
 
         assertTrue(TypeTokenHelper.isAssignable(
-                new TypeToken<A<Key<BaseValue<EnderDragon>>>.B<Value<Double>>>() {
+                new TypeToken<A<Key<Value<EnderDragon>>>.B<Value.Mutable<Double>>>() {
                     private static final long serialVersionUID = 3945720091540514712L;
                 },
-                new TypeToken<A<Key<BaseValue<? extends Living>>>.B<Value<? extends Number>>>() {
+                new TypeToken<A<Key<Value<? extends Living>>>.B<Value.Mutable<? extends Number>>>() {
                     private static final long serialVersionUID = -5900476749764702993L;
                 }));
     }

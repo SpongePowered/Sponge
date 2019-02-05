@@ -33,13 +33,11 @@ import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableBann
 import org.spongepowered.api.data.manipulator.mutable.tileentity.BannerData;
 import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.type.DyeColor;
-import org.spongepowered.api.data.value.immutable.ImmutablePatternListValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeBannerData;
-import org.spongepowered.common.data.util.DataConstants;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongePatternListValue;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableListValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
 
 import java.util.List;
 
@@ -48,15 +46,15 @@ public class ImmutableSpongeBannerData extends AbstractImmutableData<ImmutableBa
     private final DyeColor base;
     private final List<PatternLayer> layers;
 
-    private final ImmutableValue<DyeColor> baseValue;
-    private final ImmutableSpongePatternListValue layersValue;
+    private final Value.Immutable<DyeColor> baseValue;
+    private final SpongeImmutableListValue<PatternLayer> layersValue;
 
     public ImmutableSpongeBannerData(DyeColor base, List<PatternLayer> layers) {
         super(ImmutableBannerData.class);
         this.base = checkNotNull(base, "Null base!");
         this.layers = ImmutableList.copyOf(checkNotNull(layers, "Null pattern list!"));
-        this.baseValue = ImmutableSpongeValue.cachedOf(Keys.BANNER_BASE_COLOR, DataConstants.Catalog.DEFAULT_BANNER_BASE, this.base);
-        this.layersValue = new ImmutableSpongePatternListValue(Keys.BANNER_PATTERNS, this.layers);
+        this.baseValue = SpongeImmutableValue.cachedOf(Keys.BANNER_BASE_COLOR, this.base);
+        this.layersValue = new SpongeImmutableListValue<>(Keys.BANNER_PATTERNS, this.layers);
         registerGetters();
     }
 
@@ -78,12 +76,12 @@ public class ImmutableSpongeBannerData extends AbstractImmutableData<ImmutableBa
     }
 
     @Override
-    public ImmutableValue<DyeColor> baseColor() {
+    public Value.Immutable<DyeColor> baseColor() {
         return this.baseValue;
     }
 
     @Override
-    public ImmutablePatternListValue patterns() {
+    public SpongeImmutableListValue<PatternLayer> patterns() {
         return this.layersValue;
     }
 

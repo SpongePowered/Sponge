@@ -30,18 +30,17 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableLockableData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.LockableData;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeLockableData;
 import org.spongepowered.common.data.processor.common.AbstractTileEntitySingleDataProcessor;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 
 import java.util.Optional;
 
 public final class TileEntityLockableDataProcessor
-        extends AbstractTileEntitySingleDataProcessor<TileEntityLockable, String, Value<String>, LockableData, ImmutableLockableData> {
+        extends AbstractTileEntitySingleDataProcessor<TileEntityLockable, String, LockableData, ImmutableLockableData> {
 
     public TileEntityLockableDataProcessor() {
         super(TileEntityLockable.class, Keys.LOCK_TOKEN);
@@ -76,13 +75,13 @@ public final class TileEntityLockableDataProcessor
     }
 
     @Override
-    protected Value<String> constructValue(String actualValue) {
-        return new SpongeValue<String>(Keys.LOCK_TOKEN, "", actualValue);
+    protected Value.Mutable<String> constructMutableValue(String actualValue) {
+        return new SpongeMutableValue<String>(Keys.LOCK_TOKEN, actualValue);
     }
 
     @Override
-    protected ImmutableValue<String> constructImmutableValue(String value) {
-        return new ImmutableSpongeValue<String>(Keys.LOCK_TOKEN, "", value);
+    protected Value.Immutable<String> constructImmutableValue(String value) {
+        return new SpongeImmutableValue<String>(Keys.LOCK_TOKEN, value);
     }
 
     @Override

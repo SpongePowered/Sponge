@@ -28,19 +28,19 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableAgeableData;
 import org.spongepowered.api.data.manipulator.mutable.entity.AgeableData;
-import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAgeableData;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
 
 public class ImmutableSpongeAgeableData extends AbstractImmutableData<ImmutableAgeableData, AgeableData> implements ImmutableAgeableData {
 
     private int age;
     private boolean adult;
 
-    private final ImmutableBoundedValue<Integer> ageValue;
+    private final BoundedValue.Immutable<Integer> ageValue;
 
     public ImmutableSpongeAgeableData(int age, boolean adult) {
         super(ImmutableAgeableData.class);
@@ -48,8 +48,7 @@ public class ImmutableSpongeAgeableData extends AbstractImmutableData<ImmutableA
         this.adult = adult;
 
         this.ageValue = SpongeValueFactory.boundedBuilder(Keys.AGE)
-                .actualValue(this.age)
-                .defaultValue(0)
+                .value(this.age)
                 .minimum(Integer.MIN_VALUE)
                 .maximum(Integer.MAX_VALUE)
                 .build().asImmutable();
@@ -63,13 +62,13 @@ public class ImmutableSpongeAgeableData extends AbstractImmutableData<ImmutableA
     }
 
     @Override
-    public ImmutableBoundedValue<Integer> age() {
+    public BoundedValue.Immutable<Integer> age() {
         return this.ageValue;
     }
 
     @Override
-    public ImmutableValue<Boolean> adult() {
-        return ImmutableSpongeValue.cachedOf(Keys.IS_ADULT, true, this.adult);
+    public Value.Immutable<Boolean> adult() {
+        return SpongeImmutableValue.cachedOf(Keys.IS_ADULT, this.adult);
     }
 
     @Override

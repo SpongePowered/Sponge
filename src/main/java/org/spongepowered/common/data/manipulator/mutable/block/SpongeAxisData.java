@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.mutable.block;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableAxisData;
 import org.spongepowered.api.data.manipulator.mutable.block.AxisData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeAxisData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleEnumData;
@@ -43,7 +43,7 @@ public class SpongeAxisData extends AbstractSingleEnumData<Axis, AxisData, Immut
     }
 
     @Override
-    public Value<Axis> type() {
+    public Value.Mutable<Axis> type() {
         return getValueGetter();
     }
 }

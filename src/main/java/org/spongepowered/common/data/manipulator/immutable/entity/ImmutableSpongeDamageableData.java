@@ -28,12 +28,12 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableDamageableData;
 import org.spongepowered.api.data.manipulator.mutable.entity.DamageableData;
-import org.spongepowered.api.data.value.immutable.ImmutableOptionalValue;
+import org.spongepowered.api.data.value.OptionalValue;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeDamageableData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeOptionalValue;
+import org.spongepowered.common.data.value.SpongeImmutableOptionalValue;
 
 import java.util.Optional;
 
@@ -44,8 +44,8 @@ public class ImmutableSpongeDamageableData extends AbstractImmutableData<Immutab
     @Nullable private final EntitySnapshot lastAttacker;
     @Nullable private final Double lastDamage;
 
-    private final ImmutableOptionalValue<EntitySnapshot> lastAttackerValue;
-    private final ImmutableOptionalValue<Double> lastDamageValue;
+    private final OptionalValue.Immutable<EntitySnapshot> lastAttackerValue;
+    private final OptionalValue.Immutable<Double> lastDamageValue;
 
     public ImmutableSpongeDamageableData() {
         this((EntitySnapshot) null, null);
@@ -55,8 +55,8 @@ public class ImmutableSpongeDamageableData extends AbstractImmutableData<Immutab
         super(ImmutableDamageableData.class);
         this.lastAttacker = lastAttacker;
         this.lastDamage = lastDamage;
-        this.lastAttackerValue = new ImmutableSpongeOptionalValue<>(Keys.LAST_ATTACKER, Optional.ofNullable(this.lastAttacker));
-        this.lastDamageValue = new ImmutableSpongeOptionalValue<>(Keys.LAST_DAMAGE, Optional.ofNullable(this.lastDamage));
+        this.lastAttackerValue = new SpongeImmutableOptionalValue<>(Keys.LAST_ATTACKER, Optional.ofNullable(this.lastAttacker));
+        this.lastDamageValue = new SpongeImmutableOptionalValue<>(Keys.LAST_DAMAGE, Optional.ofNullable(this.lastDamage));
         this.registerGetters();
     }
 
@@ -65,12 +65,12 @@ public class ImmutableSpongeDamageableData extends AbstractImmutableData<Immutab
     }
 
     @Override
-    public ImmutableOptionalValue<EntitySnapshot> lastAttacker() {
+    public OptionalValue.Immutable<EntitySnapshot> lastAttacker() {
         return this.lastAttackerValue;
     }
 
     @Override
-    public ImmutableOptionalValue<Double> lastDamage() {
+    public OptionalValue.Immutable<Double> lastDamage() {
         return this.lastDamageValue;
     }
 

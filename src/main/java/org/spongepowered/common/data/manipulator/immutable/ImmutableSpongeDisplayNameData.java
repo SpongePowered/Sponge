@@ -28,16 +28,16 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableDisplayNameData;
 import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeDisplayNameData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
 
 public class ImmutableSpongeDisplayNameData extends AbstractImmutableSingleData<Text, ImmutableDisplayNameData, DisplayNameData> implements ImmutableDisplayNameData {
 
-    private final ImmutableSpongeValue<Text> nameValue;
+    private final SpongeImmutableValue<Text> nameValue;
 
     public ImmutableSpongeDisplayNameData() {
         this(Text.of());
@@ -45,11 +45,11 @@ public class ImmutableSpongeDisplayNameData extends AbstractImmutableSingleData<
 
     public ImmutableSpongeDisplayNameData(Text value) {
         super(ImmutableDisplayNameData.class, value, Keys.DISPLAY_NAME);
-        this.nameValue = new ImmutableSpongeValue<>(this.usedKey, Text.empty(), value);
+        this.nameValue = new SpongeImmutableValue<>(this.usedKey, value);
     }
 
     @Override
-    protected ImmutableValue<?> getValueGetter() {
+    protected Value.Immutable<?> getValueGetter() {
         return this.displayName();
     }
 
@@ -59,7 +59,7 @@ public class ImmutableSpongeDisplayNameData extends AbstractImmutableSingleData<
     }
 
     @Override
-    public ImmutableValue<Text> displayName() {
+    public Value.Immutable<Text> displayName() {
         return this.nameValue;
     }
 

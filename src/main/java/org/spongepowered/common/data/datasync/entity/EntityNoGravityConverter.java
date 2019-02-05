@@ -27,9 +27,9 @@ package org.spongepowered.common.data.datasync.entity;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
 
 import java.util.List;
 import java.util.Optional;
@@ -43,15 +43,15 @@ public class EntityNoGravityConverter extends DataParameterConverter<Boolean> {
     @Override
     public Optional<DataTransactionResult> createTransaction(Boolean currentValue, Boolean value) {
         return Optional.of(DataTransactionResult.builder()
-            .replace(ImmutableSpongeValue.cachedOf(Keys.HAS_GRAVITY, true, !currentValue))
-            .success(ImmutableSpongeValue.cachedOf(Keys.HAS_GRAVITY, true, !value))
+            .replace(SpongeImmutableValue.cachedOf(Keys.HAS_GRAVITY, !currentValue))
+            .success(SpongeImmutableValue.cachedOf(Keys.HAS_GRAVITY, !value))
             .result(DataTransactionResult.Type.SUCCESS)
             .build());
     }
 
     @Override
-    public Boolean getValueFromEvent(Boolean originalValue, List<ImmutableValue<?>> immutableValues) {
-        for (ImmutableValue<?> immutableValue : immutableValues) {
+    public Boolean getValueFromEvent(Boolean originalValue, List<Value.Immutable<?>> immutableValues) {
+        for (Value.Immutable<?> immutableValue : immutableValues) {
             if (immutableValue.getKey() == Keys.HAS_GRAVITY) {
                 return !(Boolean) immutableValue.get();
             }

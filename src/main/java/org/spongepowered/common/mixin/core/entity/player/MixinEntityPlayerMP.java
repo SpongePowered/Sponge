@@ -113,8 +113,7 @@ import org.spongepowered.api.data.manipulator.mutable.entity.GameModeData;
 import org.spongepowered.api.data.manipulator.mutable.entity.JoinData;
 import org.spongepowered.api.data.property.PropertyMatcher;
 import org.spongepowered.api.data.type.SkinPart;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.SoundCategory;
 import org.spongepowered.api.effect.sound.SoundType;
@@ -183,8 +182,8 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeJoinData;
 import org.spongepowered.common.data.processor.data.entity.SkinDataProcessor;
 import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.effect.record.SpongeMusicDisc;
@@ -1056,13 +1055,13 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
-    public Value<Instant> firstPlayed() {
-        return new SpongeValue<>(Keys.FIRST_DATE_PLAYED, Instant.EPOCH, SpongePlayerDataHandler.getFirstJoined(this.getUniqueID()).get());
+    public Value.Mutable<Instant> firstPlayed() {
+        return new SpongeMutableValue<>(Keys.FIRST_DATE_PLAYED, SpongePlayerDataHandler.getFirstJoined(this.getUniqueID()).get());
     }
 
     @Override
-    public Value<Instant> lastPlayed() {
-        return new SpongeValue<>(Keys.LAST_DATE_PLAYED, Instant.EPOCH, Instant.now());
+    public Value.Mutable<Instant> lastPlayed() {
+        return new SpongeMutableValue<>(Keys.LAST_DATE_PLAYED, Instant.now());
     }
 
     @Override
@@ -1086,8 +1085,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
-    public Value<GameMode> gameMode() {
-        return new SpongeValue<>(Keys.GAME_MODE, DataConstants.Catalog.DEFAULT_GAMEMODE,
+    public Value.Mutable<GameMode> gameMode() {
+        return new SpongeMutableValue<>(Keys.GAME_MODE,
                 (GameMode) (Object) this.interactionManager.getGameType());
     }
 
@@ -1604,7 +1603,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             return DataTransactionResult.successNoData();
         }
         Collection<ProfileProperty> skin = this.getProfile().getPropertyMap().removeAll("textures");
-        ImmutableValue<?> oldValue = new ImmutableSpongeValue<>(Keys.SKIN, skin.iterator().next());
+        Value.Immutable<?> oldValue = new SpongeImmutableValue<>(Keys.SKIN, skin.iterator().next());
         this.updateSkin();
 
         return DataTransactionResult.builder().result(DataTransactionResult.Type.SUCCESS).replace(oldValue).build();

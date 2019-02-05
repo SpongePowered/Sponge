@@ -27,27 +27,26 @@ package org.spongepowered.common.data.processor.value.entity;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 
 import java.util.Optional;
 
-public class EntityDisplayNameValueProcessor extends AbstractSpongeValueProcessor<Entity, Text, Value<Text>> {
+public class EntityDisplayNameValueProcessor extends AbstractSpongeValueProcessor<Entity, Text> {
 
     public EntityDisplayNameValueProcessor() {
         super(Entity.class, Keys.DISPLAY_NAME);
     }
 
     @Override
-    protected Value<Text> constructValue(Text actualValue) {
-        return new SpongeValue<>(this.key, Text.empty(), actualValue);
+    protected Value.Mutable<Text> constructMutableValue(Text actualValue) {
+        return new SpongeMutableValue<>(this.key, actualValue);
     }
 
     @Override
@@ -62,8 +61,8 @@ public class EntityDisplayNameValueProcessor extends AbstractSpongeValueProcesso
     }
 
     @Override
-    protected ImmutableValue<Text> constructImmutableValue(Text value) {
-        return new ImmutableSpongeValue<>(this.key, Text.empty(), value);
+    protected Value.Immutable<Text> constructImmutableValue(Text value) {
+        return new SpongeImmutableValue<>(this.key, value);
     }
 
     @Override
@@ -73,7 +72,7 @@ public class EntityDisplayNameValueProcessor extends AbstractSpongeValueProcesso
         if (optional.isPresent()) {
             try {
                 ((IMixinEntity) container).setDisplayName(null);
-                return builder.replace(new ImmutableSpongeValue<>(this.key, optional.get())).result(DataTransactionResult.Type.SUCCESS).build();
+                return builder.replace(new SpongeImmutableValue<>(this.key, optional.get())).result(DataTransactionResult.Type.SUCCESS).build();
             } catch (Exception e) {
                 SpongeImpl.getLogger().error("There was an issue resetting the display name on an entity!", e);
                 return builder.result(DataTransactionResult.Type.ERROR).build();

@@ -30,14 +30,13 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.HorseData;
 import org.spongepowered.api.data.type.HorseColor;
 import org.spongepowered.api.data.type.HorseStyle;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.animal.RideableHorse;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHorseData;
-import org.spongepowered.common.data.util.DataConstants;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 import org.spongepowered.common.registry.type.entity.HorseColorRegistryModule;
 import org.spongepowered.common.registry.type.entity.HorseStyleRegistryModule;
 
@@ -48,13 +47,13 @@ import java.util.List;
 public abstract class MixinEntityHorse extends MixinAbstractHorse implements RideableHorse {
 
     @Override
-    public Value<HorseStyle> style() {
-        return new SpongeValue<>(Keys.HORSE_STYLE, DataConstants.Horse.DEFAULT_STYLE, HorseStyleRegistryModule.getHorseStyle((EntityHorse) (Object) this));
+    public Value.Mutable<HorseStyle> style() {
+        return new SpongeMutableValue<>(Keys.HORSE_STYLE, HorseStyleRegistryModule.getHorseStyle((EntityHorse) (Object) this));
     }
 
     @Override
-    public Value<HorseColor> color() {
-        return new SpongeValue<>(Keys.HORSE_COLOR, DataConstants.Horse.DEFAULT_COLOR, HorseColorRegistryModule.getHorseColor((EntityHorse) (Object) this));
+    public Value.Mutable<HorseColor> color() {
+        return new SpongeMutableValue<>(Keys.HORSE_COLOR, HorseColorRegistryModule.getHorseColor((EntityHorse) (Object) this));
     }
 
     @Override

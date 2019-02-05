@@ -28,7 +28,7 @@ import net.minecraft.entity.monster.EntitySlime;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.SlimeData;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.entity.living.monster.Slime;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -44,12 +44,12 @@ public abstract class MixinEntitySlime extends MixinEntityLiving implements Slim
     @Shadow public abstract int getSlimeSize();
 
     @Override
-    public MutableBoundedValue<Integer> slimeSize() {
+    public BoundedValue.Mutable<Integer> slimeSize() {
         return SpongeValueFactory.boundedBuilder(Keys.SLIME_SIZE)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
                 .defaultValue(1)
-                .actualValue(getSlimeSize())
+                .value(getSlimeSize())
                 .build();
     }
 

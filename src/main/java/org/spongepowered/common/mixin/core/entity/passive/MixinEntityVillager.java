@@ -36,7 +36,7 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.CareerData;
 import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.data.type.Profession;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.entity.living.Villager;
 import org.spongepowered.api.item.inventory.Carrier;
@@ -56,9 +56,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeCareerData;
-import org.spongepowered.common.data.util.DataConstants;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 import org.spongepowered.common.entity.SpongeCareer;
 import org.spongepowered.common.entity.SpongeEntityMeta;
 import org.spongepowered.common.interfaces.entity.IMixinVillager;
@@ -226,8 +224,8 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
     }
 
     @Override
-    public Value<Career> career() {
-        return new SpongeValue<>(Keys.CAREER, DataConstants.Catalog.CAREER_DEFAULT, getCareer());
+    public Value.Mutable<Career> career() {
+        return new SpongeMutableValue<>(Keys.CAREER, getCareer());
     }
 
     @Override

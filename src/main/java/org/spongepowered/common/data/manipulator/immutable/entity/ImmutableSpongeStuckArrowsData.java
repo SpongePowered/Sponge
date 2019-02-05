@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.immutable.entity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableStuckArrowsData;
 import org.spongepowered.api.data.manipulator.mutable.entity.StuckArrowsData;
-import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableIntData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeStuckArrowsData;
 
@@ -38,7 +38,7 @@ public class ImmutableSpongeStuckArrowsData extends AbstractImmutableIntData<Imm
     }
 
     @Override
-    public ImmutableBoundedValue<Integer> stuckArrows() {
+    public BoundedValue.Immutable<Integer> stuckArrows() {
         return this.getValueGetter();
     }
 

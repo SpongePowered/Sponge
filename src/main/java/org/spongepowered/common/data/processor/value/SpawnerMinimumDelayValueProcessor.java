@@ -26,29 +26,27 @@ package org.spongepowered.common.data.processor.value;
 
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.interfaces.IMixinMobSpawner;
 
 import java.util.Optional;
 
-public class SpawnerMinimumDelayValueProcessor extends AbstractSpongeValueProcessor<IMixinMobSpawner, Short, MutableBoundedValue<Short>> {
+public class SpawnerMinimumDelayValueProcessor extends AbstractSpongeValueProcessor<IMixinMobSpawner, Short> {
 
     public SpawnerMinimumDelayValueProcessor() {
         super(IMixinMobSpawner.class, Keys.SPAWNER_MINIMUM_DELAY);
     }
 
     @Override
-    protected MutableBoundedValue<Short> constructValue(Short actualValue) {
+    protected BoundedValue.Mutable<Short> constructMutableValue(Short actualValue) {
         return SpongeValueFactory.boundedBuilder(this.key)
                 .minimum((short) 0)
                 .maximum(Short.MAX_VALUE)
-                .defaultValue(DataConstants.DEFAULT_SPAWNER_MINIMUM_SPAWN_DELAY)
-                .actualValue(actualValue)
+                .value(actualValue)
                 .build();
     }
 
@@ -64,8 +62,8 @@ public class SpawnerMinimumDelayValueProcessor extends AbstractSpongeValueProces
     }
 
     @Override
-    protected ImmutableValue<Short> constructImmutableValue(Short value) {
-        return constructValue(value).asImmutable();
+    protected Value.Immutable<Short> constructImmutableValue(Short value) {
+        return constructMutableValue(value).asImmutable();
     }
 
     @Override

@@ -27,24 +27,23 @@ package org.spongepowered.common.data.processor.value.entity;
 import net.minecraft.entity.EntityAreaEffectCloud;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 
 import java.util.Optional;
 
-public class AreaEffectCloudColorProcessor extends AbstractSpongeValueProcessor<EntityAreaEffectCloud, Color, Value<Color>> {
+public class AreaEffectCloudColorProcessor extends AbstractSpongeValueProcessor<EntityAreaEffectCloud, Color> {
 
     public AreaEffectCloudColorProcessor() {
         super(EntityAreaEffectCloud.class, Keys.AREA_EFFECT_CLOUD_COLOR);
     }
 
     @Override
-    protected Value<Color> constructValue(Color actualValue) {
-        return new SpongeValue<>(Keys.AREA_EFFECT_CLOUD_COLOR, Color.WHITE, actualValue);
+    protected Value.Mutable<Color> constructMutableValue(Color actualValue) {
+        return new SpongeMutableValue<>(Keys.AREA_EFFECT_CLOUD_COLOR, actualValue);
     }
 
     @Override
@@ -59,8 +58,8 @@ public class AreaEffectCloudColorProcessor extends AbstractSpongeValueProcessor<
     }
 
     @Override
-    protected ImmutableValue<Color> constructImmutableValue(Color value) {
-        return constructValue(value).asImmutable();
+    protected Value.Immutable<Color> constructImmutableValue(Color value) {
+        return constructMutableValue(value).asImmutable();
     }
 
     @Override

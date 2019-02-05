@@ -28,20 +28,20 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableAuthorData;
 import org.spongepowered.api.data.manipulator.mutable.item.AuthorData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeAuthorData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
 
 public class ImmutableSpongeAuthorData extends AbstractImmutableSingleData<Text, ImmutableAuthorData, AuthorData> implements ImmutableAuthorData {
 
-    final ImmutableSpongeValue<Text> author;
+    final SpongeImmutableValue<Text> author;
 
     public ImmutableSpongeAuthorData(Text value) {
         super(ImmutableAuthorData.class, value, Keys.BOOK_AUTHOR);
-        this.author = new ImmutableSpongeValue<>(Keys.BOOK_AUTHOR, Text.empty(), value);
+        this.author = new SpongeImmutableValue<>(Keys.BOOK_AUTHOR, value);
     }
 
     @Override
@@ -51,12 +51,12 @@ public class ImmutableSpongeAuthorData extends AbstractImmutableSingleData<Text,
     }
 
     @Override
-    public ImmutableValue<Text> author() {
+    public Value.Immutable<Text> author() {
         return this.author;
     }
 
     @Override
-    protected ImmutableValue<?> getValueGetter() {
+    protected Value.Immutable<?> getValueGetter() {
         return author();
     }
 

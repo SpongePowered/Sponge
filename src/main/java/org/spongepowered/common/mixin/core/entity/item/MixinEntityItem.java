@@ -32,7 +32,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.Item;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -48,7 +48,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedItemData;
 import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.entity.item.IMixinEntityItem;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
@@ -233,8 +233,8 @@ public abstract class MixinEntityItem extends MixinEntity implements Item, IMixi
     }
 
     @Override
-    public Value<ItemStackSnapshot> item() {
-        return new SpongeValue<>(Keys.REPRESENTED_ITEM, ItemStackSnapshot.NONE, ItemStackUtil.snapshotOf(getItem()));
+    public Value.Mutable<ItemStackSnapshot> item() {
+        return new SpongeMutableValue<>(Keys.REPRESENTED_ITEM, ItemStackUtil.snapshotOf(getItem()));
     }
 
     @Override

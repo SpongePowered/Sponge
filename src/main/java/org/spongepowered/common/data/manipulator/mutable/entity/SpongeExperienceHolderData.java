@@ -30,8 +30,7 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableExperienceHolderData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ExperienceHolderData;
-import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeExperienceHolderData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.processor.common.ExperienceHolderUtils;
@@ -76,40 +75,36 @@ public class SpongeExperienceHolderData extends AbstractData<ExperienceHolderDat
     }
 
     @Override
-    public MutableBoundedValue<Integer> level() {
+    public BoundedValue.Mutable<Integer> level() {
         return SpongeValueFactory.boundedBuilder(Keys.EXPERIENCE_LEVEL)
-            .defaultValue(0)
             .minimum(0)
             .maximum(Integer.MAX_VALUE)
-            .actualValue(this.level)
+            .value(this.level)
             .build();
     }
 
     @Override
-    public MutableBoundedValue<Integer> totalExperience() {
+    public BoundedValue.Mutable<Integer> totalExperience() {
         return SpongeValueFactory.boundedBuilder(Keys.TOTAL_EXPERIENCE)
-            .defaultValue(0)
             .minimum(0)
             .maximum(Integer.MAX_VALUE)
-            .actualValue(this.totalExp)
+            .value(this.totalExp)
             .build();
     }
 
     @Override
-    public MutableBoundedValue<Integer> experienceSinceLevel() {
+    public BoundedValue.Mutable<Integer> experienceSinceLevel() {
         return SpongeValueFactory.boundedBuilder(Keys.EXPERIENCE_SINCE_LEVEL)
             .minimum(0)
             .maximum(Integer.MAX_VALUE)
-            .defaultValue(0)
-            .actualValue(this.expSinceLevel)
+            .value(this.expSinceLevel)
             .build();
     }
 
     @Override
-    public ImmutableBoundedValue<Integer> getExperienceBetweenLevels() {
+    public BoundedValue.Immutable<Integer> getExperienceBetweenLevels() {
         return SpongeValueFactory.boundedBuilder(Keys.EXPERIENCE_FROM_START_OF_LEVEL)
-            .defaultValue(0)
-            .actualValue(this.expBetweenLevels)
+            .value(this.expBetweenLevels)
             .minimum(0)
             .maximum(Integer.MAX_VALUE)
             .build()

@@ -30,28 +30,28 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableVehicleData;
 import org.spongepowered.api.data.manipulator.mutable.entity.VehicleData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeVehicleData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
 
 public class ImmutableSpongeVehicleData extends AbstractImmutableData<ImmutableVehicleData, VehicleData> implements ImmutableVehicleData {
 
     private final EntitySnapshot vehicle;
     private final EntitySnapshot baseVehicle;
 
-    private final ImmutableValue<EntitySnapshot> vehicleValue;
-    private final ImmutableValue<EntitySnapshot> baseVehicleValue;
+    private final Value.Immutable<EntitySnapshot> vehicleValue;
+    private final Value.Immutable<EntitySnapshot> baseVehicleValue;
 
     public ImmutableSpongeVehicleData(EntitySnapshot vehicle, EntitySnapshot baseVehicle) {
         super(ImmutableVehicleData.class);
         this.vehicle = checkNotNull(vehicle, "vehicle");
         this.baseVehicle = checkNotNull(baseVehicle, "baseVehicle");
 
-        this.vehicleValue = new ImmutableSpongeValue<>(Keys.VEHICLE, this.vehicle);
-        this.baseVehicleValue = new ImmutableSpongeValue<>(Keys.BASE_VEHICLE, this.baseVehicle);
+        this.vehicleValue = new SpongeImmutableValue<>(Keys.VEHICLE, this.vehicle);
+        this.baseVehicleValue = new SpongeImmutableValue<>(Keys.BASE_VEHICLE, this.baseVehicle);
         registerGetters();
     }
 
@@ -60,12 +60,12 @@ public class ImmutableSpongeVehicleData extends AbstractImmutableData<ImmutableV
     }
 
     @Override
-    public ImmutableValue<EntitySnapshot> vehicle() {
+    public Value.Immutable<EntitySnapshot> vehicle() {
         return this.vehicleValue;
     }
 
     @Override
-    public ImmutableValue<EntitySnapshot> baseVehicle() {
+    public Value.Immutable<EntitySnapshot> baseVehicle() {
         return this.baseVehicleValue;
     }
 

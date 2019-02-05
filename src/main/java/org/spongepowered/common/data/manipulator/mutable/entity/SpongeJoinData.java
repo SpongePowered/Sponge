@@ -30,10 +30,10 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableJoinData;
 import org.spongepowered.api.data.manipulator.mutable.entity.JoinData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeJoinData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 
 import java.time.Instant;
 
@@ -72,13 +72,13 @@ public class SpongeJoinData extends AbstractData<JoinData, ImmutableJoinData> im
     }
 
     @Override
-    public Value<Instant> firstPlayed() {
-        return new SpongeValue<>(Keys.FIRST_DATE_PLAYED, Instant.EPOCH, this.firstJoined);
+    public Value.Mutable<Instant> firstPlayed() {
+        return new SpongeMutableValue<>(Keys.FIRST_DATE_PLAYED, this.firstJoined);
     }
 
     @Override
-    public Value<Instant> lastPlayed() {
-        return new SpongeValue<>(Keys.LAST_DATE_PLAYED, Instant.EPOCH, this.lastJoined);
+    public Value.Mutable<Instant> lastPlayed() {
+        return new SpongeMutableValue<>(Keys.LAST_DATE_PLAYED, this.lastJoined);
     }
 
     @Override

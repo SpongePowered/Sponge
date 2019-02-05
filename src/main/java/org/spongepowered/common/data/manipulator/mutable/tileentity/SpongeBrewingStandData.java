@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.mutable.tileentity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableBrewingStandData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.BrewingStandData;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeBrewingStandData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBoundedComparableData;
 import org.spongepowered.common.data.util.ComparatorUtil;
@@ -49,7 +49,7 @@ public class SpongeBrewingStandData extends AbstractBoundedComparableData<Intege
     }
 
     @Override
-    public MutableBoundedValue<Integer> remainingBrewTime() {
+    public BoundedValue.Mutable<Integer> remainingBrewTime() {
         return getValueGetter();
     }
 }

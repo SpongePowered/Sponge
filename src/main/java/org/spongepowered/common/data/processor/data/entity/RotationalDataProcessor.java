@@ -29,21 +29,19 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableRotationalData;
 import org.spongepowered.api.data.manipulator.mutable.RotationalData;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.util.rotation.Rotation;
-import org.spongepowered.api.util.rotation.Rotations;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRotationalData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.processor.common.RotationalUtils;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 
 import java.util.Optional;
 
 public class RotationalDataProcessor
-        extends AbstractEntitySingleDataProcessor<EntityItemFrame, Rotation, Value<Rotation>, RotationalData, ImmutableRotationalData> {
+        extends AbstractEntitySingleDataProcessor<EntityItemFrame, Rotation, RotationalData, ImmutableRotationalData> {
 
     public RotationalDataProcessor() {
         super(EntityItemFrame.class, Keys.ROTATION);
@@ -61,8 +59,8 @@ public class RotationalDataProcessor
     }
 
     @Override
-    protected ImmutableValue<Rotation> constructImmutableValue(Rotation value) {
-        return ImmutableSpongeValue.cachedOf(Keys.ROTATION, Rotations.BOTTOM, value);
+    protected Value.Immutable<Rotation> constructImmutableValue(Rotation value) {
+        return SpongeImmutableValue.cachedOf(Keys.ROTATION, value);
     }
 
     @Override
@@ -71,8 +69,8 @@ public class RotationalDataProcessor
     }
 
     @Override
-    protected Value<Rotation> constructValue(Rotation actualValue) {
-        return new SpongeValue<>(Keys.ROTATION, Rotations.BOTTOM, actualValue);
+    protected Value.Mutable<Rotation> constructMutableValue(Rotation actualValue) {
+        return new SpongeMutableValue<>(Keys.ROTATION, actualValue);
     }
 
     @Override

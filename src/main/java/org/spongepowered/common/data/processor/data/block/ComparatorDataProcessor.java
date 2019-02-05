@@ -29,13 +29,13 @@ import org.spongepowered.api.data.manipulator.immutable.block.ImmutableComparato
 import org.spongepowered.api.data.manipulator.mutable.block.ComparatorData;
 import org.spongepowered.api.data.type.ComparatorType;
 import org.spongepowered.api.data.type.ComparatorTypes;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeComparatorData;
 import org.spongepowered.common.data.processor.common.AbstractBlockOnlyDataProcessor;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 
 public class ComparatorDataProcessor extends
-        AbstractBlockOnlyDataProcessor<ComparatorType, Value<ComparatorType>, ComparatorData, ImmutableComparatorData> {
+        AbstractBlockOnlyDataProcessor<ComparatorType, ComparatorData, ImmutableComparatorData> {
 
     public ComparatorDataProcessor() {
         super(Keys.COMPARATOR_TYPE);
@@ -52,8 +52,8 @@ public class ComparatorDataProcessor extends
     }
 
     @Override
-    protected Value<ComparatorType> constructValue(ComparatorType actualValue) {
-        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
+    protected Value.Mutable<ComparatorType> constructMutableValue(ComparatorType actualValue) {
+        return new SpongeMutableValue<>(this.key, actualValue);
     }
 
 }

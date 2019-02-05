@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.immutable;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableFireworkRocketData;
 import org.spongepowered.api.data.manipulator.mutable.FireworkRocketData;
-import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableIntData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeFireworkRocketData;
 
@@ -44,7 +44,7 @@ public class ImmutableSpongeFireworkRocketData extends AbstractImmutableIntData<
     }
 
     @Override
-    public ImmutableBoundedValue<Integer> flightModifier() {
+    public BoundedValue.Immutable<Integer> flightModifier() {
         return getValueGetter();
     }
 }

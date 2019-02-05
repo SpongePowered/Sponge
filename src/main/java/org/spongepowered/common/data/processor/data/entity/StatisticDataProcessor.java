@@ -35,21 +35,20 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableStatisticData;
 import org.spongepowered.api.data.manipulator.mutable.entity.StatisticData;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.MapValue;
 import org.spongepowered.api.statistic.Statistic;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeStatisticData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeMapValue;
-import org.spongepowered.common.data.value.mutable.SpongeMapValue;
+import org.spongepowered.common.data.value.SpongeImmutableMapValue;
+import org.spongepowered.common.data.value.SpongeMutableMapValue;
 import org.spongepowered.common.interfaces.statistic.IMixinStatisticsManager;
 
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 
-public class StatisticDataProcessor extends AbstractEntitySingleDataProcessor<EntityPlayerMP, Map<Statistic, Long>, MapValue<Statistic, Long>, StatisticData, ImmutableStatisticData> {
+public class StatisticDataProcessor extends AbstractEntitySingleDataProcessor<EntityPlayerMP, Map<Statistic, Long>, StatisticData, ImmutableStatisticData> {
 
     public StatisticDataProcessor() {
         super(EntityPlayerMP.class, Keys.STATISTICS);
@@ -89,13 +88,13 @@ public class StatisticDataProcessor extends AbstractEntitySingleDataProcessor<En
     }
 
     @Override
-    protected ImmutableValue<Map<Statistic, Long>> constructImmutableValue(Map<Statistic, Long> value) {
-        return new ImmutableSpongeMapValue<>(Keys.STATISTICS, checkNotNull(value, "null value"));
+    protected Value.Immutable<Map<Statistic, Long>> constructImmutableValue(Map<Statistic, Long> value) {
+        return new SpongeImmutableMapValue<>(Keys.STATISTICS, checkNotNull(value, "null value"));
     }
 
     @Override
-    protected MapValue<Statistic, Long> constructValue(Map<Statistic, Long> actualValue) {
-        return new SpongeMapValue<>(Keys.STATISTICS, checkNotNull(actualValue, "null value"));
+    protected Value.Mutable<Map<Statistic, Long>> constructMutableValue(Map<Statistic, Long> actualValue) {
+        return new SpongeMutableMapValue<>(Keys.STATISTICS, checkNotNull(actualValue, "null value"));
     }
 
     @Override

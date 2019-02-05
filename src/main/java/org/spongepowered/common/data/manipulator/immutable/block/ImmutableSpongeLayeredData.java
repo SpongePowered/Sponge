@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.immutable.block;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableLayeredData;
 import org.spongepowered.api.data.manipulator.mutable.block.LayeredData;
-import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableIntData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeLayeredData;
 
@@ -46,7 +46,7 @@ public class ImmutableSpongeLayeredData extends AbstractImmutableIntData<Immutab
     }
 
     @Override
-    public ImmutableBoundedValue<Integer> layer() {
+    public BoundedValue.Immutable<Integer> layer() {
         return getValueGetter();
     }
 }

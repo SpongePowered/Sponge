@@ -29,9 +29,6 @@ import static net.minecraft.entity.player.EntityPlayer.MAIN_HAND;
 import static net.minecraft.entity.player.EntityPlayer.PLAYER_MODEL_FLAG;
 import static net.minecraft.entity.player.EntityPlayer.PLAYER_SCORE;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
@@ -64,27 +61,19 @@ import net.minecraft.world.GameType;
 import net.minecraft.world.World;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.persistence.DataBuilder;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.living.player.tab.TabListEntry;
 import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.api.scoreboard.TeamMember;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.IMixinSkinnable;
 import org.spongepowered.common.network.keepalive.SpongeClientWaiter;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nullable;
 

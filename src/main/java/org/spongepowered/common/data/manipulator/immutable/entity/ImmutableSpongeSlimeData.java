@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.immutable.entity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSlimeData;
 import org.spongepowered.api.data.manipulator.mutable.entity.SlimeData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableIntData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSlimeData;
 
@@ -42,7 +42,7 @@ public class ImmutableSpongeSlimeData extends AbstractImmutableIntData<Immutable
     }
 
     @Override
-    public ImmutableValue<Integer> size() {
+    public Value.Immutable<Integer> size() {
         return getValueGetter();
     }
 

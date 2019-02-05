@@ -31,10 +31,10 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableMinecartBlockData;
 import org.spongepowered.api.data.manipulator.mutable.entity.MinecartBlockData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeMinecartBlockData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 
 public class SpongeMinecartBlockData extends AbstractData<MinecartBlockData, ImmutableMinecartBlockData> implements MinecartBlockData {
 
@@ -55,13 +55,13 @@ public class SpongeMinecartBlockData extends AbstractData<MinecartBlockData, Imm
     }
 
     @Override
-    public Value<BlockState> block() {
-        return new SpongeValue<>(Keys.REPRESENTED_BLOCK, (BlockState) Blocks.AIR.getDefaultState(), this.block);
+    public Value.Mutable<BlockState> block() {
+        return new SpongeMutableValue<>(Keys.REPRESENTED_BLOCK, this.block);
     }
 
     @Override
-    public Value<Integer> offset() {
-        return new SpongeValue<>(Keys.OFFSET, 6, this.offset);
+    public Value.Mutable<Integer> offset() {
+        return new SpongeMutableValue<>(Keys.OFFSET, this.offset);
     }
 
     @Override

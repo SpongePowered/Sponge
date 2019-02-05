@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.mutable.block;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDropData;
 import org.spongepowered.api.data.manipulator.mutable.block.DropData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDropData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;
 
@@ -42,7 +42,7 @@ public class SpongeDropData extends AbstractBooleanData<DropData, ImmutableDropD
     }
 
     @Override
-    public Value<Boolean> willDrop() {
+    public Value.Mutable<Boolean> willDrop() {
         return getValueGetter();
     }
 }

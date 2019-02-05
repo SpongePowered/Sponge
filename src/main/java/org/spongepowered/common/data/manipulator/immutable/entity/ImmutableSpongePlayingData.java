@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.immutable.entity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutablePlayingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.PlayingData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongePlayingData;
 
@@ -38,7 +38,7 @@ public class ImmutableSpongePlayingData extends AbstractImmutableBooleanData<Imm
     }
 
     @Override
-    public ImmutableValue<Boolean> playing() {
+    public Value.Immutable<Boolean> playing() {
         return getValueGetter();
     }
 

@@ -29,9 +29,8 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableBrewingStandData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.BrewingStandData;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeBrewingStandData;
 import org.spongepowered.common.data.processor.common.AbstractTileEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
@@ -39,7 +38,7 @@ import org.spongepowered.common.data.value.SpongeValueFactory;
 import java.util.Optional;
 
 public class BrewingStandDataProcessor extends
-        AbstractTileEntitySingleDataProcessor<TileEntityBrewingStand, Integer, MutableBoundedValue<Integer>, BrewingStandData, ImmutableBrewingStandData> {
+        AbstractTileEntitySingleDataProcessor<TileEntityBrewingStand, Integer, BrewingStandData, ImmutableBrewingStandData> {
 
     public BrewingStandDataProcessor() {
         super(TileEntityBrewingStand.class, Keys.REMAINING_BREW_TIME);
@@ -61,18 +60,18 @@ public class BrewingStandDataProcessor extends
     }
 
     @Override
-    protected MutableBoundedValue<Integer> constructValue(Integer actualValue) {
+    protected Value.Mutable<Integer> constructMutableValue(Integer actualValue) {
         return SpongeValueFactory.boundedBuilder(Keys.REMAINING_BREW_TIME)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
                 .defaultValue(400)
-                .actualValue(actualValue)
+                .value(actualValue)
                 .build();
     }
 
     @Override
-    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
-        return constructValue(value).asImmutable();
+    protected Value.Immutable<Integer> constructImmutableValue(Integer value) {
+        return constructMutableValue(value).asImmutable();
     }
 
     @Override

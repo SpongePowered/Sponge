@@ -28,12 +28,12 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutablePotionTypeData;
 import org.spongepowered.api.data.manipulator.mutable.PotionTypeData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.item.potion.PotionType;
 import org.spongepowered.api.item.potion.PotionTypes;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongePotionTypeData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 
 public class SpongePotionTypeData extends AbstractSingleData<PotionType, PotionTypeData, ImmutablePotionTypeData> implements PotionTypeData {
 
@@ -53,8 +53,8 @@ public class SpongePotionTypeData extends AbstractSingleData<PotionType, PotionT
 
 
     @Override
-    public Value<PotionType> type() {
-        return new SpongeValue<>(Keys.POTION_TYPE, PotionTypes.EMPTY, this.getValue());
+    public Value.Mutable<PotionType> type() {
+        return new SpongeMutableValue<>(Keys.POTION_TYPE, this.getValue());
     }
 
     @Override
@@ -69,7 +69,7 @@ public class SpongePotionTypeData extends AbstractSingleData<PotionType, PotionT
 
 
     @Override
-    protected Value<?> getValueGetter() {
+    protected Value.Mutable<?> getValueGetter() {
         return type();
     }
 }

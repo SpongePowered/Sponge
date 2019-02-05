@@ -28,19 +28,18 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDirectionalData;
 import org.spongepowered.api.data.manipulator.mutable.block.DirectionalData;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeDirectionalData;
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 import org.spongepowered.common.interfaces.entity.IMixinEntityHanging;
 
 import java.util.Optional;
 
-public class HangingDataProcessor extends AbstractSingleDataSingleTargetProcessor<IMixinEntityHanging, Direction, Value<Direction>, DirectionalData, ImmutableDirectionalData> {
+public class HangingDataProcessor extends AbstractSingleDataSingleTargetProcessor<IMixinEntityHanging, Direction, DirectionalData, ImmutableDirectionalData> {
 
     public HangingDataProcessor() {
         super(Keys.DIRECTION, IMixinEntityHanging.class);
@@ -63,13 +62,13 @@ public class HangingDataProcessor extends AbstractSingleDataSingleTargetProcesso
     }
 
     @Override
-    protected ImmutableValue<Direction> constructImmutableValue(Direction value) {
-        return ImmutableSpongeValue.cachedOf(this.key, Direction.NONE, value);
+    protected Value.Immutable<Direction> constructImmutableValue(Direction value) {
+        return SpongeImmutableValue.cachedOf(this.key, value);
     }
 
     @Override
-    protected Value<Direction> constructValue(Direction actualValue) {
-        return new SpongeValue<>(this.key, Direction.NONE, actualValue);
+    protected Value.Mutable<Direction> constructMutableValue(Direction actualValue) {
+        return new SpongeMutableValue<>(this.key, actualValue);
     }
 
     @Override

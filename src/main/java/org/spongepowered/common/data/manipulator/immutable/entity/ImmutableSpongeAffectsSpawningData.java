@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.immutable.entity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableAffectsSpawningData;
 import org.spongepowered.api.data.manipulator.mutable.entity.AffectsSpawningData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAffectsSpawningData;
 
@@ -38,7 +38,7 @@ public class ImmutableSpongeAffectsSpawningData extends AbstractImmutableBoolean
     }
 
     @Override
-    public ImmutableValue<Boolean> affectsSpawning() {
+    public Value.Immutable<Boolean> affectsSpawning() {
         return getValueGetter();
     }
 

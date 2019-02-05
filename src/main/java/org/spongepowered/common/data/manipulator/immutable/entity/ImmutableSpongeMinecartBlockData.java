@@ -31,18 +31,18 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableMinecartBlockData;
 import org.spongepowered.api.data.manipulator.mutable.entity.MinecartBlockData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeMinecartBlockData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
 
 public class ImmutableSpongeMinecartBlockData extends AbstractImmutableData<ImmutableMinecartBlockData, MinecartBlockData> implements ImmutableMinecartBlockData {
 
     private final BlockState block;
     private final int offset;
 
-    private final ImmutableValue<BlockState> blockValue;
-    private final ImmutableValue<Integer> offsetValue;
+    private final Value.Immutable<BlockState> blockValue;
+    private final Value.Immutable<Integer> offsetValue;
 
     public ImmutableSpongeMinecartBlockData() {
         this((BlockState) Blocks.AIR.getDefaultState(), 6);
@@ -52,18 +52,18 @@ public class ImmutableSpongeMinecartBlockData extends AbstractImmutableData<Immu
         super(ImmutableMinecartBlockData.class);
         this.block = Preconditions.checkNotNull(block);
         this.offset = offset;
-        this.blockValue = new ImmutableSpongeValue<>(Keys.REPRESENTED_BLOCK, (BlockState) Blocks.AIR.getDefaultState(), block);
-        this.offsetValue = new ImmutableSpongeValue<>(Keys.OFFSET, 6, offset);
+        this.blockValue = new SpongeImmutableValue<>(Keys.REPRESENTED_BLOCK, block);
+        this.offsetValue = new SpongeImmutableValue<>(Keys.OFFSET, offset);
         registerGetters();
     }
 
     @Override
-    public ImmutableValue<BlockState> block() {
+    public Value.Immutable<BlockState> block() {
         return this.blockValue;
     }
 
     @Override
-    public ImmutableValue<Integer> offset() {
+    public Value.Immutable<Integer> offset() {
         return this.offsetValue;
     }
 

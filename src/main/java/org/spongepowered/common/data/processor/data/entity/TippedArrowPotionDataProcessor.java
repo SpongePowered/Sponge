@@ -30,15 +30,14 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutablePotionEffectData;
 import org.spongepowered.api.data.manipulator.mutable.PotionEffectData;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.common.data.manipulator.mutable.SpongePotionEffectData;
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
 import org.spongepowered.common.data.util.PotionUtil;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
-import org.spongepowered.common.data.value.mutable.SpongeListValue;
+import org.spongepowered.common.data.value.SpongeImmutableListValue;
+import org.spongepowered.common.data.value.SpongeMutableListValue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +45,7 @@ import java.util.Optional;
 import java.util.Set;
 
 public class TippedArrowPotionDataProcessor extends AbstractSingleDataSingleTargetProcessor<EntityTippedArrow, List<PotionEffect>,
-        ListValue<PotionEffect>, PotionEffectData, ImmutablePotionEffectData> {
+        PotionEffectData, ImmutablePotionEffectData> {
 
     public TippedArrowPotionDataProcessor() {
         super(Keys.POTION_EFFECTS, EntityTippedArrow.class);
@@ -76,13 +75,13 @@ public class TippedArrowPotionDataProcessor extends AbstractSingleDataSingleTarg
     }
 
     @Override
-    protected ImmutableValue<List<PotionEffect>> constructImmutableValue(List<PotionEffect> value) {
-        return new ImmutableSpongeListValue<>(Keys.POTION_EFFECTS, ImmutableList.copyOf(value));
+    protected Value.Immutable<List<PotionEffect>> constructImmutableValue(List<PotionEffect> value) {
+        return new SpongeImmutableListValue<>(Keys.POTION_EFFECTS, ImmutableList.copyOf(value));
     }
 
     @Override
-    protected ListValue<PotionEffect> constructValue(List<PotionEffect> actualValue) {
-        return new SpongeListValue<>(Keys.POTION_EFFECTS, actualValue);
+    protected Value.Mutable<List<PotionEffect>> constructMutableValue(List<PotionEffect> actualValue) {
+        return new SpongeMutableListValue<>(Keys.POTION_EFFECTS, actualValue);
     }
 
     @Override

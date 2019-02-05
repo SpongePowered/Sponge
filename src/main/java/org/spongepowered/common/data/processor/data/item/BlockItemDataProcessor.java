@@ -33,18 +33,16 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableBlockItemData;
 import org.spongepowered.api.data.manipulator.mutable.item.BlockItemData;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeBlockItemData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
-import org.spongepowered.common.data.util.DataConstants;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 
 import java.util.Optional;
 
-public class BlockItemDataProcessor extends AbstractItemSingleDataProcessor<BlockState, Value<BlockState>, BlockItemData, ImmutableBlockItemData> {
+public class BlockItemDataProcessor extends AbstractItemSingleDataProcessor<BlockState, BlockItemData, ImmutableBlockItemData> {
 
     public BlockItemDataProcessor() {
         super(stack -> stack.getItem() instanceof ItemBlock, Keys.ITEM_BLOCKSTATE);
@@ -76,13 +74,13 @@ public class BlockItemDataProcessor extends AbstractItemSingleDataProcessor<Bloc
     }
 
     @Override
-    protected Value<BlockState> constructValue(BlockState actualValue) {
-        return new SpongeValue<>(Keys.ITEM_BLOCKSTATE, DataConstants.Catalog.DEFAULT_BLOCK_STATE, actualValue);
+    protected Value.Mutable<BlockState> constructMutableValue(BlockState actualValue) {
+        return new SpongeMutableValue<>(Keys.ITEM_BLOCKSTATE, actualValue);
     }
 
     @Override
-    protected ImmutableValue<BlockState> constructImmutableValue(BlockState value) {
-        return new ImmutableSpongeValue<>(Keys.ITEM_BLOCKSTATE, DataConstants.Catalog.DEFAULT_BLOCK_STATE, value);
+    protected Value.Immutable<BlockState> constructImmutableValue(BlockState value) {
+        return new SpongeImmutableValue<>(Keys.ITEM_BLOCKSTATE, value);
     }
 
     @Override

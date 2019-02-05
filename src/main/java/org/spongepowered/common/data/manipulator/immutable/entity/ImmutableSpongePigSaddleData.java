@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.immutable.entity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutablePigSaddleData;
 import org.spongepowered.api.data.manipulator.mutable.entity.PigSaddleData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongePigSaddleData;
 
@@ -38,7 +38,7 @@ public class ImmutableSpongePigSaddleData extends AbstractImmutableBooleanData<I
     }
 
     @Override
-    public ImmutableValue<Boolean> saddle() {
+    public Value.Immutable<Boolean> saddle() {
         return getValueGetter();
     }
 

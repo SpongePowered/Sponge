@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.immutable.block;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDelayableData;
 import org.spongepowered.api.data.manipulator.mutable.block.DelayableData;
-import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableIntData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeDelayableData;
 
@@ -46,7 +46,7 @@ public class ImmutableSpongeDelayableData extends AbstractImmutableIntData<Immut
     }
 
     @Override
-    public ImmutableBoundedValue<Integer> delay() {
+    public BoundedValue.Immutable<Integer> delay() {
         return getValueGetter();
     }
 

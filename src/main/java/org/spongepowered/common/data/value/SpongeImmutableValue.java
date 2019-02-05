@@ -22,46 +22,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.value.mutable;
+package org.spongepowered.common.data.value;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.value.AbstractBaseValue;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.api.data.value.Value;
 
 import java.util.function.Function;
 
-public class SpongeValue<E> extends AbstractBaseValue<E> implements Value<E> {
+public class SpongeImmutableValue<E> extends SpongeValue<E> implements Value.Immutable<E> {
 
-    public SpongeValue(Key<? extends BaseValue<E>> key, E defaultValue) {
-        this(key, defaultValue, defaultValue);
-    }
-
-    public SpongeValue(Key<? extends BaseValue<E>> key, E defaultValue, E actualValue) {
-        super(key, defaultValue, actualValue);
+    public SpongeImmutableValue(Key<? extends Value<E>> key, E value) {
+        super(key, value);
     }
 
     @Override
-    public Value<E> set(E value) {
-        this.actualValue = value;
-        return this;
+    public E get() {
+        return CopyHelper.copy(super.get());
     }
 
     @Override
-    public Value<E> transform(Function<E, E> function) {
-        this.actualValue = function.apply(this.actualValue);
-        return this;
+    public SpongeValue.Immutable<E> with(E value) {
+        checkNotNull(value, "value");
+        return new SpongeImmutableValue<>(this.key, CopyHelper.copy(value));
     }
 
     @Override
-    public ImmutableValue<E> asImmutable() {
-        return ImmutableSpongeValue.cachedOf(this.getKey(), this.getDefault(), this.actualValue);
+    public SpongeValue.Immutable<E> transform(Function<E, E> function) {
+        return with(checkNotNull(function, "function").apply(get()));
     }
 
     @Override
-    public Value<E> copy() {
-        return new SpongeValue<>(this.getKey(), this.getDefault(), this.actualValue);
+    public Mutable<E> asMutable() {
+        return new SpongeMutableValue<>(this.key, CopyHelper.copy(this.value));
+    }
+
+    public static <E> SpongeImmutableValue<E> cachedOf(Key<? extends Value<E>> key, E value) {
+        return new SpongeImmutableValue<>(key, value);
     }
 }

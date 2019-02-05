@@ -27,40 +27,39 @@ package org.spongepowered.common.data.processor.value.entity;
 import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 
 import java.util.Optional;
 
-public class WalkingSpeedValueProcessor extends AbstractSpongeValueProcessor<EntityPlayer, Double, Value<Double>> {
+public class WalkingSpeedValueProcessor extends AbstractSpongeValueProcessor<EntityPlayer, Double> {
 
     public WalkingSpeedValueProcessor() {
         super(EntityPlayer.class, Keys.WALKING_SPEED);
     }
 
     @Override
-    protected Value<Double> constructValue(Double defaultValue) {
-        return new SpongeValue<>(Keys.WALKING_SPEED, 0.7D);
+    protected Value.Mutable<Double> constructMutableValue(Double defaultValue) {
+        return new SpongeMutableValue<>(Keys.WALKING_SPEED, 0.7D);
     }
 
     @Override
-    protected ImmutableValue<Double> constructImmutableValue(Double value) {
-        return constructValue(value).asImmutable();
+    protected Value.Immutable<Double> constructImmutableValue(Double value) {
+        return constructMutableValue(value).asImmutable();
     }
 
     @Override
     protected boolean set(EntityPlayer container, Double value) {
-        container.capabilities.walkSpeed = value.floatValue();
+        container.abilities.walkSpeed = value.floatValue();
         container.sendPlayerAbilities();
         return true;
     }
 
     @Override
     protected Optional<Double> getVal(EntityPlayer container) {
-        return Optional.of(((double) container.capabilities.getWalkSpeed()));
+        return Optional.of(((double) container.abilities.getWalkSpeed()));
     }
 
     @Override

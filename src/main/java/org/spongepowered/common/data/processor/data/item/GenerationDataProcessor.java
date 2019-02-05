@@ -30,20 +30,19 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableGenerationData;
 import org.spongepowered.api.data.manipulator.mutable.item.GenerationData;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeGenerationData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
 
 import java.util.Optional;
 
 public final class GenerationDataProcessor
-        extends AbstractItemSingleDataProcessor<Integer, MutableBoundedValue<Integer>, GenerationData, ImmutableGenerationData> {
+        extends AbstractItemSingleDataProcessor<Integer, GenerationData, ImmutableGenerationData> {
 
     public GenerationDataProcessor() {
         super(stack -> stack.getItem().equals(Items.WRITTEN_BOOK), Keys.GENERATION);
@@ -55,9 +54,9 @@ public final class GenerationDataProcessor
     }
 
     @Override
-    protected MutableBoundedValue<Integer> constructValue(Integer actualValue) {
+    protected Value.Mutable<Integer> constructMutableValue(Integer actualValue) {
         return SpongeValueFactory.boundedBuilder(Keys.GENERATION)
-                .actualValue(actualValue)
+                .value(actualValue)
                 .defaultValue(0)
                 .minimum(0)
                 .maximum(DataConstants.MAXIMUM_GENERATION)
@@ -76,8 +75,8 @@ public final class GenerationDataProcessor
     }
 
     @Override
-    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
-        return ImmutableSpongeValue.cachedOf(Keys.GENERATION, 0, value);
+    protected Value.Immutable<Integer> constructImmutableValue(Integer value) {
+        return SpongeImmutableValue.cachedOf(Keys.GENERATION, value);
     }
 
     @Override

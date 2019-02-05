@@ -34,18 +34,17 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutablePotionTypeData;
 import org.spongepowered.api.data.manipulator.mutable.PotionTypeData;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.item.potion.PotionType;
 import org.spongepowered.common.data.manipulator.mutable.SpongePotionTypeData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 
 import java.util.Optional;
 
-public class ItemPotionTypeDataProcessor extends AbstractItemSingleDataProcessor<PotionType, Value<PotionType>, PotionTypeData, ImmutablePotionTypeData> {
+public class ItemPotionTypeDataProcessor extends AbstractItemSingleDataProcessor<PotionType, PotionTypeData, ImmutablePotionTypeData> {
 
     public ItemPotionTypeDataProcessor() {
         super(itemStack -> itemStack.getItem() == Items.POTIONITEM || itemStack.getItem() == Items.SPLASH_POTION ||
@@ -69,13 +68,13 @@ public class ItemPotionTypeDataProcessor extends AbstractItemSingleDataProcessor
     }
 
     @Override
-    protected ImmutableValue<PotionType> constructImmutableValue(PotionType value) {
-        return new ImmutableSpongeValue<>(Keys.POTION_TYPE, value);
+    protected Value.Immutable<PotionType> constructImmutableValue(PotionType value) {
+        return new SpongeImmutableValue<>(Keys.POTION_TYPE, value);
     }
 
     @Override
-    protected Value<PotionType> constructValue(PotionType actualValue) {
-        return new SpongeValue<>(Keys.POTION_TYPE, actualValue);
+    protected Value.Mutable<PotionType> constructMutableValue(PotionType actualValue) {
+        return new SpongeMutableValue<>(Keys.POTION_TYPE, actualValue);
     }
 
     @Override

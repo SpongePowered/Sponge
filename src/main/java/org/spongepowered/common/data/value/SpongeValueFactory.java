@@ -27,22 +27,14 @@ package org.spongepowered.common.data.value;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.collect.Lists;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BoundedValue;
+import org.spongepowered.api.data.value.ListValue;
+import org.spongepowered.api.data.value.MapValue;
+import org.spongepowered.api.data.value.OptionalValue;
+import org.spongepowered.api.data.value.SetValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueFactory;
-import org.spongepowered.api.data.value.mutable.ListValue;
-import org.spongepowered.api.data.value.mutable.MapValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
-import org.spongepowered.api.data.value.mutable.OptionalValue;
-import org.spongepowered.api.data.value.mutable.SetValue;
-import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
-import org.spongepowered.common.data.value.mutable.SpongeListValue;
-import org.spongepowered.common.data.value.mutable.SpongeMapValue;
-import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
-import org.spongepowered.common.data.value.mutable.SpongeSetValue;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Comparator;
 import java.util.List;
@@ -60,66 +52,42 @@ public class SpongeValueFactory implements ValueFactory {
         return instance;
     }
 
-    @Override
-    public <E> Value<E> createValue(Key<Value<E>> key, E element) {
-        return new SpongeValue<>(checkNotNull(key, "key"), checkNotNull(element, "element"));
-    }
+    private SpongeValueFactory() {}
 
     @Override
-    public <E> Value<E> createValue(Key<Value<E>> key, E element, E defaultValue) {
-        return new SpongeValue<>(checkNotNull(key, "key"), checkNotNull(defaultValue, "defaultValue"), checkNotNull(element, "element"));
+    public <E> Value.Mutable<E> createValue(Key<? extends Value<E>> key, E element) {
+        return new SpongeMutableValue<>(key, element);
     }
 
     @Override
-    public <E> ListValue<E> createListValue(Key<ListValue<E>> key, List<E> elements) {
-        return new SpongeListValue<>(checkNotNull(key, "key"), Lists.<E>newArrayList(), Lists.newArrayList(elements));
+    public <E> ListValue.Mutable<E> createListValue(Key<? extends Value<List<E>>> key, List<E> elements) {
+        return new SpongeMutableListValue<>(key, elements);
     }
 
     @Override
-    public <E> ListValue<E> createListValue(Key<ListValue<E>> key, List<E> elements, List<E> defaults) {
-        return new SpongeListValue<>(checkNotNull(key, "key"), checkNotNull(defaults, "defaults"), checkNotNull(elements));
+    public <E> SetValue.Mutable<E> createSetValue(Key<? extends Value<Set<E>>> key, Set<E> elements) {
+        return new SpongeMutableSetValue<>(key, elements);
     }
 
     @Override
-    public <E> SetValue<E> createSetValue(Key<SetValue<E>> key, Set<E> elements) {
-        return new SpongeSetValue<>(checkNotNull(key, "key"), checkNotNull(elements, "elements"));
+    public <K, V> MapValue.Mutable<K, V> createMapValue(Key<? extends Value<Map<K, V>>> key, Map<K, V> map) {
+        return new SpongeMutableMapValue<>(key, map);
     }
 
     @Override
-    public <E> SetValue<E> createSetValue(Key<SetValue<E>> key, Set<E> elements, Set<E> defaults) {
-        return new SpongeSetValue<>(checkNotNull(key, "key"), checkNotNull(defaults, "defaults"), checkNotNull(elements, "elements"));
+    public <E> BoundedValueBuilder<E> createBoundedValueBuilder(Key<? extends BoundedValue<E>> key) {
+        return new SpongeBoundedValueBuilder<>(key);
     }
 
     @Override
-    public <K, V> MapValue<K, V> createMapValue(Key<MapValue<K, V>> key, Map<K, V> map) {
-        return new SpongeMapValue<>(checkNotNull(key, "key"), checkNotNull(map, "map"));
+    public <E> OptionalValue.Mutable<E> createOptionalValue(Key<? extends OptionalValue<E>> key, @Nullable E element) {
+        return new SpongeMutableOptionalValue<>(key, Optional.ofNullable(element));
     }
 
-    @Override
-    public <K, V> MapValue<K, V> createMapValue(Key<MapValue<K, V>> key, Map<K, V> map, Map<K, V> defaults) {
-        return new SpongeMapValue<>(checkNotNull(key, "key"), checkNotNull(defaults, "defaults"), checkNotNull(map, "map"));
+    @SuppressWarnings("unchecked")
+    public static <E> BoundedValueBuilder<E> boundedBuilder(Key<? extends Value<E>> key) {
+        return new SpongeBoundedValueBuilder<>((Key<? extends BoundedValue<E>>) key);
     }
-
-    @Override
-    public <E> BoundedValueBuilder<E> createBoundedValueBuilder(Key<MutableBoundedValue<E>> key) {
-        return new SpongeBoundedValueBuilder<>(checkNotNull(key));
-    }
-
-    @Override
-    public <E> OptionalValue<E> createOptionalValue(Key<OptionalValue<E>> key, @Nullable E element) {
-        return new SpongeOptionalValue<>(checkNotNull(key, "key"), Optional.<E>empty(), Optional.ofNullable(element));
-    }
-
-    @Override
-    public <E> OptionalValue<E> createOptionalValue(Key<OptionalValue<E>> key, @Nullable E element, E defaultElement) {
-        return new SpongeOptionalValue<>(checkNotNull(key, "key"), Optional.of(defaultElement), Optional.ofNullable(element));
-    }
-
-    public static <E> BoundedValueBuilder<E> boundedBuilder(Key<? extends BoundedValue<E>> key) {
-        return new SpongeBoundedValueBuilder<>(checkNotNull(key));
-    }
-
-    private SpongeValueFactory() { }
 
     public static final class SpongeBoundedValueBuilder<E> implements BoundedValueBuilder<E> {
 
@@ -127,7 +95,6 @@ public class SpongeValueFactory implements ValueFactory {
         private Comparator<E> comparator;
         private E minimum;
         private E maximum;
-        private E defaultValue;
         private E value;
 
         public SpongeBoundedValueBuilder(Key<? extends BoundedValue<E>> key) {
@@ -161,27 +128,18 @@ public class SpongeValueFactory implements ValueFactory {
         }
 
         @Override
-        public BoundedValueBuilder<E> defaultValue(E defaultValue) {
-            this.defaultValue = checkNotNull(defaultValue);
-            return this;
-        }
-
-        @Override
-        public BoundedValueBuilder<E> actualValue(E value) {
+        public BoundedValueBuilder<E> value(E value) {
             this.value = checkNotNull(value);
             return this;
         }
 
         @Override
-        public SpongeBoundedValue<E> build() {
+        public SpongeMutableBoundedValue<E> build() {
             checkState(this.comparator != null);
             checkState(this.minimum != null);
             checkState(this.maximum != null);
-            checkState(this.defaultValue != null);
-            if (this.value == null) {
-                return new SpongeBoundedValue<>(this.key, this.defaultValue, this.comparator, this.minimum, this.maximum);
-            }
-            return new SpongeBoundedValue<>(this.key, this.defaultValue, this.comparator, this.minimum, this.maximum, this.value);
+            checkState(this.value != null);
+            return new SpongeMutableBoundedValue<>(this.key, this.value, this.minimum, this.maximum, this.comparator);
         }
     }
 }

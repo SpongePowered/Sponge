@@ -31,31 +31,30 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableStuckArrowsData;
 import org.spongepowered.api.data.manipulator.mutable.entity.StuckArrowsData;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeStuckArrowsData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.util.ComparatorUtil;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
+import org.spongepowered.common.data.value.SpongeImmutableBoundedValue;
 
 import java.util.Optional;
 
 public class StuckArrowsDataProcessor extends
-        AbstractEntitySingleDataProcessor<EntityLivingBase, Integer, MutableBoundedValue<Integer>, StuckArrowsData, ImmutableStuckArrowsData> {
+        AbstractEntitySingleDataProcessor<EntityLivingBase, Integer, StuckArrowsData, ImmutableStuckArrowsData> {
 
     public StuckArrowsDataProcessor() {
         super(EntityLivingBase.class, Keys.STUCK_ARROWS);
     }
 
     @Override
-    protected MutableBoundedValue<Integer> constructValue(Integer actualValue) {
+    protected Value.Mutable<Integer> constructMutableValue(Integer actualValue) {
         return SpongeValueFactory.boundedBuilder(this.key)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
                 .defaultValue(0)
-                .actualValue(actualValue)
+                .value(actualValue)
                 .build();
     }
 
@@ -72,8 +71,8 @@ public class StuckArrowsDataProcessor extends
     }
 
     @Override
-    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
-        return new ImmutableSpongeBoundedValue<>(this.key, 0, value, ComparatorUtil.intComparator(), 0, Integer.MAX_VALUE);
+    protected Value.Immutable<Integer> constructImmutableValue(Integer value) {
+        return new SpongeImmutableBoundedValue<>(this.key, value, 0, Integer.MAX_VALUE, ComparatorUtil.intComparator());
     }
 
     @Override

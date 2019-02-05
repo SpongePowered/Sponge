@@ -29,7 +29,7 @@ import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableRedstonePoweredData;
 import org.spongepowered.api.data.manipulator.mutable.block.RedstonePoweredData;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeRedstonePoweredData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBoundedComparableData;
 
@@ -49,7 +49,7 @@ public class SpongeRedstonePoweredData extends AbstractBoundedComparableData<Int
     }
 
     @Override
-    public MutableBoundedValue<Integer> power() {
+    public BoundedValue.Mutable<Integer> power() {
         return getValueGetter();
     }
 }

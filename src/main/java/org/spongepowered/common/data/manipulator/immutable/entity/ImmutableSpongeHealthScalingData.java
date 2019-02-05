@@ -27,8 +27,8 @@ package org.spongepowered.common.data.manipulator.immutable.entity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableHealthScalingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.HealthScalingData;
-import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthScaleData;
 import org.spongepowered.common.data.value.SpongeValueFactory;
@@ -42,18 +42,17 @@ public class ImmutableSpongeHealthScalingData
     }
 
     @Override
-    public ImmutableBoundedValue<Double> healthScale() {
+    public BoundedValue.Immutable<Double> healthScale() {
         return SpongeValueFactory.boundedBuilder(Keys.HEALTH_SCALE)
                 .minimum(1D)
                 .maximum((double) Float.MAX_VALUE)
-                .defaultValue(20D)
-                .actualValue(this.value)
+                .value(this.value)
                 .build()
                 .asImmutable();
     }
 
     @Override
-    protected ImmutableValue<?> getValueGetter() {
+    protected Value.Immutable<?> getValueGetter() {
         return healthScale();
     }
 

@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.mutable.entity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableBreedableData;
 import org.spongepowered.api.data.manipulator.mutable.entity.BreedableData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeBreedableData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;
 
@@ -42,7 +42,7 @@ public class SpongeBreedableData extends AbstractBooleanData<BreedableData, Immu
     }
 
     @Override
-    public Value<Boolean> breedable() {
+    public Value.Mutable<Boolean> breedable() {
         return getValueGetter();
     }
 

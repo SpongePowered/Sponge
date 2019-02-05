@@ -27,16 +27,15 @@ package org.spongepowered.common.data.processor.value.tileentity;
 import net.minecraft.tileentity.TileEntityEndGateway;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntityEndGateway;
 
 import java.util.Optional;
 
-public class EndGatewayTeleportCooldownValueProcessor extends AbstractSpongeValueProcessor<TileEntityEndGateway, Integer, Value<Integer>> {
+public class EndGatewayTeleportCooldownValueProcessor extends AbstractSpongeValueProcessor<TileEntityEndGateway, Integer> {
 
     public EndGatewayTeleportCooldownValueProcessor() {
         super(TileEntityEndGateway.class, Keys.END_GATEWAY_TELEPORT_COOLDOWN);
@@ -44,8 +43,8 @@ public class EndGatewayTeleportCooldownValueProcessor extends AbstractSpongeValu
 
 
     @Override
-    protected Value<Integer> constructValue(Integer actualValue) {
-        return new SpongeValue<>(Keys.END_GATEWAY_TELEPORT_COOLDOWN, actualValue);
+    protected Value.Mutable<Integer> constructMutableValue(Integer actualValue) {
+        return new SpongeMutableValue<>(Keys.END_GATEWAY_TELEPORT_COOLDOWN, actualValue);
     }
 
     @Override
@@ -60,8 +59,8 @@ public class EndGatewayTeleportCooldownValueProcessor extends AbstractSpongeValu
     }
 
     @Override
-    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
-        return constructValue(value).asImmutable();
+    protected Value.Immutable<Integer> constructImmutableValue(Integer value) {
+        return constructMutableValue(value).asImmutable();
     }
 
     @Override

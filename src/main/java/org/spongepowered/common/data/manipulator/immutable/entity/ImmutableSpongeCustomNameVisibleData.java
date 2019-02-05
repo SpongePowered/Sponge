@@ -27,7 +27,7 @@ package org.spongepowered.common.data.manipulator.immutable.entity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableCustomNameVisibleData;
 import org.spongepowered.api.data.manipulator.mutable.entity.CustomNameVisibleData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeCustomNameVisibleData;
 
@@ -40,7 +40,7 @@ public class ImmutableSpongeCustomNameVisibleData extends AbstractImmutableBoole
     }
 
     @Override
-    public ImmutableValue<Boolean> customNameVisible() {
+    public Value.Immutable<Boolean> customNameVisible() {
         return this.getValueGetter();
     }
 

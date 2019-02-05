@@ -28,26 +28,26 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableMovementSpeedData;
 import org.spongepowered.api.data.manipulator.mutable.entity.MovementSpeedData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeMovementSpeedData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
 
 public class ImmutableSpongeMovementSpeedData extends AbstractImmutableData<ImmutableMovementSpeedData, MovementSpeedData> implements ImmutableMovementSpeedData  {
 
     private final double walkSpeed;
     private final double flySpeed;
 
-    private final ImmutableValue<Double> walkSpeedValue;
-    private final ImmutableValue<Double> flyingSpeedValue;
+    private final Value.Immutable<Double> walkSpeedValue;
+    private final Value.Immutable<Double> flyingSpeedValue;
 
 
     public ImmutableSpongeMovementSpeedData(double walkSpeed, double flySpeed) {
         super(ImmutableMovementSpeedData.class);
         this.walkSpeed = walkSpeed;
         this.flySpeed = flySpeed;
-        this.walkSpeedValue = new ImmutableSpongeValue<>(Keys.WALKING_SPEED, 0.7D, this.walkSpeed);
-        this.flyingSpeedValue = new ImmutableSpongeValue<>(Keys.FLYING_SPEED, 0.05D, this.flySpeed);
+        this.walkSpeedValue = new SpongeImmutableValue<>(Keys.WALKING_SPEED, this.walkSpeed);
+        this.flyingSpeedValue = new SpongeImmutableValue<>(Keys.FLYING_SPEED, this.flySpeed);
 
         registerGetters();
     }
@@ -70,12 +70,12 @@ public class ImmutableSpongeMovementSpeedData extends AbstractImmutableData<Immu
     }
 
     @Override
-    public ImmutableValue<Double> walkSpeed() {
+    public Value.Immutable<Double> walkSpeed() {
         return this.walkSpeedValue;
     }
 
     @Override
-    public ImmutableValue<Double> flySpeed() {
+    public Value.Immutable<Double> flySpeed() {
         return this.flyingSpeedValue;
     }
 

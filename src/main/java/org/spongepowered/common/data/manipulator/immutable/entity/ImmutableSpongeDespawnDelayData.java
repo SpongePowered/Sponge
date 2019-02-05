@@ -27,31 +27,31 @@ package org.spongepowered.common.data.manipulator.immutable.entity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableDespawnDelayData;
 import org.spongepowered.api.data.manipulator.mutable.entity.DespawnDelayData;
-import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableIntData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeDespawnDelayData;
 import org.spongepowered.common.data.util.DataConstants;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
 
 public final class ImmutableSpongeDespawnDelayData extends AbstractImmutableIntData<ImmutableDespawnDelayData, DespawnDelayData>
         implements ImmutableDespawnDelayData {
 
-    private final ImmutableValue<Boolean> infinite;
+    private final Value.Immutable<Boolean> infinite;
 
     public ImmutableSpongeDespawnDelayData(int value) {
         super(ImmutableDespawnDelayData.class, value, Keys.DESPAWN_DELAY, SpongeDespawnDelayData.class, DataConstants.Entity.Item.MIN_DESPAWN_DELAY,
                 DataConstants.Entity.Item.MAX_DESPAWN_DELAY, DataConstants.Entity.Item.DEFAULT_DESPAWN_DELAY);
-        this.infinite = ImmutableSpongeValue.cachedOf(Keys.INFINITE_DESPAWN_DELAY, false, this.getValue() == DataConstants.Entity.Item.MAGIC_NO_DESPAWN);
+        this.infinite = SpongeImmutableValue.cachedOf(Keys.INFINITE_DESPAWN_DELAY, this.getValue() == DataConstants.Entity.Item.MAGIC_NO_DESPAWN);
     }
 
     @Override
-    public ImmutableBoundedValue<Integer> delay() {
+    public BoundedValue.Immutable<Integer> delay() {
         return this.getValueGetter();
     }
 
     @Override
-    public ImmutableValue<Boolean> infinite() {
+    public Value.Immutable<Boolean> infinite() {
         return this.infinite;
     }
 

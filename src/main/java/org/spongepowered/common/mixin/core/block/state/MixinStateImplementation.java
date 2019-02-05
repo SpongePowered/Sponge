@@ -46,8 +46,7 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.property.Property;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.Cycleable;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
@@ -90,7 +89,7 @@ public abstract class MixinStateImplementation implements BlockState, IMixinBloc
     // implementation can pose during start up, or whether game state
     // can affect the various systems in place (i.e. we sometimes can't load certain
     // systems before other registries have finished registering their stuff)
-    @Nullable private ImmutableSet<ImmutableValue<?>> values;
+    @Nullable private ImmutableSet<Value.Immutable<?>> values;
     @Nullable private ImmutableSet<Key<?>> keys;
     @Nullable private ImmutableList<ImmutableDataManipulator<?, ?>> manipulators;
     @Nullable private ImmutableMap<Key<?>, Object> keyMap;
@@ -99,7 +98,7 @@ public abstract class MixinStateImplementation implements BlockState, IMixinBloc
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
-    public BlockState cycleValue(Key<? extends BaseValue<? extends Cycleable<?>>> key) {
+    public BlockState cycleValue(Key<? extends Value<? extends Cycleable<?>>> key) {
         final Optional<Cycleable<?>> optional = get((Key) key);
         return optional
             .map(Cycleable::cycleNext)
@@ -155,9 +154,9 @@ public abstract class MixinStateImplementation implements BlockState, IMixinBloc
         if (this.keyMap == null) {
             ImmutableMap.Builder<Key<?>, Object> builder = ImmutableMap.builder();
             ImmutableSet.Builder<Key<?>> keyBuilder = ImmutableSet.builder();
-            ImmutableSet.Builder<ImmutableValue<?>> valueBuilder = ImmutableSet.builder();
+            ImmutableSet.Builder<Value.Immutable<?>> valueBuilder = ImmutableSet.builder();
             for (ImmutableDataManipulator<?, ?> manipulator : this.manipulators) {
-                for (ImmutableValue<?> value : manipulator.getValues()) {
+                for (Value.Immutable<?> value : manipulator.getValues()) {
                     builder.put(value.getKey(), value.get());
                     valueBuilder.add(value);
                     keyBuilder.add(value.getKey());
@@ -198,14 +197,14 @@ public abstract class MixinStateImplementation implements BlockState, IMixinBloc
     }
 
     @Override
-    public <E> Optional<BlockState> transform(Key<? extends BaseValue<E>> key, Function<E, E> function) {
+    public <E> Optional<BlockState> transform(Key<? extends Value<E>> key, Function<E, E> function) {
         return this.get(checkNotNull(key, "Key cannot be null!")) // If we don't have a value for the key, we don't support it.
             .map(checkNotNull(function, "Function cannot be null!"))
             .map(newVal -> with(key, newVal).orElse(this)); // We can either return this value or the updated value, but not an empty
     }
 
     @Override
-    public <E> Optional<BlockState> with(Key<? extends BaseValue<E>> key, E value) {
+    public <E> Optional<BlockState> with(Key<? extends Value<E>> key, E value) {
         if (!supports(key)) {
             return Optional.empty();
         }
@@ -214,8 +213,8 @@ public abstract class MixinStateImplementation implements BlockState, IMixinBloc
 
     @SuppressWarnings("unchecked")
     @Override
-    public Optional<BlockState> with(BaseValue<?> value) {
-        return with((Key<? extends BaseValue<Object>>) value.getKey(), value.get());
+    public Optional<BlockState> with(Value<?> value) {
+        return with((Key<? extends Value<Object>>) value.getKey(), value.get());
     }
 
     @SuppressWarnings({"unchecked"})
@@ -331,15 +330,15 @@ public abstract class MixinStateImplementation implements BlockState, IMixinBloc
 
     @SuppressWarnings("unchecked")
     @Override
-    public <E> Optional<E> get(Key<? extends BaseValue<E>> key) {
+    public <E> Optional<E> get(Key<? extends Value<E>> key) {
         return Optional.ofNullable((E) this.getKeyMap().get(key));
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public <E, V extends BaseValue<E>> Optional<V> getValue(Key<V> key) {
+    public <E, V extends Value<E>> Optional<V> getValue(Key<V> key) {
         checkNotNull(key);
-        for (ImmutableValue<?> value : this.getValues()) {
+        for (Value.Immutable<?> value : this.getValues()) {
             if (value.getKey().equals(key)) {
                 return Optional.of((V) value.asMutable());
             }
@@ -366,7 +365,7 @@ public abstract class MixinStateImplementation implements BlockState, IMixinBloc
     }
 
     @Override
-    public Set<ImmutableValue<?>> getValues() {
+    public Set<Value.Immutable<?>> getValues() {
         if (this.values == null) {
             lazyLoadManipulatorsAndKeys();
         }

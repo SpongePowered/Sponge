@@ -27,13 +27,13 @@ package org.spongepowered.common.data.processor.data.block;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDirectionalData;
 import org.spongepowered.api.data.manipulator.mutable.block.DirectionalData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeDirectionalData;
 import org.spongepowered.common.data.processor.common.AbstractBlockOnlyDataProcessor;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 
-public class DirectionalDataProcessor extends AbstractBlockOnlyDataProcessor<Direction, Value<Direction>, DirectionalData, ImmutableDirectionalData> {
+public class DirectionalDataProcessor extends AbstractBlockOnlyDataProcessor<Direction, DirectionalData, ImmutableDirectionalData> {
 
     public DirectionalDataProcessor() {
         super(Keys.DIRECTION);
@@ -50,8 +50,8 @@ public class DirectionalDataProcessor extends AbstractBlockOnlyDataProcessor<Dir
     }
 
     @Override
-    protected Value<Direction> constructValue(Direction actualValue) {
-        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
+    protected Value.Mutable<Direction> constructMutableValue(Direction actualValue) {
+        return new SpongeMutableValue<>(this.key, actualValue);
     }
 
 }

@@ -25,13 +25,13 @@
 package org.spongepowered.test.myhomes.data.home;
 
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.value.immutable.ImmutableMapValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.MapValue;
+import org.spongepowered.api.data.value.Value;
 
 public interface ImmutableHomeData extends ImmutableDataManipulator<ImmutableHomeData, HomeData> {
 
-    ImmutableValue<Home> defaultHome();
+    Value.Immutable<Home> defaultHome();
 
-    ImmutableMapValue<String, Home> homes();
+    MapValue.Immutable<String, Home> homes();
 
 }

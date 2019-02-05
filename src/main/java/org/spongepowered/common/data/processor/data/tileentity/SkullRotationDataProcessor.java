@@ -31,20 +31,19 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDirectionalData;
 import org.spongepowered.api.data.manipulator.mutable.block.DirectionalData;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeDirectionalData;
 import org.spongepowered.common.data.processor.common.AbstractTileEntitySingleDataProcessor;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 
 import java.util.Optional;
 
 public class SkullRotationDataProcessor
-        extends AbstractTileEntitySingleDataProcessor<TileEntitySkull, Direction, Value<Direction>, DirectionalData, ImmutableDirectionalData> {
+        extends AbstractTileEntitySingleDataProcessor<TileEntitySkull, Direction, DirectionalData, ImmutableDirectionalData> {
 
     public SkullRotationDataProcessor() {
         super(TileEntitySkull.class, Keys.DIRECTION);
@@ -57,8 +56,8 @@ public class SkullRotationDataProcessor
     }
 
     @Override
-    protected Value<Direction> constructValue(Direction actualValue) {
-        return new SpongeValue<>(Keys.DIRECTION, Direction.NONE, actualValue);
+    protected Value.Mutable<Direction> constructMutableValue(Direction actualValue) {
+        return new SpongeMutableValue<>(Keys.DIRECTION, actualValue);
     }
 
     @Override
@@ -80,8 +79,8 @@ public class SkullRotationDataProcessor
     }
 
     @Override
-    protected ImmutableValue<Direction> constructImmutableValue(Direction value) {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.DIRECTION, Direction.NORTH, value);
+    protected Value.Immutable<Direction> constructImmutableValue(Direction value) {
+        return ImmutableDataCachingUtil.getValue(SpongeImmutableValue.class, Keys.DIRECTION, Direction.NORTH, value);
     }
 
     @Override

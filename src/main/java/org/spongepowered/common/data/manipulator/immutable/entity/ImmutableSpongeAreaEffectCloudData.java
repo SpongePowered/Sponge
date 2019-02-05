@@ -29,9 +29,9 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableAreaEffectCloudData;
 import org.spongepowered.api.data.manipulator.mutable.entity.AreaEffectCloudData;
-import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
-import org.spongepowered.api.data.value.immutable.ImmutableListValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.ListValue;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.api.effect.particle.ParticleTypes;
 import org.spongepowered.api.effect.potion.PotionEffect;
@@ -39,8 +39,8 @@ import org.spongepowered.api.util.Color;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAreaEffectData;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableListValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 
 import java.util.List;
 
@@ -58,17 +58,17 @@ public class ImmutableSpongeAreaEffectCloudData extends AbstractImmutableData<Im
     private final ImmutableList<PotionEffect> potionEffects;
     private final int age;
 
-    private final ImmutableBoundedValue<Integer> durationOnUseValue;
-    private final ImmutableValue<Color> colorImmutableValue;
-    private final ImmutableValue<ParticleType> particleTypeImmutableValue;
-    private final ImmutableBoundedValue<Integer> immutableAge;
-    private final ImmutableSpongeListValue<PotionEffect> immutablePotionEffectsValue;
-    private final ImmutableBoundedValue<Integer> reapplicationDelayValue;
-    private final ImmutableBoundedValue<Double> radiusValue;
-    private final ImmutableBoundedValue<Integer> durationValue;
-    private final ImmutableBoundedValue<Integer> waitTimeValue;
-    private final ImmutableBoundedValue<Double> radiusOnUseValue;
-    private final ImmutableBoundedValue<Double> radiusPerTickValue;
+    private final BoundedValue.Immutable<Integer> durationOnUseValue;
+    private final Value.Immutable<Color> colorImmutableValue;
+    private final Value.Immutable<ParticleType> particleTypeImmutableValue;
+    private final BoundedValue.Immutable<Integer> immutableAge;
+    private final SpongeImmutableListValue<PotionEffect> immutablePotionEffectsValue;
+    private final BoundedValue.Immutable<Integer> reapplicationDelayValue;
+    private final BoundedValue.Immutable<Double> radiusValue;
+    private final BoundedValue.Immutable<Integer> durationValue;
+    private final BoundedValue.Immutable<Integer> waitTimeValue;
+    private final BoundedValue.Immutable<Double> radiusOnUseValue;
+    private final BoundedValue.Immutable<Double> radiusPerTickValue;
 
     public ImmutableSpongeAreaEffectCloudData(Color color,
             double radius,
@@ -96,63 +96,55 @@ public class ImmutableSpongeAreaEffectCloudData extends AbstractImmutableData<Im
         this.radiusOnUseValue = SpongeValueFactory.boundedBuilder(Keys.AREA_EFFECT_CLOUD_RADIUS_ON_USE)
                 .minimum(0.0D)
                 .maximum((double) Float.MAX_VALUE)
-                .defaultValue(0.0D)
-                .actualValue(this.radiusOnUse)
+                .value(this.radiusOnUse)
                 .build()
                 .asImmutable();
         this.radiusPerTickValue =
                 SpongeValueFactory.boundedBuilder(Keys.AREA_EFFECT_CLOUD_RADIUS_PER_TICK)
                         .minimum(0.0D)
                         .maximum((double) Float.MAX_VALUE)
-                        .defaultValue(0.0D)
-                        .actualValue(this.radiusPerTick)
+                        .value(this.radiusPerTick)
                         .build()
                         .asImmutable();
         this.waitTimeValue = SpongeValueFactory.boundedBuilder(Keys.AREA_EFFECT_CLOUD_WAIT_TIME)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
-                .defaultValue(20)
-                .actualValue(this.waitTime)
+                .value(this.waitTime)
                 .build()
                 .asImmutable();
         this.durationValue = SpongeValueFactory.boundedBuilder(Keys.AREA_EFFECT_CLOUD_DURATION)
                 .minimum(Integer.MIN_VALUE)
                 .maximum(Integer.MAX_VALUE)
-                .defaultValue(600)
-                .actualValue(this.duration)
+                .value(this.duration)
                 .build()
                 .asImmutable();
         this.radiusValue = SpongeValueFactory.boundedBuilder(Keys.AREA_EFFECT_CLOUD_RADIUS)
                 .minimum(0D)
                 .maximum((double) Float.MAX_VALUE)
-                .defaultValue(0.5D)
-                .actualValue(this.radius)
+                .value(this.radius)
                 .build()
                 .asImmutable();
         this.reapplicationDelayValue = SpongeValueFactory.boundedBuilder(Keys.AREA_EFFECT_CLOUD_DURATION_ON_USE)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
-                .defaultValue(0)
-                .actualValue(this.reapplicationDelay)
+                .value(this.reapplicationDelay)
                 .build()
                 .asImmutable();
-        this.immutablePotionEffectsValue = new ImmutableSpongeListValue<>(Keys.POTION_EFFECTS, this.potionEffects);
+        this.immutablePotionEffectsValue = new SpongeImmutableListValue<>(Keys.POTION_EFFECTS, this.potionEffects);
         this.immutableAge = SpongeValueFactory.boundedBuilder(Keys.AREA_EFFECT_CLOUD_AGE)
-                .defaultValue(0)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
-                .actualValue(this.age)
+                .value(this.age)
                 .build()
                 .asImmutable();
         this.particleTypeImmutableValue =
-                new SpongeValue<>(Keys.AREA_EFFECT_CLOUD_PARTICLE_TYPE, ParticleTypes.MOB_SPELL, ParticleTypes.MOB_SPELL).asImmutable();
+                new SpongeMutableValue<>(Keys.AREA_EFFECT_CLOUD_PARTICLE_TYPE, ParticleTypes.MOB_SPELL).asImmutable();
         this.colorImmutableValue =
-                new SpongeValue<>(Keys.AREA_EFFECT_CLOUD_COLOR, Color.WHITE, this.color).asImmutable();
+                new SpongeMutableValue<>(Keys.AREA_EFFECT_CLOUD_COLOR, this.color).asImmutable();
         this.durationOnUseValue = SpongeValueFactory.boundedBuilder(Keys.AREA_EFFECT_CLOUD_DURATION_ON_USE)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
-                .defaultValue(0)
-                .actualValue(this.durationOnUse)
+                .value(this.durationOnUse)
                 .build()
                 .asImmutable();
         registerGetters();
@@ -238,57 +230,57 @@ public class ImmutableSpongeAreaEffectCloudData extends AbstractImmutableData<Im
     }
 
     @Override
-    public ImmutableValue<Color> color() {
+    public Value.Immutable<Color> color() {
         return this.colorImmutableValue;
     }
 
     @Override
-    public ImmutableBoundedValue<Double> radius() {
+    public BoundedValue.Immutable<Double> radius() {
         return this.radiusValue;
     }
 
     @Override
-    public ImmutableValue<ParticleType> particleType() {
+    public Value.Immutable<ParticleType> particleType() {
         return this.particleTypeImmutableValue;
     }
 
     @Override
-    public ImmutableBoundedValue<Integer> duration() {
+    public BoundedValue.Immutable<Integer> duration() {
         return this.durationValue;
     }
 
     @Override
-    public ImmutableBoundedValue<Integer> waitTime() {
+    public BoundedValue.Immutable<Integer> waitTime() {
         return this.waitTimeValue;
     }
 
     @Override
-    public ImmutableBoundedValue<Double> radiusOnUse() {
+    public BoundedValue.Immutable<Double> radiusOnUse() {
         return this.radiusOnUseValue;
     }
 
     @Override
-    public ImmutableBoundedValue<Double> radiusPerTick() {
+    public BoundedValue.Immutable<Double> radiusPerTick() {
         return this.radiusPerTickValue;
     }
 
     @Override
-    public ImmutableBoundedValue<Integer> durationOnUse() {
+    public BoundedValue.Immutable<Integer> durationOnUse() {
         return this.durationOnUseValue;
     }
 
     @Override
-    public ImmutableBoundedValue<Integer> applicationDelay() {
+    public BoundedValue.Immutable<Integer> applicationDelay() {
         return this.reapplicationDelayValue;
     }
 
     @Override
-    public ImmutableListValue<PotionEffect> effects() {
+    public ListValue.Immutable<PotionEffect> effects() {
         return this.immutablePotionEffectsValue;
     }
 
     @Override
-    public ImmutableBoundedValue<Integer> age() {
+    public BoundedValue.Immutable<Integer> age() {
         return this.immutableAge;
     }
 }

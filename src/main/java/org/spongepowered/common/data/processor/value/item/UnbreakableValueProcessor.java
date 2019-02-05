@@ -28,16 +28,15 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Optional;
 
-public class UnbreakableValueProcessor extends AbstractSpongeValueProcessor<ItemStack, Boolean, Value<Boolean>> {
+public class UnbreakableValueProcessor extends AbstractSpongeValueProcessor<ItemStack, Boolean> {
 
     public UnbreakableValueProcessor() {
         super(ItemStack.class, Keys.UNBREAKABLE);
@@ -49,33 +48,30 @@ public class UnbreakableValueProcessor extends AbstractSpongeValueProcessor<Item
     }
 
     @Override
-    public Value<Boolean> constructValue(Boolean defaultValue) {
-        return SpongeValueFactory.getInstance().createValue(Keys.UNBREAKABLE, defaultValue, false);
+    public Value.Mutable<Boolean> constructMutableValue(Boolean defaultValue) {
+        return SpongeValueFactory.getInstance().createValue(Keys.UNBREAKABLE, defaultValue);
     }
 
     @Override
     public boolean set(ItemStack container, Boolean value) {
-        if (value) {
-            container.setItemDamage(0);
+        if (!container.hasTag()) {
+            container.setTag(new NBTTagCompound());
         }
-        if (!container.hasTagCompound()) {
-            container.setTagCompound(new NBTTagCompound());
-        }
-        container.getTagCompound().setBoolean(NbtDataUtil.ITEM_UNBREAKABLE, value);
+        container.getTag().setBoolean(NbtDataUtil.ITEM_UNBREAKABLE, value);
         return true;
     }
 
     @Override
     public Optional<Boolean> getVal(ItemStack container) {
-        if (container.hasTagCompound() && container.getTagCompound().hasKey(NbtDataUtil.ITEM_UNBREAKABLE)) {
-            return Optional.of(container.getTagCompound().getBoolean(NbtDataUtil.ITEM_UNBREAKABLE));
+        if (container.hasTag() && container.getTag().hasKey(NbtDataUtil.ITEM_UNBREAKABLE)) {
+            return Optional.of(container.getTag().getBoolean(NbtDataUtil.ITEM_UNBREAKABLE));
         }
         return Optional.of(false);
     }
 
     @Override
-    public ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
-        return constructValue(value).asImmutable();
+    public Value.Immutable<Boolean> constructImmutableValue(Boolean value) {
+        return constructMutableValue(value).asImmutable();
     }
 
     @Override

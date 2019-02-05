@@ -28,10 +28,10 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFuseData;
 import org.spongepowered.api.data.manipulator.mutable.entity.FuseData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeFuseData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 
 public class SpongeFuseData extends AbstractData<FuseData, ImmutableFuseData> implements FuseData {
 
@@ -61,13 +61,13 @@ public class SpongeFuseData extends AbstractData<FuseData, ImmutableFuseData> im
     }
 
     @Override
-    public Value<Integer> fuseDuration() {
-        return new SpongeValue<>(Keys.FUSE_DURATION, this.fuseDuration);
+    public Value.Mutable<Integer> fuseDuration() {
+        return new SpongeMutableValue<>(Keys.FUSE_DURATION, this.fuseDuration);
     }
 
     @Override
-    public Value<Integer> ticksRemaining() {
-        return new SpongeValue<>(Keys.TICKS_REMAINING, this.ticksRemaining);
+    public Value.Mutable<Integer> ticksRemaining() {
+        return new SpongeMutableValue<>(Keys.TICKS_REMAINING, this.ticksRemaining);
     }
 
     @Override

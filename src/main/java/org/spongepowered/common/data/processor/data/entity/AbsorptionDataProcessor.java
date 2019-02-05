@@ -31,18 +31,16 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableAbsorptionData;
 import org.spongepowered.api.data.manipulator.mutable.entity.AbsorptionData;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAbsorptionData;
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
-import org.spongepowered.common.data.util.DataConstants;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 
 import java.util.Optional;
 
-public final class AbsorptionDataProcessor extends AbstractSingleDataSingleTargetProcessor<EntityLivingBase, Double, Value<Double>, AbsorptionData, ImmutableAbsorptionData> {
+public final class AbsorptionDataProcessor extends AbstractSingleDataSingleTargetProcessor<EntityLivingBase, Double, AbsorptionData, ImmutableAbsorptionData> {
 
     public AbsorptionDataProcessor() {
         super(Keys.ABSORPTION, EntityLivingBase.class);
@@ -66,13 +64,13 @@ public final class AbsorptionDataProcessor extends AbstractSingleDataSingleTarge
     }
 
     @Override
-    protected ImmutableValue<Double> constructImmutableValue(Double value) {
-        return new ImmutableSpongeValue<>(this.key, DataConstants.Entity.DEFAULT_ABSORPTION, value);
+    protected Value.Immutable<Double> constructImmutableValue(Double value) {
+        return new SpongeImmutableValue<>(this.key, value);
     }
 
     @Override
-    protected Value<Double> constructValue(Double actualValue) {
-        return new SpongeValue<>(this.key, DataConstants.Entity.DEFAULT_ABSORPTION, actualValue);
+    protected Value.Mutable<Double> constructMutableValue(Double actualValue) {
+        return new SpongeMutableValue<>(this.key, actualValue);
     }
 
     @Override

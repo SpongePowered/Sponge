@@ -26,7 +26,7 @@ package org.spongepowered.test.myhomes.data.friends.impl;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.manipulator.immutable.common.AbstractImmutableListData;
-import org.spongepowered.api.data.value.immutable.ImmutableListValue;
+import org.spongepowered.api.data.value.ListValue;
 import org.spongepowered.test.myhomes.MyHomes;
 import org.spongepowered.test.myhomes.data.friends.FriendsData;
 import org.spongepowered.test.myhomes.data.friends.ImmutableFriendsData;
@@ -41,7 +41,7 @@ public class ImmutableFriendsDataImpl extends AbstractImmutableListData<UUID, Im
     }
 
     @Override
-    public ImmutableListValue<UUID> friends() {
+    public ListValue.Immutable<UUID> friends() {
         return getListValue();
     }
 

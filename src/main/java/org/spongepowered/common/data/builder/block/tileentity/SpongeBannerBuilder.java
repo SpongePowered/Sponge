@@ -35,7 +35,7 @@ import org.spongepowered.api.data.manipulator.mutable.tileentity.BannerData;
 import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.type.DyeColor;
-import org.spongepowered.api.data.value.mutable.ListValue;
+import org.spongepowered.api.data.value.ListValue;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeBannerData;
 import org.spongepowered.common.data.util.DataQueries;
 
@@ -66,7 +66,7 @@ public class SpongeBannerBuilder extends AbstractTileBuilder<Banner> {
 
             // Now we have to get the patterns list
             final List<PatternLayer> patternsList = container.getSerializableList(DataQueries.PATTERNS, PatternLayer.class).get();
-            final ListValue<PatternLayer> patternLayers = bannerData.patternsList();
+            final ListValue.Mutable<PatternLayer> patternLayers = bannerData.patternsList();
             patternsList.forEach(patternLayers::add);
             bannerData.set(patternLayers);
             banner1.offer(bannerData);

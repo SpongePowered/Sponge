@@ -27,28 +27,27 @@ package org.spongepowered.common.data.processor.value.entity;
 import net.minecraft.entity.EntityAreaEffectCloud;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.mixin.core.entity.IMixinAreaEffectCloud;
 
 import java.util.Optional;
 
-public class AreaEffectCloudRadiusOnUseProcessor extends AbstractSpongeValueProcessor<EntityAreaEffectCloud, Double, MutableBoundedValue<Double>> {
+public class AreaEffectCloudRadiusOnUseProcessor extends AbstractSpongeValueProcessor<EntityAreaEffectCloud, Double> {
 
     public AreaEffectCloudRadiusOnUseProcessor() {
         super(EntityAreaEffectCloud.class, Keys.AREA_EFFECT_CLOUD_RADIUS_ON_USE);
     }
 
     @Override
-    protected MutableBoundedValue<Double> constructValue(Double actualValue) {
+    protected BoundedValue.Mutable<Double> constructMutableValue(Double actualValue) {
         return SpongeValueFactory.boundedBuilder(Keys.AREA_EFFECT_CLOUD_RADIUS_ON_USE)
                 .minimum(0.0D)
                 .maximum(((double) Float.MAX_VALUE))
-                .defaultValue(0.0D)
-                .actualValue(actualValue)
+                .value(actualValue)
                 .build();
     }
 
@@ -64,8 +63,8 @@ public class AreaEffectCloudRadiusOnUseProcessor extends AbstractSpongeValueProc
     }
 
     @Override
-    protected ImmutableValue<Double> constructImmutableValue(Double value) {
-        return constructValue(value).asImmutable();
+    protected Value.Immutable<Double> constructImmutableValue(Double value) {
+        return constructMutableValue(value).asImmutable();
     }
 
     @Override

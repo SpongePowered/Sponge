@@ -28,23 +28,21 @@ import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.extra.fluid.FluidStackSnapshot;
 import org.spongepowered.api.extra.fluid.FluidTypes;
 import org.spongepowered.api.extra.fluid.data.manipulator.immutable.ImmutableFluidItemData;
 import org.spongepowered.api.extra.fluid.data.manipulator.mutable.FluidItemData;
 import org.spongepowered.common.data.manipulator.mutable.extra.SpongeFluidItemData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 import org.spongepowered.common.extra.fluid.SpongeFluidStackBuilder;
-import org.spongepowered.common.extra.fluid.SpongeFluidStackSnapshot;
 
 import java.util.Optional;
 
-public class FluidItemDataProcessor extends AbstractItemSingleDataProcessor<FluidStackSnapshot, Value<FluidStackSnapshot>, FluidItemData,
+public class FluidItemDataProcessor extends AbstractItemSingleDataProcessor<FluidStackSnapshot, FluidItemData,
         ImmutableFluidItemData> {
 
     private static final FluidStackSnapshot WATER = new SpongeFluidStackBuilder().fluid(FluidTypes.WATER).volume(1000).build().createSnapshot();
@@ -82,13 +80,13 @@ public class FluidItemDataProcessor extends AbstractItemSingleDataProcessor<Flui
     }
 
     @Override
-    protected ImmutableValue<FluidStackSnapshot> constructImmutableValue(FluidStackSnapshot value) {
-        return new ImmutableSpongeValue<>(Keys.FLUID_ITEM_STACK, SpongeFluidStackSnapshot.DEFAULT, value);
+    protected Value.Immutable<FluidStackSnapshot> constructImmutableValue(FluidStackSnapshot value) {
+        return new SpongeImmutableValue<>(Keys.FLUID_ITEM_STACK, value);
     }
 
     @Override
-    protected Value<FluidStackSnapshot> constructValue(FluidStackSnapshot actualValue) {
-        return new SpongeValue<>(Keys.FLUID_ITEM_STACK, SpongeFluidStackSnapshot.DEFAULT, actualValue);
+    protected Value.Mutable<FluidStackSnapshot> constructMutableValue(FluidStackSnapshot actualValue) {
+        return new SpongeMutableValue<>(Keys.FLUID_ITEM_STACK, actualValue);
     }
 
     @Override

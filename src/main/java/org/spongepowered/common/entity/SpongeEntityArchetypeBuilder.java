@@ -37,7 +37,7 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntityType;
@@ -138,7 +138,7 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
 
     @SuppressWarnings("unchecked")
     @Override
-    public <E, V extends BaseValue<E>> EntityArchetype.Builder set(V value) {
+    public <E, V extends Value<E>> EntityArchetype.Builder set(V value) {
         if (this.entityData == null) {
             this.entityData = DataContainer.createNew();
         }
@@ -149,7 +149,7 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
 
     @SuppressWarnings("unchecked")
     @Override
-    public <E, V extends BaseValue<E>> EntityArchetype.Builder set(Key<V> key, E value) {
+    public <E, V extends Value<E>> EntityArchetype.Builder set(Key<V> key, E value) {
         if (this.entityData == null) {
             this.entityData = DataContainer.createNew();
         }

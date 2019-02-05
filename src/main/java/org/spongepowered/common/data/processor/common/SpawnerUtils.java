@@ -33,7 +33,7 @@ import net.minecraft.util.WeightedSpawnerEntity;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.mutable.MobSpawnerData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
@@ -131,8 +131,8 @@ public class SpawnerUtils {
 
     public static void applyData(MobSpawnerBaseLogic logic, MobSpawnerData data) {
         final Map<Key<?>, Object> map = new IdentityHashMap<>();
-        final Set<ImmutableValue<?>> newValues = data.getValues();
-        for (ImmutableValue<?> value : newValues) {
+        final Set<Value.Immutable<?>> newValues = data.getValues();
+        for (Value.Immutable<?> value : newValues) {
             map.put(value.getKey(), value.get());
         }
         applyData(logic, map);

@@ -28,10 +28,10 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTameableData;
 import org.spongepowered.api.data.manipulator.mutable.entity.TameableData;
-import org.spongepowered.api.data.value.immutable.ImmutableOptionalValue;
+import org.spongepowered.api.data.value.OptionalValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeTameableData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeOptionalValue;
+import org.spongepowered.common.data.value.SpongeImmutableOptionalValue;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -40,11 +40,11 @@ import javax.annotation.Nullable;
 
 public class ImmutableSpongeTameableData extends AbstractImmutableData<ImmutableTameableData, TameableData> implements ImmutableTameableData {
 
-    private static final ImmutableSpongeOptionalValue<UUID> EMPTY_VALUE = new ImmutableSpongeOptionalValue<>(Keys.TAMED_OWNER, Optional.empty());
+    private static final SpongeImmutableOptionalValue<UUID> EMPTY_VALUE = new SpongeImmutableOptionalValue<>(Keys.TAMED_OWNER, Optional.empty());
     private static final ImmutableSpongeTameableData EMPTY_DATA = new ImmutableSpongeTameableData(null);
 
     @Nullable private final UUID owner;
-    private final ImmutableOptionalValue<UUID> immutableValue;
+    private final OptionalValue.Immutable<UUID> immutableValue;
 
     public ImmutableSpongeTameableData(@Nullable UUID owner) {
         super(ImmutableTameableData.class);
@@ -52,13 +52,13 @@ public class ImmutableSpongeTameableData extends AbstractImmutableData<Immutable
         if (this.owner == null) {
             this.immutableValue = EMPTY_VALUE;
         } else {
-            this.immutableValue = new ImmutableSpongeOptionalValue<>(Keys.TAMED_OWNER, Optional.of(this.owner));
+            this.immutableValue = new SpongeImmutableOptionalValue<>(Keys.TAMED_OWNER, Optional.of(this.owner));
         }
         registerGetters();
     }
 
     @Override
-    public ImmutableOptionalValue<UUID> owner() {
+    public OptionalValue.Immutable<UUID> owner() {
         return this.immutableValue;
     }
 
@@ -91,10 +91,10 @@ public class ImmutableSpongeTameableData extends AbstractImmutableData<Immutable
         return new ImmutableSpongeTameableData(owner);
     }
 
-    public static ImmutableSpongeOptionalValue<UUID> createValue(Optional<UUID> owner) {
+    public static SpongeImmutableOptionalValue<UUID> createValue(Optional<UUID> owner) {
         if (!owner.isPresent()) {
             return EMPTY_VALUE;
         }
-        return new ImmutableSpongeOptionalValue<>(Keys.TAMED_OWNER, owner);
+        return new SpongeImmutableOptionalValue<>(Keys.TAMED_OWNER, owner);
     }
 }

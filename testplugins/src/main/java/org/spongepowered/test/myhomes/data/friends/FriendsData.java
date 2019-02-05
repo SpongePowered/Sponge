@@ -25,12 +25,12 @@
 package org.spongepowered.test.myhomes.data.friends;
 
 import org.spongepowered.api.data.manipulator.mutable.ListData;
-import org.spongepowered.api.data.value.mutable.ListValue;
+import org.spongepowered.api.data.value.ListValue;
 
 import java.util.UUID;
 
 public interface FriendsData extends ListData<UUID, FriendsData, ImmutableFriendsData> {
 
-    ListValue<UUID> friends();
+    ListValue.Mutable<UUID> friends();
 
 }

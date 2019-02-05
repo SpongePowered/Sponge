@@ -27,12 +27,12 @@ package org.spongepowered.common.data.processor.data.block;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDropData;
 import org.spongepowered.api.data.manipulator.mutable.block.DropData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeDropData;
 import org.spongepowered.common.data.processor.common.AbstractBlockOnlyDataProcessor;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 
-public class DropDataProcessor extends AbstractBlockOnlyDataProcessor<Boolean, Value<Boolean>, DropData, ImmutableDropData> {
+public class DropDataProcessor extends AbstractBlockOnlyDataProcessor<Boolean, DropData, ImmutableDropData> {
 
     public DropDataProcessor() {
         super(Keys.SHOULD_DROP);
@@ -49,8 +49,8 @@ public class DropDataProcessor extends AbstractBlockOnlyDataProcessor<Boolean, V
     }
 
     @Override
-    protected Value<Boolean> constructValue(Boolean actualValue) {
-        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
+    protected Value.Mutable<Boolean> constructMutableValue(Boolean actualValue) {
+        return new SpongeMutableValue<>(this.key, actualValue);
     }
 
 }

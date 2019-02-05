@@ -30,15 +30,15 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutablePassengerData;
 import org.spongepowered.api.data.manipulator.mutable.entity.PassengerData;
+import org.spongepowered.api.data.value.ListValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableListValue;
-import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongePassengerData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
-import org.spongepowered.common.data.value.mutable.SpongeListValue;
+import org.spongepowered.common.data.value.SpongeImmutableListValue;
+import org.spongepowered.common.data.value.SpongeMutableListValue;
 import org.spongepowered.common.entity.EntityUtil;
 
 import java.util.List;
@@ -46,7 +46,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-public class PassengerDataProcessor extends AbstractEntitySingleDataProcessor<net.minecraft.entity.Entity, List<UUID>, ListValue<UUID>, PassengerData, ImmutablePassengerData> {
+public class PassengerDataProcessor extends AbstractEntitySingleDataProcessor<net.minecraft.entity.Entity, List<UUID>, PassengerData, ImmutablePassengerData> {
 
     public PassengerDataProcessor() {
         super(net.minecraft.entity.Entity.class, Keys.PASSENGERS);
@@ -83,13 +83,13 @@ public class PassengerDataProcessor extends AbstractEntitySingleDataProcessor<ne
     }
 
     @Override
-    protected ImmutableListValue<UUID> constructImmutableValue(List<UUID> value) {
-        return new ImmutableSpongeListValue<>(Keys.PASSENGERS, ImmutableList.copyOf(value));
+    protected ListValue.Immutable<UUID> constructImmutableValue(List<UUID> value) {
+        return new SpongeImmutableListValue<>(Keys.PASSENGERS, ImmutableList.copyOf(value));
     }
 
     @Override
-    protected ListValue<UUID> constructValue(List<UUID> actualValue) {
-        return new SpongeListValue<>(Keys.PASSENGERS, actualValue);
+    protected Value.Mutable<List<UUID>> constructMutableValue(List<UUID> actualValue) {
+        return new SpongeMutableListValue<>(Keys.PASSENGERS, actualValue);
     }
 
     @Override

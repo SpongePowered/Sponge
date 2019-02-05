@@ -28,7 +28,7 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableSignData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
-import org.spongepowered.api.data.value.immutable.ImmutableListValue;
+import org.spongepowered.api.data.value.ListValue;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableListData;
@@ -44,7 +44,7 @@ public class ImmutableSpongeSignData extends AbstractImmutableListData<Text, Imm
     }
 
     @Override
-    public ImmutableListValue<Text> lines() {
+    public ListValue.Immutable<Text> lines() {
         return this.getValueGetter();
     }
 

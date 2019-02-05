@@ -30,21 +30,19 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableParrotData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ParrotData;
 import org.spongepowered.api.data.type.ParrotVariant;
-import org.spongepowered.api.data.type.ParrotVariants;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeParrotData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.SpongeImmutableValue;
+import org.spongepowered.common.data.value.SpongeMutableValue;
 import org.spongepowered.common.entity.SpongeParrotVariant;
 import org.spongepowered.common.registry.type.entity.ParrotVariantRegistryModule;
 
 import java.util.Optional;
 
 public class ParrotDataProcessor extends
-        AbstractEntitySingleDataProcessor<EntityParrot, ParrotVariant, Value<ParrotVariant>, ParrotData, ImmutableParrotData> {
+        AbstractEntitySingleDataProcessor<EntityParrot, ParrotVariant, ParrotData, ImmutableParrotData> {
 
     public ParrotDataProcessor() {
         super(EntityParrot.class, Keys.PARROT_VARIANT);
@@ -62,13 +60,13 @@ public class ParrotDataProcessor extends
     }
 
     @Override
-    protected ImmutableValue<ParrotVariant> constructImmutableValue(ParrotVariant value) {
-        return ImmutableSpongeValue.cachedOf(this.key, ParrotVariants.RED, value);
+    protected Value.Immutable<ParrotVariant> constructImmutableValue(ParrotVariant value) {
+        return SpongeImmutableValue.cachedOf(this.key, value);
     }
 
     @Override
-    protected Value<ParrotVariant> constructValue(ParrotVariant actualValue) {
-        return new SpongeValue<>(this.key, ParrotVariants.RED, actualValue);
+    protected Value.Mutable<ParrotVariant> constructMutableValue(ParrotVariant actualValue) {
+        return new SpongeMutableValue<>(this.key, actualValue);
     }
 
     @Override

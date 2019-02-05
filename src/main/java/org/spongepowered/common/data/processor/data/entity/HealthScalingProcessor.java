@@ -29,9 +29,8 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableHealthScalingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.HealthScalingData;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthScaleData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
@@ -39,7 +38,7 @@ import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 
 import java.util.Optional;
 
-public class HealthScalingProcessor extends AbstractEntitySingleDataProcessor<EntityPlayerMP, Double, MutableBoundedValue<Double>, HealthScalingData, ImmutableHealthScalingData> {
+public class HealthScalingProcessor extends AbstractEntitySingleDataProcessor<EntityPlayerMP, Double, HealthScalingData, ImmutableHealthScalingData> {
 
     public HealthScalingProcessor() {
         super(EntityPlayerMP.class, Keys.HEALTH_SCALE);
@@ -75,23 +74,21 @@ public class HealthScalingProcessor extends AbstractEntitySingleDataProcessor<En
     }
 
     @Override
-    protected ImmutableValue<Double> constructImmutableValue(Double value) {
+    protected Value.Immutable<Double> constructImmutableValue(Double value) {
         return SpongeValueFactory.boundedBuilder(Keys.HEALTH_SCALE)
                 .minimum(1D)
                 .maximum((double) Float.MAX_VALUE)
-                .defaultValue(20D)
-                .actualValue(value)
+                .value(value)
                 .build()
                 .asImmutable();
     }
 
     @Override
-    protected MutableBoundedValue<Double> constructValue(Double actualValue) {
+    protected Value.Mutable<Double> constructMutableValue(Double actualValue) {
         return SpongeValueFactory.boundedBuilder(Keys.HEALTH_SCALE)
                 .minimum(1D)
                 .maximum((double) Float.MAX_VALUE)
-                .defaultValue(20D)
-                .actualValue(actualValue)
+                .value(actualValue)
                 .build();
     }
 
@@ -100,7 +97,7 @@ public class HealthScalingProcessor extends AbstractEntitySingleDataProcessor<En
         if (!(container instanceof IMixinEntityPlayerMP)) {
             return DataTransactionResult.failNoData();
         }
-        final ImmutableValue<Double> current = constructImmutableValue(((IMixinEntityPlayerMP) container).getHealthScale());
+        final Value.Immutable<Double> current = constructImmutableValue(((IMixinEntityPlayerMP) container).getHealthScale());
         ((IMixinEntityPlayerMP) container).setHealthScale(20D);
         ((IMixinEntityPlayerMP) container).setHealthScaled(false);
         return DataTransactionResult.successRemove(current);
