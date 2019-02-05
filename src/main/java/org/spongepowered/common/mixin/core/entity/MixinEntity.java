@@ -58,6 +58,8 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
@@ -133,6 +135,7 @@ import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
+import org.spongepowered.common.interfaces.text.IMixinTextComponent;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
@@ -159,7 +162,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
     private static final String LAVA_DAMAGESOURCE_FIELD = "Lnet/minecraft/util/DamageSource;LAVA:Lnet/minecraft/util/DamageSource;";
     private static final String ATTACK_ENTITY_FROM_METHOD = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z";
     private static final String FIRE_DAMAGESOURCE_FIELD = "Lnet/minecraft/util/DamageSource;IN_FIRE:Lnet/minecraft/util/DamageSource;";
-    private static final String WORLD_SPAWN_PARTICLE = "Lnet/minecraft/world/World;spawnParticle(Lnet/minecraft/util/EnumParticleTypes;DDDDDD[I)V";
+    private static final String WORLD_SPAWN_PARTICLE = "Lnet/minecraft/world/World;spawnParticle(Lnet/minecraft/particles/IParticleData;DDDDDD)V";
     private static final String RIDING_ENTITY_FIELD = "Lnet/minecraft/entity/Entity;ridingEntity:Lnet/minecraft/entity/Entity;";
     @SuppressWarnings("unused")
     private static final String
@@ -248,6 +251,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
     @Shadow protected abstract void applyEnchantments(EntityLivingBase entityLivingBaseIn, net.minecraft.entity.Entity entityIn);
     @Shadow public abstract void extinguish();
     @Shadow protected abstract void setFlag(int flag, boolean set);
+    @Shadow public abstract void shadow$remove();
 
     // @formatter:on
 
@@ -259,6 +263,18 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
 
     @Shadow public boolean preventEntitySpawning;
 
+    @Shadow @Final private List<net.minecraft.entity.Entity> passengers;
+
+    @Shadow public abstract AxisAlignedBB shadow$getBoundingBox();
+
+    @Shadow public boolean removed;
+
+    @Shadow public abstract boolean writeUnlessRemoved(NBTTagCompound p_184198_1_);
+
+    @Shadow public abstract NBTTagCompound writeWithoutTypeId(NBTTagCompound p_189511_1_);
+
+    @Shadow public abstract void setCustomName(@Nullable ITextComponent name);
+
     @Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;dimension:I", opcode = Opcodes.PUTFIELD))
     private void onSet(net.minecraft.entity.Entity self, int dimensionId, net.minecraft.world.World worldIn) {
         if (worldIn instanceof IMixinWorldServer) {
@@ -269,7 +285,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
     }
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void onSpongeConstruction(net.minecraft.world.World worldIn, CallbackInfo ci) {
+    private void onSpongeConstruction(net.minecraft.entity.EntityType<?> entityType, @Nullable net.minecraft.world.World worldIn, CallbackInfo ci) {
         if (this.entityType instanceof SpongeEntityType) {
             SpongeEntityType spongeEntityType = (SpongeEntityType) this.entityType;
             this.refreshCache();
@@ -316,7 +332,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
      * @reason - adjusted to support {@link DismountTypes}
      */
     @Overwrite
-    public void dismountRidingEntity() {
+    public void stopRiding() {
         if (this.ridingEntity != null) {
             if (this.getRidingEntity().removed) {
                 this.dismountRidingEntity(DismountTypes.DEATH);
@@ -333,7 +349,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
                 frame.pushCause(this);
                 frame.addContext(EventContextKeys.DISMOUNT_TYPE, type);
                 if (SpongeImpl.postEvent(SpongeEventFactory.
-                        createRideEntityEventDismount(frame.getCurrentCause(), type, (Entity) this.getRidingEntity()))) {
+                        createRideEntityEventDismount(frame.getCurrentCause(), (Entity) this.getRidingEntity()))) {
                     return false;
                 }
             }
@@ -350,8 +366,8 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
     @Override
     public boolean removePassengers(DismountType type) {
         boolean dismount = false;
-        for (int i = this.riddenByEntities.size() - 1; i >= 0; --i) {
-            dismount = ((IMixinEntity) this.riddenByEntities.get(i)).dismountRidingEntity(type) || dismount;
+        for (int i = this.passengers.size() - 1; i >= 0; --i) {
+            dismount = ((IMixinEntity) this.passengers.get(i)).dismountRidingEntity(type) || dismount;
         }
         return dismount;
     }
@@ -382,7 +398,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
             return entity.attackEntityFrom(source, damage);
         }
         try {
-            AxisAlignedBB bb = this.getEntityBoundingBox().grow(-0.10000000149011612D, -0.4000000059604645D, -0.10000000149011612D);
+            AxisAlignedBB bb = this.shadow$getBoundingBox().grow(-0.10000000149011612D, -0.4000000059604645D, -0.10000000149011612D);
             Location location = DamageEventHandler.findFirstMatchingBlock((net.minecraft.entity.Entity) (Object) this, bb, block ->
                     block.getMaterial() == Material.LAVA);
             DamageSource.LAVA = new MinecraftBlockDamageSource(CatalogKey.minecraft("lava"), location).setFireDamage();
@@ -405,9 +421,9 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
             return entity.attackEntityFrom(source, damage);
         }
         try {
-            AxisAlignedBB bb = this.getEntityBoundingBox().grow(-0.001D, -0.001D, -0.001D);
+            AxisAlignedBB bb = this.shadow$getBoundingBox().grow(-0.001D, -0.001D, -0.001D);
             Location location = DamageEventHandler.findFirstMatchingBlock((net.minecraft.entity.Entity) (Object) this, bb, block ->
-                    block.getBlock() == Blocks.FIRE || block.getBlock() == Blocks.FLOWING_LAVA || block.getBlock() == Blocks.LAVA);
+                    block.getMaterial() == Material.FIRE || block.getMaterial() == Material.LAVA);
             DamageSource.IN_FIRE = new MinecraftBlockDamageSource(CatalogKey.minecraft("inFire"), location).setFireDamage();
             return entity.attackEntityFrom(DamageSource.IN_FIRE, damage);
         } finally {
@@ -662,7 +678,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
 
     }
 
-    @Inject(method = "onUpdate", at = @At("RETURN"))
+    @Inject(method = "tick", at = @At("RETURN"))
     private void spongeOnUpdate(CallbackInfo callbackInfo) {
         if (this.pendingVisibilityUpdate && !this.world.isRemote) {
             final EntityTracker entityTracker = ((WorldServer) this.world).getEntityTracker();
@@ -773,9 +789,8 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
         }
     }
 
-    @Override
-    public Optional<AABB> getBoundingBox() {
-        final AxisAlignedBB boundingBox = getEntityBoundingBox();
+    public Optional<AABB> entity$getBoundingBox() {
+        final AxisAlignedBB boundingBox = shadow$getBoundingBox();
         if (boundingBox == null) {
             return Optional.empty();
         }
@@ -794,7 +809,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
 
     @Override
     public boolean isRemoved() {
-        return this.isDead;
+        return this.removed;
     }
 
     @Override
@@ -803,9 +818,10 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
         return !isRemoved();
     }
 
+    @Intrinsic
     @Override
     public void remove() {
-        this.isDead = true;
+        this.shadow$remove();
     }
 
     @Override
@@ -901,7 +917,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
             return false;
         }
         if (getRidingEntity() != null) {
-            dismountRidingEntity();
+            dismountRidingEntity(DismountTypes.PLAYER);
             return true;
         }
         return entity != null && entity.addPassenger(this);
@@ -1009,7 +1025,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
     public DataContainer toContainer() {
         final Transform transform = getTransform();
         final NBTTagCompound compound = new NBTTagCompound();
-        writeToNBT(compound);
+        writeWithoutTypeId(compound);
         NbtDataUtil.filterSpongeCustomData(compound); // We must filter the custom data so it isn't stored twice
         final DataContainer unsafeNbt = NbtTranslator.getInstance().translateFrom(compound);
         final DataContainer container = DataContainer.createNew()
@@ -1057,7 +1073,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
         }
         try {
             final NBTTagCompound compound = new NBTTagCompound();
-            writeToNBT(compound);
+            writeWithoutTypeId(compound);
             net.minecraft.entity.Entity entity = net.minecraft.entity.EntityType.create(this.world, (ResourceLocation) (Object) this.entityType.getKey());
             compound.setUniqueId(NbtDataUtil.UUID, entity.getUniqueID());
             entity.read(compound);
@@ -1140,21 +1156,21 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
         this.setCurrentCollidingBlock(null);
     }
 
-    @Redirect(method = "doBlockCollisions", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;onEntityCollision(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/Entity;)V")) // doBlockCollisions
-    public void onEntityCollideWithBlockState(Block block, net.minecraft.world.World world, BlockPos pos, IBlockState state, net.minecraft.entity.Entity entity) {
+    @Redirect(method = "doBlockCollisions", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/state/IBlockState;onEntityCollision(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/Entity;)V")) // doBlockCollisions
+    public void onEntityCollideWithBlockState(IBlockState state, net.minecraft.world.World world, BlockPos pos, net.minecraft.entity.Entity entity) {
         // if block can't collide, return
-        if (!((IMixinBlock) block).hasCollideWithStateLogic()) {
+        if (!((IMixinBlock) state.getBlock()).hasCollideWithStateLogic()) {
             return;
         }
 
         if (world.isRemote) {
-            block.onEntityCollision(world, pos, state, entity);
+            state.onEntityCollision(world, pos, entity);
             return;
         }
 
         this.setCurrentCollidingBlock((BlockState) state);
-        if (!SpongeCommonEventFactory.handleCollideBlockEvent(block, world, pos, state, entity, Direction.NONE)) {
-            block.onEntityCollision(world, pos, state, entity);
+        if (!SpongeCommonEventFactory.handleCollideBlockEvent(state.getBlock(), world, pos, state, entity, Direction.NONE)) {
+            state.onEntityCollision(world, pos, entity);
             this.lastCollidedBlockPos = pos;
         }
 
@@ -1268,18 +1284,18 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
 
         this.skipSettingCustomNameTag = true;
         if (this.displayName == null) {
-            this.setCustomNameTag("");
+            this.setCustomName(SpongeTexts.toComponent(Text.of()));
         } else {
-            this.setCustomNameTag(SpongeTexts.toLegacy(this.displayName));
+            this.setCustomName(SpongeTexts.toComponent(this.displayName));
         }
 
         this.skipSettingCustomNameTag = false;
     }
 
-    @Inject(method = "setCustomNameTag", at = @At("RETURN"))
-    public void onSetCustomNameTag(String name, CallbackInfo ci) {
+    @Inject(method = "setCustomName", at = @At("RETURN"))
+    public void onSetCustomNameTag(ITextComponent name, CallbackInfo ci) {
         if (!this.skipSettingCustomNameTag) {
-            this.displayName = SpongeTexts.fromLegacy(name);
+            this.displayName = ((IMixinTextComponent) name).toText();
         }
     }
 
@@ -1362,7 +1378,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
 
     @Override
     public Value.Mutable<Boolean> gravity() {
-        return this.getValue(Keys.HAS_GRAVITY).get();
+        return this.getValue(Keys.HAS_GRAVITY).get().asMutable();
     }
 
     @Override
