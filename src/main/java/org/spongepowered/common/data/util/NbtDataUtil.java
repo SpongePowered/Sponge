@@ -206,7 +206,6 @@ public final class NbtDataUtil {
         }
 
         public static final class World {
-            public static final String UUID = "UUID";
             public static final String WORLD_UUID_LEAST_1_8 = "uuid_least";
             public static final String WORLD_UUID_MOST_1_8 = "uuid_most";
 

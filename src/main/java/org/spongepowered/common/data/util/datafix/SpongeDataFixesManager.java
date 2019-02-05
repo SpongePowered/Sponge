@@ -42,7 +42,7 @@ public final class SpongeDataFixesManager {
     private static final DataFixer DATA_FIXER = createFixer();
 
     private static DataFixer createFixer() {
-        ExecutorService service =
+        final ExecutorService service =
             Executors.newCachedThreadPool((new ThreadFactoryBuilder()).setUncaughtExceptionHandler((thread, throwable) -> {
             SpongeImpl.getLogger().error("Unable to build datafixers", throwable);
             Runtime.getRuntime().exit(1);
