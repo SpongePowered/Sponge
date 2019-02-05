@@ -24,9 +24,7 @@
  */
 package org.spongepowered.common.registry;
 
-import net.minecraft.item.crafting.FurnaceRecipes;
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.advancement.AdvancementType;
@@ -49,6 +47,7 @@ import org.spongepowered.api.boss.BossBarOverlay;
 import org.spongepowered.api.boss.ServerBossBar;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.api.item.potion.PotionType;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.data.meta.PatternLayer;
@@ -89,9 +88,9 @@ import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDama
 import org.spongepowered.api.event.cause.entity.dismount.DismountType;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
 import org.spongepowered.api.event.cause.entity.teleport.TeleportType;
-import org.spongepowered.api.extra.fluid.FluidStack;
-import org.spongepowered.api.extra.fluid.FluidStackSnapshot;
-import org.spongepowered.api.extra.fluid.FluidType;
+import org.spongepowered.api.fluid.FluidStack;
+import org.spongepowered.api.fluid.FluidStackSnapshot;
+import org.spongepowered.api.fluid.FluidType;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.item.ItemType;
@@ -125,7 +124,6 @@ import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
 import org.spongepowered.api.service.economy.transaction.TransactionType;
 import org.spongepowered.api.statistic.Statistic;
-import org.spongepowered.api.statistic.StatisticType;
 import org.spongepowered.api.text.BookView;
 import org.spongepowered.api.text.LiteralText;
 import org.spongepowered.api.text.ScoreText;
@@ -146,9 +144,7 @@ import org.spongepowered.api.util.ban.Ban;
 import org.spongepowered.api.util.ban.BanType;
 import org.spongepowered.api.util.rotation.Rotation;
 import org.spongepowered.api.world.DimensionType;
-import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.api.world.PortalAgentType;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.WorldBorder;
@@ -370,7 +366,7 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(RangeAgentAITask.Builder.class, SpongeRangeAgentAIBuilder::new)
             .registerBuilderSupplier(LookIdleAITask.Builder.class, SpongeLookIdleAIBuilder::new)
             .registerBuilderSupplier(PatternLayer.Builder.class, SpongePatternLayerBuilder::new)
-            .registerBuilderSupplier(Task.Builder.class, () -> Sponge.getScheduler().createTaskBuilder())
+            .registerBuilderSupplier(Task.Builder.class, SpongeTaskBuilder::new)
             .registerBuilderSupplier(BigMushroom.Builder.class, BigMushroomBuilder::new)
             .registerBuilderSupplier(BlockBlob.Builder.class, BlockBlobBuilder::new)
             .registerBuilderSupplier(ChorusFlower.Builder.class, ChorusFlowerBuilder::new)
@@ -451,16 +447,13 @@ public final class CommonModuleRegistry {
             .registerModule(BannerPatternShape.class, new BannerPatternShapeRegistryModule())
             .registerModule(BodyPart.class, new BodyPartRegistryModule())
             .registerModule(BooleanTrait.class, BooleanTraitRegistryModule.getInstance())
-            .registerModule(BigMushroomType.class, new BigMushroomRegistryModule())
             .registerModule(BiomeTreeType.class, new BiomeTreeTypeRegistryModule())
             .registerModule(BiomeType.class, new BiomeTypeRegistryModule())
             .registerModule(BlockState.class, BlockStateRegistryModule.getInstance())
             .registerModule(BlockType.class, BlockTypeRegistryModule.getInstance())
-            .registerModule(BrickType.class, new BrickTypeRegistryModule())
             .registerModule(Career.class, CareerRegistryModule.getInstance())
             .registerModule(new ChatTypeRegistryModule())
             .registerModule(ComparatorType.class, new ComparatorTypeRegistryModule())
-            .registerModule(CookedFish.class, new CookedFishRegistryModule())
             .registerModule(Criterion.class, new CriteriaRegistryModule())
             .registerModule(DamageModifierType.class, new DamageModifierTypeRegistryModule())
             .registerModule(new DamageSourceRegistryModule())
@@ -469,9 +462,7 @@ public final class CommonModuleRegistry {
             .registerModule(DataTranslator.class, DataTranslatorRegistryModule.getInstance())
             .registerModule(Difficulty.class, DifficultyRegistryModule.getInstance())
             .registerModule(DimensionType.class, DimensionTypeRegistryModule.getInstance())
-            .registerModule(DisguisedBlockType.class, new DisguisedBlockTypeRegistryModule())
             .registerModule(DisplaySlot.class, DisplaySlotRegistryModule.getInstance())
-            .registerModule(DoublePlantType.class, new DoublePlantTypeRegistryModule())
             .registerModule(DyeColor.class, DyeColorRegistryModule.getInstance())
             .registerModule(EnchantmentType.class, EnchantmentRegistryModule.getInstance())
             .registerModule((Class<EnumTrait<?>>) (Class) EnumTrait.class, EnumTraitRegistryModule.getInstance())
@@ -487,7 +478,6 @@ public final class CommonModuleRegistry {
             .registerModule(IntegerTrait.class, IntegerTraitRegistryModule.getInstance())
             .registerModule(ItemType.class, ItemTypeRegistryModule.getInstance())
             .registerModule(new LocaleRegistryModule())
-            .registerModule(LogAxis.class, new LogAxisRegistryModule())
             .registerModule(MushroomType.class, new MushroomTypeRegistryModule())
             .registerModule(NotePitch.class, new NotePitchRegistryModule())
             .registerModule(ObjectiveDisplayMode.class, new ObjectiveDisplayModeRegistryModule())
@@ -495,32 +485,22 @@ public final class CommonModuleRegistry {
             .registerModule(ParrotVariant.class, new ParrotVariantRegistryModule())
             .registerModule(ParticleType.class, ParticleRegistryModule.getInstance())
             .registerModule((Class<ParticleOption<?>>) (Class<?>) ParticleOption.class, new ParticleOptionRegistryModule())
-            .registerModule(PistonType.class, new PistonTypeRegistryModule())
-            .registerModule(PlantType.class, new PlantTypeModuleRegistry())
             .registerModule(PopulatorObject.class, new PopulatorObjectRegistryModule())
             .registerModule(PopulatorType.class, PopulatorTypeRegistryModule.getInstance())
             .registerModule(PortionType.class, new PortionTypeRegistryModule())
             .registerModule(PotionType.class, PotionTypeRegistryModule.getInstance())
             .registerModule(PotionEffectType.class, PotionEffectTypeRegistryModule.getInstance())
-            .registerModule(PrismarineType.class, new PrismarineRegistryModule())
             .registerModule(Profession.class, ProfessionRegistryModule.getInstance())
-            .registerModule(QuartzType.class, new QuartzTypeRegistryModule())
             .registerModule(QueryOperationType.class, new QueryOperationRegistryModule())
             .registerModule(RabbitType.class, new RabbitTypeRegistryModule())
             .registerModule(RailDirection.class, new RailDirectionRegistryModule())
             .registerModule(Rotation.class, RotationRegistryModule.getInstance())
-            .registerModule(SandstoneType.class, new SandstoneTypeRegistryModule())
-            .registerModule(SandType.class, new SandTypeRegistryModule())
             .registerModule(SelectorType.class, new SelectorTypeRegistryModule())
             .registerModule(SerializationBehavior.class, new SerializationBehaviorRegistryModule())
-            .registerModule(ShrubType.class, new ShrubTypeRegistryModule())
-            .registerModule(SkullType.class, new SkullTypeRegistryModule())
-            .registerModule(SlabType.class, new SlabTypeRegistryModule())
             .registerModule(SoundType.class, new SoundRegistryModule())
             .registerModule(SpawnType.class, new SpawnTypeRegistryModule())
             .registerModule(SoundCategory.class, new SoundCategoryRegistryModule())
             .registerModule(StairShape.class, new StairShapeRegistryModule())
-            .registerModule(StoneType.class, new StoneTypeRegistryModule())
             .registerModule(TeleportHelperFilter.class, new TeleportHelperFilterRegistryModule())
             .registerModule(TeleportType.class, TeleportTypeRegistryModule.getInstance())
             .registerModule(TextColor.class, TextColorRegistryModule.getInstance())
@@ -532,7 +512,6 @@ public final class CommonModuleRegistry {
             .registerModule(Visibility.class, new VisibilityRegistryModule())
             .registerModule(Statistic.class, StatisticRegistryModule.getInstance())
             .registerModule(StatisticType.class, new StatisticTypeRegistryModule())
-            .registerModule(WallType.class, new WallTypeRegistryModule())
             .registerModule(Weather.class, new WeatherRegistryModule())
             .registerModule(WireAttachmentType.class, new WireAttachmentRegistryModule())
             .registerModule(WorldGeneratorModifier.class, WorldGeneratorModifierRegistryModule.getInstance())
@@ -556,7 +535,7 @@ public final class CommonModuleRegistry {
             .registerModule(CraftingRecipe.class, SpongeCraftingRecipeRegistry.getInstance())
             .registerModule(SmeltingRecipe.class, (CatalogRegistryModule<SmeltingRecipe>) FurnaceRecipes.instance())
             .registerModule(EventContextKey.class, EventContextKeysModule.getInstance())
-            .registerModule(RecordType.class, MusicDiscRegistryModule.getInstance())
+            .registerModule(MusicDisc.class, MusicDiscRegistryModule.getInstance())
             .registerModule(HorseStyle.class, HorseStyleRegistryModule.getInstance())
             .registerModule(HorseColor.class, HorseColorRegistryModule.getInstance())
             .registerModule(InstrumentType.class, InstrumentTypeRegistryModule.getInstance())

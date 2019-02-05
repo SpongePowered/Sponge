@@ -30,12 +30,9 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.tileentity.TileEntitySkull;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.type.SkullType;
-import org.spongepowered.api.data.type.SkullTypes;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedPlayerData;
-import org.spongepowered.common.data.type.SpongeSkullType;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntitySkull;
 
@@ -47,73 +44,33 @@ import javax.annotation.Nullable;
 
 public class SkullUtils {
 
-    /**
-     * There's not really a meaningful default value for this, since it's a CatalogType. However, the Vanilla give command defaults the skeleton type (index 0), so it's used as the default here.
-     */
-    public static final SkullType DEFAULT_TYPE = SkullTypes.SKELETON;
-
-    public static boolean supportsObject(Object object) {
-        return object instanceof TileEntitySkull || isValidItemStack(object);
-    }
-
-    public static SkullType getSkullType(int skullType) {
-        for (SkullType type : SpongeImpl.getRegistry().getAllOf(SkullType.class)){
-            if (type instanceof SpongeSkullType && ((SpongeSkullType) type).getByteId() == skullType) {
-                return type;
-            }
-        }
-        return DEFAULT_TYPE;
-    }
-
-    public static boolean isValidItemStack(Object container) {
-        return container instanceof ItemStack && ((ItemStack) container).getItem().equals(Items.SKULL);
-    }
-
-    public static SkullType getSkullType(TileEntitySkull tileEntitySkull) {
-        return SkullUtils.getSkullType(tileEntitySkull.getSkullType());
-    }
-
-    public static void setSkullType(TileEntitySkull tileEntitySkull, int skullType) {
-        tileEntitySkull.setType(skullType);
-        tileEntitySkull.markDirty();
-        tileEntitySkull.getWorld().notifyBlockUpdate(tileEntitySkull.getPos(), tileEntitySkull.getWorld().getBlockState(tileEntitySkull.getPos()), tileEntitySkull.getWorld()
-                .getBlockState(tileEntitySkull.getPos()), 3);
-    }
-
-    public static SkullType getSkullType(ItemStack itemStack) {
-        return SkullUtils.getSkullType(itemStack.getMetadata());
-    }
-
     public static Optional<GameProfile> getProfile(TileEntitySkull entity) {
         return Optional.ofNullable((GameProfile) entity.getPlayerProfile());
     }
 
     public static boolean setProfile(TileEntitySkull tileEntitySkull, @Nullable GameProfile profile) {
-        if (getSkullType(tileEntitySkull).equals(SkullTypes.PLAYER)) {
-            final GameProfile newProfile = SpongeRepresentedPlayerData.NULL_PROFILE.equals(profile) ? null : resolveProfileIfNecessary(profile);
-            tileEntitySkull.setPlayerProfile((com.mojang.authlib.GameProfile) newProfile);
-            tileEntitySkull.markDirty();
-            tileEntitySkull.getWorld().notifyBlockUpdate(tileEntitySkull.getPos(), tileEntitySkull.getWorld().getBlockState(tileEntitySkull.getPos()), tileEntitySkull.getWorld()
-                    .getBlockState(tileEntitySkull.getPos()), 3);
-            return true;
-        }
-        return false;
+        final GameProfile newProfile = SpongeRepresentedPlayerData.NULL_PROFILE.equals(profile) ? null : resolveProfileIfNecessary(profile);
+        tileEntitySkull.setPlayerProfile((com.mojang.authlib.GameProfile) newProfile);
+        tileEntitySkull.markDirty();
+        tileEntitySkull.getWorld().notifyBlockUpdate(tileEntitySkull.getPos(), tileEntitySkull.getWorld().getBlockState(tileEntitySkull.getPos()), tileEntitySkull.getWorld()
+                .getBlockState(tileEntitySkull.getPos()), 3);
+        return true;
     }
 
     public static Optional<GameProfile> getProfile(ItemStack skull) {
-        if (isValidItemStack(skull) && getSkullType(skull).equals(SkullTypes.PLAYER)) {
-            final NBTTagCompound nbt = skull.getSubCompound(NbtDataUtil.ITEM_SKULL_OWNER);
-            final com.mojang.authlib.GameProfile mcProfile = nbt == null ? null : NBTUtil.readGameProfileFromNBT(nbt);
+        if (skull.getItem() == Items.PLAYER_HEAD) {
+            final NBTTagCompound nbt = skull.getChildTag(NbtDataUtil.ITEM_SKULL_OWNER);
+            final com.mojang.authlib.GameProfile mcProfile = nbt == null ? null : NBTUtil.readGameProfile(nbt);
             return Optional.ofNullable((GameProfile) mcProfile);
         }
         return Optional.empty();
     }
 
     public static boolean setProfile(ItemStack skull, @Nullable GameProfile profile) {
-        if (isValidItemStack(skull) && getSkullType(skull).equals(SkullTypes.PLAYER)) {
+        if (skull.getItem() == Items.PLAYER_HEAD) {
             if (profile == null || profile.equals(SpongeRepresentedPlayerData.NULL_PROFILE)) {
-                if (skull.getTagCompound() != null) {
-                    skull.getTagCompound().removeTag(NbtDataUtil.ITEM_SKULL_OWNER);
+                if (skull.getTag() != null) {
+                    skull.getTag().removeTag(NbtDataUtil.ITEM_SKULL_OWNER);
                 }
             } else {
                 final NBTTagCompound nbt = new NBTTagCompound();

@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.data.processor.data.item;
 
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableRepresentedPlayerData;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedPlayerData;
-import org.spongepowered.api.data.type.SkullTypes;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.profile.GameProfile;
@@ -45,11 +45,7 @@ public class ItemSkullRepresentedPlayerDataProcessor
         extends AbstractItemSingleDataProcessor<GameProfile, RepresentedPlayerData, ImmutableRepresentedPlayerData> {
 
     public ItemSkullRepresentedPlayerDataProcessor() {
-        super(ItemSkullRepresentedPlayerDataProcessor::isSupportedItem, Keys.REPRESENTED_PLAYER);
-    }
-
-    private static boolean isSupportedItem(ItemStack stack) {
-        return SkullUtils.isValidItemStack(stack) && SkullUtils.getSkullType(stack).equals(SkullTypes.PLAYER);
+        super(item -> item.getItem() == Items.PLAYER_HEAD, Keys.REPRESENTED_PLAYER);
     }
 
     @Override

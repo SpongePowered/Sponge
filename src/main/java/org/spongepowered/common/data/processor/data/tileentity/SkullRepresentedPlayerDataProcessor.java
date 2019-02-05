@@ -29,7 +29,6 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableRepresentedPlayerData;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedPlayerData;
-import org.spongepowered.api.data.type.SkullTypes;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.profile.GameProfile;
@@ -46,11 +45,6 @@ public class SkullRepresentedPlayerDataProcessor extends
 
     public SkullRepresentedPlayerDataProcessor() {
         super(TileEntitySkull.class, Keys.REPRESENTED_PLAYER);
-    }
-
-    @Override
-    public boolean supports(TileEntitySkull skull) {
-        return SkullUtils.getSkullType(skull).equals(SkullTypes.PLAYER);
     }
 
     @Override
