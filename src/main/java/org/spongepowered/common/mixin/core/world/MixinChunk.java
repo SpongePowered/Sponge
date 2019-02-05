@@ -54,6 +54,7 @@ import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.chunk.Chunk.EnumCreateEntityType;
 import net.minecraft.world.chunk.ChunkPrimer;
+import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraft.world.gen.IChunkGenerator;
@@ -61,7 +62,6 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.block.ScheduledBlockUpdate;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
@@ -70,6 +70,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.profile.GameProfile;
+import org.spongepowered.api.scheduler.ScheduledUpdate;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
@@ -77,11 +78,11 @@ import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
-import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.biome.BiomeType;
-import org.spongepowered.api.world.extent.Extent;
-import org.spongepowered.api.world.extent.worker.MutableBiomeVolumeWorker;
-import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
+import org.spongepowered.api.world.biome.worker.MutableBiomeVolumeWorker;
+import org.spongepowered.api.world.chunk.Chunk;
+import org.spongepowered.api.world.volume.EntityHit;
+import org.spongepowered.api.world.volume.block.worker.MutableBlockVolumeWorker;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -98,8 +99,8 @@ import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.PhaseData;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.interfaces.IMixinCachable;
 import org.spongepowered.common.interfaces.IMixinChunk;
@@ -154,7 +155,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     @Shadow @Final private World world;
     @Shadow @Final public int x;
     @Shadow @Final public int z;
-    @Shadow @Final private ExtendedBlockStorage[] storageArrays;
+    @Shadow @Final private ChunkSection[] storageArrays;
     @Shadow @Final private int[] precipitationHeightMap;
     @Shadow @Final private int[] heightMap;
     @Shadow @Final private ClassInheritanceMultiMap<Entity>[] entityLists;
@@ -264,7 +265,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     @Redirect(method = "removeTileEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntity;invalidate()V"))
     private void onChunkRemoveTileEntity(TileEntity tileEntityIn) {
         ((IMixinTileEntity) tileEntityIn).setActiveChunk(null);
-        tileEntityIn.invalidate();
+        tileEntityIn.remove();
     }
 
     @Inject(method = "onLoad", at = @At("RETURN"))
@@ -338,12 +339,6 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public int getInhabittedTime() {
-        return (int) this.inhabitedTime;
-    }
-
-    @Override
     public int getInhabitedTime() {
         return (int) this.inhabitedTime;
     }
@@ -352,7 +347,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     public double getRegionalDifficultyFactor() {
         final boolean flag = this.world.getDifficulty() == EnumDifficulty.HARD;
         float moon = this.world.getCurrentMoonPhaseFactor();
-        float f2 = MathHelper.clamp((this.world.getWorldTime() - 72000.0F) / 1440000.0F, 0.0F, 1.0F) * 0.25F;
+        float f2 = MathHelper.clamp((this.world.getDayTime() - 72000.0F) / 1440000.0F, 0.0F, 1.0F) * 0.25F;
         float f3 = 0.0F;
         f3 += MathHelper.clamp(this.inhabitedTime / 3600000.0F, 0.0F, 1.0F) * (flag ? 1.0F : 0.75F);
         f3 += MathHelper.clamp(moon * 0.25F, 0.0F, f2);
@@ -519,7 +514,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     }
 
     @Inject(method = "getEntitiesWithinAABBForEntity", at = @At(value = "RETURN"))
-    public void onGetEntitiesWithinAABBForEntity(Entity entityIn, AxisAlignedBB aabb, List<Entity> listToFill, Predicate<Entity> p_177414_4_,
+    public void onGetEntitiesWithinAABBForEntity(@Nullable Entity entityIn, AxisAlignedBB aabb, List<Entity> listToFill, Predicate<? super Entity> p_177414_4_,
             CallbackInfo ci) {
         if (this.world.isRemote || PhaseTracker.getInstance().getCurrentPhaseData().state.ignoresEntityCollisions()) {
             return;
@@ -629,7 +624,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         Block currentBlock = currentState.getBlock();
         // Sponge End
 
-        ExtendedBlockStorage extendedblockstorage = this.storageArrays[yPos >> 4];
+        ChunkSection extendedblockstorage = this.storageArrays[yPos >> 4];
         // Sponge - make this final so we don't change it later
         final boolean requiresNewLightCalculations;
 
@@ -738,7 +733,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
                         this.addTrackedBlockPosition(newBlock, pos, owner, PlayerTracker.Type.OWNER);
                     }
                 }
-                
+
                 // Sponge End
                 this.world.setTileEntity(pos, tileentity);
             }
@@ -883,17 +878,17 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     }
 
     @Override
-    public Collection<ScheduledBlockUpdate> getScheduledUpdates(int x, int y, int z) {
-        return this.sponge_world.getScheduledUpdates((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15));
+    public Collection<ScheduledUpdate<BlockType>> getScheduledUpdates(int x, int y, int z) {
+        return this.sponge_world.getScheduledBlockUpdates().getScheduledAt((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15));
     }
 
     @Override
-    public ScheduledBlockUpdate addScheduledUpdate(int x, int y, int z, int priority, int ticks) {
+    public ScheduledUpdate<BlockType> addScheduledUpdate(int x, int y, int z, int priority, int ticks) {
         return this.sponge_world.addScheduledUpdate((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), priority, ticks);
     }
 
     @Override
-    public void removeScheduledUpdate(int x, int y, int z, ScheduledBlockUpdate update) {
+    public void removeScheduledUpdate(int x, int y, int z, ScheduledUpdate update) {
         this.sponge_world.removeScheduledUpdate((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), update);
     }
 
@@ -1266,7 +1261,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
                     if (block.getMaterial() != Material.AIR) {
                         int section = y >> 4;
                         if (this.storageArrays[section] == net.minecraft.world.chunk.Chunk.NULL_BLOCK_STORAGE) {
-                            this.storageArrays[section] = new ExtendedBlockStorage(section << 4, flag);
+                            this.storageArrays[section] = new ChunkSection(section << 4, flag);
                         }
                         this.storageArrays[section].set(x, y & 15, z, block);
                     }

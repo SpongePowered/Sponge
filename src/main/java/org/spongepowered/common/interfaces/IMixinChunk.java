@@ -28,14 +28,13 @@ import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.EnumSkyBlock;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkPrimer;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.BlockChangeFlag;
-import org.spongepowered.api.world.Chunk;
-import org.spongepowered.api.world.extent.EntityUniverse;
+import org.spongepowered.api.world.volume.EntityHit;
 import org.spongepowered.common.entity.PlayerTracker;
 
 import java.util.List;
@@ -92,8 +91,8 @@ public interface IMixinChunk {
 
     void setScheduledForUnload(long scheduled);
 
-    void getIntersectingEntities(Vector3d start, Vector3d direction, double distance, Predicate<EntityUniverse.EntityHit> filter,
-            double entryY, double exitY, Set<EntityUniverse.EntityHit> intersections);
+    void getIntersectingEntities(Vector3d start, Vector3d direction, double distance, Predicate<EntityHit> filter,
+            double entryY, double exitY, Set<EntityHit> intersections);
 
     boolean isPersistedChunk();
 
