@@ -99,14 +99,10 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     private boolean allowsBlockEventCreation = true;
     private boolean allowsEntityEventCreation = true;
 
-    @Shadow protected boolean tileEntityInvalid;
     @Shadow protected net.minecraft.world.World world;
-    @Shadow private int blockMetadata;
     @Shadow protected BlockPos pos;
 
     @Shadow public abstract BlockPos getPos();
-    @Shadow public abstract Block getBlockType();
-    @Shadow public abstract NBTTagCompound writeToNBT(NBTTagCompound compound);
     @Override @Shadow public abstract void markDirty();
 
     @Inject(method = "<init>*", at = @At("RETURN"))
@@ -141,8 +137,8 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     }
 
     @Override
-    public Location<World> getLocation() {
-        return new Location<>((World) this.world, VecHelper.toVector3i(this.getPos()));
+    public Location getLocation() {
+        return new Location((World) this.world, VecHelper.toVector3i(this.getPos()));
     }
 
     @Override
@@ -299,7 +295,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
                 blockState = this.getBlock();
             }
             this.locatableBlock = LocatableBlock.builder()
-                    .location(new Location<World>((World) this.world, this.pos.getX(), this.pos.getY(), this.pos.getZ()))
+                    .location(new Location((World) this.world, this.pos.getX(), this.pos.getY(), this.pos.getZ()))
                     .state(blockState)
                     .build();
         }

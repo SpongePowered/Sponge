@@ -380,11 +380,11 @@ public class SpongeCommandManager implements CommandManager {
     }
 
     @Override
-    public List<String> getSuggestions(CommandSource src, String arguments, @Nullable Location<World> targetPosition) {
+    public List<String> getSuggestions(CommandSource src, String arguments, @Nullable Location targetPosition) {
         return this.getSuggestions(src, arguments, targetPosition, false);
     }
 
-    public List<String> getSuggestions(CommandSource src, String arguments, @Nullable Location<World> targetPosition, boolean usingBlock) {
+    public List<String> getSuggestions(CommandSource src, String arguments, @Nullable Location targetPosition, boolean usingBlock) {
         try {
             final String[] argSplit = arguments.split(" ", 2);
             List<String> suggestions = new ArrayList<>(this.dispatcher.getSuggestions(src, arguments, targetPosition));

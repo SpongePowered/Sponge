@@ -35,10 +35,8 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import net.minecraft.advancements.PlayerAdvancements;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.command.ICommandSender;
 import net.minecraft.command.ICommandSource;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EntityTrackerEntry;
 import net.minecraft.entity.IMerchant;
@@ -87,7 +85,6 @@ import net.minecraft.server.management.PlayerInteractionManager;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.stats.StatBase;
 import net.minecraft.stats.StatList;
-import net.minecraft.stats.StatisticsManagerServer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundEvent;
@@ -117,7 +114,6 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.SoundCategory;
 import org.spongepowered.api.effect.sound.SoundType;
-import org.spongepowered.api.effect.sound.record.RecordType;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.CooldownTracker;
 import org.spongepowered.api.entity.living.player.Player;
@@ -163,7 +159,6 @@ import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldBorder;
-import org.spongepowered.api.world.gamerule.DefaultGameRules;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -268,10 +263,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow public abstract void setSpectatingEntity(Entity entity);
     @Shadow public abstract void sendPlayerAbilities();
     @Shadow @Override public abstract void takeStat(StatBase stat);
-    @Shadow public abstract StatisticsManagerServer getStatFile();
     @Shadow public abstract void displayGUIChest(IInventory chestInventory);
     @Shadow public abstract void displayGui(IInteractionObject guiOwner);
-    @Shadow public abstract void openGuiHorseInventory(AbstractHorse horse, IInventory horseInventory);
 
     // Inventory
     @Shadow public abstract void closeScreen();
@@ -324,7 +317,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     public void readFromNbt(NBTTagCompound compound) {
         super.readFromNbt(compound);
-        if (compound.hasKey(NbtDataUtil.HEALTH_SCALE, NbtDataUtil.TAG_DOUBLE)) {
+        if (compound.hasKey(NbtDataUtil.HEALTH_SCALE)) {
             this.healthScaling = true;
             this.healthScale = compound.getDouble(NbtDataUtil.HEALTH_SCALE);
         }

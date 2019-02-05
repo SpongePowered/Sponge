@@ -32,11 +32,8 @@ import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockGrass;
 import net.minecraft.block.BlockLeaves;
-import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.BlockLog;
-import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
@@ -53,7 +50,6 @@ import org.spongepowered.api.block.BlockSoundGroup;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.block.trait.BlockTrait;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.property.Property;
@@ -71,7 +67,6 @@ import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.World;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -123,18 +118,10 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     private boolean allowsEntityEventCreation = true;
 
     @Shadow private boolean needsRandomTick;
-    @Shadow protected SoundType blockSoundType;
-    @Shadow @Final protected BlockStateContainer blockState;
 
     @Shadow public abstract String getTranslationKey();
     @Shadow public abstract Material getMaterial(IBlockState state);
     @Shadow public abstract IBlockState shadow$getDefaultState();
-    @Shadow public abstract boolean shadow$getTickRandomly();
-    @Shadow public abstract void dropBlockAsItem(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, int fortune);
-
-    @Shadow public abstract BlockStateContainer getBlockState();
-
-    @Shadow protected boolean enableStats;
 
     @Inject(method = "<init>*", at = @At("RETURN"))
     public void onConstruction(CallbackInfo ci) {
@@ -182,7 +169,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     @Override
     public CatalogKey getKey() {
-        return (CatalogKey) (Object) Block.REGISTRY.getNameForObject((Block) (Object) this);
+        return (CatalogKey) (Object) Block.REGISTRY.getKey((Block) (Object) this);
     }
 
     @Override
@@ -194,7 +181,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
         // This should always succeed when things are working properly,
         // so we just catch the exception instead of doing a null check.
         try {
-            return Block.REGISTRY.getNameForObject((Block) (Object) this).toString();
+            return Block.REGISTRY.getKey((Block) (Object) this).toString();
         } catch (NullPointerException e) {
             throw new RuntimeException(String.format("Block '%s' (class '%s') is not registered with the block registry! This is likely a bug in the corresponding mod.", this, this.getClass().getName()), e);
         }

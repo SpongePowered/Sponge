@@ -27,7 +27,6 @@ package org.spongepowered.common.data.builder.block.tileentity;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Maps;
-import net.minecraft.block.BlockJukebox;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityBanner;
 import net.minecraft.tileentity.TileEntityBeacon;
@@ -41,14 +40,14 @@ import net.minecraft.tileentity.TileEntityDropper;
 import net.minecraft.tileentity.TileEntityEnchantmentTable;
 import net.minecraft.tileentity.TileEntityEndPortal;
 import net.minecraft.tileentity.TileEntityEnderChest;
-import net.minecraft.tileentity.TileEntityFlowerPot;
 import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.tileentity.TileEntityHopper;
+import net.minecraft.tileentity.TileEntityJukebox;
 import net.minecraft.tileentity.TileEntityMobSpawner;
-import net.minecraft.tileentity.TileEntityNote;
 import net.minecraft.tileentity.TileEntityPiston;
 import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.tileentity.TileEntitySkull;
+import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.Sponge;
@@ -73,7 +72,7 @@ import java.util.Optional;
  */
 public abstract class AbstractTileBuilder<T extends org.spongepowered.api.block.tileentity.TileEntity> extends AbstractDataBuilder<T> implements DataBuilder<T> {
 
-    private static final Map<Class<? extends TileEntity>, BlockType> classToTypeMap = Maps.newHashMap();
+    private static final Map<Class<? extends TileEntityType<?>>, BlockType> classToTypeMap = Maps.newHashMap();
 
     protected AbstractTileBuilder(Class<T> clazz, int version) {
         super(clazz, version);
@@ -92,13 +91,13 @@ public abstract class AbstractTileBuilder<T extends org.spongepowered.api.block.
             throw new InvalidDataException("The provided container references a world that does not exist!");
         }
 
-        Class<? extends TileEntity> clazz = TileEntity.REGISTRY.getObject(new ResourceLocation(container.getString(DataQueries.TILE_TYPE).get()));
+        final Class<? extends TileEntityType> clazz = TileEntityType.REGISTRY.get(new ResourceLocation(container.getString(DataQueries.TILE_TYPE).get())).getClass();
         if (clazz == null) {
             // TODO do we want to throw an InvalidDataException since the class is not registered?
             return Optional.empty(); // basically we didn't manage to find the class and the class isn't even registered with MC
         }
 
-        BlockType type = classToTypeMap.get(clazz);
+        final BlockType type = classToTypeMap.get(clazz);
         if (type == null) {
             return Optional.empty(); // TODO throw exception maybe?
         }
@@ -115,7 +114,7 @@ public abstract class AbstractTileBuilder<T extends org.spongepowered.api.block.
             return Optional.empty(); // TODO throw exception maybe?
         }
         // We really need to validate only after the implementing class deems it ready...
-        tileEntity.invalidate();
+        tileEntity.remove();
         return Optional.of((T) tileEntity);
     }
 
@@ -125,11 +124,11 @@ public abstract class AbstractTileBuilder<T extends org.spongepowered.api.block.
         addBlockMapping(TileEntityDropper.class, BlockTypes.DROPPER);
         addBlockMapping(TileEntityChest.class, BlockTypes.CHEST);
         addBlockMapping(TileEntityEnderChest.class, BlockTypes.ENDER_CHEST);
-        addBlockMapping(BlockJukebox.TileEntityJukebox.class, BlockTypes.JUKEBOX);
+        addBlockMapping(TileEntityJukebox.class, BlockTypes.JUKEBOX);
         addBlockMapping(TileEntityDispenser.class, BlockTypes.DISPENSER);
         addBlockMapping(TileEntityDropper.class, BlockTypes.DROPPER);
-        addBlockMapping(TileEntitySign.class, BlockTypes.STANDING_SIGN);
-        addBlockMapping(TileEntityMobSpawner.class, BlockTypes.MOB_SPAWNER);
+        addBlockMapping(TileEntitySign.class, BlockTypes.SIGN);
+        addBlockMapping(TileEntityMobSpawner.class, BlockTypes.SPAWNER);
         addBlockMapping(TileEntityNote.class, BlockTypes.NOTEBLOCK);
         addBlockMapping(TileEntityPiston.class, BlockTypes.PISTON);
         addBlockMapping(TileEntityFurnace.class, BlockTypes.FURNACE);
@@ -141,7 +140,7 @@ public abstract class AbstractTileBuilder<T extends org.spongepowered.api.block.
         addBlockMapping(TileEntitySkull.class, BlockTypes.SKULL);
         addBlockMapping(TileEntityDaylightDetector.class, BlockTypes.DAYLIGHT_DETECTOR);
         addBlockMapping(TileEntityHopper.class, BlockTypes.HOPPER);
-        addBlockMapping(TileEntityComparator.class, BlockTypes.UNPOWERED_COMPARATOR);
+        addBlockMapping(TileEntityComparator.class, BlockTypes.COMPARATOR);
         addBlockMapping(TileEntityFlowerPot.class, BlockTypes.FLOWER_POT);
         addBlockMapping(TileEntityBanner.class, BlockTypes.STANDING_BANNER);
     }
@@ -149,5 +148,4 @@ public abstract class AbstractTileBuilder<T extends org.spongepowered.api.block.
     private static void addBlockMapping(Class<? extends TileEntity> tileClass, BlockType blocktype) {
         classToTypeMap.put(tileClass, blocktype);
     }
-
 }

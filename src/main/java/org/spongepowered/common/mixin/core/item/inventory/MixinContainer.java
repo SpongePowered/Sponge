@@ -37,7 +37,6 @@ import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.inventory.Slot;
 import net.minecraft.inventory.SlotCrafting;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.network.play.server.SPacketSetSlot;
 import net.minecraft.util.NonNullList;
@@ -140,7 +139,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     private List<SlotTransaction> capturedCraftPreviewTransactions = new ArrayList<>();
     private Fabric fabric;
     private SlotProvider slots;
-    private Lens lens;
+    @Nullable private Lens lens;
     private boolean initialized;
     private Map<Integer, SlotAdapter> adapters = new HashMap<>();
     private InventoryArchetype archetype;

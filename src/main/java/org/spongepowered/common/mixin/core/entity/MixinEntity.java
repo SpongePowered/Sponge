@@ -33,7 +33,6 @@ import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.EntityTrackerEntry;
@@ -54,7 +53,6 @@ import net.minecraft.network.play.server.SPacketPlayerPosLook;
 import net.minecraft.particles.IParticleData;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
-import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
@@ -89,6 +87,7 @@ import org.spongepowered.api.event.cause.entity.dismount.DismountTypes;
 import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
 import org.spongepowered.api.event.entity.IgniteEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
+import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.translation.Translation;
@@ -98,7 +97,6 @@ import org.spongepowered.api.util.RelativePositions;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.lib.Opcodes;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -192,7 +190,6 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
     private boolean allowsEntityEventCreation = true;
 
     @Shadow public net.minecraft.entity.Entity ridingEntity;
-    @Shadow @Final private List<net.minecraft.entity.Entity> riddenByEntities;
     @Shadow private UUID entityUniqueID;
     @Shadow public net.minecraft.world.World world;
     @Shadow public double posX;
@@ -210,7 +207,6 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
     @Shadow public float width;
     @Shadow public float height;
     @Shadow public float fallDistance;
-    @Shadow public boolean isDead;
     @Shadow public boolean onGround;
     @Shadow public boolean inWater;
     @Shadow protected boolean isImmuneToFire;
@@ -224,15 +220,11 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
     @Shadow public int ticksExisted;
 
     @Shadow public abstract void setPosition(double x, double y, double z);
-    @Shadow public abstract void setDead();
     @Shadow public abstract int getAir();
     @Shadow public abstract void setAir(int air);
     @Shadow public abstract float getEyeHeight();
-    @Shadow public abstract void setCustomNameTag(String name);
     @Shadow public abstract UUID getUniqueID();
-    @Shadow @Nullable public abstract AxisAlignedBB getEntityBoundingBox();
     @Shadow public abstract void setFire(int seconds);
-    @Shadow public abstract NBTTagCompound writeToNBT(NBTTagCompound compound);
     @Shadow public abstract boolean attackEntityFrom(DamageSource source, float amount);
     @Shadow public abstract int getEntityId();
     @Shadow public abstract boolean isBeingRidden();
@@ -242,10 +234,8 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
     @Shadow public abstract net.minecraft.entity.Entity getRidingEntity();
     @Shadow public abstract void removePassengers();
     @Shadow public abstract void playSound(SoundEvent soundIn, float volume, float pitch);
-    @Shadow public abstract boolean isEntityInvulnerable(DamageSource source);
     @Shadow public abstract boolean isSprinting();
     @Shadow public abstract boolean isInWater();
-    @Shadow public abstract boolean isRiding();
     @Shadow public abstract boolean isOnSameTeam(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract double getDistanceSq(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract void setLocationAndAngles(double x, double y, double z, float yaw, float pitch);
@@ -266,8 +256,6 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
     @Shadow public abstract void setItemStackToSlot(EntityEquipmentSlot slotIn, ItemStack stack);
 
     @Shadow protected abstract boolean shouldSetPosAfterLoading();
-
-    @Shadow public abstract String getCustomNameTag();
 
     @Shadow public boolean preventEntitySpawning;
 
@@ -432,9 +420,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
     @Override
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
         Optional<VehicleData> vehicleData = get(VehicleData.class);
-        if (vehicleData.isPresent()) {
-            manipulators.add(vehicleData.get());
-        }
+        vehicleData.ifPresent(manipulators::add);
         if (this.fire > 0) {
             manipulators.add(get(IgniteableData.class).get());
         }
@@ -718,7 +704,12 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
     }
 
     protected void runDelay(int ticks, Runnable runnable) {
-        Sponge.getScheduler().createTaskBuilder().execute(runnable).delayTicks(ticks).submit(SpongeImpl.getPlugin());
+        final Task task = Task.builder()
+            .execute(runnable)
+            .delayTicks(ticks)
+            .plugin(SpongeImpl.getPlugin())
+            .build();
+        Sponge.getServer().getScheduler().submit(task);
     }
 
     @Override
@@ -732,12 +723,12 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
     }
 
     @Override
-    public Transform<World> getTransform() {
-        return new Transform<>(getWorld(), getPosition(), getRotation(), getScale());
+    public Transform getTransform() {
+        return new Transform(getWorld(), getPosition(), getRotation(), getScale());
     }
 
     @Override
-    public boolean setTransform(Transform<World> transform) {
+    public boolean setTransform(Transform transform) {
         checkNotNull(transform, "The transform cannot be null!");
         boolean result = setLocation(transform.getLocation());
         if (result) {
@@ -753,7 +744,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
     public boolean transferToWorld(World world, Vector3d position) {
         checkNotNull(world, "World was null!");
         checkNotNull(position, "Position was null!");
-        return setLocation(new Location<>(world, position));
+        return setLocation(new Location(world, position));
     }
 
     @Override
@@ -1016,7 +1007,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
 
     @Override
     public DataContainer toContainer() {
-        final Transform<World> transform = getTransform();
+        final Transform transform = getTransform();
         final NBTTagCompound compound = new NBTTagCompound();
         writeToNBT(compound);
         NbtDataUtil.filterSpongeCustomData(compound); // We must filter the custom data so it isn't stored twice
@@ -1251,7 +1242,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
     private void spawnParticle(net.minecraft.world.World world, IParticleData particleTypes, double xCoord, double yCoord, double zCoord,
             double xOffset, double yOffset, double zOffset) {
         if (!this.isVanished) {
-            this.world.spawnParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset;
+            this.world.spawnParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset);
         }
     }
 

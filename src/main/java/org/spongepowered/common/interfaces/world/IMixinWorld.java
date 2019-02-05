@@ -26,7 +26,6 @@ package org.spongepowered.common.interfaces.world;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;

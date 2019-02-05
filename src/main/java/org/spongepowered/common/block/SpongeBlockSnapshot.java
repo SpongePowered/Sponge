@@ -92,12 +92,12 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     private final ImmutableList<ImmutableDataManipulator<?, ?>> extraData;
     private ImmutableMap<Key<?>, Value.Immutable<?>> keyValueMap;
     private ImmutableSet<Value.Immutable<?>> valueSet;
-    private ImmutableList<ImmutableDataManipulator<?, ?>> blockData;
-    private ImmutableMap<Key<?>, Value.Immutable<?>> blockKeyValueMap;
-    private ImmutableSet<Value.Immutable<?>> blockValueSet;
+    @Nullable private ImmutableList<ImmutableDataManipulator<?, ?>> blockData;
+    @Nullable private ImmutableMap<Key<?>, Value.Immutable<?>> blockKeyValueMap;
+    @Nullable private ImmutableSet<Value.Immutable<?>> blockValueSet;
     @Nullable final NBTTagCompound compound;
-    @Nullable final UUID creatorUniqueId;
-    @Nullable final UUID notifierUniqueId;
+    @Nullable private final UUID creatorUniqueId;
+    @Nullable private final UUID notifierUniqueId;
     // Internal use only
     private final BlockPos blockPos;
     private SpongeBlockChangeFlag changeFlag;
@@ -179,7 +179,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         try (PhaseContext<?> context = BlockPhase.State.RESTORING_BLOCKS.createPhaseContext()) {
             context.buildAndSwitch();
             BlockPos pos = VecHelper.toBlockPos(this.pos);
-            if (!world.isValid(pos)) { // Invalid position. Inline this check
+            if (!WorldServer.isValid(pos)) { // Invalid position. Inline this check
                 return false;
             }
             IBlockState current = world.getBlockState(pos);
@@ -218,11 +218,8 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
 
     @Override
     public Optional<Location> getLocation() {
-        Optional<World> worldOptional = SpongeImpl.getGame().getServer().getWorld(this.worldUniqueId);
-        if (worldOptional.isPresent()) {
-            return Optional.of(new Location(worldOptional.get(), this.getPosition()));
-        }
-        return Optional.empty();
+        final Optional<World> optWorld = SpongeImpl.getGame().getServer().getWorld(this.worldUniqueId);
+        return optWorld.map(world -> new Location(world, this.getPosition()));
     }
 
     @Override
@@ -291,11 +288,8 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
 
     @Override
     public <E> Optional<BlockSnapshot> with(Key<? extends Value<E>> key, E value) {
-        Optional<BlockState> optional = this.blockState.with(key, value);
-        if (optional.isPresent()) {
-            return Optional.of(withState(optional.get()));
-        }
-        return Optional.empty();
+        Optional<BlockState> optState = this.blockState.with(key, value);
+        return optState.map(this::withState);
     }
 
     @SuppressWarnings("rawtypes")

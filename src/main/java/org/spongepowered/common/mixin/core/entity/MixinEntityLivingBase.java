@@ -38,6 +38,7 @@ import net.minecraft.entity.passive.EntityWolf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.MobEffects;
+import net.minecraft.init.Particles;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -831,7 +832,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                 double d3 = d0 + (this.posX - d0) * d6 + (random.nextDouble() - 0.5D) * (double)this.width * 2.0D;
                 double d4 = d1 + (this.posY - d1) * d6 + random.nextDouble() * (double)this.height;
                 double d5 = d2 + (this.posZ - d2) * d6 + (random.nextDouble() - 0.5D) * (double)this.width * 2.0D;
-                world.spawnParticle(EnumParticleTypes.PORTAL, d3, d4, d5, (double)f, (double)f1, (double)f2, new int[0]);
+                world.spawnParticle(Particles.PORTAL, d3, d4, d5, (double)f, (double)f1, (double)f2);
             }
 
             if ((Object) this instanceof EntityCreature)
@@ -1013,11 +1014,6 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                 .maximum((double) Float.MAX_VALUE)
                 .value((double) this.getMaxHealth())
                 .build();
-    }
-
-    @Override
-    public DamageableData getDamageableData() {
-        return new SpongeDamageableData((Living) this.revengeTarget, (double) this.lastDamage);
     }
 
     @Override
