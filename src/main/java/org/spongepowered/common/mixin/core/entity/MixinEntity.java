@@ -51,6 +51,7 @@ import net.minecraft.network.play.server.SPacketDestroyEntities;
 import net.minecraft.network.play.server.SPacketPlayerListItem;
 import net.minecraft.network.play.server.SPacketPlayerPosLook;
 import net.minecraft.particles.IParticleData;
+import net.minecraft.scoreboard.Team;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.ResourceLocation;
@@ -277,6 +278,8 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
     @Shadow public abstract void setCustomName(@Nullable ITextComponent name);
 
     @Shadow public abstract boolean isPassenger();
+
+    @Shadow @Nullable public abstract Team getTeam();
 
     @Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;dimension:I", opcode = Opcodes.PUTFIELD))
     private void onSet(net.minecraft.entity.Entity self, int dimensionId, net.minecraft.world.World worldIn) {

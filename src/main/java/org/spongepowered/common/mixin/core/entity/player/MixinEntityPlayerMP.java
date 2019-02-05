@@ -344,6 +344,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     /**
      * @author blood - May 12th, 2016
      * @author gabizou - June 3rd, 2016
+     * @author Aaron1011 - February 5th, 2018 - Update for 1.13
      *
      * @reason SpongeForge requires an overwrite so we do it here instead. This handles player death events.
      */
@@ -400,25 +401,18 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
                 this.inventory.dropAllItems();
             }
 
-            for (ScoreObjective scoreobjective : this.getWorldScoreboard().getObjectivesFromCriteria(IScoreCriteria.DEATH_COUNT)) {
-                Score score = this.getWorldScoreboard().getOrCreateScore(this.getName(), scoreobjective);
-                score.incrementScore();
-            }
+            this.getWorldScoreboard().forAllObjectives(IScoreCriteria.DEATH_COUNT, this.getScoreboardName(), Score::incrementScore);
 
             EntityLivingBase entitylivingbase = this.getAttackingEntity();
 
             if (entitylivingbase != null) {
-                EntityList.EntityEggInfo entitylist$entityegginfo = EntityList.ENTITY_EGGS.get(EntityList.getKey(entitylivingbase));
-
-                if (entitylist$entityegginfo != null) {
-                    this.addStat(entitylist$entityegginfo.entityKilledByStat);
-                }
-
-                entitylivingbase.awardKillScore((EntityPlayerMP) (Object) this, this.scoreValue, cause);
+                this.addStat(StatList.ENTITY_KILLED_BY.get(entitylivingbase.getType()));
+                entitylivingbase.awardKillScore(this, this.scoreValue, cause);
             }
 
             this.addStat(StatList.DEATHS);
-            this.takeStat(StatList.TIME_SINCE_DEATH);
+            this.takeStat(StatList.CUSTOM.get(StatList.TIME_SINCE_DEATH));
+            this.takeStat(StatList.CUSTOM.get(StatList.TIME_SINCE_REST));
             this.extinguish();
             this.setFlag(0, false);
             this.getCombatTracker().reset();
@@ -1441,12 +1435,16 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         return ((IMixinPlayerAdvancements) this.advancements).getAdvancementTrees();
     }
 
-    @Override
+    // TODO - the vanilla method isDead was renamed to remove()
+    // We'd like our remove() method to exist in production, to catch plugins doing dumb things
+    // However, in development, there's not much we can do (short of inspecting the call stack)
+    // Can Mixin accomplish this?
+    /*@Override
     public void remove() {
         throw new UnsupportedOperationException("This is an internal method not intended for use with Players " +
                 "as it causes the player to be placed into an undefined state. " +
                 "Consider putting them through the normal death process instead.");
-    }
+    }*/
 
     @Override
     public Optional<UUID> getWorldUniqueId() {

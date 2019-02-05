@@ -180,6 +180,8 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
 
     @Shadow public abstract void addStat(ResourceLocation p_195067_1_, int p_195067_2_);
 
+    @Shadow public abstract String getScoreboardName();
+
     private boolean affectsSpawning = true;
     private UUID collidingEntityUuid = null;
     private Vector3d targetedLocation;
@@ -832,7 +834,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
         }
     }
 
-    @Redirect(method = "setDead", at = @At(value = "INVOKE", ordinal = 1, target = "Lnet/minecraft/inventory/Container;onContainerClosed(Lnet/minecraft/entity/player/EntityPlayer;)V"))
+    @Redirect(method = "remove", at = @At(value = "INVOKE", ordinal = 1, target = "Lnet/minecraft/inventory/Container;onContainerClosed(Lnet/minecraft/entity/player/EntityPlayer;)V"))
     private void onOnContainerClosed(Container container, EntityPlayer player) {
         // Corner case where the server is shutting down on the client, the enitty player mp is also being killed off.
         if (Sponge.isServerAvailable() && SpongeImplHooks.isClientAvailable() && Sponge.getGame().getState() == GameState.SERVER_STOPPING) {
