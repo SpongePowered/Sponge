@@ -26,7 +26,6 @@ package org.spongepowered.common.text.action;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import net.minecraft.entity.EntityList;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.TextComponentString;
@@ -115,9 +114,9 @@ public abstract class HoverTextActionImpl<R> extends TextActionImpl<R> implement
 
         @Override
         HoverEvent createEvent() {
-            final ItemStack item = (ItemStack) this.result.createStack();
+            final ItemStack item = (ItemStack) (Object) this.result.createStack();
             final NBTTagCompound compound = new NBTTagCompound();
-            item.writeToNBT(compound);
+            item.write(compound);
             return new HoverEvent(HoverEvent.Action.SHOW_ITEM, new TextComponentString(compound.toString()));
         }
 
@@ -163,7 +162,7 @@ public abstract class HoverTextActionImpl<R> extends TextActionImpl<R> implement
             compound.setString("id", this.result.getUniqueId().toString());
             compound.setString("name", this.result.getName());
             if (this.result.getType().isPresent()) {
-                compound.setString("type", EntityList.getKey(((SpongeEntityType) this.result.getType().get()).entityClass).toString());
+                compound.setString("type", net.minecraft.entity.EntityType.getId(((SpongeEntityType) this.result.getType().get()).).toString());
             }
             return new HoverEvent(HoverEvent.Action.SHOW_ENTITY, new TextComponentString(compound.toString()));
         }

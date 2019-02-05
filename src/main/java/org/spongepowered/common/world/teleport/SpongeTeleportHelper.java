@@ -53,9 +53,9 @@ import java.util.stream.Stream;
 public class SpongeTeleportHelper implements TeleportHelper {
 
     @Override
-    public Optional<Location<World>> getSafeLocation(Location<World> location, int height, int width, int distanceToDrop,
+    public Optional<Location> getSafeLocation(Location location, int height, int width, int distanceToDrop,
             TeleportHelperFilter filter, TeleportHelperFilter... additionalFilters) {
-        final World world = location.getExtent();
+        final World world = location.getWorld();
         final Set<TeleportHelperFilter> filters = Sets.newHashSet(additionalFilters);
         filters.add(filter);
 
@@ -72,7 +72,7 @@ public class SpongeTeleportHelper implements TeleportHelper {
             // The vectors should be sorted by distance from the centre of the checking region, so
             // this makes it easier to try to get close, because we can just iterate and get progressively further out.
             Optional<Vector3i> result = getSafeLocation(world, getBlockLocations(location, height, width), distanceToDrop, filters);
-            return result.map(vector3i -> new Location<>(world, vector3i.toDouble().add(0.5, 0, 0.5)));
+            return result.map(vector3i -> new Location(world, vector3i.toDouble().add(0.5, 0, 0.5)));
         } finally {
             // Just in case some exception occurs, we want this to disable again.
             chunkProviderServer.setForceChunkRequests(false);
@@ -80,16 +80,16 @@ public class SpongeTeleportHelper implements TeleportHelper {
 
     }
 
-    private Stream<Vector3i> getBlockLocations(Location<World> worldLocation, int height, int width) {
+    private Stream<Vector3i> getBlockLocations(Location worldLocation, int height, int width) {
         // We don't want to warp outside of the world border, so we want to check that we're within it.
-        WorldBorder worldBorder = (WorldBorder) worldLocation.getExtent().getWorldBorder();
+        WorldBorder worldBorder = (WorldBorder) worldLocation.getWorld().getWorldBorder();
         int worldBorderMinX = GenericMath.floor(worldBorder.minX());
         int worldBorderMinZ = GenericMath.floor(worldBorder.minZ());
         int worldBorderMaxX = GenericMath.floor(worldBorder.maxX());
         int worldBorderMaxZ = GenericMath.floor(worldBorder.maxZ());
 
         // Get the World and get the maximum Y value.
-        int worldMaxY = worldLocation.getExtent().getBlockMax().getY();
+        int worldMaxY = worldLocation.getWorld().getBlockMax().getY();
 
         Vector3i vectorLocation = worldLocation.getBlockPosition();
 

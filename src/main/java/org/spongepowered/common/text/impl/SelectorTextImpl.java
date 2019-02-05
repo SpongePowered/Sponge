@@ -105,7 +105,6 @@ public class SelectorTextImpl extends TextImpl implements SelectorText {
         private Selector selector;
 
         public Builder() {
-            selector(selector);
         }
 
         Builder(final Text text) {

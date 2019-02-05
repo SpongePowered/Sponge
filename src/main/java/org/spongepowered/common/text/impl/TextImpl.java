@@ -151,7 +151,7 @@ public abstract class TextImpl implements Text {
 
     @Override
     public final String toPlain() {
-        return ((IMixinTextComponent) asComponent()).toPlain();
+        return ((IMixinTextComponent) this.asComponent()).toPlain();
     }
 
     @Override
@@ -208,7 +208,7 @@ public abstract class TextImpl implements Text {
 
     public String toJson() {
         if (this.json == null) {
-            this.json = ITextComponent.Serializer.componentToJson(this.asComponent());
+            this.json = ITextComponent.Serializer.toJson(this.asComponent());
         }
         return this.json;
     }

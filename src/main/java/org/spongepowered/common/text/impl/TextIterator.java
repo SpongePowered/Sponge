@@ -57,7 +57,7 @@ final class TextIterator implements Iterator<Text> {
 
     @Override
     public Text next() {
-        if (!hasNext()) {
+        if (!this.hasNext()) {
             throw new NoSuchElementException();
         }
         if (this.children == null) {
