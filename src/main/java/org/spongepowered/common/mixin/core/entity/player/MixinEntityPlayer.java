@@ -27,9 +27,9 @@ package org.spongepowered.common.mixin.core.entity.player;
 import com.flowpowered.math.vector.Vector3d;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.CreatureAttribute;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.EnumCreatureAttribute;
 import net.minecraft.entity.IEntityMultiPart;
 import net.minecraft.entity.MultiPartEntityPart;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -40,6 +40,7 @@ import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.entity.player.PlayerCapabilities;
 import net.minecraft.init.Items;
 import net.minecraft.init.MobEffects;
+import net.minecraft.init.Particles;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.EntityEquipmentSlot;
@@ -50,14 +51,13 @@ import net.minecraft.item.ItemSword;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.play.server.SPacketEntityVelocity;
 import net.minecraft.scoreboard.Scoreboard;
-import net.minecraft.scoreboard.Team;
 import net.minecraft.stats.StatBase;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.CooldownTracker;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.FoodStats;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
@@ -137,7 +137,6 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow public int experienceLevel;
     @Shadow public int experienceTotal;
     @Shadow public float experience;
-    @Shadow public PlayerCapabilities capabilities;
     @Shadow public InventoryPlayer inventory;
     @Shadow private BlockPos spawnPos;
     @Shadow private BlockPos bedLocation;
@@ -164,14 +163,22 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow public abstract FoodStats getFoodStats();
     @Shadow public abstract GameProfile getGameProfile();
     @Shadow public abstract Scoreboard getWorldScoreboard();
-    @Shadow public abstract String getName();
-    @Shadow @Nullable public abstract Team getTeam();
     @Shadow public abstract void addExperienceLevel(int levels);
     @Shadow public abstract void addScore(int scoreIn);
     @Shadow public abstract CooldownTracker shadow$getCooldownTracker();
 
     @Shadow protected abstract void spawnShoulderEntities();
     @Shadow public abstract boolean isCreative();
+
+    @Shadow public PlayerCapabilities abilities;
+
+    @Shadow public abstract ITextComponent getName();
+
+    @Shadow public abstract void addStat(ResourceLocation p_195066_1_);
+
+    @Shadow public abstract UUID getUUID(GameProfile p_146094_0_);
+
+    @Shadow public abstract void addStat(ResourceLocation p_195067_1_, int p_195067_2_);
 
     private boolean affectsSpawning = true;
     private UUID collidingEntityUuid = null;
@@ -237,8 +244,11 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
      * the totalExperience recalculation above for this method, which would
      * otherwise have weird intermediate states.
      */
+    // TODO: Update for 1.13
     @Overwrite
-    public void addExperience(int amount) {
+    public void giveExperiencePoints(int amount) {
+        throw new IllegalStateException("This method needs to be updated for 1.13!");
+        /*
         this.addScore(amount);
         int i = Integer.MAX_VALUE - this.experienceTotal;
 
@@ -269,31 +279,33 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
         this.experienceTotal = finalExperience;
         this.experienceLevel = finalLevel;
         // Sponge end
+        */
     }
 
-    @Inject(method = "readEntityFromNBT", at = @At("RETURN"))
+    @Inject(method = "readAdditional", at = @At("RETURN"))
     private void recalculateXpOnLoad(NBTTagCompound compound, CallbackInfo ci) {
         // Fix the mistakes of /xp commands past.
         recalculateTotalExperience();
     }
 
     public boolean isFlying() {
-        return this.capabilities.isFlying;
+        return this.abilities.isFlying;
     }
 
     public void setFlying(boolean flying) {
-        this.capabilities.isFlying = flying;
+        this.abilities.isFlying = flying;
     }
 
     /**
      * @author blood - May 12th, 2016
+     * @author Aaron1011 - February 05, 2019 - Update for 1.13
      *
      * @reason SpongeForge requires an overwrite so we do it here instead. This handles player death events.
      */
     @Overwrite
     @Override
-    public void onDeath(DamageSource cause) {
-        final boolean isMainThread = Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
+    public void onDeath(@Nullable DamageSource cause) {
+        final boolean isMainThread = Sponge.isServerAvailable() && Sponge.getServer().onMainThread();
         Optional<DestructEntityEvent.Death>
                 event = SpongeCommonEventFactory.callDestructEntityEventDeath((EntityPlayer) (Object) this, cause, isMainThread);
         if (event.map(Cancellable::isCancelled).orElse(true)) {
@@ -304,8 +316,8 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
         this.setPosition(this.posX, this.posY, this.posZ);
         this.motionY = 0.10000000149011612D;
 
-        if (this.getName().equals("Notch")) {
-            this.dropItem(new ItemStack(Items.APPLE, 1), true, false);
+        if ("Notch".equals(this.getName().getString())) {
+            this.dropItem(new ItemStack(Items.APPLE), true, false);
         }
 
         if (!this.world.getGameRules().getBoolean("keepInventory") && !this.isSpectator()) {
@@ -314,19 +326,21 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
         }
 
         if (cause != null) {
-            this.motionX = (double) (-MathHelper.cos((this.attackedAtYaw + this.rotationYaw) * 0.017453292F) * 0.1F);
-            this.motionZ = (double) (-MathHelper.sin((this.attackedAtYaw + this.rotationYaw) * 0.017453292F) * 0.1F);
+            this.motionX = (double)(-MathHelper.cos((this.attackedAtYaw + this.rotationYaw) * 0.017453292F) * 0.1F);
+            this.motionZ = (double)(-MathHelper.sin((this.attackedAtYaw + this.rotationYaw) * 0.017453292F) * 0.1F);
         } else {
-            this.motionX = this.motionZ = 0.0D;
+            this.motionX = 0.0D;
+            this.motionZ = 0.0D;
         }
 
         this.addStat(StatList.DEATHS);
-        this.takeStat(StatList.TIME_SINCE_DEATH);
+        this.takeStat(StatList.CUSTOM.get(StatList.TIME_SINCE_DEATH));
+        this.takeStat(StatList.CUSTOM.get(StatList.TIME_SINCE_REST));
         this.extinguish();
         this.setFlag(0, false);
     }
 
-    @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;isPlayerSleeping()Z"))
+    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;isPlayerSleeping()Z"))
     public boolean onIsPlayerSleeping(EntityPlayer self) {
         if (self.isPlayerSleeping()) {
             if (!((IMixinWorld) this.world).isFake()) {
@@ -394,6 +408,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
 
     /**
      * @author gabizou - June 4th, 2016
+     * @author Aaron1011 - February 5th, 2019 - Update for .113
      * @reason When a player drops an item, all methods flow through here instead of {@link Entity#dropItem(Item, int)}
      * because of the idea of {@code dropAround} and {@code traceItem}.
      *
@@ -418,7 +433,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
         entityitem.setPickupDelay(40);
 
         if (traceItem) {
-            entityitem.setThrower(this.getName());
+            entityitem.setThrowerId(this.getUniqueID());
         }
 
         if (dropAround) {
@@ -445,7 +460,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
 
         if (traceItem) {
             if (itemstack != null && !itemstack.isEmpty()) { // Sponge - add null check
-                this.addStat(StatList.getDroppedObjectStats(itemstack.getItem()), droppedItem.getCount());
+                this.addStat(StatList.ITEM_DROPPED.get(itemstack.getItem()), itemstack.getCount());
             }
 
             this.addStat(StatList.DROP);
@@ -507,6 +522,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     /**
      * @author gabizou - April 8th, 2016
      * @author gabizou - April 11th, 2016 - Update for 1.9 - This enitre method was rewritten
+     * @author Aaron1011 - Februrary 5th, 2019 - Update for 1.13
      *
      *
      * @reason Rewrites the attackTargetEntityWithCurrentItem to throw an {@link AttackEntityEvent} prior
@@ -515,22 +531,23 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
      * and effectively bypass our damage event hooks.
      *
      * LVT Rename Table:
-     * float f        | damage               |
-     * float f1       | enchantmentDamage    |
-     * float f2       | attackStrength       |
-     * boolean flag   | isStrongAttack       |
-     * boolean flag1  | isSprintingAttack    |
-     * boolean flag2  | isCriticalAttack     | Whether critical particles will spawn and of course, multiply the output damage
-     * boolean flag3  | isSweapingAttack     | Whether the player is sweaping an attack and will deal AoE damage
-     * int i          | knockbackModifier    | The knockback modifier, must be set from the event after it has been thrown
-     * float f4       | targetOriginalHealth | This is initially set as the entity original health
-     * boolean flag4  | litEntityOnFire      | This is an internal flag to where if the attack failed, the entity is no longer set on fire
-     * int j          | fireAspectModifier   | Literally just to check that the weapon used has fire aspect enchantments
-     * double d0      | distanceWalkedDelta  | This checks that the distance walked delta is more than the normal walking speed to evaluate if you're making a sweaping attack
-     * double d1      | targetMotionX        | Current target entity motion x vector
-     * double d2      | targetMotionY        | Current target entity motion y vector
-     * double d3      | targetMotionZ        | Current target entity motion z vector
-     * boolean flag5  | attackSucceeded      | Whether the attack event succeeded
+     * p_71059_1_         | targetEntity         |
+     * float lvt_2_1_     | damage               |
+     * float lvt_3_2_     | enchantmentDamage    |
+     * float lvt_4_1_     | attackStrength       |
+     * boolean lvt_5_1_   | isStrongAttack       |
+     * boolean lvt_6_1_   | isSprintingAttack    |
+     * boolean lvt_8_1_   | isCriticalAttack     | Whether critical particles will spawn and of course, multiply the output damage
+     * boolean flag3      | isSweepingAttack     | Whether the player is sweaping an attack and will deal AoE damage
+     * int lvt_7_1_       | knockbackModifier    | The knockback modifier, must be set from the event after it has been thrown
+     * float lvt_12_2_    | targetOriginalHealth | This is initially set as the entity original health
+     * boolean lvt_13_1_  | litEntityOnFire      | This is an internal flag to where if the attack failed, the entity is no longer set on fire
+     * int j              | fireAspectModifier   | Literally just to check that the weapon used has fire aspect enchantments
+     * double lvt_10_1_   | distanceWalkedDelta  | This checks that the distance walked delta is more than the normal walking speed to evaluate if you're making a sweaping attack
+     * double lvt_15_1_          | targetMotionX        | Current target entity motion x vector
+     * double lvt_17_1_          | targetMotionY        | Current target entity motion y vector
+     * double lvt_19_1          | targetMotionZ        | Current target entity motion z vector
+     * boolean lvt_21_1_      | attackSucceeded      | Whether the attack event succeeded
      *
      * @param targetEntity The target entity
      */
@@ -546,12 +563,12 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
             if (!targetEntity.hitByEntity((EntityPlayer) (Object) this)) {
                 // Sponge Start - Prepare our event values
                 // float damage = (float) this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue();
-                final double originalBaseDamage = this.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue();
+                final double originalBaseDamage = this.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getValue();
                 float damage = (float) originalBaseDamage;
                 // Sponge End
                 float enchantmentDamage = 0.0F;
 
-                // Spogne Start - Redirect getting enchantments for our damage event handlers
+                // Sponge Start - Redirect getting enchantments for our damage event handlers
                 // if (targetEntity instanceof EntityLivingBase) {
                 //     enchantmentDamage = EnchantmentHelper.getModifierForCreature(this.getHeldItemMainhand(), ((EntityLivingBase) targetEntity).getCreatureAttribute());
                 // } else {
@@ -561,9 +578,9 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
 
                 final List<ModifierFunction<DamageModifier>> originalFunctions = new ArrayList<>();
 
-                final EnumCreatureAttribute creatureAttribute = targetEntity instanceof EntityLivingBase
+                final CreatureAttribute creatureAttribute = targetEntity instanceof EntityLivingBase
                                                                 ? ((EntityLivingBase) targetEntity).getCreatureAttribute()
-                                                                : EnumCreatureAttribute.UNDEFINED;
+                                                                : CreatureAttribute.UNDEFINED;
                 final List<DamageFunction> enchantmentModifierFunctions = DamageEventHandler.createAttackEnchantmentFunction(this.getHeldItemMainhand(), creatureAttribute, attackStrength);
                 // This is kept for the post-damage event handling
                 final List<DamageModifier> enchantmentModifiers = enchantmentModifierFunctions.stream().map(ModifierFunction::getModifier).collect(Collectors.toList());
@@ -583,8 +600,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                 if (damage > 0.0F || enchantmentDamage > 0.0F) {
                     boolean isStrongAttack = attackStrength > 0.9F;
                     boolean isSprintingAttack = false;
-                    boolean isCriticalAttack = false;
-                    boolean isSweapingAttack = false;
+                    boolean isSweepingAttack = false;
                     int knockbackModifier = 0;
                     knockbackModifier = knockbackModifier + EnchantmentHelper.getKnockbackModifier((EntityPlayer) (Object) this);
 
@@ -595,7 +611,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                         isSprintingAttack = true;
                     }
 
-                    isCriticalAttack = isStrongAttack && this.fallDistance > 0.0F && !this.onGround && !this.isOnLadder() && !this.isInWater() && !this.isPotionActive(MobEffects.BLINDNESS) && !this.isRiding() && targetEntity instanceof EntityLivingBase;
+                    boolean isCriticalAttack = isStrongAttack && this.fallDistance > 0.0F && !this.onGround && !this.isOnLadder() && !this.isInWater() && !this.isPotionActive(MobEffects.BLINDNESS) && !this.isPassenger() && targetEntity instanceof EntityLivingBase;
                     isCriticalAttack = isCriticalAttack && !this.isSprinting();
 
                     if (isCriticalAttack) {
@@ -605,15 +621,16 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                         // Sponge End
                     }
 
-                    // damage = damage + enchantmentDamage; // Sponge - We don't need this since our event will re-assign the damage to deal
+                    // damage += enchantmentDamage; // Sponge - We don't need this since our event will re-assign the damage to deal
                     double distanceWalkedDelta = (double) (this.distanceWalkedModified - this.prevDistanceWalkedModified);
 
+                    // Sponge - move heldItem outside of 'if 'block
                     final ItemStack heldItem = this.getHeldItem(EnumHand.MAIN_HAND);
                     if (isStrongAttack && !isCriticalAttack && !isSprintingAttack && this.onGround && distanceWalkedDelta < (double) this.getAIMoveSpeed()) {
                         ItemStack itemstack = heldItem;
 
                         if (itemstack.getItem() instanceof ItemSword) {
-                            isSweapingAttack = true;
+                            isSweepingAttack = true;
                         }
                     }
 
@@ -644,7 +661,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
 
                     float targetOriginalHealth = 0.0F;
                     boolean litEntityOnFire = false;
-                    int fireAspectModifier = EnchantmentHelper.getFireAspectModifier((EntityPlayer) (Object) this);
+                    int fireAspectModifier = EnchantmentHelper.getFireAspectModifier((EntityPlayer) (Object) this); // Sponge - cast to Object for mixin compat
 
                     if (targetEntity instanceof EntityLivingBase) {
                         targetOriginalHealth = ((EntityLivingBase) targetEntity).getHealth();
@@ -658,7 +675,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                     double targetMotionX = targetEntity.motionX;
                     double targetMotionY = targetEntity.motionY;
                     double targetMotionZ = targetEntity.motionZ;
-                    boolean attackSucceeded = targetEntity.attackEntityFrom(DamageSource.causePlayerDamage((EntityPlayer) (Object) this), damage);
+                    boolean attackSucceeded = targetEntity.attackEntityFrom(DamageSource.causePlayerDamage((EntityPlayer) (Object) this), damage);  // Sponge - cast to Object for mixin compat
 
                     if (attackSucceeded) {
                         if (knockbackModifier > 0) {
@@ -673,9 +690,9 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                             this.setSprinting(false);
                         }
 
-                        if (isSweapingAttack) {
-                            for (EntityLivingBase entitylivingbase : this.world.getEntitiesWithinAABB(EntityLivingBase.class, targetEntity.getEntityBoundingBox().grow(1.0D, 0.25D, 1.0D))) {
-                                if (entitylivingbase != (EntityPlayer) (Object) this && entitylivingbase != targetEntity && !this.isOnSameTeam(entitylivingbase) && this.getDistanceSq(entitylivingbase) < 9.0D) {
+                        if (isSweepingAttack) {
+                            for (EntityLivingBase entitylivingbase : this.world.getEntitiesWithinAABB(EntityLivingBase.class, targetEntity.getBoundingBox().grow(1.0D, 0.25D, 1.0D))) {
+                                if (entitylivingbase != (Object) this && entitylivingbase != targetEntity && !this.isOnSameTeam(entitylivingbase) && this.getDistanceSq(entitylivingbase) < 9.0D) {
                                     // Sponge Start - Do a small event for these entities
                                     // entitylivingbase.knockBack(this, 0.4F, (double)MathHelper.sin(this.rotationYaw * 0.017453292F), (double)(-MathHelper.cos(this.rotationYaw * 0.017453292F)));
                                     // entitylivingbase.attackEntityFrom(DamageSource.causePlayerDamage(this), 1.0F);
@@ -698,7 +715,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                                         sweapingFunctions.add(sweapingFunction);
                                         AttackEntityEvent sweepingAttackEvent = SpongeEventFactory.createAttackEntityEvent(
                                             currentCause,
-                                            sweapingFunctions, EntityUtil.fromNative(entitylivingbase), 1, 1.0D);
+                                            EntityUtil.fromNative(entitylivingbase), sweapingFunctions, 1, 1.0D);
                                         SpongeImpl.postEvent(sweepingAttackEvent);
                                         if (!sweepingAttackEvent.isCancelled()) {
                                             entitylivingbase
@@ -730,7 +747,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                             this.onCriticalHit(targetEntity);
                         }
 
-                        if (!isCriticalAttack && !isSweapingAttack) {
+                        if (!isCriticalAttack && !isSweepingAttack) {
                             if (isStrongAttack) {
                                 this.world.playSound((EntityPlayer) null, this.posX, this.posY, this.posZ, SoundEvents.ENTITY_PLAYER_ATTACK_STRONG, this.getSoundCategory(), 1.0F, 1.0F);
                             } else {
@@ -777,7 +794,8 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
 
                             if (this.world instanceof WorldServer && f5 > 2.0F) {
                                 int k = (int) ((double) f5 * 0.5D);
-                                ((WorldServer) this.world).spawnParticle(EnumParticleTypes.DAMAGE_INDICATOR, targetEntity.posX, targetEntity.posY + (double) (targetEntity.height * 0.5F), targetEntity.posZ, k, 0.1D, 0.0D, 0.1D, 0.2D, new int[0]);
+                                ((WorldServer) this.world).spawnParticle(
+                                        Particles.DAMAGE_INDICATOR, targetEntity.posX, targetEntity.posY + (double) (targetEntity.height * 0.5F), targetEntity.posZ, k, 0.1D, 0.0D, 0.1D, 0.2D);
                             }
                         }
 

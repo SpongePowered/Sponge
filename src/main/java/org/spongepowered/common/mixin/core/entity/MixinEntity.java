@@ -59,7 +59,6 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
@@ -99,6 +98,7 @@ import org.spongepowered.api.util.RelativePositions;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.lib.Opcodes;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -263,7 +263,8 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
 
     @Shadow public boolean preventEntitySpawning;
 
-    @Shadow @Final private List<net.minecraft.entity.Entity> passengers;
+    @Shadow @Final
+    private List<net.minecraft.entity.Entity> passengers;
 
     @Shadow public abstract AxisAlignedBB shadow$getBoundingBox();
 
@@ -274,6 +275,8 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
     @Shadow public abstract NBTTagCompound writeWithoutTypeId(NBTTagCompound p_189511_1_);
 
     @Shadow public abstract void setCustomName(@Nullable ITextComponent name);
+
+    @Shadow public abstract boolean isPassenger();
 
     @Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;dimension:I", opcode = Opcodes.PUTFIELD))
     private void onSet(net.minecraft.entity.Entity self, int dimensionId, net.minecraft.world.World worldIn) {
