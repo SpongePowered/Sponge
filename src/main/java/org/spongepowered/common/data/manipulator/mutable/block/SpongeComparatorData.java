@@ -27,8 +27,8 @@ package org.spongepowered.common.data.manipulator.mutable.block;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableComparatorData;
-import org.spongepowered.api.data.manipulator.mutable.block.ComparatorData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableComparatorData;
+import org.spongepowered.api.data.manipulator.mutable.ComparatorData;
 import org.spongepowered.api.data.type.ComparatorType;
 import org.spongepowered.api.data.type.ComparatorTypes;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeComparatorData;

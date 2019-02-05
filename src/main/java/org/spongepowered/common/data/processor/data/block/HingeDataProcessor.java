@@ -25,8 +25,8 @@
 package org.spongepowered.common.data.processor.data.block;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableHingeData;
-import org.spongepowered.api.data.manipulator.mutable.block.HingeData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableHingeData;
+import org.spongepowered.api.data.manipulator.mutable.HingeData;
 import org.spongepowered.api.data.type.Hinge;
 import org.spongepowered.api.data.type.Hinges;
 import org.spongepowered.api.data.value.Value;

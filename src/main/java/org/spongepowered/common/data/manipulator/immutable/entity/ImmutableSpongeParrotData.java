@@ -25,8 +25,8 @@
 package org.spongepowered.common.data.manipulator.immutable.entity;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableParrotData;
-import org.spongepowered.api.data.manipulator.mutable.entity.ParrotData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableParrotData;
+import org.spongepowered.api.data.manipulator.mutable.ParrotData;
 import org.spongepowered.api.data.type.ParrotVariant;
 import org.spongepowered.api.data.type.ParrotVariants;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleCatalogData;

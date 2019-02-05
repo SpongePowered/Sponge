@@ -27,8 +27,8 @@ package org.spongepowered.common.data.manipulator.mutable.block;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutablePortionData;
-import org.spongepowered.api.data.manipulator.mutable.block.PortionData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutablePortionData;
+import org.spongepowered.api.data.manipulator.mutable.PortionData;
 import org.spongepowered.api.data.type.PortionType;
 import org.spongepowered.api.data.type.PortionTypes;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongePortionData;

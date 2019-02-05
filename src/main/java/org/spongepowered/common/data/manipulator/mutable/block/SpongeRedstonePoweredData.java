@@ -27,8 +27,8 @@ package org.spongepowered.common.data.manipulator.mutable.block;
 import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableRedstonePoweredData;
-import org.spongepowered.api.data.manipulator.mutable.block.RedstonePoweredData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableRedstonePoweredData;
+import org.spongepowered.api.data.manipulator.mutable.RedstonePoweredData;
 import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeRedstonePoweredData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBoundedComparableData;

@@ -31,8 +31,8 @@ import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableArmorStandData;
-import org.spongepowered.api.data.manipulator.mutable.entity.ArmorStandData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableArmorStandData;
+import org.spongepowered.api.data.manipulator.mutable.ArmorStandData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeArmorStandData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
 

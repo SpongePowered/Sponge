@@ -25,8 +25,8 @@
 package org.spongepowered.common.data.processor.data.block;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableMoistureData;
-import org.spongepowered.api.data.manipulator.mutable.block.MoistureData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableMoistureData;
+import org.spongepowered.api.data.manipulator.mutable.MoistureData;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeMoistureData;
 import org.spongepowered.common.data.processor.common.AbstractBlockOnlyDataProcessor;

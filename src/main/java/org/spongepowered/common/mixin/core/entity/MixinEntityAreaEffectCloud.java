@@ -29,7 +29,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.potion.PotionType;
 import net.minecraft.util.EnumParticleTypes;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.mutable.entity.AreaEffectCloudData;
+import org.spongepowered.api.data.manipulator.mutable.AreaEffectCloudData;
 import org.spongepowered.api.data.value.ListValue;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.BoundedValue;

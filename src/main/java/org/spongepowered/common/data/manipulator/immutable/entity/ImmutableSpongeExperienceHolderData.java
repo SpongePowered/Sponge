@@ -28,8 +28,8 @@ import static org.spongepowered.common.data.value.SpongeValueFactory.boundedBuil
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableExperienceHolderData;
-import org.spongepowered.api.data.manipulator.mutable.entity.ExperienceHolderData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableExperienceHolderData;
+import org.spongepowered.api.data.manipulator.mutable.ExperienceHolderData;
 import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExperienceHolderData;

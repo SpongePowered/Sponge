@@ -57,7 +57,7 @@ import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.DamageableData;
-import org.spongepowered.api.data.manipulator.mutable.entity.HealthData;
+import org.spongepowered.api.data.manipulator.mutable.HealthData;
 import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.data.value.OptionalValue;
 import org.spongepowered.api.entity.EntitySnapshot;

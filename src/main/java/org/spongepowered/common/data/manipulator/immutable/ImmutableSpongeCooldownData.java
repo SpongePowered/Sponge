@@ -25,8 +25,8 @@
 package org.spongepowered.common.data.manipulator.immutable;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableCooldownData;
-import org.spongepowered.api.data.manipulator.mutable.tileentity.CooldownData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableCooldownData;
+import org.spongepowered.api.data.manipulator.mutable.CooldownData;
 import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableIntData;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeCooldownData;

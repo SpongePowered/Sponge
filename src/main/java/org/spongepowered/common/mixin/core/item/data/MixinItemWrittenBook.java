@@ -27,9 +27,9 @@ package org.spongepowered.common.mixin.core.item.data;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemWrittenBook;
 import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.mutable.item.AuthorData;
-import org.spongepowered.api.data.manipulator.mutable.item.GenerationData;
-import org.spongepowered.api.data.manipulator.mutable.item.PagedData;
+import org.spongepowered.api.data.manipulator.mutable.AuthorData;
+import org.spongepowered.api.data.manipulator.mutable.GenerationData;
+import org.spongepowered.api.data.manipulator.mutable.PagedData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.core.item.MixinItem;
 

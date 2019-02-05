@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.entity.item.EntityFallingBlock;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFallingBlockData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableFallingBlockData;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.FallingBlock;
 import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;

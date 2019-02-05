@@ -25,8 +25,8 @@
 package org.spongepowered.common.data.manipulator.mutable.entity;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFlammableData;
-import org.spongepowered.api.data.manipulator.mutable.entity.FlammableData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableFlammableData;
+import org.spongepowered.api.data.manipulator.mutable.FlammableData;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeFlammableData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;

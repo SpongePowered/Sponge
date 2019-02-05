@@ -28,7 +28,7 @@ import net.minecraft.entity.monster.EntityEndermite;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.mutable.entity.ExpirableData;
+import org.spongepowered.api.data.manipulator.mutable.ExpirableData;
 import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.entity.living.monster.Endermite;
 import org.spongepowered.api.event.CauseStackManager;

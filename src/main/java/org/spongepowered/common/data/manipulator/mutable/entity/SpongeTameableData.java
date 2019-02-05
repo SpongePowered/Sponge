@@ -26,8 +26,8 @@ package org.spongepowered.common.data.manipulator.mutable.entity;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTameableData;
-import org.spongepowered.api.data.manipulator.mutable.entity.TameableData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableTameableData;
+import org.spongepowered.api.data.manipulator.mutable.TameableData;
 import org.spongepowered.api.data.value.OptionalValue;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeTameableData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;

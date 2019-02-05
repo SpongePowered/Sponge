@@ -25,8 +25,8 @@
 package org.spongepowered.common.data.manipulator.mutable.block;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableAttachedData;
-import org.spongepowered.api.data.manipulator.mutable.block.AttachedData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableAttachedData;
+import org.spongepowered.api.data.manipulator.mutable.AttachedData;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeAttachedData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;

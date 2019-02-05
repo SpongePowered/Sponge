@@ -33,8 +33,8 @@ import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableMovementSpeedData;
-import org.spongepowered.api.data.manipulator.mutable.entity.MovementSpeedData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableMovementSpeedData;
+import org.spongepowered.api.data.manipulator.mutable.MovementSpeedData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeMovementSpeedData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
 

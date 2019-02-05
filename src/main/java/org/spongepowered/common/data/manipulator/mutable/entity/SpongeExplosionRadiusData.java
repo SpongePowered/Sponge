@@ -25,8 +25,8 @@
 package org.spongepowered.common.data.manipulator.mutable.entity;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableExplosionRadiusData;
-import org.spongepowered.api.data.manipulator.mutable.entity.ExplosionRadiusData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableExplosionRadiusData;
+import org.spongepowered.api.data.manipulator.mutable.ExplosionRadiusData;
 import org.spongepowered.api.data.value.OptionalValue;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeExplosionRadiusData;

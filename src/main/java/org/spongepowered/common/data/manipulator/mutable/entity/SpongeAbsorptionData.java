@@ -25,8 +25,8 @@
 package org.spongepowered.common.data.manipulator.mutable.entity;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableAbsorptionData;
-import org.spongepowered.api.data.manipulator.mutable.entity.AbsorptionData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableAbsorptionData;
+import org.spongepowered.api.data.manipulator.mutable.AbsorptionData;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeAbsorptionData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;

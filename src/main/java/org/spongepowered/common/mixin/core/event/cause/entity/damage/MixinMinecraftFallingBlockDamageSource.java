@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.event.cause.entity.damage;
 
 import com.google.common.base.MoreObjects;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFallingBlockData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableFallingBlockData;
 import org.spongepowered.api.entity.FallingBlock;
 import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;
 import org.spongepowered.asm.mixin.Final;

@@ -25,8 +25,8 @@
 package org.spongepowered.common.data.manipulator.immutable.entity;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSlimeData;
-import org.spongepowered.api.data.manipulator.mutable.entity.SlimeData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableSlimeData;
+import org.spongepowered.api.data.manipulator.mutable.SlimeData;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableIntData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSlimeData;

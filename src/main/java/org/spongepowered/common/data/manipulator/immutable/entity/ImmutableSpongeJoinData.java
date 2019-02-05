@@ -26,8 +26,8 @@ package org.spongepowered.common.data.manipulator.immutable.entity;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableJoinData;
-import org.spongepowered.api.data.manipulator.mutable.entity.JoinData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableJoinData;
+import org.spongepowered.api.data.manipulator.mutable.JoinData;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeJoinData;

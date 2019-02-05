@@ -26,8 +26,8 @@ package org.spongepowered.common.data.manipulator.immutable.entity;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableBreathingData;
-import org.spongepowered.api.data.manipulator.mutable.entity.BreathingData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableBreathingData;
+import org.spongepowered.api.data.manipulator.mutable.BreathingData;
 import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeBreathingData;

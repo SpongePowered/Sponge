@@ -26,8 +26,8 @@ package org.spongepowered.common.data.manipulator.mutable.item;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.item.ImmutablePlainPagedData;
-import org.spongepowered.api.data.manipulator.mutable.item.PlainPagedData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutablePlainPagedData;
+import org.spongepowered.api.data.manipulator.mutable.PlainPagedData;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongePlainPagedData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractListData;
 

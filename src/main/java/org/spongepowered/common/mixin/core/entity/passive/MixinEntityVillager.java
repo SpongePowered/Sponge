@@ -33,7 +33,7 @@ import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.village.MerchantRecipeList;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.mutable.entity.CareerData;
+import org.spongepowered.api.data.manipulator.mutable.CareerData;
 import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.data.type.Profession;
 import org.spongepowered.api.data.value.Value;

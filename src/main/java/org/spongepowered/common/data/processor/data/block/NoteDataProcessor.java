@@ -25,8 +25,8 @@
 package org.spongepowered.common.data.processor.data.block;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableNoteData;
-import org.spongepowered.api.data.manipulator.mutable.block.NoteData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableNoteData;
+import org.spongepowered.api.data.manipulator.mutable.NoteData;
 import org.spongepowered.api.data.type.NotePitch;
 import org.spongepowered.api.data.type.NotePitches;
 import org.spongepowered.api.data.value.Value;

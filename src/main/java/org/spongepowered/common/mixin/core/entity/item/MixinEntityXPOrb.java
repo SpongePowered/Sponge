@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.entity.item;
 import net.minecraft.entity.item.EntityXPOrb;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.mutable.entity.ExpOrbData;
+import org.spongepowered.api.data.manipulator.mutable.ExpOrbData;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.ExperienceOrb;
 import org.spongepowered.asm.mixin.Mixin;

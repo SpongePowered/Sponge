@@ -25,8 +25,8 @@
 package org.spongepowered.common.data.manipulator.mutable.entity;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFallDistanceData;
-import org.spongepowered.api.data.manipulator.mutable.entity.FallDistanceData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableFallDistanceData;
+import org.spongepowered.api.data.manipulator.mutable.FallDistanceData;
 import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeFallDistanceData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBoundedComparableData;

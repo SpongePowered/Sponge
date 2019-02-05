@@ -26,8 +26,8 @@ package org.spongepowered.common.data.processor.data.entity;
 
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableAggressiveData;
-import org.spongepowered.api.data.manipulator.mutable.entity.AggressiveData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableAggressiveData;
+import org.spongepowered.api.data.manipulator.mutable.AggressiveData;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.util.OptBool;

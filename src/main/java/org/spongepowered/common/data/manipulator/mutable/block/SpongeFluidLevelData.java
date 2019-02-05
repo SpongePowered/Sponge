@@ -27,8 +27,8 @@ package org.spongepowered.common.data.manipulator.mutable.block;
 import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableFluidLevelData;
-import org.spongepowered.api.data.manipulator.mutable.block.FluidLevelData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableFluidLevelData;
+import org.spongepowered.api.data.manipulator.mutable.FluidLevelData;
 import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeFluidLevelData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBoundedComparableData;

@@ -25,8 +25,8 @@
 package org.spongepowered.common.data.manipulator.mutable.entity;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableHealthScalingData;
-import org.spongepowered.api.data.manipulator.mutable.entity.HealthScalingData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableHealthScalingData;
+import org.spongepowered.api.data.manipulator.mutable.HealthScalingData;
 import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeHealthScalingData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;

@@ -25,8 +25,8 @@
 package org.spongepowered.common.data.manipulator.mutable.entity;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableKnockbackData;
-import org.spongepowered.api.data.manipulator.mutable.entity.KnockbackData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableKnockbackData;
+import org.spongepowered.api.data.manipulator.mutable.KnockbackData;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeKnockbackData;

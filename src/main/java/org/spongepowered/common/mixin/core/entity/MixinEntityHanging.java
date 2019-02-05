@@ -34,7 +34,7 @@ import net.minecraft.util.EnumFacing;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.mutable.block.DirectionalData;
+import org.spongepowered.api.data.manipulator.mutable.DirectionalData;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.hanging.Hanging;
 import org.spongepowered.api.event.CauseStackManager;

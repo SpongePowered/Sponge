@@ -27,8 +27,8 @@ package org.spongepowered.common.data.manipulator.mutable.entity;
 import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableExpOrbData;
-import org.spongepowered.api.data.manipulator.mutable.entity.ExpOrbData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableExpOrbData;
+import org.spongepowered.api.data.manipulator.mutable.ExpOrbData;
 import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeExpOrbData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBoundedComparableData;

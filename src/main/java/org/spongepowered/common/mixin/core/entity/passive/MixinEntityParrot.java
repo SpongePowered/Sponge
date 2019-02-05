@@ -31,7 +31,7 @@ import net.minecraft.util.EnumHand;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.mutable.entity.ParrotData;
+import org.spongepowered.api.data.manipulator.mutable.ParrotData;
 import org.spongepowered.api.data.type.ParrotVariant;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.animal.Parrot;

@@ -26,8 +26,8 @@ package org.spongepowered.common.data.manipulator.immutable.entity;
 
 import com.google.common.collect.ImmutableSet;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTagData;
-import org.spongepowered.api.data.manipulator.mutable.entity.TagData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableTagData;
+import org.spongepowered.api.data.manipulator.mutable.TagData;
 import org.spongepowered.api.data.value.SetValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleSetData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeTagData;

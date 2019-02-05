@@ -25,8 +25,8 @@
 package org.spongepowered.common.data.manipulator.mutable.entity;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableCustomNameVisibleData;
-import org.spongepowered.api.data.manipulator.mutable.entity.CustomNameVisibleData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableCustomNameVisibleData;
+import org.spongepowered.api.data.manipulator.mutable.CustomNameVisibleData;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeCustomNameVisibleData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;

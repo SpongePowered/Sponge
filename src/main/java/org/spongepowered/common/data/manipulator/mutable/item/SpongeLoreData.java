@@ -26,8 +26,8 @@ package org.spongepowered.common.data.manipulator.mutable.item;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.item.ImmutableLoreData;
-import org.spongepowered.api.data.manipulator.mutable.item.LoreData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableLoreData;
+import org.spongepowered.api.data.manipulator.mutable.LoreData;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeLoreData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractListData;

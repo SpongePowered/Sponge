@@ -25,8 +25,8 @@
 package org.spongepowered.common.data.manipulator.mutable.entity;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableAffectsSpawningData;
-import org.spongepowered.api.data.manipulator.mutable.entity.AffectsSpawningData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableAffectsSpawningData;
+import org.spongepowered.api.data.manipulator.mutable.AffectsSpawningData;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeAffectsSpawningData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;

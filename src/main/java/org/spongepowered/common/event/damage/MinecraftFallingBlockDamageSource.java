@@ -29,8 +29,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import net.minecraft.entity.item.EntityFallingBlock;
 import net.minecraft.util.EntityDamageSource;
 import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFallingBlockData;
-import org.spongepowered.api.data.manipulator.mutable.entity.FallingBlockData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableFallingBlockData;
+import org.spongepowered.api.data.manipulator.mutable.FallingBlockData;
 
 public class MinecraftFallingBlockDamageSource extends EntityDamageSource {
 

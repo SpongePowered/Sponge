@@ -26,8 +26,8 @@ package org.spongepowered.common.data.manipulator.mutable.tileentity;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableFurnaceData;
-import org.spongepowered.api.data.manipulator.mutable.tileentity.FurnaceData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableFurnaceData;
+import org.spongepowered.api.data.manipulator.mutable.FurnaceData;
 import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeFurnaceData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;

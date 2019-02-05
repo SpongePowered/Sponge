@@ -27,8 +27,8 @@ package org.spongepowered.common.data.manipulator.mutable.block;
 import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDelayableData;
-import org.spongepowered.api.data.manipulator.mutable.block.DelayableData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableDelayableData;
+import org.spongepowered.api.data.manipulator.mutable.DelayableData;
 import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDelayableData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBoundedComparableData;

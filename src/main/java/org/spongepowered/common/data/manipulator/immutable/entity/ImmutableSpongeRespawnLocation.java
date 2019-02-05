@@ -25,8 +25,8 @@
 package org.spongepowered.common.data.manipulator.immutable.entity;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableRespawnLocation;
-import org.spongepowered.api.data.manipulator.mutable.entity.RespawnLocationData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableRespawnLocation;
+import org.spongepowered.api.data.manipulator.mutable.RespawnLocationData;
 import org.spongepowered.api.util.RespawnLocation;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableMappedData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeRespawnLocationData;

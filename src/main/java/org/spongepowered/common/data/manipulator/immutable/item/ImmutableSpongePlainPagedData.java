@@ -27,15 +27,10 @@ package org.spongepowered.common.data.manipulator.immutable.item;
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.item.ImmutablePagedData;
-import org.spongepowered.api.data.manipulator.immutable.item.ImmutablePlainPagedData;
-import org.spongepowered.api.data.manipulator.mutable.item.PagedData;
-import org.spongepowered.api.data.manipulator.mutable.item.PlainPagedData;
-import org.spongepowered.api.text.Text;
+import org.spongepowered.api.data.manipulator.immutable.ImmutablePlainPagedData;
+import org.spongepowered.api.data.manipulator.mutable.PlainPagedData;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableListData;
-import org.spongepowered.common.data.manipulator.mutable.item.SpongePagedData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongePlainPagedData;
-import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.List;
 

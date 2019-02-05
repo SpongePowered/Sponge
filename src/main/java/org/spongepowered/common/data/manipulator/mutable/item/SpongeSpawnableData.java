@@ -25,8 +25,8 @@
 package org.spongepowered.common.data.manipulator.mutable.item;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.item.ImmutableSpawnableData;
-import org.spongepowered.api.data.manipulator.mutable.item.SpawnableData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableSpawnableData;
+import org.spongepowered.api.data.manipulator.mutable.SpawnableData;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeSpawnableData;

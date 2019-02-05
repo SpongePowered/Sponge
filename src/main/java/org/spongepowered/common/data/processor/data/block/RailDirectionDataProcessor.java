@@ -25,8 +25,8 @@
 package org.spongepowered.common.data.processor.data.block;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableRailDirectionData;
-import org.spongepowered.api.data.manipulator.mutable.block.RailDirectionData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableRailDirectionData;
+import org.spongepowered.api.data.manipulator.mutable.RailDirectionData;
 import org.spongepowered.api.data.type.RailDirection;
 import org.spongepowered.api.data.type.RailDirections;
 import org.spongepowered.api.data.value.Value;

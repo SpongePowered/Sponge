@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.entity.monster;
 import net.minecraft.entity.monster.EntityPigZombie;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.mutable.entity.AngerableData;
+import org.spongepowered.api.data.manipulator.mutable.AngerableData;
 import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.entity.living.monster.ZombiePigman;
 import org.spongepowered.asm.mixin.Implements;

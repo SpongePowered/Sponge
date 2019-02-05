@@ -33,8 +33,8 @@ import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableAgeableData;
-import org.spongepowered.api.data.manipulator.mutable.entity.AgeableData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableAgeableData;
+import org.spongepowered.api.data.manipulator.mutable.AgeableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAgeableData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
 

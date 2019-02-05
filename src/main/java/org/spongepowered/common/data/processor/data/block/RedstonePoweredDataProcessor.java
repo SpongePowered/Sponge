@@ -25,8 +25,8 @@
 package org.spongepowered.common.data.processor.data.block;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableRedstonePoweredData;
-import org.spongepowered.api.data.manipulator.mutable.block.RedstonePoweredData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableRedstonePoweredData;
+import org.spongepowered.api.data.manipulator.mutable.RedstonePoweredData;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeRedstonePoweredData;
 import org.spongepowered.common.data.processor.common.AbstractBlockOnlyDataProcessor;

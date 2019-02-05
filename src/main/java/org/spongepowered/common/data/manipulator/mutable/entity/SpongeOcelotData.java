@@ -25,8 +25,8 @@
 package org.spongepowered.common.data.manipulator.mutable.entity;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableOcelotData;
-import org.spongepowered.api.data.manipulator.mutable.entity.OcelotData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableOcelotData;
+import org.spongepowered.api.data.manipulator.mutable.OcelotData;
 import org.spongepowered.api.data.type.OcelotType;
 import org.spongepowered.api.data.type.OcelotTypes;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeOcelotData;

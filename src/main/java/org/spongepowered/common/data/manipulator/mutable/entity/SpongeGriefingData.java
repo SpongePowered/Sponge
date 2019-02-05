@@ -25,8 +25,8 @@
 package org.spongepowered.common.data.manipulator.mutable.entity;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableGriefingData;
-import org.spongepowered.api.data.manipulator.mutable.entity.GriefingData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableGriefingData;
+import org.spongepowered.api.data.manipulator.mutable.GriefingData;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeGriefingData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;

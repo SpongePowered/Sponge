@@ -27,8 +27,8 @@ package org.spongepowered.common.data.manipulator.mutable.block;
 import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableMoistureData;
-import org.spongepowered.api.data.manipulator.mutable.block.MoistureData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableMoistureData;
+import org.spongepowered.api.data.manipulator.mutable.MoistureData;
 import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeMoistureData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBoundedComparableData;

@@ -25,8 +25,8 @@
 package org.spongepowered.common.data.manipulator.mutable.entity;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSilentData;
-import org.spongepowered.api.data.manipulator.mutable.entity.SilentData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableSilentData;
+import org.spongepowered.api.data.manipulator.mutable.SilentData;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeSilentData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;

@@ -25,8 +25,8 @@
 package org.spongepowered.common.data.manipulator.mutable.entity;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableGravityData;
-import org.spongepowered.api.data.manipulator.mutable.entity.GravityData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableGravityData;
+import org.spongepowered.api.data.manipulator.mutable.GravityData;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeGravityData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;

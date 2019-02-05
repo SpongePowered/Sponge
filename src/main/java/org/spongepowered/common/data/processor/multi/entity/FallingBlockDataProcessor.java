@@ -34,8 +34,8 @@ import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFallingBlockData;
-import org.spongepowered.api.data.manipulator.mutable.entity.FallingBlockData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableFallingBlockData;
+import org.spongepowered.api.data.manipulator.mutable.FallingBlockData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFallingBlockData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
 

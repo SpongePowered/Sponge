@@ -25,8 +25,8 @@
 package org.spongepowered.common.data.manipulator.immutable.entity;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFuseData;
-import org.spongepowered.api.data.manipulator.mutable.entity.FuseData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableFuseData;
+import org.spongepowered.api.data.manipulator.mutable.FuseData;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFuseData;

@@ -27,8 +27,8 @@ package org.spongepowered.common.data.manipulator.mutable.block;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableStairShapeData;
-import org.spongepowered.api.data.manipulator.mutable.block.StairShapeData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableStairShapeData;
+import org.spongepowered.api.data.manipulator.mutable.StairShapeData;
 import org.spongepowered.api.data.type.StairShape;
 import org.spongepowered.api.data.type.StairShapes;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeStairShapeData;

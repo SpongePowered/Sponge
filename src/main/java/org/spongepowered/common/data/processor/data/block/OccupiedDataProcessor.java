@@ -25,8 +25,8 @@
 package org.spongepowered.common.data.processor.data.block;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableOccupiedData;
-import org.spongepowered.api.data.manipulator.mutable.block.OccupiedData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableOccupiedData;
+import org.spongepowered.api.data.manipulator.mutable.OccupiedData;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeOccupiedData;
 import org.spongepowered.common.data.processor.common.AbstractBlockOnlyDataProcessor;

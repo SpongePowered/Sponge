@@ -25,8 +25,8 @@
 package org.spongepowered.common.data.manipulator.immutable.entity;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableActiveItemData;
-import org.spongepowered.api.data.manipulator.mutable.entity.ActiveItemData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableActiveItemData;
+import org.spongepowered.api.data.manipulator.mutable.ActiveItemData;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleData;

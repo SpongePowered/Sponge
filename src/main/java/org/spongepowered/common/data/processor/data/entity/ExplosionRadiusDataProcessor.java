@@ -28,8 +28,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableExplosionRadiusData;
-import org.spongepowered.api.data.manipulator.mutable.entity.ExplosionRadiusData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableExplosionRadiusData;
+import org.spongepowered.api.data.manipulator.mutable.ExplosionRadiusData;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.entity.explosive.Explosive;

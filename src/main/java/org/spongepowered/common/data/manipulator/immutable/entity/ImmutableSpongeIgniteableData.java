@@ -28,8 +28,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableIgniteableData;
-import org.spongepowered.api.data.manipulator.mutable.entity.IgniteableData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableIgniteableData;
+import org.spongepowered.api.data.manipulator.mutable.IgniteableData;
 import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeIgniteableData;

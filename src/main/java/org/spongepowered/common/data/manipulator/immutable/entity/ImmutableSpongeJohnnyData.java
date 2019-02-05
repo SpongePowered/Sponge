@@ -25,8 +25,8 @@
 package org.spongepowered.common.data.manipulator.immutable.entity;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableJohnnyData;
-import org.spongepowered.api.data.manipulator.mutable.entity.JohnnyData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableJohnnyData;
+import org.spongepowered.api.data.manipulator.mutable.JohnnyData;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeJohnnyData;

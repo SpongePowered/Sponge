@@ -26,8 +26,8 @@ package org.spongepowered.common.data.manipulator.mutable.entity;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableMovementSpeedData;
-import org.spongepowered.api.data.manipulator.mutable.entity.MovementSpeedData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableMovementSpeedData;
+import org.spongepowered.api.data.manipulator.mutable.MovementSpeedData;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeMovementSpeedData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
