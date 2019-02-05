@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.item;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemEnderEye;
 import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
@@ -37,7 +36,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(ItemEnderEye.class)
-public class MixinItemEnderEye extends Item {
+public class MixinItemEnderEye {
 
     @Redirect(method = "onItemRightClick", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z"))

@@ -26,9 +26,7 @@ package org.spongepowered.common.mixin.core.item;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.PlayerCapabilities;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemFirework;
+import net.minecraft.item.ItemFireworkRocket;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
@@ -36,34 +34,22 @@ import net.minecraft.world.World;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.projectile.Firework;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
-import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.interfaces.entity.IMixinEntityFireworkRocket;
 
-@Mixin(ItemFirework.class)
-public class MixinItemFirework extends Item {
-
-    private static final String TARGET_CREATIVE_MODE = "Lnet/minecraft/entity/player/PlayerCapabilities;isCreativeMode:Z";
-
-    private boolean primeCancelled;
+@Mixin(ItemFireworkRocket.class)
+public class MixinItemFirework {
 
     @Redirect(method = "onItemUse", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z"))
     private boolean onspawnEntity(World world, Entity firework, EntityPlayer player, World worldIn, BlockPos pos, EnumHand side, EnumFacing hitX, float hitY, float hitZ, float p_180614_9_) {
         ((Firework) firework).setShooter((ProjectileSource) player);
         Sponge.getCauseStackManager().pushCause(player);
-        this.primeCancelled = !((IMixinEntityFireworkRocket) firework).shouldPrime();
+        final boolean primeCancelled = !((IMixinEntityFireworkRocket) firework).shouldPrime();
         Sponge.getCauseStackManager().popCause();
-        return !this.primeCancelled && world.spawnEntity(firework);
-    }
-
-    @Redirect(method = "onItemUse", at = @At(value = "FIELD", target = TARGET_CREATIVE_MODE, opcode = Opcodes.GETFIELD))
-    private boolean shouldNotDecreaseStack(PlayerCapabilities capabilities) {
-        boolean notCondition = capabilities.isCreativeMode || this.primeCancelled;
-        this.primeCancelled = false;
-        return notCondition;
+        return !primeCancelled && world.spawnEntity(firework);
     }
 
 }

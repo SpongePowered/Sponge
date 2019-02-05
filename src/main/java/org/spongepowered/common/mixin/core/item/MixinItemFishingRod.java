@@ -46,7 +46,7 @@ import org.spongepowered.common.SpongeImpl;
 import javax.annotation.Nullable;
 
 @Mixin(ItemFishingRod.class)
-public abstract class MixinItemFishingRod extends Item {
+public abstract class MixinItemFishingRod {
 
     @Nullable private EntityFishHook fishHook;
 
