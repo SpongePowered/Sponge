@@ -49,7 +49,7 @@ final class TimingsPls {
 
     public static int getEntityId(final EntityType type) {
         if (type instanceof SpongeEntityType) {
-            return ((SpongeEntityType) type).entityTypeId;
+            return ((SpongeEntityType) type).networkId;
         }
         int fake;
         if ((fake = ENTITY_IDS.getInt(type)) == NOT_FOUND) {

@@ -159,7 +159,7 @@ public class EntityActivationRange {
             spongeType.setActivationRangeInitialized(true);
         }
 
-        EntityActivationModCategory entityMod = config.getModList().get(spongeType.getModId().toLowerCase());
+        EntityActivationModCategory entityMod = config.getModList().get(spongeType.getKey().getNamespace());
         int defaultActivationRange = config.getDefaultRanges().get(activationTypeMappings.get(activationType));
         if (entityMod == null) {
             // use default activation range
@@ -230,7 +230,7 @@ public class EntityActivationRange {
 
             maxRange = Math.min((((org.spongepowered.api.world.World) world).getViewDistance() << 4) - 8, maxRange);
             ((IModData_Activation) player).setActivatedTick(SpongeImpl.getServer().getTickCounter());
-            growBb(maxBB, player.getEntityBoundingBox(), maxRange, 256, maxRange);
+            growBb(maxBB, player.getBoundingBox(), maxRange, 256, maxRange);
 
             int i = MathHelper.floor(maxBB.minX / 16.0D);
             int j = MathHelper.floor(maxBB.maxX / 16.0D);
@@ -286,41 +286,41 @@ public class EntityActivationRange {
                     int bbActivationRange = spongeEntity.getActivationRange();
 
                     if (activationType == 5) {
-                        growBb(miscBB, player.getEntityBoundingBox(), bbActivationRange, 256, bbActivationRange);
+                        growBb(miscBB, player.getBoundingBox(), bbActivationRange, 256, bbActivationRange);
                     } else if (activationType == 4) {
-                        growBb(ambientBB, player.getEntityBoundingBox(), bbActivationRange, 256, bbActivationRange);
+                        growBb(ambientBB, player.getBoundingBox(), bbActivationRange, 256, bbActivationRange);
                     } else if (activationType == 3) {
-                        growBb(aquaticBB, player.getEntityBoundingBox(), bbActivationRange, 256, bbActivationRange);
+                        growBb(aquaticBB, player.getBoundingBox(), bbActivationRange, 256, bbActivationRange);
                     } else if (activationType == 2) {
-                        growBb(creatureBB, player.getEntityBoundingBox(), bbActivationRange, 256, bbActivationRange);
+                        growBb(creatureBB, player.getBoundingBox(), bbActivationRange, 256, bbActivationRange);
                     } else {
-                        growBb(monsterBB, player.getEntityBoundingBox(), bbActivationRange, 256, bbActivationRange);
+                        growBb(monsterBB, player.getBoundingBox(), bbActivationRange, 256, bbActivationRange);
                     }
 
                     switch (spongeEntity.getActivationType()) {
                         case 1:
-                            if (monsterBB.intersects(entity.getEntityBoundingBox())) {
+                            if (monsterBB.intersects(entity.getBoundingBox())) {
                                 spongeEntity.setActivatedTick(currentTick);
                             }
                             break;
                         case 2:
-                            if (creatureBB.intersects(entity.getEntityBoundingBox())) {
+                            if (creatureBB.intersects(entity.getBoundingBox())) {
                                 spongeEntity.setActivatedTick(currentTick);
                             }
                             break;
                         case 3:
-                            if (aquaticBB.intersects(entity.getEntityBoundingBox())) {
+                            if (aquaticBB.intersects(entity.getBoundingBox())) {
                                 spongeEntity.setActivatedTick(currentTick);
                             }
                             break;
                         case 4:
-                            if (ambientBB.intersects(entity.getEntityBoundingBox())) {
+                            if (ambientBB.intersects(entity.getBoundingBox())) {
                                 spongeEntity.setActivatedTick(currentTick);
                             }
                             break;
                         case 5:
                         default:
-                            if (miscBB.intersects(entity.getEntityBoundingBox())) {
+                            if (miscBB.intersects(entity.getBoundingBox())) {
                                 spongeEntity.setActivatedTick(currentTick);
                             }
                     }
@@ -441,8 +441,8 @@ public class EntityActivationRange {
         boolean requiresSave = false;
         String entityType = "misc";
         entityType = EntityActivationRange.activationTypeMappings.get(activationType);
-        final String entityModId = type.getModId().toLowerCase();
-        final String entityId = type.getName().toLowerCase();
+        final String entityModId = type.getKey().getNamespace();
+        final String entityId = type.getKey().getValue();
         EntityActivationRangeCategory activationCategory = config.getConfig().getEntityActivationRange();
         EntityActivationModCategory entityMod = activationCategory.getModList().get(entityModId);
         Integer defaultActivationRange = activationCategory.getDefaultRanges().get(entityType);

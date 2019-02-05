@@ -74,7 +74,7 @@ public class MixinEntity_Collisions implements IModData_Collisions {
                 this.entityName = this.spongeEntityType.getName();
             }
 
-            this.entityModId = this.spongeEntityType.getModId();
+            this.entityModId = this.spongeEntityType.getKey().getNamespace();
             if (!this.world.isRemote) {
                 initializeCollisionState(this.world);
             }

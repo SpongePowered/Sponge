@@ -39,10 +39,6 @@ import org.spongepowered.common.config.category.EntityTrackerModCategory;
 import org.spongepowered.common.config.type.TrackerConfig;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
-import java.util.Locale;
-
-import javax.annotation.Nullable;
-
 public class SpongeEntityType extends SpongeCatalogType.Translatable implements EntityType {
 
     public static final EntityType UNKNOWN = new EntityType() {
@@ -73,9 +69,10 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
 
     };
 
-    public final int entityTypeId;
-    public String entityName;
-    public final String modId;
+    public final ResourceLocation key;
+    public final net.minecraft.entity.EntityType<?> type;
+
+    public final int networkId;
     public final Class<? extends Entity> entityClass;
     private EnumCreatureType creatureType;
     private boolean activationRangeInitialized = false;
@@ -89,33 +86,18 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
     public boolean allowsBlockEventCreation = true;
     public boolean allowsEntityEventCreation = true;
 
-    public SpongeEntityType(int id, ResourceLocation resourceLoc, Class<? extends Entity> clazz, Translation translation) {
-        this(id, resourceLoc, resourceLoc, clazz, translation);
+    public <T extends Entity> SpongeEntityType(final ResourceLocation key, final net.minecraft.entity.EntityType<T> type) {
+        this(key, net.minecraft.entity.EntityType.REGISTRY.getId(type), type);
     }
 
-    public SpongeEntityType(int id, ResourceLocation spongeKey, ResourceLocation minecraftId, Class<? extends Entity> clazz, Translation translation) {
-        super((CatalogKey) (Object) spongeKey, check(translation));
-        this.entityTypeId = id;
-        this.entityName = minecraftId.getPath();
-        this.entityClass = clazz;
-        this.modId = minecraftId.getNamespace();
+    public <T extends Entity> SpongeEntityType(final ResourceLocation key, final int networkId, final net.minecraft.entity.EntityType<T> type) {
+        super((CatalogKey) (Object) key, new SpongeTranslation(type.getTranslationKey()));
+        this.key = key;
+        this.networkId = networkId;
+        this.type = type;
+        this.entityClass = type.getEntityClass();
+
         this.initializeTrackerState();
-    }
-
-    public SpongeEntityType(int id, String name, String modId, Class<? extends Entity> clazz, Translation translation) {
-        this(id, new ResourceLocation(modId), new ResourceLocation(modId), clazz, translation);
-        this.entityName = name;
-    }
-
-    private static Translation check(@Nullable Translation translation) {
-        if (translation == null) {
-            return UNKNOWN.getTranslation();
-        }
-        return translation;
-    }
-
-    public String getModId() {
-        return this.modId;
     }
 
     public EnumCreatureType getEnumCreatureType() {
@@ -137,26 +119,28 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
     public void initializeTrackerState() {
         SpongeConfig<TrackerConfig> trackerConfig = SpongeImpl.getTrackerConfig();
         EntityTrackerCategory entityTracker = trackerConfig.getConfig().getEntityTracker();
-        EntityTrackerModCategory modCapturing = entityTracker.getModMappings().get(this.modId);
+        EntityTrackerModCategory modCapturing = entityTracker.getModMappings().get(this.key.getNamespace());
 
         if (modCapturing == null) {
             modCapturing = new EntityTrackerModCategory();
-            entityTracker.getModMappings().put(this.modId, modCapturing);
+            entityTracker.getModMappings().put(this.key.getNamespace(), modCapturing);
         }
+
+        final String key = this.key.getPath();
         if (!modCapturing.isEnabled()) {
             this.allowsBlockBulkCapture = false;
             this.allowsEntityBulkCapture = false;
             this.allowsBlockEventCreation = false;
             this.allowsEntityEventCreation = false;
-            modCapturing.getBlockBulkCaptureMap().computeIfAbsent(this.entityName.toLowerCase(Locale.ENGLISH), k -> this.allowsBlockBulkCapture);
-            modCapturing.getEntityBulkCaptureMap().computeIfAbsent(this.entityName.toLowerCase(Locale.ENGLISH), k -> this.allowsEntityBulkCapture);
-            modCapturing.getBlockEventCreationMap().computeIfAbsent(this.entityName.toLowerCase(Locale.ENGLISH), k -> this.allowsBlockEventCreation);
-            modCapturing.getEntityEventCreationMap().computeIfAbsent(this.entityName.toLowerCase(Locale.ENGLISH), k -> this.allowsEntityEventCreation);
+            modCapturing.getBlockBulkCaptureMap().computeIfAbsent(key, k -> this.allowsBlockBulkCapture);
+            modCapturing.getEntityBulkCaptureMap().computeIfAbsent(key, k -> this.allowsEntityBulkCapture);
+            modCapturing.getBlockEventCreationMap().computeIfAbsent(key, k -> this.allowsBlockEventCreation);
+            modCapturing.getEntityEventCreationMap().computeIfAbsent(key, k -> this.allowsEntityEventCreation);
         } else {
-            this.allowsBlockBulkCapture = modCapturing.getBlockBulkCaptureMap().computeIfAbsent(this.entityName.toLowerCase(Locale.ENGLISH), k -> true);
-            this.allowsEntityBulkCapture = modCapturing.getEntityBulkCaptureMap().computeIfAbsent(this.entityName.toLowerCase(Locale.ENGLISH), k -> true);
-            this.allowsBlockEventCreation = modCapturing.getBlockEventCreationMap().computeIfAbsent(this.entityName.toLowerCase(Locale.ENGLISH), k -> true);
-            this.allowsEntityEventCreation = modCapturing.getEntityEventCreationMap().computeIfAbsent(this.entityName.toLowerCase(Locale.ENGLISH), k -> true);
+            this.allowsBlockBulkCapture = modCapturing.getBlockBulkCaptureMap().computeIfAbsent(key, k -> true);
+            this.allowsEntityBulkCapture = modCapturing.getEntityBulkCaptureMap().computeIfAbsent(key, k -> true);
+            this.allowsBlockEventCreation = modCapturing.getBlockEventCreationMap().computeIfAbsent(key, k -> true);
+            this.allowsEntityEventCreation = modCapturing.getEntityEventCreationMap().computeIfAbsent(key, k -> true);
         }
 
         if (entityTracker.autoPopulateData()) {
@@ -173,7 +157,8 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
     @Override
     protected MoreObjects.ToStringHelper toStringHelper() {
         return super.toStringHelper()
-                .add("modid", this.modId)
+                .add("key", this.key)
+                .add("type", this.type)
                 .add("class", this.entityClass.getName());
     }
 
