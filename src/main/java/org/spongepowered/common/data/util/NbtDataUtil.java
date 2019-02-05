@@ -227,7 +227,7 @@ public final class NbtDataUtil {
      * Gets the main {@link NBTTagCompound} as an {@link Optional}. The issue
      * with {@link ItemStack}s is that the main compound is never instantiated
      * by default, so <code>null</code>s are permitted. Of course, another issue
-     * is that {@link ItemStack#getTagCompound()} does not perform any
+     * is that {@link ItemStack#getTag()} does not perform any
      * <code>null</code> checks, and therefor, may return <code>null</code> as
      * well. This method is provided to ensure that if the main compound does
      * not exist, none are created. To create a new compound regardless,
@@ -237,8 +237,8 @@ public final class NbtDataUtil {
      * @return The main compound, if available
      */
     public static Optional<NBTTagCompound> getItemCompound(ItemStack itemStack) {
-        if (itemStack.hasTagCompound()) {
-            return Optional.of(itemStack.getTagCompound());
+        if (itemStack.hasTag()) {
+            return Optional.of(itemStack.getTag());
         }
         return Optional.empty();
     }
@@ -253,10 +253,10 @@ public final class NbtDataUtil {
      * @return The pre-existing or already generated compound
      */
     public static NBTTagCompound getOrCreateCompound(ItemStack itemStack) {
-        if (!itemStack.hasTagCompound()) {
-            itemStack.setTagCompound(new NBTTagCompound());
+        if (!itemStack.hasTag()) {
+            itemStack.setTag(new NBTTagCompound());
         }
-        return itemStack.getTagCompound();
+        return itemStack.getTag();
     }
 
     /**
@@ -271,75 +271,75 @@ public final class NbtDataUtil {
      * @return The sub compound keyed by the provided string key
      */
     public static NBTTagCompound getOrCreateSubCompound(NBTTagCompound mainCompound, final String key) {
-        if (!mainCompound.hasKey(key, TAG_COMPOUND)) {
+        if (!mainCompound.contains(key, TAG_COMPOUND)) {
             mainCompound.setTag(key, new NBTTagCompound());
         }
-        return mainCompound.getCompoundTag(key);
+        return mainCompound.getCompound(key);
     }
 
     public static NBTTagCompound filterSpongeCustomData(NBTTagCompound rootCompound) {
-        if (rootCompound.hasKey(FORGE_DATA, TAG_COMPOUND)) {
-            final NBTTagCompound forgeCompound = rootCompound.getCompoundTag(FORGE_DATA);
-            if (forgeCompound.hasKey(SPONGE_DATA, TAG_COMPOUND)) {
+        if (rootCompound.contains(FORGE_DATA, TAG_COMPOUND)) {
+            final NBTTagCompound forgeCompound = rootCompound.getCompound(FORGE_DATA);
+            if (forgeCompound.contains(SPONGE_DATA, TAG_COMPOUND)) {
                 cleanseInnerCompound(forgeCompound, SPONGE_DATA);
             }
-        } else if (rootCompound.hasKey(SPONGE_DATA, TAG_COMPOUND)) {
+        } else if (rootCompound.contains(SPONGE_DATA, TAG_COMPOUND)) {
             cleanseInnerCompound(rootCompound, SPONGE_DATA);
         }
         return rootCompound;
     }
 
     private static void cleanseInnerCompound(NBTTagCompound compound, String innerCompound) {
-        final NBTTagCompound inner = compound.getCompoundTag(innerCompound);
+        final NBTTagCompound inner = compound.getCompound(innerCompound);
         if (inner.isEmpty()) {
             compound.removeTag(innerCompound);
         }
     }
 
     public static List<Text> getLoreFromNBT(NBTTagCompound subCompound) {
-        final NBTTagList list = subCompound.getTagList(ITEM_LORE, TAG_STRING);
+        final NBTTagList list = subCompound.getList(ITEM_LORE, TAG_STRING);
         return SpongeTexts.fromNbtLegacy(list);
     }
 
     public static void removeLoreFromNBT(ItemStack stack) {
-        if(stack.getSubCompound(ITEM_DISPLAY) == null) {
+        if(stack.getChildTag(ITEM_DISPLAY) == null) {
             return;
         }
-        stack.getSubCompound(ITEM_DISPLAY).removeTag(ITEM_LORE);
+        stack.getChildTag(ITEM_DISPLAY).removeTag(ITEM_LORE);
     }
 
     public static void setLoreToNBT(ItemStack stack, List<Text> lore) {
         final NBTTagList list =  SpongeTexts.asLegacy(lore);
-        stack.getOrCreateSubCompound(ITEM_DISPLAY).setTag(ITEM_LORE, list); // setSubCompound
+        stack.getOrCreateChildTag(ITEM_DISPLAY).setTag(ITEM_LORE, list); // setSubCompound
     }
 
     public static boolean hasColorFromNBT(ItemStack stack) {
-        return stack.hasTagCompound() &&
-                stack.getTagCompound().hasKey(ITEM_DISPLAY) &&
-                stack.getTagCompound().getCompoundTag(ITEM_DISPLAY).hasKey(ITEM_COLOR);
+        return stack.hasTag() &&
+                stack.getTag().hasKey(ITEM_DISPLAY) &&
+                stack.getTag().getCompound(ITEM_DISPLAY).hasKey(ITEM_COLOR);
     }
 
     public static Optional<Color> getColorFromNBT(NBTTagCompound subCompound) {
         if (!subCompound.hasKey(ITEM_COLOR)) {
             return Optional.empty();
         }
-        return Optional.of(Color.ofRgb(subCompound.getInteger(ITEM_COLOR)));
+        return Optional.of(Color.ofRgb(subCompound.getInt(ITEM_COLOR)));
     }
 
     public static void removeColorFromNBT(ItemStack stack) {
-        if(stack.getSubCompound(ITEM_DISPLAY) == null) {
+        if(stack.getChildTag(ITEM_DISPLAY) == null) {
             return;
         }
-        stack.getSubCompound(ITEM_DISPLAY).removeTag(ITEM_COLOR);
+        stack.getChildTag(ITEM_DISPLAY).removeTag(ITEM_COLOR);
     }
 
     public static void setColorToNbt(ItemStack stack, Color color) {
         final int mojangColor = ColorUtil.javaColorToMojangColor(color);
-        stack.getOrCreateSubCompound(ITEM_DISPLAY).setInteger(ITEM_COLOR, mojangColor);
+        stack.getOrCreateChildTag(ITEM_DISPLAY).setInt(ITEM_COLOR, mojangColor);
     }
 
     public static List<Text> getPagesFromNBT(NBTTagCompound compound) {
-        final NBTTagList list = compound.getTagList(ITEM_BOOK_PAGES, TAG_STRING);
+        final NBTTagList list = compound.getList(ITEM_BOOK_PAGES, TAG_STRING);
         if (list.isEmpty()) {
             return new ArrayList<>();
         }
@@ -353,11 +353,11 @@ public final class NbtDataUtil {
     }
 
     public static List<String> getPlainPagesFromNBT(NBTTagCompound compound) {
-        final NBTTagList list = compound.getTagList(ITEM_BOOK_PAGES, TAG_STRING);
+        final NBTTagList list = compound.getList(ITEM_BOOK_PAGES, TAG_STRING);
         List<String> stringList = new ArrayList<>();
         if (!list.isEmpty()) {
-            for (int i = 0; i < list.tagCount(); i++) {
-                stringList.add(list.getStringTagAt(i));
+            for (int i = 0; i < list.size(); i++) {
+                stringList.add(list.getString(i));
             }
         }
         return stringList;
@@ -365,10 +365,10 @@ public final class NbtDataUtil {
 
     public static void removePagesFromNBT(ItemStack stack) {
         final NBTTagList list = new NBTTagList();
-        if (!stack.hasTagCompound()) {
+        if (!stack.hasTag()) {
             return;
         }
-        stack.getTagCompound().setTag(ITEM_BOOK_PAGES, list);
+        stack.getTag().setTag(ITEM_BOOK_PAGES, list);
     }
 
     public static void setPagesToNBT(ItemStack stack, List<Text> pages) {
@@ -378,7 +378,7 @@ public final class NbtDataUtil {
     public static void setPlainPagesToNBT(ItemStack stack, List<String> pages) {
         final NBTTagList list = new NBTTagList();
         for (String page : pages) {
-            list.appendTag(new NBTTagString(page));
+            list.add(new NBTTagString(page));
         }
         setPagesToNBT(stack, list);
     }
@@ -396,13 +396,13 @@ public final class NbtDataUtil {
     }
 
     public static List<Enchantment> getItemEnchantments(ItemStack itemStack) {
-        if (!itemStack.isItemEnchanted()) {
+        if (!itemStack.isEnchanted()) {
             return Collections.emptyList();
         }
         final List<Enchantment> enchantments = Lists.newArrayList();
         final NBTTagList list = itemStack.getEnchantmentTagList();
-        for (int i = 0; i < list.tagCount(); i++) {
-            final NBTTagCompound compound = list.getCompoundTagAt(i);
+        for (int i = 0; i < list.size(); i++) {
+            final NBTTagCompound compound = list.getCompound(i);
             final short enchantmentId = compound.getShort(NbtDataUtil.ITEM_ENCHANTMENT_ID);
             final short level = compound.getShort(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL);
 
@@ -417,11 +417,11 @@ public final class NbtDataUtil {
 
     public static void setItemEnchantments(ItemStack itemStack, List<Enchantment> value) {
         final NBTTagCompound compound;
-        if (itemStack.getTagCompound() == null) {
+        if (itemStack.getTag() == null) {
             compound = new NBTTagCompound();
-            itemStack.setTagCompound(compound);
+            itemStack.setTag(compound);
         } else {
-            compound = itemStack.getTagCompound();
+            compound = itemStack.getTag();
         }
 
         if (value.isEmpty()) { // if there's no enchantments, remove the tag that says there's enchantments
@@ -437,9 +437,9 @@ public final class NbtDataUtil {
         final NBTTagList newList = new NBTTagList(); // construct the enchantment list
         for (Map.Entry<EnchantmentType, Integer> entry : valueMap.entrySet()) {
             final NBTTagCompound enchantmentCompound = new NBTTagCompound();
-            enchantmentCompound.setShort(NbtDataUtil.ITEM_ENCHANTMENT_ID, (short) net.minecraft.enchantment.Enchantment.getEnchantmentID((net.minecraft.enchantment.Enchantment) entry.getKey()));
+            enchantmentCompound.setShort(NbtDataUtil.ITEM_ENCHANTMENT_ID, (short) net.minecraft.enchantment.Enchantment.REGISTRY.getId((net.minecraft.enchantment.Enchantment) entry.getKey()));
             enchantmentCompound.setShort(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL, entry.getValue().shortValue());
-            newList.appendTag(enchantmentCompound);
+            newList.add(enchantmentCompound);
         }
 
         compound.setTag(NbtDataUtil.ITEM_ENCHANTMENT_LIST, newList);
@@ -452,7 +452,7 @@ public final class NbtDataUtil {
 
         for (int j = 0; j < i; ++j) {
             double d1 = adouble[j];
-            nbttaglist.appendTag(new NBTTagDouble(d1));
+            nbttaglist.add(new NBTTagDouble(d1));
         }
 
         return nbttaglist;
@@ -462,7 +462,7 @@ public final class NbtDataUtil {
         NBTTagList nbttaglist = new NBTTagList();
 
         for (float f : numbers) {
-            nbttaglist.appendTag(new NBTTagFloat(f));
+            nbttaglist.add(new NBTTagFloat(f));
         }
 
         return nbttaglist;
