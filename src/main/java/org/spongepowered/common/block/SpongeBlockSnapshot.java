@@ -217,10 +217,10 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     }
 
     @Override
-    public Optional<Location<World>> getLocation() {
+    public Optional<Location> getLocation() {
         Optional<World> worldOptional = SpongeImpl.getGame().getServer().getWorld(this.worldUniqueId);
         if (worldOptional.isPresent()) {
-            return Optional.of(new Location<>(worldOptional.get(), this.getPosition()));
+            return Optional.of(new Location(worldOptional.get(), this.getPosition()));
         }
         return Optional.empty();
     }
