@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.server.network;
 
 import net.minecraft.network.NetworkManager;
-import net.minecraft.network.login.server.SPacketDisconnect;
+import net.minecraft.network.login.server.SPacketDisconnectLogin;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.server.network.NetHandlerLoginServer;
@@ -74,8 +74,8 @@ public abstract class MixinNetHandlerLoginServer implements IMixinNetHandlerLogi
 
     private void closeConnection(ITextComponent reason) {
         try {
-            LOGGER.info("Disconnecting " + this.getConnectionInfo() + ": " + reason.getUnformattedText());
-            this.networkManager.sendPacket(new SPacketDisconnect(reason));
+            LOGGER.info("Disconnecting " + this.getConnectionInfo() + ": " + reason.getString());
+            this.networkManager.sendPacket(new SPacketDisconnectLogin(reason));
             this.networkManager.closeChannel(reason);
         } catch (Exception exception) {
             LOGGER.error("Error whilst disconnecting player", exception);

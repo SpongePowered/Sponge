@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.server.network;
 
 import net.minecraft.network.NetworkManager;
-import net.minecraft.network.handshake.client.C00Handshake;
+import net.minecraft.network.handshake.client.CPacketHandshake;
 import net.minecraft.server.network.NetHandlerHandshakeTCP;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -42,7 +42,7 @@ public abstract class MixinNetHandlerHandshakeTCP {
     @Shadow @Final private NetworkManager networkManager;
 
     @Inject(method = "processHandshake", at = @At("HEAD"))
-    public void onProcessHandshake(C00Handshake packetIn, CallbackInfo ci) {
+    public void onProcessHandshake(CPacketHandshake packetIn, CallbackInfo ci) {
         IMixinNetworkManager info = (IMixinNetworkManager) this.networkManager;
         info.setVersion(packetIn.getProtocolVersion());
         info.setVirtualHost(NetworkUtil.cleanVirtualHost(packetIn.ip), packetIn.port);

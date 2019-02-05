@@ -45,7 +45,8 @@ public class SpongeDimension implements Dimension {
 
     @Override
     public GeneratorType getGeneratorType() {
-        return (GeneratorType) this.dimension.terrainType;
+//        return (GeneratorType) this.dimension.terrainType;
+        throw new UnsupportedOperationException(); // TODO(kashike): field removed
     }
 
     @Override
@@ -55,7 +56,8 @@ public class SpongeDimension implements Dimension {
 
     @Override
     public int getMinimumSpawnHeight() {
-        return this.dimension.getAverageGroundLevel();
+//        return this.dimension.getAverageGroundLevel();
+        throw new UnsupportedOperationException(); // TODO(kashike): method removed
     }
 
     @Override
