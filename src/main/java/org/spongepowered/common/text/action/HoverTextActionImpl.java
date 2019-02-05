@@ -162,7 +162,7 @@ public abstract class HoverTextActionImpl<R> extends TextActionImpl<R> implement
             compound.setString("id", this.result.getUniqueId().toString());
             compound.setString("name", this.result.getName());
             if (this.result.getType().isPresent()) {
-                compound.setString("type", net.minecraft.entity.EntityType.getId(((SpongeEntityType) this.result.getType().get()).).toString());
+                compound.setString("type", net.minecraft.entity.EntityType.getId(((SpongeEntityType) this.result.getType().get())).toString());
             }
             return new HoverEvent(HoverEvent.Action.SHOW_ENTITY, new TextComponentString(compound.toString()));
         }
