@@ -35,6 +35,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
 import net.minecraft.block.BlockPistonBase;
@@ -42,6 +43,7 @@ import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReportCategory;
+import net.minecraft.crash.ReportedException;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntitySkeletonHorse;
@@ -61,7 +63,6 @@ import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.IProgressUpdate;
 import net.minecraft.util.ITickable;
-import net.minecraft.util.ReportedException;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -185,9 +186,9 @@ import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMap;
 import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
+import org.spongepowered.common.interfaces.world.IMixinDimension;
 import org.spongepowered.common.interfaces.world.IMixinServerWorldEventHandler;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
-import org.spongepowered.common.interfaces.world.IMixinDimension;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
@@ -901,7 +902,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         TrackingUtil.updateTickBlock(this, block, pos, state, rand);
     }
 
-    @Redirect(method = "tickUpdates", at = @At(value = "INVOKE", target = "Lnet/minecraft/crash/CrashReportCategory;addBlockInfo(Lnet/minecraft/crash/CrashReportCategory;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)V"))
+    // TODO: 1.13
+    /*@Redirect(method = "tickUpdates", at = @At(value = "INVOKE", target = "Lnet/minecraft/crash/CrashReportCategory;addBlockInfo(Lnet/minecraft/crash/CrashReportCategory;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)V"))
     private void onBlockInfo(CrashReportCategory category, BlockPos pos, IBlockState state) {
         try {
             CrashReportCategory.addBlockInfo(category, pos, state);
@@ -910,11 +912,11 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             SpongeImpl.getLogger().error("Original caught error:", category.crashReport.cause);
             throw new ReportedException(category.crashReport);
         }
-    }
+    }*/
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Redirect(method = "addBlockEvent", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer$ServerBlockEventList;add(Ljava/lang/Object;)Z", remap = false))
-    private boolean onAddBlockEvent(WorldServer.ServerBlockEventList list, Object obj, BlockPos pos, Block blockIn, int eventId, int eventParam) {
+    private boolean onAddBlockEvent(ObjectLinkedOpenHashSet<BlockEventData> list, Object obj, BlockPos pos, Block blockIn, int eventId, int eventParam) {
         final BlockEventData blockEventData = (BlockEventData) obj;
         IMixinBlockEventData blockEvent = (IMixinBlockEventData) blockEventData;
         // We fire a Pre event to make sure our captures do not get stuck in a loop.
