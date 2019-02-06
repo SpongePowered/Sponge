@@ -60,7 +60,7 @@ public class FireworkEffectDataProcessor extends
 
     @Override
     public boolean supports(EntityType entityType) {
-        return entityType.equals(EntityTypes.FIREWORK);
+        return entityType.equals(EntityTypes.FIREWORK_ROCKET);
     }
 
     @Override

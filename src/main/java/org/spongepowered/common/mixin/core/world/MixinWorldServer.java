@@ -650,7 +650,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                                 ConstructEntityEvent.Pre
                                     lightning =
                                     SpongeEventFactory
-                                        .createConstructEntityEventPre(frame.getCurrentCause(), EntityTypes.LIGHTNING,
+                                        .createConstructEntityEventPre(frame.getCurrentCause(), EntityTypes.LIGHTNING_BOLT,
                                             transform);
                                 SpongeImpl.postEvent(lightning);
                                 if (!lightning.isCancelled()) {
@@ -670,7 +670,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                                 ConstructEntityEvent.Pre
                                     event =
                                     SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(),
-                                        EntityTypes.LIGHTNING, transform);
+                                        EntityTypes.LIGHTNING_BOLT, transform);
                                 SpongeImpl.postEvent(event);
                                 if (!event.isCancelled()) {
                                     LightningEvent.Pre lightningPre = SpongeEventFactory.createLightningEventPre(frame.getCurrentCause());

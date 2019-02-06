@@ -70,7 +70,7 @@ public final class EntityTypeRegistryModule extends AbstractCatalogRegistryModul
     public void registerDefaults() {
         this.register(net.minecraft.entity.EntityType.AREA_EFFECT_CLOUD);
         this.register(net.minecraft.entity.EntityType.ARMOR_STAND);
-        this.register(net.minecraft.entity.EntityType.ARROW, "tipped_arrow");
+        this.register(net.minecraft.entity.EntityType.ARROW);
         this.register(net.minecraft.entity.EntityType.BAT);
         this.register(net.minecraft.entity.EntityType.BLAZE);
         this.register(net.minecraft.entity.EntityType.BOAT);
@@ -84,46 +84,46 @@ public final class EntityTypeRegistryModule extends AbstractCatalogRegistryModul
         this.register(net.minecraft.entity.EntityType.DRAGON_FIREBALL);
         this.register(net.minecraft.entity.EntityType.DROWNED);
         this.register(net.minecraft.entity.EntityType.ELDER_GUARDIAN);
-        this.register(net.minecraft.entity.EntityType.END_CRYSTAL, "ender_crystal");
+        this.register(net.minecraft.entity.EntityType.END_CRYSTAL);
         this.register(net.minecraft.entity.EntityType.ENDER_DRAGON);
         this.register(net.minecraft.entity.EntityType.ENDERMAN);
         this.register(net.minecraft.entity.EntityType.ENDERMITE);
-        this.register(net.minecraft.entity.EntityType.EVOKER_FANGS, "evocation_fangs");
-        this.register(net.minecraft.entity.EntityType.EVOKER, "evocation_illager");
+        this.register(net.minecraft.entity.EntityType.EVOKER_FANGS);
+        this.register(net.minecraft.entity.EntityType.EVOKER);
         this.register(net.minecraft.entity.EntityType.EXPERIENCE_ORB);
         this.register(net.minecraft.entity.EntityType.EYE_OF_ENDER);
         this.register(net.minecraft.entity.EntityType.FALLING_BLOCK);
-        this.register(net.minecraft.entity.EntityType.FIREWORK_ROCKET, "firework");
+        this.register(net.minecraft.entity.EntityType.FIREWORK_ROCKET);
         this.register(net.minecraft.entity.EntityType.GHAST);
         this.register(net.minecraft.entity.EntityType.GIANT);
         this.register(net.minecraft.entity.EntityType.GUARDIAN);
         this.register(net.minecraft.entity.EntityType.HORSE);
         this.register(net.minecraft.entity.EntityType.HUSK);
-        this.register(net.minecraft.entity.EntityType.ILLUSIONER, "illusion_illager");
+        this.register(net.minecraft.entity.EntityType.ILLUSIONER);
         this.register(net.minecraft.entity.EntityType.ITEM);
         this.register(net.minecraft.entity.EntityType.ITEM_FRAME);
         this.register(net.minecraft.entity.EntityType.FIREBALL);
-        this.register(net.minecraft.entity.EntityType.LEASH_KNOT, "leash_hitch");
+        this.register(net.minecraft.entity.EntityType.LEASH_KNOT);
         this.register(net.minecraft.entity.EntityType.LLAMA);
         this.register(net.minecraft.entity.EntityType.LLAMA_SPIT);
         this.register(net.minecraft.entity.EntityType.MAGMA_CUBE);
-        this.register(net.minecraft.entity.EntityType.MINECART, "rideable_minecart");
-        this.register(net.minecraft.entity.EntityType.CHEST_MINECART, "chested_minecart");
-        this.register(net.minecraft.entity.EntityType.COMMAND_BLOCK_MINECART, "commandblock_minecart");
+        this.register(net.minecraft.entity.EntityType.MINECART);
+        this.register(net.minecraft.entity.EntityType.CHEST_MINECART);
+        this.register(net.minecraft.entity.EntityType.COMMAND_BLOCK_MINECART);
         this.register(net.minecraft.entity.EntityType.FURNACE_MINECART);
         this.register(net.minecraft.entity.EntityType.HOPPER_MINECART);
-        this.register(net.minecraft.entity.EntityType.SPAWNER_MINECART, "mob_spawner_minecart");
+        this.register(net.minecraft.entity.EntityType.SPAWNER_MINECART);
         this.register(net.minecraft.entity.EntityType.TNT_MINECART);
         this.register(net.minecraft.entity.EntityType.MULE);
-        this.register(net.minecraft.entity.EntityType.MOOSHROOM, "mushroom_cow");
+        this.register(net.minecraft.entity.EntityType.MOOSHROOM);
         this.register(net.minecraft.entity.EntityType.OCELOT);
         this.register(net.minecraft.entity.EntityType.PAINTING);
         this.register(net.minecraft.entity.EntityType.PARROT);
         this.register(net.minecraft.entity.EntityType.PIG);
         this.register(net.minecraft.entity.EntityType.PUFFERFISH);
-        this.register(net.minecraft.entity.EntityType.ZOMBIE_PIGMAN, "pig_zombie");
+        this.register(net.minecraft.entity.EntityType.ZOMBIE_PIGMAN);
         this.register(net.minecraft.entity.EntityType.POLAR_BEAR);
-        this.register(net.minecraft.entity.EntityType.TNT, "primed_tnt");
+        this.register(net.minecraft.entity.EntityType.TNT);
         this.register(net.minecraft.entity.EntityType.RABBIT);
         this.register(net.minecraft.entity.EntityType.SALMON);
         this.register(net.minecraft.entity.EntityType.SHEEP);
@@ -134,7 +134,7 @@ public final class EntityTypeRegistryModule extends AbstractCatalogRegistryModul
         this.register(net.minecraft.entity.EntityType.SKELETON_HORSE);
         this.register(net.minecraft.entity.EntityType.SLIME);
         this.register(net.minecraft.entity.EntityType.SMALL_FIREBALL);
-        this.register(net.minecraft.entity.EntityType.SNOW_GOLEM, "snowman");
+        this.register(net.minecraft.entity.EntityType.SNOW_GOLEM);
         this.register(net.minecraft.entity.EntityType.SNOWBALL);
         this.register(net.minecraft.entity.EntityType.SPECTRAL_ARROW);
         this.register(net.minecraft.entity.EntityType.SPIDER);
@@ -144,12 +144,12 @@ public final class EntityTypeRegistryModule extends AbstractCatalogRegistryModul
         this.register(net.minecraft.entity.EntityType.TURTLE);
         this.register(net.minecraft.entity.EntityType.EGG);
         this.register(net.minecraft.entity.EntityType.ENDER_PEARL);
-        this.register(net.minecraft.entity.EntityType.EXPERIENCE_BOTTLE, "thrown_exp_bottle");
-        this.register(net.minecraft.entity.EntityType.POTION, "splash_potion");
+        this.register(net.minecraft.entity.EntityType.EXPERIENCE_BOTTLE);
+        this.register(net.minecraft.entity.EntityType.POTION);
         this.register(net.minecraft.entity.EntityType.VEX);
         this.register(net.minecraft.entity.EntityType.VILLAGER);
         this.register(net.minecraft.entity.EntityType.IRON_GOLEM);
-        this.register(net.minecraft.entity.EntityType.VINDICATOR, "vindication_illager");
+        this.register(net.minecraft.entity.EntityType.VINDICATOR);
         this.register(net.minecraft.entity.EntityType.WITCH);
         this.register(net.minecraft.entity.EntityType.WITHER);
         this.register(net.minecraft.entity.EntityType.WITHER_SKELETON);
@@ -159,9 +159,9 @@ public final class EntityTypeRegistryModule extends AbstractCatalogRegistryModul
         this.register(net.minecraft.entity.EntityType.ZOMBIE_HORSE);
         this.register(net.minecraft.entity.EntityType.ZOMBIE_VILLAGER);
         this.register(net.minecraft.entity.EntityType.PHANTOM);
-        this.register(net.minecraft.entity.EntityType.LIGHTNING_BOLT, "lightning");
+        this.register(net.minecraft.entity.EntityType.LIGHTNING_BOLT);
         this.register(net.minecraft.entity.EntityType.PLAYER);
-        this.register(net.minecraft.entity.EntityType.FISHING_BOBBER, "fishing_hook");
+        this.register(net.minecraft.entity.EntityType.FISHING_BOBBER);
         this.register(net.minecraft.entity.EntityType.TRIDENT);
 
         register(CatalogKey.sponge("human"), createHumanEntityType()); // TODO: Figure out what id to use, as negative ids no longer work
@@ -170,15 +170,9 @@ public final class EntityTypeRegistryModule extends AbstractCatalogRegistryModul
         register(CatalogKey.of("unknown", "unknown"), SpongeEntityType.UNKNOWN);
     }
 
-    private <T extends Entity> SpongeEntityType register(final net.minecraft.entity.EntityType<T> type) {
+    private <T extends Entity> void register(final net.minecraft.entity.EntityType<T> type) {
         final SpongeEntityType sponge = this.createType(type);
         this.register((CatalogKey) (Object) net.minecraft.entity.EntityType.getId(type), sponge);
-        return sponge;
-    }
-
-    private <T extends Entity> void register(final net.minecraft.entity.EntityType<T> type, final String spongeKey) {
-        final SpongeEntityType sponge = this.register(type);
-        this.register(CatalogKey.minecraft(spongeKey), sponge);
     }
 
     private <T extends Entity> SpongeEntityType createType(final net.minecraft.entity.EntityType<T> type) {
