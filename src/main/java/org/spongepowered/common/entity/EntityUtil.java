@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.entity;
 
-import static net.minecraft.util.EntitySelectors.NOT_SPECTATING;
-
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableList;
@@ -62,6 +60,7 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.dimension.EndDimension;
+import net.minecraft.world.gen.Heightmap;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.type.Profession;
@@ -84,17 +83,20 @@ import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.PortalAgent;
 import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.gamerule.DefaultGameRules;
 import org.spongepowered.api.world.storage.WorldProperties;
+import org.spongepowered.api.world.teleport.PortalAgent;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.event.tracking.*;
+import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.entity.TeleportingContext;
 import org.spongepowered.common.interfaces.IMixinPlayerList;
@@ -108,7 +110,6 @@ import org.spongepowered.common.interfaces.world.IMixinITeleporter;
 import org.spongepowered.common.interfaces.world.IMixinTeleporter;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
-import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.registry.type.entity.ProfessionRegistryModule;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.WorldManager;
@@ -126,6 +127,8 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
+
+import static net.minecraft.util.EntitySelectors.NOT_SPECTATING;
 
 public final class EntityUtil {
 
@@ -292,7 +295,7 @@ public final class EntityUtil {
 
         // Update reducedDebugInfo game rule
         playerIn.connection.sendPacket(new SPacketEntityStatus(playerIn,
-                toWorld.getGameRules().getBoolean(DefaultGameRules.REDUCED_DEBUG_INFO) ? (byte) 22 : 23));
+                toWorld.getGameRules().getBoolean("reducedDebugInfo") ? (byte) 22 : 23));
 
         for (PotionEffect potioneffect : playerIn.getActivePotionEffects()) {
             playerIn.connection.sendPacket(new SPacketEntityEffect(playerIn.getEntityId(), potioneffect));
@@ -314,7 +317,7 @@ public final class EntityUtil {
         return entity.removed;
     }
 
-    public static MoveEntityEvent.Teleport handleDisplaceEntityTeleportEvent(Entity entityIn, Location<World> location) {
+    public static MoveEntityEvent.Teleport handleDisplaceEntityTeleportEvent(Entity entityIn, Location location) {
         Transform fromTransform = ((IMixinEntity) entityIn).getTransform();
         Transform toTransform = fromTransform.setLocation(location).setRotation(new Vector3d(entityIn.rotationPitch, entityIn.rotationYaw, 0));
         return handleDisplaceEntityTeleportEvent(entityIn, fromTransform, toTransform);
@@ -326,7 +329,7 @@ public final class EntityUtil {
         return handleDisplaceEntityTeleportEvent(entityIn, fromTransform, toTransform);
     }
 
-    public static MoveEntityEvent.Teleport handleDisplaceEntityTeleportEvent(Entity entityIn, Transform<World> fromTransform, Transform<World> toTransform) {
+    public static MoveEntityEvent.Teleport handleDisplaceEntityTeleportEvent(Entity entityIn, Transform fromTransform, Transform toTransform) {
 
         // Use origin world to get correct cause
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
@@ -429,14 +432,14 @@ public final class EntityUtil {
             // Complete phases, just because we need to. The phases don't actually do anything, because the processing resides here.
 
             // Grab the exit location of entity after being placed into portal
-            final Transform<World> portalExitTransform = mixinEntity.getTransform().setWorld((World) toWorld);
+            final Transform portalExitTransform = mixinEntity.getTransform().setWorld((World) toWorld);
             // Use setLocationAndAngles to avoid firing MoveEntityEvent to plugins
             mixinEntity.setLocationAndAngles(fromTransform);
             final MoveEntityEvent.Teleport.Portal event = SpongeEventFactory.createMoveEntityEventTeleportPortal(frame.getCurrentCause(), fromTransform, portalExitTransform, (PortalAgent) teleporter, mixinEntity, true);
             SpongeImpl.postEvent(event);
             final Vector3i chunkPosition = mixinEntity.getLocation().getChunkPosition();
             final List<BlockSnapshot> capturedBlocks = context.getCapturedBlocks();
-            final Transform<World> toTransform = event.getToTransform();
+            final Transform toTransform = event.getToTransform();
 
             if (event.isCancelled()) {
                 // Mods may cancel this event in order to run custom transfer logic
@@ -484,7 +487,7 @@ public final class EntityUtil {
                 }
             } else {
                 if (toWorld.dimension instanceof EndDimension) {
-                    BlockPos blockpos = entityIn.world.getTopSolidOrLiquidBlock(toWorld.getSpawnPoint());
+                    BlockPos blockpos = entityIn.world.getHeight(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, toWorld.getSpawnPoint());
                     entityIn.moveToBlockPosAndAngles(blockpos, entityIn.rotationYaw, entityIn.rotationPitch);
                 }
             }
@@ -695,13 +698,15 @@ public final class EntityUtil {
             playerMPs.add(player);
         }
         for (EntityPlayerMP playerMP : playerMPs) {
-            SpongeImpl.getGame().getScheduler().createTaskBuilder()
-                    .delayTicks(SpongeImpl.getGlobalConfig().getConfig().getEntity().getPaintingRespawnDelaly())
-                    .execute(() -> {
-                        final SPacketSpawnPainting packet = new SPacketSpawnPainting(painting);
-                        playerMP.connection.sendPacket(packet);
-                    })
-                    .submit(SpongeImpl.getPlugin());
+            SpongeImpl.getGame().getServer().getScheduler().submit(
+              Task.builder()
+                .delayTicks(SpongeImpl.getGlobalConfig().getConfig().getEntity().getPaintingRespawnDelaly())
+                .execute(() -> {
+                    final SPacketSpawnPainting packet = new SPacketSpawnPainting(painting);
+                    playerMP.connection.sendPacket(packet);
+                })
+              .build()
+            );
         }
         return true;
     }
@@ -873,7 +878,7 @@ public final class EntityUtil {
         return fromNative(entity).createSnapshot();
     }
 
-    public static void changeWorld(Entity entity, Location<World> location, int currentDim, int targetDim) {
+    public static void changeWorld(Entity entity, Location location, int currentDim, int targetDim) {
         final MinecraftServer mcServer = SpongeImpl.getServer();
         final WorldServer fromWorld = mcServer.getWorld(currentDim);
         final WorldServer toWorld = mcServer.getWorld(targetDim);
@@ -933,7 +938,7 @@ public final class EntityUtil {
 
             // Update reducedDebugInfo game rule
             entityPlayerMP.connection.sendPacket(new SPacketEntityStatus(entityPlayerMP,
-                    toWorld.getGameRules().getBoolean(DefaultGameRules.REDUCED_DEBUG_INFO) ? (byte) 22 : 23));
+                    toWorld.getGameRules().getBoolean("reducedDebugInfo") ? (byte) 22 : 23));
 
 
             ((IMixinEntityPlayerMP) entityPlayerMP).refreshXpHealthAndFood();
@@ -1109,7 +1114,7 @@ public final class EntityUtil {
             entityitem.setPickupDelay(40);
 
             if (traceItem) {
-                entityitem.setThrower(player.getName());
+                entityitem.setThrowerId(player.getUniqueID());
             }
 
             final Random random = mixinPlayer.getRandom();
@@ -1139,7 +1144,7 @@ public final class EntityUtil {
 
             if (traceItem) {
                 if (!itemstack.isEmpty()) {
-                    player.addStat(StatList.getDroppedObjectStats(itemstack.getItem()), droppedItem.getCount());
+                    player.addStat(StatList.ITEM_DROPPED.get(itemstack.getItem()), droppedItem.getCount());
                 }
 
                 player.addStat(StatList.DROP);
@@ -1197,7 +1202,7 @@ public final class EntityUtil {
         }
 
         // SECOND throw the ConstructEntityEvent
-        Transform<World> suggested = new Transform<>(entity.getWorld(), new Vector3d(posX, posY, posZ));
+        Transform suggested = new Transform(entity.getWorld(), new Vector3d(posX, posY, posZ));
         frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
         ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), EntityTypes.ITEM, suggested);
         frame.removeContext(EventContextKeys.SPAWN_TYPE);
@@ -1263,24 +1268,12 @@ public final class EntityUtil {
         return stack;
     }
 
-    @SuppressWarnings("unchecked")
     public static Optional<EntityType> fromNameToType(String name) {
-        // EntityList includes all forge mods with *unedited* entity names
-        Class<?> clazz = SpongeImplHooks.getEntityClass(new ResourceLocation(name));
-        if(clazz == null) {
-            return Optional.empty();
-        }
-
-        return Optional.of(EntityTypeRegistryModule.getInstance().getForClass((Class<? extends Entity>) clazz));
+        return fromLocationToType(new ResourceLocation(name));
     }
 
-    @SuppressWarnings("unchecked")
     public static Optional<EntityType> fromLocationToType(ResourceLocation location) {
-        Class<?> clazz = SpongeImplHooks.getEntityClass(location);
-        if (clazz == null) {
-            return Optional.empty();
-        }
-        return Optional.of(EntityTypeRegistryModule.getInstance().getForClass((Class<? extends Entity>) clazz));
+        return Optional.ofNullable((EntityType) net.minecraft.entity.EntityType.REGISTRY.get(location));
     }
 
     // I'm lazy, but this is better than using the convenience method
