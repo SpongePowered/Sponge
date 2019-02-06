@@ -54,6 +54,7 @@ import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.property.Property;
+import org.spongepowered.api.data.type.TreeType;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Transform;
@@ -127,6 +128,9 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     @Shadow @Final protected MapColor blockMapColor;
 
+    @Shadow @Final protected Material material;
+    private Optional<TreeType> treeType;
+
     @Inject(method = "<init>*", at = @At("RETURN"))
     public void onConstruction(CallbackInfo ci) {
         // Determine which blocks can avoid executing un-needed event logic
@@ -179,6 +183,17 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Override
     public String getName() {
         return this.getNameFromRegistry();
+    }
+
+    @Nullable
+    @Override
+    public Optional<TreeType> getTreeType() {
+        return this.treeType;
+    }
+
+    @Override
+    public void setTreeType(Optional<TreeType> treeType) {
+        this.treeType = treeType;
     }
 
     private String getNameFromRegistry() {

@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockDoor;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.state.properties.DoorHingeSide;
 import net.minecraft.state.properties.DoubleBlockHalf;
@@ -38,6 +39,7 @@ import org.spongepowered.api.data.manipulator.immutable.ImmutableHingeData;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableOpenData;
 import org.spongepowered.api.data.manipulator.immutable.ImmutablePortionData;
 import org.spongepowered.api.data.manipulator.immutable.ImmutablePoweredData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableTreeData;
 import org.spongepowered.api.data.type.Hinge;
 import org.spongepowered.api.data.type.PortionType;
 import org.spongepowered.api.data.type.PortionTypes;
@@ -51,8 +53,10 @@ import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSponge
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeOpenData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongePortionData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongePoweredData;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
 import org.spongepowered.common.data.util.DirectionChecker;
 import org.spongepowered.common.data.util.DirectionResolver;
+import org.spongepowered.common.registry.type.block.TreeTypeRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Optional;
@@ -62,14 +66,18 @@ public abstract class MixinBlockDoor extends MixinBlock {
 
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getHingeFor(blockState), getIsOpenFor(blockState),
-                getIsPoweredFor(blockState), getDirectionalData(blockState), getPortionData(blockState));
+        final ImmutableList.Builder<ImmutableDataManipulator<?, ?>> builder = ImmutableList.<ImmutableDataManipulator<?, ?>>builder()
+                .add(getHingeFor(blockState), getIsOpenFor(blockState), getIsPoweredFor(blockState),
+                        getDirectionalData(blockState), getPortionData(blockState));
+        TreeTypeRegistryModule.getTreeType(blockState).ifPresent(treeType -> builder.add(new ImmutableSpongeTreeData(treeType)));
+        return builder.build();
     }
 
     @Override
     public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
         return ImmutableHingeData.class.isAssignableFrom(immutable) || ImmutableOpenData.class.isAssignableFrom(immutable)
-                || ImmutablePoweredData.class.isAssignableFrom(immutable) || ImmutablePortionData.class.isAssignableFrom(immutable);
+                || ImmutablePoweredData.class.isAssignableFrom(immutable) || ImmutablePortionData.class.isAssignableFrom(immutable)
+                || (this.material == Material.WOOD && ImmutableTreeData.class.isAssignableFrom(immutable));
     }
 
     @Override

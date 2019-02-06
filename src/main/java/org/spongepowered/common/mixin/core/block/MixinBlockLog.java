@@ -26,25 +26,22 @@ package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockLog;
-import net.minecraft.block.BlockNewLog;
-import net.minecraft.block.BlockOldLog;
-import net.minecraft.block.BlockPlanks;
 import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableLogAxisData;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableTreeData;
-import org.spongepowered.api.data.type.LogAxis;
-import org.spongepowered.api.data.type.TreeType;
-import org.spongepowered.api.data.type.TreeTypes;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableAxisData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableTreeData;
 import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeLogAxisData;
-import org.spongepowered.common.data.util.TreeTypeResolver;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeAxisData;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
+import org.spongepowered.common.data.util.DirectionResolver;
+import org.spongepowered.common.registry.type.block.TreeTypeRegistryModule;
 
 import java.util.List;
 import java.util.Optional;
@@ -54,74 +51,38 @@ import java.util.Optional;
 public abstract class MixinBlockLog extends MixinBlock {
 
     protected ImmutableTreeData getTreeData(IBlockState blockState) {
-        BlockPlanks.EnumType type;
-        if(blockState.getBlock() instanceof BlockOldLog) {
-            type = blockState.getValue(BlockOldLog.VARIANT);
-        } else if(blockState.getBlock() instanceof BlockNewLog) {
-            type = blockState.getValue(BlockNewLog.VARIANT);
-        } else {
-            type = BlockPlanks.EnumType.OAK;
-        }
-
-        final TreeType treeType = TreeTypeResolver.getFor(type);
-
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeTreeData.class, treeType);
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeTreeData.class, TreeTypeRegistryModule.getTreeType(blockState).get());
     }
 
-    protected ImmutableLogAxisData getLogAxisData(IBlockState blockState) {
-        final LogAxis logAxis = (LogAxis) (Object) blockState.getValue(BlockLog.LOG_AXIS);
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeLogAxisData.class, logAxis);
+    protected ImmutableAxisData getLogAxisData(IBlockState blockState) {
+        final Axis axis = DirectionResolver.getFor(blockState.get(BlockLog.AXIS));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeAxisData.class, axis);
     }
-
 
     @Override
     public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
-        return ImmutableTreeData.class.isAssignableFrom(immutable) || ImmutableLogAxisData.class.isAssignableFrom(immutable);
+        return ImmutableTreeData.class.isAssignableFrom(immutable) || ImmutableAxisData.class.isAssignableFrom(immutable);
     }
 
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
-        if (manipulator instanceof ImmutableTreeData) {
-            final TreeType treeType = ((ImmutableTreeData) manipulator).type().get();
-            final BlockPlanks.EnumType type = TreeTypeResolver.getFor(treeType);
-            return processLogType(blockState, type, treeType);
-        } else if (manipulator instanceof ImmutableLogAxisData) {
-            final LogAxis logAxis = ((ImmutableLogAxisData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.withProperty(BlockLog.LOG_AXIS, (BlockLog.EnumAxis) (Object) logAxis));
+        if (manipulator instanceof ImmutableAxisData) {
+            final Axis axis = ((ImmutableAxisData) manipulator).type().get();
+            return Optional.of((BlockState) blockState.with(BlockLog.AXIS, DirectionResolver.getFor(axis)));
         }
         return super.getStateWithData(blockState, manipulator);
     }
 
     @Override
     public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends Value<E>> key, E value) {
-        if (key.equals(Keys.TREE_TYPE)) {
-            final TreeType treeType = (TreeType) value;
-            final BlockPlanks.EnumType type = TreeTypeResolver.getFor(treeType);
-            return processLogType(blockState, type, treeType);
-        } else if (key.equals(Keys.LOG_AXIS)) {
-            return Optional.of((BlockState) blockState.withProperty(BlockLog.LOG_AXIS, (BlockLog.EnumAxis) value));
+        if (key.equals(Keys.AXIS)) {
+            return Optional.of((BlockState) blockState.with(BlockLog.AXIS, DirectionResolver.getFor((Axis) value)));
         }
         return super.getStateWithValue(blockState, key, value);
     }
 
-    private Optional<BlockState> processLogType(IBlockState blockState, BlockPlanks.EnumType type, TreeType treeType) {
-        if (blockState.getBlock() instanceof BlockOldLog) {
-            if (treeType.equals(TreeTypes.OAK) ||
-                treeType.equals(TreeTypes.BIRCH) ||
-                treeType.equals(TreeTypes.SPRUCE) ||
-                treeType.equals(TreeTypes.JUNGLE)) {
-                return Optional.of((BlockState) blockState.withProperty(BlockOldLog.VARIANT, type));
-            }
-        } else if (blockState.getBlock() instanceof BlockNewLog) {
-            if (treeType.equals(TreeTypes.ACACIA) || treeType.equals(TreeTypes.DARK_OAK)) {
-                return Optional.of((BlockState) blockState.withProperty(BlockNewLog.VARIANT, type));
-            }
-        }
-        return Optional.empty();
-    }
-
     @Override
     public List<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getTreeData(blockState), getLogAxisData(blockState));
+        return ImmutableList.of(getTreeData(blockState), getLogAxisData(blockState));
     }
 }

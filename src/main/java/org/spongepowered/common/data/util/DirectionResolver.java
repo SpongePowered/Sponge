@@ -26,12 +26,37 @@ package org.spongepowered.common.data.util;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.block.BlockLever;
 import net.minecraft.util.EnumFacing;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.util.Direction;
 
 public class DirectionResolver {
+
+    public static EnumFacing.Axis getFor(Axis axis) {
+        switch (checkNotNull(axis)) {
+            case X:
+                return EnumFacing.Axis.X;
+            case Y:
+                return EnumFacing.Axis.Y;
+            case Z:
+                return EnumFacing.Axis.Z;
+            default:
+                throw new IllegalArgumentException("No matching axis found for: " + axis);
+        }
+    }
+
+    public static Axis getFor(EnumFacing.Axis axis) {
+        switch (checkNotNull(axis)) {
+            case X:
+                return Axis.X;
+            case Y:
+                return Axis.Y;
+            case Z:
+                return Axis.Z;
+            default:
+                throw new IllegalArgumentException("No matching axis found for: " + axis);
+        }
+    }
 
     public static EnumFacing getFor(Direction direction) {
         switch (checkNotNull(direction)) {
@@ -70,47 +95,4 @@ public class DirectionResolver {
                 throw new IllegalArgumentException("No matching enum facing direction found for direction: " + facing);
         }
     }
-
-    public static Direction getFor(BlockLever.EnumOrientation orientation) {
-        switch (orientation) {
-            case DOWN_X:
-                return Direction.DOWN;
-            case EAST:
-                return Direction.EAST;
-            case WEST:
-                return Direction.WEST;
-            case SOUTH:
-                return Direction.SOUTH;
-            case NORTH:
-                return Direction.NORTH;
-            case UP_Z:
-                return Direction.UP;
-            case UP_X:
-                return Direction.UP;
-            case DOWN_Z:
-                return Direction.DOWN;
-            default:
-                return Direction.NORTH;
-        }
-    }
-
-    public static BlockLever.EnumOrientation getAsOrientation(Direction direction, Axis axis) {
-        switch (direction) {
-            case DOWN:
-                return axis == Axis.Z ? BlockLever.EnumOrientation.DOWN_Z : BlockLever.EnumOrientation.DOWN_X;
-            case EAST:
-                return BlockLever.EnumOrientation.EAST;
-            case WEST:
-                return BlockLever.EnumOrientation.WEST;
-            case SOUTH:
-                return BlockLever.EnumOrientation.SOUTH;
-            case NORTH:
-                return BlockLever.EnumOrientation.NORTH;
-            case UP:
-                return axis == Axis.Z ? BlockLever.EnumOrientation.UP_Z : BlockLever.EnumOrientation.UP_X;
-            default:
-                return BlockLever.EnumOrientation.NORTH;
-        }
-    }
-
 }

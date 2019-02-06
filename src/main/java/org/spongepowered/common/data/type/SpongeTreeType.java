@@ -22,46 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.data.types;
+package org.spongepowered.common.data.type;
 
-import net.minecraft.block.BlockDoor;
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.data.type.Hinge;
-import org.spongepowered.api.data.type.Hinges;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.api.data.type.TreeType;
+import org.spongepowered.api.text.translation.FixedTranslation;
+import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.common.SpongeCatalogType;
 
-import javax.annotation.Nullable;
+public final class SpongeTreeType extends SpongeCatalogType implements TreeType {
 
-@Mixin(BlockDoor.EnumHingePosition.class)
-@Implements(@Interface(iface = Hinge.class, prefix = "hinge$"))
-public abstract class MixinBlockDoorEnumHingePosition implements Hinge {
-
-    @Shadow public abstract String shadow$getName();
-
-    @Nullable private CatalogKey key;
-
-    @Override
-    public CatalogKey getKey() {
-        if (this.key == null) {
-            this.key = CatalogKey.minecraft(this.shadow$getName());
-        }
-        return this.key;
-    }
-
-    @Intrinsic
-    public String hinge$getName() {
-        return shadow$getName();
+    public SpongeTreeType(CatalogKey key, String name) {
+        super(key, name);
     }
 
     @Override
-    public Hinge cycleNext() {
-        if (this.equals(Hinges.LEFT)) {
-            return Hinges.RIGHT;
-        }
-        return Hinges.LEFT;
+    public Translation getTranslation() {
+        return new FixedTranslation(getName());
     }
 }

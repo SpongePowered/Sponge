@@ -54,11 +54,11 @@ import javax.annotation.Nullable;
 public abstract class MixinBlockFarmland extends MixinBlock {
 
     @Nullable private Entity currentGriefer;
-    @Shadow protected static void turnToDirt(World world, BlockPos pos) {}
+    @Shadow protected static void turnToDirt(IBlockState state, World worldIn, BlockPos pos) {}
 
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getMoistureData(blockState));
+        return ImmutableList.of(getMoistureData(blockState));
     }
 
     @Override
@@ -107,7 +107,7 @@ public abstract class MixinBlockFarmland extends MixinBlock {
     @Redirect(method = "onFallenUpon", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockFarmland;turnToDirt(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)V"))
     private void beforeTurnToDirt(World world, BlockPos pos) {
         if (this.currentGriefer instanceof IMixinGriefer && ((IMixinGriefer) this.currentGriefer).canGrief()) {
-            MixinBlockFarmland.turnToDirt(world, pos);
+            MixinBlockFarmland.turnToDirt(world.getBlockState(pos), world, pos);
         }
     }
 }

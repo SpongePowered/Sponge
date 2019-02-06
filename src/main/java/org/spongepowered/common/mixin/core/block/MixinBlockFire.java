@@ -46,7 +46,7 @@ import java.util.Random;
 @Mixin(BlockFire.class)
 public abstract class MixinBlockFire extends MixinBlock {
 
-    @Redirect(method = "updateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;I)Z", ordinal = 1))
+    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;I)Z", ordinal = 1))
     private boolean onFireSpread(World world, BlockPos pos, IBlockState state, int updateFlag) {
         if (!((IMixinWorld) world).isFake() && ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {

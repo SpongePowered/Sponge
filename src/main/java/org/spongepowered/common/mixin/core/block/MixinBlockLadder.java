@@ -47,7 +47,7 @@ public abstract class MixinBlockLadder extends MixinBlock {
 
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getDirectionalData(blockState));
+        return ImmutableList.of(getDirectionalData(blockState));
     }
 
     @Override

@@ -54,14 +54,14 @@ public final class EnchantmentRegistryModule extends AbstractCatalogRegistryModu
     @Override
     public void registerDefaults() {
         for (ResourceLocation key: net.minecraft.enchantment.Enchantment.REGISTRY.getKeys()) {
-            this.map.put((CatalogKey) (Object) key, (EnchantmentType) net.minecraft.enchantment.Enchantment.REGISTRY.getObject(key));
+            this.map.put((CatalogKey) (Object) key, (EnchantmentType) net.minecraft.enchantment.Enchantment.REGISTRY.get(key));
         }
     }
 
     @AdditionalRegistration
     public void registerAdditional() {
         for (ResourceLocation key : net.minecraft.enchantment.Enchantment.REGISTRY.getKeys()) {
-            net.minecraft.enchantment.Enchantment enchantment = net.minecraft.enchantment.Enchantment.REGISTRY.getObject(key);
+            net.minecraft.enchantment.Enchantment enchantment = net.minecraft.enchantment.Enchantment.REGISTRY.get(key);
             if (enchantment == null) {
                 continue;
             }

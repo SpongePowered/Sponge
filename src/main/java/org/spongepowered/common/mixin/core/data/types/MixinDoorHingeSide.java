@@ -22,34 +22,46 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.util;
+package org.spongepowered.common.mixin.core.data.types;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import net.minecraft.state.properties.DoorHingeSide;
+import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.data.type.Hinge;
+import org.spongepowered.api.data.type.Hinges;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.ImmutableBiMap;
-import net.minecraft.block.BlockPlanks;
-import org.spongepowered.api.data.type.TreeType;
-import org.spongepowered.api.data.type.TreeTypes;
+import javax.annotation.Nullable;
 
-public class TreeTypeResolver {
+@Mixin(DoorHingeSide.class)
+@Implements(@Interface(iface = Hinge.class, prefix = "hinge$"))
+public abstract class MixinDoorHingeSide implements Hinge {
 
-    private static final TreeTypeResolver instance = new TreeTypeResolver();
+    @Shadow public abstract String shadow$getName();
 
-    private final BiMap<TreeType, BlockPlanks.EnumType> biMap = ImmutableBiMap.<TreeType, BlockPlanks.EnumType>builder()
-        .put(TreeTypes.OAK, BlockPlanks.EnumType.OAK)
-        .put(TreeTypes.BIRCH, BlockPlanks.EnumType.BIRCH)
-        .put(TreeTypes.SPRUCE, BlockPlanks.EnumType.SPRUCE)
-        .put(TreeTypes.JUNGLE, BlockPlanks.EnumType.JUNGLE)
-        .put(TreeTypes.ACACIA, BlockPlanks.EnumType.ACACIA)
-        .put(TreeTypes.DARK_OAK, BlockPlanks.EnumType.DARK_OAK).build();
+    @Nullable private CatalogKey key;
 
-    public static BlockPlanks.EnumType getFor(TreeType treeType) {
-        return instance.biMap.get(checkNotNull(treeType));
+    @Override
+    public CatalogKey getKey() {
+        if (this.key == null) {
+            this.key = CatalogKey.minecraft(this.shadow$getName());
+        }
+        return this.key;
     }
 
-    public static TreeType getFor(BlockPlanks.EnumType planks) {
-        return instance.biMap.inverse().get(checkNotNull(planks));
+    @Intrinsic
+    public String hinge$getName() {
+        return shadow$getName();
     }
 
+    @Override
+    public Hinge cycleNext() {
+        if (this.equals(Hinges.LEFT)) {
+            return Hinges.RIGHT;
+        }
+        return Hinges.LEFT;
+    }
 }

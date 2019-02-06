@@ -27,19 +27,18 @@ package org.spongepowered.common.mixin.core.block;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockLever;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.EnumFacing;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.manipulator.immutable.ImmutableAxisData;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableDirectionalData;
 import org.spongepowered.api.data.manipulator.immutable.ImmutablePoweredData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableSurfaceAttachmentData;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeAxisData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirectionalData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongePoweredData;
 import org.spongepowered.common.data.util.DirectionResolver;
@@ -51,84 +50,48 @@ public abstract class MixinBlockLever extends MixinBlock {
 
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getIsPoweredFor(blockState), getDirectionalData(blockState), getAxisData(blockState));
+        // TODO: ImmutableSurfaceAttachmentData
+        return ImmutableList.of(getIsPoweredFor(blockState), getDirectionalData(blockState));
     }
 
     @Override
     public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
         return ImmutablePoweredData.class.isAssignableFrom(immutable) || ImmutableDirectionalData.class.isAssignableFrom(immutable)
-                || ImmutableAxisData.class.isAssignableFrom(immutable);
+                || ImmutableSurfaceAttachmentData.class.isAssignableFrom(immutable);
     }
 
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutablePoweredData) {
-            return Optional.of((BlockState) blockState.withProperty(BlockLever.POWERED, ((ImmutablePoweredData) manipulator).powered().get()));
+            return Optional.of((BlockState) blockState.with(BlockLever.POWERED, ((ImmutablePoweredData) manipulator).powered().get()));
         }
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction dir = ((ImmutableDirectionalData) manipulator).direction().get();
-            final Axis axis = this.getAxisFromOrientation(blockState.getValue(BlockLever.FACING));
-            return Optional.of((BlockState) blockState.withProperty(BlockLever.FACING, DirectionResolver.getAsOrientation(dir, axis)));
+            return Optional.of((BlockState) blockState.with(BlockLever.HORIZONTAL_FACING, DirectionResolver.getFor(dir)));
         }
-        if (manipulator instanceof ImmutableAxisData) {
-            final Axis axis = ((ImmutableAxisData) manipulator).axis().get();
-            final Direction dir = DirectionResolver.getFor(blockState.getValue(BlockLever.FACING));
-            return Optional.of((BlockState) blockState.withProperty(BlockLever.FACING, DirectionResolver.getAsOrientation(dir, axis)));
-        }
+        // TODO: ImmutableSurfaceAttachmentData
         return super.getStateWithData(blockState, manipulator);
     }
 
     @Override
     public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends Value<E>> key, E value) {
         if (key.equals(Keys.POWERED)) {
-            return Optional.of((BlockState) blockState.withProperty(BlockLever.POWERED, (Boolean) value));
+            return Optional.of((BlockState) blockState.with(BlockLever.POWERED, (Boolean) value));
         }
         if (key.equals(Keys.DIRECTION)) {
             final Direction dir = (Direction) value;
-            final Axis axis = this.getAxisFromOrientation(blockState.getValue(BlockLever.FACING));
-            return Optional.of((BlockState) blockState.withProperty(BlockLever.FACING, DirectionResolver.getAsOrientation(dir, axis)));
+            return Optional.of((BlockState) blockState.with(BlockLever.HORIZONTAL_FACING, DirectionResolver.getFor(dir)));
         }
-        if (key.equals(Keys.AXIS)) {
-            final Axis axis = (Axis) value;
-            final Direction dir = DirectionResolver.getFor(blockState.getValue(BlockLever.FACING));
-            return Optional.of((BlockState) blockState.withProperty(BlockLever.FACING, DirectionResolver.getAsOrientation(dir, axis)));
-        }
+        // TODO: ImmutableSurfaceAttachmentData
         return super.getStateWithValue(blockState, key, value);
     }
 
     private ImmutablePoweredData getIsPoweredFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class, blockState.getValue(BlockLever.POWERED));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class, blockState.get(BlockLever.POWERED));
     }
 
     private ImmutableDirectionalData getDirectionalData(IBlockState blockState) {
-        final BlockLever.EnumOrientation intDir = blockState.getValue(BlockLever.FACING);
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class, DirectionResolver.getFor(intDir));
-    }
-
-    public ImmutableAxisData getAxisData(IBlockState blockState) {
-        final BlockLever.EnumOrientation orientation = blockState.getValue(BlockLever.FACING);
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeAxisData.class, this.getAxisFromOrientation(orientation));
-    }
-
-    private Axis getAxisFromOrientation(BlockLever.EnumOrientation orientation) {
-        final Axis axis;
-        switch (orientation) {
-            case UP_X:
-                axis = Axis.X;
-                break;
-            case DOWN_X:
-                axis = Axis.X;
-                break;
-            case UP_Z:
-                axis = Axis.Z;
-                break;
-            case DOWN_Z:
-                axis = Axis.Z;
-                break;
-            default:
-                axis = Axis.Y;
-                break;
-        }
-        return axis;
+        final EnumFacing direction = blockState.get(BlockLever.HORIZONTAL_FACING);
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class, DirectionResolver.getFor(direction));
     }
 }

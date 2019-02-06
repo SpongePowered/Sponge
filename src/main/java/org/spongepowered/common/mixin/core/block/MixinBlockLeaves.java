@@ -26,9 +26,6 @@ package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockLeaves;
-import net.minecraft.block.BlockNewLeaf;
-import net.minecraft.block.BlockOldLeaf;
-import net.minecraft.block.BlockPlanks;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockState;
@@ -36,9 +33,7 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableDecayableData;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableTreeData;
-import org.spongepowered.api.data.type.TreeType;
-import org.spongepowered.api.data.type.TreeTypes;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableTreeData;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.LocatableBlock;
@@ -53,7 +48,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDecayableData;
-import org.spongepowered.common.data.util.TreeTypeResolver;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
@@ -61,6 +56,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.registry.type.block.TreeTypeRegistryModule;
 
 import java.util.List;
 import java.util.Optional;
@@ -74,7 +70,8 @@ public abstract class MixinBlockLeaves extends MixinBlock {
         this.setTickRandomly(SpongeImpl.getGlobalConfig().getConfig().getWorld().getLeafDecay());
     }
 
-    @Redirect(method = "updateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;I)Z"))
+    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;"
+            + "Lnet/minecraft/block/state/IBlockState;I)Z"))
     private boolean onUpdateDecayState(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, int flags) {
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final boolean isBlockAlready = phaseTracker.getCurrentState().getPhase() != TrackingPhases.BLOCK;
@@ -83,7 +80,7 @@ public abstract class MixinBlockLeaves extends MixinBlock {
         try (PhaseContext<?> context = isBlockAlready && !isWorldGen
                                        ? BlockPhase.State.BLOCK_DECAY.createPhaseContext()
                                            .source(LocatableBlock.builder()
-                                               .location(new Location<World>((World) worldIn, pos.getX(), pos.getY(), pos.getZ()))
+                                               .location(new Location((World) worldIn, pos.getX(), pos.getY(), pos.getZ()))
                                                .state((BlockState) state)
                                                .build())
                                        : null) {
@@ -118,7 +115,7 @@ public abstract class MixinBlockLeaves extends MixinBlock {
             final boolean isBlockAlready = phaseTracker.getCurrentState().getPhase() != TrackingPhases.BLOCK;
             try (PhaseContext<?> context = isBlockAlready && !isWorldGen ? BlockPhase.State.BLOCK_DECAY.createPhaseContext()
                 .source(LocatableBlock.builder()
-                    .location(new Location<>((World) worldIn, pos.getX(), pos.getY(), pos.getZ()))
+                    .location(new Location((World) worldIn, pos.getX(), pos.getY(), pos.getZ()))
                     .state((BlockState) state)
                     .build()) : null) {
                 if (context != null) {
@@ -136,21 +133,11 @@ public abstract class MixinBlockLeaves extends MixinBlock {
     }
 
     private ImmutableTreeData getTreeData(IBlockState blockState) {
-        BlockPlanks.EnumType type;
-        if (blockState.getBlock() instanceof BlockOldLeaf) {
-            type = blockState.getValue(BlockOldLeaf.VARIANT);
-        } else if (blockState.getBlock() instanceof BlockNewLeaf) {
-            type = blockState.getValue(BlockNewLeaf.VARIANT);
-        } else {
-            type = BlockPlanks.EnumType.OAK;
-        }
-
-        final TreeType treeType = TreeTypeResolver.getFor(type);
-
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeTreeData.class, treeType);
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeTreeData.class, TreeTypeRegistryModule.getTreeType(blockState));
     }
 
     private ImmutableDecayableData getIsDecayableFor(IBlockState blockState) {
+        // TODO: Update data
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDecayableData.class, blockState.getValue(BlockLeaves.DECAYABLE));
     }
 
@@ -161,59 +148,32 @@ public abstract class MixinBlockLeaves extends MixinBlock {
 
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
-        if (manipulator instanceof ImmutableTreeData) {
-            final TreeType treeType = ((ImmutableTreeData) manipulator).type().get();
-            final BlockPlanks.EnumType type = TreeTypeResolver.getFor(treeType);
-            if (blockState.getBlock() instanceof BlockOldLeaf) {
-                if (treeType.equals(TreeTypes.OAK) ||
-                        treeType.equals(TreeTypes.BIRCH) ||
-                        treeType.equals(TreeTypes.SPRUCE) ||
-                        treeType.equals(TreeTypes.JUNGLE)) {
-                    return Optional.of((BlockState) blockState.withProperty(BlockOldLeaf.VARIANT, type));
-                }
-            } else if (blockState.getBlock() instanceof BlockNewLeaf) {
-                if (treeType.equals(TreeTypes.ACACIA) || treeType.equals(TreeTypes.DARK_OAK)) {
-                    return Optional.of((BlockState) blockState.withProperty(BlockNewLeaf.VARIANT, type));
-                }
-            }
-            return Optional.empty();
-        }
         if (manipulator instanceof ImmutableDecayableData) {
-            final boolean decayable = ((ImmutableDecayableData) manipulator).decayable().get();
-            return Optional.of((BlockState) blockState.withProperty(BlockLeaves.DECAYABLE, decayable));
+            final ImmutableDecayableData decayableData = (ImmutableDecayableData) manipulator;
+            final int distance = decayableData.get(Keys.DECAY_DISTANCE).get();
+            final boolean persistent = decayableData.get(Keys.PERSISTENT).get();
+            return Optional.of((BlockState) blockState
+                    .with(BlockLeaves.DISTANCE, distance)
+                    .with(BlockLeaves.PERSISTENT, persistent));
         }
         return super.getStateWithData(blockState, manipulator);
     }
 
     @Override
     public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends Value<E>> key, E value) {
-        if (key.equals(Keys.TREE_TYPE)) {
-            final TreeType treeType = (TreeType) value;
-            final BlockPlanks.EnumType type = TreeTypeResolver.getFor(treeType);
-            if (blockState.getBlock() instanceof BlockOldLeaf) {
-                if (treeType.equals(TreeTypes.OAK) ||
-                        treeType.equals(TreeTypes.BIRCH) ||
-                        treeType.equals(TreeTypes.SPRUCE) ||
-                        treeType.equals(TreeTypes.JUNGLE)) {
-                    return Optional.of((BlockState) blockState.withProperty(BlockOldLeaf.VARIANT, type));
-                }
-            } else if (blockState.getBlock() instanceof BlockNewLeaf) {
-                if (treeType.equals(TreeTypes.ACACIA) || treeType.equals(TreeTypes.DARK_OAK)) {
-                    return Optional.of((BlockState) blockState.withProperty(BlockNewLeaf.VARIANT, type));
-                }
-            }
-            return Optional.empty();
-        }
-        if (key.equals(Keys.DECAYABLE)) {
-            final boolean decayable = (Boolean) value;
-            return Optional.of((BlockState) blockState.withProperty(BlockLeaves.DECAYABLE, decayable));
+        if (key.equals(Keys.DECAY_DISTANCE)) {
+            final int distance = (Integer) value;
+            return Optional.of((BlockState) blockState.with(BlockLeaves.DISTANCE, distance));
+        } else if (key.equals(Keys.PERSISTENT)) {
+            final boolean persistent = (Boolean) value;
+            return Optional.of((BlockState) blockState.with(BlockLeaves.PERSISTENT, persistent));
         }
         return super.getStateWithValue(blockState, key, value);
     }
 
     @Override
     public List<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getTreeData(blockState), getIsDecayableFor(blockState));
+        return ImmutableList.of(getTreeData(blockState), getIsDecayableFor(blockState));
 
     }
 

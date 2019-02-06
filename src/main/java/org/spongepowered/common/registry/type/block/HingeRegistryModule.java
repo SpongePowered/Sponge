@@ -24,18 +24,18 @@
  */
 package org.spongepowered.common.registry.type.block;
 
-import net.minecraft.block.BlockDoor;
+import net.minecraft.state.properties.DoorHingeSide;
 import org.spongepowered.api.data.type.Hinge;
 import org.spongepowered.api.data.type.Hinges;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
 
 @RegisterCatalog(Hinges.class)
-public final class HingeRegistryModule extends MinecraftEnumBasedCatalogTypeModule<BlockDoor.EnumHingePosition, Hinge> {
+public final class HingeRegistryModule extends MinecraftEnumBasedCatalogTypeModule<DoorHingeSide, Hinge> {
 
     @Override
-    protected BlockDoor.EnumHingePosition[] getValues() {
-        return BlockDoor.EnumHingePosition.values();
+    protected DoorHingeSide[] getValues() {
+        return DoorHingeSide.values();
     }
 
 }

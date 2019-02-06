@@ -47,7 +47,8 @@ public abstract class MixinBlockFurnace extends MixinBlock {
 
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getDirectionalData(blockState));
+        // TODO: LitData
+        return ImmutableList.of(getDirectionalData(blockState));
     }
 
     @Override
@@ -61,6 +62,7 @@ public abstract class MixinBlockFurnace extends MixinBlock {
             final Direction dir = DirectionChecker.checkDirectionToHorizontal(((ImmutableDirectionalData) manipulator).direction().get());
             return Optional.of((BlockState) blockState.with(BlockFurnace.FACING, DirectionResolver.getFor(dir)));
         }
+        // TODO: LitData
         return super.getStateWithData(blockState, manipulator);
     }
 
@@ -70,6 +72,7 @@ public abstract class MixinBlockFurnace extends MixinBlock {
             final Direction dir = DirectionChecker.checkDirectionToHorizontal((Direction) value);
             return Optional.of((BlockState) blockState.with(BlockFurnace.FACING, DirectionResolver.getFor(dir)));
         }
+        // TODO: LitData
         return super.getStateWithValue(blockState, key, value);
     }
 

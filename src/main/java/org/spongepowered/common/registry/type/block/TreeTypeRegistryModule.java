@@ -24,17 +24,89 @@
  */
 package org.spongepowered.common.registry.type.block;
 
-import net.minecraft.block.BlockPlanks;
+import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
+import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.type.TreeType;
 import org.spongepowered.api.data.type.TreeTypes;
+import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
+import org.spongepowered.api.registry.util.RegistrationDependency;
+import org.spongepowered.common.data.type.SpongeTreeType;
+import org.spongepowered.common.interfaces.block.IMixinBlock;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
+import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
+import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
+@RegistrationDependency(ItemTypeRegistryModule.class)
 @RegisterCatalog(TreeTypes.class)
-public final class TreeTypeRegistryModule extends MinecraftEnumBasedCatalogTypeModule<BlockPlanks.EnumType, TreeType> {
+public final class TreeTypeRegistryModule extends AbstractCatalogRegistryModule<TreeType> implements SpongeAdditionalCatalogRegistryModule<TreeType> {
+
+    public static TreeTypeRegistryModule getInstance() {
+        return Holder.INSTANCE;
+    }
+
+    private TreeTypeRegistryModule() {
+    }
 
     @Override
-    protected BlockPlanks.EnumType[] getValues() {
-        return BlockPlanks.EnumType.values();
+    public boolean allowsApiRegistration() {
+        return false;
+    }
+
+    @Override
+    public void registerAdditionalCatalog(TreeType treeType) {
+        this.map.put(treeType.getKey(), treeType);
+    }
+
+    @Override
+    public void registerDefaults() {
+        final Map<String, String> names = new HashMap<>();
+        names.put("oak", CatalogKey.MINECRAFT_NAMESPACE);
+        names.put("birch", CatalogKey.MINECRAFT_NAMESPACE);
+        names.put("acacia", CatalogKey.MINECRAFT_NAMESPACE);
+        names.put("dark_oak", CatalogKey.MINECRAFT_NAMESPACE);
+        names.put("jungle", CatalogKey.MINECRAFT_NAMESPACE);
+        names.put("chorus", CatalogKey.MINECRAFT_NAMESPACE); // Is this a real tree?
+
+        // Extract all possible tree types from item names
+        for (ItemType itemType : ItemTypeRegistryModule.getInstance().getAll()) {
+            String name = itemType.getKey().getValue();
+            if (name.endsWith("_log")) {
+                name = name.substring(0, name.lastIndexOf('_'));
+            }
+            names.putIfAbsent(name, itemType.getKey().getNamespace());
+        }
+
+        names.forEach((key, namespace) -> new SpongeTreeType(CatalogKey.of(namespace, key), key));
+    }
+
+    public static Optional<TreeType> getTreeType(String name) {
+        for (TreeType treeType : getInstance().map.values()) {
+            if (name.startsWith(treeType.getName())) {
+                return Optional.of(treeType);
+            }
+        }
+        return Optional.empty();
+    }
+
+    public static Optional<TreeType> getTreeType(IBlockState blockState) {
+        final Block block = blockState.getBlock();
+        Optional<TreeType> treeType = ((IMixinBlock) block).getTreeType();
+        if (treeType != null) {
+            return treeType;
+        }
+        treeType = getTreeType(((BlockType) block).getKey().getValue());
+        ((IMixinBlock) block).setTreeType(treeType);
+        return treeType;
+    }
+
+    private static final class Holder {
+        static final TreeTypeRegistryModule INSTANCE = new TreeTypeRegistryModule();
     }
 }

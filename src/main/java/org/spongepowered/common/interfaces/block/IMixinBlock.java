@@ -32,12 +32,16 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.property.Property;
+import org.spongepowered.api.data.type.TreeType;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.common.interfaces.IMixinTrackable;
 
 import java.util.List;
 import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 /**
  * A quasi interface to mix into every possible {@link Block} such that their
@@ -141,4 +145,9 @@ public interface IMixinBlock extends IMixinTrackable {
     ImmutableMap<Property<?>, ?> getProperties(IBlockState mixinStateImplementation);
 
     void initializeTrackerState();
+
+    @Nullable
+    Optional<TreeType> getTreeType();
+
+    void setTreeType(Optional<TreeType> treeType);
 }

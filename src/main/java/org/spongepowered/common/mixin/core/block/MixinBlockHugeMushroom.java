@@ -31,11 +31,12 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableBigMushroomData;
-import org.spongepowered.api.data.type.BigMushroomType;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableBigMushroomPoresData;
+import org.spongepowered.api.data.manipulator.mutable.BigMushroomPoresData;
+import org.spongepowered.api.data.value.SetValue;
 import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
 
 import java.util.Optional;
 
@@ -44,35 +45,54 @@ public abstract class MixinBlockHugeMushroom extends MixinBlock {
 
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getBigMushroomTypeFor(blockState));
+        // TODO: BigMushroomPoresData
+        return ImmutableList.of();
     }
 
     @Override
     public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
-        return ImmutableBigMushroomData.class.isAssignableFrom(immutable);
+        return ImmutableBigMushroomPoresData.class.isAssignableFrom(immutable);
     }
 
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
-        if (manipulator instanceof ImmutableBigMushroomData) {
-            final BlockHugeMushroom.EnumType bigMushroomType =
-                    (BlockHugeMushroom.EnumType) (Object) ((ImmutableBigMushroomData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.withProperty(BlockHugeMushroom.VARIANT, bigMushroomType));
+        if (manipulator instanceof BigMushroomPoresData) {
+            final BigMushroomPoresData data = (BigMushroomPoresData) manipulator;
+            return Optional.of((BlockState) blockState
+                    .with(BlockHugeMushroom.UP, data.get(Keys.BIG_MUSHROOM_PORES_UP).get())
+                    .with(BlockHugeMushroom.DOWN, data.get(Keys.BIG_MUSHROOM_PORES_DOWN).get())
+                    .with(BlockHugeMushroom.EAST, data.get(Keys.BIG_MUSHROOM_PORES_EAST).get())
+                    .with(BlockHugeMushroom.WEST, data.get(Keys.BIG_MUSHROOM_PORES_WEST).get())
+                    .with(BlockHugeMushroom.NORTH, data.get(Keys.BIG_MUSHROOM_PORES_NORTH).get())
+                    .with(BlockHugeMushroom.SOUTH, data.get(Keys.BIG_MUSHROOM_PORES_SOUTH).get()));
         }
         return super.getStateWithData(blockState, manipulator);
     }
 
     @Override
     public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends Value<E>> key, E value) {
-        if (key.equals(Keys.BIG_MUSHROOM_TYPE)) {
-            final BlockHugeMushroom.EnumType bigMushroomType = (BlockHugeMushroom.EnumType) value;
-            return Optional.of((BlockState) blockState.withProperty(BlockHugeMushroom.VARIANT, bigMushroomType));
+        if (key.equals(Keys.BIG_MUSHROOM_PORES_UP)) {
+            return Optional.of((BlockState) blockState.with(BlockHugeMushroom.UP, (Boolean) value));
+        } else if (key.equals(Keys.BIG_MUSHROOM_PORES_DOWN)) {
+            return Optional.of((BlockState) blockState.with(BlockHugeMushroom.DOWN, (Boolean) value));
+        } else if (key.equals(Keys.BIG_MUSHROOM_PORES_EAST)) {
+            return Optional.of((BlockState) blockState.with(BlockHugeMushroom.EAST, (Boolean) value));
+        } else if (key.equals(Keys.BIG_MUSHROOM_PORES_WEST)) {
+            return Optional.of((BlockState) blockState.with(BlockHugeMushroom.WEST, (Boolean) value));
+        } else if (key.equals(Keys.BIG_MUSHROOM_PORES_NORTH)) {
+            return Optional.of((BlockState) blockState.with(BlockHugeMushroom.NORTH, (Boolean) value));
+        } else if (key.equals(Keys.BIG_MUSHROOM_PORES_SOUTH)) {
+            return Optional.of((BlockState) blockState.with(BlockHugeMushroom.SOUTH, (Boolean) value));
+        } else if (key.equals(Keys.BIG_MUSHROOM_PORES)) {
+            final SetValue<Direction> directions = (SetValue<Direction>) value;
+            return Optional.of((BlockState) blockState
+                    .with(BlockHugeMushroom.UP, directions.contains(Direction.UP))
+                    .with(BlockHugeMushroom.DOWN, directions.contains(Direction.DOWN))
+                    .with(BlockHugeMushroom.EAST, directions.contains(Direction.EAST))
+                    .with(BlockHugeMushroom.WEST, directions.contains(Direction.WEST))
+                    .with(BlockHugeMushroom.NORTH, directions.contains(Direction.NORTH))
+                    .with(BlockHugeMushroom.SOUTH, directions.contains(Direction.SOUTH)));
         }
         return super.getStateWithValue(blockState, key, value);
-    }
-
-    private ImmutableBigMushroomData getBigMushroomTypeFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeBigMushroomData.class,
-                (BigMushroomType) (Object) blockState.getValue(BlockHugeMushroom.VARIANT));
     }
 }
