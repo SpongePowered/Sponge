@@ -42,8 +42,6 @@ import net.minecraft.block.BlockPistonBase;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.crash.CrashReportCategory;
-import net.minecraft.crash.ReportedException;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntitySkeletonHorse;
@@ -70,6 +68,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.EnumDifficulty;
+import net.minecraft.world.EnumLightType;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.GameType;
@@ -84,13 +83,14 @@ import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
+import net.minecraft.world.dimension.Dimension;
 import net.minecraft.world.gen.ChunkGeneratorEnd;
 import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.storage.ISaveHandler;
-import net.minecraft.world.storage.MapStorage;
 import net.minecraft.world.storage.WorldInfo;
 import net.minecraft.world.storage.WorldSavedData;
+import net.minecraft.world.storage.WorldSavedDataStorage;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Sponge;
@@ -129,13 +129,13 @@ import org.spongepowered.api.world.GeneratorTypes;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.PortalAgent;
-import org.spongepowered.api.world.PortalAgentType;
-import org.spongepowered.api.world.PortalAgentTypes;
 import org.spongepowered.api.world.gen.BiomeGenerator;
 import org.spongepowered.api.world.gen.WorldGenerator;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.api.world.storage.WorldStorage;
+import org.spongepowered.api.world.teleport.PortalAgentType;
+import org.spongepowered.api.world.teleport.PortalAgentTypes;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.Weathers;
 import org.spongepowered.asm.mixin.Final;
@@ -211,6 +211,7 @@ import org.spongepowered.common.world.type.SpongeWorldType;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
@@ -263,7 +264,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Shadow private int blockEventCacheIndex;
     @Shadow private int updateEntityTick;
 
-    @Shadow protected abstract void saveLevel() throws MinecraftException;
+    @Shadow protected abstract void saveLevel();
     @Shadow public abstract boolean fireBlockEvent(BlockEventData event);
     @Shadow public abstract void createBonusChest();
     @Shadow @Nullable public abstract net.minecraft.entity.Entity getEntityFromUuid(UUID uuid);
@@ -275,13 +276,13 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         return false; // Shadowed
     }
 
-    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldProvider;setWorld(Lnet/minecraft/world/World;)V"))
-    private void onSetWorld(WorldProvider worldProvider, World worldIn) {
+    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/dimension/Dimension;setWorld(Lnet/minecraft/world/World;)V"))
+    private void onSetWorld(Dimension dimension, World worldIn) {
         // Guarantees no mod has changed our worldInfo.
         // Mods such as FuturePack replace worldInfo with a custom one for separate world time.
         // This change is not needed as all worlds in Sponge use separate save handlers.
         WorldInfo originalWorldInfo = worldIn.getWorldInfo();
-        worldProvider.setWorld(worldIn);
+        dimension.setWorld(worldIn);
         this.worldInfo = originalWorldInfo;
     }
 
@@ -301,7 +302,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         this.timings = new WorldTimingsHandler((WorldServer) (Object) this);
         this.dimensionId = dimensionId;
         this.prevWeather = this.getWeather();
-        this.weatherStartTime = this.worldInfo.getWorldTotalTime();
+        this.weatherStartTime = this.worldInfo.getGameTime();
         ((World) (Object) this).getWorldBorder().addListener(new PlayerBorderListener(this.getMinecraftServer(), dimensionId));
         PortalAgentType portalAgentType = ((WorldProperties) this.worldInfo).getPortalAgentType();
         if (!portalAgentType.equals(PortalAgentTypes.DEFAULT)) {
@@ -326,8 +327,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         this.setMemoryViewDistance(this.chooseViewDistanceValue(this.getActiveConfig().getConfig().getWorld().getViewDistance()));
     }
 
-    @Redirect(method = "init", at = @At(value = "NEW", target = "net/minecraft/world/storage/MapStorage"))
-    private MapStorage onCreateMapStorage(ISaveHandler saveHandler) {
+    @Redirect(method = "init", at = @At(value = "NEW", target = "net/minecraft/world/storage/WorldSavedDataStorage"))
+    private WorldSavedDataStorage onCreateWorldSavedDataStorage(ISaveHandler saveHandler) {
         WorldServer overWorld = WorldManager.getWorldByDimensionId(0).orElse(null);
         // if overworld has loaded, use its mapstorage
         if (this.dimensionId != 0 && overWorld != null) {
@@ -335,15 +336,15 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
 
         // if we are loading overworld, create a new mapstorage
-        return new MapStorage(saveHandler);
+        return new WorldSavedDataStorage(saveHandler);
     }
 
     // The following two redirects work around the fact that 'onCreateMapStorage' causes all worlds to share a single MapStorage.
     // Worlds other than the Overworld have scoreboard created, but they are never used. Therefore, we need to ensure that these unused scoreboards
     // are not saved into the global MapStorage when non-Overworld worlds are initialized.
 
-    @Redirect(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/MapStorage;setData(Ljava/lang/String;Lnet/minecraft/world/storage/WorldSavedData;)V"))
-    private void onMapStorageSetData(MapStorage storage, String name, WorldSavedData data) {
+    @Redirect(method = "init", at = @At(value = "INVOKE", target = "Lnet.minecraft.world.storage.WorldSavedDataStorage;setData(Ljava/lang/String;Lnet/minecraft/world/storage/WorldSavedData;)V"))
+    private void onMapStorageSetData(WorldSavedDataStorage storage, String name, WorldSavedData data) {
         if (name.equals("scoreboard") && this.dimensionId != 0) {
             return;
         }
@@ -2011,7 +2012,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      * @return The light for the defined sky type and block position
      */
     @Override
-    public int getLightFor(EnumSkyBlock type, BlockPos pos) {
+    public int getLightFor(EnumLightType type, BlockPos pos) {
         if (pos.getY() < 0) {
             pos = new BlockPos(pos.getX(), 0, pos.getZ());
         }
@@ -2454,7 +2455,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @Override
     public long getRunningDuration() {
-        return this.worldInfo.getWorldTotalTime() - this.weatherStartTime;
+        return this.worldInfo.getGameTime() - this.weatherStartTime;
     }
 
     @Override
@@ -2463,10 +2464,10 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     @Override
-    public void setWeather(Weather weather, long duration) {
+    public void setWeather(Weather weather, Duration duration) {
         this.prevWeather = getWeather();
         if (weather.equals(Weathers.CLEAR)) {
-            this.worldInfo.setCleanWeatherTime((int) duration);
+            this.worldInfo.setClearWeatherTime((int) duration);
             this.worldInfo.setRainTime(0);
             this.worldInfo.setThunderTime(0);
             this.worldInfo.setRaining(false);

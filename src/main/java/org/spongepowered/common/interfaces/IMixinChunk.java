@@ -121,4 +121,6 @@ public interface IMixinChunk {
     void markChunkDirty();
 
     boolean isActive();
+
+    boolean isEmpty();
 }

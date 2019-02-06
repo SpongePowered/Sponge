@@ -46,6 +46,7 @@ import net.minecraft.entity.item.EntityFallingBlock;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityPainting;
 import net.minecraft.entity.item.EntityPainting.EnumArt;
+import net.minecraft.entity.item.PaintingType;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
@@ -60,19 +61,17 @@ import net.minecraft.util.ITickable;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.EnumLightType;
-import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.GameType;
 import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorldEventListener;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
@@ -100,18 +99,19 @@ import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
-import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.ChunkPreGenerate;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.biome.BiomeType;
+import org.spongepowered.api.world.biome.worker.MutableBiomeVolumeWorker;
+import org.spongepowered.api.world.chunk.Chunk;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.extent.Extent;
-import org.spongepowered.api.world.extent.worker.MutableBiomeVolumeWorker;
-import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
 import org.spongepowered.api.world.storage.WorldProperties;
+import org.spongepowered.api.world.volume.EntityHit;
+import org.spongepowered.api.world.volume.block.worker.MutableBlockVolumeWorker;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -136,9 +136,9 @@ import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
+import org.spongepowered.common.interfaces.world.IMixinDimension;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
-import org.spongepowered.common.interfaces.world.IMixinDimension;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.mixin.tileentityactivation.MixinWorldServer_TileEntityActivation;
@@ -210,7 +210,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public int seaLevel;
 
     @Shadow public boolean processingLoadedTiles;
-    @Shadow protected boolean scheduledUpdatesAreImmediate;
     @Shadow protected WorldInfo worldInfo;
     @Shadow protected IChunkProvider chunkProvider;
     @Shadow @Final public net.minecraft.world.border.WorldBorder worldBorder;
@@ -220,14 +219,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Shadow protected abstract void tickPlayers();
 
-    @Shadow public net.minecraft.world.World init() {
-        // Should never be overwritten because this is @Shadow'ed
-        throw new RuntimeException("Bad things have happened");
-    }
 
     // To be overridden in MixinWorldServer_Lighting
-    @Shadow public abstract int getLight(BlockPos pos);
-    @Shadow public abstract int getLight(BlockPos pos, boolean checkNeighbors);
     @Shadow public abstract int getRawLight(BlockPos pos, EnumLightType lightType);
     @Shadow public abstract int getSkylightSubtracted();
     @Shadow public abstract net.minecraft.world.chunk.Chunk getChunk(BlockPos pos);
@@ -236,12 +229,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract boolean checkLightFor(EnumLightType lightType, BlockPos pos);
     @Shadow public abstract boolean addTileEntity(net.minecraft.tileentity.TileEntity tile);
     @Shadow public abstract void onEntityAdded(net.minecraft.entity.Entity entityIn);
-    @Shadow public abstract boolean isAreaLoaded(BlockPos from, BlockPos to);
-    @Shadow public abstract boolean isAreaLoaded(BlockPos center, int radius, boolean allowEmpty);
-    @Shadow public abstract boolean isAreaLoaded(int xStart, int yStart, int zStart, int xEnd, int yEnd, int zEnd, boolean allowEmpty);
     @Shadow public abstract void onEntityRemoved(net.minecraft.entity.Entity entityIn);
-    @Shadow public abstract void updateEntity(net.minecraft.entity.Entity ent);
-    @Shadow public abstract boolean isBlockLoaded(BlockPos pos);
     @Shadow public void markChunkDirty(BlockPos pos, net.minecraft.tileentity.TileEntity unusedTileEntity){};
    // @Shadow public abstract List<Entity> getEntitiesInAABBexcluding(@Nullable net.minecraft.entity.Entity entityIn, AxisAlignedBB boundingBox, @Nullable Predicate <? super net.minecraft.entity.Entity > predicate);
     @Shadow public abstract boolean addWeatherEffect(net.minecraft.entity.Entity entityIn);
@@ -250,42 +238,25 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract net.minecraft.world.chunk.Chunk getChunk(int chunkX, int chunkZ);
     @Shadow public abstract net.minecraft.world.Explosion newExplosion(@Nullable net.minecraft.entity.Entity entityIn, double x, double y, double z, float strength,
             boolean isFlaming, boolean isSmoking);
-    @Shadow public abstract List<net.minecraft.entity.Entity> getEntities(Class<net.minecraft.entity.Entity> entityType,
-            com.google.common.base.Predicate<net.minecraft.entity.Entity> filter);
-    @Shadow public abstract <T extends net.minecraft.entity.Entity> List<T> getEntitiesWithinAABB(Class <? extends T > clazz, AxisAlignedBB aabb,
-            com.google.common.base.Predicate<? super T > filter);
-    @Shadow public abstract List<net.minecraft.entity.Entity> getEntitiesWithinAABBExcludingEntity(net.minecraft.entity.Entity entityIn, AxisAlignedBB bb);
-    @Shadow public abstract MinecraftServer getMinecraftServer();
     // Methods needed for MixinWorldServer & Tracking
     @Shadow public abstract boolean spawnEntity(net.minecraft.entity.Entity entity); // This is overridden in MixinWorldServer
     @Shadow public abstract void updateAllPlayersSleepingFlag();
     @Shadow public abstract boolean setBlockState(BlockPos pos, IBlockState state);
     @Shadow public abstract boolean setBlockState(BlockPos pos, IBlockState state, int flags);
-    @Shadow public abstract void immediateBlockTick(BlockPos pos, IBlockState state, Random random);
     @Shadow public abstract void updateComparatorOutputLevel(BlockPos pos, Block blockIn);
     @Shadow public abstract void neighborChanged(BlockPos pos, final Block blockIn, BlockPos otherPos);
     @Shadow public abstract void notifyNeighborsOfStateExcept(BlockPos pos, Block blockType, EnumFacing skipSide);
-    @Shadow public abstract void updateObservingBlocksAt(BlockPos pos, Block blockType);
-    @Shadow public abstract void notifyNeighborsRespectDebug(BlockPos pos, Block blockType, boolean updateObserverBlocks);
-    @Shadow public abstract void notifyNeighborsOfStateChange(BlockPos pos, Block blockType, boolean updateObserverBlocks);
     @Shadow public abstract void notifyBlockUpdate(BlockPos pos, IBlockState oldState, IBlockState newState, int flags);
-    @Shadow public abstract void updateBlockTick(BlockPos pos, Block blockIn, int delay, int priority); // this is really scheduleUpdate
     @Shadow public abstract void playSound(EntityPlayer p_184148_1_, double p_184148_2_, double p_184148_4_, double p_184148_6_, SoundEvent p_184148_8_, net.minecraft.util.SoundCategory p_184148_9_, float p_184148_10_, float p_184148_11_);
-    @Shadow protected abstract void updateBlocks();
     @Shadow public abstract GameRules shadow$getGameRules();
     @Shadow public abstract boolean isRaining();
     @Shadow public abstract boolean isThundering();
     @Shadow public abstract boolean isRainingAt(BlockPos strikePosition);
     @Shadow public abstract DifficultyInstance getDifficultyForLocation(BlockPos pos);
-    @Shadow public abstract BlockPos getPrecipitationHeight(BlockPos pos);
-    @Shadow public abstract boolean canBlockFreezeNoWater(BlockPos pos);
-    @Shadow public abstract boolean canSnowAt(BlockPos pos, boolean checkLight);
-    @Shadow public abstract List<AxisAlignedBB> getCollisionBoxes(net.minecraft.entity.Entity entityIn, AxisAlignedBB bb);
     @Shadow public abstract void notifyLightSet(BlockPos pos);
     @Shadow @Nullable private net.minecraft.tileentity.TileEntity getPendingTileEntityAt(BlockPos p_189508_1_) {
         return null; // Shadowed
     }
-    @Shadow public abstract int getHeight(int x, int z);
     @Shadow public boolean destroyBlock(BlockPos pos, boolean dropBlock) {
         return false; // shadowed
     }
@@ -359,12 +330,12 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public Optional<Chunk> getChunk(int x, int y, int z) {
+    public Chunk getChunk(int x, int y, int z) {
         if (!SpongeChunkLayout.instance.isValidChunk(x, y, z)) {
-            return Optional.empty();
+            throw new IllegalStateException(String.format("Invalid chunk position %s %s %s", x, y, z));
         }
         final WorldServer worldserver = (WorldServer) (Object) this;
-        return Optional.ofNullable((Chunk) worldserver.getChunkProvider().getLoadedChunk(x, z));
+        return (Chunk) worldserver.getChunkProvider().getLoadedChunk(x, z);
     }
 
     @Override
@@ -422,9 +393,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public void setBiome(int x, int y, int z, BiomeType biome) {
+    public boolean setBiome(int x, int y, int z, BiomeType biome) {
         checkBiomeBounds(x, y, z);
-        ((Chunk) getChunk(x >> 4, z >> 4)).setBiome(x, y, z, biome);
+        return ((Chunk) getChunk(x >> 4, z >> 4)).setBiome(x, y, z, biome);
     }
 
     @SuppressWarnings("unchecked")
@@ -512,13 +483,13 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
         if (naturally && entity instanceof EntityLiving) {
             // Adding the default equipment
-            ((EntityLiving)entity).onInitialSpawn(world.getDifficultyForLocation(new BlockPos(x, y, z)), null);
+            ((EntityLiving)entity).onInitialSpawn(world.getDifficultyForLocation(new BlockPos(x, y, z)), null, null);
         }
 
         if (entity instanceof EntityPainting) {
             // This is default when art is null when reading from NBT, could
             // choose a random art instead?
-            ((EntityPainting) entity).art = EnumArt.KEBAB;
+            ((EntityPainting) entity).art = PaintingType.KEBAB;
         }
 
         return entity;
@@ -709,7 +680,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public void triggerExplosion(Explosion explosion) {
         checkNotNull(explosion, "explosion");
-        Location<World> origin = explosion.getLocation();
+        Location origin = explosion.getLocation();
         checkNotNull(origin, "location");
         newExplosion(EntityUtil.toNullableNative(explosion.getSourceExplosive().orElse(null)), origin.getX(),
                 origin.getY(), origin.getZ(), explosion.getRadius(), explosion.canCauseFire(),
@@ -726,12 +697,12 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public MutableBiomeVolumeWorker<World> getBiomeWorker() {
-        return new SpongeMutableBiomeVolumeWorker<>(this);
+        return new SpongeMutableBiomeVolumeWorker((World) this);
     }
 
     @Override
     public MutableBlockVolumeWorker<World> getBlockWorker() {
-        return new SpongeMutableBlockVolumeWorker<>(this);
+        return new SpongeMutableBlockVolumeWorker(this);
     }
 
     @Override
@@ -760,7 +731,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 builder.add(manipulator);
             }
             final NBTTagCompound compound = new NBTTagCompound();
-            ((net.minecraft.tileentity.TileEntity) tileEntity).writeToNBT(compound);
+            ((net.minecraft.tileentity.TileEntity) tileEntity).write(compound);
             builder.unsafeNbt(compound);
         }
         return builder.build();
@@ -773,7 +744,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public boolean restoreSnapshot(int x, int y, int z, BlockSnapshot snapshot, boolean force, BlockChangeFlag flag) {
-        snapshot = snapshot.withLocation(new Location<>(this, new Vector3i(x, y, z)));
+        snapshot = snapshot.withLocation(new Location(this, new Vector3i(x, y, z)));
         return snapshot.restore(force, flag);
     }
 
@@ -800,7 +771,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         checkBlockBounds(x, y, z);
         final BlockPos pos = new BlockPos(x, y, z);
         final IBlockState state = getBlockState(pos);
-        final AxisAlignedBB box = state.getBoundingBox((IBlockAccess) this, pos);
+        final AxisAlignedBB box = state.getShape((IBlockReader) this, pos).getBoundingBox();
         try {
             return Optional.of(VecHelper.toSpongeAABB(box).offset(x, y, z));
         } catch (IllegalArgumentException exception) {
@@ -929,7 +900,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 }
                 // If the intersections are near another chunk, its entities might be partially in the current chunk, so include it also
                 final IMixinChunk nearIntersections = getChunkNearIntersections(xChunk, zChunk, xCurrent, zCurrent, xNext, zNext);
-                if (nearIntersections != null) {
+                if (nearIntersections != null && !nearIntersections.isEmpty()) {
                     nearIntersections
                             .getIntersectingEntities(chunkStart, direction, remainingDistance, filter, chunkStart.getY(), yNext, intersecting);
                 }
@@ -960,42 +931,42 @@ public abstract class MixinWorld implements World, IMixinWorld {
         final boolean d21 = c1.distanceSquared(xNext, zNext) <= nearDistance2;
         if (d11 && d21) {
             // Near corner -x, -z
-            return (IMixinChunk) getChunkAtBlock(xChunk - chunkWidth, 0, zChunk - chunkWidth).orElse(null);
+            return (IMixinChunk) getChunkAtBlock(xChunk - chunkWidth, 0, zChunk - chunkWidth);
         }
         final boolean d12 = c2.distanceSquared(xCurrent, zCurrent) <= nearDistance2;
         final boolean d22 = c2.distanceSquared(xNext, zNext) <= nearDistance2;
         if (d12 && d22) {
             // Near corner +x, -z
-            return (IMixinChunk) getChunkAtBlock(xChunk + chunkWidth, 0, zChunk - chunkWidth).orElse(null);
+            return (IMixinChunk) getChunkAtBlock(xChunk + chunkWidth, 0, zChunk - chunkWidth);
         }
         final boolean d13 = c3.distanceSquared(xCurrent, zCurrent) <= nearDistance2;
         final boolean d23 = c3.distanceSquared(xNext, zNext) <= nearDistance2;
         if (d13 && d23) {
             // Near corner -x, +z
-            return (IMixinChunk) getChunkAtBlock(xChunk - chunkWidth, 0, zChunk + chunkWidth).orElse(null);
+            return (IMixinChunk) getChunkAtBlock(xChunk - chunkWidth, 0, zChunk + chunkWidth);
         }
         final boolean d14 = c4.distanceSquared(xCurrent, zCurrent) <= nearDistance2;
         final boolean d24 = c4.distanceSquared(xNext, zNext) <= nearDistance2;
         if (d14 && d24) {
             // Near corner +x, +z
-            return (IMixinChunk) getChunkAtBlock(xChunk + chunkWidth, 0, zChunk + chunkWidth).orElse(null);
+            return (IMixinChunk) getChunkAtBlock(xChunk + chunkWidth, 0, zChunk + chunkWidth);
         }
         // Look for two intersections being near the corners on the same face
         if (d11 && d23 || d21 && d13) {
             // Near face -x
-            return (IMixinChunk) getChunkAtBlock(xChunk - chunkWidth, 0, zChunk).orElse(null);
+            return (IMixinChunk) getChunkAtBlock(xChunk - chunkWidth, 0, zChunk);
         }
         if (d11 && d22 || d21 && d12) {
             // Near face -z
-            return (IMixinChunk) getChunkAtBlock(xChunk, 0, zChunk - chunkWidth).orElse(null);
+            return (IMixinChunk) getChunkAtBlock(xChunk, 0, zChunk - chunkWidth);
         }
         if (d14 && d22 || d24 && d12) {
             // Near face +x
-            return (IMixinChunk) getChunkAtBlock(xChunk + chunkWidth, 0, zChunk).orElse(null);
+            return (IMixinChunk) getChunkAtBlock(xChunk + chunkWidth, 0, zChunk);
         }
         if (d14 && d23 || d24 && d13) {
             // Near face +z
-            return (IMixinChunk) getChunkAtBlock(xChunk, 0, zChunk + chunkWidth).orElse(null);
+            return (IMixinChunk) getChunkAtBlock(xChunk, 0, zChunk + chunkWidth);
         }
         return null;
     }
@@ -1012,23 +983,23 @@ public abstract class MixinWorld implements World, IMixinWorld {
         // Neighbour -x chunk
         final Vector3i chunkBlockPos = SpongeChunkLayout.instance.forceToWorld(chunkPos);
         if (start.getX() - chunkBlockPos.getX() <= nearDistance) {
-            ((IMixinChunk) getChunk(chunkPos.add(-1, 0, 0)).get())
+            ((IMixinChunk) getChunk(chunkPos.add(-1, 0, 0)))
                     .getIntersectingEntities(start, direction, distance, filter, start.getY(), endY, intersecting);
         }
         // Neighbour -z chunk
         if (start.getZ() - chunkBlockPos.getZ() <= nearDistance) {
-            ((IMixinChunk) getChunk(chunkPos.add(0, 0, -1)).get())
+            ((IMixinChunk) getChunk(chunkPos.add(0, 0, -1)))
                     .getIntersectingEntities(start, direction, distance, filter, start.getY(), endY, intersecting);
         }
         // Neighbour +x chunk
         final int chunkWidth = SpongeChunkLayout.CHUNK_SIZE.getX();
         if (chunkBlockPos.getX() + chunkWidth - start.getX() <= nearDistance) {
-            ((IMixinChunk) getChunk(chunkPos.add(1, 0, 0)).get())
+            ((IMixinChunk) getChunk(chunkPos.add(1, 0, 0)))
                     .getIntersectingEntities(start, direction, distance, filter, start.getY(), endY, intersecting);
         }
         // Neighbour +z chunk
         if (chunkBlockPos.getZ() + chunkWidth - start.getZ() <= nearDistance) {
-            ((IMixinChunk) getChunk(chunkPos.add(0, 0, 1)).get())
+            ((IMixinChunk) getChunk(chunkPos.add(0, 0, 1)))
                     .getIntersectingEntities(start, direction, distance, filter, start.getY(), endY, intersecting);
         }
         return intersecting;
@@ -1114,8 +1085,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public void sendBlockChange(int x, int y, int z, BlockState state) {
         checkNotNull(state, "state");
         SPacketBlockChange packet = new SPacketBlockChange();
-        packet.blockPosition = new BlockPos(x, y, z);
-        packet.blockState = BlockUtil.toNative(state);
+        packet.pos = new BlockPos(x, y, z);
+        packet.state = BlockUtil.toNative(state);
 
         for (EntityPlayer player : this.playerEntities) {
             if (player instanceof EntityPlayerMP) {
@@ -1139,25 +1110,25 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Inject(method = "destroyBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;playEvent(ILnet/minecraft/util/math/BlockPos;I)V"), cancellable = true)
     public void onDestroyBlock(BlockPos pos, boolean dropBlock, CallbackInfoReturnable<Boolean> cir) {
-        
+
     }
 
-    @Redirect(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;onUpdate()V"))
+    @Redirect(method = "tickEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;onUpdate()V"))
     protected void onUpdateWeatherEffect(net.minecraft.entity.Entity entityIn) {
-        entityIn.onUpdate();
+        entityIn.tick();
     }
 
-    @Redirect(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/ITickable;update()V"))
+    @Redirect(method = "tickEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/ITickable;update()V"))
     protected void onUpdateTileEntities(ITickable tile) {
-        tile.update();
+        tile.tick();
     }
 
-    @Redirect(method = "updateEntityWithOptionalForce", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;onUpdate()V"))
+    @Redirect(method = "tickEntity(Lnet/minecraft/entity/Entity;Z)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;onUpdate()V"))
     protected void onCallEntityUpdate(net.minecraft.entity.Entity entity) {
-        entity.onUpdate();
+        entity.tick();
     }
 
-    @Redirect(method = "updateEntityWithOptionalForce", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;updateRidden()V"))
+    @Redirect(method = "tickEntity(Lnet/minecraft/entity/Entity;Z)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;updateRidden()V"))
     protected void onCallEntityRidingUpdate(net.minecraft.entity.Entity entity) {
         entity.updateRidden();
     }
@@ -1209,12 +1180,13 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public int getRawBlockLight(BlockPos pos, EnumSkyBlock lightType) {
+    public int getRawBlockLight(BlockPos pos, EnumLightType lightType) {
         return this.getRawLight(pos, lightType);
     }
 
     /**
      * @author gabizou - July 25th, 2016
+     * @author Aaron1011 - February 5th, 2018 - Update for 1.13
      * @reason Optimizes several blockstate lookups for getting raw light.
      *
      * @param pos The position to get the light for
@@ -1223,7 +1195,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
      */
     @Inject(method = "getRawLight", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getBlockState" +
             "(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/state/IBlockState;"), cancellable = true)
-    private void onLightGetBlockState(BlockPos pos, EnumSkyBlock enumSkyBlock, CallbackInfoReturnable<Integer> cir) {
+    private void onLightGetBlockState(BlockPos pos, EnumLightType enumSkyBlock, CallbackInfoReturnable<Integer> cir) {
         final net.minecraft.world.chunk.Chunk chunk;
         if (!this.isFake()) {
             chunk = ((IMixinChunkProviderServer) ((WorldServer) (Object) this).getChunkProvider()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
@@ -1311,31 +1283,34 @@ public abstract class MixinWorld implements World, IMixinWorld {
      * @return True if the area is loaded
      */
     @Redirect(method = "checkLightFor", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;isAreaLoaded(Lnet/minecraft/util/math/BlockPos;IZ)Z"))
-    protected boolean spongeIsAreaLoadedForCheckingLight(net.minecraft.world.World thisWorld, BlockPos pos, int radius, boolean allowEmtpy, EnumSkyBlock lightType, BlockPos samePosition) {
+    protected boolean spongeIsAreaLoadedForCheckingLight(net.minecraft.world.World thisWorld, BlockPos pos, int radius, boolean allowEmtpy, EnumLightType lightType, BlockPos samePosition) {
         return isAreaLoaded(pos, radius, allowEmtpy);
     }
 
     /**
      * @author gabizou - August 4th, 2016
+     * @author Aaron1011 - February 6th, 2019 - Update for 1.13
      * @reason Rewrites the check to be inlined to {@link IMixinBlockPos}.
      *
      * @param pos The position
      * @return True if the block position is valid
+     *
      */
     @Overwrite
-    public boolean isValid(BlockPos pos) { // isValid
+    public static boolean isValid(BlockPos pos) { // isValid
         return ((IMixinBlockPos) pos).isValidPosition();
     }
 
     /**
      * @author gabizou - August 4th, 2016
      * @reason Rewrites the check to be inlined to {@link IMixinBlockPos}.
+     * @author Aaron1011 - February 6th, 2019 - Update for 1.13
      *
      * @param pos The position
      * @return True if the block position is outside build height
      */
     @Overwrite
-    public boolean isOutsideBuildHeight(BlockPos pos) { // isOutsideBuildHeight
+    public static boolean isOutsideBuildHeight(BlockPos pos) { // isOutsideBuildHeight
         return ((IMixinBlockPos) pos).isInvalidYPosition();
     }
 
@@ -1347,8 +1322,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
      * @param pos The position
      * @return The light for the defined sky type and block position
      */
-    @Overwrite
-    public int getLightFor(EnumSkyBlock type, BlockPos pos) {
+    // TODO 1.13 - this doesn't seem to be necessary in 1.13
+    /*@Overwrite
+    public int getLightFor(EnumLightType type, BlockPos pos) {
         if (pos.getY() < 0) {
             pos = new BlockPos(pos.getX(), 0, pos.getZ());
         }
@@ -1362,7 +1338,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             net.minecraft.world.chunk.Chunk chunk = this.getChunk(pos);
             return chunk.getLightFor(type, pos);
         }
-    }
+    }*/
 
     /**
      * @author gabizou - August 4th, 2016
@@ -1372,6 +1348,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
      * @param pos The block position
      * @param lightValue The light value to set to
      */
+    // TODO 1.13 - this doesn't seem to be necessary in 1.13
+    /*
     @Overwrite
     public void setLightFor(EnumSkyBlock type, BlockPos pos, int lightValue) {
         // Sponge Start - Replace with inlined Valid position check
@@ -1384,7 +1362,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 this.notifyLightSet(pos);
             }
         }
-    }
+    }*/
 
 
     /**
@@ -1394,7 +1372,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
      * @param bbox The AABB to check
      * @return True if the AABB collides with a block
      */
-    @Overwrite
+    // TODO 1.13: This msethod no longer includes explicit bounds checks
+    /*@Overwrite
     public boolean collidesWithAnyBlock(AxisAlignedBB bbox) {
         List<AxisAlignedBB> list = Lists.<AxisAlignedBB>newArrayList();
         int i = MathHelper.floor(bbox.minX) - 1;
@@ -1440,7 +1419,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         } finally {
             blockpos$pooledmutableblockpos.release();
         }
-    }
+    }*/
 
 
     /*********************** TIMINGS ***********************/

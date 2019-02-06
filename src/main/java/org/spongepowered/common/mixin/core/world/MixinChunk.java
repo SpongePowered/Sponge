@@ -84,6 +84,9 @@ import org.spongepowered.api.world.chunk.Chunk;
 import org.spongepowered.api.world.volume.EntityHit;
 import org.spongepowered.api.world.volume.block.worker.MutableBlockVolumeWorker;
 import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -134,6 +137,7 @@ import javax.annotation.Nullable;
 
 @NonnullByDefault
 @Mixin(net.minecraft.world.chunk.Chunk.class)
+@Implements(@Interface(iface = IMixinChunk.class, prefix = "imixinchunk$"))
 public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
 
     private org.spongepowered.api.world.World sponge_world;
@@ -172,7 +176,6 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     @Shadow public abstract int getLightFor(EnumSkyBlock p_177413_1_, BlockPos pos);
     @Shadow public abstract IBlockState getBlockState(BlockPos pos);
     @Shadow public abstract IBlockState getBlockState(int x, int y, int z);
-    @Shadow public abstract Biome getBiome(BlockPos pos, BiomeProvider chunkManager);
     @Shadow public abstract byte[] getBiomeArray();
     @Shadow public abstract void setBiomeArray(byte[] biomeArray);
     @Shadow public abstract void checkLight();
@@ -182,6 +185,10 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     @Shadow private void relightBlock(int x, int y, int z) { };
     @Shadow public abstract BlockPos getPrecipitationHeight(BlockPos pos);
     // @formatter:on
+
+    @Shadow @Override public abstract boolean isEmpty();
+
+    @Shadow public abstract Biome getBiome(BlockPos p_201600_1_);
 
     @Inject(method = "<init>(Lnet/minecraft/world/World;II)V", at = @At("RETURN"), remap = false)
     public void onConstructed(World world, int x, int z, CallbackInfo ci) {
@@ -196,6 +203,11 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
                     this.sponge_world.getUniqueId().getLeastSignificantBits() ^ (z * 2 + 1));
         }
         this.cacheKey = ChunkPos.asLong(this.x, this.z);
+    }
+
+    @Intrinsic
+    public boolean imixinchunk$isEmpty() {
+        return this.isEmpty();
     }
 
     @Override
@@ -374,11 +386,11 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     @Override
     public BiomeType getBiome(int x, int y, int z) {
         checkBiomeBounds(x, y, z);
-        return (BiomeType) getBiome(new BlockPos(x, y, z), this.world.getBiomeProvider());
+        return (BiomeType) getBiome(new BlockPos(x, y, z));
     }
 
     @Override
-    public void setBiome(int x, int y, int z, BiomeType biome) {
+    public boolean setBiome(int x, int y, int z, BiomeType biome) {
         checkBiomeBounds(x, y, z);
         // Taken from Chunk#getBiome
         byte[] biomeArray = getBiomeArray();
@@ -393,6 +405,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
                 ((IMixinPlayerChunkMapEntry) entry).markBiomesForUpdate();
             }
         }
+        return true;
     }
 
     @Override

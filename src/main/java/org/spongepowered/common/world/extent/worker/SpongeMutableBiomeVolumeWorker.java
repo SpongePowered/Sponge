@@ -25,9 +25,13 @@
 package org.spongepowered.common.world.extent.worker;
 
 import org.spongepowered.api.world.biome.BiomeType;
-import org.spongepowered.api.world.extent.MutableBiomeVolume;
-import org.spongepowered.api.world.extent.worker.MutableBiomeVolumeWorker;
-import org.spongepowered.api.world.extent.worker.procedure.BiomeVolumeFiller;
+import org.spongepowered.api.world.biome.MutableBiomeVolume;
+import org.spongepowered.api.world.biome.UnmodifiableBiomeVolume;
+import org.spongepowered.api.world.biome.worker.MutableBiomeVolumeWorker;
+import org.spongepowered.api.world.volume.worker.function.VolumeFiller;
+import org.spongepowered.api.world.volume.worker.function.VolumeMapper;
+import org.spongepowered.api.world.volume.worker.function.VolumeMerger;
+import org.spongepowered.api.world.volume.worker.function.VolumeVisitor;
 
 /**
  *
@@ -39,7 +43,7 @@ public class SpongeMutableBiomeVolumeWorker<V extends MutableBiomeVolume> extend
     }
 
     @Override
-    public void fill(BiomeVolumeFiller filler) {
+    public void fill(VolumeFiller<BiomeType> filler) {
         final int xMin = this.volume.getBiomeMin().getX();
         final int yMin = this.volume.getBiomeMin().getY();
         final int zMin = this.volume.getBiomeMin().getZ();
@@ -49,7 +53,7 @@ public class SpongeMutableBiomeVolumeWorker<V extends MutableBiomeVolume> extend
         for (int z = zMin; z <= zMax; z++) {
             for (int y = yMin; y <= yMax; y++) {
                 for (int x = xMin; x <= xMax; x++) {
-                    final BiomeType biome = filler.produce(x, y, z);
+                    final BiomeType biome = filler.provide(x, y, z);
                     this.volume.setBiome(x, y, z, biome);
                 }
             }
