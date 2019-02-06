@@ -32,6 +32,7 @@ import com.google.common.collect.Multimap;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.CreatureAttribute;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureAttribute;
@@ -396,7 +397,7 @@ public class DamageEventHandler {
     }
 
     public static List<DamageFunction> createAttackEnchantmentFunction(
-            net.minecraft.item.ItemStack heldItem, EnumCreatureAttribute creatureAttribute, float attackStrength) {
+            net.minecraft.item.ItemStack heldItem, CreatureAttribute creatureAttribute, float attackStrength) {
         final Multimap<Enchantment, Integer> enchantments = LinkedHashMultimap.create();
         final List<DamageFunction> damageModifierFunctions = new ArrayList<>();
         if (!heldItem.isEmpty()) {
@@ -405,9 +406,9 @@ public class DamageEventHandler {
                 return ImmutableList.of();
             }
 
-            for (int i = 0; i < nbttaglist.tagCount(); ++i) {
-                int j = nbttaglist.getCompoundTagAt(i).getShort("id");
-                int enchantmentLevel = nbttaglist.getCompoundTagAt(i).getShort("lvl");
+            for (int i = 0; i < nbttaglist.size(); ++i) {
+                int j = nbttaglist.getCompound(i).getShort("id");
+                int enchantmentLevel = nbttaglist.getCompound(i).getShort("lvl");
 
                 final Enchantment enchantment = Enchantment.getEnchantmentByID(j);
                 if (enchantment != null) {

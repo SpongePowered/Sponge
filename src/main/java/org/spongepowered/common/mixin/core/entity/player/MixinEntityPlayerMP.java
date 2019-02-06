@@ -87,6 +87,7 @@ import net.minecraft.stats.StatBase;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
@@ -114,6 +115,7 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.SoundCategory;
 import org.spongepowered.api.effect.sound.SoundType;
+import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.CooldownTracker;
 import org.spongepowered.api.entity.living.player.Player;
@@ -146,6 +148,7 @@ import org.spongepowered.api.network.PlayerConnection;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.api.resourcepack.ResourcePack;
+import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.text.BookView;
@@ -407,7 +410,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
             if (entitylivingbase != null) {
                 this.addStat(StatList.ENTITY_KILLED_BY.get(entitylivingbase.getType()));
-                entitylivingbase.awardKillScore(this, this.scoreValue, cause);
+                entitylivingbase.awardKillScore((Entity) (Object) this, this.scoreValue, cause);
             }
 
             this.addStat(StatList.DEATHS);
@@ -888,8 +891,9 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             event = SoundEvents.getRegisteredSoundEvent(sound.getKey().toString());
         } catch (IllegalStateException e) {
             // Otherwise send it as a custom sound
-            this.connection.sendPacket(new SPacketCustomSound(sound.getKey().toString(), (net.minecraft.util.SoundCategory) (Object) category,
-                    position.getX(), position.getY(), position.getZ(), (float) Math.max(minVolume, volume), (float) pitch));
+            ResourceLocation resourceLocation = new ResourceLocation(sound.getKey().getNamespace(), sound.getKey().getValue());
+            this.connection.sendPacket(new SPacketCustomSound(resourceLocation, (net.minecraft.util.SoundCategory) (Object) category,
+                    VecHelper.toVec3d(position), (float) Math.max(minVolume, volume), (float) pitch));
             return;
         }
 
@@ -922,17 +926,17 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
-    public void playRecord(Vector3i position, RecordType recordType) {
-        playRecord0(position, checkNotNull(recordType, "recordType"));
+    public void playMusicDisc(Vector3i position, MusicDisc musicDisc) {
+        playRecord0(position, checkNotNull(musicDisc, "musicDisc"));
     }
 
     @Override
-    public void stopRecord(Vector3i position) {
+    public void stopMusicDisc(Vector3i position) {
         playRecord0(position, null);
     }
 
-    private void playRecord0(Vector3i position, @Nullable RecordType recordType) {
-        this.connection.sendPacket(SpongeMusicDisc.createPacket(position, recordType));
+    private void playRecord0(Vector3i position, @Nullable MusicDisc musicDisc) {
+        this.connection.sendPacket(SpongeMusicDisc.createPacket(position, musicDisc));
     }
 
     @Override
@@ -997,8 +1001,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     private void onSetGameType(GameType gameType, CallbackInfo ci) {
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(this);
-            ChangeGameModeEvent.TargetPlayer event =
-                    SpongeEventFactory.createChangeGameModeEventTargetPlayer(frame.getCurrentCause(),
+            ChangeGameModeEvent  event =
+                    SpongeEventFactory.createChangeGameModeEvent(frame.getCurrentCause(),
                             (GameMode) (Object) this.interactionManager.getGameType(), (GameMode) (Object) gameType, this);
             SpongeImpl.postEvent(event);
             if (event.isCancelled()) {
@@ -1200,7 +1204,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         this.trackInteractable(villager);
     }
 
-    @Inject(method = "openGuiHorseInventory", at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/Container;addListener(Lnet/minecraft/inventory/IContainerListener;)V"))
+    @Inject(method = "openHorseInventory", at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/Container;addListener(Lnet/minecraft/inventory/IContainerListener;)V"))
     private void onOpenGuiHorseInventoryAddListener(AbstractHorse horse, IInventory inventoryIn, CallbackInfo ci) {
         this.trackInteractable(inventoryIn);
     }
@@ -1257,7 +1261,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         if (this.worldBorder == border) {
             return; //do not fire an event since nothing would have changed
         }
-        if (!SpongeImpl.postEvent(SpongeEventFactory.createChangeWorldBorderEventTargetPlayer(cause, Optional.ofNullable(this.worldBorder), Optional.ofNullable(border), this))) {
+        if (!SpongeImpl.postEvent(SpongeEventFactory.createChangeWorldBorderEventTargetPlayer(cause, Optional.ofNullable(this.worldBorder), (Player) this, Optional.ofNullable(border)))) {
             if (this.worldBorder != null) { //is the world border about to be unset?
                 ((net.minecraft.world.border.WorldBorder) this.worldBorder).listeners.remove(this.borderListener); //remove the listener, if so
             }
@@ -1290,7 +1294,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         }
     }
 
-    @Redirect(method = "onUpdateEntity",
+    @Redirect(method = "playerTick",
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/entity/player/EntityPlayerMP;getHealth()F"
@@ -1310,7 +1314,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         return getInternalScaledHealth();
     }
 
-    @Inject(method = "onUpdateEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;getTotalArmorValue()I", ordinal = 0))
+    @Inject(method = "playerTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;getTotalArmorValue()I", ordinal = 0))
     private void updateHealthPriorToArmor(CallbackInfo ci) {
         refreshScaledHealth();
     }
@@ -1413,7 +1417,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         return (CooldownTracker) shadow$getCooldownTracker();
     }
 
-    @Redirect(method = "readEntityFromNBT", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getForceGamemode()Z"))
+    @Redirect(method = "readAdditional", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getForceGamemode()Z"))
     private boolean onCheckForcedGameMode(MinecraftServer minecraftServer) {
         return minecraftServer.getForceGamemode() && !hasForcedGamemodeOverridePermission();
     }
@@ -1455,7 +1459,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     public boolean setLocation(Vector3d position, UUID world) {
         WorldProperties prop = Sponge.getServer().getWorldProperties(world).orElseThrow(() -> new IllegalArgumentException("Invalid World: No world found for UUID"));
         World loaded = Sponge.getServer().loadWorld(prop).orElseThrow(() -> new IllegalArgumentException("Invalid World: Could not load world for UUID"));
-        return this.setLocation(new Location<>(loaded, position));
+        return this.setLocation(new Location(loaded, position));
     }
 
     @Nullable private Text displayName = null;
@@ -1481,7 +1485,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         return new TextComponentString(SpongeTexts.toLegacy(this.displayName));
     }
 
-    @Redirect(method = "openGuiHorseInventory", at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/IInventory;getDisplayName()Lnet/minecraft/util/text/ITextComponent;"))
+    @Redirect(method = "openHorseInventory", at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/IInventory;getDisplayName()Lnet/minecraft/util/text/ITextComponent;"))
     private ITextComponent onGetDisplayName3(IInventory inventoryIn) {
         if (this.displayName == null) {
             return inventoryIn.getDisplayName();
@@ -1645,7 +1649,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             }, (EntityPlayerMP) (Object) this);
         };
 
-        if (this.isDead) {
+        if (this.removed) {
             // If we're dead, we don't want to force a respawn now.
             // Instead, we wait for a respawn to occur before restoring the tab list.
             // This might appear odd to plugins, but unfortunately, it can't be helped.
@@ -1653,7 +1657,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
                 if (event.getOriginalPlayer().getUniqueId().equals(this.getUniqueID())) {
                     // Delay restoring the skin by one tick, to ensure
                     // that the respawn packet is sent to the client before we change the skin back
-                    Sponge.getScheduler().createTaskBuilder().execute(restoreOldEntry).delayTicks(1).submit(SpongeImpl.getPlugin());
+                    Sponge.getServer().getScheduler().submit(Task.builder().execute(restoreOldEntry).delayTicks(1).plugin(SpongeImpl.getPlugin()).build());
                     Sponge.getEventManager().unregisterListeners(this);
                 }
             });
@@ -1738,7 +1742,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     private void updateSkinOthers() {
         // If we're already vanished, do nothing. When a plugin unvanishes us,
         // the skin will be applied
-        if (!this.isDead && !this.get(Keys.VANISH).get()) {
+        if (!this.removed && !this.get(Keys.VANISH).get()) {
             // MixinEntity#spongeOnUpdate takes care of setting the new skin when we unvanish.
             this.offer(Keys.VANISH, true);
             this.runDelay(2, () -> this.offer(Keys.VANISH, false));
@@ -1776,7 +1780,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
         // Update reducedDebugInfo game rule
         this.connection.sendPacket(new SPacketEntityStatus((EntityPlayerMP) (Object) this,
-                worldServer.getGameRules().getBoolean(DefaultGameRules.REDUCED_DEBUG_INFO) ? DataConstants.REDUCED_DEBUG_INFO_ENABLE : DataConstants.REDUCED_DEBUG_INFO_DISABLE));
+                ((World) worldServer).getGameRule(org.spongepowered.api.world.gamerule.GameRules.REDUCED_DEBUG_INFO) ? DataConstants.REDUCED_DEBUG_INFO_ENABLE : DataConstants.REDUCED_DEBUG_INFO_DISABLE));
 
         for (Object potioneffect : this.getActivePotionEffects()) {
             this.connection.sendPacket(new SPacketEntityEffect(this.getEntityId(), (PotionEffect) potioneffect));

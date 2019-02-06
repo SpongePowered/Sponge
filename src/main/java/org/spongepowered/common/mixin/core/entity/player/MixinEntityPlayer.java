@@ -172,11 +172,9 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
 
     @Shadow public PlayerCapabilities abilities;
 
-    @Shadow public abstract ITextComponent getName();
+    @Shadow public abstract ITextComponent shadow$getName();
 
     @Shadow public abstract void addStat(ResourceLocation p_195066_1_);
-
-    @Shadow public abstract UUID getUUID(GameProfile p_146094_0_);
 
     @Shadow public abstract void addStat(ResourceLocation p_195067_1_, int p_195067_2_);
 
@@ -318,7 +316,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
         this.setPosition(this.posX, this.posY, this.posZ);
         this.motionY = 0.10000000149011612D;
 
-        if ("Notch".equals(this.getName().getString())) {
+        if ("Notch".equals(this.shadow$getName().getString())) {
             this.dropItem(new ItemStack(Items.APPLE), true, false);
         }
 
@@ -643,7 +641,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                         Sponge.getCauseStackManager().pushCause(damageSource);
                     }
                     final Cause currentCause = isMainthread ? Sponge.getCauseStackManager().getCurrentCause() : Cause.of(EventContext.empty(), damageSource);
-                    final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(currentCause, originalFunctions, EntityUtil.fromNative(targetEntity), knockbackModifier, originalBaseDamage);
+                    final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(currentCause, EntityUtil.fromNative(targetEntity), originalFunctions, knockbackModifier, originalBaseDamage);
                     SpongeImpl.postEvent(event);
                     if (isMainthread) {
                         Sponge.getCauseStackManager().popCause();
