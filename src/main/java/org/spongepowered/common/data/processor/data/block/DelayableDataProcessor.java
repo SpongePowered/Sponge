@@ -40,11 +40,6 @@ public class DelayableDataProcessor extends
     }
 
     @Override
-    protected Integer getDefaultValue() {
-        return 1;
-    }
-
-    @Override
     protected DelayableData createManipulator() {
         return new SpongeDelayableData();
     }

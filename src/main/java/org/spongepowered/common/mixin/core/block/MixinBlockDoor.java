@@ -26,8 +26,9 @@ package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockDoor;
-import net.minecraft.block.BlockDoor.EnumDoorHalf;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.state.properties.DoorHingeSide;
+import net.minecraft.state.properties.DoubleBlockHalf;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -74,22 +75,22 @@ public abstract class MixinBlockDoor extends MixinBlock {
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableHingeData) {
-            final BlockDoor.EnumHingePosition hinge = (BlockDoor.EnumHingePosition) (Object) ((ImmutableHingeData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.withProperty(BlockDoor.HINGE, hinge));
+            final DoorHingeSide hinge = (DoorHingeSide) (Object) ((ImmutableHingeData) manipulator).type().get();
+            return Optional.of((BlockState) blockState.with(BlockDoor.HINGE, hinge));
         }
         if (manipulator instanceof ImmutableOpenData) {
             final boolean isOpen = ((ImmutableOpenData) manipulator).open().get();
-            return Optional.of((BlockState) blockState.withProperty(BlockDoor.OPEN, isOpen));
+            return Optional.of((BlockState) blockState.with(BlockDoor.OPEN, isOpen));
         }
         if (manipulator instanceof ImmutablePoweredData) {
-            return Optional.of((BlockState) blockState.withProperty(BlockDoor.POWERED, ((ImmutablePoweredData) manipulator).powered().get()));
+            return Optional.of((BlockState) blockState.with(BlockDoor.POWERED, ((ImmutablePoweredData) manipulator).powered().get()));
         }
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction dir = DirectionChecker.checkDirectionToHorizontal(((ImmutableDirectionalData) manipulator).direction().get());
-            return Optional.of((BlockState) blockState.withProperty(BlockDoor.FACING, DirectionResolver.getFor(dir)));
+            return Optional.of((BlockState) blockState.with(BlockDoor.FACING, DirectionResolver.getFor(dir)));
         }
         if (manipulator instanceof ImmutablePortionData) {
-            return Optional.of((BlockState) blockState.withProperty(BlockDoor.HALF,
+            return Optional.of((BlockState) blockState.with(BlockDoor.HALF,
                     convertPortionType(((ImmutablePortionData) manipulator).type().get())));
         }
         return super.getStateWithData(blockState, manipulator);
@@ -98,51 +99,51 @@ public abstract class MixinBlockDoor extends MixinBlock {
     @Override
     public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends Value<E>> key, E value) {
         if (key.equals(Keys.HINGE_POSITION)) {
-            final BlockDoor.EnumHingePosition hinge = (BlockDoor.EnumHingePosition) value;
-            return Optional.of((BlockState) blockState.withProperty(BlockDoor.HINGE, hinge));
+            final DoorHingeSide hinge = (DoorHingeSide) value;
+            return Optional.of((BlockState) blockState.with(BlockDoor.HINGE, hinge));
         }
         if (key.equals(Keys.OPEN)) {
             final boolean isOpen = (Boolean) value;
-            return Optional.of((BlockState) blockState.withProperty(BlockDoor.OPEN, isOpen));
+            return Optional.of((BlockState) blockState.with(BlockDoor.OPEN, isOpen));
         }
         if (key.equals(Keys.POWERED)) {
-            return Optional.of((BlockState) blockState.withProperty(BlockDoor.POWERED, (Boolean) value));
+            return Optional.of((BlockState) blockState.with(BlockDoor.POWERED, (Boolean) value));
         }
         if (key.equals(Keys.DIRECTION)) {
             final Direction dir = DirectionChecker.checkDirectionToHorizontal((Direction) value);
-            return Optional.of((BlockState) blockState.withProperty(BlockDoor.FACING, DirectionResolver.getFor(dir)));
+            return Optional.of((BlockState) blockState.with(BlockDoor.FACING, DirectionResolver.getFor(dir)));
         }
         if (key.equals(Keys.PORTION_TYPE)) {
-            return Optional.of((BlockState) blockState.withProperty(BlockDoor.HALF, convertPortionType((PortionType) value)));
+            return Optional.of((BlockState) blockState.with(BlockDoor.HALF, convertPortionType((PortionType) value)));
         }
         return super.getStateWithValue(blockState, key, value);
     }
 
-    private BlockDoor.EnumDoorHalf convertPortionType(PortionType portionType) {
-        return portionType == PortionTypes.BOTTOM ? BlockDoor.EnumDoorHalf.LOWER : BlockDoor.EnumDoorHalf.UPPER;
+    private DoubleBlockHalf convertPortionType(PortionType portionType) {
+        return portionType == PortionTypes.BOTTOM ? DoubleBlockHalf.LOWER : DoubleBlockHalf.UPPER;
     }
 
     private ImmutableHingeData getHingeFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeHingeData.class, (Hinge) (Object) blockState.getValue(BlockDoor.HINGE));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeHingeData.class, (Hinge) (Object) blockState.get(BlockDoor.HINGE));
     }
 
     private ImmutableOpenData getIsOpenFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeOpenData.class, blockState.getValue(BlockDoor.OPEN));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeOpenData.class, blockState.get(BlockDoor.OPEN));
     }
 
     private ImmutablePoweredData getIsPoweredFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class, blockState.getValue(BlockDoor.POWERED));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class, blockState.get(BlockDoor.POWERED));
     }
 
     private ImmutableDirectionalData getDirectionalData(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                DirectionResolver.getFor(blockState.getValue(BlockDoor.FACING)));
+                DirectionResolver.getFor(blockState.get(BlockDoor.FACING)));
     }
 
     private ImmutablePortionData getPortionData(IBlockState blockState) {
-        EnumDoorHalf half = blockState.getValue(BlockDoor.HALF);
+        DoubleBlockHalf half = blockState.get(BlockDoor.HALF);
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePortionData.class,
-                half == EnumDoorHalf.LOWER ? PortionTypes.BOTTOM : PortionTypes.TOP);
+                half == DoubleBlockHalf.LOWER ? PortionTypes.BOTTOM : PortionTypes.TOP);
     }
 
     @Override

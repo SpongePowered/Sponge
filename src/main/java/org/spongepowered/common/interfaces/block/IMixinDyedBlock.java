@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.interfaces.block;
 
-import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.item.EnumDyeColor;
 
-public interface IMixinDyeableBlock {
+import javax.annotation.Nullable;
 
-    void setProperty(PropertyEnum<EnumDyeColor> property);
+public interface IMixinDyedBlock {
 
+    @Nullable
+    EnumDyeColor getDyeColor(); // TODO: For new property 1.13
 }

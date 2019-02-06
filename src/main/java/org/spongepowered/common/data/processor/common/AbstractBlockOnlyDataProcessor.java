@@ -57,8 +57,6 @@ public abstract class AbstractBlockOnlyDataProcessor<T, M extends DataManipulato
         return Optional.empty();
     }
 
-    protected abstract T getDefaultValue();
-
     @Override
     protected Value.Immutable<T> constructImmutableValue(T value) {
         return SpongeImmutableValue.cachedOf(this.key, value);

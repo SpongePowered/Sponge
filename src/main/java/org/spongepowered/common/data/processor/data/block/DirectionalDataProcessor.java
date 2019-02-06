@@ -40,11 +40,6 @@ public class DirectionalDataProcessor extends AbstractBlockOnlyDataProcessor<Dir
     }
 
     @Override
-    protected Direction getDefaultValue() {
-        return Direction.NONE;
-    }
-
-    @Override
     protected DirectionalData createManipulator() {
         return new SpongeDirectionalData();
     }

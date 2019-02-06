@@ -39,11 +39,6 @@ public class InWallDataProcessor extends AbstractBlockOnlyDataProcessor<Boolean,
     }
 
     @Override
-    protected Boolean getDefaultValue() {
-        return false;
-    }
-
-    @Override
     protected InWallData createManipulator() {
         return new SpongeInWallData();
     }

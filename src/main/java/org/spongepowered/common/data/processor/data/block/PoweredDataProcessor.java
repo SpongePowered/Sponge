@@ -39,11 +39,6 @@ public class PoweredDataProcessor extends AbstractBlockOnlyDataProcessor<Boolean
     }
 
     @Override
-    protected Boolean getDefaultValue() {
-        return false;
-    }
-
-    @Override
     protected PoweredData createManipulator() {
         return new SpongePoweredData();
     }

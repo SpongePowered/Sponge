@@ -24,26 +24,22 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
-import net.minecraft.block.BlockColored;
-import net.minecraft.block.material.Material;
-import org.spongepowered.api.text.translation.Translation;
+import net.minecraft.block.BlockShulkerBox;
+import net.minecraft.item.EnumDyeColor;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.interfaces.block.IMixinDyeableBlock;
-import org.spongepowered.common.text.translation.SpongeTranslation;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.interfaces.block.IMixinDyedBlock;
 
-@Mixin(BlockColored.class)
-public abstract class MixinBlockColored extends MixinBlock implements IMixinDyeableBlock {
+import javax.annotation.Nullable;
 
-    @Inject(method = "<init>", at = @At("RETURN"))
-    public void onInit(Material material, CallbackInfo ci) {
-        this.setProperty(BlockColored.COLOR);
-    }
+@Mixin(BlockShulkerBox.class)
+public abstract class MixinBlockShulkerBox extends MixinBlock implements IMixinDyedBlock {
+
+    @Shadow @Final @Nullable private EnumDyeColor color;
 
     @Override
-    public Translation getTranslation() {
-        return new SpongeTranslation(getTranslationKey() + ".white.name");
+    public EnumDyeColor getDyeColor() {
+        return this.color;
     }
 }

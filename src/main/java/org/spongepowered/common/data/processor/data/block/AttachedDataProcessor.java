@@ -39,11 +39,6 @@ public class AttachedDataProcessor extends AbstractBlockOnlyDataProcessor<Boolea
     }
 
     @Override
-    protected Boolean getDefaultValue() {
-        return false;
-    }
-
-    @Override
     protected AttachedData createManipulator() {
         return new SpongeAttachedData();
     }

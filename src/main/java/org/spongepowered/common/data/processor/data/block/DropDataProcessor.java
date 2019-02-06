@@ -39,11 +39,6 @@ public class DropDataProcessor extends AbstractBlockOnlyDataProcessor<Boolean, D
     }
 
     @Override
-    protected Boolean getDefaultValue() {
-        return true;
-    }
-
-    @Override
     protected DropData createManipulator() {
         return new SpongeDropData();
     }

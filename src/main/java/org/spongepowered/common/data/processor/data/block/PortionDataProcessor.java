@@ -28,7 +28,6 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutablePortionData;
 import org.spongepowered.api.data.manipulator.mutable.PortionData;
 import org.spongepowered.api.data.type.PortionType;
-import org.spongepowered.api.data.type.PortionTypes;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongePortionData;
 import org.spongepowered.common.data.processor.common.AbstractBlockOnlyDataProcessor;
@@ -43,11 +42,6 @@ public class PortionDataProcessor extends AbstractBlockOnlyDataProcessor<Portion
     @Override
     public PortionData createManipulator() {
         return new SpongePortionData();
-    }
-
-    @Override
-    protected PortionType getDefaultValue() {
-        return PortionTypes.BOTTOM;
     }
 
     @Override

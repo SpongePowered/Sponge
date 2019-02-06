@@ -25,64 +25,50 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.BlockBanner;
-import net.minecraft.block.BlockBanner.BlockBannerHanging;
+import net.minecraft.block.BlockDirtSnowy;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.EnumFacing;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.manipulator.immutable.ImmutableDirectionalData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableSnowedData;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirectionalData;
-import org.spongepowered.common.data.util.DirectionResolver;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeSnowedData;
 
 import java.util.Optional;
 
-@Mixin(BlockBannerHanging.class)
-public abstract class MixinBlockBannerHanging extends MixinBlockBanner {
+@Mixin(BlockDirtSnowy.class)
+public abstract class MixinBlockDirtSnowy extends MixinBlock {
 
-    private ImmutableDirectionalData getDirectionalData(IBlockState blockState) {
-        final EnumFacing facing = blockState.getValue(BlockBanner.FACING);
-        final Direction direction = DirectionResolver.getFor(facing);
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class, direction);
+    @Override
+    public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
+        return ImmutableList.of(getIsSnowedFor(blockState));
     }
 
     @Override
     public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
-        return super.supports(immutable) || ImmutableDirectionalData.class.isAssignableFrom(immutable);
+        return ImmutableSnowedData.class.isAssignableFrom(immutable);
     }
 
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
-        if (manipulator instanceof ImmutableDirectionalData) {
-            final Direction direction = ((ImmutableDirectionalData) manipulator).direction().get();
-            final EnumFacing facing = DirectionResolver.getFor(direction);
-            return Optional.of((BlockState) blockState.withProperty(BlockBanner.FACING, facing));
+        if (manipulator instanceof ImmutableSnowedData) {
+            return Optional.of((BlockState) blockState);
         }
         return super.getStateWithData(blockState, manipulator);
     }
 
     @Override
     public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends Value<E>> key, E value) {
-        if (key.equals(Keys.DIRECTION)) {
-            final Direction direction = (Direction) value;
-            final EnumFacing facing = DirectionResolver.getFor(direction);
-            return Optional.of((BlockState) blockState.withProperty(BlockBanner.FACING, facing));
+        if (key.equals(Keys.SNOWED)) {
+            return Optional.of((BlockState) blockState);
         }
         return super.getStateWithValue(blockState, key, value);
     }
 
-    @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>builder()
-                .addAll(super.getManipulators(blockState))
-                .add(getDirectionalData(blockState))
-                .build();
+    private ImmutableSnowedData getIsSnowedFor(IBlockState blockState) {
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSnowedData.class, blockState.get(BlockDirtSnowy.SNOWY));
     }
-
 }

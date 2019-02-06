@@ -39,11 +39,6 @@ public class OpenDataProcessor extends AbstractBlockOnlyDataProcessor<Boolean, O
     }
 
     @Override
-    protected Boolean getDefaultValue() {
-        return false;
-    }
-
-    @Override
     protected OpenData createManipulator() {
         return new SpongeOpenData();
     }

@@ -26,57 +26,58 @@ package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockBanner;
-import net.minecraft.block.BlockBanner.BlockBannerHanging;
 import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.manipulator.immutable.ImmutableAttachedData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableDirectionalData;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeAttachedData;
-import org.spongepowered.common.text.translation.SpongeTranslation;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirectionalData;
 
 import java.util.Optional;
 
 @Mixin(BlockBanner.class)
-public abstract class MixinBlockBanner extends MixinBlock {
+public abstract class MixinBlockBanner extends MixinBlockAbstractBanner {
 
-    @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getIsAttachedFor(blockState));
+    private ImmutableDirectionalData getDirectionalData(IBlockState blockState) {
+        final int intDir = blockState.get(BlockBanner.ROTATION);
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class, Direction.values()[(intDir + 8) % 16]);
     }
 
     @Override
     public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
-        return ImmutableAttachedData.class.isAssignableFrom(immutable);
+        return super.supports(immutable) || ImmutableDirectionalData.class.isAssignableFrom(immutable);
     }
 
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
-        if (manipulator instanceof ImmutableAttachedData) {
-            return Optional.of((BlockState) blockState);
+        if (manipulator instanceof ImmutableDirectionalData) {
+            final Direction direction = ((ImmutableDirectionalData) manipulator).direction().get();
+            final int intDirection = (direction.ordinal() + 8) % 16;
+            return Optional.of((BlockState) blockState.with(BlockBanner.ROTATION, intDirection));
         }
         return super.getStateWithData(blockState, manipulator);
     }
 
     @Override
     public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends Value<E>> key, E value) {
-        if (key.equals(Keys.ATTACHED)) {
-            return Optional.of((BlockState) blockState);
+        if (key.equals(Keys.DIRECTION)) {
+            final Direction direction = (Direction) value;
+            final int intDirection = (direction.ordinal() + 8) % 16;
+            return Optional.of((BlockState) blockState.with(BlockBanner.ROTATION, intDirection));
         }
         return super.getStateWithValue(blockState, key, value);
     }
 
-    private ImmutableAttachedData getIsAttachedFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeAttachedData.class, blockState.getBlock() instanceof BlockBannerHanging);
-    }
-
     @Override
-    public Translation getTranslation() {
-        return new SpongeTranslation("item.banner.white.name");
+    public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
+        return ImmutableList.<ImmutableDataManipulator<?, ?>>builder()
+                .addAll(super.getManipulators(blockState))
+                .add(getDirectionalData(blockState))
+                .build();
     }
 }

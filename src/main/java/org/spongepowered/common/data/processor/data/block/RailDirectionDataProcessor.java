@@ -28,7 +28,6 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableRailDirectionData;
 import org.spongepowered.api.data.manipulator.mutable.RailDirectionData;
 import org.spongepowered.api.data.type.RailDirection;
-import org.spongepowered.api.data.type.RailDirections;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeRailDirectionData;
 import org.spongepowered.common.data.processor.common.AbstractBlockOnlyDataProcessor;
@@ -44,11 +43,6 @@ public class RailDirectionDataProcessor extends
     @Override
     public RailDirectionData createManipulator() {
         return new SpongeRailDirectionData();
-    }
-
-    @Override
-    protected RailDirection getDefaultValue() {
-        return RailDirections.NORTH_SOUTH;
     }
 
     @Override

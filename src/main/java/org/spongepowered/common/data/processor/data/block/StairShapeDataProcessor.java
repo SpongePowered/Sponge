@@ -28,7 +28,6 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableStairShapeData;
 import org.spongepowered.api.data.manipulator.mutable.StairShapeData;
 import org.spongepowered.api.data.type.StairShape;
-import org.spongepowered.api.data.type.StairShapes;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeStairShapeData;
 import org.spongepowered.common.data.processor.common.AbstractBlockOnlyDataProcessor;
@@ -44,11 +43,6 @@ public class StairShapeDataProcessor extends
     @Override
     public StairShapeData createManipulator() {
         return new SpongeStairShapeData();
-    }
-
-    @Override
-    protected StairShape getDefaultValue() {
-        return StairShapes.STRAIGHT;
     }
 
     @Override

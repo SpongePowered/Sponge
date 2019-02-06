@@ -39,11 +39,6 @@ public class GrowthDataProcessor extends AbstractBlockOnlyDataProcessor<Integer,
     }
 
     @Override
-    protected Integer getDefaultValue() {
-        return 0;
-    }
-
-    @Override
     protected GrowthData createManipulator() {
         return new SpongeGrowthData();
     }

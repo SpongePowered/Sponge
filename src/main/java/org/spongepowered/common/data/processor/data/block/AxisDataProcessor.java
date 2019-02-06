@@ -40,11 +40,6 @@ public class AxisDataProcessor extends AbstractBlockOnlyDataProcessor<Axis, Axis
     }
 
     @Override
-    protected Axis getDefaultValue() {
-        return Axis.X;
-    }
-
-    @Override
     protected AxisData createManipulator() {
         return new SpongeAxisData();
     }

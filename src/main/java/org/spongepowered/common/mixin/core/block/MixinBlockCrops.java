@@ -44,7 +44,7 @@ import java.util.Optional;
 @Mixin(BlockCrops.class)
 public abstract class MixinBlockCrops extends MixinBlock {
 
-    @Shadow protected abstract IntegerProperty getAgeProperty();
+    @Shadow public abstract IntegerProperty getAgeProperty();
     @Shadow public abstract int getMaxAge();
 
     @Override

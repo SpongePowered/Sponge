@@ -25,65 +25,55 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.BlockDirt;
+import net.minecraft.block.BlockRotatedPillar;
 import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDirtData;
-import org.spongepowered.api.data.manipulator.immutable.ImmutableSnowedData;
-import org.spongepowered.api.data.type.DirtType;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableAxisData;
 import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.util.Axis;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirtData;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeSnowedData;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeAxisData;
+import org.spongepowered.common.data.util.DirectionChecker;
 
 import java.util.Optional;
 
-@Mixin(BlockDirt.class)
-public abstract class MixinBlockDirt extends MixinBlock {
+@Mixin(BlockRotatedPillar.class)
+public abstract class MixinBlockRotatedPillar extends MixinBlock {
 
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getDirtTypeFor(blockState), getIsSnowedFor(blockState));
+        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getAxisData(blockState));
     }
 
     @Override
     public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
-        return ImmutableDirtData.class.isAssignableFrom(immutable) || ImmutableSnowedData.class.isAssignableFrom(immutable);
+        return ImmutableAxisData.class.isAssignableFrom(immutable);
     }
 
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
-        if (manipulator instanceof ImmutableDirtData) {
-            final BlockDirt.DirtType dirtType = (BlockDirt.DirtType) (Object) ((ImmutableDirtData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.withProperty(BlockDirt.VARIANT, dirtType));
-        }
-        if (manipulator instanceof ImmutableSnowedData) {
-            return Optional.of((BlockState) blockState);
+        if (manipulator instanceof ImmutableAxisData) {
+            final Axis axis = ((ImmutableAxisData) manipulator).axis().get();
+            return Optional.of((BlockState) blockState.with(BlockRotatedPillar.AXIS, DirectionChecker.convertAxisToMinecraft(axis)));
         }
         return super.getStateWithData(blockState, manipulator);
     }
 
     @Override
     public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends Value<E>> key, E value) {
-        if (key.equals(Keys.DIRT_TYPE)) {
-            final BlockDirt.DirtType dirtType = (BlockDirt.DirtType) value;
-            return Optional.of((BlockState) blockState.withProperty(BlockDirt.VARIANT, dirtType));
-        }
-        if (key.equals(Keys.SNOWED)) {
-            return Optional.of((BlockState) blockState);
+        if (key.equals(Keys.AXIS)) {
+            final Axis axis = (Axis) value;
+            return Optional.of((BlockState) blockState.with(BlockRotatedPillar.AXIS, DirectionChecker.convertAxisToMinecraft(axis)));
         }
         return super.getStateWithValue(blockState, key, value);
     }
 
-    private ImmutableDirtData getDirtTypeFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirtData.class, (DirtType) (Object) blockState.getValue(BlockDirt.VARIANT));
-    }
-
-    private ImmutableSnowedData getIsSnowedFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSnowedData.class, blockState.getValue(BlockDirt.SNOWY));
+    public ImmutableAxisData getAxisData(IBlockState blockState) {
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeAxisData.class,
+                DirectionChecker.convertAxisToSponge(blockState.get(BlockRotatedPillar.AXIS)));
     }
 }

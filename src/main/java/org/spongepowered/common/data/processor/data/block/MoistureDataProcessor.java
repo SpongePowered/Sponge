@@ -40,11 +40,6 @@ public class MoistureDataProcessor
     }
 
     @Override
-    protected Integer getDefaultValue() {
-        return 0;
-    }
-
-    @Override
     protected MoistureData createManipulator() {
         return new SpongeMoistureData(0, 0, 7);
     }

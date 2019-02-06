@@ -40,11 +40,6 @@ public class RedstonePoweredDataProcessor extends
     }
 
     @Override
-    protected Integer getDefaultValue() {
-        return 0;
-    }
-
-    @Override
     protected RedstonePoweredData createManipulator() {
         return new SpongeRedstonePoweredData();
     }

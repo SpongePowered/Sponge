@@ -39,11 +39,6 @@ public class LayeredDataProcessor extends AbstractBlockOnlyDataProcessor<Integer
     }
 
     @Override
-    protected Integer getDefaultValue() {
-        return 1;
-    }
-
-    @Override
     protected LayeredData createManipulator() {
         return new SpongeLayeredData();
     }

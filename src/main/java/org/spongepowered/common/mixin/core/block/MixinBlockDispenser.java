@@ -81,7 +81,7 @@ public abstract class MixinBlockDispenser extends MixinBlock {
 
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getDirectionalData(blockState));
+        return ImmutableList.of(getDirectionalData(blockState));
     }
 
     @Override
@@ -92,7 +92,8 @@ public abstract class MixinBlockDispenser extends MixinBlock {
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableDirectionalData) {
-            return Optional.of((BlockState) blockState.withProperty(BlockDispenser.FACING, DirectionResolver.getFor(((ImmutableDirectionalData) manipulator).direction().get())));
+            return Optional.of((BlockState) blockState.with(BlockDispenser.FACING,
+                    DirectionResolver.getFor(((ImmutableDirectionalData) manipulator).direction().get())));
         }
         return super.getStateWithData(blockState, manipulator);
     }
@@ -100,14 +101,14 @@ public abstract class MixinBlockDispenser extends MixinBlock {
     @Override
     public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends Value<E>> key, E value) {
         if (key.equals(Keys.DIRECTION)) {
-            return Optional.of((BlockState) blockState.withProperty(BlockDispenser.FACING, DirectionResolver.getFor((Direction) value)));
+            return Optional.of((BlockState) blockState.with(BlockDispenser.FACING, DirectionResolver.getFor((Direction) value)));
         }
         return super.getStateWithValue(blockState, key, value);
     }
 
     private ImmutableDirectionalData getDirectionalData(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                DirectionResolver.getFor(blockState.getValue(BlockDispenser.FACING)));
+                DirectionResolver.getFor(blockState.get(BlockDispenser.FACING)));
     }
 
     @Inject(method = "dispense", at = @At(value = "HEAD"))

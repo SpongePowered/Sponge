@@ -39,11 +39,6 @@ public class DisarmedDataProcessor extends AbstractBlockOnlyDataProcessor<Boolea
     }
 
     @Override
-    protected Boolean getDefaultValue() {
-        return false;
-    }
-
-    @Override
     protected DisarmedData createManipulator() {
         return new SpongeDisarmedData();
     }

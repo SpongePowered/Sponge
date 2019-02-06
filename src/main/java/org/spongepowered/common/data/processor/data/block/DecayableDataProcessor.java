@@ -39,11 +39,6 @@ public class DecayableDataProcessor extends AbstractBlockOnlyDataProcessor<Boole
     }
 
     @Override
-    protected Boolean getDefaultValue() {
-        return false;
-    }
-
-    @Override
     protected DecayableData createManipulator() {
         return new SpongeDecayableData();
     }

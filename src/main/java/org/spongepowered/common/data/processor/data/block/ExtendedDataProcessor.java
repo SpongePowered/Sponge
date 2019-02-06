@@ -39,11 +39,6 @@ public class ExtendedDataProcessor extends AbstractBlockOnlyDataProcessor<Boolea
     }
 
     @Override
-    protected Boolean getDefaultValue() {
-        return false;
-    }
-
-    @Override
     protected ExtendedData createManipulator() {
         return new SpongeExtendedData();
     }

@@ -24,21 +24,35 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockConcretePowder;
+import net.minecraft.item.EnumDyeColor;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.interfaces.block.IMixinDyeableBlock;
+import org.spongepowered.common.interfaces.block.IMixinDyedBlock;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 @Mixin(BlockConcretePowder.class)
-public abstract class MixinBlockConcretePowder extends MixinBlock implements IMixinDyeableBlock {
+public abstract class MixinBlockConcretePowder extends MixinBlock implements IMixinDyedBlock {
+
+    private EnumDyeColor color;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    public void onInit(CallbackInfo ci) {
-        this.setProperty(BlockConcretePowder.COLOR);
+    private void onInit(Block block, Block.Builder builder, CallbackInfo ci) {
+        for (EnumDyeColor color : EnumDyeColor.values()) {
+            if (this.blockMapColor == color.getMapColor()) {
+                this.color = color;
+                break;
+            }
+        }
+    }
+
+    @Override
+    public EnumDyeColor getDyeColor() {
+        return this.color;
     }
 
     @Override

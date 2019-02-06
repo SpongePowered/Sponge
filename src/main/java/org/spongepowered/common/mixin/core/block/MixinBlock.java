@@ -33,6 +33,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockGrass;
 import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.BlockLog;
+import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
@@ -67,6 +68,7 @@ import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.World;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -122,6 +124,8 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Shadow public abstract String getTranslationKey();
     @Shadow public abstract Material getMaterial(IBlockState state);
     @Shadow public abstract IBlockState shadow$getDefaultState();
+
+    @Shadow @Final protected MapColor blockMapColor;
 
     @Inject(method = "<init>*", at = @At("RETURN"))
     public void onConstruction(CallbackInfo ci) {

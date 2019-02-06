@@ -39,11 +39,6 @@ public class SnowedDataProcessor extends AbstractBlockOnlyDataProcessor<Boolean,
     }
 
     @Override
-    protected Boolean getDefaultValue() {
-        return false;
-    }
-
-    @Override
     protected SnowedData createManipulator() {
         return new SpongeSnowedData();
     }

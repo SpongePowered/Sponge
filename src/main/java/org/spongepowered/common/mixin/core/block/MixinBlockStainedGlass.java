@@ -26,18 +26,22 @@ package org.spongepowered.common.mixin.core.block;
 
 import net.minecraft.block.BlockStainedGlass;
 import net.minecraft.block.material.Material;
+import net.minecraft.item.EnumDyeColor;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.interfaces.block.IMixinDyeableBlock;
+import org.spongepowered.common.interfaces.block.IMixinDyedBlock;
 
 @Mixin(BlockStainedGlass.class)
-public abstract class MixinBlockStainedGlass extends MixinBlock implements IMixinDyeableBlock {
+public abstract class MixinBlockStainedGlass extends MixinBlock implements IMixinDyedBlock {
 
-    @Inject(method = "<init>", at = @At("RETURN"))
-    public void onInit(Material material, CallbackInfo ci) {
-        this.setProperty(BlockStainedGlass.COLOR);
+    @Shadow @Final private EnumDyeColor color;
+
+    @Override
+    public EnumDyeColor getDyeColor() {
+        return this.color;
     }
-
 }

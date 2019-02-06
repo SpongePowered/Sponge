@@ -28,7 +28,6 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableHingeData;
 import org.spongepowered.api.data.manipulator.mutable.HingeData;
 import org.spongepowered.api.data.type.Hinge;
-import org.spongepowered.api.data.type.Hinges;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeHingeData;
 import org.spongepowered.common.data.processor.common.AbstractBlockOnlyDataProcessor;
@@ -43,11 +42,6 @@ public class HingeDataProcessor extends AbstractBlockOnlyDataProcessor<Hinge, Hi
     @Override
     public HingeData createManipulator() {
         return new SpongeHingeData();
-    }
-
-    @Override
-    protected Hinge getDefaultValue() {
-        return Hinges.LEFT;
     }
 
     @Override

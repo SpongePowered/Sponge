@@ -28,7 +28,6 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableNoteData;
 import org.spongepowered.api.data.manipulator.mutable.NoteData;
 import org.spongepowered.api.data.type.NotePitch;
-import org.spongepowered.api.data.type.NotePitches;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeNoteData;
 import org.spongepowered.common.data.processor.common.AbstractBlockOnlyDataProcessor;
@@ -38,11 +37,6 @@ public class NoteDataProcessor extends AbstractBlockOnlyDataProcessor<NotePitch,
 
     public NoteDataProcessor() {
         super(Keys.NOTE_PITCH);
-    }
-
-    @Override
-    protected NotePitch getDefaultValue() {
-        return NotePitches.F_SHARP0;
     }
 
     @Override

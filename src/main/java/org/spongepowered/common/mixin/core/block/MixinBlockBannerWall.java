@@ -25,56 +25,63 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.BlockHay;
-import net.minecraft.block.BlockRotatedPillar;
+import net.minecraft.block.BlockBannerWall;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.EnumFacing;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.manipulator.immutable.ImmutableAxisData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableDirectionalData;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.util.Axis;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeAxisData;
-import org.spongepowered.common.data.util.DirectionChecker;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirectionalData;
+import org.spongepowered.common.data.util.DirectionResolver;
 
 import java.util.Optional;
 
-@Mixin(BlockHay.class)
-public abstract class MixinBlockHay extends MixinBlock {
+@Mixin(BlockBannerWall.class)
+public abstract class MixinBlockBannerWall extends MixinBlockAbstractBanner {
 
-    @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getAxisData(blockState));
+    private ImmutableDirectionalData getDirectionalData(IBlockState blockState) {
+        final EnumFacing facing = blockState.get(BlockBannerWall.HORIZONTAL_FACING);
+        final Direction direction = DirectionResolver.getFor(facing);
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class, direction);
     }
 
     @Override
     public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
-        return ImmutableAxisData.class.isAssignableFrom(immutable);
+        return super.supports(immutable) || ImmutableDirectionalData.class.isAssignableFrom(immutable);
     }
 
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
-        if (manipulator instanceof ImmutableAxisData) {
-            final Axis axis = ((ImmutableAxisData) manipulator).axis().get();
-            return Optional.of((BlockState) blockState.with(BlockRotatedPillar.AXIS, DirectionChecker.convertAxisToMinecraft(axis)));
+        if (manipulator instanceof ImmutableDirectionalData) {
+            final Direction direction = ((ImmutableDirectionalData) manipulator).direction().get();
+            final EnumFacing facing = DirectionResolver.getFor(direction);
+            return Optional.of((BlockState) blockState.with(BlockBannerWall.HORIZONTAL_FACING, facing));
         }
         return super.getStateWithData(blockState, manipulator);
     }
 
     @Override
     public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends Value<E>> key, E value) {
-        if (key.equals(Keys.AXIS)) {
-            final Axis axis = (Axis) value;
-            return Optional.of((BlockState) blockState.with(BlockRotatedPillar.AXIS, DirectionChecker.convertAxisToMinecraft(axis)));
+        if (key.equals(Keys.DIRECTION)) {
+            final Direction direction = (Direction) value;
+            final EnumFacing facing = DirectionResolver.getFor(direction);
+            return Optional.of((BlockState) blockState.with(BlockBannerWall.HORIZONTAL_FACING, facing));
         }
         return super.getStateWithValue(blockState, key, value);
     }
 
-    public ImmutableAxisData getAxisData(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeAxisData.class,
-                DirectionChecker.convertAxisToSponge(blockState.get(BlockRotatedPillar.AXIS)));
+    @Override
+    public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
+        return ImmutableList.<ImmutableDataManipulator<?, ?>>builder()
+                .addAll(super.getManipulators(blockState))
+                .add(getDirectionalData(blockState))
+                .build();
     }
+
 }

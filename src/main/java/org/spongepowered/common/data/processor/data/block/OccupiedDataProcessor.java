@@ -39,11 +39,6 @@ public class OccupiedDataProcessor extends AbstractBlockOnlyDataProcessor<Boolea
     }
 
     @Override
-    protected Boolean getDefaultValue() {
-        return false;
-    }
-
-    @Override
     protected OccupiedData createManipulator() {
         return new SpongeOccupiedData();
     }

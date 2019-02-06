@@ -27,7 +27,9 @@ package org.spongepowered.common.mixin.core.block;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockBed;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.item.EnumDyeColor;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
@@ -36,18 +38,28 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableOccupiedData;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeOccupiedData;
+import org.spongepowered.common.interfaces.block.IMixinDyedBlock;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Optional;
 
 @Mixin(BlockBed.class)
-public abstract class MixinBlockBed extends MixinBlockHorizontal {
+public abstract class MixinBlockBed extends MixinBlockHorizontal implements IMixinDyedBlock {
+
+    @Shadow @Final private EnumDyeColor color;
+
+    @Override
+    public EnumDyeColor getDyeColor() {
+        return this.color;
+    }
 
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
@@ -88,7 +100,7 @@ public abstract class MixinBlockBed extends MixinBlockHorizontal {
     }
 
     @Inject(method = "hasRoomForPlayer", at = @At(value = "RETURN"), cancellable = true)
-    private static void onHasRoomForPlayer(World world, BlockPos pos, CallbackInfoReturnable<Boolean> ci ) {
-        ci.setReturnValue(ci.getReturnValue() && world.getWorldBorder().contains(pos));
+    private static void onHasRoomForPlayer(IBlockReader world, BlockPos pos, CallbackInfoReturnable<Boolean> ci) {
+        ci.setReturnValue(ci.getReturnValue() && (!(world instanceof World) || ((World) world).getWorldBorder().contains(pos)));
     }
 }
