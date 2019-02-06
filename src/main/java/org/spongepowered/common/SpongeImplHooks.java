@@ -59,6 +59,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.GameType;
 import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
@@ -181,12 +182,12 @@ public final class SpongeImplHooks {
 
     // Block
 
-    public static boolean isBlockFlammable(Block block, IBlockAccess world, BlockPos pos, EnumFacing face) {
+    public static boolean isBlockFlammable(Block block, IBlockReader world, BlockPos pos, EnumFacing face) {
         return Blocks.FIRE.getFlammability(block) > 0;
     }
 
-    public static int getBlockLightOpacity(IBlockState state, IBlockAccess world, BlockPos pos) {
-        return state.getLightOpacity();
+    public static int getBlockLightOpacity(IBlockState state, IBlockReader world, BlockPos pos) {
+        return state.getOpacity(world, pos);
     }
 
 	public static int getChunkPosLight(IBlockState blockState, World world, BlockPos pos) {
@@ -197,7 +198,7 @@ public final class SpongeImplHooks {
     @Nullable
     public static TileEntity createTileEntity(Block block, net.minecraft.world.World world, IBlockState state) {
         if (block instanceof ITileEntityProvider) {
-            return ((ITileEntityProvider) block).createNewTileEntity(world, block.getMetaFromState(state));
+            return ((ITileEntityProvider) block).createNewTileEntity(world);
         }
         return null;
     }

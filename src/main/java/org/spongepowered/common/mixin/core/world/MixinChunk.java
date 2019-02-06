@@ -35,6 +35,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Sets;
 import net.minecraft.block.Block;
+import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
@@ -47,7 +48,9 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.EnumDifficulty;
+import net.minecraft.world.EnumLightType;
 import net.minecraft.world.EnumSkyBlock;
+import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.Biome;
@@ -57,6 +60,7 @@ import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
+import net.minecraft.world.gen.Heightmap;
 import net.minecraft.world.gen.IChunkGenerator;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -159,9 +163,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     @Shadow @Final private World world;
     @Shadow @Final public int x;
     @Shadow @Final public int z;
-    @Shadow @Final private ChunkSection[] storageArrays;
-    @Shadow @Final private int[] precipitationHeightMap;
-    @Shadow @Final private int[] heightMap;
+    @Shadow @Final private ChunkSection[] sections;
     @Shadow @Final private ClassInheritanceMultiMap<Entity>[] entityLists;
     @Shadow @Final private Map<BlockPos, TileEntity> tileEntities;
     @Shadow private long inhabitedTime;
@@ -173,7 +175,6 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     // @formatter:off
     @Shadow @Nullable public abstract TileEntity getTileEntity(BlockPos pos, EnumCreateEntityType p_177424_2_);
     @Shadow public abstract void generateSkylightMap();
-    @Shadow public abstract int getLightFor(EnumSkyBlock p_177413_1_, BlockPos pos);
     @Shadow public abstract IBlockState getBlockState(BlockPos pos);
     @Shadow public abstract IBlockState getBlockState(int x, int y, int z);
     @Shadow public abstract byte[] getBiomeArray();
@@ -189,6 +190,10 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     @Shadow @Override public abstract boolean isEmpty();
 
     @Shadow public abstract Biome getBiome(BlockPos p_201600_1_);
+
+    @Shadow @Final private Map<Heightmap.Type, Heightmap> heightMap;
+
+    @Shadow public abstract int getLightFor(EnumLightType p_177413_1_, BlockPos p_177413_2_);
 
     @Inject(method = "<init>(Lnet/minecraft/world/World;II)V", at = @At("RETURN"), remap = false)
     public void onConstructed(World world, int x, int z, CallbackInfo ci) {
@@ -586,7 +591,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
      */
     @Nullable
     @Overwrite
-    public IBlockState setBlockState(BlockPos pos, IBlockState state) {
+    public IBlockState setBlockState(BlockPos pos, IBlockState state, boolean b) {
         IBlockState iblockstate1 = this.getBlockState(pos);
 
         // Sponge - reroute to new method that accepts snapshot to prevent a second snapshot from being created.
@@ -603,6 +608,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
      * @author blood - November 2015
      * @author gabizou - updated April 10th, 2016 - Add cause tracking refactor changes
      * @author gabizou - Updated June 26th, 2018 - Bulk capturing changes
+     * @author Aaron1011 - February 6th, 2018 - Update for 1.13
      *
      *
      * @param pos The position changing
@@ -615,41 +621,34 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     @Nullable
-    public IBlockState setBlockState(BlockPos pos, IBlockState newState, IBlockState currentState, @Nullable BlockSnapshot newBlockSnapshot, BlockChangeFlag flag) {
+    public IBlockState setBlockState(BlockPos pos, IBlockState newState, IBlockState currentState, @Nullable BlockSnapshot newBlockSnapshot, BlockChangeFlag flag, boolean bool) {
         int xPos = pos.getX() & 15;
         int yPos = pos.getY();
         int zPos = pos.getZ() & 15;
-        int combinedPos = zPos << 4 | xPos;
+        int currentHeight = ((Heightmap)this.heightMap.get(Heightmap.Type.LIGHT_BLOCKING)).getHeight(xPos, zPos);
 
-        if (yPos >= this.precipitationHeightMap[combinedPos] - 1) {
-            this.precipitationHeightMap[combinedPos] = -999;
-        }
-
-        int currentHeight = this.heightMap[combinedPos];
-
-        // Sponge Start - remove blockstate check as we handle it in world.setBlockState
-        // IBlockState iblockstate = this.getBlockState(pos);
-        //
-        // if (iblockstate == state) {
+        // Sponge start - remove blockstate equality check, as this is hanlded in world.setBlockState
+        //if (lvt_8_1_ == p_177436_2_) {
         //    return null;
-        // } else {
+        //} else {
+        // Sponge end
+
         Block newBlock = newState.getBlock();
         Block currentBlock = currentState.getBlock();
-        // Sponge End
 
-        ChunkSection extendedblockstorage = this.storageArrays[yPos >> 4];
+        ChunkSection extendedblockstorage = this.sections[yPos >> 4];
         // Sponge - make this final so we don't change it later
         final boolean requiresNewLightCalculations;
 
-        // Sponge - Forge moves this from
-        int newBlockLightOpacity = SpongeImplHooks.getBlockLightOpacity(newState, this.world, pos);
+        // Sponge - Forge moves this up here
+        int newBlockLightOpacity = SpongeImplHooks.getBlockLightOpacity(newState, (IBlockReader) this.world, pos);
 
-        if (extendedblockstorage == net.minecraft.world.chunk.Chunk.NULL_BLOCK_STORAGE) {
-            if (newBlock == Blocks.AIR) {
+        if (extendedblockstorage == net.minecraft.world.chunk.Chunk.EMPTY_SECTION) {
+            if (newState.isAir()) {
                 return null;
             }
 
-            extendedblockstorage = this.storageArrays[yPos >> 4] = new ExtendedBlockStorage(yPos >> 4 << 4, this.world.provider.hasSkyLight());
+            extendedblockstorage = this.sections[yPos >> 4] = new ChunkSection(yPos >> 4 << 4, this.world.dimension.hasSkyLight());
             requiresNewLightCalculations = yPos >= currentHeight;
             // Sponge Start - properly initialize variable
         } else {
@@ -657,11 +656,21 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         }
         // Sponge end
 
-        // Sponge Start
-        final int modifiedY = yPos & 15;
-        extendedblockstorage.set(xPos, modifiedY, zPos, newState);
+        extendedblockstorage.set(xPos, yPos & 15, zPos, newState);
+        ((Heightmap)this.heightMap.get(Heightmap.Type.MOTION_BLOCKING)).update(xPos, yPos, zPos, newState);
+        ((Heightmap)this.heightMap.get(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES)).update(xPos, yPos, zPos, newState);
+        ((Heightmap)this.heightMap.get(Heightmap.Type.OCEAN_FLOOR)).update(xPos, yPos, zPos, newState);
+        ((Heightmap)this.heightMap.get(Heightmap.Type.WORLD_SURFACE)).update(xPos, yPos, zPos, newState);
+
+        if (!this.world.isRemote) {
+            currentState.onReplaced(this.world, pos, newState, bool);
+        } else if (newBlock != currentBlock && SpongeImplHooks.hasBlockTileEntity(currentBlock, currentState)) { // Sponge - use SpongeImplsHooks for Forge compat
+            this.world.removeTileEntity(pos);
+        }
 
 
+        // TODO 1.13: I believe this is now unecessary
+        /*
         // if (block1 != block) // Sponge - Forge removes this change.
         {
             if (!this.world.isRemote) {
@@ -683,7 +692,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
                     this.world.removeTileEntity(pos);
                 }
             }
-        }
+        }*/
+
 
         final IBlockState blockAfterSet = extendedblockstorage.get(xPos, modifiedY, zPos);
         if (blockAfterSet.getBlock() != newBlock) {
@@ -699,20 +709,21 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
             // int postNewBlockLightOpacity = newState.getLightOpacity(this.worldObj, pos); - Sponge use the SpongeImplHooks for forge compatibility
             int postNewBlockLightOpacity = SpongeImplHooks.getBlockLightOpacity(newState, this.world, pos);
             // Sponge End
+            this.relightBlock(xPos, yPos, zPos);
 
-            if (newBlockLightOpacity > 0) {
-                if (yPos >= currentHeight) {
-                    this.relightBlock(xPos, yPos + 1, zPos);
-                }
-            } else if (yPos == currentHeight - 1) {
-                this.relightBlock(xPos, yPos, zPos);
-            }
-
-            if (newBlockLightOpacity != postNewBlockLightOpacity && (newBlockLightOpacity < postNewBlockLightOpacity || this.getLightFor(EnumSkyBlock.SKY, pos) > 0 || this.getLightFor(EnumSkyBlock.BLOCK, pos) > 0)) {
+            if (newBlockLightOpacity != postNewBlockLightOpacity && (newBlockLightOpacity < postNewBlockLightOpacity || this.getLightFor(EnumLightType.SKY, pos) > 0 || this.getLightFor(EnumLightType.BLOCK, pos) > 0)) {
                 this.propagateSkylightOcclusion(xPos, zPos);
             }
         }
 
+        if (SpongeImplHooks.hasBlockTileEntity(currentBlock, currentState)) { // Sponge - use SpongeImplHooks for Forge compat
+            TileEntity tileentity = this.getTileEntity(pos, net.minecraft.world.chunk.Chunk.EnumCreateEntityType.CHECK);
+            if (tileentity != null) {
+                tileentity.updateContainingBlockInfo();
+            }
+        }
+
+        // Sponge start -add phase checks
         if (!((IMixinWorld) this.world).isFake() && currentBlock != newBlock) {
             final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
             final boolean isBulkCapturing = ((IPhaseState) peek.state).doesBulkBlockCapture(peek.context);
@@ -722,7 +733,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
                 // The new block state is null if called directly from Chunk#setBlockState(BlockPos, IBlockState)
                 // If it is null, then directly call the onBlockAdded logic.
                 if (flag.performBlockPhysics()) {
-                    newBlock.onBlockAdded(this.world, pos, newState);
+                    newState.onBlockAdded(this.world, pos, currentState);
                 }
             }
             // Sponge end
@@ -749,9 +760,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
 
                 // Sponge End
                 this.world.setTileEntity(pos, tileentity);
-            }
-
-            if (tileentity != null) {
+            } else {
                 tileentity.updateContainingBlockInfo();
             }
         }
@@ -1266,11 +1275,11 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
 
     @Override
     public void fill(ChunkPrimer primer) {
-        boolean flag = this.world.provider.hasSkyLight();
+        boolean flag = this.world.dimension.hasSkyLight();
         for (int x = 0; x < 16; ++x) {
             for (int z = 0; z < 16; ++z) {
                 for (int y = 0; y < 256; ++y) {
-                    IBlockState block = primer.getBlockState(x, y, z);
+                    IBlockState block = primer.getBlockState(new BlockPos(x, y, z));
                     if (block.getMaterial() != Material.AIR) {
                         int section = y >> 4;
                         if (this.storageArrays[section] == net.minecraft.world.chunk.Chunk.NULL_BLOCK_STORAGE) {
