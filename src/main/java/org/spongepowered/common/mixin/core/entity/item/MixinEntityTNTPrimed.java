@@ -88,7 +88,7 @@ public abstract class MixinEntityTNTPrimed extends MixinEntity implements Primed
     public void defuse() {
         checkState(isPrimed(), "not primed");
         if (shouldDefuse()) {
-            setDead();
+            remove();
             // Place a TNT block at the Entity's position
             Sponge.getCauseStackManager().pushCause(this);
             getWorld().setBlock((int) this.posX, (int) this.posY, (int) this.posZ, BlockState.builder().blockType(BLOCK_TYPE).build(), BlockChangeFlags.ALL);
@@ -130,18 +130,18 @@ public abstract class MixinEntityTNTPrimed extends MixinEntity implements Primed
     @Override
     public void prime() {
         checkState(!isPrimed(), "already primed");
-        checkState(this.isDead, "tnt about to be primed");
+        checkState(this.removed, "tnt about to be primed");
         getWorld().spawnEntity(this);
     }
 
     @Override
     public boolean isPrimed() {
-        return this.fuse > 0 && this.fuse < this.fuseDuration && !this.isDead || this.exploding;
+        return this.fuse > 0 && this.fuse < this.fuseDuration && !this.removed || this.exploding;
     }
 
     @Override
     public void detonate() {
-        setDead();
+        remove();
         explode();
     }
 
@@ -154,7 +154,7 @@ public abstract class MixinEntityTNTPrimed extends MixinEntity implements Primed
     protected net.minecraft.world.Explosion onExplode(net.minecraft.world.World worldObj, Entity self, double x,
                                                       double y, double z, float strength, boolean smoking) {
         return detonate(Explosion.builder()
-                .location(new Location<>((World) worldObj, new Vector3d(x, y, z)))
+                .location(new Location((World) worldObj, new Vector3d(x, y, z)))
                 .sourceExplosive(this)
                 .radius(this.explosionRadius)
                 .shouldPlaySmoke(smoking)

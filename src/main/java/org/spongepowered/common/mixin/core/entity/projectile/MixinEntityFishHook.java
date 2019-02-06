@@ -197,7 +197,7 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
                 i = 2;
             }
 
-            this.setDead();
+            this.remove();
             return i;
         } else {
             return 0;

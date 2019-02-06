@@ -81,7 +81,7 @@ public abstract class MixinEntityFallingBlock extends MixinEntity implements Fal
         if (!TrackingUtil.processBlockCaptures(currentPhaseData.context.getCapturedBlocks(), currentPhaseData.state, currentPhaseData.context)) {
             // So, it's been cancelled, we want to absolutely remove this entity.
             // And we want to stop the entity update at this point.
-            this.setDead();
+            this.remove();
             ci.cancel();
         }
     }

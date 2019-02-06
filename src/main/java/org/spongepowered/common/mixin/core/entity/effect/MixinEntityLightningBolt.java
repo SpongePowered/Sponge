@@ -120,9 +120,9 @@ public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect 
         }
     }
 
-    @Inject(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/effect/EntityLightningBolt;setDead()V"))
+    @Inject(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/effect/EntityLightningBolt;remove()V"))
     public void onLivingTimeExpired(CallbackInfo ci) {
-        if (this.isDead || this.world.isRemote) {
+        if (this.removed || this.world.isRemote) {
             return;
         }
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {

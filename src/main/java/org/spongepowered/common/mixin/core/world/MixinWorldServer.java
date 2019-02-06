@@ -1205,7 +1205,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         for (net.minecraft.entity.Entity entity : entities) {
             // Make sure no entities load in invalid positions
             if (((IMixinBlockPos) entity.getPosition()).isInvalidYPosition()) {
-                entity.setDead();
+                entity.remove();
                 continue;
             }
             if (this.canAddEntity(entity)) {

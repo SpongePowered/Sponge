@@ -147,7 +147,7 @@ public abstract class MixinEntityArmorStand extends MixinEntityLivingBase implem
 
     @Inject(method = "attackEntityFrom",
             slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/util/DamageSource;OUT_OF_WORLD:Lnet/minecraft/util/DamageSource;")),
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityArmorStand;setDead()V", ordinal = 0),
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityArmorStand;remove()V", ordinal = 0),
             cancellable = true)
     private void fireDamageEventOutOfWorld(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         fireDestroyDamageEvent(source, cir);
@@ -206,7 +206,7 @@ public abstract class MixinEntityArmorStand extends MixinEntityLivingBase implem
     /**
      * @author JBYoshi
      * @reason EntityArmorStand "simplifies" this method to simply call {@link
-     * #setDead()}. However, this ignores our custom event. Instead, delegate
+     * #remove()}. However, this ignores our custom event. Instead, delegate
      * to the superclass and use {@link
      * EntityArmorStand#attackEntityFrom(DamageSource, float)}.
      */

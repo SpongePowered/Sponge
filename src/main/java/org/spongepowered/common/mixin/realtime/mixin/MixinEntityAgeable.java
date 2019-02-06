@@ -35,14 +35,14 @@ public abstract class MixinEntityAgeable {
 
     private static final String ENTITY_AGEABLE_SET_GROWING_AGE_METHOD = "Lnet/minecraft/entity/EntityAgeable;setGrowingAge(I)V";
 
-    @Redirect(method = "onLivingUpdate", at = @At(value = "INVOKE", target = ENTITY_AGEABLE_SET_GROWING_AGE_METHOD, ordinal = 0))
+    @Redirect(method = "livingTick", at = @At(value = "INVOKE", target = ENTITY_AGEABLE_SET_GROWING_AGE_METHOD, ordinal = 0))
     public void fixupGrowingUp(EntityAgeable self, int age) {
         // Subtract the one the original update method added
         int diff = (int) ((IMixinRealTimeTicking) self.getEntityWorld()).getRealTimeTicks() - 1;
         self.setGrowingAge(Math.min(0, age + diff));
     }
 
-    @Redirect(method = "onLivingUpdate", at = @At(value = "INVOKE", target = ENTITY_AGEABLE_SET_GROWING_AGE_METHOD, ordinal = 1))
+    @Redirect(method = "livingTick", at = @At(value = "INVOKE", target = ENTITY_AGEABLE_SET_GROWING_AGE_METHOD, ordinal = 1))
     public void fixupBreedingCooldown(EntityAgeable self, int age) {
         // Subtract the one the original update method added
         int diff = (int) ((IMixinRealTimeTicking) self.getEntityWorld()).getRealTimeTicks() - 1;

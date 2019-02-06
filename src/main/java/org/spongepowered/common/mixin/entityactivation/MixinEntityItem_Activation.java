@@ -47,7 +47,7 @@ public abstract class MixinEntityItem_Activation extends MixinEntity_Activation 
         }
 
         if (!this.world.isRemote && this.age >= ((IMixinWorldServer) this.world).getActiveConfig().getConfig().getEntity().getItemDespawnRate()) {
-            this.setDead();
+            this.remove();
         }
     }
 

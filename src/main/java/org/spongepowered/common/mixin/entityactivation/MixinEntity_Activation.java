@@ -51,7 +51,7 @@ public abstract class MixinEntity_Activation implements Entity, IModData_Activat
     @Shadow public boolean onGround;
 
     @Shadow
-    public abstract void setDead();
+    public abstract void remove();
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onEntityActivationConstruction(World world, CallbackInfo ci) {

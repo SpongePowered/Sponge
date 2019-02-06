@@ -118,7 +118,7 @@ public abstract class MixinDragonFightManager {
 
                     if (!flag) {
                         LOGGER.info("But we didn\'t have a portal, let\'s remove it.");
-                        entitydragon.setDead();
+                        entitydragon.remove();
                         this.dragonUniqueId = null;
                     }
                 }

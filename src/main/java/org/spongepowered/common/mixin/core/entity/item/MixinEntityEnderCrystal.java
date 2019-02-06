@@ -69,7 +69,7 @@ public abstract class MixinEntityEnderCrystal extends MixinEntity implements End
 
     @Override
     public void detonate() {
-        setDead();
+        remove();
         this.detonationCause = null;
         onExplode(this.world, null, this.posX, this.posY, this.posZ, this.explosionStrength, true);
     }

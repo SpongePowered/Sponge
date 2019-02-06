@@ -185,7 +185,7 @@ public abstract class MixinEntityCreeper extends MixinEntityMob implements Creep
     @Inject(method = "explode", at = @At("RETURN"))
     private void postExplode(CallbackInfo ci) {
         if (this.detonationCancelled) {
-            this.detonationCancelled = this.isDead = false;
+            this.detonationCancelled = this.removed = false;
         }
     }
 

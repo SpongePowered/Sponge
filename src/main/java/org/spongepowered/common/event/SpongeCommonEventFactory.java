@@ -853,7 +853,7 @@ public class SpongeCommonEventFactory {
     public static MoveEntityEvent callMoveEntityEvent(net.minecraft.entity.Entity entity) {
         // Ignore movement event if entity is dead, a projectile, or item.
         // Note: Projectiles are handled with CollideBlockEvent.Impact
-        if (entity.isDead || entity instanceof IProjectile || entity instanceof EntityItem) {
+        if (entity.removed || entity instanceof IProjectile || entity instanceof EntityItem) {
             return null;
         }
 
@@ -1052,9 +1052,9 @@ public class SpongeCommonEventFactory {
             }
 
             if (cancelled) {
-                // Entities such as EnderPearls call setDead during onImpact. However, if the event is cancelled
-                // setDead will never be called resulting in a bad state such as falling through world.
-                projectile.setDead();
+                // Entities such as EnderPearls call remove during onImpact. However, if the event is cancelled
+                // remove will never be called resulting in a bad state such as falling through world.
+                projectile.remove();
             }
             return cancelled;
         }
@@ -1232,7 +1232,7 @@ public class SpongeCommonEventFactory {
             // containers
 
             // Allow viewing inventory; except when dead
-            ((IMixinContainer) container).setCanInteractWith(p -> !p.isDead);
+            ((IMixinContainer) container).setCanInteractWith(p -> !p.removed);
         }
         return container;
     }

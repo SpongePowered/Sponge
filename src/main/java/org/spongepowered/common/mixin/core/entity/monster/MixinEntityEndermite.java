@@ -71,8 +71,8 @@ public abstract class MixinEntityEndermite extends MixinEntityMob implements End
         manipulators.add(getExpirableData());
     }
 
-    @Inject(method = "onLivingUpdate",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/monster/EntityEndermite;setDead()V"))
+    @Inject(method = "livingTick",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/monster/EntityEndermite;remove()V"))
     private void fireExpireEventLifetime(CallbackInfo ci) {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(this);

@@ -107,7 +107,7 @@ public abstract class MixinEntityLargeFireball extends MixinEntityFireball imple
     @Override
     public void detonate() {
         onSpongeExplosion(this.world, null, this.posX, this.posY, this.posZ, this.explosionPower, true, true);
-        setDead();
+        remove();
     }
 
 }

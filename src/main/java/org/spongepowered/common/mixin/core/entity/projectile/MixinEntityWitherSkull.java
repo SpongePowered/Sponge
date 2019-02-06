@@ -114,7 +114,7 @@ public abstract class MixinEntityWitherSkull extends MixinEntityFireball impleme
     @Override
     public void detonate() {
         onExplode(this.world, (Entity) (Object) this, this.posX, this.posY, this.posZ, 0, false, true);
-        setDead();
+        remove();
     }
 
     @SuppressWarnings("deprecation")

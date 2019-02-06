@@ -54,6 +54,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.play.server.SPacketBlockChange;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.SoundEvent;
@@ -1047,7 +1048,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
         for (Object entity : this.playerEntities) {
             EntityPlayer player = (EntityPlayer) entity;
-            if (player == null || player.isDead || !((IMixinEntityPlayer) player).affectsSpawning()) {
+            if (player == null || player.removed || !((IMixinEntityPlayer) player).affectsSpawning()) {
                 continue;
             }
 
@@ -1075,7 +1076,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Redirect(method = "isAnyPlayerWithinRangeAt", at = @At(value = "INVOKE", target = "Lcom/google/common/base/Predicate;apply(Ljava/lang/Object;)Z", remap = false))
     public boolean onIsAnyPlayerWithinRangePredicate(com.google.common.base.Predicate<EntityPlayer> predicate, Object object) {
         EntityPlayer player = (EntityPlayer) object;
-        return !(player.isDead || !((IMixinEntityPlayer) player).affectsSpawning()) && predicate.apply(player);
+        return !(player.removed || !((IMixinEntityPlayer) player).affectsSpawning()) && predicate.apply(player);
     }
 
     // For invisibility
@@ -1469,15 +1470,15 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 CrashReportCategory crashreportcategory = crashreport.makeCategory("Entity being ticked");
 
                 if (entity == null) {
-                    crashreportcategory.addCrashSection("Entity", "~~NULL~~");
+                    crashreportcategory.addDetail("Entity", "~~NULL~~");
                 } else {
-                    entity.addEntityCrashInfo(crashreportcategory);
+                    entity.fillCrashReport(crashreportcategory);
                 }
 
                 SpongeImplHooks.onEntityError(entity, crashreport);
             }
 
-            if (entity.isDead) {
+            if (entity.removed) {
                 this.weatherEffects.remove(i--);
             }
         }
@@ -1514,17 +1515,17 @@ public abstract class MixinWorld implements World, IMixinWorld {
             net.minecraft.entity.Entity entity3 = entity2.getRidingEntity();
 
             if (entity3 != null) {
-                if (!entity3.isDead && entity3.isPassenger(entity2)) {
+                if (!entity3.removed && entity3.isPassenger(entity2)) {
                     continue;
                 }
 
-                entity2.dismountRidingEntity();
+                entity2.stopRiding();
             }
 
             this.profiler.startSection("tick");
             this.startEntityTickTiming(); // Sponge
 
-            if (!entity2.isDead && !(entity2 instanceof EntityPlayerMP)) {
+            if (!entity2.removed && !(entity2 instanceof EntityPlayerMP)) {
                 try {
                     SpongeImplHooks.onEntityTickStart(entity2);
                     this.updateEntity(entity2);
@@ -1533,7 +1534,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                     this.stopTimingTickEntityCrash(entity2); // Sponge
                     CrashReport crashreport1 = CrashReport.makeCrashReport(throwable1, "Ticking entity");
                     CrashReportCategory crashreportcategory1 = crashreport1.makeCategory("Entity being ticked");
-                    entity2.addEntityCrashInfo(crashreportcategory1);
+                    entity2.fillCrashReport(crashreportcategory1);
                     SpongeImplHooks.onEntityError(entity2, crashreport1);
                 }
             }
@@ -1543,7 +1544,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             this.profiler.startSection("remove");
             this.startEntityRemovalTick(); // Sponge
 
-            if (entity2.isDead) {
+            if (entity2.removed) {
                 // Sponge start - use cached chunk
                 // int l1 = entity2.chunkCoordX;
                 // int i2 = entity2.chunkCoordZ;
@@ -1571,14 +1572,14 @@ public abstract class MixinWorld implements World, IMixinWorld {
             this.startTileTickTimer(); // Sponge
             net.minecraft.tileentity.TileEntity tileentity = iterator.next();
 
-            if (!tileentity.isInvalid() && tileentity.hasWorld()) {
+            if (!tileentity.isRemoved() && tileentity.hasWorld()) {
                 BlockPos blockpos = tileentity.getPos();
 
                 if (((IMixinTileEntity) tileentity).shouldTick() && this.worldBorder.contains(blockpos)) { // Sponge
                     try {
-                        this.profiler.func_194340_a(() -> String.valueOf(net.minecraft.tileentity.TileEntity.getKey(tileentity.getClass())));
+                        this.profiler.startSection(() -> String.valueOf(TileEntityType.REGISTRY.getKey(tileentity.getType())));
                         SpongeImplHooks.onTETickStart(tileentity);
-                        ((ITickable) tileentity).update();
+                        ((ITickable) tileentity).tick();
                         //this.profiler.endSection();
                         SpongeImplHooks.onTETickEnd(tileentity);
                     } catch (Throwable throwable) {
@@ -1593,7 +1594,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
             this.stopTileEntityAndStartRemoval(); // Sponge
 
-            if (tileentity.isInvalid()) {
+            if (tileentity.isRemoved()) {
                 iterator.remove();
                 this.loadedTileEntityList.remove(tileentity);
                 // Sponge start - use cached chunk
@@ -1640,7 +1641,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             for (int j1 = 0; j1 < this.addedTileEntityList.size(); ++j1) {
                 net.minecraft.tileentity.TileEntity tileentity1 = this.addedTileEntityList.get(j1);
 
-                if (!tileentity1.isInvalid()) {
+                if (!tileentity1.isRemoved()) {
                     if (!this.loadedTileEntityList.contains(tileentity1)) {
                         this.addTileEntity(tileentity1);
                     }

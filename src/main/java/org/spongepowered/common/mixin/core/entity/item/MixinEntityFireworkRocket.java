@@ -101,7 +101,7 @@ public abstract class MixinEntityFireworkRocket extends MixinEntity implements F
     @Override
     public void prime() {
         checkState(!isPrimed(), "already primed");
-        checkState(this.isDead, "firework about to be primed");
+        checkState(this.removed, "firework about to be primed");
         getWorld().spawnEntity(this);
     }
 
@@ -109,14 +109,14 @@ public abstract class MixinEntityFireworkRocket extends MixinEntity implements F
     public void defuse() {
         checkState(isPrimed(), "not primed");
         if (shouldDefuse()) {
-            setDead();
+            remove();
             postDefuse();
         }
     }
 
     @Override
     public boolean isPrimed() {
-        return this.fireworkAge > 0 && this.fireworkAge <= this.lifetime && !this.isDead;
+        return this.fireworkAge > 0 && this.fireworkAge <= this.lifetime && !this.removed;
     }
 
     @Override

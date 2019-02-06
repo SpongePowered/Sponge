@@ -162,7 +162,7 @@ public abstract class MixinEntityMinecartTNT extends MixinEntityMinecart impleme
     @Nullable
     private net.minecraft.world.Explosion onSpongeExplode(net.minecraft.world.World worldObj, Entity self, double x, double y, double z,
         float strength, boolean smoking) {
-        return detonate(Explosion.builder().location(new Location<>((World) worldObj, new Vector3d(x, y, z))).sourceExplosive(this)
+        return detonate(Explosion.builder().location(new Location((World) worldObj, new Vector3d(x, y, z))).sourceExplosive(this)
                 .radius(this.explosionRadius.isPresent() ? this.explosionRadius.get() : strength).shouldPlaySmoke(smoking).shouldBreakBlocks(smoking))
                         .orElseGet(() -> {
                             this.detonationCancelled = true;
@@ -173,7 +173,7 @@ public abstract class MixinEntityMinecartTNT extends MixinEntityMinecart impleme
     @Inject(method = "explodeCart", at = @At("RETURN"))
     private void postExplode(CallbackInfo ci) {
         if (this.detonationCancelled) {
-            this.detonationCancelled = this.isDead = false;
+            this.detonationCancelled = this.removed = false;
         }
     }
 

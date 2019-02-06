@@ -115,7 +115,7 @@ public abstract class MixinEntityDragon extends MixinEntityLiving implements End
      *
      * @author JBYoshi
      */
-    @Redirect(method = "onLivingUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/boss/dragon/phase/IPhase;getTargetLocation()Lnet/minecraft/util/math/Vec3d;"))
+    @Redirect(method = "livingTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/boss/dragon/phase/IPhase;getTargetLocation()Lnet/minecraft/util/math/Vec3d;"))
     @Nullable
     private Vec3d getTargetLocationOrNull(IPhase iPhase) {
         Vec3d target = iPhase.getTargetLocation();

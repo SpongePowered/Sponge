@@ -282,7 +282,7 @@ public abstract class MixinWorldEntitySpawner {
                                                     ++spawnCount;
                                                     worldServerIn.spawnEntity(entityliving);
                                                 } else {
-                                                    entityliving.setDead();
+                                                    entityliving.remove();
                                                 }
 
                                                 mobLimit--;

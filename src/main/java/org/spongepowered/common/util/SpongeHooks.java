@@ -121,7 +121,7 @@ public class SpongeHooks {
 
         SpongeConfig<? extends GeneralConfigBase> config = getActiveConfig((WorldServer) entity.world);
         if (config.getConfig().getLogging().entityDeathLogging()) {
-            logInfo("Dim: {0} setDead(): {1}", ((IMixinWorldServer) entity.world).getDimensionId(), entity);
+            logInfo("Dim: {0} remove(): {1}", ((IMixinWorldServer) entity.world).getDimensionId(), entity);
             logStack(config);
         }
     }
@@ -314,10 +314,10 @@ public class SpongeHooks {
             logWarning("Entity bounding box: {0}", entity.getCollisionBoundingBox());
             logWarning("Entity: {0}", entity);
             NBTTagCompound tag = new NBTTagCompound();
-            entity.writeToNBT(tag);
+            entity.writeWithoutTypeId(tag);
             logWarning("Entity NBT: {0}", tag);
             logStack(config);
-            entity.setDead();
+            entity.remove();
             return true;
         }
         return false;
@@ -360,7 +360,7 @@ public class SpongeHooks {
                     return false;
                 }
                 // Remove the entity;
-                entity.isDead = true;
+                entity.removed = true;
                 return false;
             }
         }
@@ -384,7 +384,7 @@ public class SpongeHooks {
             return;
         }
 
-        if (collisionWarnSize > 0 && (entity.getEntityWorld().getMinecraftServer().getTickCounter() % 10) == 0 && list.size() >= collisionWarnSize) {
+        if (collisionWarnSize > 0 && (entity.getEntityWorld().getServer().getTickCounter() % 10) == 0 && list.size() >= collisionWarnSize) {
             SpongeHooks.CollisionWarning warning = new SpongeHooks.CollisionWarning(entity.world, entity);
             if (SpongeHooks.recentWarnings.containsKey(warning)) {
                 long lastWarned = SpongeHooks.recentWarnings.get(warning);

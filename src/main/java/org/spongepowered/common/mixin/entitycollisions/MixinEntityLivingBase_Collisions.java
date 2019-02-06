@@ -46,13 +46,13 @@ public abstract class MixinEntityLivingBase_Collisions extends MixinEntity_Colli
 
     private boolean runningCollideWithNearby = false;
 
-    @Inject(method = "onLivingUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;collideWithNearbyEntities()V"))
-    public void onLivingUpdateBeforeCollide(CallbackInfo ci) {
+    @Inject(method = "livingTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;collideWithNearbyEntities()V"))
+    public void onLivingTickBeforeCollide(CallbackInfo ci) {
         this.runningCollideWithNearby = true;
     }
 
-    @Inject(method = "onLivingUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;collideWithNearbyEntities()V", shift = Shift.AFTER))
-    public void onLivingUpdateAfterCollide(CallbackInfo ci) {
+    @Inject(method = "livingTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;collideWithNearbyEntities()V", shift = Shift.AFTER))
+    public void onLivingTickAfterCollide(CallbackInfo ci) {
         this.runningCollideWithNearby = false;
     }
 
