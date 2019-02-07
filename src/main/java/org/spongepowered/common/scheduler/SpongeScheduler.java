@@ -113,11 +113,6 @@ public abstract class SpongeScheduler implements Scheduler {
     }
 
     @Override
-    public int getPreferredTickInterval() {
-        return TICK_DURATION_MS;
-    }
-
-    @Override
     public Optional<ScheduledTask> getTaskById(UUID id) {
         synchronized (this.taskMap) {
             return Optional.ofNullable(this.taskMap.get(id));

@@ -73,12 +73,12 @@ public final class SpongeTask implements Task {
 
     @Override
     public Duration getDelay() {
-        return Duration.ofMillis(this.delay);
+        return Duration.ofNanos(this.delay);
     }
 
     @Override
     public Duration getInterval() {
-        return Duration.ofMillis(this.interval);
+        return Duration.ofNanos(this.interval);
     }
 
     @Override
