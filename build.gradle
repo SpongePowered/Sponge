@@ -17,7 +17,7 @@ buildscript {
     }
 
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.0.85', changing: true
         classpath 'org.spongepowered:spongegradle:0.8.2-SNAPSHOT'
         classpath 'gradle.plugin.net.minecrell:licenser:0.4'
     }
