@@ -90,10 +90,10 @@ public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType,
         if (tileEntity == null) {
             return Optional.empty();
         }
-        compound.setInteger("x", blockpos.getX());
-        compound.setInteger("y", blockpos.getY());
-        compound.setInteger("z", blockpos.getZ());
-        tileEntity.readFromNBT(compound);
+        compound.setInt("x", blockpos.getX());
+        compound.setInt("y", blockpos.getY());
+        compound.setInt("z", blockpos.getZ());
+        tileEntity.read(compound);
         tileEntity.markDirty();
         return Optional.of((org.spongepowered.api.block.tileentity.TileEntity) tileEntity);
     }

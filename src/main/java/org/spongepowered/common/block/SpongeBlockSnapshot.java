@@ -184,8 +184,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
             }
             IBlockState current = world.getBlockState(pos);
             IBlockState replaced = (IBlockState) this.blockState;
-            if (!force && (current.getBlock() != replaced.getBlock() || current.getBlock().getMetaFromState(current) != replaced.getBlock()
-                .getMetaFromState(replaced))) {
+            if (!force && (current != replaced)) {
                 return false;
             }
 

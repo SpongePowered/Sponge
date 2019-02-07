@@ -42,7 +42,6 @@ import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.nbt.NbtDataTypes;
 import org.spongepowered.common.data.nbt.validation.Validations;
@@ -102,7 +101,7 @@ public class SpongeTileEntityArchetypeBuilder extends AbstractDataBuilder<TileEn
     }
 
     @Override
-    public TileEntityArchetype.Builder from(Location<World> location) {
+    public TileEntityArchetype.Builder from(Location location) {
         final TileEntity tileEntity = location.getTileEntity()
                 .orElseThrow(() -> new IllegalArgumentException("There is no tile entity available at the provided location: " + location));
 
@@ -113,7 +112,7 @@ public class SpongeTileEntityArchetypeBuilder extends AbstractDataBuilder<TileEn
     public TileEntityArchetype.Builder tile(TileEntity tileEntity) {
         checkArgument(tileEntity instanceof net.minecraft.tileentity.TileEntity, "TileEntity is not compatible with this implementation!");
         NBTTagCompound nbttagcompound = new NBTTagCompound();
-        ((net.minecraft.tileentity.TileEntity) tileEntity).writeToNBT(nbttagcompound);
+        ((net.minecraft.tileentity.TileEntity) tileEntity).write(nbttagcompound);
         nbttagcompound.removeTag("x");
         nbttagcompound.removeTag("y");
         nbttagcompound.removeTag("z");

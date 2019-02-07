@@ -26,7 +26,6 @@ package org.spongepowered.common.effect.particle;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.util.EnumParticleTypes;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.effect.particle.ParticleOption;
 import org.spongepowered.api.effect.particle.ParticleType;
@@ -39,10 +38,10 @@ import javax.annotation.Nullable;
 
 public class SpongeParticleType extends SpongeCatalogType implements ParticleType {
 
-    @Nullable private final EnumParticleTypes internalType;
+    @Nullable private final net.minecraft.particles.ParticleType internalType;
     private final Map<ParticleOption<?>, Object> options;
 
-    public SpongeParticleType(CatalogKey key, @Nullable EnumParticleTypes internalType,
+    public SpongeParticleType(CatalogKey key, @Nullable net.minecraft.particles.ParticleType internalType,
             Map<ParticleOption<?>, Object> options) {
         super(key, key.getValue());
         this.options = ImmutableMap.copyOf(options);
@@ -50,7 +49,7 @@ public class SpongeParticleType extends SpongeCatalogType implements ParticleTyp
     }
 
     @Nullable
-    public EnumParticleTypes getInternalType() {
+    public net.minecraft.particles.ParticleType getInternalType() {
         return this.internalType;
     }
 

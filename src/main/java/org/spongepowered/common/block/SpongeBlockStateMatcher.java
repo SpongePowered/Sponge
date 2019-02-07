@@ -30,7 +30,6 @@ import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockStateMatcher;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.block.trait.BlockTrait;
 import org.spongepowered.api.data.property.PropertyMatcher;
 
 import java.util.List;

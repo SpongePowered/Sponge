@@ -31,6 +31,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityFireworkRocket;
 import net.minecraft.init.Items;
+import net.minecraft.init.Particles;
 import net.minecraft.item.Item;
 import net.minecraft.network.Packet;
 import net.minecraft.network.datasync.EntityDataManager;
@@ -40,9 +41,9 @@ import net.minecraft.network.play.server.SPacketEntityMetadata;
 import net.minecraft.network.play.server.SPacketEntityStatus;
 import net.minecraft.network.play.server.SPacketParticles;
 import net.minecraft.network.play.server.SPacketSpawnObject;
+import net.minecraft.particles.ParticleType;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionType;
-import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import org.spongepowered.api.block.BlockState;
@@ -138,7 +139,7 @@ public final class SpongeParticleHelper {
     private static ICachedParticleEffect toCachedPacket(SpongeParticleEffect effect) {
         SpongeParticleType type = effect.getType();
 
-        EnumParticleTypes internal = type.getInternalType();
+        ParticleType internal = type.getInternalType();
         // Special cases
         if (internal == null) {
             if (type == ParticleTypes.FIREWORKS) {
@@ -146,7 +147,7 @@ public final class SpongeParticleHelper {
                 if (effects.isEmpty()) {
                     return EmptyCachedPacket.INSTANCE;
                 }
-                final net.minecraft.item.ItemStack itemStack = new net.minecraft.item.ItemStack(Items.FIREWORKS);
+                final net.minecraft.item.ItemStack itemStack = new net.minecraft.item.ItemStack(Items.FIREWORK_ROCKET);
                 FireworkUtils.setFireworkEffects(itemStack, effects);
                 final SPacketEntityMetadata packetEntityMetadata = new SPacketEntityMetadata();
                 packetEntityMetadata.entityId = CachedFireworkPacket.FIREWORK_ROCKET_ID;
@@ -200,7 +201,7 @@ public final class SpongeParticleHelper {
         // Note: If the count > 0 -> speed = 0f else if count = 0 -> speed = 1f
 
         Optional<BlockState> defaultBlockState;
-        if (internal != EnumParticleTypes.ITEM_CRACK && (defaultBlockState = type.getDefaultOption(ParticleOptions.BLOCK_STATE)).isPresent()) {
+        if (internal != Particles.ITEM && (defaultBlockState = type.getDefaultOption(ParticleOptions.BLOCK_STATE)).isPresent()) {
             int state = getBlockState(effect, defaultBlockState);
             if (state == 0) {
                 return EmptyCachedPacket.INSTANCE;

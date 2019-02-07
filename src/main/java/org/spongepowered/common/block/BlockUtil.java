@@ -24,10 +24,6 @@
  */
 package org.spongepowered.common.block;
 
-import com.flowpowered.math.vector.Vector3i;
-import com.google.common.collect.ComparisonChain;
-import com.google.common.collect.MapDifference;
-import com.google.common.collect.Maps;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
@@ -35,18 +31,11 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.block.trait.BlockTrait;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
-import org.spongepowered.common.util.VecHelper;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 public final class BlockUtil {
 
