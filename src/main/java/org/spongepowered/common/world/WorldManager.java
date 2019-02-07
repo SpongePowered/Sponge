@@ -1018,7 +1018,7 @@ public final class WorldManager {
             ((IMixinMinecraftServer) SpongeImpl.getServer()).setSaveEnabled(false);
         }
 
-        final CompletableFuture<Optional<WorldProperties>> future = SpongeImpl.getScheduler().submitAsyncTask(new CopyWorldTask(info, copyName));
+        final CompletableFuture<Optional<WorldProperties>> future = SpongeImpl.getAsyncScheduler().submit(new CopyWorldTask(info, copyName));
         if (worldServer != null) { // World was loaded
             future.thenRun(() -> ((IMixinMinecraftServer) SpongeImpl.getServer()).setSaveEnabled(true));
         }
@@ -1065,7 +1065,7 @@ public final class WorldManager {
         checkNotNull(worldProperties);
         checkArgument(worldPropertiesByWorldUuid.containsKey(worldProperties.getUniqueId()), "World properties not registered!");
         checkState(!worldByDimensionId.containsKey(((IMixinWorldInfo) worldProperties).getDimensionId()), "World not unloaded!");
-        return SpongeImpl.getScheduler().submitAsyncTask(new DeleteWorldTask(worldProperties));
+        return SpongeImpl.getAsyncScheduler().submit(new DeleteWorldTask(worldProperties));
     }
 
     /**

@@ -27,47 +27,45 @@ package org.spongepowered.common.scheduler;
 import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
+import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 
-public abstract class SyncScheduler extends SpongeScheduler {
+public class ServerScheduler extends SyncScheduler {
 
-    // The number of ticks elapsed since this scheduler began.
-    private volatile long counter = 0L;
-
-    protected SyncScheduler(String tag) {
-        super(tag);
+    public ServerScheduler() {
+        super("S");
     }
 
-    /**
-     * The hook to update the Ticks known by the SyncScheduler.
-     */
+    @Override
     public void tick() {
-        this.counter++;
+        super.tick();
 
-        runTick();
-
-        if (Sponge.isServerAvailable()) {
-            for (Player player : Sponge.getServer().getOnlinePlayers()) {
-                if (player instanceof EntityPlayer) {
-                    // Detect Changes on PlayerInventories marked as dirty.
-                    ((IMixinInventoryPlayer) ((EntityPlayer) player).inventory).cleanupDirty();
-                }
+        for (Player player : Sponge.getServer().getOnlinePlayers()) {
+            if (player instanceof EntityPlayer) {
+                // Detect Changes on PlayerInventories marked as dirty.
+                ((IMixinInventoryPlayer) ((EntityPlayer) player).inventory).cleanupDirty();
             }
         }
     }
 
-    @Override
-    protected long getTimestamp(SpongeScheduledTask task) {
-        // The task is based on minecraft ticks, so we generate
-        // a timestamp based on the elapsed ticks
-        if (task.task.tickBased) {
-            return this.counter * SpongeScheduler.TICK_DURATION_NS;
-        }
-        return super.getTimestamp(task);
-    }
+    // TODO: Also track tasks on the client scheduler?
 
     @Override
     protected void executeTaskRunnable(SpongeScheduledTask task, Runnable runnable) {
-        runnable.run();
+        try (BasicPluginContext context = PluginPhase.State.SCHEDULED_TASK.createPhaseContext()
+                .source(task)) {
+            context.buildAndSwitch();
+            super.executeTaskRunnable(task, runnable);
+        }
+    }
+
+    @Override
+    protected PhaseContext<?> createContext(SpongeScheduledTask task, PluginContainer container) {
+        return PluginPhase.State.SCHEDULED_TASK.createPhaseContext()
+                .source(task)
+                .container(container);
     }
 }

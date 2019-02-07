@@ -55,6 +55,8 @@ import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.launch.SpongeLaunch;
 import org.spongepowered.common.registry.SpongeGameRegistry;
+import org.spongepowered.common.scheduler.AsyncScheduler;
+import org.spongepowered.common.scheduler.ServerScheduler;
 import org.spongepowered.common.scheduler.SpongeScheduler;
 
 import java.nio.file.Path;
@@ -93,7 +95,6 @@ public final class SpongeImpl {
     @Inject @Nullable private static SpongeGameRegistry registry;
     @Inject @Nullable private static SpongeDataManager dataManager;
     @Inject @Nullable private static SpongePropertyRegistry propertyRegistry;
-    @Inject @Nullable private static SpongeScheduler scheduler;
     @Inject @Nullable private static SpongeCauseStackManager causeStackManager;
 
     private static final List<PluginContainer> internalPlugins = new ArrayList<>();
@@ -149,8 +150,12 @@ public final class SpongeImpl {
         return check(propertyRegistry);
     }
 
-    public static SpongeScheduler getScheduler() {
-        return check(scheduler);
+    public static ServerScheduler getServerScheduler() {
+        return (ServerScheduler) Sponge.getServer().getScheduler();
+    }
+
+    public static AsyncScheduler getAsyncScheduler() {
+        return getGame().getAsyncScheduler();
     }
 
     public static SpongeCauseStackManager getCauseStackManager() {

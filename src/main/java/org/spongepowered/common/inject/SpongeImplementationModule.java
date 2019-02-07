@@ -44,7 +44,6 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.network.ChannelRegistrar;
 import org.spongepowered.api.plugin.PluginManager;
-import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.service.ServiceManager;
 import org.spongepowered.api.util.metric.MetricsConfigManager;
 import org.spongepowered.common.service.SpongeServiceManager;
@@ -78,7 +77,6 @@ public class SpongeImplementationModule extends PrivateModule {
         this.bindAndExpose(AssetManager.class).to(SpongeAssetManager.class);
         this.bindAndExpose(GameRegistry.class).to(SpongeGameRegistry.class);
         this.bindAndExpose(TeleportHelper.class).to(SpongeTeleportHelper.class);
-        this.bindAndExpose(Scheduler.class).to(SpongeScheduler.class);
         this.bindAndExpose(CommandManager.class).to(SpongeCommandManager.class);
         this.bindAndExpose(DataManager.class).to(SpongeDataManager.class);
         this.bindAndExpose(ConfigManager.class).to(SpongeConfigManager.class);

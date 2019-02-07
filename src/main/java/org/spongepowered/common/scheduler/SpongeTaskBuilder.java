@@ -27,37 +27,39 @@ package org.spongepowered.common.scheduler;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static org.spongepowered.common.scheduler.SpongeScheduler.checkPluginInstance;
 
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.Task;
+import org.spongepowered.api.util.TemporalUnits;
 
+import java.time.Duration;
+import java.time.temporal.TemporalUnit;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+
+import javax.annotation.Nullable;
 
 public class SpongeTaskBuilder implements Task.Builder {
 
-    private final SpongeScheduler scheduler;
-    private Consumer<Task> consumer;
-    private ScheduledTask.TaskSynchronicity syncType;
-    private String name;
-    private long delay; //nanoseconds or ticks
-    private long interval; //nanoseconds or ticks
-    private boolean delayIsTicks;
-    private boolean intervalIsTicks;
+    private static final AtomicInteger taskCounter = new AtomicInteger();
 
-    public SpongeTaskBuilder(SpongeScheduler scheduler) {
-        this.scheduler = scheduler;
-        this.syncType = ScheduledTask.TaskSynchronicity.SYNCHRONOUS;
+    private Consumer<ScheduledTask> consumer;
+    @Nullable private PluginContainer plugin;
+    @Nullable private String name;
+    private long delay;
+    private long interval;
+    private boolean tickBasedDelay;
+    private boolean tickBasedInterval;
+
+    public SpongeTaskBuilder() {
     }
 
     @Override
-    public Task.Builder async() {
-        this.syncType = ScheduledTask.TaskSynchronicity.ASYNCHRONOUS;
-        return this;
-    }
-
-    @Override
-    public Task.Builder execute(Consumer<Task> executor) {
+    public Task.Builder execute(Consumer<ScheduledTask> executor) {
         this.consumer = checkNotNull(executor, "executor");
         return this;
     }
@@ -66,15 +68,37 @@ public class SpongeTaskBuilder implements Task.Builder {
     public Task.Builder delay(long delay, TimeUnit unit) {
         checkArgument(delay >= 0, "Delay cannot be negative");
         this.delay = checkNotNull(unit, "unit").toNanos(delay);
-        this.delayIsTicks = false;
+        this.tickBasedDelay = false;
+        return this;
+    }
+
+    @Override
+    public Task.Builder delay(long delay, TemporalUnit unit) {
+        checkArgument(delay >= 0, "Delay cannot be negative");
+        this.delay = checkNotNull(unit, "unit").getDuration().toNanos() * delay;
+        this.tickBasedDelay = TemporalUnits.MINECRAFT_TICKS == unit;
         return this;
     }
 
     @Override
     public Task.Builder delayTicks(long delay) {
         checkArgument(delay >= 0, "Delay cannot be negative");
-        this.delay = delay;
-        this.delayIsTicks = true;
+        this.delay = delay * SpongeScheduler.TICK_DURATION_NS;
+        this.tickBasedDelay = true;
+        return this;
+    }
+
+    @Override
+    public Task.Builder delay(Duration delay) {
+        this.delay = checkNotNull(delay, "delay").toNanos();
+        this.tickBasedDelay = false;
+        return this;
+    }
+
+    @Override
+    public Task.Builder interval(Duration interval) {
+        this.interval = checkNotNull(interval, "interval").toNanos();
+        this.tickBasedInterval = false;
         return this;
     }
 
@@ -82,15 +106,23 @@ public class SpongeTaskBuilder implements Task.Builder {
     public Task.Builder interval(long interval, TimeUnit unit) {
         checkArgument(interval >= 0, "Interval cannot be negative");
         this.interval = checkNotNull(unit, "unit").toNanos(interval);
-        this.intervalIsTicks = false;
+        this.tickBasedInterval = false;
+        return this;
+    }
+
+    @Override
+    public Task.Builder interval(long delay, TemporalUnit unit) {
+        checkArgument(delay >= 0, "Interval cannot be negative");
+        this.interval = checkNotNull(unit, "unit").getDuration().toNanos() * delay;
+        this.tickBasedInterval = TemporalUnits.MINECRAFT_TICKS == unit;
         return this;
     }
 
     @Override
     public Task.Builder intervalTicks(long interval) {
         checkArgument(interval >= 0, "Interval cannot be negative");
-        this.interval = interval;
-        this.intervalIsTicks = true;
+        this.interval = interval * SpongeScheduler.TICK_DURATION_NS;
+        this.tickBasedInterval = true;
         return this;
     }
 
@@ -102,48 +134,55 @@ public class SpongeTaskBuilder implements Task.Builder {
     }
 
     @Override
-    public Task submit(Object plugin) {
-        PluginContainer pluginContainer = this.scheduler.checkPluginInstance(plugin);
+    public Task.Builder plugin(Object plugin) {
+        this.plugin = checkPluginInstance(plugin);
+        return this;
+    }
+
+    @Override
+    public Task build() {
         checkState(this.consumer != null, "Runnable task not set");
-        String name;
+        PluginContainer pluginContainer = this.plugin;
+        if (pluginContainer == null) {
+            if (Sponge.isServerAvailable() && Sponge.getServer().onMainThread()) {
+                pluginContainer = Sponge.getCauseStackManager().getCurrentCause().first(PluginContainer.class)
+                        .orElseThrow(() -> new IllegalStateException("Cannot find PluginContainer in CauseStackManager."));
+            } else {
+                throw new IllegalStateException("Cannot access CauseStackManager off the main thread.");
+            }
+        }
+        final String name;
         if (this.name == null) {
-            name = this.scheduler.getNameFor(pluginContainer, this.syncType);
+            name = pluginContainer.getId() + "-" + taskCounter.incrementAndGet();
         } else {
             name = this.name;
         }
-        long delay = this.delay;
-        long interval = this.interval;
-        boolean delayIsTicks = this.delayIsTicks;
-        boolean intervalIsTicks = this.intervalIsTicks;
-        if (this.syncType == ScheduledTask.TaskSynchronicity.ASYNCHRONOUS) {
-            delay = delayIsTicks ? delay * SpongeScheduler.TICK_DURATION_NS : delay;
-            interval = intervalIsTicks ? interval * SpongeScheduler.TICK_DURATION_NS : interval;
-            delayIsTicks = intervalIsTicks = false;
-        }
-        ScheduledTask task = new ScheduledTask(this.syncType, this.consumer, name, delay, delayIsTicks, interval, intervalIsTicks, pluginContainer);
-        this.scheduler.submit(task);
-        return task;
+        return new SpongeTask(this.consumer, name, this.name, pluginContainer,
+                this.delay, this.interval, this.tickBasedDelay && this.tickBasedInterval);
     }
 
     @Override
     public Task.Builder from(Task value) {
-        this.syncType = value.isAsynchronous() ? ScheduledTask.TaskSynchronicity.ASYNCHRONOUS : ScheduledTask.TaskSynchronicity.SYNCHRONOUS;
+        final SpongeTask task = (SpongeTask) value;
         this.consumer = value.getConsumer();
-        this.interval = value.getInterval();
-        this.delay = value.getDelay();
-        this.delayIsTicks = false;
-        this.name = value.getName();
+        this.interval = task.interval;
+        this.delay = task.delay;
+        this.tickBasedDelay = task.tickBased;
+        this.tickBasedInterval = task.tickBased;
+        this.name = task.customName;
+        this.plugin = task.getOwner();
         return this;
     }
 
     @Override
     public Task.Builder reset() {
-        this.syncType = ScheduledTask.TaskSynchronicity.SYNCHRONOUS;
         this.consumer = null;
         this.interval = 0;
         this.delay = 0;
-        this.delayIsTicks = false;
+        this.tickBasedDelay = false;
+        this.tickBasedInterval = false;
         this.name = null;
+        this.plugin = null;
         return this;
     }
 }

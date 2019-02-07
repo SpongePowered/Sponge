@@ -22,34 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.inject.provider;
+package org.spongepowered.common.scheduler;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.scheduler.Scheduler;
-import org.spongepowered.api.scheduler.SpongeExecutorService;
+public class ClientScheduler extends SyncScheduler {
 
-public abstract class SpongeExecutorServiceProvider implements Provider<SpongeExecutorService> {
-
-    @Inject protected Scheduler scheduler;
-    @Inject protected PluginContainer container;
-
-    public static final class Synchronous extends SpongeExecutorServiceProvider {
-
-        @Override
-        public SpongeExecutorService get() {
-            return this.scheduler.createSyncExecutor(this.container);
-        }
-
-    }
-
-    public static final class Asynchronous extends SpongeExecutorServiceProvider {
-
-        @Override
-        public SpongeExecutorService get() {
-            return this.scheduler.createAsyncExecutor(this.container);
-        }
-
+    public ClientScheduler() {
+        super("C");
     }
 }

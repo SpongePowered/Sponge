@@ -87,7 +87,7 @@ public abstract class MixinRConThreadClient extends RConThreadBase implements Re
     @Inject(method = "closeSocket", at = @At("HEAD"))
     public void rconLogoutCallback(CallbackInfo ci) {
         if (this.loggedIn) {
-            SpongeImpl.getScheduler().callSync(() -> {
+            SpongeImpl.getServerScheduler().execute(() -> {
                 final CauseStackManager causeStackManager = Sponge.getCauseStackManager();
                 causeStackManager.pushCause(this);
                 causeStackManager.pushCause(this.source);
@@ -115,7 +115,7 @@ public abstract class MixinRConThreadClient extends RConThreadBase implements Re
         // Call the connection event
         final RconConnectionEvent.Connect connectEvent;
         try {
-            connectEvent = SpongeImpl.getScheduler().callSync(() -> {
+            connectEvent = SpongeImpl.getServerScheduler().execute(() -> {
                 final CauseStackManager causeStackManager = Sponge.getCauseStackManager();
                 causeStackManager.pushCause(this);
                 causeStackManager.pushCause(this.source);
@@ -174,7 +174,7 @@ public abstract class MixinRConThreadClient extends RConThreadBase implements Re
                                 try {
                                     /// Sponge: START
                                     // Execute the command on the main thread and wait for it
-                                    SpongeImpl.getScheduler().callSync(() -> {
+                                    SpongeImpl.getServerScheduler().execute(() -> {
                                         final CauseStackManager causeStackManager = Sponge.getCauseStackManager();
                                         // Only add the RemoteConnection here, the RconSource
                                         // will be added by the command manager
@@ -197,7 +197,7 @@ public abstract class MixinRConThreadClient extends RConThreadBase implements Re
                             final String password = RConUtils.getBytesAsString(this.buffer, j, i);
                             if (!password.isEmpty() && password.equals(this.rconPassword)) {
                                 /// Sponge: START
-                                final RconConnectionEvent.Login event = SpongeImpl.getScheduler().callSync(() -> {
+                                final RconConnectionEvent.Login event = SpongeImpl.getServerScheduler().execute(() -> {
                                     final CauseStackManager causeStackManager = Sponge.getCauseStackManager();
                                     causeStackManager.pushCause(this);
                                     causeStackManager.pushCause(this.source);
