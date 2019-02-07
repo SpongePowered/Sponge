@@ -29,6 +29,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockChest;
 import net.minecraft.block.BlockCommandBlock;
 import net.minecraft.block.BlockDoor;
+import net.minecraft.block.BlockDoublePlant;
 import net.minecraft.block.BlockStructure;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -38,11 +39,13 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
-import net.minecraft.item.ItemDoor;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemUseContext;
 import net.minecraft.network.play.server.SPacketBlockChange;
 import net.minecraft.network.play.server.SPacketCloseWindow;
 import net.minecraft.server.management.PlayerInteractionManager;
+import net.minecraft.state.properties.DoubleBlockHalf;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.EnumActionResult;
@@ -80,37 +83,34 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
     /**
      * @author Aaron1011
      * @author gabizou - May 28th, 2016 - Rewritten for 1.9.4
+     * @author Aaron1011 - February 6th, 2019 - Updated for 1.13
      *
      * @reason Fire interact block event.
      */
     @Overwrite
     public EnumActionResult processRightClickBlock(EntityPlayer player, net.minecraft.world.World worldIn, ItemStack stack, EnumHand hand, BlockPos
             pos, EnumFacing facing, float hitX, float hitY, float hitZ) {
+        IBlockState lvt_10_1_ = worldIn.getBlockState(pos);
         if (this.gameType == GameType.SPECTATOR) {
-            TileEntity tileentity = worldIn.getTileEntity(pos);
-
-            if (tileentity instanceof ILockableContainer) {
-                Block block = worldIn.getBlockState(pos).getBlock();
-                ILockableContainer ilockablecontainer = (ILockableContainer) tileentity;
-
-                if (ilockablecontainer instanceof TileEntityChest && block instanceof BlockChest) {
-                    ilockablecontainer = ((BlockChest) block).getLockableContainer(worldIn, pos);
+            TileEntity lvt_11_1_ = worldIn.getTileEntity(pos);
+            if (lvt_11_1_ instanceof ILockableContainer) {
+                Block lvt_12_1_ = lvt_10_1_.getBlock();
+                ILockableContainer lvt_13_1_ = (ILockableContainer)lvt_11_1_;
+                if (lvt_13_1_ instanceof TileEntityChest && lvt_12_1_ instanceof BlockChest) {
+                    lvt_13_1_ = ((BlockChest)lvt_12_1_).getContainer(lvt_10_1_, worldIn, pos, false);
                 }
 
-                if (ilockablecontainer != null) {
-                    // TODO - fire event
-                    player.displayGUIChest(ilockablecontainer);
+                if (lvt_13_1_ != null) {
+                    player.displayGUIChest(lvt_13_1_);
                     return EnumActionResult.SUCCESS;
                 }
-            } else if (tileentity instanceof IInventory) {
-                // TODO - fire event
-                player.displayGUIChest((IInventory) tileentity);
+            } else if (lvt_11_1_ instanceof IInventory) {
+                player.displayGUIChest((IInventory)lvt_11_1_);
                 return EnumActionResult.SUCCESS;
             }
 
             return EnumActionResult.PASS;
-
-        } // else { // Sponge - Remove unecessary else
+        }  // else { // Sponge - Remove unecessary else
         // Sponge Start - Create an interact block event before something happens.
         final ItemStack oldStack = stack.copy();
         final Vector3d hitVec = new Vector3d(pos.getX() + hitX, pos.getY() + hitY, pos.getZ() + hitZ);
@@ -135,10 +135,10 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
                 // CommandBlock GUI opens solely on the client, we need to force it close on cancellation
                 this.player.connection.sendPacket(new SPacketCloseWindow(0));
 
-            } else if (state.getProperties().containsKey(BlockDoor.HALF)) {
+            } else if (state.getProperties().contains(BlockDoor.HALF)) {
                 // Stopping a door from opening while `g the top part will allow the door to open, we need to update the
                 // client to resolve this
-                if (state.getValue(BlockDoor.HALF) == BlockDoor.EnumDoorHalf.LOWER) {
+                if (state.get(BlockDoor.HALF) == DoubleBlockHalf.LOWER) {
                     this.player.connection.sendPacket(new SPacketBlockChange(worldIn, pos.up()));
                 } else {
                     this.player.connection.sendPacket(new SPacketBlockChange(worldIn, pos.down()));
@@ -147,7 +147,7 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
             } else if (!oldStack.isEmpty()) {
                 // Stopping the placement of a door or double plant causes artifacts (ghosts) on the top-side of the block. We need to remove it
                 final Item item = oldStack.getItem();
-                if (item instanceof ItemDoor || (item instanceof ItemBlock && ((ItemBlock) item).getBlock().equals(Blocks.DOUBLE_PLANT))) {
+                if ((item instanceof ItemBlock && ((ItemBlock) item).getBlock() instanceof BlockDoublePlant) || BlockTags.WOODEN_DOORS.contains(((ItemBlock) item).getBlock())) {
                     this.player.connection.sendPacket(new SPacketBlockChange(worldIn, pos.up(2)));
                 }
             }
@@ -164,7 +164,7 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
                 IBlockState iblockstate = (IBlockState) currentSnapshot.getState();
                 Container lastOpenContainer = player.openContainer;
 
-                EnumActionResult result = iblockstate.getBlock().onBlockActivated(worldIn, pos, iblockstate, player, hand, facing, hitX, hitY, hitZ)
+                EnumActionResult result = iblockstate.onBlockActivated(worldIn, pos, player, hand, facing, hitX, hitY, hitZ)
                          ? EnumActionResult.SUCCESS
                          : EnumActionResult.PASS;
                 // if itemstack changed, avoid restore
@@ -214,9 +214,9 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
         // Sponge Start - complete the method with the micro change of resetting item damage and quantity from the copied stack.
         EnumActionResult result = EnumActionResult.PASS;
         if (event.getUseItemResult() != Tristate.FALSE) {
-            result = stack.onItemUse(player, worldIn, pos, hand, facing, hitX, hitY, hitZ);
+            ItemUseContext itemUseContext = new ItemUseContext(player, stack,  pos, facing, hitX, hitY, hitZ);
+            result = stack.onItemUse(itemUseContext);
             if (this.isCreative()) {
-                stack.setItemDamage(oldStack.getItemDamage());
                 stack.setCount(oldStack.getCount());
             }
         }

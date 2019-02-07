@@ -49,7 +49,7 @@ public abstract class MixinPlayerChunkMapEntry implements IMixinPlayerChunkMapEn
 
     private boolean updateBiomes;
 
-    @Inject(method = "update", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "tick", at = @At("HEAD"), cancellable = true)
     public void resendUpdatedBiomes(CallbackInfo ci) {
         final Chunk chunk = this.playerChunkMap.getWorld().getChunk(this.pos.x, this.pos.z);
         if (this.updateBiomes) {
