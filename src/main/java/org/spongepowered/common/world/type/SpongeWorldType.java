@@ -49,7 +49,7 @@ public abstract class SpongeWorldType extends WorldType {
         return oldLen;
     }
 
-    public abstract BiomeProvider getBiomeProvider(World world);
+    public abstract BiomeProvider createBiomeProvider(final World world);
 
-    public abstract IChunkGenerator getChunkGenerator(World world, String generatorOptions);
+    public abstract IChunkGenerator createChunkGenerator(final World world, String generatorOptions);
 }

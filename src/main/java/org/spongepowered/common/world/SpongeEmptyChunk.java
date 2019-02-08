@@ -25,20 +25,22 @@
 package org.spongepowered.common.world;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Predicate;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.init.Biomes;
 import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.EnumLightType;
-import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
+import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
 
+import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
+import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
@@ -46,9 +48,10 @@ import javax.annotation.Nullable;
 // This is simply a copy of it that will be used on server.
 // It acts merely as a mechanism to avoid loading chunks.
 public class SpongeEmptyChunk extends Chunk {
+    private static final Biome[] BIOMES = Util.make(new Biome[16 * 16], biomes -> Arrays.fill(biomes, Biomes.PLAINS));
 
-    public SpongeEmptyChunk(World worldIn, int x, int z) {
-        super(worldIn, x, z);
+    public SpongeEmptyChunk(final World world, final int x, final int z) {
+        super(world, x, z, BIOMES);
     }
 
     @Override
@@ -57,8 +60,7 @@ public class SpongeEmptyChunk extends Chunk {
     }
 
     @Override
-    public int getHeightValue(int x, int z) {
-        return 0;
+    public void generateHeightMap() {
     }
 
     @Override
@@ -67,21 +69,16 @@ public class SpongeEmptyChunk extends Chunk {
 
     @Override
     public IBlockState getBlockState(BlockPos pos) {
-        return Blocks.AIR.getDefaultState();
+        return Blocks.VOID_AIR.getDefaultState();
     }
 
     @Override
-    public int getBlockLightOpacity(BlockPos pos) {
-        return 255;
+    public int getLight(EnumLightType type, BlockPos pos, boolean p_201587_3_) {
+      return type.defaultLightValue;
     }
 
     @Override
-    public int getLightFor(EnumLightType p_177413_1_, BlockPos pos) {
-        return p_177413_1_.defaultLightValue;
-    }
-
-    @Override
-    public void setLightFor(EnumLightType p_177431_1_, BlockPos pos, int value) {
+    public void setLightFor(EnumLightType type, BlockPos pos, int value) {
     }
 
     @Override
@@ -149,12 +146,6 @@ public class SpongeEmptyChunk extends Chunk {
     @Override
     public boolean needsSaving(boolean p_76601_1_) {
         return false;
-    }
-
-    @Override
-    public Random getRandomWithSeed(long seed) {
-        return new Random(this.getWorld().getSeed() + (long) (this.x * this.x * 4987142) + (long) (this.x * 5947611)
-                + (long) (this.z * this.z) * 4392871L + (long) (this.z * 389711) ^ seed);
     }
 
     @Override

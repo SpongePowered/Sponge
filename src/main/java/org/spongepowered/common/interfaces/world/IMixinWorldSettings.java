@@ -30,8 +30,8 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.difficulty.Difficulty;
-import org.spongepowered.api.world.PortalAgentType;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
+import org.spongepowered.api.world.teleport.PortalAgentType;
 
 import javax.annotation.Nullable;
 

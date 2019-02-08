@@ -25,26 +25,34 @@
 package org.spongepowered.common.world.type;
 
 import net.minecraft.init.Biomes;
+import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeProviderSingle;
 import net.minecraft.world.biome.provider.BiomeProvider;
-import net.minecraft.world.gen.ChunkGeneratorHell;
+import net.minecraft.world.biome.provider.BiomeProviderType;
+import net.minecraft.world.biome.provider.SingleBiomeProviderSettings;
+import net.minecraft.world.gen.ChunkGeneratorType;
 import net.minecraft.world.gen.IChunkGenerator;
+import net.minecraft.world.gen.NetherGenSettings;
 
 public class SpongeWorldTypeNether extends SpongeWorldType {
 
     public SpongeWorldTypeNether() {
         super("nether");
-        enableInfoNotice();
+        this.enableInfoNotice();
     }
 
     @Override
-    public BiomeProvider getBiomeProvider(World world) {
-        return new BiomeProviderSingle(Biomes.HELL);
+    public BiomeProvider createBiomeProvider(final World world) {
+        final SingleBiomeProviderSettings settings = BiomeProviderType.FIXED.createSettings();
+        settings.setBiome(Biomes.NETHER);
+        return BiomeProviderType.FIXED.create(settings);
     }
 
     @Override
-    public IChunkGenerator getChunkGenerator(World world, String generatorOptions) {
-        return new ChunkGeneratorHell(world, world.getWorldInfo().isMapFeaturesEnabled(), world.getSeed());
+    public IChunkGenerator createChunkGenerator(final World world, final String generatorOptions) {
+        final NetherGenSettings settings = ChunkGeneratorType.CAVES.createSettings();
+        settings.setDefautBlock(Blocks.NETHERRACK.getDefaultState());
+        settings.setDefaultFluid(Blocks.LAVA.getDefaultState());
+        return ChunkGeneratorType.CAVES.create(world, this.createBiomeProvider(world), settings);
     }
 }

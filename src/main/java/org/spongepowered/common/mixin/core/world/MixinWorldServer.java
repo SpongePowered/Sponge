@@ -530,8 +530,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         final IChunkGenerator chunkGenerator;
         final BiomeProvider biomeProvider;
         if (worldType instanceof SpongeWorldType) {
-            chunkGenerator = ((SpongeWorldType) worldType).getChunkGenerator(worldServer, settings);
-            biomeProvider = ((SpongeWorldType) worldType).getBiomeProvider(worldServer);
+            chunkGenerator = ((SpongeWorldType) worldType).createChunkGenerator(worldServer, settings);
+            biomeProvider = ((SpongeWorldType) worldType).createBiomeProvider(worldServer);
         } else {
             final IChunkGenerator currentGenerator = this.getChunkProvider().chunkGenerator;
             if (currentGenerator != null) {

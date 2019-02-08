@@ -24,28 +24,37 @@
  */
 package org.spongepowered.common.world.type;
 
-import net.minecraft.init.Biomes;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeProviderSingle;
 import net.minecraft.world.biome.provider.BiomeProvider;
+import net.minecraft.world.biome.provider.BiomeProviderType;
+import net.minecraft.world.biome.provider.EndBiomeProvider;
+import net.minecraft.world.biome.provider.EndBiomeProviderSettings;
+import net.minecraft.world.dimension.EndDimension;
+import net.minecraft.world.gen.ChunkGeneratorType;
+import net.minecraft.world.gen.EndGenSettings;
 import net.minecraft.world.gen.IChunkGenerator;
-import net.minecraft.world.gen.ChunkGeneratorEnd;
 
 public class SpongeWorldTypeEnd extends SpongeWorldType {
 
     public SpongeWorldTypeEnd() {
         super("the_end");
-        enableInfoNotice();
+        this.enableInfoNotice();
     }
 
     @Override
-    public BiomeProvider getBiomeProvider(World world) {
-        return new BiomeProviderSingle(Biomes.SKY);
+    public BiomeProvider createBiomeProvider(final World world) {
+        final EndBiomeProviderSettings settings = BiomeProviderType.THE_END.createSettings();
+        settings.setSeed(world.getSeed());
+        return new EndBiomeProvider(settings);
     }
 
     @Override
-    public IChunkGenerator getChunkGenerator(World world, String generatorOptions) {
-        return new ChunkGeneratorEnd(world, true, world.getSeed(), new BlockPos(100, 50, 0));
+    public IChunkGenerator createChunkGenerator(final World world, final String generatorOptions) {
+        final EndGenSettings settings = ChunkGeneratorType.FLOATING_ISLANDS.createSettings();
+        settings.setDefautBlock(Blocks.END_STONE.getDefaultState());
+        settings.setDefaultFluid(Blocks.AIR.getDefaultState());
+        settings.setSpawnPos(EndDimension.field_209958_g);
+        return ChunkGeneratorType.FLOATING_ISLANDS.create(world, this.createBiomeProvider(world), settings);
     }
 }
