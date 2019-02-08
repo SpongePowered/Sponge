@@ -58,7 +58,6 @@ public class SpongeItemStackSnapshotBuilder extends AbstractDataBuilder<ItemStac
             final String itemString = container.getString(DataQueries.ITEM_TYPE).get();
             final ItemType itemType = SpongeImpl.getRegistry().getType(ItemType.class, itemString).get();
             final int count = getData(container, DataQueries.ITEM_COUNT, Integer.class);
-            final int damage = container.getInt(DataQueries.ITEM_DAMAGE_VALUE).orElse(0);
             final ImmutableList<ImmutableDataManipulator<?, ?>> manipulators;
             if (container.contains(DataQueries.DATA_MANIPULATORS)) {
                 manipulators = DataUtil.deserializeImmutableManipulatorList(container.getViewList(DataQueries.DATA_MANIPULATORS).get());

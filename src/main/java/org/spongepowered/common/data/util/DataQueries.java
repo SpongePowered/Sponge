@@ -146,7 +146,6 @@ public final class DataQueries {
     // ItemStacks
     public static final DataQuery ITEM_COUNT = of("Count");
     public static final DataQuery ITEM_TYPE = of("ItemType");
-    public static final DataQuery ITEM_DAMAGE_VALUE = of("UnsafeDamage");
 
     // TradeOffers
     public static final DataQuery FIRST_QUERY = of("FirstItem");

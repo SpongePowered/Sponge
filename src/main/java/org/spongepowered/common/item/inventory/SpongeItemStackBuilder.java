@@ -74,7 +74,6 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
     @Nullable private Set<DataManipulator<?, ?>> itemDataSet;
     private ItemType type;
     private int quantity;
-    private int damageValue = 0;
     @Nullable private LinkedHashMap<Key<?>, Object> keyValues;
     @Nullable private NBTTagCompound compound;
 
@@ -92,7 +91,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
 
     @Override
     public ItemType getCurrentItem() {
-        return this.type == null ? ItemTypes.NONE : this.type;
+        return this.type == null ? ItemTypes.AIR : this.type;
     }
 
     @Override
@@ -139,9 +138,8 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         // Assumes the item stack's values don't need to be validated
         this.type = itemStack.getType();
         this.quantity = itemStack.getQuantity();
-        if (itemStack instanceof net.minecraft.item.ItemStack) {
-            this.damageValue = ((net.minecraft.item.ItemStack) itemStack).getItemDamage();
-            final NBTTagCompound itemCompound = ((net.minecraft.item.ItemStack) itemStack).getTagCompound();
+        if ((Object) itemStack instanceof net.minecraft.item.ItemStack) {
+            final NBTTagCompound itemCompound = ((net.minecraft.item.ItemStack) (Object) itemStack).getTag();
             if (itemCompound != null) {
                 this.compound = itemCompound.copy();
             }
@@ -156,8 +154,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
     @Override
     public ItemStack.Builder fromContainer(DataView container) {
         checkNotNull(container);
-        if (!container.contains(DataQueries.ITEM_TYPE) || !container.contains(DataQueries.ITEM_COUNT)
-            || !container.contains(DataQueries.ITEM_DAMAGE_VALUE)) {
+        if (!container.contains(DataQueries.ITEM_TYPE) || !container.contains(DataQueries.ITEM_COUNT)) {
             return this;
         }
         reset();
@@ -169,10 +166,9 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         final ItemType itemType = SpongeImpl.getRegistry().getType(ItemType.class, itemTypeId).get();
         itemType(itemType);
 
-        this.damageValue = getData(container, DataQueries.ITEM_DAMAGE_VALUE, Integer.class);
         if (container.contains(DataQueries.UNSAFE_NBT)) {
             final NBTTagCompound compound = NbtTranslator.getInstance().translateData(container.getView(DataQueries.UNSAFE_NBT).get());
-            if (compound.hasKey(NbtDataUtil.SPONGE_DATA, NbtDataUtil.TAG_COMPOUND)) {
+            if (compound.hasKey(NbtDataUtil.SPONGE_DATA)) {
                 compound.removeTag(NbtDataUtil.SPONGE_DATA);
             }
             this.compound = compound;
@@ -196,7 +192,6 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
             itemData(manipulator);
         }
         if (snapshot instanceof SpongeItemStackSnapshot) {
-            this.damageValue = ((SpongeItemStackSnapshot) snapshot).getDamageValue();
             final Optional<NBTTagCompound> compoundOptional = ((SpongeItemStackSnapshot) snapshot).getCompound();
             if (compoundOptional.isPresent()) {
                 this.compound = compoundOptional.get();
@@ -218,7 +213,6 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         quantity(1);
         if (blockSnapshot instanceof SpongeBlockSnapshot) {
             final Block block = (Block) blockType;
-            this.damageValue = block.damageDropped((IBlockState) blockSnapshot.getState());
             final Optional<NBTTagCompound> compound = ((SpongeBlockSnapshot) blockSnapshot).getCompound();
             if (compound.isPresent()) {
                 this.compound = new NBTTagCompound();
@@ -245,7 +239,8 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
             return this;
         }
         itemType(item.get());
-        this.damageValue = minecraftState.getBlock().damageDropped(minecraftState);
+
+        //this.damageValue = minecraftState.getBlock().damageDropped(minecraftState);
         return this;
     }
 
@@ -271,31 +266,29 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
     @Override
     protected Optional<ItemStack> buildContent(DataView container) throws InvalidDataException {
         checkNotNull(container);
-        if (!container.contains(DataQueries.ITEM_TYPE) || !container.contains(DataQueries.ITEM_COUNT) || !container.contains(
-            DataQueries.ITEM_DAMAGE_VALUE)) {
+        if (!container.contains(DataQueries.ITEM_TYPE) || !container.contains(DataQueries.ITEM_COUNT)) {
             return Optional.empty();
         }
         final String itemTypeId = container.getString(DataQueries.ITEM_TYPE).get();
         final int count = getData(container, DataQueries.ITEM_COUNT, Integer.class);
         final ItemType itemType = SpongeImpl.getRegistry().getType(ItemType.class, itemTypeId).orElseThrow(() -> new IllegalStateException("Unable to find item with id: " + itemTypeId));
-        final int damage = getData(container, DataQueries.ITEM_DAMAGE_VALUE, Integer.class);
-        final net.minecraft.item.ItemStack itemStack = new net.minecraft.item.ItemStack((Item) itemType, count, damage);
+        final net.minecraft.item.ItemStack itemStack = new net.minecraft.item.ItemStack((Item) itemType, count);
         if (container.contains(DataQueries.UNSAFE_NBT)) {
             final NBTTagCompound compound = NbtTranslator.getInstance().translateData(container.getView(DataQueries.UNSAFE_NBT).get());
-            itemStack.setTagCompound(compound);
+            itemStack.setTag(compound);
         }
         if (container.contains(DataQueries.DATA_MANIPULATORS)) {
             final List<DataView> views = container.getViewList(DataQueries.DATA_MANIPULATORS).get();
             final SerializedDataTransaction transaction = DataUtil.deserializeManipulatorList(views);
             final List<DataManipulator<?, ?>> manipulators = transaction.deserializedManipulators;
             for (DataManipulator<?, ?> manipulator : manipulators) {
-                ((IMixinCustomDataHolder) itemStack).offerCustom(manipulator, MergeFunction.IGNORE_ALL);
+                ((IMixinCustomDataHolder) (Object) itemStack).offerCustom(manipulator, MergeFunction.IGNORE_ALL);
             }
             if (!transaction.failedData.isEmpty()) {
-                ((IMixinCustomDataHolder) itemStack).addFailedData(transaction.failedData);
+                ((IMixinCustomDataHolder) (Object) itemStack).addFailedData(transaction.failedData);
             }
         }
-        return Optional.of((ItemStack) itemStack);
+        return Optional.of((ItemStack) (Object) itemStack);
     }
 
     @Override
@@ -304,7 +297,6 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         this.quantity = 1;
         this.itemDataSet = new HashSet<>();
         this.compound = null;
-        this.damageValue = 0;
         return this;
     }
 
@@ -313,14 +305,14 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
     public ItemStack build() throws IllegalStateException {
         checkState(this.type != null, "Item type has not been set");
 
-        if (this.type == ItemTypes.NONE || this.quantity <= 0) {
+        if (this.type == ItemTypes.AIR || this.quantity <= 0) {
             // If either type is none(air) or quantity is 0 return the vanilla EMPTY item
-            return ((ItemStack) net.minecraft.item.ItemStack.EMPTY);
+            return ((ItemStack) (Object) net.minecraft.item.ItemStack.EMPTY);
         }
 
-        final ItemStack stack = (ItemStack) new net.minecraft.item.ItemStack((Item) this.type, this.quantity, this.damageValue);
+        final ItemStack stack = (ItemStack) (Object) new net.minecraft.item.ItemStack((Item) this.type, this.quantity);
         if (this.compound != null) {
-            ((net.minecraft.item.ItemStack) stack).setTagCompound(this.compound.copy());
+            ((net.minecraft.item.ItemStack) (Object) stack).setTag(this.compound.copy());
         }
         if (this.itemDataSet != null) {
             this.itemDataSet.forEach(stack::offer);

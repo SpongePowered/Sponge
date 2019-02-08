@@ -95,10 +95,7 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
 
     @Shadow public abstract int getCount();
     @Shadow public abstract void setCount(int size); // Do not use field directly as Minecraft tracks the empty state
-    @Shadow public abstract void setItemDamage(int meta);
-    @Shadow public abstract void setTagCompound(@Nullable NBTTagCompound compound);
     @Shadow public abstract void setTagInfo(String key, INBTBase nbtBase);
-    @Shadow public abstract int getItemDamage();
     @Shadow public abstract int getMaxStackSize();
     @Shadow public abstract boolean hasTag();
     @Shadow public abstract boolean shadow$isEmpty();
@@ -107,8 +104,9 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
     @Shadow public abstract net.minecraft.item.ItemStack shadow$copy();
     @Shadow public abstract Item shadow$getItem();
 
+    @Shadow public abstract void setTag(@Nullable NBTTagCompound nbt);
 
-    @Inject(method = "writeToNBT", at = @At(value = "HEAD"))
+    @Inject(method = "write", at = @At(value = "HEAD"))
     private void onWrite(NBTTagCompound incoming, CallbackInfoReturnable<NBTTagCompound> info) {
         if (this.hasManipulators()) {
             writeToNbt(incoming);
@@ -127,22 +125,22 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
         final net.minecraft.item.ItemStack itemStack = info.getReturnValue();
         if (hasManipulators()) { // no manipulators? no problem.
             for (DataManipulator<?, ?> manipulator : this.manipulators) {
-                ((IMixinCustomDataHolder) itemStack).offerCustom(manipulator.copy(), MergeFunction.IGNORE_ALL);
+                ((IMixinCustomDataHolder) (Object) itemStack).offerCustom(manipulator.copy(), MergeFunction.IGNORE_ALL);
             }
         }
     }
 
-    @Inject(method = "splitStack", at = @At("RETURN"))
+    @Inject(method = "split", at = @At("RETURN"))
     private void onSplit(int amount, CallbackInfoReturnable<net.minecraft.item.ItemStack> info) {
         final net.minecraft.item.ItemStack itemStack = info.getReturnValue();
         if (hasManipulators()) {
             for (DataManipulator<?, ?> manipulator : this.manipulators) {
-                ((IMixinCustomDataHolder) itemStack).offerCustom(manipulator.copy(), MergeFunction.IGNORE_ALL);
+                ((IMixinCustomDataHolder) (Object) itemStack).offerCustom(manipulator.copy(), MergeFunction.IGNORE_ALL);
             }
         }
     }
 
-    @Inject(method = "setTagCompound", at = @At("RETURN"))
+    @Inject(method = "setTag", at = @At("RETURN"))
     private void onSet(NBTTagCompound compound, CallbackInfo callbackInfo) {
         if (hasTag() && getTag().contains(NbtDataUtil.SPONGE_DATA, NbtDataUtil.TAG_COMPOUND)) {
             readFromNbt(getTag().getCompound(NbtDataUtil.SPONGE_DATA));
@@ -185,7 +183,7 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
     public void setRawData(DataView container) throws InvalidDataException {
 
     }
-    
+
     @Override
     public DataHolder copy() {
         return this.itemstack$copy();
@@ -205,8 +203,7 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
         final DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, getContentVersion())
                 .set(DataQueries.ITEM_TYPE, this.itemstack$getType().getKey())
-                .set(DataQueries.ITEM_COUNT, this.itemstack$getQuantity())
-                .set(DataQueries.ITEM_DAMAGE_VALUE, this.getItemDamage());
+                .set(DataQueries.ITEM_COUNT, this.itemstack$getQuantity());
         if (hasTag()) { // no tag? no data, simple as that.
             final NBTTagCompound compound = getTag().copy();
             if (compound.hasKey(NbtDataUtil.SPONGE_DATA)) {
@@ -321,7 +318,7 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
         if (compound.isEmpty()) {
             getTag().removeTag(NbtDataUtil.SPONGE_DATA);
             if (getTag().isEmpty()) {
-                setTagCompound(null);
+                setTag(null);
             }
         }
     }
@@ -399,7 +396,7 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
                 this.getTag().removeTag(NbtDataUtil.SPONGE_DATA);
             }
             if (this.getTag().isEmpty()) {
-                this.setTagCompound(null);
+                this.setTag(null);
             }
         }
     }
