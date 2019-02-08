@@ -293,12 +293,14 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
 
     }
 
+    @Override
     public void cleanupDirty() {
         if (this.timesChanged != this.lastTimesChanged) {
             this.player.openContainer.detectAndSendChanges();
         }
     }
 
+    @Override
     public void markClean() {
         this.lastTimesChanged = this.timesChanged;
     }

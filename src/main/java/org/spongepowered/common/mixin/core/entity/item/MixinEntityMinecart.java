@@ -91,7 +91,7 @@ public abstract class MixinEntityMinecart extends MixinEntity implements Minecar
     private void onAttackEntityFrom(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(source);
-            AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.getCurrentCause(), new ArrayList<>(), this, 0, amount);
+            AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.getCurrentCause(), this, new ArrayList<>(), 0, amount);
             SpongeImpl.postEvent(event);
             if (event.isCancelled()) {
                 cir.setReturnValue(true);
@@ -155,10 +155,10 @@ public abstract class MixinEntityMinecart extends MixinEntity implements Minecar
             this.slowWhenEmpty = compound.getBoolean("slowWhenEmpty");
         }
         if (compound.hasKey("airborneModifier")) {
-            this.airborneMod = VectorSerializer.fromNbt(compound.getCompoundTag("airborneModifier"));
+            this.airborneMod = VectorSerializer.fromNbt(compound.getCompound("airborneModifier"));
         }
         if (compound.hasKey("derailedModifier")) {
-            this.derailedMod = VectorSerializer.fromNbt(compound.getCompoundTag("derailedModifier"));
+            this.derailedMod = VectorSerializer.fromNbt(compound.getCompound("derailedModifier"));
         }
     }
 

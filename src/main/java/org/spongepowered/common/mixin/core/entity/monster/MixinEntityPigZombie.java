@@ -50,7 +50,7 @@ public abstract class MixinEntityPigZombie extends MixinEntityZombie implements 
     @Shadow private int angerLevel;
 
     @Shadow public abstract boolean isAngry();
-    
+
     @Intrinsic
     public boolean aggressive$isAngry() {
         return this.isAngry();
@@ -83,7 +83,6 @@ public abstract class MixinEntityPigZombie extends MixinEntityZombie implements 
     public BoundedValue.Mutable<Integer> angerLevel() {
         return SpongeValueFactory.boundedBuilder(Keys.ANGER)
                 .value(this.angerLevel)
-                .defaultValue(0)
                 .minimum(Integer.MIN_VALUE)
                 .maximum(Integer.MAX_VALUE)
                 .build();

@@ -24,11 +24,19 @@
  */
 package org.spongepowered.common.mixin.core.entity;
 
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityAITasks;
+import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemAxe;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
@@ -43,6 +51,8 @@ import org.spongepowered.api.entity.ai.GoalTypes;
 import org.spongepowered.api.entity.ai.task.AITask;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.entity.damage.DamageFunction;
+import org.spongepowered.api.event.entity.AttackEntityEvent;
 import org.spongepowered.api.event.entity.LeashEntityEvent;
 import org.spongepowered.api.event.entity.UnleashEntityEvent;
 import org.spongepowered.api.event.entity.ai.SetAITargetEvent;
@@ -61,8 +71,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAgentData;
 import org.spongepowered.common.data.value.SpongeMutableValue;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.interfaces.ai.IMixinEntityAIBase;
 import org.spongepowered.common.interfaces.ai.IMixinEntityAITasks;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
@@ -70,6 +82,7 @@ import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -123,7 +136,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
         while (taskItr.hasNext()) {
             EntityAITasks.EntityAITaskEntry task = taskItr.next();
             final AITaskEvent.Add event = SpongeEventFactory.createAITaskEventAdd(Sponge.getCauseStackManager().getCurrentCause(),
-                    task.priority, task.priority, (Goal<? extends Agent>) tasks, this, (AITask<?>) task.action);
+                    task.priority, task.priority, this, (Goal<? extends Agent>) tasks, (AITask<?>) task.action);
             SpongeImpl.postEvent(event);
             if (event.isCancelled()) {
                 ((IMixinEntityAIBase) task.action).setGoal(null);
@@ -175,7 +188,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
         return Optional.empty();
     }
 
-    @ModifyConstant(method = "despawnEntity", constant = @Constant(doubleValue = 16384.0D))
+    @ModifyConstant(method = "checkDespawn", constant = @Constant(doubleValue = 16384.0D))
     private double getHardDespawnRange(double value) {
         if (!this.world.isRemote) {
             return Math.pow(((IMixinWorldServer) this.world).getActiveConfig().getConfig().getEntity().getHardDespawnRange(), 2);
@@ -184,7 +197,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     }
 
     // Note that this should inject twice.
-    @ModifyConstant(method = "despawnEntity", constant = @Constant(doubleValue = 1024.0D), expect = 2)
+    @ModifyConstant(method = "checkDespawn", constant = @Constant(doubleValue = 1024.0D), expect = 2)
     private double getSoftDespawnRange(double value) {
         if (!this.world.isRemote) {
             return Math.pow(((IMixinWorldServer) this.world).getActiveConfig().getConfig().getEntity().getSoftDespawnRange(), 2);
@@ -192,7 +205,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
         return value;
     }
 
-    @ModifyConstant(method = "despawnEntity", constant = @Constant(intValue = 600))
+    @ModifyConstant(method = "checkDespawn", constant = @Constant(intValue = 600))
     private int getMinimumLifetime(int value) {
         if (!this.world.isRemote) {
             return ((IMixinWorldServer) this.world).getActiveConfig().getConfig().getEntity().getMinimumLife() * 20;
@@ -201,7 +214,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     }
 
     @Nullable
-    @Redirect(method = "despawnEntity", at = @At(value = "INVOKE", target = GET_CLOSEST_PLAYER))
+    @Redirect(method = "checkDespawn", at = @At(value = "INVOKE", target = GET_CLOSEST_PLAYER))
     public EntityPlayer onDespawnEntity(World world, net.minecraft.entity.Entity entity, double distance) {
         return ((IMixinWorld) world).getClosestPlayerToEntityWhoAffectsSpawning(entity, distance);
     }
@@ -245,6 +258,87 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
                 }
             }
         }
+    }
+
+
+    /**
+     * @author gabizou - April 8th, 2016
+     * @author gabizou - April 11th, 2016 - Update for 1.9 additions
+     * @author Aaron1011 - November 12, 2016 - Update for 1.11
+     * @author Aaron1011 - February 7th, 2019 - Update for 1.13, moved from EntityMob
+     *
+     * @reason Rewrite this to throw an {@link AttackEntityEvent} and process correctly.
+     *
+     * float f        | baseDamage
+     * int i          | knockbackModifier
+     * boolean flag   | attackSucceeded
+     *
+     * @param targetEntity The entity to attack
+     * @return True if the attack was successful
+     */
+    @Overwrite
+    public boolean attackEntityAsMob(net.minecraft.entity.Entity targetEntity) {
+        // Sponge Start - Prepare our event values
+        // float baseDamage = this.getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue();
+        final double originalBaseDamage = this.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getValue();
+        final List<DamageFunction> originalFunctions = new ArrayList<>();
+        // Sponge End
+        int knockbackModifier = 0;
+
+        if (targetEntity instanceof EntityLivingBase) {
+            // Sponge Start - Gather modifiers
+            originalFunctions.addAll(DamageEventHandler
+                    .createAttackEnchantmentFunction(this.getHeldItemMainhand(), ((EntityLivingBase) targetEntity).getCreatureAttribute(), 1.0F)); // 1.0F is for full attack strength since mobs don't have the concept
+            // baseDamage += EnchantmentHelper.getModifierForCreature(this.getHeldItem(), ((EntityLivingBase) targetEntity).getCreatureAttribute());
+            knockbackModifier += EnchantmentHelper.getKnockbackModifier((EntityMob) (Object) this);
+        }
+
+        // Sponge Start - Throw our event and handle appropriately
+        final DamageSource damageSource = DamageSource.causeMobDamage((EntityMob) (Object) this);
+        Sponge.getCauseStackManager().pushCause(damageSource);
+        final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), EntityUtil.fromNative(targetEntity), originalFunctions,
+                knockbackModifier, originalBaseDamage);
+        SpongeImpl.postEvent(event);
+        Sponge.getCauseStackManager().popCause();
+        if (event.isCancelled()) {
+            return false;
+        }
+        knockbackModifier = event.getKnockbackModifier();
+        // boolean attackSucceeded = targetEntity.attackEntityFrom(DamageSource.causeMobDamage(this), baseDamage);
+        boolean attackSucceeded = targetEntity.attackEntityFrom(damageSource, (float) event.getFinalOutputDamage());
+        // Sponge End
+        if (attackSucceeded) {
+            if (knockbackModifier > 0 && targetEntity instanceof EntityLivingBase) {
+                ((EntityLivingBase) targetEntity).knockBack((net.minecraft.entity.Entity) (Object) this, (float)knockbackModifier * 0.5F, (double)MathHelper.sin(this.rotationYaw * ((float)Math.PI / 180F)), (double)(-MathHelper.cos(this.rotationYaw * ((float)Math.PI / 180F))));
+                this.motionX *= 0.6D;
+                this.motionZ *= 0.6D;
+            }
+
+            int j = EnchantmentHelper.getFireAspectModifier((EntityMob) (Object) this);
+
+            if (j > 0) {
+                targetEntity.setFire(j * 4);
+            }
+
+            if (targetEntity instanceof EntityPlayer) {
+                EntityPlayer entityplayer = (EntityPlayer) targetEntity;
+                ItemStack itemstack = this.getHeldItemMainhand();
+                ItemStack itemstack1 = entityplayer.isHandActive() ? entityplayer.getActiveItemStack() : ItemStack.EMPTY;
+
+                if (!itemstack.isEmpty() && !itemstack1.isEmpty() && itemstack.getItem() instanceof ItemAxe && itemstack1.getItem() == Items.SHIELD) {
+                    float f1 = 0.25F + (float) EnchantmentHelper.getEfficiencyModifier((EntityMob) (Object) this) * 0.05F;
+
+                    if (this.rand.nextFloat() < f1) {
+                        entityplayer.getCooldownTracker().setCooldown(Items.SHIELD, 100);
+                        this.world.setEntityState(entityplayer, (byte) 30);
+                    }
+                }
+            }
+
+            this.applyEnchantments((EntityMob) (Object) this, targetEntity);
+        }
+
+        return attackSucceeded;
     }
 
     /**

@@ -171,7 +171,7 @@ public abstract class MixinEntityCreeper extends MixinEntityMob implements Creep
     private net.minecraft.world.Explosion onExplode(net.minecraft.world.World world, Entity self, double x,
         double y, double z, float strength, boolean smoking) {
         return detonate(Explosion.builder()
-                .location(new Location<>((World) world, new Vector3d(x, y, z)))
+                .location(new Location((World) world, new Vector3d(x, y, z)))
                 .sourceExplosive(this)
                 .radius(strength)
                 .shouldPlaySmoke(smoking)

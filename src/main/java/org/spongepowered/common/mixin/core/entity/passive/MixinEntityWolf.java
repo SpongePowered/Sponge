@@ -72,7 +72,7 @@ public abstract class MixinEntityWolf extends MixinEntityAnimal implements Wolf 
         if (random == 0) {
             stack.shrink(1);
             try {
-                Sponge.getCauseStackManager().pushCause(((org.spongepowered.api.item.inventory.ItemStack) stack).createSnapshot());
+                Sponge.getCauseStackManager().pushCause(((org.spongepowered.api.item.inventory.ItemStack) (Object) stack).createSnapshot());
                 Sponge.getCauseStackManager().pushCause(player);
                 if (!SpongeImpl.postEvent(SpongeEventFactory.createTameEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), this))) {
                     stack.grow(1);

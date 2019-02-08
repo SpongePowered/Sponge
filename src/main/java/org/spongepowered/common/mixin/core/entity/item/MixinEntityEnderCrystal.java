@@ -84,7 +84,7 @@ public abstract class MixinEntityEnderCrystal extends MixinEntity implements End
                                                     double y, double z, float strength, boolean smoking) {
         if (this.detonationCause != null) Sponge.getCauseStackManager().pushCause(this.detonationCause);
         net.minecraft.world.Explosion ex = detonate(Explosion.builder()
-                .location(new Location<>((World) world, new Vector3d(x, y, z)))
+                .location(new Location((World) world, new Vector3d(x, y, z)))
                 .radius(this.explosionStrength)
                 .shouldPlaySmoke(smoking))
                 .orElse(null);

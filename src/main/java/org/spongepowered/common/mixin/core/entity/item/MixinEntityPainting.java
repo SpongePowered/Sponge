@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.entity.item;
 
 import net.minecraft.entity.item.EntityPainting;
+import net.minecraft.entity.item.PaintingType;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.ArtData;
@@ -42,7 +43,7 @@ import java.util.List;
 @Mixin(EntityPainting.class)
 public abstract class MixinEntityPainting extends MixinEntityHanging implements Painting {
 
-    @Shadow public EntityPainting.EnumArt art;
+    @Shadow public PaintingType art;
 
     @Override
     public ArtData getArtData() {

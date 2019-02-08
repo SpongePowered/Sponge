@@ -24,122 +24,24 @@
  */
 package org.spongepowered.common.mixin.core.entity.monster;
 
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.monster.EntityMob;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
-import net.minecraft.item.ItemAxe;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.EnumLightType;
 import net.minecraft.world.chunk.Chunk;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.monster.Monster;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.entity.damage.DamageFunction;
-import org.spongepowered.api.event.entity.AttackEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.mixin.core.entity.MixinEntityCreature;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Mixin(EntityMob.class)
 public abstract class MixinEntityMob extends MixinEntityCreature implements Monster {
 
     /**
-     * @author gabizou - April 8th, 2016
-     * @author gabizou - April 11th, 2016 - Update for 1.9 additions
-     * @author Aaro1011 - November 12, 2016 - Update for 1.11
-     *
-     * @reason Rewrite this to throw an {@link AttackEntityEvent} and process correctly.
-     *
-     * float f        | baseDamage
-     * int i          | knockbackModifier
-     * boolean flag   | attackSucceeded
-     *
-     * @param targetEntity The entity to attack
-     * @return True if the attack was successful
-     */
-    @Overwrite
-    public boolean attackEntityAsMob(Entity targetEntity) {
-        // Sponge Start - Prepare our event values
-        // float baseDamage = this.getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue();
-        final double originalBaseDamage = this.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getValue();
-        final List<DamageFunction> originalFunctions = new ArrayList<>();
-        // Sponge End
-        int knockbackModifier = 0;
-
-        if (targetEntity instanceof EntityLivingBase) {
-            // Sponge Start - Gather modifiers
-            originalFunctions.addAll(DamageEventHandler.createAttackEnchantmentFunction(this.getHeldItemMainhand(), ((EntityLivingBase) targetEntity).getCreatureAttribute(), 1.0F)); // 1.0F is for full attack strength since mobs don't have the concept
-            // baseDamage += EnchantmentHelper.getModifierForCreature(this.getHeldItem(), ((EntityLivingBase) targetEntity).getCreatureAttribute());
-            knockbackModifier += EnchantmentHelper.getKnockbackModifier((EntityMob) (Object) this);
-        }
-
-        // Sponge Start - Throw our event and handle appropriately
-        final DamageSource damageSource = DamageSource.causeMobDamage((EntityMob) (Object) this);
-        Sponge.getCauseStackManager().pushCause(damageSource);
-        final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), originalFunctions,
-                EntityUtil.fromNative(targetEntity), knockbackModifier, originalBaseDamage);
-        SpongeImpl.postEvent(event);
-        Sponge.getCauseStackManager().popCause();
-        if (event.isCancelled()) {
-            return false;
-        }
-        knockbackModifier = event.getKnockbackModifier();
-        // boolean attackSucceeded = targetEntity.attackEntityFrom(DamageSource.causeMobDamage(this), baseDamage);
-        boolean attackSucceeded = targetEntity.attackEntityFrom(damageSource, (float) event.getFinalOutputDamage());
-        // Sponge End
-        if (attackSucceeded) {
-            if (knockbackModifier > 0 && targetEntity instanceof EntityLivingBase) {
-                ((EntityLivingBase) targetEntity).knockBack((EntityMob) (Object) this, (float) knockbackModifier * 0.5F, (double) MathHelper.sin(this.rotationYaw * 0.017453292F), (double) (-MathHelper.cos(this.rotationYaw * 0.017453292F)));
-                this.motionX *= 0.6D;
-                this.motionZ *= 0.6D;
-            }
-
-            int j = EnchantmentHelper.getFireAspectModifier((EntityMob) (Object) this);
-
-            if (j > 0) {
-                targetEntity.setFire(j * 4);
-            }
-
-            if (targetEntity instanceof EntityPlayer) {
-                EntityPlayer entityplayer = (EntityPlayer) targetEntity;
-                ItemStack itemstack = this.getHeldItemMainhand();
-                ItemStack itemstack1 = entityplayer.isHandActive() ? entityplayer.getActiveItemStack() : ItemStack.EMPTY;
-
-                if (!itemstack.isEmpty() && !itemstack1.isEmpty() && itemstack.getItem() instanceof ItemAxe && itemstack1.getItem() == Items.SHIELD) {
-                    float f1 = 0.25F + (float) EnchantmentHelper.getEfficiencyModifier((EntityMob) (Object) this) * 0.05F;
-
-                    if (this.rand.nextFloat() < f1) {
-                        entityplayer.getCooldownTracker().setCooldown(Items.SHIELD, 100);
-                        this.world.setEntityState(entityplayer, (byte) 30);
-                    }
-                }
-            }
-
-            this.applyEnchantments((EntityMob) (Object) this, targetEntity);
-        }
-
-        return attackSucceeded;
-    }
-
-    /**
      * @author aikar - February 20th, 2017 - Optimizes light level check.
      * @author blood - February 20th, 2017 - Avoids checking unloaded chunks and chunks with pending light updates.
+     * @author Aaron1011 - February 7th, 2019 - Updated for 1.13
      *
      * @reason Avoids checking unloaded chunks and chunks with pending light updates.
      *
@@ -148,7 +50,7 @@ public abstract class MixinEntityMob extends MixinEntityCreature implements Mons
     @Overwrite
     protected boolean isValidLightLevel()
     {
-        final BlockPos blockpos = new BlockPos(this.posX, this.getEntityBoundingBox().minY, this.posZ);
+        final BlockPos blockpos = new BlockPos(this.posX, this.shadow$getBoundingBox().minY, this.posZ);
         final Chunk chunk = ((IMixinChunkProviderServer) this.world.getChunkProvider()).getLoadedChunkWithoutMarkingActive(blockpos.getX() >> 4, blockpos.getZ() >> 4);
         if (chunk == null || !((IMixinChunk) chunk).isActive()) {
             return false;
@@ -157,21 +59,11 @@ public abstract class MixinEntityMob extends MixinEntityCreature implements Mons
         if (this.world.getLightFor(EnumLightType.SKY, blockpos) > this.rand.nextInt(32))
         {
             return false;
-        } 
-        else 
+        }
+        else
         {
-            //int i = this.worldObj.getLightFromNeighbors(blockpos);
-            boolean passes; // Sponge
-            if (this.world.isThundering()) {
-                int j = this.world.getSkylightSubtracted();;
-                this.world.setSkylightSubtracted(10);
-                passes = !((IMixinWorldServer) this.world).isLightLevel(chunk, blockpos, this.rand.nextInt(9));
-                this.world.setSkylightSubtracted(j);
-            } else { 
-                passes = !((IMixinWorldServer) this.world).isLightLevel(chunk, blockpos, this.rand.nextInt(9)); 
-            }
-
-            return passes;
+            int i = this.world.isThundering() ? this.world.getNeighborAwareLightSubtracted(blockpos, 10) : this.world.getLight(blockpos);
+            return i <= this.rand.nextInt(8);
         }
     }
 }

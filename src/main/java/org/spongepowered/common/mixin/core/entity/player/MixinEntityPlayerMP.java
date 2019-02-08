@@ -243,7 +243,8 @@ import java.util.UUID;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-@Mixin(EntityPlayerMP.class)
+@Mixin(EntityPlayerMP.
+        class)
 public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements Player, IMixinSubject, IMixinEntityPlayerMP, IMixinCommandSender,
         IMixinCommandSource {
 
