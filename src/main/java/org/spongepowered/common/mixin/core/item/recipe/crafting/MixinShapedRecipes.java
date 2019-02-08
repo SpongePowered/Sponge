@@ -24,17 +24,16 @@
  */
 package org.spongepowered.common.mixin.core.item.recipe.crafting;
 
-import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.item.crafting.ShapedRecipes;
+import net.minecraft.item.crafting.ShapedRecipe;
 import net.minecraft.util.NonNullList;
 import org.spongepowered.api.item.recipe.crafting.ShapedCraftingRecipe;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(ShapedRecipes.class)
-public abstract class MixinShapedRecipes implements IRecipe, ShapedCraftingRecipe {
+@Mixin(ShapedRecipe.class)
+public abstract class MixinShapedRecipes implements ShapedCraftingRecipe {
 
     @Shadow @Final protected int recipeWidth;
     @Shadow @Final protected int recipeHeight;

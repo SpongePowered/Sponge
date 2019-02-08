@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.item;
 
-import net.minecraft.item.Item;
+import net.minecraft.item.ItemTier;
 import org.apache.commons.lang3.StringUtils;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.ToolType;
@@ -35,7 +35,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Locale;
 
-@Mixin(Item.ToolMaterial.class)
+@Mixin(ItemTier.class)
 public abstract class MixinItemToolMaterial implements ToolType {
 
     private CatalogKey key;

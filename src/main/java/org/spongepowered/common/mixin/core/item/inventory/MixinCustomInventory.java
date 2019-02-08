@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.item.inventory;
 
 import net.minecraft.inventory.InventoryBasic;
 import org.spongepowered.api.data.property.Property;
-import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
+import org.spongepowered.api.event.item.inventory.container.InteractContainerEvent;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
@@ -64,7 +64,7 @@ public abstract class MixinCustomInventory implements MinecraftInventoryAdapter,
     @SuppressWarnings("unchecked")
     @Inject(method = "<init>*", at = @At("RETURN"), remap = false)
     private void onConstructed(InventoryArchetype archetype, Map<Property<?>, ?> properties, Carrier carrier, Map<Class<? extends
-            InteractInventoryEvent>, List<Consumer<? extends InteractInventoryEvent>>> listeners, boolean isVirtual, PluginContainer plugin,CallbackInfo ci) {
+            InteractContainerEvent>, List<Consumer<? extends InteractContainerEvent>>> listeners, boolean isVirtual, PluginContainer plugin,CallbackInfo ci) {
         this.slots = new SlotLensCollection.Builder().add(this.inv.getSizeInventory()).build();
         this.lens = new CustomLens(this, this.slots, archetype, properties);
         this.plugin = plugin;

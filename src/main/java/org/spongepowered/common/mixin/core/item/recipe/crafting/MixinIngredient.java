@@ -37,19 +37,25 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nullable;
+
 @Mixin(Ingredient.class)
 @Implements(@Interface(iface = org.spongepowered.api.item.recipe.crafting.Ingredient.class, prefix = "ingredient$"))
 public abstract class MixinIngredient {
 
     @Shadow @Final protected ItemStack[] matchingStacks;
-    @Shadow public abstract boolean apply(ItemStack p_apply_1_);
+
+    @Shadow protected abstract void determineMatchingStacks();
+
+    @Shadow public abstract boolean test(@Nullable ItemStack p_test_1_);
 
     public List<org.spongepowered.api.item.inventory.ItemStackSnapshot> ingredient$displayedItems() {
+        this.determineMatchingStacks();
         return Arrays.stream(matchingStacks).map(ItemStackUtil::snapshotOf).collect(Collectors.toList());
     }
 
     public boolean ingredient$test(org.spongepowered.api.item.inventory.ItemStack itemStack) {
-        return this.apply(ItemStackUtil.toNative(itemStack));
+        return this.test(ItemStackUtil.toNative(itemStack));
     }
 
     /**
@@ -75,6 +81,6 @@ public abstract class MixinIngredient {
      *
      */
     public boolean test(Object stack) {
-        return this.apply((ItemStack) stack);
+        return this.test((ItemStack) stack);
     }
 }

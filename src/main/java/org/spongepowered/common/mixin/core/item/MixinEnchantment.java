@@ -65,7 +65,7 @@ public abstract class MixinEnchantment implements IMixinEnchantment, Enchantment
     @Inject(method = "registerEnchantments", at = @At("RETURN"))
     private static void onRegister(CallbackInfo ci) {
         for (ResourceLocation resourceLocation: net.minecraft.enchantment.Enchantment.REGISTRY.getKeys()) {
-            ((IMixinEnchantment) net.minecraft.enchantment.Enchantment.REGISTRY.getObject(resourceLocation)).setId(resourceLocation);
+            ((IMixinEnchantment) net.minecraft.enchantment.Enchantment.REGISTRY.get(resourceLocation)).setId(resourceLocation);
         }
     }
 

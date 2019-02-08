@@ -55,7 +55,7 @@ public abstract class MixinMerchantRecipe implements TradeOffer {
 
     @Override
     public ItemStackSnapshot getFirstBuyingItem() {
-        return ((ItemStack) getItemToBuy()).createSnapshot();
+        return ((ItemStack) (Object) getItemToBuy()).createSnapshot();
     }
 
     @Override
@@ -68,12 +68,12 @@ public abstract class MixinMerchantRecipe implements TradeOffer {
         if (getSecondItemToBuy() == null) {
             return Optional.empty();
         }
-        return Optional.of(((ItemStack) getSecondItemToBuy()).createSnapshot());
+        return Optional.of(((ItemStack) (Object) getSecondItemToBuy()).createSnapshot());
     }
 
     @Override
     public ItemStackSnapshot getSellingItem() {
-        return ((ItemStack) getItemToSell()).createSnapshot();
+        return ((ItemStack) (Object) getItemToSell()).createSnapshot();
     }
 
     @Override
@@ -125,9 +125,9 @@ public abstract class MixinMerchantRecipe implements TradeOffer {
             return false;
         }
         MerchantRecipe other = (MerchantRecipe) o;
-        return ItemStackComparators.ALL.compare((ItemStack) this.getItemToBuy(), (ItemStack) other.getItemToBuy()) == 0
-                && ItemStackComparators.ALL.compare((ItemStack) this.getSecondItemToBuy(), (ItemStack) other.getSecondItemToBuy()) == 0
-                && ItemStackComparators.ALL.compare((ItemStack) this.getItemToSell(), (ItemStack) other.getItemToSell()) == 0
+        return ItemStackComparators.ALL.compare((ItemStack) (Object) this.getItemToBuy(), (ItemStack) (Object) other.getItemToBuy()) == 0
+                && ItemStackComparators.ALL.compare((ItemStack) (Object) this.getSecondItemToBuy(), (ItemStack) (Object) other.getSecondItemToBuy()) == 0
+                && ItemStackComparators.ALL.compare((ItemStack) (Object) this.getItemToSell(), (ItemStack) (Object)other.getItemToSell()) == 0
                 && this.getToolUses() == other.getToolUses()
                 && this.getMaxTradeUses() == other.getMaxTradeUses()
                 && this.getRewardsExp() == other.getRewardsExp();

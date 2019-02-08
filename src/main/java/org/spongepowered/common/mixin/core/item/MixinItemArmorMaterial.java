@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.item;
 
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemArmor;
+import net.minecraft.item.ArmorMaterial;
+import net.minecraft.item.crafting.Ingredient;
+import net.minecraft.util.LazyLoadBase;
 import org.apache.commons.lang3.StringUtils;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.ArmorType;
-import org.spongepowered.api.item.ItemType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -39,22 +39,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Optional;
 
-import javax.annotation.Nullable;
-
-@Mixin(ItemArmor.ArmorMaterial.class)
+@Mixin(ArmorMaterial.class)
 public abstract class MixinItemArmorMaterial implements ArmorType {
 
     @Shadow @Final private String name;
-    @Shadow public abstract Item shadow$getRepairItem();
+    @Shadow LazyLoadBase<Ingredient> repairMaterial;
 
     // getName() end up replacing a method with the same signature in ArmorMaterial
     // at dev time. Since it's capitalized, the client becomes unable to retrieve
     // the texture, as the resource location is wrong.
     private String capitalizedName;
     private CatalogKey key;
-
-    @Nullable
-    private Optional<ItemType> repairItemType;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onConstruct(CallbackInfo ci) {
@@ -74,12 +69,10 @@ public abstract class MixinItemArmorMaterial implements ArmorType {
         return this.name;
     }
 
+
     @Override
-    public Optional<ItemType> getRepairItemType() {
-        if (this.repairItemType == null) {
-            this.repairItemType = Optional.ofNullable((ItemType) shadow$getRepairItem());
-        }
-        return this.repairItemType;
+    public Optional<org.spongepowered.api.item.recipe.crafting.Ingredient> getRepairItemIngredient() {
+        return Optional.ofNullable((org.spongepowered.api.item.recipe.crafting.Ingredient) (Object) this.repairMaterial.getValue());
     }
 
 }

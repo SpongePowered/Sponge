@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.network.rcon;
 
+import net.minecraft.command.CommandSource;
 import net.minecraft.network.rcon.IServer;
 import net.minecraft.network.rcon.RConConsoleSource;
 import net.minecraft.network.rcon.RConThreadBase;
@@ -179,7 +180,7 @@ public abstract class MixinRConThreadClient extends RConThreadBase implements Re
                                         // Only add the RemoteConnection here, the RconSource
                                         // will be added by the command manager
                                         causeStackManager.pushCause(this);
-                                        SpongeImpl.getServer().getCommandManager().executeCommand(this.source, command);
+                                        SpongeImpl.getServer().getCommandManager().handleCommand((CommandSource) (Object) this.source, command);
                                         causeStackManager.popCause();
                                     }).get();
                                     final String logContents = this.source.getLogContents();

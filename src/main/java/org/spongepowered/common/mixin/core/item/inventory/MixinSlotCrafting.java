@@ -32,7 +32,6 @@ import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.inventory.Slot;
 import net.minecraft.inventory.SlotCrafting;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.network.play.server.SPacketSetSlot;
 import net.minecraft.util.NonNullList;
 import org.spongepowered.api.event.item.inventory.CraftItemEvent;
@@ -96,7 +95,7 @@ public abstract class MixinSlotCrafting extends Slot {
 
     @Inject(method = "onTake", at = @At("HEAD"))
     private void beforeTake(EntityPlayer thePlayer, ItemStack stack, CallbackInfoReturnable<ItemStack> cir) {
-        this.lastRecipe = ((CraftingRecipe) CraftingManager.findMatchingRecipe(this.craftMatrix, thePlayer.world));
+        this.lastRecipe = ((CraftingRecipe) player.getEntityWorld().getRecipeManager().getRecipe(this.craftMatrix, thePlayer.world));
         if (((IMixinContainer) thePlayer.openContainer).isShiftCrafting()) {
             ((IMixinContainer) thePlayer.openContainer).detectAndSendChanges(true);
             ((IMixinContainer) thePlayer.openContainer).setShiftCrafting(false);
@@ -121,7 +120,7 @@ public abstract class MixinSlotCrafting extends Slot {
         if (this.lastRecipe == null) {
             return NonNullList.withSize(craftMatrix.getSizeInventory(), ItemStack.EMPTY);
         }
-        return CraftingManager.getRemainingItems(craftMatrix, worldIn);
+        return worldIn.getRecipeManager().getRemainingItems(craftMatrix, worldIn);
     }
 
     /**
@@ -185,7 +184,7 @@ public abstract class MixinSlotCrafting extends Slot {
                 ? new SlotTransaction(craftingInventory.getResult(), ItemStackSnapshot.NONE, ItemStackUtil.snapshotOf(this.getStack()))
                 : previewTransactions.get(0);
 
-        CraftingRecipe newRecipe = (CraftingRecipe) CraftingManager.findMatchingRecipe(this.craftMatrix, thePlayer.world);
+        CraftingRecipe newRecipe = (CraftingRecipe) thePlayer.getEntityWorld().getRecipeManager().getRecipe(this.craftMatrix, thePlayer.world);
 
         SpongeCommonEventFactory.callCraftEventPre(thePlayer, craftingInventory, last, newRecipe, container, previewTransactions);
         previewTransactions.clear();

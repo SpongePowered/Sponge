@@ -29,7 +29,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.FurnaceRecipes;
+import net.minecraft.item.crafting.FurnaceRecipe;
+import net.minecraft.item.crafting.Ingredient;
+import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.recipe.smelting.SmeltingRecipe;
@@ -59,11 +61,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-@Mixin(FurnaceRecipes.class)
+@Mixin(FurnaceRecipe.class)
 public abstract class MixinFurnaceRecipes implements SmeltingRecipeRegistry, SpongeAdditionalCatalogRegistryModule<SmeltingRecipe> {
 
-    @Shadow @Final private Map<ItemStack, ItemStack> smeltingList;
-    @Shadow @Final private Map<ItemStack, Float> experienceList;
 
     private final Map<CatalogKey, SmeltingRecipe> recipesByKey = new HashMap<>();
 
@@ -75,28 +75,30 @@ public abstract class MixinFurnaceRecipes implements SmeltingRecipeRegistry, Spo
         throw new IllegalStateException("unreachable");
     }
 
-    @Inject(method = "getSmeltingResult", at = @At("RETURN"), cancellable = true)
-    private void onGetSmeltingResult(ItemStack stack, CallbackInfoReturnable<ItemStack> cir) {
-        ItemStackSnapshot ingredient = ItemStackUtil.snapshotOf(stack);
-        Optional<SmeltingResult> result = getCustomResult(ingredient);
+    @Shadow @Final private Ingredient input;
+
+    @Inject(method = "getCraftingResult", at = @At("RETURN"), cancellable = true)
+    private void onGetSmeltingResult(CallbackInfoReturnable<ItemStack> cir) {
+        Optional<SmeltingResult> result = getCustomResult(this.input);
 
         if (result.isPresent()) {
             ItemStack nativeResult = ItemStackUtil.fromSnapshotToNative(result.get().getResult());
             cir.setReturnValue(nativeResult);
         } else {
             for (ItemStack nativeIngredient : this.nativeIngredientToCustomRecipe.keySet()) {
-                if (this.compareItemStacks(nativeIngredient, stack)) {
-                    cir.setReturnValue(ItemStack.EMPTY);
-                    return;
-                }
+                // displayedItems is exact for Minecraft ingredients
+                for (ItemStackSnapshot snapshot: ((org.spongepowered.api.item.recipe.crafting.Ingredient) (Object) this.input).displayedItems())
+                    if (this.compareItemStacks(nativeIngredient, ItemStackUtil.toNative(snapshot.createStack()))) {
+                        cir.setReturnValue(ItemStack.EMPTY);
+                        return;
+                    }
             }
         }
     }
 
-    @Inject(method = "getSmeltingExperience", at = @At("RETURN"), cancellable = true)
-    private void onGetSmeltingExperience(ItemStack stack, CallbackInfoReturnable<Float> cir) {
-        ItemStackSnapshot ingredient = ItemStackUtil.snapshotOf(stack);
-        Optional<SmeltingResult> result = getCustomResult(ingredient);
+    @Inject(method = "getExperience", at = @At("RETURN"), cancellable = true)
+    private void onGetSmeltingExperience(CallbackInfoReturnable<Float> cir) {
+        Optional<SmeltingResult> result = getCustomResult(this.input);
 
         if (result.isPresent()) {
             float nativeResult = (float) result.get().getExperience();
@@ -105,23 +107,26 @@ public abstract class MixinFurnaceRecipes implements SmeltingRecipeRegistry, Spo
         }
     }
 
-    private Optional<SmeltingResult> getCustomResult(ItemStackSnapshot ingredient) {
+    private Optional<SmeltingResult> getCustomResult(Ingredient ingredient) {
         checkNotNull(ingredient, "ingredient");
 
         for (SmeltingRecipe recipe : this.customRecipes) {
-            Optional<SmeltingResult> result = recipe.getResult(ingredient);
+            for (ItemStackSnapshot snapshot: ((org.spongepowered.api.item.recipe.crafting.Ingredient) (Object) ingredient).displayedItems()) {
+                Optional<SmeltingResult> result = recipe.getResult(snapshot);
 
-            if (result.isPresent()) {
-                return result;
+                if (result.isPresent()) {
+                    return result;
+                }
             }
+
         }
 
         return Optional.empty();
     }
 
-    @Inject(method = "addSmeltingRecipe(Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemStack;F)V", at = @At("RETURN"))
-    private void onAddSmeltingRecipe(ItemStack input, ItemStack stack, float experience, CallbackInfo ci) {
-        final ItemStackSnapshot result = ItemStackUtil.snapshotOf(stack);
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void onAddSmeltingRecipe(ResourceLocation p_i48715_1_, String p_i48715_2_, Ingredient p_i48715_3_, ItemStack output, float p_i48715_5_, int p_i48715_6_, CallbackInfo ci) {
+        final ItemStackSnapshot result = ItemStackUtil.snapshotOf(output);
         final ItemStackSnapshot ingredient = ItemStackUtil.snapshotOf(input);
         final Predicate<ItemStackSnapshot> ingredientPredicate = new MatchSmeltingVanillaItemStack(ingredient);
 

@@ -24,9 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.item.recipe.crafting;
 
-import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.item.crafting.ShapelessRecipes;
+import net.minecraft.item.crafting.ShapelessRecipe;
 import net.minecraft.util.NonNullList;
 import org.spongepowered.api.item.recipe.crafting.ShapelessCraftingRecipe;
 import org.spongepowered.asm.mixin.Final;
@@ -38,8 +37,8 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
-@Mixin(ShapelessRecipes.class)
-public abstract class MixinShapelessRecipes implements IRecipe, ShapelessCraftingRecipe {
+@Mixin(ShapelessRecipe.class)
+public abstract class MixinShapelessRecipes implements ShapelessCraftingRecipe {
 
     @Shadow @Final private NonNullList<Ingredient> recipeItems;
 

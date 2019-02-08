@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.network.rcon;
 
 import net.minecraft.command.ICommandSender;
+import net.minecraft.command.ICommandSource;
 import net.minecraft.network.rcon.RConConsoleSource;
 import net.minecraft.network.rcon.RConThreadClient;
 import net.minecraft.util.text.ITextComponent;
@@ -45,7 +46,7 @@ import org.spongepowered.common.interfaces.IMixinRConConsoleSource;
 import org.spongepowered.common.interfaces.IMixinSubject;
 
 @Mixin(RConConsoleSource.class)
-public abstract class MixinRConConsoleSource implements ICommandSender, IMixinCommandSource, IMixinCommandSender, IMixinRConConsoleSource, RconSource, IMixinSubject {
+public abstract class MixinRConConsoleSource implements ICommandSource, IMixinCommandSource, IMixinCommandSender, IMixinRConConsoleSource, RconSource, IMixinSubject {
 
     @Shadow @Final private StringBuffer buffer;
 
@@ -96,7 +97,7 @@ public abstract class MixinRConConsoleSource implements ICommandSender, IMixinCo
     }
 
     @Override
-    public ICommandSender asICommandSender() {
+    public ICommandSource asICommandSender() {
         return this;
     }
 

@@ -26,13 +26,16 @@ package org.spongepowered.common.mixin.core.item.recipe.crafting;
 
 import static org.spongepowered.common.item.inventory.util.InventoryUtil.toNativeInventory;
 
+import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryCrafting;
-import net.minecraft.item.crafting.CraftingManager;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.item.crafting.ShapedRecipes;
-import net.minecraft.item.crafting.ShapelessRecipes;
+import net.minecraft.item.crafting.ShapedRecipe;
+import net.minecraft.item.crafting.ShapelessRecipe;
 import net.minecraft.util.NonNullList;
+import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
@@ -50,10 +53,12 @@ import javax.annotation.Nonnull;
 @Mixin(IRecipe.class)
 public interface MixinIRecipe extends CraftingRecipe {
 
-    @Shadow boolean matches(InventoryCrafting inv, net.minecraft.world.World worldIn);
-    @Shadow net.minecraft.item.ItemStack getCraftingResult(InventoryCrafting inv);
-    @Shadow net.minecraft.item.ItemStack getRecipeOutput();
-    @Shadow NonNullList<net.minecraft.item.ItemStack> getRemainingItems(InventoryCrafting inv);
+    @Shadow boolean matches(IInventory iInventory, net.minecraft.world.World world);
+    @Shadow ItemStack getRecipeOutput();
+    @Shadow ItemStack getCraftingResult(IInventory iInventory);
+    @Shadow NonNullList<ItemStack> getRemainingItems(IInventory p_179532_1_);
+
+    @Shadow ResourceLocation getId();
 
     @Override
     @Nonnull
@@ -82,7 +87,7 @@ public interface MixinIRecipe extends CraftingRecipe {
 
     @Override
     default CatalogKey getKey() {
-        return (CatalogKey) (Object) CraftingManager.REGISTRY.getNameForObject((IRecipe) this);
+        return (CatalogKey) (Object) this.getId();
     }
     @Override
     default String getName() {
@@ -92,12 +97,12 @@ public interface MixinIRecipe extends CraftingRecipe {
     @Override
     default Optional<String> getGroup() {
         String group = "";
-        if (this instanceof ShapedRecipes) {
+        if (this instanceof ShapedRecipe) {
 
-            group = ((ShapedRecipes) this).group;
+            group = ((ShapedRecipe) this).group;
         }
-        if (this instanceof ShapelessRecipes) {
-            group = ((ShapelessRecipes) this).group;
+        if (this instanceof ShapelessRecipe) {
+            group = ((ShapelessRecipe) this).group;
         }
         if (group.isEmpty()) {
             return Optional.empty();

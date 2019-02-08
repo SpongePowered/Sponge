@@ -33,7 +33,6 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IContainerListener;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryCraftResult;
-import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.inventory.Slot;
 import net.minecraft.inventory.SlotCrafting;
 import net.minecraft.item.ItemStack;
@@ -289,7 +288,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     protected void markClean() {
     }
 
-    @Inject(method = "addSlotToContainer", at = @At(value = "HEAD"))
+    @Inject(method = "addSlot", at = @At(value = "HEAD"))
     public void onAddSlotToContainer(Slot slotIn, CallbackInfoReturnable<Slot> cir) {
         this.dirty = true;
     }
@@ -406,7 +405,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
 
     @Inject(method = "slotChangedCraftingGrid", cancellable = true,
             at = @At(value = "INVOKE", target = "Lnet/minecraft/network/NetHandlerPlayServer;sendPacket(Lnet/minecraft/network/Packet;)V"))
-    private void afterSlotChangedCraftingGrid(World world, EntityPlayer player, InventoryCrafting craftingInventory, InventoryCraftResult output, CallbackInfo ci)
+    private void afterSlotChangedCraftingGrid(World world, EntityPlayer player, IInventory craftingInventory, InventoryCraftResult output, CallbackInfo ci)
     {
         if (this.firePreview && !this.capturedCraftPreviewTransactions.isEmpty()) {
             Inventory inv = this.query(QueryOperationTypes.INVENTORY_TYPE.of(CraftingInventory.class));
@@ -416,7 +415,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
             }
             SlotTransaction previewTransaction = this.capturedCraftPreviewTransactions.get(this.capturedCraftPreviewTransactions.size() - 1);
 
-            IRecipe recipe = CraftingManager.findMatchingRecipe(craftingInventory, world);
+            IRecipe recipe = world.getRecipeManager().getRecipe(craftingInventory, world);
             SpongeCommonEventFactory.callCraftEventPre(player, ((CraftingInventory) inv), previewTransaction, ((CraftingRecipe) recipe),
                     ((Container)(Object) this), this.capturedCraftPreviewTransactions);
             this.capturedCraftPreviewTransactions.clear();
