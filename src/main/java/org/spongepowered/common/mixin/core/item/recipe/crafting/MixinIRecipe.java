@@ -26,16 +26,16 @@ package org.spongepowered.common.mixin.core.item.recipe.crafting;
 
 import static org.spongepowered.common.item.inventory.util.InventoryUtil.toNativeInventory;
 
+import com.google.common.base.Strings;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.FurnaceRecipe;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.ShapedRecipe;
 import net.minecraft.item.crafting.ShapelessRecipe;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
@@ -96,17 +96,14 @@ public interface MixinIRecipe extends CraftingRecipe {
 
     @Override
     default Optional<String> getGroup() {
-        String group = "";
+        String group = null;
         if (this instanceof ShapedRecipe) {
-
             group = ((ShapedRecipe) this).group;
-        }
-        if (this instanceof ShapelessRecipe) {
+        } else if (this instanceof ShapelessRecipe) {
             group = ((ShapelessRecipe) this).group;
+        } else if (this instanceof FurnaceRecipe) {
+            group = ((FurnaceRecipe) this).group;
         }
-        if (group.isEmpty()) {
-            return Optional.empty();
-        }
-        return Optional.of(group);
+        return Optional.ofNullable(Strings.emptyToNull(group));
     }
 }
