@@ -48,6 +48,7 @@ import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.effect.particle.SpongeParticleType;
 import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
 import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
+import org.spongepowered.common.registry.type.AbstractPrefixCheckCatalogRegistryModule;
 import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 import org.spongepowered.common.registry.type.NotePitchRegistryModule;
@@ -63,17 +64,14 @@ import javax.annotation.Nullable;
 
 @RegistrationDependency({ ParticleOptionRegistryModule.class, NotePitchRegistryModule.class, BlockTypeRegistryModule.class,
         ItemTypeRegistryModule.class, PotionEffectTypeRegistryModule.class, FireworkShapeRegistryModule.class })
-public final class ParticleTypeRegistryModule extends
-    AbstractPrefixAlternateCatalogTypeRegistryModule<ParticleType> {
+public final class ParticleTypeRegistryModule extends AbstractPrefixCheckCatalogRegistryModule<ParticleType> {
 
     public static ParticleTypeRegistryModule getInstance() {
         return Holder.INSTANCE;
     }
 
     @RegisterCatalog(ParticleTypes.class)
-    private final Map<String, SpongeParticleType> particleMappings = Maps.newHashMap();
     private final Map<String, ParticleType> particleByName = Maps.newHashMap();
-    private final Map<EnumParticleTypes, SpongeParticleType> particleTypeMapping = Maps.newHashMap();
 
     @Override
     public Optional<ParticleType> getById(String id) {
@@ -190,7 +188,6 @@ public final class ParticleTypeRegistryModule extends
 
     private void addEffectType(String id, @Nullable EnumParticleTypes internalType, Map<ParticleOption<?>, Object> options) {
         SpongeParticleType particleType = new SpongeParticleType("minecraft:" + id, id, internalType, options);
-        this.particleMappings.put(id, particleType);
         this.particleByName.put(particleType.getId().toLowerCase(Locale.ENGLISH), particleType);
     }
 
