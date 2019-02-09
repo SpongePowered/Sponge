@@ -63,6 +63,7 @@ public class SpongeTeamBuilder implements Team.Builder {
     @Override
     public Team.Builder name(String name) {
         this.name = checkNotNull(name, "Name cannot be null!");
+        checkState(name.length() < 17, "Name is " + name.length() + " characters long! It must be at most 16.");
         if (this.displayName == null) {
             this.displayName = Text.of(this.name);
         }
@@ -77,6 +78,8 @@ public class SpongeTeamBuilder implements Team.Builder {
 
     @Override
     public Team.Builder displayName(Text displayName) throws IllegalArgumentException {
+        final int length = displayName.toPlain().length();
+        checkState(length < 33, "DisplayName is " + length + " characters long! It must be at most 32.");
         this.displayName = checkNotNull(displayName, "DisplayName cannot be null!");
         return this;
     }
