@@ -679,8 +679,7 @@ public class SpongeCommonEventFactory {
         }
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             final BlockState blockstate = (BlockState) ((net.minecraft.world.World) world).getBlockState(sourcePos);
-            final LocatableBlock locatable = LocatableBlock.builder()
-                    .location(new Location(world, sourcePos.getX(), sourcePos.getY(), sourcePos.getZ()))
+            final LocatableBlock locatable = LocatableBlock.builder().world(world).position(sourcePos.getX(), sourcePos.getY(), sourcePos.getZ())
                     .state(blockstate)
                     .build();
             if (context.getNotifier().isPresent()) {
