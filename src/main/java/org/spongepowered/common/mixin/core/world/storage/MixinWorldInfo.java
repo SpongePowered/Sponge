@@ -387,7 +387,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     @Override
     public void setGameMode(GameMode gamemode) {
-        this.gameType = GameModeRegistryModule.toGameType(gamemode);
+        this.gameType = (GameType) (Object) gamemode;
     }
 
     @Override
