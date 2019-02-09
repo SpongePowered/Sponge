@@ -26,6 +26,7 @@ package org.spongepowered.common.world.extent;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -166,6 +167,12 @@ public class ExtentViewDownsize implements DefaultedExtent {
     private void checkBlockRange(int x, int y, int z) {
         if (!VecHelper.inBounds(x, y, z, this.blockMin, this.blockMax)) {
             throw new PositionOutOfBoundsException(new Vector3i(x, y, z), this.blockMin, this.blockMax);
+        }
+    }
+
+    private void checkBlockRange(int x, int z) {
+        if (!VecHelper.inBounds(x, z, this.blockMin.toVector2(true), this.blockMax.toVector2(true))) {
+            throw new PositionOutOfBoundsException(new Vector2i(x, z), this.blockMin, this.blockMax);
         }
     }
 
@@ -593,13 +600,13 @@ public class ExtentViewDownsize implements DefaultedExtent {
 
     @Override
     public int getHighestYAt(int x, int z) {
-        checkBlockRange(x, 0, z);
+        checkBlockRange(x, z);
         return this.extent.getHighestYAt(x, z);
     }
 
     @Override
     public int getPrecipitationLevelAt(int x, int z) {
-        checkBlockRange(x, 0, z);
+        checkBlockRange(x, z);
         return this.extent.getPrecipitationLevelAt(x, z);
     }
 
