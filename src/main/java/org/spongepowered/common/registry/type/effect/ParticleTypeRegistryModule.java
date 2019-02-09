@@ -77,7 +77,11 @@ public final class ParticleTypeRegistryModule extends
 
     @Override
     public Optional<ParticleType> getById(String id) {
-        return Optional.ofNullable(this.particleByName.get(defaultModIdToPrepend + ":" + checkNotNull(id).toLowerCase(Locale.ENGLISH)));
+        String key = checkNotNull(id).toLowerCase(Locale.ENGLISH);
+        if (!key.contains(":")) {
+            key = this.defaultModIdToPrepend + ":" + key;
+        }
+        return Optional.ofNullable(this.particleByName.get(key));
     }
 
     @Override
