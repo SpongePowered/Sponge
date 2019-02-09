@@ -112,6 +112,7 @@ import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.action.LightningEvent;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
@@ -1736,6 +1737,10 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     private boolean forceSpawnEntity(net.minecraft.entity.Entity entity, int chunkX, int chunkZ) {
+        if (!this.isRemote) {
+            Cause cause = Sponge.getCauseStackManager().getCurrentCause();
+            SpongeHooks.logEntitySpawn(cause, entity);
+        }
         if (entity instanceof EntityPlayer) {
             EntityPlayer entityplayer = (EntityPlayer) entity;
             this.playerEntities.add(entityplayer);

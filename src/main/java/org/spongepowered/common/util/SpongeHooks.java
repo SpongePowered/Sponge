@@ -143,17 +143,18 @@ public class SpongeHooks {
             return;
         }
 
-        String spawnName = entity.getName();
-        if (entity instanceof EntityItem) {
-            spawnName = ((EntityItem) entity).getItem().getDisplayName();
+        if (!(entity instanceof EntityLivingBase)) {
+            return;
         }
+
+        String spawnName = entity.getName();
 
         Optional<User> user = cause.first(User.class);
         SpongeConfig<? extends GeneralConfigBase> config = getActiveConfig((WorldServer) entity.world);
         if (config.getConfig().getLogging().entitySpawnLogging()) {
             logInfo("SPAWNED " + spawnName + " [RootCause: {0}][User: {1}][World: {2}][DimId: {3}]",
                     getFriendlyCauseName(cause),
-                    user.isPresent() ? user.get().getName() : "None",
+                    user.map(User::getName).orElse("None"),
                     entity.world.getWorldInfo().getWorldName(),
                     ((IMixinWorldServer) entity.world).getDimensionId());
             logStack(config);
