@@ -81,6 +81,7 @@ public abstract class MixinEntityArrow extends MixinEntity implements Arrow, IMi
 
     @Override
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        super.supplyVanillaManipulators(manipulators);
         manipulators.add(getKnockbackData());
     }
 
