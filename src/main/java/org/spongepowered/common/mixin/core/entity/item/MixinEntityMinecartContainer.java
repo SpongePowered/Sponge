@@ -32,10 +32,12 @@ import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
+import org.spongepowered.common.item.inventory.lens.impl.DefaultEmptyLens;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.IInventoryFabric;
@@ -48,7 +50,7 @@ public abstract class MixinEntityMinecartContainer extends MixinEntityMinecart i
 
     protected Fabric fabric = new IInventoryFabric(this);
     protected SlotCollection slots = new SlotCollection.Builder().add(this.getSizeInventory()).build();
-    protected Lens lens = new OrderedInventoryLensImpl(0, this.getSizeInventory(), 1, this.slots);
+    protected Lens lens = this.getSizeInventory() == 0 ? new DefaultEmptyLens((InventoryAdapter) this) : new OrderedInventoryLensImpl(0, this.getSizeInventory(), 1, this.slots);
 
     @SuppressWarnings("unchecked")
     public SlotProvider inventory$getSlotProvider() {
