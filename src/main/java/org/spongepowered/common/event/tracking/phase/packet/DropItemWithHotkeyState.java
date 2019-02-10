@@ -39,13 +39,12 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
-import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
-import org.spongepowered.api.item.inventory.property.SlotIndex;
+import org.spongepowered.api.item.inventory.slot.SlotIndex;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
@@ -143,10 +142,10 @@ final class DropItemWithHotkeyState extends BasicInventoryPacketState {
             ClickContainerEvent.Drop event;
             if (usedButton == PacketPhase.PACKET_BUTTON_PRIMARY_ID) {
                 event = SpongeEventFactory.createClickContainerEventDropSingle(Sponge.getCauseStackManager().getCurrentCause(), openContainer,
-                        transaction, capturedEntities, openContainer, Optional.ofNullable(slot), slotTransactions);
+                        transaction, capturedEntities, Optional.ofNullable(slot), slotTransactions);
             } else {
                 event = SpongeEventFactory.createClickContainerEventDropFull(Sponge.getCauseStackManager().getCurrentCause(), openContainer,
-                        transaction, capturedEntities, openContainer, Optional.ofNullable(slot), slotTransactions);
+                        transaction, capturedEntities,  Optional.ofNullable(slot), slotTransactions);
             }
             // TODO the nature of how this event is handled prevents the cause information being preserved through
             // the event call, somehow should not release this frame until after the event is posted

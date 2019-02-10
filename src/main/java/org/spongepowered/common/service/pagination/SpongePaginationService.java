@@ -174,7 +174,7 @@ public class SpongePaginationService implements PaginationService {
                         .executor(pageExecutor).build();
 
         //Fallback to page arguments
-        ChildCommandElementExecutor childDispatcher = new ChildCommandElementExecutor(pageExecutor);
+        ChildCommandElementExecutor childDispatcher = new ChildCommandElementExecutor(pageExecutor, null, false);
         childDispatcher.register(next, "next", "n");
         childDispatcher.register(prev, "prev", "p", "previous");
         childDispatcher.register(page, "page");

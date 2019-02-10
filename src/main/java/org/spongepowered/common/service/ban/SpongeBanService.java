@@ -69,14 +69,14 @@ public class SpongeBanService implements BanService {
     @Override
     public Collection<Ban.Profile> getProfileBans() {
         this.getUserBanList().removeExpired();
-        return new ArrayList<>((Collection<Ban.Profile>) (Object) this.getUserBanList().getValues().values());
+        return new ArrayList<>((Collection<Ban.Profile>) (Object) this.getUserBanList().getEntries());
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Collection<Ban.Ip> getIpBans() {
         this.getIPBanList().removeExpired();
-        return new ArrayList<>((Collection<Ban.Ip>) (Object) this.getIPBanList().getValues().values());
+        return new ArrayList<>((Collection<Ban.Ip>) (Object) this.getIPBanList().getEntries();
     }
 
     @Override
@@ -84,7 +84,7 @@ public class SpongeBanService implements BanService {
         UserListBans bans = this.getUserBanList();
 
         bans.removeExpired();
-        return Optional.ofNullable((Ban.Profile) bans.getValues().get(bans.getObjectKey((com.mojang.authlib.GameProfile) profile)));
+        return Optional.ofNullable((Ban.Profile) bans.getEntry((com.mojang.authlib.GameProfile) profile)))
     }
 
     @Override
@@ -92,7 +92,7 @@ public class SpongeBanService implements BanService {
         UserListIPBans bans = this.getIPBanList();
 
         bans.removeExpired();
-        return Optional.ofNullable((Ban.Ip) bans.getValues().get(bans.getObjectKey(bans.addressToString(new InetSocketAddress(address, 0)))));
+        return Optional.ofNullable((Ban.Ip) bans.getBanEntry(new InetSocketAddress(address, 0)));
     }
 
     @Override
@@ -100,7 +100,7 @@ public class SpongeBanService implements BanService {
         UserListBans bans = this.getUserBanList();
 
         bans.removeExpired();
-        return bans.values.containsKey(bans.getObjectKey((com.mojang.authlib.GameProfile) profile));
+        return bans.getEntry((com.mojang.authlib.GameProfile) profile) != null;
     }
 
     @Override
@@ -108,7 +108,7 @@ public class SpongeBanService implements BanService {
         UserListIPBans bans = this.getIPBanList();
 
         bans.removeExpired();
-        return bans.getValues().containsKey(bans.getObjectKey(bans.addressToString(new InetSocketAddress(address, 0))));
+        return bans.getBanEntry(new InetSocketAddress(address, 0)) != null;
     }
 
     @Override

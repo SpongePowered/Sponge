@@ -56,7 +56,7 @@ import org.spongepowered.api.text.selector.SelectorTypes;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.util.Functional;
 import org.spongepowered.api.world.Locatable;
-import org.spongepowered.api.world.extent.Extent;
+import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 
 import java.util.ArrayList;
@@ -97,22 +97,22 @@ public class SelectorResolver {
 
     @Nullable private final CommandSource origin;
     @Nullable private final Entity entityOrigin;
-    private final Collection<Extent> extents;
+    private final Collection<World> worlds;
     private final Vector3d position;
     private final Selector selector;
     private final Predicate<Entity> selectorFilter;
 
-    public SelectorResolver(Selector selector, Collection<? extends Extent> extents) {
-        this(selector, extents, null, null);
+    public SelectorResolver(Selector selector, Collection<? extends World> worlds) {
+        this(selector, worlds, null, null);
     }
 
     public SelectorResolver(Selector selector, CommandSource origin) {
         this(selector, SpongeImpl.getGame().getServer().getWorlds(), origin, positionFromSource(origin));
     }
 
-    private SelectorResolver(Selector selector, Collection<? extends Extent> extents, @Nullable CommandSource origin, @Nullable Vector3d position) {
+    private SelectorResolver(Selector selector, Collection<? extends World> worlds, @Nullable CommandSource origin, @Nullable Vector3d position) {
         this.selector = checkNotNull(selector);
-        this.extents = ImmutableSet.copyOf(extents);
+        this.worlds = ImmutableSet.copyOf(worlds);
         this.origin = origin;
         if (this.origin instanceof Entity) {
             this.entityOrigin = (Entity) origin;
@@ -143,8 +143,8 @@ public class SelectorResolver {
     }
 
     private void addDimensionFilters(final Vector3d position, List<Predicate<Entity>> filters) {
-        if (this.selector.has(ArgumentTypes.DIMENSION.x()) || 
-                this.selector.has(ArgumentTypes.DIMENSION.y()) || 
+        if (this.selector.has(ArgumentTypes.DIMENSION.x()) ||
+                this.selector.has(ArgumentTypes.DIMENSION.y()) ||
                 this.selector.has(ArgumentTypes.DIMENSION.z())) return;
 
         Integer x = this.selector.get(ArgumentTypes.DIMENSION.x()).orElse(0);
@@ -245,11 +245,11 @@ public class SelectorResolver {
     private void addScoreFilters(List<Predicate<Entity>> filters) {
         for (Argument<?> arg : this.selector.getArguments()) {
             String key = arg.getType().getKey();
-            if (!key.startsWith("score_")) continue;    
+            if (!key.startsWith("score_")) continue;
 
             String objectiveName = key.replaceAll("^score_", "").replaceAll("_min$", "");
             boolean min = key.endsWith("_min");
-            filters.add(input -> {                
+            filters.add(input -> {
                 Optional<Scoreboard> scoreboard = Sponge.getGame().getServer().getServerScoreboard();
                 if (!scoreboard.isPresent()) return false;
 
@@ -331,7 +331,7 @@ public class SelectorResolver {
         int maxToSelect = this.selector.get(ArgumentTypes.COUNT).orElse(defaultCount);
         boolean isReversed = maxToSelect < 0;
         maxToSelect = Math.abs(maxToSelect);
-        Set<? extends Extent> extents = getExtentSet();
+        Set<? extends World> extents = getExtentSet();
         Stream<Entity> entityStream = extents.stream()
                 .flatMap(ext -> ext.getEntities().stream())
                 .filter(this.selectorFilter);
@@ -364,13 +364,13 @@ public class SelectorResolver {
         };
     }
 
-    private Set<? extends Extent> getExtentSet() {
+    private Set<? extends World> getExtentSet() {
         boolean location = this.selector.getArguments().stream()
                 .anyMatch(arg -> LOCATION_BASED_ARGUMENTS.contains(arg.getType()));
         if (location && this.origin instanceof Locatable) {
             return ImmutableSet.of(((Locatable) this.origin).getWorld());
         }
-        return ImmutableSet.copyOf(this.extents);
+        return ImmutableSet.copyOf(this.worlds);
     }
 
     private static AABB getAABB(Vector3i pos, int x, int y, int z) {

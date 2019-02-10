@@ -320,7 +320,7 @@ public abstract class AdapterLogic {
         for (int ord = 0; ord < lens.slotCount(); ord++) {
             net.minecraft.item.ItemStack slotStack = lens.getStack(inv, ord);
             if (slotStack.isEmpty()) {
-                if (type == null || type == ItemTypes.NONE) {
+                if (type == null || type == ItemTypes.AIR) {
                     return true; // Found an empty Slot
                 }
             } else {

@@ -30,7 +30,6 @@ import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
-import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
@@ -51,7 +50,7 @@ public final class MiddleDragInventoryStopState extends DragInventoryStopState {
     @Override
     public ClickContainerEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
             List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, int usedButton, @Nullable Slot slot) {
-        return SpongeEventFactory.createClickContainerEventDragMiddle(Sponge.getCauseStackManager().getCurrentCause(), transaction, openContainer,
+        return SpongeEventFactory.createClickContainerEventDragMiddle(Sponge.getCauseStackManager().getCurrentCause(), openContainer, transaction,
                 Optional.ofNullable(slot), slotTransactions);
     }
 

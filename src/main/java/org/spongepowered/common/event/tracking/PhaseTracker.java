@@ -54,6 +54,7 @@ import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.BlockChangeFlag;
@@ -119,7 +120,7 @@ public final class PhaseTracker {
     private static final CopyOnWriteArrayList<net.minecraft.entity.Entity> ASYNC_CAPTURED_ENTITIES = new CopyOnWriteArrayList<>();
 
     @SuppressWarnings("unused")
-    private static final Task ASYNC_TO_SYNC_SPAWNER = Task.builder()
+    private static final ScheduledTask ASYNC_TO_SYNC_SPAWNER = Sponge.getServer().getScheduler().submit(Task.builder()
         .name("Sponge Async To Sync Entity Spawn Task")
         .intervalTicks(1)
         .execute(() -> {
@@ -139,8 +140,8 @@ public final class PhaseTracker {
                 }
             }
 
-        })
-        .submit(SpongeImpl.getPlugin());
+        }).plugin(SpongeImpl.getPlugin())
+        .build());
 
     public static final BiConsumer<PrettyPrinter, PhaseContext<?>> CONTEXT_PRINTER = (printer, context) ->
         context.printCustom(printer, 4);
@@ -635,10 +636,10 @@ public final class PhaseTracker {
             CrashReportCategory crashreportcategory = crashreport.makeCategory("Block being updated");
             crashreportcategory.addDetail("Source block type", () -> {
                 try {
-                    return String.format("ID #%d (%s // %s)", Block.getIdFromBlock(sourceBlock),
+                    return String.format("ID %s (%s // %s)", Block.REGISTRY.getKey(sourceBlock),
                             sourceBlock.getTranslationKey(), sourceBlock.getClass().getCanonicalName());
                 } catch (Throwable var2) {
-                    return "ID #" + Block.getIdFromBlock(sourceBlock);
+                    return "ID #" + Block.REGISTRY.getKey(sourceBlock);
                 }
             });
             CrashReportCategory.addBlockInfo(crashreportcategory, notifyPos, iblockstate);
@@ -728,7 +729,7 @@ public final class PhaseTracker {
                     }
                     // else { // Sponge - unnecessary formatting
                     // Continue doing neighbor notification
-                    if (newState.getLightOpacity() != iblockstate.getLightOpacity() || newState.getLightValue() != iblockstate.getLightValue()) {
+                    if (newState.getOpacity(minecraftWorld, pos) != iblockstate.getOpacity(minecraftWorld, pos) || newState.getLightValue() != iblockstate.getLightValue()) {
                         minecraftWorld.profiler.startSection("checkLight"); // Sponge - we don't need to us the profiler
                         minecraftWorld.checkLight(pos);
                         minecraftWorld.profiler.endSection(); // Sponge - We don't need to use the profiler
@@ -798,7 +799,7 @@ public final class PhaseTracker {
             return false;
         }
         // else { // Sponge - unnecessary formatting
-        if (newState.getLightOpacity() != iblockstate.getLightOpacity() || newState.getLightValue() != iblockstate.getLightValue()) {
+        if (newState.getOpacity(minecraftWorld, pos) != iblockstate.getOpacity(minecraftWorld, pos) || newState.getLightValue() != iblockstate.getLightValue()) {
             minecraftWorld.profiler.startSection("checkLight");
             minecraftWorld.checkLight(pos);
             minecraftWorld.profiler.endSection();

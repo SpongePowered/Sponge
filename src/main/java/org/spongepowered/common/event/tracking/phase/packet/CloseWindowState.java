@@ -33,7 +33,7 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
-import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
+import org.spongepowered.api.event.item.inventory.container.InteractContainerEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -59,7 +59,7 @@ final class CloseWindowState extends BasicPacketState {
         ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
         if (lastCursor != null) {
             Sponge.getCauseStackManager().pushCause(player);
-            InteractInventoryEvent.Close event =
+            InteractContainerEvent.Close event =
                     SpongeCommonEventFactory.callInteractInventoryCloseEvent(container, player, lastCursor, newCursor, true);
             if (event.isCancelled()) {
                 Sponge.getCauseStackManager().popCause();

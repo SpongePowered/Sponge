@@ -44,7 +44,7 @@ public class MixinNextTickListEntry implements ScheduledBlockUpdate, IMixinNextT
     @Shadow public int priority;
     @Shadow public long scheduledTime;
 
-    private Location<org.spongepowered.api.world.World> location;
+    private Location location;
     private World world;
 
     @Override
@@ -55,7 +55,7 @@ public class MixinNextTickListEntry implements ScheduledBlockUpdate, IMixinNextT
     }
 
     @Override
-    public Location<org.spongepowered.api.world.World> getLocation() {
+    public Location getLocation() {
         checkState(this.location != null, "Unable to determine location at this time");
         return this.location;
     }
@@ -65,7 +65,7 @@ public class MixinNextTickListEntry implements ScheduledBlockUpdate, IMixinNextT
         if (this.world == null) {
             return Integer.MAX_VALUE;
         }
-        return (int) (this.scheduledTime - this.world.getWorldInfo().getWorldTotalTime());
+        return (int) (this.scheduledTime - this.world.getWorldInfo().getTime());
     }
 
     @Override

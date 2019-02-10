@@ -28,7 +28,6 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.item.inventory.Container;
@@ -75,25 +74,25 @@ abstract class SimpleInventoryPacketState extends BasicInventoryPacketState {
 
     static SimpleEventCreator transform(SimpleEventCreatorNoButton creator)
     {
-        return (cause, container, cTrans, inv, slot, trans, btn) -> creator.createEvent(cause, container, cTrans, inv, slot, trans);
+        return (cause, container, cTrans, inv, slot, btn) -> creator.createEvent(cause, container, cTrans, inv, slot);
     }
 
     @Override
     public ClickContainerEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
             List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, int usedButton, @Nullable Slot slot) {
         return this.eventCreator.createEvent(Sponge.getCauseStackManager().getCurrentCause(), openContainer, transaction,
-                openContainer, Optional.ofNullable(slot), slotTransactions, usedButton);
+                Optional.ofNullable(slot), slotTransactions, usedButton);
     }
 
     @FunctionalInterface
     interface SimpleEventCreator {
-        ClickContainerEvent createEvent(Cause cause, Container container, Transaction<ItemStackSnapshot> cursorTransaction, Container inventory,
+        ClickContainerEvent createEvent(Cause cause, Container container, Transaction<ItemStackSnapshot> cursorTransaction,
                 Optional<Slot> slot, List<SlotTransaction> transactions, int usedButton);
     }
 
     @FunctionalInterface
     interface SimpleEventCreatorNoButton {
-        ClickContainerEvent createEvent(Cause cause, Container container, Transaction<ItemStackSnapshot> cursorTransaction, Container inventory,
+        ClickContainerEvent createEvent(Cause cause, Container container, Transaction<ItemStackSnapshot> cursorTransaction,
                 Optional<Slot> slot, List<SlotTransaction> transactions);
     }
 

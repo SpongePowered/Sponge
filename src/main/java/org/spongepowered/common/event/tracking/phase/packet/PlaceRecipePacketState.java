@@ -28,6 +28,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.CPacketPlaceRecipe;
+import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
@@ -64,12 +65,14 @@ public class PlaceRecipePacketState extends BasicInventoryPacketState {
     public void unwind(InventoryPacketContext context) {
         CPacketPlaceRecipe packet = context.getPacket();
         boolean shift = packet.shouldPlaceAll();
-        IRecipe recipe = packet.func_194317_b();
+        ResourceLocation recipeID = packet.getRecipeId();
 
         final EntityPlayerMP player = context.getPacketPlayer();
         ((IMixinContainer)player.openContainer).detectAndSendChanges(true);
         ((IMixinContainer) player.openContainer).setCaptureInventory(false);
         ((IMixinContainer) player.openContainer).setFirePreview(true);
+
+        IRecipe recipe = player.getEntityWorld().getRecipeManager().getRecipe(recipeID);
 
         Inventory craftInv = ((Inventory) player.openContainer).query(QueryOperationTypes.INVENTORY_TYPE.of(CraftingInventory.class));
         if (!(craftInv instanceof CraftingInventory)) {
@@ -99,10 +102,10 @@ public class PlaceRecipePacketState extends BasicInventoryPacketState {
             Container openContainer = (Container) player.openContainer;
             if (shift) {
                 event = SpongeEventFactory.createClickContainerEventRecipeAll(frame.getCurrentCause(), openContainer,
-                        cursorTransaction, openContainer, (Recipe) recipe, Optional.empty(), transactions);
+                        cursorTransaction, (Recipe) recipe, Optional.empty(), transactions);
             } else {
                 event = SpongeEventFactory.createClickContainerEventRecipeSingle(frame.getCurrentCause(), openContainer,
-                        cursorTransaction, openContainer, (Recipe) recipe, Optional.empty(), transactions);
+                        cursorTransaction, (Recipe) recipe, Optional.empty(), transactions);
             }
             SpongeImpl.postEvent(event);
             PacketPhaseUtil.handleCustomCursor(player, event.getCursorTransaction(), event.isCancelled());

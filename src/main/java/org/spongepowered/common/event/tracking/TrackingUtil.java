@@ -33,6 +33,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
+import net.minecraft.block.BlockRedstoneLamp;
 import net.minecraft.block.BlockRedstoneRepeater;
 import net.minecraft.block.BlockRedstoneTorch;
 import net.minecraft.block.state.IBlockState;
@@ -269,7 +270,7 @@ public final class TrackingUtil {
              final Timing timing = BlockUtil.toMixin(state).getTimingsHandler()) {
             timing.startTiming();
             context.buildAndSwitch();
-            block.updateTick(world, pos, state, random);
+            state.tick(world, pos, random);
         } catch (Exception | NoClassDefFoundError e) {
             phaseTracker.printExceptionFromPhase(e, phaseContext);
 
@@ -294,7 +295,7 @@ public final class TrackingUtil {
         }
 
         final LocatableBlock locatable = LocatableBlock.builder()
-            .location(new Location<>(apiWorld, pos.getX(), pos.getY(), pos.getZ()))
+            .location(new Location(apiWorld, pos.getX(), pos.getY(), pos.getZ()))
             .state((BlockState) state)
             .build();
         final BlockTickContext phaseContext = TickPhase.Tick.RANDOM_BLOCK.createPhaseContext().source(locatable);
@@ -306,7 +307,7 @@ public final class TrackingUtil {
         // Now actually switch to the new phase
         try (PhaseContext<?> context = phaseContext) {
             context.buildAndSwitch();
-            block.randomTick(world, pos, state, random);
+            state.randomTick(world, pos, random);
         } catch (Exception | NoClassDefFoundError e) {
             phaseTracker.printExceptionFromPhase(e, phaseContext);
         }
@@ -374,7 +375,7 @@ public final class TrackingUtil {
         }
 
 
-        if (newState.getLightOpacity() != currentState.getLightOpacity() || newState.getLightValue() != currentState.getLightValue()) {
+        if (newState.getOpacity(world, pos) != currentState.getOpacity(world, pos) || newState.getLightValue() != currentState.getLightValue()) {
             world.profiler.startSection("checkLight");
             world.checkLight(pos);
             world.profiler.endSection();
@@ -409,7 +410,7 @@ public final class TrackingUtil {
         } else if (originalBlock instanceof BlockRedstoneTorch && newBlock instanceof BlockRedstoneTorch) {
             return true;
         } else
-            return originalBlock instanceof BlockRedstoneLight && newBlock instanceof BlockRedstoneLight;
+            return originalBlock instanceof BlockRedstoneLamp && newBlock instanceof BlockRedstoneLamp;
     }
 
     private TrackingUtil() {

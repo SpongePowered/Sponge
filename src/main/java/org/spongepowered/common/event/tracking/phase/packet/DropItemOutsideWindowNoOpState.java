@@ -34,14 +34,12 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
-import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 
 import java.util.List;
-import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -73,10 +71,10 @@ final class DropItemOutsideWindowNoOpState extends BasicInventoryPacketState {
 
             if (usedButton == PacketPhase.PACKET_BUTTON_PRIMARY_ID) {
                 return SpongeEventFactory.createClickContainerEventDropOutsidePrimary(frame.getCurrentCause(), openContainer, transaction,
-                        capturedEntities, openContainer, Optional.ofNullable(slot), slotTransactions);
+                        capturedEntities,slotTransactions);
             } else {
                 return SpongeEventFactory.createClickContainerEventDropOutsideSecondary(frame.getCurrentCause(), openContainer, transaction,
-                        capturedEntities, openContainer, Optional.ofNullable(slot), slotTransactions);
+                        capturedEntities,  slotTransactions);
             }
         }
     }

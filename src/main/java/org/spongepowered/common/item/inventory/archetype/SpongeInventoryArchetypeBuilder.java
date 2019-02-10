@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
+import org.spongepowered.api.event.item.inventory.container.InteractContainerEvent;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.common.registry.type.item.InventoryArchetypeRegistryModule;
 
@@ -43,7 +44,7 @@ public class SpongeInventoryArchetypeBuilder implements InventoryArchetype.Build
 
     private List<InventoryArchetype> types = new ArrayList<>();
     private Map<Property<?>, Object> properties = new HashMap<>();
-    private Set<Class<? extends InteractInventoryEvent>> events = new HashSet<>();
+    private Set<Class<? extends InteractContainerEvent>> events = new HashSet<>();
     private CompositeInventoryArchetype.ContainerProvider containerProvider;
 
     @Override

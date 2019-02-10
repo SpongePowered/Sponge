@@ -150,7 +150,7 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
         final ArrayList<Entity> entities = new ArrayList<>(1);
         entities.add(entity);
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(entity.getLocation().getExtent());
+            frame.pushCause(entity.getLocation().getWorld());
             return SpongeCommonEventFactory.callSpawnEntitySpawner(entities, context);
         }
     }
