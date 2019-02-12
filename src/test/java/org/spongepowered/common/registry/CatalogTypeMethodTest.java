@@ -114,8 +114,7 @@ public class CatalogTypeMethodTest {
             }
         } catch (Throwable t) {
             if (ignoredFailures.contains(this.implementationClass + "#" + this.method.getName() + "()")) {
-                LOG.warn("Catalog Type: {} Id : {} has broken Method: {} ({}): {}", this.name, this.catalogId, this.methodName,
-                        this.implementationClass, t);
+//                LOG.warn("Catalog Type: {} Id : {} has broken Method: {} ({}): {}", this.name, this.catalogId, this.methodName, this.implementationClass, t);
                 return;
             }
             throw t;
