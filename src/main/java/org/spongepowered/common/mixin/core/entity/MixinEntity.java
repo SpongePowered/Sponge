@@ -486,7 +486,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
 
     @Override
     public Location getLocation() {
-        return new Location<>((World) this.world, getPosition());
+        return new Location((World) this.world, getPosition());
     }
 
     @Override
