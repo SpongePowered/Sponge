@@ -435,7 +435,7 @@ public final class EntityUtil {
             final Transform portalExitTransform = mixinEntity.getTransform().setWorld((World) toWorld);
             // Use setLocationAndAngles to avoid firing MoveEntityEvent to plugins
             mixinEntity.setLocationAndAngles(fromTransform);
-            final MoveEntityEvent.Teleport.Portal event = SpongeEventFactory.createMoveEntityEventTeleportPortal(frame.getCurrentCause(), fromTransform, portalExitTransform, (PortalAgent) teleporter, mixinEntity, true);
+            final MoveEntityEvent.Teleport.Portal event = SpongeEventFactory.createMoveEntityEventTeleportPortal(frame.getCurrentCause(), fromTransform, portalExitTransform, mixinEntity, (PortalAgent) teleporter, true);
             SpongeImpl.postEvent(event);
             final Vector3i chunkPosition = mixinEntity.getLocation().getChunkPosition();
             final List<BlockSnapshot> capturedBlocks = context.getCapturedBlocks();
