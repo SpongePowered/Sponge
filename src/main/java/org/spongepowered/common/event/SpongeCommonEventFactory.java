@@ -532,10 +532,10 @@ public class SpongeCommonEventFactory {
                     frame.addContext(EventContextKeys.FAKE_PLAYER, EntityUtil.toPlayer(player));
                 }
             }
-            data.context.applyOwnerIfAvailable(owner -> frame.addContext(EventContextKeys.OWNER, owner));
 
-            if (player != null) {
-                frame.addContext(EventContextKeys.OWNER, (User) player);
+            final User owner = data.context.getOwner().orElse((User) player);
+            if (owner != null) {
+                frame.addContext(EventContextKeys.OWNER, owner);
             }
 
             data.context.applyNotifierIfAvailable(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));

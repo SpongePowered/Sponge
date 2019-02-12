@@ -313,11 +313,6 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
 
     @Override
     public void setSpongeOwner(@Nullable User owner) {
-        if (owner == null) {
-            this.spongeOwner = null;
-            this.hasSetOwner = false;
-            return;
-        }
         this.spongeOwner = owner;
         this.hasSetOwner = true;
     }
@@ -340,11 +335,6 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
 
     @Override
     public void setSpongeNotifier(@Nullable User notifier) {
-        if (notifier == null) {
-            this.spongeNotifier = null;
-            this.hasSetNotifier = false;
-            return;
-        }
         this.spongeNotifier = notifier;
         this.hasSetNotifier = true;
     }
