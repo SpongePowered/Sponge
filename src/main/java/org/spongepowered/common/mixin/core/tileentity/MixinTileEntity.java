@@ -93,8 +93,6 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     @Nullable private User spongeOwner;
     @Nullable private User spongeNotifier;
     private boolean isTicking = false;
-    private boolean hasSetOwner = false;
-    private boolean hasSetNotifier = false;
     private WeakReference<IMixinChunk> activeChunk = new WeakReference<>(null);
     // Used by tracker config
     private boolean allowsBlockBulkCapture = true;
@@ -314,46 +312,22 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     @Override
     public void setSpongeOwner(@Nullable User owner) {
         this.spongeOwner = owner;
-        this.hasSetOwner = true;
     }
 
     @Override
     public User getSpongeOwner() {
-        if (!this.hasSetOwner()) {
-            IMixinChunk activeChunk = this.getActiveChunk();
-            if (activeChunk != null) {
-                this.setSpongeOwner(activeChunk.getBlockOwner(pos).orElse(null));
-            }
-        }
         return this.spongeOwner;
-    }
-
-    @Override
-    public boolean hasSetOwner() {
-        return this.hasSetOwner;
     }
 
     @Override
     public void setSpongeNotifier(@Nullable User notifier) {
         this.spongeNotifier = notifier;
-        this.hasSetNotifier = true;
     }
 
     @Nullable
     @Override
     public User getSpongeNotifier() {
-        if (!this.hasSetNotifier()) {
-            IMixinChunk activeChunk = this.getActiveChunk();
-            if (activeChunk != null) {
-                this.setSpongeNotifier(activeChunk.getBlockNotifier(pos).orElse(null));
-            }
-        }
         return this.spongeNotifier;
-    }
-
-    @Override
-    public boolean hasSetNotifier() {
-        return this.hasSetNotifier;
     }
 
     @Override

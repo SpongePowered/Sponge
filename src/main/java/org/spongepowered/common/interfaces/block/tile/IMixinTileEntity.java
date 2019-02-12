@@ -109,10 +109,6 @@ public interface IMixinTileEntity extends IMixinTrackable {
 
     @Nullable User getSpongeNotifier();
 
-    boolean hasSetOwner();
-
-    boolean hasSetNotifier();
-
     @Nullable IMixinChunk getActiveChunk();
 
     void setActiveChunk(IMixinChunk chunk);
