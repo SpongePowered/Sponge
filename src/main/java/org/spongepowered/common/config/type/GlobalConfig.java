@@ -30,18 +30,17 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import ninja.leaping.configurate.objectmapping.Setting;
-import org.spongepowered.common.config.category.BrokenModCategory;
 import org.spongepowered.common.config.category.BungeeCordCategory;
-import org.spongepowered.common.config.category.PhaseTrackerCategory;
 import org.spongepowered.common.config.category.CommandsCategory;
 import org.spongepowered.common.config.category.ExploitCategory;
 import org.spongepowered.common.config.category.GlobalGeneralCategory;
 import org.spongepowered.common.config.category.GlobalWorldCategory;
+import org.spongepowered.common.config.category.MetricsCategory;
 import org.spongepowered.common.config.category.ModuleCategory;
 import org.spongepowered.common.config.category.MovementChecksCategory;
 import org.spongepowered.common.config.category.OptimizationCategory;
+import org.spongepowered.common.config.category.PhaseTrackerCategory;
 import org.spongepowered.common.config.category.SqlCategory;
-import org.spongepowered.common.config.category.MetricsCategory;
 import org.spongepowered.common.config.category.TeleportHelperCategory;
 import org.spongepowered.common.util.IpSet;
 
@@ -90,18 +89,11 @@ public class GlobalConfig extends GeneralConfigBase {
     @Setting("movement-checks")
     private MovementChecksCategory movementChecks = new MovementChecksCategory();
 
-    @Setting(value = "broken-mods", comment = "Stopgap measures for dealing with broken mods")
-    private BrokenModCategory brokenMods = new BrokenModCategory();
-
     @Setting(value = "metrics")
     private MetricsCategory metricsCategory = new MetricsCategory();
 
     public GlobalConfig() {
         super();
-    }
-
-    public BrokenModCategory getBrokenMods() {
-        return this.brokenMods;
     }
 
     public BungeeCordCategory getBungeeCord() {
