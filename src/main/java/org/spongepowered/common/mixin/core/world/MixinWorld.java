@@ -104,7 +104,7 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.biome.BiomeType;
-import org.spongepowered.api.world.biome.worker.MutableBiomeVolumeWorker;
+import org.spongepowered.api.world.volume.biome.worker.MutableBiomeVolumeWorker;
 import org.spongepowered.api.world.chunk.Chunk;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.extent.Extent;

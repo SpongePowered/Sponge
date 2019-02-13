@@ -26,12 +26,13 @@ package org.spongepowered.common.world.gen;
 
 import com.google.common.base.MoreObjects;
 import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.CatalogType;
+import org.spongepowered.api.text.translation.Translatable;
 import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.api.world.gen.PopulatorType;
 
 import java.util.Locale;
 
-public class SpongePopulatorType implements PopulatorType {
+public class SpongePopulatorType implements CatalogType, Translatable {
 
     public final CatalogKey id;
     public final String populatorName;

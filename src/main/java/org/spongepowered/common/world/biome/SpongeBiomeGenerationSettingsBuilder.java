@@ -27,11 +27,6 @@ package org.spongepowered.common.world.biome;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Lists;
-import org.spongepowered.api.world.biome.BiomeGenerationSettings;
-import org.spongepowered.api.world.biome.BiomeGenerationSettings.Builder;
-import org.spongepowered.api.world.biome.GroundCoverLayer;
-import org.spongepowered.api.world.gen.GenerationPopulator;
-import org.spongepowered.api.world.gen.Populator;
 
 import java.util.List;
 

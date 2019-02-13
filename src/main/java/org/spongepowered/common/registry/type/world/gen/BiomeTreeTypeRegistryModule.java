@@ -45,7 +45,6 @@ import net.minecraft.world.gen.feature.WorldGenerator;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.util.weighted.VariableAmount;
-import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.api.world.gen.type.BiomeTreeType;
 import org.spongepowered.api.world.gen.type.BiomeTreeTypes;
 import org.spongepowered.common.interfaces.world.gen.IWorldGenTrees;

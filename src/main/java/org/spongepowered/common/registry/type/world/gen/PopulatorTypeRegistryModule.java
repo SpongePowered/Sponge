@@ -73,11 +73,8 @@ import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.util.CustomCatalogRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.api.world.gen.PopulatorType;
-import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 import org.spongepowered.common.registry.RegistryHelper;
-import org.spongepowered.common.world.gen.InternalPopulatorTypes;
 import org.spongepowered.common.world.gen.SpongePopulatorType;
 
 import java.util.Map;

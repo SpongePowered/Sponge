@@ -33,19 +33,13 @@ import com.google.common.collect.Lists;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.api.world.gen.WorldGeneratorModifier;
-import org.spongepowered.api.world.gen.WorldGeneratorModifiers;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.world.gen.modifier.VoidWorldGeneratorModifier;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
 
 @RegisterCatalog(WorldGeneratorModifiers.class)
 public class WorldGeneratorModifierRegistryModule extends AbstractCatalogRegistryModule<WorldGeneratorModifier>

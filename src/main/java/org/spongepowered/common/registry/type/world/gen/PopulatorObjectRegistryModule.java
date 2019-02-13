@@ -50,8 +50,6 @@ import net.minecraft.world.gen.feature.WorldGenerator;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.util.weighted.VariableAmount;
-import org.spongepowered.api.world.gen.PopulatorObject;
-import org.spongepowered.api.world.gen.PopulatorObjects;
 import org.spongepowered.common.interfaces.world.gen.IWorldGenTrees;
 import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 

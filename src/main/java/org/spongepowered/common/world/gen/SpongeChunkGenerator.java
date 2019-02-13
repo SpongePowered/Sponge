@@ -64,17 +64,12 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.world.chunk.PopulateChunkEvent;
-import org.spongepowered.api.world.biome.BiomeGenerationSettings;
 import org.spongepowered.api.world.biome.BiomeType;
-import org.spongepowered.api.world.biome.GroundCoverLayer;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.extent.ImmutableBiomeVolume;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.gen.BiomeGenerator;
-import org.spongepowered.api.world.gen.GenerationConfig;
-import org.spongepowered.api.world.gen.GenerationPopulator;
-import org.spongepowered.api.world.gen.Populator;
-import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.api.world.gen.FeatureConfig;
 import org.spongepowered.api.world.gen.SurfaceBuilder;
 import org.spongepowered.api.world.gen.SurfacePainter;
 import org.spongepowered.api.world.gen.WorldCarver;
@@ -111,14 +106,14 @@ import javax.annotation.Nullable;
  * Similar class to {@link ChunkGeneratorOverworld}, but instead gets its blocks
  * from a custom chunk generator.
  */
-public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
+public class SpongeChunkGenerator implements WorldGenerator {
     /*
     A note about this class and it's 100% error ridden sections:
     This is an implementation intended for 1.13 and 1.13's new world generation
     pipeline. It is not at all compatible with 1.12's world generation base.
 
     There are some concepts that are being exposed potentially to the API,
-    whether it's through the GenerationConfig, or SurfacePainter etc.
+    whether it's through the FeatureConfig, or SurfacePainter etc.
 
     1.13's world generation pipeline is as follows:
     1) Create ChunkPrimer (IChunk || ProtoChunk, haven't figured out a name for it in API)
@@ -184,7 +179,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
     // For decorations, we have Features, which are controlled by Placement controllers
     protected Multimap<GenerationStage.Decoration, Populator<?>> populators;
 
-    protected List<GenerationConfig> carverConfigs;
+    protected List<FeatureConfig> carverConfigs;
 
 
     protected Random rand;

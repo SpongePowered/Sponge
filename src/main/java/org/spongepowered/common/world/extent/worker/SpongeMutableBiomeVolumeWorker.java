@@ -25,13 +25,9 @@
 package org.spongepowered.common.world.extent.worker;
 
 import org.spongepowered.api.world.biome.BiomeType;
-import org.spongepowered.api.world.biome.MutableBiomeVolume;
-import org.spongepowered.api.world.biome.UnmodifiableBiomeVolume;
-import org.spongepowered.api.world.biome.worker.MutableBiomeVolumeWorker;
+import org.spongepowered.api.world.volume.biome.MutableBiomeVolume;
+import org.spongepowered.api.world.volume.biome.worker.MutableBiomeVolumeWorker;
 import org.spongepowered.api.world.volume.worker.function.VolumeFiller;
-import org.spongepowered.api.world.volume.worker.function.VolumeMapper;
-import org.spongepowered.api.world.volume.worker.function.VolumeMerger;
-import org.spongepowered.api.world.volume.worker.function.VolumeVisitor;
 
 /**
  *
