@@ -68,16 +68,14 @@ import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.extent.ImmutableBiomeVolume;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
-import org.spongepowered.api.world.gen.BiomeGenerator;
 import org.spongepowered.api.world.gen.FeatureConfig;
-import org.spongepowered.api.world.gen.SurfaceBuilder;
-import org.spongepowered.api.world.gen.SurfacePainter;
-import org.spongepowered.api.world.gen.WorldCarver;
+import org.spongepowered.api.world.gen.carver.Carver;
+import org.spongepowered.api.world.gen.surface.SurfaceBuilder;
 import org.spongepowered.api.world.gen.WorldGenerator;
 import org.spongepowered.api.world.gen.biome.BiomeGenerator;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.generation.PopulatorPhaseContext;
@@ -113,7 +111,7 @@ public class SpongeChunkGenerator implements WorldGenerator {
     pipeline. It is not at all compatible with 1.12's world generation base.
 
     There are some concepts that are being exposed potentially to the API,
-    whether it's through the FeatureConfig, or SurfacePainter etc.
+    whether it's through the FeatureConfig, or SurfaceBuilder etc.
 
     1.13's world generation pipeline is as follows:
     1) Create ChunkPrimer (IChunk || ProtoChunk, haven't figured out a name for it in API)
@@ -169,12 +167,11 @@ public class SpongeChunkGenerator implements WorldGenerator {
     // It will need the ProtoChunk, ImmutableBiomeVolume, Random, and seaLevel configured
     protected SurfaceBuilder baseGenerator;
 
-    protected SurfacePainter surfacePainter;
     // Then, we'll need carvers to carve out caves, both air and liquid filled caves
     // This part is handled by the biome providing the carvers, so technically the biome should be providing
     // the WorldCarvers from biome generators
-    protected List<WorldCarver<?>> airCarvers;
-    protected List<WorldCarver<?>> liquidCarvers;
+    protected List<Carver<?>> airCarvers;
+    protected List<Carver<?>> liquidCarvers;
 
     // For decorations, we have Features, which are controlled by Placement controllers
     protected Multimap<GenerationStage.Decoration, Populator<?>> populators;
