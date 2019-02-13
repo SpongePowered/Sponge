@@ -20,7 +20,7 @@ dependencies {
 
 minecraft {
     mappings channel: common.mcpType, version: common.mcpMappings
-    accessTransformer(common.file('common_at.cfg'))
+    accessTransformer(common.file('src/main/resources/META-INF/common_at.cfg'))
     runs {
         if (project.isClient) {
             client = {

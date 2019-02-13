@@ -95,7 +95,7 @@ public abstract class MixinMapGenStructure_Structure_Saving extends MapGenBase {
             // Sponge start - check if structure is allowed to save
             if (this.canSaveStructures) {
                 // use hook since Forge supports per-world map storage
-                this.structureData = (MapGenStructureData)SpongeImplHooks.getWorldMapStorage(worldIn).getOrLoadData(MapGenStructureData.class, this.getStructureName());
+                this.structureData = (MapGenStructureData)SpongeImplHooks.getWorldSavedDataStorage(worldIn).getOrLoadData(MapGenStructureData.class, this.getStructureName());
             }
             else
             {

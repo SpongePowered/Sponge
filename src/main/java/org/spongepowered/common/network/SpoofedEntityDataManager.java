@@ -62,9 +62,8 @@ public class SpoofedEntityDataManager extends EntityDataManager {
         this.cached.set(key, value);
     }
 
-    @Override
     public <T> void setDirty(DataParameter<T> key) {
-        this.cached.setDirty(key);
+        ((IMixinEntityDataManager) this.cached).setDirty(key);
     }
 
     @Override

@@ -48,7 +48,6 @@ public abstract class MixinEntitySlime extends MixinEntityLiving implements Slim
         return SpongeValueFactory.boundedBuilder(Keys.SLIME_SIZE)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
-                .defaultValue(1)
                 .value(getSlimeSize())
                 .build();
     }

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.nbt;
 
-import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.INBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.asm.mixin.Final;
@@ -50,17 +50,17 @@ import javax.annotation.Nullable;
  * out for the client to see and report to both Sponge and the mod author.
  */
 @Mixin(NBTTagCompound.class)
-public abstract class MixinNBTTagCompound extends NBTBase {
+public abstract class MixinNBTTagCompound implements INBTBase {
 
     private static final String SET_TAG = "Lnet/minecraft/nbt/NBTTagCompound;setTag(Ljava/lang/String;Lnet/minecraft/nbt/NBTBase;)V";
 
-    @Shadow @Final private Map<String, NBTBase> tagMap;
+    @Shadow @Final private Map<String, INBTBase> tagMap;
 
     @Redirect(method = "copy", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/NBTBase;copy()Lnet/minecraft/nbt/NBTBase;"))
     @Nullable
-    private NBTBase onTagCopy(@Nullable NBTBase base) {
+    private INBTBase onTagCopy(@Nullable INBTBase base) {
         try {
-            final NBTBase copy = base == null ? null : base.copy();
+            final INBTBase copy = base == null ? null : base.copy();
             return copy;
         } catch (StackOverflowError e) {
             final PrettyPrinter printer = new PrettyPrinter(60)
@@ -76,7 +76,7 @@ public abstract class MixinNBTTagCompound extends NBTBase {
             } catch (Throwable error) {
                 printer.addWrapped(80, "Unable to get the string of this compound. Printing out some of the entries to better assist");
 
-                for (Map.Entry<String, NBTBase> entry : this.tagMap.entrySet()) {
+                for (Map.Entry<String, INBTBase> entry : this.tagMap.entrySet()) {
                     try {
                         printer.addWrapped(80, "%s : %s", entry.getKey(), entry.getValue());
                     } catch (Throwable throwable) {
@@ -93,7 +93,7 @@ public abstract class MixinNBTTagCompound extends NBTBase {
     }
 
     @Redirect(method = "copy", at = @At(value = "INVOKE", target = SET_TAG))
-    private void onCopySet(NBTTagCompound compound, String string, @Nullable NBTBase base) {
+    private void onCopySet(NBTTagCompound compound, String string, @Nullable INBTBase base) {
         if (base == null) {
             IllegalStateException exception = new IllegalStateException("There is a null NBTBase in the compound for key: " + string);
             SpongeImpl.getLogger().error("Printing out a stacktrace to catch an exception in performing an NBTTagCompound.copy!\n"

@@ -49,7 +49,7 @@ public abstract class SpongeEntityAICommonSuperclass extends EntityAIBase {
     }
 
     @Override
-    public void updateTask() {
+    public void tick() {
         this.update();
     }
 

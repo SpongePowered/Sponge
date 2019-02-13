@@ -79,8 +79,8 @@ public class SpongeObjective implements Objective {
 
     private void updateDisplayName() {
         for (ScoreObjective objective: this.objectives.values()) {
-            objective.displayName = SpongeTexts.toLegacy(this.displayName);
-            objective.scoreboard.onObjectiveDisplayNameChanged(objective);
+            objective.displayName = SpongeTexts.toComponent(this.displayName);
+            objective.scoreboard.func_199869_b(objective);
         }
     }
 
@@ -104,7 +104,7 @@ public class SpongeObjective implements Objective {
     private void updateDisplayMode() {
         for (ScoreObjective objective: this.objectives.values()) {
             objective.renderType = (IScoreCriteria.EnumRenderType) (Object) this.displayMode;
-            objective.scoreboard.onObjectiveDisplayNameChanged(objective);
+            objective.scoreboard.func_199869_b(objective);
         }
     }
 
@@ -222,13 +222,13 @@ public class SpongeObjective implements Objective {
         if (this.objectives.containsKey(scoreboard)) {
             return this.objectives.get(scoreboard);
         }
-        ScoreObjective objective = new ScoreObjective(scoreboard, this.name, (IScoreCriteria) this.criterion);
+        ScoreObjective objective = new ScoreObjective(scoreboard, this.name, (IScoreCriteria) this.criterion, SpongeTexts.toComponent(this.displayName), (IScoreCriteria.EnumRenderType) (Object) this.displayMode);
 
         // We deliberately set the fields here instead of using the methods.
         // Since a new objective is being created here, we want to avoid
         // sending packets until everything is in the proper state.
 
-        objective.displayName = SpongeTexts.toLegacy(this.displayName);
+        objective.displayName = SpongeTexts.toComponent(this.displayName);
         objective.renderType = (IScoreCriteria.EnumRenderType) (Object) this.displayMode;
 
         ((IMixinScoreObjective) objective).setSpongeObjective(this);
