@@ -70,7 +70,7 @@ public abstract class MixinDamageSource implements DamageSource {
             at = @At(value = "RETURN"))
     public void beforeGetDeathMessageReturn(EntityLivingBase entityLivingBaseIn, CallbackInfoReturnable<ITextComponent> cir) {
         // This prevents untranslated keys from appearing in death messages, switching out those that are untranslated with the generic message.
-        if (cir.getReturnValue().getUnformattedText().equals("death.attack." + this.damageType)) {
+        if (cir.getReturnValue().getUnformattedComponentText().equals("death.attack." + this.damageType)) {
             cir.setReturnValue(new TextComponentTranslation("death.attack.generic", entityLivingBaseIn.getDisplayName()));
         }
     }

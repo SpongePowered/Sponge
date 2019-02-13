@@ -24,13 +24,16 @@
  */
 package org.spongepowered.common.data.type;
 
+import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.extra.fluid.FluidType;
+import org.spongepowered.api.fluid.FluidState;
+import org.spongepowered.api.fluid.FluidType;
+import org.spongepowered.api.state.StateProperty;
 import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.data.property.IPropertyHolder;
 
-import java.util.Optional;
+import java.util.Collection;
 
 import javax.annotation.Nullable;
 
@@ -45,10 +48,5 @@ public final class SpongeCommonFluidType extends SpongeCatalogType implements Fl
     public SpongeCommonFluidType(String id, BlockType base) {
         super(CatalogKey.minecraft(id), id);
         this.base = base;
-    }
-
-    @Override
-    public Optional<BlockType> getBlockTypeBase() {
-        return Optional.ofNullable(this.base);
     }
 }

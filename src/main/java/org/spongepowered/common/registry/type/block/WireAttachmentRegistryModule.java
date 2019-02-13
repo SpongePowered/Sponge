@@ -24,18 +24,18 @@
  */
 package org.spongepowered.common.registry.type.block;
 
-import net.minecraft.block.BlockRedstoneWire;
+import net.minecraft.state.properties.RedstoneSide;
 import org.spongepowered.api.data.type.WireAttachmentType;
 import org.spongepowered.api.data.type.WireAttachmentTypes;
 import org.spongepowered.common.registry.RegistryHelper;
-import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
+import org.spongepowered.common.registry.type.MinecraftRegistryBasedCatalogTypeModule;
 
-public final class WireAttachmentRegistryModule extends MinecraftEnumBasedCatalogTypeModule<BlockRedstoneWire.EnumAttachPosition,
+public final class WireAttachmentRegistryModule extends MinecraftRegistryBasedCatalogTypeModule<RedstoneSide,
         WireAttachmentType> {
 
     @Override
-    protected BlockRedstoneWire.EnumAttachPosition[] getValues() {
-        return BlockRedstoneWire.EnumAttachPosition.values();
+    protected RedstoneSide[] getValues() {
+        return RedstoneSide.values();
     }
 
     @Override

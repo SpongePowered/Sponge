@@ -28,10 +28,10 @@ import net.minecraft.scoreboard.Team;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.scoreboard.Visibilities;
 import org.spongepowered.api.scoreboard.Visibility;
-import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
+import org.spongepowered.common.registry.type.MinecraftRegistryBasedCatalogTypeModule;
 
 @RegisterCatalog(Visibilities.class)
-public final class VisibilityRegistryModule extends MinecraftEnumBasedCatalogTypeModule<Team.EnumVisible, Visibility> {
+public final class VisibilityRegistryModule extends MinecraftRegistryBasedCatalogTypeModule<Team.EnumVisible, Visibility> {
 
     @Override
     protected Team.EnumVisible[] getValues() {

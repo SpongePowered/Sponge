@@ -28,10 +28,10 @@ import net.minecraft.world.GameType;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
+import org.spongepowered.common.registry.type.MinecraftRegistryBasedCatalogTypeModule;
 
 @RegisterCatalog(GameModes.class)
-public final class GameModeRegistryModule extends MinecraftEnumBasedCatalogTypeModule<GameType, GameMode> {
+public final class GameModeRegistryModule extends MinecraftRegistryBasedCatalogTypeModule<GameType, GameMode> {
 
     @Override
     protected GameType[] getValues() {

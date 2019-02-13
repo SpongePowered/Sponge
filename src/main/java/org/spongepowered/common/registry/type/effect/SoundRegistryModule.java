@@ -50,7 +50,7 @@ public final class SoundRegistryModule extends AbstractCatalogRegistryModule<Sou
     @Override
     public void registerDefaults() {
         for (ResourceLocation key : SoundEvent.REGISTRY.getKeys()) {
-            this.map.put((CatalogKey) (Object) key, (SoundType) SoundEvent.REGISTRY.getObject(key));
+            this.map.put((CatalogKey) (Object) key, (SoundType) SoundEvent.REGISTRY.get(key));
         }
     }
 

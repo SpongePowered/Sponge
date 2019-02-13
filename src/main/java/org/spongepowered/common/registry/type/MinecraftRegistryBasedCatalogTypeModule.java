@@ -27,11 +27,11 @@ package org.spongepowered.common.registry.type;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 
-public abstract class MinecraftEnumBasedCatalogTypeModule<E extends Enum<E>, T extends CatalogType>
+public abstract class MinecraftRegistryBasedCatalogTypeModule<E, T extends CatalogType>
         extends AbstractCatalogRegistryModule<T> {
 
 
-    protected MinecraftEnumBasedCatalogTypeModule() {
+    protected MinecraftRegistryBasedCatalogTypeModule() {
         generateInitialMap();
     }
 

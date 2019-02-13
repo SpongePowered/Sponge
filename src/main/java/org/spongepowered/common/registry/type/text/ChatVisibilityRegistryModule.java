@@ -34,11 +34,12 @@ import org.spongepowered.api.text.chat.ChatTypes;
 import org.spongepowered.api.text.chat.ChatVisibilities;
 import org.spongepowered.api.text.chat.ChatVisibility;
 import org.spongepowered.common.interfaces.IMixinEnumChatVisibility;
-import org.spongepowered.common.registry.type.MinecraftEnumBasedAlternateCatalogTypeRegistryModule;
+import org.spongepowered.common.registry.type.MinecraftRegistryBasedAlternateCatalogTypeRegistryModule;
 
 @RegisterCatalog(ChatVisibilities.class)
 @RegistrationDependency(ChatTypeRegistryModule.class)
-public final class ChatVisibilityRegistryModule extends MinecraftEnumBasedAlternateCatalogTypeRegistryModule<EntityPlayer.EnumChatVisibility, ChatVisibility>{
+public final class ChatVisibilityRegistryModule extends
+        MinecraftRegistryBasedAlternateCatalogTypeRegistryModule<EntityPlayer.EnumChatVisibility, ChatVisibility> {
 
     @Override
     public void registerDefaults() {

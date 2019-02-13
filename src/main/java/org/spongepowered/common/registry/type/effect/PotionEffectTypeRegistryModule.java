@@ -54,7 +54,7 @@ public final class PotionEffectTypeRegistryModule extends AbstractCatalogRegistr
             if (potion != null) {
                 PotionEffectType potionEffectType = (PotionEffectType) potion;
                 this.potionList.add(potionEffectType);
-                this.map.put((CatalogKey) (Object) Potion.REGISTRY.getNameForObject(potion), potionEffectType);
+                this.map.put((CatalogKey) (Object) Potion.REGISTRY.getKey(potion), potionEffectType);
             }
         }
     }
@@ -66,7 +66,7 @@ public final class PotionEffectTypeRegistryModule extends AbstractCatalogRegistr
                 PotionEffectType potionEffectType = (PotionEffectType) potion;
                 if (!this.potionList.contains(potionEffectType)) {
                     this.potionList.add(potionEffectType);
-                    this.map.put((CatalogKey) (Object) Potion.REGISTRY.getNameForObject(potion), potionEffectType);
+                    this.map.put((CatalogKey) (Object) Potion.REGISTRY.getKey(potion), potionEffectType);
                 }
             }
         }

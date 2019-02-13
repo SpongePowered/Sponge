@@ -28,21 +28,20 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.block.trait.IntegerTrait;
-import org.spongepowered.api.block.trait.IntegerTraits;
-import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
+import org.spongepowered.api.state.BooleanStateProperties;
+import org.spongepowered.api.state.BooleanStateProperty;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
+import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
 
 import java.util.Locale;
 
-@RegisterCatalog(IntegerTraits.class)
-public final class IntegerTraitRegistryModule
-    extends AbstractCatalogRegistryModule<IntegerTrait>
-        implements SpongeAdditionalCatalogRegistryModule<IntegerTrait>, AlternateCatalogRegistryModule<IntegerTrait> {
+@RegisterCatalog(BooleanStateProperties.class)
+public final class BooleanStatePropertyRegistryModule
+        extends AbstractPrefixAlternateCatalogTypeRegistryModule<BooleanStateProperty>
+        implements SpongeAdditionalCatalogRegistryModule<BooleanStateProperty>{
 
-    public static IntegerTraitRegistryModule getInstance() {
+    public static BooleanStatePropertyRegistryModule getInstance() {
         return Holder.INSTANCE;
     }
 
@@ -52,18 +51,23 @@ public final class IntegerTraitRegistryModule
     }
 
     @Override
-    public void registerAdditionalCatalog(IntegerTrait extraCatalog) {
-        this.register(extraCatalog);
+    public void registerAdditionalCatalog(BooleanStateProperty extraCatalog) {
+        this.map.put(extraCatalog.getKey(), extraCatalog);
     }
 
-    public void registerBlock(CatalogKey id, BlockType block, IntegerTrait property) {
+    public void registerBlock(CatalogKey id, BlockType block, BooleanStateProperty property) {
         checkNotNull(id, "Id was null!");
+        checkNotNull(property, "Property was null!");
         this.map.put(id, property);
         final String propertyId = block.getKey().toString().toLowerCase(Locale.ENGLISH) + "_" + property.getName().toLowerCase(Locale.ENGLISH);
         this.map.put(CatalogKey.resolve(propertyId), property);
     }
 
+    BooleanStatePropertyRegistryModule() {
+        super("minecraft", new String[] {"minecraft:"} );
+    }
+
     private static final class Holder {
-        final static IntegerTraitRegistryModule INSTANCE = new IntegerTraitRegistryModule();
+        final static BooleanStatePropertyRegistryModule INSTANCE = new BooleanStatePropertyRegistryModule();
     }
 }

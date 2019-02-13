@@ -24,17 +24,17 @@
  */
 package org.spongepowered.common.registry.type.block;
 
-import net.minecraft.block.BlockRedstoneComparator;
+import net.minecraft.state.properties.ComparatorMode;
 import org.spongepowered.api.data.type.ComparatorType;
 import org.spongepowered.api.data.type.ComparatorTypes;
 import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
+import org.spongepowered.common.registry.type.MinecraftRegistryBasedCatalogTypeModule;
 
 @RegisterCatalog(ComparatorTypes.class)
-public class ComparatorTypeRegistryModule extends MinecraftEnumBasedCatalogTypeModule<BlockRedstoneComparator.Mode, ComparatorType> {
+public class ComparatorTypeRegistryModule extends MinecraftRegistryBasedCatalogTypeModule<ComparatorMode, ComparatorType> {
 
     @Override
-    protected BlockRedstoneComparator.Mode[] getValues() {
-        return BlockRedstoneComparator.Mode.values();
+    protected ComparatorMode[] getValues() {
+        return ComparatorMode.values();
     }
 }

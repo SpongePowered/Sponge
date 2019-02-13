@@ -24,29 +24,29 @@
  */
 package org.spongepowered.common.registry.type.item;
 
-import net.minecraft.item.ItemArmor;
+import net.minecraft.item.ArmorMaterial;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.ArmorType;
 import org.spongepowered.api.data.type.ArmorTypes;
 import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.common.registry.type.MinecraftEnumBasedAlternateCatalogTypeRegistryModule;
+import org.spongepowered.common.registry.type.MinecraftRegistryBasedAlternateCatalogTypeRegistryModule;
 
 @RegisterCatalog(ArmorTypes.class)
-public class ArmorTypeRegistryModule extends MinecraftEnumBasedAlternateCatalogTypeRegistryModule<ItemArmor.ArmorMaterial, ArmorType> {
+public class ArmorTypeRegistryModule extends MinecraftRegistryBasedAlternateCatalogTypeRegistryModule<ArmorMaterial, ArmorType> {
 
     public ArmorTypeRegistryModule() {
         super(new String[] {"minecraft"}, id -> id.equals("chainmail") ? "chain" : id);
     }
 
     @Override
-    protected ItemArmor.ArmorMaterial[] getValues() {
-        return ItemArmor.ArmorMaterial.values();
+    protected ArmorMaterial[] getValues() {
+        return ArmorMaterial.values();
     }
 
     @AdditionalRegistration
     public void customRegistration() {
-        for (ItemArmor.ArmorMaterial armorMaterial : ItemArmor.ArmorMaterial.values()) {
+        for (ArmorMaterial armorMaterial : ArmorMaterial.values()) {
             final CatalogKey key = enumAs(armorMaterial).getKey();
             if (!this.map.containsKey(key)) {
                 this.map.put(key, enumAs(armorMaterial));

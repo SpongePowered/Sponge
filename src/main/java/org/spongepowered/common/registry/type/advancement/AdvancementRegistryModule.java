@@ -31,7 +31,7 @@ import net.minecraft.advancements.AdvancementList;
 import net.minecraft.advancements.AdvancementManager;
 import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.Criterion;
-import net.minecraft.advancements.critereon.ImpossibleTrigger;
+import net.minecraft.advancements.criterion.ImpossibleTrigger;
 import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;

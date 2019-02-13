@@ -28,21 +28,21 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.block.trait.EnumTrait;
-import org.spongepowered.api.block.trait.EnumTraits;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.api.state.EnumStateProperties;
+import org.spongepowered.api.state.EnumStateProperty;
 import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 
 import java.util.Locale;
 
-@RegisterCatalog(EnumTraits.class)
-public final class EnumTraitRegistryModule
-        extends AbstractCatalogRegistryModule<EnumTrait<?>>
-        implements SpongeAdditionalCatalogRegistryModule<EnumTrait<?>>, AlternateCatalogRegistryModule<EnumTrait<?>> {
+@RegisterCatalog(EnumStateProperties.class)
+public final class EnumStatePropertyRegistryModule
+        extends AbstractCatalogRegistryModule<EnumStateProperty<?>>
+        implements SpongeAdditionalCatalogRegistryModule<EnumStateProperty<?>>, AlternateCatalogRegistryModule<EnumStateProperty<?>> {
 
-    public static EnumTraitRegistryModule getInstance() {
+    public static EnumStatePropertyRegistryModule getInstance() {
         return Holder.INSTANCE;
     }
 
@@ -52,11 +52,11 @@ public final class EnumTraitRegistryModule
     }
 
     @Override
-    public void registerAdditionalCatalog(EnumTrait<?> extraCatalog) {
+    public void registerAdditionalCatalog(EnumStateProperty<?> extraCatalog) {
         this.register(extraCatalog);
     }
 
-    public void registerBlock(CatalogKey id, BlockType block, EnumTrait<?> property) {
+    public void registerBlock(CatalogKey id, BlockType block, EnumStateProperty<?> property) {
         checkNotNull(id, "Id was null!");
         checkNotNull(property, "Property was null!");
         this.map.put(id, property);
@@ -65,6 +65,6 @@ public final class EnumTraitRegistryModule
     }
 
     private static final class Holder {
-        final static EnumTraitRegistryModule INSTANCE = new EnumTraitRegistryModule();
+        final static EnumStatePropertyRegistryModule INSTANCE = new EnumStatePropertyRegistryModule();
     }
 }

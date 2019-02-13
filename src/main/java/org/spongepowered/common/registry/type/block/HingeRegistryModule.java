@@ -28,10 +28,10 @@ import net.minecraft.state.properties.DoorHingeSide;
 import org.spongepowered.api.data.type.Hinge;
 import org.spongepowered.api.data.type.Hinges;
 import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
+import org.spongepowered.common.registry.type.MinecraftRegistryBasedCatalogTypeModule;
 
 @RegisterCatalog(Hinges.class)
-public final class HingeRegistryModule extends MinecraftEnumBasedCatalogTypeModule<DoorHingeSide, Hinge> {
+public final class HingeRegistryModule extends MinecraftRegistryBasedCatalogTypeModule<DoorHingeSide, Hinge> {
 
     @Override
     protected DoorHingeSide[] getValues() {

@@ -26,23 +26,16 @@ package org.spongepowered.common.registry.type.extra;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.ImmutableSet;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.extra.fluid.FluidType;
-import org.spongepowered.api.extra.fluid.FluidTypes;
+import org.spongepowered.api.fluid.FluidType;
+import org.spongepowered.api.fluid.FluidTypes;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.common.data.type.SpongeCommonFluidType;
 import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
 
 @RegisterCatalog(FluidTypes.class)
 @RegistrationDependency(BlockTypeRegistryModule.class)

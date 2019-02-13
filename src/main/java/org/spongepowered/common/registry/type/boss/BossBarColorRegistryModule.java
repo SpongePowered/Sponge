@@ -29,10 +29,10 @@ import org.spongepowered.api.boss.BossBarColor;
 import org.spongepowered.api.boss.BossBarColors;
 import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
+import org.spongepowered.common.registry.type.MinecraftRegistryBasedCatalogTypeModule;
 
 @RegisterCatalog(BossBarColors.class)
-public final class BossBarColorRegistryModule extends MinecraftEnumBasedCatalogTypeModule<BossInfo.Color, BossBarColor> {
+public final class BossBarColorRegistryModule extends MinecraftRegistryBasedCatalogTypeModule<BossInfo.Color, BossBarColor> {
 
     @AdditionalRegistration
     public void customRegistration() {

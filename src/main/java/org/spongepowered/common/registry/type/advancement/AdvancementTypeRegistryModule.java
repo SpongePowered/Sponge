@@ -28,10 +28,10 @@ import net.minecraft.advancements.FrameType;
 import org.spongepowered.api.advancement.AdvancementType;
 import org.spongepowered.api.advancement.AdvancementTypes;
 import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
+import org.spongepowered.common.registry.type.MinecraftRegistryBasedCatalogTypeModule;
 
 @RegisterCatalog(AdvancementTypes.class)
-public final class AdvancementTypeRegistryModule extends MinecraftEnumBasedCatalogTypeModule<FrameType, AdvancementType> {
+public final class AdvancementTypeRegistryModule extends MinecraftRegistryBasedCatalogTypeModule<FrameType, AdvancementType> {
 
     @Override
     protected FrameType[] getValues() {

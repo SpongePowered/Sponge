@@ -30,10 +30,10 @@ import org.spongepowered.api.data.type.PickupRules;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
+import org.spongepowered.common.registry.type.MinecraftRegistryBasedCatalogTypeModule;
 
 @RegisterCatalog(PickupRules.class)
-public final class PickupRuleRegistryModule extends MinecraftEnumBasedCatalogTypeModule<EntityArrow.PickupStatus, PickupRule> implements CatalogRegistryModule<PickupRule> {
+public final class PickupRuleRegistryModule extends MinecraftRegistryBasedCatalogTypeModule<EntityArrow.PickupStatus, PickupRule> implements CatalogRegistryModule<PickupRule> {
 
     public PickupRuleRegistryModule() {
         super();

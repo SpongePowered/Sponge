@@ -28,10 +28,10 @@ import net.minecraft.scoreboard.Team;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.scoreboard.CollisionRule;
 import org.spongepowered.api.scoreboard.CollisionRules;
-import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
+import org.spongepowered.common.registry.type.MinecraftRegistryBasedCatalogTypeModule;
 
 @RegisterCatalog(CollisionRules.class)
-public final class CollisionRuleRegistryModule extends MinecraftEnumBasedCatalogTypeModule<Team.CollisionRule, CollisionRule> {
+public final class CollisionRuleRegistryModule extends MinecraftRegistryBasedCatalogTypeModule<Team.CollisionRule, CollisionRule> {
 
     @Override
     protected Team.CollisionRule[] getValues() {

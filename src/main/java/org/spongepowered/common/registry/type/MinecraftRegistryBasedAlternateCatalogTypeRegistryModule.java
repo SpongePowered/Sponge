@@ -24,32 +24,29 @@
  */
 package org.spongepowered.common.registry.type;
 
-import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
-public abstract class MinecraftEnumBasedAlternateCatalogTypeRegistryModule<E extends Enum<E>, T extends CatalogType>
-        extends MinecraftEnumBasedCatalogTypeModule<E, T>
+public abstract class MinecraftRegistryBasedAlternateCatalogTypeRegistryModule<E extends Enum<E>, T extends CatalogType>
+        extends MinecraftRegistryBasedCatalogTypeModule<E, T>
         implements AlternateCatalogRegistryModule<T> {
 
     protected final String[] modIdToFilter;
     @Nullable protected final Function<String, String> catalogIdModifierFunction;
 
-    public MinecraftEnumBasedAlternateCatalogTypeRegistryModule() {
+    public MinecraftRegistryBasedAlternateCatalogTypeRegistryModule() {
         this(new String[] {});
     }
 
-    public MinecraftEnumBasedAlternateCatalogTypeRegistryModule(String[] modIdToFilter) {
+    public MinecraftRegistryBasedAlternateCatalogTypeRegistryModule(String[] modIdToFilter) {
         this(modIdToFilter, null);
     }
 
-    public MinecraftEnumBasedAlternateCatalogTypeRegistryModule(String[] array,
+    public MinecraftRegistryBasedAlternateCatalogTypeRegistryModule(String[] array,
             @Nullable Function<String, String> catalogIdModifierFunction) {
         this.modIdToFilter = array;
         this.catalogIdModifierFunction = catalogIdModifierFunction;

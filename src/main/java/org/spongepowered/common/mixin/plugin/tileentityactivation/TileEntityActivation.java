@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.plugin.tileentityactivation;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.management.PlayerChunkMap;
@@ -39,8 +37,8 @@ import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.category.TileEntityActivationModCategory;
 import org.spongepowered.common.config.category.TileEntityActivationCategory;
+import org.spongepowered.common.config.category.TileEntityActivationModCategory;
 import org.spongepowered.common.config.type.GeneralConfigBase;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.interfaces.IMixinChunk;
@@ -218,7 +216,7 @@ public class TileEntityActivation {
         }
 
         // check tick rate
-        if (isActive && world.getWorldInfo().getWorldTotalTime() % spongeTileEntity.getSpongeTickRate() != 0L) {
+        if (isActive && world.getWorldInfo().getGameTime() % spongeTileEntity.getSpongeTickRate() != 0L) {
             isActive = false;
         }
 

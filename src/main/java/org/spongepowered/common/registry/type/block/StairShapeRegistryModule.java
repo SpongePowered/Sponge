@@ -24,17 +24,17 @@
  */
 package org.spongepowered.common.registry.type.block;
 
-import net.minecraft.block.BlockStairs;
+import net.minecraft.state.properties.StairsShape;
 import org.spongepowered.api.data.type.StairShape;
 import org.spongepowered.api.data.type.StairShapes;
 import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
+import org.spongepowered.common.registry.type.MinecraftRegistryBasedCatalogTypeModule;
 
 @RegisterCatalog(StairShapes.class)
-public final class StairShapeRegistryModule extends MinecraftEnumBasedCatalogTypeModule<BlockStairs.EnumShape, StairShape> {
+public final class StairShapeRegistryModule extends MinecraftRegistryBasedCatalogTypeModule<StairsShape, StairShape> {
 
     @Override
-    protected BlockStairs.EnumShape[] getValues() {
-        return BlockStairs.EnumShape.values();
+    protected StairsShape[] getValues() {
+        return StairsShape.values();
     }
 }

@@ -33,9 +33,9 @@ import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.CustomCatalogRegistration;
 import org.spongepowered.common.registry.RegistryHelper;
-import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
+import org.spongepowered.common.registry.type.MinecraftRegistryBasedCatalogTypeModule;
 
-public final class ArtRegistryModule extends MinecraftEnumBasedCatalogTypeModule<PaintingType, Art> implements CatalogRegistryModule<Art> {
+public final class ArtRegistryModule extends MinecraftRegistryBasedCatalogTypeModule<PaintingType, Art> implements CatalogRegistryModule<Art> {
 
     @Override
     public void registerDefaults() {

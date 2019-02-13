@@ -33,7 +33,7 @@ public class UserListUtils {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static void addEntry(UserList list, UserListEntry entry) {
-        list.getValues().put(list.getObjectKey(entry.getValue()), entry);
+        list.addEntry(entry);
 
         try {
             list.writeChanges();
@@ -45,7 +45,7 @@ public class UserListUtils {
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     public static void removeEntry(UserList list, Object object) {
-        list.getValues().remove(list.getObjectKey(object));
+        list.removeEntry(object);
 
         try {
             list.writeChanges();

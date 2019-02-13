@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.registry.type.entity;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import net.minecraft.entity.Entity;
@@ -191,7 +189,7 @@ public final class EntityTypeRegistryModule extends AbstractCatalogRegistryModul
         this.customEntities.add(new FutureRegistration(300, new ResourceLocation(SpongeImpl.ECOSYSTEM_ID, "human"), EntityHuman.class, "Human"));
         final net.minecraft.entity.EntityType<EntityHuman> type = net.minecraft.entity.EntityType.Builder.create(EntityHuman.class, EntityHuman::new).build("sponge:human");
         new SpongeEntityType(key, type);
-        return new SpongeEntityType(300, new ResourceLocation("sponge:human"), new ResourceLocation("sponge:human"), EntityHuman.class, null);
+        return new SpongeEntityType(new ResourceLocation("sponge:human"), 300, type);
     }
 
     @CustomCatalogRegistration

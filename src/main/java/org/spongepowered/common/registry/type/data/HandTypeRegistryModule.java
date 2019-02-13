@@ -29,10 +29,10 @@ import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
-import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
+import org.spongepowered.common.registry.type.MinecraftRegistryBasedCatalogTypeModule;
 
 @RegisterCatalog(HandTypes.class)
-public class HandTypeRegistryModule extends MinecraftEnumBasedCatalogTypeModule<EnumHand, HandType>
+public class HandTypeRegistryModule extends MinecraftRegistryBasedCatalogTypeModule<EnumHand, HandType>
         implements SpongeAdditionalCatalogRegistryModule<HandType> {
 
     public static HandTypeRegistryModule getInstance() {

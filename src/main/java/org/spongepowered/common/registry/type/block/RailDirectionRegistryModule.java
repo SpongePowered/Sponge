@@ -28,10 +28,10 @@ import net.minecraft.state.properties.RailShape;
 import org.spongepowered.api.data.type.RailDirection;
 import org.spongepowered.api.data.type.RailDirections;
 import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
+import org.spongepowered.common.registry.type.MinecraftRegistryBasedCatalogTypeModule;
 
 @RegisterCatalog(RailDirections.class)
-public final class RailDirectionRegistryModule extends MinecraftEnumBasedCatalogTypeModule<RailShape, RailDirection> {
+public final class RailDirectionRegistryModule extends MinecraftRegistryBasedCatalogTypeModule<RailShape, RailDirection> {
 
     @Override
     protected RailShape[] getValues() {

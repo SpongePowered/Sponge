@@ -25,14 +25,12 @@
 package org.spongepowered.common.registry.type.item;
 
 import net.minecraft.item.ItemFishFood;
-import org.spongepowered.api.data.type.Fish;
-import org.spongepowered.api.data.type.Fishes;
 import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.common.registry.type.MinecraftEnumBasedAlternateCatalogTypeRegistryModule;
+import org.spongepowered.common.registry.type.MinecraftRegistryBasedAlternateCatalogTypeRegistryModule;
 
 @RegisterCatalog(Fishes.class)
-public final class FishRegistryModule extends MinecraftEnumBasedAlternateCatalogTypeRegistryModule<ItemFishFood.FishType, Fish> {
+public final class FishRegistryModule extends MinecraftRegistryBasedAlternateCatalogTypeRegistryModule<ItemFishFood.FishType, Fish> {
 
     public FishRegistryModule() {
         super(new String[] {"raw."});
