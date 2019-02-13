@@ -24,32 +24,23 @@
  */
 package org.spongepowered.common.registry.type.entity;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
-import net.minecraft.entity.item.EntityPainting;
+import com.google.common.collect.Lists;
+import net.minecraft.entity.item.PaintingType;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.Art;
 import org.spongepowered.api.data.type.Arts;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.CustomCatalogRegistration;
-import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.registry.RegistryHelper;
 import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
 
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-
-public final class ArtRegistryModule extends MinecraftEnumBasedCatalogTypeModule<EntityPainting.EnumArt, Art> implements CatalogRegistryModule<Art> {
+public final class ArtRegistryModule extends MinecraftEnumBasedCatalogTypeModule<PaintingType, Art> implements CatalogRegistryModule<Art> {
 
     @Override
     public void registerDefaults() {
-        for (EntityPainting.EnumArt art : EntityPainting.EnumArt.values()) {
-            this.map.put(((Art) (Object) art).getKey(), (Art) (Object) art);
+        for (PaintingType art : PaintingType.REGISTRY) {
+            this.map.put(((Art) art).getKey(), (Art) art);
         }
     }
 
@@ -64,7 +55,7 @@ public final class ArtRegistryModule extends MinecraftEnumBasedCatalogTypeModule
 
     @AdditionalRegistration
     public void registerAdditionals() {
-        for (EntityPainting.EnumArt art : EntityPainting.EnumArt.values()) {
+        for (PaintingType art : PaintingType.REGISTRY) {
             if (!this.map.containsValue(art)) {
                 this.map.put(((Art) (Object) art).getKey(), (Art) (Object) art);
             }
@@ -72,7 +63,7 @@ public final class ArtRegistryModule extends MinecraftEnumBasedCatalogTypeModule
     }
 
     @Override
-    protected EntityPainting.EnumArt[] getValues() {
-        return EntityPainting.EnumArt.values();
+    protected PaintingType[] getValues() {
+        return Lists.newArrayList(PaintingType.REGISTRY.iterator()).toArray(new PaintingType[0]);
     }
 }

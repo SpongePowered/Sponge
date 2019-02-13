@@ -62,14 +62,15 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.item.inventory.InteractItemEvent;
-import org.spongepowered.api.item.inventory.slot.EquipmentSlot;
-import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -79,7 +80,6 @@ import org.spongepowered.common.event.tracking.phase.packet.PacketContext;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerInteractionManager;
-import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.util.VecHelper;
 
@@ -168,7 +168,7 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
             float f = 1.0F;
 
             if (iblockstate.getMaterial() != Material.AIR) {
-                block.onBlockClicked(this.world, pos, this.player);
+                iblockstate.onBlockClicked(world, pos, this.player);
                 f = iblockstate.getPlayerRelativeBlockHardness(this.player, this.player.world, pos);
             }
 
@@ -269,7 +269,7 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
 
                 // Don't close client gui based on the result of Block#onBlockActivated
                 // See https://github.com/SpongePowered/SpongeForge/commit/a684cccd0355d1387a30a7fee08d23fa308273c9
-                if (iblockstate.getBlock().onBlockActivated(worldIn, pos, iblockstate, player, hand, facing, hitX, hitY, hitZ)) {
+                if (iblockstate.onBlockActivated(worldIn, pos, player, hand, facing, hitX, hitY, hitZ)) {
                     result = EnumActionResult.SUCCESS;
                 }
 

@@ -24,16 +24,15 @@
  */
 package org.spongepowered.common.mixin.core.network.rcon;
 
-import net.minecraft.command.ICommandSender;
 import net.minecraft.command.ICommandSource;
 import net.minecraft.network.rcon.RConConsoleSource;
 import net.minecraft.network.rcon.RConThreadClient;
 import net.minecraft.util.text.ITextComponent;
+import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.command.source.RconSource;
 import org.spongepowered.api.network.RemoteConnection;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.util.Tristate;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.source.RconSource;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;

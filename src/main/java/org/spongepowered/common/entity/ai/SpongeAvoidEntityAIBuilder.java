@@ -30,7 +30,6 @@ import net.minecraft.entity.ai.EntityAIAvoidEntity;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.ai.task.builtin.creature.AvoidEntityAITask;
 import org.spongepowered.api.entity.living.Creature;
-import org.spongepowered.api.util.Functional;
 
 import java.util.function.Predicate;
 
@@ -90,7 +89,6 @@ public final class SpongeAvoidEntityAIBuilder implements AvoidEntityAITask.Build
         Preconditions.checkNotNull(owner);
         Preconditions.checkNotNull(this.targetSelector);
         return (AvoidEntityAITask) new EntityAIAvoidEntity((EntityCreature) owner, Entity.class,
-                Functional.java8ToGuava((Predicate) this.targetSelector),
-                this.searchDistance, this.closeRangeSpeed, this.farRangeSpeed);
+                this.searchDistance, this.closeRangeSpeed, this.farRangeSpeed, this.targetSelector);
     }
 }

@@ -32,6 +32,7 @@ import com.google.common.base.Charsets;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.SPacketCustomPayload;
+import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.network.ChannelBinding;
 import org.spongepowered.api.network.ChannelBuf;
 import org.spongepowered.api.network.ChannelRegistrar;
@@ -52,11 +53,11 @@ public abstract class SpongeNetworkManager implements ChannelRegistrar {
         return optPlugin.get();
     }
 
-    protected static SPacketCustomPayload getRegPacket(String channelName) {
+    protected static SPacketCustomPayload getRegPacket(ResourceLocation channelName) {
         return new SPacketCustomPayload("REGISTER", new PacketBuffer(wrappedBuffer(channelName.getBytes(Charsets.UTF_8))));
     }
 
-    protected static SPacketCustomPayload getUnregPacket(String channelName) {
+    protected static SPacketCustomPayload getUnregPacket(ResourceLocation channelName) {
         return new SPacketCustomPayload("UNREGISTER", new PacketBuffer(wrappedBuffer(channelName.getBytes(Charsets.UTF_8))));
     }
 

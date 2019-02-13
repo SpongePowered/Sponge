@@ -60,7 +60,6 @@ public abstract class MixinEntityXPOrb extends MixinEntity implements Experience
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
                 .value(this.xpValue)
-                .defaultValue(0)
                 .build();
     }
 

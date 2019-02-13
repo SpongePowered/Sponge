@@ -44,6 +44,7 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.EntityDamageSourceIndirect;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -98,10 +99,10 @@ public class DamageEventHandler {
         if ((damageSource instanceof FallingBlockDamageSource) && !entityLivingBase.getItemStackFromSlot(EntityEquipmentSlot.HEAD).isEmpty()) {
             // TODO: direct cause creation: bad bad bad
             DamageModifier modifier = DamageModifier.builder()
-                .cause(
-                    Cause.of(EventContext.empty(), ((ItemStack) (Object) entityLivingBase.getItemStackFromSlot(EntityEquipmentSlot.HEAD)).createSnapshot()))
-                .type(DamageModifierTypes.HARD_HAT)
-                .build();
+                    .cause(
+                            Cause.of(EventContext.empty(), ((ItemStack) (Object) entityLivingBase.getItemStackFromSlot(EntityEquipmentSlot.HEAD)).createSnapshot()))
+                    .type(DamageModifierTypes.HARD_HAT)
+                    .build();
             return Optional.of(new DamageFunction(modifier, HARD_HAT_FUNCTION));
         }
         return Optional.empty();
@@ -163,11 +164,11 @@ public class DamageEventHandler {
 
                 // TODO: direct cause creation: bad bad bad
                 DamageModifier modifier = DamageModifier.builder()
-                    .cause(Cause.of(EventContext.empty(), ((org.spongepowered.api.item.inventory.ItemStack) inventory[prop.slot]).createSnapshot(),
-                                    prop, // We need this property to refer to the slot.
-                                    object)) // We need this object later on.
-                    .type(DamageModifierTypes.ARMOR)
-                    .build();
+                        .cause(Cause.of(EventContext.empty(), ((org.spongepowered.api.item.inventory.ItemStack) inventory[prop.slot]).createSnapshot(),
+                                prop, // We need this property to refer to the slot.
+                                object)) // We need this object later on.
+                        .type(DamageModifierTypes.ARMOR)
+                        .build();
                 modifiers.add(new DamageFunction(modifier, function));
                 first = false;
             }
@@ -223,9 +224,9 @@ public class DamageEventHandler {
             PotionEffect effect = ((PotionEffect) entityLivingBase.getActivePotionEffect(MobEffects.RESISTANCE));
             // TODO: direct cause creation: bad bad bad
             return Optional.of(new DamageFunction(DamageModifier.builder()
-                                               .cause(Cause.of(EventContext.empty(), effect))
-                                               .type(DamageModifierTypes.DEFENSIVE_POTION_EFFECT)
-                                               .build(), createResistanceFunction(effect.getAmplifier())));
+                    .cause(Cause.of(EventContext.empty(), effect))
+                    .type(DamageModifierTypes.DEFENSIVE_POTION_EFFECT)
+                    .build(), createResistanceFunction(effect.getAmplifier())));
         }
         return Optional.empty();
     }
@@ -251,17 +252,17 @@ public class DamageEventHandler {
                     continue;
                 }
 
-                for (int i = 0; i < enchantmentList.tagCount(); ++i) {
-                    final short enchantmentId = enchantmentList.getCompoundTagAt(i).getShort(NbtDataUtil.ITEM_ENCHANTMENT_ID);
-                    final short level = enchantmentList.getCompoundTagAt(i).getShort(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL);
+                for (int i = 0; i < enchantmentList.size(); ++i) {
+                    final String enchantmentId = enchantmentList.getCompound(i).getString(NbtDataUtil.ITEM_ENCHANTMENT_ID);
+                    final int level = enchantmentList.getCompound(i).getInt(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL);
 
-                    if (Enchantment.getEnchantmentByID(enchantmentId) != null) {
-                        // Ok, we have an enchantment!
-                        final Enchantment enchantment = Enchantment.getEnchantmentByID(enchantmentId);
-                        final int temp = enchantment.calcModifierDamage(level, damageSource);
-                        if (temp != 0) {
-                            enchantments.put(enchantment, level);
-                        }
+                    final Enchantment enchantment = Enchantment.REGISTRY.get(ResourceLocation.makeResourceLocation(enchantmentId));
+                    if (enchantment != null) {
+                        enchantments.put(enchantment, modifi)
+                    }
+                    final int temp = enchantment.calcModifierDamage(level, damageSource);
+                    if (temp != 0) {
+                        enchantments.put(enchantment, level);
                     }
                 }
                 ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(itemStack);
@@ -306,9 +307,9 @@ public class DamageEventHandler {
 
                     // TODO: direct cause creation: bad bad bad
                     DamageModifier enchantmentModifier = DamageModifier.builder()
-                        .cause(Cause.of(EventContext.empty(), enchantment, snapshot, entityLivingBase))
-                        .type(DamageModifierTypes.ARMOR_ENCHANTMENT)
-                        .build();
+                            .cause(Cause.of(EventContext.empty(), enchantment, snapshot, entityLivingBase))
+                            .type(DamageModifierTypes.ARMOR_ENCHANTMENT)
+                            .build();
                     modifiers.add(new DamageFunction(enchantmentModifier, enchantmentFunction));
                 }
                 if (!modifiers.isEmpty()) {
@@ -320,16 +321,16 @@ public class DamageEventHandler {
     }
 
     public static Optional<DamageFunction> createAbsorptionModifier(EntityLivingBase entityLivingBase,
-                                                                                                             DamageSource damageSource) {
+            DamageSource damageSource) {
         final float absorptionAmount = entityLivingBase.getAbsorptionAmount();
         if (absorptionAmount > 0) {
             DoubleUnaryOperator function = damage ->
-                -(Math.max(damage - Math.max(damage - absorptionAmount, 0.0F), 0.0F));
-                // TODO: direct cause creation: bad bad bad
+                    -(Math.max(damage - Math.max(damage - absorptionAmount, 0.0F), 0.0F));
+            // TODO: direct cause creation: bad bad bad
             DamageModifier modifier = DamageModifier.builder()
-                .cause(Cause.of(EventContext.empty(), entityLivingBase))
-                .type(DamageModifierTypes.ABSORPTION)
-                .build();
+                    .cause(Cause.of(EventContext.empty(), entityLivingBase))
+                    .type(DamageModifierTypes.ABSORPTION)
+                    .build();
             return Optional.of(new DamageFunction(modifier, function));
         }
         return Optional.empty();

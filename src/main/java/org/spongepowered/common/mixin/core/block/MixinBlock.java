@@ -29,10 +29,12 @@ import co.aikar.timings.Timing;
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockGrass;
 import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.BlockLog;
+import net.minecraft.block.SoundType;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -42,6 +44,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.state.StateContainer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
@@ -125,6 +128,9 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Shadow public abstract String getTranslationKey();
     @Shadow public abstract Material getMaterial(IBlockState state);
     @Shadow public abstract IBlockState shadow$getDefaultState();
+    @Shadow public abstract boolean getTickRandomly(IBlockState state);
+    @Shadow public abstract StateContainer<Block, IBlockState> getStateContainer();
+    @Shadow public abstract SoundType getSoundType();
 
     @Shadow @Final protected MapColor blockMapColor;
 
@@ -213,8 +219,8 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     @SuppressWarnings("unchecked")
     @Override
-    public Collection<BlockState> getAllBlockStates() {
-        return (Collection<BlockState>) (Collection<?>) this.blockState.getValidStates();
+    public ImmutableList<BlockState> getValidStates() {
+        return (ImmutableList<BlockState>) (ImmutableList) this.getStateContainer().getValidStates();
     }
 
     @Override
@@ -233,12 +239,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     @Intrinsic
     public boolean block$getTickRandomly() {
-        return shadow$getTickRandomly();
-    }
-
-    @Override
-    public void setTickRandomly(boolean tickRandomly) {
-        this.needsRandomTick = tickRandomly;
+        return this.getTickRandomly(shadow$getDefaultState());
     }
 
     @Override
@@ -280,7 +281,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     @Override
     public Collection<StateProperty<?>> getTraits() {
-        return getDefaultBlockState().getTraits();
+        return getDefaultBlockState().getStateProperties();
     }
 
     @Override
@@ -339,7 +340,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
         // TODO - Determine whether DropItemEvent.Pre is supposed to spawn here.
 
         // Go ahead and throw the construction event
-        Transform<World> position = new Transform<>((World) worldIn, new Vector3d(xPos, yPos, zPos));
+        Transform position = new Transform((World) worldIn, new Vector3d(xPos, yPos, zPos));
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(worldIn.getBlockState(pos));
             final ConstructEntityEvent.Pre eventPre = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), EntityTypes.ITEM, position);
@@ -446,7 +447,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     @Override
     public BlockSoundGroup getSoundGroup() {
-        return (BlockSoundGroup) this.blockSoundType;
+        return (BlockSoundGroup) this.getSoundType();
     }
 
     @Override

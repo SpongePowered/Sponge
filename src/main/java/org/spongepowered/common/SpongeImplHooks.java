@@ -29,9 +29,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockFire;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReport;
+import net.minecraft.crash.ReportedException;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
@@ -43,13 +45,12 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
-import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.network.NetworkManager;
+import net.minecraft.network.Packet;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ReportedException;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
@@ -58,13 +59,13 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.GameType;
-import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.dimension.Dimension;
-import net.minecraft.world.storage.MapStorage;
+import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.storage.WorldSavedDataStorage;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
@@ -93,8 +94,6 @@ import org.spongepowered.common.interfaces.world.IMixinITeleporter;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
-import org.spongepowered.common.mixin.core.tileentity.MixinTileEntity;
-import org.spongepowered.common.mixin.core.world.MixinWorldServer;
 import org.spongepowered.common.registry.type.entity.ProfessionRegistryModule;
 import org.spongepowered.common.util.SpawnerSpawnType;
 import org.spongepowered.common.world.WorldManager;
@@ -141,7 +140,7 @@ public final class SpongeImplHooks {
     // Entity
 
     public static boolean isCreatureOfType(Entity entity, EnumCreatureType type) {
-        return type.getCreatureClass().isAssignableFrom(entity.getClass());
+        return type.getBaseClass().isAssignableFrom(entity.getClass());
     }
 
     public static boolean isFakePlayer(Entity entity) {
@@ -187,7 +186,7 @@ public final class SpongeImplHooks {
     // Block
 
     public static boolean isBlockFlammable(Block block, IBlockReader world, BlockPos pos, EnumFacing face) {
-        return Blocks.FIRE.getFlammability(block) > 0;
+        return ((BlockFire) Blocks.FIRE).getFlammability(block) > 0;
     }
 
     public static int getBlockLightOpacity(IBlockState state, IBlockReader world, BlockPos pos) {
@@ -253,7 +252,7 @@ public final class SpongeImplHooks {
             spawnFuzz = border;
         }
 
-        if (!world.provider.isNether() && !isAdventure && spawnFuzz != 0)
+        if (!world.dimension.isNether() && !isAdventure && spawnFuzz != 0)
         {
             if (spawnFuzz < 2) {
                 spawnFuzz = 2;
@@ -274,12 +273,12 @@ public final class SpongeImplHooks {
         }
     }
 
-    public static MapStorage getWorldMapStorage(World world) {
+    public static WorldSavedDataStorage getWorldSavedDataStorage(World world) {
         return world.getMapStorage();
     }
 
     public static int countEntities(WorldServer worldServer, net.minecraft.entity.EnumCreatureType type, boolean forSpawnCount) {
-        return worldServer.countEntities(type.getCreatureClass());
+        return worldServer.countEntities(type.getBaseClass());
     }
 
     public static int getMaxSpawnPackSize(EntityLiving entityLiving) {
@@ -316,7 +315,7 @@ public final class SpongeImplHooks {
     }
 
     public static void blockExploded(Block block, World world, BlockPos blockpos, Explosion explosion) {
-        world.setBlockToAir(blockpos);
+        world.setBlockState(blockpos, Blocks.AIR.getDefaultState());
         block.onExplosionDestroy(world, blockpos, explosion);
     }
 
@@ -332,7 +331,7 @@ public final class SpongeImplHooks {
         // forge only method
     }
 
-    public static boolean canConnectRedstone(Block block, IBlockState state, IBlockAccess world, BlockPos pos, @Nullable EnumFacing side) {
+    public static boolean canConnectRedstone(Block block, IBlockState state, IBlockReader world, BlockPos pos, @Nullable EnumFacing side) {
         return state.canProvidePower() && side != null;
     }
     // Crafting
@@ -360,16 +359,16 @@ public final class SpongeImplHooks {
     }
 
     public static Optional<CraftingRecipe> findMatchingRecipe(CraftingGridInventory inventory, org.spongepowered.api.world.World world) {
-        IRecipe recipe = CraftingManager.findMatchingRecipe(InventoryUtil.toNativeInventory(inventory), ((net.minecraft.world.World) world));
+        IRecipe recipe = ((World) world).getRecipeManager().getRecipe(InventoryUtil.toNativeInventory(inventory), ((net.minecraft.world.World) world));
         return Optional.ofNullable(((CraftingRecipe) recipe));
     }
 
     public static Collection<CraftingRecipe> getCraftingRecipes() {
-        return Streams.stream(CraftingManager.REGISTRY.iterator()).map(CraftingRecipe.class::cast).collect(ImmutableList.toImmutableList());
+        return Streams.stream(SpongeImpl.getServer().getRecipeManager().getRecipes().iterator()).map(CraftingRecipe.class::cast).collect(ImmutableList.toImmutableList());
     }
 
     public static Optional<CraftingRecipe> getRecipeById(String id) {
-        IRecipe recipe = CraftingManager.REGISTRY.getObject(new ResourceLocation(id));
+        IRecipe recipe = SpongeImpl.getServer().getRecipeManager().getRecipe(new ResourceLocation(id));
         if (recipe == null) {
             return Optional.empty();
         }
@@ -377,7 +376,7 @@ public final class SpongeImplHooks {
     }
 
     public static Optional<CraftingRecipe> getRecipeById(CatalogKey id) {
-        IRecipe recipe = CraftingManager.REGISTRY.getObject((ResourceLocation) (Object) id);
+        IRecipe recipe = SpongeImpl.getServer().getRecipeManager().getRecipe((ResourceLocation) (Object) id);
         if (recipe == null) {
             return Optional.empty();
         }
@@ -410,13 +409,13 @@ public final class SpongeImplHooks {
         return entity.world.rayTraceBlocks(startPos, endPos);
     }
 
-    public static boolean shouldKeepSpawnLoaded(net.minecraft.world.DimensionType dimensionType, int dimensionId) {
+    public static boolean shouldKeepSpawnLoaded(DimensionType dimensionType, int dimensionId) {
         final WorldServer worldServer = WorldManager.getWorldByDimensionId(dimensionId).orElse(null);
         return worldServer != null && ((WorldProperties) worldServer.getWorldInfo()).doesKeepSpawnLoaded();
 
     }
 
-    public static void setShouldLoadSpawn(net.minecraft.world.DimensionType dimensionType, boolean keepSpawnLoaded) {
+    public static void setShouldLoadSpawn(DimensionType dimensionType, boolean keepSpawnLoaded) {
         // This is only used in SpongeForge
     }
 
@@ -434,7 +433,7 @@ public final class SpongeImplHooks {
     }
 
     public static void onTileEntityInvalidate(TileEntity te) {
-        te.invalidate();
+        te.remove();
     }
 
     public static void capturePerEntityItemDrop(PhaseContext<?> phaseContext, Entity owner,
@@ -500,7 +499,7 @@ public final class SpongeImplHooks {
         // Return true when the server isn't yet initialized, this means on a client
         // that the game is still being loaded. This is needed to support initialization
         // events with cause tracking.
-        return !Sponge.isServerAvailable() || Sponge.getServer().isMainThread();
+        return !Sponge.isServerAvailable() || Sponge.getServer().onMainThread();
     }
 
     // Overridden by MixinSpongeImplHooks_ItemNameOverflowPrevention for exploit check

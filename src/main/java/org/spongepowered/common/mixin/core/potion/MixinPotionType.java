@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.potion;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.RegistryNamespacedDefaultedByKey;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.item.potion.PotionType;
 import org.spongepowered.asm.mixin.Final;
@@ -38,7 +39,6 @@ import org.spongepowered.common.interfaces.potion.IMixinPotion;
 import org.spongepowered.common.registry.type.item.PotionTypeRegistryModule;
 
 import java.util.List;
-import java.util.Locale;
 
 @Mixin(net.minecraft.potion.PotionType.class)
 public abstract class MixinPotionType implements PotionType, IMixinPotion {
@@ -54,8 +54,8 @@ public abstract class MixinPotionType implements PotionType, IMixinPotion {
     }
 
     @Override
-    public String getId() {
-        return this.spongeResourceID;
+    public CatalogKey getKey() {
+        return (CatalogKey) (Object) net.minecraft.potion.PotionType.REGISTRY.getKey((net.minecraft.potion.PotionType) (Object) this);
     }
 
     @Override
@@ -69,13 +69,8 @@ public abstract class MixinPotionType implements PotionType, IMixinPotion {
         final ResourceLocation resource = (ResourceLocation) location;
         final net.minecraft.potion.PotionType mcPotion = (net.minecraft.potion.PotionType) potion;
 
-        ((IMixinPotion) mcPotion).setId(resource.toString().toLowerCase(Locale.ENGLISH));
+        ((IMixinPotion) mcPotion).setId(resource);
         PotionTypeRegistryModule.getInstance().registerFromGameData(resource.toString(), (PotionType) mcPotion);
         registry.register(id, location, potion);
-    }
-
-    @Override
-    public void setId(String id) {
-        this.spongeResourceID = id;
     }
 }
