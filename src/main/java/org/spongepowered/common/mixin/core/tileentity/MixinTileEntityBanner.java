@@ -64,8 +64,8 @@ public abstract class MixinTileEntityBanner extends MixinTileEntity implements B
 
     private List<PatternLayer> patternLayers = Lists.newArrayList();
 
-    @Inject(method = "setItemValues", at = @At("RETURN"))
-    private void onSetItemValues(CallbackInfo ci) {
+    @Inject(method = "loadFromItemStack", at = @At("RETURN"))
+    private void onLoadFromItemStack(CallbackInfo ci) {
         updatePatterns();
     }
 
@@ -78,7 +78,7 @@ public abstract class MixinTileEntityBanner extends MixinTileEntity implements B
     @Override
     public void sendDataToContainer(DataView dataView) {
         dataView.set(Keys.BANNER_PATTERNS.getQuery(), Lists.newArrayList(this.patternLayers));
-        dataView.set(Keys.BANNER_BASE_COLOR.getQuery(), this.baseColor.getDyeDamage());
+        dataView.set(Keys.BANNER_BASE_COLOR.getQuery(), this.baseColor.getId());
     }
 
     @Override
@@ -98,12 +98,12 @@ public abstract class MixinTileEntityBanner extends MixinTileEntity implements B
         this.patternLayers.clear();
         if (this.patterns != null) {
             SpongeGameRegistry registry = SpongeImpl.getRegistry();
-            for (int i = 0; i < this.patterns.tagCount(); i++) {
-                NBTTagCompound tagCompound = this.patterns.getCompoundTagAt(i);
+            for (int i = 0; i < this.patterns.size(); i++) {
+                NBTTagCompound tagCompound = this.patterns.getCompound(i);
                 String patternId = tagCompound.getString(NbtDataUtil.BANNER_PATTERN_ID);
                 this.patternLayers.add(new SpongePatternLayer(
                     SpongeImpl.getRegistry().getType(BannerPatternShape.class, patternId).get(),
-                    registry.getType(DyeColor.class, EnumDyeColor.byDyeDamage(tagCompound.getInteger(NbtDataUtil.BANNER_PATTERN_COLOR)).getName()).get()));
+                    registry.getType(DyeColor.class, EnumDyeColor.byId(tagCompound.getInt(NbtDataUtil.BANNER_PATTERN_COLOR)).getName()).get()));
             }
         }
         this.markDirtyAndUpdate();
@@ -121,9 +121,9 @@ public abstract class MixinTileEntityBanner extends MixinTileEntity implements B
         this.patterns = new NBTTagList();
         for (PatternLayer layer : this.patternLayers) {
             NBTTagCompound compound = new NBTTagCompound();
-            compound.setString(NbtDataUtil.BANNER_PATTERN_ID, layer.getShape().getName());
-            compound.setInteger(NbtDataUtil.BANNER_PATTERN_COLOR, ((EnumDyeColor) (Object) layer.getColor()).getDyeDamage());
-            this.patterns.appendTag(compound);
+            compound.putString(NbtDataUtil.BANNER_PATTERN_ID, layer.getShape().getName());
+            compound.putInt(NbtDataUtil.BANNER_PATTERN_COLOR, ((EnumDyeColor) (Object) layer.getColor()).getId());
+            this.patterns.add(compound);
         }
         markDirtyAndUpdate();
     }

@@ -61,6 +61,7 @@ import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.IProgressUpdate;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -88,6 +89,7 @@ import net.minecraft.world.gen.ChunkGeneratorEnd;
 import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.storage.ISaveHandler;
+import net.minecraft.world.storage.SessionLockException;
 import net.minecraft.world.storage.WorldInfo;
 import net.minecraft.world.storage.WorldSavedData;
 import net.minecraft.world.storage.WorldSavedDataStorage;
@@ -998,7 +1000,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         // TODO: Expose flush parameter in SpongeAPI?
         try {
             WorldManager.saveWorld((WorldServer) (Object) this, true);
-        } catch (MinecraftException e) {
+        } catch (SessionLockException e) {
             throw new RuntimeException(e);
         }
         return true;
@@ -2291,7 +2293,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             event = SoundEvents.getRegisteredSoundEvent(sound.getKey().toString());
         } catch (IllegalStateException e) {
             // Otherwise send it as a custom sound
-            this.playCustomSound(null, position.getX(), position.getY(), position.getZ(), sound.getKey().toString(),
+            this.playCustomSound(null, position.getX(), position.getY(), position.getZ(), (ResourceLocation) (Object) sound.getKey(),
                     (net.minecraft.util.SoundCategory) (Object) category, (float) Math.max(minVolume, volume), (float) pitch);
             return;
         }
@@ -2301,7 +2303,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     @Override
-    public void playCustomSound(@Nullable EntityPlayer player, double x, double y, double z, String soundIn, net.minecraft.util.SoundCategory category,
+    public void playCustomSound(@Nullable EntityPlayer player, double x, double y, double z, ResourceLocation soundIn, net.minecraft.util.SoundCategory category,
             float volume, float pitch) {
 
         if (player instanceof IMixinEntity) {
@@ -2526,8 +2528,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         return MoreObjects.toStringHelper(this)
                 .add("Name", this.worldInfo.getWorldName())
                 .add("DimensionId", ((IMixinWorldServer) this).getDimensionId())
-                .add("DimensionType", ((org.spongepowered.api.world.DimensionType) (Object) this.dimension.getDimensionType()).getKey())
-                .add("DimensionTypeId", this.dimension.getDimensionType().getId())
+                .add("DimensionType", ((org.spongepowered.api.world.DimensionType) (Object) this.dimension.getType()).getKey())
+                .add("DimensionTypeId", this.dimension.getType().getId())
                 .toString();
     }
 }

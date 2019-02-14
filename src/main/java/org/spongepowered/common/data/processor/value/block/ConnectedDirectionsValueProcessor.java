@@ -25,6 +25,9 @@
 package org.spongepowered.common.data.processor.value.block;
 
 import com.google.common.collect.Sets;
+import net.minecraft.block.BlockChest;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.state.properties.ChestType;
 import net.minecraft.tileentity.TileEntityChest;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
@@ -33,6 +36,7 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
+import org.spongepowered.common.data.util.DirectionResolver;
 import org.spongepowered.common.data.value.SpongeMutableSetValue;
 
 import java.util.Optional;
@@ -57,23 +61,11 @@ public class ConnectedDirectionsValueProcessor extends
 
     @Override
     protected Optional<Set<Direction>> getVal(TileEntityChest chest) {
-        chest.checkForAdjacentChests();
-
-        Set<Direction> directions = Sets.newHashSet();
-        if (chest.adjacentChestZNeg != null) {
-            directions.add(Direction.NORTH);
+        IBlockState state = chest.getBlockState();
+        if (state.get(BlockChest.TYPE) == ChestType.SINGLE) {
+            return Optional.empty();
         }
-        if (chest.adjacentChestXPos != null) {
-            directions.add(Direction.EAST);
-        }
-        if (chest.adjacentChestZPos != null) {
-            directions.add(Direction.SOUTH);
-        }
-        if (chest.adjacentChestXNeg != null) {
-            directions.add(Direction.WEST);
-        }
-
-        return Optional.of(directions);
+        return Optional.of(Sets.newHashSet(DirectionResolver.getFor(BlockChest.getDirectionToAttached(chest.getBlockState()))));
     }
 
     @Override

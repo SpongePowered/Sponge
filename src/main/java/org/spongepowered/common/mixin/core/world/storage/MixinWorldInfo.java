@@ -53,14 +53,13 @@ import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.DimensionTypes;
-import org.spongepowered.api.world.GeneratorType;
-import org.spongepowered.api.world.PortalAgentType;
-import org.spongepowered.api.world.PortalAgentTypes;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.storage.WorldProperties;
+import org.spongepowered.api.world.teleport.PortalAgentType;
+import org.spongepowered.api.world.teleport.PortalAgentTypes;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -267,16 +266,6 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         this.spawnX = position.getX();
         this.spawnY = position.getY();
         this.spawnZ = position.getZ();
-    }
-
-    @Override
-    public GeneratorType getGeneratorType() {
-        return (GeneratorType) this.terrainType;
-    }
-
-    @Override
-    public void setGeneratorType(GeneratorType type) {
-        this.terrainType = (WorldType) type;
     }
 
     @Intrinsic

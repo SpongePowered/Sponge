@@ -29,6 +29,7 @@ import static org.spongepowered.api.data.DataQuery.of;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
 import net.minecraft.tileentity.TileEntityBeacon;
+import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.block.tileentity.carrier.Beacon;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataView;
@@ -89,12 +90,12 @@ public abstract class MixinTileEntityBeacon extends MixinTileEntityLockable impl
     // We want to preserve the normal behavior of isBeaconEffect, except when reading saved effects from NBT
     // and when setting from a Sponge DataProcessor. This ensures that vanilla in-game interactions with the beacon
     // work as normal, while still allowing plugins to set a custom potion through the API
-    @Redirect(method = "readFromNBT", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntityBeacon;isBeaconEffect(I)Lnet/minecraft/potion/Potion;", ordinal = 0))
+    @Redirect(method = "read", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntityBeacon;isBeaconEffect(I)Lnet/minecraft/potion/Potion;", ordinal = 0))
     private Potion onFirstIsBeaconEffect(int id) {
         return Potion.getPotionById(id);
     }
 
-    @Redirect(method = "readFromNBT", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntityBeacon;isBeaconEffect(I)Lnet/minecraft/potion/Potion;", ordinal = 1))
+    @Redirect(method = "read", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntityBeacon;isBeaconEffect(I)Lnet/minecraft/potion/Potion;", ordinal = 1))
     private Potion oSecondIsBeaconEffect(int id) {
         return Potion.getPotionById(id);
     }
@@ -121,8 +122,8 @@ public abstract class MixinTileEntityBeacon extends MixinTileEntityLockable impl
     }
 
     @Override
-    public void setCustomDisplayName(String customName) {
-        ((TileEntityBeacon) (Object) this).setName(customName);
+    public void setCustomDisplayName(ITextComponent customName) {
+        ((TileEntityBeacon) (Object) this).setCustomName(customName);
     }
 
     @Override

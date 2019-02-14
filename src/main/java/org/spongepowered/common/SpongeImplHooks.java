@@ -43,6 +43,7 @@ import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.fluid.IFluidState;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.crafting.IRecipe;
@@ -60,6 +61,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.GameType;
 import net.minecraft.world.IBlockReader;
+import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
@@ -509,5 +511,13 @@ public final class SpongeImplHooks {
 
     public static TileEntityType getTileEntityType(Class<? extends IMixinTileEntity> aClass) {
         return SpongeImpl.getRegistry().getTranslated(aClass, TileEntityType.class);
+    }
+
+    public static float getExplosionResistance(IBlockState state, IWorldReader world, BlockPos pos, @Nullable Entity exploder, Explosion explosion) {
+        return state.getBlock().getExplosionResistance();
+    }
+
+    public static float getExplosionResistance(IFluidState fluidState, IWorldReader world, BlockPos pos, @Nullable Entity exploder, Explosion explosion) {
+        return fluidState.getExplosionResistance();
     }
 }

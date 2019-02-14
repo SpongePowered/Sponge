@@ -29,6 +29,7 @@ import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
@@ -103,7 +104,7 @@ public interface IMixinWorldServer extends IMixinWorld {
 
     net.minecraft.world.Explosion triggerInternalExplosion(Explosion explosion, Function<net.minecraft.world.Explosion, PhaseContext<?>> contextCreator);
 
-    void playCustomSound(@Nullable EntityPlayer player, double x, double y, double z, String soundIn, SoundCategory category, float volume, float pitch);
+    void playCustomSound(@Nullable EntityPlayer player, double x, double y, double z, ResourceLocation soundIn, SoundCategory category, float volume, float pitch);
 
     void doChunkGC();
 

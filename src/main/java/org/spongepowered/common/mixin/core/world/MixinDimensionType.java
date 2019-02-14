@@ -24,8 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.world;
 
-import net.minecraft.world.DimensionType;
-import net.minecraft.world.WorldProvider;
+import net.minecraft.world.dimension.DimensionType;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.world.Dimension;
@@ -53,7 +52,7 @@ import java.nio.file.Path;
 @Implements(value = @Interface(iface = org.spongepowered.api.world.DimensionType.class, prefix = "dimensionType$"))
 public abstract class MixinDimensionType implements IMixinDimensionType {
 
-    @Shadow @Final private Class <? extends WorldProvider> clazz;
+    @Shadow @Final private Class <? extends net.minecraft.world.dimension.Dimension> clazz;
     @Shadow public abstract String getName();
 
     private CatalogKey key;
@@ -66,7 +65,7 @@ public abstract class MixinDimensionType implements IMixinDimensionType {
     private boolean loadSpawn;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    public void onConstruct(String enumName, int ordinal, int idIn, String nameIn, String suffixIn, Class <? extends WorldProvider > clazzIn,
+    public void onConstruct(String enumName, int ordinal, int idIn, String nameIn, String suffixIn, Class <? extends net.minecraft.world.dimension.Dimension> clazzIn,
             CallbackInfo ci) {
         String dimName = enumName.toLowerCase().replace(" ", "_").replaceAll("[^A-Za-z0-9_]", "");
         this.enumName = dimName;

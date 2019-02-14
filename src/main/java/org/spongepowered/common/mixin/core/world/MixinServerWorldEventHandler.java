@@ -27,10 +27,12 @@ package org.spongepowered.common.mixin.core.world;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.play.server.SPacketCustomSound;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
-import net.minecraft.world.DimensionType;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.ServerWorldEventHandler;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.dimension.DimensionType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -58,9 +60,9 @@ public abstract class MixinServerWorldEventHandler implements IMixinServerWorldE
     }
 
     @Override
-    public void playCustomSoundToAllNearExcept(@Nullable EntityPlayer player, String soundIn, SoundCategory category, double x, double y, double z,
+    public void playCustomSoundToAllNearExcept(@Nullable EntityPlayer player, ResourceLocation soundIn, SoundCategory category, double x, double y, double z,
             float volume, float pitch) {
         this.server.getPlayerList().sendToAllNearExcept(player, x, y, z, volume > 1.0F ? (double)(16.0F * volume) : 16.0D,
-                ((IMixinWorldServer) this.world).getDimensionId(), new SPacketCustomSound(soundIn, category, x, y, z, volume, pitch));
+                ((IMixinWorldServer) this.world).getDimensionId(), new SPacketCustomSound(soundIn, category, new Vec3d(x, y, z), volume, pitch));
     }
 }

@@ -24,7 +24,8 @@
  */
 package org.spongepowered.common.data.processor.value.tileentity;
 
-import net.minecraft.world.IWorldNameable;
+import net.minecraft.util.INameable;
+import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.Value;
@@ -39,10 +40,10 @@ import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.Optional;
 
-public class TileEntityDisplayNameValueProcessor extends AbstractSpongeValueProcessor<IWorldNameable, Text> {
+public class TileEntityDisplayNameValueProcessor extends AbstractSpongeValueProcessor<INameable, Text> {
 
     public TileEntityDisplayNameValueProcessor() {
-        super(IWorldNameable.class, Keys.DISPLAY_NAME);
+        super(INameable.class, Keys.DISPLAY_NAME);
     }
 
     @Override
@@ -51,9 +52,9 @@ public class TileEntityDisplayNameValueProcessor extends AbstractSpongeValueProc
     }
 
     @Override
-    protected boolean set(IWorldNameable container, Text value) {
+    protected boolean set(INameable container, Text value) {
         if (container instanceof IMixinCustomNameable) {
-            final String legacy = SpongeTexts.toLegacy(value);
+            final ITextComponent legacy = SpongeTexts.toComponent(value);
             try {
                 ((IMixinCustomNameable) container).setCustomDisplayName(legacy);
             } catch (Exception e) {
@@ -64,9 +65,9 @@ public class TileEntityDisplayNameValueProcessor extends AbstractSpongeValueProc
     }
 
     @Override
-    protected Optional<Text> getVal(IWorldNameable container) {
+    protected Optional<Text> getVal(INameable container) {
         if (container.hasCustomName()) {
-            return Optional.of(SpongeTexts.fromLegacy(container.getName()));
+            return Optional.of(SpongeTexts.toText(container.getName()));
         }
         return Optional.empty();
     }

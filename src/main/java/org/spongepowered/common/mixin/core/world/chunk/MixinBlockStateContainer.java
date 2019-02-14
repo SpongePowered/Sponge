@@ -62,7 +62,8 @@ public abstract class MixinBlockStateContainer {
             int z = i >> 4 & 15;
             int idAdd = add == null ? 0 : add.get(x, y, z);
             int blockId = idAdd << 8 | (id[i] & 255);
-            Block block = Block.REGISTRY.getObjectById(blockId);
+            Block block = Block.REGISTRY.get(blockId);
+            newState = block.getDefaultState();
             if (block != null) {
                 newState = block.getDefaultState();
             } else {

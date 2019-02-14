@@ -28,7 +28,6 @@ import co.aikar.timings.SpongeTimings;
 import co.aikar.timings.Timing;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
-import net.minecraft.block.Block;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
@@ -55,7 +54,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeTileEntityArchetypeBuilder;
 import org.spongepowered.common.data.nbt.CustomDataNbtUtil;
@@ -68,7 +66,6 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
-import org.spongepowered.common.registry.type.block.TileEntityTypeRegistryModule;
 import org.spongepowered.common.util.VecHelper;
 
 import java.lang.ref.WeakReference;
@@ -102,6 +99,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
 
     @Shadow protected net.minecraft.world.World world;
     @Shadow protected BlockPos pos;
+    @Shadow private boolean removed;
 
     @Shadow public abstract BlockPos getPos();
     @Override @Shadow public abstract void markDirty();
@@ -129,14 +127,6 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
         }
     }
 
-    @SuppressWarnings({"rawtypes"})
-    @Inject(method = "register(Ljava/lang/String;Ljava/lang/Class;)V", at = @At(value = "RETURN"))
-    private static void onRegister(String name, Class clazz, CallbackInfo callbackInfo) {
-        if (clazz != null) {
-            TileEntityTypeRegistryModule.getInstance().doTileEntityRegistration(clazz, name);
-        }
-    }
-
     @Override
     public Location getLocation() {
         return new Location((World) this.world, VecHelper.toVector3i(this.getPos()));
@@ -157,7 +147,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
             .set(Queries.POSITION_Z, this.getPos().getZ())
             .set(DataQueries.BLOCK_ENTITY_TILE_TYPE, this.tileType.getKey());
         final NBTTagCompound compound = new NBTTagCompound();
-        this.writeToNBT(compound);
+        this.writeToNbt(compound);
         NbtDataUtil.filterSpongeCustomData(compound); // We must filter the custom data so it isn't stored twice
         container.set(DataQueries.UNSAFE_NBT, NbtTranslator.getInstance().translateFrom(compound));
         final Collection<DataManipulator<?, ?>> manipulators = ((IMixinCustomDataHolder) this).getCustomManipulators();
@@ -184,12 +174,12 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
 
     @Override
     public boolean isValid() {
-        return !this.tileEntityInvalid;
+        return !this.removed;
     }
 
     @Override
     public void setValid(boolean valid) {
-        this.tileEntityInvalid = valid;
+        this.removed = valid;
     }
 
     @Override
@@ -202,7 +192,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
         return (BlockState) this.world.getBlockState(this.getPos());
     }
 
-    @Inject(method = "invalidate", at = @At("RETURN"))
+    @Inject(method = "remove", at = @At("RETURN"))
     public void onSpongeInvalidate(CallbackInfo ci) {
         this.setActiveChunk(null);
     }
@@ -215,7 +205,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
      * @param compound The compound vanilla writes to (unused because we write to SpongeData)
      * @param ci (Unused) callback info
      */
-    @Inject(method = "Lnet/minecraft/tileentity/TileEntity;writeToNBT(Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/nbt/NBTTagCompound;", at = @At("HEAD"))
+    @Inject(method = "write", at = @At("HEAD"))
     public void onWriteToNBT(NBTTagCompound compound, CallbackInfoReturnable<NBTTagCompound> ci) {
         this.writeToNbt(this.getSpongeData());
     }
@@ -228,7 +218,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
      * @param compound The compound vanilla reads from (unused because we read from SpongeData)
      * @param ci (Unused) callback info
      */
-    @Inject(method = "Lnet/minecraft/tileentity/TileEntity;readFromNBT(Lnet/minecraft/nbt/NBTTagCompound;)V", at = @At("RETURN"))
+    @Inject(method = "read", at = @At("RETURN"))
     public void onReadFromNBT(NBTTagCompound compound, CallbackInfo ci) {
         this.readFromNbt(this.getSpongeData());
     }
@@ -439,7 +429,6 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
             .add("tileType", this.tileType)
             .add("world", this.world)
             .add("pos", this.pos)
-            .add("blockMetadata", this.blockMetadata)
             .toString();
     }
 }

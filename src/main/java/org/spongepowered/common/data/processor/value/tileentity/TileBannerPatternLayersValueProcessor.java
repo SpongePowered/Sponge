@@ -31,13 +31,9 @@ import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.value.ListValue;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.mutable.PatternListValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.value.SpongeImmutableBoundedValue;
 import org.spongepowered.common.data.value.SpongeImmutableListValue;
 import org.spongepowered.common.data.value.SpongeMutableListValue;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongePatternListValue;
-import org.spongepowered.common.data.value.mutable.SpongePatternListValue;
 import org.spongepowered.common.interfaces.block.tile.IMixinBanner;
 
 import java.util.List;

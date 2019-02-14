@@ -25,13 +25,14 @@
 package org.spongepowered.common.interfaces.world;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 
 import javax.annotation.Nullable;
 
 public interface IMixinServerWorldEventHandler {
 
-    void playCustomSoundToAllNearExcept(@Nullable EntityPlayer player, String soundIn, SoundCategory category, double x, double y, double z,
+    void playCustomSoundToAllNearExcept(@Nullable EntityPlayer player, ResourceLocation soundIn, SoundCategory category, double x, double y, double z,
 float volume, float pitch);
 
 }

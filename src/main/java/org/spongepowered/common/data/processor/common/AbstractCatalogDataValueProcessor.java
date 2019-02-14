@@ -51,13 +51,13 @@ public abstract class AbstractCatalogDataValueProcessor<T extends CatalogType> e
 
     @Override
     protected boolean set(ItemStack container, T value) {
-        container.setItemDamage(this.setToMeta(value));
+        container.setDamage(this.setToMeta(value));
         return true;
     }
 
     @Override
     protected Optional<T> getVal(ItemStack container) {
-        return Optional.of(this.getFromMeta(container.getItemDamage()));
+        return Optional.of(this.getFromMeta(container.getDamage()));
     }
 
     @Override

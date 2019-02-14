@@ -60,7 +60,6 @@ import org.spongepowered.common.scoreboard.SpongeScore;
 import org.spongepowered.common.scoreboard.SpongeScoreboardConstants;
 import org.spongepowered.common.text.SpongeTexts;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -77,6 +76,9 @@ public abstract class MixinScoreboardLogic extends Scoreboard implements IMixinS
     @Shadow protected abstract void markSaveDataDirty();
 
     // Get Objective
+
+    @Override
+    @Shadow public abstract void onTeamAdded(ScorePlayerTeam playerTeam);
 
     public Optional<Objective> scoreboard$getObjective(String name) {
         if (this.scoreObjectives.containsKey(name)) {
@@ -107,12 +109,12 @@ public abstract class MixinScoreboardLogic extends Scoreboard implements IMixinS
         })).add(scoreObjective);
 
         this.scoreObjectives.put(objective.getName(), scoreObjective);
-        this.onScoreObjectiveAdded(scoreObjective);
+        this.onObjectiveAdded(scoreObjective);
 
         ((SpongeObjective) objective).updateScores(this);
     }
 
-    @Inject(method = "onScoreObjectiveAdded", at = @At("RETURN"))
+    @Inject(method = "onObjectiveAdded", at = @At("RETURN"))
     public void onOnScoreObjectiveAdded(ScoreObjective objective, CallbackInfo ci) {
         this.sendToPlayers(new SPacketScoreboardObjective(objective, SpongeScoreboardConstants.OBJECTIVE_PACKET_ADD));
     }
@@ -249,7 +251,7 @@ public abstract class MixinScoreboardLogic extends Scoreboard implements IMixinS
         for (String entry: team.getMembershipCollection()) {
             this.addPlayerToTeam(entry, team);
         }
-        this.broadcastTeamCreated(team);
+        this.onTeamAdded(team);
     }
 
     // Remove team

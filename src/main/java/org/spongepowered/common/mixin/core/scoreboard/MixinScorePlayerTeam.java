@@ -70,13 +70,13 @@ public abstract class MixinScorePlayerTeam extends net.minecraft.scoreboard.Team
 
     @Shadow public abstract void setAllowFriendlyFire(boolean friendlyFire);
 
-    private static final String TEAM_UPDATE_SIGNATURE = "Lnet/minecraft/scoreboard/Scoreboard;broadcastTeamInfoUpdate(Lnet/minecraft/scoreboard/ScorePlayerTeam;)V";
+    private static final String TEAM_UPDATE_SIGNATURE = "Lnet/minecraft/scoreboard/Scoreboard;onTeamChanged(Lnet/minecraft/scoreboard/ScorePlayerTeam;)V";
 
     // Minecraft doesn't do a null check on scoreboard, so we redirect
     // the call and do it ourselves.
     private void doTeamUpdate() {
         if (this.scoreboard != null) {
-            this.scoreboard.broadcastTeamInfoUpdate((ScorePlayerTeam) (Object) this);
+            this.scoreboard.onTeamChanged((ScorePlayerTeam) (Object) this);
         }
     }
 

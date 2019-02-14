@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.world.chunk.storage;
 
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityList;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -108,10 +107,10 @@ public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
                 Integer ownerUniqueIdIndex = mapEntry.getValue().ownerIndex;
                 Integer notifierUniqueIdIndex = mapEntry.getValue().notifierIndex;
                 NBTTagCompound valueNbt = new NBTTagCompound();
-                valueNbt.setInteger("owner", ownerUniqueIdIndex);
-                valueNbt.setInteger("notifier", notifierUniqueIdIndex);
+                valueNbt.setInt("owner", ownerUniqueIdIndex);
+                valueNbt.setInt("notifier", notifierUniqueIdIndex);
                 valueNbt.setShort("pos", pos);
-                positions.appendTag(valueNbt);
+                positions.add(valueNbt);
             }
 
             for (Map.Entry<Integer, PlayerTracker> mapEntry : chunk.getTrackedIntPlayerPositions().entrySet()) {
@@ -119,10 +118,10 @@ public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
                 Integer ownerUniqueIdIndex = mapEntry.getValue().ownerIndex;
                 Integer notifierUniqueIdIndex = mapEntry.getValue().notifierIndex;
                 NBTTagCompound valueNbt = new NBTTagCompound();
-                valueNbt.setInteger("owner", ownerUniqueIdIndex);
-                valueNbt.setInteger("notifier", notifierUniqueIdIndex);
-                valueNbt.setInteger("ipos", pos);
-                positions.appendTag(valueNbt);
+                valueNbt.setInt("owner", ownerUniqueIdIndex);
+                valueNbt.setInt("notifier", notifierUniqueIdIndex);
+                valueNbt.setInt("ipos", pos);
+                positions.add(valueNbt);
             }
         }
     }
@@ -133,26 +132,26 @@ public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
         if (compound.hasKey(NbtDataUtil.SPONGE_DATA)) {
             final Map<Integer, PlayerTracker> trackedIntPlayerPositions = new HashMap<>();
             final Map<Short, PlayerTracker> trackedShortPlayerPositions = new HashMap<>();
-            final NBTTagList positions = compound.getCompoundTag(NbtDataUtil.SPONGE_DATA).getTagList(NbtDataUtil.SPONGE_BLOCK_POS_TABLE, 10);
+            final NBTTagList positions = compound.getCompound(NbtDataUtil.SPONGE_DATA).getList(NbtDataUtil.SPONGE_BLOCK_POS_TABLE, 10);
             final IMixinChunk chunk = (IMixinChunk) chunkIn;
-            for (int i = 0; i < positions.tagCount(); i++) {
-                NBTTagCompound valueNbt = positions.getCompoundTagAt(i);
+            for (int i = 0; i < positions.size(); i++) {
+                NBTTagCompound valueNbt = positions.getCompound(i);
                 boolean isShortPos = valueNbt.hasKey("pos");
                 PlayerTracker tracker = new PlayerTracker();
                 if (valueNbt.hasKey("owner")) {
-                    tracker.ownerIndex = valueNbt.getInteger("owner");
+                    tracker.ownerIndex = valueNbt.getInt("owner");
                 } else if (valueNbt.hasKey("uuid")) { // Migrate old data, remove in future
-                    tracker.ownerIndex = valueNbt.getInteger("uuid");
+                    tracker.ownerIndex = valueNbt.getInt("uuid");
                 }
                 if (valueNbt.hasKey("notifier")) {
-                    tracker.notifierIndex = valueNbt.getInteger("notifier");
+                    tracker.notifierIndex = valueNbt.getInt("notifier");
                 }
 
                 if (tracker.notifierIndex != -1 || tracker.ownerIndex != -1) {
                     if (isShortPos) {
                         trackedShortPlayerPositions.put(valueNbt.getShort("pos"), tracker);
                     } else {
-                        trackedIntPlayerPositions.put(valueNbt.getInteger("ipos"), tracker);
+                        trackedIntPlayerPositions.put(valueNbt.getInt("ipos"), tracker);
                     }
                 }
             }
@@ -172,7 +171,7 @@ public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
     private static Entity onReadChunkEntity(NBTTagCompound compound, World world, Chunk chunk) {
         if ("Minecart".equals(compound.getString(NbtDataUtil.ENTITY_TYPE_ID))) {
             compound.setString(NbtDataUtil.ENTITY_TYPE_ID,
-                    EntityMinecart.Type.values()[compound.getInteger(NbtDataUtil.MINECART_TYPE)].getName());
+                    EntityMinecart.Type.values()[compound.getInt(NbtDataUtil.MINECART_TYPE)].name());
             compound.removeTag(NbtDataUtil.MINECART_TYPE);
         }
         Class<? extends Entity> entityClass = SpongeImplHooks.getEntityClass(new ResourceLocation(compound.getString(NbtDataUtil.ENTITY_TYPE_ID)));
@@ -183,11 +182,11 @@ public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
         if (type == null) {
             return null;
         }
-        NBTTagList positionList = compound.getTagList(NbtDataUtil.ENTITY_POSITION, NbtDataUtil.TAG_DOUBLE);
-        NBTTagList rotationList = compound.getTagList(NbtDataUtil.ENTITY_ROTATION, NbtDataUtil.TAG_FLOAT);
-        Vector3d position = new Vector3d(positionList.getDoubleAt(0), positionList.getDoubleAt(1), positionList.getDoubleAt(2));
-        Vector3d rotation = new Vector3d(rotationList.getFloatAt(0), rotationList.getFloatAt(1), 0);
-        Transform<org.spongepowered.api.world.World> transform = new Transform<>((org.spongepowered.api.world.World) world, position, rotation);
+        NBTTagList positionList = compound.getList(NbtDataUtil.ENTITY_POSITION, NbtDataUtil.TAG_DOUBLE);
+        NBTTagList rotationList = compound.getList(NbtDataUtil.ENTITY_ROTATION, NbtDataUtil.TAG_FLOAT);
+        Vector3d position = new Vector3d(positionList.getDouble(0), positionList.getDouble(1), positionList.getDouble(2));
+        Vector3d rotation = new Vector3d(rotationList.getFloat(0), rotationList.getFloat(1), 0);
+        Transform transform = new Transform((org.spongepowered.api.world.World) world, position, rotation);
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.CHUNK_LOAD);
             ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), type, transform);
@@ -195,7 +194,7 @@ public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
             if (event.isCancelled()) {
                 return null;
             }
-            return EntityList.createEntityFromNBT(compound, world);
+            return net.minecraft.entity.EntityType.create(compound, world);
         }
     }
 

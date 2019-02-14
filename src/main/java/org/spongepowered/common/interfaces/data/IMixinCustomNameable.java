@@ -24,8 +24,10 @@
  */
 package org.spongepowered.common.interfaces.data;
 
+import net.minecraft.util.text.ITextComponent;
+
 public interface IMixinCustomNameable {
 
-    void setCustomDisplayName(String string);
+    void setCustomDisplayName(ITextComponent string);
 
 }

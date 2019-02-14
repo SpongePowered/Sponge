@@ -29,17 +29,24 @@ import static com.google.common.base.Preconditions.checkState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.NextTickListEntry;
 import net.minecraft.world.World;
-import org.spongepowered.api.block.ScheduledBlockUpdate;
+import org.spongepowered.api.scheduler.ScheduledUpdate;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.IMixinNextTickListEntry;
 import org.spongepowered.common.util.VecHelper;
 
-@Mixin(NextTickListEntry.class)
-public class MixinNextTickListEntry implements ScheduledBlockUpdate, IMixinNextTickListEntry {
+import java.time.Duration;
 
+@Mixin(NextTickListEntry.class)
+@Implements(@Interface(iface = ScheduledUpdate.class, prefix = "update$"))
+public abstract class MixinNextTickListEntry implements IMixinNextTickListEntry {
+
+    @Shadow public abstract Object getTarget();
     @Shadow @Final public BlockPos position;
     @Shadow public int priority;
     @Shadow public long scheduledTime;
@@ -76,14 +83,9 @@ public class MixinNextTickListEntry implements ScheduledBlockUpdate, IMixinNextT
         this.scheduledTime = this.world.getWorldInfo().getWorldTotalTime() + ticks;
     }
 
-    @Override
-    public int getPriority() {
-        return this.priority;
-    }
-
-    @Override
-    public void setPriority(int priority) {
-        this.priority = priority;
+    @Intrinsic
+    public Object update$getTarget() {
+        return this.getTarget();
     }
 
 }

@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.realtime.mixin;
 
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityFurnace;
+import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.math.MathHelper;
 import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
@@ -43,19 +44,23 @@ public abstract class MixinTileEntityFurnace extends TileEntity {
     @Shadow private int cookTime;
     @Shadow private int totalCookTime;
 
-    @Redirect(method = "update", at = @At(value = "FIELD", target = FURNACE_BURN_TIME_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
+    public MixinTileEntityFurnace(TileEntityType<?> tileEntityTypeIn) {
+        super(tileEntityTypeIn);
+    }
+
+    @Redirect(method = "tick", at = @At(value = "FIELD", target = FURNACE_BURN_TIME_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
     public void fixupBurnTime(TileEntityFurnace self, int modifier) {
         int ticks = (int) ((IMixinRealTimeTicking) this.getWorld()).getRealTimeTicks();
         this.furnaceBurnTime = Math.max(0, this.furnaceBurnTime - ticks);
     }
 
-    @Redirect(method = "update", at = @At(value = "FIELD", target = FURNACE_COOK_TIME_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
+    @Redirect(method = "tick", at = @At(value = "FIELD", target = FURNACE_COOK_TIME_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
     public void fixupCookTime(TileEntityFurnace self, int modifier) {
         int ticks = (int) ((IMixinRealTimeTicking) this.getWorld()).getRealTimeTicks();
         this.cookTime = Math.min(this.totalCookTime, this.cookTime + ticks);
     }
 
-    @Redirect(method = "update", at = @At(value = "FIELD", target = FURNACE_COOK_TIME_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 3))
+    @Redirect(method = "tick", at = @At(value = "FIELD", target = FURNACE_COOK_TIME_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 3))
     public void fixupCookTimeCooldown(TileEntityFurnace self, int modifier) {
         int ticks = (int) ((IMixinRealTimeTicking) this.getWorld()).getRealTimeTicks();
         this.cookTime = MathHelper.clamp(this.cookTime - (2 * ticks), 0, this.totalCookTime);

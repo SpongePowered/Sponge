@@ -26,8 +26,9 @@ package org.spongepowered.common.mixin.core.text;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.JsonToNBT;
-import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.event.HoverEvent;
@@ -65,13 +66,13 @@ public abstract class MixinHoverEvent implements IMixinHoverEvent {
                         setHandle(TextActions.showText(((IMixinTextComponent) this.value).toText()));
                         break;
                     case SHOW_ITEM:
-                        setHandle(TextActions.showItem(ItemStackUtil.snapshotOf(new net.minecraft.item.ItemStack(loadNbt()))));
+                        setHandle(TextActions.showItem(ItemStackUtil.snapshotOf(ItemStack.read(loadNbt()))));
                         break;
                     case SHOW_ENTITY:
                         NBTTagCompound nbt = loadNbt();
                         String name = nbt.getString("name");
                         EntityType type = null;
-                        if (nbt.hasKey("type", NbtDataUtil.TAG_STRING)) {
+                        if (nbt.contains("type", NbtDataUtil.TAG_STRING)) {
                             type = SpongeImpl.getGame().getRegistry().getType(EntityType.class, CatalogKey.resolve(name)).orElse(null);
                         }
 
@@ -90,8 +91,8 @@ public abstract class MixinHoverEvent implements IMixinHoverEvent {
 
     private NBTTagCompound loadNbt() {
         try {
-            return checkNotNull(JsonToNBT.getTagFromJson(this.value.getUnformattedText()), "NBT");
-        } catch (NBTException e) {
+            return checkNotNull(JsonToNBT.getTagFromJson(this.value.getUnformattedComponentText()), "NBT");
+        } catch (CommandSyntaxException e) {
             throw new RuntimeException(e);
         }
     }

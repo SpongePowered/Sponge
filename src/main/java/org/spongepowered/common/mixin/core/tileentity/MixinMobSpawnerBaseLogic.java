@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.tileentity;
 
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityList;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.MobSpawnerBaseLogic;
@@ -115,7 +114,7 @@ public abstract class MixinMobSpawnerBaseLogic {
         }
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.MOB_SPAWNER);
-            Transform<org.spongepowered.api.world.World> transform = new Transform<>(
+            Transform transform = new Transform(
                     ((org.spongepowered.api.world.World) world), new Vector3d(x, y, z));
             ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), type, transform);
             SpongeImpl.postEvent(event);
@@ -123,10 +122,11 @@ public abstract class MixinMobSpawnerBaseLogic {
                 return null;
             }
         }
-        Entity entity;
+        Entity entity = null;
         try {
-            entity = EntityList.createEntityFromNBT(compound, world);
+            net.minecraft.entity.EntityType.create(compound, world);
         } catch (Exception e) {
+            SpongeImpl.getLogger().error("Error creating entity: ", e);
             return null;
         }
 
@@ -141,11 +141,11 @@ public abstract class MixinMobSpawnerBaseLogic {
         }
 
 
-        if (compound.hasKey(NbtDataUtil.Minecraft.PASSENGERS, NbtDataUtil.TAG_LIST)) {
-            final NBTTagList passengerList = compound.getTagList(NbtDataUtil.Minecraft.PASSENGERS, NbtDataUtil.TAG_COMPOUND);
+        if (compound.contains(NbtDataUtil.Minecraft.PASSENGERS, NbtDataUtil.TAG_LIST)) {
+            final NBTTagList passengerList = compound.getList(NbtDataUtil.Minecraft.PASSENGERS, NbtDataUtil.TAG_COMPOUND);
 
-            for (int i = 0; i < passengerList.tagCount(); i++) {
-                final Entity passenger = readEntityFromCompoundAtWorld(passengerList.getCompoundTagAt(i), world, x, y, z, attemptToSpawn);
+            for (int i = 0; i < passengerList.size(); i++) {
+                final Entity passenger = readEntityFromCompoundAtWorld(passengerList.getCompound(i), world, x, y, z, attemptToSpawn);
                 if (passenger != null) {
                     passenger.startRiding(entity, true);
                 }

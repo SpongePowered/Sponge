@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.data.processor.value.tileentity;
 
+import net.minecraft.block.BlockFurnace;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntityFurnace;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -48,7 +50,6 @@ public class MaxBurnTimeValueProcessor extends AbstractSpongeValueProcessor<Tile
         return SpongeValueFactory.boundedBuilder(Keys.MAX_BURN_TIME)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
-                .defaultValue(defaultValue)
                 .build();
     }
 
@@ -56,8 +57,7 @@ public class MaxBurnTimeValueProcessor extends AbstractSpongeValueProcessor<Tile
     protected boolean set(TileEntityFurnace container, Integer value) {
         if (!container.isBurning() && value > 0 || container.isBurning() && value == 0) {
             final World world = (World) container.getWorld();
-            world.setBlockType(container.getPos().getX(), container.getPos().getY(),
-                    container.getPos().getZ(), value > 0 ? BlockTypes.LIT_FURNACE : BlockTypes.FURNACE);
+            container.getWorld().setBlockState(container.getPos(), (IBlockState)container.getWorld().getBlockState(container.getPos()).with(BlockFurnace.LIT, Boolean.valueOf(container.isBurning())), 3);
             container = (TileEntityFurnace) container.getWorld().getTileEntity(container.getPos());
         }
         container.setField(1, value);
@@ -74,7 +74,6 @@ public class MaxBurnTimeValueProcessor extends AbstractSpongeValueProcessor<Tile
         return SpongeValueFactory.boundedBuilder(Keys.MAX_BURN_TIME)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
-                .defaultValue(1000)
                 .value(value)
                 .build()
                 .asImmutable();

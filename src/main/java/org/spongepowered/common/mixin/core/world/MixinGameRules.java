@@ -44,8 +44,8 @@ public abstract class MixinGameRules implements IMixinGameRules {
     @Override
     public boolean removeGameRule(String gameRule) {
         // Cannot remove default gamerule
-        if (DEFAULT_GAME_RULES.hasRule(gameRule)) {
-            this.setOrCreateGameRule(gameRule, DEFAULT_GAME_RULES.getString(gameRule));
+        if (DEFAULT_GAME_RULES.get(gameRule) != null) {
+            this.setOrCreateGameRule(gameRule, DEFAULT_GAME_RULES.get(gameRule).getString());
             return true;
         }
 
