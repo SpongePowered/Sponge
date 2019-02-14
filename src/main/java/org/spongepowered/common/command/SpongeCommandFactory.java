@@ -38,7 +38,7 @@ import static org.spongepowered.api.command.args.GenericArguments.string;
 import static org.spongepowered.api.command.args.GenericArguments.world;
 import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 
-import co.aikar.timings.SpongeTimingsFactory;
+import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
 import co.aikar.timings.Timings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;

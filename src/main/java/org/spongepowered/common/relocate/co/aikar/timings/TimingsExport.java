@@ -22,13 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package co.aikar.timings;
+package org.spongepowered.common.relocate.co.aikar.timings;
 
-import static co.aikar.timings.TimingsManager.HISTORY;
 import static org.spongepowered.api.Platform.Component.IMPLEMENTATION;
 
-import co.aikar.util.JSONUtil;
-import co.aikar.util.JSONUtil.JsonObjectBuilder;
+import org.spongepowered.common.relocate.co.aikar.util.JSONUtil;
+import org.spongepowered.common.relocate.co.aikar.util.JSONUtil.JsonObjectBuilder;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -39,7 +38,6 @@ import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.tileentity.TileEntityType;
-import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.source.RconSource;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
@@ -149,10 +147,10 @@ class TimingsExport extends Thread {
         Set<TileEntityType> tileEntityTypeSet = Sets.newHashSet();
         Set<EntityType> entityTypeSet = Sets.newHashSet();
 
-        int size = HISTORY.size();
+        int size = TimingsManager.HISTORY.size();
         TimingHistory[] history = new TimingHistory[size + 1];
         int i = 0;
-        for (TimingHistory timingHistory : HISTORY) {
+        for (TimingHistory timingHistory : TimingsManager.HISTORY) {
             tileEntityTypeSet.addAll(timingHistory.tileEntityTypeSet);
             entityTypeSet.addAll(timingHistory.entityTypeSet);
             history[i++] = timingHistory;

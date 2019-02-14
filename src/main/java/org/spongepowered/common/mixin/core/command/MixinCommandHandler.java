@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.command;
 
-import co.aikar.timings.SpongeTimings;
+import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimings;
 import net.minecraft.command.CommandHandler;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;

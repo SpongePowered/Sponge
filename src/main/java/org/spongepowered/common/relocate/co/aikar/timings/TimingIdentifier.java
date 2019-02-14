@@ -22,10 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package co.aikar.timings;
+package org.spongepowered.common.relocate.co.aikar.timings;
 
-import co.aikar.util.LoadingMap;
-import co.aikar.util.MRUMapCache;
+import co.aikar.timings.Timing;
+import org.spongepowered.common.relocate.co.aikar.util.LoadingMap;
+import org.spongepowered.common.relocate.co.aikar.util.MRUMapCache;
 
 import java.util.ArrayDeque;
 import java.util.Map;

@@ -26,7 +26,7 @@ package org.spongepowered.common.scheduler;
 
 import com.google.common.base.MoreObjects;
 
-import co.aikar.timings.SpongeTimings;
+import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimings;
 import co.aikar.timings.Timing;
 
 import org.spongepowered.api.plugin.PluginContainer;

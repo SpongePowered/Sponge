@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.registry.factory;
 
-import co.aikar.timings.SpongeTimingsFactory;
+import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
 import co.aikar.timings.Timings;
 import co.aikar.timings.TimingsFactory;
 import org.spongepowered.api.registry.FactoryRegistry;

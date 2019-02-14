@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package co.aikar.util;
+package org.spongepowered.common.relocate.co.aikar.util;
 
 import java.lang.reflect.Constructor;
 import java.util.AbstractMap;

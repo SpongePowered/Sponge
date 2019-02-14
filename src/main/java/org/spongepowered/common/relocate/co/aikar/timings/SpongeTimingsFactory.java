@@ -22,15 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package co.aikar.timings;
+package org.spongepowered.common.relocate.co.aikar.timings;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import co.aikar.timings.Timing;
+import co.aikar.timings.TimingsFactory;
 import com.google.common.collect.EvictingQueue;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.channel.MessageChannel;
-import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.category.TimingsCategory;
 

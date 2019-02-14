@@ -22,15 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package co.aikar.timings;
+package org.spongepowered.common.relocate.co.aikar.timings;
 
-import static co.aikar.timings.TimingsManager.FULL_SERVER_TICK;
-import static co.aikar.timings.TimingsManager.MINUTE_REPORTS;
-
-import co.aikar.timings.TimingHistory.RegionData.RegionId;
-import co.aikar.util.JSONUtil;
-import co.aikar.util.LoadingMap;
-import co.aikar.util.MRUMapCache;
+import org.spongepowered.common.relocate.co.aikar.timings.TimingHistory.RegionData.RegionId;
+import org.spongepowered.common.relocate.co.aikar.util.JSONUtil;
+import org.spongepowered.common.relocate.co.aikar.util.LoadingMap;
+import org.spongepowered.common.relocate.co.aikar.util.MRUMapCache;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gson.JsonArray;
@@ -74,18 +71,18 @@ public class TimingHistory {
     TimingHistory() {
         this.endTime = System.currentTimeMillis() / 1000;
         this.startTime = TimingsManager.historyStart / 1000;
-        if (timedTicks % 1200 != 0 || MINUTE_REPORTS.isEmpty()) {
-            this.minuteReports = MINUTE_REPORTS.toArray(new MinuteReport[MINUTE_REPORTS.size() + 1]);
+        if (timedTicks % 1200 != 0 || TimingsManager.MINUTE_REPORTS.isEmpty()) {
+            this.minuteReports = TimingsManager.MINUTE_REPORTS.toArray(new MinuteReport[TimingsManager.MINUTE_REPORTS.size() + 1]);
             this.minuteReports[this.minuteReports.length - 1] = new MinuteReport();
         } else {
-            this.minuteReports = MINUTE_REPORTS.toArray(new MinuteReport[MINUTE_REPORTS.size()]);
+            this.minuteReports = TimingsManager.MINUTE_REPORTS.toArray(new MinuteReport[TimingsManager.MINUTE_REPORTS.size()]);
         }
         long ticks = 0;
         for (MinuteReport mp : this.minuteReports) {
             ticks += mp.ticksRecord.timed;
         }
         this.totalTicks = ticks;
-        this.totalTime = FULL_SERVER_TICK.record.getTotalTime();
+        this.totalTime = TimingsManager.FULL_SERVER_TICK.record.getTotalTime();
         this.entries = new TimingHistoryEntry[TimingsManager.HANDLERS.size()];
 
         int i = 0;

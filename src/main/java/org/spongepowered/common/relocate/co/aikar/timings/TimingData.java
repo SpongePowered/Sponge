@@ -22,9 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package co.aikar.timings;
+package org.spongepowered.common.relocate.co.aikar.timings;
 
-import co.aikar.util.JSONUtil;
+import org.spongepowered.common.relocate.co.aikar.util.JSONUtil;
 import com.google.gson.JsonArray;
 
 import java.util.function.Function;

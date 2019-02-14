@@ -22,32 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package co.aikar.timings;
+package org.spongepowered.common.relocate.co.aikar.timings;
 
-import org.spongepowered.common.SpongeImpl;
+import co.aikar.timings.Timing;
 
-class UnsafeTimingHandler extends TimingHandler {
-
-    UnsafeTimingHandler(TimingIdentifier id) {
-        super(id);
-    }
-
-    private static void checkThread() {
-        if (!SpongeImpl.getServer().isCallingFromMinecraftThread()) {
-            throw new IllegalStateException("Calling Timings from Async Operation");
-        }
-    }
+public final class NullTimingHandler implements Timing {
 
     @Override
-    public TimingHandler startTiming() {
-        checkThread();
-        super.startTiming();
+    public Timing startTiming() {
         return this;
     }
 
     @Override
     public void stopTiming() {
-        checkThread();
-        super.stopTiming();
     }
+
+    @Override
+    public void startTimingIfSync() {
+    }
+
+    @Override
+    public void stopTimingIfSync() {
+    }
+
+    @Override
+    public void abort() {
+    }
+
+    @Override
+    public void close() {
+    }
+
 }

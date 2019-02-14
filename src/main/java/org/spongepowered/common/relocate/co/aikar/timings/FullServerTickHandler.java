@@ -22,12 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package co.aikar.timings;
+package org.spongepowered.common.relocate.co.aikar.timings;
 
-import static co.aikar.timings.TimingsManager.CURRENT;
-import static co.aikar.timings.TimingsManager.MINUTE_REPORTS;
-import static co.aikar.timings.TimingsManager.TIMINGS_TICK;
-import static co.aikar.timings.TimingsManager.TIMING_MAP;
+import co.aikar.timings.Timings;
 
 public class FullServerTickHandler extends TimingHandler {
 
@@ -40,7 +37,7 @@ public class FullServerTickHandler extends TimingHandler {
         super(IDENTITY);
         this.minuteData = new TimingData(this.id);
 
-        TIMING_MAP.put(IDENTITY, this);
+        TimingsManager.TIMING_MAP.put(IDENTITY, this);
     }
 
     @Override
@@ -80,8 +77,8 @@ public class FullServerTickHandler extends TimingHandler {
         long start = System.nanoTime();
         TimingsManager.tick();
         long diff = System.nanoTime() - start;
-        CURRENT = TIMINGS_TICK;
-        TIMINGS_TICK.addDiff(diff);
+        TimingsManager.CURRENT = TimingsManager.TIMINGS_TICK;
+        TimingsManager.TIMINGS_TICK.addDiff(diff);
         // addDiff for TIMINGS_TICK incremented this, bring it back down to 1
         // per tick.
         this.record.curTickCount--;
@@ -89,11 +86,11 @@ public class FullServerTickHandler extends TimingHandler {
         this.minuteData.curTickCount = 1;
         boolean violated = isViolated();
         this.minuteData.processTick(violated);
-        TIMINGS_TICK.processTick(violated);
+        TimingsManager.TIMINGS_TICK.processTick(violated);
         processTick(violated);
 
         if (TimingHistory.timedTicks % 1200 == 0) {
-            MINUTE_REPORTS.add(new TimingHistory.MinuteReport());
+            TimingsManager.MINUTE_REPORTS.add(new TimingHistory.MinuteReport());
             TimingHistory.resetTicks(false);
             this.minuteData.reset();
         }

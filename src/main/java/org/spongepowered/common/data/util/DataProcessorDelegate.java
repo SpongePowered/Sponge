@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.util;
 
-import co.aikar.timings.SpongeTimingsFactory;
+import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
 import co.aikar.timings.Timing;
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.data.DataContainer;

@@ -26,7 +26,7 @@ package org.spongepowered.common.world.gen;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import co.aikar.timings.SpongeTimingsFactory;
+import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
 import co.aikar.timings.Timing;
 import com.flowpowered.math.GenericMath;
 import com.flowpowered.math.vector.Vector3i;

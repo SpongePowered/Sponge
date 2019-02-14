@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package co.aikar.util;
+package org.spongepowered.common.relocate.co.aikar.util;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;

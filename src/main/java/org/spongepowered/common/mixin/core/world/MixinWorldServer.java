@@ -27,8 +27,8 @@ package org.spongepowered.common.mixin.core.world;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import co.aikar.timings.TimingHistory;
-import co.aikar.timings.WorldTimingsHandler;
+import org.spongepowered.common.relocate.co.aikar.timings.TimingHistory;
+import org.spongepowered.common.relocate.co.aikar.timings.WorldTimingsHandler;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.MoreObjects;
@@ -126,7 +126,6 @@ import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
 import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.PortalAgent;
 import org.spongepowered.api.world.PortalAgentType;
 import org.spongepowered.api.world.PortalAgentTypes;
@@ -170,9 +169,6 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
-import org.spongepowered.common.event.tracking.phase.entity.BasicEntityContext;
-import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
@@ -2135,7 +2131,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     public void startEntityGlobalTimings() {
         this.timings.entityTick.startTiming();
-        co.aikar.timings.TimingHistory.entityTicks += this.loadedEntityList.size();
+        TimingHistory.entityTicks += this.loadedEntityList.size();
     }
 
     @Override

@@ -27,8 +27,8 @@ package org.spongepowered.common.mixin.core.data;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import co.aikar.timings.SpongeTimings;
-import co.aikar.timings.TimingsManager;
+import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimings;
+import org.spongepowered.common.relocate.co.aikar.timings.TimingsManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;

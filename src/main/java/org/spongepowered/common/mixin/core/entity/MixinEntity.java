@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.entity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import co.aikar.timings.SpongeTimings;
+import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimings;
 import co.aikar.timings.Timing;
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.Lists;
