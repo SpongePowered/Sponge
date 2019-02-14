@@ -74,6 +74,7 @@ final class TimingsPls {
                 SpongeImpl.getLogger().error("Class: " + TimingsPls.class);
                 SpongeImpl.getLogger().error("Classloader: " + TimingsPls.class.getClassLoader());
                 SpongeImpl.getLogger().error("Location: " + TimingsPls.class.getProtectionDomain().getCodeSource());
+                return -1;
             }
         }
         int fake;
