@@ -31,8 +31,8 @@ import static com.google.common.base.Preconditions.checkState;
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.block.BlockStateMatcher;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.block.trait.BlockTrait;
 import org.spongepowered.api.data.property.PropertyMatcher;
+import org.spongepowered.api.state.StateProperty;
 
 import java.util.ArrayList;
 
@@ -41,7 +41,7 @@ import javax.annotation.Nullable;
 public class SpongeBlockStateMatcherBuilder implements BlockStateMatcher.Builder {
 
     @Nullable private BlockType type;
-    private ArrayList<BlockTrait<?>> traits = new ArrayList<>();
+    private ArrayList<StateProperty<?>> traits = new ArrayList<>();
     private ArrayList<Object> values = new ArrayList<>();
     private ArrayList<PropertyMatcher<?>> propertyMatchers = new ArrayList<>();
 
@@ -52,7 +52,7 @@ public class SpongeBlockStateMatcherBuilder implements BlockStateMatcher.Builder
     }
 
     @Override
-    public <T extends Comparable<T>> SpongeBlockStateMatcherBuilder trait(BlockTrait<T> trait, T value) throws IllegalArgumentException {
+    public <T extends Comparable<T>> SpongeBlockStateMatcherBuilder trait(StateProperty<T> trait, T value) throws IllegalArgumentException {
         checkState(this.type != null, "BlockType cannot be null! Must be set before using any traits!");
         checkArgument(this.type.getTraits().contains(trait), "BlockType does not contain the specified trait: %s", trait);
         checkArgument(trait.getPossibleValues().contains(value), "BlockTrait %s does not contain value %s", trait, value);
@@ -72,7 +72,7 @@ public class SpongeBlockStateMatcherBuilder implements BlockStateMatcher.Builder
     @Override
     public SpongeBlockStateMatcher build() throws IllegalStateException {
         checkState(this.type != null, "BlockType cannot be null!");
-        return new SpongeBlockStateMatcher(this.type, this.traits.toArray(new BlockTrait<?>[0]), this.values.toArray(),
+        return new SpongeBlockStateMatcher(this.type, this.traits.toArray(new StateProperty<?>[0]), this.values.toArray(),
                 ImmutableList.copyOf(this.propertyMatchers));
     }
 
@@ -83,7 +83,7 @@ public class SpongeBlockStateMatcherBuilder implements BlockStateMatcher.Builder
         final SpongeBlockStateMatcher other = (SpongeBlockStateMatcher) value;
         type(other.type);
         for (int i = 0; i < other.traits.length; i++) {
-            trait((BlockTrait) other.traits[i], (Comparable) other.values[i]);
+            trait((StateProperty) other.traits[i], (Comparable) other.values[i]);
         }
         this.propertyMatchers.clear();
         this.propertyMatchers.addAll(other.propertyMatchers);

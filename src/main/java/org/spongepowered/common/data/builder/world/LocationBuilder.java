@@ -35,7 +35,7 @@ import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import java.util.Optional;
 import java.util.UUID;
 
-public class LocationBuilder extends AbstractDataBuilder<Location<World>> {
+public class LocationBuilder extends AbstractDataBuilder<Location> {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public LocationBuilder() {
@@ -43,7 +43,7 @@ public class LocationBuilder extends AbstractDataBuilder<Location<World>> {
     }
 
     @Override
-    protected Optional<Location<World>> buildContent(DataView container) throws InvalidDataException {
+    protected Optional<Location> buildContent(DataView container) throws InvalidDataException {
         if (!container.contains(Queries.WORLD_NAME, Queries.WORLD_ID, Queries.POSITION_X, Queries.POSITION_Y, Queries.POSITION_Z)) {
             return Optional.empty();
         }
@@ -59,6 +59,6 @@ public class LocationBuilder extends AbstractDataBuilder<Location<World>> {
         final double x = container.getDouble(Queries.POSITION_X).get();
         final double y = container.getDouble(Queries.POSITION_Y).get();
         final double z = container.getDouble(Queries.POSITION_Z).get();
-        return Optional.of(new Location<>(world.get(), x, y, z));
+        return Optional.of(new Location(world.get(), x, y, z));
     }
 }

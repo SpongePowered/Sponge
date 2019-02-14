@@ -32,9 +32,9 @@ public class VectorSerializer {
 
     public static NBTTagCompound toNbt(Vector3d vector) {
         NBTTagCompound compound = new NBTTagCompound();
-        compound.setDouble("x", vector.getX());
-        compound.setDouble("y", vector.getY());
-        compound.setDouble("z", vector.getZ());
+        compound.putDouble("x", vector.getX());
+        compound.putDouble("y", vector.getY());
+        compound.putDouble("z", vector.getZ());
         return compound;
     }
 

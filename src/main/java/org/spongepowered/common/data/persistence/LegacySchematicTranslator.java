@@ -131,7 +131,7 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
                     Optional<BlockState> blockState = palette.get(palette_id);
                     if (!blockState.isPresent()) {
                         // At the very least get the default state id
-                        blockState = Optional.of((BlockState) Block.REGISTRY.getObjectById(default_state_id));
+                        blockState = Optional.of((BlockState) Block.BLOCK_STATE_IDS.getByValue(default_state_id));
                     }
                     BlockState block = blockState.orElseGet(BlockTypes.COBBLESTONE::getDefaultState);
                     buffer.setBlock(x - offsetX, y - offsetY, z - offsetZ, block);

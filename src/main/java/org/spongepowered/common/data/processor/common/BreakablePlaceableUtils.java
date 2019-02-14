@@ -40,13 +40,13 @@ import java.util.Set;
 public final class BreakablePlaceableUtils {
 
     public static boolean set(ItemStack stack, String nbtKey, Set<BlockType> value) {
-        NBTTagCompound stackTag = stack.getTagCompound();
+        NBTTagCompound stackTag = stack.getTag();
 
         if (value.isEmpty()) {
             if (stackTag != null) {
-                stackTag.removeTag(nbtKey);
+                stackTag.remove(nbtKey);
                 if (stackTag.isEmpty()) {
-                    stack.setTagCompound(null);
+                    stack.setTag(null);
                 }
             }
         } else {
@@ -56,31 +56,31 @@ public final class BreakablePlaceableUtils {
                 if (breakable.getKey().getNamespace().equals(CatalogKey.MINECRAFT_NAMESPACE)) {
                     id = breakable.getKey().getValue(); // Trim the minecraft namespace, because vanilla.
                 }
-                breakableIds.appendTag(new NBTTagString(id));
+                breakableIds.add(new NBTTagString(id));
             }
             if (stackTag == null) {
                 stackTag = new NBTTagCompound();
-                stack.setTagCompound(stackTag);
+                stack.setTag(stackTag);
             }
-            stackTag.setTag(nbtKey, breakableIds);
+            stackTag.put(nbtKey, breakableIds);
         }
 
         return true;
     }
 
     public static Optional<Set<BlockType>> get(ItemStack stack, String nbtKey) {
-        NBTTagCompound tag = stack.getTagCompound();
+        NBTTagCompound tag = stack.getTag();
         if (tag == null) {
             return Optional.empty();
         }
-        NBTTagList blockIds = tag.getTagList(nbtKey, NbtDataUtil.TAG_STRING);
+        NBTTagList blockIds = tag.getList(nbtKey, NbtDataUtil.TAG_STRING);
         if (blockIds.isEmpty()) {
             return Optional.empty();
         }
-        Set<BlockType> blockTypes = Sets.newHashSetWithExpectedSize(blockIds.tagCount());
-        for (int i = 0; i < blockIds.tagCount(); i++) {
+        Set<BlockType> blockTypes = Sets.newHashSetWithExpectedSize(blockIds.size());
+        for (int i = 0; i < blockIds.size(); i++) {
             SpongeImpl.getGame().getRegistry()
-                .getType(BlockType.class, CatalogKey.resolve(blockIds.getStringTagAt(i)))
+                .getType(BlockType.class, CatalogKey.resolve(blockIds.getString(i)))
                 .ifPresent(blockTypes::add);
         }
         return Optional.of(blockTypes);

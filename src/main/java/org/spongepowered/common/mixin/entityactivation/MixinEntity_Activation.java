@@ -53,6 +53,8 @@ public abstract class MixinEntity_Activation implements Entity, IModData_Activat
     @Shadow
     public abstract void remove();
 
+    @Shadow public boolean removed;
+
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onEntityActivationConstruction(World world, CallbackInfo ci) {
         if (world != null && !((IMixinWorld) world).isFake() && ((IMixinWorldInfo) world.getWorldInfo()).isValid()) {

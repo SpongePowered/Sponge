@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.processor.data.entity;
 
 import net.minecraft.entity.item.EntityPainting;
+import net.minecraft.entity.item.PaintingType;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableArtData;
@@ -51,7 +52,7 @@ public class ArtDataProcessor extends AbstractEntitySingleDataProcessor<EntityPa
     @Override
     protected boolean set(EntityPainting entity, Art value) {
         if (!entity.world.isRemote) {
-            return EntityUtil.refreshPainting(entity, (EntityPainting.EnumArt) (Object) value);
+            return EntityUtil.refreshPainting(entity, (PaintingType) (Object) value);
         }
         return true;
     }

@@ -74,11 +74,11 @@ public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType,
     }
 
     @Override
-    public Optional<org.spongepowered.api.block.tileentity.TileEntity> apply(Location<World> location) {
+    public Optional<org.spongepowered.api.block.tileentity.TileEntity> apply(Location location) {
         final BlockState currentState = location.getBlock();
         final Block currentBlock = BlockUtil.toBlock(currentState);
         final Block newBlock = BlockUtil.toBlock(this.blockState);
-        final net.minecraft.world.World minecraftWorld = (net.minecraft.world.World) location.getExtent();
+        final net.minecraft.world.World minecraftWorld = (net.minecraft.world.World) location.getWorld();
 
         BlockPos blockpos = VecHelper.toBlockPos(location);
         if (currentBlock != newBlock) {
@@ -90,20 +90,20 @@ public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType,
         if (tileEntity == null) {
             return Optional.empty();
         }
-        compound.setInt("x", blockpos.getX());
-        compound.setInt("y", blockpos.getY());
-        compound.setInt("z", blockpos.getZ());
+        compound.putInt("x", blockpos.getX());
+        compound.putInt("y", blockpos.getY());
+        compound.putInt("z", blockpos.getZ());
         tileEntity.read(compound);
         tileEntity.markDirty();
         return Optional.of((org.spongepowered.api.block.tileentity.TileEntity) tileEntity);
     }
 
     @Override
-    public BlockSnapshot toSnapshot(Location<World> location) {
+    public BlockSnapshot toSnapshot(Location location) {
         final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
         builder.blockState = this.blockState;
         builder.compound = this.data.copy();
-        builder.worldUuid = location.getExtent().getUniqueId();
+        builder.worldUuid = location.getWorld().getUniqueId();
         builder.coords = location.getBlockPosition();
         return builder.build();
     }

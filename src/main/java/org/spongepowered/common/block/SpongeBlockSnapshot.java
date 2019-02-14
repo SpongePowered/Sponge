@@ -523,6 +523,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
             return Optional.empty();
         }
         final String tileId = this.compound.getString(NbtDataUtil.BLOCK_ENTITY_ID);
+        net.minecraft.tileentity.TileEntityType.getId()
         final Class<? extends TileEntity> tileClass = TileEntity.REGISTRY.getObject(new ResourceLocation(tileId));
         if (tileClass == null) {
             return Optional.empty();

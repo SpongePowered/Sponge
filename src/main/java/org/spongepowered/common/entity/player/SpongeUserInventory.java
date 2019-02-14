@@ -141,7 +141,7 @@ public class SpongeUserInventory implements IInventory {
         for (int i = 0; i < this.mainInventory.size(); ++i) {
             if (!this.mainInventory.get(i).isEmpty()) {
                 NBTTagCompound nbttagcompound = new NBTTagCompound();
-                nbttagcompound.setByte("Slot", (byte) i);
+                nbttagcompound.putByte("Slot", (byte) i);
                 this.mainInventory.get(i).write(nbttagcompound);
                 nbtTagListIn.add(nbttagcompound);
             }
@@ -150,7 +150,7 @@ public class SpongeUserInventory implements IInventory {
         for (int j = 0; j < this.armorInventory.size(); ++j) {
             if (!this.armorInventory.get(j).isEmpty()) {
                 NBTTagCompound nbttagcompound1 = new NBTTagCompound();
-                nbttagcompound1.setByte("Slot", (byte) (j + 100));
+                nbttagcompound1.putByte("Slot", (byte) (j + 100));
                 this.armorInventory.get(j).write(nbttagcompound1);
                 nbtTagListIn.add(nbttagcompound1);
             }
@@ -159,7 +159,7 @@ public class SpongeUserInventory implements IInventory {
         for (int k = 0; k < this.offHandInventory.size(); ++k) {
             if (!this.offHandInventory.get(k).isEmpty()) {
                 NBTTagCompound nbttagcompound2 = new NBTTagCompound();
-                nbttagcompound2.setByte("Slot", (byte) (k + 150));
+                nbttagcompound2.putByte("Slot", (byte) (k + 150));
                 this.offHandInventory.get(k).write(nbttagcompound2);
                 nbtTagListIn.add(nbttagcompound2);
             }

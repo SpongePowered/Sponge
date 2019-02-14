@@ -168,7 +168,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
     @Override
     public void readAdditional(NBTTagCompound tagCompund) {
         super.readAdditional(tagCompund);
-        if (!((IMixinEntity) this).getSpongeData().hasKey("skinProperty")) {
+        if (!((IMixinEntity) this).getSpongeData().contains("skinProperty")) {
             return;
         }
 
@@ -184,9 +184,9 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
         super.writeAdditional(tagCompound);
         NBTTagCompound spongeData = ((IMixinEntity) this).getSpongeData();
         if (this.skinProperty != null) {
-            spongeData.setTag("skinProperty", NbtTranslator.getInstance().translateData(this.skinProperty.toContainer()));
+            spongeData.put("skinProperty", NbtTranslator.getInstance().translateData(this.skinProperty.toContainer()));
         } else {
-            spongeData.removeTag("skinProperty");
+            spongeData.remove("skinProperty");
         }
     }
 

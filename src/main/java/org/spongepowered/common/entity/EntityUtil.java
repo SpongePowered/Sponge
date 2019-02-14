@@ -186,7 +186,7 @@ public final class EntityUtil {
         entity.world.profiler.startSection("reposition");
 
         final Vector3i toChunkPosition = toTransform.getLocation().getChunkPosition();
-        toWorld.getChunkProvider().loadChunk(toChunkPosition.getX(), toChunkPosition.getZ());
+        toWorld.getChunkProvider().getChunk(toChunkPosition.getX(), toChunkPosition.getZ());
         // Only need to update the entity location here as the portal is handled in SpongeCommonEventFactory
         final Vector3d toPosition = toTransform.getPosition();
         entity.setLocationAndAngles(toPosition.getX(), toPosition.getY(), toPosition.getZ(), (float) toTransform.getYaw(), (float) toTransform.getPitch());
@@ -1272,7 +1272,7 @@ public final class EntityUtil {
     }
 
     public static Optional<EntityType> fromLocationToType(ResourceLocation location) {
-        return Optional.ofNullable((EntityType) net.minecraft.entity.EntityType.REGISTRY.get(location));
+        return Optional.ofNullable((EntityType) net.minecraft.entity.EntityType.field_200787_a.get(location));
     }
 
     // I'm lazy, but this is better than using the convenience method

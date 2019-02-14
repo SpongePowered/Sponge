@@ -80,13 +80,13 @@ public class ProjectileSourceSerializer {
         }
         INBTBase projectileNbt = toNbt(projectileSource);
         if (projectileNbt != null) {
-            compound.setTag("projectileSource", projectileNbt);
+            compound.put("projectileSource", projectileNbt);
         }
     }
 
     public static void readSourceFromNbt(NBTTagCompound compound, Projectile projectile) {
-        if (compound.hasKey("projectileSource")) {
-            projectile.setShooter(fromNbt((World) projectile.getWorld(), compound.getTag("projectileSource")));
+        if (compound.contains("projectileSource")) {
+            projectile.setShooter(fromNbt((World) projectile.getWorld(), compound.get("projectileSource")));
         }
     }
 }

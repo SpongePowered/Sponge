@@ -84,17 +84,17 @@ public class FireworkUtils {
 
     public static FireworkEffect fromNbt(NBTTagCompound effectNbt) {
         FireworkEffect.Builder builder = new SpongeFireworkEffectBuilder();
-        if(effectNbt.hasKey("Flicker")) {
+        if(effectNbt.contains("Flicker")) {
             builder.flicker(effectNbt.getBoolean("Flicker"));
         }
-        if(effectNbt.hasKey("Trail")) {
+        if(effectNbt.contains("Trail")) {
             builder.trail(effectNbt.getBoolean("Trail"));
         }
-        if(effectNbt.hasKey("Type")) {
+        if(effectNbt.contains("Type")) {
             byte type = effectNbt.getByte("Type");
             builder.shape(getShape(type));
         }
-        if(effectNbt.hasKey("Colors")) {
+        if(effectNbt.contains("Colors")) {
             List<Color> colors = Lists.newArrayList();
             int[] colorsRaw = effectNbt.getIntArray("Colors");
             for(int color : colorsRaw) {
@@ -102,7 +102,7 @@ public class FireworkUtils {
             }
             builder.colors(colors);
         }
-        if(effectNbt.hasKey("FadeColors")) {
+        if(effectNbt.contains("FadeColors")) {
             List<Color> fades = Lists.newArrayList();
             int[] fadesRaw = effectNbt.getIntArray("FadeColors");
             for(int fade : fadesRaw) {
@@ -116,21 +116,21 @@ public class FireworkUtils {
 
     public static NBTTagCompound toNbt(FireworkEffect effect) {
         NBTTagCompound tag = new NBTTagCompound();
-        tag.setBoolean("Flicker", effect.flickers());
-        tag.setBoolean("Trail", effect.hasTrail());
-        tag.setByte("Type", getShapeId(effect.getShape()));
+        tag.putBoolean("Flicker", effect.flickers());
+        tag.putBoolean("Trail", effect.hasTrail());
+        tag.putByte("Type", getShapeId(effect.getShape()));
         int[] colorsArray = new int[effect.getColors().size()];
         List<Color> colors = effect.getColors();
         for (int i = 0; i < colors.size(); i++) {
             colorsArray[i] = colors.get(i).getRgb();
         }
-        tag.setIntArray("Colors", colorsArray);
+        tag.putIntArray("Colors", colorsArray);
         int[] fadeArray = new int[effect.getFadeColors().size()];
         List<Color> fades = effect.getFadeColors();
         for (int i = 0; i < fades.size(); i++) {
             fadeArray[i] = fades.get(i).getRgb();
         }
-        tag.setIntArray("FadeColors", fadeArray);
+        tag.putIntArray("FadeColors", fadeArray);
 
         return tag;
     }
@@ -147,9 +147,9 @@ public class FireworkUtils {
 
         if(item.getItem() == Items.FIREWORK_STAR) {
             if(effects.size() != 0) {
-                NbtDataUtil.getOrCreateCompound(item).setTag("Explosion", toNbt(effects.get(0)));
+                NbtDataUtil.getOrCreateCompound(item).put("Explosion", toNbt(effects.get(0)));
             } else {
-                NbtDataUtil.getOrCreateCompound(item).removeTag("Explosion");
+                NbtDataUtil.getOrCreateCompound(item).remove("Explosion");
             }
             return true;
         } else if(item.getItem() == Items.FIREWORK_ROCKET) {
@@ -157,7 +157,7 @@ public class FireworkUtils {
             effects.stream().map(FireworkUtils::toNbt).forEach(nbtEffects::add);
 
             NBTTagCompound fireworks = item.getOrCreateChildTag("Fireworks");
-            fireworks.setTag("Explosions", nbtEffects);
+            fireworks.put("Explosions", nbtEffects);
             return true;
         }
         return false;
@@ -176,7 +176,7 @@ public class FireworkUtils {
         List<FireworkEffect> effects;
         if(item.getItem() == Items.FIREWORK_ROCKET) {
             NBTTagCompound fireworks = item.getChildTag("Fireworks");
-            if(fireworks == null || !fireworks.hasKey("Explosions")) return Optional.empty();
+            if(fireworks == null || !fireworks.contains("Explosions")) return Optional.empty();
 
             NBTTagList effectsNbt = fireworks.getList("Explosions", NbtDataUtil.TAG_COMPOUND);
             effects = Lists.newArrayList();
@@ -204,11 +204,11 @@ public class FireworkUtils {
         if(item.isEmpty()) return false;
 
         if(item.getItem() == Items.FIREWORK_STAR) {
-            NbtDataUtil.getOrCreateCompound(item).removeTag("Explosion");
+            NbtDataUtil.getOrCreateCompound(item).remove("Explosion");
             return true;
         } else if(item.getItem() == Items.FIREWORK_ROCKET) {
             NBTTagCompound fireworks = item.getChildTag("Fireworks");
-            fireworks.removeTag("Explosions");
+            fireworks.remove("Explosions");
             return true;
         }
 

@@ -113,9 +113,9 @@ public class SpongeTileEntityArchetypeBuilder extends AbstractDataBuilder<TileEn
         checkArgument(tileEntity instanceof net.minecraft.tileentity.TileEntity, "TileEntity is not compatible with this implementation!");
         NBTTagCompound nbttagcompound = new NBTTagCompound();
         ((net.minecraft.tileentity.TileEntity) tileEntity).write(nbttagcompound);
-        nbttagcompound.removeTag("x");
-        nbttagcompound.removeTag("y");
-        nbttagcompound.removeTag("z");
+        nbttagcompound.remove("x");
+        nbttagcompound.remove("y");
+        nbttagcompound.remove("z");
         this.tileData = NbtTranslator.getInstance().translate(nbttagcompound);
         this.blockState = tileEntity.getBlock();
         this.tileEntityType = tileEntity.getType();

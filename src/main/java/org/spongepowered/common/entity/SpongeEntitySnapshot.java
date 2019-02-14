@@ -117,7 +117,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot, IPropertyHolder {
         this.scale = builder.scale == null ? Vector3d.ZERO : builder.scale;
         this.entityReference = builder.entityReference;
         if (this.compound != null) {
-            this.compound.setTag("Pos", NbtDataUtil.newDoubleNBTList(this.position.getX(), this.position.getY(), this.position.getZ()));
+            this.compound.put("Pos", NbtDataUtil.newDoubleNBTList(this.position.getX(), this.position.getY(), this.position.getZ()));
             // TODO should ensure other elements are within the compound as well
         }
     }
@@ -388,7 +388,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot, IPropertyHolder {
         builder.position = location.getPosition();
         builder.worldId = location.getWorld().getUniqueId();
         NBTTagCompound newCompound = this.compound.copy();
-        newCompound.setInt("Dimension", ((IMixinWorldInfo) location.getWorld().getProperties()).getDimensionId());
+        newCompound.putInt("Dimension", ((IMixinWorldInfo) location.getWorld().getProperties()).getDimensionId());
         builder.compound = newCompound;
         return builder.build();
     }
@@ -433,7 +433,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot, IPropertyHolder {
                 if (this.compound != null) {
                     nmsEntity.read(this.compound);
                 }
-    
+
                 boolean spawnResult = world.get().spawnEntity((Entity) nmsEntity);
                 if (spawnResult) {
                     return Optional.of((Entity) nmsEntity);

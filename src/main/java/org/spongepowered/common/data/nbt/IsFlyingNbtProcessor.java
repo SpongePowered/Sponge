@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.nbt;
 
-import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.INBTBase;
 import net.minecraft.nbt.NBTTagByte;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -52,7 +52,7 @@ public class IsFlyingNbtProcessor extends AbstractSpongeNbtProcessor<FlyingData,
 
     @Override
     public Optional<FlyingData> readFrom(NBTTagCompound compound) {
-        final NBTBase tag = compound.getTag(NbtDataUtil.Minecraft.IS_FLYING);
+        final INBTBase tag = compound.get(NbtDataUtil.Minecraft.IS_FLYING);
         if (tag != null) {
             return Optional.of(new SpongeFlyingData(((NBTTagByte) tag).getByte() != 0));
         }
@@ -66,7 +66,7 @@ public class IsFlyingNbtProcessor extends AbstractSpongeNbtProcessor<FlyingData,
 
     @Override
     public Optional<NBTTagCompound> storeToCompound(NBTTagCompound compound, FlyingData manipulator) {
-        compound.setBoolean(NbtDataUtil.Minecraft.IS_FLYING, manipulator.flying().get());
+        compound.putBoolean(NbtDataUtil.Minecraft.IS_FLYING, manipulator.flying().get());
         return Optional.of(compound);
     }
 

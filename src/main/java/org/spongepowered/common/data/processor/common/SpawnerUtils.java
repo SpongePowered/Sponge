@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.data.processor.common;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityList;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.MobSpawnerBaseLogic;
 import net.minecraft.util.ResourceLocation;
@@ -69,9 +67,9 @@ public class SpawnerUtils {
     @SuppressWarnings("unchecked")
     public static void setNextEntity(MobSpawnerBaseLogic logic, WeightedSerializableObject<EntityArchetype> value) {
         NBTTagCompound compound = NbtTranslator.getInstance().translateData(value.get().getEntityData());
-        if (!compound.hasKey(NbtDataUtil.ENTITY_TYPE_ID)) {
-            final ResourceLocation key = EntityList.getKey((Class<? extends Entity>) value.get().getType().getEntityClass());
-            compound.setString(NbtDataUtil.ENTITY_TYPE_ID, key != null ? key.toString() : "");
+        if (!compound.contains(NbtDataUtil.ENTITY_TYPE_ID)) {
+            final ResourceLocation key = (ResourceLocation) (Object) value.get().getType().getKey();
+            compound.putString(NbtDataUtil.ENTITY_TYPE_ID, key != null ? key.toString() : "");
         }
 
         logic.setNextSpawnData(new WeightedSpawnerEntity((int) value.getWeight(), compound));
@@ -106,9 +104,9 @@ public class SpawnerUtils {
             WeightedObject<EntityArchetype> object = (WeightedObject<EntityArchetype>) entry;
 
             NBTTagCompound compound = NbtTranslator.getInstance().translateData(object.get().getEntityData());
-            if (!compound.hasKey(NbtDataUtil.ENTITY_TYPE_ID)) {
-                final ResourceLocation key = EntityList.getKey((Class<? extends Entity>) object.get().getType().getEntityClass());
-                compound.setString(NbtDataUtil.ENTITY_TYPE_ID, key != null ? key.toString() : "");
+            if (!compound.contains(NbtDataUtil.ENTITY_TYPE_ID)) {
+                final ResourceLocation key = (ResourceLocation) (Object) object.get().getType().getKey();
+                compound.putString(NbtDataUtil.ENTITY_TYPE_ID, key != null ? key.toString() : "");
             }
 
 

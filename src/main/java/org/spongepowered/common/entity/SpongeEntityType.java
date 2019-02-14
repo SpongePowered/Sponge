@@ -87,7 +87,7 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
     public boolean allowsEntityEventCreation = true;
 
     public <T extends Entity> SpongeEntityType(final ResourceLocation key, final net.minecraft.entity.EntityType<T> type) {
-        this(key, net.minecraft.entity.EntityType.REGISTRY.getId(type), type);
+        this(key, net.minecraft.entity.EntityType.field_200787_a.getId(type), type);
     }
 
     public <T extends Entity> SpongeEntityType(final ResourceLocation key, final int networkId, final net.minecraft.entity.EntityType<T> type) {

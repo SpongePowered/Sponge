@@ -35,11 +35,11 @@ import net.minecraft.entity.IEntityMultiPart;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
@@ -143,7 +143,7 @@ public class SpongeHooks {
             return;
         }
 
-        String spawnName = entity.getName();
+        ITextComponent spawnName = entity.getName();
         if (entity instanceof EntityItem) {
             spawnName = ((EntityItem) entity).getItem().getDisplayName();
         }
@@ -151,7 +151,7 @@ public class SpongeHooks {
         Optional<User> user = cause.first(User.class);
         SpongeConfig<? extends GeneralConfigBase> config = getActiveConfig((WorldServer) entity.world);
         if (config.getConfig().getLogging().entitySpawnLogging()) {
-            logInfo("SPAWNED " + spawnName + " [RootCause: {0}][User: {1}][World: {2}][DimId: {3}]",
+            logInfo("SPAWNED " + spawnName.getUnformattedComponentText() + " [RootCause: {0}][User: {1}][World: {2}][DimId: {3}]",
                     getFriendlyCauseName(cause),
                     user.isPresent() ? user.get().getName() : "None",
                     entity.world.getWorldInfo().getWorldName(),
@@ -332,7 +332,7 @@ public class SpongeHooks {
         int maxSpeed = config.getConfig().getEntity().getMaxSpeed();
         if (maxSpeed > 0) {
             double distance = x * x + z * z;
-            if (distance > maxSpeed && !entity.isRiding()) {
+            if (distance > maxSpeed && !entity.isPassenger()) {
                 if (config.getConfig().getLogging().logEntitySpeedRemoval()) {
                     logInfo("Speed violation: {0} was over {1} - Removing Entity: {2}", distance, maxSpeed, entity);
                     if (entity instanceof EntityLivingBase) {
@@ -348,7 +348,7 @@ public class SpongeHooks {
                         logInfo("Motion: ({0}, {1}, {2})", entity.motionX, entity.motionY, entity.motionZ);
                         logInfo("Entity: {0}", entity);
                         NBTTagCompound tag = new NBTTagCompound();
-                        entity.writeToNBT(tag);
+                        entity.writeWithoutTypeId(tag);
                         logInfo("Entity NBT: {0}", tag);
                         logStack(config);
                     }
@@ -388,7 +388,7 @@ public class SpongeHooks {
             SpongeHooks.CollisionWarning warning = new SpongeHooks.CollisionWarning(entity.world, entity);
             if (SpongeHooks.recentWarnings.containsKey(warning)) {
                 long lastWarned = SpongeHooks.recentWarnings.get(warning);
-                if ((MinecraftServer.getCurrentTimeMillis() - lastWarned) < 30000) {
+                if ((SpongeImpl.getServer().getServerTime() - lastWarned) < 30000) {
                     return;
                 }
             }
@@ -557,11 +557,11 @@ public class SpongeHooks {
             causedBy = user.getName();
         } else if (rootCause instanceof EntityItem) {
             EntityItem item = (EntityItem) rootCause;
-            causedBy = item.getItem().getDisplayName();
+            causedBy = item.getItem().getDisplayName().getUnformattedComponentText();
         }
         else if (rootCause instanceof Entity) {
             Entity causeEntity = (Entity) rootCause;
-            causedBy = causeEntity.getName();
+            causedBy = causeEntity.getName().getUnformattedComponentText();
         }else if (rootCause instanceof BlockSnapshot) {
             BlockSnapshot snapshot = (BlockSnapshot) rootCause;
             causedBy = snapshot.getState().getType().getKey().toString();

@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.datasync.entity;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.Value;
@@ -36,30 +37,33 @@ import org.spongepowered.common.text.SpongeTexts;
 import java.util.List;
 import java.util.Optional;
 
-public class EntityCustomNameConverter extends DataParameterConverter<String> {
+public class EntityCustomNameConverter extends DataParameterConverter<Optional<ITextComponent>> {
 
     public EntityCustomNameConverter() {
         super(Entity.CUSTOM_NAME);
     }
 
     @Override
-    public Optional<DataTransactionResult> createTransaction(String currentValue, String value) {
-        Text currentText = SpongeTexts.fromLegacy(currentValue);
-        Text newValue = SpongeTexts.fromLegacy(value);
+    public Optional<DataTransactionResult> createTransaction(Optional<ITextComponent> currentValue, Optional<ITextComponent> value) {
+        if (!currentValue.isPresent() && !value.isPresent()) {
+            return Optional.empty();
+        }
+        Optional<Text> currentText = currentValue.map(SpongeTexts::toText);
+        Optional<Text> newValue = value.map(SpongeTexts::toText);
 
-        return Optional.of(DataTransactionResult.builder()
-            .replace(new SpongeImmutableValue<>(Keys.DISPLAY_NAME, currentText))
-            .success(new SpongeImmutableValue<>(Keys.DISPLAY_NAME, newValue))
-            .result(DataTransactionResult.Type.SUCCESS)
-            .build());
+        DataTransactionResult.Builder builder = DataTransactionResult.builder();
+        currentText.map(v -> builder.replace(new SpongeImmutableValue<>(Keys.DISPLAY_NAME, v)));
+        newValue.map(v -> builder.success(new SpongeImmutableValue<>(Keys.DISPLAY_NAME, v)));
+
+        return Optional.of(builder.result(DataTransactionResult.Type.SUCCESS).build());
     }
 
     @Override
-    public String getValueFromEvent(String originalValue, List<Value.Immutable<?>> immutableValues) {
+    public Optional<ITextComponent> getValueFromEvent(Optional<ITextComponent> originalValue, List<Value.Immutable<?>> immutableValues) {
         for (Value.Immutable<?> value : immutableValues) {
             if (value.getKey() == Keys.DISPLAY_NAME) {
                 try {
-                    return SpongeTexts.toLegacy((Text) value.get());
+                    return Optional.of(SpongeTexts.toComponent((Text) value.get()));
                 } catch (Exception e) {
                     return originalValue;
                 }

@@ -88,11 +88,11 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
             return Optional.empty();
         }
 
-        this.data.setTag("Pos", NbtDataUtil.newDoubleNBTList(x, y, z));
-        this.data.setInt("Dimension", ((IMixinWorldInfo) location.getWorld().getProperties()).getDimensionId());
+        this.data.put("Pos", NbtDataUtil.newDoubleNBTList(x, y, z));
+        this.data.putInt("Dimension", ((IMixinWorldInfo) location.getWorld().getProperties()).getDimensionId());
         entity.read(this.data);
-        this.data.removeTag("Pos");
-        this.data.removeTag("Dimension");
+        this.data.remove("Pos");
+        this.data.remove("Dimension");
 
         final org.spongepowered.api.entity.Entity spongeEntity = EntityUtil.fromNative(entity);
         final List<org.spongepowered.api.entity.Entity> entities = new ArrayList<>();
@@ -122,9 +122,9 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
         final SpongeEntitySnapshotBuilder builder = new SpongeEntitySnapshotBuilder();
         builder.entityType = this.type;
         NBTTagCompound newCompound = this.data.copy();
-        newCompound.setTag("Pos", NbtDataUtil
+        newCompound.put("Pos", NbtDataUtil
                 .newDoubleNBTList(new double[] { location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ() }));
-        newCompound.setInt("Dimension", ((IMixinWorldInfo) location.getWorld().getProperties()).getDimensionId());
+        newCompound.putInt("Dimension", ((IMixinWorldInfo) location.getWorld().getProperties()).getDimensionId());
         builder.compound = newCompound;
         builder.worldId = location.getWorld().getUniqueId();
         builder.position = location.getPosition();

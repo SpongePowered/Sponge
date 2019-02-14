@@ -47,7 +47,7 @@ public final class ColorUtil {
         final Item item = stack.getItem();
         if (item instanceof ItemArmorDyeable) {
             final NBTTagCompound tagCompound = stack.getTag();
-            if (tagCompound == null || !tagCompound.hasKey(NbtDataUtil.ARMOR_COLOR_DISPLAY_TAG)) {
+            if (tagCompound == null || !tagCompound.contains(NbtDataUtil.ARMOR_COLOR_DISPLAY_TAG)) {
                 return Optional.empty();
             }
             final int color = ((ItemArmorDyeable) item).getColor(stack);

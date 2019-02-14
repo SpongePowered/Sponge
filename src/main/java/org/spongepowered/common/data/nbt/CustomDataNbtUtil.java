@@ -52,31 +52,31 @@ import javax.annotation.Nullable;
 public class CustomDataNbtUtil {
 
     public static DataTransactionResult apply(NBTTagCompound compound, DataManipulator<?, ?> manipulator) {
-        if (!compound.hasKey(NbtDataUtil.FORGE_DATA, NbtDataUtil.TAG_COMPOUND)) {
-            compound.setTag(NbtDataUtil.FORGE_DATA, new NBTTagCompound());
+        if (!compound.contains(NbtDataUtil.FORGE_DATA, NbtDataUtil.TAG_COMPOUND)) {
+            compound.put(NbtDataUtil.FORGE_DATA, new NBTTagCompound());
         }
-        final NBTTagCompound forgeCompound = compound.getCompoundTag(NbtDataUtil.FORGE_DATA);
-        if (!forgeCompound.hasKey(NbtDataUtil.SPONGE_DATA, NbtDataUtil.TAG_COMPOUND)) {
-            forgeCompound.setTag(NbtDataUtil.SPONGE_DATA, new NBTTagCompound());
+        final NBTTagCompound forgeCompound = compound.getCompound(NbtDataUtil.FORGE_DATA);
+        if (!forgeCompound.contains(NbtDataUtil.SPONGE_DATA, NbtDataUtil.TAG_COMPOUND)) {
+            forgeCompound.put(NbtDataUtil.SPONGE_DATA, new NBTTagCompound());
         }
-        final NBTTagCompound spongeTag = forgeCompound.getCompoundTag(NbtDataUtil.SPONGE_DATA);
+        final NBTTagCompound spongeTag = forgeCompound.getCompound(NbtDataUtil.SPONGE_DATA);
 
         boolean isReplacing;
         // Validate that the custom manipulator isn't already existing in the compound
         final NBTTagList list;
-        if (spongeTag.hasKey(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_LIST)) {
-            list = spongeTag.getTagList(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_COMPOUND);
-            for (int i = 0; i < list.tagCount(); i++) {
-                final NBTTagCompound dataCompound = list.getCompoundTagAt(i);
+        if (spongeTag.contains(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_LIST)) {
+            list = spongeTag.getList(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_COMPOUND);
+            for (int i = 0; i < list.size(); i++) {
+                final NBTTagCompound dataCompound = list.getCompound(i);
                 final String clazzName = dataCompound.getString(NbtDataUtil.CUSTOM_DATA_CLASS);
                 if (manipulator.getClass().getName().equals(clazzName)) {
-                    final NBTTagCompound current = dataCompound.getCompoundTag(NbtDataUtil.CUSTOM_DATA);
+                    final NBTTagCompound current = dataCompound.getCompound(NbtDataUtil.CUSTOM_DATA);
                     final DataContainer currentView = NbtTranslator.getInstance().translate(current);
                     DataManipulator<?, ?> existing = deserialize(clazzName, currentView);
                     isReplacing = existing != null;
                     final DataContainer container = manipulator.toContainer();
                     final NBTTagCompound newCompound = NbtTranslator.getInstance().translateData(container);
-                    dataCompound.setTag(NbtDataUtil.CUSTOM_DATA_CLASS, newCompound);
+                    dataCompound.put(NbtDataUtil.CUSTOM_DATA_CLASS, newCompound);
                     if (isReplacing) {
                         return DataTransactionResult.successReplaceResult(manipulator.getValues(), existing.getValues());
                     }
@@ -85,15 +85,15 @@ public class CustomDataNbtUtil {
             }
         } else {
             list = new NBTTagList();
-            spongeTag.setTag(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, list);
+            spongeTag.put(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, list);
         }
         // We are now adding to the list, not replacing
         final NBTTagCompound newCompound = new NBTTagCompound();
-        newCompound.setString(NbtDataUtil.CUSTOM_DATA_CLASS, manipulator.getClass().getName());
+        newCompound.putString(NbtDataUtil.CUSTOM_DATA_CLASS, manipulator.getClass().getName());
         final DataContainer dataContainer = manipulator.toContainer();
         final NBTTagCompound dataCompound = NbtTranslator.getInstance().translateData(dataContainer);
-        newCompound.setTag(NbtDataUtil.CUSTOM_DATA, dataCompound);
-        list.appendTag(newCompound);
+        newCompound.put(NbtDataUtil.CUSTOM_DATA, dataCompound);
+        list.add(newCompound);
         return DataTransactionResult.builder().result(DataTransactionResult.Type.SUCCESS).success(manipulator.getValues()).build();
     }
 
@@ -140,27 +140,27 @@ public class CustomDataNbtUtil {
     }
 
     public static DataTransactionResult remove(NBTTagCompound data, Class<? extends DataManipulator<?, ?>> containerClass) {
-        if (!data.hasKey(NbtDataUtil.FORGE_DATA, NbtDataUtil.TAG_COMPOUND)) {
+        if (!data.contains(NbtDataUtil.FORGE_DATA, NbtDataUtil.TAG_COMPOUND)) {
             return DataTransactionResult.successNoData();
         }
-        final NBTTagCompound forgeTag = data.getCompoundTag(NbtDataUtil.FORGE_DATA);
-        if (!forgeTag.hasKey(NbtDataUtil.SPONGE_DATA, NbtDataUtil.TAG_COMPOUND)) {
+        final NBTTagCompound forgeTag = data.getCompound(NbtDataUtil.FORGE_DATA);
+        if (!forgeTag.contains(NbtDataUtil.SPONGE_DATA, NbtDataUtil.TAG_COMPOUND)) {
             return DataTransactionResult.successNoData();
         }
-        final NBTTagCompound spongeData = forgeTag.getCompoundTag(NbtDataUtil.SPONGE_DATA);
-        if (!spongeData.hasKey(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_LIST)) {
+        final NBTTagCompound spongeData = forgeTag.getCompound(NbtDataUtil.SPONGE_DATA);
+        if (!spongeData.contains(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_LIST)) {
             return DataTransactionResult.successNoData();
         }
-        final NBTTagList dataList = spongeData.getTagList(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_COMPOUND);
-        if (dataList.tagCount() == 0) {
+        final NBTTagList dataList = spongeData.getList(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_COMPOUND);
+        if (dataList.size() == 0) {
             return DataTransactionResult.successNoData();
         }
         boolean isRemoving;
-        for (int i = 0; i < dataList.tagCount(); i++) {
-            final NBTTagCompound dataCompound = dataList.getCompoundTagAt(i);
+        for (int i = 0; i < dataList.size(); i++) {
+            final NBTTagCompound dataCompound = dataList.getCompound(i);
             final String dataClass = dataCompound.getString(NbtDataUtil.CUSTOM_DATA_CLASS);
             if (containerClass.getName().equals(dataClass)) {
-                final NBTTagCompound current = dataCompound.getCompoundTag(NbtDataUtil.CUSTOM_DATA);
+                final NBTTagCompound current = dataCompound.getCompound(NbtDataUtil.CUSTOM_DATA);
                 final DataContainer currentView = NbtTranslator.getInstance().translate(current);
                 DataManipulator<?, ?> existing = deserialize(dataClass, currentView);
                 isRemoving = existing != null;
@@ -195,12 +195,12 @@ public class CustomDataNbtUtil {
     @SuppressWarnings("unchecked")
     public static void readCustomData(NBTTagCompound compound, DataHolder dataHolder) {
         if (dataHolder instanceof IMixinCustomDataHolder) {
-            if (compound.hasKey(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_LIST)) {
-                final NBTTagList list = compound.getTagList(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_COMPOUND);
+            if (compound.contains(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_LIST)) {
+                final NBTTagList list = compound.getList(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_COMPOUND);
                 final ImmutableList.Builder<DataView> builder = ImmutableList.builder();
-                if (list != null && list.tagCount() != 0) {
-                    for (int i = 0; i < list.tagCount(); i++) {
-                        final NBTTagCompound internal = list.getCompoundTagAt(i);
+                if (list != null && list.size() != 0) {
+                    for (int i = 0; i < list.size(); i++) {
+                        final NBTTagCompound internal = list.getCompound(i);
                         builder.add(NbtTranslator.getInstance().translateFrom(internal));
                     }
                 }
@@ -217,18 +217,18 @@ public class CustomDataNbtUtil {
                     SpongeImpl.getLogger().error("Could not translate custom plugin data! ", e);
                 }
             }
-            if (compound.hasKey(NbtDataUtil.FAILED_CUSTOM_DATA, NbtDataUtil.TAG_LIST)) {
-                final NBTTagList list = compound.getTagList(NbtDataUtil.FAILED_CUSTOM_DATA, NbtDataUtil.TAG_COMPOUND);
+            if (compound.contains(NbtDataUtil.FAILED_CUSTOM_DATA, NbtDataUtil.TAG_LIST)) {
+                final NBTTagList list = compound.getList(NbtDataUtil.FAILED_CUSTOM_DATA, NbtDataUtil.TAG_COMPOUND);
                 final ImmutableList.Builder<DataView> builder = ImmutableList.builder();
-                if (list != null && list.tagCount() != 0) {
-                    for (int i = 0; i < list.tagCount(); i++) {
-                        final NBTTagCompound internal = list.getCompoundTagAt(i);
+                if (list != null && list.size() != 0) {
+                    for (int i = 0; i < list.size(); i++) {
+                        final NBTTagCompound internal = list.getCompound(i);
                         builder.add(NbtTranslator.getInstance().translateFrom(internal));
                     }
 
                 }
                 // We want to attempt to refresh the failed data if it does succeed in getting read.
-                compound.removeTag(NbtDataUtil.FAILED_CUSTOM_DATA);
+                compound.remove(NbtDataUtil.FAILED_CUSTOM_DATA);
                 // Re-attempt to deserialize custom data
                 final SerializedDataTransaction transaction = DataUtil.deserializeManipulatorList(builder.build());
                 final List<DataManipulator<?, ?>> manipulators = transaction.deserializedManipulators;
@@ -258,17 +258,17 @@ public class CustomDataNbtUtil {
                 final List<DataView> manipulatorViews = DataUtil.getSerializedManipulatorList(manipulators);
                 final NBTTagList manipulatorTagList = new NBTTagList();
                 for (DataView dataView : manipulatorViews) {
-                    manipulatorTagList.appendTag(NbtTranslator.getInstance().translateData(dataView));
+                    manipulatorTagList.add(NbtTranslator.getInstance().translateData(dataView));
                 }
-                compound.setTag(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, manipulatorTagList);
+                compound.put(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, manipulatorTagList);
             }
             final List<DataView> failedData = ((IMixinCustomDataHolder) dataHolder).getFailedData();
             if (!failedData.isEmpty()) {
                 final NBTTagList failedList = new NBTTagList();
                 for (DataView failedDatum : failedData) {
-                    failedList.appendTag(NbtTranslator.getInstance().translateData(failedDatum));
+                    failedList.add(NbtTranslator.getInstance().translateData(failedDatum));
                 }
-                compound.setTag(NbtDataUtil.FAILED_CUSTOM_DATA, failedList);
+                compound.put(NbtDataUtil.FAILED_CUSTOM_DATA, failedList);
             }
         }
     }

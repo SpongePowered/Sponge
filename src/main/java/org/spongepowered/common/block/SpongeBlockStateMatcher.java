@@ -31,6 +31,7 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockStateMatcher;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.property.PropertyMatcher;
+import org.spongepowered.api.state.StateProperty;
 
 import java.util.List;
 import java.util.Optional;
@@ -39,15 +40,15 @@ import javax.annotation.Nullable;
 
 public class SpongeBlockStateMatcher implements BlockStateMatcher {
     final BlockType type;
-    final BlockTrait<?>[] traits;
+    final StateProperty<?>[] traits;
     final Object[] values;
     final List<PropertyMatcher<?>> propertyMatchers;
     @Nullable private ImmutableList<BlockState> compatibleStates; // Lazily constructed
 
-    SpongeBlockStateMatcher(BlockType type, BlockTrait<?>[] traits, Object[] values,
+    SpongeBlockStateMatcher(BlockType type, StateProperty<?>[] traits, Object[] values,
             List<PropertyMatcher<?>> propertyMatchers) {
         this.type = type;
-        this.traits = new BlockTrait<?>[traits.length];
+        this.traits = new StateProperty<?>[traits.length];
         this.propertyMatchers = propertyMatchers;
         System.arraycopy(traits, 0, this.traits, 0, traits.length);
         this.values = new Object[values.length];
@@ -55,7 +56,7 @@ public class SpongeBlockStateMatcher implements BlockStateMatcher {
     }
 
     private ImmutableList<BlockState> computeCompatibleStates() {
-        return this.type.getAllBlockStates()
+        return this.type.getValidStates()
                 .stream()
                 .filter(this::matches)
                 .collect(ImmutableList.toImmutableList());
@@ -68,9 +69,9 @@ public class SpongeBlockStateMatcher implements BlockStateMatcher {
             return false;
         }
         for (int i = 0; i < this.traits.length; i++) {
-            final BlockTrait<?> trait = this.traits[i];
+            final StateProperty<?> trait = this.traits[i];
             final Object value = this.values[i];
-            final Optional<?> traitValue = state.getTraitValue(trait);
+            final Optional<?> traitValue = state.getStateProperty(trait);
             if (!traitValue.isPresent()) { // If for any reason this fails, that means there's another problem, but alas, just in case
                 return false;
             }

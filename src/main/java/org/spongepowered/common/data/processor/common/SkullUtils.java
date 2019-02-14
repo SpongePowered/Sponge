@@ -70,7 +70,7 @@ public class SkullUtils {
         if (skull.getItem() == Items.PLAYER_HEAD) {
             if (profile == null || profile.equals(SpongeRepresentedPlayerData.NULL_PROFILE)) {
                 if (skull.getTag() != null) {
-                    skull.getTag().removeTag(NbtDataUtil.ITEM_SKULL_OWNER);
+                    skull.getTag().remove(NbtDataUtil.ITEM_SKULL_OWNER);
                 }
             } else {
                 final NBTTagCompound nbt = new NBTTagCompound();
