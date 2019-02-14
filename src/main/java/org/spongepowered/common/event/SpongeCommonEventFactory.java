@@ -75,6 +75,7 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
+import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.CollideBlockEvent;
@@ -89,6 +90,7 @@ import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
+import org.spongepowered.api.event.entity.RotateEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.entity.ai.SetAITargetEvent;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
@@ -841,7 +843,7 @@ public class SpongeCommonEventFactory {
     }
 
     @Nullable
-    public static MoveEntityEvent callMoveEntityEvent(net.minecraft.entity.Entity entity,
+    public static Event callMoveEntityEvent(net.minecraft.entity.Entity entity,
         EntityTickContext context) {
         // Ignore movement event if entity is dead, a projectile, or item.
         // Note: Projectiles are handled with CollideBlockEvent.Impact
@@ -876,7 +878,15 @@ public class SpongeCommonEventFactory {
 
                 final Transform<World> oldTransform = new Transform<>(world, oldPositionVector, oldRotationVector, spongeEntity.getScale());
                 final Transform<World> newTransform = new Transform<>(world, currentPositionVector, currentRotationVector, spongeEntity.getScale());
-                final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(frame.getCurrentCause(), oldTransform, newTransform, spongeEntity);
+                Event event  = null;
+                Transform<World> eventToTransform = null;
+                if (!oldPositionVector.equals(currentPositionVector)) {
+                    event = SpongeEventFactory.createMoveEntityEventPosition(frame.getCurrentCause(), oldTransform, newTransform, spongeEntity);
+                    eventToTransform = ((MoveEntityEvent) event).getToTransform();
+                } else {
+                    event = SpongeEventFactory.createRotateEntityEvent(frame.getCurrentCause(), oldTransform, newTransform, spongeEntity);
+                    eventToTransform = ((RotateEntityEvent) event).getToTransform();
+                }
     
                 if (SpongeImpl.postEvent(event)) { // Cancelled event, reset positions to previous position.
                     entity.posX = context.prevX;
@@ -885,13 +895,13 @@ public class SpongeCommonEventFactory {
                     entity.rotationPitch = entity.prevRotationPitch;
                     entity.rotationYaw = entity.prevRotationYaw;
                 } else {
-                    Vector3d newPosition = event.getToTransform().getPosition();
+                    Vector3d newPosition = eventToTransform.getPosition();
                     if (!newPosition.equals(currentPositionVector)) {
                         entity.posX = newPosition.getX();
                         entity.posY = newPosition.getY();
                         entity.posZ = newPosition.getZ();
                     }
-                    if (!event.getToTransform().getRotation().equals(currentRotationVector)) {
+                    if (!eventToTransform.getRotation().equals(currentRotationVector)) {
                         entity.rotationPitch = (float) currentRotationVector.getX();
                         entity.rotationYaw = (float) currentRotationVector.getY();
                     }

@@ -96,12 +96,15 @@ import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
+import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.tileentity.ChangeSignEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
+import org.spongepowered.api.event.entity.RotateEntityEvent;
 import org.spongepowered.api.event.entity.living.humanoid.AnimateHandEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.event.message.MessageEvent;
@@ -497,19 +500,27 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                 Transform<World> fromTransform = player.getTransform().setLocation(from).setRotation(fromrot);
                 Transform<World> toTransform = player.getTransform().setLocation(to).setRotation(torot);
                 Transform<World> originalToTransform = toTransform;
-                if (ShouldFire.MOVE_ENTITY_EVENT) {
+                if ((rotationOnly && ShouldFire.ROTATE_ENTITY_EVENT) || (!rotationOnly && ShouldFire.MOVE_ENTITY_EVENT_POSITION)) {
                     try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                         Sponge.getCauseStackManager().pushCause(player);
-                        MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), fromTransform, toTransform, player);
+                        Event event = null;
+                        Transform<World> eventToTransform = null;
+                        if (rotationOnly) {
+                            event = SpongeEventFactory.createRotateEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), fromTransform, toTransform, player);
+                            eventToTransform = ((RotateEntityEvent) event).getToTransform();
+                        } else {
+                            event = SpongeEventFactory.createMoveEntityEventPosition(Sponge.getCauseStackManager().getCurrentCause(), fromTransform, toTransform, player);
+                            eventToTransform = ((MoveEntityEvent) event).getToTransform();
+                        }
                         SpongeImpl.postEvent(event);
                         Sponge.getCauseStackManager().popCause();
-                        if (event.isCancelled()) {
+                        if (((Cancellable) event).isCancelled()) {
                             mixinPlayer.setLocationAndAngles(fromTransform);
                             this.lastMoveLocation = from;
                             ((IMixinEntityPlayerMP) this.player).setVelocityOverride(null);
                             return true;
                         }
-                        toTransform = event.getToTransform();
+                        toTransform = eventToTransform;
                     }
                 }
                 if (!toTransform.equals(originalToTransform)) {

@@ -67,10 +67,13 @@ public class ShouldFire {
     public static boolean DROP_ITEM_EVENT_DISPENSE = false;
 
     public static boolean MOVE_ENTITY_EVENT = false;
+    public static boolean MOVE_ENTITY_EVENT_POSITION = false;
 
     public static boolean RIDE_ENTITY_EVENT = false;
     public static boolean RIDE_ENTITY_EVENT_MOUNT = false;
     public static boolean RIDE_ENTITY_EVENT_DISMOUNT = false;
+
+    public static boolean ROTATE_ENTITY_EVENT = false;
 
     public static boolean PRIME_EXPLOSIVE_EVENT_PRE = false;
     public static boolean PRIME_EXPLOSIVE_EVENT_POST = false;

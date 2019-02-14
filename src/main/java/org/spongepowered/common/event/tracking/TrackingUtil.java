@@ -155,7 +155,7 @@ public final class TrackingUtil {
             context.buildAndSwitch();
             entityTiming.startTiming();
             entity.onUpdate();
-            if (ShouldFire.MOVE_ENTITY_EVENT) {
+            if (ShouldFire.MOVE_ENTITY_EVENT_POSITION || ShouldFire.ROTATE_ENTITY_EVENT) {
                 SpongeCommonEventFactory.callMoveEntityEvent(entity, context);
             }
         } catch (Exception | NoClassDefFoundError e) {
@@ -183,7 +183,7 @@ public final class TrackingUtil {
                 .ifPresent(context::owner);
             context.buildAndSwitch();
             entity.updateRidden();
-            if (ShouldFire.MOVE_ENTITY_EVENT) {
+            if (ShouldFire.MOVE_ENTITY_EVENT_POSITION || ShouldFire.ROTATE_ENTITY_EVENT) {
                 SpongeCommonEventFactory.callMoveEntityEvent(entity, context);
             }
         } catch (Exception | NoClassDefFoundError e) {
