@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.scoreboard;
 
-import net.minecraft.scoreboard.IScoreCriteria;
+import net.minecraft.scoreboard.ScoreCriteria;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
 import org.spongepowered.asm.mixin.Final;
@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.Shadow;
 
 import javax.annotation.Nullable;
 
-@Mixin(IScoreCriteria.EnumRenderType.class)
+@Mixin(ScoreCriteria.RenderType.class)
 public abstract class MixinScoreboardObjectiveDisplayType implements ObjectiveDisplayMode {
 
     @Shadow @Final public String field_211840_c; // renderType

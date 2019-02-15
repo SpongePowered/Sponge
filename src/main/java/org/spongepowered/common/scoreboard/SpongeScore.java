@@ -77,7 +77,7 @@ public class SpongeScore implements Score {
             if (j != this.score || score.forceUpdate)
             {
                 score.forceUpdate = false;
-                score.getScoreScoreboard().onScoreUpdated(score);
+                score.getScoreScoreboard().onScoreChanged(score);
             }
         }
     }

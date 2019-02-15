@@ -25,7 +25,7 @@
 package org.spongepowered.common.scoreboard;
 
 import com.google.common.collect.Maps;
-import net.minecraft.scoreboard.IScoreCriteria;
+import net.minecraft.scoreboard.ScoreCriteria;
 import net.minecraft.scoreboard.ScoreObjective;
 import org.spongepowered.api.scoreboard.Score;
 import org.spongepowered.api.scoreboard.Scoreboard;
@@ -80,7 +80,7 @@ public class SpongeObjective implements Objective {
     private void updateDisplayName() {
         for (ScoreObjective objective: this.objectives.values()) {
             objective.displayName = SpongeTexts.toComponent(this.displayName);
-            objective.scoreboard.func_199869_b(objective);
+            objective.scoreboard.onObjectiveChanged(objective);
         }
     }
 
@@ -103,8 +103,8 @@ public class SpongeObjective implements Objective {
 
     private void updateDisplayMode() {
         for (ScoreObjective objective: this.objectives.values()) {
-            objective.renderType = (IScoreCriteria.EnumRenderType) (Object) this.displayMode;
-            objective.scoreboard.func_199869_b(objective);
+            objective.renderType = (ScoreCriteria.RenderType) (Object) this.displayMode;
+            objective.scoreboard.onObjectiveChanged(objective);
         }
     }
 
@@ -196,10 +196,10 @@ public class SpongeObjective implements Objective {
                     Map<?, ?> map1 = scoreboard.entitiesScoreObjectives.remove(name);
 
                     if (map1 != null) {
-                        scoreboard.broadcastScoreUpdate(name);
+                        scoreboard.onPlayerScoreRemoved(name, objective);
                     }
                 } else if (score != null) {
-                    scoreboard.broadcastScoreUpdate(name, objective);
+                    scoreboard.onScoreChanged(score);
                 }
             }
             ((SpongeScore) spongeScore).removeScoreFor(objective);
@@ -222,14 +222,14 @@ public class SpongeObjective implements Objective {
         if (this.objectives.containsKey(scoreboard)) {
             return this.objectives.get(scoreboard);
         }
-        ScoreObjective objective = new ScoreObjective(scoreboard, this.name, (IScoreCriteria) this.criterion, SpongeTexts.toComponent(this.displayName), (IScoreCriteria.EnumRenderType) (Object) this.displayMode);
+        ScoreObjective objective = new ScoreObjective(scoreboard, this.name, (ScoreCriteria) this.criterion, SpongeTexts.toComponent(this.displayName), (ScoreCriteria.RenderType) (Object) this.displayMode);
 
         // We deliberately set the fields here instead of using the methods.
         // Since a new objective is being created here, we want to avoid
         // sending packets until everything is in the proper state.
 
         objective.displayName = SpongeTexts.toComponent(this.displayName);
-        objective.renderType = (IScoreCriteria.EnumRenderType) (Object) this.displayMode;
+        objective.renderType = (ScoreCriteria.RenderType) (Object) this.displayMode;
 
         ((IMixinScoreObjective) objective).setSpongeObjective(this);
         this.objectives.put(scoreboard, objective);

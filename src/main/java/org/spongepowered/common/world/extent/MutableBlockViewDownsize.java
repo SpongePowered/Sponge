@@ -35,7 +35,7 @@ import org.spongepowered.common.util.gen.ArrayImmutableBlockBuffer;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
 import org.spongepowered.common.world.schematic.GlobalPalette;
 
-public class MutableBlockViewDownsize extends AbstractBlockViewDownsize<MutableBlockVolume> implements MutableBlockVolume {
+public class MutableBlockViewDownsize extends AbstractBlockViewDownsize<    MutableBlockVolume> implements MutableBlockVolume {
 
     public MutableBlockViewDownsize(MutableBlockVolume volume, Vector3i min, Vector3i max) {
         super(volume, min, max);

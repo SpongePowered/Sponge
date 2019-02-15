@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.scoreboard;
 
 import com.google.common.base.CaseFormat;
-import net.minecraft.scoreboard.IScoreCriteria;
+import net.minecraft.scoreboard.ScoreCriteria;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.scoreboard.critieria.Criterion;
 import org.spongepowered.asm.mixin.Implements;
@@ -36,7 +36,7 @@ import org.spongepowered.asm.mixin.Shadow;
 
 import javax.annotation.Nullable;
 
-@Mixin(IScoreCriteria.class)
+@Mixin(ScoreCriteria.class)
 @Implements(@Interface(iface = Criterion.class, prefix = "criterion$"))
 public abstract class MixinCriterion { // Trick to allow avoid shadowing, since multiple targets are used
     @Shadow public abstract String getName();

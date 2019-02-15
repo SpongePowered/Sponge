@@ -11,7 +11,7 @@
         "network.MixinNetHandlerHandshakeTCP",
         "network.MixinNetHandlerLoginServer",
         "network.MixinNetworkManager",
-        "network.packet.MixinC00Handshake"
+      "network.packet.MixinCPacketHandshake"
     ],
     "injectors": {
         "defaultRequire": 1

@@ -27,8 +27,8 @@ package org.spongepowered.common.mixin.core.scoreboard;
 import com.google.common.collect.Lists;
 import net.minecraft.network.play.server.SPacketDisplayObjective;
 import net.minecraft.network.play.server.SPacketScoreboardObjective;
-import net.minecraft.scoreboard.IScoreCriteria;
 import net.minecraft.scoreboard.Score;
+import net.minecraft.scoreboard.ScoreCriteria;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
@@ -90,7 +90,7 @@ public abstract class MixinScoreboardLogic extends Scoreboard implements IMixinS
     // Add objective
 
     @Override
-    public ScoreObjective addObjective(String name, IScoreCriteria criteria, ITextComponent displayName, IScoreCriteria.EnumRenderType renderType) {
+    public ScoreObjective addObjective(String name, ScoreCriteria criteria, ITextComponent displayName, ScoreCriteria.RenderType renderType) {
         SpongeObjective objective = new SpongeObjective(name, (Criterion) criteria);
         objective.setDisplayMode((ObjectiveDisplayMode) (Object) renderType);
         objective.setDisplayName(((IMixinTextComponent) displayName).toText());
