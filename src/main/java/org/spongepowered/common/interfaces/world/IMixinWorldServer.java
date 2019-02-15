@@ -33,7 +33,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
@@ -41,7 +40,6 @@ import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.GeneralConfigBase;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.world.gen.SpongeChunkGenerator;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -56,8 +54,6 @@ public interface IMixinWorldServer extends IMixinWorld {
     SpongeConfig<WorldConfig> getWorldConfig();
 
     void setActiveConfig(SpongeConfig<? extends GeneralConfigBase> config);
-
-    Integer getDimensionId();
 
     void updateWorldGenerator();
 
@@ -77,12 +73,6 @@ public interface IMixinWorldServer extends IMixinWorld {
     void addEntityRotationUpdate(Entity entity, Vector3d rotation);
 
     SpongeBlockSnapshot createSpongeBlockSnapshot(IBlockState state, IBlockState extended, BlockPos pos, BlockChangeFlag updateFlag);
-
-    SpongeWorldGenerator createWorldGenerator(DataContainer settings);
-
-    SpongeWorldGenerator createWorldGenerator(String settings);
-
-    SpongeChunkGenerator createChunkGenerator(SpongeWorldGenerator newGenerator);
 
     boolean isProcessingExplosion();
 

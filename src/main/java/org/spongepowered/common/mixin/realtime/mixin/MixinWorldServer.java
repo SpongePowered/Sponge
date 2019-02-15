@@ -26,22 +26,25 @@ package org.spongepowered.common.mixin.realtime.mixin;
 
 import net.minecraft.profiler.Profiler;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.dimension.Dimension;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
+import net.minecraft.world.storage.WorldSavedDataStorage;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.mixin.realtime.IMixinRealTimeTicking;
 
+import javax.annotation.Nullable;
+
 @Mixin(WorldServer.class)
 public abstract class MixinWorldServer extends World implements IMixinRealTimeTicking {
 
-    protected MixinWorldServer(ISaveHandler saveHandlerIn, WorldInfo info, WorldProvider providerIn,
-            Profiler profilerIn, boolean client) {
-        super(saveHandlerIn, info, providerIn, profilerIn, client);
+    protected MixinWorldServer(ISaveHandler saveHandler, @Nullable WorldSavedDataStorage storage,
+        WorldInfo properties, Dimension dimension, Profiler profiler, boolean isClient) {
+        super(saveHandler, storage, properties, dimension, profiler, isClient);
     }
 
     @Inject(method = "tick", at = @At("HEAD"))
@@ -51,7 +54,7 @@ public abstract class MixinWorldServer extends World implements IMixinRealTimeTi
             long diff = this.getRealTimeTicks() - 1;
             // Don't set if we're not changing it as other mods might be listening for changes
             if (diff > 0) {
-                this.worldInfo.setWorldTime(this.worldInfo.getWorldTime() + diff);
+                this.worldInfo.setDayTime(this.worldInfo.getDayTime() + diff);
             }
         }
     }

@@ -29,13 +29,11 @@ import co.aikar.timings.Timing;
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockGrass;
 import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.BlockLog;
 import net.minecraft.block.SoundType;
-import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
@@ -48,6 +46,7 @@ import net.minecraft.state.StateContainer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.registry.IRegistry;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSoundGroup;
@@ -132,8 +131,6 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Shadow public abstract StateContainer<Block, IBlockState> getStateContainer();
     @Shadow public abstract SoundType getSoundType();
 
-    @Shadow @Final protected MapColor blockMapColor;
-
     @Shadow @Final protected Material material;
     private Optional<TreeType> treeType;
 
@@ -183,7 +180,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     @Override
     public CatalogKey getKey() {
-        return (CatalogKey) (Object) Block.REGISTRY.getKey((Block) (Object) this);
+        return (CatalogKey) (Object) IRegistry.BLOCK.getKey((Block) (Object) this);
     }
 
     @Override
@@ -206,7 +203,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
         // This should always succeed when things are working properly,
         // so we just catch the exception instead of doing a null check.
         try {
-            return Block.REGISTRY.getKey((Block) (Object) this).toString();
+            return IRegistry.BLOCK.getKey((Block) (Object) this).toString();
         } catch (NullPointerException e) {
             throw new RuntimeException(String.format("Block '%s' (class '%s') is not registered with the block registry! This is likely a bug in the corresponding mod.", this, this.getClass().getName()), e);
         }
@@ -296,7 +293,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
         // It also expects block drops to trigger an event during the quarry TE tick. As our captures are processed
         // post tick, we must avoid capturing to ensure the quarry can capture items properly.
         // If a fake player is detected with an item in hand, avoid captures
-        if (stack != null && SpongeImplHooks.isFakePlayer(player) && player.getHeldItemMainhand() != null && !player.getHeldItemMainhand().isEmpty()) {
+        if (stack != null && SpongeImplHooks.isFakePlayer(player) && !player.getHeldItemMainhand().isEmpty()) {
             canCaptureItems = false;
         }
     }

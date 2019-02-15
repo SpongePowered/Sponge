@@ -202,7 +202,7 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.WorldManager;
 import org.spongepowered.common.world.WorldUtil;
 import org.spongepowered.common.world.border.PlayerBorderListener;
-import org.spongepowered.common.world.gen.SpongeChunkGenerator;
+import org.spongepowered.common.world.gen.SpongeTerrainGenerator;
 import org.spongepowered.common.world.type.SpongeWorldType;
 
 import java.io.File;
@@ -235,7 +235,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     private static final EnumSet<EnumFacing> NOTIFY_DIRECTIONS = EnumSet.of(EnumFacing.WEST, EnumFacing.EAST, EnumFacing.DOWN, EnumFacing.UP, EnumFacing.NORTH, EnumFacing.SOUTH);
 
     private final Map<net.minecraft.entity.Entity, Vector3d> rotationUpdates = new HashMap<>();
-    private SpongeChunkGenerator spongegen;
+    private SpongeTerrainGenerator spongegen;
     private SpongeConfig<? extends GeneralConfigBase> activeConfig;
     private long weatherStartTime;
     private Weather prevWeather;
@@ -490,8 +490,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     @Override
-    public SpongeChunkGenerator createChunkGenerator(SpongeWorldGenerator newGenerator) {
-        return new SpongeChunkGenerator((net.minecraft.world.World) (Object) this, newGenerator.getBaseGenerationPopulator(),
+    public SpongeTerrainGenerator createChunkGenerator(SpongeWorldGenerator newGenerator) {
+        return new SpongeTerrainGenerator((net.minecraft.world.World) (Object) this, newGenerator.getBaseGenerationPopulator(),
                 newGenerator.getBiomeGenerator());
     }
 

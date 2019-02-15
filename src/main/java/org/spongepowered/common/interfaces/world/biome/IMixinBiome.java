@@ -24,9 +24,7 @@
  */
 package org.spongepowered.common.interfaces.world.biome;
 
-import net.minecraft.world.World;
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 
 public interface IMixinBiome {
 

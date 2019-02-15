@@ -31,7 +31,6 @@ import org.spongepowered.api.data.manipulator.mutable.entity.DamageableData;
 import org.spongepowered.api.data.value.OptionalValue;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.living.Living;
-import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeDamageableData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.value.SpongeMutableOptionalValue;
 

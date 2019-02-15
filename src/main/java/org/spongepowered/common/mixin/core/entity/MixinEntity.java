@@ -282,15 +282,6 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
 
     @Shadow @Nullable public abstract Team getTeam();
 
-    @Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;dimension:I", opcode = Opcodes.PUTFIELD))
-    private void onSet(net.minecraft.entity.Entity self, int dimensionId, net.minecraft.world.World worldIn) {
-        if (worldIn instanceof IMixinWorldServer) {
-            self.dimension = ((IMixinWorldServer) worldIn).getDimensionId();
-        } else {
-            self.dimension = dimensionId;
-        }
-    }
-
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onSpongeConstruction(net.minecraft.entity.EntityType<?> entityType, @Nullable net.minecraft.world.World worldIn, CallbackInfo ci) {
         if (this.entityType instanceof SpongeEntityType) {
@@ -544,8 +535,8 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
                         ((Player) entityPlayerMP).closeInventory(); // Call API method to make sure we capture it
                     }
                 }
-                EntityUtil.changeWorld((net.minecraft.entity.Entity) (Object) this, location, ((IMixinWorldServer) this.world).getDimensionId(),
-                        ((IMixinWorldServer) nmsWorld).getDimensionId());
+                EntityUtil.changeWorld((net.minecraft.entity.Entity) (Object) this, location, this.world.getDimension().getType(),
+                        nmsWorld.getDimension().getType());
             } else {
                 double distance = location.getPosition().distance(this.getPosition());
 

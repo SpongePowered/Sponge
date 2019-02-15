@@ -258,7 +258,7 @@ public class DamageEventHandler {
 
                     final Enchantment enchantment = Enchantment.REGISTRY.get(ResourceLocation.makeResourceLocation(enchantmentId));
                     if (enchantment != null) {
-                        enchantments.put(enchantment, modifi)
+                        enchantments.put(enchantment, modifi);
                     }
                     final int temp = enchantment.calcModifierDamage(level, damageSource);
                     if (temp != 0) {

@@ -76,7 +76,7 @@ public class SpongeBanService implements BanService {
     @Override
     public Collection<Ban.Ip> getIpBans() {
         this.getIPBanList().removeExpired();
-        return new ArrayList<>((Collection<Ban.Ip>) (Object) this.getIPBanList().getEntries();
+        return new ArrayList<>((Collection<Ban.Ip>) (Object) this.getIPBanList().getEntries());
     }
 
     @Override
@@ -84,7 +84,7 @@ public class SpongeBanService implements BanService {
         UserListBans bans = this.getUserBanList();
 
         bans.removeExpired();
-        return Optional.ofNullable((Ban.Profile) bans.getEntry((com.mojang.authlib.GameProfile) profile)))
+        return Optional.ofNullable((Ban.Profile) bans.getEntry((com.mojang.authlib.GameProfile) profile));
     }
 
     @Override

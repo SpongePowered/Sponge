@@ -75,7 +75,6 @@ import org.spongepowered.api.registry.util.CustomCatalogRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 import org.spongepowered.common.registry.RegistryHelper;
-import org.spongepowered.common.world.gen.SpongePopulatorType;
 
 import java.util.Map;
 import java.util.function.Function;
