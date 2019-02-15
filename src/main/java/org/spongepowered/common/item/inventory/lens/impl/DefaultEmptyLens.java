@@ -142,8 +142,7 @@ public class DefaultEmptyLens implements Lens {
 
     @Override
     public Iterator<Lens> iterator() {
-        // TODO 
-        return null;
+        return Collections.emptyIterator();
     }
 
     public SlotLens getSlotLens(int ordinal) {
