@@ -31,7 +31,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.IRegistry;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
@@ -40,41 +39,15 @@ import org.spongepowered.common.config.category.EntityTrackerModCategory;
 import org.spongepowered.common.config.type.TrackerConfig;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
-public class SpongeEntityType extends SpongeCatalogType.Translatable implements EntityType {
+public class SpongeEntityType<I extends Entity> extends SpongeCatalogType.Translatable implements EntityType {
 
-    public static final EntityType UNKNOWN = new EntityType() {
-
-        private final Translation translation = new SpongeTranslation("entity.generic.name");
-        private final CatalogKey key = CatalogKey.of("unknown", "unknown");
-
-        @Override
-        public Translation getTranslation() {
-            return this.translation;
-        }
-
-        @Override
-        public String getName() {
-            return "Unknown";
-        }
-
-
-        @Override
-        public CatalogKey getKey() {
-            return this.key;
-        }
-
-        @Override
-        public Class<? extends org.spongepowered.api.entity.Entity> getEntityClass() {
-            throw new UnsupportedOperationException("Unknown entity type has no entity class");
-        }
-
-    };
+    public static final EntityType UNKNOWN = new UnknownEntityType();
 
     public final ResourceLocation key;
-    public final net.minecraft.entity.EntityType<?> type;
-
+    public final net.minecraft.entity.EntityType<I> type;
+    public final Class<I> entityClass;
     public final int networkId;
-    public final Class<? extends Entity> entityClass;
+
     private EnumCreatureType creatureType;
     private boolean activationRangeInitialized = false;
     // currently not used
@@ -87,16 +60,16 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
     public boolean allowsBlockEventCreation = true;
     public boolean allowsEntityEventCreation = true;
 
-    public <T extends Entity> SpongeEntityType(final ResourceLocation key, final net.minecraft.entity.EntityType<T> type) {
-        this(key, IRegistry.ENTITY_TYPE.getId(type), type);
+    public SpongeEntityType(final ResourceLocation key, final net.minecraft.entity.EntityType<I> type, final Class<I> klass) {
+        this(key, type, klass, IRegistry.ENTITY_TYPE.getId(type));
     }
 
-    public <T extends Entity> SpongeEntityType(final ResourceLocation key, final int networkId, final net.minecraft.entity.EntityType<T> type) {
+    public SpongeEntityType(final ResourceLocation key, final net.minecraft.entity.EntityType<I> type, final Class<I> klass, final int networkId) {
         super((CatalogKey) (Object) key, new SpongeTranslation(type.getTranslationKey()));
         this.key = key;
-        this.networkId = networkId;
         this.type = type;
-        this.entityClass = type.getEntityClass();
+        this.entityClass = klass;
+        this.networkId = networkId;
 
         this.initializeTrackerState();
     }

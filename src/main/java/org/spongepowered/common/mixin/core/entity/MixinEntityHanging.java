@@ -84,13 +84,13 @@ public abstract class MixinEntityHanging extends MixinEntity implements Hanging,
     @Override
     public void writeToNbt(NBTTagCompound compound) {
         super.writeToNbt(compound);
-        compound.setBoolean("ignorePhysics", this.ignorePhysics);
+        compound.putBoolean("ignorePhysics", this.ignorePhysics);
     }
 
     @Override
     public void readFromNbt(NBTTagCompound compound) {
         super.readFromNbt(compound);
-        if (compound.hasKey("ignorePhysics")) {
+        if (compound.contains("ignorePhysics")) {
             this.ignorePhysics = compound.getBoolean("ignorePhysics");
         }
     }

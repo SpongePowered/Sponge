@@ -84,7 +84,7 @@ public abstract class MixinEntityWitherSkull extends MixinEntityFireball impleme
     @Override
     public void readFromNbt(NBTTagCompound compound) {
         super.readFromNbt(compound);
-        if (compound.hasKey(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT)) {
+        if (compound.contains(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT)) {
             this.damage = compound.getFloat(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT);
             this.damageSet = true;
         }
@@ -94,9 +94,9 @@ public abstract class MixinEntityWitherSkull extends MixinEntityFireball impleme
     public void writeToNbt(NBTTagCompound compound) {
         super.writeToNbt(compound);
         if (this.damageSet) {
-            compound.setFloat(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT, this.damage);
+            compound.putFloat(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT, this.damage);
         } else {
-            compound.removeTag(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT);
+            compound.remove(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT);
         }
     }
 
@@ -126,11 +126,10 @@ public abstract class MixinEntityWitherSkull extends MixinEntityFireball impleme
         boolean griefer = ((IMixinGriefer) this).canGrief();
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(this);
-            frame.addContext(EventContextKeys.THROWER, getShooter()); // TODO - Remove in API 8/1.13
             frame.addContext(EventContextKeys.PROJECTILE_SOURCE, getShooter());
             frame.pushCause(getShooter());
             return detonate(Explosion.builder()
-                .location(new Location<>((World) worldObj, new Vector3d(x, y, z)))
+                .location(new Location((World) worldObj, new Vector3d(x, y, z)))
                 .sourceExplosive(this)
                 .radius(this.explosionRadius)
                 .canCauseFire(flaming)

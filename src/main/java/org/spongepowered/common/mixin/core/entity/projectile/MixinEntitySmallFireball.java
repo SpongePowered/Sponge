@@ -61,7 +61,7 @@ public abstract class MixinEntitySmallFireball extends MixinEntityFireball imple
     @Override
     public void readFromNbt(NBTTagCompound compound) {
         super.readFromNbt(compound);
-        if (compound.hasKey(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT)) {
+        if (compound.contains(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT)) {
             this.damage = compound.getFloat(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT);
         }
     }
@@ -69,7 +69,7 @@ public abstract class MixinEntitySmallFireball extends MixinEntityFireball imple
     @Override
     public void writeToNbt(NBTTagCompound compound) {
         super.writeToNbt(compound);
-        compound.setFloat(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT, this.damage);
+        compound.putFloat(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT, this.damage);
     }
 
 

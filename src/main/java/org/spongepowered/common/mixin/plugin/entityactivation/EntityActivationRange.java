@@ -152,7 +152,7 @@ public class EntityActivationRange {
             spongeEntity.setDefaultActivationState(true);
             return;
         }
-        final SpongeEntityType spongeType = (SpongeEntityType) type;
+        final SpongeEntityType<?> spongeType = (SpongeEntityType<?>) type;
         final byte activationType = spongeEntity.getActivationType();
         if (!spongeType.isActivationRangeInitialized()) {
             addEntityToConfig(entity.world, spongeType, activationType);

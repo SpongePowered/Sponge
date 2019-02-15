@@ -110,7 +110,7 @@ public abstract class MixinEntityFishHook extends MixinEntity implements Fishing
     @Inject(method = "setHookedEntity", at = @At("HEAD"), cancellable = true)
     private void onSetHookedEntity(CallbackInfo ci) {
         if (SpongeImpl.postEvent(SpongeEventFactory.createFishingEventHookEntity(Sponge.getCauseStackManager().getCurrentCause(), this,
-                (Entity) (Object) this.caughtEntity))) {
+                (FishingBobber) (Object) this.caughtEntity))) {
             this.caughtEntity = null;
             ci.cancel();
         }
