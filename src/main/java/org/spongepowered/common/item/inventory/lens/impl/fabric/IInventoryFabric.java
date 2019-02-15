@@ -67,7 +67,7 @@ public class IInventoryFabric extends MinecraftFabric {
 
     @Override
     public Translation getDisplayName() {
-        return new FixedTranslation(this.inventory.getDisplayName().getUnformattedText());
+        return new FixedTranslation(this.inventory.getDisplayName().getUnformattedComponentText());
     }
 
     @Override

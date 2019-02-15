@@ -49,7 +49,7 @@ public class SpongeArgumentType<T> extends SpongeArgumentHolder<ArgumentType<T>>
     static {
         converters.put(String.class.getName(), Function.<String>identity());
         converters.put(EntityType.class.getName(),
-                       (Function<String, EntityType>) input -> EntityTypeRegistryModule.getInstance().get(input.toLowerCase()).orElse(null));
+                       (Function<String, EntityType>) input -> EntityTypeRegistryModule.getInstance().get(CatalogKey.resolve(input.toLowerCase())).orElse(null));
         converters.put(GameMode.class.getName(), input -> {
             try {
                 int i = Integer.parseInt(input);

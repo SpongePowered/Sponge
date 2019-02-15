@@ -52,7 +52,7 @@ public class SpongeCommandBlockBuilder extends AbstractTileBuilder<CommandBlock>
             cmdBlockLogic.setCommand(container.getString(DataQueries.STORED_COMMAND).get());
             cmdBlockLogic.successCount = container.getInt(DataQueries.SUCCESS_COUNT).get();
             cmdBlockLogic.setTrackOutput(container.getBoolean(DataQueries.DOES_TRACK_OUTPUT).get());
-            if (cmdBlockLogic.shouldTrackOutput()) {
+            if (cmdBlockLogic.shouldReceiveErrors()) {
                 cmdBlockLogic.setLastOutput(SpongeTexts.toComponent(SpongeTexts.fromLegacy(
                         container.getString(DataQueries.TRACKED_OUTPUT).get())));
             }

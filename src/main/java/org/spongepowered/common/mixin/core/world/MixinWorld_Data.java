@@ -64,52 +64,52 @@ public abstract class MixinWorld_Data implements World {
 
     @Override
     public Map<Property<?>, ?> getProperties(Vector3i coords) {
-        return SpongeImpl.getPropertyRegistry().getPropertiesFor(new Location<>(this, coords));
+        return SpongeImpl.getPropertyRegistry().getPropertiesFor(new Location(this, coords));
     }
 
     @Override
     public Map<Property<?>, ?> getProperties(int x, int y, int z) {
-        return SpongeImpl.getPropertyRegistry().getPropertiesFor(new Location<>(this, x, y, z));
+        return SpongeImpl.getPropertyRegistry().getPropertiesFor(new Location(this, x, y, z));
     }
 
     @Override
     public <V> Optional<V> getProperty(Vector3i coords, Property<V> property) {
-        return SpongeImpl.getPropertyRegistry().getStore(property).getFor(new Location<>(this, coords));
+        return SpongeImpl.getPropertyRegistry().getStore(property).getFor(new Location(this, coords));
     }
 
     @Override
     public <V> Optional<V> getProperty(int x, int y, int z, Property<V> property) {
-        return SpongeImpl.getPropertyRegistry().getStore(property).getFor(new Location<>(this, x, y, z));
+        return SpongeImpl.getPropertyRegistry().getStore(property).getFor(new Location(this, x, y, z));
     }
 
     @Override
     public <V> Optional<V> getProperty(Vector3i coords, Direction direction, Property<V> property) {
-        return SpongeImpl.getPropertyRegistry().getStore(property).getFor(new Location<>(this, coords), direction);
+        return SpongeImpl.getPropertyRegistry().getStore(property).getFor(new Location(this, coords), direction);
     }
 
     @Override
     public <V> Optional<V> getProperty(int x, int y, int z, Direction direction, Property<V> property) {
-        return SpongeImpl.getPropertyRegistry().getStore(property).getFor(new Location<>(this, x, y, z), direction);
+        return SpongeImpl.getPropertyRegistry().getStore(property).getFor(new Location(this, x, y, z), direction);
     }
 
     @Override
     public OptionalDouble getDoubleProperty(Vector3i coords, Property<Double> property) {
-        return SpongeImpl.getPropertyRegistry().getDoubleStore(property).getDoubleFor(new Location<>(this, coords));
+        return SpongeImpl.getPropertyRegistry().getDoubleStore(property).getDoubleFor(new Location(this, coords));
     }
 
     @Override
     public OptionalDouble getDoubleProperty(int x, int y, int z, Property<Double> property) {
-        return SpongeImpl.getPropertyRegistry().getDoubleStore(property).getDoubleFor(new Location<>(this, x, y, z));
+        return SpongeImpl.getPropertyRegistry().getDoubleStore(property).getDoubleFor(new Location(this, x, y, z));
     }
 
     @Override
     public OptionalInt getIntProperty(Vector3i coords, Property<Integer> property) {
-        return SpongeImpl.getPropertyRegistry().getIntStore(property).getIntFor(new Location<>(this, coords));
+        return SpongeImpl.getPropertyRegistry().getIntStore(property).getIntFor(new Location(this, coords));
     }
 
     @Override
     public OptionalInt getIntProperty(int x, int y, int z, Property<Integer> property) {
-        return SpongeImpl.getPropertyRegistry().getIntStore(property).getIntFor(new Location<>(this, x, y, z));
+        return SpongeImpl.getPropertyRegistry().getIntStore(property).getIntFor(new Location(this, x, y, z));
     }
 
     @Override

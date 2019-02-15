@@ -30,7 +30,7 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.property.Property;
-import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
+import org.spongepowered.api.event.item.inventory.container.InteractContainerEvent;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
@@ -58,7 +58,7 @@ public class SpongeInventoryBuilder implements Inventory.Builder {
 
     private InventoryArchetype archetype;
     private Map<Property<?>, Object> properties = new HashMap<>();
-    private Map<Class<? extends InteractInventoryEvent>, List<Consumer<? extends InteractInventoryEvent>>> listeners = new HashMap<>();
+    private Map<Class<? extends InteractContainerEvent>, List<Consumer<? extends InteractContainerEvent>>> listeners = new HashMap<>();
     private Carrier carrier;
 
     public SpongeInventoryBuilder() {
@@ -136,8 +136,8 @@ public class SpongeInventoryBuilder implements Inventory.Builder {
     }
 
     @Override
-    public <E extends InteractInventoryEvent> Inventory.Builder listener(Class<E> type, Consumer<E> listener) {
-        List<Consumer<? extends InteractInventoryEvent>> list = this.listeners.get(type);
+    public <E extends InteractContainerEvent> Inventory.Builder listener(Class<E> type, Consumer<E> listener) {
+        List<Consumer<? extends InteractContainerEvent>> list = this.listeners.get(type);
         if (list == null) {
             list = new ArrayList<>();
             this.listeners.put(type, list);

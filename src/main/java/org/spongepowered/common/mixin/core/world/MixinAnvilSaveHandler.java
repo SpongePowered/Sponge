@@ -24,7 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.world;
 
-import net.minecraft.util.datafix.DataFixer;
+import com.mojang.datafixers.DataFixer;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
 import net.minecraft.world.chunk.storage.AnvilSaveHandler;
 import net.minecraft.world.chunk.storage.IChunkLoader;
@@ -37,12 +38,15 @@ import org.spongepowered.common.interfaces.IMixinSaveHandler;
 
 import java.io.File;
 
+import javax.annotation.Nullable;
+
 @NonnullByDefault
 @Mixin(AnvilSaveHandler.class)
 public abstract class MixinAnvilSaveHandler extends SaveHandler {
 
-    public MixinAnvilSaveHandler(File p_i46648_1_, String p_i46648_2_, boolean p_i46648_3_, DataFixer p_i46648_4_) {
-        super(p_i46648_1_, p_i46648_2_, p_i46648_3_, p_i46648_4_);
+    public MixinAnvilSaveHandler(File p_i49566_1_, String p_i49566_2_, @Nullable MinecraftServer p_i49566_3_,
+            DataFixer p_i49566_4_) {
+        super(p_i49566_1_, p_i49566_2_, p_i49566_3_, p_i49566_4_);
     }
 
     /**

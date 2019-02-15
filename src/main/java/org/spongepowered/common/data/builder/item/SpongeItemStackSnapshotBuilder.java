@@ -70,7 +70,7 @@ public class SpongeItemStackSnapshotBuilder extends AbstractDataBuilder<ItemStac
             } else {
                 compound = null;
             }
-            return Optional.of(new SpongeItemStackSnapshot(itemType, count, damage, manipulators, compound));
+            return Optional.of(new SpongeItemStackSnapshot(itemType, count, manipulators, compound));
         }
         return Optional.empty();
     }

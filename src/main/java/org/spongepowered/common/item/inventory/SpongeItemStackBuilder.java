@@ -168,8 +168,8 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
 
         if (container.contains(DataQueries.UNSAFE_NBT)) {
             final NBTTagCompound compound = NbtTranslator.getInstance().translateData(container.getView(DataQueries.UNSAFE_NBT).get());
-            if (compound.hasKey(NbtDataUtil.SPONGE_DATA)) {
-                compound.removeTag(NbtDataUtil.SPONGE_DATA);
+            if (compound.contains(NbtDataUtil.SPONGE_DATA)) {
+                compound.remove(NbtDataUtil.SPONGE_DATA);
             }
             this.compound = compound;
         }
@@ -216,7 +216,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
             final Optional<NBTTagCompound> compound = ((SpongeBlockSnapshot) blockSnapshot).getCompound();
             if (compound.isPresent()) {
                 this.compound = new NBTTagCompound();
-                this.compound.setTag(NbtDataUtil.BLOCK_ENTITY_TAG, compound.get());
+                this.compound.put(NbtDataUtil.BLOCK_ENTITY_TAG, compound.get());
             }
             // todo probably needs more testing, but this'll do donkey...
         } else { // TODO handle through the API specifically handling the rest of the data stuff
@@ -239,8 +239,6 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
             return this;
         }
         itemType(item.get());
-
-        //this.damageValue = minecraftState.getBlock().damageDropped(minecraftState);
         return this;
     }
 

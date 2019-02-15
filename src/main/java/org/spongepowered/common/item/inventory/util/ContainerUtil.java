@@ -164,7 +164,7 @@ public final class ContainerUtil {
                     {
                         int i = RANDOM.nextInt(21) + 10;
 
-                        EntityItem entityitem = new EntityItem(worldServer, x + f, y + f1, z + f2, itemStack.splitStack(i));
+                        EntityItem entityitem = new EntityItem(worldServer, x + f, y + f1, z + f2, itemStack.split(i));
 
                         entityitem.motionX = RANDOM.nextGaussian() * 0.05;
                         entityitem.motionY = RANDOM.nextGaussian() * 0.05 + 0.2;
@@ -260,7 +260,7 @@ public final class ContainerUtil {
                 }
                 else if (subInventory instanceof InventoryBasic && subInventory.getClass().isAnonymousClass()) {
                     // Anonymous InventoryBasic -> Check for Vanilla Containers:
-                    switch (subInventory.getName()) {
+                    switch (subInventory.getName().getUnformattedComponentText()    ) {
                         case "Enchant": // Container InputSlots
                         case "Repair": // Container InputSlots
                             lens = new DefaultIndexedLens(index, slotCount, slots);
@@ -448,9 +448,9 @@ public final class ContainerUtil {
                 if (slot.inventory instanceof TileEntity) {
                     return new IMixinSingleBlockCarrier() {
                         @Override
-                        public Location<org.spongepowered.api.world.World> getLocation() {
+                        public Location getLocation() {
                             BlockPos pos = ((TileEntity) slot.inventory).getPos();
-                            return new Location<>(((org.spongepowered.api.world.World) ((TileEntity) slot.inventory).getWorld()), pos.getX(), pos.getY(), pos.getZ());
+                            return new Location(((org.spongepowered.api.world.World) ((TileEntity) slot.inventory).getWorld()), pos.getX(), pos.getY(), pos.getZ());
                         }
 
                         @SuppressWarnings("rawtypes")
@@ -462,11 +462,11 @@ public final class ContainerUtil {
                 }
             }
         }
-        Location<org.spongepowered.api.world.World> loc = ((IMixinContainer) container).getOpenLocation();
+        Location loc = ((IMixinContainer) container).getOpenLocation();
         if (loc != null) {
             return new IMixinSingleBlockCarrier() {
                 @Override
-                public Location<org.spongepowered.api.world.World> getLocation() {
+                public Location getLocation() {
                     return loc;
                 }
 

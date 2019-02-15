@@ -32,10 +32,11 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.IInteractionObject;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.property.Property;
-import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.event.item.inventory.container.InteractContainerEvent;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -46,9 +47,9 @@ import org.spongepowered.api.item.inventory.gui.GuiIds;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.TranslatableText;
-import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.common.data.type.SpongeGuiId;
 import org.spongepowered.common.item.inventory.archetype.CompositeInventoryArchetype;
+import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.HashSet;
 import java.util.List;
@@ -56,6 +57,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
+
+import javax.annotation.Nullable;
 
 public class CustomInventory implements IInventory, IInteractionObject {
 
@@ -87,17 +90,17 @@ public class CustomInventory implements IInventory, IInteractionObject {
         Text title = (Text) properties.getOrDefault(InventoryProperties.TITLE, archetype.getProperty(InventoryProperties.TITLE).orElse(null));
         boolean isCustom = !(title instanceof TranslatableText); // TODO: Check minecraft/custom translation
 
-        String legacyTitle = title == null ? "" :
-                isCustom ? TextSerializers.LEGACY_FORMATTING_CODE.serialize(title)
-                        : ((TranslatableText) title).getTranslation().getId();
-        this.inv = new InventoryBasic(legacyTitle, isCustom, count);
+        ITextComponent componentTitle = title == null ? new TextComponentString("") :
+                isCustom ? SpongeTexts.toComponent(title)
+                        : new TextComponentTranslation(((TranslatableText) title).getTranslation().getId());
+        this.inv = new InventoryBasic(componentTitle, count);
 
         // Updates the Inventory for all viewers on any change
-        this.inv.addInventoryChangeListener(i -> this.viewers.forEach(v -> {
+        this.inv.addListener(i -> this.viewers.forEach(v -> {
             v.openContainer.detectAndSendChanges();
         }));
 
-        for (Map.Entry<Class<? extends InteractInventoryEvent>, List<Consumer<? extends InteractInventoryEvent>>> entry: listeners.entrySet()) {
+        for (Map.Entry<Class<? extends InteractContainerEvent>, List<Consumer<? extends InteractContainerEvent>>> entry: listeners.entrySet()) {
             Sponge.getEventManager().registerListener(plugin, entry.getKey(), new CustomInventoryListener((Inventory) this, entry.getValue()));
         }
     }
@@ -174,8 +177,14 @@ public class CustomInventory implements IInventory, IInteractionObject {
         return this.inv.getDisplayName();
     }
 
+    @Nullable
     @Override
-    public String getName() {
+    public ITextComponent getCustomName() {
+        return this.inv.getDisplayName();
+    }
+
+    @Override
+    public ITextComponent getName() {
         return this.inv.getName();
     }
 

@@ -203,7 +203,7 @@ public abstract class TextImpl implements Text {
 
     // Mutable instances are not nice :(
     public ITextComponent asComponentCopy() {
-        return this.asComponent().createCopy();
+        return this.asComponent().deepCopy();
     }
 
     public String toJson() {

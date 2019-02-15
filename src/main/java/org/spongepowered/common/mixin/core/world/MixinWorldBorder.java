@@ -52,10 +52,6 @@ public abstract class MixinWorldBorder implements WorldBorder {
     @Shadow(prefix = "shadow$")
     public abstract void shadow$setCenter(double x, double z);
     @Shadow(prefix = "shadow$")
-    public abstract double shadow$getDamageAmount();
-    @Shadow(prefix = "shadow$")
-    public abstract void shadow$setDamageAmount(double amount);
-    @Shadow(prefix = "shadow$")
     public abstract int shadow$getWarningTime();
     @Shadow(prefix = "shadow$")
     public abstract void shadow$setWarningTime(int time);
@@ -146,8 +142,4 @@ public abstract class MixinWorldBorder implements WorldBorder {
         shadow$setDamageAmount(damage);
     }
 
-    @Override
-    public ChunkPreGenerate.Builder newChunkPreGenerate(World world) {
-        return new SpongeChunkPreGenerateTask.Builder(world, getCenter(), getNewDiameter());
-    }
 }

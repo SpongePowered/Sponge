@@ -30,6 +30,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentTranslation;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.common.SpongeImplHooks;
@@ -85,14 +86,14 @@ public final class InventoryUtil {
 
             TileEntity tileentity1 = chest.getWorld().getTileEntity(blockpos);
 
-            if (tileentity1 instanceof TileEntityChest && tileentity1.getBlockType() == chest.getBlockType()) {
+            if (tileentity1 instanceof TileEntityChest && tileentity1.getType() == chest.getType()) {
 
                 InventoryLargeChest inventory;
 
                 if (enumfacing != EnumFacing.WEST && enumfacing != EnumFacing.NORTH) {
-                    inventory = new InventoryLargeChest("container.chestDouble", chest, (TileEntityChest) tileentity1);
+                    inventory = new InventoryLargeChest(new TextComponentTranslation("container.chestDouble"), chest, (TileEntityChest) tileentity1);
                 } else {
-                    inventory = new InventoryLargeChest("container.chestDouble", (TileEntityChest) tileentity1, chest);
+                    inventory = new InventoryLargeChest(new TextComponentTranslation("container.chestDouble"), (TileEntityChest) tileentity1, chest);
                 }
 
                 return Optional.of((Inventory) inventory);

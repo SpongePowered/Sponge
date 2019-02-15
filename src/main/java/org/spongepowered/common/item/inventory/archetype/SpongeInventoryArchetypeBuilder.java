@@ -26,10 +26,11 @@ package org.spongepowered.common.item.inventory.archetype;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.property.Property;
-import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.event.item.inventory.container.InteractContainerEvent;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.registry.type.item.InventoryArchetypeRegistryModule;
 
 import java.util.ArrayList;
@@ -46,6 +47,9 @@ public class SpongeInventoryArchetypeBuilder implements InventoryArchetype.Build
     private Map<Property<?>, Object> properties = new HashMap<>();
     private Set<Class<? extends InteractContainerEvent>> events = new HashSet<>();
     private CompositeInventoryArchetype.ContainerProvider containerProvider;
+    private CatalogKey key;
+    private String name;
+    private String id;
 
     @Override
     public <V> SpongeInventoryArchetypeBuilder property(Property<V> property, V value) {
@@ -92,7 +96,33 @@ public class SpongeInventoryArchetypeBuilder implements InventoryArchetype.Build
     }
 
     @Override
-    public InventoryArchetype build(String id, String name) {
+    public InventoryArchetype.Builder key(CatalogKey key) {
+        this.key = key;
+        this.name = key.getValue();
+        return this;
+    }
+
+    @Override
+    public InventoryArchetype.Builder id(String id) {
+        this.id = id;
+        return this;
+    }
+
+    @Override
+    public InventoryArchetype.Builder name(String name) {
+        this.name = name;
+        return this;
+    }
+
+    @Override
+    public InventoryArchetype.Builder name(Translation translation) {
+        // TODO - implement
+        this.name = translation.getId();
+        return this;
+    }
+
+    @Override
+    public InventoryArchetype build() {
         // TODO register archetype
         // TODO events
         final CompositeInventoryArchetype

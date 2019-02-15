@@ -48,10 +48,10 @@ public abstract class ItemStackUtil {
      * @return The non-null compound
      */
     public static NBTTagCompound getTagCompound(net.minecraft.item.ItemStack itemStack) {
-        NBTTagCompound compound = itemStack.getTagCompound();
+        NBTTagCompound compound = itemStack.getTag();
         if (compound == null) {
             compound = new NBTTagCompound();
-            itemStack.setTagCompound(compound);
+            itemStack.setTag(compound);
         }
         return compound;
     }

@@ -32,7 +32,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
-import org.spongepowered.api.GameDictionary;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Queries;
@@ -71,7 +70,6 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
     private final ItemType itemType;
     private final int quantity;
-    private final int damageValue;
     private final ImmutableList<ImmutableDataManipulator<?, ?>> manipulators;
     private final transient ItemStack privateStack; // only for internal use since the processors have a huge say
     private final ImmutableSet<Key<?>> keys;
@@ -91,20 +89,19 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
             keyBuilder.addAll(manipulator.getKeys());
             valueBuilder.addAll(manipulator.getValues());
         }
-        this.damageValue = ((net.minecraft.item.ItemStack) itemStack).getItemDamage();
         this.manipulators = builder.build();
         this.privateStack = itemStack.copy();
         this.keys = keyBuilder.build();
         this.values = valueBuilder.build();
-        @Nullable NBTTagCompound compound = ((net.minecraft.item.ItemStack) this.privateStack).getTagCompound();
+        @Nullable NBTTagCompound compound = ((net.minecraft.item.ItemStack) this.privateStack).getTag();
         if (compound != null) {
             compound = compound.copy();
         }
         if (compound != null) {
-            if (compound.hasKey(NbtDataUtil.SPONGE_DATA)) {
-                final NBTTagCompound spongeCompound = compound.getCompoundTag(NbtDataUtil.SPONGE_DATA);
-                if (spongeCompound.hasKey(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST)) {
-                    spongeCompound.removeTag(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST);
+            if (compound.contains(NbtDataUtil.SPONGE_DATA)) {
+                final NBTTagCompound spongeCompound = compound.getCompound(NbtDataUtil.SPONGE_DATA);
+                if (spongeCompound.contains(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST)) {
+                    spongeCompound.remove(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST);
                 }
             }
             NbtDataUtil.filterSpongeCustomData(compound);
@@ -120,14 +117,12 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
     public SpongeItemStackSnapshot(ItemType itemType,
                                    int quantity,
-                                   int damageValue,
                                    ImmutableList<ImmutableDataManipulator<?, ?>> manipulators,
                                    @Nullable NBTTagCompound compound) {
         this.itemType = checkNotNull(itemType);
         this.quantity = quantity;
         this.manipulators = checkNotNull(manipulators);
-        this.damageValue = damageValue;
-        this.privateStack = (ItemStack) new net.minecraft.item.ItemStack((Item) this.itemType, this.quantity, this.damageValue);
+        this.privateStack = (ItemStack) new net.minecraft.item.ItemStack((Item) this.itemType, this.quantity);
         ImmutableSet.Builder<Key<?>> keyBuilder = ImmutableSet.builder();
         ImmutableSet.Builder<Value.Immutable<?>> valueBuilder = ImmutableSet.builder();
         for (ImmutableDataManipulator<?, ?> manipulator : this.manipulators) {
@@ -164,7 +159,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     public ItemStack createStack() {
         net.minecraft.item.ItemStack nativeStack = ItemStackUtil.cloneDefensiveNative(ItemStackUtil.toNative(this.privateStack.copy()));
         if(this.compound != null) {
-            nativeStack.setTagCompound(this.compound.copy());
+            nativeStack.setTag(this.compound.copy());
         }
         for (ImmutableDataManipulator<?, ?> manipulator : this.manipulators) {
             ((ItemStack) nativeStack).offer(manipulator.asMutable());
@@ -187,8 +182,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         final DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, getContentVersion())
             .set(DataQueries.ITEM_TYPE, this.itemType.getKey())
-            .set(DataQueries.ITEM_COUNT, this.quantity)
-            .set(DataQueries.ITEM_DAMAGE_VALUE, this.damageValue);
+            .set(DataQueries.ITEM_COUNT, this.quantity);
         if (!this.manipulators.isEmpty()) {
             container.set(DataQueries.DATA_MANIPULATORS, DataUtil.getSerializedImmutableManipulatorList(this.manipulators));
         }
@@ -365,10 +359,6 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
                 .toString();
     }
 
-    public int getDamageValue() {
-        return this.damageValue;
-    }
-
     public Optional<NBTTagCompound> getCompound() {
         if (this.compound != null) {
             return Optional.of(this.compound.copy());
@@ -376,10 +366,11 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         return Optional.empty();
     }
 
-    @Override
+    // TODO 1.13
+    /*@Override
     public GameDictionary.Entry createGameDictionaryEntry() {
         return new SpongeGameDictionaryEntry.Specific((Item) this.itemType, this.damageValue);
-    }
+    }*/
 
     public Optional<UUID> getCreator() {
         return this.creatorUniqueId;
@@ -401,7 +392,6 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         }
         SpongeItemStackSnapshot that = (SpongeItemStackSnapshot) o;
         return this.quantity == that.quantity &&
-               this.damageValue == that.damageValue &&
                Objects.equal(this.itemType, that.itemType) &&
                Objects.equal(this.compound, that.compound) &&
                Objects.equal(this.creatorUniqueId, that.creatorUniqueId);
@@ -409,6 +399,6 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(this.itemType, this.quantity, this.damageValue, this.compound, this.creatorUniqueId);
+        return Objects.hashCode(this.itemType, this.quantity, this.compound, this.creatorUniqueId);
     }
 }
