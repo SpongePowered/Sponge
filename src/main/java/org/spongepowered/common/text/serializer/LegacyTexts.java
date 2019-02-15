@@ -276,7 +276,7 @@ public final class LegacyTexts {
             if (child instanceof TextComponentString) {
                 child = parseComponent((TextComponentString) child, code);
             } else {
-                child = child.createCopy();
+                child = child.deepCopy();
             }
             newComponent.appendSibling(child);
         }
