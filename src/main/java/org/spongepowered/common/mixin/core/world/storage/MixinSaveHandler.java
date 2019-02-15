@@ -110,20 +110,18 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
 
         if (spongeFile.exists() || spongeOldFile.exists()) {
             final File actualFile = spongeFile.exists() ? spongeFile : spongeOldFile;
+            final NBTTagCompound compound;
             try (final FileInputStream stream = new FileInputStream(actualFile)) {
-                final NBTTagCompound compound;
-                try {
-                    compound = CompressedStreamTools.readCompressed(stream);
-                } catch (Exception ex) {
-                    throw new RuntimeException("Attempt failed when reading Sponge level data for [" + info.getWorldName() + "] from file [" +
-                      actualFile.getName() + "]!", ex);
-                }
-                ((IMixinWorldInfo) info).setSpongeRootLevelNBT(compound);
-                if (compound.hasKey(NbtDataUtil.SPONGE_DATA)) {
-                    final NBTTagCompound spongeCompound = compound.getCompoundTag(NbtDataUtil.SPONGE_DATA);
-                    DataUtil.spongeDataFixer.process(FixTypes.LEVEL, spongeCompound);
-                    ((IMixinWorldInfo) info).readSpongeNbt(spongeCompound);
-                }
+                compound = CompressedStreamTools.readCompressed(stream);
+            } catch (Exception ex) {
+                throw new RuntimeException("Attempt failed when reading Sponge level data for [" + info.getWorldName() + "] from file [" +
+                        actualFile.getName() + "]!", ex);
+            }
+            ((IMixinWorldInfo) info).setSpongeRootLevelNBT(compound);
+            if (compound.hasKey(NbtDataUtil.SPONGE_DATA)) {
+                final NBTTagCompound spongeCompound = compound.getCompoundTag(NbtDataUtil.SPONGE_DATA);
+                DataUtil.spongeDataFixer.process(FixTypes.LEVEL, spongeCompound);
+                ((IMixinWorldInfo) info).readSpongeNbt(spongeCompound);
             }
         }
     }
@@ -135,21 +133,21 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
             final File spongeFile3 = new File(this.worldDirectory, "level_sponge.dat");
             try (final FileOutputStream stream = new FileOutputStream(spongeFile1)) {
                 CompressedStreamTools.writeCompressed(((IMixinWorldInfo) info).getSpongeRootLevelNbt(), stream);
-                if (spongeFile2.exists()) {
-                    spongeFile2.delete();
-                }
+            }
+            if (spongeFile2.exists()) {
+                spongeFile2.delete();
+            }
 
-                spongeFile3.renameTo(spongeFile2);
+            spongeFile3.renameTo(spongeFile2);
 
-                if (spongeFile3.exists()) {
-                    spongeFile3.delete();
-                }
+            if (spongeFile3.exists()) {
+                spongeFile3.delete();
+            }
 
-                spongeFile1.renameTo(spongeFile3);
+            spongeFile1.renameTo(spongeFile3);
 
-                if (spongeFile1.exists()) {
-                    spongeFile1.delete();
-                }
+            if (spongeFile1.exists()) {
+                spongeFile1.delete();
             }
         } catch (Exception exception) {
             exception.printStackTrace();
