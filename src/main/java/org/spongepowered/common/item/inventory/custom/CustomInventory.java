@@ -243,6 +243,7 @@ public class CustomInventory implements IInventory, IInteractionObject {
     public void closeInventory(EntityPlayer player) {
         this.viewers.remove(player);
         this.inv.closeInventory(player);
+        Sponge.getEventManager().unregisterListeners(this);
     }
 
     @Override

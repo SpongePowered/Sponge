@@ -41,7 +41,6 @@ import org.spongepowered.api.event.filter.Getter;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
-import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Carrier;
@@ -59,8 +58,11 @@ import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+
+import java.util.function.Consumer;
 
 /**
  * When trying to break an Inventory TE while sneaking you open a custom Version of it instead.
@@ -159,6 +161,13 @@ public class CustomInventoryTest {
         if (loc.getBlockType() == BlockTypes.CRAFTING_TABLE) {
             Inventory inventory = Inventory.builder().of(InventoryArchetypes.WORKBENCH)
                     .property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of("Custom Workbench")))
+                    .listener(ClickInventoryEvent.Shift.class, new Consumer<ClickInventoryEvent.Shift>() {
+
+                        @Override
+                        public void accept(ClickInventoryEvent.Shift shift) {
+                            shift.getCause().first(Player.class).get().sendMessage(Text.of(TextColors.GREEN, "Shift click!"));
+                        }
+                    })
                     .build(this);
             for (Inventory slot : inventory.slots()) {
                 slot.set(ItemStack.of(ItemTypes.IRON_NUGGET, 1));
@@ -177,6 +186,13 @@ public class CustomInventoryTest {
                 BasicCarrier myCarrier = new BasicCarrier();
                 Inventory custom = Inventory.builder().from(((Carrier) te).getInventory())
                         .property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of("Custom ", ((Carrier) te).getInventory().getName())))
+                        .listener(ClickInventoryEvent.Shift.class, new Consumer<ClickInventoryEvent.Shift>() {
+
+                            @Override
+                            public void accept(ClickInventoryEvent.Shift shift) {
+                                player.sendMessage(Text.of(TextColors.YELLOW, "Carrier shift click!"));
+                            }
+                        })
                         .withCarrier(myCarrier)
                         .build(this);
                 myCarrier.init(custom);
