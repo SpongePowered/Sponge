@@ -67,7 +67,7 @@ public class DispenserSourceLogic implements ProjectileSourceLogic<Dispenser> {
 
     @SuppressWarnings("unchecked")
     private <P extends Projectile> Optional<P> launch(TileEntityDispenser dispenser, Class<P> projectileClass, Item item) {
-        BehaviorDefaultDispenseItem behavior = (BehaviorDefaultDispenseItem) BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.getOrDefault(item);
+        BehaviorDefaultDispenseItem behavior = (BehaviorDefaultDispenseItem) BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.get(item);
         List<Entity> entityList = dispenser.getWorld().loadedEntityList;
         int numEntities = entityList.size();
         behavior.dispense(new BlockSourceImpl(dispenser.getWorld(), dispenser.getPos()), new ItemStack(item));

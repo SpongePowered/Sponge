@@ -28,6 +28,7 @@ import com.google.common.base.MoreObjects;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.registry.IRegistry;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.text.translation.Translation;
@@ -87,7 +88,7 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
     public boolean allowsEntityEventCreation = true;
 
     public <T extends Entity> SpongeEntityType(final ResourceLocation key, final net.minecraft.entity.EntityType<T> type) {
-        this(key, net.minecraft.entity.EntityType.field_200787_a.getId(type), type);
+        this(key, IRegistry.ENTITY_TYPE.getId(type), type);
     }
 
     public <T extends Entity> SpongeEntityType(final ResourceLocation key, final int networkId, final net.minecraft.entity.EntityType<T> type) {
