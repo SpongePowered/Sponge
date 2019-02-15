@@ -64,6 +64,8 @@ public class CustomInventory implements IInventory, IInteractionObject {
     public static final String INVENTORY_CAPACITY = InventoryCapacity.class.getSimpleName().toLowerCase(Locale.ENGLISH);
     public static final String INVENTORY_DIMENSION = InventoryDimension.class.getSimpleName().toLowerCase(Locale.ENGLISH);
     public static final String TITLE = InventoryTitle.class.getSimpleName().toLowerCase(Locale.ENGLISH);
+    private final Map<Class<? extends InteractInventoryEvent>, List<Consumer<? extends InteractInventoryEvent>>> listeners;
+    private final PluginContainer plugin;
 
     private InventoryBasic inv;
     protected InventoryArchetype archetype;
@@ -71,6 +73,7 @@ public class CustomInventory implements IInventory, IInteractionObject {
     private Carrier carrier;
 
     private Set<EntityPlayer> viewers = new HashSet<>();
+    private boolean registered;
 
     @SuppressWarnings("deprecation")
     public CustomInventory(InventoryArchetype archetype, Map<String, InventoryProperty<?, ?>> properties, Carrier carrier,
@@ -78,6 +81,8 @@ public class CustomInventory implements IInventory, IInteractionObject {
         this.archetype = archetype;
         this.properties = properties;
         this.carrier = carrier;
+        this.listeners = listeners;
+        this.plugin = plugin;
 
         int count;
         InventoryDimension size = (InventoryDimension)properties.get(INVENTORY_DIMENSION); // TODO INVENTORY_CAPACITY
@@ -100,9 +105,14 @@ public class CustomInventory implements IInventory, IInteractionObject {
             v.openContainer.detectAndSendChanges();
         }));
 
-        for (Map.Entry<Class<? extends InteractInventoryEvent>, List<Consumer<? extends InteractInventoryEvent>>> entry: listeners.entrySet()) {
-            Sponge.getEventManager().registerListener(plugin, entry.getKey(), new CustomInventoryListener((Inventory) this, entry.getValue()));
+
+    }
+
+    private void doRegistration() {
+        for (Map.Entry<Class<? extends InteractInventoryEvent>, List<Consumer<? extends InteractInventoryEvent>>> entry: this.listeners.entrySet()) {
+            Sponge.getEventManager().registerListener(this.plugin, entry.getKey(), new CustomInventoryListener((Inventory) this, entry.getValue()));
         }
+        this.registered = true;
     }
 
     private static int getSlotCount(InventoryArchetype archetype) {
@@ -243,7 +253,10 @@ public class CustomInventory implements IInventory, IInteractionObject {
     public void closeInventory(EntityPlayer player) {
         this.viewers.remove(player);
         this.inv.closeInventory(player);
-        Sponge.getEventManager().unregisterListeners(this);
+        if (this.viewers.isEmpty()) {
+            Sponge.getEventManager().unregisterListeners(this);
+            this.registered = false;
+        }
     }
 
     @Override
@@ -277,5 +290,11 @@ public class CustomInventory implements IInventory, IInteractionObject {
 
     public Carrier getCarrier() {
         return this.carrier;
+    }
+
+    public void ensureListenersRegistered() {
+        if (!this.registered) {
+            this.doRegistration();
+        }
     }
 }

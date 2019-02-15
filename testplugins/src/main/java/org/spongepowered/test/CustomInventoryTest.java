@@ -198,6 +198,8 @@ public class CustomInventoryTest {
                 myCarrier.init(custom);
                 Sponge.getCauseStackManager().pushCause(player);
                 player.openInventory(custom);
+                player.closeInventory();
+                player.openInventory(custom);
                 Sponge.getCauseStackManager().popCause();
                 event.setCancelled(true);
             }

@@ -1171,6 +1171,7 @@ public class SpongeCommonEventFactory {
                 return null; // Invalid size for vanilla inventory ; This is to
                              // prevent crashing the client with invalid data
             }
+            ((CustomInventory) inventory).ensureListenersRegistered();
         }
 
 
