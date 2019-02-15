@@ -52,8 +52,8 @@ public abstract class MixinAbstractHorse extends MixinEntityAnimal implements Ho
 
     @Inject(method = "initHorseChest", at = @At("RETURN"))
     private void onInitHorseChest(CallbackInfo ci) {
-        if (horseChest instanceof IMixinCarriedInventory) {
-            ((IMixinCarriedInventory) horseChest).setCarrier(this);
+        if (this.horseChest instanceof IMixinCarriedInventory) {
+            ((IMixinCarriedInventory) this.horseChest).setCarrier(this);
         }
     }
 }

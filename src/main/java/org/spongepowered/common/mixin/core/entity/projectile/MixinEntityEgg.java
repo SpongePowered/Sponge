@@ -47,7 +47,7 @@ public abstract class MixinEntityEgg extends MixinEntityThrowable implements Egg
     @Override
     public void readFromNbt(NBTTagCompound compound) {
         super.readFromNbt(compound);
-        if (compound.hasKey(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT)) {
+        if (compound.contains(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT)) {
             this.damageAmount = compound.getDouble(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT);
         }
     }
@@ -55,6 +55,6 @@ public abstract class MixinEntityEgg extends MixinEntityThrowable implements Egg
     @Override
     public void writeToNbt(NBTTagCompound compound) {
         super.writeToNbt(compound);
-        compound.setDouble(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT, this.damageAmount);
+        compound.putDouble(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT, this.damageAmount);
     }
 }

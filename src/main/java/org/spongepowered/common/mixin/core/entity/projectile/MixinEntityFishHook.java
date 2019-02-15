@@ -40,7 +40,7 @@ import net.minecraft.world.storage.loot.LootTableList;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.projectile.FishHook;
+import org.spongepowered.api.entity.projectile.FishingBobber;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -62,7 +62,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 @Mixin(EntityFishHook.class)
-public abstract class MixinEntityFishHook extends MixinEntity implements FishHook {
+public abstract class MixinEntityFishHook extends MixinEntity implements FishingBobber {
 
     @Shadow @Nullable private EntityPlayer angler;
     @Shadow @Nullable public net.minecraft.entity.Entity caughtEntity;
@@ -110,7 +110,7 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
     @Inject(method = "setHookedEntity", at = @At("HEAD"), cancellable = true)
     private void onSetHookedEntity(CallbackInfo ci) {
         if (SpongeImpl.postEvent(SpongeEventFactory.createFishingEventHookEntity(Sponge.getCauseStackManager().getCurrentCause(), this,
-                (Entity) this.caughtEntity))) {
+                (Entity) (Object) this.caughtEntity))) {
             this.caughtEntity = null;
             ci.cancel();
         }

@@ -314,7 +314,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     public void writeToNbt(NBTTagCompound compound) {
         super.writeToNbt(compound);
         if (this.healthScaling) {
-            compound.setDouble(NbtDataUtil.HEALTH_SCALE, this.healthScale);
+            compound.putDouble(NbtDataUtil.HEALTH_SCALE, this.healthScale);
         }
     }
 

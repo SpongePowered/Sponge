@@ -632,7 +632,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     public void spawnItemParticle(World world, IParticleData particleTypes, double xCoord, double yCoord, double zCoord, double xOffset,
             double yOffset, double zOffset) {
         if (!this.isVanished()) {
-            this.world.spawnParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset);
+            this.world.addParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset);
         }
     }
 
@@ -820,7 +820,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                 }
                 // Sponge end
 
-                if (world.getCollisionBoxes((Entity) (Object) this, this.getBoundingBox()).isEmpty() && !world.containsAnyLiquid(this.getBoundingBox()))
+                if (world.isCollisionBoxesEmpty((Entity) (Object) this, this.shadow$getBoundingBox()) && !world.containsAnyLiquid(this.shadow$getBoundingBox()))
                 {
                     flag = true;
                 }
@@ -860,7 +860,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                 double d3 = d0 + (this.posX - d0) * d6 + (random.nextDouble() - 0.5D) * (double)this.width * 2.0D;
                 double d4 = d1 + (this.posY - d1) * d6 + random.nextDouble() * (double)this.height;
                 double d5 = d2 + (this.posZ - d2) * d6 + (random.nextDouble() - 0.5D) * (double)this.width * 2.0D;
-                world.spawnParticle(Particles.PORTAL, d3, d4, d5, (double)f, (double)f1, (double)f2);
+                world.addParticle(Particles.PORTAL, d3, d4, d5, (double)f, (double)f1, (double)f2);
             }
 
             if ((Object) this instanceof EntityCreature)

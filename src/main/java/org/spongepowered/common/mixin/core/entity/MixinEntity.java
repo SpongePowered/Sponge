@@ -284,8 +284,6 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
 
     @Shadow public abstract boolean isInvulnerableTo(DamageSource p_180431_1_);
 
-    @Shadow public abstract AxisAlignedBB getBoundingBox();
-
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onSpongeConstruction(net.minecraft.entity.EntityType<?> entityType, @Nullable net.minecraft.world.World worldIn, CallbackInfo ci) {
         if (this.entityType instanceof SpongeEntityType) {

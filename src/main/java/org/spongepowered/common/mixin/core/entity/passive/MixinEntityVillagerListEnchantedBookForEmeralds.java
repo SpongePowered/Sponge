@@ -33,6 +33,7 @@ import net.minecraft.init.Items;
 import net.minecraft.item.ItemEnchantedBook;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.registry.IRegistry;
 import net.minecraft.village.MerchantRecipe;
 import org.spongepowered.api.item.merchant.Merchant;
 import org.spongepowered.api.item.merchant.TradeOffer;
@@ -52,8 +53,8 @@ public class MixinEntityVillagerListEnchantedBookForEmeralds implements TradeOff
     @Override
     public TradeOffer apply(Random random) {
         checkNotNull(random, "Random cannot be null!");
-        Enchantment enchantment = Enchantment.REGISTRY.getRandomObject(random);
-        int enchantmentLevel = MathHelper.getInt(random, enchantment.getMinLevel(), enchantment.getMaxLevel());
+        Enchantment enchantment = IRegistry.ENCHANTMENT.getRandom(random);
+        int enchantmentLevel = MathHelper.nextInt(random, enchantment.getMinLevel(), enchantment.getMaxLevel());
         ItemStack itemstack = ItemEnchantedBook.getEnchantedItemStack(new EnchantmentData(enchantment, enchantmentLevel));
         int emeraldCount = 2 + random.nextInt(5 + enchantmentLevel * 10) + 3 * enchantmentLevel;
 

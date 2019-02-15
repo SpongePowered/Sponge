@@ -60,7 +60,7 @@ import org.spongepowered.api.entity.projectile.Egg;
 import org.spongepowered.api.entity.projectile.EnderPearl;
 import org.spongepowered.api.entity.projectile.EyeOfEnder;
 import org.spongepowered.api.entity.projectile.Firework;
-import org.spongepowered.api.entity.projectile.FishHook;
+import org.spongepowered.api.entity.projectile.FishingBobber;
 import org.spongepowered.api.entity.projectile.LlamaSpit;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.entity.projectile.Snowball;
@@ -300,12 +300,12 @@ public class ProjectileLauncher {
             }
         });
         registerProjectileLogic(EyeOfEnder.class, new SimpleDispenserLaunchLogic<>(EyeOfEnder.class));
-        registerProjectileLogic(FishHook.class, new SimpleDispenserLaunchLogic<FishHook>(FishHook.class) {
+        registerProjectileLogic(FishingBobber.class, new SimpleDispenserLaunchLogic<FishingBobber>(FishingBobber.class) {
 
             @Override
-            protected Optional<FishHook> createProjectile(EntityLivingBase source, Location loc) {
+            protected Optional<FishingBobber> createProjectile(EntityLivingBase source, Location loc) {
                 if (source instanceof EntityPlayer) {
-                    FishHook hook = (FishHook) new EntityFishHook(source.world, (EntityPlayer) source);
+                    FishingBobber hook = (FishingBobber) new EntityFishHook(source.world, (EntityPlayer) source);
                     return doLaunch(loc.getWorld(), hook);
                 }
                 return super.createProjectile(source, loc);

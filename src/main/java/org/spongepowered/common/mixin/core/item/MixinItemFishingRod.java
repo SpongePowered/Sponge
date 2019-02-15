@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.item;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityFishHook;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemFishingRod;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
@@ -34,7 +33,7 @@ import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.projectile.FishHook;
+import org.spongepowered.api.entity.projectile.FishingBobber;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -70,7 +69,7 @@ public abstract class MixinItemFishingRod {
 
         EntityFishHook fishHook = new EntityFishHook(world, player);
         Sponge.getCauseStackManager().pushCause(player);
-        if (SpongeImpl.postEvent(SpongeEventFactory.createFishingEventStart(Sponge.getCauseStackManager().getCurrentCause(), (FishHook) fishHook))) {
+        if (SpongeImpl.postEvent(SpongeEventFactory.createFishingEventStart(Sponge.getCauseStackManager().getCurrentCause(), (FishingBobber) fishHook))) {
             fishHook.remove(); // Bye
             cir.setReturnValue(new ActionResult<>(EnumActionResult.SUCCESS, player.getHeldItem(hand)));
         } else {
