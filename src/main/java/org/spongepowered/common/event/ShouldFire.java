@@ -41,7 +41,7 @@ public class ShouldFire {
     // You must always check a flag that either corresponds directly
     // to the event you're firing, or to a supertype of the event.
     // For example, when firing DropItemEvent.Dispense, you can check
-    // ShouldFire.DROP_ITEM_EVENT_DISPENSE or ShouldFire.SPAWN_ENTITY_EVENT
+    // ShouldFire.DROP_ITEM_EVENT_DISPENSE or ShouldFire    .SPAWN_ENTITY_EVENT
     // However, you may *not* check ShouldFire.SPAWN_ENTITY_EVENT_CUSTOM,
     // since SpawnEntityEvent.CUSTOM is not in the hierarchy of DropItemEvent.DISPENSE
 
@@ -61,6 +61,9 @@ public class ShouldFire {
     public static boolean CHANGE_BLOCK_EVENT_BREAK = false;
     public static boolean CHANGE_BLOCK_EVENT_PLACE = false;
     public static boolean CHANGE_BLOCK_EVENT_POST = false;
+
+    public static boolean CLICK_INVENTORY_EVENT = false;
+    public static boolean CLICK_INVENTORY_EVENT_DOUBLE = false;
 
     public static boolean DROP_ITEM_EVENT = false;
     public static boolean DROP_ITEM_EVENT_DESTRUCT = false;
