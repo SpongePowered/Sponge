@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.mixin.core.block.properties;
 
-import net.minecraft.block.properties.IProperty;
 import net.minecraft.state.AbstractProperty;
+import net.minecraft.state.IProperty;
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.block.trait.BlockTrait;
+import org.spongepowered.api.state.StateProperty;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.interfaces.block.IMixinPropertyHolder;
 import org.spongepowered.common.registry.provider.BlockPropertyIdProvider;
@@ -41,7 +41,7 @@ import java.util.Optional;
  * @param <T> The type of comparable
  */
 @Mixin(value = AbstractProperty.class)
-public abstract class MixinAbstractProperty<T extends Comparable<T>> implements BlockTrait<T>, IMixinPropertyHolder {
+public abstract class MixinAbstractProperty<T extends Comparable<T>> implements StateProperty<T>, IMixinPropertyHolder {
 
     private CatalogKey key;
 
@@ -58,6 +58,6 @@ public abstract class MixinAbstractProperty<T extends Comparable<T>> implements 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public Optional<T> parseValue(String value) {
-        return Optional.ofNullable((T) ((IProperty) this).parseValue(value).orNull());
+        return Optional.ofNullable((T) ((IProperty) this).parseValue(value).orElse(null));
     }
 }

@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.block.properties;
 import net.minecraft.state.AbstractProperty;
 import net.minecraft.state.IProperty;
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.block.trait.BlockTrait;
+import org.spongepowered.api.state.StateProperty;
 import org.spongepowered.api.util.Functional;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -39,7 +39,7 @@ import java.util.Collection;
 import java.util.function.Predicate;
 
 /**
- * This default implements the {@link BlockTrait} methods directly
+ * This default implements the {@link StateProperty} methods directly
  * into {@link IProperty} such that regardless of whether a mod extends
  * {@link AbstractProperty} or only implements {@link IProperty}, we can
  * still cast back and forth between the implementation interface and
@@ -50,13 +50,13 @@ import java.util.function.Predicate;
  * @param <T> The type of comparable.
  */
 @Mixin(value = IProperty.class)
-@Implements(@Interface(iface = BlockTrait.class, prefix = "trait$"))
+@Implements(@Interface(iface = StateProperty.class, prefix = "trait$"))
 public interface MixinIProperty<T extends Comparable<T>> extends IProperty<T> {
 
 
 
-    default String trait$getId() {
-        return BlockPropertyIdProvider.getInstance().get(this).map(CatalogKey::toString)
+    default CatalogKey trait$getKey() {
+        return BlockPropertyIdProvider.getInstance().get(this)
             .orElseThrow(() -> new IllegalStateException("Unknown registration for Property: " + this));
     }
 

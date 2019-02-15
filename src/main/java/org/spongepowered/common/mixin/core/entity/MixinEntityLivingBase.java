@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.entity;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3d;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
@@ -44,6 +45,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.particles.IParticleData;
 import net.minecraft.potion.Potion;
+import net.minecraft.stats.StatList;
 import net.minecraft.util.CombatTracker;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
@@ -258,7 +260,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Override
     public void readFromNbt(NBTTagCompound compound) {
         super.readFromNbt(compound);
-        if (compound.hasKey("maxAir")) {
+        if (compound.contains("maxAir")) {
             this.maxAir = compound.getInt("maxAir");
         }
     }
@@ -266,7 +268,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Override
     public void writeToNbt(NBTTagCompound compound) {
         super.writeToNbt(compound);
-        compound.setInt("maxAir", this.maxAir);
+        compound.putInt("maxAir", this.maxAir);
     }
 
     @Override
@@ -426,6 +428,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
      * @author bloodmc - November 22, 2015
      * @author gabizou - Updated April 11th, 2016 - Update for 1.9 changes
      * @author Aaron1011 - Updated Nov 11th, 2016 - Update for 1.11 changes
+     * @author Aaron1011 - Updated February 15th, 2018 - Updated for 1.13
      *
      * @reason Reroute damageEntity calls to our hook in order to prevent damage.
      */
@@ -449,7 +452,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         if (!this.hookModAttack((EntityLivingBase) (Object) this, source, amount))
             return false;
         // Sponge end
-        if (this.isEntityInvulnerable(source)) {
+        if (this.isInvulnerableTo(source)) {
             return false;
         } else if (this.world.isRemote) {
             return false;
@@ -551,7 +554,16 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                     } else if (source instanceof net.minecraft.util.EntityDamageSource && ((net.minecraft.util.EntityDamageSource) source).getIsThornsDamage()) {
                         this.world.setEntityState((EntityLivingBase) (Object) this, (byte) 33);
                     } else {
-                        this.world.setEntityState((EntityLivingBase) (Object) this, (byte) 2);
+                        byte b0;
+                        if (source == DamageSource.DROWN) {
+                            b0 = 36;
+                        } else if (source.isFireDamage()) {
+                            b0 = 37;
+                        } else {
+                            b0 = 2;
+                        }
+
+                        this.world.setEntityState(this, b0);
                     }
 
 
@@ -602,6 +614,10 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                     this.lastDamageStamp = this.world.getGameTime();
                 }
 
+                if ((Object) entity instanceof EntityPlayerMP) {
+                    CriteriaTriggers.PLAYER_HURT_ENTITY.trigger((EntityPlayerMP)entity, this, source, f, amount, flag);
+                }
+
                 return !flag; // Sponge - remove 'amount > 0.0F'
             }
         }
@@ -622,7 +638,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
     @Override
     public boolean damageEntityHook(DamageSource damageSource, float damage) {
-        if (!this.isEntityInvulnerable(damageSource)) {
+        if (!this.isInvulnerableTo(damageSource)) {
             final boolean human = (Object) this instanceof EntityPlayer;
             // apply forge damage hook
             damage = applyModDamage((EntityLivingBase) (Object) this, damageSource, damage);
@@ -688,7 +704,9 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                 }
 
                 // Shield
+                boolean flag = false;
                 if (shieldFunction.isPresent()) {
+                    flag = true;
                     this.damageShield((float) event.getBaseDamage()); // TODO gabizou: Should this be in the API?
                     if (!damageSource.isProjectile()) {
                         Entity entity = damageSource.getImmediateSource();
@@ -696,6 +714,13 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                         if (entity instanceof EntityLivingBase) {
                             this.blockUsingShield((EntityLivingBase) entity);
                         }
+                    }
+                }
+
+                if ((Object) this instanceof EntityPlayerMP) {
+                    CriteriaTriggers.ENTITY_HURT_PLAYER.trigger((EntityPlayerMP) (Object) this, damageSource, (float) event.getBaseDamage(), (float) event.getBaseDamage(), flag);
+                    if (event.getBaseDamage() > 0.0F && event.getBaseDamage() < 3.4028235E37F) {
+                        ((EntityPlayerMP) (Object) this).addStat(StatList.DAMAGE_BLOCKED_BY_SHIELD, Math.round((float) event.getBaseDamage() * 10.0F));
                     }
                 }
 
@@ -795,7 +820,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                 }
                 // Sponge end
 
-                if (world.getCollisionBoxes((Entity) (Object) this, this.getEntityBoundingBox()).isEmpty() && !world.containsAnyLiquid(this.getEntityBoundingBox()))
+                if (world.getCollisionBoxes((Entity) (Object) this, this.getBoundingBox()).isEmpty() && !world.containsAnyLiquid(this.getBoundingBox()))
                 {
                     flag = true;
                 }

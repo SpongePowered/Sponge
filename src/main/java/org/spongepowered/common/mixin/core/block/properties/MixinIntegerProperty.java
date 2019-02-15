@@ -25,10 +25,10 @@
 package org.spongepowered.common.mixin.core.block.properties;
 
 import net.minecraft.state.IntegerProperty;
-import org.spongepowered.api.block.trait.IntegerTrait;
+import org.spongepowered.api.state.IntegerStateProperty;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(value = IntegerProperty.class)
-public abstract class MixinIntegerProperty extends MixinAbstractProperty<Integer> implements IntegerTrait {
+public abstract class MixinIntegerProperty extends MixinAbstractProperty<Integer> implements IntegerStateProperty {
 
 }

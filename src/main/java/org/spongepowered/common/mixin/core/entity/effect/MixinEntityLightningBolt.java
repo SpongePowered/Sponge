@@ -88,7 +88,7 @@ public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect 
         return onStrikeBlock(world, pos, blockState);
     }
 
-    @Redirect(method = "onUpdate()V", at = @At(value = "INVOKE",
+    @Redirect(method = "tick()V", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z"))
     public boolean onStrikeBlockUpdate(net.minecraft.world.World world, BlockPos pos, IBlockState blockState) {
         return onStrikeBlock(world, pos, blockState);
@@ -109,7 +109,7 @@ public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect 
         return false;
     }
 
-    @Redirect(method = "onUpdate()V", at = @At(value = "INVOKE",
+    @Redirect(method = "tick()V", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/entity/Entity;onStruckByLightning(Lnet/minecraft/entity/effect/EntityLightningBolt;)V"))
     public void onStrikeEntity(net.minecraft.entity.Entity mcEntity, EntityLightningBolt lightningBolt) {
         if (!this.effect) {
@@ -120,7 +120,7 @@ public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect 
         }
     }
 
-    @Inject(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/effect/EntityLightningBolt;remove()V"))
+    @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/effect/EntityLightningBolt;remove()V"))
     public void onLivingTimeExpired(CallbackInfo ci) {
         if (this.removed || this.world.isRemote) {
             return;
@@ -152,7 +152,7 @@ public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect 
     @Override
     public void readFromNbt(NBTTagCompound compound) {
         super.readFromNbt(compound);
-        if (compound.hasKey("effect")) {
+        if (compound.contains("effect")) {
             this.effect = compound.getBoolean("effect");
         }
     }
@@ -160,7 +160,7 @@ public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect 
     @Override
     public void writeToNbt(NBTTagCompound compound) {
         super.writeToNbt(compound);
-        compound.setBoolean("effect", this.effect);
+        compound.putBoolean("effect", this.effect);
     }
 
     // Data delegated methods

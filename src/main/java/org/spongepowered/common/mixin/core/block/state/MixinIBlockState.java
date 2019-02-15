@@ -67,10 +67,6 @@ public interface MixinIBlockState extends BlockState {
         return (BlockType) shadow$getBlock();
     }
 
-    @Override
-    default BlockState withExtendedProperties(Location<World> location) {
-        return (BlockState) ((IBlockState) this).getActualState((net.minecraft.world.World) location.getExtent(), VecHelper.toBlockPos(location));
-    }
 
     @Override
     default BlockState cycleValue(Key<? extends Value<? extends Cycleable<?>>> key) {
