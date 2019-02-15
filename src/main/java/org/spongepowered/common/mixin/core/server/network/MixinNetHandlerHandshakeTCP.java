@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.server.network;
 
+import net.minecraft.network.NetHandlerHandshakeTCP;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.handshake.client.CPacketHandshake;
-import net.minecraft.server.network.NetHandlerHandshakeTCP;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;

@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.server.network;
 
+import net.minecraft.network.NetHandlerLoginServer;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.login.server.SPacketDisconnectLogin;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
-import net.minecraft.server.network.NetHandlerLoginServer;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import org.apache.logging.log4j.Logger;
@@ -66,9 +66,8 @@ public abstract class MixinNetHandlerLoginServer implements IMixinNetHandlerLogi
     @Shadow public abstract String getConnectionInfo();
     @Shadow protected abstract com.mojang.authlib.GameProfile getOfflineProfile(com.mojang.authlib.GameProfile profile);
 
-    @Redirect(method = "tryAcceptPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;"
-            + "allowUserToConnect(Ljava/net/SocketAddress;Lcom/mojang/authlib/GameProfile;)Ljava/lang/String;"))
-    public String onAllowUserToConnect(PlayerList confMgr, SocketAddress address, com.mojang.authlib.GameProfile profile) {
+    @Redirect(method = "tryAcceptPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;canPlayerLogin(Ljava/net/SocketAddress;Lcom/mojang/authlib/GameProfile;)Lnet/minecraft/util/text/ITextComponent;"))
+    public ITextComponent onAllowUserToConnect(PlayerList confMgr, SocketAddress address, com.mojang.authlib.GameProfile profile) {
         return null; // We handle disconnecting
     }
 

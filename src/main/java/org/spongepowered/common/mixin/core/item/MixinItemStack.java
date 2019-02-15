@@ -206,10 +206,10 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
                 .set(DataQueries.ITEM_COUNT, this.itemstack$getQuantity());
         if (hasTag()) { // no tag? no data, simple as that.
             final NBTTagCompound compound = getTag().copy();
-            if (compound.hasKey(NbtDataUtil.SPONGE_DATA)) {
+            if (compound.contains(NbtDataUtil.SPONGE_DATA)) {
                 final NBTTagCompound spongeCompound = compound.getCompound(NbtDataUtil.SPONGE_DATA);
-                if (spongeCompound.hasKey(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST)) {
-                    spongeCompound.removeTag(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST);
+                if (spongeCompound.contains(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST)) {
+                    spongeCompound.remove(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST);
                 }
             }
             NbtDataUtil.filterSpongeCustomData(compound); // We must filter the custom data so it isn't stored twice
@@ -274,7 +274,7 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
         if (compound.contains(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_LIST)) {
             final NBTTagList list = compound.getList(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_COMPOUND);
             if (!list.isEmpty()) {
-                compound.removeTag(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST);
+                compound.remove(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST);
                 final List<DataView> views = Lists.newArrayList();
                 for (int i = 0; i < list.size(); i++) {
                     final NBTTagCompound dataCompound = list.getCompound(i);
@@ -289,9 +289,9 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
                     addFailedData(transaction.failedData);
                 }
             } else {
-                compound.removeTag(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST);
+                compound.remove(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST);
                 if (compound.isEmpty()) {
-                    getTag().removeTag(NbtDataUtil.SPONGE_DATA);
+                    getTag().remove(NbtDataUtil.SPONGE_DATA);
                     return;
                 }
             }
@@ -316,7 +316,7 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
             }
         }
         if (compound.isEmpty()) {
-            getTag().removeTag(NbtDataUtil.SPONGE_DATA);
+            getTag().remove(NbtDataUtil.SPONGE_DATA);
             if (getTag().isEmpty()) {
                 setTag(null);
             }
@@ -383,17 +383,17 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
                 newList.add(NbtTranslator.getInstance().translateData(dataView));
             }
             final NBTTagCompound spongeCompound = getOrCreateChildTag(NbtDataUtil.SPONGE_DATA);
-            spongeCompound.setTag(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, newList);
+            spongeCompound.put(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, newList);
         } else if (!this.failedData.isEmpty()) {
             final NBTTagList newList = new NBTTagList();
             for (DataView failedDatum : this.failedData) {
                 newList.add(NbtTranslator.getInstance().translateData(failedDatum));
             }
             final NBTTagCompound spongeCompound = getOrCreateChildTag(NbtDataUtil.SPONGE_DATA);
-            spongeCompound.setTag(NbtDataUtil.FAILED_CUSTOM_DATA, newList);
+            spongeCompound.put(NbtDataUtil.FAILED_CUSTOM_DATA, newList);
         } else {
             if (hasTag()) {
-                this.getTag().removeTag(NbtDataUtil.SPONGE_DATA);
+                this.getTag().remove(NbtDataUtil.SPONGE_DATA);
             }
             if (this.getTag().isEmpty()) {
                 this.setTag(null);

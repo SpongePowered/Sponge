@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.tileentity;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
-import net.minecraft.command.ICommandSender;
+import net.minecraft.command.ICommandSource;
 import net.minecraft.tileentity.CommandBlockBaseLogic;
 import net.minecraft.tileentity.TileEntityCommandBlock;
 import org.spongepowered.api.block.tileentity.CommandBlock;
@@ -52,7 +52,7 @@ public abstract class MixinTileEntityCommandBlock extends MixinTileEntity implem
     }
 
     @Override
-    public ICommandSender asICommandSender() {
+    public ICommandSource asICommandSender() {
         return getCommandBlockLogic();
     }
 
@@ -68,8 +68,8 @@ public abstract class MixinTileEntityCommandBlock extends MixinTileEntity implem
         container.set(of("StoredCommand"), this.getCommandBlockLogic().getCommand());
         container.set(of("SuccessCount"), this.getCommandBlockLogic().getSuccessCount());
         container.set(of("CustomName"), this.getCommandBlockLogic().getName());
-        container.set(of("DoesTrackOutput"), this.getCommandBlockLogic().shouldTrackOutput());
-        if (this.getCommandBlockLogic().shouldTrackOutput()) {
+        container.set(of("DoesTrackOutput"), this.getCommandBlockLogic().shouldReceiveErrors());
+        if (this.getCommandBlockLogic().shouldReceiveErrors()) {
         }
         return container;
     }

@@ -24,22 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.world.chunk;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BitArray;
 import net.minecraft.world.chunk.BlockStateContainer;
-import net.minecraft.world.chunk.NibbleArray;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-import javax.annotation.Nullable;
-
 @Mixin(BlockStateContainer.class)
 public abstract class MixinBlockStateContainer {
-
-    @Shadow protected abstract void set(int index, IBlockState state);
 
     /**
      * @author barteks2x
@@ -47,7 +39,8 @@ public abstract class MixinBlockStateContainer {
      * Attempts to fix invalid block metadata instead of completely throwing away the block.
      * When block state lookup returns null - gets block by ID and attempts to use the default state.
      */
-    @Redirect(
+    // TODO 1.13: Check if this is still necessary
+    /*@Redirect(
             method = "setDataFromNBT",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/BlockStateContainer;set(ILnet/minecraft/block/state/IBlockState;)V")
     )
@@ -62,7 +55,7 @@ public abstract class MixinBlockStateContainer {
             int z = i >> 4 & 15;
             int idAdd = add == null ? 0 : add.get(x, y, z);
             int blockId = idAdd << 8 | (id[i] & 255);
-            Block block = Block.REGISTRY.get(blockId);
+            Block block = IRegistry.BLOCK.get(blockId);
             newState = block.getDefaultState();
             if (block != null) {
                 newState = block.getDefaultState();
@@ -71,7 +64,7 @@ public abstract class MixinBlockStateContainer {
             }
         }
         this.set(i, newState);
-    }
+    }*/
 
     /**
      * Serializing a BlockStateContainer to a PacketBuffer is done in two parts:

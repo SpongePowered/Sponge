@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.server.network;
 
-import net.minecraft.server.network.NetHandlerLoginServer;
+import net.minecraft.network.NetHandlerLoginServer;
 import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.interfaces.IMixinNetHandlerLoginServer;
 
-@Mixin(targets = "net/minecraft/server/network/NetHandlerLoginServer$2")
+@Mixin(targets = "net/minecraft/server/network/NetHandlerLoginServer$1")
 public class MixinNetHandlerLoginServerAnonThread extends Thread {
 
     @Shadow(aliases = {"this$0", "field_180221_a"})

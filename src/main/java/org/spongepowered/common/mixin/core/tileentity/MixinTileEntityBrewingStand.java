@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.tileentity;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityBrewingStand;
+import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.block.tileentity.carrier.BrewingStand;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -46,13 +47,14 @@ import org.spongepowered.common.item.inventory.lens.impl.collections.SlotLensCol
 import org.spongepowered.common.item.inventory.lens.impl.minecraft.BrewingStandInventoryLens;
 import org.spongepowered.common.item.inventory.lens.impl.slots.FilteringSlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.slots.InputSlotLensImpl;
+import org.spongepowered.common.text.SpongeTexts;
 
 @NonnullByDefault
 @Mixin(TileEntityBrewingStand.class)
 @Implements({@Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$")})
 public abstract class MixinTileEntityBrewingStand extends MixinTileEntityLockable implements BrewingStand, IMixinCustomNameable {
 
-    @Shadow private String customName;
+    @Shadow private ITextComponent customName;
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
@@ -85,12 +87,12 @@ public abstract class MixinTileEntityBrewingStand extends MixinTileEntityLockabl
     public void sendDataToContainer(DataView dataView) {
         dataView.set(DataQueries.BLOCK_ENTITY_BREWING_TIME, this.getField(0));
         if (this.customName != null) {
-            dataView.set(DataQueries.BLOCK_ENTITY_CUSTOM_NAME, this.customName);
+            dataView.set(DataQueries.BLOCK_ENTITY_CUSTOM_NAME, SpongeTexts.toLegacy(SpongeTexts.toText(this.customName)));
         }
     }
 
     @Override
-    public void setCustomDisplayName(String customName) {
-        ((TileEntityBrewingStand) (Object) this).setName(customName);
+    public void setCustomDisplayName(ITextComponent customName) {
+        ((TileEntityBrewingStand) (Object) this).setCustomName(customName);
     }
 }

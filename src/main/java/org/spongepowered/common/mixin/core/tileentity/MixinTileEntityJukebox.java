@@ -31,6 +31,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemRecord;
+import net.minecraft.tileentity.TileEntityJukebox;
 import org.spongepowered.api.block.tileentity.Jukebox;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
@@ -41,7 +42,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import java.util.List;
 import java.util.Optional;
 
-@Mixin(BlockJukebox.TileEntityJukebox.class)
+@Mixin(TileEntityJukebox.class)
 public abstract class MixinTileEntityJukebox extends MixinTileEntity implements Jukebox {
 
     private static final int PLAY_RECORD_EVENT = 1010;
@@ -50,29 +51,29 @@ public abstract class MixinTileEntityJukebox extends MixinTileEntity implements 
     @Shadow public abstract void setRecord(net.minecraft.item.ItemStack recordStack);
 
     @Override
-    public void playRecord() {
+    public void play() {
         if (!getRecord().isEmpty()) {
             this.world.playEvent(null, PLAY_RECORD_EVENT, this.pos, Item.getIdFromItem(getRecord().getItem()));
         }
     }
 
     @Override
-    public void stopRecord() {
+    public void stop() {
         this.world.playEvent(PLAY_RECORD_EVENT, this.pos, 0);
         this.world.playRecord(this.pos, null);
     }
 
     @Override
-    public void ejectRecord() {
+    public void eject() {
         IBlockState block = this.world.getBlockState(this.pos);
         if (block.getBlock() == Blocks.JUKEBOX) {
-            ((BlockJukebox) block.getBlock()).dropRecord(this.world, this.pos, block);
-            this.world.setBlockState(this.pos, block.withProperty(BlockJukebox.HAS_RECORD, false), 2);
+            ((BlockJukebox) block.getBlock()).func_203419_a(this.world, this.pos, block);
+            this.world.setBlockState(this.pos, block.with(BlockJukebox.HAS_RECORD, false), 2);
         }
     }
 
     @Override
-    public void insertRecord(ItemStack record) {
+    public void insert(ItemStack record) {
         net.minecraft.item.ItemStack itemStack = (net.minecraft.item.ItemStack) checkNotNull(record, "record");
         if (!(itemStack.getItem() instanceof ItemRecord)) {
             return;
@@ -81,7 +82,7 @@ public abstract class MixinTileEntityJukebox extends MixinTileEntity implements 
         if (block.getBlock() == Blocks.JUKEBOX) {
             // Don't use BlockJukebox#insertRecord - it looses item data
             this.setRecord(itemStack);
-            this.world.setBlockState(this.pos, block.withProperty(BlockJukebox.HAS_RECORD, true), 2);
+            this.world.setBlockState(this.pos, block.with(BlockJukebox.HAS_RECORD, true), 2);
         }
     }
 

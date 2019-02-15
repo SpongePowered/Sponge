@@ -47,7 +47,7 @@ public abstract class MixinTileEntityEnderChest extends MixinTileEntity implemen
      *
      * @reason Overwritten in case ender chests ever attempt to tick
      */
-    @Inject(method = "update", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "tick", at = @At("HEAD"), cancellable = true)
     public void onUpdate(CallbackInfo ci) {
         if (this.world == null || !this.world.isRemote) {
             // chests should never tick on server
@@ -76,7 +76,7 @@ public abstract class MixinTileEntityEnderChest extends MixinTileEntity implemen
             double posY = (double)this.pos.getY() + 0.5D;
             double posZ = (double)this.pos.getZ() + 0.5D;
 
-            this.world.playSound(null, posX, posY, posZ, SoundEvents.BLOCK_ENDERCHEST_OPEN, SoundCategory.BLOCKS, 0.5F, this.world.rand.nextFloat() * 0.1F + 0.9F);
+            this.world.playSound(null, posX, posY, posZ, SoundEvents.BLOCK_ENDER_CHEST_OPEN, SoundCategory.BLOCKS, 0.5F, this.world.rand.nextFloat() * 0.1F + 0.9F);
         }
     }
 
@@ -101,7 +101,7 @@ public abstract class MixinTileEntityEnderChest extends MixinTileEntity implemen
             double posZ = (double)this.pos.getZ() + 0.5D;
 
 
-            this.world.playSound(null, posX, posY, posZ, SoundEvents.BLOCK_ENDERCHEST_CLOSE, SoundCategory.BLOCKS, 0.5F, this.world.rand.nextFloat() * 0.1F + 0.9F);
+            this.world.playSound(null, posX, posY, posZ, SoundEvents.BLOCK_ENDER_CHEST_CLOSE, SoundCategory.BLOCKS, 0.5F, this.world.rand.nextFloat() * 0.1F + 0.9F);
         }
     }
 }

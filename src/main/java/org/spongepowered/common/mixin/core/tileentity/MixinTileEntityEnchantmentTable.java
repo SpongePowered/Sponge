@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.tileentity;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import net.minecraft.tileentity.TileEntityEnchantmentTable;
+import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.block.tileentity.EnchantmentTable;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -42,12 +43,12 @@ import java.util.List;
 @Mixin(TileEntityEnchantmentTable.class)
 public abstract class MixinTileEntityEnchantmentTable extends MixinTileEntity implements EnchantmentTable, IMixinCustomNameable {
 
-    @Shadow private String customName;
+    @Shadow private ITextComponent customname;
 
     @Override
     public DataContainer toContainer() {
         DataContainer container = super.toContainer();
-        container.set(of("CustomName"), this.customName);
+        container.set(of("CustomName"), this.customname);
         return container;
     }
 
@@ -60,7 +61,7 @@ public abstract class MixinTileEntityEnchantmentTable extends MixinTileEntity im
     }
 
     @Override
-    public void setCustomDisplayName(String customName) {
+    public void setCustomDisplayName(ITextComponent customName) {
         ((TileEntityEnchantmentTable) (Object) this).setCustomName(customName);
     }
 }

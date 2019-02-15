@@ -29,6 +29,7 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityFurnace;
+import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.block.tileentity.carrier.Furnace;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -52,7 +53,7 @@ import org.spongepowered.common.item.inventory.lens.impl.slots.OutputSlotLensImp
 @Mixin(TileEntityFurnace.class)
 public abstract class MixinTileEntityFurnace extends MixinTileEntityLockable implements Furnace, IMixinCustomNameable {
 
-    @Shadow private String furnaceCustomName;
+    @Shadow private ITextComponent furnaceCustomName;
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
@@ -91,8 +92,8 @@ public abstract class MixinTileEntityFurnace extends MixinTileEntityLockable imp
     }
 
     @Override
-    public void setCustomDisplayName(String customName) {
-        ((TileEntityFurnace) (Object) this).setCustomInventoryName(customName);
+    public void setCustomDisplayName(ITextComponent customName) {
+        ((TileEntityFurnace) (Object) this).setCustomName(customName);
     }
 
 }

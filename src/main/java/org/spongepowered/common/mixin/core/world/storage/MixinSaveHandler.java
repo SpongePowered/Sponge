@@ -112,7 +112,7 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
             final NBTTagCompound compound = CompressedStreamTools.readCompressed(new FileInputStream(spongeFile.exists() ? spongeFile :
                     spongeOldFile));
             ((IMixinWorldInfo) info).setSpongeRootLevelNBT(compound);
-            if (compound.hasKey(NbtDataUtil.SPONGE_DATA)) {
+            if (compound.contains(NbtDataUtil.SPONGE_DATA)) {
                 final NBTTagCompound spongeCompound = compound.getCompound(NbtDataUtil.SPONGE_DATA);
                 DataUtil.spongeDataFixer.process(FixTypes.LEVEL, spongeCompound);
                 ((IMixinWorldInfo) info).readSpongeNbt(spongeCompound);

@@ -346,7 +346,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         WorldServer worldserver = (WorldServer) this.world;
         net.minecraft.world.chunk.Chunk chunk = null;
         if (worldserver.getChunkProvider().chunkExists(this.x, this.z) || generate) {
-            chunk = worldserver.getChunkProvider().loadChunk(this.x, this.z);
+            chunk = worldserver.getChunkProvider().getChunk(this.x, this.z);
         }
 
         return chunk != null;

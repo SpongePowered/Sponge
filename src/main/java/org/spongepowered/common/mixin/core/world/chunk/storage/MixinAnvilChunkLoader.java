@@ -88,9 +88,6 @@ public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
     @Shadow @Final private File chunkSaveLocation;
     @Shadow private boolean flushing;
 
-    @Shadow
-    public abstract void writeChunkData(ChunkPos pos, NBTTagCompound compound);
-
     @Inject(method = "writeChunkToNBT", at = @At(value = "RETURN"))
     public void onWriteChunkToNBT(net.minecraft.world.chunk.Chunk chunkIn, World worldIn, NBTTagCompound compound, CallbackInfo ci) {
         IMixinChunk chunk = (IMixinChunk) chunkIn;
@@ -99,17 +96,17 @@ public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
         if (chunk.getTrackedShortPlayerPositions().size() > 0 || chunk.getTrackedIntPlayerPositions().size() > 0) {
             NBTTagCompound trackedNbt = new NBTTagCompound();
             NBTTagList positions = new NBTTagList();
-            trackedNbt.setTag(NbtDataUtil.SPONGE_BLOCK_POS_TABLE, positions);
-            compound.setTag(NbtDataUtil.SPONGE_DATA, trackedNbt);
+            trackedNbt.put(NbtDataUtil.SPONGE_BLOCK_POS_TABLE, positions);
+            compound.put(NbtDataUtil.SPONGE_DATA, trackedNbt);
 
             for (Map.Entry<Short, PlayerTracker> mapEntry : chunk.getTrackedShortPlayerPositions().entrySet()) {
                 Short pos = mapEntry.getKey();
                 Integer ownerUniqueIdIndex = mapEntry.getValue().ownerIndex;
                 Integer notifierUniqueIdIndex = mapEntry.getValue().notifierIndex;
                 NBTTagCompound valueNbt = new NBTTagCompound();
-                valueNbt.setInt("owner", ownerUniqueIdIndex);
-                valueNbt.setInt("notifier", notifierUniqueIdIndex);
-                valueNbt.setShort("pos", pos);
+                valueNbt.putInt("owner", ownerUniqueIdIndex);
+                valueNbt.putInt("notifier", notifierUniqueIdIndex);
+                valueNbt.putShort("pos", pos);
                 positions.add(valueNbt);
             }
 
@@ -118,9 +115,9 @@ public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
                 Integer ownerUniqueIdIndex = mapEntry.getValue().ownerIndex;
                 Integer notifierUniqueIdIndex = mapEntry.getValue().notifierIndex;
                 NBTTagCompound valueNbt = new NBTTagCompound();
-                valueNbt.setInt("owner", ownerUniqueIdIndex);
-                valueNbt.setInt("notifier", notifierUniqueIdIndex);
-                valueNbt.setInt("ipos", pos);
+                valueNbt.putInt("owner", ownerUniqueIdIndex);
+                valueNbt.putInt("notifier", notifierUniqueIdIndex);
+                valueNbt.putInt("ipos", pos);
                 positions.add(valueNbt);
             }
         }
@@ -129,21 +126,21 @@ public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
     @Inject(method = "readChunkFromNBT", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/NBTTagCompound;getIntArray(Ljava/lang/String;)[I", shift = At.Shift.BEFORE), locals = LocalCapture.CAPTURE_FAILHARD)
     private void onReadChunkFromNBT(World worldIn, NBTTagCompound compound, CallbackInfoReturnable<net.minecraft.world.chunk.Chunk> ci, int chunkX,
       int chunkZ, net.minecraft.world.chunk.Chunk chunkIn) {
-        if (compound.hasKey(NbtDataUtil.SPONGE_DATA)) {
+        if (compound.contains(NbtDataUtil.SPONGE_DATA)) {
             final Map<Integer, PlayerTracker> trackedIntPlayerPositions = new HashMap<>();
             final Map<Short, PlayerTracker> trackedShortPlayerPositions = new HashMap<>();
             final NBTTagList positions = compound.getCompound(NbtDataUtil.SPONGE_DATA).getList(NbtDataUtil.SPONGE_BLOCK_POS_TABLE, 10);
             final IMixinChunk chunk = (IMixinChunk) chunkIn;
             for (int i = 0; i < positions.size(); i++) {
                 NBTTagCompound valueNbt = positions.getCompound(i);
-                boolean isShortPos = valueNbt.hasKey("pos");
+                boolean isShortPos = valueNbt.contains("pos");
                 PlayerTracker tracker = new PlayerTracker();
-                if (valueNbt.hasKey("owner")) {
+                if (valueNbt.contains("owner")) {
                     tracker.ownerIndex = valueNbt.getInt("owner");
-                } else if (valueNbt.hasKey("uuid")) { // Migrate old data, remove in future
+                } else if (valueNbt.contains("uuid")) { // Migrate old data, remove in future
                     tracker.ownerIndex = valueNbt.getInt("uuid");
                 }
-                if (valueNbt.hasKey("notifier")) {
+                if (valueNbt.contains("notifier")) {
                     tracker.notifierIndex = valueNbt.getInt("notifier");
                 }
 
@@ -170,9 +167,9 @@ public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
     @Redirect(method = "readChunkEntity", at = @At(value = "INVOKE", target = ENTITY_LIST_CREATE_FROM_NBT), require = 0, expect = 0)
     private static Entity onReadChunkEntity(NBTTagCompound compound, World world, Chunk chunk) {
         if ("Minecart".equals(compound.getString(NbtDataUtil.ENTITY_TYPE_ID))) {
-            compound.setString(NbtDataUtil.ENTITY_TYPE_ID,
+            compound.putString(NbtDataUtil.ENTITY_TYPE_ID,
                     EntityMinecart.Type.values()[compound.getInt(NbtDataUtil.MINECART_TYPE)].name());
-            compound.removeTag(NbtDataUtil.MINECART_TYPE);
+            compound.remove(NbtDataUtil.MINECART_TYPE);
         }
         Class<? extends Entity> entityClass = SpongeImplHooks.getEntityClass(new ResourceLocation(compound.getString(NbtDataUtil.ENTITY_TYPE_ID)));
         if (entityClass == null) {
