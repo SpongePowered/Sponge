@@ -32,7 +32,7 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.projectile.Firework;
+import org.spongepowered.api.entity.projectile.FireworkRocket;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -45,7 +45,7 @@ public class MixinItemFirework {
     @Redirect(method = "onItemUse", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z"))
     private boolean onspawnEntity(World world, Entity firework, EntityPlayer player, World worldIn, BlockPos pos, EnumHand side, EnumFacing hitX, float hitY, float hitZ, float p_180614_9_) {
-        ((Firework) firework).setShooter((ProjectileSource) player);
+        ((FireworkRocket) firework).setShooter((ProjectileSource) player);
         Sponge.getCauseStackManager().pushCause(player);
         final boolean primeCancelled = !((IMixinEntityFireworkRocket) firework).shouldPrime();
         Sponge.getCauseStackManager().popCause();

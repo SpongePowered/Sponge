@@ -50,7 +50,7 @@ public class MixinEntity_Collisions implements IModData_Collisions {
 
     private int maxCollisions = 8;
     private boolean refreshCache = false;
-    private SpongeEntityType<?> spongeEntityType;
+    private SpongeEntityType<?, ?> spongeEntityType;
     private String entityName = "unknown";
     private String entityModId = "unknown";
     @Shadow public World world;

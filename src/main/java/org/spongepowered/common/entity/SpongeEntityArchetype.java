@@ -83,7 +83,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
         final World world = location.getWorld();
         final WorldServer worldServer = (WorldServer) world;
 
-        final Entity entity = ((SpongeEntityType) this.type).type.create(worldServer);
+        final Entity entity = ((SpongeEntityType<?, ?>) this.type).type.create(worldServer);
         if (entity == null) {
             return Optional.empty();
         }

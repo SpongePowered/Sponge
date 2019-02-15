@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.world;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 import com.flowpowered.math.GenericMath;
 import com.flowpowered.math.vector.Vector2d;
@@ -37,20 +38,9 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.MultiPartEntityPart;
-import net.minecraft.entity.effect.EntityLightningBolt;
-import net.minecraft.entity.item.EntityArmorStand;
-import net.minecraft.entity.item.EntityEnderPearl;
-import net.minecraft.entity.item.EntityFallingBlock;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.item.EntityPainting;
-import net.minecraft.entity.item.EntityPainting.EnumArt;
-import net.minecraft.entity.item.PaintingType;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.play.server.SPacketBlockChange;
 import net.minecraft.profiler.Profiler;
@@ -75,7 +65,6 @@ import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
-import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -86,8 +75,6 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.projectile.EnderPearl;
-import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.chat.ChatType;
@@ -126,7 +113,9 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
+import org.spongepowered.common.entity.EntityFactory;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
@@ -417,76 +406,10 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     private Entity createEntity(EntityType type, Vector3d position, boolean naturally) throws IllegalArgumentException, IllegalStateException {
-        checkNotNull(type, "The entity type cannot be null!");
-        checkNotNull(position, "The position cannot be null!");
-
-        Entity entity = null;
-
-        Class<? extends Entity> entityClass = type.getEntityClass();
-        double x = position.getX();
-        double y = position.getY();
-        double z = position.getZ();
-
-        if (entityClass.isAssignableFrom(EntityPlayerMP.class) || entityClass.isAssignableFrom(MultiPartEntityPart.class)) {
-            // Unable to construct these
-            throw new IllegalArgumentException("Cannot construct " + type.getKey() + " please look to using entity types correctly!");
-        }
-
-        net.minecraft.world.World world = (net.minecraft.world.World) (Object) this;
-
-        // TODO - archetypes should solve the problem of calling the correct constructor
-        // Not all entities have a single World parameter as their constructor
-        if (entityClass.isAssignableFrom(EntityLightningBolt.class)) {
-            entity = (Entity) new EntityLightningBolt(world, x, y, z, false);
-        } else if (entityClass.isAssignableFrom(EntityEnderPearl.class)) {
-            EntityArmorStand tempEntity = new EntityArmorStand(world, x, y, z);
-            tempEntity.posY -= tempEntity.getEyeHeight();
-            entity = (Entity) new EntityEnderPearl(world, tempEntity);
-            ((EnderPearl) entity).setShooter(ProjectileSource.UNKNOWN);
-        }
-
-        // Some entities need to have non-null fields (and the easiest way to
-        // set them is to use the more specialised constructor).
-        if (entityClass.isAssignableFrom(EntityFallingBlock.class)) {
-            entity = (Entity) new EntityFallingBlock(world, x, y, z, Blocks.SAND.getDefaultState());
-        } else if (entityClass.isAssignableFrom(EntityItem.class)) {
-            entity = (Entity) new EntityItem(world, x, y, z, new ItemStack(Blocks.STONE));
-        }
-
-        if (entity == null) {
-            try {
-                entity = ConstructorUtils.invokeConstructor(entityClass, this);
-                ((net.minecraft.entity.Entity) entity).setPosition(x, y, z);
-            } catch (Exception e) {
-                throw new RuntimeException("There was an issue attempting to construct " + type.getKey(), e);
-            }
-        }
-
-        // TODO - replace this with an actual check
-        /*
-        if (entity instanceof EntityHanging) {
-            if (((EntityHanging) entity).facingDirection == null) {
-                // TODO Some sort of detection of a valid direction?
-                // i.e scan immediate blocks for something to attach onto.
-                ((EntityHanging) entity).facingDirection = EnumFacing.NORTH;
-            }
-            if (!((EntityHanging) entity).onValidSurface()) {
-                return Optional.empty();
-            }
-        }*/
-
-        if (naturally && entity instanceof EntityLiving) {
-            // Adding the default equipment
-            ((EntityLiving)entity).onInitialSpawn(world.getDifficultyForLocation(new BlockPos(x, y, z)), null, null);
-        }
-
-        if (entity instanceof EntityPainting) {
-            // This is default when art is null when reading from NBT, could
-            // choose a random art instead?
-            ((EntityPainting) entity).art = PaintingType.KEBAB;
-        }
-
-        return entity;
+      checkNotNull(type, "The entity type cannot be null!");
+      checkNotNull(position, "The position cannot be null!");
+      checkState(type instanceof SpongeEntityType<?, ?>, "Don't know how to create a %s", type.getKey());
+      return (Entity) EntityFactory.create((SpongeEntityType<?, ?>) type, (net.minecraft.world.World) (Object) this, position.getX(), position.getY(), position.getZ(), naturally);
     }
 
     @Override

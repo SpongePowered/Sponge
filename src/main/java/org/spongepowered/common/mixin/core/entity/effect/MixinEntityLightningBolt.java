@@ -39,7 +39,7 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.ExpirableData;
 import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.weather.Lightning;
+import org.spongepowered.api.entity.weather.LightningBolt;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.action.LightningEvent;
@@ -60,7 +60,7 @@ import org.spongepowered.common.util.VecHelper;
 import java.util.List;
 
 @Mixin(EntityLightningBolt.class)
-public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect implements Lightning, IMixinEntityLightningBolt {
+public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect implements LightningBolt, IMixinEntityLightningBolt {
 
     private final List<Entity> struckEntities = Lists.newArrayList();
     private final List<Transaction<BlockSnapshot>> struckBlocks = Lists.newArrayList();

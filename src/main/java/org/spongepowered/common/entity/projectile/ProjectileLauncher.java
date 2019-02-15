@@ -59,13 +59,13 @@ import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.projectile.Egg;
 import org.spongepowered.api.entity.projectile.EnderPearl;
 import org.spongepowered.api.entity.projectile.EyeOfEnder;
-import org.spongepowered.api.entity.projectile.Firework;
+import org.spongepowered.api.entity.projectile.FireworkRocket;
 import org.spongepowered.api.entity.projectile.FishingBobber;
 import org.spongepowered.api.entity.projectile.LlamaSpit;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.entity.projectile.Snowball;
-import org.spongepowered.api.entity.projectile.ThrownExpBottle;
-import org.spongepowered.api.entity.projectile.ThrownPotion;
+import org.spongepowered.api.entity.projectile.ExperienceBottle;
+import org.spongepowered.api.entity.projectile.Potion;
 import org.spongepowered.api.entity.projectile.arrow.Arrow;
 import org.spongepowered.api.entity.projectile.arrow.SpectralArrow;
 import org.spongepowered.api.entity.projectile.arrow.TippedArrow;
@@ -224,11 +224,11 @@ public class ProjectileLauncher {
                 return doLaunch(loc.getWorld(), fireball);
             }
         });
-        registerProjectileLogic(Firework.class, new SimpleItemLaunchLogic<Firework>(Firework.class, Items.FIREWORK_ROCKET) {
+        registerProjectileLogic(FireworkRocket.class, new SimpleItemLaunchLogic<FireworkRocket>(FireworkRocket.class, Items.FIREWORK_ROCKET) {
 
             @Override
-            protected Optional<Firework> createProjectile(EntityLivingBase source, Location loc) {
-                Firework firework = (Firework) new EntityFireworkRocket(source.world, loc.getX(), loc.getY(), loc.getZ(), ItemStack.EMPTY);
+            protected Optional<FireworkRocket> createProjectile(EntityLivingBase source, Location loc) {
+                FireworkRocket firework = (FireworkRocket) new EntityFireworkRocket(source.world, loc.getX(), loc.getY(), loc.getZ(), ItemStack.EMPTY);
                 return doLaunch(loc.getWorld(), firework);
             }
         });
@@ -241,11 +241,11 @@ public class ProjectileLauncher {
                 return doLaunch(loc.getWorld(), snowball);
             }
         });
-        registerProjectileLogic(ThrownExpBottle.class, new SimpleItemLaunchLogic<ThrownExpBottle>(ThrownExpBottle.class, Items.EXPERIENCE_BOTTLE) {
+        registerProjectileLogic(ExperienceBottle.class, new SimpleItemLaunchLogic<ExperienceBottle>(ExperienceBottle.class, Items.EXPERIENCE_BOTTLE) {
 
             @Override
-            protected Optional<ThrownExpBottle> createProjectile(EntityLivingBase source, Location loc) {
-                ThrownExpBottle expBottle = (ThrownExpBottle) new EntityExpBottle(source.world, source);
+            protected Optional<ExperienceBottle> createProjectile(EntityLivingBase source, Location loc) {
+                ExperienceBottle expBottle = (ExperienceBottle) new EntityExpBottle(source.world, source);
                 ((EntityThrowable) expBottle).shoot(source, source.rotationPitch, source.rotationYaw, -20.0F, 0.7F, 0);
                 return doLaunch(loc.getWorld(), expBottle);
             }
@@ -311,11 +311,11 @@ public class ProjectileLauncher {
                 return super.createProjectile(source, loc);
             }
         });
-        registerProjectileLogic(ThrownPotion.class, new SimpleDispenserLaunchLogic<ThrownPotion>(ThrownPotion.class) {
+        registerProjectileLogic(Potion.class, new SimpleDispenserLaunchLogic<Potion>(Potion.class) {
 
             @Override
-            protected Optional<ThrownPotion> createProjectile(EntityLivingBase source, Location loc) {
-                ThrownPotion potion = (ThrownPotion) new EntityPotion(source.world, source, new ItemStack(Items.SPLASH_POTION, 1));
+            protected Optional<Potion> createProjectile(EntityLivingBase source, Location loc) {
+                Potion potion = (Potion) new EntityPotion(source.world, source, new ItemStack(Items.SPLASH_POTION, 1));
                 ((EntityThrowable) potion).shoot(source, source.rotationPitch, source.rotationYaw, -20.0F, 0.5F, 0);
                 return doLaunch(loc.getWorld(), potion);
             }

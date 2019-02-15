@@ -39,7 +39,7 @@ import org.spongepowered.common.config.category.EntityTrackerModCategory;
 import org.spongepowered.common.config.type.TrackerConfig;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
-public class SpongeEntityType<I extends Entity> extends SpongeCatalogType.Translatable implements EntityType {
+public class SpongeEntityType<I extends Entity, A extends org.spongepowered.api.entity.Entity> extends SpongeCatalogType.Translatable implements EntityType<A> {
 
     public static final EntityType UNKNOWN = new UnknownEntityType();
 
@@ -122,10 +122,10 @@ public class SpongeEntityType<I extends Entity> extends SpongeCatalogType.Transl
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public Class<? extends org.spongepowered.api.entity.Entity> getEntityClass() {
-        return (Class<? extends org.spongepowered.api.entity.Entity>) this.entityClass;
+    @SuppressWarnings("unchecked")
+    public Class<A> getEntityClass() {
+        return (Class<A>) (Object) this.entityClass;
     }
 
     @Override

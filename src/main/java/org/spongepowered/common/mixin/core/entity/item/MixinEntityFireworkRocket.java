@@ -34,7 +34,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.world.World;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.projectile.Firework;
+import org.spongepowered.api.entity.projectile.FireworkRocket;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
@@ -52,7 +52,7 @@ import org.spongepowered.common.mixin.core.entity.MixinEntity;
 import java.util.Optional;
 
 @Mixin(EntityFireworkRocket.class)
-public abstract class MixinEntityFireworkRocket extends MixinEntity implements Firework, IMixinEntityFireworkRocket {
+public abstract class MixinEntityFireworkRocket extends MixinEntity implements FireworkRocket, IMixinEntityFireworkRocket {
 
     private static final String TARGET_ENTITY_STATE = "Lnet/minecraft/world/World;setEntityState"
             + "(Lnet/minecraft/entity/Entity;B)V";

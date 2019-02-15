@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.entity.boss;
 
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.MultiPartEntityPart;
 import net.minecraft.entity.boss.EntityDragon;
@@ -36,10 +35,9 @@ import net.minecraft.entity.boss.dragon.phase.PhaseManager;
 import net.minecraft.entity.item.EntityEnderCrystal;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.GameRules;
 import net.minecraft.world.end.DragonFightManager;
 import org.spongepowered.api.boss.ServerBossBar;
-import org.spongepowered.api.entity.EnderCrystal;
+import org.spongepowered.api.entity.EndCrystal;
 import org.spongepowered.api.entity.living.complex.EnderDragon;
 import org.spongepowered.api.entity.living.complex.EnderDragonPart;
 import org.spongepowered.asm.lib.Opcodes;
@@ -101,8 +99,8 @@ public abstract class MixinEntityDragon extends MixinEntityLiving implements End
     }
     
     @Override
-    public Optional<EnderCrystal> getHealingCrystal() {
-        return Optional.ofNullable((EnderCrystal) this.healingEnderCrystal);
+    public Optional<EndCrystal> getHealingCrystal() {
+        return Optional.ofNullable((EndCrystal) this.healingEnderCrystal);
     }
 
     /**

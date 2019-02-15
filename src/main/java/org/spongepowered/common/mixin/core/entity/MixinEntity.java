@@ -287,7 +287,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onSpongeConstruction(net.minecraft.entity.EntityType<?> entityType, @Nullable net.minecraft.world.World worldIn, CallbackInfo ci) {
         if (this.entityType instanceof SpongeEntityType) {
-            SpongeEntityType<?> spongeEntityType = (SpongeEntityType<?>) this.entityType;
+            SpongeEntityType<?, ?> spongeEntityType = (SpongeEntityType<?, ?>) this.entityType;
             this.refreshCache();
             if (spongeEntityType.getEnumCreatureType() == null) {
                 for (EnumCreatureType type : EnumCreatureType.values()) {

@@ -25,10 +25,10 @@
 package org.spongepowered.common.mixin.core.entity.projectile;
 
 import net.minecraft.entity.projectile.EntityPotion;
-import org.spongepowered.api.entity.projectile.ThrownPotion;
+import org.spongepowered.api.entity.projectile.Potion;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(EntityPotion.class)
-public abstract class MixinEntityPotion extends MixinEntityThrowable implements ThrownPotion {
+public abstract class MixinEntityPotion extends MixinEntityThrowable implements Potion {
 
 }

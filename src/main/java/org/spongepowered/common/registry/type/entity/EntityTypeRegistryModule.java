@@ -261,7 +261,7 @@ public final class EntityTypeRegistryModule extends AbstractCatalogRegistryModul
 
     private <T extends Entity> void register(final net.minecraft.entity.EntityType<T> type, final Class<T> klass) {
         final ResourceLocation key = net.minecraft.entity.EntityType.getId(type);
-        final SpongeEntityType<T> sponge = new SpongeEntityType<>(key, type, klass);
+        final SpongeEntityType<T, ?> sponge = new SpongeEntityType<>(key, type, klass);
         this.register((CatalogKey) (Object) key, sponge);
         this.entityClassToTypeMappings.put(klass, sponge);
         KeyRegistryModule.getInstance().registerForEntityClass(klass);
@@ -269,7 +269,7 @@ public final class EntityTypeRegistryModule extends AbstractCatalogRegistryModul
 
     private <T extends Entity> void registerCustom(final ResourceLocation key, final Function<? super World, ? extends T> factory, final Class<T> klass, final int networkId, final String oldName) {
         final net.minecraft.entity.EntityType<T> type = net.minecraft.entity.EntityType.Builder.create(klass, factory).build(key.toString());
-        final SpongeEntityType<T> sponge = new SpongeEntityType<>(key, type, klass, networkId);
+        final SpongeEntityType<T, ?> sponge = new SpongeEntityType<>(key, type, klass, networkId);
         this.customEntities.add(new FutureRegistration(networkId, key, klass, oldName));
         this.register((CatalogKey) (Object) key, sponge);
     }
@@ -283,7 +283,7 @@ public final class EntityTypeRegistryModule extends AbstractCatalogRegistryModul
             }
             final CatalogKey key = fieldName.equalsIgnoreCase("human") ? CatalogKey.sponge(fieldName) : CatalogKey.minecraft(fieldName);
             EntityType entityType = this.map.get(key);
-            this.entityClassToTypeMappings.putIfAbsent(((SpongeEntityType<?>) entityType).entityClass, entityType);
+            this.entityClassToTypeMappings.putIfAbsent(((SpongeEntityType<?, ?>) entityType).entityClass, entityType);
             return entityType;
         });
         this.map.put(CatalogKey.minecraft("ozelot"), this.map.get(CatalogKey.minecraft("ocelot")));
@@ -303,7 +303,7 @@ public final class EntityTypeRegistryModule extends AbstractCatalogRegistryModul
     @Override
     public void registerAdditionalCatalog(EntityType extraCatalog) {
         this.map.put(extraCatalog.getKey(), extraCatalog);
-        this.entityClassToTypeMappings.put(((SpongeEntityType<?>) extraCatalog).entityClass, extraCatalog);
+        this.entityClassToTypeMappings.put(((SpongeEntityType<?, ?>) extraCatalog).entityClass, extraCatalog);
     }
 
     @Override

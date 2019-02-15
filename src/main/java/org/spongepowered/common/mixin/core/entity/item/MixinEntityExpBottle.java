@@ -25,11 +25,11 @@
 package org.spongepowered.common.mixin.core.entity.item;
 
 import net.minecraft.entity.item.EntityExpBottle;
-import org.spongepowered.api.entity.projectile.ThrownExpBottle;
+import org.spongepowered.api.entity.projectile.ExperienceBottle;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.core.entity.projectile.MixinEntityThrowable;
 
 @Mixin(EntityExpBottle.class)
-public abstract class MixinEntityExpBottle extends MixinEntityThrowable implements ThrownExpBottle {
+public abstract class MixinEntityExpBottle extends MixinEntityThrowable implements ExperienceBottle {
 
 }

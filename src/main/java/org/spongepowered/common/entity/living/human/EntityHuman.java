@@ -63,6 +63,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.persistence.DataBuilder;
 import org.spongepowered.api.entity.EntityTypes;
+import org.spongepowered.api.entity.living.Human;
 import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.api.scoreboard.TeamMember;
 import org.spongepowered.api.text.Text;
@@ -99,7 +100,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
     private boolean aiDisabled = false, leftHanded = false;
 
     public EntityHuman(final World world) {
-        super(((SpongeEntityType) EntityTypes.HUMAN).type, world);
+        super(((SpongeEntityType<EntityHuman, Human>) EntityTypes.HUMAN).type, world);
         this.fakeProfile = new GameProfile(this.entityUniqueID, "");
         this.setSize(0.6F, 1.8F);
         this.setCanPickUpLoot(true);

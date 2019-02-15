@@ -29,7 +29,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityEnderCrystal;
 import net.minecraft.util.DamageSource;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.EnderCrystal;
+import org.spongepowered.api.entity.EndCrystal;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
@@ -46,7 +46,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 @Mixin(EntityEnderCrystal.class)
-public abstract class MixinEntityEnderCrystal extends MixinEntity implements EnderCrystal, IMixinExplosive {
+public abstract class MixinEntityEnderCrystal extends MixinEntity implements EndCrystal, IMixinExplosive {
 
     private static final String TARGET_NEW_EXPLOSION = "Lnet/minecraft/world/World;createExplosion"
             + "(Lnet/minecraft/entity/Entity;DDDFZ)Lnet/minecraft/world/Explosion;";
