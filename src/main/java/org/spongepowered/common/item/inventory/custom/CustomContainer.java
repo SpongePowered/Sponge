@@ -38,16 +38,16 @@ public class CustomContainer extends Container {
 
         // TODO what significance has the x/y coord on the Slots?
         for (int slot = 0; slot < inventory.getSizeInventory(); slot++) {
-            this.addSlotToContainer(new Slot(inventory, slot, 0, 0));
+            this.addSlot(new Slot(inventory, slot, 0, 0));
         }
 
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
-                this.addSlotToContainer(new Slot(player.inventory, (row + 1) * 9 + col, 0, 0));
+                this.addSlot(new Slot(player.inventory, (row + 1) * 9 + col, 0, 0));
             }
         }
         for (int col = 0; col < 9; col++) {
-            this.addSlotToContainer(new Slot(player.inventory, col, 0, 0));
+            this.addSlot(new Slot(player.inventory, col, 0, 0));
         }
     }
 

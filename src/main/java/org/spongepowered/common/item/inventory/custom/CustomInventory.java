@@ -36,6 +36,7 @@ import net.minecraft.world.IInteractionObject;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
+import org.spongepowered.api.event.item.inventory.container.InteractContainerEvent;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
@@ -68,7 +69,7 @@ public class CustomInventory implements IInventory, IInteractionObject {
 
     @SuppressWarnings("deprecation")
     public CustomInventory(InventoryArchetype archetype, Map<Property<?>, Object> properties, Carrier carrier,
-            Map<Class<? extends InteractInventoryEvent>, List<Consumer<? extends InteractInventoryEvent>>> listeners, boolean isVirtual,
+            Map<Class<? extends InteractContainerEvent>, List<Consumer<? extends InteractContainerEvent>>> listeners, boolean isVirtual,
             PluginContainer plugin) {
         this.archetype = archetype;
         this.properties = properties;

@@ -26,6 +26,7 @@ package org.spongepowered.common.inject.provider;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.network.ChannelBinding;
 import org.spongepowered.api.network.ChannelId;
 import org.spongepowered.api.network.ChannelRegistrar;
@@ -38,8 +39,9 @@ public abstract class ChannelBindingProvider<B extends ChannelBinding> implement
     @Inject PluginContainer container;
     @Inject private Provider<SpongeInjectionPoint> point;
 
-    final String getChannel() {
-        return this.point.get().getAnnotation(ChannelId.class).value();
+    final CatalogKey getChannel() {
+        return CatalogKey.of(this.point.get().getAnnotation(ChannelId.class).namespace(),
+                this.point.get().getAnnotation(ChannelId.class).value());
     }
 
     public static class Indexed extends ChannelBindingProvider<ChannelBinding.IndexedMessageChannel> {

@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.realtime.mixin;
 
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.EntityType;
 import net.minecraft.world.World;
 import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
@@ -38,8 +39,8 @@ public abstract class MixinEntityLiving extends EntityLivingBase {
 
     private static final String ENTITY_LIVING_AGE_FIELD = "Lnet/minecraft/entity/EntityLiving;idleTime:I";
 
-    public MixinEntityLiving(World worldIn) {
-        super(worldIn);
+    protected MixinEntityLiving(EntityType<?> type, World p_i48577_2_) {
+        super(type, p_i48577_2_);
     }
 
     @Redirect(method = "updateEntityActionState", at = @At(value = "FIELD", target = ENTITY_LIVING_AGE_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))

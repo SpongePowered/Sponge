@@ -40,7 +40,6 @@ import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.util.VecHelper;
 
 import javax.annotation.Nullable;
@@ -80,7 +79,7 @@ public interface MixinMerchant extends Merchant {
     }
 
     default World imerchant$getWorld() {
-        return ((World) getLocation().getExtent());
+        return ((World) getLocation().getWorld());
     }
 
     default BlockPos imerchant$getPos() {
