@@ -26,8 +26,10 @@ package org.spongepowered.common.mixin.core.item;
 
 import net.minecraft.item.ItemMap;
 import net.minecraft.item.ItemMapBase;
+import net.minecraft.world.ISaveDataAccess;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
+import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.storage.WorldSavedData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -41,34 +43,25 @@ import javax.annotation.Nullable;
 @Mixin(ItemMap.class)
 public class MixinItemMap extends ItemMapBase {
 
-    public MixinItemMap(Builder p_i48514_1_) {
+    public MixinItemMap(Properties p_i48514_1_) {
         super(p_i48514_1_);
     }
 
-    @Redirect(method = "setupNewMap", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getUniqueDataId(Ljava/lang/String;)I"))
-    private static int onCreateMap(World worldIn, String key) {
-        if (worldIn.isRemote) {
-            return worldIn.getUniqueDataId(key);
+    @Redirect(method = "createMapData", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;func_212410_a(Lnet/minecraft/world/dimension/DimensionType;Ljava/lang/String;)I"))
+    private static int onGetMapId(World world, DimensionType dimensionType, String key) {
+        if (world.isRemote) {
+            return world.func_212410_a(dimensionType, key);
         }
-        return WorldManager.getWorldByDimensionId(0).get().getUniqueDataId(key);
+        return WorldManager.getWorldByDimensionId(0).get().func_212410_a(dimensionType, key);
     }
 
-    @Redirect(method = "setupNewMap", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;"
-        + "setData(Ljava/lang/String;Lnet/minecraft/world/storage/WorldSavedData;)V"))
-    private static void onSetupNewMapSetOverworldMapData(World worldIn, String dataId, WorldSavedData data) {
-        if (worldIn.isRemote) {
-            worldIn.setData(dataId, data);
-        } else {
-            WorldManager.getWorldByDimensionId(0).get().setData(dataId, data);
-        }
-    }
 
     @Nullable
     @Redirect(method = "getMapData", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;"
         + "loadData(Ljava/lang/Class;Ljava/lang/String;)Lnet/minecraft/world/storage/WorldSavedData;"))
     private static WorldSavedData loadOverworldMapData(IWorld world, Function<String, ?> constructor, String dataId) {
         if (((World) world).isRemote) {
-            return world.loadData((Function) constructor, dataId);
+            return world.load((Function) constructor, dataId);
         }
         return WorldManager.getWorldByDimensionId(0).get().loadData((Function) constructor, dataId);
     }

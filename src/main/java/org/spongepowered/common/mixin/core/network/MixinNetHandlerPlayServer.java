@@ -188,9 +188,10 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     @Shadow public abstract void setPlayerLocation(double x, double y, double z, float yaw, float pitch);
     @Shadow private static boolean isMovePlayerPacketInvalid(CPacketPlayer packetIn) { return false; } // Shadowed
 
+    @Shadow private long keepAliveTime;
     // Appears to be the last keep-alive packet ID. Currently the same as
     // field_194402_f, but _f is time (which the ID just so happens to match).
-    @Shadow private long field_194404_h;
+    //@Shadow private long field_194404_h;
     private boolean justTeleported = false;
     @Nullable private Location lastMoveLocation = null;
 
@@ -282,7 +283,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         } else if (packetIn instanceof SPacketResourcePackSend) {
             // Send a custom keep-alive packet that doesn't match vanilla.
             long now = Util.milliTime() - 1;
-            while (now == this.field_194404_h || this.customKeepAliveCallbacks.containsKey(now)) {
+            while (now == this.keepAliveTime || this.customKeepAliveCallbacks.containsKey(now)) {
                 now--;
             }
             final ResourcePack resourcePack = ((IMixinPacketResourcePackSend) packetIn).getResourcePack();
@@ -359,15 +360,15 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             ItemStack itemstack = packetIn.getStack();
             NBTTagCompound nbttagcompound = itemstack.getChildTag("BlockEntityTag");
 
-            if (!itemstack.isEmpty() && nbttagcompound != null && nbttagcompound.hasKey("x") && nbttagcompound.hasKey("y") && nbttagcompound.hasKey("z")) {
+            if (!itemstack.isEmpty() && nbttagcompound != null && nbttagcompound.contains("x") && nbttagcompound.contains("y") && nbttagcompound.contains("z")) {
                 BlockPos blockpos = new BlockPos(nbttagcompound.getInt("x"), nbttagcompound.getInt("y"), nbttagcompound.getInt("z"));
                 TileEntity tileentity = this.player.world.getTileEntity(blockpos);
 
                 if (tileentity != null) {
                     NBTTagCompound nbttagcompound1 = tileentity.write(new NBTTagCompound());
-                    nbttagcompound1.removeTag("x");
-                    nbttagcompound1.removeTag("y");
-                    nbttagcompound1.removeTag("z");
+                    nbttagcompound1.remove("x");
+                    nbttagcompound1.remove("y");
+                    nbttagcompound1.remove("z");
                     itemstack.setTagInfo("BlockEntityTag", nbttagcompound1);
                 }
             }

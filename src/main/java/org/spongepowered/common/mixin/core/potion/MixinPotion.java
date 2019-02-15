@@ -76,7 +76,7 @@ public abstract class MixinPotion implements PotionEffectType, IMixinPotion {
 
     public CatalogKey potion$getKey() {
         if (this.key == null) { // Just in case???
-            this.key = (CatalogKey) (Object) Potion.REGISTRY.getKey((Potion) (Object) this);
+            this.key = (CatalogKey) (Object) IRegistry.MOB_EFFECT.getKey((Potion) (Object) this);
         }
         return this.key;
     }

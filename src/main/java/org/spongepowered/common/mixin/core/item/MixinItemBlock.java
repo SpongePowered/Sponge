@@ -43,7 +43,7 @@ import java.util.Optional;
 public abstract class MixinItemBlock extends MixinItem {
 
     @Inject(method = "<init>", at = @At(value = "RETURN"))
-    public void onConstructed(Block block, Item.Builder builder, CallbackInfo ci) {
+    public void onConstructed(Block block, Item.Properties properties, CallbackInfo ci) {
         this.blockType = Optional.of((BlockType) block);
     }
 

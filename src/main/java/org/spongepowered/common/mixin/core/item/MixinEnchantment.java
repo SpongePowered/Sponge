@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.item;
 
 import com.google.common.base.MoreObjects;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.registry.IRegistry;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -64,8 +65,7 @@ public abstract class MixinEnchantment implements IMixinEnchantment, Enchantment
 
     @Inject(method = "registerEnchantments", at = @At("RETURN"))
     private static void onRegister(CallbackInfo ci) {
-        for (ResourceLocation resourceLocation: net.minecraft.enchantment.Enchantment.REGISTRY.getKeys()) {
-            ((IMixinEnchantment) net.minecraft.enchantment.Enchantment.REGISTRY.get(resourceLocation)).setId(resourceLocation);
+             ((IMixinEnchantment) net.minecraft.enchantment.Enchantment.REGISTRY.get(resourceLocation)).setId(resourceLocation);
         }
     }
 

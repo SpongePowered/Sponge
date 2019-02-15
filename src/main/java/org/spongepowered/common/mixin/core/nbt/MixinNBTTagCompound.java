@@ -101,7 +101,7 @@ public abstract class MixinNBTTagCompound implements INBTBase {
                                          + "possible bugs in any mods present. Please report this to SpongePowered and/or the relative mod\n"
                                          + "authors for the offending compound data!", exception);
         } else {
-            compound.setTag(string, base);
+            compound.put(string, base);
         }
     }
 

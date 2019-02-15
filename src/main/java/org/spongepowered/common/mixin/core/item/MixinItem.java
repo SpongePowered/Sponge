@@ -30,6 +30,7 @@ import com.google.common.base.MoreObjects;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.registry.IRegistry;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -60,8 +61,9 @@ public abstract class MixinItem implements ItemType, IMixinItem {
 
     @Shadow private String translationKey;
 
-    @Shadow public abstract int getItemStackLimit();
     @Shadow public abstract String getTranslationKey();
+
+    @Shadow public abstract int getMaxStackSize();
 
     // A item stack used to retrieve properties
     @Nullable private org.spongepowered.api.item.inventory.ItemStack propertyItemStack;
@@ -73,7 +75,7 @@ public abstract class MixinItem implements ItemType, IMixinItem {
 
     @Override
     public CatalogKey getKey() {
-        final ResourceLocation resourceLocation = Item.REGISTRY.getKey((Item) (Object) this);
+        final ResourceLocation resourceLocation = IRegistry.ITEM.getKey((Item) (Object) this);
         checkState(resourceLocation != null, "Attempted to access the id before the Item is registered.");
         return (CatalogKey) (Object) resourceLocation;
     }
@@ -112,7 +114,7 @@ public abstract class MixinItem implements ItemType, IMixinItem {
 
     @Override
     public int getMaxStackQuantity() {
-        return getItemStackLimit();
+        return getMaxStackSize();
     }
 
     @Override

@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.potion;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.registry.IRegistry;
 import net.minecraft.util.registry.RegistryNamespacedDefaultedByKey;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.effect.potion.PotionEffect;
@@ -55,7 +56,7 @@ public abstract class MixinPotionType implements PotionType, IMixinPotion {
 
     @Override
     public CatalogKey getKey() {
-        return (CatalogKey) (Object) net.minecraft.potion.PotionType.REGISTRY.getKey((net.minecraft.potion.PotionType) (Object) this);
+        return (CatalogKey) (Object) IRegistry.POTION.getKey((net.minecraft.potion.PotionType) (Object) this);
     }
 
     @Override
@@ -64,13 +65,12 @@ public abstract class MixinPotionType implements PotionType, IMixinPotion {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    @Redirect(method = "registerPotionType", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/registry/RegistryNamespacedDefaultedByKey;register(ILjava/lang/Object;Ljava/lang/Object;)V"))
-    private static void onPotionRegister(RegistryNamespacedDefaultedByKey registry, int id, Object location, Object potion) {
-        final ResourceLocation resource = (ResourceLocation) location;
+    @Redirect(method = "register", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/registry/IRegistry;put("))
+    private static void onPotionRegister(RegistryNamespacedDefaultedByKey registry, ResourceLocation resource, Object potion) {
         final net.minecraft.potion.PotionType mcPotion = (net.minecraft.potion.PotionType) potion;
 
         ((IMixinPotion) mcPotion).setId(resource);
         PotionTypeRegistryModule.getInstance().registerFromGameData(resource.toString(), (PotionType) mcPotion);
-        registry.register(id, location, potion);
+        registry.put(resource, potion);
     }
 }
