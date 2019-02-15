@@ -32,6 +32,7 @@ ext.isClient = false
 ext.rootGroup = "net.minecraft"
 ext.rootMinecraft = "server"
 ext.rootVersion = "$minecraftVersion"
+ext.classifier = ":sources"
 apply from: 'gradle/minecraft.gradle'
 
 // Inherit SpongeCommon version from SpongeAPI

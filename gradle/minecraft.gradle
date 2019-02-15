@@ -14,7 +14,7 @@ apply plugin: 'java'
 apply plugin: 'net.minecraftforge.gradle'
 
 dependencies {
-    minecraft "$rootGroup:$rootMinecraft:$rootVersion"
+    minecraft "$rootGroup:$rootMinecraft:${rootVersion}$classifier"
     testCompile 'org.spongepowered:lwts:1.0.0'
 }
 
