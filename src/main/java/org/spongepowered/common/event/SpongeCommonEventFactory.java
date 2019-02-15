@@ -867,10 +867,10 @@ public class SpongeCommonEventFactory {
                 final double currentPosX = entity.posX;
                 final double currentPosY = entity.posY;
                 final double currentPosZ = entity.posZ;
-    
+
                 final Vector3d oldPositionVector = new Vector3d(context.prevX, context.prevY, context.prevZ);
                 final Vector3d currentPositionVector = new Vector3d(currentPosX, currentPosY, currentPosZ);
-    
+
                 final Vector3d oldRotationVector = new Vector3d(entity.prevRotationPitch, entity.prevRotationYaw, 0);
                 final Vector3d currentRotationVector = new Vector3d(entity.rotationPitch, entity.rotationYaw, 0);
 
@@ -887,7 +887,7 @@ public class SpongeCommonEventFactory {
                     event = SpongeEventFactory.createRotateEntityEvent(frame.getCurrentCause(), oldTransform, newTransform, spongeEntity);
                     eventToTransform = ((RotateEntityEvent) event).getToTransform();
                 }
-    
+
                 if (SpongeImpl.postEvent(event)) { // Cancelled event, reset positions to previous position.
                     entity.posX = context.prevX;
                     entity.posY = context.prevY;
@@ -1417,6 +1417,7 @@ public class SpongeCommonEventFactory {
                         cursorTransaction, Optional.ofNullable(recipe), Optional.of(slot), ((org.spongepowered.api.item.inventory.Container) container), transactions);
         SpongeImpl.postEvent(event);
 
+        boolean capture = ((IMixinContainer) container).capturingInventory();
         ((IMixinContainer) container).setCaptureInventory(false);
         // handle slot-transactions
         PacketPhaseUtil.handleSlotRestore(player, container, new ArrayList<>(transactions), event.isCancelled());
@@ -1430,7 +1431,7 @@ public class SpongeCommonEventFactory {
         }
 
         transactions.clear();
-        ((IMixinContainer) container).setCaptureInventory(true);
+        ((IMixinContainer) container).setCaptureInventory(capture);
         return event;
     }
 
