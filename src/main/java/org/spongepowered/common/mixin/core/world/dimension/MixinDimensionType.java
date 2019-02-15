@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world;
+package org.spongepowered.common.mixin.core.world.dimension;
 
 import net.minecraft.world.dimension.DimensionType;
 import org.spongepowered.api.CatalogKey;

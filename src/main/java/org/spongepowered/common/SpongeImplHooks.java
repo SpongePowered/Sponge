@@ -413,7 +413,7 @@ public final class SpongeImplHooks {
         return entity.world.rayTraceBlocks(startPos, endPos);
     }
 
-    public static boolean shouldKeepSpawnLoaded(DimensionType dimensionType, int dimensionId) {
+    public static boolean shouldKeepSpawnLoaded(DimensionType dimensionType) {
         final WorldServer worldServer = WorldManager.getWorldByDimensionId(dimensionId).orElse(null);
         return worldServer != null && ((WorldProperties) worldServer.getWorldInfo()).doesKeepSpawnLoaded();
 

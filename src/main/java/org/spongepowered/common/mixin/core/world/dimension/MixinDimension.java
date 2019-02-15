@@ -22,57 +22,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world;
+package org.spongepowered.common.mixin.core.world.dimension;
 
 import net.minecraft.world.World;
-import net.minecraft.world.WorldProvider;
-import net.minecraft.world.WorldType;
 import net.minecraft.world.border.WorldBorder;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.DimensionType;
-import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
 import org.spongepowered.common.interfaces.world.IMixinDimension;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 @NonnullByDefault
-@Mixin(WorldProvider.class)
-public abstract class MixinWorldProvider implements Dimension, IMixinDimension {
+@Mixin(net.minecraft.world.dimension.Dimension.class)
+public abstract class MixinDimension implements Dimension, IMixinDimension {
 
-    @Shadow public WorldType terrainType;
     @Shadow protected World world;
-    @Shadow public abstract net.minecraft.world.DimensionType getDimensionType();
+    @Shadow(prefix = "shadow$") public abstract net.minecraft.world.dimension.DimensionType shadow$getType();
     @Shadow public abstract boolean canRespawnHere();
-    @Shadow public abstract int getAverageGroundLevel();
     @Shadow public abstract boolean doesWaterVaporize();
     @Shadow public abstract WorldBorder createWorldBorder();
     @Shadow public abstract boolean isNether();
-    @Shadow private String generatorSettings;
 
     @Override
     public DimensionType getType() {
-        return (DimensionType) (Object) this.getDimensionType();
-    }
-
-    @Override
-    public GeneratorType getGeneratorType() {
-        return (GeneratorType) this.terrainType;
+        return (DimensionType) this.shadow$getType();
     }
 
     @Override
     public boolean allowsPlayerRespawns() {
         return this.canRespawnHere();
-    }
-
-    @Override
-    public int getMinimumSpawnHeight() {
-        return this.getAverageGroundLevel();
     }
 
     @Override
@@ -86,13 +69,8 @@ public abstract class MixinWorldProvider implements Dimension, IMixinDimension {
     }
 
     @Override
-    public void setGeneratorSettings(String generatorSettings) {
-        this.generatorSettings = generatorSettings;
-    }
-
-    @Override
     public Context getContext() {
-        return ((IMixinDimensionType) (Object) getDimensionType()).getContext();
+        return ((IMixinDimensionType) this.shadow$getType()).getContext();
     }
 
     @Override
@@ -108,7 +86,6 @@ public abstract class MixinWorldProvider implements Dimension, IMixinDimension {
     public boolean canDropChunk(int x, int z) {
         final boolean isSpawnChunk = this.world.isSpawnChunk(x, z);
 
-        return !isSpawnChunk || !SpongeImplHooks.shouldKeepSpawnLoaded(this.world.provider.getDimensionType(), ((IMixinWorldServer) this.world)
-                .getDimensionId());
+        return !isSpawnChunk || !SpongeImplHooks.shouldKeepSpawnLoaded(this.world.dimension.getType());
     }
 }

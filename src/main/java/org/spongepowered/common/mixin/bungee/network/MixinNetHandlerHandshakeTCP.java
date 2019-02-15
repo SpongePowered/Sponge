@@ -28,10 +28,10 @@ import com.google.gson.Gson;
 import com.mojang.authlib.properties.Property;
 import com.mojang.util.UUIDTypeAdapter;
 import net.minecraft.network.EnumConnectionState;
+import net.minecraft.network.NetHandlerHandshakeTCP;
 import net.minecraft.network.NetworkManager;
-import net.minecraft.network.handshake.client.C00Handshake;
-import net.minecraft.network.login.server.SPacketDisconnect;
-import net.minecraft.server.network.NetHandlerHandshakeTCP;
+import net.minecraft.network.handshake.client.CPacketHandshake;
+import net.minecraft.network.play.server.SPacketDisconnect;
 import net.minecraft.util.text.TextComponentString;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -52,7 +52,7 @@ public abstract class MixinNetHandlerHandshakeTCP {
     @Shadow @Final private NetworkManager networkManager;
 
     @Inject(method = "processHandshake", at = @At(value = "HEAD"), cancellable = true)
-    public void onProcessHandshakeStart(C00Handshake packetIn, CallbackInfo ci) {
+    public void onProcessHandshakeStart(CPacketHandshake packetIn, CallbackInfo ci) {
         if (SpongeImpl.getGlobalConfig().getConfig().getBungeeCord().getIpForwarding() && packetIn.getRequestedState().equals(EnumConnectionState.LOGIN)) {
             String[] split = packetIn.ip.split("\00\\|", 2)[0].split("\00"); // ignore any extra data
 
