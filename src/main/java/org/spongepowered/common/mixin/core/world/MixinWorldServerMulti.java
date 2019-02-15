@@ -30,8 +30,12 @@ import net.minecraft.world.MinecraftException;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldServerMulti;
+import net.minecraft.world.WorldSettings;
+import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.storage.ISaveHandler;
+import net.minecraft.world.storage.SessionLockException;
 import net.minecraft.world.storage.WorldInfo;
+import net.minecraft.world.storage.WorldSavedDataStorage;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -42,10 +46,9 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(WorldServerMulti.class)
 public abstract class MixinWorldServerMulti extends WorldServer {
 
-    @Shadow @Final private WorldServer delegate;
-
-    public MixinWorldServerMulti(MinecraftServer server, ISaveHandler saveHandlerIn, WorldInfo info, int dimensionId, Profiler profilerIn) {
-        super(server, saveHandlerIn, info, dimensionId, profilerIn);
+    public MixinWorldServerMulti(MinecraftServer server, ISaveHandler handler, WorldSavedDataStorage storage,
+        WorldInfo properties, DimensionType type, Profiler profiler) {
+        super(server, handler, storage, properties, type, profiler);
     }
 
     /**
@@ -54,11 +57,11 @@ public abstract class MixinWorldServerMulti extends WorldServer {
      * the "parent" world since multi-world support changes the
      * structure.
      *
-     * @throws MinecraftException An exception
+     * @throws SessionLockException An exception
      */
     @Override
     @Overwrite
-    protected void saveLevel() throws MinecraftException {
+    protected void saveLevel() throws SessionLockException {
         // this.perWorldStorage.saveAllData();
         // we handle all saving including perWorldStorage in WorldServer.saveLevel. This needs to be disabled since we
         // use a seperate save handler for each world. Each world folder needs to generate a corresponding
@@ -72,25 +75,7 @@ public abstract class MixinWorldServerMulti extends WorldServer {
      */
     @Override
     @Overwrite
-    public World init()
-    {
-        /*this.mapStorage = this.delegate.getMapStorage();
-        this.worldScoreboard = this.delegate.getScoreboard();
-        this.lootTable = this.delegate.getLootTableManager();
-        String s = VillageCollection.fileNameForProvider(this.provider);
-        VillageCollection villagecollection = (VillageCollection)this.mapStorage.getOrLoadData(VillageCollection.class, s);
-
-        if (villagecollection == null)
-        {
-            this.villageCollectionObj = new VillageCollection(this);
-            this.mapStorage.setData(s, this.villageCollectionObj);
-        }
-        else
-        {
-            this.villageCollectionObj = villagecollection;
-            this.villageCollectionObj.setWorldsForAll(this);
-        }*/
-
-        return super.init();
+    public WorldServer func_212251_i__() {
+        return super.func_212251_i__();
     }
 }

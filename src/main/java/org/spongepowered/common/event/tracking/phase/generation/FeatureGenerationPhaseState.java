@@ -22,25 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.command.vanilla;
+package org.spongepowered.common.event.tracking.phase.generation;
 
-import net.minecraft.command.server.CommandSetDefaultSpawnpoint;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+final class FeatureGenerationPhaseState extends GeneralGenerationPhaseState<FeaturePhaseContext> {
 
-@Mixin(CommandSetDefaultSpawnpoint.class)
-public abstract class MixinCommandSetDefaultSpawnpoint {
-
-    @Redirect(method = "execute", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;"
-            + "setSpawnPoint(Lnet/minecraft/util/math/BlockPos;)V"))
-    private void onSetSpawnPoint(World world, BlockPos pos) {
-        for (WorldServer worldServer : world.getMinecraftServer().worlds) {
-            worldServer.setSpawnPoint(pos);
-        }
+    FeatureGenerationPhaseState(String id) {
+        super(id);
     }
+
+    @Override
+    public FeaturePhaseContext createPhaseContext() {
+        return new FeaturePhaseContext(this)
+            .addEntityCaptures();
+    }
+
 
 }

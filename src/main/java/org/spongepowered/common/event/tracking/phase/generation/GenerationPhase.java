@@ -53,7 +53,7 @@ public final class GenerationPhase extends TrackingPhase {
 
         public static final IPhaseState<GenericGenerationContext> WORLD_SPAWNER_SPAWNING = new WorldSpawnerPhaseState().bake();
 
-        public static final IPhaseState<PopulatorPhaseContext> POPULATOR_RUNNING = new PopulatorGenerationPhaseState("POPULATOR_RUNNING");
+        public static final IPhaseState<FeaturePhaseContext> POPULATOR_RUNNING = new FeatureGenerationPhaseState("POPULATOR_RUNNING");
 
         public static final IPhaseState<GenericGenerationContext> TERRAIN_GENERATION = new TerrainGenerationState();
 

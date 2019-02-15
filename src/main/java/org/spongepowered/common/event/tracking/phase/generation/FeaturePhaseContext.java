@@ -22,26 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.command.multiworld;
+package org.spongepowered.common.event.tracking.phase.generation;
 
-import net.minecraft.command.ICommandSender;
-import net.minecraft.command.server.CommandSetDefaultSpawnpoint;
-import net.minecraft.network.Packet;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.PlayerList;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.api.world.gen.feature.Feature;
+import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.common.event.tracking.IPhaseState;
 
-@Mixin(CommandSetDefaultSpawnpoint.class)
-public abstract class MixinCommandSetDefaultSpawnpoint {
+public class FeaturePhaseContext extends GenerationContext<FeaturePhaseContext> {
 
-    // Set new spawn point packet only to players in the affected dimensions
-    @Redirect(method = "execute", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
-    private void onSendSpawnPointPacket(PlayerList playerList, Packet<?> packet, MinecraftServer server, ICommandSender sender, String[] args) {
-        playerList.sendPacketToAllPlayersInDimension(packet, ((IMixinWorldServer) sender.getEntityWorld()).getDimensionId());
+    private Feature<?> feature;
+
+    FeaturePhaseContext(
+        IPhaseState<? extends FeaturePhaseContext> state) {
+        super(state);
     }
 
+    public FeaturePhaseContext feature(Feature<?> feature) {
+        this.feature = feature;
+        return this;
+    }
+
+    public Feature<?> getFeature() {
+        return this.feature;
+    }
+
+    @Override
+    public PrettyPrinter printCustom(PrettyPrinter printer, int indent) {
+        String s = String.format("%1$"+indent+"s", "");
+        return super.printCustom(printer, indent)
+            .add(s + "- %s: %s", "Feature", this.feature);
+    }
 }
