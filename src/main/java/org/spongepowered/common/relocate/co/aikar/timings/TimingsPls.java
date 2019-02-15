@@ -66,6 +66,8 @@ final class TimingsPls {
                 return TILE_ENTITY_IDS.get(type);
             } catch (NullPointerException e) {
                 SpongeImpl.getLogger().error("Got an impossible NPE: ", e);
+                SpongeImpl.getLogger().error("Type: " + type);
+                SpongeImpl.getLogger().error("ModId: " + type != null && type instanceof SpongeTileEntityType ? (((SpongeTileEntityType) type).getModId()) : "<NULL>");
                 SpongeImpl.getLogger().error("TILE_ENTITY_IDS: " + TILE_ENTITY_IDS);
                 SpongeImpl.getLogger().error("ENTITY_IDS: " + ENTITY_IDS);
                 SpongeImpl.getLogger().error("NOT_FOUND: " + NOT_FOUND);
