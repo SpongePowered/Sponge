@@ -187,10 +187,10 @@ public abstract class MixinEntityItem extends MixinEntity implements Item, IMixi
     public void writeToNbt(NBTTagCompound compound) {
         super.writeToNbt(compound);
 
-        compound.setBoolean(NbtDataUtil.INFINITE_PICKUP_DELAY, this.infinitePickupDelay);
-        compound.setShort(NbtDataUtil.PREVIOUS_PICKUP_DELAY, (short) this.previousPickupDelay);
-        compound.setBoolean(NbtDataUtil.INFINITE_DESPAWN_DELAY, this.infiniteDespawnDelay);
-        compound.setShort(NbtDataUtil.PREVIOUS_DESPAWN_DELAY, (short) this.previousDespawnDelay);
+        compound.putBoolean(NbtDataUtil.INFINITE_PICKUP_DELAY, this.infinitePickupDelay);
+        compound.putShort(NbtDataUtil.PREVIOUS_PICKUP_DELAY, (short) this.previousPickupDelay);
+        compound.putBoolean(NbtDataUtil.INFINITE_DESPAWN_DELAY, this.infiniteDespawnDelay);
+        compound.putShort(NbtDataUtil.PREVIOUS_DESPAWN_DELAY, (short) this.previousDespawnDelay);
     }
 
     @Override

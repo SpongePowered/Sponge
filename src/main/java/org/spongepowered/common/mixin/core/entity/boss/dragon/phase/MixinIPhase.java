@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.entity.boss.dragon.phase;
 
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.boss.dragon.phase.IPhase;
-import net.minecraft.entity.boss.dragon.phase.PhaseList;
+import net.minecraft.entity.boss.dragon.phase.PhaseType;
 import net.minecraft.util.math.Vec3d;
 import org.spongepowered.api.entity.living.complex.dragon.phase.EnderDragonPhase;
 import org.spongepowered.api.entity.living.complex.dragon.phase.EnderDragonPhaseType;
@@ -43,7 +43,8 @@ import java.util.Optional;
 public interface MixinIPhase {
 
     @Shadow Vec3d getTargetLocation();
-    @Shadow PhaseList<? extends IPhase> getType();
+    @Shadow
+    PhaseType<? extends IPhase> getType();
 
     default EnderDragonPhaseType phase$getType() {
         return (EnderDragonPhaseType) getType();

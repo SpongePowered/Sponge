@@ -169,16 +169,16 @@ public abstract class MixinEntityBoat extends MixinEntity implements Boat {
     @Override
     public void readFromNbt(NBTTagCompound compound) {
         super.readFromNbt(compound);
-        if (compound.hasKey(NbtDataUtil.BOAT_MAX_SPEED)) {
+        if (compound.contains(NbtDataUtil.BOAT_MAX_SPEED)) {
             this.maxSpeed = compound.getDouble(NbtDataUtil.BOAT_MAX_SPEED);
         }
-        if (compound.hasKey(NbtDataUtil.BOAT_MOVE_ON_LAND)) {
+        if (compound.contains(NbtDataUtil.BOAT_MOVE_ON_LAND)) {
             this.moveOnLand = compound.getBoolean(NbtDataUtil.BOAT_MOVE_ON_LAND);
         }
-        if (compound.hasKey(NbtDataUtil.BOAT_OCCUPIED_DECELERATION_SPEED)) {
+        if (compound.contains(NbtDataUtil.BOAT_OCCUPIED_DECELERATION_SPEED)) {
             this.occupiedDecelerationSpeed = compound.getDouble(NbtDataUtil.BOAT_OCCUPIED_DECELERATION_SPEED);
         }
-        if (compound.hasKey(NbtDataUtil.BOAT_UNOCCUPIED_DECELERATION_SPEED)) {
+        if (compound.contains(NbtDataUtil.BOAT_UNOCCUPIED_DECELERATION_SPEED)) {
             this.unoccupiedDecelerationSpeed = compound.getDouble(NbtDataUtil.BOAT_UNOCCUPIED_DECELERATION_SPEED);
         }
     }
@@ -186,9 +186,9 @@ public abstract class MixinEntityBoat extends MixinEntity implements Boat {
     @Override
     public void writeToNbt(NBTTagCompound compound) {
         super.writeToNbt(compound);
-        compound.setDouble(NbtDataUtil.BOAT_MAX_SPEED, this.maxSpeed);
-        compound.setBoolean(NbtDataUtil.BOAT_MOVE_ON_LAND, this.moveOnLand);
-        compound.setDouble(NbtDataUtil.BOAT_OCCUPIED_DECELERATION_SPEED, this.occupiedDecelerationSpeed);
-        compound.setDouble(NbtDataUtil.BOAT_UNOCCUPIED_DECELERATION_SPEED, this.unoccupiedDecelerationSpeed);
+        compound.putDouble(NbtDataUtil.BOAT_MAX_SPEED, this.maxSpeed);
+        compound.putBoolean(NbtDataUtil.BOAT_MOVE_ON_LAND, this.moveOnLand);
+        compound.putDouble(NbtDataUtil.BOAT_OCCUPIED_DECELERATION_SPEED, this.occupiedDecelerationSpeed);
+        compound.putDouble(NbtDataUtil.BOAT_UNOCCUPIED_DECELERATION_SPEED, this.unoccupiedDecelerationSpeed);
     }
 }

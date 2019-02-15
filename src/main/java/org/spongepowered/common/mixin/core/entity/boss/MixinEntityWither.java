@@ -32,7 +32,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.boss.EntityWither;
 import net.minecraft.world.BossInfoServer;
-import net.minecraft.world.GameRules;
 import org.spongepowered.api.boss.ServerBossBar;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.monster.Wither;
@@ -216,7 +215,7 @@ public abstract class MixinEntityWither extends MixinEntityMob implements Wither
                                                       boolean smoking) {
         return detonate(Explosion.builder()
                 .sourceExplosive(this)
-                .location(new Location<>((World) worldObj, new Vector3d(x, y, z)))
+                .location(new Location((World) worldObj, new Vector3d(x, y, z)))
                 .radius(this.explosionRadius)
                 .canCauseFire(flaming)
                 .shouldPlaySmoke(smoking)

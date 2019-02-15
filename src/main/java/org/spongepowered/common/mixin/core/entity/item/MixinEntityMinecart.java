@@ -148,16 +148,16 @@ public abstract class MixinEntityMinecart extends MixinEntity implements Minecar
     @Override
     public void readFromNbt(NBTTagCompound compound) {
         super.readFromNbt(compound);
-        if (compound.hasKey("maxSpeed")) {
+        if (compound.contains("maxSpeed")) {
             this.maxSpeed = compound.getDouble("maxSpeed");
         }
-        if (compound.hasKey("slowWhenEmpty")) {
+        if (compound.contains("slowWhenEmpty")) {
             this.slowWhenEmpty = compound.getBoolean("slowWhenEmpty");
         }
-        if (compound.hasKey("airborneModifier")) {
+        if (compound.contains("airborneModifier")) {
             this.airborneMod = VectorSerializer.fromNbt(compound.getCompound("airborneModifier"));
         }
-        if (compound.hasKey("derailedModifier")) {
+        if (compound.contains("derailedModifier")) {
             this.derailedMod = VectorSerializer.fromNbt(compound.getCompound("derailedModifier"));
         }
     }
@@ -165,10 +165,10 @@ public abstract class MixinEntityMinecart extends MixinEntity implements Minecar
     @Override
     public void writeToNbt(NBTTagCompound compound) {
         super.writeToNbt(compound);
-        compound.setDouble("maxSpeed", this.maxSpeed);
-        compound.setBoolean("slowWhenEmpty", this.slowWhenEmpty);
-        compound.setTag("airborneModifier", VectorSerializer.toNbt(this.airborneMod));
-        compound.setTag("derailedModifier", VectorSerializer.toNbt(this.derailedMod));
+        compound.putDouble("maxSpeed", this.maxSpeed);
+        compound.putBoolean("slowWhenEmpty", this.slowWhenEmpty);
+        compound.put("airborneModifier", VectorSerializer.toNbt(this.airborneMod));
+        compound.put("derailedModifier", VectorSerializer.toNbt(this.derailedMod));
     }
 
 }

@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.core.entity.boss;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSet.Builder;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -69,13 +68,7 @@ public abstract class MixinEntityDragon extends MixinEntityLiving implements End
 
     @Override
     public Set<EnderDragonPart> getParts() {
-        Builder<EnderDragonPart> builder = ImmutableSet.builder();
-
-        for (MultiPartEntityPart part : this.dragonPartArray) {
-            builder.add((EnderDragonPart) part);
-        }
-
-        return builder.build();
+        return ImmutableSet.copyOf((EnderDragonPart[]) this.dragonPartArray);
     }
 
     /**
