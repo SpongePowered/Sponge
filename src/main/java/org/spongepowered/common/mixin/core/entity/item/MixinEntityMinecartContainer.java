@@ -55,7 +55,7 @@ public abstract class MixinEntityMinecartContainer extends MixinEntityMinecart i
     protected SlotCollection slots = new SlotCollection.Builder().add(this.getSizeInventory()).build();
     protected Lens lens;
 
-    @Inject(method = "<init>", at = @At("RETURN"))
+    @Inject(method = "<init>*", at = @At("RETURN"))
     public void onInit(CallbackInfo ci) {
         this.lens = this.getSizeInventory() == 0 ? new DefaultEmptyLens((InventoryAdapter) this) : new OrderedInventoryLensImpl(0,
                 this.getSizeInventory(), 1, this.slots);
