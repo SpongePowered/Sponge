@@ -24,12 +24,36 @@
  */
 package org.spongepowered.common.registry.type.block;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntityBanner;
+import net.minecraft.tileentity.TileEntityBeacon;
+import net.minecraft.tileentity.TileEntityBed;
+import net.minecraft.tileentity.TileEntityBrewingStand;
 import net.minecraft.tileentity.TileEntityChest;
+import net.minecraft.tileentity.TileEntityCommandBlock;
+import net.minecraft.tileentity.TileEntityComparator;
+import net.minecraft.tileentity.TileEntityConduit;
+import net.minecraft.tileentity.TileEntityDaylightDetector;
+import net.minecraft.tileentity.TileEntityDispenser;
+import net.minecraft.tileentity.TileEntityDropper;
+import net.minecraft.tileentity.TileEntityEnchantmentTable;
+import net.minecraft.tileentity.TileEntityEndGateway;
+import net.minecraft.tileentity.TileEntityEndPortal;
 import net.minecraft.tileentity.TileEntityEnderChest;
+import net.minecraft.tileentity.TileEntityFurnace;
+import net.minecraft.tileentity.TileEntityHopper;
+import net.minecraft.tileentity.TileEntityJukebox;
+import net.minecraft.tileentity.TileEntityMobSpawner;
+import net.minecraft.tileentity.TileEntityPiston;
+import net.minecraft.tileentity.TileEntityShulkerBox;
+import net.minecraft.tileentity.TileEntitySign;
+import net.minecraft.tileentity.TileEntitySkull;
+import net.minecraft.tileentity.TileEntityStructure;
+import net.minecraft.tileentity.TileEntityTrappedChest;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.registry.IRegistry;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.block.tileentity.TileEntityTypes;
@@ -40,7 +64,6 @@ import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
 
-import java.util.Locale;
 import java.util.Map;
 
 @RegisterCatalog(TileEntityTypes.class)
@@ -48,13 +71,6 @@ public final class TileEntityTypeRegistryModule
         extends AbstractPrefixAlternateCatalogTypeRegistryModule<TileEntityType>
         implements ExtraClassCatalogRegistryModule<TileEntityType, TileEntity>,
         SpongeAdditionalCatalogRegistryModule<TileEntityType> {
-
-
-    private static final Map<String, String> NAME_TO_ID_MAPPING = ImmutableMap.<String, String>builder()
-        .put("enchanting_table", "enchantment_table")
-        .put("noteblock", "note")
-        .put("EndGateway", "end_gateway")
-        .build();
 
     public static TileEntityTypeRegistryModule getInstance() {
         return Holder.INSTANCE;
@@ -86,23 +102,36 @@ public final class TileEntityTypeRegistryModule
 
     @Override
     public void registerDefaults() {
-        try {
-            // We just need to class load TileEntity so that it registers,
-            // otherwise this is delayed until either pre-init or loading.
-            Class.forName("net.minecraft.tileentity.TileEntity");
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public String getIdForName(String name) {
-        final String id = NAME_TO_ID_MAPPING.get(name);
-        return id == null ? name : id;
+        this.doTileEntityRegistration(TileEntityFurnace.class, net.minecraft.tileentity.TileEntityType.FURNACE);
+        this.doTileEntityRegistration(TileEntityChest.class, net.minecraft.tileentity.TileEntityType.CHEST);
+        this.doTileEntityRegistration(TileEntityTrappedChest.class, net.minecraft.tileentity.TileEntityType.TRAPPED_CHEST);
+        this.doTileEntityRegistration(TileEntityEnderChest.class, net.minecraft.tileentity.TileEntityType.ENDER_CHEST);
+        this.doTileEntityRegistration(TileEntityJukebox.class, net.minecraft.tileentity.TileEntityType.JUKEBOX);
+        this.doTileEntityRegistration(TileEntityDispenser.class, net.minecraft.tileentity.TileEntityType.DISPENSER);
+        this.doTileEntityRegistration(TileEntityDropper.class, net.minecraft.tileentity.TileEntityType.DROPPER);
+        this.doTileEntityRegistration(TileEntitySign.class, net.minecraft.tileentity.TileEntityType.SIGN);
+        this.doTileEntityRegistration(TileEntityMobSpawner.class, net.minecraft.tileentity.TileEntityType.MOB_SPAWNER);
+        this.doTileEntityRegistration(TileEntityPiston.class, net.minecraft.tileentity.TileEntityType.PISTON);
+        this.doTileEntityRegistration(TileEntityBrewingStand.class, net.minecraft.tileentity.TileEntityType.BREWING_STAND);
+        this.doTileEntityRegistration(TileEntityEnchantmentTable.class, net.minecraft.tileentity.TileEntityType.ENCHANTING_TABLE);
+        this.doTileEntityRegistration(TileEntityEndPortal.class, net.minecraft.tileentity.TileEntityType.END_PORTAL);
+        this.doTileEntityRegistration(TileEntityBeacon.class, net.minecraft.tileentity.TileEntityType.BEACON);
+        this.doTileEntityRegistration(TileEntitySkull.class, net.minecraft.tileentity.TileEntityType.SKULL);
+        this.doTileEntityRegistration(TileEntityDaylightDetector.class, net.minecraft.tileentity.TileEntityType.DAYLIGHT_DETECTOR);
+        this.doTileEntityRegistration(TileEntityHopper.class, net.minecraft.tileentity.TileEntityType.HOPPER);
+        this.doTileEntityRegistration(TileEntityComparator.class, net.minecraft.tileentity.TileEntityType.COMPARATOR);
+        this.doTileEntityRegistration(TileEntityBanner.class, net.minecraft.tileentity.TileEntityType.BANNER);
+        this.doTileEntityRegistration(TileEntityStructure.class, net.minecraft.tileentity.TileEntityType.STRUCTURE_BLOCK);
+        this.doTileEntityRegistration(TileEntityEndGateway.class, net.minecraft.tileentity.TileEntityType.END_GATEWAY);
+        this.doTileEntityRegistration(TileEntityCommandBlock.class, net.minecraft.tileentity.TileEntityType.COMMAND_BLOCK);
+        this.doTileEntityRegistration(TileEntityShulkerBox.class, net.minecraft.tileentity.TileEntityType.SHULKER_BOX);
+        this.doTileEntityRegistration(TileEntityBed.class, net.minecraft.tileentity.TileEntityType.BED);
+        this.doTileEntityRegistration(TileEntityConduit.class, net.minecraft.tileentity.TileEntityType.CONDUIT);
     }
 
     @SuppressWarnings("unchecked")
-    public TileEntityType doTileEntityRegistration(Class<?> clazz, String name) {
-        final String id = TileEntityTypeRegistryModule.getInstance().getIdForName(name);
+    public <T extends TileEntity> TileEntityType doTileEntityRegistration(Class<T> clazz, net.minecraft.tileentity.TileEntityType<T> type) {
+        final ResourceLocation id = IRegistry.BLOCK_ENTITY_TYPE.getKey(type);
         boolean canTick = true;
         try {
             if (ITickable.class.isAssignableFrom(clazz)) {
@@ -112,15 +141,13 @@ public final class TileEntityTypeRegistryModule
                     canTick = false;
                 }
             }
-        } catch (Throwable e) {
-            // ignore
+        } catch (NoSuchMethodException e) {
+            // do nothing
         }
-        final String modId = SpongeImplHooks.getModIdFromClass(clazz);
-        final String tileId = modId + ":" + id;
         final TileEntityType tileEntityType =
-                new SpongeTileEntityType((Class<? extends org.spongepowered.api.block.tileentity.TileEntity>) clazz, CatalogKey.of(modId, id), canTick);
+                new SpongeTileEntityType((Class<? extends org.spongepowered.api.block.tileentity.TileEntity>) clazz, (CatalogKey) (Object) id, canTick);
 
-        TileEntityTypeRegistryModule.getInstance().registerAdditionalCatalog(tileEntityType);
+        this.registerAdditionalCatalog(tileEntityType);
         return tileEntityType;
     }
 

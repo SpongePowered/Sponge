@@ -37,9 +37,9 @@ import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -86,7 +86,6 @@ import javax.annotation.Nullable;
 public class SpongeBlockSnapshot implements BlockSnapshot {
 
     private final BlockState blockState;
-    private final BlockState extendedState;
     private final UUID worldUniqueId;
     private final Vector3i pos;
     private final ImmutableList<ImmutableDataManipulator<?, ?>> extraData;
@@ -105,7 +104,6 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
 
     public SpongeBlockSnapshot(SpongeBlockSnapshotBuilder builder) {
         this.blockState = checkNotNull(builder.blockState, "The block state was null!");
-        this.extendedState = builder.extendedState;
         this.worldUniqueId = checkNotNull(builder.worldUuid, "The world UUID was null");
         this.creatorUniqueId = builder.creatorUuid;
         this.notifierUniqueId = builder.notifierUuid;
@@ -130,11 +128,6 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     @Override
     public BlockState getState() {
         return this.blockState;
-    }
-
-    @Override
-    public BlockState getExtendedState() {
-        return this.extendedState;
     }
 
     @Override
@@ -243,9 +236,6 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
             .getContainer()
             .set(DataQueries.BLOCK_STATE, this.blockState);
 
-        if (this.blockState != this.extendedState) {
-            container.set(DataQueries.BLOCK_EXTENDED_STATE, this.extendedState);
-        }
         if (this.compound != null) {
             container.set(DataQueries.UNSAFE_NBT, NbtTranslator.getInstance().translateFrom(this.compound));
         }
@@ -461,7 +451,6 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     public SpongeBlockSnapshotBuilder createBuilder() {
         final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
         builder.blockState(this.blockState)
-            .extendedState(this.extendedState)
             .position(this.pos)
             .worldId(this.worldUniqueId);
         for (ImmutableDataManipulator<?, ?> manipulator : this.extraData) {
@@ -489,7 +478,6 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
                 .add("worldUniqueId", this.worldUniqueId)
                 .add("position", this.pos)
                 .add("blockState", this.blockState)
-                .add("extendedState", this.extendedState)
                 .toString();
     }
 
@@ -523,15 +511,13 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
             return Optional.empty();
         }
         final String tileId = this.compound.getString(NbtDataUtil.BLOCK_ENTITY_ID);
-        net.minecraft.tileentity.TileEntityType.getId()
-        final Class<? extends TileEntity> tileClass = TileEntity.REGISTRY.getObject(new ResourceLocation(tileId));
-        if (tileClass == null) {
+        Optional<TileEntityType> tileType = TileEntityTypeRegistryModule.getInstance().get(CatalogKey.resolve(tileId));
+        if (!tileType.isPresent()) {
             return Optional.empty();
         }
-        final TileEntityType tileType = TileEntityTypeRegistryModule.getInstance().getForClass(tileClass);
 
         final TileEntityArchetype archetype = TileEntityArchetype.builder()
-                .tile(tileType)
+                .tile(tileType.get())
                 .state(this.blockState)
                 .tileData(NbtTranslator.getInstance().translate(this.compound))
                 .build();
@@ -548,7 +534,6 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         }
         SpongeBlockSnapshot that = (SpongeBlockSnapshot) o;
         return this.changeFlag == that.changeFlag &&
-               Objects.equal(this.extendedState, that.extendedState) &&
                Objects.equal(this.worldUniqueId, that.worldUniqueId) &&
                Objects.equal(this.pos, that.pos) &&
                Objects.equal(this.extraData, that.extraData) &&
@@ -558,8 +543,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     @Override
     public int hashCode() {
         return Objects
-            .hashCode(this.extendedState,
-                this.worldUniqueId,
+                .hashCode(this.worldUniqueId,
                 this.pos,
                 this.extraData,
                 this.changeFlag,

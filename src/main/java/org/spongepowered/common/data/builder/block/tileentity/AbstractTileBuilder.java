@@ -50,6 +50,7 @@ import net.minecraft.tileentity.TileEntitySkull;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
@@ -60,6 +61,7 @@ import org.spongepowered.api.data.persistence.DataBuilder;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.registry.type.block.TileEntityTypeRegistryModule;
 
 import java.util.Map;
 import java.util.Optional;
@@ -91,13 +93,15 @@ public abstract class AbstractTileBuilder<T extends org.spongepowered.api.block.
             throw new InvalidDataException("The provided container references a world that does not exist!");
         }
 
-        final Class<? extends TileEntityType> clazz = TileEntityType.REGISTRY.get(new ResourceLocation(container.getString(DataQueries.TILE_TYPE).get())).getClass();
-        if (clazz == null) {
+        final Optional<Class<? extends TileEntityType>> clazz = TileEntityTypeRegistryModule.getInstance()
+                .get((CatalogKey) (Object) new ResourceLocation(container.getString(DataQueries.TILE_TYPE).get()))
+                .map(p ->  (Class<? extends TileEntityType>) p.getTileEntityType());
+        if (!clazz.isPresent()) {
             // TODO do we want to throw an InvalidDataException since the class is not registered?
             return Optional.empty(); // basically we didn't manage to find the class and the class isn't even registered with MC
         }
 
-        final BlockType type = classToTypeMap.get(clazz);
+        final BlockType type = classToTypeMap.get(clazz.get());
         if (type == null) {
             return Optional.empty(); // TODO throw exception maybe?
         }
@@ -121,6 +125,8 @@ public abstract class AbstractTileBuilder<T extends org.spongepowered.api.block.
     // We need these mappings for rebuilding a tile entity at the proper location.
     static {
         // These are our known block types. We need to find a way to support the mod ones
+        // TODO 1.13: This needs to be updated to support tileentities with multiple
+        // blocks (e.g. TileEntityBanner)
         addBlockMapping(TileEntityDropper.class, BlockTypes.DROPPER);
         addBlockMapping(TileEntityChest.class, BlockTypes.CHEST);
         addBlockMapping(TileEntityEnderChest.class, BlockTypes.ENDER_CHEST);
@@ -129,7 +135,6 @@ public abstract class AbstractTileBuilder<T extends org.spongepowered.api.block.
         addBlockMapping(TileEntityDropper.class, BlockTypes.DROPPER);
         addBlockMapping(TileEntitySign.class, BlockTypes.SIGN);
         addBlockMapping(TileEntityMobSpawner.class, BlockTypes.SPAWNER);
-        addBlockMapping(TileEntityNote.class, BlockTypes.NOTEBLOCK);
         addBlockMapping(TileEntityPiston.class, BlockTypes.PISTON);
         addBlockMapping(TileEntityFurnace.class, BlockTypes.FURNACE);
         addBlockMapping(TileEntityBrewingStand.class, BlockTypes.BREWING_STAND);
@@ -137,12 +142,9 @@ public abstract class AbstractTileBuilder<T extends org.spongepowered.api.block.
         addBlockMapping(TileEntityEndPortal.class, BlockTypes.END_PORTAL);
         addBlockMapping(TileEntityCommandBlock.class, BlockTypes.COMMAND_BLOCK);
         addBlockMapping(TileEntityBeacon.class, BlockTypes.BEACON);
-        addBlockMapping(TileEntitySkull.class, BlockTypes.SKULL);
         addBlockMapping(TileEntityDaylightDetector.class, BlockTypes.DAYLIGHT_DETECTOR);
         addBlockMapping(TileEntityHopper.class, BlockTypes.HOPPER);
         addBlockMapping(TileEntityComparator.class, BlockTypes.COMPARATOR);
-        addBlockMapping(TileEntityFlowerPot.class, BlockTypes.FLOWER_POT);
-        addBlockMapping(TileEntityBanner.class, BlockTypes.STANDING_BANNER);
     }
 
     private static void addBlockMapping(Class<? extends TileEntity> tileClass, BlockType blocktype) {

@@ -65,7 +65,6 @@ import javax.annotation.Nullable;
 public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapshot> implements BlockSnapshot.Builder {
 
     @Nullable BlockState blockState;
-    @Nullable BlockState extendedState;
     @Nullable UUID worldUuid;
     @Nullable UUID creatorUuid;
     @Nullable UUID notifierUuid;
@@ -94,11 +93,6 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
     @Override
     public SpongeBlockSnapshotBuilder blockState(BlockState blockState) {
         this.blockState = checkNotNull(blockState);
-        return this;
-    }
-
-    public SpongeBlockSnapshotBuilder extendedState(BlockState extendedState) {
-        this.extendedState = checkNotNull(extendedState);
         return this;
     }
 
@@ -169,9 +163,6 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
         checkNotNull(key, "key");
         checkState(this.blockState != null);
         this.blockState = this.blockState.with(key, value).orElse(this.blockState);
-        if(this.extendedState != null) {
-            this.extendedState = this.extendedState.with(key, value).orElse(this.extendedState);
-        }
         return this;
     }
 
@@ -215,9 +206,6 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
     @Override
     public BlockSnapshot build() {
         checkState(this.blockState != null);
-        if (this.extendedState == null) {
-            this.extendedState = this.blockState;
-        }
         return new SpongeBlockSnapshot(this);
     }
 
@@ -244,7 +232,6 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
         }
 
         builder.blockState(blockState)
-                .extendedState(extendedState)
                 .position(coordinate)
                 .worldId(worldUuid);
         creatorUuid.ifPresent(s -> builder.creator(UUID.fromString(s)));
