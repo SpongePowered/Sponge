@@ -58,6 +58,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.DamageableData;
 import org.spongepowered.api.data.manipulator.mutable.entity.HealthData;
+import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.api.entity.EntitySnapshot;
@@ -226,6 +227,8 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow public int deathTime;
 
     @Shadow public abstract void heal(float healAmount);
+
+    @Shadow public abstract EnumHand getActiveHand();
 
     private int deathEventsPosted;
 
@@ -1082,8 +1085,9 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
         UseItemStackEvent.Start event;
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(stack);
-            this.addSelfToFrame(frame, snapshot);
+            final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(stack);
+            final HandType handType = (HandType) (Object) hand;
+            this.addSelfToFrame(frame, snapshot, handType);
             event = SpongeEventFactory.createUseItemStackEventStart(Sponge.getCauseStackManager().getCurrentCause(),
                     stack.getMaxItemUseDuration(), stack.getMaxItemUseDuration(), snapshot);
         }
@@ -1106,7 +1110,12 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     // A helper method for firing UseItemStackEvent sub-events
     // This ensures that the cause and context for these events
     // always have OWNER and NOTIFIER set (if possible),
-    // as well as USED_ITEM
+    // as well as USED_ITEM and USED_HAND
+    private void addSelfToFrame(CauseStackManager.StackFrame frame, ItemStackSnapshot snapshot, HandType hand) {
+        frame.addContext(EventContextKeys.USED_HAND, hand);
+        addSelfToFrame(frame, snapshot);
+    }
+
     private void addSelfToFrame(CauseStackManager.StackFrame frame, ItemStackSnapshot snapshot) {
         frame.pushCause(this);
         frame.addContext(EventContextKeys.USED_ITEM, snapshot);
@@ -1125,8 +1134,9 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
         UseItemStackEvent.Tick event;
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(this.activeItemStack);
-            this.addSelfToFrame(frame, snapshot);
+            final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(this.activeItemStack);
+            final HandType handType = (HandType) (Object) this.getActiveHand();
+            this.addSelfToFrame(frame, snapshot, handType);
             event = SpongeEventFactory.createUseItemStackEventTick(Sponge.getCauseStackManager().getCurrentCause(),
                     this.activeItemStackUseCount, this.activeItemStackUseCount, snapshot);
             SpongeImpl.postEvent(event);
@@ -1156,8 +1166,9 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
         UseItemStackEvent.Finish event;
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(this.activeItemStack);
-            this.addSelfToFrame(frame, snapshot);
+            final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(this.activeItemStack);
+            final HandType handType = (HandType) (Object) this.getActiveHand();
+            this.addSelfToFrame(frame, snapshot, handType);
             event = SpongeEventFactory.createUseItemStackEventFinish(Sponge.getCauseStackManager().getCurrentCause(),
                     this.activeItemStackUseCount, this.activeItemStackUseCount, snapshot);
         }
@@ -1193,8 +1204,9 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
         UseItemStackEvent.Replace event;
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(stack);
-            this.addSelfToFrame(frame, activeItemStackSnapshot);
+            final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(stack);
+            final HandType handType = (HandType) (Object) hand;
+            this.addSelfToFrame(frame, activeItemStackSnapshot, handType);
             event = SpongeEventFactory.createUseItemStackEventReplace(Sponge.getCauseStackManager().getCurrentCause(),
                     this.activeItemStackUseCount, this.activeItemStackUseCount, activeItemStackSnapshot,
                     new Transaction<>((org.spongepowered.api.item.inventory.ItemStack) this.activeItemStackCopy, snapshot));
@@ -1221,8 +1233,9 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             return;
         }
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(stack);
-            this.addSelfToFrame(frame, snapshot);
+            final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(stack);
+            final HandType handType = (HandType) (Object) this.getActiveHand();
+            this.addSelfToFrame(frame, snapshot, handType);
             if (!SpongeImpl.postEvent(SpongeEventFactory.createUseItemStackEventStop(Sponge.getCauseStackManager().getCurrentCause(),
                     duration, duration, snapshot))) {
                 stack.onPlayerStoppedUsing(world, self, duration);

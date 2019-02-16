@@ -31,6 +31,7 @@ import net.minecraft.network.play.client.CPacketUseEntity;
 import net.minecraft.world.WorldServer;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -64,6 +65,7 @@ public final class AttackEntityPacketState extends BasicPacketState {
     private BiConsumer<CauseStackManager.StackFrame, BasicPacketContext>
         ATTACK_MODIFIER = super.getFrameModifier().andThen((frame, ctx) -> {
         frame.addContext(EventContextKeys.USED_ITEM, ctx.getItemUsed().createSnapshot());
+        frame.addContext(EventContextKeys.USED_HAND, ctx.getHandUsed());
     });
 
     @Override
@@ -87,6 +89,7 @@ public final class AttackEntityPacketState extends BasicPacketState {
         if(stack != null) {
             context.itemUsed(stack);
         }
+        context.handUsed(HandTypes.MAIN_HAND);
     }
 
 

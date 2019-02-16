@@ -35,6 +35,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.CauseStackManager;
@@ -80,7 +81,8 @@ public final class PlaceBlockPacketState extends BasicPacketState {
         final net.minecraft.item.ItemStack itemUsed = playerMP.getHeldItem(placeBlock.getHand());
         final ItemStack itemstack = ItemStackUtil.cloneDefensive(itemUsed);
         context.itemUsed(itemstack);
-
+        final HandType handType = (HandType) (Object) placeBlock.getHand();
+        context.handUsed(handType);
     }
 
     @Override
@@ -116,11 +118,13 @@ public final class PlaceBlockPacketState extends BasicPacketState {
         // CPacketPlayerBlockPlacement
         final ItemStack itemStack = context.getItemUsed();
         final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(itemStack);
+        final HandType hand = context.getHandUsed();
         context.getCapturedEntitySupplier()
             .acceptAndClearIfNotEmpty(entities -> {
                 try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                     frame.pushCause(player);
                     frame.pushCause(snapshot);
+                    frame.addContext(EventContextKeys.USED_HAND, hand);
                     frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.SPAWN_EGG);
                     SpongeCommonEventFactory.callSpawnEntity(entities, context);
                 }
@@ -130,11 +134,12 @@ public final class PlaceBlockPacketState extends BasicPacketState {
                 originalBlocks -> {
                     try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                         frame.pushCause(player);
+                        frame.addContext(EventContextKeys.USED_HAND, hand);
+                        frame.addContext(EventContextKeys.USED_ITEM, snapshot);
                         boolean success = TrackingUtil.processBlockCaptures(originalBlocks, this, context);
                         if (!success && snapshot != ItemTypeRegistryModule.NONE_SNAPSHOT) {
                             frame.pushCause(player);
-                            EnumHand hand = ((CPacketPlayerTryUseItemOnBlock) packet).getHand();
-                            PacketPhaseUtil.handlePlayerSlotRestore(player, (net.minecraft.item.ItemStack) itemStack, hand);
+                            PacketPhaseUtil.handlePlayerSlotRestore(player, (net.minecraft.item.ItemStack) itemStack, (EnumHand) (Object) hand);
                         }
                     }
                 });
