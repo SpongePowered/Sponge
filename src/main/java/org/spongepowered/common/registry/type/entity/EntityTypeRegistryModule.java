@@ -139,6 +139,7 @@ import org.spongepowered.common.registry.RegistryHelper;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.registry.type.data.KeyRegistryModule;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -148,6 +149,8 @@ import java.util.function.Function;
 @RegisterCatalog(EntityTypes.class)
 public final class EntityTypeRegistryModule extends AbstractCatalogRegistryModule<EntityType>
     implements ExtraClassCatalogRegistryModule<EntityType, Entity>, SpongeAdditionalCatalogRegistryModule<EntityType> {
+
+    public final Map<net.minecraft.entity.EntityType<?>, EntityType<?>> typesByV = new HashMap<>();
 
     public final Map<Class<? extends Entity>, EntityType> entityClassToTypeMappings = Maps.newHashMap();
     private final Set<FutureRegistration> customEntities = new HashSet<>();
@@ -263,6 +266,7 @@ public final class EntityTypeRegistryModule extends AbstractCatalogRegistryModul
         final ResourceLocation key = net.minecraft.entity.EntityType.getId(type);
         final SpongeEntityType<T, ?> sponge = new SpongeEntityType<>(key, type, klass);
         this.register((CatalogKey) (Object) key, sponge);
+        this.typesByV.put(type, sponge);
         this.entityClassToTypeMappings.put(klass, sponge);
         KeyRegistryModule.getInstance().registerForEntityClass(klass);
     }

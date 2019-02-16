@@ -51,6 +51,7 @@ import net.minecraft.util.ITickable;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.registry.IRegistry;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.EnumLightType;
 import net.minecraft.world.GameRules;
@@ -255,6 +256,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow protected abstract void playEvent(int i, BlockPos pos, int stateId);
 
     // @formatter:on
+
+    @Shadow public abstract void tickEntity(final net.minecraft.entity.Entity entity);
 
     @Shadow
     public boolean isBlockModifiable(EntityPlayer player, BlockPos pos) {
@@ -1366,7 +1369,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
             try {
                 ++entity.ticksExisted;
-                entity.onUpdate();
+                entity.tick();
             } catch (Throwable throwable2) {
                 this.stopTimingForWeatherEntityTickCrash(entity); // Sponge - end the entity timing
                 CrashReport crashreport = CrashReport.makeCrashReport(throwable2, "Ticking entity");
@@ -1431,7 +1434,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             if (!entity2.removed && !(entity2 instanceof EntityPlayerMP)) {
                 try {
                     SpongeImplHooks.onEntityTickStart(entity2);
-                    this.updateEntity(entity2);
+                    this.tickEntity(entity2);
                     SpongeImplHooks.onEntityTickEnd(entity2);
                 } catch (Throwable throwable1) {
                     this.stopTimingTickEntityCrash(entity2); // Sponge
@@ -1482,7 +1485,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
                 if (((IMixinTileEntity) tileentity).shouldTick() && this.worldBorder.contains(blockpos)) { // Sponge
                     try {
-                        this.profiler.startSection(() -> String.valueOf(TileEntityType.REGISTRY.getKey(tileentity.getType())));
+                        this.profiler.startSection(() -> String.valueOf(IRegistry.BLOCK_ENTITY_TYPE.getKey(tileentity.getType())));
                         SpongeImplHooks.onTETickStart(tileentity);
                         ((ITickable) tileentity).tick();
                         //this.profiler.endSection();

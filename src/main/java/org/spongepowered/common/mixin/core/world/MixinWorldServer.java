@@ -563,7 +563,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
             while (iterator1.hasNext())
             {
-                iterator1.next().onTick(false);
+                iterator1.next().tick(false);
             }
             return; // Sponge: Add return
         }
@@ -592,7 +592,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             this.timings.updateBlocksCheckNextLight.stopTiming(); // Sponge - Timings
             // this.profiler.endStartSection("tickChunk"); // Sponge - Don't use the profiler
             this.timings.updateBlocksChunkTick.startTiming(); // Sponge - Timings
-            chunk.onTick(false);
+            chunk.tick(false);
             this.timings.updateBlocksChunkTick.stopTiming(); // Sponge - Timings
             // Sponge start - if surrounding neighbors are not loaded, skip
             if (!((IMixinChunk) chunk).areNeighborsLoaded()) {
@@ -1009,8 +1009,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Inject(method = "saveLevel", at = @At("HEAD"))
     private void onSaveLevel(CallbackInfo ci) {
         // Always call the provider's onWorldSave method as we do not use WorldServerMulti
-        for (WorldServer worldServer : this.server.worlds) {
-            worldServer.provider.onWorldSave();
+        for (WorldServer worldServer : this.server.getWorlds()) {
+            worldServer.dimension.onWorldSave();
         }
     }
 
@@ -1552,7 +1552,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         final IPhaseState<?> state = phaseTracker.getCurrentState();
 
         if (state.alreadyCapturingTileTicks()) {
-            tile.update();
+            tile.tick();
             return;
         }
 
@@ -1564,7 +1564,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final IPhaseState<?> state = phaseTracker.getCurrentState();
         if (state.alreadyCapturingEntityTicks()) {
-            entity.onUpdate();
+            entity.tick();
             return;
         }
 
@@ -1629,7 +1629,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             }
         }
         // Sponge Start - check the phase tracker
-        final boolean isMainThread = Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
+        final boolean isMainThread = Sponge.isServerAvailable() && Sponge.getServer().onMainThread();
         if (!isMainThread) {
             // Short circuit here if we're not on the main thread. Don't bother with the PhaseTracker off thread.
             return list;
@@ -1643,7 +1643,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             if (((IPhaseState) state).doesCaptureEntityDrops(context)) {
                 for (EntityItem entity : context.getCapturedItems()) {
                     // We can ignore the type check because we're already checking the instance class of the entity.
-                    if (clazz.isInstance(entity) && entity.getEntityBoundingBox().intersects(aabb) && (filter == null || filter.apply((T) entity))) {
+                    if (clazz.isInstance(entity) && entity.getBoundingBox().intersects(aabb) && (filter == null || filter.apply((T) entity))) {
                         list.add((T) entity);
                     }
                 }
@@ -1651,14 +1651,14 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             if (state.doesCaptureEntitySpawns()) {
                 for (Entity entity : context.getCapturedEntities()) {
                     // We can ignore the type check because we're already checking the instance class of the entity.
-                    if (clazz.isInstance(entity) && EntityUtil.toNative(entity).getEntityBoundingBox().intersects(aabb) && (filter == null || filter.apply((T) entity))) {
+                    if (clazz.isInstance(entity) && EntityUtil.toNative(entity).getBoundingBox().intersects(aabb) && (filter == null || filter.apply((T) entity))) {
                         list.add((T) entity);
                     }
                 }
                 if (((IPhaseState) state).doesBulkBlockCapture(context)) {
                     for (net.minecraft.entity.Entity entity : context.getPerBlockEntitySpawnSuppplier().get().values()) {
                         // We can ignore the type check because we're already checking the instance class of the entity.
-                        if (clazz.isInstance(entity) && entity.getEntityBoundingBox().intersects(aabb) && (filter == null || filter.apply((T) entity))) {
+                        if (clazz.isInstance(entity) && entity.getBoundingBox().intersects(aabb) && (filter == null || filter.apply((T) entity))) {
                             list.add((T) entity);
                         }
                     }
@@ -2402,8 +2402,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     public long getRemainingDuration() {
         Weather weather = getWeather();
         if (weather.equals(Weathers.CLEAR)) {
-            if (this.worldInfo.getCleanWeatherTime() > 0) {
-                return this.worldInfo.getCleanWeatherTime();
+            if (this.worldInfo.getClearWeatherTime() > 0) {
+                return this.worldInfo.getClearWeatherTime();
             }
             return Math.min(this.worldInfo.getThunderTime(), this.worldInfo.getRainTime());
         } else if (weather.equals(Weathers.THUNDER_STORM)) {
@@ -2434,13 +2434,13 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             this.worldInfo.setRaining(false);
             this.worldInfo.setThundering(false);
         } else if (weather.equals(Weathers.RAIN)) {
-            this.worldInfo.setCleanWeatherTime(0);
+            this.worldInfo.setClearWeatherTime(0);
             this.worldInfo.setRainTime((int) duration);
             this.worldInfo.setThunderTime((int) duration);
             this.worldInfo.setRaining(true);
             this.worldInfo.setThundering(false);
         } else if (weather.equals(Weathers.THUNDER_STORM)) {
-            this.worldInfo.setCleanWeatherTime(0);
+            this.worldInfo.setClearWeatherTime(0);
             this.worldInfo.setRainTime((int) duration);
             this.worldInfo.setThunderTime((int) duration);
             this.worldInfo.setRaining(true);
