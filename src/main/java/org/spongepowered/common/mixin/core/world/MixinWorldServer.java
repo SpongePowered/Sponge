@@ -1733,9 +1733,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     private boolean forceSpawnEntity(net.minecraft.entity.Entity entity, int chunkX, int chunkZ) {
-        if (!this.isRemote) {
-            Cause cause = Sponge.getCauseStackManager().getCurrentCause();
-            SpongeHooks.logEntitySpawn(cause, entity);
+        if (!this.isFake() && SpongeImplHooks.isMainThread()) {
+            SpongeHooks.logEntitySpawn(entity);
         }
         if (entity instanceof EntityPlayer) {
             EntityPlayer entityplayer = (EntityPlayer) entity;

@@ -138,8 +138,8 @@ public class SpongeHooks {
         }
     }
 
-    public static void logEntitySpawn(Cause cause, Entity entity) {
-        if (entity == null || entity.world.isRemote) {
+    public static void logEntitySpawn(Entity entity) {
+        if (entity == null) {
             return;
         }
 
@@ -149,12 +149,9 @@ public class SpongeHooks {
 
         String spawnName = entity.getName();
 
-        Optional<User> user = cause.first(User.class);
         SpongeConfig<? extends GeneralConfigBase> config = getActiveConfig((WorldServer) entity.world);
         if (config.getConfig().getLogging().entitySpawnLogging()) {
-            logInfo("SPAWNED " + spawnName + " [RootCause: {0}][User: {1}][World: {2}][DimId: {3}]",
-                    getFriendlyCauseName(cause),
-                    user.map(User::getName).orElse("None"),
+            logInfo("SPAWNED " + spawnName + " [World: {2}][DimId: {3}]",
                     entity.world.getWorldInfo().getWorldName(),
                     ((IMixinWorldServer) entity.world).getDimensionId());
             logStack(config);
@@ -190,12 +187,10 @@ public class SpongeHooks {
         }
 
         SpongeConfig<? extends GeneralConfigBase> config = getActiveConfig((WorldServer) world);
-        Optional<User> user = Sponge.getCauseStackManager().getCurrentCause().first(User.class);
+
         LoggingCategory logging = config.getConfig().getLogging();
         if (type != null && type.allowsLogging(logging)) {
-            logInfo("Block " + type.name() + " [RootCause: {0}][User: {1}][World: {2}][DimId: {3}][OriginalState: {4}][NewState: {5}]",
-                    getFriendlyCauseName(Sponge.getCauseStackManager().getCurrentCause()),
-                    user.isPresent() ? user.get().getName() : "None",
+            logInfo("Block " + type.name() + " [World: {2}][DimId: {3}][OriginalState: {4}][NewState: {5}]",
                     world.getWorldInfo().getWorldName(),
                     ((IMixinWorldServer) world).getDimensionId(),
                     transaction.getOriginal().getState(),
