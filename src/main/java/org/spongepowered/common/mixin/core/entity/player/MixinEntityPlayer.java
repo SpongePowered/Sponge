@@ -809,8 +809,8 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                             }
                         }
 
-                        if(!itemstack1.isEmpty() && targetEntity instanceof EntityLivingBase) {
-                            itemstack1.hitEntity((EntityLivingBase)targetEntity, (EntityPlayer) (Object) this);
+                        if(!itemstack1.isEmpty() && entity instanceof EntityLivingBase) {
+                            itemstack1.hitEntity((EntityLivingBase) entity, (EntityPlayer) (Object) this);
                             if(itemstack1.isEmpty()) {
                                 this.setHeldItem(EnumHand.MAIN_HAND, ItemStack.EMPTY);
                             }
