@@ -120,7 +120,6 @@ import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.registry.type.entity.ProfessionRegistryModule;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.common.world.VirtualPortalAgent;
 import org.spongepowered.common.world.WorldManager;
 
 import java.util.ArrayList;
@@ -414,7 +413,7 @@ public final class EntityUtil {
             frame.addContext(EventContextKeys.TELEPORT_TYPE, TeleportTypes.PORTAL);
 
 
-            if (entityIn.isEntityAlive() && (teleporter instanceof IMixinTeleporter && !(fromWorld.provider instanceof WorldProviderEnd))) {
+            if (entityIn.isEntityAlive() && (teleporter instanceof IMixinITeleporter && !(fromWorld.provider instanceof WorldProviderEnd))) {
                 fromWorld.profiler.startSection("placing");
                 // Only place entity in portal if one of the following are true :
                 // 1. The teleporter is custom. (not vanilla)
@@ -443,7 +442,7 @@ public final class EntityUtil {
             final Transform<World> portalExitTransform = mixinEntity.getTransform().setExtent((World) toWorld);
             // Use setLocationAndAngles to avoid firing MoveEntityEvent to plugins
             mixinEntity.setLocationAndAngles(fromTransform);
-            final MoveEntityEvent.Teleport.Portal event = SpongeEventFactory.createMoveEntityEventTeleportPortal(frame.getCurrentCause(), fromTransform, portalExitTransform, VirtualPortalAgent.workaround(teleporter), mixinEntity, true);
+            final MoveEntityEvent.Teleport.Portal event = SpongeEventFactory.createMoveEntityEventTeleportPortal(frame.getCurrentCause(), fromTransform, portalExitTransform, (PortalAgent) teleporter, mixinEntity, true);
             SpongeImpl.postEvent(event);
             final Vector3i chunkPosition = mixinEntity.getLocation().getChunkPosition();
             final List<BlockSnapshot> capturedBlocks = context.getCapturedBlocks();
