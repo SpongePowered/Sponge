@@ -247,6 +247,7 @@ public class CustomInventory implements IInventory, IInteractionObject {
     public void openInventory(EntityPlayer player) {
         this.viewers.add(player);
         this.inv.openInventory(player);
+        this.ensureListenersRegistered();
     }
 
     @Override

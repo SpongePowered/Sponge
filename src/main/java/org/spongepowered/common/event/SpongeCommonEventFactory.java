@@ -1197,7 +1197,6 @@ public class SpongeCommonEventFactory {
                 return null; // Invalid size for vanilla inventory ; This is to
                              // prevent crashing the client with invalid data
             }
-            ((CustomInventory) inventory).ensureListenersRegistered();
         }
 
 
@@ -1261,6 +1260,13 @@ public class SpongeCommonEventFactory {
             // Allow viewing inventory; except when dead
             ((IMixinContainer) container).setCanInteractWith(p -> !p.isDead);
         }
+
+        // This call must go at the end of this method,
+        // to ensure that it runs after any new viewers are added.
+        if (inventory instanceof CustomInventory) {
+            ((CustomInventory) inventory).ensureListenersRegistered();
+        }
+
         return container;
     }
 
