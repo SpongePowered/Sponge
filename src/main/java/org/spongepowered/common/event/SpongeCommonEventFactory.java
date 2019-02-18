@@ -81,7 +81,6 @@ import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
-import org.spongepowered.api.event.cause.EventContextKey;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.ChangeEntityEquipmentEvent;
@@ -1426,8 +1425,8 @@ public class SpongeCommonEventFactory {
     public static UpdateAnvilEvent callUpdateAnvilEvent(ContainerRepair anvil, ItemStack slot1, ItemStack slot2, ItemStack result, String name, int levelCost, int materialCost) {
         Transaction<ItemStackSnapshot> transaction = new Transaction<>(ItemStackSnapshot.NONE, ItemStackUtil.snapshotOf(result));
         UpdateAnvilEventCost costs = new UpdateAnvilEventCost(levelCost, materialCost);
-        UpdateAnvilEvent event = SpongeEventFactory.createUpdateAnvilEvent(Sponge.getCauseStackManager().getCurrentCause(), transaction,
-        (Inventory)anvil, name, ItemStackUtil.snapshotOf(slot1), new Transaction(costs, costs), ItemStackUtil.snapshotOf(slot2));
+        UpdateAnvilEvent event = SpongeEventFactory.createUpdateAnvilEvent(Sponge.getCauseStackManager().getCurrentCause(), new Transaction<>(costs, costs),
+        (Inventory)anvil, name, ItemStackUtil.snapshotOf(slot1), transaction, ItemStackUtil.snapshotOf(slot2));
         SpongeImpl.postEvent(event);
         return event;
     }
