@@ -381,6 +381,10 @@ public final class SpongeImplHooks {
         return Optional.of(((CraftingRecipe) recipe));
     }
 
+    public static void register(ResourceLocation name, IRecipe recipe) {
+        CraftingManager.register(name, recipe);
+    }
+
     @Nullable
     public static PluginContainer getActiveModContainer() {
         return null;

@@ -27,16 +27,20 @@ package org.spongepowered.test;
 import static org.spongepowered.api.item.ItemTypes.BED;
 import static org.spongepowered.api.item.ItemTypes.BEDROCK;
 import static org.spongepowered.api.item.ItemTypes.COAL;
+import static org.spongepowered.api.item.ItemTypes.IRON_BLOCK;
+import static org.spongepowered.api.item.ItemTypes.IRON_INGOT;
 import static org.spongepowered.api.item.ItemTypes.STONE;
 import static org.spongepowered.api.item.ItemTypes.WOOL;
 
 import org.slf4j.Logger;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.game.GameRegistryEvent;
+import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.item.inventory.CraftItemEvent;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentTypes;
@@ -73,6 +77,23 @@ public class RecipeTest {
     @Inject
     public RecipeTest(Logger logger) {
         this.logger = logger;
+    }
+
+    @Listener
+    public void onInit(GameInitializationEvent event) {
+        final Ingredient s = Ingredient.of(IRON_INGOT);
+        final Ingredient b = Ingredient.of(IRON_BLOCK);
+        final ItemStack item = ItemStack.of(BEDROCK, 1);
+        final ShapedCraftingRecipe recipe = CraftingRecipe.shapedBuilder().rows()
+                .row(s, s, s)
+                .row(s, b, s)
+                .row(s, s, s)
+                .result(item)
+                .id("iron_to_bedrock")
+                .build();
+
+        Sponge.getGame().getRegistry().getCraftingRecipeRegistry().register(recipe);
+        this.logger.info("Registering custom crafting recipes using the deprecated method!");
     }
 
     @Listener

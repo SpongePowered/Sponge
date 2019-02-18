@@ -26,6 +26,7 @@ package org.spongepowered.common.item.recipe.crafting;
 
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipeRegistry;
@@ -124,7 +125,7 @@ public class SpongeCraftingRecipeRegistry implements CraftingRecipeRegistry, Spo
         if (!(recipe instanceof IRecipe)) {
             recipe = new DelegateSpongeCraftingRecipe(recipe);
         }
-        CraftingManager.register(recipe.getId(), (IRecipe) recipe);
+        SpongeImplHooks.register(new ResourceLocation(recipe.getId()), (IRecipe) recipe);
     }
 
     private static final class Holder {
