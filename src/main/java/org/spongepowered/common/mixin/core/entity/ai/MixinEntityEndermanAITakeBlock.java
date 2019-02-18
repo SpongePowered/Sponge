@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.entity.ai;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.monster.EntityEnderman;
-import net.minecraft.world.GameRules;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -55,12 +54,12 @@ public abstract class MixinEntityEndermanAITakeBlock extends EntityAIBase {
         method = "shouldExecute",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/entity/monster/EntityEnderman;getHeldBlockState()Lnet/minecraft/block/state/IBlockState;"
+            target = "Lnet/minecraft/entity/monster/EntityEnderman;func_195405_dq()Lnet/minecraft/block/state/IBlockState;"
         )
     )
     @Nullable
     private IBlockState onCanGrief(EntityEnderman entityEnderman) {
-        final IBlockState heldBlockState = entityEnderman.getHeldBlockState();
+        final IBlockState heldBlockState = entityEnderman.func_195405_dq();
         return ((IMixinGriefer) this.enderman).canGrief() ? heldBlockState : null;
     }
 }

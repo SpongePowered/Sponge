@@ -167,6 +167,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Shadow protected abstract void setCurrentTaskAndPercentDone(ITextComponent p_200250_1_, int p_200250_2_);
 
+    @Shadow public abstract int getSpawnRadius(@Nullable WorldServer worldIn);
+
     @Nullable private List<String> currentTabCompletionOptions;
     private ResourcePack resourcePack;
     private boolean enableSaving = true;

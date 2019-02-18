@@ -121,7 +121,7 @@ public class SpongeHooks {
 
         SpongeConfig<? extends GeneralConfigBase> config = getActiveConfig((WorldServer) entity.world);
         if (config.getConfig().getLogging().entityDeathLogging()) {
-            logInfo("Dim: {0} remove(): {1}", ((IMixinWorldServer) entity.world).getDimensionId(), entity);
+            logInfo("Dim: {0} remove(): {1}", ((IMixinWorldServer) entity.world).(), entity);
             logStack(config);
         }
     }

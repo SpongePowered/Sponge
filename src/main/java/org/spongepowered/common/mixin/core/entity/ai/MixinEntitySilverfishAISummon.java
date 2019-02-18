@@ -29,7 +29,6 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.monster.EntitySilverfish;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -52,7 +51,7 @@ public abstract class MixinEntitySilverfishAISummon extends EntityAIBase {
      * @param cir
      */
     @Redirect(
-        method = "updateTask",
+        method = "tick",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/world/World;destroyBlock(Lnet/minecraft/util/math/BlockPos;Z)Z"
@@ -62,6 +61,6 @@ public abstract class MixinEntitySilverfishAISummon extends EntityAIBase {
         final IBlockState blockState = world.getBlockState(pos);
         return ((IMixinGriefer) this.silverfish).canGrief()
                ? world.destroyBlock(pos, dropBlock)
-               : world.setBlockState(pos, blockState.getValue(BlockSilverfish.VARIANT).getModelBlock(), 3);
+               : world.setBlockState(pos,  ((BlockSilverfish)blockState.getBlock()).getMimickedBlock().getDefaultState(), 3);
     }
 }

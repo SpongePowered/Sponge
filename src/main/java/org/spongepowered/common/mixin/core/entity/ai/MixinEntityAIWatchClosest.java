@@ -99,7 +99,7 @@ public abstract class MixinEntityAIWatchClosest extends EntityAIBase implements 
 
         for (net.minecraft.entity.Entity foundEntity: (List< net.minecraft.entity.Entity>) world.getEntities(this.watchedClass,
                 EntitySelectors.NOT_SPECTATING)) {
-            if (foundEntity.getEntityBoundingBox().intersects(aabb) && foundEntity != entity) {
+            if (foundEntity.getBoundingBox().intersects(aabb) && foundEntity != entity) {
                 double d1 = entity.getDistanceSq(foundEntity);
 
                 if (d1 <= d0)

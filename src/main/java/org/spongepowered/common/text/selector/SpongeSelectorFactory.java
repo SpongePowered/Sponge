@@ -31,7 +31,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import net.minecraft.command.EntitySelector;
+import net.minecraft.command.arguments.EntitySelector;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.scoreboard.Score;
 import org.spongepowered.api.text.selector.Argument;
@@ -147,7 +147,7 @@ public class SpongeSelectorFactory implements SelectorFactory {
                 rawMap = ImmutableMap.of();
             } else {
                 rawMap =
-                        EntitySelector.getArgumentMap(selector.substring(
+                        EntitySelector.get(selector.substring(
                                 argListIndex + 1, selector.length() - 1));
             }
             Map<ArgumentType<?>, Argument<?>> arguments =

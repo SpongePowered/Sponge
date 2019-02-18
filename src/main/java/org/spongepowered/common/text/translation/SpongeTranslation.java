@@ -27,6 +27,7 @@ package org.spongepowered.common.text.translation;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
+import net.minecraft.util.text.translation.LanguageMap;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 
@@ -49,7 +50,7 @@ public class SpongeTranslation implements Translation {
     @SuppressWarnings("deprecation")
     @Override
     public String get(Locale locale) {
-        return net.minecraft.util.text.translation.I18n.translateToLocal(this.id);
+        return LanguageMap.getInstance().translateKey(this.id);
     }
 
     @SuppressWarnings("deprecation")

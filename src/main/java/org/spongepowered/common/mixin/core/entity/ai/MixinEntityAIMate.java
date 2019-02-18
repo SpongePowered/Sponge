@@ -57,7 +57,7 @@ public abstract class MixinEntityAIMate {
     public void callBreedEvent(CallbackInfo ci, EntityAgeable entityageable) {
         Sponge.getCauseStackManager().pushCause(this.animal);
         final BreedEntityEvent.Breed event = SpongeEventFactory.createBreedEntityEventBreed(Sponge.getCauseStackManager().getCurrentCause(),
-                Optional.empty(), (Ageable)entityageable, (Ageable)this.targetMate);
+                  (Ageable)this.targetMate, Optional.empty(), (Ageable)entityageable);
         SpongeImpl.postEvent(event);
         Sponge.getCauseStackManager().popCause();
         if(event.isCancelled()) {

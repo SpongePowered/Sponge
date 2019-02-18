@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.text.selector.Argument;
 import org.spongepowered.api.text.selector.ArgumentType;
@@ -37,7 +36,6 @@ import org.spongepowered.api.text.selector.Selector;
 import org.spongepowered.api.text.selector.SelectorType;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 
 import java.util.Collection;
 import java.util.List;
@@ -98,21 +96,6 @@ public class SpongeSelector implements Selector {
             return false;
         }
         return ((Argument.Invertible<?>) this.arguments.get(type)).isInverted();
-    }
-
-    @Override
-    public ImmutableSet<Entity> resolve(CommandSource origin) {
-        return new SelectorResolver(this, origin).resolve();
-    }
-
-    @Override
-    public ImmutableSet<Entity> resolve(Extent... extents) {
-        return resolve(ImmutableSet.copyOf(extents));
-    }
-
-    @Override
-    public ImmutableSet<Entity> resolve(Collection<? extends Extent> extents) {
-        return new SelectorResolver(this, extents).resolve();
     }
 
     @Override

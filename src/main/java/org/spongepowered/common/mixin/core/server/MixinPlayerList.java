@@ -48,6 +48,7 @@ import net.minecraft.network.play.server.SPacketServerDifficulty;
 import net.minecraft.network.play.server.SPacketSetExperience;
 import net.minecraft.network.play.server.SPacketSpawnPosition;
 import net.minecraft.network.play.server.SPacketTagsList;
+import net.minecraft.network.play.server.SPacketUpdateRecipes;
 import net.minecraft.network.play.server.SPacketUpdateRecipesPacket;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.server.MinecraftServer;
@@ -354,7 +355,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         nethandlerplayserver.sendPacket(new SPacketServerDifficulty(worldinfo.getDifficulty(), worldinfo.isDifficultyLocked()));
         nethandlerplayserver.sendPacket(new SPacketPlayerAbilities(playerIn.abilities));
         nethandlerplayserver.sendPacket(new SPacketHeldItemChange(playerIn.inventory.currentItem));
-        nethandlerplayserver.sendPacket(new SPacketUpdateRecipesPacket(this.server.getRecipeManager().getRecipes()));
+        nethandlerplayserver.sendPacket(new SPacketUpdateRecipes(this.server.getRecipeManager().getRecipes()));
         nethandlerplayserver.sendPacket(new SPacketTagsList(this.server.getNetworkTagManager()));
         this.updatePermissionLevel(playerIn);
         playerIn.getStats().markAllDirty();

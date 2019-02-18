@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.entity.ai;
 
-import com.google.common.collect.ImmutableList;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.ai.EntityAIBase;
@@ -40,17 +39,13 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -75,12 +70,12 @@ public abstract class MixinEntityEndermanAIPlaceBlock extends EntityAIBase {
         method = "shouldExecute",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/entity/monster/EntityEnderman;getHeldBlockState()Lnet/minecraft/block/state/IBlockState;"
+            target = "Lnet/minecraft/entity/monster/EntityEnderman;func_195405_dq()Lnet/minecraft/block/state/IBlockState;"
         )
     )
     @Nullable
     private IBlockState onCanGrief(EntityEnderman entityEnderman) {
-        final IBlockState heldBlockState = entityEnderman.getHeldBlockState();
+        final IBlockState heldBlockState = entityEnderman.func_195405_dq();
         return ((IMixinGriefer) this.enderman).canGrief() ? heldBlockState : null;
     }
 
@@ -97,12 +92,12 @@ public abstract class MixinEntityEndermanAIPlaceBlock extends EntityAIBase {
      * @param state The new state
      * @return True if the state is a full cube, and the event didnt get cancelled
      */
-    @Redirect(method = "canPlaceBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/state/IBlockState;isFullCube()Z"))
+    @Redirect(method = "func_195924_a", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/state/IBlockState;isFullCube()Z"))
     private boolean onUpdateCancel(IBlockState blockState, World world, BlockPos pos, Block toPlace, IBlockState old, IBlockState state) {
         if (state.isFullCube()) {
             if (ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
-                final Location<org.spongepowered.api.world.World> location = VecHelper.toLocation(world, pos);
-                final List<Location<org.spongepowered.api.world.World>> list = new ArrayList<>(1);
+                final Location location = VecHelper.toLocation(world, pos);
+                final List<Location> list = new ArrayList<>(1);
                 list.add(location);
                 final Cause cause = Sponge.getCauseStackManager().getCurrentCause();
                 final ChangeBlockEvent.Pre event = SpongeEventFactory.createChangeBlockEventPre(cause, list);
