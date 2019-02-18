@@ -829,7 +829,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
 
                         // Is interaction allowed with item in hand
                         if (SpongeCommonEventFactory.callInteractItemEventSecondary(this.player, itemstack, hand, VecHelper.toVector3d(packetIn
-                            .getHitVec()), entity).isCancelled() || SpongeCommonEventFactory.callInteractEntityEventSecondary(this.player,
+                            .getHitVec()), entity).isCancelled() || SpongeCommonEventFactory.callInteractEntityEventSecondary(this.player, itemstack,
                             entity, hand, VecHelper.toVector3d(entity.getPositionVector().add(packetIn.getHitVec()))).isCancelled()) {
 
                             // Restore held item in hand
@@ -893,7 +893,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                     }
 
                     // Sponge start
-                    if (SpongeCommonEventFactory.callInteractEntityEventPrimary(this.player, entity, hand, hitVec).isCancelled()) {
+                    if (SpongeCommonEventFactory.callInteractEntityEventPrimary(this.player, itemstack, entity, hand, hitVec).isCancelled()) {
                         ((IMixinEntityPlayerMP) this.player).restorePacketItem(hand);
                         return;
                     }

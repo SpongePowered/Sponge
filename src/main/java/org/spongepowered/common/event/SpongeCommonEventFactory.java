@@ -706,41 +706,58 @@ public class SpongeCommonEventFactory {
         }
     }
 
-    public static InteractEntityEvent.Primary callInteractEntityEventPrimary(EntityPlayerMP player, net.minecraft.entity.Entity entity, EnumHand
+    public static InteractEntityEvent.Primary callInteractEntityEventPrimary(EntityPlayerMP player, ItemStack stack, net.minecraft.entity.Entity entity, EnumHand
             hand, @Nullable Vector3d hitVec) {
-        Sponge.getCauseStackManager().pushCause(player);
-        InteractEntityEvent.Primary event;
-        if (hand == EnumHand.MAIN_HAND) {
-            event = SpongeEventFactory.createInteractEntityEventPrimaryMainHand(
-                    Sponge.getCauseStackManager().getCurrentCause(), HandTypes.MAIN_HAND, Optional.ofNullable(hitVec), EntityUtil.fromNative(entity));
-        } else {
-            event = SpongeEventFactory.createInteractEntityEventPrimaryOffHand(
-                    Sponge.getCauseStackManager().getCurrentCause(), HandTypes.OFF_HAND, Optional.ofNullable(hitVec), EntityUtil.fromNative(entity));
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.addContext(EventContextKeys.OWNER, (User) player);
+            frame.addContext(EventContextKeys.NOTIFIER, (User) player);
+            frame.addContext(EventContextKeys.ENTITY_HIT, ((Entity) entity));
+            if (!stack.isEmpty()) {
+                frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(stack));
+            }
+            InteractEntityEvent.Primary event;
+            if (hand == EnumHand.MAIN_HAND) {
+                event = SpongeEventFactory.createInteractEntityEventPrimaryMainHand(
+                        frame.getCurrentCause(), HandTypes.MAIN_HAND, Optional.ofNullable(hitVec), EntityUtil.fromNative(entity));
+            } else {
+                event = SpongeEventFactory.createInteractEntityEventPrimaryOffHand(
+                        frame.getCurrentCause(), HandTypes.OFF_HAND, Optional.ofNullable(hitVec), EntityUtil.fromNative(entity));
+            }
+            if (entity instanceof Player && !((World) player.world).getProperties().isPVPEnabled()) {
+                event.setCancelled(true); // if PvP is disabled for world, cancel
+            }
+            SpongeImpl.postEvent(event);
+            return event;
         }
-        if (entity instanceof Player && !((World) player.world).getProperties().isPVPEnabled()) {
-            event.setCancelled(true); // if PvP is disabled for world, cancel
-        }
-        SpongeImpl.postEvent(event);
-        return event;
     }
 
-    public static InteractEntityEvent.Secondary callInteractEntityEventSecondary(EntityPlayerMP player, net.minecraft.entity.Entity entity,
+    public static InteractEntityEvent.Secondary callInteractEntityEventSecondary(EntityPlayerMP player, ItemStack stack, net.minecraft.entity.Entity entity,
             EnumHand hand, @Nullable Vector3d hitVec) {
-        InteractEntityEvent.Secondary event;
-        if (hand == EnumHand.MAIN_HAND) {
-            event = SpongeEventFactory.createInteractEntityEventSecondaryMainHand(
-                    Sponge.getCauseStackManager().getCurrentCause(), HandTypes.MAIN_HAND, Optional.ofNullable(hitVec), EntityUtil.fromNative(entity));
-        } else {
-            event = SpongeEventFactory.createInteractEntityEventSecondaryOffHand(
-                    Sponge.getCauseStackManager().getCurrentCause(), HandTypes.OFF_HAND, Optional.ofNullable(hitVec), EntityUtil.fromNative(entity));
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.addContext(EventContextKeys.OWNER, (User) player);
+            frame.addContext(EventContextKeys.NOTIFIER, (User) player);
+            frame.addContext(EventContextKeys.ENTITY_HIT, (Entity) entity);
+            if (!stack.isEmpty()) {
+                frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(stack));
+            }
+            InteractEntityEvent.Secondary event;
+            if (hand == EnumHand.MAIN_HAND) {
+                event = SpongeEventFactory.createInteractEntityEventSecondaryMainHand(
+                        frame.getCurrentCause(), HandTypes.MAIN_HAND, Optional.ofNullable(hitVec), EntityUtil.fromNative(entity));
+            } else {
+                event = SpongeEventFactory.createInteractEntityEventSecondaryOffHand(
+                        frame.getCurrentCause(), HandTypes.OFF_HAND, Optional.ofNullable(hitVec), EntityUtil.fromNative(entity));
+            }
+            SpongeImpl.postEvent(event);
+            return event;
         }
-        SpongeImpl.postEvent(event);
-        return event;
     }
 
     public static InteractItemEvent.Primary callInteractItemEventPrimary(EntityPlayer player, ItemStack stack, EnumHand hand,
         @Nullable Vector3d hitVec, Object hitTarget) {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.addContext(EventContextKeys.OWNER, (User) player);
+            frame.addContext(EventContextKeys.NOTIFIER, (User) player);
             if (hitTarget instanceof Entity) {
                 frame.addContext(EventContextKeys.ENTITY_HIT, ((Entity) hitTarget));
             } else if (hitTarget instanceof BlockSnapshot) {
@@ -765,6 +782,8 @@ public class SpongeCommonEventFactory {
     public static InteractItemEvent.Secondary callInteractItemEventSecondary(EntityPlayer player, ItemStack stack, EnumHand hand,
             @Nullable Vector3d hitVec, Object hitTarget) {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.addContext(EventContextKeys.OWNER, (User) player);
+            frame.addContext(EventContextKeys.NOTIFIER, (User) player);
             if (hitTarget instanceof Entity) {
                 frame.addContext(EventContextKeys.ENTITY_HIT, ((Entity) hitTarget));
             } else if (hitTarget instanceof BlockSnapshot) {
@@ -792,26 +811,31 @@ public class SpongeCommonEventFactory {
 
     public static InteractBlockEvent.Primary callInteractBlockEventPrimary(EntityPlayer player, ItemStack heldItem, BlockSnapshot blockSnapshot, EnumHand hand,
             @Nullable EnumFacing side, @Nullable Vector3d hitVec) {
-        InteractBlockEvent.Primary event;
-        Direction direction;
-        if (side != null) {
-            direction = DirectionFacingProvider.getInstance().getKey(side).get();
-        } else {
-            direction = Direction.NONE;
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.addContext(EventContextKeys.OWNER, (User) player);
+            frame.addContext(EventContextKeys.NOTIFIER, (User) player);
+            frame.addContext(EventContextKeys.BLOCK_HIT, blockSnapshot);
+
+            InteractBlockEvent.Primary event;
+            Direction direction;
+            if (side != null) {
+                direction = DirectionFacingProvider.getInstance().getKey(side).get();
+            } else {
+                direction = Direction.NONE;
+            }
+            if (!heldItem.isEmpty()) {
+                frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(heldItem));
+            }
+            if (hand == EnumHand.MAIN_HAND) {
+                event = SpongeEventFactory.createInteractBlockEventPrimaryMainHand(frame.getCurrentCause(), HandTypes.MAIN_HAND,
+                        Optional.ofNullable(hitVec), blockSnapshot, direction);
+            } else {
+                event = SpongeEventFactory.createInteractBlockEventPrimaryOffHand(frame.getCurrentCause(), HandTypes.OFF_HAND,
+                        Optional.ofNullable(hitVec), blockSnapshot, direction);
+            }
+            SpongeImpl.postEvent(event);
+            return event;
         }
-        Sponge.getCauseStackManager().addContext(EventContextKeys.BLOCK_HIT, blockSnapshot);
-        if (!heldItem.isEmpty()) {
-            Sponge.getCauseStackManager().addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(heldItem));
-        }
-        if (hand == EnumHand.MAIN_HAND) {
-            event = SpongeEventFactory.createInteractBlockEventPrimaryMainHand(Sponge.getCauseStackManager().getCurrentCause(), HandTypes.MAIN_HAND,
-                    Optional.ofNullable(hitVec), blockSnapshot, direction);
-        } else {
-            event = SpongeEventFactory.createInteractBlockEventPrimaryOffHand(Sponge.getCauseStackManager().getCurrentCause(), HandTypes.OFF_HAND,
-                    Optional.ofNullable(hitVec), blockSnapshot, direction);
-        }
-        SpongeImpl.postEvent(event);
-        return event;
     }
 
     public static InteractBlockEvent.Secondary createInteractBlockEventSecondary(EntityPlayer player, ItemStack heldItem, @Nullable Vector3d hitVec,
@@ -824,11 +848,13 @@ public class SpongeCommonEventFactory {
             Tristate originalUseItemResult, Tristate useItemResult, @Nullable Vector3d hitVec, BlockSnapshot targetBlock,
             Direction targetSide, EnumHand hand) {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            InteractBlockEvent.Secondary event;
+            frame.addContext(EventContextKeys.OWNER, (User) player);
+            frame.addContext(EventContextKeys.NOTIFIER, (User) player);
             frame.addContext(EventContextKeys.BLOCK_HIT, targetBlock);
             if (!heldItem.isEmpty()) {
                 frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(heldItem));
             }
+            InteractBlockEvent.Secondary event;
             if (hand == EnumHand.MAIN_HAND) {
                 event = SpongeEventFactory.createInteractBlockEventSecondaryMainHand(frame.getCurrentCause(),
                         originalUseBlockResult, useBlockResult, originalUseItemResult, useItemResult, HandTypes.MAIN_HAND, Optional.ofNullable
