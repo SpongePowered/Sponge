@@ -36,7 +36,7 @@ public interface MixinSpongeSmeltingRecipe extends CatalogType {
     /**
      * @author Cybermaxke
      */
-    @Overwrite
+    @Overwrite(remap = false)
     @Override
     default String getId() {
         return CustomSmeltingRecipeIds.getDefaultId((SmeltingRecipe) this);
