@@ -90,7 +90,7 @@
         "block.MixinBlockPressurePlate",
         "block.MixinBlockPressurePlateWeighted",
         "block.MixinBlockPrismarine",
-        "block.MixinBlockPumpkin",
+        "block.MixinBlockCarvedPumpkin",
         "block.MixinBlockQuartz",
         "block.MixinBlockRailBase",
         "block.MixinBlockRailDetector",

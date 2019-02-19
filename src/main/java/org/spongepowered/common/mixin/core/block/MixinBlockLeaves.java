@@ -60,6 +60,7 @@ import org.spongepowered.common.registry.type.block.TreeTypeRegistryModule;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 @NonnullByDefault
 @Mixin(BlockLeaves.class)
@@ -104,32 +105,32 @@ public abstract class MixinBlockLeaves extends MixinBlock {
      * @param pos The position
      */
     @Overwrite
-    private void destroy(net.minecraft.world.World worldIn, BlockPos pos) {
-        final IBlockState state = worldIn.getBlockState(pos);
-        // Sponge Start - Cause tracking
-        if (!((IMixinWorld) worldIn).isFake()) {
-            final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-            final PhaseData peek = phaseTracker.getCurrentPhaseData();
-            final IPhaseState<?> currentState = peek.state;
-            final boolean isWorldGen = currentState.isWorldGeneration();
-            final boolean isBlockAlready = phaseTracker.getCurrentState().getPhase() != TrackingPhases.BLOCK;
-            try (PhaseContext<?> context = isBlockAlready && !isWorldGen ? BlockPhase.State.BLOCK_DECAY.createPhaseContext()
-                .source(LocatableBlock.builder()
-                    .location(new Location((World) worldIn, pos.getX(), pos.getY(), pos.getZ()))
-                    .state((BlockState) state)
-                    .build()) : null) {
-                if (context != null) {
-                    context.buildAndSwitch();
+    public void randomTick(IBlockState state, net.minecraft.world.World worldIn, BlockPos pos, Random random) {
+        if (!state.get(BlockLeaves.PERSISTENT) && state.get(BlockLeaves.DISTANCE) == 7) {
+            // Sponge Start - Cause tracking
+            if (!((IMixinWorld) worldIn).isFake()) {
+                final PhaseTracker phaseTracker = PhaseTracker.getInstance();
+                final PhaseData peek = phaseTracker.getCurrentPhaseData();
+                final IPhaseState<?> currentState = peek.state;
+                final boolean isWorldGen = currentState.isWorldGeneration();
+                final boolean isBlockAlready = phaseTracker.getCurrentState().getPhase() != TrackingPhases.BLOCK;
+                try (PhaseContext<?> context = isBlockAlready && !isWorldGen ? BlockPhase.State.BLOCK_DECAY.createPhaseContext()
+                        .source(LocatableBlock.builder()
+                                .location(new Location((World) worldIn, pos.getX(), pos.getY(), pos.getZ()))
+                                .state((BlockState) state)
+                                .build()) : null) {
+                    if (context != null) {
+                        context.buildAndSwitch();
+                    }
+                    state.dropBlockAsItem(worldIn, pos, 0);
+                    worldIn.removeBlock(pos);
                 }
-                this.dropBlockAsItem(worldIn, pos, state, 0);
-                worldIn.setBlockToAir(pos);
+                return;
             }
-            return;
+            // Sponge End
+            state.dropBlockAsItem(worldIn, pos, 0);
+            worldIn.removeBlock(pos);
         }
-        // Sponge End
-        this.dropBlockAsItem(worldIn, pos, state , 0);
-        worldIn.setBlockToAir(pos);
-
     }
 
     private ImmutableTreeData getTreeData(IBlockState blockState) {

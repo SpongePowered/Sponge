@@ -104,10 +104,10 @@ public abstract class MixinBlockFarmland extends MixinBlock {
         this.currentGriefer = null;
     }
 
-    @Redirect(method = "onFallenUpon", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockFarmland;turnToDirt(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)V"))
-    private void beforeTurnToDirt(World world, BlockPos pos) {
+    @Redirect(method = "onFallenUpon", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockFarmland;turnToDirt(Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)V"))
+    private void beforeTurnToDirt(IBlockState state, World world, BlockPos pos) {
         if (this.currentGriefer instanceof IMixinGriefer && ((IMixinGriefer) this.currentGriefer).canGrief()) {
-            MixinBlockFarmland.turnToDirt(world.getBlockState(pos), world, pos);
+            MixinBlockFarmland.turnToDirt(state, world, pos);
         }
     }
 }

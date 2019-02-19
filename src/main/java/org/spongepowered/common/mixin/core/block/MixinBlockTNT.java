@@ -51,24 +51,24 @@ public abstract class MixinBlockTNT extends MixinBlock {
 
     private static final String TARGET_PRIME = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z";
     private static final String TARGET_PRIME_SOUND = "Lnet/minecraft/world/World;playSound(Lnet/minecraft/entity/player/EntityPlayer;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V";
-    private static final String TARGET_REMOVE = "Lnet/minecraft/world/World;setBlockToAir(Lnet/minecraft/util/math/BlockPos;)Z";
+    private static final String TARGET_REMOVE = "Lnet/minecraft/world/World;removeBlock(Lnet/minecraft/util/math/BlockPos;)Z";
     private static final String TARGET_REMOVE_BLOCK = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;I)Z";
 
     private EntityLivingBase igniter;
     private boolean primeCancelled;
 
     private boolean onRemove(World world, BlockPos pos) {
-        boolean removed = !this.primeCancelled && world.setBlockToAir(pos);
+        boolean removed = !this.primeCancelled && world.removeBlock(pos);
         this.primeCancelled = false;
         return removed;
     }
 
-    @Inject(method = "explode", at = @At("INVOKE"))
-    public void prePrime(World world, BlockPos pos, IBlockState state, EntityLivingBase igniter, CallbackInfo ci) {
+    @Inject(method = "explode(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/EntityLivingBase;)V", at = @At("INVOKE"))
+    public void prePrime(World world, BlockPos pos, EntityLivingBase igniter, CallbackInfo ci) {
         this.igniter = igniter;
     }
 
-    @Redirect(method = "explode", at = @At(value = "INVOKE", target = TARGET_PRIME))
+    @Redirect(method = "explode(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/EntityLivingBase;)V", at = @At(value = "INVOKE", target = TARGET_PRIME))
     public boolean onPrime(World world, Entity tnt) {
         IMixinEntityTNTPrimed mixin = (IMixinEntityTNTPrimed) tnt;
         mixin.setDetonator(this.igniter);
@@ -81,7 +81,7 @@ public abstract class MixinBlockTNT extends MixinBlock {
         return !this.primeCancelled && world.spawnEntity(tnt);
     }
 
-    @Redirect(method = "explode", at = @At(value = "INVOKE", target = TARGET_PRIME_SOUND))
+    @Redirect(method = "explode(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/EntityLivingBase;)V", at = @At(value = "INVOKE", target = TARGET_PRIME_SOUND))
     public void onPrimeSound(World world, EntityPlayer player, double x, double y, double z, SoundEvent soundIn, SoundCategory category, float volume, float pitch) {
         if (!this.primeCancelled) {
             world.playSound(null, x, y, z, soundIn, category, volume, pitch);

@@ -35,6 +35,7 @@ import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.BlockLog;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.material.MaterialColor;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
@@ -60,7 +61,6 @@ import org.spongepowered.api.data.type.TreeType;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Transform;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
@@ -74,7 +74,6 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -132,6 +131,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Shadow public abstract SoundType getSoundType();
 
     @Shadow @Final protected Material material;
+    @Shadow @Final protected MaterialColor materialColor;
     private Optional<TreeType> treeType;
 
     @Inject(method = "<init>*", at = @At("RETURN"))
@@ -168,13 +168,13 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
         }
 
         Block block = (Block) (Object) this;
-        if (block instanceof BlockLeaves || block instanceof BlockLog || block instanceof BlockGrass || block instanceof BlockLiquid) {
+        if (block instanceof BlockLeaves || block instanceof BlockLog || block instanceof BlockGrass) {
             this.requiresBlockCapture = false;
         }
     }
 
-    @Inject(method = "registerBlock(ILnet/minecraft/util/ResourceLocation;Lnet/minecraft/block/Block;)V", at = @At("RETURN"))
-    private static void onRegisterBlock(int id, ResourceLocation location, Block block, CallbackInfo ci) {
+    @Inject(method = "register(Lnet/minecraft/util/ResourceLocation;Lnet/minecraft/block/Block;)V", at = @At("RETURN"))
+    private static void onRegisterBlock(ResourceLocation location, Block block, CallbackInfo ci) {
         BlockTypeRegistryModule.getInstance().registerFromGameData(location, (BlockType) block);
     }
 
@@ -234,8 +234,8 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
         return new SpongeTranslation(getTranslationKey() + ".name");
     }
 
-    @Intrinsic
-    public boolean block$getTickRandomly() {
+    @Override
+    public boolean doesUpdateRandomly() {
         return this.getTickRandomly(shadow$getDefaultState());
     }
 
@@ -283,7 +283,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     @Override
     public Optional<StateProperty<?>> getTrait(String blockTrait) {
-        return getDefaultBlockState().getTrait(blockTrait);
+        return getDefaultBlockState().getStatePropertyByName(blockTrait);
     }
 
     @Inject(method = "harvestBlock", at = @At(value = "HEAD"))
@@ -363,7 +363,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     // This method can be called directly by pistons, mods, etc. so the hook must go here
     @Inject(method = "dropBlockAsItemWithChance", at = @At(value = "HEAD"), cancellable = true)
-    private void onDropBlockAsItemWithChanceHead(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, float chance, int fortune,
+    private void onDropBlockAsItemWithChanceHead(IBlockState state, net.minecraft.world.World worldIn, BlockPos pos, float chance, int fortune,
         CallbackInfo ci) {
         if (!((IMixinWorld) worldIn).isFake()) {
             if (PhaseTracker.getInstance().getCurrentState() == BlockPhase.State.RESTORING_BLOCKS) {
@@ -391,7 +391,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Nullable private PhaseData data = null; // Soft reference for the methods between this
 
     @Inject(method = "dropBlockAsItemWithChance", at = @At(value = "RETURN"), cancellable = true)
-    private void onDropBlockAsItemWithChanceReturn(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, float chance, int fortune,
+    private void onDropBlockAsItemWithChanceReturn(IBlockState state, net.minecraft.world.World worldIn, BlockPos pos, float chance, int fortune,
         CallbackInfo ci) {
         if (!((IMixinWorld) worldIn).isFake()) {
             if (this.data == null) {

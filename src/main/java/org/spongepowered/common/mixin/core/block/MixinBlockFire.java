@@ -69,7 +69,7 @@ public abstract class MixinBlockFire extends MixinBlock {
         }
     }
 
-    @Inject(method = "catchOnFire", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockToAir(Lnet/minecraft/util/math/BlockPos;)Z"), require = 0, expect = 0, cancellable = true)
+    @Inject(method = "catchOnFire", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;removeBlock(Lnet/minecraft/util/math/BlockPos;)Z"), require = 0, expect = 0, cancellable = true)
     private void onCatchFirePreCheckOther(World world, BlockPos pos, int chance, Random random, int age, CallbackInfo callbackInfo) {
         if (!world.isRemote) {
             if (SpongeCommonEventFactory.callChangeBlockEventPre((IMixinWorldServer) world, pos).isCancelled()) {

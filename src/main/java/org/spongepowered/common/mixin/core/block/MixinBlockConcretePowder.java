@@ -41,9 +41,9 @@ public abstract class MixinBlockConcretePowder extends MixinBlock implements IMi
     private EnumDyeColor color;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void onInit(Block block, Block.Builder builder, CallbackInfo ci) {
+    private void onInit(Block block, Block.Properties properties, CallbackInfo ci) {
         for (EnumDyeColor color : EnumDyeColor.values()) {
-            if (this.blockMapColor == color.getMapColor()) {
+            if (this.materialColor == color.getMapColor()) {
                 this.color = color;
                 break;
             }
