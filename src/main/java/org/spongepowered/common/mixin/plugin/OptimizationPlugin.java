@@ -95,6 +95,8 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
                     (module) -> true)
             .put("org.spongepowered.common.mixin.optimization.enchantment.MixinEnchantmentHelper_No_Source_Leak",
                     OptimizationCategory::useEnchantmentHelperFix)
+            .put("org.spongepowered.common.mixin.optimization.block.MixinBlockRedstoneWire_Eigen",
+                    OptimizationCategory::useEigenRedstone)
             .put("org.spongepowered.common.mixin.optimization.block.MixinBlockRedstoneWire",
                     OptimizationCategory::usePandaRedstone)
             .put("org.spongepowered.common.mixin.optimization.entity.MixinEntityTameable_Cached_Owner",

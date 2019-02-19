@@ -55,9 +55,14 @@ public class OptimizationCategory extends ConfigCategory {
     @Setting(value = "async-lighting", comment = "Runs lighting updates asynchronously.")
     private AsyncLightingCategory asyncLightingCategory = new AsyncLightingCategory();
 
+    @Setting(value = "eigen-redstone", comment = "Uses theosib's redstone algorithms to completely overhaul the way redstone works.")
+    private EigenRedstoneCategory eigenRedstonCategory = new EigenRedstoneCategory();
+
     @Setting(value = "panda-redstone", comment = "If 'true', uses Panda4494's redstone implementation which improves performance. \n"
                                                + "See https://bugs.mojang.com/browse/MC-11193 for more information. \n"
-                                               + "Note: This optimization has a few issues which are explained in the bug report.")
+                                               + "Note: This optimization has a few issues which are explained in the bug report. \n"
+                                               + "We strongly recommend using eigen redstone over this implementation as this will\n"
+                                               + "be removed in a future release.")
     private boolean pandaRedstone = false;
 
     @Setting(value = "enchantment-helper-leak-fix", comment = "If 'true', provides a fix for possible leaks through\n"
@@ -129,6 +134,14 @@ public class OptimizationCategory extends ConfigCategory {
 
     public boolean useAsyncLighting() {
         return this.asyncLightingCategory.isEnabled();
+    }
+
+    public EigenRedstoneCategory getEigenRedstoneCategory() {
+        return this.eigenRedstonCategory;
+    }
+
+    public boolean useEigenRedstone() {
+        return this.eigenRedstonCategory.isEnabled();
     }
 
     public boolean usePandaRedstone() {
