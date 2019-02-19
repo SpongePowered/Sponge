@@ -42,6 +42,7 @@ import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.game.GameRegistryEvent;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.item.inventory.CraftItemEvent;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -51,6 +52,7 @@ import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.api.item.recipe.crafting.Ingredient;
 import org.spongepowered.api.item.recipe.crafting.ShapedCraftingRecipe;
 import org.spongepowered.api.item.recipe.smelting.SmeltingRecipe;
+import org.spongepowered.api.item.recipe.smelting.SmeltingResult;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.World;
@@ -132,6 +134,14 @@ public class RecipeTest {
                 .experience(5)
                 .build());
         this.logger.info("Registering custom smelting recipes!");
+
+        final SmeltIronRecipe smeltIronRecipe = new SmeltIronRecipe();
+        event.register(smeltIronRecipe);
+        this.logger.info("SmeltIronRecipe ID: " + smeltIronRecipe.getId());
+
+        final SmeltGoldRecipe smeltGoldRecipe = new SmeltGoldRecipe();
+        event.register(smeltGoldRecipe);
+        this.logger.info("SmeltGoldRecipe ID: " + smeltGoldRecipe.getId());
 
         this.logger.info("## Smelting recipes:");
         event.getRegistryModule().getAll().forEach(recipe -> this.logger.info(" - " + recipe.getId()));
@@ -219,6 +229,68 @@ public class RecipeTest {
         @Override
         public ItemStackSnapshot getExemplaryResult() {
             return this.baseRecipe.getExemplaryResult();
+        }
+    }
+
+    public static class SmeltIronRecipe implements SmeltingRecipe {
+
+        @Override
+        public ItemStackSnapshot getExemplaryIngredient() {
+            return ItemStack.of(ItemTypes.IRON_BLOCK).createSnapshot();
+        }
+
+        @Override
+        public boolean isValid(ItemStackSnapshot ingredient) {
+            return ingredient.getType() == ItemTypes.IRON_BLOCK;
+        }
+
+        @Override
+        public Optional<SmeltingResult> getResult(ItemStackSnapshot ingredient) {
+            if (!isValid(ingredient)) {
+                return Optional.empty();
+            }
+            return Optional.of(new SmeltingResult(ItemStack.of(ItemTypes.IRON_INGOT, 9).createSnapshot(), 0));
+        }
+
+        @Override
+        public ItemStackSnapshot getExemplaryResult() {
+            return ItemStack.of(ItemTypes.IRON_INGOT, 9).createSnapshot();
+        }
+    }
+
+    public static class SmeltGoldRecipe implements SmeltingRecipe {
+
+        @Override
+        public String getId() {
+            return "recipe_test:smelt_gold_block_to_ingots";
+        }
+
+        @Override
+        public String getName() {
+            return "Smelt Gold Block To Ingot";
+        }
+
+        @Override
+        public ItemStackSnapshot getExemplaryIngredient() {
+            return ItemStack.of(ItemTypes.GOLD_BLOCK).createSnapshot();
+        }
+
+        @Override
+        public boolean isValid(ItemStackSnapshot ingredient) {
+            return ingredient.getType() == ItemTypes.GOLD_BLOCK;
+        }
+
+        @Override
+        public Optional<SmeltingResult> getResult(ItemStackSnapshot ingredient) {
+            if (!isValid(ingredient)) {
+                return Optional.empty();
+            }
+            return Optional.of(new SmeltingResult(ItemStack.of(ItemTypes.GOLD_INGOT, 9).createSnapshot(), 0));
+        }
+
+        @Override
+        public ItemStackSnapshot getExemplaryResult() {
+            return ItemStack.of(ItemTypes.GOLD_INGOT, 9).createSnapshot();
         }
     }
 }

@@ -389,6 +389,7 @@
         "item.recipe.crafting.MixinShapedRecipes",
         "item.recipe.crafting.MixinShapelessRecipes",
         "item.recipe.smelting.MixinFurnaceRecipes",
+        "item.recipe.smelting.MixinSpongeSmeltingRecipe",
         "item.merchant.MixinMerchantRecipe",
         "nbt.MixinNBTTagCompound",
         "network.MixinNetHandlerPlayServer",
