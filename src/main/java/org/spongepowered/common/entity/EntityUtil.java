@@ -414,7 +414,7 @@ public final class EntityUtil {
             frame.addContext(EventContextKeys.TELEPORT_TYPE, TeleportTypes.PORTAL);
 
 
-            if (entityIn.isEntityAlive() && (teleporter instanceof IMixinTeleporter && !(fromWorld.provider instanceof WorldProviderEnd))) {
+            if (entityIn.isEntityAlive() && (teleporter instanceof IMixinITeleporter && !(fromWorld.provider instanceof WorldProviderEnd))) {
                 fromWorld.profiler.startSection("placing");
                 // Only place entity in portal if one of the following are true :
                 // 1. The teleporter is custom. (not vanilla)
