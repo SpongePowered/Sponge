@@ -41,7 +41,7 @@ import org.spongepowered.common.interfaces.world.IMixinDimension;
 
 @NonnullByDefault
 @Mixin(net.minecraft.world.dimension.Dimension.class)
-public abstract class MixinDimension implements IMixinDimension {
+public abstract class MixinDimension implements IMixinDimension, Dimension {
 
     @Shadow protected World world;
     @Shadow(prefix = "shadow$") public abstract net.minecraft.world.dimension.DimensionType shadow$getType();
@@ -72,7 +72,7 @@ public abstract class MixinDimension implements IMixinDimension {
 
     @Override
     public Context getContext() {
-        return ((IMixinDimensionType) this.shadow$getType()).getContext();
+        return ((IMixinDimensionType) this.shadow$getType()).getGlobalDimensionType().getContext();
     }
 
     @Override

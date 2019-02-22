@@ -659,7 +659,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         }
 
         if (!isCustom) {
-            ((IMixinWorldInfo) world.getWorldInfo()).forceSetDifficulty(difficulty);
+            ((IMixinWorldInfo) world.getWorldInfo()).setNonCustomDifficulty(difficulty);
         } else {
             world.getWorldInfo().setDifficulty(difficulty);
         }
