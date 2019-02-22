@@ -30,16 +30,15 @@ import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.filter.cause.Root;
-import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -47,12 +46,11 @@ import org.spongepowered.api.world.World;
 import java.util.Optional;
 
 @Plugin(id = "flowerpottest", name = "Flower Pot Destruction", description = "A plugin to test causes for breaking blocks beneath flower pots", version = "0.0.0")
-public class FlowerPotTest {
+public class FlowerPotTest implements LoadableModule {
 
     @Inject private Logger logger;
-    private final DroppedBlockContextTestListener listener = new DroppedBlockContextTestListener();
-
-    private boolean registered = false;
+    @Inject private PluginContainer container;
+    private final FlowerPotListener listener = new FlowerPotListener();
 
     /*
     Basically, this verifies that the context for breaking a block that performs a drop will never have an incorrect drop
@@ -60,22 +58,13 @@ public class FlowerPotTest {
     because the BlockHit position was previously used instead of the source position of the LocatableBlock.
 
      */
-    @Listener
-    public void onInit(GameInitializationEvent event) {
-        Sponge.getCommandManager().register(this,
-            CommandSpec.builder().executor((source, context) -> {
-                if (this.registered) {
-                    this.registered = false;
-                    Sponge.getEventManager().unregisterListeners(this.listener);
-                } else {
-                    this.registered = true;
-                    Sponge.getEventManager().registerListeners(this, this.listener);
-                }
-                return CommandResult.success();
-            }).build(), "flowerPotTest");
+
+    @Override
+    public void enable(CommandSource src) {
+        Sponge.getEventManager().registerListeners(this.container, this.listener);
     }
 
-    private class DroppedBlockContextTestListener {
+    public static class FlowerPotListener {
 
         @Listener
         public void onConstruct(ConstructEntityEvent.Pre event, @Root BlockState state, @First LocatableBlock blockBeingDropped) {
@@ -93,7 +82,7 @@ public class FlowerPotTest {
             final Vector3i targetPosition = event.getTransform().getPosition().toInt();
             final boolean isTargetEqualToDropped = targetPosition.getX() != droppedPosition.getX() || targetPosition.getZ() != droppedPosition.getZ();
             if (isDroppedPotentiallyOrigin && isHitSameAsDropped && !isTargetEqualToDropped) {
-                logger.error("Failed Drop Test for Blocks, positions are not matching!");
+                System.err.println("Failed Drop Test for Blocks, positions are not matching!");
             }
 
 

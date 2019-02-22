@@ -34,6 +34,7 @@ import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.data.DataContainer;
@@ -66,7 +67,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 @Plugin(id = "copypasta", name = "CopyPasta", description = CopyPasta.DESCRIPTION, version = "0.0.0")
-public class CopyPasta {
+public class CopyPasta implements LoadableModule {
 
     public static final String PLUGIN_ID = "copypasta";
     public static final String DESCRIPTION = "A simple plugin that allows creating, saving, and pasting schematics with SpongeAPI";
@@ -75,14 +76,15 @@ public class CopyPasta {
     @Inject private PluginContainer plugin;
     @Inject @ConfigDir(sharedRoot = false) private File config;
 
-    private final Map<UUID, PlayerData> player_data = Maps.newHashMap();
+    private final CopyPastaListener listener = new CopyPastaListener();
+    private static final Map<UUID, PlayerData> player_data = Maps.newHashMap();
     private File schematicsDir;
 
-    private PlayerData get(Player pl) {
-        PlayerData data = this.player_data.get(pl.getUniqueId());
+    private static PlayerData get(Player pl) {
+        PlayerData data = player_data.get(pl.getUniqueId());
         if (data == null) {
             data = new PlayerData(pl.getUniqueId());
-            this.player_data.put(pl.getUniqueId(), data);
+            player_data.put(pl.getUniqueId(), data);
         }
         return data;
     }
@@ -225,23 +227,31 @@ public class CopyPasta {
             .build(), "load");
     }
 
-    @Listener
-    public void onInteract(InteractBlockEvent.Secondary.MainHand event, @Root Player player) {
-        Optional<ItemStack> item = player.getItemInHand(HandTypes.MAIN_HAND);
-        if (item.isPresent() && item.get().getType().equals(ItemTypes.WOODEN_AXE) && event.getTargetBlock() != BlockSnapshot.NONE) {
-            get(player).setPos2(event.getTargetBlock().getPosition());
-            player.sendMessage(Text.of(TextColors.LIGHT_PURPLE, "Position 2 set to " + event.getTargetBlock().getPosition()));
-            event.setCancelled(true);
-        }
+    @Override
+    public void enable(CommandSource src) {
+        Sponge.getEventManager().registerListeners(this.plugin, this.listener);
     }
 
-    @Listener
-    public void onInteract(InteractBlockEvent.Primary.MainHand event, @Root Player player) {
-        Optional<ItemStack> item = player.getItemInHand(HandTypes.MAIN_HAND);
-        if (item.isPresent() && item.get().getType().equals(ItemTypes.WOODEN_AXE)) {
-            get(player).setPos1(event.getTargetBlock().getPosition());
-            player.sendMessage(Text.of(TextColors.LIGHT_PURPLE, "Position 1 set to " + event.getTargetBlock().getPosition()));
-            event.setCancelled(true);
+    public static class CopyPastaListener {
+
+        @Listener
+        public void onInteract(InteractBlockEvent.Secondary.MainHand event, @Root Player player) {
+            Optional<ItemStack> item = player.getItemInHand(HandTypes.MAIN_HAND);
+            if (item.isPresent() && item.get().getType().equals(ItemTypes.WOODEN_AXE) && event.getTargetBlock() != BlockSnapshot.NONE) {
+                get(player).setPos2(event.getTargetBlock().getPosition());
+                player.sendMessage(Text.of(TextColors.LIGHT_PURPLE, "Position 2 set to " + event.getTargetBlock().getPosition()));
+                event.setCancelled(true);
+            }
+        }
+
+        @Listener
+        public void onInteract(InteractBlockEvent.Primary.MainHand event, @Root Player player) {
+            Optional<ItemStack> item = player.getItemInHand(HandTypes.MAIN_HAND);
+            if (item.isPresent() && item.get().getType().equals(ItemTypes.WOODEN_AXE)) {
+                get(player).setPos1(event.getTargetBlock().getPosition());
+                player.sendMessage(Text.of(TextColors.LIGHT_PURPLE, "Position 1 set to " + event.getTargetBlock().getPosition()));
+                event.setCancelled(true);
+            }
         }
     }
 

@@ -24,6 +24,9 @@
  */
 package org.spongepowered.test;
 
+import com.google.inject.Inject;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.data.property.item.RecordProperty;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.living.player.Player;
@@ -33,21 +36,36 @@ import org.spongepowered.api.event.item.inventory.InteractItemEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 
 import java.util.Optional;
 
 @Plugin(id = "record_test", name = "Record Test", description = "Right click to start/stop a record at a position.", version = "0.0.0")
-public class RecordTest {
+public class RecordTest implements LoadableModule {
 
-    @Listener
-    public void onPlayerInteract(InteractItemEvent.Secondary event, @Root Player player) {
-        final ItemStack itemStack = player.getItemInHand(HandTypes.MAIN_HAND).orElse(null);
-        if (itemStack != null) {
-            final Optional<RecordProperty> optRecord = itemStack.getProperty(RecordProperty.class);
-            if (optRecord.isPresent()) {
-                player.playRecord(player.getLocation().getPosition().toInt(), optRecord.get().getValue());
-            } else if (itemStack.getType() == ItemTypes.SPONGE) {
-                player.stopRecord(player.getLocation().getPosition().toInt());
+    @Inject private PluginContainer container;
+
+    private final RecordListener listener = new RecordListener();
+
+
+
+    @Override
+    public void enable(CommandSource src) {
+        Sponge.getEventManager().registerListeners(this.container, this.listener);
+    }
+
+    public static class RecordListener {
+
+        @Listener
+        public void onPlayerInteract(InteractItemEvent.Secondary event, @Root Player player) {
+            final ItemStack itemStack = player.getItemInHand(HandTypes.MAIN_HAND).orElse(null);
+            if (itemStack != null) {
+                final Optional<RecordProperty> optRecord = itemStack.getProperty(RecordProperty.class);
+                if (optRecord.isPresent()) {
+                    player.playRecord(player.getLocation().getPosition().toInt(), optRecord.get().getValue());
+                } else if (itemStack.getType() == ItemTypes.SPONGE) {
+                    player.stopRecord(player.getLocation().getPosition().toInt());
+                }
             }
         }
     }

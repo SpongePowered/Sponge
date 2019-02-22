@@ -25,6 +25,8 @@
 package org.spongepowered.test;
 
 import com.google.inject.Inject;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.effect.sound.SoundCategories;
 import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.entity.living.player.Player;
@@ -38,35 +40,36 @@ import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scheduler.Task;
 
 @Plugin(id = "stopsoundtest", version = "0.0.0", name = "StopSounds", description = "Stops sounds when right clicking an ender rod")
-public class StopSoundTest {
+public class StopSoundTest implements LoadableModule {
+
+    public static final String ID = "stopsoundtest";
 
     @Inject private PluginContainer pluginContainer;
 
-    @Listener
-    public void onServerStart(GameStartedServerEvent event) {
-        // Block rain sounds
-        /*
-        Task.builder()
-                .intervalTicks(1)
-                .execute(() -> Sponge.getServer().getOnlinePlayers().forEach(player -> {
-                    player.stopSounds(SoundTypes.WEATHER_RAIN, SoundCategories.WEATHER);
-                    player.stopSounds(SoundTypes.WEATHER_RAIN_ABOVE, SoundCategories.WEATHER);
-                }))
-                .submit(this.pluginContainer);
-        */
+    private final StopSoundListener listener = new StopSoundListener();
+
+
+
+    @Override
+    public void enable(CommandSource src) {
+        Sponge.getEventManager().registerListeners(this.pluginContainer, this.listener);
     }
 
-    @Listener
-    public void onUseItem(InteractItemEvent event, @First Player player) {
-        if (event.getItemStack().getType() != ItemTypes.END_ROD) {
-            return;
-        }
-        player.playSound(SoundTypes.ENTITY_ENDERMEN_DEATH, SoundCategories.MASTER, player.getLocation().getPosition(), 1.0);
-        if (event instanceof InteractItemEvent.Secondary) {
-            Task.builder()
-                    .delayTicks(5)
-                    .execute(() -> player.stopSounds(SoundTypes.ENTITY_ENDERMEN_DEATH, SoundCategories.MASTER))
-                    .submit(this.pluginContainer);
+    public static class StopSoundListener {
+
+        @Listener
+        public void onUseItem(InteractItemEvent event, @First Player player) {
+            if (event.getItemStack().getType() != ItemTypes.END_ROD) {
+                return;
+            }
+            player.playSound(SoundTypes.ENTITY_ENDERMEN_DEATH, SoundCategories.MASTER, player.getLocation().getPosition(), 1.0);
+            if (event instanceof InteractItemEvent.Secondary) {
+                PluginContainer pluginContainer = Sponge.getPluginManager().getPlugin(ID).get();
+                Task.builder()
+                        .delayTicks(5)
+                        .execute(() -> player.stopSounds(SoundTypes.ENTITY_ENDERMEN_DEATH, SoundCategories.MASTER))
+                        .submit(pluginContainer);
+            }
         }
     }
 }

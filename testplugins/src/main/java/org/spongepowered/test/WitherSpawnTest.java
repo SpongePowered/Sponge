@@ -24,40 +24,32 @@
  */
 package org.spongepowered.test;
 
+import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.util.stream.Collectors;
 
 @Plugin(id = "witherspawntest", name = "Wither Spawn Test", description = "Log Wither Skele Spawn and generation", version = "0.0.0")
-public class WitherSpawnTest {
+public class WitherSpawnTest implements LoadableModule {
 
     private final SpawnListener listener = new SpawnListener();
-    private boolean enabled = false;
 
-    @Listener
-    public void onInit(GameInitializationEvent event) {
-        Sponge.getCommandManager().register(this,
-                CommandSpec.builder().executor((src, args) -> {
-                    this.enabled = !this.enabled;
-                    src.sendMessage(Text.of("Enabled: ", this.enabled));
-                    if (this.enabled) {
-                        Sponge.getEventManager().registerListeners(this, this.listener);
-                    } else {
-                        Sponge.getEventManager().unregisterListeners(this.listener);
-                    }
-                    return CommandResult.success();
-                }).build(),
-                "toggle-spawn-logging"
-        );
+    @Inject private PluginContainer container;
+
+    @Override
+    public void enable(CommandSource src) {
+        Sponge.getEventManager().registerListeners(this.container, this.listener);
     }
 
     public static class SpawnListener {

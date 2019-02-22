@@ -38,7 +38,7 @@ import org.spongepowered.api.plugin.Plugin;
 
 import javax.inject.Inject;
 
-@Plugin(id = "data_translator_test", name = "Data Translator Test", version = "0.0.0")
+@Plugin(id = "data_translator_test", name = "Data Translator Test", description = "test custom DataTranslator", version = "0.0.0")
 public class DataTranslatorTest {
 
     @Inject private Logger logger;

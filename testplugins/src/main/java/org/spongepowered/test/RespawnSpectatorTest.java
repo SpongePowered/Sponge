@@ -24,8 +24,10 @@
  */
 package org.spongepowered.test;
 
+import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.living.player.Player;
@@ -35,27 +37,20 @@ import org.spongepowered.api.event.entity.living.humanoid.player.RespawnPlayerEv
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 
-@Plugin(id = "respawnspectatortest", name = "Respawn Spectator Test", version = "0.0.0")
-public class RespawnSpectatorTest {
+@Plugin(id = "respawnspectatortest", name = "Respawn Spectator Test", description = "Spectator after death", version = "0.0.0")
+public class RespawnSpectatorTest implements LoadableModule{
 
     private final RespawnSpectatorListener listener = new RespawnSpectatorListener();
-    private boolean registered = false;
+    @Inject private PluginContainer container;
 
-    @Listener
-    public void onInit(GameInitializationEvent event) {
-        Sponge.getCommandManager().register(this,
-                CommandSpec.builder().executor((source, context) -> {
-                    this.registered = !this.registered;
-                    source.sendMessage(Text.of("listener set to " + this.registered));
-                    if (this.registered) {
-                        Sponge.getEventManager().unregisterListeners(this.listener);
-                    } else {
-                        Sponge.getEventManager().registerListeners(this, this.listener);
-                    }
-                    return CommandResult.success();
-                }).build(), "togglespectatorrespawn");
+
+
+    @Override
+    public void enable(CommandSource src) {
+        Sponge.getEventManager().registerListeners(this.container, this.listener);
     }
 
     public static class RespawnSpectatorListener {

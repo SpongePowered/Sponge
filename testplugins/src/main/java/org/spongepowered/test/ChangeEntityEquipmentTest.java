@@ -35,42 +35,36 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.entity.ChangeEntityEquipmentEvent;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 
 import javax.annotation.Nullable;
 
 @Plugin(id = "changeentityequipmenttest", name = "Entity Equipment Change Test", description = ChangeEntityEquipmentTest.DESCRIPTION, version = "0.0.0")
-public class ChangeEntityEquipmentTest {
+public class ChangeEntityEquipmentTest implements LoadableModule {
+
     public static final String DESCRIPTION = "A plugin for testing ChangeEntityEquipmentEvents.";
+
+    private final ChangeEntityEquipmentListener listener = new ChangeEntityEquipmentListener();
+
     @Inject private Logger logger;
+    @Inject private PluginContainer container;
 
-    @Nullable
-    private TestListener listener = null;
-
-    @Listener
-    public void onGameInitialization(GameInitializationEvent event) {
-        CommandSpec command = CommandSpec.builder().executor(this::onCommand).build();
-        Sponge.getCommandManager().register(this, command, "togglechangeentityequipmenttest");
+    @Override
+    public void enable(CommandSource src) {
+        Sponge.getEventManager().registerListeners(this.container, this.listener);
     }
 
-    private CommandResult onCommand(CommandSource source, CommandContext context) {
-        if (this.listener != null) {
-            Sponge.getEventManager().unregisterListeners(this.listener);
-            this.listener = null;
-        } else {
-            this.listener = new TestListener();
-            Sponge.getEventManager().registerListeners(this, this.listener);
-        }
-        return CommandResult.success();
-    }
-
-    public class TestListener {
-        private TestListener() {}
+    public static class ChangeEntityEquipmentListener {
 
         @Listener
         public void onChangeEntityEquipment(ChangeEntityEquipmentEvent event) {
-            logger.info("Event: " + event.getClass().getSimpleName());
-            logger.info(event.getCause().toString());
-            logger.info(event.getTransaction().toString());
+            System.err.println(
+                    "Event: " + event.getClass().getSimpleName() + "\n" +
+                    "Cause: " + event.getCause() + "\n" +
+                    "Transaction: " + event.getTransaction()
+            );
         }
     }
 }

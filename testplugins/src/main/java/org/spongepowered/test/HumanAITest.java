@@ -25,6 +25,9 @@
 package org.spongepowered.test;
 
 import com.flowpowered.math.vector.Vector3d;
+import com.google.inject.Inject;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.ai.GoalTypes;
 import org.spongepowered.api.entity.ai.task.AITask;
@@ -39,24 +42,37 @@ import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.world.Location;
 
 // Only newly spawned Humans will work. If you want prior ones, update the code in onSpawnEntity to lookup the creator and add the task :p.
 @Plugin(id = "humanaitest", name = "Human AI Test", description = "Simple plugin used for AI and other tests", version = "0.0.0")
-public class HumanAITest {
+public class HumanAITest implements LoadableModule {
 
-    @Listener
-    public void onSpawnEntity(SpawnEntityEvent event, @First Player player) {
-        if (player != null) {
-            event.getEntities().stream().filter(entity -> entity instanceof Human).map(entity -> (Human) entity).forEach(human ->
-                    human.getGoal(GoalTypes.NORMAL).get().addTask(0, new MoveSillyToPlayerAITask(player)));
-        }
+    @Inject private PluginContainer container;
+
+    private final HumanAIListener listener = new HumanAIListener();
+
+    @Override
+    public void enable(CommandSource src) {
+        Sponge.getEventManager().registerListeners(this.container, this.listener);
     }
 
-    @Listener
-    public void onInteractEntity(InteractEntityEvent.Secondary.MainHand event, @Root Player player) {
-        if (event.getTargetEntity() instanceof Human) {
-            event.getTargetEntity().addPassenger(player);
+    public static class HumanAIListener {
+
+        @Listener
+        public void onSpawnEntity(SpawnEntityEvent event, @First Player player) {
+            if (player != null) {
+                event.getEntities().stream().filter(entity -> entity instanceof Human).map(entity -> (Human) entity).forEach(human ->
+                        human.getGoal(GoalTypes.NORMAL).get().addTask(0, new MoveSillyToPlayerAITask(player)));
+            }
+        }
+
+        @Listener
+        public void onInteractEntity(InteractEntityEvent.Secondary.MainHand event, @Root Player player) {
+            if (event.getTargetEntity() instanceof Human) {
+                event.getTargetEntity().addPassenger(player);
+            }
         }
     }
 

@@ -89,7 +89,7 @@ public class WorldLimitTest {
                         })
                         .arguments(GenericArguments.vector3d(Text.of("coord")))
                         .build(),
-                "setLocation"
+                "setlocation"
         );
 
         Sponge.getCommandManager().register(this,

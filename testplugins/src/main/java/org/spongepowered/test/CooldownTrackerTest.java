@@ -24,9 +24,11 @@
  */
 package org.spongepowered.test;
 
+import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.data.type.HandTypes;
@@ -39,6 +41,7 @@ import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
@@ -48,9 +51,11 @@ import java.util.Set;
 import java.util.UUID;
 
 @Plugin(id = "cooldowntracker", name = "Cooldown Tracker", description = "A plugin to test the cooldown tracker.", version = "0.0.0")
-public final class CooldownTrackerTest {
+public final class CooldownTrackerTest implements LoadableModule {
 
-    private final Set<UUID> enabled = new HashSet<>();
+    private final CooldownListener listener = new CooldownListener();
+
+    @Inject private PluginContainer container;
 
     @Listener
     public void onInit(GameInitializationEvent event) {
@@ -92,22 +97,6 @@ public final class CooldownTrackerTest {
                 .arguments(GenericArguments.integer(Text.of("cooldown")))
                 .build();
 
-        final CommandSpec enable = CommandSpec.builder()
-                .executor(((src, args) -> {
-                    if (!(src instanceof Player)) {
-                        throw new CommandException(Text.of(TextColors.RED, "You must be a player to execute this command!"));
-                    }
-                    final Player player = (Player) src;
-                    if (!this.enabled.remove(player.getUniqueId())) {
-                        this.enabled.add(player.getUniqueId());
-                        src.sendMessage(Text.of(TextColors.GOLD, "You have enabled the cooldown listeners!"));
-                    } else {
-                        src.sendMessage(Text.of(TextColors.GOLD, "You have disabled the cooldown listeners!"));
-                    }
-                    return CommandResult.success();
-                }))
-                .build();
-
         Sponge.getCommandManager().register(this,
                 CommandSpec.builder()
                         .executor(((src, args) -> {
@@ -116,25 +105,28 @@ public final class CooldownTrackerTest {
                         }))
                         .child(test, "test")
                         .child(set, "set")
-                        .child(enable, "enable", "disable")
                         .build(),
                 "cooldowns");
     }
 
-    @Listener(order = Order.LAST)
-    public void onSetCooldown(final CooldownEvent.Set event) {
-        final Player player = event.getTargetEntity();
-        if (this.enabled.contains(player.getUniqueId())) {
+    @Override
+    public void enable(CommandSource src) {
+        Sponge.getEventManager().registerListeners(this.container, this.listener);
+    }
+
+    public static class CooldownListener {
+
+        @Listener(order = Order.LAST)
+        public void onSetCooldown(final CooldownEvent.Set event) {
+            final Player player = event.getTargetEntity();
             event.setNewCooldown(event.getOriginalNewCooldown() * 2);
             player.sendMessage(Text.of(TextColors.GOLD, event.getItemType().getId() + " are now on cooldown for you for "
                     + event.getNewCooldown() + " ticks!"));
         }
-    }
 
-    @Listener(order = Order.LAST)
-    public void onCooldownEnd(final CooldownEvent.End event) {
-        final Player player = event.getTargetEntity();
-        if (this.enabled.contains(player.getUniqueId())) {
+        @Listener(order = Order.LAST)
+        public void onCooldownEnd(final CooldownEvent.End event) {
+            final Player player = event.getTargetEntity();
             player.sendMessage(Text.of(TextColors.GOLD, event.getItemType().getId() + " are no longer on cooldown for you!"));
         }
     }

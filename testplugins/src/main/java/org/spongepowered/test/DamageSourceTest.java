@@ -24,9 +24,11 @@
  */
 package org.spongepowered.test;
 
+import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
@@ -39,38 +41,18 @@ import org.spongepowered.api.event.filter.Getter;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
-
 @Plugin(id = "damagesourcetest", name = "Damage Source Test", description = "A plugin to test damage sources", version = "0.0.0")
-public final class DamageSourceTest {
+public final class DamageSourceTest implements LoadableModule {
 
-    private final Set<UUID> activated = new HashSet<>();
+    private final DamageSourceListener listener = new DamageSourceListener();
+    @Inject private PluginContainer container;
 
     @Listener
     public void onInit(GameInitializationEvent event) {
-        Sponge.getCommandManager().register(this,
-                CommandSpec.builder()
-                        .executor((src, args) -> {
-                            if (src instanceof Player) {
-                                final UUID uuid = ((Player) src).getUniqueId();
-                                if (this.activated.contains(uuid)) {
-                                    this.activated.remove(uuid);
-                                    src.sendMessage(Text.of("You have deactivated damage source analysis."));
-                                } else {
-                                    this.activated.add(uuid);
-                                    src.sendMessage(Text.of("You have activated damage source analysis."));
-                                }
-                                return CommandResult.success();
-                            }
-                            throw new CommandException(Text.of(TextColors.RED, "You must be a player to execute this command!"));
-                        })
-                        .build(),
-                "dstest");
 
         final DamageSource damageSource = DamageSource.builder()
                 .type(DamageTypes.CUSTOM)
@@ -94,19 +76,25 @@ public final class DamageSourceTest {
                 "dsdamage");
     }
 
-    @Listener(order = Order.POST)
-    public void onPlayerDamage(DamageEntityEvent event, @Getter("getTargetEntity") Player player, @Root DamageSource source) {
-        if (this.activated.contains(player.getUniqueId())) {
-            player.sendMessage(Text.of(TextColors.BLUE, "You have been damaged by the following source for " + event.getFinalDamage()));
-            player.sendMessage(Text.of(TextColors.GOLD, "======================================="));
-            player.sendMessage(Text.of(TextColors.GOLD, "Damage type: ", TextColors.GRAY, source.getType().getName()));
-            player.sendMessage(Text.of(TextColors.GOLD, "Affects creative: ", TextColors.GRAY, source.doesAffectCreative()));
-            player.sendMessage(Text.of(TextColors.GOLD, "Exhaustion: ", TextColors.GRAY, source.getExhaustion()));
-            player.sendMessage(Text.of(TextColors.GOLD, "Absolute: ", TextColors.GRAY, source.isAbsolute()));
-            player.sendMessage(Text.of(TextColors.GOLD, "Bypassing armor: ", TextColors.GRAY, source.isBypassingArmor()));
-            player.sendMessage(Text.of(TextColors.GOLD, "Explosive: ", TextColors.GRAY, source.isExplosive()));
-            player.sendMessage(Text.of(TextColors.GOLD, "Magic: ", TextColors.GRAY, source.isMagic()));
-            player.sendMessage(Text.of(TextColors.GOLD, "Scaled by difficulty: ", TextColors.GRAY, source.isScaledByDifficulty()));
+    @Override
+    public void enable(CommandSource src) {
+        Sponge.getEventManager().registerListeners(this.container, this.listener);
+    }
+
+    public static class DamageSourceListener {
+
+        @Listener(order = Order.POST)
+        public void onPlayerDamage(DamageEntityEvent event, @Getter("getTargetEntity") Player player, @Root DamageSource source) {
+            Sponge.getServer().getBroadcastChannel().send(Text.of(TextColors.BLUE, "You have been damaged by the following source for " + event.getFinalDamage()));
+            Sponge.getServer().getBroadcastChannel().send(Text.of(TextColors.GOLD, "======================================="));
+            Sponge.getServer().getBroadcastChannel().send(Text.of(TextColors.GOLD, "Damage type: ", TextColors.GRAY, source.getType().getName()));
+            Sponge.getServer().getBroadcastChannel().send(Text.of(TextColors.GOLD, "Affects creative: ", TextColors.GRAY, source.doesAffectCreative()));
+            Sponge.getServer().getBroadcastChannel().send(Text.of(TextColors.GOLD, "Exhaustion: ", TextColors.GRAY, source.getExhaustion()));
+            Sponge.getServer().getBroadcastChannel().send(Text.of(TextColors.GOLD, "Absolute: ", TextColors.GRAY, source.isAbsolute()));
+            Sponge.getServer().getBroadcastChannel().send(Text.of(TextColors.GOLD, "Bypassing armor: ", TextColors.GRAY, source.isBypassingArmor()));
+            Sponge.getServer().getBroadcastChannel().send(Text.of(TextColors.GOLD, "Explosive: ", TextColors.GRAY, source.isExplosive()));
+            Sponge.getServer().getBroadcastChannel().send(Text.of(TextColors.GOLD, "Magic: ", TextColors.GRAY, source.isMagic()));
+            Sponge.getServer().getBroadcastChannel().send(Text.of(TextColors.GOLD, "Scaled by difficulty: ", TextColors.GRAY, source.isScaledByDifficulty()));
         }
     }
 

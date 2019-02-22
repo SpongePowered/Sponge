@@ -81,6 +81,7 @@ public class RecipeTest {
         this.logger = logger;
     }
 
+    @SuppressWarnings(value = "deprecation")
     @Listener
     public void onInit(GameInitializationEvent event) {
         final Ingredient s = Ingredient.of(IRON_INGOT);
