@@ -167,9 +167,7 @@ public interface WorldLoader {
      * @return The world or {@link Optional#empty()}} if load failed
      */
     Optional<WorldServer> loadWorld(String folderName);
-
-    void loadKnownWorlds(String saveFolder, String worldFolder, long seed, WorldType type, JsonElement generatorOptions);
-
+    
     /**
      * Unloads a {@link WorldServer} by it's {@link DimensionType}.
      *
