@@ -724,9 +724,10 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         SpongeCommonEventFactory.lastAnimationPacketTick = SpongeImpl.getServer().getTickCounter();
         SpongeCommonEventFactory.lastAnimationPlayer = new WeakReference<>(this.player);
         if (ShouldFire.ANIMATE_HAND_EVENT) {
-            HandType handType = packetIn.getHand() == EnumHand.MAIN_HAND ? HandTypes.MAIN_HAND : HandTypes.OFF_HAND;
+            final HandType handType = (HandType) (Object) packetIn.getHand();
             final ItemStack heldItem = this.player.getHeldItem(packetIn.getHand());
             Sponge.getCauseStackManager().addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(heldItem));
+            Sponge.getCauseStackManager().addContext(EventContextKeys.USED_HAND, handType);
             AnimateHandEvent event =
                 SpongeEventFactory.createAnimateHandEvent(Sponge.getCauseStackManager().getCurrentCause(), handType, (Humanoid) this.player);
             if (SpongeImpl.postEvent(event)) {

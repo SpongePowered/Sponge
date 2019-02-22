@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
@@ -103,6 +104,7 @@ public final class EventContextKeysModule
         this.createKey("sponge:block_hit", "Block Hit", BlockSnapshot.class);
         this.createKey("sponge:entity_hit", "Entity Hit", BlockSnapshot.class);
         this.createKey("sponge:used_item", "Used Item", ItemStackSnapshot.class);
+        this.createKey("sponge:used_hand", "Used Hand", HandType.class);
         this.createKey("sponge:plugin", "Plugin", PluginContainer.class);
     }
 

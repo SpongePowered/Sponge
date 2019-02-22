@@ -29,6 +29,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.CPacketUseEntity;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -77,6 +78,8 @@ public final class InteractAtEntityPacketState extends BasicPacketState {
         if (stack != null) {
             context.itemUsed(stack);
         }
+        final HandType handType = (HandType) (Object) useEntityPacket.getHand();
+        context.handUsed(handType);
     }
 
     @Override
