@@ -27,20 +27,23 @@ package org.spongepowered.common.mixin.core.tileentity;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import net.minecraft.tileentity.TileEntityLockableLoot;
+import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.data.IMixinCustomNameable;
 
+import javax.annotation.Nullable;
+
 @Mixin(TileEntityLockableLoot.class)
 public abstract class MixinTileEntityLockableLoot extends MixinTileEntityLockable implements IMixinCustomNameable {
 
-    @Shadow protected String customName;
+    @Shadow public abstract void setCustomName(@Nullable ITextComponent name);
 
-    @Shadow public abstract void setCustomName(String p_190575_1_);
+    @Shadow protected ITextComponent customName;
 
     @Override
-    public void setCustomDisplayName(String customName) {
+    public void setCustomDisplayName(ITextComponent customName) {
         setCustomName(customName);
     }
 

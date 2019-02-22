@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.tileentity;
 
-import net.minecraft.tileentity.TileEntityStructure;
 import org.apache.commons.lang3.StringUtils;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.StructureMode;
@@ -40,7 +39,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import javax.annotation.Nullable;
 
-@Mixin(TileEntityStructure.Mode.class)
+@Mixin(net.minecraft.state.properties.StructureMode.class)
 @Implements(@Interface(iface = StructureMode.class, prefix = "structure$"))
 public abstract class MixinTileEntityStructureMode implements StructureMode {
 
@@ -49,7 +48,7 @@ public abstract class MixinTileEntityStructureMode implements StructureMode {
     private String friendlyName;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void construct(String name, int id, String enumName, int ordinal, CallbackInfo ci) {
+    private void construct(String name, CallbackInfo ci) {
         this.friendlyName = StringUtils.capitalize(name);
     }
 

@@ -52,7 +52,7 @@ public abstract class MixinTileEntitySign extends MixinTileEntity implements Sig
         DataContainer container = super.toContainer();
         List<String> lines = Lists.newArrayList();
         for (ITextComponent line : this.signText) {
-            lines.add(ITextComponent.Serializer.componentToJson(line));
+            lines.add(ITextComponent.Serializer.toJson(line));
         }
         container.set(Keys.SIGN_LINES.getQuery(), lines);
         return container;

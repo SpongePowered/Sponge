@@ -42,7 +42,7 @@ public abstract class MixinTileEntityStructure extends MixinTileEntity implement
     @Shadow private String author;
     @Shadow private BlockPos position;
     @Shadow private BlockPos size = BlockPos.ORIGIN;
-    @Shadow private TileEntityStructure.Mode mode;
+    @Shadow private net.minecraft.state.properties.StructureMode mode;
     @Shadow private boolean ignoreEntities;
     @Shadow private boolean powered;
     @Shadow private boolean showAir;
@@ -77,7 +77,7 @@ public abstract class MixinTileEntityStructure extends MixinTileEntity implement
 
     @Override
     public void setMode(StructureMode mode) {
-        this.mode = (TileEntityStructure.Mode) (Object) checkNotNull(mode, "mode");
+        this.mode = (net.minecraft.state.properties.StructureMode) (Object) checkNotNull(mode, "mode");
     }
 
     @Override

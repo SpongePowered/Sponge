@@ -46,7 +46,7 @@ public abstract class MixinCooldownTrackerServer extends MixinCooldownTracker {
             return true;
         }
         final CooldownEvent.Set event = SpongeEventFactory.createCooldownEventSet(Sponge.getCauseStackManager().getCurrentCause(),
-                ticks, ticks, type, (Player) this.player, getCooldown(type));
+                ticks, ticks, type, getCooldown(type), (Player) this.player);
         return !Sponge.getEventManager().post(event);
     }
 

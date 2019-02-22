@@ -41,9 +41,9 @@ import net.minecraft.world.Teleporter;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.PortalAgent;
-import org.spongepowered.api.world.PortalAgentType;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.teleport.PortalAgent;
+import org.spongepowered.api.world.teleport.PortalAgentType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -51,7 +51,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.interfaces.world.IMixinTeleporter;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.world.PortalAgentRegistryModule;
@@ -110,7 +109,7 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
      */
     @Overwrite
     public void placeInPortal(Entity entityIn, float rotationYaw) {
-        Location<World> targetLocation = ((org.spongepowered.api.entity.Entity) entityIn).getLocation();
+        Location targetLocation = ((org.spongepowered.api.entity.Entity) entityIn).getLocation();
         // Sponge - remove hardcode to support any world using end or nether providers
         if (this.createNetherPortal) {
             if (!this.placeInExistingPortal(entityIn, rotationYaw)) {
@@ -124,7 +123,7 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
         }
     }
 
-    private void createEndPortal(Location<World> targetLocation) {
+    private void createEndPortal(Location targetLocation) {
         int xTarget = targetLocation.getBlockX();
         int yTarget = targetLocation.getBlockY() - 1;
         int zTarget = targetLocation.getBlockZ();
@@ -146,8 +145,8 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
     }
 
     @Override
-    public Optional<Location<World>> findOrCreatePortal(Location<World> targetLocation) {
-        Optional<Location<World>> foundTeleporter = this.findPortal(targetLocation);
+    public Optional<Location> findOrCreatePortal(Location targetLocation) {
+        Optional<Location> foundTeleporter = this.findPortal(targetLocation);
         if (!foundTeleporter.isPresent()) {
             if (this.createPortal(targetLocation).isPresent()) {
                 return this.findPortal(targetLocation);
@@ -180,7 +179,7 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
     }
 
     @Override
-    public Optional<Location<World>> findPortal(Location<World> searchLocation) {
+    public Optional<Location> findPortal(Location searchLocation) {
         double closest = -1.0D;
         boolean addToCache = true;
         BlockPos portalPosition = BlockPos.ORIGIN;
@@ -192,7 +191,7 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
             Teleporter.PortalPosition teleporter$portalposition = this.destinationCoordinateCache.get(targetPosition);
             closest = 0.0D;
             portalPosition = teleporter$portalposition;
-            teleporter$portalposition.lastUpdateTime = this.world.getTotalWorldTime();
+            teleporter$portalposition.lastUpdateTime = this.world.getGameTime();
             addToCache = false;
         } else {
             BlockPos blockSearchPosition = VecHelper.toBlockPos(searchLocation);
@@ -225,7 +224,7 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
 
         if (closest >= 0.0D) {
             if (addToCache) {
-                this.destinationCoordinateCache.put(targetPosition, ((Teleporter) (Object) this).new PortalPosition(portalPosition, this.world.getTotalWorldTime()));
+                this.destinationCoordinateCache.put(targetPosition, ((Teleporter) (Object) this).new PortalPosition(portalPosition, this.world.getGameTime()));
             }
 
             return Optional.of(new Location<>(searchLocation.getExtent(), VecHelper.toVector3d(portalPosition)));
@@ -299,12 +298,12 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
     }
 
     @Override
-    public Optional<Location<World>> createPortal(Location<World> toLocation) {
+    public Optional<Location> createPortal(Location toLocation) {
         return this.createTeleporter(toLocation);
     }
 
     // Adds boolean to turn on special tracking if called from API
-    private Optional<Location<World>> createTeleporter(Location<World> nearLocation) {
+    private Optional<Location> createTeleporter(Location nearLocation) {
 //        IMixinWorldServer spongeWorld = (IMixinWorldServer) nearLocation.getExtent();
 //        final PhaseTracker causeTracker = PhaseTracker.getInstance();
 //        if (plugin) {

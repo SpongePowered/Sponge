@@ -53,7 +53,7 @@ public abstract class MixinTileEntityMobSpawner extends MixinTileEntity implemen
             getLogic().maxNearbyEntities = Short.MAX_VALUE;
 
             getLogic().spawnDelay = 0;
-            getLogic().updateSpawner();
+            getLogic().tick();
 
             getLogic().maxNearbyEntities = oldMaxNearby;
         } else {

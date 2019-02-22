@@ -72,26 +72,26 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
     private static final String COMPRESSED_WRITE_FILE = "Lnet/minecraft/nbt/CompressedStreamTools;writeCompressed"
                                                         + "(Lnet/minecraft/nbt/NBTTagCompound;Ljava/io/OutputStream;)V";
     private static final String READ_PLAYER_DATA = "readPlayerData(Lnet/minecraft/entity/player/EntityPlayer;)Lnet/minecraft/nbt/NBTTagCompound;";
-    private static final String NBT_COMPOUND_SET = "Lnet/minecraft/nbt/NBTTagCompound;setTag(Ljava/lang/String;"
-                                                   + "Lnet/minecraft/nbt/NBTBase;)V";
+    private static final String NBT_COMPOUND_PUT = "Lnet/minecraft/nbt/NBTTagCompound;put(Ljava/lang/String;"
+                                                   + "Lnet/minecraft/nbt/INBTBase;)V";
     @Shadow @Final private File worldDirectory;
     @Shadow @Final private long initializationTime;
 
     private Exception capturedException;
 
-    @ModifyArg(method = "checkSessionLock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/MinecraftException;<init>(Ljava/lang/String;)V"
+    @ModifyArg(method = "checkSessionLock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/SessionLockException;<init>(Ljava/lang/String;)V"
             , ordinal = 0, remap = false))
     public String modifyMinecraftExceptionOutputIfNotInitializationTime(String message) {
         return "The save folder for world " + this.worldDirectory + " is being accessed from another location, aborting";
     }
 
-    @ModifyArg(method = "checkSessionLock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/MinecraftException;<init>(Ljava/lang/String;)V"
+    @ModifyArg(method = "checkSessionLock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/SessionLockException;<init>(Ljava/lang/String;)V"
             , ordinal = 1, remap = false))
     public String modifyMinecraftExceptionOutputIfIOException(String message) {
         return "Failed to check session lock for world " + this.worldDirectory + ", aborting";
     }
 
-    @Inject(method = "saveWorldInfoWithPlayer", at = @At(value = "INVOKE", target = NBT_COMPOUND_SET, shift = At.Shift.AFTER),
+    @Inject(method = "saveWorldInfoWithPlayer", at = @At(value = "INVOKE", target = NBT_COMPOUND_PUT, shift = At.Shift.AFTER),
             locals = LocalCapture.CAPTURE_FAILHARD)
     public void onSaveWorldInfoWithPlayerAfterTagSet(WorldInfo worldInformation, NBTTagCompound tagCompound, CallbackInfo ci,
             NBTTagCompound nbttagcompound1, NBTTagCompound nbttagcompound2) {
@@ -150,9 +150,9 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
     @Override
     public void loadDimensionAndOtherData(SaveHandler handler, WorldInfo info, NBTTagCompound compound) {
         // Preserve dimension data from Sponge
-        final NBTTagCompound customWorldDataCompound = compound.getCompoundTag("Forge");
-        if (customWorldDataCompound.hasKey("DimensionData")) {
-            WorldManager.loadDimensionDataMap(customWorldDataCompound.getCompoundTag("DimensionData"));
+        final NBTTagCompound customWorldDataCompound = compound.getCompound("Forge");
+        if (customWorldDataCompound.contains("DimensionData")) {
+            WorldManager.loadDimensionDataMap(customWorldDataCompound.getCompound("DimensionData"));
         }
     }
 

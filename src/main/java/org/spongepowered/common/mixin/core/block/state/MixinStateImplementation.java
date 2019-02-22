@@ -34,6 +34,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.chunk.BlockStateContainer;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
@@ -79,7 +80,7 @@ import javax.annotation.Nullable;
  * all relies on Data API implementations.
  */
 @Implements(@Interface(iface = BlockState.class, prefix = "blockState$"))
-@Mixin(net.minecraft.block.state.BlockStateContainer.StateImplementation.class)
+@Mixin(BlockStateContainer.StateImplementation.class)
 public abstract class MixinStateImplementation implements BlockState, IMixinBlockState {
 
     @Shadow @Final private Block block;
