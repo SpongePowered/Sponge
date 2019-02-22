@@ -25,11 +25,18 @@
 package org.spongepowered.common.interfaces;
 
 import com.mojang.datafixers.DataFixer;
+import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.storage.WorldSavedDataStorage;
+import org.spongepowered.common.world.WorldLoader;
 
 public interface IMixinMinecraftServer {
 
     DataFixer getDataFixer();
+
+    WorldLoader getWorldLoader();
+
+    void adjustWorldForDifficulty(WorldServer world, EnumDifficulty difficulty, boolean isCustom);
 
     long[] getWorldTickTimes(int dimensionId);
 
@@ -37,7 +44,7 @@ public interface IMixinMinecraftServer {
 
     void removeWorldTickTimes(int dimensionId);
 
-    void prepareSpawnArea(WorldServer worldServer);
+    void prepareSpawnArea(WorldSavedDataStorage storage, WorldServer worldServer);
 
     void setSaveEnabled(boolean enabled);
 

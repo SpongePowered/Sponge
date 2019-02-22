@@ -39,7 +39,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -91,6 +90,7 @@ import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
+import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
@@ -101,7 +101,6 @@ import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.registry.type.entity.ProfessionRegistryModule;
 import org.spongepowered.common.util.SpawnerSpawnType;
-import org.spongepowered.common.world.WorldManager;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -243,8 +242,8 @@ public final class SpongeImplHooks {
         return true;
     }
 
-    public static int getRespawnDimension(Dimension targetDimension, EntityPlayerMP player) {
-        return 0;
+    public static DimensionType getRespawnDimension(Dimension targetDimension, EntityPlayerMP player) {
+        return DimensionType.OVERWORLD;
     }
 
     public static BlockPos getRandomizedSpawnPoint(WorldServer world) {
@@ -415,7 +414,8 @@ public final class SpongeImplHooks {
     }
 
     public static boolean shouldKeepSpawnLoaded(DimensionType dimensionType) {
-        final WorldServer worldServer = WorldManager.getWorldByDimensionId(dimensionId).orElse(null);
+        final WorldServer worldServer =
+            ((IMixinMinecraftServer) Sponge.getServer()).getWorldLoader().getWorld(dimensionType).orElse(null);
         return worldServer != null && ((WorldProperties) worldServer.getWorldInfo()).doesKeepSpawnLoaded();
 
     }
@@ -424,12 +424,12 @@ public final class SpongeImplHooks {
         // This is only used in SpongeForge
     }
 
-    public static BlockPos getBedLocation(EntityPlayer playerIn, int dimension) {
-        return ((IMixinEntityPlayer) playerIn).getBedLocation(dimension);
+    public static BlockPos getBedLocation(EntityPlayer playerIn, DimensionType dimensionType) {
+        return ((IMixinEntityPlayer) playerIn).getBedLocation(dimensionType);
     }
 
-    public static boolean isSpawnForced(EntityPlayer playerIn, int dimension) {
-        return ((IMixinEntityPlayer) playerIn).isSpawnForced(dimension);
+    public static boolean isSpawnForced(EntityPlayer playerIn, DimensionType dimensionType) {
+        return ((IMixinEntityPlayer) playerIn).isSpawnForced(dimensionType);
     }
 
     public static Inventory toInventory(Object inventory, @Nullable Object fallback) {

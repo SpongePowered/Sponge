@@ -34,7 +34,8 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.common.world.WorldManager;
+import org.spongepowered.common.interfaces.IMixinMinecraftServer;
+import org.spongepowered.common.world.WorldLoader;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -68,8 +69,9 @@ public final class SpongePlayerDataHandler {
         if (!Sponge.isServerAvailable()) {
             return;
         }
+        final WorldLoader loader = ((IMixinMinecraftServer) Sponge.getServer()).getWorldLoader();
         handlerInstance.playerDataMap = new ConcurrentHashMap<>();
-        final Path filePath = WorldManager.getCurrentSavesDirectory().get().resolve("data").resolve
+        final Path filePath = loader.getSaveDirectory().resolve("data").resolve
                 (SPONGE_DATA);
 
         try {

@@ -33,7 +33,9 @@ import net.minecraft.inventory.InventoryEnderChest;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.storage.SaveHandler;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataSerializable;
@@ -55,8 +57,8 @@ import org.spongepowered.common.data.nbt.CustomDataNbtUtil;
 import org.spongepowered.common.data.type.SpongeEquipmentType;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
-import org.spongepowered.common.world.WorldManager;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -94,7 +96,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     private double posX;
     private double posY;
     private double posZ;
-    private int dimension;
+    private DimensionType dimensionType;
     private float rotationYaw;
     private float rotationPitch;
 
@@ -119,9 +121,13 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         this.posX = position.getDouble(0);
         this.posY = position.getDouble(1);
         this.posZ = position.getDouble(2);
-        this.dimension = 0;
+        this.dimensionType = DimensionType.OVERWORLD;
         if (compound.contains(NbtDataUtil.ENTITY_DIMENSION)) {
-            this.dimension = compound.getInt(NbtDataUtil.ENTITY_DIMENSION);
+            this.dimensionType = DimensionType.getById(compound.getInt(NbtDataUtil.ENTITY_DIMENSION));
+            if (this.dimensionType == null) {
+                // TODO (1.13) - Log this maybe?
+                this.dimensionType = DimensionType.OVERWORLD;
+            }
         }
         NBTTagList rotation = compound.getList(NbtDataUtil.ENTITY_ROTATION, NbtDataUtil.TAG_FLOAT);
         this.rotationYaw = rotation.getFloat(0);
@@ -188,7 +194,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         compound.putInt(NbtDataUtil.Minecraft.SELECTED_ITEM_SLOT, this.inventory.currentItem);
 
         compound.put(NbtDataUtil.ENTITY_POSITION, NbtDataUtil.newDoubleNBTList(this.posX, this.posY, this.posZ));
-        compound.putInt(NbtDataUtil.ENTITY_DIMENSION, this.dimension);
+        compound.putInt(NbtDataUtil.ENTITY_DIMENSION, this.dimensionType.getId());
         compound.put(NbtDataUtil.ENTITY_ROTATION, NbtDataUtil.newFloatNBTList(this.rotationYaw, this.rotationPitch));
 
         final NBTTagCompound forgeCompound = compound.getCompound(NbtDataUtil.FORGE_DATA);
@@ -371,7 +377,8 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     }
 
     public void save() {
-        SaveHandler saveHandler = (SaveHandler) WorldManager.getWorldByDimensionId(0).get().getSaveHandler();
+        SaveHandler saveHandler =
+            (SaveHandler) ((IMixinMinecraftServer) Sponge.getServer()).getWorldLoader().getWorld(this.dimensionType).get().getSaveHandler();
         File dataFile = new File(saveHandler.playersDirectory, getUniqueId() + ".dat");
         NBTTagCompound tag;
         if (dataFile.isFile()) {

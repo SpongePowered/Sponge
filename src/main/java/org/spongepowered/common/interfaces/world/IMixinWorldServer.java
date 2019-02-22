@@ -51,7 +51,7 @@ public interface IMixinWorldServer extends IMixinWorld {
 
     SpongeConfig<? extends GeneralConfigBase> getActiveConfig();
 
-    SpongeConfig<WorldConfig> getWorldConfig();
+    SpongeConfig<WorldConfig> getConfig();
 
     void setActiveConfig(SpongeConfig<? extends GeneralConfigBase> config);
 

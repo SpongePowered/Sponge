@@ -78,7 +78,6 @@ import net.minecraft.network.play.server.SPacketWorldBorder;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.scoreboard.IScoreCriteria;
 import net.minecraft.scoreboard.Score;
-import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerInteractionManager;
@@ -97,6 +96,7 @@ import net.minecraft.world.GameRules;
 import net.minecraft.world.GameType;
 import net.minecraft.world.IInteractionObject;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.dimension.DimensionType;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.Advancement;
@@ -211,6 +211,7 @@ import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
+import org.spongepowered.common.interfaces.world.IMixinDimensionType;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.network.keepalive.SpongeClientWaiter;
@@ -223,7 +224,6 @@ import org.spongepowered.common.util.LocaleCache;
 import org.spongepowered.common.util.NetworkUtil;
 import org.spongepowered.common.util.SkinUtil;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.common.world.WorldManager;
 import org.spongepowered.common.world.border.PlayerOwnBorderListener;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 
@@ -1751,16 +1751,16 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     // Adapted from MixinPlayerList#recreatePlayerEntity
-    // We want to respawn the player *only* on tts own client. Therefore,
+    // We want to respawn the player *only* on it's own client. Therefore,
     // we skip most of the logic that's performed for a normal respawn.
     private void fakeRespawn() {
         WorldServer worldServer = this.getServerWorld();
-        final int dimensionId = WorldManager.getClientDimensionId((EntityPlayerMP) (Object) this, worldServer);
+        final DimensionType dimensionType = ((IMixinDimensionType) worldServer.dimension.getType()).asClientDimensionType();
         PlayerList playerList = SpongeImpl.getServer().getPlayerList();
         Transform transform = this.getTransform();
 
-        this.connection.sendPacket(new SPacketRespawn(dimensionId, worldServer.getDifficulty(), worldServer
-                .getWorldInfo().getTerrainType(), this.interactionManager.getGameType()));
+        this.connection.sendPacket(new SPacketRespawn(dimensionType, worldServer.getDifficulty(), worldServer
+                .getWorldInfo().getGenerator(), this.interactionManager.getGameType()));
         this.connection.sendPacket(new SPacketServerDifficulty(worldServer.getDifficulty(), worldServer.getWorldInfo().isDifficultyLocked()));
         this.connection.setPlayerLocation(transform.getLocation().getX(), transform.getLocation().getY(), transform.getLocation().getZ(),
                 (float) transform.getYaw(), (float) transform.getPitch());

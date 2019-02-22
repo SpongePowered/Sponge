@@ -52,8 +52,8 @@ import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhaseState;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
-import org.spongepowered.common.world.WorldManager;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -138,7 +138,7 @@ final class CommandState extends GeneralState<CommandPhaseContext> implements IE
                     final UUID key = entry.getKey();
                     @Nullable
                     net.minecraft.entity.Entity foundEntity = null;
-                    for (WorldServer worldServer : WorldManager.getWorlds())
+                    for (WorldServer worldServer : ((IMixinMinecraftServer) Sponge.getServer()).getWorldLoader().getWorlds())
                     {
                         final net.minecraft.entity.Entity entityFromUuid = worldServer.getEntityFromUuid(key);
                         if (entityFromUuid != null)

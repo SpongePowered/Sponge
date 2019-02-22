@@ -199,7 +199,6 @@ import org.spongepowered.common.registry.type.world.BlockChangeFlagRegistryModul
 import org.spongepowered.common.util.NonNullArrayList;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.common.world.WorldManager;
 import org.spongepowered.common.world.WorldUtil;
 import org.spongepowered.common.world.border.PlayerBorderListener;
 import org.spongepowered.common.world.gen.SpongeTerrainGenerator;
@@ -312,10 +311,10 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
         this.updateWorldGenerator();
         // Need to set the active config before we call it.
-        this.chunkGCLoadThreshold = SpongeHooks.getActiveConfig((WorldServer) (Object) this).getConfig().getWorld().getChunkLoadThreadhold();
-        this.chunkGCTickInterval = this.getActiveConfig().getConfig().getWorld().getTickInterval();
-        this.weatherIceAndSnowEnabled = this.getActiveConfig().getConfig().getWorld().getWeatherIceAndSnow();
-        this.weatherThunderEnabled = this.getActiveConfig().getConfig().getWorld().getWeatherThunder();
+        this.chunkGCLoadThreshold = SpongeHooks.getActiveConfig((WorldServer) (Object) this).getConfig().getWorld().getChunkGCLoadThreshold();
+        this.chunkGCTickInterval = this.getActiveConfig().getConfig().getWorld().getChunkGCTickInterval();
+        this.weatherIceAndSnowEnabled = this.getActiveConfig().getConfig().getWorld().canWeatherIceAndSnow();
+        this.weatherThunderEnabled = this.getActiveConfig().getConfig().getWorld().canWeatherAndThunder();
         this.updateEntityTick = 0;
         this.mixinChunkProviderServer = ((IMixinChunkProviderServer) this.getChunkProvider());
         this.setMemoryViewDistance(this.chooseViewDistanceValue(this.getActiveConfig().getConfig().getWorld().getViewDistance()));
@@ -381,11 +380,6 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
     }
 
-    @Redirect(method = "createSpawnPosition", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldSettings;isBonusChestEnabled()Z"))
-    private boolean onIsBonusChestEnabled(WorldSettings settings) {
-        return this.getProperties().doesGenerateBonusChest();
-    }
-
     @Override
     public boolean isProcessingExplosion() {
         return this.processingExplosion;
@@ -397,8 +391,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     @Override
-    public SpongeConfig<WorldConfig> getWorldConfig() {
-        return ((IMixinWorldInfo) this.worldInfo).getOrCreateWorldConfig();
+    public SpongeConfig<WorldConfig> getConfig() {
+        return ((IMixinWorldInfo) this.worldInfo).createConfig();
     }
 
 
@@ -411,10 +405,10 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     public void setActiveConfig(SpongeConfig<? extends GeneralConfigBase> config) {
         this.activeConfig = config;
         // update cached settings
-        this.chunkGCLoadThreshold = this.activeConfig.getConfig().getWorld().getChunkLoadThreadhold();
-        this.chunkGCTickInterval = this.activeConfig.getConfig().getWorld().getTickInterval();
-        this.weatherIceAndSnowEnabled = this.activeConfig.getConfig().getWorld().getWeatherIceAndSnow();
-        this.weatherThunderEnabled = this.activeConfig.getConfig().getWorld().getWeatherThunder();
+        this.chunkGCLoadThreshold = this.activeConfig.getConfig().getWorld().getChunkGCLoadThreshold();
+        this.chunkGCTickInterval = this.activeConfig.getConfig().getWorld().getChunkGCTickInterval();
+        this.weatherIceAndSnowEnabled = this.activeConfig.getConfig().getWorld().canWeatherIceAndSnow();
+        this.weatherThunderEnabled = this.activeConfig.getConfig().getWorld().canWeatherAndThunder();
         this.chunkUnloadDelay = this.activeConfig.getConfig().getWorld().getChunkUnloadDelay() * 1000;
         if (this.getChunkProvider() != null) {
             final int maxChunkUnloads = this.activeConfig.getConfig().getWorld().getMaxChunkUnloads();

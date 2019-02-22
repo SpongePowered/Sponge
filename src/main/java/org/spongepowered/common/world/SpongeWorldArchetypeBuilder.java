@@ -210,7 +210,7 @@ public class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder {
         this.mapFeaturesEnabled = value.usesMapFeatures();
         this.hardcore = value.isHardcore();
         this.worldEnabled = value.isEnabled();
-        this.loadOnStartup = value.loadOnStartup();
+        this.loadOnStartup = value.doesLoadOnStartup();
         this.keepSpawnLoaded = value.doesKeepSpawnLoaded();
         this.generatorSettings = value.getGeneratorSettings();
         this.generatorModifiers = ImmutableList.copyOf(value.getGeneratorModifiers());
@@ -232,10 +232,10 @@ public class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder {
         this.serializationBehavior = value.getSerializationBehavior();
         this.seed = value.getSeed();
         this.seedRandomized = false;
-        this.mapFeaturesEnabled = value.usesMapFeatures();
+        this.mapFeaturesEnabled = value.areStructuresEnabled();
         this.hardcore = value.isHardcore();
         this.worldEnabled = value.isEnabled();
-        this.loadOnStartup = value.loadOnStartup();
+        this.loadOnStartup = value.doesLoadOnStartup();
         this.keepSpawnLoaded = value.doesKeepSpawnLoaded();
         this.generatorSettings = value.getGeneratorSettings();
         this.generatorModifiers = ImmutableList.copyOf(value.getGeneratorModifiers());

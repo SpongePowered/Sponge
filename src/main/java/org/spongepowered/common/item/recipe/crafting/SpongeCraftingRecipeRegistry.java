@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.item.recipe.crafting;
 
-import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
@@ -46,8 +45,7 @@ import java.util.stream.Collectors;
  * Proxy for {@link CraftingManager}
  */
 @SuppressWarnings("deprecation")
-public class SpongeCraftingRecipeRegistry implements CraftingRecipeRegistry,
-        SpongeAdditionalCatalogRegistryModule<CraftingRecipe> {
+public class SpongeCraftingRecipeRegistry implements CraftingRecipeRegistry, SpongeAdditionalCatalogRegistryModule<CraftingRecipe> {
 
     public static SpongeCraftingRecipeRegistry getInstance() {
         return Holder.INSTANCE;

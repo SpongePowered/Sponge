@@ -26,6 +26,7 @@ package org.spongepowered.common.interfaces.entity.player;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.dimension.DimensionType;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 
 import java.util.UUID;
@@ -34,9 +35,9 @@ import javax.annotation.Nullable;
 
 public interface IMixinEntityPlayer extends IMixinEntity {
 
-    @Nullable BlockPos getBedLocation(int dim);
+    @Nullable BlockPos getBedLocation(DimensionType dimensionType);
 
-    boolean isSpawnForced(int dim);
+    boolean isSpawnForced(DimensionType dimensionType);
 
     boolean affectsSpawning();
 

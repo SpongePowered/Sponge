@@ -38,14 +38,16 @@ import net.minecraft.server.management.UserListEntryBan;
 import net.minecraft.server.management.UserListWhitelist;
 import net.minecraft.server.management.UserListWhitelistEntry;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.storage.SaveHandler;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.profile.ProfileNotFoundException;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.player.SpongeUser;
+import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
-import org.spongepowered.common.world.WorldManager;
+import org.spongepowered.common.world.WorldLoader;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -169,8 +171,9 @@ class UserDiscoverer {
         // Add all cached profiles
         userCache.asMap().values().stream().map(User::getProfile).forEach(p -> profiles.put(p.getUniqueId(), p));
 
+        final WorldLoader loader = ((IMixinMinecraftServer) Sponge.getServer()).getWorldLoader();
         // Add all known profiles from the data files
-        SaveHandler saveHandler = (SaveHandler) WorldManager.getWorldByDimensionId(0).get().getSaveHandler();
+        SaveHandler saveHandler = (SaveHandler) loader.getWorld(DimensionType.OVERWORLD).orElse(null).getSaveHandler();
         String[] uuids = saveHandler.getAvailablePlayerDat();
         final PlayerProfileCache profileCache = SpongeImpl.getServer().getPlayerProfileCache();
         for (String playerUuid : uuids) {
@@ -339,13 +342,13 @@ class UserDiscoverer {
         // This may be called triggered by mods using FakePlayer during
         // initial world gen (before the overworld is registered). Because of
         // this, we need to check if the overworld is actually registered yet
-        Optional<WorldServer> worldServer = WorldManager.getWorldByDimensionId(0);
-        if (!worldServer.isPresent()) {
+        final WorldServer overworld = ((IMixinMinecraftServer) Sponge.getServer()).getWorldLoader().getWorld(DimensionType.OVERWORLD).orElse(null);
+        if (overworld == null) {
             return null;
         }
 
         // Note: Uses the overworld's player data
-        SaveHandler saveHandler = (SaveHandler) worldServer.get().getSaveHandler();
+        SaveHandler saveHandler = (SaveHandler) overworld.getSaveHandler();
         File file = new File(saveHandler.playersDirectory, uniqueId.toString() + ".dat");
         if (file.exists()) {
             return file;

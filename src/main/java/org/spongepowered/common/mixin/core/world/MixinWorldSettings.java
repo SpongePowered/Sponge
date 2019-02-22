@@ -109,7 +109,7 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
             this.serializationBehavior = properties.getSerializationBehavior();
             this.generatorSettings = properties.getGeneratorSettings().copy();
             this.isEnabled = properties.isEnabled();
-            this.loadOnStartup = properties.loadOnStartup();
+            this.loadOnStartup = properties.doesLoadOnStartup();
             this.keepSpawnLoaded = properties.doesKeepSpawnLoaded();
             this.generateSpawnOnLoad = properties.doesGenerateSpawnOnLoad();
             this.pvpEnabled = properties.isPVPEnabled();
@@ -219,7 +219,7 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
     }
 
     @Override
-    public boolean loadOnStartup() {
+    public boolean doesLoadOnStartup() {
         return this.loadOnStartup;
     }
 

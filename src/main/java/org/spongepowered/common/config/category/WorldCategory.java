@@ -38,12 +38,6 @@ public class WorldCategory extends ConfigCategory {
                                                    + "Note: 20 ticks is equivalent to 1 second.")
     private int autoSaveInterval = 900;
 
-    @Setting(value = "infinite-water-source", comment = "Vanilla water source behavior - is infinite")
-    private boolean infiniteWaterSource = false;
-
-    @Setting(value = "flowing-lava-decay", comment = "Lava behaves like vanilla water when source block is removed")
-    private boolean flowingLavaDecay = false;
-
     @Setting(value = "mob-spawn-range", comment = "Specifies the radius (in chunks) of where creatures will spawn. \n"
                                                 + "This value is capped to the current view distance setting in server.properties")
     private int mobSpawnRange = 4;
@@ -52,13 +46,13 @@ public class WorldCategory extends ConfigCategory {
     private boolean worldEnabled = true;
 
     @Setting(value = "load-on-startup", comment = "If 'true', this world will load on startup.")
-    private Boolean loadOnStartup = false;
+    private boolean loadOnStartup = true;
 
     @Setting(value = "generate-spawn-on-load", comment = "If 'true', this world will generate its spawn the moment its loaded.")
-    private Boolean generateSpawnOnLoad = false;
+    private boolean generateSpawnOnLoad = true;
 
     @Setting(value = "keep-spawn-loaded", comment = "If 'true', this worlds spawn will remain loaded with no players.")
-    private Boolean keepSpawnLoaded = true;
+    private boolean keepSpawnLoaded = true;
 
     @Setting(value = "pvp-enabled", comment = "If 'true', this world will allow PVP combat.")
     private boolean pvpEnabled = true;
@@ -71,18 +65,22 @@ public class WorldCategory extends ConfigCategory {
     @Setting(value = "deny-chunk-requests", comment = "If 'true', any request for a chunk not currently loaded will be denied (exceptions apply \n"
                                                     + "for things like world gen and player movement). \n"
                                                     + "Warning: As this is an experimental setting for performance gain, if you encounter any issues \n"
-                                                    + "then we recommend disabling it.")
-    private boolean denyChunkRequests = false;
+                                                    + "then we recommend disabling it. Removing this value will use the dimension's value. \n"
+                                                    + "If that has not been specified then a default will be used (600).")
+    private boolean denyChunkRequests;
 
     @Setting(value = "chunk-gc-tick-interval", comment = "The tick interval used to cleanup all inactive chunks that have leaked in a world. \n"
-                                                       + "Set to 0 to disable which restores vanilla handling. (Default: 600)")
+                                                        + "Removing this value will use the dimension's value. If that has \n"
+                                                        + "not been specified then a default will be used (600).")
     private int chunkGCTickInterval = 600;
 
     @Setting(value = "max-chunk-unloads-per-tick", comment = "The maximum number of queued unloaded chunks that will be unloaded in a single tick. \n"
-                                                           + "Note: With the chunk gc enabled, this setting only applies to the ticks \n"
-                                                           + "where the gc runs (controlled by 'chunk-gc-tick-interval') \n"
-                                                           + "Note: If the maximum unloads is too low, too many chunks may remain \n"
-                                                           + "loaded on the world and increases the chance for a drop in tps. (Default: 100)")
+                                                            + "Note: With the chunk gc enabled, this setting only applies to the ticks \n"
+                                                            + "where the gc runs (controlled by 'chunk-gc-tick-interval') \n"
+                                                            + "Note: If the maximum unloads is too low, too many chunks may remain \n"
+                                                            + "loaded on the world and increases the chance for a drop in tps. \n"
+                                                            + "Removing this value will use the dimension's value. If that has \n"
+                                                            + "not been specified then a default will be used (100).")
     private int maxChunkUnloads = 100;
 
     @Setting(value = "chunk-gc-load-threshold", comment = "The number of newly loaded chunks before triggering a forced cleanup. \n"
@@ -109,14 +107,14 @@ public class WorldCategory extends ConfigCategory {
     @Setting(value = "weather-ice-and-snow", comment = "If 'true', natural formation of ice and snow in supported biomes will be allowed.")
     private boolean weatherIceAndSnow = true;
 
-    public static final int USE_SERVER_VIEW_DISTANCE = -1;
     @Setting(
             value = "view-distance",
             comment = "Override world distance per world/dimension \n"
                     + "The value must be greater than or equal to 3 and less than or equal to 32 \n"
-                    + "The server-wide view distance will be used when the value is " + USE_SERVER_VIEW_DISTANCE + "."
+                    + "Removing this value will use the dimension's view distance. If that has \n"
+                    + "not been specified then the server's view distance will be used."
     )
-    private int viewDistance = USE_SERVER_VIEW_DISTANCE;
+    private int viewDistance;
 
     public WorldCategory() {
         this.portalAgents.put("minecraft:default_nether", "DIM-1");
@@ -131,76 +129,64 @@ public class WorldCategory extends ConfigCategory {
         return this.autoSaveInterval;
     }
 
-    public boolean hasInfiniteWaterSource() {
-        return this.infiniteWaterSource;
-    }
-
-    public void setInfiniteWaterSource(boolean infiniteWaterSource) {
-        this.infiniteWaterSource = infiniteWaterSource;
-    }
-
-    public boolean hasFlowingLavaDecay() {
-        return this.flowingLavaDecay;
-    }
-
-    public void setFlowingLavaDecay(boolean flowingLavaDecay) {
-        this.flowingLavaDecay = flowingLavaDecay;
+    public void setAutoSaveInterval(Integer value) {
+        this.autoSaveInterval = value;
     }
 
     public boolean isWorldEnabled() {
         return this.worldEnabled;
     }
 
-    public void setWorldEnabled(boolean enabled) {
-        this.worldEnabled = enabled;
+    public void setWorldEnabled(boolean value) {
+        this.worldEnabled = value;
     }
 
-    public long getChunkUnloadDelay() {
+    public int getChunkUnloadDelay() {
         return this.chunkUnloadDelay;
     }
 
-    public void setChunkUnloadDelay(int delay) {
-        this.chunkUnloadDelay = delay;
+    public void setChunkUnloadDelay(int value) {
+        this.chunkUnloadDelay = value;
     }
 
-    public Boolean loadOnStartup() {
+    public boolean doesLoadOnStartup() {
         return this.loadOnStartup;
     }
 
-    public void setLoadOnStartup(Boolean state) {
-        this.loadOnStartup = state;
+    public void setLoadOnStartup(boolean value) {
+        this.loadOnStartup = value;
     }
 
-    public Boolean getKeepSpawnLoaded() {
+    public boolean doesKeepSpawnLoaded() {
         return this.keepSpawnLoaded;
     }
 
-    public void setKeepSpawnLoaded(Boolean loaded) {
-        this.keepSpawnLoaded = loaded;
+    public void setKeepSpawnLoaded(boolean value) {
+        this.keepSpawnLoaded = value;
     }
 
-    public boolean getPVPEnabled() {
+    public boolean isPVPEnabled() {
         return this.pvpEnabled;
     }
 
-    public void setPVPEnabled(boolean allow) {
-        this.pvpEnabled = allow;
+    public void setPVPEnabled(boolean value) {
+        this.pvpEnabled = value;
     }
 
-    public Boolean getGenerateSpawnOnLoad() {
+    public boolean doesGenerateSpawnOnLoad() {
         return this.generateSpawnOnLoad;
     }
 
-    public void setGenerateSpawnOnLoad(Boolean allow) {
-        this.generateSpawnOnLoad = allow;
+    public void setGenerateSpawnOnLoad(boolean value) {
+        this.generateSpawnOnLoad = value;
     }
 
     public int getMobSpawnRange() {
         return this.mobSpawnRange;
     }
 
-    public void setMobSpawnRange(int range) {
-        this.mobSpawnRange = range;
+    public void setMobSpawnRange(int value) {
+        this.mobSpawnRange = value;
     }
 
     public Map<String, String> getPortalAgents() {
@@ -211,35 +197,63 @@ public class WorldCategory extends ConfigCategory {
         return this.denyChunkRequests;
     }
 
-    public int getTickInterval() {
+    public void setDenyChunkRequests(boolean value) {
+        this.denyChunkRequests = value;
+    }
+
+    public int getChunkGCTickInterval() {
         return this.chunkGCTickInterval;
     }
 
-    public int getChunkLoadThreadhold() {
+    public void setChunkGCTickInterval(int value) {
+        this.chunkGCTickInterval = value;
+    }
+
+    public int getChunkGCLoadThreshold() {
         return this.chunkGCLoadThreshold;
+    }
+
+    public void setChunkGCLoadThreshold(int value) {
+        this.chunkGCLoadThreshold = value;
     }
 
     public int getMaxChunkUnloads() {
         return this.maxChunkUnloads;
     }
 
+    public void setMaxChunkUnloads(int value) {
+        this.maxChunkUnloads = value;
+    }
+
     public double getItemMergeRadius() {
         return this.itemMergeRadius;
     }
 
-    public boolean getWeatherThunder() {
+    public void setItemMergeRadius(double value) {
+        this.itemMergeRadius = value;
+    }
+
+    public boolean canWeatherAndThunder() {
         return this.weatherThunder;
     }
 
-    public boolean getWeatherIceAndSnow() {
+    public void setCanWeatherThunder(boolean value) {
+        this.weatherThunder = value;
+    }
+
+    public boolean canWeatherIceAndSnow() {
         return this.weatherIceAndSnow;
+    }
+
+    public void setCanWeatherIceAndSnow(boolean value) {
+        this.weatherIceAndSnow = value;
     }
 
     public int getViewDistance() {
         return this.viewDistance;
     }
 
-    public void setViewDistance(final int viewDistance) {
-        this.viewDistance = viewDistance;
+    public void setViewDistance(int value) {
+        this.viewDistance = value;
     }
 }

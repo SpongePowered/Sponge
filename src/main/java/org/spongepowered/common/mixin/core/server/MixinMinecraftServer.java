@@ -28,31 +28,36 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import co.aikar.timings.TimingsManager;
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.gson.JsonElement;
 import com.mojang.datafixers.DataFixer;
+import it.unimi.dsi.fastutil.longs.LongIterator;
 import net.minecraft.command.ICommandSource;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.EnumDifficulty;
-import net.minecraft.world.GameType;
+import net.minecraft.world.ForcedChunksSaveData;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldType;
-import net.minecraft.world.dimension.Dimension;
+import net.minecraft.world.chunk.storage.AnvilSaveHandler;
+import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.SessionLockException;
+import net.minecraft.world.storage.WorldInfo;
+import net.minecraft.world.storage.WorldSavedDataStorage;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
@@ -61,9 +66,7 @@ import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.source.ConsoleSource;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.api.event.command.TabCompleteEvent;
 import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scoreboard.Scoreboard;
@@ -71,14 +74,12 @@ import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.util.Tristate;
-import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.chunk.ChunkTicketManager;
 import org.spongepowered.api.world.storage.ChunkLayout;
 import org.spongepowered.api.world.storage.WorldProperties;
-import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
@@ -87,113 +88,88 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.command.SpongeCommandManager;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTrackerCrashHandler;
-import org.spongepowered.common.event.tracking.phase.generation.GenerationContext;
-import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
-import org.spongepowered.common.event.tracking.phase.generation.GenericGenerationContext;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.IMixinSubject;
+import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
 import org.spongepowered.common.text.SpongeTexts;
-import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.common.world.WorldManager;
+import org.spongepowered.common.world.task.CopyWorldTask;
+import org.spongepowered.common.world.task.DeleteWorldTask;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
-import javax.annotation.Nullable;
-
+@SuppressWarnings({"rawtypes", "unchecked"})
 @Mixin(MinecraftServer.class)
 public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMixinSubject, IMixinCommandSource, IMixinCommandSender,
         IMixinMinecraftServer {
 
     @Shadow @Final private static Logger LOGGER;
+
     @Shadow @Final public Profiler profiler;
     @Shadow @Final public long[] tickTimeArray;
-    @Shadow private boolean enableBonusChest;
+    @Shadow @Final private DataFixer dataFixer;
+
+    @Shadow public Thread serverThread;
+
     @Shadow private boolean serverStopped;
     @Shadow private int tickCounter;
     @Shadow private String motd;
-    @Shadow public WorldServer[] worlds;
-    @Shadow private Thread serverThread;
-    @Shadow @Final private DataFixer dataFixer;
 
     @Shadow public abstract void sendMessage(ITextComponent message);
     @Shadow public abstract void initiateShutdown();
     @Shadow public abstract boolean isServerInOnlineMode();
     @Shadow public abstract boolean isServerRunning();
-    @Shadow public abstract boolean canStructuresSpawn();
-    @Shadow public abstract boolean isHardcore();
-    @Shadow public abstract boolean isSinglePlayer();
     @Shadow public abstract String getFolderName();
     @Shadow public abstract PlayerList getPlayerList();
     @Shadow public abstract EnumDifficulty getDifficulty();
-    @Shadow public abstract GameType getGameType();
     @Shadow protected abstract void clearCurrentTask();
-    @Shadow protected abstract void convertMapIfNeeded(String worldNameIn);
-    @Shadow public abstract void setResourcePackFromWorld(String worldNameIn, ISaveHandler saveHandlerIn);
-    @Shadow public abstract boolean getAllowNether();
     @Shadow public abstract int getMaxPlayerIdleMinutes();
     @Shadow public abstract void shadow$setPlayerIdleTimeout(int timeout);
     @Shadow public abstract boolean isDedicatedServer();
-
     @Shadow protected abstract void setUserMessage(ITextComponent p_200245_1_);
-
     @Shadow protected abstract void setCurrentTaskAndPercentDone(ITextComponent p_200250_1_, int p_200250_2_);
+    @Shadow public abstract boolean allowSpawnMonsters();
+    @Shadow public abstract boolean getCanSpawnAnimals();
 
-    @Shadow public abstract int getSpawnRadius(@Nullable WorldServer worldIn);
-
-    @Nullable private List<String> currentTabCompletionOptions;
     private ResourcePack resourcePack;
     private boolean enableSaving = true;
     private GameProfileManager profileManager;
     private MessageChannel broadcastChannel = MessageChannel.TO_ALL;
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public Optional<World> getWorld(String worldName) {
-        return (Optional<World>) (Object) WorldManager.getWorld(worldName);
-    }
-
     @Override
     public ChunkLayout getChunkLayout() {
         return SpongeChunkLayout.instance;
-    }
-
-    @Override
-    public Optional<WorldProperties> getWorldProperties(String worldName) {
-        return WorldManager.getWorldProperties(worldName);
-    }
-
-    @Override
-    public Collection<WorldProperties> getAllWorldProperties() {
-        return WorldManager.getAllWorldProperties();
     }
 
     @Override
@@ -323,161 +299,370 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     /**
      * @author blood - December 23rd, 2015
      * @author Zidane - March 13th, 2016
+     * @author Zidane - Feburary 18th, 2019
      *
-     * Sponge re-writes this method because we take control of loading existing Sponge dimensions, migrate old worlds to our standard, and
+     * @reason Sponge re-writes this method because we take control of loading existing Sponge dimensions, migrate old worlds to our standard, and
      * configuration checks.
-     * @reason Add multiworld support
+     * @reason Update to Minecraft 1.13
      */
     @Overwrite
-    public void loadAllWorlds(String overworldFolder, String worldName, long seed, WorldType type, JsonElement generatorOptions) {
-        SpongeCommonEventFactory.convertingMapFormat = true;
-        this.convertMapIfNeeded(overworldFolder);
-        SpongeCommonEventFactory.convertingMapFormat = false;
-        this.setUserMessage(new TextComponentTranslation("menu.loadingLevel"));
-
-        WorldManager.loadAllWorlds(seed, type, generatorOptions);
-
-        this.getPlayerList().setPlayerManager(this.worlds);
-        this.setDifficultyForAllWorlds(this.getDifficulty());
+    public void loadAllWorlds(String saveFolder, String worldFolder, long seed, WorldType type, JsonElement generatorOptions) {
+        this.getWorldLoader().loadKnownWorlds(saveFolder, worldFolder, seed, type, generatorOptions);
     }
 
     /**
      * @author Zidane - March 13th, 2016
+     * @author Zidane - Feburary 18th, 2019
      *
-     * @reason Sponge has a config option for determining if we'll
-     * generate spawn on server start. I enforce that here.
+     * @reason Sponge has a config option for determining if we'll generate spawn on server start. I enforce that here.
+     * @reason Update to Minecraft 1.13
      */
     @Overwrite
-    public void initialWorldChunkLoad() {
-        for (WorldServer worldServer: this.worlds) {
-            this.prepareSpawnArea(worldServer);
+    public void initialWorldChunkLoad(WorldSavedDataStorage overworldStorage) {
+        for (WorldServer world: this.getWorldLoader().getWorlds()) {
+            if (world.dimension.getType() == DimensionType.OVERWORLD) {
+                this.prepareSpawnArea(overworldStorage, world);
+            } else {
+                this.prepareSpawnArea(new WorldSavedDataStorage(world.getSaveHandler()), world);
+            }
         }
         this.clearCurrentTask();
     }
 
     @Override
-    public void prepareSpawnArea(WorldServer worldServer) {
-        if (!((WorldProperties) worldServer.getWorldInfo()).doesGenerateSpawnOnLoad()) {
-            return;
-        }
+    public void prepareSpawnArea(WorldSavedDataStorage storage, WorldServer world) {
+        this.setUserMessage(new TextComponentTranslation("menu.generatingTerrain"));
+        LOGGER.info("Preparing start region for dimension " + DimensionType.getKey(world.dimension.getType()));
+        BlockPos blockpos = world.getSpawnPoint();
+        List<ChunkPos> list = Lists.newArrayList();
+        Set<ChunkPos> set = Sets.newConcurrentHashSet();
+        Stopwatch stopwatch = Stopwatch.createStarted();
 
-        IMixinChunkProviderServer chunkProviderServer = (IMixinChunkProviderServer) worldServer.getChunkProvider();
-        chunkProviderServer.setForceChunkRequests(true);
+        for (int j1 = -192; j1 <= 192 && this.isServerRunning(); j1 += 16) {
+            for (int k1 = -192; k1 <= 192 && this.isServerRunning(); k1 += 16) {
+                list.add(new ChunkPos(blockpos.getX() + j1 >> 4, blockpos.getZ() + k1 >> 4));
+            }
 
-        try (GenerationContext<GenericGenerationContext> context = GenerationPhase.State.TERRAIN_GENERATION.createPhaseContext()
-            .source(worldServer)
-            .world( worldServer)) {
-            context.buildAndSwitch();
-            int i = 0;
-            this.setUserMessage(new TextComponentTranslation("menu.generatingTerrain"));
-            LOGGER.info("Preparing start region for level {} ({})", ((IMixinWorldServer) worldServer).getDimensionId(), ((World) worldServer).getName());
-            BlockPos blockpos = worldServer.getSpawnPoint();
-            long j = Util.milliTime();
-            for (int k = -192; k <= 192 && this.isServerRunning(); k += 16) {
-                for (int l = -192; l <= 192 && this.isServerRunning(); l += 16) {
-                    long i1 = Util.milliTime();
+            // Sponge Start - Load chunks for world, not just overworld
+            CompletableFuture<?> completablefuture = world.getChunkProvider().loadChunks(list, (p_201701_1_) -> {
+                set.add(p_201701_1_.getPos());
+            });
+            // Sponge End
 
-                    if (i1 - j > 1000L) {
-                        this.setCurrentTaskAndPercentDone(new TextComponentTranslation("menu.preparingSpawn"), i * 100 / 625);
-                        j = i1;
+            while (!completablefuture.isDone()) {
+                try {
+                    completablefuture.get(1L, TimeUnit.SECONDS);
+                } catch (InterruptedException interruptedexception) {
+                    throw new RuntimeException(interruptedexception);
+                } catch (ExecutionException executionexception) {
+                    if (executionexception.getCause() instanceof RuntimeException) {
+                        throw (RuntimeException) executionexception.getCause();
                     }
 
-                    ++i;
-                    worldServer.getChunkProvider().provideChunk(blockpos.getX() + k >> 4, blockpos.getZ() + l >> 4);
+                    throw new RuntimeException(executionexception.getCause());
+                } catch (TimeoutException var22) {
+                    this.setCurrentTaskAndPercentDone(new TextComponentTranslation("menu.preparingSpawn"), set.size() * 100 / 625);
                 }
             }
-            this.clearCurrentTask();
+
+            this.setCurrentTaskAndPercentDone(new TextComponentTranslation("menu.preparingSpawn"), set.size() * 100 / 625);
         }
-        chunkProviderServer.setForceChunkRequests(false);
+
+        LOGGER.info("Time elapsed: {} ms", stopwatch.elapsed(TimeUnit.MILLISECONDS));
+
+        // Sponge Start - Get forced chunks for passed in world
+        ForcedChunksSaveData forcedchunkssavedata = storage.get(world.dimension.getType(), ForcedChunksSaveData::new, "chunks");
+
+        if (forcedchunkssavedata != null) {
+            LongIterator longiterator = forcedchunkssavedata.getChunks().iterator();
+
+            while (longiterator.hasNext()) {
+                this.setCurrentTaskAndPercentDone(new TextComponentTranslation("menu.loadingForcedChunks", world.dimension.getType()),
+                    forcedchunkssavedata.getChunks().size() * 100 / 625);
+                long l1 = longiterator.nextLong();
+                ChunkPos chunkpos = new ChunkPos(l1);
+                world.getChunkProvider().getChunk(chunkpos.x, chunkpos.z, true, true);
+            }
+        // Sponge End
+        }
+
+        this.clearCurrentTask();
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
-    public Optional<World> loadWorld(UUID uuid) {
-        return (Optional) WorldManager.loadWorld(uuid);
+    public Optional<World> getWorld(String folderName) {
+        return (Optional<World>) (Object) this.getWorldLoader().getWorld(folderName);
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Override
+    public Collection<World> getWorlds() {
+        return (Collection<World>) (Object) this.getWorldLoader().getWorlds();
+    }
+
+    @Override
+    public Optional<World> loadWorld(UUID uniqueId) {
+        return (Optional<World>) (Object) this.getWorldLoader().loadWorld(uniqueId);
+    }
+
     @Override
     public Optional<World> loadWorld(WorldProperties properties) {
-        return (Optional) WorldManager.loadWorld(properties);
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    @Override
-    public Optional<World> loadWorld(String worldName) {
-        return (Optional) WorldManager.loadWorld(worldName);
+        return (Optional<World>) (Object) this.getWorldLoader().loadWorld((WorldInfo) properties);
     }
 
     @Override
-    public WorldProperties createWorldProperties(String folderName, WorldArchetype archetype) {
-        return WorldManager.createWorldProperties(folderName, archetype);
+    public Optional<World> loadWorld(String folderName) {
+        return (Optional<World>) (Object) this.getWorldLoader().loadWorld(folderName);
+    }
+
+    @Override
+    public Optional<WorldProperties> createWorldProperties(String folderName, WorldArchetype archetype) {
+        return (Optional<WorldProperties>) (Object) this.getWorldLoader().createWorldInfo(folderName, archetype);
     }
 
     @Override
     public boolean unloadWorld(World world) {
-        // API is not allowed to unload overworld
-        return ((IMixinWorldServer) world).getDimensionId() != 0 && WorldManager.unloadWorld((WorldServer) world, false);
-
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Collection<World> getWorlds() {
-        return (Collection<World>) (Object) Collections.unmodifiableCollection(WorldManager.getWorlds());
+        return this.getWorldLoader().unloadWorld((WorldServer) world, false);
     }
 
     @Override
     public Optional<World> getWorld(UUID uniqueId) {
-        for (WorldServer worldserver : WorldManager.getWorlds()) {
-            if (((World) worldserver).getUniqueId().equals(uniqueId)) {
-                return Optional.of((World) worldserver);
-            }
-        }
-        return Optional.empty();
+        return (Optional<World>) (Object) this.getWorldLoader().getWorld(uniqueId);
     }
 
     @Override
     public Optional<WorldProperties> getDefaultWorld() {
-        return WorldManager.getWorldByDimensionId(0).map(worldServer -> ((World) worldServer).getProperties());
+        return this.getWorldLoader().getWorld(DimensionType.OVERWORLD).map(world -> (WorldProperties) world.getWorldInfo());
     }
 
     @Override
     public String getDefaultWorldName() {
-        checkState(getFolderName() != null, "Attempt made to grab default world name too early!");
-        return getFolderName();
-    }
-
-    @Override
-    public Collection<WorldProperties> getUnloadedWorlds() {
-        return WorldManager.getAllWorldProperties().stream()
-                .filter(props -> !this.getWorld(props.getUniqueId()).isPresent())
-                .collect(ImmutableSet.toImmutableSet());
+        checkState(this.getFolderName() != null, "Attempt made to grab the save folder too early!");
+        return this.getFolderName();
     }
 
     @Override
     public Optional<WorldProperties> getWorldProperties(UUID uniqueId) {
-        return WorldManager.getWorldProperties(uniqueId);
+        return (Optional<WorldProperties>) (Object) this.getWorldLoader().getWorldInfo(uniqueId);
     }
 
     @Override
-    public CompletableFuture<Optional<WorldProperties>> copyWorld(WorldProperties worldProperties, String copyName) {
-        return WorldManager.copyWorld(worldProperties, copyName);
-    }
-
-    @Override
-    public Optional<WorldProperties> renameWorld(WorldProperties worldProperties, String newName) {
-        return WorldManager.renameWorld(worldProperties, newName);
-    }
-
-    @Override
-    public CompletableFuture<Boolean> deleteWorld(WorldProperties worldProperties) {
-        return WorldManager.deleteWorld(worldProperties);
+    public Optional<WorldProperties> getWorldProperties(String worldName) {
+        return (Optional<WorldProperties>) (Object) this.getWorldLoader().getWorldInfo(worldName);
     }
 
     @Override
     public boolean saveWorldProperties(WorldProperties properties) {
-        return WorldManager.saveWorldProperties(properties);
+        // TODO (1.13) - Zidane
+
+        return false;
+    }
+
+    @Override
+    public Collection<WorldProperties> getUnloadedWorlds() {
+        return (Collection<WorldProperties>) (Object) this.getWorldLoader().getUnloadedWorldInfos();
+    }
+
+    @Override
+    public Collection<WorldProperties> getAllWorldProperties() {
+        return (Collection<WorldProperties>) (Object) this.getWorldLoader().getWorldInfos();
+    }
+
+    @Override
+    public CompletableFuture<Optional<WorldProperties>> copyWorld(String folderName, String copyName) {
+        checkNotNull(folderName);
+        checkNotNull(copyName);
+
+        final Path saveFolder = Paths.get(this.getFolderName());
+
+        final WorldInfo info = this.getWorldLoader().getWorldInfo(folderName).orElseGet(() -> {
+            // We don't know of this info, could have been copied in. For performance, cache the world data
+            final Path path = saveFolder.resolve(folderName);
+            if (Files.notExists(path)) {
+                return null;
+            }
+
+            final ISaveHandler handler = new AnvilSaveHandler(saveFolder.toFile(), folderName, (MinecraftServer) (Object) this, this.dataFixer);
+            final WorldInfo foundInfo = handler.loadWorldInfo();
+            this.getWorldLoader().registerWorldInfo(folderName, foundInfo);
+            return foundInfo;
+        });
+
+        if (info == null) {
+            return CompletableFuture.completedFuture(Optional.empty());
+        }
+
+        final WorldServer world = this.getWorldLoader().getWorld(folderName).orElse(null);
+
+        final CompletableFuture<Optional<WorldInfo>> future = SpongeImpl.getAsyncScheduler().submit(new CopyWorldTask(this.getWorldLoader(),
+            saveFolder, info, world, copyName));
+        if (world != null) {
+            future.thenAccept(result -> {
+                ((IMixinMinecraftServer) SpongeImpl.getServer()).setSaveEnabled(true);
+
+                result.ifPresent(copyInfo -> {
+                    ((IMixinWorldInfo) copyInfo).setDimensionType(null);
+                    ((IMixinWorldInfo) copyInfo).setUniqueId(null);
+                    this.getWorldLoader().registerWorldInfo(copyName, copyInfo);
+                });
+            });
+        } else {
+            future.thenAccept(result -> result.ifPresent(copyInfo -> {
+                ((IMixinWorldInfo) copyInfo).setDimensionType(null);
+                ((IMixinWorldInfo) copyInfo).setUniqueId(null);
+                this.getWorldLoader().registerWorldInfo(copyName, copyInfo);
+            }));
+        }
+
+        return (CompletableFuture<Optional<WorldProperties>>) (Object) future;
+    }
+
+    @Override
+    public Optional<WorldProperties> renameWorld(String oldFolderName, String newFolderName) {
+        checkNotNull(oldFolderName);
+        checkNotNull(newFolderName);
+
+        final Path saveFolder = Paths.get(this.getFolderName());
+        final Path oldWorldFolder = saveFolder.resolve(oldFolderName);
+        final Path newWorldFolder = oldWorldFolder.resolveSibling(newFolderName);
+
+        if (Files.exists(newWorldFolder)) {
+            return Optional.empty();
+        }
+
+        final WorldServer world = this.getWorldLoader().getWorld(oldFolderName).orElse(null);
+        WorldInfo info = null;
+
+        if (world != null) {
+            if (!this.getWorldLoader().unloadWorld(world, false)) {
+                return Optional.empty();
+            }
+
+            info = world.getWorldInfo();
+        }
+
+        try {
+            Files.move(oldWorldFolder, newWorldFolder);
+        } catch (IOException e) {
+            return Optional.empty();
+        }
+
+        if (info != null) {
+            this.getWorldLoader().unregisterWorldInfo(info);
+        } else {
+            this.getWorldLoader().unregisterWorldInfo(oldFolderName);
+        }
+
+        final ISaveHandler handler = new AnvilSaveHandler(saveFolder.toFile(), newFolderName, (MinecraftServer) (Object) this, this.dataFixer);
+        info = handler.loadWorldInfo();
+
+        if (info != null) {
+            ((IMixinWorldInfo) info).createConfig();
+            this.getWorldLoader().registerWorldInfo(newFolderName, info);
+        }
+
+        return Optional.ofNullable((WorldProperties) info);
+    }
+
+    @Override
+    public CompletableFuture<Boolean> deleteWorld(String folderName) {
+        checkNotNull(folderName);
+
+        final Path saveFolder = Paths.get(this.getFolderName());
+        final WorldServer world = this.getWorldLoader().getWorld(folderName).orElse(null);
+
+        if (world == null) {
+            return SpongeImpl.getAsyncScheduler().submit(new DeleteWorldTask(this.getWorldLoader(), saveFolder, folderName));
+        }
+
+        if (!this.getWorldLoader().unloadWorld(folderName, false)) {
+            return CompletableFuture.completedFuture(false);
+        }
+
+        return SpongeImpl.getAsyncScheduler().submit(new DeleteWorldTask(this.getWorldLoader(), saveFolder, folderName));
+    }
+
+    /**
+     * @author blood - June 2nd, 2016
+     * @author Zidane - Feburary 18th, 2019
+     *
+     * @reason To allow per-world auto-save tick intervals or disable auto-saving entirely
+     * @reason Update to Minecraft 1.13
+     */
+    @Overwrite
+    public void saveAllWorlds(boolean isSilent) {
+        if (!this.enableSaving) {
+            return;
+        }
+
+        for (WorldServer world : this.getWorldLoader().getWorlds()) {
+            if (!world.disableLevelSaving) {
+                // Sponge start - check auto save interval in world config
+                if (this.isDedicatedServer() && this.isServerRunning()) {
+                    final IMixinWorldServer spongeWorld = (IMixinWorldServer) world;
+                    final int autoSaveInterval = spongeWorld.getActiveConfig().getConfig().getWorld().getAutoSaveInterval();
+                    final boolean logAutoSave = !isSilent && spongeWorld.getActiveConfig().getConfig().getLogging().worldAutoSaveLogging();
+                    if (autoSaveInterval <= 0
+                        || ((WorldProperties) world.getWorldInfo()).getSerializationBehavior() != SerializationBehaviors.AUTOMATIC) {
+                        if (logAutoSave) {
+                            LOGGER.warn("Auto-saving has been disabled for level \'" + world.getWorldInfo().getWorldName() + "\'/"
+                                + world.getDimension().getType() + ". "
+                                + "No chunk data will be auto-saved - to re-enable auto-saving set 'auto-save-interval' to a value greater than"
+                                + " zero in the corresponding world config.");
+                        }
+                        continue;
+                    }
+                    if (this.tickCounter % autoSaveInterval != 0) {
+                        continue;
+                    }
+                    if (logAutoSave) {
+                        LOGGER.info("Auto-saving chunks for level \'" + world.getWorldInfo().getWorldName() + "\'/"
+                            + world.dimension.getType());
+                    }
+                } else if (!isSilent) {
+                    LOGGER.info("Saving chunks for level \'" + world.getWorldInfo().getWorldName() + "\'/"
+                        + world.dimension.getType());
+                }
+                // Sponge end
+
+                try {
+                    world.saveAllChunks(true, null);
+                } catch (SessionLockException sessionlockexception) {
+                    LOGGER.warn(sessionlockexception.getMessage());
+                }
+            }
+        }
+    }
+    /**
+     * @author Zidane - Feburary 18th, 2019
+     *
+     * @reason Honor the server difficulty as well as difficulties set via mods/plugins
+     */
+    @Overwrite
+    public void setDifficultyForAllWorlds(EnumDifficulty difficulty) {
+        final EnumDifficulty serverDifficulty = SpongeImpl.getServer().getDifficulty();
+
+        for (WorldServer world : this.getWorldLoader().getWorlds()) {
+            this.adjustWorldForDifficulty(world, ((IMixinWorldInfo) world.getWorldInfo()).hasCustomDifficulty() ? world.getWorldInfo()
+                .getDifficulty() : serverDifficulty, false);
+        }
+    }
+
+    @Override
+    public void adjustWorldForDifficulty(WorldServer world, EnumDifficulty difficulty, boolean isCustom) {
+        if (world.getWorldInfo().isHardcore()) {
+            difficulty = EnumDifficulty.HARD;
+            world.setAllowedSpawnTypes(true, true);
+        } else if (SpongeImpl.getServer().isSinglePlayer()) {
+            world.setAllowedSpawnTypes(world.getDifficulty() != EnumDifficulty.PEACEFUL, true);
+        } else {
+            world.setAllowedSpawnTypes(this.allowSpawnMonsters(), this.getCanSpawnAnimals());
+        }
+
+        if (!isCustom) {
+            ((IMixinWorldInfo) world.getWorldInfo()).forceSetDifficulty(difficulty);
+        } else {
+            world.getWorldInfo().setDifficulty(difficulty);
+        }
     }
 
     @Override
@@ -518,47 +703,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Override
     public Optional<Scoreboard> getServerScoreboard() {
-        return WorldManager.getWorldByDimensionId(0).map(worldServer -> (Scoreboard) worldServer.getScoreboard());
-    }
-
-    @Redirect(method = "getTabCompletions", at = @At(value = "INVOKE",
-            target = "Lcom/google/common/collect/Lists;newArrayList()Ljava/util/ArrayList;", remap = false))
-    private ArrayList<String> onGetTabCompletionCreateList() {
-        ArrayList<String> list = new ArrayList<>();
-        this.currentTabCompletionOptions = list;
-        return list;
-    }
-
-    @Inject(method = "getTabCompletions", at = @At(value = "RETURN", ordinal = 0))
-    private void onTabCompleteChat(ICommandSource sender, String input, BlockPos pos, boolean usingBlock,
-            CallbackInfoReturnable<List<String>> cir) {
-
-        List<String> completions = checkNotNull(this.currentTabCompletionOptions, "currentTabCompletionOptions");
-        this.currentTabCompletionOptions = null;
-
-        Sponge.getCauseStackManager().pushCause(sender);
-        TabCompleteEvent.Chat event = SpongeEventFactory.createTabCompleteEventChat(Sponge.getCauseStackManager().getCurrentCause(),
-                ImmutableList.copyOf(completions), completions, input, Optional.ofNullable(getTarget(sender, pos)), usingBlock);
-        Sponge.getEventManager().post(event);
-        Sponge.getCauseStackManager().popCause();
-        if (event.isCancelled()) {
-            completions.clear();
-        }
-    }
-
-    @Redirect(method = "getTabCompletions", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/ICommandManager;getTabCompletions"
-            + "(Lnet/minecraft/command/ICommandSender;Ljava/lang/String;Lnet/minecraft/util/math/BlockPos;)Ljava/util/List;"))
-    public List<String> onGetTabCompletionOptions(ICommandManager manager, ICommandSender sender, String input, @Nullable BlockPos pos, ICommandSender sender_, String input_, BlockPos pos_, boolean hasTargetBlock) {
-        return ((SpongeCommandManager) SpongeImpl.getGame().getCommandManager()).getSuggestions((CommandSource) sender, input, getTarget(sender, pos), hasTargetBlock);
-    }
-
-    @Nullable
-    private static Location getTarget(ICommandSource sender, @Nullable BlockPos pos) {
-        @Nullable Location targetPos = null;
-        if (pos != null) {
-            targetPos = new Location((World) sender.get(), VecHelper.toVector3i(pos));
-        }
-        return targetPos;
+        return this.getWorldLoader().getWorld(DimensionType.OVERWORLD).map(world -> (Scoreboard) world.getScoreboard());
     }
 
     @Override
@@ -606,19 +751,6 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         TimingsManager.FULL_SERVER_TICK.stopTiming();
     }
 
-    private int dimensionId;
-
-    @Redirect(method = "addServerStatsToSnooper", at = @At(value = "FIELD", target = "Lnet/minecraft/world/WorldServer;provider:Lnet/minecraft/world/WorldProvider;", opcode = Opcodes.GETFIELD))
-    private Dimension onGetDimensionForSnooper(WorldServer world) {
-        this.dimensionId = WorldManager.getDimensionId(world);
-        return world.dimension;
-    }
-
-    @ModifyArg(method = "addServerStatsToSnooper", at = @At(value = "INVOKE", target = "Ljava/lang/Integer;valueOf(I)Ljava/lang/Integer;", ordinal = 5))
-    private int onValueOfInteger(int dimensionId) {
-        return this.dimensionId;
-    }
-
     @ModifyConstant(method = "tick", constant = @Constant(intValue = 900))
     private int getSaveTickInterval(int tickInterval) {
         if (!isDedicatedServer()) {
@@ -636,56 +768,6 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         this.saveAllWorlds(true);
         // force check to fail as we handle everything above
         return this.tickCounter + 1;
-    }
-
-    /**
-     * @author blood - June 2nd, 2016
-     *
-     * @reason To allow per-world auto-save tick intervals or disable auto-saving entirely
-     *
-     * @param dontLog Whether to log during saving
-     */
-    @Overwrite
-    public void saveAllWorlds(boolean dontLog) {
-        if (!this.enableSaving) {
-            return;
-        }
-        for (WorldServer worldserver : this.worlds) {
-            if (worldserver != null && !worldserver.disableLevelSaving) {
-                // Sponge start - check auto save interval in world config
-                if (this.isDedicatedServer() && this.isServerRunning()) {
-                    final IMixinWorldServer spongeWorld = (IMixinWorldServer) worldserver;
-                    final int autoSaveInterval = spongeWorld.getActiveConfig().getConfig().getWorld().getAutoSaveInterval();
-                    final boolean logAutoSave = spongeWorld.getActiveConfig().getConfig().getLogging().worldAutoSaveLogging();
-                    if (autoSaveInterval <= 0
-                            || ((WorldProperties) worldserver.getWorldInfo()).getSerializationBehavior() != SerializationBehaviors.AUTOMATIC) {
-                        if (logAutoSave) {
-                            LOGGER.warn("Auto-saving has been disabled for level \'" + worldserver.getWorldInfo().getWorldName() + "\'/"
-                                    + worldserver.getDimension().getType().getName() + ". "
-                                    + "No chunk data will be auto-saved - to re-enable auto-saving set 'auto-save-interval' to a value greater than"
-                                    + " zero in the corresponding world config.");
-                        }
-                        continue;
-                    }
-                    if (this.tickCounter % autoSaveInterval != 0) {
-                        continue;
-                    }
-                    if (logAutoSave) {
-                        LOGGER.info("Auto-saving chunks for level \'" + worldserver.getWorldInfo().getWorldName() + "\'/"
-                                + worldserver.dimension.getType().getName());
-                    }
-                } else if (!dontLog) {
-                    LOGGER.info("Saving chunks for level \'" + worldserver.getWorldInfo().getWorldName() + "\'/"
-                            + worldserver.dimension.getType().getName());
-                }
-                // Sponge end
-                try {
-                    WorldManager.saveWorld(worldserver, false);
-                } catch (SessionLockException ex) {
-                    ex.printStackTrace();
-                }
-            }
-        }
     }
 
     @Inject(method = "stopServer", at = @At(value = "HEAD"), cancellable = true)
@@ -706,24 +788,6 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Intrinsic
     public void server$setPlayerIdleTimeout(int timeout) {
         this.shadow$setPlayerIdleTimeout(timeout);
-    }
-
-    /**
-     * @author Zidane - June 2nd
-     * @reason Tells the server to use our WorldManager instead of the arrays, this will
-     * work in Forge as well as our WorldManagement system is intended to work with Forge
-     * modded worlds.
-     *
-     * @param dimensionId The dimension id requested
-     * @return The world server, or else the overworld.
-     */
-    @Overwrite
-    public WorldServer getWorld(int dimensionId) {
-        return WorldManager.getWorldByDimensionId(dimensionId)
-                .orElse(WorldManager.getWorldByDimensionId(0)
-                        .orElseThrow(() -> new RuntimeException("Attempt made to get world before overworld is loaded!")
-                        )
-                );
     }
 
     @Override
@@ -763,14 +827,5 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     private void onCrashReport(CrashReport report, CallbackInfoReturnable<CrashReport> cir) {
         report.makeCategory("Sponge PhaseTracker").addDetail("Phase Stack", CauseTrackerCrashHandler.INSTANCE);
         cir.setReturnValue(report);
-    }
-
-    /**
-     * @author unknown
-     * @reason uses the world manager to update.
-     */
-    @Overwrite
-    public void setDifficultyForAllWorlds(EnumDifficulty difficulty) {
-        WorldManager.updateServerDifficulty();
     }
 }

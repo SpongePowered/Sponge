@@ -34,12 +34,14 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.config.type.DimensionConfig;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
 import org.spongepowered.common.interfaces.world.IMixinDimension;
 
 @NonnullByDefault
 @Mixin(net.minecraft.world.dimension.Dimension.class)
-public abstract class MixinDimension implements Dimension, IMixinDimension {
+public abstract class MixinDimension implements IMixinDimension {
 
     @Shadow protected World world;
     @Shadow(prefix = "shadow$") public abstract net.minecraft.world.dimension.DimensionType shadow$getType();

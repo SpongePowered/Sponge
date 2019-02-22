@@ -63,6 +63,7 @@ import org.spongepowered.common.config.type.DimensionConfig;
 import org.spongepowered.common.config.type.GeneralConfigBase;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.entity.SpongeEntityType;
+import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.IMixinTrackable;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -72,7 +73,6 @@ import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
 import org.spongepowered.common.registry.type.block.TileEntityTypeRegistryModule;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.world.BlockChange;
-import org.spongepowered.common.world.WorldManager;
 import org.spongepowered.common.world.teleport.ConfigTeleportHelperFilter;
 
 import java.io.File;
@@ -121,7 +121,7 @@ public class SpongeHooks {
 
         SpongeConfig<? extends GeneralConfigBase> config = getActiveConfig((WorldServer) entity.world);
         if (config.getConfig().getLogging().entityDeathLogging()) {
-            logInfo("Dim: {0} remove(): {1}", ((IMixinWorldServer) entity.world).(), entity);
+            logInfo("Dim: {0} remove(): {1}", entity.world.dimension.getType().getId(), entity);
             logStack(config);
         }
     }
@@ -133,7 +133,7 @@ public class SpongeHooks {
 
         SpongeConfig<? extends GeneralConfigBase> config = getActiveConfig((WorldServer) entity.world);
         if (config.getConfig().getLogging().entityDespawnLogging()) {
-            logInfo("Dim: {0} Despawning ({1}): {2}", ((IMixinWorldServer) entity.world).getDimensionId(), reason, entity);
+            logInfo("Dim: {0} Despawning ({1}): {2}", entity.world.dimension.getType().getId(), reason, entity);
             logStack(config);
         }
     }
@@ -155,7 +155,7 @@ public class SpongeHooks {
                     getFriendlyCauseName(cause),
                     user.isPresent() ? user.get().getName() : "None",
                     entity.world.getWorldInfo().getWorldName(),
-                    ((IMixinWorldServer) entity.world).getDimensionId());
+                    entity.world.dimension.getType().getId());
             logStack(config);
         }
     }
@@ -169,7 +169,7 @@ public class SpongeHooks {
         if (config.getConfig().getLogging().blockTrackLogging() && allowed) {
             logInfo("Tracking Block " + "[RootCause: {0}][World: {1}][Block: {2}][Pos: {3}]",
                     user.getName(),
-                    world.getWorldInfo().getWorldName() + "(" + ((IMixinWorldServer) world).getDimensionId() + ")",
+                    world.getWorldInfo().getWorldName() + "(" + world.dimension.getType().getId() + ")",
                     ((BlockType) block).getKey(),
                     pos);
             logStack(config);
@@ -177,7 +177,7 @@ public class SpongeHooks {
             logInfo("Blacklisted! Unable to track Block " + "[RootCause: {0}][World: {1}][DimId: {2}][Block: {3}][Pos: {4}]",
                     user.getName(),
                     world.getWorldInfo().getWorldName(),
-                    ((IMixinWorldServer) world).getDimensionId(),
+                    world.dimension.getType().getId(),
                     ((BlockType) block).getKey(),
                     pos.getX() + ", " + pos.getY() + ", " + pos.getZ());
         }
@@ -196,7 +196,7 @@ public class SpongeHooks {
                     getFriendlyCauseName(Sponge.getCauseStackManager().getCurrentCause()),
                     user.isPresent() ? user.get().getName() : "None",
                     world.getWorldInfo().getWorldName(),
-                    ((IMixinWorldServer) world).getDimensionId(),
+                    world.dimension.getType().getId(),
                     transaction.getOriginal().getState(),
                     transaction.getFinal().getState());
             logStack(config);
@@ -210,7 +210,7 @@ public class SpongeHooks {
 
         SpongeConfig<? extends GeneralConfigBase> config = getActiveConfig((WorldServer) world);
         if (config.getConfig().getLogging().chunkLoadLogging()) {
-            logInfo("Load Chunk At [{0}] ({1}, {2})", ((IMixinWorldServer) world).getDimensionId(), chunkPos.getX(),
+            logInfo("Load Chunk At [{0}] ({1}, {2})", world.dimension.getType().getId(), chunkPos.getX(),
                     chunkPos.getZ());
             logStack(config);
         }
@@ -223,7 +223,7 @@ public class SpongeHooks {
 
         SpongeConfig<? extends GeneralConfigBase> config = getActiveConfig((WorldServer) world);
         if (config.getConfig().getLogging().chunkUnloadLogging()) {
-            logInfo("Unload Chunk At [{0}] ({1}, {2})", ((IMixinWorldServer) world).getDimensionId(), chunkPos.getX(),
+            logInfo("Unload Chunk At [{0}] ({1}, {2})", world.dimension.getType().getId(), chunkPos.getX(),
                     chunkPos.getZ());
             logStack(config);
         }
@@ -236,7 +236,7 @@ public class SpongeHooks {
 
         SpongeConfig<? extends GeneralConfigBase> config = getActiveConfig(world);
         if (config.getConfig().getLogging().chunkGCQueueUnloadLogging()) {
-            logInfo("Chunk GC Queued Chunk At [{0}] ({1}, {2} for unload)", ((IMixinWorldServer) world).getDimensionId(), chunk.x, chunk.z);
+            logInfo("Chunk GC Queued Chunk At [{0}] ({1}, {2} for unload)", world.dimension.getType().getId(), chunk.x, chunk.z);
             logStack(config);
         }
     }
@@ -403,7 +403,7 @@ public class SpongeHooks {
         public int dimensionId;
 
         public CollisionWarning(World world, Entity entity) {
-            this.dimensionId = ((IMixinWorldServer) world).getDimensionId();
+            this.dimensionId = world.dimension.getType().getId();
             this.blockPos = new BlockPos(entity.chunkCoordX, entity.chunkCoordY, entity.chunkCoordZ);
         }
 
@@ -452,7 +452,7 @@ public class SpongeHooks {
         final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) world;
         SpongeConfig<? extends GeneralConfigBase> activeConfig = mixinWorldServer.getActiveConfig();
         if (activeConfig == null || refresh) {
-            activeConfig = mixinWorldServer.getWorldConfig();
+            activeConfig = mixinWorldServer.getConfig();
             mixinWorldServer.setActiveConfig(activeConfig);
         }
 
@@ -506,7 +506,7 @@ public class SpongeHooks {
             ((SpongeEntityType) entityType).initializeTrackerState();
         }
 
-        for (WorldServer world : WorldManager.getWorlds()) {
+        for (WorldServer world : ((IMixinMinecraftServer) Sponge.getServer()).getWorldLoader().getWorlds()) {
             ((IMixinWorldServer) world).setActiveConfig(SpongeHooks.getActiveConfig(world, true));
             for (Entity entity : world.loadedEntityList) {
                 if (entity instanceof IModData_Activation) {

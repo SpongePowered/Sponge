@@ -24,127 +24,52 @@
  */
 package org.spongepowered.common.mixin.core.world.dimension;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import net.minecraft.world.dimension.DimensionType;
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.service.context.Context;
-import org.spongepowered.api.world.Dimension;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.type.DimensionConfig;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
 import org.spongepowered.common.registry.type.world.DimensionTypeRegistryModule;
-import org.spongepowered.common.world.WorldManager;
-
-import java.nio.file.Path;
+import org.spongepowered.common.registry.type.world.dimension.GlobalDimensionType;
 
 @Mixin(DimensionType.class)
-@Implements(value = @Interface(iface = org.spongepowered.api.world.DimensionType.class, prefix = "dimensionType$"))
 public abstract class MixinDimensionType implements IMixinDimensionType {
 
-    @Shadow @Final private Class <? extends net.minecraft.world.dimension.Dimension> clazz;
-    @Shadow public abstract String getName();
+    private GlobalDimensionType globalDimensionType;
 
-    private CatalogKey key;
-    private String enumName;
-    private String modId;
-    private Path configPath;
-    private SpongeConfig<DimensionConfig> config;
-    private volatile Context context;
-    private boolean generateSpawnOnLoad;
-    private boolean loadSpawn;
+    @Inject(method = "register", at = @At("RETURN"))
+    private static void onRegister(String path, DimensionType dimensionType, CallbackInfoReturnable<DimensionType> cir) {
+        final PluginContainer container = SpongeImplHooks.getActiveModContainer();
+        final CatalogKey key = CatalogKey.of(container.getId(), path);
 
-    @Inject(method = "<init>", at = @At("RETURN"))
-    public void onConstruct(String enumName, int ordinal, int idIn, String nameIn, String suffixIn, Class <? extends net.minecraft.world.dimension.Dimension> clazzIn,
-            CallbackInfo ci) {
-        String dimName = enumName.toLowerCase().replace(" ", "_").replaceAll("[^A-Za-z0-9_]", "");
-        this.enumName = dimName;
-        this.modId = SpongeImplHooks.getModIdFromClass(clazzIn);
-        this.configPath = SpongeImpl.getSpongeConfigDir().resolve("worlds").resolve(this.modId).resolve(this.enumName);
-        this.config = new SpongeConfig<>(SpongeConfig.Type.DIMENSION, this.configPath.resolve("dimension.conf"), SpongeImpl.ECOSYSTEM_ID, SpongeImpl.getGlobalConfig());
-        this.generateSpawnOnLoad = idIn == 0;
-        this.loadSpawn = this.generateSpawnOnLoad;
-        this.config.getConfig().getWorld().setGenerateSpawnOnLoad(this.generateSpawnOnLoad);
-        this.key = CatalogKey.of(this.modId, dimName);
-        String contextId = this.key.toString().replace(":", ".");
-        this.context = new Context(Context.DIMENSION_KEY, contextId);
-        if (!WorldManager.isDimensionRegistered(idIn)) {
-            DimensionTypeRegistryModule.getInstance().registerAdditionalCatalog((org.spongepowered.api.world.DimensionType) this);
-        }
+        final DimensionTypeRegistryModule module = DimensionTypeRegistryModule.getInstance();
+
+        ((IMixinDimensionType) dimensionType).setGlobalDimensionType((GlobalDimensionType) module.get(key).orElseGet(() -> {
+            final GlobalDimensionType globalDimensionType = new GlobalDimensionType(key, dimensionType.create().getClass());
+            module.registerAdditionalCatalog(globalDimensionType);
+            return globalDimensionType;
+        }));
     }
 
     @Override
-    public boolean shouldGenerateSpawnOnLoad() {
-        return this.generateSpawnOnLoad;
+    public GlobalDimensionType getGlobalDimensionType() {
+        return this.globalDimensionType;
     }
 
     @Override
-    public boolean shouldLoadSpawn() {
-        return this.loadSpawn;
+    public void setGlobalDimensionType(GlobalDimensionType dimensionType) {
+        checkNotNull(dimensionType);
+        this.globalDimensionType = dimensionType;
     }
 
     @Override
-    public void setShouldLoadSpawn(boolean keepSpawnLoaded) {
-        this.loadSpawn = keepSpawnLoaded;
-    }
-
-    public CatalogKey dimensionType$getKey() {
-        return this.key;
-    }
-
-    @Intrinsic
-    public String dimensionType$getName() {
-        return this.getName();
-    }
-
-    @Override
-    public String getEnumName() {
-        return this.enumName;
-    }
-
-    @Override
-    public String getModId() {
-        return this.modId;
-    }
-
-    @Override
-    public Path getConfigPath() {
-        return this.configPath;
-    }
-
-    @SuppressWarnings("unchecked")
-    public Class<? extends Dimension> dimensionType$getDimensionClass() {
-        return (Class<? extends Dimension>) this.clazz;
-    }
-
-    @Override
-    public SpongeConfig<DimensionConfig> getDimensionConfig() {
-        return this.config;
-    }
-
-    @Override
-    public Context getContext() {
-        return this.context;
-    }
-
-    /**
-     * @author Zidane - March 30th, 2016
-     * @reason This method generally checks dimension type ids (-1 | 0 | 1) in Vanilla. I change this assumption to dimension
-     * instance ids. Since the WorldManager tracks dimension instance ids by dimension type ids and Vanilla keeps
-     * their ids 1:1, this is a safe change that ensures a mixup can't happen.
-     */
-    @Overwrite
-    public static DimensionType getById(int dimensionTypeId) {
-        return WorldManager.getDimensionTypeByTypeId(dimensionTypeId).orElseThrow(() -> new IllegalArgumentException("Invalid dimension id " + dimensionTypeId));
+    public DimensionType asClientDimensionType() {
+        return (DimensionType) (Object) this;
     }
 }

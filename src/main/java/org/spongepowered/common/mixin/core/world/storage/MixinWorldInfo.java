@@ -26,43 +26,36 @@ package org.spongepowered.common.mixin.core.world.storage;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.MoreObjects;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import com.google.common.collect.ImmutableMap;
-import com.google.gson.JsonParseException;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.play.server.SPacketServerDifficulty;
-import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.world.EnumDifficulty;
-import net.minecraft.world.GameRules;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
+import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.storage.WorldInfo;
 import org.apache.logging.log4j.Level;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataQuery;
-import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.api.world.DimensionType;
-import org.spongepowered.api.world.DimensionTypes;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.api.world.WorldArchetype;
+import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.difficulty.Difficulty;
+import org.spongepowered.api.world.gamerule.GameRule;
+import org.spongepowered.api.world.gen.GeneratorType;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.api.world.teleport.PortalAgentType;
 import org.spongepowered.api.world.teleport.PortalAgentTypes;
+import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -70,381 +63,304 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.config.category.WorldCategory;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
-import org.spongepowered.common.interfaces.world.IMixinGameRules;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
-import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
-import org.spongepowered.common.registry.type.world.DimensionTypeRegistryModule;
 import org.spongepowered.common.registry.type.world.PortalAgentRegistryModule;
-import org.spongepowered.common.registry.type.world.WorldGeneratorModifierRegistryModule;
-import org.spongepowered.common.util.FunctionalUtil;
-import org.spongepowered.common.world.WorldManager;
+import org.spongepowered.common.world.WorldLoader;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.time.Duration;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-@NonnullByDefault
 @Mixin(WorldInfo.class)
-@Implements(@Interface(iface = WorldProperties.class, prefix = "worldproperties$"))
-public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo {
+@Implements(@Interface(iface = WorldProperties.class, prefix = "prop$"))
+public abstract class MixinWorldInfo implements IMixinWorldInfo {
 
-    @Shadow public long randomSeed;
-    @Shadow private WorldType terrainType;
-    @Shadow private String generatorOptions;
+    @Shadow private String levelName;
+    @Shadow private boolean initialized;
     @Shadow private int spawnX;
     @Shadow private int spawnY;
     @Shadow private int spawnZ;
-    @Shadow private long totalTime;
-    @Shadow private long worldTime;
-    @Shadow private long lastTimePlayed;
-    @Shadow private long sizeOnDisk;
-    @Shadow private NBTTagCompound playerTag;
-    @Shadow private String levelName;
-    @Shadow private int saveVersion;
-    @Shadow private int cleanWeatherTime;
-    @Shadow private boolean raining;
-    @Shadow private int rainTime;
-    @Shadow private boolean thundering;
-    @Shadow private int thunderTime;
-    @Shadow private GameType gameType;
+    @Shadow private WorldType generator;
+    @Shadow public long randomSeed;
+    @Shadow private long gameTime;
+    @Shadow private long dayTime;
     @Shadow private boolean mapFeaturesEnabled;
     @Shadow private boolean hardcore;
     @Shadow private boolean allowCommands;
-    @Shadow private boolean initialized;
     @Shadow public EnumDifficulty difficulty;
-    @Shadow private boolean difficultyLocked;
-    @Shadow private double borderCenterX;
-    @Shadow private double borderCenterZ;
-    @Shadow private double borderSize;
-    @Shadow private long borderSizeLerpTime;
-    @Shadow private double borderSizeLerpTarget;
-    @Shadow private double borderSafeZone;
-    @Shadow private double borderDamagePerBlock;
-    @Shadow private int borderWarningDistance;
-    @Shadow private int borderWarningTime;
-    @Shadow private GameRules gameRules;
-    private ServerScoreboard scoreboard;
-    private boolean hasCustomDifficulty = false;
+    private Set<UUID> pendingPlayerUniqueIds = new HashSet<>();
 
-    @Shadow public abstract void setDifficulty(EnumDifficulty newDifficulty);
-    @Shadow public abstract NBTTagCompound cloneNBTCompound(@Nullable NBTTagCompound nbt);
+    @Shadow protected abstract void updateTagCompound(NBTTagCompound compound, NBTTagCompound spSaveCompound);
+    @Shadow public abstract void setDifficulty(EnumDifficulty difficulty);
+    @Shadow public abstract boolean isDifficultyLocked();
 
-    @Nullable private UUID uuid;
-    @Nullable private Integer dimensionId;
-    private DimensionType dimensionType = DimensionTypes.OVERWORLD;
-    private SerializationBehavior serializationBehavior = SerializationBehaviors.AUTOMATIC;
-    private boolean isMod = false;
-    private boolean generateBonusChest, isValid = true;
-    private NBTTagCompound spongeRootLevelNbt = new NBTTagCompound(), spongeNbt = new NBTTagCompound();
-    private final NBTTagList playerUniqueIdNbt = new NBTTagList();
     private final BiMap<Integer, UUID> playerUniqueIdMap = HashBiMap.create();
-    private final List<UUID> pendingUniqueIds = new ArrayList<>();
-    private int trackedUniqueIdCount = 0;
-    @Nullable private SpongeConfig<WorldConfig> worldConfig;
-    @Nullable private PortalAgentType portalAgentType;
+    private Integer trackedUniqueIdCount;
 
-    //     protected WorldInfo()
-    @Inject(method = "<init>", at = @At("RETURN") )
-    private void onConstruction(CallbackInfo ci) {
-        this.onConstructionCommon();
+    @Nullable private DimensionType dimensionType;
+    @Nullable private UUID uniqueId;
+    private GameType gameType;
+    private PortalAgentType portalAgentType = PortalAgentTypes.DEFAULT;
+    private SpongeConfig<WorldConfig> config;
+    private SerializationBehavior serializationBehavior = SerializationBehaviors.AUTOMATIC;
+    private boolean isFake;
+    private boolean createdByMod;
+    private boolean hasCustomDifficulty;
+
+    public boolean prop$isInitialized() {
+        return this.initialized;
     }
 
-    //     public WorldInfo(NBTTagCompound nbt)
-    @Inject(method = "<init>(Lnet/minecraft/nbt/NBTTagCompound;)V", at = @At("RETURN") )
-    private void onConstruction(NBTTagCompound nbt, CallbackInfo ci) {
-        if (!SpongeCommonEventFactory.convertingMapFormat) {
-            this.onConstructionCommon();
-        }
+    public String prop$getFolderName() {
+        return null;
     }
 
-    //     public WorldInfo(WorldSettings settings, String name)
-    @Inject(method = "<init>(Lnet/minecraft/world/WorldSettings;Ljava/lang/String;)V", at = @At("RETURN"))
-    private void onConstruction(WorldSettings settings, String name, CallbackInfo ci) {
-        if (name.equals("MpServer") || name.equals("sponge$dummy_world")) {
-            this.isValid = false;
-            return;
-        }
-
-        this.onConstructionCommon();
-
-        final WorldArchetype archetype = (WorldArchetype) (Object) settings;
-        this.setDimensionType(archetype.getDimensionType());
-
-        this.createWorldConfig();
-        this.setEnabled(archetype.isEnabled());
-        this.setLoadOnStartup(archetype.loadOnStartup());
-        if (((IMixinWorldSettings)(Object) settings).internalKeepSpawnLoaded() != null) {
-            this.setKeepSpawnLoaded(archetype.doesKeepSpawnLoaded());
-        }
-        this.setGenerateSpawnOnLoad(archetype.doesGenerateSpawnOnLoad());
-        this.forceSetDifficulty((EnumDifficulty) (Object) archetype.getDifficulty());
-        Collection<WorldGeneratorModifier> modifiers = this.getGeneratorModifiers();
-        if (modifiers.isEmpty()) {
-            this.setGeneratorModifiers(archetype.getGeneratorModifiers());
-        } else {
-            // use config modifiers
-            this.setGeneratorModifiers(modifiers);
-        }
-        this.setDoesGenerateBonusChest(archetype.doesGenerateBonusChest());
-        this.setSerializationBehavior(archetype.getSerializationBehavior());
-        this.getOrCreateWorldConfig().save();
+    public String prop$getWorldName() {
+        return this.levelName;
     }
 
-    //     public WorldInfo(WorldInfo worldInformation)
-    @Inject(method = "<init>(Lnet/minecraft/world/storage/WorldInfo;)V", at = @At("RETURN") )
-    private void onConstruction(WorldInfo worldInformation, CallbackInfo ci) {
-        this.onConstructionCommon();
-
-        MixinWorldInfo info = (MixinWorldInfo) (Object) worldInformation;
-        this.getOrCreateWorldConfig(); // Create the config now if it has not yet been created.
-        this.portalAgentType = info.portalAgentType;
-        this.setDimensionType(info.dimensionType);
+    public boolean prop$isEnabled() {
+        return this.getConfig().getConfig().getWorld().isWorldEnabled();
     }
 
-    // used in all init methods
-    private void onConstructionCommon() {
-        this.spongeNbt.setTag(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, this.playerUniqueIdNbt);
-        this.spongeRootLevelNbt.setTag(NbtDataUtil.SPONGE_DATA, this.spongeNbt);
+    public void prop$setEnabled(boolean state) {
+        this.getConfig().getConfig().getWorld().setWorldEnabled(state);
     }
 
-    @Inject(method = "updateTagCompound", at = @At("HEAD"))
-    private void ensureLevelNameMatchesDirectory(NBTTagCompound compound, NBTTagCompound player, CallbackInfo ci) {
-        if (this.dimensionId == null) {
-            return;
-        }
-
-        final String name = WorldManager.getWorldFolderByDimensionId(this.dimensionId).orElse(this.levelName);
-        if (!this.levelName.equalsIgnoreCase(name)) {
-            this.levelName = name;
-        }
+    public boolean prop$doesLoadOnStartup() {
+        return this.getConfig().getConfig().getWorld().doesLoadOnStartup();
     }
 
-    @Override
-    public boolean createWorldConfig() {
-        if (this.worldConfig != null) {
-             return false;
-        }
-
-        this.worldConfig =
-                new SpongeConfig<>(SpongeConfig.Type.WORLD, ((IMixinDimensionType) this.dimensionType).getConfigPath()
-                                .resolve(this.levelName)
-                                .resolve("world.conf"),
-                        SpongeImpl.ECOSYSTEM_ID,
-                        ((IMixinDimensionType) getDimensionType()).getDimensionConfig());
-        return true;
+    public void prop$setLoadOnStartup(boolean state) {
+        this.getConfig().getConfig().getWorld().setLoadOnStartup(state);
     }
 
-    @Override
-    public boolean isValid() {
-        return this.isValid;
+    public boolean prop$doesKeepSpawnLoaded() {
+        return this.getConfig().getConfig().getWorld().doesKeepSpawnLoaded();
     }
 
-    @Override
-    public Vector3i getSpawnPosition() {
+    public void prop$setKeepSpawnLoaded(boolean state) {
+        this.getConfig().getConfig().getWorld().setKeepSpawnLoaded(state);
+    }
+
+    public boolean prop$doesGenerateSpawnOnLoad() {
+        return this.getConfig().getConfig().getWorld().doesGenerateSpawnOnLoad();
+    }
+
+    public void prop$setGenerateSpawnOnLoad(boolean state) {
+        this.getConfig().getConfig().getWorld().setGenerateSpawnOnLoad(state);
+    }
+
+    public Vector3i prop$getSpawnPosition() {
         return new Vector3i(this.spawnX, this.spawnY, this.spawnZ);
     }
 
-    @Override
-    public void setSpawnPosition(Vector3i position) {
-        checkNotNull(position);
+    public void prop$setSpawnPosition(Vector3i position) {
         this.spawnX = position.getX();
         this.spawnY = position.getY();
         this.spawnZ = position.getZ();
     }
 
-    @Intrinsic
-    public long worldproperties$getSeed() {
+    public GeneratorType prop$getGeneratorType() {
+        return (GeneratorType) (Object) this.generator;
+    }
+
+    public void prop$setGeneratorType(GeneratorType type) {
+        this.generator = (WorldType) (Object) type;
+    }
+
+    public long prop$getSeed() {
         return this.randomSeed;
     }
 
-    @Override
-    public void setSeed(long seed) {
+    public void prop$setSeed(long seed) {
         this.randomSeed = seed;
     }
 
-    @Override
-    public long getTotalTime() {
-        return this.totalTime;
+    public Duration prop$getTotalTime() {
+        // TODO (1.13)
+        return Duration.ofSeconds(this.gameTime);
     }
 
-    @Intrinsic
-    public long worldproperties$getWorldTime() {
-        return this.worldTime;
+    public Duration prop$getWorldTime() {
+        // TODO (1.13) - Since this is in ticks, this seems really weird..
+        return Duration.ofSeconds(this.dayTime);
     }
 
-    @Override
-    public void setWorldTime(long time) {
-        this.worldTime = time;
+    public void prop$setWorldTime(Duration time) {
+        // TODO (1.13) - Since this is in ticks, this seems really weird..
+        this.dayTime = time.getSeconds();
     }
 
+    public PortalAgentType prop$getPortalAgentType() {
+        return this.portalAgentType;
+    }
+
+    public boolean prop$isPVPEnabled() {
+        return this.getConfig().getConfig().getWorld().isPVPEnabled();
+    }
+
+    public void prop$setPVPEnabled(boolean enabled) {
+        this.getConfig().getConfig().getWorld().setPVPEnabled(enabled);
+    }
+
+    public GameMode prop$getGameMode() {
+        return (GameMode) (Object) this.gameType;
+    }
+
+    public void prop$setGameMode(GameMode gamemode) {
+        this.gameType = (GameType) (Object) gamemode;
+    }
+
+    public boolean prop$areStructuresEnabled() {
+        return this.mapFeaturesEnabled;
+    }
+
+    public void prop$setStructuresEnabled(boolean state) {
+        this.mapFeaturesEnabled = state;
+    }
+
+    public boolean prop$isHardcore() {
+        return this.hardcore;
+    }
+
+    public void prop$setHardcore(boolean state) {
+        this.hardcore = state;
+    }
+
+    public boolean prop$areCommandsAllowed() {
+        return this.allowCommands;
+    }
+
+    public void prop$setCommandsAllowed(boolean state) {
+        this.allowCommands = state;
+    }
+
+    public Difficulty prop$getDifficulty() {
+        return (Difficulty) (Object) this.difficulty;
+    }
+
+    public void prop$setDifficulty(Difficulty difficulty) {
+        this.setDifficulty((EnumDifficulty) (Object) difficulty);
+    }
+
+    public WorldBorder prop$getWorldBorder() {
+        // TODO (1.13)
+        return null;
+    }
+
+    public SerializationBehavior prop$getSerializationBehavior() {
+        return this.serializationBehavior;
+    }
+
+    public void prop$setSerializationBehavior(SerializationBehavior behavior) {
+        this.serializationBehavior = behavior;
+    }
+
+    public int prop$getContentVersion() {
+        // TODO (1.13)
+        return 0;
+    }
+
+    public DataContainer prop$toContainer() {
+        final NBTTagCompound compound = new NBTTagCompound();
+        // We don't care about SSP save data
+        this.updateTagCompound(compound, null);
+        this.writeSpongeCompound(compound);
+        return NbtTranslator.getInstance().translate(compound);
+    }
+
+    public <V> V prop$getGameRule(GameRule<V> gameRule) {
+        // TODO (1.13)
+        return null;
+    }
+
+    public <V> void prop$setGameRule(GameRule<V> gameRule, V value) {
+        // TODO (1.13)
+    }
+
+    public Map<GameRule<?>, ?> prop$getGameRules() {
+        // TODO (1.13)
+        return null;
+    }
+
+    public Weather prop$getWeather() {
+        // TODO (1.13)
+
+        return null;
+    }
+
+    public Duration prop$getRemainingWeatherDuration() {
+        // TODO (1.13) - Since this is in ticks, this seems really weird..
+        return null;
+    }
+
+    public Duration prop$getRunningWeatherDuration() {
+        // TODO (1.13) - Since this is in ticks, this seems really weird..
+        return null;
+    }
+
+    public void prop$setWeather(Weather weather) {
+        // TODO (1.13)
+    }
+
+    public void prop$setWeather(Weather weather, Duration duration) {
+        // TODO (1.13)
+    }
+
+    // IMixinWorldInfo
     @Override
     public DimensionType getDimensionType() {
         return this.dimensionType;
     }
 
     @Override
-    public void setDimensionType(DimensionType type) {
-        this.dimensionType = type;
-        String modId = SpongeImplHooks.getModIdFromClass(this.dimensionType.getDimensionClass());
-        if (!modId.equals("minecraft")) {
-            this.isMod = true;
-        }
+    public void setDimensionType(@Nullable DimensionType dimensionType) {
+        this.dimensionType = dimensionType;
     }
 
     @Override
-    public PortalAgentType getPortalAgentType() {
-        if (this.portalAgentType == null) {
-            this.portalAgentType = PortalAgentTypes.DEFAULT;
-        }
-        return this.portalAgentType;
+    public UUID getUniqueId() {
+        return this.uniqueId;
+    }
+
+    @Override
+    public void setUniqueId(@Nullable UUID uniqueId) {
+        this.uniqueId = uniqueId;
+    }
+
+    @Override
+    public boolean isFake() {
+        return this.isFake;
+    }
+
+    @Override
+    public boolean isCreatedByMod() {
+        return this.createdByMod;
+    }
+
+    @Override
+    public void setCreatedByMod(boolean createdByMod) {
+        this.createdByMod = createdByMod;
     }
 
     @Override
     public void setPortalAgentType(PortalAgentType type) {
+        checkNotNull(type);
         this.portalAgentType = type;
-    }
-
-    @Intrinsic
-    public String worldproperties$getWorldName() {
-        return this.levelName;
-    }
-
-    @Intrinsic
-    public boolean worldproperties$isRaining() {
-        return this.raining;
-    }
-
-    @Override
-    public void setRaining(boolean state) {
-        this.raining = state;
-    }
-
-    @Intrinsic
-    public int worldproperties$getRainTime() {
-        return this.rainTime;
-    }
-
-    @Intrinsic
-    public void worldproperties$setRainTime(int time) {
-        this.rainTime = time;
-    }
-
-    @Intrinsic
-    public boolean worldproperties$isThundering() {
-        return this.thundering;
-    }
-
-    @Intrinsic
-    public void worldproperties$setThundering(boolean state) {
-        this.thundering = state;
-    }
-
-    @Override
-    public int getThunderTime() {
-        return this.thunderTime;
-    }
-
-    @Override
-    public void setThunderTime(int time) {
-        this.thunderTime = time;
-    }
-
-    @Override
-    public GameMode getGameMode() {
-        return (GameMode) (Object) this.gameType;
-    }
-
-    @Override
-    public void setGameMode(GameMode gamemode) {
-        this.gameType = (GameType) (Object) gamemode;
-    }
-
-    @Override
-    public boolean usesMapFeatures() {
-        return this.mapFeaturesEnabled;
-    }
-
-    @Override
-    public void setMapFeaturesEnabled(boolean state) {
-        this.mapFeaturesEnabled = state;
-    }
-
-    @Override
-    public boolean isHardcore() {
-        return this.hardcore;
-    }
-
-    @Override
-    public void setHardcore(boolean state) {
-        this.hardcore = state;
-    }
-
-    @Override
-    public boolean areCommandsAllowed() {
-        return this.allowCommands;
-    }
-
-    @Override
-    public void setCommandsAllowed(boolean state) {
-        this.allowCommands = state;
-    }
-
-    @Override
-    public boolean isInitialized() {
-        return this.initialized;
-    }
-
-    @Override
-    public Difficulty getDifficulty() {
-        return (Difficulty) (Object) this.difficulty;
-    }
-
-    @Inject(method = "setDifficulty", at = @At("HEAD"), cancellable = true)
-    private void onSetDifficultyVanilla(EnumDifficulty newDifficulty, CallbackInfo ci) {
-        this.hasCustomDifficulty = true;
-        if (newDifficulty == null) {
-            // This is an error from someone
-            new PrettyPrinter(60).add("Null Difficulty being set!").centre().hr()
-                .add("Someone (not Sponge) is attempting to set a null difficulty to this WorldInfo setup! Please report to the mod/plugin author!")
-                .add()
-                .addWrapped(60, " %s : %s", "WorldInfo", this)
-                .add()
-                .add(new Exception("Stacktrace"))
-                .log(SpongeImpl.getLogger(), Level.ERROR);
-            ci.cancel(); // We cannot let the null set the field.
-            return;
-        }
-
-        // If the difficulty is set, we need to sync it to the players in the world attached to the worldinfo (if any)
-        WorldManager.getWorlds()
-          .stream()
-          .filter(world -> world.getWorldInfo() == (WorldInfo) (Object) this)
-          .flatMap(world -> world.playerEntities.stream())
-          .filter(player -> player instanceof EntityPlayerMP)
-          .map(player -> (EntityPlayerMP) player)
-          .forEach(player -> player.connection.sendPacket(new SPacketServerDifficulty(newDifficulty, ((WorldInfo) (Object) this).isDifficultyLocked
-            ())));
-    }
-
-    @Override
-    public void setDifficulty(Difficulty difficulty) {
-        this.setDifficulty((EnumDifficulty) (Object) difficulty);
     }
 
     @Override
@@ -453,365 +369,69 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     }
 
     @Override
-    public void forceSetDifficulty(EnumDifficulty difficulty) {
+    public void setNonCustomDifficulty(EnumDifficulty difficulty) {
         this.difficulty = difficulty;
     }
 
+    @Nullable
     @Override
-    public boolean doesGenerateBonusChest() {
-        return this.generateBonusChest;
-    }
-
-    private void setDoesGenerateBonusChest(boolean state) {
-        this.generateBonusChest = state;
-    }
-
-    @Override
-    public Vector3d getWorldBorderCenter() {
-        return new Vector3d(this.borderCenterX, 0, this.borderCenterZ);
-    }
-
-    @Override
-    public void setWorldBorderCenter(double x, double z) {
-        this.borderCenterX = x;
-        this.borderCenterZ = z;
-    }
-
-    @Override
-    public double getWorldBorderDiameter() {
-        return this.borderSize;
-    }
-
-    @Override
-    public void setWorldBorderDiameter(double diameter) {
-        this.borderSize = diameter;
-    }
-
-    @Override
-    public double getWorldBorderTargetDiameter() {
-        return this.borderSizeLerpTarget;
-    }
-
-    @Override
-    public void setWorldBorderTargetDiameter(double diameter) {
-        this.borderSizeLerpTarget = diameter;
-    }
-
-    @Override
-    public double getWorldBorderDamageThreshold() {
-        return this.borderSafeZone;
-    }
-
-    @Override
-    public void setWorldBorderDamageThreshold(double distance) {
-        this.borderSafeZone = distance;
-    }
-
-    @Override
-    public double getWorldBorderDamageAmount() {
-        return this.borderDamagePerBlock;
-    }
-
-    @Override
-    public void setWorldBorderDamageAmount(double damage) {
-        this.borderDamagePerBlock = damage;
-    }
-
-    @Override
-    public int getWorldBorderWarningTime() {
-        return this.borderWarningTime;
-    }
-
-    @Override
-    public void setWorldBorderWarningTime(int time) {
-        this.borderWarningTime = time;
-    }
-
-    @Override
-    public int getWorldBorderWarningDistance() {
-        return this.borderWarningDistance;
-    }
-
-    @Override
-    public void setWorldBorderWarningDistance(int distance) {
-        this.borderWarningDistance = distance;
-    }
-
-    @Override
-    public long getWorldBorderTimeRemaining() {
-        return this.borderSizeLerpTime;
-    }
-
-    @Override
-    public void setWorldBorderTimeRemaining(long time) {
-        this.borderSizeLerpTime = time;
-    }
-
-    @Override
-    public Optional<String> getGameRule(String gameRule) {
-        checkNotNull(gameRule, "The gamerule cannot be null!");
-        if (this.gameRules.hasRule(gameRule)) {
-            return Optional.of(this.gameRules.getString(gameRule));
-        }
-        return Optional.empty();
-    }
-
-    @Override
-    public Map<String, String> getGameRules() {
-        ImmutableMap.Builder<String, String> ruleMap = ImmutableMap.builder();
-        for (String rule : this.gameRules.getRules()) {
-            ruleMap.put(rule, this.gameRules.getString(rule));
-        }
-        return ruleMap.build();
-    }
-
-    @Override
-    public void setGameRule(String gameRule, String value) {
-        checkNotNull(gameRule, "The gamerule cannot be null!");
-        checkNotNull(value, "The gamerule value cannot be null!");
-        this.gameRules.setOrCreateGameRule(gameRule, value);
-    }
-
-    @Override
-    public boolean removeGameRule(String gameRule) {
-        checkNotNull(gameRule, "The gamerule cannot be null!");
-        return ((IMixinGameRules) this.gameRules).removeGameRule(gameRule);
-    }
-
-    @Override
-    public void setDimensionId(int id) {
-        this.dimensionId = id;
-    }
-
-    @Override
-    public Integer getDimensionId() {
-        return this.dimensionId;
-    }
-
-    @Override
-    public UUID getUniqueId() {
-        return this.uuid;
-    }
-
-    @Override
-    public int getContentVersion() {
-        return 0;
-    }
-
-    @Override
-    public DataContainer toContainer() {
-        return NbtTranslator.getInstance().translateFrom(this.cloneNBTCompound(null));
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return this.getOrCreateWorldConfig().getConfig().getWorld().isWorldEnabled();
-    }
-
-    @Override
-    public void setEnabled(boolean enabled) {
-        this.getOrCreateWorldConfig().getConfig().getWorld().setWorldEnabled(enabled);
-    }
-
-    @Override
-    public boolean loadOnStartup() {
-        Boolean loadOnStartup = this.getOrCreateWorldConfig().getConfig().getWorld().loadOnStartup();
-        if (loadOnStartup == null) {
-           loadOnStartup = ((IMixinDimensionType) this.dimensionType).shouldGenerateSpawnOnLoad();
-           this.setLoadOnStartup(loadOnStartup);
-        }
-        return loadOnStartup;
-    }
-
-    @Override
-    public void setLoadOnStartup(boolean state) {
-        this.getOrCreateWorldConfig().getConfig().getWorld().setLoadOnStartup(state);
-        this.saveConfig();
-    }
-
-    @Override
-    public boolean doesKeepSpawnLoaded() {
-        Boolean keepSpawnLoaded = this.getOrCreateWorldConfig().getConfig().getWorld().getKeepSpawnLoaded();
-        if (keepSpawnLoaded == null) {
-            keepSpawnLoaded = ((IMixinDimensionType) this.dimensionType).shouldLoadSpawn();
-        } else if (this.isMod && !keepSpawnLoaded) { // If disabled and a mod dimension, validate
-            if (this.dimensionId == ((net.minecraft.world.DimensionType)(Object) this.dimensionType).getId()) {
-                keepSpawnLoaded = ((IMixinDimensionType) this.dimensionType).shouldKeepSpawnLoaded();
-                this.setKeepSpawnLoaded(keepSpawnLoaded);
-            }
-        }
-        return keepSpawnLoaded;
-    }
-
-    @Override
-    public void setKeepSpawnLoaded(boolean loaded) {
-        this.getOrCreateWorldConfig().getConfig().getWorld().setKeepSpawnLoaded(loaded);
-        this.saveConfig();
-    }
-
-    @Override
-    public boolean doesGenerateSpawnOnLoad() {
-        Boolean shouldGenerateSpawn = this.getOrCreateWorldConfig().getConfig().getWorld().getGenerateSpawnOnLoad();
-        if (shouldGenerateSpawn == null) {
-            shouldGenerateSpawn = ((IMixinDimensionType) this.dimensionType).shouldGenerateSpawnOnLoad();
-            this.setGenerateSpawnOnLoad(shouldGenerateSpawn);
-        }
-        return shouldGenerateSpawn;
-    }
-
-    @Override
-    public void setGenerateSpawnOnLoad(boolean state) {
-        this.getOrCreateWorldConfig().getConfig().getWorld().setGenerateSpawnOnLoad(state);
-        this.saveConfig();
-    }
-
-    @Override
-    public boolean isPVPEnabled() {
-        return this.getOrCreateWorldConfig().getConfig().getWorld().getPVPEnabled();
-    }
-
-    @Override
-    public void setPVPEnabled(boolean enabled) {
-        this.getOrCreateWorldConfig().getConfig().getWorld().setPVPEnabled(enabled);
-    }
-
-    @Override
-    public void setUniqueId(UUID uniqueId) {
-        this.uuid = uniqueId;
-    }
-
-    @Override
-    public void setIsMod(boolean flag) {
-        this.isMod = flag;
-    }
-
-    @Override
-    public void setScoreboard(ServerScoreboard scoreboard) {
-        this.scoreboard = scoreboard;
-    }
-
-    @Override
-    public boolean getIsMod() {
-        return this.isMod;
-    }
-
-    @Override
-    public SpongeConfig<WorldConfig> getOrCreateWorldConfig() {
-        if (this.worldConfig == null) {
-            this.createWorldConfig();
-        }
-        return this.worldConfig;
-    }
-
-    @Override
-    public SpongeConfig<WorldConfig> getWorldConfig() {
-        return this.getOrCreateWorldConfig();
-    }
-
-    @Override
-    public Collection<WorldGeneratorModifier> getGeneratorModifiers() {
-        return WorldGeneratorModifierRegistryModule.getInstance().toModifiers(this.getOrCreateWorldConfig().getConfig().getWorldGenModifiers());
-    }
-
-    @Override
-    public void setGeneratorModifiers(Collection<WorldGeneratorModifier> modifiers) {
-        checkNotNull(modifiers, "modifiers");
-
-        this.getOrCreateWorldConfig().getConfig().getWorldGenModifiers().clear();
-        this.getOrCreateWorldConfig().getConfig().getWorldGenModifiers().addAll(WorldGeneratorModifierRegistryModule.getInstance().toIds(modifiers));
-    }
-
-    @Override
-    public DataContainer getGeneratorSettings() {
-        // Minecraft uses a String, we want to return a fancy DataContainer
-        // Parse the world generator settings as JSON
-        try {
-            return DataFormats.JSON.read(this.generatorOptions);
-        } catch (JsonParseException | IOException ignored) {
-        }
-        return DataContainer.createNew().set(DataQueries.WORLD_CUSTOM_SETTINGS, this.generatorOptions);
-    }
-
-    @Override
-    public SerializationBehavior getSerializationBehavior() {
-        return this.serializationBehavior;
-    }
-
-    @Override
-    public void setSerializationBehavior(SerializationBehavior behavior) {
-        this.serializationBehavior = behavior;
-    }
-
-    @Override
-    public Optional<DataView> getPropertySection(DataQuery path) {
-        if (this.spongeRootLevelNbt.hasKey(path.toString())) {
-            return Optional
-                    .<DataView>of(NbtTranslator.getInstance().translateFrom(this.spongeRootLevelNbt.getCompound(path.toString())));
-        }
-        return Optional.empty();
-    }
-
-    @Override
-    public void setPropertySection(DataQuery path, DataView data) {
-        NBTTagCompound nbt = NbtTranslator.getInstance().translateData(data);
-        this.spongeRootLevelNbt.setTag(path.toString(), nbt);
-    }
-
-    @Override
-    public int getIndexForUniqueId(UUID uuid) {
-        final Integer index = this.playerUniqueIdMap.inverse().get(uuid);
+    public Integer getOrCreateIndexForPlayerUniqueId(UUID uniqueId) {
+        checkNotNull(uniqueId);
+        Integer index = this.playerUniqueIdMap.inverse().get(uniqueId);
         if (index != null) {
             return index;
         }
 
-        this.playerUniqueIdMap.put(this.trackedUniqueIdCount, uuid);
-        this.pendingUniqueIds.add(uuid);
+        this.playerUniqueIdMap.put(this.trackedUniqueIdCount, uniqueId);
+        this.pendingPlayerUniqueIds.add(uniqueId);
         return this.trackedUniqueIdCount++;
     }
 
+    @Nullable
     @Override
-    public Optional<UUID> getUniqueIdForIndex(int index) {
-        return Optional.ofNullable(this.playerUniqueIdMap.get(index));
+    public UUID getPlayerUniqueIdForIndex(int index) {
+        return this.playerUniqueIdMap.get(index);
     }
 
     @Override
-    public NBTTagCompound getSpongeRootLevelNbt() {
-        this.writeSpongeNbt();
-        return this.spongeRootLevelNbt;
-    }
+    public SpongeConfig<WorldConfig> createConfig() {
+        final DimensionType dimensionType = this.getDimensionType();
 
-    @Override
-    public NBTTagCompound getSpongeNbt() {
-        this.writeSpongeNbt();
-        return this.spongeNbt;
-    }
-
-    @Override
-    public void setSpongeRootLevelNBT(NBTTagCompound nbt) {
-        this.spongeRootLevelNbt = nbt;
-        if (nbt.hasKey(NbtDataUtil.SPONGE_DATA)) {
-            this.spongeNbt = nbt.getCompound(NbtDataUtil.SPONGE_DATA);
+        if (dimensionType == null) {
+            return null;
         }
+
+        if (this.config == null) {
+            this.config =
+                new SpongeConfig<>(SpongeConfig.Type.WORLD, ((IMixinDimensionType) this.dimensionType).getGlobalDimensionType().getConfigPath()
+                    .resolve(this.levelName)
+                    .resolve("world.conf"),
+                    SpongeImpl.ECOSYSTEM_ID,
+                    ((IMixinDimensionType) dimensionType).getGlobalDimensionType().getConfig());
+        }
+
+        return this.config;
+    }
+
+    @Nullable
+    @Override
+    public SpongeConfig<WorldConfig> getConfig() {
+        return this.config;
     }
 
     @Override
-    public void readSpongeNbt(NBTTagCompound nbt) {
-        final UUID nbtUniqueId = nbt.getUniqueId(NbtDataUtil.UUID);
-        if (UUID.fromString("00000000-0000-0000-0000-000000000000").equals(nbtUniqueId)) {
+    public void readSpongeCompound(NBTTagCompound compound) {
+        checkNotNull(compound);
+
+        if (this.isFake) {
             return;
         }
-        this.uuid = nbtUniqueId;
-        this.dimensionId = nbt.getInt(NbtDataUtil.DIMENSION_ID);
-        final String dimensionTypeId = nbt.getString(NbtDataUtil.DIMENSION_TYPE);
-        final DimensionType dimensionType = (org.spongepowered.api.world.DimensionType)(Object) WorldManager.getDimensionType(this.dimensionId).orElse(null);
-        this.setDimensionType(dimensionType != null ? dimensionType : DimensionTypeRegistryModule.getInstance().getById(dimensionTypeId)
-                .orElseThrow(FunctionalUtil.invalidArgument("Could not find a DimensionType registered for world '" + this.getWorldName() + "' with dim id: " + this.dimensionId)));
-        this.generateBonusChest = nbt.getBoolean(NbtDataUtil.GENERATE_BONUS_CHEST);
-        this.portalAgentType = PortalAgentRegistryModule.getInstance().validatePortalAgent(nbt.getString(NbtDataUtil.PORTAL_AGENT_TYPE), this.levelName);
-        this.hasCustomDifficulty = nbt.getBoolean(NbtDataUtil.HAS_CUSTOM_DIFFICULTY);
+
+        this.portalAgentType = PortalAgentRegistryModule.getInstance().validatePortalAgent(compound.getString(NbtDataUtil.PORTAL_AGENT_TYPE), this.levelName);
+        this.hasCustomDifficulty = compound.getBoolean(NbtDataUtil.HAS_CUSTOM_DIFFICULTY);
         this.trackedUniqueIdCount = 0;
-        if (nbt.hasKey(NbtDataUtil.WORLD_SERIALIZATION_BEHAVIOR)) {
-            short saveBehavior = nbt.getShort(NbtDataUtil.WORLD_SERIALIZATION_BEHAVIOR);
+        if (compound.contains(NbtDataUtil.WORLD_SERIALIZATION_BEHAVIOR)) {
+            short saveBehavior = compound.getShort(NbtDataUtil.WORLD_SERIALIZATION_BEHAVIOR);
             if (saveBehavior == 1) {
                 this.serializationBehavior = SerializationBehaviors.AUTOMATIC;
             } else if (saveBehavior == 0) {
@@ -820,10 +440,10 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
                 this.serializationBehavior = SerializationBehaviors.NONE;
             }
         }
-        if (nbt.hasKey(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, NbtDataUtil.TAG_LIST)) {
-            final NBTTagList playerIdList = nbt.getTagList(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, NbtDataUtil.TAG_COMPOUND);
-            for (int i = 0; i < playerIdList.tagCount(); i++) {
-                final NBTTagCompound playerId = playerIdList.getCompoundTagAt(i);
+        if (compound.contains(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, NbtDataUtil.TAG_LIST)) {
+            final NBTTagList playerIdList = compound.getList(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, NbtDataUtil.TAG_COMPOUND);
+            for (int i = 0; i < playerIdList.size(); i++) {
+                final NBTTagCompound playerId = playerIdList.getCompound(i);
                 final UUID playerUuid = playerId.getUniqueId(NbtDataUtil.UUID);
                 final Integer playerIndex = this.playerUniqueIdMap.inverse().get(playerUuid);
                 if (playerIndex == null) {
@@ -836,63 +456,100 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         }
     }
 
-    private void writeSpongeNbt() {
-        // Never save Sponge data if we have no UUID
-        if (this.uuid != null) {
-            this.spongeNbt.setInteger(NbtDataUtil.DATA_VERSION, DataUtil.DATA_VERSION);
-            this.spongeNbt.setUniqueId(NbtDataUtil.UUID, this.uuid);
-            this.spongeNbt.setInteger(NbtDataUtil.DIMENSION_ID, this.dimensionId);
-            this.spongeNbt.setString(NbtDataUtil.DIMENSION_TYPE, this.dimensionType.getKey().toString());
-            this.spongeNbt.setBoolean(NbtDataUtil.GENERATE_BONUS_CHEST, this.generateBonusChest);
-            if (this.portalAgentType == null) {
-                this.portalAgentType = PortalAgentTypes.DEFAULT;
-            }
-            this.spongeNbt.setString(NbtDataUtil.PORTAL_AGENT_TYPE, this.portalAgentType.getPortalAgentClass().getName());
-            short saveBehavior = 1;
-            if (this.serializationBehavior == SerializationBehaviors.NONE) {
-                saveBehavior = -1;
-            } else if (this.serializationBehavior == SerializationBehaviors.MANUAL) {
-                saveBehavior = 0;
-            }
-            this.spongeNbt.setShort(NbtDataUtil.WORLD_SERIALIZATION_BEHAVIOR, saveBehavior);
-            this.spongeNbt.setBoolean(NbtDataUtil.HAS_CUSTOM_DIFFICULTY, this.hasCustomDifficulty);
-            final Iterator<UUID> iterator = this.pendingUniqueIds.iterator();
-            final NBTTagList playerIdList = this.spongeNbt.getTagList(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, NbtDataUtil.TAG_COMPOUND);
-            while (iterator.hasNext()) {
-                final NBTTagCompound compound = new NBTTagCompound();
-                compound.setUniqueId(NbtDataUtil.UUID, iterator.next());
-                playerIdList.appendTag(compound);
-                iterator.remove();
-            }
+    @Override
+    public NBTTagCompound writeSpongeCompound(NBTTagCompound compound) {
+        checkNotNull(compound);
+
+        if (this.isFake) {
+            return compound;
         }
+
+        compound.putInt(NbtDataUtil.DATA_VERSION, DataUtil.DATA_VERSION);
+        compound.putUniqueId(NbtDataUtil.UUID, this.uniqueId);
+        compound.putInt(NbtDataUtil.DIMENSION_ID, this.dimensionType.getId());
+        compound.putString(NbtDataUtil.DIMENSION_TYPE, ((IMixinDimensionType) this.dimensionType).getGlobalDimensionType().getKey().toString());
+        compound.putString(NbtDataUtil.PORTAL_AGENT_TYPE, this.portalAgentType.getPortalAgentClass().getName());
+        short saveBehavior = 1;
+        if (this.serializationBehavior == SerializationBehaviors.NONE) {
+            saveBehavior = -1;
+        } else if (this.serializationBehavior == SerializationBehaviors.MANUAL) {
+            saveBehavior = 0;
+        }
+        compound.putShort(NbtDataUtil.WORLD_SERIALIZATION_BEHAVIOR, saveBehavior);
+        compound.putBoolean(NbtDataUtil.HAS_CUSTOM_DIFFICULTY, this.hasCustomDifficulty);
+        final Iterator<UUID> iterator = this.pendingPlayerUniqueIds.iterator();
+        final NBTTagList playerIdList = new NBTTagList();
+        while (iterator.hasNext()) {
+            final NBTTagCompound playerUniqueIdCompound = new NBTTagCompound();
+            playerUniqueIdCompound.putUniqueId(NbtDataUtil.UUID, iterator.next());
+            playerIdList.add(compound);
+            iterator.remove();
+        }
+
+        compound.put(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, playerIdList);
+        return compound;
     }
 
-    @Override
-    public DataContainer getAdditionalProperties() {
-        NBTTagCompound additionalProperties = this.spongeRootLevelNbt.copy();
-        additionalProperties.removeTag(SpongeImpl.ECOSYSTEM_NAME);
-        return NbtTranslator.getInstance().translateFrom(additionalProperties);
+    @Inject(method = "<init>(Lnet/minecraft/world/WorldSettings;Ljava/lang/String;)V", at = @At("RETURN"))
+    public void onConstruct(WorldSettings settings, String levelName, CallbackInfo ci) {
+        if (levelName.equals("MpServer") || levelName.equals("sponge$dummy_world")) {
+            this.isFake = true;
+            return;
+        }
+
+        final WorldArchetype archetype = (WorldArchetype) (Object) settings;
+
+        final SpongeConfig<WorldConfig> config = this.createConfig();
+        final WorldCategory category = config.getConfig().getWorld();
+        category.setWorldEnabled(archetype.isEnabled());
+        category.setLoadOnStartup(archetype.doesLoadOnStartup());
+        category.setKeepSpawnLoaded(archetype.doesKeepSpawnLoaded());
+        category.setGenerateSpawnOnLoad(archetype.doesGenerateSpawnOnLoad());
+        category.setPVPEnabled(archetype.isPVPEnabled());
+
+        // TODO (1.13) - Determine the following as candidacy for configs.
+        this.gameType = (GameType) (Object) archetype.getGameMode();
+        this.generator = (WorldType) (Object) archetype.getGeneratorType();
+        this.mapFeaturesEnabled = archetype.areStructuresEnabled();
+        this.hardcore = archetype.isHardcore();
+        this.allowCommands = archetype.areCommandsAllowed();
+        this.serializationBehavior = archetype.getSerializationBehavior();
+
+        // Since the Archetype wants the difficulty set, we want it counted as a custom one
+        this.setDifficulty((EnumDifficulty) (Object) archetype.getDifficulty());
+
+        // TODO (1.13) - Review Portal Agents
+        this.portalAgentType = archetype.getPortalAgentType();
+
+        this.getConfig().save();
     }
 
-    private void saveConfig() {
-        this.getOrCreateWorldConfig().save();
-    }
+    @Inject(method = "setDifficulty", at = @At("HEAD"), cancellable = true)
+    private void onSetDifficultyVanilla(EnumDifficulty newDifficulty, CallbackInfo ci) {
+        this.hasCustomDifficulty = true;
+        if (newDifficulty == null) {
+            // This is an error from someone
+            new PrettyPrinter(60).add("Null Difficulty being set!").centre().hr()
+                .add("Someone (not Sponge) is attempting to set a null difficulty to the properties of a world! Please report to the mod/plugin "
+                    + "author!")
+                .add()
+                .addWrapped(60, " %s : %s", "WorldInfo", this)
+                .add()
+                .add(new Exception("Stacktrace"))
+                .log(SpongeImpl.getLogger(), Level.ERROR);
+            ci.cancel();
+            return;
+        }
 
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-            .add("levelName", this.levelName)
-            .add("terrainType", this.terrainType)
-            .add("uuid", this.uuid)
-            .add("dimensionId", this.dimensionId)
-            .add("dimensionType", this.dimensionType)
-            .add("spawnX", this.spawnX)
-            .add("spawnY", this.spawnY)
-            .add("spawnZ", this.spawnZ)
-            .add("gameType", this.gameType)
-            .add("hardcore", this.hardcore)
-            .add("difficulty", this.difficulty)
-            .add("isMod", this.isMod)
-            .toString();
+        if (Sponge.isServerAvailable()) {
+            final WorldLoader manager = ((IMixinMinecraftServer) SpongeImpl.getServer()).getWorldLoader();
+            manager.getWorlds()
+                .stream()
+                .filter(world -> world.getWorldInfo() == (WorldInfo) (Object) this)
+                .flatMap(world -> world.playerEntities.stream())
+                .filter(player -> player instanceof EntityPlayerMP)
+                .map(player -> (EntityPlayerMP) player)
+                .forEach(player -> player.connection.sendPacket(new SPacketServerDifficulty(newDifficulty, this.isDifficultyLocked())));
+        }
     }
 }

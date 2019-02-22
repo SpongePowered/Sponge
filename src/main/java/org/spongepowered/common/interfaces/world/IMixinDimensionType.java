@@ -24,29 +24,48 @@
  */
 package org.spongepowered.common.interfaces.world;
 
-import org.spongepowered.api.service.context.Context;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.type.DimensionConfig;
-
-import java.nio.file.Path;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.world.WorldServer;
+import net.minecraft.world.dimension.Dimension;
+import net.minecraft.world.dimension.DimensionType;
+import org.spongepowered.common.registry.type.world.dimension.GlobalDimensionType;
 
 public interface IMixinDimensionType {
 
-    SpongeConfig<DimensionConfig> getDimensionConfig();
+    /**
+     * Gets the {@link GlobalDimensionType}.
+     *
+     * <p>This is used to associate {@link WorldServer} {@link DimensionType}s to their global one. Ex. World A, B, and C can all be "Overworld"
+     * style worlds, each have their own Mojang DimensionType, but one Sponge DimensionType.</p>
+     * @return The global dimension type
+     */
+    GlobalDimensionType getGlobalDimensionType();
 
-    Context getContext();
+    /**
+     * Sets the {@link GlobalDimensionType}.
+     *
+     * @see {@link IMixinDimensionType#getGlobalDimensionType()}
+     *
+     * @param dimensionType The global dimension type
+     */
+    void setGlobalDimensionType(GlobalDimensionType dimensionType);
 
-    String getEnumName();
+    /**
+     * Gets a {@link DimensionType} that is compatible with a client.
+     *
+     * <p>In SpongeVanilla, this will return {@link DimensionType#OVERWORLD} for {@link Dimension} that are not Vanilla.</p>
+     *
+     * <p>In SpongeForge. this will return the result that SpongeVanilla would if and only if the client is Vanilla. Otherwise
+     * the dimension registration will be sent down.</p>
+     * @return The compatible dimension type
+     */
+    DimensionType asClientDimensionType();
 
-    String getModId();
-
-    Path getConfigPath();
-
-    boolean shouldGenerateSpawnOnLoad();
-
-    boolean shouldLoadSpawn();
-
-    boolean shouldKeepSpawnLoaded();
-
-    void setShouldLoadSpawn(boolean keepSpawnLoaded);
+    /**
+     * Sends dimension registration to the {@link EntityPlayerMP}.
+     *
+     * <p>This is entirely dependent upon the player's client honoring this. Mostly added for Forge clients.</p>
+     * @param player The player
+     */
+    void sendDimensionRegistrationTo(EntityPlayerMP player);
 }

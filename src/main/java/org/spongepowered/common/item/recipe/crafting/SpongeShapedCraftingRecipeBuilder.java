@@ -30,7 +30,7 @@ import static com.google.common.base.Preconditions.checkState;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.chars.Char2ObjectArrayMap;
-import net.minecraft.item.crafting.ShapedRecipes;
+import net.minecraft.item.crafting.ShapedRecipe;
 import net.minecraft.util.NonNullList;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -174,7 +174,7 @@ public final class SpongeShapedCraftingRecipeBuilder extends SpongeCatalogBuilde
         ingredientsMap.putIfAbsent(" ", net.minecraft.item.crafting.Ingredient.EMPTY);
 
         // Throws JsonException when pattern is not complete or defines unused Ingredients
-        NonNullList<net.minecraft.item.crafting.Ingredient> ingredients = ShapedRecipes.deserializeIngredients(keys, ingredientsMap, width, height);
+        NonNullList<net.minecraft.item.crafting.Ingredient> ingredients = ShapedRecipe.deserializeIngredients(keys, ingredientsMap, width, height);
 
         return ((ShapedCraftingRecipe) new SpongeShapedRecipe(key, name, this.groupName,
                 width, height, ingredients, ItemStackUtil.toNative(this.result)));

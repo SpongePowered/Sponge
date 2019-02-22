@@ -26,15 +26,15 @@ package org.spongepowered.common.mixin.core.item;
 
 import net.minecraft.item.ItemMap;
 import net.minecraft.item.ItemMapBase;
-import net.minecraft.world.ISaveDataAccess;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.storage.WorldSavedData;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.world.WorldManager;
+import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 
 import java.util.function.Function;
 
@@ -52,7 +52,7 @@ public class MixinItemMap extends ItemMapBase {
         if (world.isRemote) {
             return world.func_212410_a(dimensionType, key);
         }
-        return WorldManager.getWorldByDimensionId(0).get().func_212410_a(dimensionType, key);
+        return ((IMixinMinecraftServer) Sponge.getServer()).getWorldLoader().getWorld(DimensionType.OVERWORLD).get().func_212410_a(dimensionType, key);
     }
 
 
@@ -63,20 +63,20 @@ public class MixinItemMap extends ItemMapBase {
         if (((World) world).isRemote) {
             return world.load((Function) constructor, dataId);
         }
-        return WorldManager.getWorldByDimensionId(0).get().loadData((Function) constructor, dataId);
+        return ((IMixinMinecraftServer) Sponge.getServer()).getWorldLoader().getWorld(DimensionType.OVERWORLD).get().loadData((Function) constructor, dataId);
     }
 
     @Redirect(method = "getMapData", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getUniqueDataId(Ljava/lang/String;)I"))
     private static int getOverworldUniqueDataId(World worldIn, String key) {
         // The caller already has remote check
-        return WorldManager.getWorldByDimensionId(0).get().getUniqueDataId(key);
+        return ((IMixinMinecraftServer) Sponge.getServer()).getWorldLoader().getWorld(DimensionType.OVERWORLD).get().getUniqueDataId(key);
     }
 
     @Redirect(method = "getMapData", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;"
         + "setData(Ljava/lang/String;Lnet/minecraft/world/storage/WorldSavedData;)V"))
     private static void setOverworldMapData(World worldIn, String dataId, WorldSavedData data) {
         // The caller already has remote check
-        WorldManager.getWorldByDimensionId(0).get().setData(dataId, data);
+        return ((IMixinMinecraftServer) Sponge.getServer()).getWorldLoader().getWorld(DimensionType.OVERWORLD).setData(dataId, data);
     }
 
     @Redirect(method = "scaleMap", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getUniqueDataId(Ljava/lang/String;)I"))
@@ -84,7 +84,7 @@ public class MixinItemMap extends ItemMapBase {
         if (worldIn.isRemote) {
             return worldIn.getUniqueDataId(key);
         }
-        return WorldManager.getWorldByDimensionId(0).get().getUniqueDataId(key);
+        return ((IMixinMinecraftServer) Sponge.getServer()).getWorldLoader().getWorld(DimensionType.OVERWORLD).get().getUniqueDataId(key);
     }
 
     @Redirect(method = "scaleMap", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;"
@@ -93,7 +93,7 @@ public class MixinItemMap extends ItemMapBase {
         if (worldIn.isRemote) {
             worldIn.setData(dataId, data);
         } else {
-            WorldManager.getWorldByDimensionId(0).get().setData(dataId, data);
+            return ((IMixinMinecraftServer) Sponge.getServer()).getWorldLoader().getWorld(DimensionType.OVERWORLD).setData(dataId, data);
         }
     }
 
@@ -102,7 +102,7 @@ public class MixinItemMap extends ItemMapBase {
         if (worldIn.isRemote) {
             return worldIn.getUniqueDataId(key);
         }
-        return WorldManager.getWorldByDimensionId(0).get().getUniqueDataId(key);
+        return ((IMixinMinecraftServer) Sponge.getServer()).getWorldLoader().getWorld(DimensionType.OVERWORLD).get().getUniqueDataId(key);
     }
 
     @Redirect(method = "createMapData", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;"
@@ -111,7 +111,7 @@ public class MixinItemMap extends ItemMapBase {
         if (worldIn.isRemote) {
             worldIn.setData(dataId, data);
         } else {
-            WorldManager.getWorldByDimensionId(0).get().setData(dataId, data);
+            return ((IMixinMinecraftServer) Sponge.getServer()).getWorldLoader().getWorld(DimensionType.OVERWORLD).get().setData(dataId, data);
         }
     }
 }

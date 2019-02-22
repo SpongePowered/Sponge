@@ -28,8 +28,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Preconditions;
 import net.minecraft.inventory.InventoryEnderChest;
+import net.minecraft.world.WorldServer;
+import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.storage.WorldInfo;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.profile.GameProfile;
@@ -39,16 +42,17 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.player.SpongeUser;
+import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.IMixinSubject;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
-import org.spongepowered.common.mixin.core.world.storage.MixinWorldInfo;
-import org.spongepowered.common.world.WorldManager;
+import org.spongepowered.common.world.WorldLoader;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -61,7 +65,7 @@ public abstract class MixinSpongeUser implements User, IMixinSubject {
     @Shadow private double posX;
     @Shadow private double posY;
     @Shadow private double posZ;
-    @Shadow private int dimension;
+    @Shadow private DimensionType dimensionType;
     @Shadow private float rotationPitch;
     @Shadow private float rotationYaw;
 
@@ -109,18 +113,30 @@ public abstract class MixinSpongeUser implements User, IMixinSubject {
 
     @Override
     public Optional<UUID> getWorldUniqueId() {
-        Optional<String> folder = WorldManager.getWorldFolderByDimensionId(this.dimension);
-        return folder.map(WorldManager::getWorldProperties).flatMap(e -> e.map(WorldProperties::getUniqueId));
+        final WorldLoader loader = ((IMixinMinecraftServer) Sponge.getServer()).getWorldLoader();
+
+        WorldServer world = loader.getWorld(this.dimensionType).orElse(null);
+        if (world == null) {
+            world = loader.getWorld(this.dimensionType.getSuffix()).orElse(null);
+        }
+
+        UUID uniqueId = null;
+        if (world != null) {
+            uniqueId = ((World) world).getUniqueId();
+        }
+
+        return Optional.ofNullable(uniqueId);
     }
 
     @Override
     public boolean setLocation(Vector3d position, UUID world) {
-        WorldProperties prop = WorldManager.getWorldProperties(world).orElseThrow(() -> new IllegalArgumentException("Invalid World: No world found for UUID"));
-        Integer dimensionId = ((IMixinWorldInfo) prop).getDimensionId();
-        if (dimensionId == null) {
-            throw new IllegalArgumentException("Invalid World: missing dimensionID)");
+        final WorldLoader loader = ((IMixinMinecraftServer) Sponge.getServer()).getWorldLoader();
+        final WorldInfo info = loader.getWorldInfo(world).orElseThrow(() -> new IllegalArgumentException(
+            "Invalid World: No world found for UUID"));
+        if (((IMixinWorldInfo) info).getDimensionType() == null) {
+            throw new IllegalArgumentException("Invalid World: Not initialized and has no Dimension registration.");
         }
-        this.dimension = dimensionId;
+        this.dimensionType = ((IMixinWorldInfo) info).getDimensionType();
         this.posX = position.getX();
         this.posY = position.getY();
         this.posZ = position.getZ();

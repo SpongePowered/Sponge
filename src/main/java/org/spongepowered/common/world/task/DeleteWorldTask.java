@@ -22,38 +22,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.type.world;
+package org.spongepowered.common.world.task;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import org.spongepowered.api.util.file.DeleteFileVisitor;
+import org.spongepowered.common.world.WorldLoader;
 
-import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.api.world.DimensionTypes;
-import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
-import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.concurrent.Callable;
 
-@RegisterCatalog(DimensionTypes.class)
-public final class DimensionTypeRegistryModule extends AbstractCatalogRegistryModule<org.spongepowered.api.world.DimensionType>
-    implements SpongeAdditionalCatalogRegistryModule<org.spongepowered.api.world.DimensionType> {
+public final class DeleteWorldTask implements Callable<Boolean> {
 
-    public static DimensionTypeRegistryModule getInstance() {
-        return Holder.instance;
+    private final WorldLoader manager;
+    private final Path saveFolder;
+    private final String folderName;
+
+    public DeleteWorldTask(WorldLoader manager, Path saveFolder, String folderName) {
+        this.manager = manager;
+        this.saveFolder = saveFolder;
+        this.folderName = folderName;
     }
 
     @Override
-    public boolean allowsApiRegistration() {
-        return false;
+    public Boolean call() {
+        final Path worldFolder = this.saveFolder.resolve(this.folderName);
+        if (!Files.exists(worldFolder)) {
+            this.manager.unregisterWorldInfo(this.folderName);
+            return true;
+        }
+
+        try {
+            Files.walkFileTree(worldFolder, DeleteFileVisitor.INSTANCE);
+            this.manager.unregisterWorldInfo(this.folderName);
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
-    @Override
-    public void registerAdditionalCatalog(org.spongepowered.api.world.DimensionType dimensionType) {
-        checkNotNull(dimensionType);
-        this.map.put(dimensionType.getKey(), dimensionType);
-    }
-
-    private DimensionTypeRegistryModule() {
-    }
-
-    private static final class Holder {
-        static final DimensionTypeRegistryModule instance = new DimensionTypeRegistryModule();
-    }
 }

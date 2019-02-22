@@ -59,6 +59,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.dimension.EndDimension;
 import net.minecraft.world.gen.Heightmap;
 import org.spongepowered.api.Sponge;
@@ -106,13 +107,13 @@ import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.item.IMixinItem;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
+import org.spongepowered.common.interfaces.world.IMixinDimensionType;
 import org.spongepowered.common.interfaces.world.IMixinITeleporter;
 import org.spongepowered.common.interfaces.world.IMixinTeleporter;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.entity.ProfessionRegistryModule;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.common.world.WorldManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -263,21 +264,24 @@ public final class EntityUtil {
     public static void transferPlayerToDimension(MoveEntityEvent.Teleport.Portal event, EntityPlayerMP playerIn) {
         WorldServer fromWorld = (WorldServer) event.getFromTransform().getWorld();
         WorldServer toWorld = (WorldServer) event.getToTransform().getWorld();
-        playerIn.dimension = WorldManager.getClientDimensionId(playerIn, toWorld);
+        playerIn.dimension = ((IMixinDimensionType) toWorld.getDimension().getType()).asClientDimensionType();
         toWorld.getChunkProvider().loadChunk(event.getToTransform().getLocation().getChunkPosition().getX(), event.getToTransform().getLocation().getChunkPosition().getZ());
         // Support vanilla clients teleporting to custom dimensions
-        final int dimensionId = playerIn.dimension;
+        final DimensionType dimensionType = playerIn.dimension;
 
         // Send dimension registration
         if (((IMixinEntityPlayerMP) playerIn).usesCustomClient()) {
-            WorldManager.sendDimensionRegistration(playerIn, toWorld.dimension);
+            ((IMixinDimensionType) toWorld.getDimension().getType()).sendDimensionRegistrationTo(playerIn);
         } else {
             // Force vanilla client to refresh its chunk cache if same dimension type
             if (fromWorld != toWorld && fromWorld.dimension.getType() == toWorld.dimension.getType()) {
-                playerIn.connection.sendPacket(new SPacketRespawn((dimensionId >= 0 ? -1 : 0), toWorld.getDifficulty(), toWorld.getWorldInfo().getTerrainType(), playerIn.interactionManager.getGameType()));
+                playerIn.connection.sendPacket(new SPacketRespawn((dimensionType.getId() >= DimensionType.OVERWORLD.getId() ? DimensionType.NETHER :
+                    DimensionType.OVERWORLD), toWorld.getDifficulty(), toWorld.getWorldInfo().getGenerator(),
+                    playerIn.interactionManager.getGameType()));
             }
         }
-        playerIn.connection.sendPacket(new SPacketRespawn(dimensionId, toWorld.getDifficulty(), toWorld.getWorldInfo().getTerrainType(), playerIn.interactionManager.getGameType()));
+        playerIn.connection.sendPacket(new SPacketRespawn(dimensionType, toWorld.getDifficulty(), toWorld.getWorldInfo().getGenerator(),
+            playerIn.interactionManager.getGameType()));
         playerIn.connection.sendPacket(new SPacketServerDifficulty(toWorld.getDifficulty(), toWorld.getWorldInfo().isDifficultyLocked()));
         SpongeImpl.getServer().getPlayerList().updatePermissionLevel(playerIn);
         fromWorld.removeEntityDangerously(playerIn);
@@ -345,7 +349,8 @@ public final class EntityUtil {
     }
 
     @Nullable
-    public static MoveEntityEvent.Teleport.Portal handleDisplaceEntityPortalEvent(Entity entityIn, int targetDimensionId, IMixinITeleporter teleporter) {
+    public static MoveEntityEvent.Teleport.Portal handleDisplaceEntityPortalEvent(Entity entityIn, DimensionType targetDimensionType,
+        IMixinITeleporter teleporter) {
         SpongeImplHooks.registerPortalAgentType(teleporter);
         final MinecraftServer mcServer = SpongeImpl.getServer();
         final IMixinPlayerList mixinPlayerList = (IMixinPlayerList) mcServer.getPlayerList();
@@ -353,12 +358,12 @@ public final class EntityUtil {
         final Transform fromTransform = mixinEntity.getTransform();
         final WorldServer fromWorld = ((WorldServer) entityIn.world);
         final IMixinWorldServer fromMixinWorld = (IMixinWorldServer) fromWorld;
-        boolean sameDimension = entityIn.dimension == targetDimensionId;
+        boolean sameDimension = entityIn.dimension == targetDimensionType;
         // handle the end
-        if (targetDimensionId == 1 && fromWorld.dimension instanceof EndDimension) {
-            targetDimensionId = 0;
+        if (targetDimensionType == DimensionType.THE_END && fromWorld.dimension instanceof EndDimension) {
+            targetDimensionType = DimensionType.OVERWORLD;
         }
-        WorldServer toWorld = mcServer.getWorld(targetDimensionId);
+        WorldServer toWorld = mcServer.getWorld(targetDimensionType);
         // If we attempted to travel a new dimension but were denied due to some reason such as world
         // not being loaded then short-circuit to prevent unnecessary logic from running
         if (!sameDimension && fromWorld == toWorld) {
@@ -370,7 +375,7 @@ public final class EntityUtil {
 
         // Check if we're to use a different teleporter for this world
         if (teleporter.getClass().getName().equals("net.minecraft.world.Teleporter")) {
-            worldName = portalAgents.get("minecraft:default_" + toWorld.dimension.getType().getName().toLowerCase(Locale.ENGLISH));
+            worldName = portalAgents.get("minecraft:default_" + toWorld.dimension.getType().getSuffix().toLowerCase(Locale.ENGLISH));
         } else { // custom
             worldName = portalAgents.get("minecraft:" + teleporter.getClass().getSimpleName());
         }
@@ -421,8 +426,8 @@ public final class EntityUtil {
 
                     // When MoveEntityEvent.Teleport.Portal is fully implemented,
                     // this logic should be reworked.
-                    int oldDimension = entityIn.dimension;
-                    entityIn.dimension = targetDimensionId;
+                    DimensionType oldDimension = entityIn.dimension;
+                    entityIn.dimension = targetDimensionType;
                     teleporter.placeEntity(toWorld, entityIn, entityIn.rotationYaw);
                     entityIn.dimension = oldDimension;
                 }
@@ -765,18 +770,18 @@ public final class EntityUtil {
         }
 
         final Dimension targetDimension = (Dimension) targetWorld.dimension;
-        int targetDimensionId = ((IMixinWorldServer) targetWorld).getDimensionId();
+        DimensionType targetDinensionType = ((net.minecraft.world.dimension.Dimension) targetDimension).getType();
         // Cannot respawn in requested world, use the fallback dimension for
         // that world. (Usually overworld unless a mod says otherwise).
         if (!targetDimension.allowsPlayerRespawns()) {
-            targetDimensionId = SpongeImplHooks.getRespawnDimension((net.minecraft.world.dimension.Dimension) targetDimension, playerIn);
-            targetWorld = targetWorld.getServer().getWorld(targetDimensionId);
+            targetDinensionType = SpongeImplHooks.getRespawnDimension((net.minecraft.world.dimension.Dimension) targetDimension, playerIn);
+            targetWorld = targetWorld.getServer().getWorld(targetDinensionType);
         }
 
         Vector3d targetSpawnVec = VecHelper.toVector3d(targetWorld.getSpawnPoint());
-        BlockPos bedPos = SpongeImplHooks.getBedLocation(playerIn, targetDimensionId);
+        BlockPos bedPos = SpongeImplHooks.getBedLocation(playerIn, targetDinensionType);
         if (bedPos != null) { // Player has a bed
-            boolean forceBedSpawn = SpongeImplHooks.isSpawnForced(playerIn, targetDimensionId);
+            boolean forceBedSpawn = SpongeImplHooks.isSpawnForced(playerIn, targetDinensionType);
             BlockPos bedSpawnLoc = EntityPlayer.getBedSpawnLocation(targetWorld, bedPos, forceBedSpawn);
             if (bedSpawnLoc != null) { // The bed exists and is not obstructed
                 tempIsBedSpawn = true;
@@ -787,8 +792,8 @@ public final class EntityUtil {
                 bedPos = null; // null = remove location
             }
             // Set the new bed location for the new dimension
-            int prevDim = playerIn.dimension; // Temporarily for setSpawnPoint
-            playerIn.dimension = targetDimensionId;
+            DimensionType prevDim = playerIn.dimension; // Temporarily for setSpawnPoint
+            playerIn.dimension = targetDinensionType;
             playerIn.setSpawnPoint(bedPos, forceBedSpawn);
             playerIn.dimension = prevDim;
         }
@@ -877,10 +882,10 @@ public final class EntityUtil {
         return fromNative(entity).createSnapshot();
     }
 
-    public static void changeWorld(Entity entity, Location location, int currentDim, int targetDim) {
+    public static void changeWorld(Entity entity, Location location, DimensionType currentDimensionType, DimensionType targetDimensionType) {
         final MinecraftServer mcServer = SpongeImpl.getServer();
-        final WorldServer fromWorld = mcServer.getWorld(currentDim);
-        final WorldServer toWorld = mcServer.getWorld(targetDim);
+        final WorldServer fromWorld = mcServer.getWorld(currentDimensionType);
+        final WorldServer toWorld = mcServer.getWorld(targetDimensionType);
         if (entity instanceof EntityPlayer) {
             fromWorld.getEntityTracker().removePlayerFromTrackers((EntityPlayerMP) entity);
             fromWorld.getPlayerChunkMap().removePlayer((EntityPlayerMP) entity);
@@ -892,7 +897,7 @@ public final class EntityUtil {
         entity.stopRiding();
         entity.world.removeEntityDangerously(entity);
         entity.removed = false;
-        entity.dimension = targetDim;
+        entity.dimension = targetDimensionType;
         entity.setPositionAndRotation(location.getX(), location.getY(), location.getZ(), 0, 0);
         while (!toWorld.getCollisionBoxes(entity, entity.getBoundingBox()).isEmpty() && entity.posY < 256.0D) {
             entity.setPosition(entity.posX, entity.posY + 1.0D, entity.posZ);
@@ -903,15 +908,15 @@ public final class EntityUtil {
         if (entity instanceof EntityPlayerMP && ((EntityPlayerMP) entity).connection != null) {
             EntityPlayerMP entityPlayerMP = (EntityPlayerMP) entity;
             // Support vanilla clients going into custom dimensions
-            final int toDimensionId = WorldManager.getClientDimensionId(entityPlayerMP, toWorld);
+            final DimensionType toDimensionType = ((IMixinDimensionType) toWorld).asClientDimensionType();
             if (((IMixinEntityPlayerMP) entityPlayerMP).usesCustomClient()) {
-                WorldManager.sendDimensionRegistration(entityPlayerMP, toWorld.dimension);
+                ((IMixinDimensionType) toWorld.getDimension().getType()).sendDimensionRegistrationTo(entityPlayerMP);
             } else {
                 // Force vanilla client to refresh its chunk cache if same dimension type
                 if (fromWorld != toWorld && fromWorld.dimension.getType() == toWorld.dimension.getType()) {
-                    entityPlayerMP.connection.sendPacket(
-                            new SPacketRespawn(toDimensionId >= 0 ? -1 : 0, toWorld.getDifficulty(),
-                                    toWorld.getWorldInfo().getTerrainType(), entityPlayerMP.interactionManager.getGameType()));
+                    entityPlayerMP.connection.sendPacket(new SPacketRespawn((toDimensionType.getId() >= DimensionType.OVERWORLD.getId() ? DimensionType.NETHER :
+                        DimensionType.OVERWORLD), toWorld.getDifficulty(), toWorld.getWorldInfo().getGenerator(),
+                        entityPlayerMP.interactionManager.getGameType()));
                 }
             }
 
@@ -919,7 +924,7 @@ public final class EntityUtil {
             ((IMixinNetHandlerPlayServer) entityPlayerMP.connection).setLastMoveLocation(null);
 
             entityPlayerMP.connection.sendPacket(
-                    new SPacketRespawn(toDimensionId, toWorld.getDifficulty(), toWorld.getWorldInfo().getTerrainType(),
+                    new SPacketRespawn(toDimensionType, toWorld.getDifficulty(), toWorld.getWorldInfo().getGenerator(),
                             entityPlayerMP.interactionManager.getGameType()));
             entityPlayerMP.connection.sendPacket(new SPacketServerDifficulty(toWorld.getDifficulty(), toWorld.getWorldInfo().isDifficultyLocked()));
             SpongeImpl.getServer().getPlayerList().updatePermissionLevel(entityPlayerMP);
