@@ -32,6 +32,7 @@ import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.world.teleport.PortalAgentType;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.WorldConfig;
+import org.spongepowered.common.registry.type.world.dimension.GlobalDimensionType;
 
 import java.util.UUID;
 
@@ -58,6 +59,14 @@ public interface IMixinWorldInfo {
     void setDimensionType(@Nullable DimensionType type);
 
     /**
+     * Sets the {@link GlobalDimensionType}.
+     *
+     * <p>Unlike the {@link IMixinWorldInfo#getDimensionType()}</p>, we know the global one when constructing
+     * a new {@link WorldInfo} or when loading from disk for the first time (as it is part of our contract)</p>
+     * @param dimensionType The global dimension type
+     */
+    void setGlobalDimensionType(GlobalDimensionType dimensionType);
+    /**
      * Gets the {@link UUID} of this {@link WorldInfo}.
      *
      * <p>If this info has never been loaded by the server, it will not have an assigned unique id.</p>
@@ -73,6 +82,13 @@ public interface IMixinWorldInfo {
      * @param uniqueId The unique id
      */
     void setUniqueId(@Nullable UUID uniqueId);
+
+    /**
+     * Sets the directory name that backs this {@link WorldInfo}.
+     *
+     * @param directoryName The directory name
+     */
+    void setDirectoryName(String directoryName);
 
     /**
      * Gets if this {@link WorldInfo} is fake.
@@ -153,15 +169,13 @@ public interface IMixinWorldInfo {
     UUID getPlayerUniqueIdForIndex(int index);
 
     /**
-     * Creates configuration data for this {@link WorldInfo}.
+     * Gets the {@link SpongeConfig<WorldConfig>} for this {@link WorldInfo} or creates it if it doesn't exist.
      *
      * <p>This normally exists in ./config/sponge/worlds/<dimension_type>/<level_name></p>
      *
-     * <p>If the config already exists, it will be returned.</p>
-     *
      * @return The config
      */
-    SpongeConfig<WorldConfig> createConfig();
+    SpongeConfig<WorldConfig> getOrCreateConfig();
 
     /**
      * Gets the {@link SpongeConfig<WorldConfig>} for this {@link WorldInfo}.
@@ -170,6 +184,13 @@ public interface IMixinWorldInfo {
      */
     @Nullable
     SpongeConfig<WorldConfig> getConfig();
+
+    /**
+     * Sets the {@link SpongeConfig<WorldConfig>} for this {@link WorldInfo}.
+     *
+     * @param config The config
+     */
+    void setConfig(@Nullable SpongeConfig<WorldConfig> config);
 
     /**
      * Reads from the provided {@link NBTTagCompound} that contains the decoded data from the

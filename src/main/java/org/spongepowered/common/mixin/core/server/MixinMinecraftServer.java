@@ -32,7 +32,6 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.gson.JsonElement;
 import com.mojang.datafixers.DataFixer;
 import it.unimi.dsi.fastutil.longs.LongIterator;
 import net.minecraft.command.ICommandSource;
@@ -51,7 +50,6 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.ForcedChunksSaveData;
 import net.minecraft.world.WorldServer;
-import net.minecraft.world.WorldType;
 import net.minecraft.world.chunk.storage.AnvilSaveHandler;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.storage.ISaveHandler;
@@ -297,20 +295,6 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     }
 
     /**
-     * @author blood - December 23rd, 2015
-     * @author Zidane - March 13th, 2016
-     * @author Zidane - Feburary 18th, 2019
-     *
-     * @reason Sponge re-writes this method because we take control of loading existing Sponge dimensions, migrate old worlds to our standard, and
-     * configuration checks.
-     * @reason Update to Minecraft 1.13
-     */
-    @Overwrite
-    public void loadAllWorlds(String saveFolder, String worldFolder, long seed, WorldType type, JsonElement generatorOptions) {
-        this.getWorldLoader().loadKnownWorlds(saveFolder, worldFolder, seed, type, generatorOptions);
-    }
-
-    /**
      * @author Zidane - March 13th, 2016
      * @author Zidane - Feburary 18th, 2019
      *
@@ -501,14 +485,14 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
                 result.ifPresent(copyInfo -> {
                     ((IMixinWorldInfo) copyInfo).setDimensionType(null);
-                    ((IMixinWorldInfo) copyInfo).setUniqueId(null);
+                    ((IMixinWorldInfo) copyInfo).setUniqueId(UUID.randomUUID());
                     this.getWorldLoader().registerWorldInfo(copyName, copyInfo);
                 });
             });
         } else {
             future.thenAccept(result -> result.ifPresent(copyInfo -> {
                 ((IMixinWorldInfo) copyInfo).setDimensionType(null);
-                ((IMixinWorldInfo) copyInfo).setUniqueId(null);
+                ((IMixinWorldInfo) copyInfo).setUniqueId(UUID.randomUUID());
                 this.getWorldLoader().registerWorldInfo(copyName, copyInfo);
             }));
         }
@@ -517,19 +501,19 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     }
 
     @Override
-    public Optional<WorldProperties> renameWorld(String oldFolderName, String newFolderName) {
-        checkNotNull(oldFolderName);
-        checkNotNull(newFolderName);
+    public Optional<WorldProperties> renameWorld(String oldDirectoryName, String newDirectoryName) {
+        checkNotNull(oldDirectoryName);
+        checkNotNull(newDirectoryName);
 
-        final Path saveFolder = Paths.get(this.getFolderName());
-        final Path oldWorldFolder = saveFolder.resolve(oldFolderName);
-        final Path newWorldFolder = oldWorldFolder.resolveSibling(newFolderName);
+        final Path saveDirectory = this.getWorldLoader().getSaveDirectory();
+        final Path oldDirectory = saveDirectory.resolve(oldDirectoryName);
+        final Path newDirectory = oldDirectory.resolveSibling(newDirectoryName);
 
-        if (Files.exists(newWorldFolder)) {
+        if (Files.exists(newDirectory)) {
             return Optional.empty();
         }
 
-        final WorldServer world = this.getWorldLoader().getWorld(oldFolderName).orElse(null);
+        final WorldServer world = this.getWorldLoader().getWorld(oldDirectoryName).orElse(null);
         WorldInfo info = null;
 
         if (world != null) {
@@ -541,23 +525,27 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         }
 
         try {
-            Files.move(oldWorldFolder, newWorldFolder);
+            Files.move(oldDirectory, newDirectory);
         } catch (IOException e) {
             return Optional.empty();
         }
 
+        this.getWorldLoader().unregisterWorldInfo(oldDirectoryName);
+
         if (info != null) {
-            this.getWorldLoader().unregisterWorldInfo(info);
+            ((IMixinWorldInfo) info).setDirectoryName(newDirectoryName);
+            ((IMixinWorldInfo) info).setConfig(null);
+            ((IMixinWorldInfo) info).getOrCreateConfig();
+            this.getWorldLoader().registerWorldInfo(newDirectoryName, info);
         } else {
-            this.getWorldLoader().unregisterWorldInfo(oldFolderName);
-        }
+            final ISaveHandler handler =
+                new AnvilSaveHandler(saveDirectory.toFile(), newDirectoryName, (MinecraftServer) (Object) this, this.dataFixer);
+            info = handler.loadWorldInfo();
 
-        final ISaveHandler handler = new AnvilSaveHandler(saveFolder.toFile(), newFolderName, (MinecraftServer) (Object) this, this.dataFixer);
-        info = handler.loadWorldInfo();
-
-        if (info != null) {
-            ((IMixinWorldInfo) info).createConfig();
-            this.getWorldLoader().registerWorldInfo(newFolderName, info);
+            if (info != null) {
+                ((IMixinWorldInfo) info).getOrCreateConfig();
+                this.getWorldLoader().registerWorldInfo(newDirectoryName, info);
+            }
         }
 
         return Optional.ofNullable((WorldProperties) info);

@@ -24,9 +24,7 @@
  */
 package org.spongepowered.common.world;
 
-import com.google.gson.JsonElement;
 import net.minecraft.world.WorldServer;
-import net.minecraft.world.WorldType;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.world.WorldArchetype;
@@ -52,25 +50,25 @@ public interface WorldLoader {
     /**
      * Creates a new {@link WorldInfo}.
      *
-     * <p>This will cause an appropriate folder for the offline world's data as well as a config folder to be created.
+     * <p>This will cause an appropriate directory for the offline world's data as well as a config directory to be created.
      * Ex. .\world\world_a and .\config\sponge\worlds\overworld\world_a.conf</p>
      *
      * <p>If the world data already exists, it will be returned instead and that data may represent an
      * offline or online world.</p>
      *
-     * @param folderName The folder name
+     * @param directoryName The folder name
      * @param archetype The world archetype
      * @return The world info or {@link Optional#empty()} if creation failed
      */
-    Optional<WorldInfo> createWorldInfo(String folderName, WorldArchetype archetype);
+    Optional<WorldInfo> createWorldInfo(String directoryName, WorldArchetype archetype);
 
     /**
      * Registers a {@link WorldInfo}.
      *
-     * @param folderName The folder name
+     * @param directoryName The folder name
      * @param info The world info
      */
-    void registerWorldInfo(String folderName, WorldInfo info);
+    void registerWorldInfo(String directoryName, WorldInfo info);
 
     /**
      * Gets a {@link WorldInfo} by {@link DimensionType}.
@@ -91,19 +89,19 @@ public interface WorldLoader {
     Optional<WorldInfo> getWorldInfo(UUID uniqueId);
 
     /**
-     * Gets a {@link WorldInfo} by folder name.
+     * Gets a {@link WorldInfo} by directory name.
      *
-     * @param folderName The folder name
+     * @param directoryName The directory name
      * @return The world info or {@link Optional#empty()} if not found
      */
-    Optional<WorldInfo> getWorldInfo(String folderName);
+    Optional<WorldInfo> getWorldInfo(String directoryName);
 
     /**
-     * Unregisters a {@link WorldInfo} by it's folder name from being tracked by this manager.
+     * Unregisters a {@link WorldInfo} by it's directory name.
      *
-     * @param folderName The folder name
+     * @param directoryName The directory name
      */
-    void unregisterWorldInfo(String folderName);
+    void unregisterWorldInfo(String directoryName);
 
     /**
      * Unregisters a {@link WorldInfo} from being tracked by this manager.
@@ -163,11 +161,11 @@ public interface WorldLoader {
      *
      * <p>If the world is already loaded, it will be returned.</p>
      *
-     * @param folderName The folder name
+     * @param directoryName The directory name
      * @return The world or {@link Optional#empty()}} if load failed
      */
-    Optional<WorldServer> loadWorld(String folderName);
-    
+    Optional<WorldServer> loadWorld(String directoryName);
+
     /**
      * Unloads a {@link WorldServer} by it's {@link DimensionType}.
      *
@@ -191,16 +189,16 @@ public interface WorldLoader {
     /**
      * Unloads a {@link WorldServer} by it's folder name.
      *
-     * <p>If the folder name represents an offline world, a false result will be returned.</p>
+     * <p>If the directory name represents an offline world, a false result will be returned.</p>
      *
      * <p>If specifying false to check config, the world will unload regardless if set to never unload.</p>
      *
-     * @param folderName The folder name
+     * @param directoryName The directory name
      * @param checkConfig A toggle to specify checking configuration data
      * @return True if the world unloaded, false if it could not
      */
-    default boolean unloadWorld(String folderName, boolean checkConfig) {
-        final WorldServer world = this.getWorld(folderName).orElse(null);
+    default boolean unloadWorld(String directoryName, boolean checkConfig) {
+        final WorldServer world = this.getWorld(directoryName).orElse(null);
         if (world == null) {
             return false;
         }
@@ -252,10 +250,10 @@ public interface WorldLoader {
     /**
      * Gets a {@link WorldServer} by it's registered folder name.
      *
-     * @param folderName The folder name
+     * @param directoryName The directory name
      * @return The world or {@link Optional#empty()} if not found
      */
-    Optional<WorldServer> getWorld(String folderName);
+    Optional<WorldServer> getWorld(String directoryName);
 
     /**
      * Gets a {@link WorldServer} by it's {@link UUID}.

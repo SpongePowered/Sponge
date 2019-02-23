@@ -132,6 +132,8 @@ import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.PortalAgent;
 import org.spongepowered.api.world.gen.BiomeGenerator;
+import org.spongepowered.api.world.gen.GeneratorType;
+import org.spongepowered.api.world.gen.GeneratorTypes;
 import org.spongepowered.api.world.gen.WorldGenerator;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.api.world.storage.WorldStorage;
@@ -369,11 +371,6 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     private void onCreateSpawnPosition(WorldSettings settings, CallbackInfo ci) {
         GeneratorType generatorType = (GeneratorType) settings.getTerrainType();
 
-        // Allow bonus chest generation for non-Overworld worlds
-        if (!this.dimension.canRespawnHere() && this.getProperties().doesGenerateBonusChest()) {
-            this.createBonusChest();
-        }
-
         if ((generatorType != null && generatorType.equals(GeneratorTypes.THE_END)) || ((((WorldServer) (Object) this)).getChunkProvider().chunkGenerator instanceof ChunkGeneratorEnd)) {
             this.worldInfo.setSpawn(new BlockPos(100, 50, 0));
             ci.cancel();
@@ -392,9 +389,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @Override
     public SpongeConfig<WorldConfig> getConfig() {
-        return ((IMixinWorldInfo) this.worldInfo).createConfig();
+        return ((IMixinWorldInfo) this.worldInfo).getOrCreateConfig();
     }
-
 
     @Override
     public SpongeConfig<? extends GeneralConfigBase> getActiveConfig() {

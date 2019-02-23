@@ -40,6 +40,7 @@ import net.minecraft.world.WorldType;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.storage.WorldInfo;
 import org.apache.logging.log4j.Level;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
@@ -67,12 +68,12 @@ import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.WorldCategory;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
-import org.spongepowered.common.interfaces.world.IMixinDimensionType;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
+import org.spongepowered.common.registry.type.world.DimensionTypeRegistryModule;
 import org.spongepowered.common.registry.type.world.PortalAgentRegistryModule;
+import org.spongepowered.common.registry.type.world.dimension.GlobalDimensionType;
 import org.spongepowered.common.world.WorldLoader;
 
 import java.time.Duration;
@@ -112,24 +113,32 @@ public abstract class MixinWorldInfo implements IMixinWorldInfo {
 
     @Nullable private DimensionType dimensionType;
     @Nullable private UUID uniqueId;
+    private GlobalDimensionType globalDimensionType;
     private GameType gameType;
     private PortalAgentType portalAgentType = PortalAgentTypes.DEFAULT;
     private SpongeConfig<WorldConfig> config;
+    private String directoryName;
     private SerializationBehavior serializationBehavior = SerializationBehaviors.AUTOMATIC;
     private boolean isFake;
     private boolean createdByMod;
     private boolean hasCustomDifficulty;
+    // TODO (1.13) - Do we bump data version for 1.13?
+    private int dataVersion = 0;
 
     public boolean prop$isInitialized() {
         return this.initialized;
     }
 
-    public String prop$getFolderName() {
-        return null;
+    public String prop$getDirectoryName() {
+        return this.directoryName;
     }
 
     public String prop$getWorldName() {
         return this.levelName;
+    }
+
+    public UUID prop$getUniqueId() {
+        return this.uniqueId;
     }
 
     public boolean prop$isEnabled() {
@@ -205,6 +214,10 @@ public abstract class MixinWorldInfo implements IMixinWorldInfo {
         this.dayTime = time.getSeconds();
     }
 
+    public org.spongepowered.api.world.DimensionType prop$getDimensionType() {
+        return this.globalDimensionType;
+    }
+
     public PortalAgentType prop$getPortalAgentType() {
         return this.portalAgentType;
     }
@@ -270,9 +283,13 @@ public abstract class MixinWorldInfo implements IMixinWorldInfo {
         this.serializationBehavior = behavior;
     }
 
-    public int prop$getContentVersion() {
+    public DataContainer prop$getGeneratorSettings() {
         // TODO (1.13)
-        return 0;
+        return null;
+    }
+
+    public int prop$getContentVersion() {
+        return this.dataVersion;
     }
 
     public DataContainer prop$toContainer() {
@@ -333,6 +350,11 @@ public abstract class MixinWorldInfo implements IMixinWorldInfo {
     }
 
     @Override
+    public void setGlobalDimensionType(GlobalDimensionType dimensionType) {
+        this.globalDimensionType = dimensionType;
+    }
+
+    @Override
     public UUID getUniqueId() {
         return this.uniqueId;
     }
@@ -340,6 +362,12 @@ public abstract class MixinWorldInfo implements IMixinWorldInfo {
     @Override
     public void setUniqueId(@Nullable UUID uniqueId) {
         this.uniqueId = uniqueId;
+    }
+
+    @Override
+    public void setDirectoryName(String directoryName) {
+        checkNotNull(directoryName);
+        this.directoryName = directoryName;
     }
 
     @Override
@@ -394,20 +422,15 @@ public abstract class MixinWorldInfo implements IMixinWorldInfo {
     }
 
     @Override
-    public SpongeConfig<WorldConfig> createConfig() {
-        final DimensionType dimensionType = this.getDimensionType();
-
-        if (dimensionType == null) {
-            return null;
-        }
+    public SpongeConfig<WorldConfig> getOrCreateConfig() {
 
         if (this.config == null) {
             this.config =
-                new SpongeConfig<>(SpongeConfig.Type.WORLD, ((IMixinDimensionType) this.dimensionType).getGlobalDimensionType().getConfigPath()
-                    .resolve(this.levelName)
+                new SpongeConfig<>(SpongeConfig.Type.WORLD, this.globalDimensionType.getConfigPath()
+                    .resolve(this.directoryName)
                     .resolve("world.conf"),
                     SpongeImpl.ECOSYSTEM_ID,
-                    ((IMixinDimensionType) dimensionType).getGlobalDimensionType().getConfig());
+                    this.globalDimensionType.getConfig());
         }
 
         return this.config;
@@ -420,6 +443,11 @@ public abstract class MixinWorldInfo implements IMixinWorldInfo {
     }
 
     @Override
+    public void setConfig(@Nullable SpongeConfig<WorldConfig> config) {
+        this.config = config;
+    }
+
+    @Override
     public void readSpongeCompound(NBTTagCompound compound) {
         checkNotNull(compound);
 
@@ -427,19 +455,26 @@ public abstract class MixinWorldInfo implements IMixinWorldInfo {
             return;
         }
 
+        this.dataVersion = compound.getInt(NbtDataUtil.DATA_VERSION);
+        this.globalDimensionType =
+            (GlobalDimensionType) DimensionTypeRegistryModule.getInstance().get(CatalogKey.resolve(compound.getString(NbtDataUtil.DIMENSION_TYPE)))
+                .orElseThrow(() -> new RuntimeException("Reading DimensionType from Sponge Level Data but was not found. Should be impossible!"));
         this.portalAgentType = PortalAgentRegistryModule.getInstance().validatePortalAgent(compound.getString(NbtDataUtil.PORTAL_AGENT_TYPE), this.levelName);
         this.hasCustomDifficulty = compound.getBoolean(NbtDataUtil.HAS_CUSTOM_DIFFICULTY);
-        this.trackedUniqueIdCount = 0;
         if (compound.contains(NbtDataUtil.WORLD_SERIALIZATION_BEHAVIOR)) {
-            short saveBehavior = compound.getShort(NbtDataUtil.WORLD_SERIALIZATION_BEHAVIOR);
-            if (saveBehavior == 1) {
-                this.serializationBehavior = SerializationBehaviors.AUTOMATIC;
-            } else if (saveBehavior == 0) {
-                this.serializationBehavior = SerializationBehaviors.MANUAL;
-            } else {
-                this.serializationBehavior = SerializationBehaviors.NONE;
+            switch (compound.getShort(NbtDataUtil.WORLD_SERIALIZATION_BEHAVIOR)) {
+                case -1:
+                    this.serializationBehavior = SerializationBehaviors.NONE;
+                    break;
+                case 0:
+                    this.serializationBehavior = SerializationBehaviors.MANUAL;
+                    break;
+                default:
+                    this.serializationBehavior = SerializationBehaviors.AUTOMATIC;
+                    break;
             }
         }
+        this.trackedUniqueIdCount = 0;
         if (compound.contains(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, NbtDataUtil.TAG_LIST)) {
             final NBTTagList playerIdList = compound.getList(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, NbtDataUtil.TAG_COMPOUND);
             for (int i = 0; i < playerIdList.size(); i++) {
@@ -464,11 +499,12 @@ public abstract class MixinWorldInfo implements IMixinWorldInfo {
             return compound;
         }
 
-        compound.putInt(NbtDataUtil.DATA_VERSION, DataUtil.DATA_VERSION);
+        compound.putInt(NbtDataUtil.DATA_VERSION, this.dataVersion);
         compound.putUniqueId(NbtDataUtil.UUID, this.uniqueId);
         compound.putInt(NbtDataUtil.DIMENSION_ID, this.dimensionType.getId());
-        compound.putString(NbtDataUtil.DIMENSION_TYPE, ((IMixinDimensionType) this.dimensionType).getGlobalDimensionType().getKey().toString());
+        compound.putString(NbtDataUtil.DIMENSION_TYPE, this.globalDimensionType.getKey().toString());
         compound.putString(NbtDataUtil.PORTAL_AGENT_TYPE, this.portalAgentType.getPortalAgentClass().getName());
+        compound.putBoolean(NbtDataUtil.HAS_CUSTOM_DIFFICULTY, this.hasCustomDifficulty);
         short saveBehavior = 1;
         if (this.serializationBehavior == SerializationBehaviors.NONE) {
             saveBehavior = -1;
@@ -476,7 +512,6 @@ public abstract class MixinWorldInfo implements IMixinWorldInfo {
             saveBehavior = 0;
         }
         compound.putShort(NbtDataUtil.WORLD_SERIALIZATION_BEHAVIOR, saveBehavior);
-        compound.putBoolean(NbtDataUtil.HAS_CUSTOM_DIFFICULTY, this.hasCustomDifficulty);
         final Iterator<UUID> iterator = this.pendingPlayerUniqueIds.iterator();
         final NBTTagList playerIdList = new NBTTagList();
         while (iterator.hasNext()) {
@@ -499,7 +534,7 @@ public abstract class MixinWorldInfo implements IMixinWorldInfo {
 
         final WorldArchetype archetype = (WorldArchetype) (Object) settings;
 
-        final SpongeConfig<WorldConfig> config = this.createConfig();
+        final SpongeConfig<WorldConfig> config = this.getOrCreateConfig();
         final WorldCategory category = config.getConfig().getWorld();
         category.setWorldEnabled(archetype.isEnabled());
         category.setLoadOnStartup(archetype.doesLoadOnStartup());
@@ -509,6 +544,7 @@ public abstract class MixinWorldInfo implements IMixinWorldInfo {
 
         // TODO (1.13) - Determine the following as candidacy for configs.
         this.gameType = (GameType) (Object) archetype.getGameMode();
+        this.globalDimensionType = (GlobalDimensionType) archetype.getDimensionType();
         this.generator = (WorldType) (Object) archetype.getGeneratorType();
         this.mapFeaturesEnabled = archetype.areStructuresEnabled();
         this.hardcore = archetype.isHardcore();
