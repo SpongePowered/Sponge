@@ -180,7 +180,7 @@ public final class SpongeImplHooks {
 
     @Nullable
     public static String getEntityTranslation(ResourceLocation name) {
-        return EntityList.getTranslationName(name);
+        return IRegistry.ENTITY_TYPE.get(name).getTranslationKey();
     }
 
     public static int getEntityId(Class<? extends Entity> entityClass) {
