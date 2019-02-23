@@ -48,8 +48,8 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.registry.IRegistry;
 import net.minecraft.world.chunk.Chunk;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.Cause;
@@ -70,7 +70,6 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
-import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.util.VecHelper;
@@ -254,12 +253,9 @@ public class DamageEventHandler {
 
                 for (int i = 0; i < enchantmentList.size(); ++i) {
                     final String enchantmentId = enchantmentList.getCompound(i).getString(NbtDataUtil.ITEM_ENCHANTMENT_ID);
-                    final int level = enchantmentList.getCompound(i).getInt(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL);
+                    final short level = enchantmentList.getCompound(i).getShort(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL);
 
-                    final Enchantment enchantment = Enchantment.REGISTRY.get(ResourceLocation.makeResourceLocation(enchantmentId));
-                    if (enchantment != null) {
-                        enchantments.put(enchantment, modifi);
-                    }
+                    final Enchantment enchantment = IRegistry.ENCHANTMENT.get(ResourceLocation.makeResourceLocation(enchantmentId));
                     final int temp = enchantment.calcModifierDamage(level, damageSource);
                     if (temp != 0) {
                         enchantments.put(enchantment, level);
@@ -387,9 +383,9 @@ public class DamageEventHandler {
                 mixinEntity.getCreatorUser().ifPresent(creator -> frame.addContext(EventContextKeys.CREATOR, creator));
             }
         } else if (damageSource instanceof BlockDamageSource) {
-            Location<org.spongepowered.api.world.World> location = ((BlockDamageSource) damageSource).getLocation();
+            Location location = ((BlockDamageSource) damageSource).getLocation();
             BlockPos blockPos = VecHelper.toBlockPos(location);
-            final IMixinChunk mixinChunk = (IMixinChunk) ((net.minecraft.world.World) location.getExtent()).getChunk(blockPos);
+            final IMixinChunk mixinChunk = (IMixinChunk) ((net.minecraft.world.World) location.getWorld()).getChunk(blockPos);
             mixinChunk.getBlockNotifier(blockPos).ifPresent(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
             mixinChunk.getBlockOwner(blockPos).ifPresent(owner -> frame.addContext(EventContextKeys.CREATOR, owner));
         }
@@ -407,10 +403,10 @@ public class DamageEventHandler {
             }
 
             for (int i = 0; i < nbttaglist.size(); ++i) {
-                int j = nbttaglist.getCompound(i).getShort("id");
+                String id = nbttaglist.getCompound(i).getString("id");
                 int enchantmentLevel = nbttaglist.getCompound(i).getShort("lvl");
 
-                final Enchantment enchantment = Enchantment.getEnchantmentByID(j);
+                final Enchantment enchantment = IRegistry.ENCHANTMENT.get(ResourceLocation.makeResourceLocation(id));
                 if (enchantment != null) {
                     enchantments.put(enchantment, enchantmentLevel);
                 }

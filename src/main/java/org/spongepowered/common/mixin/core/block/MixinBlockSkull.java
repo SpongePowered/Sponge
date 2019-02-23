@@ -62,7 +62,7 @@ public abstract class MixinBlockSkull extends MixinBlock {
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableDropData) {
             final boolean shouldDrop = ((ImmutableDropData) manipulator).willDrop().get();
-            return Optional.of((BlockState) blockState.withProperty(BlockSkull.NODROP, !shouldDrop));
+            return Optional.of((BlockState) blockState.with(BlockSkull.NODROP, !shouldDrop));
         }
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction dir = ((ImmutableDirectionalData) manipulator).direction().get();

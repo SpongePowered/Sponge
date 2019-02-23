@@ -66,7 +66,7 @@ public class ItemEnchantmentDataProcessor
 
     @Override
     protected Optional<List<Enchantment>> getVal(ItemStack itemStack) {
-        if (itemStack.isItemEnchanted()) {
+        if (itemStack.isEnchanted()) {
             return Optional.of(NbtDataUtil.getItemEnchantments(itemStack));
         }
         return Optional.empty();
@@ -100,7 +100,7 @@ public class ItemEnchantmentDataProcessor
             if (!old.isPresent()) {
                 return DataTransactionResult.successNoData();
             }
-            stack.getTagCompound().removeTag(NbtDataUtil.ITEM_ENCHANTMENT_LIST);
+            stack.getTag().remove(NbtDataUtil.ITEM_ENCHANTMENT_LIST);
             return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
         }
         return DataTransactionResult.failNoData();

@@ -30,6 +30,7 @@ import net.minecraft.entity.EntityAgeable;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.BoundedValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
@@ -69,7 +70,7 @@ public class AgeValueProcessor extends AbstractSpongeValueProcessor<EntityAgeabl
     }
 
     @Override
-    public Optional<BoundedValue.Mutable<Integer>> getApiValueFromContainer(ValueContainer<?> container) {
+    public Optional<Value<Integer>> getApiValueFromContainer(ValueContainer<?> container) {
         if (this.supports(container)) {
             Optional<Integer> value = this.getVal((EntityAgeable) container);
             if (value.isPresent()) {
@@ -90,19 +91,18 @@ public class AgeValueProcessor extends AbstractSpongeValueProcessor<EntityAgeabl
         if (this.supports(container)) {
             final DataTransactionResult.Builder builder = DataTransactionResult.builder();
             final BoundedValue.Immutable<Integer> newAgeValue = SpongeValueFactory.boundedBuilder(Keys.AGE)
-                    .defaultValue(0)
                     .minimum(Integer.MIN_VALUE)
                     .maximum(Integer.MAX_VALUE)
                     .value(value)
                     .build()
                     .asImmutable();
-            final BoundedValue.Immutable<Integer> oldAgeValue = getApiValueFromContainer(container).get().asImmutable();
+            final Value<Integer> oldAgeValue = getApiValueFromContainer(container).get().asImmutable();
             try {
                 ((EntityAgeable) container).setGrowingAge(value);
             } catch (Exception e) {
                 return DataTransactionResult.errorResult(newAgeValue);
             }
-            return builder.success(newAgeValue).replace(oldAgeValue).result(DataTransactionResult.Type.SUCCESS).build();
+            return builder.success(newAgeValue).replace(oldAgeValue.asImmutable()).result(DataTransactionResult.Type.SUCCESS).build();
         }
         return DataTransactionResult.failResult(proposedValue);
     }

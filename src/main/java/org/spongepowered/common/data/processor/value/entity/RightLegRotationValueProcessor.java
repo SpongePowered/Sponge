@@ -60,7 +60,7 @@ public class RightLegRotationValueProcessor extends AbstractSpongeValueProcessor
 
     @Override
     protected Optional<Vector3d> getVal(EntityArmorStand container) {
-        return Optional.of(VecHelper.toVector3d(container.getRightLegRotation()));
+        return Optional.of(VecHelper.toVector3d(container.rightLegRotation));
     }
 
     @Override

@@ -64,7 +64,6 @@ public class BrewingStandDataProcessor extends
         return SpongeValueFactory.boundedBuilder(Keys.REMAINING_BREW_TIME)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
-                .defaultValue(400)
                 .value(actualValue)
                 .build();
     }

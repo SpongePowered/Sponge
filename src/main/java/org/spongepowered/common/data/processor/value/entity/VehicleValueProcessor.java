@@ -51,9 +51,9 @@ public class VehicleValueProcessor extends AbstractSpongeValueProcessor<net.mine
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
         if (container instanceof net.minecraft.entity.Entity) {
             net.minecraft.entity.Entity entity = ((net.minecraft.entity.Entity) container);
-            if (entity.isRiding()) {
+            if (entity.isPassenger()) {
                 final Entity vehicle = (Entity) entity.getRidingEntity();
-                entity.dismountRidingEntity();
+                entity.stopRiding();
                 return DataTransactionResult.successResult(new SpongeImmutableValue<>(Keys.VEHICLE, vehicle.createSnapshot()));
             }
             return DataTransactionResult.builder().result(DataTransactionResult.Type.SUCCESS).build();

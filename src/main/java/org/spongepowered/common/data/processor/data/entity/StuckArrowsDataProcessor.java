@@ -53,7 +53,6 @@ public class StuckArrowsDataProcessor extends
         return SpongeValueFactory.boundedBuilder(this.key)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
-                .defaultValue(0)
                 .value(actualValue)
                 .build();
     }

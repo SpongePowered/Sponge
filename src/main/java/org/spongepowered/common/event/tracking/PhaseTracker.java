@@ -40,6 +40,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.registry.IRegistry;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import org.apache.logging.log4j.Level;
@@ -636,10 +637,10 @@ public final class PhaseTracker {
             CrashReportCategory crashreportcategory = crashreport.makeCategory("Block being updated");
             crashreportcategory.addDetail("Source block type", () -> {
                 try {
-                    return String.format("ID %s (%s // %s)", Block.REGISTRY.getKey(sourceBlock),
+                    return String.format("ID %s (%s // %s)", IRegistry.BLOCK.getKey((sourceBlock)),
                             sourceBlock.getTranslationKey(), sourceBlock.getClass().getCanonicalName());
                 } catch (Throwable var2) {
-                    return "ID #" + Block.REGISTRY.getKey(sourceBlock);
+                    return "ID #" + IRegistry.BLOCK.getKey((sourceBlock));
                 }
             });
             CrashReportCategory.addBlockInfo(crashreportcategory, notifyPos, iblockstate);

@@ -50,13 +50,13 @@ public class HideDataProcessor extends AbstractMultiDataSingleTargetProcessor<It
 
     @Override
     protected boolean doesDataExist(ItemStack dataHolder) {
-        return dataHolder.hasTagCompound();
+        return dataHolder.hasTag();
     }
 
     @Override
     protected boolean set(ItemStack dataHolder, Map<Key<?>, Object> keyValues) {
-        if (!dataHolder.hasTagCompound()) {
-            dataHolder.setTagCompound(new NBTTagCompound());
+        if (!dataHolder.hasTag()) {
+            dataHolder.setTag(new NBTTagCompound());
         }
         int flag = 0;
         if ((boolean) keyValues.get(Keys.HIDE_ENCHANTMENTS)) {
@@ -77,17 +77,17 @@ public class HideDataProcessor extends AbstractMultiDataSingleTargetProcessor<It
         if ((boolean) keyValues.get(Keys.HIDE_MISCELLANEOUS)) {
             flag |= DataConstants.HIDE_MISCELLANEOUS_FLAG;
         }
-        dataHolder.getTagCompound().setInteger(NbtDataUtil.ITEM_HIDE_FLAGS, flag);
+        dataHolder.getTag().putInt(NbtDataUtil.ITEM_HIDE_FLAGS, flag);
         return true;
     }
 
     @Override
     protected Map<Key<?>, ?> getValues(ItemStack dataHolder) {
-        if (!dataHolder.hasTagCompound()) {
+        if (!dataHolder.hasTag()) {
             return Maps.newHashMap();
         }
         Map<Key<?>, Boolean> map = Maps.newHashMap();
-        int flag = dataHolder.getTagCompound().getInteger(NbtDataUtil.ITEM_HIDE_FLAGS);
+        int flag = dataHolder.getTag().getInt(NbtDataUtil.ITEM_HIDE_FLAGS);
 
         map.put(Keys.HIDE_MISCELLANEOUS, (flag & DataConstants.HIDE_MISCELLANEOUS_FLAG) != 0);
         map.put(Keys.HIDE_CAN_PLACE, (flag & DataConstants.HIDE_CAN_PLACE_FLAG) != 0);
@@ -124,8 +124,8 @@ public class HideDataProcessor extends AbstractMultiDataSingleTargetProcessor<It
     public DataTransactionResult remove(DataHolder dataHolder) {
         if (supports(dataHolder)) {
             ItemStack data = (ItemStack) dataHolder;
-            if (data.hasTagCompound() && data.getTagCompound().hasKey(NbtDataUtil.ITEM_HIDE_FLAGS, NbtDataUtil.TAG_INT)) {
-                data.getTagCompound().removeTag(NbtDataUtil.ITEM_HIDE_FLAGS);
+            if (data.hasTag() && data.getTag().contains(NbtDataUtil.ITEM_HIDE_FLAGS, NbtDataUtil.TAG_INT)) {
+                data.getTag().remove(NbtDataUtil.ITEM_HIDE_FLAGS);
             }
             return DataTransactionResult.successNoData();
         }

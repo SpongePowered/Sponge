@@ -59,7 +59,7 @@ public final class ItemLockableDataProcessor extends AbstractItemSingleDataProce
             if (!(block instanceof ITileEntityProvider)) {
                 return false;
             }
-            TileEntity tile = ((ITileEntityProvider) block).createNewTileEntity(null, item.getMetadata(stack.getItemDamage()));
+            TileEntity tile = ((ITileEntityProvider) block).createNewTileEntity(null);
             return tile instanceof TileEntityLockable;
         } , Keys.LOCK_TOKEN);
     }
@@ -79,20 +79,20 @@ public final class ItemLockableDataProcessor extends AbstractItemSingleDataProce
         NBTTagCompound tileCompound = NbtDataUtil.getOrCreateSubCompound(mainCompound, NbtDataUtil.BLOCK_ENTITY_TAG);
         LockCode code = new LockCode(value);
         if (code.isEmpty()) {
-            tileCompound.removeTag("Lock");
+            tileCompound.remove("Lock");
         } else {
-            code.toNBT(tileCompound);
+            code.write(tileCompound);
         }
         return true;
     }
 
     @Override
     protected Optional<String> getVal(ItemStack container) {
-        if (container.getTagCompound() == null) {
+        if (container.getTag() == null) {
             return Optional.of("");
         }
-        NBTTagCompound tileCompound = container.getTagCompound().getCompoundTag(NbtDataUtil.BLOCK_ENTITY_TAG);
-        LockCode code = LockCode.fromNBT(tileCompound);
+        NBTTagCompound tileCompound = container.getChildTag(NbtDataUtil.BLOCK_ENTITY_TAG);
+        LockCode code = LockCode.read(tileCompound);
         if (code.isEmpty()) {
             return Optional.empty();
         }

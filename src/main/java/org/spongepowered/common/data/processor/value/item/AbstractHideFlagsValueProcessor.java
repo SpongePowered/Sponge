@@ -56,16 +56,16 @@ public abstract class AbstractHideFlagsValueProcessor extends AbstractSpongeValu
         if (!container.hasTag()) {
             container.setTag(new NBTTagCompound());
         }
-        if (container.getTag().hasKey(NbtDataUtil.ITEM_HIDE_FLAGS)) {
+        if (container.getTag().contains(NbtDataUtil.ITEM_HIDE_FLAGS)) {
             int flag = container.getTag().getInt(NbtDataUtil.ITEM_HIDE_FLAGS);
             if (value) {
-                container.getTag().setInt(NbtDataUtil.ITEM_HIDE_FLAGS, flag | this.flag);
+                container.getTag().putInt(NbtDataUtil.ITEM_HIDE_FLAGS, flag | this.flag);
             } else {
-                container.getTag().setInt(NbtDataUtil.ITEM_HIDE_FLAGS, flag & ~this.flag);
+                container.getTag().putInt(NbtDataUtil.ITEM_HIDE_FLAGS, flag & ~this.flag);
             }
         } else {
             if (value) {
-                container.getTag().setInt(NbtDataUtil.ITEM_HIDE_FLAGS, this.flag);
+                container.getTag().putInt(NbtDataUtil.ITEM_HIDE_FLAGS, this.flag);
             }
         }
         return true;
@@ -73,7 +73,7 @@ public abstract class AbstractHideFlagsValueProcessor extends AbstractSpongeValu
 
     @Override
     protected Optional<Boolean> getVal(ItemStack container) {
-        if (container.hasTag() && container.getTag().hasKey(NbtDataUtil.ITEM_HIDE_FLAGS)) {
+        if (container.hasTag() && container.getTag().contains(NbtDataUtil.ITEM_HIDE_FLAGS)) {
             int flag = container.getTag().getInt(NbtDataUtil.ITEM_HIDE_FLAGS);
             if ((flag & this.flag) != 0) {
                 return OptBool.TRUE;

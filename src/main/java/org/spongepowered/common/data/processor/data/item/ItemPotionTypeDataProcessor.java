@@ -47,14 +47,14 @@ import java.util.Optional;
 public class ItemPotionTypeDataProcessor extends AbstractItemSingleDataProcessor<PotionType, PotionTypeData, ImmutablePotionTypeData> {
 
     public ItemPotionTypeDataProcessor() {
-        super(itemStack -> itemStack.getItem() == Items.POTIONITEM || itemStack.getItem() == Items.SPLASH_POTION ||
+        super(itemStack -> itemStack.getItem() == Items.POTION || itemStack.getItem() == Items.SPLASH_POTION ||
                 itemStack.getItem() == Items.LINGERING_POTION || itemStack.getItem() == Items.TIPPED_ARROW, Keys.POTION_TYPE);
     }
 
     @Override
     protected boolean set(ItemStack dataHolder, PotionType value) {
-        if (!dataHolder.hasTagCompound()) {
-            dataHolder.setTagCompound(new NBTTagCompound());
+        if (!dataHolder.hasTag()) {
+            dataHolder.setTag(new NBTTagCompound());
         }
 
         PotionUtils.addPotionToItemStack(dataHolder, ((net.minecraft.potion.PotionType) value));
@@ -91,7 +91,7 @@ public class ItemPotionTypeDataProcessor extends AbstractItemSingleDataProcessor
         ItemStack itemStack = (ItemStack) container;
         Item item = itemStack.getItem();
         // TODO check if this is correct - also for the PotionEffect Processors
-        if (item != Items.POTIONITEM) {
+        if (item != Items.POTION) {
             return DataTransactionResult.failNoData();
         }
 

@@ -25,10 +25,8 @@
 package org.spongepowered.common.data.property.store.item;
 
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemHoe;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemSword;
-import net.minecraft.item.ItemTool;
+import net.minecraft.item.ItemTiered;
 import org.spongepowered.api.data.type.ToolType;
 import org.spongepowered.common.data.property.store.common.AbstractItemStackPropertyStore;
 
@@ -40,12 +38,8 @@ public class ToolTypePropertyStore extends AbstractItemStackPropertyStore.Generi
 
     @Override
     protected Optional<ToolType> getFor(Item item, @Nullable ItemStack itemStack) {
-        if (item instanceof ItemTool) {
-            return Optional.of((ToolType) (Object) ((ItemTool) item).toolMaterial);
-        } else if (item instanceof ItemSword) {
-            return Optional.of((ToolType) (Object) ((ItemSword) item).material);
-        } else if (item instanceof ItemHoe) {
-            return Optional.of((ToolType) (Object) ((ItemHoe) item).toolMaterial);
+        if (item instanceof ItemTiered) {
+            return Optional.of((ToolType) ((ItemTiered) item).getTier());
         }
         return Optional.empty();
     }

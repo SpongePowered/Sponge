@@ -52,14 +52,14 @@ public class FlyingSpeedValueProcessor extends AbstractSpongeValueProcessor<Enti
 
     @Override
     protected boolean set(EntityPlayer container, Double value) {
-        container.capabilities.flySpeed = value.floatValue();
+        container.abilities.flySpeed = value.floatValue();
         container.sendPlayerAbilities();
         return true;
     }
 
     @Override
     protected Optional<Double> getVal(EntityPlayer container) {
-        return Optional.of(((double)container.capabilities.getFlySpeed()));
+        return Optional.of(((double)container.abilities.getFlySpeed()));
     }
 
     @Override

@@ -57,7 +57,6 @@ public final class GenerationDataProcessor
     protected Value.Mutable<Integer> constructMutableValue(Integer actualValue) {
         return SpongeValueFactory.boundedBuilder(Keys.GENERATION)
                 .value(actualValue)
-                .defaultValue(0)
                 .minimum(0)
                 .maximum(DataConstants.MAXIMUM_GENERATION)
                 .build();
@@ -65,13 +64,13 @@ public final class GenerationDataProcessor
 
     @Override
     protected boolean set(ItemStack stack, Integer value) {
-        NbtDataUtil.getOrCreateCompound(stack).setInteger(NbtDataUtil.ITEM_BOOK_GENERATION, value);
+        NbtDataUtil.getOrCreateCompound(stack).putInt(NbtDataUtil.ITEM_BOOK_GENERATION, value);
         return true;
     }
 
     @Override
     protected Optional<Integer> getVal(ItemStack stack) {
-        return Optional.of(NbtDataUtil.getItemCompound(stack).map(tag -> tag.getInteger(NbtDataUtil.ITEM_BOOK_GENERATION)).orElse(0));
+        return Optional.of(NbtDataUtil.getItemCompound(stack).map(tag -> tag.getInt(NbtDataUtil.ITEM_BOOK_GENERATION)).orElse(0));
     }
 
     @Override

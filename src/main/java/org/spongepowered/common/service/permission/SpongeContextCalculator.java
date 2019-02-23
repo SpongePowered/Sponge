@@ -32,8 +32,8 @@ import com.google.common.collect.Maps;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.source.RemoteSource;
 import org.spongepowered.api.network.RemoteConnection;
-import org.spongepowered.api.service.context.ContextCalculator;
 import org.spongepowered.api.service.context.Context;
+import org.spongepowered.api.service.context.ContextCalculator;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.world.Locatable;
 import org.spongepowered.api.world.World;
@@ -45,8 +45,6 @@ import java.net.UnknownHostException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A context calculator handling world contexts.
@@ -114,23 +112,23 @@ public class SpongeContextCalculator implements ContextCalculator<Subject> {
         Optional<CommandSource> subjSource = subject.getCommandSource();
         if (subjSource.isPresent()) {
             CommandSource source = subjSource.get();
-            if (source instanceof Locatable && context.getType().equals(Context.WORLD_KEY)) {
+            if (source instanceof Locatable && context.getKey().equals(Context.WORLD_KEY)) {
                 Locatable located = (Locatable) source;
-                if (context.getType().equals(Context.WORLD_KEY)) {
+                if (context.getKey().equals(Context.WORLD_KEY)) {
                     return located.getWorld().getContext().equals(context);
-                } else if (context.getType().equals(Context.DIMENSION_KEY)) {
+                } else if (context.getKey().equals(Context.DIMENSION_KEY)) {
                     return located.getWorld().getDimension().getContext().equals(context);
                 }
             }
             if (source instanceof RemoteSource) {
                 RemoteSource remote = (RemoteSource) source;
-                if (context.getType().equals(Context.LOCAL_HOST_KEY)) {
+                if (context.getKey().equals(Context.LOCAL_HOST_KEY)) {
                     return context.getValue().equals(remote.getConnection().getVirtualHost().getHostName());
-                } else if (context.getType().equals(Context.LOCAL_PORT_KEY)) {
+                } else if (context.getKey().equals(Context.LOCAL_PORT_KEY)) {
                     return context.getValue().equals(String.valueOf(remote.getConnection().getVirtualHost().getPort()));
-                } else if (context.getType().equals(Context.LOCAL_IP_KEY)) {
+                } else if (context.getKey().equals(Context.LOCAL_IP_KEY)) {
                     return this.localIpCache.getUnchecked(remote).contains(context);
-                } else if (context.getType().equals(Context.REMOTE_IP_KEY)) {
+                } else if (context.getKey().equals(Context.REMOTE_IP_KEY)) {
                     return this.remoteIpCache.getUnchecked(remote).contains(context);
                 }
             }

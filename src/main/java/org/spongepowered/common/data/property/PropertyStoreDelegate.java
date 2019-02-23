@@ -53,7 +53,7 @@ public class PropertyStoreDelegate<V> implements PropertyStore<V> {
     }
 
     @Override
-    public Optional<V> getFor(Location<World> location, Direction direction) {
+    public Optional<V> getFor(Location location, Direction direction) {
         for (PropertyStore<V> propertyStore : this.propertyStores) {
             final Optional<V> optional = propertyStore.getFor(location, direction);
             if (optional.isPresent()) {

@@ -70,8 +70,8 @@ public class WalkingSpeedValueProcessor extends AbstractSpongeValueProcessor<Ent
     }
 
     public static void setWalkSpeed(EntityPlayer container, double value) {
-        container.capabilities.walkSpeed = (float) value;
-        final IAttributeInstance attribute = container.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED);
+        container.abilities.walkSpeed = (float) value;
+        final IAttributeInstance attribute = container.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED);
         attribute.setBaseValue(value);
     }
 }

@@ -84,7 +84,7 @@ public class AreaEffectCloudDataProcessor extends AbstractEntityDataProcessor<En
         dataHolder.setDuration(duration);
         ((IMixinAreaEffectCloud) dataHolder).setDurationOnUse(durationOnUse);
         dataHolder.setWaitTime(waitTime);
-        final EnumParticleTypes internalType = ((SpongeParticleType) particleType).getInternalType();
+        final net.minecraft.particles.ParticleType internalType = ((SpongeParticleType) particleType).getInternalType();
         dataHolder.setParticle(internalType == null ? EnumParticleTypes.SPELL_MOB : internalType);
 
         final List<net.minecraft.potion.PotionEffect> effects = new ArrayList<>();

@@ -30,7 +30,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.world.IWorldNameable;
+import net.minecraft.util.INameable;
+import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -71,7 +72,7 @@ public class DisplayNameDataProcessor extends AbstractSingleDataProcessor<Text, 
 
     @Override
     public boolean supports(DataHolder holder) {
-        return holder instanceof Entity || holder instanceof ItemStack || holder instanceof IWorldNameable;
+        return holder instanceof Entity || holder instanceof ItemStack || holder instanceof INameable;
     }
 
     @Override
@@ -89,7 +90,7 @@ public class DisplayNameDataProcessor extends AbstractSingleDataProcessor<Text, 
             }
 
             if (stack.getItem() == Items.WRITTEN_BOOK) {
-                final NBTTagCompound compound = stack.getTagCompound();
+                final NBTTagCompound compound = stack.getTag();
                 if (compound == null) {
                     return Optional.empty(); // The book wasn't initialized.
                 }
@@ -97,15 +98,15 @@ public class DisplayNameDataProcessor extends AbstractSingleDataProcessor<Text, 
                 return Optional.of(new SpongeDisplayNameData(SpongeTexts.fromLegacy(compound.getString(NbtDataUtil.ITEM_BOOK_TITLE))));
             }
 
-            final NBTTagCompound compound = ((ItemStack) holder).getSubCompound(NbtDataUtil.ITEM_DISPLAY);
-            if (compound != null && compound.hasKey(NbtDataUtil.ITEM_DISPLAY_NAME, NbtDataUtil.TAG_STRING)) {
+            final NBTTagCompound compound = ((ItemStack) holder).getChildTag(NbtDataUtil.ITEM_DISPLAY);
+            if (compound != null && compound.contains(NbtDataUtil.ITEM_DISPLAY_NAME, NbtDataUtil.TAG_STRING)) {
                 return Optional.of(new SpongeDisplayNameData(SpongeTexts.fromLegacy(compound.getString(NbtDataUtil.ITEM_DISPLAY_NAME))));
             }
             return Optional.empty();
-        } else if (holder instanceof IWorldNameable) {
-            if (((IWorldNameable) holder).hasCustomName()) {
-                final String customName = ((IWorldNameable) holder).getName();
-                final DisplayNameData data = new SpongeDisplayNameData(SpongeTexts.fromLegacy(customName));
+        } else if (holder instanceof INameable) {
+            if (((INameable) holder).hasCustomName()) {
+                final ITextComponent customName = ((INameable) holder).getName();
+                final DisplayNameData data = new SpongeDisplayNameData(SpongeTexts.toText(customName));
                 return Optional.of(data);
             }
             return Optional.empty();
@@ -145,9 +146,9 @@ public class DisplayNameDataProcessor extends AbstractSingleDataProcessor<Text, 
             final Value.Immutable<Text> immutableValue = merged.displayName().asImmutable();
             ItemStack stack = (ItemStack) holder;
             if (stack.getItem() == Items.WRITTEN_BOOK) {
-                NbtDataUtil.getOrCreateCompound(stack).setString(NbtDataUtil.ITEM_BOOK_TITLE, SpongeTexts.toLegacy(newValue));
+                NbtDataUtil.getOrCreateCompound(stack).putString(NbtDataUtil.ITEM_BOOK_TITLE, SpongeTexts.toLegacy(newValue));
             } else {
-                stack.setStackDisplayName(SpongeTexts.toLegacy(newValue));
+                stack.setDisplayName(SpongeTexts.toComponent(newValue));
             }
             if (prevValue.isPresent()) {
                 return DataTransactionResult.successReplaceResult(prevValue.get().displayName().asImmutable(), immutableValue);

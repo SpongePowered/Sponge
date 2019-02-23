@@ -140,7 +140,7 @@
         "data.MixinCustomDataHolder",
         "data.MixinDataHolder",
         "data.MixinPropertyHolder",
-        "data.types.MixinArtType",
+      "data.types.MixinPaintingType",
         "data.types.MixinDoorHingeSide",
         "data.types.MixinRailShape",
         "data.types.MixinBlockRedstoneComparatorMode",

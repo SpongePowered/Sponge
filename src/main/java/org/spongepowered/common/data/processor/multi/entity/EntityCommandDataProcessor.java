@@ -51,9 +51,9 @@ public class EntityCommandDataProcessor extends AbstractEntityDataProcessor<Enti
     @Override
     public Optional<CommandData> fill(DataContainer container, CommandData commandData) {
         if (!container.contains(
-                Keys.LAST_COMMAND_OUTPUT.getQuery(), 
-                Keys.SUCCESS_COUNT.getQuery(), 
-                Keys.COMMAND.getQuery(), 
+                Keys.LAST_COMMAND_OUTPUT.getQuery(),
+                Keys.SUCCESS_COUNT.getQuery(),
+                Keys.COMMAND.getQuery(),
                 Keys.TRACKS_OUTPUT.getQuery())) {
             return Optional.empty();
         }
@@ -62,7 +62,7 @@ public class EntityCommandDataProcessor extends AbstractEntityDataProcessor<Enti
         int successCount = container.getInt(Keys.SUCCESS_COUNT.getQuery()).get();
         String command = container.getString(Keys.COMMAND.getQuery()).get();
         boolean tracksOutput = container.getBoolean(Keys.TRACKS_OUTPUT.getQuery()).get();
-        
+
         commandData.set(Keys.LAST_COMMAND_OUTPUT, Optional.of(lastCommandOutput));
         commandData.set(Keys.SUCCESS_COUNT, successCount);
         commandData.set(Keys.COMMAND, command);
@@ -100,7 +100,7 @@ public class EntityCommandDataProcessor extends AbstractEntityDataProcessor<Enti
         values.put(Keys.LAST_COMMAND_OUTPUT, lastCommandOutput);
         values.put(Keys.COMMAND, logic.commandStored);
         values.put(Keys.SUCCESS_COUNT, logic.successCount);
-        values.put(Keys.TRACKS_OUTPUT, logic.shouldTrackOutput());
+        values.put(Keys.TRACKS_OUTPUT, logic.shouldReceiveErrors());
         return values;
     }
 

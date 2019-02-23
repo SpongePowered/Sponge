@@ -24,15 +24,15 @@
  */
 package org.spongepowered.common.mixin.core.data.types;
 
-import net.minecraft.entity.item.EntityPainting;
+import net.minecraft.entity.item.PaintingType;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.Art;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(EntityPainting.EnumArt.class)
-public abstract class MixinArtType implements Art {
+@Mixin(PaintingType.class)
+public abstract class MixinPaintingType implements Art {
 
     private static final int PIXELS_PER_BLOCK = 16;
 

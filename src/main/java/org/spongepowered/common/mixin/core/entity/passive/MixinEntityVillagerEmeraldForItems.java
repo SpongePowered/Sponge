@@ -59,7 +59,7 @@ public class MixinEntityVillagerEmeraldForItems implements TradeOfferGenerator {
             buyingCount = this.price.getPrice(random);
         }
 
-        final ItemStack buyingItem = new ItemStack(this.buyingItem, buyingCount, 0);
+        final ItemStack buyingItem = new ItemStack(this.buyingItem, buyingCount);
         return (TradeOffer) new MerchantRecipe(buyingItem, Items.EMERALD);
     }
 

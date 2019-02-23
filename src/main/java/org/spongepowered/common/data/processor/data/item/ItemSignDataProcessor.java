@@ -59,15 +59,15 @@ public class ItemSignDataProcessor extends AbstractItemSingleDataProcessor<List<
 
     @Override
     protected Optional<List<Text>> getVal(ItemStack itemStack) {
-        if (!itemStack.hasTagCompound()) {
+        if (!itemStack.hasTag()) {
             return Optional.empty();
         }
-        final NBTTagCompound mainCompound = itemStack.getTagCompound();
-        if (!mainCompound.hasKey(NbtDataUtil.BLOCK_ENTITY_TAG, NbtDataUtil.TAG_COMPOUND)
-                || !mainCompound.getCompoundTag(NbtDataUtil.BLOCK_ENTITY_TAG).hasKey(NbtDataUtil.BLOCK_ENTITY_ID)) {
+        final NBTTagCompound mainCompound = itemStack.getTag();
+        if (!mainCompound.contains(NbtDataUtil.BLOCK_ENTITY_TAG, NbtDataUtil.TAG_COMPOUND)
+                || !mainCompound.getCompound(NbtDataUtil.BLOCK_ENTITY_TAG).contains(NbtDataUtil.BLOCK_ENTITY_ID)) {
             return Optional.empty();
         }
-        final NBTTagCompound tileCompound = mainCompound.getCompoundTag(NbtDataUtil.BLOCK_ENTITY_TAG);
+        final NBTTagCompound tileCompound = mainCompound.getCompound(NbtDataUtil.BLOCK_ENTITY_TAG);
         final String id = tileCompound.getString(NbtDataUtil.BLOCK_ENTITY_ID);
         if (!id.equalsIgnoreCase(NbtDataUtil.SIGN)) {
             return Optional.empty();
@@ -113,13 +113,13 @@ public class ItemSignDataProcessor extends AbstractItemSingleDataProcessor<List<
     protected boolean set(ItemStack itemStack, List<Text> lines) {
         final NBTTagCompound mainCompound = NbtDataUtil.getOrCreateCompound(itemStack);
         final NBTTagCompound tileCompound = NbtDataUtil.getOrCreateSubCompound(mainCompound, NbtDataUtil.BLOCK_ENTITY_TAG);
-        tileCompound.setString(NbtDataUtil.BLOCK_ENTITY_ID, NbtDataUtil.SIGN);
+        tileCompound.putString(NbtDataUtil.BLOCK_ENTITY_ID, NbtDataUtil.SIGN);
         for (int i = 0; i < 4; i++) {
             Text line = lines.size() > i ? lines.get(i) : Text.empty();
             if (line == null) {
                 throw new IllegalArgumentException("A null line was given at index " + i);
             }
-            tileCompound.setString("Text" + (i + 1), TextSerializers.JSON.serialize(line));
+            tileCompound.putString("Text" + (i + 1), TextSerializers.JSON.serialize(line));
         }
         return true;
     }
@@ -135,7 +135,7 @@ public class ItemSignDataProcessor extends AbstractItemSingleDataProcessor<List<
             return DataTransactionResult.successNoData();
         }
         try {
-            NbtDataUtil.getItemCompound(itemStack).get().removeTag(NbtDataUtil.BLOCK_ENTITY_TAG);
+            NbtDataUtil.getItemCompound(itemStack).get().remove(NbtDataUtil.BLOCK_ENTITY_TAG);
             return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
         } catch (Exception e) {
             return DataTransactionResult.builder().result(DataTransactionResult.Type.ERROR).build();

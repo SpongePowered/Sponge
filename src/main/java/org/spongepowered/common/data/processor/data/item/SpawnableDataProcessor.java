@@ -26,9 +26,11 @@ package org.spongepowered.common.data.processor.data.item;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.init.Items;
+import net.minecraft.item.ItemSpawnEgg;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.registry.IRegistry;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableSpawnableData;
@@ -42,6 +44,7 @@ import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProc
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.SpongeImmutableValue;
 import org.spongepowered.common.data.value.SpongeMutableValue;
+import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 
 import java.util.Optional;
@@ -55,11 +58,11 @@ public class SpawnableDataProcessor extends AbstractItemSingleDataProcessor<Enti
     @SuppressWarnings("unchecked")
     @Override
     public boolean set(ItemStack itemStack, EntityType value) {
-        final ResourceLocation name = EntityList.getKey((Class<? extends Entity>) value.getEntityClass());
-        if (EntityList.ENTITY_EGGS.containsKey(name)) {
+        SpongeEntityType type = (SpongeEntityType) value;
+        if (ItemSpawnEgg.EGGS.containsKey(type.type)) {
             final NBTTagCompound mainCompound = NbtDataUtil.getOrCreateCompound(itemStack);
             final NBTTagCompound subCompound = NbtDataUtil.getOrCreateSubCompound(mainCompound, NbtDataUtil.SPAWNABLE_ENTITY_TAG);
-            subCompound.setString(NbtDataUtil.ENTITY_TYPE_ID, name.toString());
+            subCompound.putString(NbtDataUtil.ENTITY_TYPE_ID, type.getKey().toString());
             return true;
         }
         return false;
@@ -67,7 +70,7 @@ public class SpawnableDataProcessor extends AbstractItemSingleDataProcessor<Enti
 
     @Override
     public Optional<EntityType> getVal(ItemStack itemStack) {
-        final ResourceLocation name = ItemMonsterPlacer.getNamedIdFrom(itemStack);
+        final ResourceLocation name =
         if (name != null) {
             final Class<? extends Entity> entity = SpongeImplHooks.getEntityClass(name);
             return Optional.ofNullable(EntityTypeRegistryModule.getInstance().getForClass(entity));

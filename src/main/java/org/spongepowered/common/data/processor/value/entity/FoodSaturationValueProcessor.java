@@ -52,7 +52,7 @@ public class FoodSaturationValueProcessor extends AbstractSpongeValueProcessor<E
 
     @Override
     protected boolean set(EntityPlayer container, Double value) {
-        container.getFoodStats().setFoodSaturationLevel(value.floatValue());
+        container.getFoodStats().foodSaturationLevel = value.floatValue();
         return true;
     }
 

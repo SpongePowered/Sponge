@@ -80,7 +80,7 @@ public class VehicleDataProcessor extends AbstractEntityDataProcessor<net.minecr
             net.minecraft.entity.Entity entity = ((net.minecraft.entity.Entity) dataHolder);
             if (entity.ridingEntity != null) {
                 final EntitySnapshot previousVehicle = ((Entity) entity.getRidingEntity()).createSnapshot();
-                entity.dismountRidingEntity();
+                entity.stopRiding();
                 return DataTransactionResult.successResult(new SpongeImmutableValue<>(Keys.VEHICLE, previousVehicle));
             }
             return DataTransactionResult.builder().result(DataTransactionResult.Type.SUCCESS).build();

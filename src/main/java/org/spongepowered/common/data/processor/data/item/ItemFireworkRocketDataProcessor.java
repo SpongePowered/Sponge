@@ -62,8 +62,8 @@ public class ItemFireworkRocketDataProcessor
 
     @Override
     protected Optional<Integer> getVal(ItemStack itemStack) {
-        NBTTagCompound fireworks = itemStack.getOrCreateSubCompound("Fireworks");
-        if (fireworks.hasKey("Flight")) {
+        NBTTagCompound fireworks = itemStack.getOrCreateChildTag("Fireworks");
+        if (fireworks.contains("Flight")) {
             return Optional.of((int) fireworks.getByte("Flight"));
         }
         return Optional.empty();
@@ -71,17 +71,17 @@ public class ItemFireworkRocketDataProcessor
 
     @Override
     protected boolean set(ItemStack itemStack, Integer modifier) {
-        NBTTagCompound fireworks = itemStack.getOrCreateSubCompound("Fireworks");
-        fireworks.setByte("Flight", modifier.byteValue());
+        NBTTagCompound fireworks = itemStack.getOrCreateChildTag("Fireworks");
+        fireworks.putByte("Flight", modifier.byteValue());
         return true;
     }
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
         if (container instanceof ItemStack) {
-            NBTTagCompound fireworks = ((ItemStack) container).getSubCompound("Fireworks");
+            NBTTagCompound fireworks = ((ItemStack) container).getChildTag("Fireworks");
             if (fireworks != null) {
-                fireworks.removeTag("Flight");
+                fireworks.remove("Flight");
             }
             return DataTransactionResult.successNoData();
         }

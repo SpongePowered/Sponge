@@ -97,7 +97,7 @@ public class PotionEntityPotionDataProcessor extends AbstractSingleDataSingleTar
         }
         Optional<List<PotionEffect>> effects = getVal((EntityPotion) container);
         if (effects.isPresent()) {
-            ((EntityPotion) container).setItem(new ItemStack(Items.POTIONITEM, 1, 0));
+            ((EntityPotion) container).setItem(new ItemStack(Items.POTION, 1));
             return DataTransactionResult.successRemove(constructImmutableValue(effects.get()));
         }
         return DataTransactionResult.successNoData();

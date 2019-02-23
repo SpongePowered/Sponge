@@ -47,13 +47,13 @@ public class ItemWetDataProcessor extends AbstractItemSingleDataProcessor<Boolea
 
     @Override
     protected boolean set(ItemStack itemStack, Boolean value) {
-        itemStack.setItemDamage(value ? 1 : 0);
+        itemStack.setDamage(value ? 1 : 0);
         return true;
     }
 
     @Override
     protected Optional<Boolean> getVal(ItemStack itemStack) {
-        return Optional.of(itemStack.getItemDamage() == 1);
+        return Optional.of(itemStack.getDamage() == 1);
     }
 
     @Override

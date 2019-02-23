@@ -29,6 +29,7 @@ import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.registry.IRegistry;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableStoredEnchantmentData;
@@ -60,31 +61,31 @@ public class StoredEnchantmentDataProcessor extends
 
     @Override
     protected boolean set(ItemStack entity, List<Enchantment> value) {
-        if (!entity.hasTagCompound()) {
-            entity.setTagCompound(new NBTTagCompound());
+        if (!entity.hasTag()) {
+            entity.setTag(new NBTTagCompound());
         }
         NBTTagList list = new NBTTagList();
         for (Enchantment enchantment : value) {
             NBTTagCompound tag = new NBTTagCompound();
-            tag.setShort(NbtDataUtil.ITEM_ENCHANTMENT_ID, (short) net.minecraft.enchantment.Enchantment.getEnchantmentID((net.minecraft.enchantment.Enchantment) enchantment.getType()));
-            tag.setShort(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL, (short) enchantment.getLevel());
-            list.appendTag(tag);
+            tag.putString(NbtDataUtil.ITEM_ENCHANTMENT_ID, IRegistry.ENCHANTMENT.getKey((net.minecraft.enchantment.Enchantment) enchantment.getType()).toString());
+            tag.putShort(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL, (short) enchantment.getLevel());
+            list.add(tag);
         }
-        entity.getTagCompound().setTag(NbtDataUtil.ITEM_STORED_ENCHANTMENTS_LIST, list);
+        entity.getTag().put(NbtDataUtil.ITEM_STORED_ENCHANTMENTS_LIST, list);
         return true;
     }
 
     @Override
     protected Optional<List<Enchantment>> getVal(ItemStack entity) {
-        if (!entity.hasTagCompound() || !entity.getTagCompound().hasKey(NbtDataUtil.ITEM_STORED_ENCHANTMENTS_LIST, NbtDataUtil.TAG_LIST)) {
+        if (!entity.hasTag() || !entity.getTag().contains(NbtDataUtil.ITEM_STORED_ENCHANTMENTS_LIST, NbtDataUtil.TAG_LIST)) {
             return Optional.empty();
         }
         List<Enchantment> list = Lists.newArrayList();
-        NBTTagList tags = entity.getTagCompound().getTagList(NbtDataUtil.ITEM_STORED_ENCHANTMENTS_LIST, NbtDataUtil.TAG_COMPOUND);
-        for (int i = 0; i < tags.tagCount(); i++) {
-            NBTTagCompound tag = tags.getCompoundTagAt(i);
+        NBTTagList tags = entity.getTag().getList(NbtDataUtil.ITEM_STORED_ENCHANTMENTS_LIST, NbtDataUtil.TAG_COMPOUND);
+        for (int i = 0; i < tags.size(); i++) {
+            NBTTagCompound tag = tags.getCompound(i);
             list.add(new SpongeEnchantment(
-                    (EnchantmentType) net.minecraft.enchantment.Enchantment.getEnchantmentByID(tag.getShort(NbtDataUtil.ITEM_ENCHANTMENT_ID)),
+                    (EnchantmentType) IRegistry.ENCHANTMENT.get(tag.getShort(NbtDataUtil.ITEM_ENCHANTMENT_ID)),
                     tag.getShort(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL)));
         }
         return Optional.of(list);
@@ -104,8 +105,8 @@ public class StoredEnchantmentDataProcessor extends
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
         if (supports(container)) {
             ItemStack stack = (ItemStack) container;
-            if (stack.hasTagCompound() && stack.getTagCompound().hasKey(NbtDataUtil.ITEM_STORED_ENCHANTMENTS_LIST, NbtDataUtil.TAG_COMPOUND)) {
-                stack.getTagCompound().removeTag(NbtDataUtil.ITEM_STORED_ENCHANTMENTS_LIST);
+            if (stack.hasTag() && stack.getTag().contains(NbtDataUtil.ITEM_STORED_ENCHANTMENTS_LIST, NbtDataUtil.TAG_COMPOUND)) {
+                stack.getTag().remove(NbtDataUtil.ITEM_STORED_ENCHANTMENTS_LIST);
             }
             return DataTransactionResult.successNoData();
         }

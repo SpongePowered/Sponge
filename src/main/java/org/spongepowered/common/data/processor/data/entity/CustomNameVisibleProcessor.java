@@ -53,13 +53,13 @@ public final class CustomNameVisibleProcessor extends
 
     @Override
     protected boolean set(Entity container, Boolean value) {
-        container.setAlwaysRenderNameTag(value);
+        container.setCustomNameVisible(value);
         return true;
     }
 
     @Override
     protected Optional<Boolean> getVal(Entity container) {
-        return Optional.of(container.getAlwaysRenderNameTag());
+        return Optional.of(container.isCustomNameVisible());
     }
 
     @Override

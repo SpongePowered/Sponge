@@ -54,25 +54,25 @@ public class DurabilityDataProcessor extends AbstractItemDataProcessor<Durabilit
 
     @Override
     public boolean set(ItemStack itemStack, Map<Key<?>, Object> keyValues) {
-        itemStack.setItemDamage(itemStack.getMaxDamage() - (int) keyValues.get(Keys.ITEM_DURABILITY));
+        itemStack.setDamage(itemStack.getMaxDamage() - (int) keyValues.get(Keys.ITEM_DURABILITY));
         final boolean unbreakable = (boolean) keyValues.get(Keys.UNBREAKABLE);
         if (unbreakable) {
-            itemStack.setItemDamage(0);
+            itemStack.setDamage(0);
         }
-        if (!itemStack.hasTagCompound()) {
-            itemStack.setTagCompound(new NBTTagCompound());
+        if (!itemStack.hasTag()) {
+            itemStack.setTag(new NBTTagCompound());
         }
-        itemStack.getTagCompound().setBoolean(NbtDataUtil.ITEM_UNBREAKABLE, unbreakable);
+        itemStack.getTag().putBoolean(NbtDataUtil.ITEM_UNBREAKABLE, unbreakable);
         return true;
     }
 
     @Override
     public Map<Key<?>, ?> getValues(ItemStack itemStack) {
-        if (itemStack.hasTagCompound() && itemStack.getTagCompound().hasKey(NbtDataUtil.ITEM_UNBREAKABLE)) {
-            return ImmutableMap.of(Keys.ITEM_DURABILITY, itemStack.getMaxDamage() - itemStack.getItemDamage(),
-                    Keys.UNBREAKABLE, itemStack.getTagCompound().getBoolean(NbtDataUtil.ITEM_UNBREAKABLE));
+        if (itemStack.hasTag() && itemStack.getTag().contains(NbtDataUtil.ITEM_UNBREAKABLE)) {
+            return ImmutableMap.of(Keys.ITEM_DURABILITY, itemStack.getMaxDamage() - itemStack.getDamage(),
+                    Keys.UNBREAKABLE, itemStack.getTag().getBoolean(NbtDataUtil.ITEM_UNBREAKABLE));
         }
-        return ImmutableMap.of(Keys.ITEM_DURABILITY, itemStack.getMaxDamage() - itemStack.getItemDamage(), Keys.UNBREAKABLE, false);
+        return ImmutableMap.of(Keys.ITEM_DURABILITY, itemStack.getMaxDamage() - itemStack.getDamage(), Keys.UNBREAKABLE, false);
     }
 
     @Override

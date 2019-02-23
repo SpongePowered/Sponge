@@ -49,7 +49,7 @@ public class FlammablePropertyStore extends AbstractBlockPropertyStore.Generic<B
     @Override
     protected Optional<Boolean> getForBlock(@Nullable Location location, IBlockState block, @Nullable EnumFacing targetFacing) {
         if (location == null) {
-            return OptBool.of(BlockFire.FIRE.getFlammability(block.getBlock()) > 0);
+            return OptBool.of(((BlockFire) Blocks.FIRE).getFlammability(block.getBlock()) > 0);
         }
         final BlockPos pos = VecHelper.toBlockPos(location);
         final World world = (World) location.getWorld();

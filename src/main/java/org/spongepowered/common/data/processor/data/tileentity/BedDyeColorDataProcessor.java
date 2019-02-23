@@ -57,7 +57,7 @@ public class BedDyeColorDataProcessor extends AbstractTileEntitySingleDataProces
 
     @Override
     protected Optional<DyeColor> getVal(TileEntityBed dataHolder) {
-        return Optional.of((DyeColor) (Object) dataHolder.getColor());
+        return Optional.of((DyeColor) (Object) dataHolder.color());
     }
 
     @Override

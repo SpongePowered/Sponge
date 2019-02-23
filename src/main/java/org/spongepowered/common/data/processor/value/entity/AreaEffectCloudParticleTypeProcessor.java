@@ -52,11 +52,11 @@ public class AreaEffectCloudParticleTypeProcessor extends AbstractSpongeValuePro
     @Override
     protected boolean set(EntityAreaEffectCloud container, ParticleType value) {
 
-        final EnumParticleTypes internalType = ((SpongeParticleType) value).getInternalType();
+        final net.minecraft.particles.ParticleType internalType = ((SpongeParticleType) value).getInternalType();
         if (internalType == null) {
             return false;
         }
-        container.setParticle(internalType);
+        container.func_195059_a(internalType);
         return true;
     }
 

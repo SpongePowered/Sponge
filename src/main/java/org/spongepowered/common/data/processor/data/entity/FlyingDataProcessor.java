@@ -59,7 +59,7 @@ public class FlyingDataProcessor extends AbstractEntitySingleDataProcessor<Entit
     protected boolean set(Entity entity, Boolean value) {
         if (entity instanceof EntityPlayer) {
             EntityPlayer entityPlayer = (EntityPlayer)entity;
-            entityPlayer.capabilities.isFlying = value;
+            entityPlayer.abilities.isFlying = value;
             entityPlayer.sendPlayerAbilities();
         } else {
             entity.isAirBorne = value;
@@ -70,7 +70,7 @@ public class FlyingDataProcessor extends AbstractEntitySingleDataProcessor<Entit
     @Override
     protected Optional<Boolean> getVal(Entity entity) {
         if (entity instanceof EntityPlayer) {
-            return Optional.of(((EntityPlayer) entity).capabilities.isFlying);
+            return Optional.of(((EntityPlayer) entity).abilities.isFlying);
         }
         return Optional.of(entity.isAirBorne);
     }

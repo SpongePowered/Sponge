@@ -87,7 +87,7 @@ public class ItemPlainPagedDataProcessor extends AbstractItemSingleDataProcessor
 
     @Override
     protected Optional<List<String>> getVal(ItemStack itemStack) {
-        if (!itemStack.hasTagCompound() || !itemStack.getTagCompound().hasKey(NbtDataUtil.ITEM_BOOK_PAGES)) {
+        if (!itemStack.hasTag() || !itemStack.getTag().contains(NbtDataUtil.ITEM_BOOK_PAGES)) {
             return Optional.empty();
         }
         return Optional.of(NbtDataUtil.getPlainPagesFromNBT(getTagCompound(itemStack)));
