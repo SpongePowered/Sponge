@@ -36,6 +36,7 @@ import org.spongepowered.api.advancement.criteria.trigger.Trigger;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockStateMatcher;
+import org.spongepowered.api.block.BlockTag;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.tileentity.TileEntityArchetype;
 import org.spongepowered.api.block.tileentity.TileEntityType;
@@ -49,6 +50,8 @@ import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.api.entity.living.complex.dragon.phase.EnderDragonPhaseType;
+import org.spongepowered.api.fluid.FluidTag;
+import org.spongepowered.api.item.ItemTag;
 import org.spongepowered.api.item.potion.PotionType;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.data.meta.PatternLayer;
@@ -262,6 +265,9 @@ import org.spongepowered.common.registry.type.world.gen.PopulatorTypeRegistryMod
 import org.spongepowered.common.scoreboard.builder.SpongeObjectiveBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeScoreboardBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeTeamBuilder;
+import org.spongepowered.common.tag.SpongeBlockTagRegistry;
+import org.spongepowered.common.tag.SpongeFluidTagRegistry;
+import org.spongepowered.common.tag.SpongeItemTagRegistry;
 import org.spongepowered.common.text.action.ClickTextActionImpl;
 import org.spongepowered.common.text.action.HoverTextActionImpl;
 import org.spongepowered.common.text.action.ShiftClickTextActionImpl;
@@ -545,6 +551,9 @@ public final class CommonModuleRegistry {
             .registerModule(((Class<DataRegistration<?, ?>>) (Class<?>) DataRegistration.class), SpongeManipulatorRegistry.getInstance())
             .registerModule(new ItemStackComparatorRegistryModule())
             .registerModule(Property.class, (CatalogRegistryModule) SpongePropertyRegistry.getInstance())
+            .registerModule(BlockTag.class, SpongeBlockTagRegistry.get())
+            .registerModule(FluidTag.class, SpongeFluidTagRegistry.get())
+            .registerModule(ItemTag.class, SpongeItemTagRegistry.get())
 
             // Miscellaneous Registries
             .registerModule(DungeonMobRegistryModule.getInstance())
