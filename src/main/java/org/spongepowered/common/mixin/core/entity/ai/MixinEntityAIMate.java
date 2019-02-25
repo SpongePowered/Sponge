@@ -95,6 +95,7 @@ public abstract class MixinEntityAIMate {
         if (ShouldFire.BREED_ENTITY_EVENT_BREED) {
             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 // TODO API 8 is removing this TargetXXXX nonsense so that is why I put the parents into the Cause
+                frame.pushCause(this.animal);
                 frame.pushCause(this.targetMate);
                 final BreedEntityEvent.Breed event = SpongeEventFactory.createBreedEntityEventBreed(Sponge.getCauseStackManager().getCurrentCause(),
                     Optional.empty(), (Ageable) baby, (Ageable) this.targetMate);
