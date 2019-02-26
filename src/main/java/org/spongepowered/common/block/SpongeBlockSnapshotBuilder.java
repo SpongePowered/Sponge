@@ -269,6 +269,6 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
             final List<DataView> dataViews = container.getViewList(DataQueries.SNAPSHOT_TILE_DATA).get();
             DataUtil.deserializeImmutableManipulatorList(dataViews).stream().forEach(builder::add);
         }
-        return Optional.of(new SpongeBlockSnapshot(builder));
+        return Optional.of(builder.build());
     }
 }

@@ -54,7 +54,6 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.Populator;
-import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.PlayerTracker;
@@ -76,6 +75,7 @@ import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.mixin.tracking.world.MixinChunk_Tracker;
 import org.spongepowered.common.world.BlockChange;
+import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.common.world.WorldUtil;
 
 import java.util.ArrayDeque;
@@ -327,11 +327,17 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * To avoid a StackOverflowError (which causes us to lose all of the associated context),
      * we track the current depth . If the processing depth exceeeds a configurable threshold,
      * processing is aborted, and the current tracker state and phase data are logged.
-     *
      * @param context The context to re-check for captures
+     * @param oldBlockSnapshot
+     * @param newState
+     * @param changeFlag
+     * @param transaction
      * @param currentDepth The current processing depth, to prevenet stack overflows
      */
-    default void performPostBlockNotificationsAndNeighborUpdates(C context, int currentDepth) {
+    default void performPostBlockNotificationsAndNeighborUpdates(C context,
+        SpongeBlockSnapshot oldBlockSnapshot, IBlockState newState, SpongeBlockChangeFlag changeFlag,
+        Transaction<BlockSnapshot> transaction,
+        int currentDepth) {
 
     }
 
@@ -832,15 +838,40 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         return false;
     }
 
-    default boolean verifyCancelledBlockChanges(C context, List<ChangeBlockEvent> blockEvents, ChangeBlockEvent.Post postEvent, ListMultimap<BlockPos, BlockEventData> scheduledEvents, boolean noCancelledTransactions) {
+    default boolean getShouldCancelAllTransactions(C context, List<ChangeBlockEvent> blockEvents, ChangeBlockEvent.Post postEvent, ListMultimap<BlockPos, BlockEventData> scheduledEvents, boolean noCancelledTransactions) {
         return false;
     }
 
-    default boolean capturesNeighborNotifications(C context, IMixinWorldServer mixinWorld, BlockPos notifyPos, Block sourceBlock, BlockPos sourcePos) {
+    default boolean capturesNeighborNotifications(C context, IMixinWorldServer mixinWorld, BlockPos notifyPos, Block sourceBlock,
+        IBlockState iblockstate, BlockPos sourcePos) {
         return false;
     }
     default void notifyCapturedBlockChange(C phaseContext, BlockPos pos, SpongeBlockSnapshot originalBlockSnapshot, IBlockState newState,
-        TileEntity tileEntity) {
+        @Nullable TileEntity tileEntity) {
 
     }
+    default void captureTileEntityReplacement(C currentContext, IMixinWorldServer mixinWorldServer, BlockPos pos, @Nullable TileEntity currenTile, @Nullable TileEntity tileEntity) {
+        // Default, do nothing.
+
+    }
+
+    default boolean tracksTileEntityChanges(C currentContext, net.minecraft.world.World thisWorld, BlockPos pos) {
+        return false;
+    }
+
+    default void processCancelledTransaction(C context, Transaction<BlockSnapshot> transaction, BlockSnapshot original) {
+        if (this.tracksBlockSpecificDrops(context)) {
+            // Cancel any block drops or harvests for the block change.
+            // This prevents unnecessary spawns.
+            if (transaction.getOriginal() instanceof SpongeBlockSnapshot) {
+                final BlockPos pos = ((SpongeBlockSnapshot) transaction.getOriginal()).getBlockPos();
+                context.getBlockDropSupplier().removeAllIfNotEmpty(pos);
+            }
+        }
+    }
+
+    default void postRestoreTransactions(C context, List<Transaction<BlockSnapshot>> invalid) {
+
+    }
+
 }

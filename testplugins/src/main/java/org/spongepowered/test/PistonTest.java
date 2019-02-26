@@ -67,12 +67,15 @@ public class PistonTest {
         if (!cancelPistons) {
             return;
         }
-        final BlockSnapshot original = event.getTransactions().get(0).getOriginal();
-        final BlockState state = original.getState();
-        final BlockType type = state.getType();
-        if (type == BlockTypes.PISTON || type == BlockTypes.PISTON_EXTENSION || type == BlockTypes.PISTON_HEAD || type == BlockTypes.STICKY_PISTON) {
-            event.setCancelled(true);
-        }
+        event.getTransactions().forEach(transaction -> {
+            final BlockSnapshot original = transaction.getOriginal();
+            final BlockState state = original.getState();
+            final BlockType type = state.getType();
+            if (type == BlockTypes.PISTON || type == BlockTypes.PISTON_EXTENSION || type == BlockTypes.PISTON_HEAD || type == BlockTypes.STICKY_PISTON) {
+                event.setCancelled(true);
+            }
+        });
+
     }
 
 }

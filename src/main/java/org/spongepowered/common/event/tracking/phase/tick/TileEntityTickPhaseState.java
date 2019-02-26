@@ -24,16 +24,33 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
+import com.google.common.collect.ListMultimap;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockEventData;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
+import net.minecraft.server.management.PlayerChunkMapEntry;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
+import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.tileentity.TileEntity;
+import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
+import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.world.LocatableBlock;
+import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.block.BlockUtil;
+import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -41,11 +58,16 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
+import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMapEntry;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
+
+import javax.annotation.Nullable;
 
 class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTickContext> {
     private final BiConsumer<StackFrame, TileEntityTickContext> TILE_ENTITY_MODIFIER =
@@ -147,6 +169,17 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
     }
 
     @Override
+    public boolean tracksTileEntityChanges(TileEntityTickContext currentContext, World thisWorld, BlockPos pos) {
+        return this.doesBulkBlockCapture(currentContext) && currentContext.getSource(net.minecraft.tileentity.TileEntity.class).get().getPos().equals(pos);
+    }
+
+    @Override
+    public void captureTileEntityReplacement(TileEntityTickContext currentContext, IMixinWorldServer mixinWorldServer, BlockPos pos,
+        @Nullable net.minecraft.tileentity.TileEntity currenTile, @Nullable net.minecraft.tileentity.TileEntity tileEntity) {
+        currentContext.logTileChange(mixinWorldServer, pos, currenTile, tileEntity);
+    }
+
+    @Override
     public void appendContextPreExplosion(ExplosionContext explosionContext, TileEntityTickContext context) {
         context.applyNotifierIfAvailable(explosionContext::notifier);
         context.applyOwnerIfAvailable(explosionContext::owner);
@@ -193,6 +226,47 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
         return false;
     }
 
+    @Override
+    public boolean getShouldCancelAllTransactions(TileEntityTickContext context, List<ChangeBlockEvent> blockEvents, ChangeBlockEvent.Post postEvent,
+        ListMultimap<BlockPos, BlockEventData> scheduledEvents, boolean noCancelledTransactions) {
+        if (!(context.getSource() instanceof net.minecraft.tileentity.TileEntity)) {
+            // we have a LocatableBlock.
+            final LocatableBlock source = (LocatableBlock) context.getSource();
+            // Basically, if the source was a tile entity, and during the block event, it changed?
+            // and if any of the transaction cancelled, the whole thing should be cancelled.
+            if (SpongeImplHooks.hasBlockTileEntity(BlockUtil.toBlock(source.getBlockState()), BlockUtil.toNative(source.getBlockState()))) {
+                return !noCancelledTransactions;
+            }
+            return false;
+        }
+        if (!noCancelledTransactions && !postEvent.getTransactions().isEmpty()) {
+            final Transaction<BlockSnapshot> first = postEvent.getTransactions().get(0);
+            final BlockState state = first.getOriginal().getState();
+            final BlockType type = state.getType();
+            return SpongeImplHooks.hasBlockTileEntity((Block) type, BlockUtil.toNative(state));
+        }
+        return !noCancelledTransactions;
+    }
+
+    @Override
+    public void performPostBlockNotificationsAndNeighborUpdates(TileEntityTickContext context,
+        SpongeBlockSnapshot oldBlockSnapshot, IBlockState newState, SpongeBlockChangeFlag changeFlag,
+        Transaction<BlockSnapshot> transaction,
+        int currentDepth) {
+        context.processTransactionsUpTo(oldBlockSnapshot, transaction, newState, currentDepth);
+    }
+
+    @Override
+    public void processCancelledTransaction(TileEntityTickContext context, Transaction<BlockSnapshot> transaction, BlockSnapshot original) {
+        context.cancelTransaction(transaction, original);
+        final WorldServer worldServer = ((SpongeBlockSnapshot) original).getWorldServer();
+        final Chunk chunk = worldServer.getChunk(((SpongeBlockSnapshot) original).getBlockPos());
+        final PlayerChunkMapEntry entry = worldServer.getPlayerChunkMap().getEntry(chunk.x, chunk.z);
+        if (entry != null) {
+            ((IMixinPlayerChunkMapEntry) entry).markBiomesForUpdate();
+        }
+        super.processCancelledTransaction(context, transaction, original);
+    }
 
     @Override
     public boolean doesBulkBlockCapture(TileEntityTickContext context) {

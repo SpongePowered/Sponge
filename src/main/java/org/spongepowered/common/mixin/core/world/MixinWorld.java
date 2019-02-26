@@ -117,6 +117,7 @@ import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.extent.worker.MutableBiomeVolumeWorker;
 import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
 import org.spongepowered.api.world.storage.WorldProperties;
+import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -676,6 +677,24 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Redirect(method = "removeTileEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getTileEntity(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/tileentity/TileEntity;"))
     protected net.minecraft.tileentity.TileEntity getTileEntityForRemoval(net.minecraft.world.World world, BlockPos pos) {
         return world.getTileEntity(pos); // Overridden in MixinWorldServer
+    }
+
+    /**
+     * @author gabizou - February 25th, 2019
+     * @reason During block events, or really any events where TileEntities
+     * are being replaced, during processing, we need to be able to track
+     * those TileEntities. In some cases, this is not used as often, whereas
+     * others, like Pistons movement, we need to be able to capture and
+     * "play back" what's going on, without performing the live changes.
+     *
+     * @param world The world, this
+     * @param pos The position of the tile entity
+     * @param tileEntity The tile entity being set onto that position
+     * @return The processing tiles field, used as a hook
+     */
+    @Redirect(method = "setTileEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntity;isInvalid()Z"))
+    protected boolean onSetTileEntityForCapture(net.minecraft.tileentity.TileEntity tileEntity, BlockPos pos, net.minecraft.tileentity.TileEntity sameEntity) {
+        return tileEntity.isInvalid();
     }
 
     @SuppressWarnings({"unchecked"})

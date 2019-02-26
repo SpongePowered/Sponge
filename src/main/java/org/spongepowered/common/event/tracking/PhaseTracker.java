@@ -607,6 +607,11 @@ public final class PhaseTracker {
         }
         final IBlockState iblockstate = ((WorldServer) mixinWorld).getBlockState(notifyPos);
 
+        performNeighborNotificationOnTarget(mixinWorld, notifyPos, sourceBlock, sourcePos, iblockstate);
+    }
+
+    public void performNeighborNotificationOnTarget(IMixinWorldServer mixinWorld, BlockPos notifyPos, Block sourceBlock, BlockPos sourcePos,
+        IBlockState iblockstate) {
         if (iblockstate.getBlock() == Blocks.AIR) {
             // Super fasts. Air doesn't do anything about neighbor notifications
             return;
@@ -618,7 +623,7 @@ public final class PhaseTracker {
             // If the phase state does not want to allow neighbor notifications to leak while processing,
             // it needs to be able to do so. It will replay the notifications in the order in which they were received,
             // such that the notification will be sent out in the same order as the block changes that may have taken place.
-            if (((IPhaseState) state).capturesNeighborNotifications(peek.context, mixinWorld, notifyPos, sourceBlock, sourcePos)) {
+            if (((IPhaseState) state).capturesNeighborNotifications(peek.context, mixinWorld, notifyPos, sourceBlock, iblockstate, sourcePos)) {
                 return;
             }
             ((IPhaseState) state).associateNeighborStateNotifier(peek.context,
@@ -728,7 +733,6 @@ public final class PhaseTracker {
         }
         if (((IPhaseState) phaseState).doesBlockEventTracking(context)) {
             try {
-                final SpongeBlockChangeFlag spongeFlag1 = (SpongeBlockChangeFlag) flag;
                 final Block block1 = newState.getBlock();
 
                 if (!ShouldFire.CHANGE_BLOCK_EVENT) { // If we don't have to worry about any block events, don't bother
@@ -748,8 +752,8 @@ public final class PhaseTracker {
                         minecraftWorld.profiler.endSection(); // Sponge - We don't need to use the profiler
                     }
 
-                    if (spongeFlag1.isNotifyClients() && chunk.isPopulated()) {
-                        minecraftWorld.notifyBlockUpdate(pos, iblockstate, newState, spongeFlag1.getRawFlag());
+                    if (spongeFlag.isNotifyClients() && chunk.isPopulated()) {
+                        minecraftWorld.notifyBlockUpdate(pos, iblockstate, newState, spongeFlag.getRawFlag());
                     }
 
                     if (flag.updateNeighbors()) {
@@ -785,7 +789,7 @@ public final class PhaseTracker {
                 final ChangeBlockEvent normalEvent =
                     originalBlockSnapshot.blockChange.createEvent(Sponge.getCauseStackManager().getCurrentCause(), transactions);
                 try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                    ((IPhaseState) phaseState).associateAdditionalCauses(context, frame);
+                    phaseState.associateAdditionalCauses(context, frame);
                     SpongeImpl.postEvent(normalEvent);
                     frame.pushCause(normalEvent); // Because of our contract for post events
                     final ChangeBlockEvent.Post post = ((IPhaseState) phaseState).createChangeBlockPostEvent(context, transactions);

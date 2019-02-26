@@ -152,10 +152,8 @@ public final class InteractionPacketState extends BasicPacketState {
                 phaseContext.getBlockItemDropSupplier().acceptAndClearIfNotEmpty(map -> {
                     if (ShouldFire.DROP_ITEM_EVENT_DESTRUCT) {
 
-                        for (BlockSnapshot blockChange : capturedBlcoks) {
-                            final Location<World> location = blockChange.getLocation().get();
-                            final Vector3d position = location.getPosition();
-                            final BlockPos blockPos = VecHelper.toBlockPos(position);
+                        for (SpongeBlockSnapshot blockChange : capturedBlcoks) {
+                            final BlockPos blockPos = blockChange.getBlockPos();
                             final Collection<EntityItem> entityItems = map.get(blockPos);
                             if (!entityItems.isEmpty()) {
                                 final List<Entity> items = entityItems.stream().map(EntityUtil::fromNative).collect(Collectors.toList());
@@ -168,10 +166,8 @@ public final class InteractionPacketState extends BasicPacketState {
                             }
                         }
                     } else {
-                        for (BlockSnapshot blockChange : capturedBlcoks) {
-                            final Location<World> location = blockChange.getLocation().get();
-                            final Vector3d position = location.getPosition();
-                            final BlockPos blockPos = VecHelper.toBlockPos(position);
+                        for (SpongeBlockSnapshot blockChange : capturedBlcoks) {
+                            final BlockPos blockPos = blockChange.getBlockPos();
                             final Collection<EntityItem> entityItems = map.get(blockPos);
                             if (!entityItems.isEmpty()) {
                                 processEntities(player, (Collection<Entity>) (Collection<?>) entityItems);

@@ -323,6 +323,10 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
         }
     }
 
+    public final List<SpongeBlockSnapshot> orEmptyList() {
+        return this.snapshots == null ? Collections.emptyList() : this.snapshots;
+    }
+
     @Override
     public int hashCode() {
         return Objects.hashCode(this.snapshots);
@@ -376,13 +380,11 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
     }
 
     public Transaction<BlockSnapshot> createTransaction(SpongeBlockSnapshot snapshot) {
-        final Location<World> originalLocation = snapshot.getLocation().get();
-        final WorldServer worldServer = (WorldServer) originalLocation.getExtent();
-        final BlockPos blockPos = VecHelper.toBlockPos(originalLocation);
+        final WorldServer worldServer = snapshot.getWorldServer();
+        final BlockPos blockPos = snapshot.getBlockPos();
         final IBlockState newState = worldServer.getBlockState(blockPos);
         final IBlockState newActualState = newState.getActualState(worldServer, blockPos);
-        final BlockSnapshot
-            newSnapshot =
+        final BlockSnapshot newSnapshot =
             ((IMixinWorldServer) worldServer).createSpongeBlockSnapshot(newState, newActualState, blockPos, BlockChangeFlags.NONE);
         // Up until this point, we can create a default Transaction
         if (this.hasMulti) { // But we need to check if there's any intermediary block changes...

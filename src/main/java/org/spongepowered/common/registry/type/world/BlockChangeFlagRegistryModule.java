@@ -29,6 +29,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import org.spongepowered.api.registry.RegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.common.registry.RegistryHelper;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -63,6 +64,14 @@ public final class BlockChangeFlagRegistryModule implements RegistryModule {
             return spongeBlockChangeFlag;
         }
         return (SpongeBlockChangeFlag) BlockChangeFlags.ALL;
+    }
+
+    public static BlockChangeFlag andNotifyClients(BlockChangeFlag flag) {
+        final int rawFlag = ((SpongeBlockChangeFlag) flag).getRawFlag();
+        if ((rawFlag & Flags.NOTIFY_CLIENTS) != 0){
+            return flag; // We don't need to rerun the flag
+        }
+        return fromNativeInt(rawFlag & ~Flags.NOTIFY_CLIENTS);
     }
 
     private BlockChangeFlagRegistryModule() {
@@ -187,7 +196,7 @@ public final class BlockChangeFlagRegistryModule implements RegistryModule {
         // with the opposite OR.
         // Example: If we DO want physics, we don't include the physics flag, if we DON'T want physics, we | it in.
         public static final int ALL                         = NOTIFY_CLIENTS | NEIGHBOR_MASK;
-        public static final int NONE                        = NOTIFY_CLIENTS | OBSERVER_MASK | PHYSICS_MASK | FORCE_RE_RENDER;
+        public static final int NONE                        = NOTIFY_CLIENTS | PHYSICS_MASK | OBSERVER_MASK | FORCE_RE_RENDER;
         public static final int NEIGHBOR                    = NOTIFY_CLIENTS | NEIGHBOR_MASK | PHYSICS_MASK | OBSERVER_MASK;
         public static final int PHYSICS                     = NOTIFY_CLIENTS | OBSERVER_MASK;
         public static final int OBSERVER                    = NOTIFY_CLIENTS | PHYSICS_MASK;

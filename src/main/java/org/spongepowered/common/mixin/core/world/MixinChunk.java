@@ -716,12 +716,16 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
             }
         }
 
-        if (!((IMixinWorld) this.world).isFake() && currentBlock != newBlock) {
+        final boolean isFakeWorld = ((IMixinWorld) this.world).isFake();
+        if (!isFakeWorld && currentBlock != newBlock) {
             final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
-            final boolean isBulkCapturing = ((IPhaseState) peek.state).doesBulkBlockCapture(peek.context);
+            final IPhaseState state = peek.state;
+            final boolean isBulkCapturing = state.doesBulkBlockCapture(peek.context);
             // Sponge start - Ignore block activations during block placement captures unless it's
             // a BlockContainer. Prevents blocks such as TNT from activating when cancelled.
-            if (!isBulkCapturing || SpongeImplHooks.hasBlockTileEntity(newBlock, newState)) {
+            // Occasionally, certain phase states will need to prevent onBlockAdded to be called until after the tile entity tracking
+            // has been done, in the event of restores needing to re-override the block changes.
+            if (!isBulkCapturing || (SpongeImplHooks.hasBlockTileEntity(newBlock, newState) && !state.tracksTileEntityChanges(peek.context, this.world, pos))) {
                 // The new block state is null if called directly from Chunk#setBlockState(BlockPos, IBlockState)
                 // If it is null, then directly call the onBlockAdded logic.
                 if (flag.performBlockPhysics()) {
@@ -733,13 +737,14 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
 
         // Sponge Start - Use SpongeImplHooks for forge compatibility
         // if (block instanceof ITileEntityProvider) { // Sponge
+        // We also don't want to create/attempt to create tile entities while they are being tracked, especially if they end up needing to be removed.
         if (SpongeImplHooks.hasBlockTileEntity(newBlock, newState)) {
             // Sponge End
             TileEntity tileentity = this.getTileEntity(pos, EnumCreateEntityType.CHECK);
 
             if (tileentity == null) {
                 // Sponge Start - use SpongeImplHooks for forge compatibility
-                if (!((IMixinWorld) this.world).isFake()) { // Surround with a server check
+                if (!isFakeWorld) { // Surround with a server check
                     // tileentity = ((ITileEntityProvider)block).createNewTileEntity(this.worldObj, block.getMetaFromState(state)); // Sponge
                     tileentity = SpongeImplHooks.createTileEntity(newBlock, this.world, newState);
                     final User owner = PhaseTracker.getInstance().getCurrentContext().getOwner().orElse(null);

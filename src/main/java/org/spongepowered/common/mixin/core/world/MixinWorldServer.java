@@ -112,7 +112,6 @@ import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.action.LightningEvent;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
@@ -151,7 +150,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.WorldCategory;
@@ -930,13 +928,18 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
         final PhaseContext<?> context = currentPhase.context;
 
-        final LocatableBlock locatable = new SpongeLocatableBlockBuilder()
-            .world(this)
-            .position(pos.getX(), pos.getY(), pos.getZ())
-            .state(this.getBlock(pos.getX(), pos.getY(), pos.getZ()))
-            .build();
+        if (SpongeImplHooks.hasBlockTileEntity(blockIn, getBlockState(pos))) {
+            blockEvent.setTickTileEntity((TileEntity) getTileEntity(pos));
+        } else {
 
-        blockEvent.setTickBlock(locatable);
+            final LocatableBlock locatable = new SpongeLocatableBlockBuilder()
+                .world(this)
+                .position(pos.getX(), pos.getY(), pos.getZ())
+                .state(this.getBlock(pos.getX(), pos.getY(), pos.getZ()))
+                .build();
+            blockEvent.setTickBlock(locatable);
+
+        }
         phaseState.appendNotifierToBlockEvent(context, this, pos, blockEvent);
         // If we are capturing block positions, we need to check if the block position has any scheduled events
         // so they will be properly added after the fact.
@@ -962,7 +965,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         return TrackingUtil.fireMinecraftBlockEvent(worldIn, event);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     @Nullable
     protected net.minecraft.tileentity.TileEntity getTileEntityForRemoval(World thisWorld, BlockPos pos) {
@@ -970,17 +973,41 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             return super.getTileEntityForRemoval(thisWorld, pos); // do nothing if we're not a sponge managed world
         }
         final PhaseTracker tracker = PhaseTracker.getInstance();
-        final IPhaseState<?> currentState = tracker.getCurrentState();
+        final IPhaseState currentState = tracker.getCurrentState();
         final PhaseContext<?> currentContext = tracker.getCurrentContext();
+        // More fast checks - bulk block capture is normally faster to be false than checking tile entity changes (certain block ticks don't capture changes)
+        if (!currentState.doesBulkBlockCapture(currentContext) || !currentState.tracksTileEntityChanges(currentContext, thisWorld, pos)) {
+            return super.getTileEntityForRemoval(thisWorld, pos);
+        }
         final net.minecraft.tileentity.TileEntity tileEntity = getTileEntity(pos);
-        final IBlockState state = getBlockState(pos);
-        if (tileEntity != null && !((IMixinTileEntity) tileEntity).isCaptured() && ((IPhaseState) currentState).doesBulkBlockCapture(currentContext)) {
+        if (tileEntity != null && !((IMixinTileEntity) tileEntity).isCaptured()) {
             ((IMixinTileEntity) tileEntity).setCaptured(true);
-            final SpongeBlockSnapshot snapshot = createSpongeBlockSnapshot(state, state, pos, BlockChangeFlags.NONE);
-            TrackingUtil.associateBlockChangeWithSnapshot(currentState, state.getBlock(), state, snapshot);
-            currentContext.getCapturedBlockSupplier().put(snapshot, BlockUtil.toNative(snapshot.getState()));
+            currentState.captureTileEntityReplacement(currentContext, this, pos, tileEntity, null);
         }
         return tileEntity;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    protected boolean onSetTileEntityForCapture(net.minecraft.tileentity.TileEntity tileEntity, BlockPos pos, net.minecraft.tileentity.TileEntity sameEntity) {
+        if (this.isFake()) {
+            // Short Circuit for fake worlds
+            return tileEntity.isInvalid();
+        }
+        final PhaseTracker tracker = PhaseTracker.getInstance();
+        final IPhaseState currentState = tracker.getCurrentState();
+        final PhaseContext<?> currentContext = tracker.getCurrentContext();
+        // More fast checks - bulk block capture is normally faster to be false than checking tile entity changes (certain block ticks don't capture changes)
+        if (!currentState.doesBulkBlockCapture(currentContext) || !currentState.tracksTileEntityChanges(currentContext, (WorldServer) (Object) this, pos)) {
+            return tileEntity.isInvalid();
+        }
+        final IMixinTileEntity mixinTile = (IMixinTileEntity) tileEntity;
+        if (!mixinTile.isCaptured()) {
+            mixinTile.setCaptured(true);
+        }
+        final net.minecraft.tileentity.TileEntity currenTile = getTileEntity(pos);
+        currentState.captureTileEntityReplacement(currentContext, this, pos, currenTile, tileEntity);
+        return tileEntity.isInvalid();
     }
 
     @Override
@@ -1825,7 +1852,30 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             }
         }
         this.builder.flag(updateFlag);
-        return new SpongeBlockSnapshot(this.builder);
+        return this.builder.build();
+    }
+
+    @Override
+    public SpongeBlockSnapshot createSpongeSnapshotForTileEntity(IBlockState state, BlockPos pos, BlockChangeFlag updateFlag,
+        @Nullable net.minecraft.tileentity.TileEntity tileEntity) {
+        this.builder.reset();
+        this.builder.blockState((BlockState) state)
+            .extendedState((BlockState) state)
+            .worldId(this.getUniqueId())
+            .position(VecHelper.toVector3i(pos));
+        if (tileEntity != null) { // Store the information of the tile entity onto the snapshot
+            NBTTagCompound nbt = new NBTTagCompound();
+            // Some mods like OpenComputers assert if attempting to save robot while moving
+            try {
+                tileEntity.writeToNBT(nbt);
+                this.builder.unsafeNbt(nbt);
+            }
+            catch(Throwable t) {
+                // ignore
+            }
+        }
+        this.builder.flag(updateFlag);
+        return this.builder.build();
     }
 
     /**

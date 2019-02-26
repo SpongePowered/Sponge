@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.interfaces.world;
 
+import net.minecraft.block.Block;
+import net.minecraft.tileentity.TileEntity;
 import org.spongepowered.common.relocate.co.aikar.timings.WorldTimingsHandler;
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.BlockEventData;
@@ -80,6 +82,8 @@ public interface IMixinWorldServer extends IMixinWorld {
 
     SpongeBlockSnapshot createSpongeBlockSnapshot(IBlockState state, IBlockState extended, BlockPos pos, BlockChangeFlag updateFlag);
 
+    SpongeBlockSnapshot createSpongeSnapshotForTileEntity(IBlockState state, BlockPos pos, BlockChangeFlag updateFlag, @Nullable TileEntity tileEntity);
+
     SpongeWorldGenerator createWorldGenerator(DataContainer settings);
 
     SpongeWorldGenerator createWorldGenerator(String settings);
@@ -111,4 +115,5 @@ public interface IMixinWorldServer extends IMixinWorld {
     void doChunkGC();
 
     void addPostEventBlockEvents(List<BlockEventData> events);
+    void spongeNotifyNeighborsWithoutObservers(BlockPos sourcePos, Block sourceBlock, boolean b);
 }
