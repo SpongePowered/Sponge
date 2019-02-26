@@ -61,6 +61,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.dimension.DimensionType;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
@@ -217,7 +218,6 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
     @Shadow protected boolean isImmuneToFire;
     @Shadow public int hurtResistantTime;
     @Shadow public int fire; // fire
-    @Shadow public int dimension;
     @Shadow protected Random rand;
     @Shadow public float prevDistanceWalkedModified;
     @Shadow public float distanceWalkedModified;
@@ -283,6 +283,8 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
     @Shadow @Nullable public abstract Team getTeam();
 
     @Shadow public abstract boolean isInvulnerableTo(DamageSource p_180431_1_);
+
+    @Shadow public DimensionType dimension;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onSpongeConstruction(net.minecraft.entity.EntityType<?> entityType, @Nullable net.minecraft.world.World worldIn, CallbackInfo ci) {
@@ -584,13 +586,15 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
     // to avoid firing a DisplaceEntityEvent.Teleport
     @Override
     public void setLocationAndAngles(Location location) {
+        if (this.world != location.getWorld()) {
+            this.world = (net.minecraft.world.World) location.getWorld();
+            this.dimension = this.world.dimension.getType();
+        }
+
         if (((Entity) this) instanceof EntityPlayerMP) {
             ((EntityPlayerMP) (Object) this).connection.setPlayerLocation(location.getX(), location.getY(), location.getZ(), this.rotationYaw, this.rotationPitch);
         } else {
             this.setPosition(location.getX(), location.getY(), location.getZ());
-        }
-        if (this.world != location.getWorld()) {
-            this.world = (net.minecraft.world.World) location.getWorld();
         }
     }
 
@@ -598,6 +602,12 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
     public void setLocationAndAngles(Transform transform) {
         Vector3d position = transform.getPosition();
         EntityPlayerMP player = null;
+
+        if (this.world != transform.getWorld()) {
+            this.world = (net.minecraft.world.World) transform.getWorld();
+            this.dimension = this.world.dimension.getType();
+        }
+
         if (((Entity) this) instanceof EntityPlayerMP) {
             player = ((EntityPlayerMP) (Object) this);
         }
@@ -605,9 +615,6 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
             player.connection.setPlayerLocation(position.getX(), position.getY(), position.getZ(), (float) transform.getYaw(), (float) transform.getPitch());
         } else {
             this.setLocationAndAngles(position.getX(), position.getY(), position.getZ(), (float) transform.getYaw(), (float) transform.getPitch());
-        }
-        if (this.world != transform.getWorld()) {
-            this.world = (net.minecraft.world.World) transform.getWorld();
         }
     }
 
@@ -617,8 +624,8 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
 
         if (relativePositions.isEmpty()) {
             // This is just a normal teleport that happens to set both.
-            relocated = setLocation(location);
-            setRotation(rotation);
+            relocated = this.setLocation(location);
+            this.setRotation(rotation);
         } else {
             if (((Entity) this) instanceof EntityPlayerMP && ((EntityPlayerMP) (Entity) this).connection != null) {
                 // Players use different logic, as they support real relative movement.
@@ -671,8 +678,8 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
                 }
 
                 // From here just a normal teleport is needed.
-                relocated = setLocation(resultantLocation);
-                setRotation(resultantRotation);
+                relocated = this.setLocation(resultantLocation);
+                this.setRotation(resultantRotation);
             }
         }
         return relocated;

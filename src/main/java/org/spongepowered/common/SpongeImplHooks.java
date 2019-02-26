@@ -424,6 +424,7 @@ public final class SpongeImplHooks {
         // This is only used in SpongeForge
     }
 
+    @Nullable
     public static BlockPos getBedLocation(EntityPlayer playerIn, DimensionType dimensionType) {
         return ((IMixinEntityPlayer) playerIn).getBedLocation(dimensionType);
     }
@@ -432,6 +433,7 @@ public final class SpongeImplHooks {
         return ((IMixinEntityPlayer) playerIn).isSpawnForced(dimensionType);
     }
 
+    @Nullable
     public static Inventory toInventory(Object inventory, @Nullable Object fallback) {
         SpongeImpl.getLogger().error("Unknown inventory " + inventory.getClass().getName() + " report this to Sponge");
         return null;

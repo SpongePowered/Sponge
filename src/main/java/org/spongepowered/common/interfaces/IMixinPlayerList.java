@@ -26,19 +26,20 @@ package org.spongepowered.common.interfaces;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.world.Teleporter;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.dimension.Dimension;
+import net.minecraft.world.dimension.DimensionType;
 
 public interface IMixinPlayerList {
 
     double getMovementFactor(Dimension dimension);
 
-    void prepareEntityForPortal(Entity entityIn, WorldServer oldWorldIn, WorldServer toWorldIn);
+    void prepareEntityForPortal(Entity entity, WorldServer fromWorld, WorldServer toWorld);
 
-    void transferPlayerToDimension(EntityPlayerMP playerIn, int targetDimensionId, net.minecraft.world.Teleporter teleporter);
+    void transferPlayerToDimension(EntityPlayerMP player, DimensionType toDimensionType, Teleporter teleporter);
 
-    void transferEntityToWorld(Entity entityIn, int fromDimensionId, WorldServer fromWorld, WorldServer toWorld, net.minecraft.world
-            .Teleporter teleporter);
+    void transferEntityToWorld(Entity entityIn, WorldServer fromWorld, WorldServer toWorld, Teleporter teleporter);
 
     void reloadAdvancementProgress();
 }
