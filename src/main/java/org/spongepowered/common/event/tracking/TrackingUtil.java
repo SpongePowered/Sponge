@@ -678,7 +678,11 @@ public final class TrackingUtil {
         }
 
         if (changeFlag.updateNeighbors()) { // Notify neighbors only if the change flag allowed it.
+            // Append the snapshot being applied that is allowing us to keep track of which source is
+            // performing the notification, it's quick and dirty.
+            PhaseTracker.getInstance().getCurrentContext().neighborNotificationSource = newBlockSnapshot;
             mixinWorld.spongeNotifyNeighborsPostBlockChange(pos, originalState, newState, changeFlag);
+            PhaseTracker.getInstance().getCurrentContext().neighborNotificationSource = null;
         } else if (changeFlag.notifyObservers()) {
             world.updateObservingBlocksAt(pos, newBlock);
         }
