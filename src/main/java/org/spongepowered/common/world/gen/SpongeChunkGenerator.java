@@ -521,6 +521,10 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
 
     @Override
     public void recreateStructures(Chunk chunkIn, int x, int z) {
+        if (!this.world.getWorldInfo().isMapFeaturesEnabled()) {
+            return;
+        }
+
         if (this.baseGenerator instanceof IChunkGenerator) {
             ((IChunkGenerator) this.baseGenerator).recreateStructures(chunkIn, x, z);
         }
