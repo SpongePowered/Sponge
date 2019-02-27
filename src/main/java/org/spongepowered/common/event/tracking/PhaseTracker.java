@@ -257,15 +257,16 @@ public final class PhaseTracker {
 
         final TrackingPhase phase = state.getPhase();
         final PhaseContext<?> context = currentPhaseData.context;
-        try (final UnwindingPhaseContext unwinding = UnwindingPhaseContext.unwind(state, context) ) {
+        final boolean hasCaptures = context.hasCaptures();
+        try (final UnwindingPhaseContext unwinding = UnwindingPhaseContext.unwind(state, context, hasCaptures) ) {
             // With UnwindingPhaseContext#unwind checking for post, if it is null, the try
             // will not attempt to close the phase context. If it is required,
             // it already automatically pushes onto the phase stack, along with
             // a new list of capture lists
             try { // Yes this is a nested try, but in the event the current phase cannot be unwound,
-                  // at least unwind UNWINDING to process any captured objects so we're not totally without
-                  // loss of objects
-                if (context.hasCaptures()) {
+                // at least unwind UNWINDING to process any captured objects so we're not totally without
+                // loss of objects
+                if (hasCaptures) {
                     ((IPhaseState) state).unwind(context);
                 }
             } catch (Exception e) {
@@ -610,6 +611,7 @@ public final class PhaseTracker {
         performNeighborNotificationOnTarget(mixinWorld, notifyPos, sourceBlock, sourcePos, iblockstate);
     }
 
+    @SuppressWarnings("rawtypes")
     public void performNeighborNotificationOnTarget(IMixinWorldServer mixinWorld, BlockPos notifyPos, Block sourceBlock, BlockPos sourcePos,
         IBlockState iblockstate) {
         if (iblockstate.getBlock() == Blocks.AIR) {
@@ -619,14 +621,14 @@ public final class PhaseTracker {
         try {
             // Sponge start - prepare notification
             final PhaseData peek = this.stack.peek();
-            final IPhaseState<?> state = peek.state;
+            final IPhaseState state = peek.state;
             // If the phase state does not want to allow neighbor notifications to leak while processing,
             // it needs to be able to do so. It will replay the notifications in the order in which they were received,
             // such that the notification will be sent out in the same order as the block changes that may have taken place.
-            if (((IPhaseState) state).capturesNeighborNotifications(peek.context, mixinWorld, notifyPos, sourceBlock, iblockstate, sourcePos)) {
+            if (state.capturesNeighborNotifications(peek.context, mixinWorld, notifyPos, sourceBlock, iblockstate, sourcePos)) {
                 return;
             }
-            ((IPhaseState) state).associateNeighborStateNotifier(peek.context,
+            state.associateNeighborStateNotifier(peek.context,
                 sourcePos, iblockstate.getBlock(), notifyPos, ((WorldServer) mixinWorld), PlayerTracker.Type.NOTIFIER);
             final LocatableBlock block = new SpongeLocatableBlockBuilder()
                 .world(((World) mixinWorld))
@@ -643,7 +645,7 @@ public final class PhaseTracker {
             ) {
                 // Since the notifier may have just been set from the previous state, we can
                 // ask it to contribute to our state
-                ((IPhaseState) state).provideNotifierForNeighbors(peek.context, context);
+                state.provideNotifierForNeighbors(peek.context, context);
                 context.buildAndSwitch();
                 // Sponge End
 

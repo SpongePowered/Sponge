@@ -359,8 +359,7 @@ public final class TrackingUtil {
 
             associateBlockChangeWithSnapshot(phaseState, newBlock, currentState, originalBlockSnapshot);
             // Make sure the phase state is aware it is capturing the block change
-            ((IPhaseState) phaseState).notifyCapturedBlockChange(phaseContext, pos, originalBlockSnapshot, newState, tileEntity);
-            phaseContext.getCapturedBlockSupplier().put(originalBlockSnapshot, newState);
+            ((IPhaseState) phaseState).captureBlockChange(phaseContext, pos, originalBlockSnapshot, newState, tileEntity);
             final IMixinChunk mixinChunk = (IMixinChunk) chunk;
             final IBlockState originalBlockState = mixinChunk.setBlockState(pos, newState, currentState, originalBlockSnapshot, BlockChangeFlags.ALL);
             if (originalBlockState == null) {
@@ -480,7 +479,7 @@ public final class TrackingUtil {
             transactionBuilders[i] = new ImmutableList.Builder<>();
         }
 
-        createTransactionLists(snapshots, transactionArrays, transactionBuilders);
+        createTransactionLists(state, context, transactionArrays, transactionBuilders);
         ListMultimap<BlockPos, BlockEventData> scheduledEvents = snapshots.getScheduledEvents();
 
         // Clear captured snapshots after creating the transactions. The transactions at this point will be dictating what blcoks are handled
@@ -528,13 +527,15 @@ public final class TrackingUtil {
         }
     }
 
-    private static void createTransactionLists(MultiBlockCaptureSupplier snapshots, ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays,
-        ImmutableList.Builder<Transaction<BlockSnapshot>>[] transactionBuilders) {
-        for (SpongeBlockSnapshot snapshot : snapshots.get()) {
+    @SuppressWarnings("rawtypes")
+    private static void createTransactionLists(IPhaseState state, PhaseContext<?> context,
+        ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays, ImmutableList.Builder<Transaction<BlockSnapshot>>[] transactionBuilders) {
+        final List<SpongeBlockSnapshot> snapshots = context.getCapturedOriginalBlocksChanged();
+        for (SpongeBlockSnapshot snapshot : snapshots) {
             // This processes each snapshot to assign them to the correct event in the next area, with the
             // correct builder array entry.
             ;
-            TRANSACTION_PROCESSOR.apply(transactionBuilders).accept(snapshots.createTransaction(snapshot));
+            TRANSACTION_PROCESSOR.apply(transactionBuilders).accept(state.createTransaction(context, snapshot));
         }
         for (int i = 0; i < EVENT_COUNT; i++) {
             // Build each event array

@@ -36,8 +36,8 @@ import javax.annotation.Nullable;
 public final class UnwindingPhaseContext extends GeneralPhaseContext<UnwindingPhaseContext> {
 
     @Nullable
-    public static UnwindingPhaseContext unwind(IPhaseState<?> state, PhaseContext<?> context) {
-        if (!state.requiresPost() || !context.hasCaptures()) {
+    public static UnwindingPhaseContext unwind(IPhaseState<?> state, PhaseContext<?> context, boolean hasCaptures) {
+        if (!state.requiresPost() || !hasCaptures) {
             return null;
         }
         return new UnwindingPhaseContext(state, context)

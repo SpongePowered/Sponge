@@ -669,4 +669,12 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         // Throw an exception if we're not capturing at all but the state says we do?
         throw new IllegalStateException("Expected to capture entities, but we aren't capturing them.");
     }
+
+    public boolean hasCapturedBlocks() {
+        return this.blocksSupplier != null && !this.blocksSupplier.isEmpty();
+    }
+
+    public List<SpongeBlockSnapshot> getCapturedBlockChanges() {
+        return this.blocksSupplier.get();
+    }
 }

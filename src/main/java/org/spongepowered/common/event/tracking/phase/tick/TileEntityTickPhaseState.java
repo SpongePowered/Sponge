@@ -176,7 +176,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
     @Override
     public void captureTileEntityReplacement(TileEntityTickContext currentContext, IMixinWorldServer mixinWorldServer, BlockPos pos,
         @Nullable net.minecraft.tileentity.TileEntity currenTile, @Nullable net.minecraft.tileentity.TileEntity tileEntity) {
-        currentContext.logTileChange(mixinWorldServer, pos, currenTile, tileEntity);
+        currentContext.getCapturedBlockSupplier().logTileChange(mixinWorldServer, pos, currenTile, tileEntity);
     }
 
     @Override
@@ -249,16 +249,23 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
     }
 
     @Override
+    public boolean capturesNeighborNotifications(TileEntityTickContext context, IMixinWorldServer mixinWorld, BlockPos notifyPos, Block sourceBlock,
+        IBlockState iblockstate, BlockPos sourcePos) {
+        context.getCapturedBlockSupplier().captureNeighborNotification(mixinWorld, notifyPos, iblockstate, sourceBlock, sourcePos);
+        return true;
+    }
+
+    @Override
     public void performPostBlockNotificationsAndNeighborUpdates(TileEntityTickContext context,
         SpongeBlockSnapshot oldBlockSnapshot, IBlockState newState, SpongeBlockChangeFlag changeFlag,
         Transaction<BlockSnapshot> transaction,
         int currentDepth) {
-        context.processTransactionsUpTo(oldBlockSnapshot, transaction, newState, currentDepth);
+        context.getCapturedBlockSupplier().processTransactionsUpTo(oldBlockSnapshot, transaction, newState, currentDepth);
     }
 
     @Override
     public void processCancelledTransaction(TileEntityTickContext context, Transaction<BlockSnapshot> transaction, BlockSnapshot original) {
-        context.cancelTransaction(transaction, original);
+        context.getCapturedBlockSupplier().cancelTransaction(transaction, original);
         final WorldServer worldServer = ((SpongeBlockSnapshot) original).getWorldServer();
         final Chunk chunk = worldServer.getChunk(((SpongeBlockSnapshot) original).getBlockPos());
         final PlayerChunkMapEntry entry = worldServer.getPlayerChunkMap().getEntry(chunk.x, chunk.z);
@@ -266,6 +273,12 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
             ((IMixinPlayerChunkMapEntry) entry).markBiomesForUpdate();
         }
         super.processCancelledTransaction(context, transaction, original);
+    }
+
+    @Override
+    public void captureBlockChange(TileEntityTickContext phaseContext, BlockPos pos, SpongeBlockSnapshot originalBlockSnapshot,
+        IBlockState newState, @Nullable net.minecraft.tileentity.TileEntity tileEntity) {
+        phaseContext.getCapturedBlockSupplier().logBlockChange(originalBlockSnapshot, newState, pos, tileEntity);
     }
 
     @Override

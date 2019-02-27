@@ -52,6 +52,7 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.common.SpongeImplHooks;
@@ -846,8 +847,9 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         IBlockState iblockstate, BlockPos sourcePos) {
         return false;
     }
-    default void notifyCapturedBlockChange(C phaseContext, BlockPos pos, SpongeBlockSnapshot originalBlockSnapshot, IBlockState newState,
+    default void captureBlockChange(C phaseContext, BlockPos pos, SpongeBlockSnapshot originalBlockSnapshot, IBlockState newState,
         @Nullable TileEntity tileEntity) {
+        phaseContext.getCapturedBlockSupplier().put(originalBlockSnapshot, newState);
 
     }
     default void captureTileEntityReplacement(C currentContext, IMixinWorldServer mixinWorldServer, BlockPos pos, @Nullable TileEntity currenTile, @Nullable TileEntity tileEntity) {
@@ -874,4 +876,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
 
     }
 
+    default Transaction<BlockSnapshot> createTransaction(C context, SpongeBlockSnapshot snapshot) {
+        return context.getCapturedBlockSupplier().createTransaction(snapshot);
+    }
 }

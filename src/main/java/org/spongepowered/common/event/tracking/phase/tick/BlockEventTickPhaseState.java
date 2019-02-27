@@ -82,7 +82,7 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
     @Override
     public boolean capturesNeighborNotifications(BlockEventTickContext context, IMixinWorldServer mixinWorld, BlockPos notifyPos, Block sourceBlock,
         IBlockState iblockstate, BlockPos sourcePos) {
-        context.captureNeighborNotification(mixinWorld, notifyPos, iblockstate, sourceBlock, sourcePos);
+        context.getCapturedBlockSupplier().captureNeighborNotification(mixinWorld, notifyPos, iblockstate, sourceBlock, sourcePos);
         return true;
     }
 
@@ -95,9 +95,9 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
     }
 
     @Override
-    public void notifyCapturedBlockChange(BlockEventTickContext phaseContext, BlockPos pos, SpongeBlockSnapshot originalBlockSnapshot,
+    public void captureBlockChange(BlockEventTickContext phaseContext, BlockPos pos, SpongeBlockSnapshot originalBlockSnapshot,
         IBlockState newState, @Nullable TileEntity tileEntity) {
-        phaseContext.logBlockChange(originalBlockSnapshot, pos, tileEntity);
+        phaseContext.getCapturedBlockSupplier().logBlockChange(originalBlockSnapshot, newState, pos, tileEntity);
     }
 
     @Override
@@ -193,7 +193,7 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
     @Override
     public void captureTileEntityReplacement(BlockEventTickContext currentContext, IMixinWorldServer mixinWorldServer, BlockPos pos,
         @Nullable TileEntity currenTile, @Nullable TileEntity tileEntity) {
-        currentContext.logTileChange(mixinWorldServer, pos, currenTile, tileEntity);
+        currentContext.getCapturedBlockSupplier().logTileChange(mixinWorldServer, pos, currenTile, tileEntity);
     }
 
     @Override
@@ -201,12 +201,12 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
         SpongeBlockSnapshot oldBlockSnapshot, IBlockState newState, SpongeBlockChangeFlag changeFlag,
         Transaction<BlockSnapshot> transaction,
         int currentDepth) {
-        context.processTransactionsUpTo(oldBlockSnapshot, transaction, newState, currentDepth);
+        context.getCapturedBlockSupplier().processTransactionsUpTo(oldBlockSnapshot, transaction, newState, currentDepth);
     }
 
     @Override
     public void processCancelledTransaction(BlockEventTickContext context, Transaction<BlockSnapshot> transaction, BlockSnapshot original) {
-        context.cancelTransaction(transaction, original);
+        context.getCapturedBlockSupplier().cancelTransaction(transaction, original);
         final WorldServer worldServer = ((SpongeBlockSnapshot) original).getWorldServer();
         final Chunk chunk = worldServer.getChunk(((SpongeBlockSnapshot) original).getBlockPos());
         final PlayerChunkMapEntry entry = worldServer.getPlayerChunkMap().getEntry(chunk.x, chunk.z);

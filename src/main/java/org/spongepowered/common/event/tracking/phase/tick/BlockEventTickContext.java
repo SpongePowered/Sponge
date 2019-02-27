@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
-public class BlockEventTickContext extends EnhancedBlockTrackingContext<BlockEventTickContext> {
+public class BlockEventTickContext extends LocationBasedTickContext<BlockEventTickContext> {
 
     BlockEventTickContext() {
         super(TickPhase.Tick.BLOCK_EVENT);

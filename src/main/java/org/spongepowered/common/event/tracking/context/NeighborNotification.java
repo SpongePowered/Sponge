@@ -22,34 +22,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.entity;
+package org.spongepowered.common.event.tracking.context;
 
-import net.minecraft.world.WorldServer;
-import org.spongepowered.asm.util.PrettyPrinter;
-import org.spongepowered.common.event.tracking.IPhaseState;
+import com.google.common.base.MoreObjects;
+import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.math.BlockPos;
+import org.spongepowered.api.world.World;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
-public class TeleportingContext extends EntityContext<TeleportingContext> {
+final class NeighborNotification {
+    final IMixinWorldServer worldServer;
+    final IBlockState source;
+    final BlockPos notifyPos;
+    final Block sourceBlock;
+    final BlockPos sourcePos;
 
-    private WorldServer targetWorld;
-
-    TeleportingContext(
-        IPhaseState<? extends TeleportingContext> state) {
-        super(state);
-    }
-
-    public WorldServer getTargetWorld() {
-        return this.targetWorld;
-    }
-
-    public TeleportingContext setTargetWorld(WorldServer targetWorld) {
-        this.targetWorld = targetWorld;
-        return this;
+    NeighborNotification(IMixinWorldServer worldServer, IBlockState source, BlockPos notifyPos, Block sourceBlock,
+        BlockPos sourcePos) {
+        this.worldServer = worldServer;
+        this.source = source;
+        this.notifyPos = notifyPos;
+        this.sourceBlock = sourceBlock;
+        this.sourcePos = sourcePos;
     }
 
     @Override
-    public PrettyPrinter printCustom(PrettyPrinter printer, int indent) {
-        String s = String.format("%1$"+indent+"s", "");
-        return super.printCustom(printer, indent)
-            .add(s + "- %s: %s", "TargetTeleportWorld", this.targetWorld);
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+            .add("worldServer", ((World) this.worldServer).getProperties().getWorldName())
+            .add("source", this.source)
+            .add("notifyPos", this.notifyPos)
+            .add("sourceBlock", this.sourceBlock)
+            .add("sourcePos", this.sourcePos)
+            .toString();
     }
 }
