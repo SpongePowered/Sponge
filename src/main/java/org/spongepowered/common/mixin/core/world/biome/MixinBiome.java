@@ -34,13 +34,13 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.interfaces.biome.IMixinBiomeType;
+import org.spongepowered.common.interfaces.biome.IMixinBiome;
 
 import javax.annotation.Nullable;
 
 @NonnullByDefault
 @Mixin(Biome.class)
-public abstract class MixinBiome implements BiomeType, IMixinBiomeType {
+public abstract class MixinBiome implements BiomeType, IMixinBiome {
 
     @Shadow @Final protected float scale;
     @Shadow @Final protected float temperature;
@@ -67,7 +67,7 @@ public abstract class MixinBiome implements BiomeType, IMixinBiomeType {
 
     @Inject(method = "register", at = @At("RETURN"))
     private static void register(int id, String name, Biome biome, CallbackInfo ci) {
-        ((IMixinBiomeType) biome).setId(CatalogKey.minecraft(name));
+        ((IMixinBiome) biome).setId(CatalogKey.minecraft(name));
     }
 
     @Override
