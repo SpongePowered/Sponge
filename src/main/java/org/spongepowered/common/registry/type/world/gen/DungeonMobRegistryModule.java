@@ -25,8 +25,8 @@
 package org.spongepowered.common.registry.type.world.gen;
 
 import com.google.common.collect.Lists;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.gen.feature.WorldGenDungeons;
+import net.minecraft.util.registry.IRegistry;
+import net.minecraft.world.gen.feature.DungeonsFeature;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
@@ -44,7 +44,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RegistrationDependency(EntityTypeRegistryModule.class)
-public class DungeonMobRegistryModule implements RegistryModule {
+public final class DungeonMobRegistryModule implements RegistryModule {
 
     // We use a non-catalog registry to allow Forge to add mobs from DungeonHooks
     private final WeightedTable<EntityArchetype> dungeonMobs = new WeightedTable<>();
@@ -57,10 +57,10 @@ public class DungeonMobRegistryModule implements RegistryModule {
 
     @Override
     public void registerDefaults() {
-        Map<String, Long> types = Arrays.stream(WorldGenDungeons.SPAWNERTYPES)
-                .collect(Collectors.groupingBy(ResourceLocation::toString, Collectors.counting()));
+        final Map<String, Long> types = Arrays.stream(DungeonsFeature.SPAWNERTYPES)
+            .collect(Collectors.groupingBy(k -> IRegistry.ENTITY_TYPE.getKey(k).toString(), Collectors.counting()));
 
-        for(String mob : types.keySet()) {
+        for (String mob : types.keySet()) {
             final Optional<EntityType> entityType = EntityUtil.fromNameToType(mob);
             if (!entityType.isPresent() || entityType.get() == EntityTypes.UNKNOWN) {
                 continue;

@@ -275,7 +275,6 @@ import org.spongepowered.common.text.impl.TranslatableTextImpl;
 import org.spongepowered.common.world.SpongeExplosionBuilder;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 import org.spongepowered.common.world.SpongeWorldArchetypeBuilder;
-import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettingsBuilder;
 import org.spongepowered.common.world.biome.SpongeVirtualBiomeTypeBuilder;
 import org.spongepowered.common.world.border.SpongeWorldBorderBuilder;
 import org.spongepowered.common.world.schematic.SpongeSchematicBuilder;

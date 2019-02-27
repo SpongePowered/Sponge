@@ -26,21 +26,16 @@ package org.spongepowered.common.mixin.core.world;
 
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.MinecraftException;
-import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldServerMulti;
-import net.minecraft.world.WorldSettings;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.SessionLockException;
 import net.minecraft.world.storage.WorldInfo;
 import net.minecraft.world.storage.WorldSavedDataStorage;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
 
 @NonnullByDefault
 @Mixin(WorldServerMulti.class)
@@ -62,10 +57,6 @@ public abstract class MixinWorldServerMulti extends WorldServer {
     @Override
     @Overwrite
     protected void saveLevel() throws SessionLockException {
-        // this.perWorldStorage.saveAllData();
-        // we handle all saving including perWorldStorage in WorldServer.saveLevel. This needs to be disabled since we
-        // use a seperate save handler for each world. Each world folder needs to generate a corresponding
-        // level.dat for plugins that require it such as MultiVerse.
         super.saveLevel();
     }
 
@@ -73,7 +64,6 @@ public abstract class MixinWorldServerMulti extends WorldServer {
      * @author blood - February 6th, 2017
      * @reason Since we use a save handler per world, we can safely call super
      */
-    @Override
     @Overwrite
     public WorldServer func_212251_i__() {
         return super.func_212251_i__();

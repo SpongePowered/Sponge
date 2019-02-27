@@ -28,14 +28,12 @@ import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.block.tileentity.TileEntityArchetype;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.world.extent.MutableBlockVolume;
-import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
 import org.spongepowered.api.world.schematic.Schematic;
-import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
+import org.spongepowered.api.world.volume.block.MutableBlockVolume;
 
 import java.util.Map;
 
-public class SpongeSchematic extends SpongeArchetypeVolume implements Schematic {
+public final class SpongeSchematic extends SpongeArchetypeVolume implements Schematic {
 
     private DataView metadata;
 
@@ -57,11 +55,6 @@ public class SpongeSchematic extends SpongeArchetypeVolume implements Schematic 
     @Override
     public DataView getMetadata() {
         return this.metadata;
-    }
-
-    @Override
-    public MutableBlockVolumeWorker<Schematic> getBlockWorker() {
-        return new SpongeMutableBlockVolumeWorker<>(this);
     }
 
 }

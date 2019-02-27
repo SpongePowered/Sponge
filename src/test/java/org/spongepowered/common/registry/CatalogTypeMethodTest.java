@@ -79,7 +79,7 @@ public class CatalogTypeMethodTest {
             .put("sponge.statistic.type.", true)
             .put("item.", false)
             .put("entity.", false)
-            .put("stat.", false)
+            .put("stats.", false)
             .put("tile.", false)
             .put("potion.effect.missing", false) // Needs API changes
             .put("gameMode.", false)

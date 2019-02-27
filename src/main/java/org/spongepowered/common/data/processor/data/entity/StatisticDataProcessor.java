@@ -28,9 +28,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Maps;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.stats.StatBase;
+import net.minecraft.stats.Stat;
 import net.minecraft.stats.StatisticsManagerServer;
-import net.minecraft.util.TupleIntJsonSerializable;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableStatisticData;
@@ -42,13 +41,13 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeStatisticD
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.SpongeImmutableMapValue;
 import org.spongepowered.common.data.value.SpongeMutableMapValue;
-import org.spongepowered.common.interfaces.statistic.IMixinStatisticsManager;
 
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 
-public class StatisticDataProcessor extends AbstractEntitySingleDataProcessor<EntityPlayerMP, Map<Statistic, Long>, StatisticData, ImmutableStatisticData> {
+public final class StatisticDataProcessor extends AbstractEntitySingleDataProcessor<EntityPlayerMP, Map<Statistic, Long>, StatisticData,
+    ImmutableStatisticData> {
 
     public StatisticDataProcessor() {
         super(EntityPlayerMP.class, Keys.STATISTICS);
@@ -60,16 +59,17 @@ public class StatisticDataProcessor extends AbstractEntitySingleDataProcessor<En
     }
 
     @Override
-    protected boolean set(EntityPlayerMP player, Map<Statistic, Long> statMap) {
-        checkNotNull(player, "null player");
-        checkNotNull(statMap, "null stat map");
-        StatisticsManagerServer stats = player.getStatFile();
-        for (Entry<Statistic, Long> statEntry : statMap.entrySet()) {
-            Long value = statEntry.getValue();
-            StatBase stat = (StatBase) statEntry.getKey();
-            int currentValue = stats.readStat(stat);
-            if (value != null) {
-                stats.increaseStat(player, (StatBase) statEntry.getKey(), (int) (value - currentValue));
+    protected boolean set(EntityPlayerMP player, Map<Statistic, Long> value) {
+        checkNotNull(player);
+        checkNotNull(value);
+
+        final StatisticsManagerServer manager = player.getStats();
+        for (Entry<Statistic, Long> entry : value.entrySet()) {
+            final Stat<?> stat = (Stat<?>) entry.getKey();
+            final Long amount = entry.getValue();
+            final int currentValue = manager.getValue(stat);
+            if (amount != null) {
+                manager.setValue(player, stat, (int) (amount - currentValue));
             }
         }
         return true;
@@ -77,14 +77,14 @@ public class StatisticDataProcessor extends AbstractEntitySingleDataProcessor<En
 
     @Override
     protected Optional<Map<Statistic, Long>> getVal(EntityPlayerMP player) {
-        checkNotNull(player, "null player");
-        StatisticsManagerServer stats = player.getStatFile();
-        Map<StatBase, TupleIntJsonSerializable> data = ((IMixinStatisticsManager) stats).getStatsData();
-        Map<Statistic, Long> statMap = Maps.newHashMap();
-        for (Entry<StatBase, TupleIntJsonSerializable> statEntry : data.entrySet()) {
-            statMap.put((Statistic) statEntry.getKey(), (long) statEntry.getValue().getIntegerValue());
+        checkNotNull(player);
+
+        final StatisticsManagerServer manager = player.getStats();
+        final Map<Statistic, Long> stats = Maps.newHashMap();
+        for (final Entry<Stat<?>, Integer> entry : manager.statsData.entrySet()) {
+            stats.put((Statistic) entry.getKey(), entry.getValue().longValue());
         }
-        return Optional.of(statMap);
+        return Optional.of(stats);
     }
 
     @Override

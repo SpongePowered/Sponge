@@ -22,76 +22,62 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.statistic;
+package org.spongepowered.common.mixin.core.stats;
 
-import net.minecraft.stats.StatBase;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.stats.IStatFormater;
+import net.minecraft.stats.Stat;
+import net.minecraft.stats.StatType;
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.scoreboard.critieria.Criterion;
-import org.spongepowered.api.statistic.EntityStatistic;
+import org.spongepowered.api.statistic.Statistic;
+import org.spongepowered.api.statistic.StatisticCategory;
 import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
-import org.spongepowered.common.text.translation.SpongeTranslation;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.text.NumberFormat;
 import java.util.Optional;
 
-import javax.annotation.Nullable;
+@Mixin(Stat.class)
+public abstract class MixinStat implements Statistic {
 
-public final class SpongeEntityStatistic extends StatBase implements EntityStatistic, TypedSpongeStatistic {
+    @Shadow @Final private StatType<Object> type;
 
-    private final String entityId;
-    private String spongeId;
     private CatalogKey key;
 
-    public SpongeEntityStatistic(String statIdIn, ITextComponent statNameIn, String entityId) {
-        super(statIdIn, statNameIn);
-        this.entityId = entityId;
-    }
-
-    @Override
-    public EntityType getEntityType() {
-        return EntityTypeRegistryModule.getInstance().getById(this.entityId).get();
-    }
-
-    @Override
-    public Translation getTranslation() {
-        return new SpongeTranslation(this.statId);
+    @Inject(method = "<init>", at = @At("RETURN"))
+    public void onConstruct(StatType<Object> type, Object value, IStatFormater formatter, CallbackInfo ci) {
+        this.key = CatalogKey.resolve(Stat.buildName(type, value));
     }
 
     @Override
     public Optional<Criterion> getCriterion() {
-        return Optional.ofNullable((Criterion) getCriteria());
+        // TODO (1.13) - Scoreboards
+        return Optional.empty();
+    }
+
+    @Override
+    public NumberFormat getFormat() {
+        // TODO (1.13) - Stats
+        return null;
+    }
+
+    @Override
+    public StatisticCategory getType() {
+        return (StatisticCategory) (Object) this.type;
     }
 
     @Override
     public CatalogKey getKey() {
-        if (this.key == null) {
-            this.key = CatalogKey.resolve(TypedSpongeStatistic.super.getId());
-        }
         return this.key;
     }
 
     @Override
-    public String getName() {
-        return getStatName().getUnformattedText();
+    public Translation getTranslation() {
+        return null;
     }
-
-    @Nullable
-    @Override
-    public String getSpongeId() {
-        return this.spongeId;
-    }
-
-    @Override
-    public void setSpongeId(String id) {
-        this.spongeId = id;
-        this.key = CatalogKey.resolve(this.spongeId);
-    }
-
-    @Override
-    public String getMinecraftId() {
-        return this.statId;
-    }
-
 }

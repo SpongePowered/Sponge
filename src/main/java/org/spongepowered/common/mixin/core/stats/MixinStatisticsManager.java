@@ -24,62 +24,43 @@
  */
 package org.spongepowered.common.mixin.core.stats;
 
-import com.google.common.collect.ImmutableMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.stats.StatBase;
+import net.minecraft.stats.Stat;
 import net.minecraft.stats.StatisticsManager;
-import net.minecraft.util.TupleIntJsonSerializable;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.statistic.ChangeStatisticEvent;
 import org.spongepowered.api.statistic.Statistic;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.interfaces.statistic.IMixinStatisticsManager;
-
-import java.util.Map;
 
 @Mixin(StatisticsManager.class)
-public abstract class MixinStatisticsManager implements IMixinStatisticsManager {
+public abstract class MixinStatisticsManager {
 
-    @Shadow public abstract int readStat(StatBase stat);
-    @Shadow public abstract void increaseStat(EntityPlayer player, StatBase stat, int amount);
+    @Shadow @Final public Object2IntMap<Stat<?>> statsData;
+    @Shadow public abstract int getValue(Stat<?> p_77444_1_);
 
-    @Shadow @Final protected Map<StatBase, TupleIntJsonSerializable> statsData;
+    /**
+     * @author Zidane - Feburary 26th, 2019 - Version 1.13
+     *
+     * @reason Fire event when changing statistic
+     */
+    @Overwrite
+    public void setValue(EntityPlayer player, Stat<?> stat, int amount) {
+        final int current = this.getValue(stat);
 
-    private boolean statCaptured = false;
-
-    @Inject(method = "increaseStat(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/stats/StatBase;I)V",
-            at = @At("HEAD"), cancellable = true)
-    public void onStatChange(EntityPlayer player, StatBase stat, int amount, CallbackInfo ci) {
-        if (this.statCaptured) {
+        Sponge.getCauseStackManager().pushCause(player);
+        final ChangeStatisticEvent event = SpongeEventFactory.createChangeStatisticEvent(Sponge.getCauseStackManager().getCurrentCause(), current,
+            current + amount, (Statistic) stat);
+        if (Sponge.getEventManager().post(event)) {
+            Sponge.getCauseStackManager().popCause();
             return;
         }
 
-        int prev = readStat(stat);
-        // TODO: Better cause here?
-        Sponge.getCauseStackManager().pushCause(player);
-        ChangeStatisticEvent.TargetPlayer event = SpongeEventFactory.createChangeStatisticEventTargetPlayer(
-                Sponge.getCauseStackManager().getCurrentCause(), prev, prev + amount, (Statistic) stat, (Player) player);
-        boolean cancelled = Sponge.getEventManager().post(event);
         Sponge.getCauseStackManager().popCause();
-        this.statCaptured = true;
-        ci.cancel();
-
-        if (!cancelled) {
-            increaseStat(player, stat, (int) (event.getValue() - prev));
-            this.statCaptured = false;
-        }
+        this.statsData.put(stat, (int) event.getValue());
     }
-
-    @Override
-    public Map<StatBase, TupleIntJsonSerializable> getStatsData() {
-        return ImmutableMap.copyOf(this.statsData);
-    }
-
 }

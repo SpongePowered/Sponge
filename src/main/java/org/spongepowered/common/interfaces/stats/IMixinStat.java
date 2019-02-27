@@ -22,25 +22,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.statistic;
+package org.spongepowered.common.interfaces.stats;
 
-import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.statistic.StatisticType;
-
-import java.util.Optional;
-
-public interface TypedSpongeStatistic extends SpongeStatistic {
-
-    @Override
-    default StatisticType getType() {
-        final String statisticTypeId = getKey().getValue().substring(0, getId().indexOf("."));
-        final CatalogKey key = CatalogKey.resolve(statisticTypeId);
-        final Optional<StatisticType> statisticType = Sponge.getRegistry().getType(StatisticType.class, key);
-        if (!statisticType.isPresent()) {
-            System.err.println("Derp");
-        }
-        return statisticType.get();
-    }
+public interface IMixinStat {
 
 }

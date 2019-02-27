@@ -390,7 +390,7 @@ public class SpongeGameRegistry implements GameRegistry {
 
     @Override
     public Optional<EntityStatistic> getEntityStatistic(StatisticType statType, EntityType entityType) {
-        checkNotNull(statType, "null stat type");
+        checkNotNull(statType, "null stats type");
         checkNotNull(entityType, "null entity type");
         EntityList.EntityEggInfo eggInfo = EntityList.ENTITY_EGGS.get((ResourceLocation) (Object) entityType.getKey());
         if (statType.equals(StatisticTypes.ENTITIES_KILLED)) {
@@ -398,13 +398,13 @@ public class SpongeGameRegistry implements GameRegistry {
         } else if (statType.equals(StatisticTypes.KILLED_BY_ENTITY)) {
             return Optional.of((EntityStatistic) eggInfo.entityKilledByStat);
         }
-        throw new IllegalArgumentException("invalid entity stat type");
+        throw new IllegalArgumentException("invalid entity stats type");
     }
 
     @SuppressWarnings("ConstantConditions")
     @Override
     public Optional<ItemStatistic> getItemStatistic(StatisticType statType, ItemType itemType) {
-        checkNotNull(statType, "null stat type");
+        checkNotNull(statType, "null stats type");
         checkNotNull(itemType, "null item type");
         Item item = (Item) itemType;
         if (statType.equals(StatisticTypes.ITEMS_CRAFTED)) {
@@ -418,14 +418,14 @@ public class SpongeGameRegistry implements GameRegistry {
         } else if (statType.equals(StatisticTypes.ITEMS_DROPPED)) {
             return Optional.of((ItemStatistic) StatList.getDroppedObjectStats(item));
         }
-        throw new IllegalArgumentException("invalid item stat type");
+        throw new IllegalArgumentException("invalid item stats type");
     }
 
     @SuppressWarnings("ConstantConditions")
     @Override
     public Optional<BlockStatistic> getBlockStatistic(StatisticType statType, BlockType blockType) {
         if (!statType.equals(StatisticTypes.BLOCKS_BROKEN)) {
-            throw new IllegalArgumentException("invalid block stat type");
+            throw new IllegalArgumentException("invalid block stats type");
         }
         return Optional.of((BlockStatistic) StatList.getBlockStats((Block) blockType));
     }

@@ -27,16 +27,15 @@ package org.spongepowered.common.mixin.optimization.block.state;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableTable;
 import net.minecraft.block.Block;
-import net.minecraft.block.properties.IProperty;
-import net.minecraft.block.state.BlockStateBase;
-import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.state.IProperty;
+import net.minecraft.world.chunk.BlockStateContainer;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(BlockStateContainer.StateImplementation.class)
+@Mixin(BlockStateContainer.class)
 public abstract class MixinStateImplementation extends BlockStateBase {
 
     @Shadow @Final private Block block;

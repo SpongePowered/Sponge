@@ -60,8 +60,10 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.RayTraceFluidMode;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.registry.IRegistry;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.dimension.EndDimension;
@@ -162,6 +164,18 @@ public final class EntityUtil {
     private static final Predicate<Entity> TRACEABLE = NOT_SPECTATING.and(entity -> entity != null && entity.canBeCollidedWith());
 
     public static final Function<Humanoid, EntityPlayer> HUMANOID_TO_PLAYER = (humanoid) -> humanoid instanceof EntityPlayer ? (EntityPlayer) humanoid : null;
+
+    public static boolean isEntityDead(org.spongepowered.api.entity.Entity entity) {
+        return isEntityDead((net.minecraft.entity.Entity) entity);
+    }
+
+    private static boolean isEntityDead(net.minecraft.entity.Entity entity) {
+        if (entity instanceof EntityLivingBase) {
+            EntityLivingBase base = (EntityLivingBase) entity;
+            return base.getHealth() <= 0 || base.deathTime > 0 || base.dead;
+        }
+        return entity.removed;
+    }
 
     /**
      * This is mostly for debugging purposes, but as well as ensuring that the phases are entered and exited correctly.
@@ -318,18 +332,6 @@ public final class EntityUtil {
         transferPlayerToDimension(event, playerIn);
         playerIn.connection.sendPacket(new SPacketEffect(1032, BlockPos.ORIGIN, 0, false));
         return playerIn;
-    }
-
-    public static boolean isEntityDead(org.spongepowered.api.entity.Entity entity) {
-        return isEntityDead((net.minecraft.entity.Entity) entity);
-    }
-
-    private static boolean isEntityDead(net.minecraft.entity.Entity entity) {
-        if (entity instanceof EntityLivingBase) {
-            EntityLivingBase base = (EntityLivingBase) entity;
-            return base.getHealth() <= 0 || base.deathTime > 0 || base.dead;
-        }
-        return entity.removed;
     }
 
     public static MoveEntityEvent.Teleport handleDisplaceEntityTeleportEvent(Entity entityIn, Location location) {
@@ -522,6 +524,139 @@ public final class EntityUtil {
         }
     }
 
+    /**
+     * A combined {@link Entity}/{@link EntityPlayerMP} transfer from one {@link WorldServer} to another.
+     *
+     * <p>This should only ever be called by API-facing methods.</p>
+     *
+     * @param server The server
+     * @param entity The entity
+     * @param location The location
+     * @param fromDimension The dimension type the entity is coming from
+     * @param toDimension The dimension type the entity is going to
+     */
+    public static void changeWorld(MinecraftServer server, Entity entity, Location location, DimensionType fromDimension, DimensionType toDimension) {
+        final WorldServer fromWorld = server.getWorld(fromDimension);
+        final WorldServer toWorld = server.getWorld(toDimension);
+
+        if (entity instanceof EntityPlayer) {
+            fromWorld.getEntityTracker().removePlayerFromTrackers((EntityPlayerMP) entity);
+            fromWorld.getPlayerChunkMap().removePlayer((EntityPlayerMP) entity);
+            server.getPlayerList().getPlayers().remove(entity);
+        } else {
+            fromWorld.getEntityTracker().untrack(entity);
+        }
+
+        entity.stopRiding();
+        entity.world.removeEntityDangerously(entity);
+        entity.removed = false;
+        entity.dimension = toDimension;
+        entity.setPositionAndRotation(location.getX(), location.getY(), location.getZ(), 0, 0);
+        while (toWorld.isCollisionBoxesEmpty(entity, entity.getBoundingBox()) && location.getY() < 256.0D) {
+            entity.setPosition(entity.posX, entity.posY + 1.0D, entity.posZ);
+        }
+
+        toWorld.getChunkProvider().getChunk((int) entity.posX >> 4, (int) entity.posZ >> 4, true, true);
+
+        if (entity instanceof EntityPlayerMP && ((EntityPlayerMP) entity).connection != null) {
+            final EntityPlayerMP player = (EntityPlayerMP) entity;
+
+            toDimension = ((IMixinDimensionType) toWorld.getDimension().getType()).asClientDimensionType();
+
+            if (!((IMixinEntityPlayerMP) player).usesCustomClient()) {
+                final GlobalDimensionType fromGlobalDimension = ((IMixinDimensionType) fromWorld.getDimension().getType()).getGlobalDimensionType();
+                final GlobalDimensionType toGlobalDimension = ((IMixinDimensionType) toDimension).getGlobalDimensionType();
+
+                if (fromGlobalDimension != toGlobalDimension) {
+                    player.connection.sendPacket(new SPacketRespawn((toDimension.getId() >= DimensionType.OVERWORLD.getId() ? DimensionType.NETHER :
+                        DimensionType.OVERWORLD), toWorld.getDifficulty(), toWorld.getWorldInfo().getGenerator(), player.interactionManager
+                        .getGameType()));
+                }
+            }
+
+            // Prevent 'lastMoveLocation' from being set to the previous world.
+            ((IMixinNetHandlerPlayServer) player.connection).setLastMoveLocation(null);
+
+            player.connection.sendPacket(
+                new SPacketRespawn(toDimension, toWorld.getDifficulty(), toWorld.getWorldInfo().getGenerator(),
+                    player.interactionManager.getGameType()));
+            player.connection.sendPacket(new SPacketServerDifficulty(toWorld.getDifficulty(), toWorld.getWorldInfo().isDifficultyLocked()));
+            server.getPlayerList().updatePermissionLevel(player);
+
+            entity.setWorld(toWorld);
+            player.connection.setPlayerLocation(player.posX, player.posY, player.posZ, player.rotationYaw, player.rotationPitch);
+            player.setSneaking(false);
+            server.getPlayerList().sendWorldInfo(player, toWorld);
+            toWorld.getPlayerChunkMap().addPlayer(player);
+            toWorld.spawnEntity(player);
+            server.getPlayerList().getPlayers().add(player);
+            player.interactionManager.setWorld(toWorld);
+            player.addSelfToInternalCraftingInventory();
+
+            player.connection.sendPacket(new SPacketEntityStatus(player, toWorld.getGameRules().getBoolean("reducedDebugInfo") ? (byte) 22 : 23));
+            ((IMixinEntityPlayerMP) player).refreshXpHealthAndFood();
+
+            for (Object effect : player.getActivePotionEffects()) {
+                player.connection.sendPacket(new SPacketEntityEffect(player.getEntityId(), (PotionEffect) effect));
+            }
+
+            // Fix MC-88179: Resend attributes when switching dimensions. Code taken from Forge.
+            final AttributeMap attributemap = (AttributeMap) player.getAttributeMap();
+            final Collection<IAttributeInstance> watchedAttribs = attributemap.getWatchedAttributes();
+            if (!watchedAttribs.isEmpty()) {
+                player.connection.sendPacket(new SPacketEntityProperties(player.getEntityId(), watchedAttribs));
+            }
+        } else {
+            entity.setWorld(toWorld);
+            toWorld.spawnEntity(entity);
+        }
+
+        fromWorld.resetUpdateEntityTick();
+        toWorld.resetUpdateEntityTick();
+    }
+
+    private static void adjustEntityPostionForTeleport(IMixinPlayerList playerList, Entity entity, WorldServer fromWorld, WorldServer toWorld) {
+        fromWorld.profiler.startSection("moving");
+        net.minecraft.world.dimension.Dimension fromDimension = fromWorld.dimension;
+        net.minecraft.world.dimension.Dimension toDimension = toWorld.dimension;
+        double moveFactor = playerList.getMovementFactor(fromDimension) / playerList.getMovementFactor(toDimension);
+        double x = entity.posX * moveFactor;
+        double y = entity.posY;
+        double z = entity.posZ * moveFactor;
+
+        if (toDimension instanceof EndDimension) {
+            BlockPos blockpos;
+
+            if (fromDimension instanceof EndDimension) {
+                blockpos = toWorld.getSpawnPoint();
+            } else {
+                blockpos = toWorld.getSpawnCoordinate();
+            }
+
+            x = blockpos.getX();
+            y = blockpos.getY();
+            z = blockpos.getZ();
+            entity.setLocationAndAngles(x, y, z, 90.0F, 0.0F);
+        }
+
+        if (!(fromDimension instanceof EndDimension)) {
+            fromWorld.profiler.startSection("placing");
+            x = MathHelper.clamp((int)x, -29999872, 29999872);
+            z = MathHelper.clamp((int)z, -29999872, 29999872);
+
+            if (entity.isAlive()) {
+                entity.setLocationAndAngles(x, y, z, entity.rotationYaw, entity.rotationPitch);
+            }
+            fromWorld.profiler.endSection();
+        }
+
+        if (entity.isAlive()) {
+            fromWorld.tickEntity(entity, false);
+        }
+
+        fromWorld.profiler.endSection();
+    }
+
     public static IMixinWorldServer getMixinWorld(org.spongepowered.api.entity.Entity entity) {
         return (IMixinWorldServer) entity.getWorld();
     }
@@ -678,7 +813,7 @@ public final class EntityUtil {
         Vec3d traceStart = EntityUtil.getPositionEyes(source, partialTicks);
         Vec3d lookDir = source.getLook(partialTicks).scale(traceDistance);
         Vec3d traceEnd = traceStart.add(lookDir);
-        return source.world.rayTraceBlocks(traceStart, traceEnd, false, false, true);
+        return source.world.rayTraceBlocks(traceStart, traceEnd, RayTraceFluidMode.NEVER, false, true);
     }
 
     private static Vec3d getPositionEyes(Entity entity, float partialTicks)
@@ -891,127 +1026,6 @@ public final class EntityUtil {
 
     public static EntitySnapshot createSnapshot(Entity entity) {
         return fromNative(entity).createSnapshot();
-    }
-
-    public static void changeWorld(MinecraftServer server, Entity entity, Location location, DimensionType fromDimension, DimensionType toDimension) {
-        final WorldServer fromWorld = server.getWorld(fromDimension);
-        final WorldServer toWorld = server.getWorld(toDimension);
-        if (entity instanceof EntityPlayer) {
-            fromWorld.getEntityTracker().removePlayerFromTrackers((EntityPlayerMP) entity);
-            fromWorld.getPlayerChunkMap().removePlayer((EntityPlayerMP) entity);
-            server.getPlayerList().getPlayers().remove(entity);
-        } else {
-            fromWorld.getEntityTracker().untrack(entity);
-        }
-
-        entity.stopRiding();
-        entity.world.removeEntityDangerously(entity);
-        entity.removed = false;
-        entity.dimension = toDimension;
-        entity.setPositionAndRotation(location.getX(), location.getY(), location.getZ(), 0, 0);
-        while (toWorld.isCollisionBoxesEmpty(entity, entity.getBoundingBox()) && location.getY() < 256.0D) {
-            entity.setPosition(entity.posX, entity.posY + 1.0D, entity.posZ);
-        }
-
-        toWorld.getChunkProvider().getChunk((int) entity.posX >> 4, (int) entity.posZ >> 4, true, true);
-
-        if (entity instanceof EntityPlayerMP && ((EntityPlayerMP) entity).connection != null) {
-            final EntityPlayerMP player = (EntityPlayerMP) entity;
-
-            toDimension = ((IMixinDimensionType) toWorld.getDimension().getType()).asClientDimensionType();
-
-            if (!((IMixinEntityPlayerMP) player).usesCustomClient()) {
-                final GlobalDimensionType fromGlobalDimension = ((IMixinDimensionType) fromWorld.getDimension().getType()).getGlobalDimensionType();
-                final GlobalDimensionType toGlobalDimension = ((IMixinDimensionType) toDimension).getGlobalDimensionType();
-
-                if (fromGlobalDimension != toGlobalDimension) {
-                    player.connection.sendPacket(new SPacketRespawn((toDimension.getId() >= DimensionType.OVERWORLD.getId() ? DimensionType.NETHER :
-                        DimensionType.OVERWORLD), toWorld.getDifficulty(), toWorld.getWorldInfo().getGenerator(), player.interactionManager
-                        .getGameType()));
-                }
-            }
-
-            // Prevent 'lastMoveLocation' from being set to the previous world.
-            ((IMixinNetHandlerPlayServer) player.connection).setLastMoveLocation(null);
-
-            player.connection.sendPacket(
-                    new SPacketRespawn(toDimension, toWorld.getDifficulty(), toWorld.getWorldInfo().getGenerator(),
-                            player.interactionManager.getGameType()));
-            player.connection.sendPacket(new SPacketServerDifficulty(toWorld.getDifficulty(), toWorld.getWorldInfo().isDifficultyLocked()));
-            server.getPlayerList().updatePermissionLevel(player);
-
-            entity.setWorld(toWorld);
-            player.connection.setPlayerLocation(player.posX, player.posY, player.posZ, player.rotationYaw, player.rotationPitch);
-            player.setSneaking(false);
-            server.getPlayerList().sendWorldInfo(player, toWorld);
-            toWorld.getPlayerChunkMap().addPlayer(player);
-            toWorld.spawnEntity(player);
-            server.getPlayerList().getPlayers().add(player);
-            player.interactionManager.setWorld(toWorld);
-            player.addSelfToInternalCraftingInventory();
-
-            player.connection.sendPacket(new SPacketEntityStatus(player, toWorld.getGameRules().getBoolean("reducedDebugInfo") ? (byte) 22 : 23));
-            ((IMixinEntityPlayerMP) player).refreshXpHealthAndFood();
-            for (Object effect : player.getActivePotionEffects()) {
-                player.connection.sendPacket(new SPacketEntityEffect(player.getEntityId(), (PotionEffect) effect));
-            }
-
-
-            // Fix MC-88179: Resend attributes when switching dimensions. Code taken from Forge.
-            final AttributeMap attributemap = (AttributeMap) player.getAttributeMap();
-            final Collection<IAttributeInstance> watchedAttribs = attributemap.getWatchedAttributes();
-            if (!watchedAttribs.isEmpty()) {
-                player.connection.sendPacket(new SPacketEntityProperties(player.getEntityId(), watchedAttribs));
-            }
-        } else {
-            entity.setWorld(toWorld);
-            toWorld.spawnEntity(entity);
-        }
-
-        fromWorld.resetUpdateEntityTick();
-        toWorld.resetUpdateEntityTick();
-    }
-
-    private static void adjustEntityPostionForTeleport(IMixinPlayerList playerList, Entity entity, WorldServer fromWorld, WorldServer toWorld) {
-        fromWorld.profiler.startSection("moving");
-        net.minecraft.world.dimension.Dimension dOld = fromWorld.dimension;
-        net.minecraft.world.dimension.Dimension dNew = toWorld.dimension;
-        double moveFactor = playerList.getMovementFactor(dOld) / playerList.getMovementFactor(dNew);
-        double x = entity.posX * moveFactor;
-        double y = entity.posY;
-        double z = entity.posZ * moveFactor;
-
-        if (dNew instanceof EndDimension) {
-            BlockPos blockpos;
-
-            if (dOld instanceof EndDimension) {
-                blockpos = toWorld.getSpawnPoint();
-            } else {
-                blockpos = toWorld.getSpawnCoordinate();
-            }
-
-            x = blockpos.getX();
-            y = blockpos.getY();
-            z = blockpos.getZ();
-            entity.setLocationAndAngles(x, y, z, 90.0F, 0.0F);
-        }
-
-        if (!(dOld instanceof EndDimension)) {
-            fromWorld.profiler.startSection("placing");
-            x = MathHelper.clamp((int)x, -29999872, 29999872);
-            z = MathHelper.clamp((int)z, -29999872, 29999872);
-
-            if (entity.isAlive()) {
-                entity.setLocationAndAngles(x, y, z, entity.rotationYaw, entity.rotationPitch);
-            }
-            fromWorld.profiler.endSection();
-        }
-
-        if (entity.isAlive()) {
-            fromWorld.tickEntity(entity, false);
-        }
-
-        fromWorld.profiler.endSection();
     }
 
     /**
@@ -1284,7 +1298,7 @@ public final class EntityUtil {
     }
 
     public static Optional<EntityType> fromLocationToType(ResourceLocation location) {
-        return Optional.ofNullable((EntityType) net.minecraft.entity.EntityType.field_200787_a.get(location));
+        return Optional.ofNullable((EntityType) IRegistry.ENTITY_TYPE.get(location));
     }
 
     // I'm lazy, but this is better than using the convenience method
