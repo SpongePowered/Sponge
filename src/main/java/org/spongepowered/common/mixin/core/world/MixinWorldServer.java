@@ -577,10 +577,6 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         {
             // this.profiler.startSection("getChunk"); // Sponge - Don't use the profiler
             net.minecraft.world.chunk.Chunk chunk = iterator.next();
-            if (!((IMixinChunk) chunk).canTick()) {
-                continue;
-            }
-
             final net.minecraft.world.World world = chunk.getWorld();
             int j = chunk.x * 16;
             int k = chunk.z * 16;
