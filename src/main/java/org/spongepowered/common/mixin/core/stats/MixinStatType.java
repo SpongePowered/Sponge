@@ -39,6 +39,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.registry.type.statistic.StatisticCategoryRegistryModule;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -56,7 +57,10 @@ public abstract class MixinStatType implements StatisticCategory {
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onConstruct(IRegistry<?> p_i49818_1_, CallbackInfo ci) {
         this.key = (CatalogKey) (Object) IRegistry.STATS.getKey((StatType) (Object) this);
+
+        StatisticCategoryRegistryModule.getInstance().registerAdditionalCatalog(this);
     }
+
     @Override
     public CatalogKey getKey() {
         return this.key;
@@ -82,7 +86,7 @@ public abstract class MixinStatType implements StatisticCategory {
     public Stat get(Object key, IStatFormater formatter) {
         return this.map.computeIfAbsent(key, (f) -> {
             final Stat stat = new Stat((StatType) (Object) this, f, formatter);
-            this.stats.add((Statistic) (Object) stat);
+            this.stats.add((Statistic) stat);
             return stat;
         });
     }

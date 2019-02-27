@@ -30,14 +30,12 @@ import com.google.common.base.CaseFormat;
 import com.google.common.base.MoreObjects;
 import com.google.gson.JsonParseException;
 import net.minecraft.world.WorldType;
-import net.minecraft.world.gen.ChunkGeneratorSettings;
-import net.minecraft.world.gen.FlatGeneratorInfo;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.gen.WorldGenerator;
+import org.spongepowered.api.world.gen.GeneratorType;
+import org.spongepowered.api.world.gen.TerrainGenerator;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -64,7 +62,7 @@ public abstract class MixinWorldType implements GeneratorType {
     @Nullable private CatalogKey key;
 
     @Inject(method = "<init>(ILjava/lang/String;)V", at = @At("RETURN"))
-    private void onConstructSpongeRegister(int id, String name, CallbackInfo callbackInfo) {
+    private void onConstruct(int id, String name, CallbackInfo callbackInfo) {
         // Ensures that new world types are automatically registered with the registry module
         GeneratorTypeRegistryModule.getInstance().registerAdditionalCatalog(this);
     }
@@ -104,9 +102,9 @@ public abstract class MixinWorldType implements GeneratorType {
     }
 
     @Override
-    public WorldGenerator createGenerator(World world) {
+    public TerrainGenerator<?> createGenerator(World world) {
         checkNotNull(world);
-        return ((IMixinWorldServer) world).createWorldGenerator(getGeneratorSettings());
+        return ((IMixinWorldServer) world).createTerrainGenerator(getGeneratorSettings());
     }
 
     @Override
@@ -133,7 +131,7 @@ public abstract class MixinWorldType implements GeneratorType {
         return MoreObjects.toStringHelper(this)
                 .add("id", getKey())
                 .add("name", getName())
-                .add("settings", getGeneratorSettings())
+                .add("settings", this.getGeneratorSettings())
                 .toString();
     }
 }

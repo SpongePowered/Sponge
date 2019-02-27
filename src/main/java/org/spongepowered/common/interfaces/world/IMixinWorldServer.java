@@ -33,8 +33,10 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
+import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.explosion.Explosion;
+import org.spongepowered.api.world.gen.TerrainGenerator;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.GeneralConfigBase;
@@ -55,7 +57,7 @@ public interface IMixinWorldServer extends IMixinWorld {
 
     void setActiveConfig(SpongeConfig<? extends GeneralConfigBase> config);
 
-    void updateWorldGenerator();
+    TerrainGenerator<?> createTerrainGenerator(DataContainer generatorSettings);
 
     void updateRotation(Entity entityIn);
 
@@ -64,7 +66,6 @@ public interface IMixinWorldServer extends IMixinWorld {
     boolean setBlockState(BlockPos pos, IBlockState state, BlockChangeFlag flag);
 
     boolean forceSpawnEntity(org.spongepowered.api.entity.Entity entity);
-
 
     void onSpongeEntityAdded(Entity entity);
 

@@ -52,6 +52,7 @@ import net.minecraft.network.play.server.SPacketPlayerListItem;
 import net.minecraft.network.play.server.SPacketPlayerPosLook;
 import net.minecraft.particles.IParticleData;
 import net.minecraft.scoreboard.Team;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.ResourceLocation;
@@ -161,42 +162,9 @@ import javax.annotation.Nullable;
 @Implements(@Interface(iface = Entity.class, prefix = "entity$"))
 public abstract class MixinEntity implements org.spongepowered.api.entity.Entity, IMixinEntity, IMixinTrackable {
 
-    private static final String LAVA_DAMAGESOURCE_FIELD = "Lnet/minecraft/util/DamageSource;LAVA:Lnet/minecraft/util/DamageSource;";
-    private static final String ATTACK_ENTITY_FROM_METHOD = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z";
-    private static final String FIRE_DAMAGESOURCE_FIELD = "Lnet/minecraft/util/DamageSource;IN_FIRE:Lnet/minecraft/util/DamageSource;";
-    private static final String WORLD_SPAWN_PARTICLE = "Lnet/minecraft/world/World;spawnParticle(Lnet/minecraft/particles/IParticleData;DDDDDD)V";
-    private static final String RIDING_ENTITY_FIELD = "Lnet/minecraft/entity/Entity;ridingEntity:Lnet/minecraft/entity/Entity;";
-    @SuppressWarnings("unused")
-    private static final String
-            ENTITY_ITEM_INIT =
-            "Lnet/minecraft/entity/item/EntityItem;<init>(Lnet/minecraft/world/World;DDDLnet/minecraft/item/ItemStack;)V";
     // @formatter:off
-    private EntityType entityType = SpongeImpl.getRegistry().getTranslated(this.getClass(), EntityType.class);
-    private boolean teleporting;
-    private WeakReference<IMixinChunk> activeChunk = new WeakReference<>(null);
-    private net.minecraft.entity.Entity teleportVehicle;
-    private float origWidth;
-    private float origHeight;
-    @Nullable private DamageSource originalLava;
-    protected boolean isConstructing = true;
-    @Nullable private Text displayName;
-    private BlockState currentCollidingBlock;
-    private BlockPos lastCollidedBlockPos;
-    private final boolean isVanilla = getClass().getName().startsWith("net.minecraft.");
-    @SuppressWarnings("unused")
-    private SpongeProfileManager spongeProfileManager;
-    @SuppressWarnings("unused")
-    private UserStorageService userStorageService;
-    private Timing timing;
-    // Used by tracker config
-    private boolean allowsBlockBulkCapture = true;
-    private boolean allowsEntityBulkCapture = true;
-    private boolean allowsBlockEventCreation = true;
-    private boolean allowsEntityEventCreation = true;
-    private boolean trackedInWorld = false;
-
     @Shadow public net.minecraft.entity.Entity ridingEntity;
-    @Shadow private UUID entityUniqueID;
+    @Shadow protected UUID entityUniqueID;
     @Shadow public net.minecraft.world.World world;
     @Shadow public double posX;
     @Shadow public double posY;
@@ -205,24 +173,22 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
     @Shadow public double motionY;
     @Shadow public double motionZ;
     @Shadow public boolean velocityChanged;
-    @Shadow public double prevPosX;
-    @Shadow public double prevPosY;
-    @Shadow public double prevPosZ;
     @Shadow public float rotationYaw;
     @Shadow public float rotationPitch;
     @Shadow public float width;
     @Shadow public float height;
     @Shadow public float fallDistance;
     @Shadow public boolean onGround;
-    @Shadow public boolean inWater;
-    @Shadow protected boolean isImmuneToFire;
     @Shadow public int hurtResistantTime;
-    @Shadow public int fire; // fire
+    @Shadow public int fire;
     @Shadow protected Random rand;
     @Shadow public float prevDistanceWalkedModified;
     @Shadow public float distanceWalkedModified;
     @Shadow protected EntityDataManager dataManager;
     @Shadow public int ticksExisted;
+    @Shadow @Final private List<net.minecraft.entity.Entity> passengers;
+    @Shadow public boolean removed;
+    @Shadow public DimensionType dimension;
 
     @Shadow public abstract void setPosition(double x, double y, double z);
     @Shadow public abstract int getAir();
@@ -245,7 +211,6 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
     @Shadow public abstract double getDistanceSq(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract void setLocationAndAngles(double x, double y, double z, float yaw, float pitch);
     @Shadow public abstract boolean hasNoGravity();
-    @Shadow public abstract void setNoGravity(boolean noGravity);
     @Shadow public abstract void setPositionAndUpdate(double x, double y, double z);
     @Shadow protected abstract void removePassenger(net.minecraft.entity.Entity passenger);
     @Shadow protected abstract void shadow$setRotation(float yaw, float pitch);
@@ -254,40 +219,41 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
     @Shadow public abstract void extinguish();
     @Shadow protected abstract void setFlag(int flag, boolean set);
     @Shadow public abstract void shadow$remove();
-
+    @Shadow public abstract void setItemStackToSlot(EntityEquipmentSlot slotIn, ItemStack stack);
+    @Shadow public abstract AxisAlignedBB shadow$getBoundingBox();
+    @Shadow public abstract NBTTagCompound writeWithoutTypeId(NBTTagCompound p_189511_1_);
+    @Shadow public abstract void setCustomName(@Nullable ITextComponent name);
+    @Shadow public abstract boolean isPassenger();
+    @Shadow @Nullable public abstract Team getTeam();
+    @Shadow public abstract boolean isInvulnerableTo(DamageSource p_180431_1_);
+    @Shadow @Nullable public abstract MinecraftServer getServer();
     // @formatter:on
 
-    @Shadow public float entityCollisionReduction;
-
-    @Shadow public abstract void setItemStackToSlot(EntityEquipmentSlot slotIn, ItemStack stack);
-
-    @Shadow protected abstract boolean shouldSetPosAfterLoading();
-
-    @Shadow public boolean preventEntitySpawning;
-
-    @Shadow @Final
-    private List<net.minecraft.entity.Entity> passengers;
-
-    @Shadow public abstract AxisAlignedBB shadow$getBoundingBox();
-
-    @Shadow public boolean removed;
-
-    @Shadow public abstract boolean writeUnlessRemoved(NBTTagCompound p_184198_1_);
-
-    @Shadow public abstract NBTTagCompound writeWithoutTypeId(NBTTagCompound p_189511_1_);
-
-    @Shadow public abstract void setCustomName(@Nullable ITextComponent name);
-
-    @Shadow public abstract boolean isPassenger();
-
-    @Shadow @Nullable public abstract Team getTeam();
-
-    @Shadow public abstract boolean isInvulnerableTo(DamageSource p_180431_1_);
-
-    @Shadow public DimensionType dimension;
+    private EntityType entityType = SpongeImpl.getRegistry().getTranslated(this.getClass(), EntityType.class);
+    private boolean teleporting;
+    private WeakReference<IMixinChunk> activeChunk = new WeakReference<>(null);
+    private net.minecraft.entity.Entity teleportVehicle;
+    private float origWidth;
+    private float origHeight;
+    private boolean isConstructing = true;
+    @Nullable private Text displayName;
+    private BlockState currentCollidingBlock;
+    private BlockPos lastCollidedBlockPos;
+    private final boolean isVanilla = getClass().getName().startsWith("net.minecraft.");
+    @SuppressWarnings("unused")
+    private SpongeProfileManager spongeProfileManager;
+    @SuppressWarnings("unused")
+    private UserStorageService userStorageService;
+    private Timing timing;
+    // Used by tracker config
+    private boolean allowsBlockBulkCapture = true;
+    private boolean allowsEntityBulkCapture = true;
+    private boolean allowsBlockEventCreation = true;
+    private boolean allowsEntityEventCreation = true;
+    private boolean trackedInWorld = false;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void onSpongeConstruction(net.minecraft.entity.EntityType<?> entityType, @Nullable net.minecraft.world.World worldIn, CallbackInfo ci) {
+    private void onConstruct(net.minecraft.entity.EntityType<?> entityType, @Nullable net.minecraft.world.World worldIn, CallbackInfo ci) {
         if (this.entityType instanceof SpongeEntityType) {
             SpongeEntityType<?, ?> spongeEntityType = (SpongeEntityType<?, ?>) this.entityType;
             this.refreshCache();
@@ -326,7 +292,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
         this.trackedInWorld = tracked;
     }
 
-    @Inject(method = "startRiding(Lnet/minecraft/entity/Entity;Z)Z", at = @At(value = "FIELD", target = RIDING_ENTITY_FIELD, ordinal = 0),
+    @Inject(method = "startRiding(Lnet/minecraft/entity/Entity;Z)Z", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;ridingEntity:Lnet/minecraft/entity/Entity;", ordinal = 0),
             cancellable = true)
     private void onStartRiding(net.minecraft.entity.Entity vehicle, boolean force, CallbackInfoReturnable<Boolean> ci) {
         if (!this.world.isRemote && (ShouldFire.RIDE_ENTITY_EVENT_MOUNT || ShouldFire.RIDE_ENTITY_EVENT)) {
@@ -539,7 +505,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
                         ((Player) entityPlayerMP).closeInventory(); // Call API method to make sure we capture it
                     }
                 }
-                EntityUtil.changeWorld((net.minecraft.entity.Entity) (Object) this, location, this.world.getDimension().getType(),
+                EntityUtil.changeWorld(this.getServer(), (net.minecraft.entity.Entity) (Object) this, location, this.world.getDimension().getType(),
                         nmsWorld.getDimension().getType());
             } else {
                 double distance = location.getPosition().distance(this.getPosition());
@@ -558,8 +524,8 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
                             ((Player) entityPlayerMP).closeInventory(); // Call API method to make sure we capture it
                         }
 
-                        ((WorldServer) location.getWorld()).getChunkProvider()
-                                .loadChunk(location.getChunkPosition().getX(), location.getChunkPosition().getZ());
+                        ((WorldServer) location.getWorld()).getChunkProvider().getChunk(location.getChunkPosition().getX(),
+                            location.getChunkPosition().getZ(), true, true);
                     }
                     entityPlayerMP.connection
                             .setPlayerLocation(location.getX(), location.getY(), location.getZ(), thisEntity.rotationYaw, thisEntity.rotationPitch);
@@ -1015,7 +981,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
     @Override
     public void readFromNbt(NBTTagCompound compound) {
         CustomDataNbtUtil.readCustomData(compound, this);
-        if (this instanceof IMixinGriefer && ((IMixinGriefer) this).isGriefer() && compound.hasKey(NbtDataUtil.CAN_GRIEF)) {
+        if (this instanceof IMixinGriefer && ((IMixinGriefer) this).isGriefer() && compound.contains(NbtDataUtil.CAN_GRIEF)) {
             ((IMixinGriefer) this).setCanGrief(compound.getBoolean(NbtDataUtil.CAN_GRIEF));
         }
     }
@@ -1029,7 +995,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
     public void writeToNbt(NBTTagCompound compound) {
         CustomDataNbtUtil.writeCustomData(compound, this);
         if (this instanceof IMixinGriefer && ((IMixinGriefer) this).isGriefer()) {
-            compound.setBoolean(NbtDataUtil.CAN_GRIEF, ((IMixinGriefer) this).canGrief());
+            compound.putBoolean(NbtDataUtil.CAN_GRIEF, ((IMixinGriefer) this).canGrief());
         }
     }
 
@@ -1092,7 +1058,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
             final NBTTagCompound compound = new NBTTagCompound();
             writeWithoutTypeId(compound);
             net.minecraft.entity.Entity entity = net.minecraft.entity.EntityType.create(this.world, (ResourceLocation) (Object) this.entityType.getKey());
-            compound.setUniqueId(NbtDataUtil.UUID, entity.getUniqueID());
+            compound.putUniqueId(NbtDataUtil.UUID, entity.getUniqueID());
             entity.read(compound);
             return (Entity) entity;
         } catch (Exception e) {
@@ -1271,19 +1237,19 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
         return entity.noClip || ((IMixinEntity) entity).isVanished();
     }
 
-    @Redirect(method = "doWaterSplashEffect", at = @At(value = "INVOKE", target = WORLD_SPAWN_PARTICLE))
+    @Redirect(method = "doWaterSplashEffect", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnParticle(Lnet/minecraft/particles/IParticleData;DDDDDD)V"))
     private void spawnParticle(net.minecraft.world.World world, IParticleData particleTypes, double xCoord, double yCoord, double zCoord,
             double xOffset, double yOffset, double zOffset) {
         if (!this.isVanished) {
-            this.world.spawnParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset);
+            this.world.addParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset);
         }
     }
 
-    @Redirect(method = "createRunningParticles", at = @At(value = "INVOKE", target = WORLD_SPAWN_PARTICLE))
+    @Redirect(method = "createRunningParticles", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnParticle(Lnet/minecraft/particles/IParticleData;DDDDDD)V"))
     private void runningSpawnParticle(net.minecraft.world.World world, IParticleData particleTypes, double xCoord, double yCoord, double zCoord,
             double xOffset, double yOffset, double zOffset) {
         if (!this.isVanished) {
-            this.world.spawnParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset);
+            this.world.addParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset);
         }
     }
 
@@ -1332,10 +1298,6 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
      * 1) If we are in a forge environment, we do NOT want forge to be capturing the item entities, because we handle them ourselves
      * 2) If we are in a client environment, we should not perform any sort of processing whatsoever.
      * 3) This method is entirely managed from the standpoint where our events have final say, as per usual.
-     *
-     * @param stack
-     * @param offsetY
-     * @return
      */
     @Overwrite
     @Nullable

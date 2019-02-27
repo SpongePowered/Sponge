@@ -27,7 +27,6 @@ package org.spongepowered.common.interfaces.world;
 import net.minecraft.entity.Entity;
 import net.minecraft.world.Teleporter;
 import net.minecraft.world.World;
-import org.spongepowered.api.world.PortalAgentType;
 
 /**
  * Compatibility interface to handle Forge binary patching {@link Teleporter} to implement their ITeleporter

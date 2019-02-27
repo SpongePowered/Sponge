@@ -32,19 +32,18 @@ import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.api.world.DimensionTypes;
-import org.spongepowered.api.world.GeneratorTypes;
 import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.WorldArchetypes;
 import org.spongepowered.api.world.difficulty.Difficulties;
+import org.spongepowered.api.world.gen.GeneratorTypes;
 import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 import org.spongepowered.common.registry.type.data.DataFormatRegistryModule;
 import org.spongepowered.common.registry.type.entity.GameModeRegistryModule;
 
 @RegisterCatalog(WorldArchetypes.class)
 @RegistrationDependency({GameModeRegistryModule.class, GeneratorTypeRegistryModule.class, DifficultyRegistryModule.class,
-                         DimensionTypeRegistryModule.class, SerializationBehaviorRegistryModule.class, WorldGeneratorModifierRegistryModule.class,
-                         DataFormatRegistryModule.class})
+                         DimensionTypeRegistryModule.class, SerializationBehaviorRegistryModule.class, DataFormatRegistryModule.class})
 public class WorldArchetypeRegistryModule extends AbstractCatalogRegistryModule<WorldArchetype>
     implements AdditionalCatalogRegistryModule<WorldArchetype>, AlternateCatalogRegistryModule<WorldArchetype> {
 
@@ -55,7 +54,6 @@ public class WorldArchetypeRegistryModule extends AbstractCatalogRegistryModule<
     @SuppressWarnings("deprecation")
     @Override
     public void registerDefaults() {
-        // Note that we don't have to register them because when we call build, they're registered.
         final WorldArchetype overworld = WorldArchetype.builder()
             .enabled(true)
             .loadsOnStartup(true)
@@ -66,34 +64,31 @@ public class WorldArchetypeRegistryModule extends AbstractCatalogRegistryModule<
             .generator(GeneratorTypes.DEFAULT)
             .dimension(DimensionTypes.OVERWORLD)
             .difficulty(Difficulties.NORMAL)
-            .usesMapFeatures(true)
+            .generateStructures(true)
             .hardcore(false)
             .pvp(true)
-            .generateBonusChest(false)
             .serializationBehavior(SerializationBehaviors.AUTOMATIC)
-            .build("minecraft:overworld", "Overworld");
-        WorldArchetype.builder()
+            .build();
+        final WorldArchetype theNether = WorldArchetype.builder()
             .from(overworld)
             .generator(GeneratorTypes.NETHER)
             .dimension(DimensionTypes.NETHER)
-            .build("minecraft:the_nether", "The Nether");
-        WorldArchetype.builder()
+            .build();
+        final WorldArchetype theEnd = WorldArchetype.builder()
             .from(overworld)
             .generator(GeneratorTypes.THE_END)
             .dimension(DimensionTypes.THE_END)
-            .build("minecraft:the_end", "The End");
-        WorldArchetype.builder()
-            .from(overworld)
-            .generatorModifiers(WorldGeneratorModifiers.VOID)
-            .build("sponge:the_void", "The Void");
+            .build();
+
+        this.registerAdditionalCatalog(overworld);
+        this.registerAdditionalCatalog(theNether);
+        this.registerAdditionalCatalog(theEnd);
     }
 
     @Override
-    public void registerAdditionalCatalog(WorldArchetype extraCatalog) {
-        checkNotNull(extraCatalog, "WorldArchetype cannot be null!");
-        //checkArgument(!id.startsWith("minecraft:"), "Plugin trying to register a fake minecraft generation settings!");
-        //checkArgument(!id.startsWith("sponge:"), "Plugin trying to register a fake sponge generation settings!");
-        this.map.put(extraCatalog.getKey(), extraCatalog);
+    public void registerAdditionalCatalog(WorldArchetype catalog) {
+        checkNotNull(catalog);
+        this.map.put(catalog.getKey(), catalog);
     }
 
     WorldArchetypeRegistryModule() {

@@ -27,9 +27,9 @@ package org.spongepowered.common.mixin.bungee.network;
 import com.google.common.base.Charsets;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
+import net.minecraft.network.NetHandlerLoginServer;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.NetHandlerLoginServer;
 import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -51,7 +51,7 @@ public abstract class MixinNetHandlerLoginServer {
     @Inject(method = "processLoginStart", at = @At(value = "FIELD", target = "Lnet/minecraft/server/network/NetHandlerLoginServer;"
             + "loginGameProfile:Lcom/mojang/authlib/GameProfile;",
             opcode = Opcodes.PUTFIELD, ordinal = 0, shift = At.Shift.AFTER))
-    public void initUuid(CallbackInfo ci) {
+    private void initUuid(CallbackInfo ci) {
         if (!this.server.isServerInOnlineMode()) {
             UUID uuid;
             if (((IMixinNetworkManager) this.networkManager).getSpoofedUUID() != null) {

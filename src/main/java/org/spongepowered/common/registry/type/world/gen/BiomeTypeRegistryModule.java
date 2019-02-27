@@ -24,118 +24,45 @@
  */
 package org.spongepowered.common.registry.type.world.gen;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.ImmutableMap;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.biome.Biome;
-import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
-import org.spongepowered.api.registry.util.AdditionalRegistration;
+import net.minecraft.util.registry.IRegistry;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.biome.BiomeTypes;
-import org.spongepowered.api.world.biome.VirtualBiomeType;
-import org.spongepowered.common.interfaces.world.biome.IMixinBiome;
-import org.spongepowered.common.registry.RegistryHelper;
-import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
+import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 
 @RegisterCatalog(BiomeTypes.class)
-public final class BiomeTypeRegistryModule
-    extends AbstractPrefixAlternateCatalogTypeRegistryModule<BiomeType>
-    implements AdditionalCatalogRegistryModule<BiomeType> {
+public final class BiomeTypeRegistryModule extends AbstractCatalogRegistryModule<BiomeType>
+    implements SpongeAdditionalCatalogRegistryModule<BiomeType> {
 
-    private final List<BiomeType> biomeTypes = new ArrayList<>();
+    public static BiomeTypeRegistryModule getInstance() {
+        return Holder.instance;
+    }
 
-    public BiomeTypeRegistryModule() {
-        super("minecraft",
-            new String[] {"minecraft:"},
-            string -> {
-                final String alternateKey = MINECRAFT_TO_SPONGE_FIELD_NAMES.get(string);
-                return alternateKey == null ? string : alternateKey;
-            });
+    private BiomeTypeRegistryModule() {
+    }
+
+    @Override
+    public boolean allowsApiRegistration() {
+        return true;
+    }
+
+    @Override
+    public void registerAdditionalCatalog(BiomeType catalog) {
+        checkNotNull(catalog);
+        this.map.put(catalog.getKey(), catalog);
     }
 
     @Override
     public void registerDefaults() {
-        for (Biome biome : Biome.REGISTRY) {
-            if (biome != null) {
-                registerBiome(biome);
-            }
-        }
+        IRegistry.BIOME
+            .stream()
+            .forEach(biome -> this.registerAdditionalCatalog((BiomeType) biome));
     }
 
-    private void registerBiome(Biome biome) {
-        CatalogKey id = ((BiomeType) biome).getKey();
-        if (id == null) {
-            ResourceLocation reg_id = Biome.REGISTRY.getNameForObject(biome);
-            ((IMixinBiome) biome).setModId(reg_id.getNamespace());
-            id = (CatalogKey) (Object) reg_id;
-            ((IMixinBiome) biome).setId(id);
-        }
-        this.biomeTypes.add((BiomeType) biome);
-        this.map.put(id, (BiomeType) biome);
+    private static final class Holder {
+        static final BiomeTypeRegistryModule instance = new BiomeTypeRegistryModule();
     }
-
-    @AdditionalRegistration
-    public void registerAdditional() {
-        for (Biome biome : Biome.REGISTRY) {
-            if (biome != null && !this.biomeTypes.contains((BiomeType) (Object) biome)) {
-                registerBiome(biome);
-            }
-        }
-        // Re-map fields in case mods have changed vanilla world types
-        RegistryHelper.mapFields(BiomeTypes.class, provideCatalogMap());
-    }
-
-    public static final ImmutableMap<String, String> MINECRAFT_TO_SPONGE_FIELD_NAMES = ImmutableMap.<String, String>builder()
-        .put("ice_flats", "ice_plains")
-        .put("beaches", "beach")
-        .put("smaller_extreme_hills", "extreme_hills_edge")
-        .put("birch_forest_hills", "birch_forest_hills")
-        .put("roofed_forest", "roofed_forest")
-        .put("taiga_cold", "cold_taiga")
-        .put("taiga_cold_hills", "cold_taiga_hills")
-        .put("redwood_taiga", "mega_taiga")
-        .put("redwood_taiga_hills", "mega_taiga_hills")
-        .put("extreme_hills_with_trees", "extreme_hills_plus")
-        .put("savanna_rock", "savanna_plateau")
-        .put("mesa_rock", "mesa_plateau_forest")
-        .put("mesa_clear_rock", "mesa_plateau")
-        .put("mutated_plains", "sunflower_plains")
-        .put("mutated_desert", "desert_mountains")
-        .put("mutated_extreme_hills", "extreme_hills_mountains")
-        .put("mutated_forest", "flower_forest")
-        .put("mutated_taiga", "taiga_mountains")
-        .put("mutated_swampland", "swampland_mountains")
-        .put("mutated_ice_flats", "ice_plains_spikes")
-        .put("mutated_jungle", "jungle_mountains")
-        .put("mutated_jungle_edge", "jungle_edge_mountains")
-        .put("mutated_birch_forest", "birch_forest_mountains")
-        .put("mutated_birch_forest_hills", "birch_forest_hills_mountains")
-        .put("mutated_roofed_forest", "roofed_forest_mountains")
-        .put("mutated_taiga_cold", "cold_taiga_mountains")
-        .put("mutated_redwood_taiga", "mega_spruce_taiga")
-        .put("mutated_redwood_taiga_hills", "mega_spruce_taiga_hills")
-        .put("mutated_extreme_hills_with_trees", "extreme_hills_plus_mountains")
-        .put("mutated_savanna", "savanna_mountains")
-        .put("mutated_savanna_rock", "savanna_plateau_mountains")
-        .put("mutated_mesa", "mesa_bryce")
-        .put("mutated_mesa_rock", "mesa_plateau_forest_mountains")
-        .put("mutated_mesa_clear_rock", "mesa_plateau_mountains")
-        .build();
-
-    @Override
-    public void registerAdditionalCatalog(BiomeType biome) {
-        checkNotNull(biome);
-        checkArgument(biome instanceof VirtualBiomeType, "Cannot register non-virtual biomes at this time.");
-        checkArgument(!getById(biome.getKey().toString()).isPresent(), "Duplicate biome id");
-
-        this.biomeTypes.add(biome);
-    }
-
 }

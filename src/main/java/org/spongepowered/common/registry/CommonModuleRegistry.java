@@ -250,15 +250,12 @@ import org.spongepowered.common.registry.type.scoreboard.DisplaySlotRegistryModu
 import org.spongepowered.common.registry.type.scoreboard.ObjectiveDisplayModeRegistryModule;
 import org.spongepowered.common.registry.type.scoreboard.VisibilityRegistryModule;
 import org.spongepowered.common.registry.type.statistic.StatisticRegistryModule;
-import org.spongepowered.common.registry.type.statistic.StatisticTypeRegistryModule;
+import org.spongepowered.common.registry.type.statistic.StatisticCategoryRegistryModule;
 import org.spongepowered.common.registry.type.text.*;
 import org.spongepowered.common.registry.type.tileentity.StructureModeRegistryModule;
 import org.spongepowered.common.registry.type.world.*;
-import org.spongepowered.common.registry.type.world.gen.BiomeTreeTypeRegistryModule;
 import org.spongepowered.common.registry.type.world.gen.BiomeTypeRegistryModule;
 import org.spongepowered.common.registry.type.world.gen.DungeonMobRegistryModule;
-import org.spongepowered.common.registry.type.world.gen.PopulatorObjectRegistryModule;
-import org.spongepowered.common.registry.type.world.gen.PopulatorTypeRegistryModule;
 import org.spongepowered.common.scoreboard.builder.SpongeObjectiveBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeScoreboardBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeTeamBuilder;
@@ -508,7 +505,7 @@ public final class CommonModuleRegistry {
             .registerModule(TreeType.class, new TreeTypeRegistryModule())
             .registerModule(Visibility.class, new VisibilityRegistryModule())
             .registerModule(Statistic.class, StatisticRegistryModule.getInstance())
-            .registerModule(StatisticType.class, new StatisticTypeRegistryModule())
+            .registerModule(StatisticType.class, new StatisticCategoryRegistryModule())
             .registerModule(Weather.class, new WeatherRegistryModule())
             .registerModule(WireAttachmentType.class, new WireAttachmentRegistryModule())
             .registerModule(WorldGeneratorModifier.class, WorldGeneratorModifierRegistryModule.getInstance())

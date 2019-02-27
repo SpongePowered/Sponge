@@ -22,34 +22,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.type.scoreboard;
+package org.spongepowered.common.registry.type.statistic;
 
-import net.minecraft.scoreboard.ScoreCriteria;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.api.scoreboard.critieria.Criteria;
-import org.spongepowered.api.scoreboard.critieria.Criterion;
-import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
+import org.spongepowered.api.statistic.StatisticCategories;
+import org.spongepowered.api.statistic.StatisticCategory;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
+import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 
-@RegisterCatalog(Criteria.class)
-public final class CriteriaRegistryModule extends AbstractPrefixAlternateCatalogTypeRegistryModule<Criterion> {
+@RegisterCatalog(StatisticCategories.class)
+public final class StatisticCategoryRegistryModule extends AbstractCatalogRegistryModule<StatisticCategory> implements
+    SpongeAdditionalCatalogRegistryModule<StatisticCategory> {
 
-    public CriteriaRegistryModule() {
-        super("minecraft", new String[] {"minecraft"}, id -> id.replace("_count", "s"));
+    public static StatisticCategoryRegistryModule getInstance() {
+        return StatisticCategoryRegistryModule.Holder.instance;
     }
 
     @Override
-    public void registerDefaults() {
-        register((Criterion) ScoreCriteria.DUMMY);
-        register((Criterion) ScoreCriteria.TRIGGER);
-        register((Criterion) ScoreCriteria.DEATH_COUNT);
-        register((Criterion) ScoreCriteria.PLAYER_KILL_COUNT);
-        register((Criterion) ScoreCriteria.TOTAL_KILL_COUNT);
-        register((Criterion) ScoreCriteria.HEALTH);
-        register((Criterion) ScoreCriteria.FOOD);
-        register((Criterion) ScoreCriteria.AIR);
-        register((Criterion) ScoreCriteria.ARMOR);
-        register((Criterion) ScoreCriteria.XP);
-        register((Criterion) ScoreCriteria.LEVEL);
+    public boolean allowsApiRegistration() {
+        return false;
     }
 
+    @Override
+    public void registerAdditionalCatalog(StatisticCategory catalog) {
+        checkNotNull(catalog);
+        this.map.put(catalog.getKey(), catalog);
+    }
+
+
+    private StatisticCategoryRegistryModule() {
+    }
+
+    private static final class Holder {
+        static final StatisticCategoryRegistryModule instance = new StatisticCategoryRegistryModule();
+    }
 }

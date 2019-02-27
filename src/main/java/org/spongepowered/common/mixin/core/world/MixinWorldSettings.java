@@ -60,7 +60,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
-import org.spongepowered.common.registry.type.world.WorldGeneratorModifierRegistryModule;
 
 import java.io.IOException;
 import java.util.Collection;

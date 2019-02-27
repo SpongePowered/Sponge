@@ -27,24 +27,22 @@ package org.spongepowered.common.registry.type;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 import net.minecraft.block.Block;
-import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
+import net.minecraft.state.IProperty;
 import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.block.trait.BlockTrait;
-import org.spongepowered.api.block.trait.BooleanTrait;
-import org.spongepowered.api.block.trait.EnumTrait;
-import org.spongepowered.api.block.trait.IntegerTrait;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.registry.util.RegistrationDependency;
+import org.spongepowered.api.state.BooleanStateProperty;
+import org.spongepowered.api.state.EnumStateProperty;
+import org.spongepowered.api.state.IntegerStateProperty;
+import org.spongepowered.api.state.StateProperty;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
@@ -54,9 +52,9 @@ import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 import org.spongepowered.common.registry.RegistryHelper;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.registry.provider.BlockPropertyIdProvider;
-import org.spongepowered.common.registry.type.block.BooleanTraitRegistryModule;
-import org.spongepowered.common.registry.type.block.EnumTraitRegistryModule;
-import org.spongepowered.common.registry.type.block.IntegerTraitRegistryModule;
+import org.spongepowered.common.registry.type.block.BooleanStatePropertyRegistryModule;
+import org.spongepowered.common.registry.type.block.EnumStatePropertyRegistryModule;
+import org.spongepowered.common.registry.type.block.IntegerStatePropertyRegistryModule;
 import org.spongepowered.common.registry.type.world.BlockChangeFlagRegistryModule;
 
 import java.util.Map;
@@ -75,8 +73,8 @@ public class BlockTypeRegistryModule extends AbstractCatalogRegistryModule<Block
     }
 
     @Override
-    public void registerAdditionalCatalog(BlockType extraCatalog) {
-        this.registerCustomBlock((ResourceLocation) (Object) extraCatalog.getKey(), extraCatalog);
+    public void registerAdditionalCatalog(BlockType catalog) {
+        this.registerCustomBlock((ResourceLocation) (Object) catalog.getKey(), catalog);
     }
 
     public void registerFromGameData(ResourceLocation id, BlockType blockType) {
@@ -84,6 +82,9 @@ public class BlockTypeRegistryModule extends AbstractCatalogRegistryModule<Block
     }
 
     private void registerCustomBlock(ResourceLocation id, BlockType blockType) {
+        checkNotNull(id);
+        checkNotNull(blockType);
+
         this.map.put((CatalogKey) (Object) id, blockType);
         registerBlockTrait(id.toString(), blockType);
         ((IMixinBlock) blockType).initializeTrackerState();
@@ -92,22 +93,22 @@ public class BlockTypeRegistryModule extends AbstractCatalogRegistryModule<Block
 
     private void registerBlockTrait(String id, BlockType block) {
         Block nmsBlock = (Block) block;
-        for (IBlockState state : nmsBlock.getBlockState().getValidStates()) {
+        for (IBlockState state : nmsBlock.getStateContainer().getValidStates()) {
             ((IMixinBlockState) state).generateId(nmsBlock);
             BlockStateRegistryModule.getInstance().registerBlockState((BlockState) state);
         }
-        for (Map.Entry<BlockTrait<?>, ?> mapEntry : block.getDefaultState().getTraitMap().entrySet()) {
-            BlockTrait<?> property = mapEntry.getKey();
+        for (Map.Entry<StateProperty<?>, ?> mapEntry : block.getDefaultState().getStatePropertyMap().entrySet()) {
+            StateProperty<?> property = mapEntry.getKey();
             final CatalogKey propertyId = BlockPropertyIdProvider.getIdAndTryRegistration((IProperty<?>) property, (Block) block, id);
             if (property instanceof IMixinPropertyHolder) {
                 ((IMixinPropertyHolder) property).setId(propertyId);
             }
-            if (property instanceof EnumTrait) {
-                EnumTraitRegistryModule.getInstance().registerBlock(propertyId, block, (EnumTrait<?>) property);
-            } else if (property instanceof IntegerTrait) {
-                IntegerTraitRegistryModule.getInstance().registerBlock(propertyId, block, (IntegerTrait) property);
-            } else if (property instanceof BooleanTrait) {
-                BooleanTraitRegistryModule.getInstance().registerBlock(propertyId, block, (BooleanTrait) property);
+            if (property instanceof BooleanStateProperty) {
+                EnumStatePropertyRegistryModule.getInstance().registerBlock(propertyId, block, (EnumStateProperty<?>) property);
+            } else if (property instanceof IntegerStateProperty) {
+                IntegerStatePropertyRegistryModule.getInstance().registerBlock(propertyId, block, (IntegerStateProperty) property);
+            } else if (property instanceof BooleanStateProperty) {
+                BooleanStatePropertyRegistryModule.getInstance().registerBlock(propertyId, block, (BooleanStateProperty) property);
             }
         }
     }
@@ -119,7 +120,7 @@ public class BlockTypeRegistryModule extends AbstractCatalogRegistryModule<Block
         this.map.put(CatalogKey.sponge("none"), (BlockType) Blocks.AIR);
     }
 
-    BlockTypeRegistryModule() { }
+    private BlockTypeRegistryModule() { }
 
     private static final class Holder {
         static final BlockTypeRegistryModule INSTANCE = new BlockTypeRegistryModule();

@@ -51,7 +51,6 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
 import org.spongepowered.common.registry.type.world.WorldArchetypeRegistryModule;
-import org.spongepowered.common.registry.type.world.WorldGeneratorModifierRegistryModule;
 
 public class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder {
 

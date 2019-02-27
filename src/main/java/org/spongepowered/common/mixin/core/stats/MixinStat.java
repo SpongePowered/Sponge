@@ -68,7 +68,7 @@ public abstract class MixinStat implements Statistic {
 
     @Override
     public StatisticCategory getType() {
-        return (StatisticCategory) (Object) this.type;
+        return (StatisticCategory) this.type;
     }
 
     @Override
