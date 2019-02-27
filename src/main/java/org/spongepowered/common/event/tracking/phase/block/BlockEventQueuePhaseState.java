@@ -24,40 +24,34 @@
  */
 package org.spongepowered.common.event.tracking.phase.block;
 
-import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.phase.TrackingPhase;
+import java.util.function.BiConsumer;
 
-public final class BlockPhase extends TrackingPhase {
+import org.spongepowered.api.event.CauseStackManager.StackFrame;
+import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.common.event.tracking.context.GeneralizedContext;
+import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 
-    public static final class State {
-        public static final IPhaseState<?> BLOCK_DECAY = new BlockDecayPhaseState();
-        public static final IPhaseState<?> BLOCK_EVENT_QUEUE = new BlockEventQueuePhaseState();
-        public static final IPhaseState<?> RESTORING_BLOCKS = new RestoringBlockPhaseState();
-        public static final IPhaseState<?> DISPENSE = new DispensePhaseState();
-        public static final IPhaseState<?> BLOCK_DROP_ITEMS = new BlockDropItemsPhaseState();
-        public static final IPhaseState<?> TILE_ENTITY_INVALIDATING = new TileEntityInvalidatingPhaseState();
+public class BlockEventQueuePhaseState extends BlockPhaseState {
 
-        /**
-         * Specifically for Forge environments where a TileEntity may need to perform block
-         * changes or entity spawns as a chunk unloads.
-         */
-        public static final IPhaseState<?> TILE_CHUNK_UNLOAD = new TileChunkUnloadState();
-
-        private State() {
+    public final BiConsumer<StackFrame, GeneralizedContext> FRAME_MODIFIER = super.getFrameModifier().andThen((frame, context) -> {
+        final IMixinBlockEventData blockEventData = context.getSource(IMixinBlockEventData.class).orElse(null);
+        if (blockEventData != null) {
+            if (blockEventData.getTickTileEntity() != null) {
+                frame.pushCause(blockEventData.getTickTileEntity());
+            } else {
+                frame.pushCause(blockEventData.getTickBlock());
+            }
+            frame.addContext(EventContextKeys.BLOCK_EVENT_QUEUE, blockEventData.getTickBlock());
         }
+    });
 
+    @Override
+    public GeneralizedContext createPhaseContext() {
+        return super.createPhaseContext();
     }
 
-    public static BlockPhase getInstance() {
-        return Holder.INSTANCE;
+    @Override
+    public BiConsumer<StackFrame, GeneralizedContext> getFrameModifier() {
+        return this.FRAME_MODIFIER;
     }
-
-    private BlockPhase() {
-    }
-
-    private static final class Holder {
-        static final BlockPhase INSTANCE = new BlockPhase();
-    }
-
-
 }

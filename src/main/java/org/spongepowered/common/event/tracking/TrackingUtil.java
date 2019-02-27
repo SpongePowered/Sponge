@@ -82,6 +82,7 @@ import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.event.tracking.phase.tick.TileEntityTickContext;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
@@ -318,23 +319,15 @@ public final class TrackingUtil {
     public static boolean fireMinecraftBlockEvent(WorldServer worldIn, BlockEventData event) {
         IBlockState currentState = worldIn.getBlockState(event.getPosition());
         final IMixinBlockEventData blockEvent = (IMixinBlockEventData) event;
-        IPhaseState<?> phase = TickPhase.Tick.BLOCK_EVENT;
-        final PhaseContext<?> phaseContext = phase.createPhaseContext();
+        try (PhaseContext<?> context = TickPhase.Tick.BLOCK_EVENT.createPhaseContext()
+                .source(blockEvent)) {
+            context.buildAndSwitch();
 
-        Object source = blockEvent.getTickBlock() != null ? blockEvent.getTickBlock() : blockEvent.getTickTileEntity();
-        if (source != null) {
-            phaseContext.source(source);
-        } else {
-            // No source present which means we are ignoring the phase state
-            return currentState.onBlockEventReceived(worldIn, event.getPosition(), event.getEventID(), event.getEventParameter());
-        }
-
-        if (blockEvent.getSourceUser() != null) {
-            phaseContext.notifier(blockEvent.getSourceUser());
-        }
-
-        try (PhaseContext<?> o = phaseContext) {
-            o.buildAndSwitch();
+            final User user = ((IMixinBlockEventData) event).getSourceUser();
+            if (user != null) {
+                context.owner = user;
+                context.notifier = user;
+            }
             return currentState.onBlockEventReceived(worldIn, event.getPosition(), event.getEventID(), event.getEventParameter());
         }
     }

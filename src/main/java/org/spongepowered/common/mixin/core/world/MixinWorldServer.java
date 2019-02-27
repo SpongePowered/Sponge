@@ -112,7 +112,7 @@ import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.action.LightningEvent;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
-import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
@@ -169,6 +169,7 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
@@ -906,41 +907,60 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     private boolean onAddBlockEvent(WorldServer.ServerBlockEventList list, Object obj, BlockPos pos, Block blockIn, int eventId, int eventParam) {
         final BlockEventData blockEventData = (BlockEventData) obj;
         IMixinBlockEventData blockEvent = (IMixinBlockEventData) blockEventData;
-        // We fire a Pre event to make sure our captures do not get stuck in a loop.
-        // This is very common with pistons as they add block events while blocks are being notified.
-        if (blockIn instanceof BlockPistonBase) {
-            // We only fire pre events for pistons
-            if (SpongeCommonEventFactory.handlePistonEvent(this, list, obj, pos, blockIn, eventId, eventParam)) {
-                return false;
+        if (((IMixinBlock) blockIn).shouldFireBlockEvents()) {
+            final PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
+            blockEvent.setSourceUser(currentContext.getActiveUser());
+            final Object source = currentContext.getSource();
+            if (source instanceof TileEntity) {
+                blockEvent.setTickTileEntity((TileEntity) source);
+            }
+            final LocatableBlock locatableBlock = new SpongeLocatableBlockBuilder()
+                    .world(this)
+                    .position(pos.getX(), pos.getY(), pos.getZ())
+                    .build();
+            blockEvent.setTickBlock(locatableBlock);
+        }
+        try (PhaseContext<?> context = BlockPhase.State.BLOCK_EVENT_QUEUE.createPhaseContext()
+                .source(blockEvent)) {
+            context.buildAndSwitch();
+            final PhaseTracker phaseTracker = PhaseTracker.getInstance();
+            final PhaseData currentPhase = phaseTracker.getCurrentPhaseData();
+            final IPhaseState phaseState = currentPhase.state;
+            if (!((IMixinBlock) blockIn).shouldFireBlockEvents() || phaseState.ignoresBlockEvent()) {
+                return list.add((BlockEventData) obj);
+            }
+            // We fire a Pre event to make sure our captures do not get stuck in a loop.
+            // This is very common with pistons as they add block events while blocks are being notified.
+            if (blockIn instanceof BlockPistonBase) {
+                // We only fire pre events for pistons
+                if (SpongeCommonEventFactory.handlePistonEvent(this, list, obj, pos, blockIn, eventId, eventParam)) {
+                    return false;
+                }
+
+                blockEvent.setCaptureBlocks(false);
+            } else if (((IMixinBlock) blockIn).shouldFireBlockEvents()) {
+                final EventContext currentContext = Sponge.getCauseStackManager().getCurrentContext();
+                BlockSnapshot notifySource = null;
+                // This is required for mod blocks, such as OpenBlocks blockbreaker, that do the following sequence:
+                // 1. Player places block
+                // 2. Placed block notifies blockbreaker.
+                // 3. Blockbreaker TE (TileEntityBlockManipulator) receives notification and adds a blockevent to world.
+                // 4. At end of world tick, all queued block events are triggered
+                // 5. Blockbreaker TE (TileEntityBlockManipulator) receives event and destroys placed block
+                // Note: All steps occur in same tick
+                if (!((IMixinBlock) blockIn).isVanilla() && currentContext.containsKey(EventContextKeys.PLAYER_PLACE)) {
+                    notifySource = Sponge.getCauseStackManager().getContext(EventContextKeys.NEIGHBOR_NOTIFY_SOURCE).orElse(null);;
+                }
+                if (SpongeCommonEventFactory.callChangeBlockEventPre(this, notifySource != null ? VecHelper.toBlockPos(notifySource.getLocation().get()) : pos).isCancelled()) {
+                    return false;
+                }
             }
 
-            blockEvent.setCaptureBlocks(false);
-            // TODO BLOCK_EVENT flag
-        } else if (SpongeCommonEventFactory.callChangeBlockEventPre(this, pos).isCancelled()) {
-            return false;
-        }
-
-
-        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-        final PhaseData currentPhase = phaseTracker.getCurrentPhaseData();
-        final IPhaseState phaseState = currentPhase.state;
-        if (phaseState.ignoresBlockEvent()) {
+            phaseState.appendNotifierToBlockEvent(context, this, pos, blockEvent);
             return list.add((BlockEventData) obj);
         }
-        final PhaseContext<?> context = currentPhase.context;
-
-        final LocatableBlock locatable = new SpongeLocatableBlockBuilder()
-            .world(this)
-            .position(pos.getX(), pos.getY(), pos.getZ())
-            .state(this.getBlock(pos.getX(), pos.getY(), pos.getZ()))
-            .build();
-
-        blockEvent.setTickBlock(locatable);
-        phaseState.appendNotifierToBlockEvent(context, this, pos, blockEvent);
-        return list.add((BlockEventData) obj);
     }
 
-    // special handling for Pistons since they use their own event system
     @Redirect(method = "sendQueuedBlockEvents", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/WorldServer;fireBlockEvent(Lnet/minecraft/block/BlockEventData;)Z"))
     private boolean onFireBlockEvent(net.minecraft.world.WorldServer worldIn, BlockEventData event) {

@@ -30,6 +30,12 @@ import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockBeacon;
+import net.minecraft.block.BlockChest;
+import net.minecraft.block.BlockEndGateway;
+import net.minecraft.block.BlockEnderChest;
+import net.minecraft.block.BlockMobSpawner;
+import net.minecraft.block.BlockShulkerBox;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.BlockStateContainer;
@@ -108,6 +114,8 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     private final boolean isVanilla = getClass().getName().startsWith("net.minecraft.");
     private boolean hasCollideLogic;
     private boolean hasCollideWithStateLogic;
+    // Used to determine if this block needs to be handled in WorldServer#addBlockEvent
+    private boolean shouldFireBlockEvents = true;
     private static boolean canCaptureItems = true;
     private Timing timing;
     // Used by tracker config
@@ -421,6 +429,15 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
         // not needed
     }
 
+    /**
+     * Used to determine if this block should fire 
+     * sponge events during WorldServer#addBlockEvent.
+     */
+    @Override 
+    public boolean shouldFireBlockEvents() {
+        return this.shouldFireBlockEvents;
+    }
+
     @Override
     public void initializeTrackerState() {
         SpongeConfig<TrackerConfig> trackerConfig = SpongeImpl.getTrackerConfig();
@@ -455,6 +472,13 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
             blockTracker.getModMappings().put(modId, modCapturing);
         }
 
+        // Determine if this block needs to be handled during WorldServer#addBlockEvent
+        final Block thisBlock = (Block)(Object) this;
+        if (thisBlock instanceof BlockMobSpawner || thisBlock instanceof BlockEnderChest
+                || thisBlock instanceof BlockChest || thisBlock instanceof BlockShulkerBox
+                || thisBlock instanceof BlockEndGateway || thisBlock instanceof BlockBeacon) {
+            this.shouldFireBlockEvents = false;
+        }
         // Determine which blocks can avoid executing un-needed event logic
         // This will allow us to avoid running event logic for blocks that do nothing such as grass collisions
         // -- blood

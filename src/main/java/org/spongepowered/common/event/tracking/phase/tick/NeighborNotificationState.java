@@ -47,8 +47,7 @@ class NeighborNotificationState extends LocationBasedTickPhaseState<NeighborNoti
 
     private final BiConsumer<StackFrame, NeighborNotificationContext> FRAME_MODIFIER = super.getFrameModifier().andThen((frame, context) -> {
         if (context.notificationSnapshot != null) {
-            // TODO - blood implement the key
-//            frame.addContext(EventContextKeys.BLOCK_EVENT_QUEUE, context.notificationSnapshot);
+            frame.addContext(EventContextKeys.NEIGHBOR_NOTIFY_SOURCE, context.notificationSnapshot);
         }
     });
 

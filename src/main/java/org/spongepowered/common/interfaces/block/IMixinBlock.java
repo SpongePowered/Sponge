@@ -125,6 +125,14 @@ public interface IMixinBlock extends IMixinTrackable {
 
     boolean hasCollideWithStateLogic();
 
+    /**
+     * Used to determine if this block should fire 
+     * sponge events during WorldServer#addBlockEvent.
+     * 
+     * @return Whether this block should fire events
+     */
+    boolean shouldFireBlockEvents();
+
     // Timings
     Timing getTimingsHandler();
 

@@ -646,6 +646,20 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     }
 
     @Nullable
+    public User getActiveUser() {
+        if (this.notifier != null) {
+            return this.notifier;
+        }
+        if (this.owner != null) {
+            return this.owner;
+        }
+        if (this.source != null && this.source instanceof User) {
+            return ((User) this.source);
+        }
+        return null;
+    }
+
+    @Nullable
     public BlockSnapshot getNeighborNotificationSource() {
         return this.neighborNotificationSource;
     }

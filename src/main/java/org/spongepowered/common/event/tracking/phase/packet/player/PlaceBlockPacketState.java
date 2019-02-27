@@ -123,9 +123,10 @@ public final class PlaceBlockPacketState extends BasicPacketState {
             .acceptAndClearIfNotEmpty(entities -> {
                 try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                     frame.pushCause(player);
-                    frame.pushCause(snapshot);
-                    frame.addContext(EventContextKeys.USED_HAND, hand);
+                    frame.addContext(EventContextKeys.PLAYER_PLACE, (World) player.world);
                     frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.SPAWN_EGG);
+                    frame.addContext(EventContextKeys.USED_HAND, hand);
+                    frame.addContext(EventContextKeys.USED_ITEM, snapshot);
                     SpongeCommonEventFactory.callSpawnEntity(entities, context);
                 }
             });
@@ -134,11 +135,11 @@ public final class PlaceBlockPacketState extends BasicPacketState {
                 originalBlocks -> {
                     try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                         frame.pushCause(player);
+                        frame.addContext(EventContextKeys.PLAYER_PLACE, (World) player.world);
                         frame.addContext(EventContextKeys.USED_HAND, hand);
                         frame.addContext(EventContextKeys.USED_ITEM, snapshot);
                         boolean success = TrackingUtil.processBlockCaptures(originalBlocks, this, context);
                         if (!success && snapshot != ItemTypeRegistryModule.NONE_SNAPSHOT) {
-                            frame.pushCause(player);
                             PacketPhaseUtil.handlePlayerSlotRestore(player, (net.minecraft.item.ItemStack) itemStack, (EnumHand) (Object) hand);
                         }
                     }
@@ -149,8 +150,11 @@ public final class PlaceBlockPacketState extends BasicPacketState {
                     .collect(Collectors.toList());
             if (!entities.isEmpty()) {
                 try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
                     frame.pushCause(player);
+                    frame.addContext(EventContextKeys.PLAYER_PLACE, (World) player.world);
+                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
+                    frame.addContext(EventContextKeys.USED_HAND, hand);
+                    frame.addContext(EventContextKeys.USED_ITEM, snapshot);
                     SpongeCommonEventFactory.callDropItemCustom(entities, context, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
 
                 }
