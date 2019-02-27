@@ -27,26 +27,23 @@ package org.spongepowered.common.mixin.core.block.state;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.Block;
-import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.state.IProperty;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.block.trait.BlockTrait;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.state.StateProperty;
 import org.spongepowered.api.util.Cycleable;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataVersions;
-import org.spongepowered.common.util.VecHelper;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -69,15 +66,15 @@ public interface MixinIBlockState extends BlockState {
 
 
     @Override
-    default BlockState cycleValue(Key<? extends Value<? extends Cycleable<?>>> key) {
-        return this;
+    default <T extends Cycleable<T>> Optional<BlockState> cycleValue(Key<? extends Value<T>> key) {
+        return Optional.of(this);
     }
 
     @SuppressWarnings({"unchecked"})
     @Override
-    default <T extends Comparable<T>> Optional<T> getTraitValue(BlockTrait<T> blockTrait) {
-        for (Map.Entry<IProperty<?>, Comparable<?>> entry : ((IBlockState) this).getProperties().entrySet()) {
-            if (entry.getKey() == blockTrait) {
+    default <T extends Comparable<T>> Optional<T> getStateProperty(StateProperty<T> stateProperty) {
+        for (Map.Entry<IProperty<?>, Comparable<?>> entry : ((IBlockState) this).getValues().entrySet()) {
+            if (entry.getKey() == stateProperty) {
                 return Optional.of((T) entry.getValue());
             }
         }
@@ -86,10 +83,10 @@ public interface MixinIBlockState extends BlockState {
 
     @SuppressWarnings("rawtypes")
     @Override
-    default Optional<BlockTrait<?>> getTrait(String blockTrait) {
-        for (IProperty property : ((IBlockState) this).getProperties().keySet()) {
+    default Optional<StateProperty<?>> getStatePropertyByName(String blockTrait) {
+        for (IProperty property : ((IBlockState) this).getValues().keySet()) {
             if (property.getName().equalsIgnoreCase(blockTrait)) {
-                return Optional.of((BlockTrait<?>) property);
+                return Optional.of((StateProperty<?>) property);
             }
         }
         return Optional.empty();
@@ -97,7 +94,7 @@ public interface MixinIBlockState extends BlockState {
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
-    default Optional<BlockState> withTrait(BlockTrait<?> trait, Object value) {
+    default <T extends Comparable<T>, V extends T> Optional<BlockState> withStateProperty(StateProperty<T> trait, V value) {
         if (value instanceof String) {
             Comparable foundValue = null;
             for (Comparable comparable : trait.getPossibleValues()) {
@@ -107,30 +104,30 @@ public interface MixinIBlockState extends BlockState {
                 }
             }
             if (foundValue != null) {
-                return Optional.of((BlockState) ((IBlockState) this).withProperty((IProperty) trait, foundValue));
+                return Optional.of((BlockState) ((IBlockState) this).with((IProperty) trait, foundValue));
             }
         }
         if (value instanceof Comparable) {
             if (getProperties().containsKey(trait) && ((IProperty) trait).getAllowedValues().contains(value)) {
-                return Optional.of((BlockState) ((IBlockState) this).withProperty((IProperty) trait, (Comparable) value));
+                return Optional.of((BlockState) ((IBlockState) this).with((IProperty) trait, (Comparable) value));
             }
         }
         return Optional.empty();
     }
 
     @Override
-    default Collection<BlockTrait<?>> getTraits() {
-        return getTraitMap().keySet();
+    default Collection<StateProperty<?>> getStateProperties() {
+        return getStatePropertyMap().keySet();
     }
 
     @Override
-    default Collection<?> getTraitValues() {
-        return getTraitMap().values();
+    default Collection<?> getStatePropertyValues() {
+        return getStatePropertyMap().values();
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    default Map<BlockTrait<?>, ?> getTraitMap() {
+    default Map<StateProperty<?>, ?> getStatePropertyMap() {
         return (ImmutableMap) ((IBlockState) this).getProperties();
     }
 
@@ -140,7 +137,7 @@ public interface MixinIBlockState extends BlockState {
         StringBuilder builder = new StringBuilder();
         builder.append(((BlockType) shadow$getBlock()).getKey().getValue());
 
-        final ImmutableMap<IProperty<?>, Comparable<?>> properties = ((IBlockState) this).getProperties();
+        final ImmutableMap<IProperty<?>, Comparable<?>> properties = ((IBlockState) this).getValues();
         if (!properties.isEmpty()) {
             builder.append('[');
             Joiner joiner = Joiner.on(',');

@@ -51,12 +51,13 @@ import org.spongepowered.api.entity.ai.GoalTypes;
 import org.spongepowered.api.entity.ai.task.AITask;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.entity.damage.DamageFunction;
+import org.spongepowered.api.event.cause.entity.ModifierFunction;
+import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
 import org.spongepowered.api.event.entity.AttackEntityEvent;
 import org.spongepowered.api.event.entity.LeashEntityEvent;
 import org.spongepowered.api.event.entity.UnleashEntityEvent;
-import org.spongepowered.api.event.entity.ai.SetAITargetEvent;
 import org.spongepowered.api.event.entity.ai.AITaskEvent;
+import org.spongepowered.api.event.entity.ai.SetAITargetEvent;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -281,7 +282,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
         // Sponge Start - Prepare our event values
         // float baseDamage = this.getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue();
         final double originalBaseDamage = this.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getValue();
-        final List<DamageFunction> originalFunctions = new ArrayList<>();
+        final List<ModifierFunction<DamageModifier>> originalFunctions = new ArrayList<>();
         // Sponge End
         int knockbackModifier = 0;
 

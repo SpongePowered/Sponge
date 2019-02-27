@@ -61,8 +61,6 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.HealthData;
 import org.spongepowered.api.data.value.BoundedValue;
-import org.spongepowered.api.data.value.OptionalValue;
-import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.User;
@@ -93,11 +91,9 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeDamageableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthData;
 import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.data.value.SpongeMutableOptionalValue;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.entity.projectile.ProjectileLauncher;
@@ -128,6 +124,7 @@ import java.util.Collection;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalDouble;
 import java.util.Random;
 
 import javax.annotation.Nullable;
@@ -456,8 +453,9 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             return false;
         } else if (this.world.isRemote) {
             return false;
-        } else {
+        } else { // Sponge - move 'else if' blocks into body of 'else'
             this.idleTime = 0;
+            float origAmount = amount;
 
             // Sponge - if the damage source is ignored, then do not return false here, as the health
             // has already been set to zero if Keys#HEALTH or SpongeHealthData is set to zero.
@@ -563,7 +561,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                             b0 = 2;
                         }
 
-                        this.world.setEntityState(this, b0);
+                        this.world.setEntityState((Entity) (Object) this, b0);
                     }
 
 
@@ -615,7 +613,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                 }
 
                 if ((Object) entity instanceof EntityPlayerMP) {
-                    CriteriaTriggers.PLAYER_HURT_ENTITY.trigger((EntityPlayerMP)entity, this, source, f, amount, flag);
+                    CriteriaTriggers.PLAYER_HURT_ENTITY.trigger((EntityPlayerMP)entity, (Entity) (Object) this, source, origAmount, amount, flag);
                 }
 
                 return !flag; // Sponge - remove 'amount > 0.0F'
@@ -1051,15 +1049,13 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     }
 
     @Override
-    public OptionalValue.Mutable<EntitySnapshot> lastAttacker() {
-        return new SpongeMutableOptionalValue<>(Keys.LAST_ATTACKER, Optional.ofNullable(this.revengeTarget == null ?
-                null : ((Living) this.revengeTarget).createSnapshot()));
+    public Optional<org.spongepowered.api.entity.Entity> getLastAttacker() {
+        return Optional.ofNullable((org.spongepowered.api.entity.Entity) this.revengeTarget);
     }
 
     @Override
-    public OptionalValue.Mutable<Double> lastDamage() {
-        return new SpongeMutableOptionalValue<>(Keys.LAST_DAMAGE, Optional.ofNullable(this.revengeTarget == null ?
-                null : (double) (this.lastDamage)));
+    public OptionalDouble getLastDamage() {
+        return this.revengeTarget != null ? OptionalDouble.of(this.lastDamage) : OptionalDouble.empty();
     }
 
     @Override
@@ -1211,7 +1207,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             this.addSelfToFrame(frame, activeItemStackSnapshot);
             event = SpongeEventFactory.createUseItemStackEventReplace(Sponge.getCauseStackManager().getCurrentCause(),
                     this.activeItemStackUseCount, this.activeItemStackUseCount, activeItemStackSnapshot,
-                    new Transaction<>((org.spongepowered.api.item.inventory.ItemStack) this.activeItemStackCopy, snapshot));
+                    new Transaction<>(((org.spongepowered.api.item.inventory.ItemStack) this.activeItemStackCopy).createSnapshot(), snapshot));
         }
 
         if (SpongeImpl.postEvent(event)) {

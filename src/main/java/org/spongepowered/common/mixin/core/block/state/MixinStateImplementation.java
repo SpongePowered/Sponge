@@ -31,10 +31,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.Block;
-import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.world.chunk.BlockStateContainer;
+import net.minecraft.state.AbstractStateHolder;
+import net.minecraft.state.IProperty;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
@@ -51,12 +51,9 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.Cycleable;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataVersions;
@@ -80,10 +77,8 @@ import javax.annotation.Nullable;
  * all relies on Data API implementations.
  */
 @Implements(@Interface(iface = BlockState.class, prefix = "blockState$"))
-@Mixin(BlockStateContainer.StateImplementation.class)
-public abstract class MixinStateImplementation implements BlockState, IMixinBlockState {
-
-    @Shadow @Final private Block block;
+@Mixin(net.minecraft.block.state.BlockState.class)
+public abstract class MixinStateImplementation extends AbstractStateHolder implements IMixinBlockState {
 
     // All of these fields are lazily evaluated either at startup or the first time
     // they are accessed by a plugin, depending on how much of an impact the
@@ -97,46 +92,39 @@ public abstract class MixinStateImplementation implements BlockState, IMixinBloc
     @Nullable private ImmutableMap<Property<?>, ?> dataProperties;
     @Nullable private CatalogKey id;
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    @Override
-    public BlockState cycleValue(Key<? extends Value<? extends Cycleable<?>>> key) {
-        final Optional<Cycleable<?>> optional = get((Key) key);
-        return optional
-            .map(Cycleable::cycleNext)
-            .map(newVal -> {
-                BlockState o = null;
-                try {
-                    o = (BlockState) with((Key) key, newVal)
-                        .orElseThrow(() -> new IllegalStateException("Unable to retrieve a cycled BlockState for key: " + key + " and value: " + newVal));
-                } catch (Throwable throwable) {
-                    throwable.printStackTrace();
-                }
-                return o;
-            })
-            .orElseThrow(() -> new IllegalArgumentException("Used an invalid cycleable key! Check with supports in the future!"));
+    protected MixinStateImplementation(Object p_i49008_1_, ImmutableMap p_i49008_2_) {
+        super(p_i49008_1_, p_i49008_2_);
     }
 
-    @Override
-    public BlockSnapshot snapshotFor(Location<World> location) {
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public  <T extends Cycleable<T>> Optional<BlockState> blockState$cycleValue(Key<? extends Value<T>> key) {
+        final Optional<Cycleable<?>> optional = blockState$get((Key) key);
+        return optional
+            .map(Cycleable::cycleNext)
+            .flatMap(newVal -> {
+                return with((Key) key, newVal);
+            });
+    }
+
+    public BlockSnapshot blockState$snapshotFor(Location location) {
         final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder()
-            .blockState(this)
+            .blockState((BlockState) this)
             .position(location.getBlockPosition())
-            .worldId(location.getExtent().getUniqueId());
-        if (this.block.hasTileEntity() && location.getBlockType().equals(this.block)) {
+            .worldId(location.getWorld().getUniqueId());
+        if (((Block) this.object).hasTileEntity() && location.getBlock().getType().equals(this.object)) {
             final TileEntity tileEntity = location.getTileEntity()
                 .orElseThrow(() -> new IllegalStateException("Unable to retrieve a TileEntity for location: " + location));
             for (DataManipulator<?, ?> manipulator : ((IMixinCustomDataHolder) tileEntity).getCustomManipulators()) {
                 builder.add(manipulator);
             }
             final NBTTagCompound compound = new NBTTagCompound();
-            ((net.minecraft.tileentity.TileEntity) tileEntity).writeToNBT(compound);
+            ((net.minecraft.tileentity.TileEntity) tileEntity).write(compound);
             builder.unsafeNbt(compound);
         }
         return builder.build();
     }
 
-    @Override
-    public List<ImmutableDataManipulator<?, ?>> getManipulators() {
+    public List<ImmutableDataManipulator<?, ?>> blockState$getManipulators() {
         return lazyLoadManipulatorsAndKeys();
     }
 
@@ -150,7 +138,7 @@ public abstract class MixinStateImplementation implements BlockState, IMixinBloc
 
     private ImmutableList<ImmutableDataManipulator<?, ?>> lazyLoadManipulatorsAndKeys() {
         if (this.manipulators == null) {
-            this.manipulators = ImmutableList.copyOf(((IMixinBlock) this.block).getManipulators((IBlockState) this));
+            this.manipulators = ImmutableList.copyOf(((IMixinBlock) this.object).getManipulators((IBlockState) this));
         }
         if (this.keyMap == null) {
             ImmutableMap.Builder<Key<?>, Object> builder = ImmutableMap.builder();
@@ -171,9 +159,8 @@ public abstract class MixinStateImplementation implements BlockState, IMixinBloc
     }
 
     @SuppressWarnings("unchecked")
-    @Override
-    public <T extends ImmutableDataManipulator<?, ?>> Optional<T> get(Class<T> containerClass) {
-        for (ImmutableDataManipulator<?, ?> manipulator : this.getManipulators()) {
+    public <T extends ImmutableDataManipulator<?, ?>> Optional<T> blockState$get(Class<T> containerClass) {
+        for (ImmutableDataManipulator<?, ?> manipulator : this.blockState$getManipulators()) {
             if (containerClass.isInstance(manipulator)) {
                 return Optional.of((T) manipulator);
             }
@@ -182,9 +169,8 @@ public abstract class MixinStateImplementation implements BlockState, IMixinBloc
     }
 
     @SuppressWarnings("unchecked")
-    @Override
-    public <T extends ImmutableDataManipulator<?, ?>> Optional<T> getOrCreate(Class<T> containerClass) {
-        for (ImmutableDataManipulator<?, ?> manipulator : this.getManipulators()) {
+    public <T extends ImmutableDataManipulator<?, ?>> Optional<T> blockState$getOrCreate(Class<T> containerClass) {
+        for (ImmutableDataManipulator<?, ?> manipulator : this.blockState$getManipulators()) {
             if (containerClass.isInstance(manipulator)) {
                 return Optional.of(((T) manipulator));
             }
@@ -192,44 +178,38 @@ public abstract class MixinStateImplementation implements BlockState, IMixinBloc
         return Optional.empty();
     }
 
-    @Override
-    public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> containerClass) {
-        return ((IMixinBlock) this.block).supports(containerClass);
+    public boolean blockState$supports(Class<? extends ImmutableDataManipulator<?, ?>> containerClass) {
+        return ((IMixinBlock) this.object).supports(containerClass);
     }
 
-    @Override
-    public <E> Optional<BlockState> transform(Key<? extends Value<E>> key, Function<E, E> function) {
-        return this.get(checkNotNull(key, "Key cannot be null!")) // If we don't have a value for the key, we don't support it.
+    public <E> Optional<BlockState> blockState$transform(Key<? extends Value<E>> key, Function<E, E> function) {
+        return this.blockState$get(checkNotNull(key, "Key cannot be null!")) // If we don't have a value for the key, we don't support it.
             .map(checkNotNull(function, "Function cannot be null!"))
-            .map(newVal -> with(key, newVal).orElse(this)); // We can either return this value or the updated value, but not an empty
+            .map(newVal -> with(key, newVal).orElse((BlockState) this)); // We can either return this value or the updated value, but not an empty
     }
 
-    @Override
     public <E> Optional<BlockState> with(Key<? extends Value<E>> key, E value) {
-        if (!supports(key)) {
+        if (!blockState$supports(key)) {
             return Optional.empty();
         }
-        return ((IMixinBlock) this.block).getStateWithValue((IBlockState) this, key, value);
+        return ((IMixinBlock) this.object).getStateWithValue((IBlockState) this, key, value);
     }
 
     @SuppressWarnings("unchecked")
-    @Override
-    public Optional<BlockState> with(Value<?> value) {
+    public Optional<BlockState> blockState$with(Value<?> value) {
         return with((Key<? extends Value<Object>>) value.getKey(), value.get());
     }
 
     @SuppressWarnings({"unchecked"})
-    @Override
-    public Optional<BlockState> with(ImmutableDataManipulator<?, ?> valueContainer) {
-        if (supports((Class<ImmutableDataManipulator<?, ?>>) valueContainer.getClass())) {
-            return ((IMixinBlock) this.block).getStateWithData((IBlockState) this, valueContainer);
+    public Optional<BlockState> blockState$with(ImmutableDataManipulator<?, ?> valueContainer) {
+        if (((BlockState) (this)).supports((Class<ImmutableDataManipulator<?, ?>>) valueContainer.getClass())) {
+            return ((IMixinBlock) this.object).getStateWithData((IBlockState) this, valueContainer);
         }
         return Optional.empty();
     }
 
-    @Override
-    public Optional<BlockState> with(Iterable<ImmutableDataManipulator<?, ?>> valueContainers) {
-        BlockState state = this;
+    public Optional<BlockState> blockState$with(Iterable<ImmutableDataManipulator<?, ?>> valueContainers) {
+        BlockState state = (BlockState) this;
         for (ImmutableDataManipulator<?, ?> manipulator : valueContainers) {
             final Optional<BlockState> optional = state.with(manipulator);
             if (optional.isPresent()) {
@@ -241,17 +221,15 @@ public abstract class MixinStateImplementation implements BlockState, IMixinBloc
         return Optional.of(state);
     }
 
-    @Override
-    public Optional<BlockState> without(Class<? extends ImmutableDataManipulator<?, ?>> containerClass) {
+    public Optional<BlockState> blockState$without(Class<? extends ImmutableDataManipulator<?, ?>> containerClass) {
         return Optional.empty(); // By default, all manipulators have to have the manipulator if it exists, we can't remove data.
     }
 
-    @Override
-    public BlockState merge(BlockState that) {
-        if (!getType().equals(that.getType())) {
-            return this;
+    public BlockState blockState$merge(BlockState that) {
+        if (!((BlockState) (this)).getType().equals(that.getType())) {
+            return (BlockState) this;
         }
-        BlockState temp = this;
+        BlockState temp = (BlockState) this;
         for (ImmutableDataManipulator<?, ?> manipulator : that.getManipulators()) {
             Optional<BlockState> optional = temp.with(manipulator);
             if (optional.isPresent()) {
@@ -263,12 +241,11 @@ public abstract class MixinStateImplementation implements BlockState, IMixinBloc
         return temp;
     }
 
-    @Override
-    public BlockState merge(BlockState that, MergeFunction function) {
-        if (!getType().equals(that.getType())) {
-            return this;
+    public BlockState blockState$merge(BlockState that, MergeFunction function) {
+        if (!((BlockState) (this)).getType().equals(that.getType())) {
+            return (BlockState) this;
         }
-        BlockState temp = this;
+        BlockState temp = (BlockState) this;
         for (ImmutableDataManipulator<?, ?> manipulator : that.getManipulators()) {
             @Nullable ImmutableDataManipulator<?, ?> old = temp.get(manipulator.getClass()).orElse(null);
             Optional<BlockState> optional = temp.with(checkNotNull(function.merge(old, manipulator)));
@@ -281,65 +258,55 @@ public abstract class MixinStateImplementation implements BlockState, IMixinBloc
         return temp;
     }
 
-    @Override
-    public <V> Optional<V> getProperty(Property<V> property) {
+    public <V> Optional<V> blockState$getProperty(Property<V> property) {
         checkNotNull(property, "property");
         return Optional.ofNullable((V) getSpongeInternalProperties().get(property));
     }
 
-    @Override
-    public <V> Optional<V> getProperty(Direction direction, Property<V> property) {
-        return getProperty(property);
+    public <V> Optional<V> blockState$getProperty(Direction direction, Property<V> property) {
+        return blockState$getProperty(property);
     }
 
-    @Override
-    public OptionalInt getIntProperty(Property<Integer> property) {
-        return getProperty(property).map(OptionalInt::of).orElse(OptionalInt.empty());
+    public OptionalInt blockState$getIntProperty(Property<Integer> property) {
+        return blockState$getProperty(property).map(OptionalInt::of).orElse(OptionalInt.empty());
     }
 
-    @Override
-    public OptionalInt getIntProperty(Direction direction, Property<Integer> property) {
-        return getIntProperty(property);
+    public OptionalInt blockState$getIntProperty(Direction direction, Property<Integer> property) {
+        return blockState$getIntProperty(property);
     }
 
-    @Override
     public OptionalDouble getDoubleProperty(Property<Double> property) {
-        return getProperty(property).map(OptionalDouble::of).orElse(OptionalDouble.empty());
+        return blockState$getProperty(property).map(OptionalDouble::of).orElse(OptionalDouble.empty());
     }
 
-    @Override
     public OptionalDouble getDoubleProperty(Direction direction, Property<Double> property) {
         return getDoubleProperty(property);
     }
 
-    @Override
-    public Map<Property<?>, ?> getProperties() {
+    public Map<Property<?>, ?> blockState$getProperties() {
         return getSpongeInternalProperties();
     }
 
     private ImmutableMap<Property<?>, ?> getSpongeInternalProperties() {
         if (this.dataProperties == null) {
-            this.dataProperties = ((IMixinBlock) this.block).getProperties((IBlockState) this);
+            this.dataProperties = ((IMixinBlock) this.object).getProperties((IBlockState) this);
         }
         return this.dataProperties;
     }
 
-    @Override
-    public List<ImmutableDataManipulator<?, ?>> getContainers() {
-        return this.getManipulators();
+    public List<ImmutableDataManipulator<?, ?>> blockState$getContainers() {
+        return this.blockState$getManipulators();
     }
 
     @SuppressWarnings("unchecked")
-    @Override
-    public <E> Optional<E> get(Key<? extends Value<E>> key) {
+    public <E> Optional<E> blockState$get(Key<? extends Value<E>> key) {
         return Optional.ofNullable((E) this.getKeyMap().get(key));
     }
 
     @SuppressWarnings("unchecked")
-    @Override
-    public <E, V extends Value<E>> Optional<V> getValue(Key<V> key) {
+    public <E, V extends Value<E>> Optional<V> blockState$getValue(Key<V> key) {
         checkNotNull(key);
-        for (Value.Immutable<?> value : this.getValues()) {
+        for (Value.Immutable<?> value : this.blockState$getValues()) {
             if (value.getKey().equals(key)) {
                 return Optional.of((V) value.asMutable());
             }
@@ -347,47 +314,36 @@ public abstract class MixinStateImplementation implements BlockState, IMixinBloc
         return Optional.empty();
     }
 
-    @Override
-    public boolean supports(Key<?> key) {
-        return this.getKeys().contains(checkNotNull(key));
+    public boolean blockState$supports(Key<?> key) {
+        return this.blockState$getKeys().contains(checkNotNull(key));
     }
 
-    @Override
-    public BlockState copy() {
-        return this;
+    public BlockState blockState$copy() {
+        return (BlockState) this;
     }
 
-    @Override
-    public Set<Key<?>> getKeys() {
+    public Set<Key<?>> blockState$getKeys() {
         if (this.keys == null) {
             lazyLoadManipulatorsAndKeys();
         }
         return this.keys;
     }
 
-    @Override
-    public Set<Value.Immutable<?>> getValues() {
+    public Set<Value.Immutable<?>> blockState$getValues() {
         if (this.values == null) {
             lazyLoadManipulatorsAndKeys();
         }
         return this.values;
     }
 
-    @Override
-    public int getContentVersion() {
+    public int blockState$getContentVersion() {
         return DataVersions.BlockState.STATE_AS_CATALOG_ID;
     }
 
-    @Override
-    public DataContainer toContainer() {
+    public DataContainer blockState$toContainer() {
         return DataContainer.createNew()
-            .set(Queries.CONTENT_VERSION, getContentVersion())
-            .set(DataQueries.BLOCK_STATE, this.getKey());
-    }
-
-    @Override
-    public int getStateMeta() {
-        return this.block.getMetaFromState((IBlockState) this);
+            .set(Queries.CONTENT_VERSION, blockState$getContentVersion())
+            .set(DataQueries.BLOCK_STATE, this.blockState$getKey());
     }
 
     @Override
@@ -396,7 +352,7 @@ public abstract class MixinStateImplementation implements BlockState, IMixinBloc
         StringBuilder builder = new StringBuilder();
         builder.append(((BlockType) block).getKey().getValue());
 
-        final ImmutableMap<IProperty<?>, Comparable<?>> properties = ((IBlockState) this).getProperties();
+        final ImmutableMap<IProperty<?>, Comparable<?>> properties = this.getValues();
         if (!properties.isEmpty()) {
             builder.append('[');
             Joiner joiner = Joiner.on(',');
@@ -410,18 +366,16 @@ public abstract class MixinStateImplementation implements BlockState, IMixinBloc
         this.id =  CatalogKey.of(nameSpace, builder.toString());
     }
 
-    @Override
-    public CatalogKey getKey() {
+    public CatalogKey blockState$getKey() {
         if (this.id == null) {
-            generateId(this.block);
+            generateId((Block) this.object);
         }
         return this.id;
     }
 
-    @Override
-    public String getName() {
+    public String blockState$getName() {
         if (this.id == null) {
-            generateId(this.block);
+            generateId((Block) this.object);
         }
         return this.id.getValue();
     }

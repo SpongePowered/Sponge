@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.entity.projectile;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.EntityArrow;
@@ -60,9 +59,7 @@ public abstract class MixinEntityArrow extends MixinEntity implements Arrow, IMi
     @Shadow private int xTile;
     @Shadow private int yTile;
     @Shadow private int zTile;
-    @Shadow private Block inTile;
-    @Shadow private int inData;
-
+    @Shadow private IBlockState inBlockState;
     @Shadow public abstract void setIsCritical(boolean critical);
 
     // Not all ProjectileSources are entities (e.g. BlockProjectileSource).
@@ -123,14 +120,13 @@ public abstract class MixinEntityArrow extends MixinEntity implements Arrow, IMi
                 this.ticksInAir = 0;
                 this.playSound(SoundEvents.ENTITY_ARROW_HIT, 1.0F, 1.2F / (this.rand.nextFloat() * 0.2F + 0.9F));
                 // if block was hit, change state to reflect it hit block to avoid onHit logic repeating indefinitely
-                if (hitResult.entityHit == null) {
+                if (hitResult.entity == null) {
                     BlockPos blockpos = hitResult.getBlockPos();
                     this.xTile = blockpos.getX();
                     this.yTile = blockpos.getY();
                     this.zTile = blockpos.getZ();
                     IBlockState iblockstate = this.world.getBlockState(blockpos);
-                    this.inTile = iblockstate.getBlock();
-                    this.inData = this.inTile.getMetaFromState(iblockstate);
+                    this.inBlockState = iblockstate;
                     this.inGround = true;
                     this.arrowShake = 7;
                     this.setIsCritical(false);

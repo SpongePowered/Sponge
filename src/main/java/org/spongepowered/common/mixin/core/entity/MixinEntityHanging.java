@@ -76,7 +76,7 @@ public abstract class MixinEntityHanging extends MixinEntity implements Hanging,
     /**
      * Called to update the entity's position/logic.
      */
-    @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityHanging;onValidSurface()Z"))
+    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityHanging;onValidSurface()Z"))
     private boolean checkIfOnValidSurceAndIgnoresPhysics(EntityHanging entityHanging) {
         return this.onValidSurface() && !this.ignorePhysics;
     }
@@ -99,7 +99,7 @@ public abstract class MixinEntityHanging extends MixinEntity implements Hanging,
     private void onAttackEntityFrom(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(source);
-            AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.getCurrentCause(), new ArrayList<>(), this, 0, amount);
+            AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.getCurrentCause(),this,  new ArrayList<>(), 0, amount);
             SpongeImpl.postEvent(event);
             if (event.isCancelled()) {
                 cir.setReturnValue(true);

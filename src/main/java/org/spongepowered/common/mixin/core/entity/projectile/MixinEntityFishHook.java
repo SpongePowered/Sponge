@@ -24,15 +24,17 @@
  */
 package org.spongepowered.common.mixin.core.entity.projectile;
 
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityFishHook;
-import net.minecraft.init.Items;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.stats.StatList;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.storage.loot.LootContext;
@@ -55,6 +57,7 @@ import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -120,10 +123,11 @@ public abstract class MixinEntityFishHook extends MixinEntity implements Fishing
      * @author Aaron1011 - February 6th, 2015
      * @author Minecrell - December 24th, 2016 (Updated to Minecraft 1.11.2)
      * @author Minecrell - June 14th, 2017 (Rewritten to handle cases where no items are dropped)
+     * @author Aaron1011 - February 27, 2019 - Update for 1.13
      * @reason This needs to handle for both cases where a fish and/or an entity is being caught.
      */
     @Overwrite
-    public int handleHookRetraction() {
+    public int handleHookRetraction(ItemStack itemStack) {
         if (!this.world.isRemote && this.angler != null) {
             int i = 0;
 
@@ -131,7 +135,7 @@ public abstract class MixinEntityFishHook extends MixinEntity implements Fishing
             List<Transaction<ItemStackSnapshot>> transactions;
             if (this.ticksCatchable > 0) {
                 // Moved from below
-                LootContext.Builder lootcontext$builder = new LootContext.Builder((WorldServer) this.world);
+                LootContext.Builder lootcontext$builder = new LootContext.Builder((WorldServer) this.world).withPosition(new BlockPos((net.minecraft.entity.Entity) (Object) this));
                 lootcontext$builder.withLuck(this.luck + this.angler.getLuck());
                 transactions = this.world.getServer().getLootTableManager().getLootTableFromLocation(LootTableList.GAMEPLAY_FISHING)
                         .generateLootForPools(this.rand, lootcontext$builder.build())
@@ -153,6 +157,7 @@ public abstract class MixinEntityFishHook extends MixinEntity implements Fishing
 
             if (this.caughtEntity != null) {
                 this.bringInHookedEntity();
+                CriteriaTriggers.FISHING_ROD_HOOKED.trigger((EntityPlayerMP)this.angler, itemStack, (EntityFishHook) (Object) this, Collections.emptyList());
                 this.world.setEntityState((net.minecraft.entity.Entity) (Object) this, (byte) 31);
                 i = this.caughtEntity instanceof EntityItem ? 3 : 5;
             } // Sponge: Remove else
@@ -182,9 +187,8 @@ public abstract class MixinEntityFishHook extends MixinEntity implements Fishing
                     this.world.spawnEntity(entityitem);
                     this.angler.world.spawnEntity(new EntityXPOrb(this.angler.world, this.angler.posX, this.angler.posY + 0.5D, this.angler.posZ + 0.5D,
                             this.rand.nextInt(6) + 1));
-                    Item item = itemstack.getItem();
 
-                    if (item == Items.FISH || item == Items.COOKED_FISH) {
+                    if (itemStack.getItem().isIn(ItemTags.FISHES)) {
                         this.angler.addStat(StatList.FISH_CAUGHT, 1);
                     }
                 }

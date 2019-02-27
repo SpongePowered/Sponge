@@ -408,7 +408,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
 
     /**
      * @author gabizou - June 4th, 2016
-     * @author Aaron1011 - February 5th, 2019 - Update for .113
+     * @author Aaron1011 - February 5th, 2019 - Update for 1.13
      * @reason When a player drops an item, all methods flow through here instead of {@link Entity#dropItem(Item, int)}
      * because of the idea of {@code dropAround} and {@code traceItem}.
      *
@@ -711,7 +711,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                                                 .type(DamageModifierTypes.SWEEPING)
                                                 .build(),
                                             (incoming) -> EnchantmentHelper.getSweepingDamageRatio((EntityPlayer) (Object) this) * attackDamage);
-                                        final List<DamageFunction> sweapingFunctions = new ArrayList<>();
+                                        final List<ModifierFunction<DamageModifier>> sweapingFunctions = new ArrayList<>();
                                         sweapingFunctions.add(sweapingFunction);
                                         AttackEntityEvent sweepingAttackEvent = SpongeEventFactory.createAttackEntityEvent(
                                             currentCause,
