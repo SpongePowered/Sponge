@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
@@ -44,6 +45,7 @@ import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.service.ServiceManager;
+import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.event.SpongeEventContextKey;
 import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
@@ -75,6 +77,8 @@ public final class EventContextKeysModule
 
     @Override
     public void registerDefaults() {
+        this.createKey("sponge:block_event_queue", "Block Event Queue", LocatableBlock.class);
+        this.createKey("sponge:block_event_process", "Block Event Process", LocatableBlock.class);
         this.createKey("sponge:creator", "Creator", User.class);
         this.createKey("sponge:damage_type", "Damage Type", DamageType.class);
         this.createKey("sponge:dismount_type", "Dimension Type", DismountType.class);
@@ -83,6 +87,7 @@ public final class EventContextKeysModule
         this.createKey("sponge:liquid_break", "Liquid Break", World.class);
         this.createKey("sponge:liquid_flow", "Liquid Flow", World.class);
         this.createKey("sponge:liquid_mix", "Liquid Mix", World.class);
+        this.createKey("sponge:neighbor_notify_source", "Neighbor Notify Source", BlockSnapshot.class);
         this.createKey("sponge:notifier", "Notifier", User.class);
         this.createKey("sponge:owner", "Owner", User.class);
         this.createKey("sponge:player", "Player", Player.class);
@@ -103,6 +108,7 @@ public final class EventContextKeysModule
         this.createKey("sponge:block_hit", "Block Hit", BlockSnapshot.class);
         this.createKey("sponge:entity_hit", "Entity Hit", BlockSnapshot.class);
         this.createKey("sponge:used_item", "Used Item", ItemStackSnapshot.class);
+        this.createKey("sponge:used_hand", "Used Hand", HandType.class);
         this.createKey("sponge:plugin", "Plugin", PluginContainer.class);
     }
 

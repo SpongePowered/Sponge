@@ -85,6 +85,8 @@ import javax.annotation.Nullable;
 public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
 
     @Nullable private static PhaseContext<?> EMPTY;
+    @Nullable BlockSnapshot neighborNotificationSource;
+
     /**
      * Default flagged empty PhaseContext that can be used for stubbing in corner cases.
      * @return
@@ -668,6 +670,25 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         }
         // Throw an exception if we're not capturing at all but the state says we do?
         throw new IllegalStateException("Expected to capture entities, but we aren't capturing them.");
+    }
+
+    @Nullable
+    public User getActiveUser() {
+        if (this.notifier != null) {
+            return this.notifier;
+        }
+        if (this.owner != null) {
+            return this.owner;
+        }
+        if (this.source != null && this.source instanceof User) {
+            return ((User) this.source);
+        }
+        return null;
+    }
+
+    @Nullable
+    public BlockSnapshot getNeighborNotificationSource() {
+        return this.neighborNotificationSource;
     }
 
     public boolean hasCapturedBlocks() {

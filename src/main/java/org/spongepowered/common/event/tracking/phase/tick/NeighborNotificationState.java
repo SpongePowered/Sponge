@@ -41,8 +41,15 @@ import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 class NeighborNotificationState extends LocationBasedTickPhaseState<NeighborNotificationContext> {
+
+    private final BiConsumer<StackFrame, NeighborNotificationContext> FRAME_MODIFIER = super.getFrameModifier().andThen((frame, context) -> {
+        if (context.notificationSnapshot != null) {
+            frame.addContext(EventContextKeys.NEIGHBOR_NOTIFY_SOURCE, context.notificationSnapshot);
+        }
+    });
 
     private final String name;
 
@@ -54,6 +61,11 @@ class NeighborNotificationState extends LocationBasedTickPhaseState<NeighborNoti
     public NeighborNotificationContext createPhaseContext() {
         return new NeighborNotificationContext(this)
                 .addCaptures();
+    }
+
+    @Override
+    public BiConsumer<StackFrame, NeighborNotificationContext> getFrameModifier() {
+        return this.FRAME_MODIFIER;
     }
 
     @Override

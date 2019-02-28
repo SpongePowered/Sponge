@@ -63,6 +63,7 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.Item;
@@ -766,6 +767,8 @@ public class SpongeCommonEventFactory {
             if (!stack.isEmpty()) {
                 frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(stack));
             }
+            HandType handType = (HandType) (Object) hand;
+            frame.addContext(EventContextKeys.USED_HAND, handType);
             InteractItemEvent.Primary event;
             if (hand == EnumHand.MAIN_HAND) {
                 event = SpongeEventFactory.createInteractItemEventPrimaryMainHand(frame.getCurrentCause(),
@@ -792,6 +795,8 @@ public class SpongeCommonEventFactory {
             if (!stack.isEmpty()) {
                 frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(stack));
             }
+            HandType handType = (HandType) (Object) hand;
+            frame.addContext(EventContextKeys.USED_HAND, handType);
             InteractItemEvent.Secondary event;
             if (hand == EnumHand.MAIN_HAND) {
                 event = SpongeEventFactory.createInteractItemEventSecondaryMainHand(frame.getCurrentCause(),
@@ -811,11 +816,12 @@ public class SpongeCommonEventFactory {
 
     public static InteractBlockEvent.Primary callInteractBlockEventPrimary(EntityPlayer player, ItemStack heldItem, BlockSnapshot blockSnapshot, EnumHand hand,
             @Nullable EnumFacing side, @Nullable Vector3d hitVec) {
+        HandType handType = (HandType) (Object) hand;
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.OWNER, (User) player);
             frame.addContext(EventContextKeys.NOTIFIER, (User) player);
             frame.addContext(EventContextKeys.BLOCK_HIT, blockSnapshot);
-
+            frame.addContext(EventContextKeys.USED_HAND, handType);
             InteractBlockEvent.Primary event;
             Direction direction;
             if (side != null) {
@@ -827,10 +833,10 @@ public class SpongeCommonEventFactory {
                 frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(heldItem));
             }
             if (hand == EnumHand.MAIN_HAND) {
-                event = SpongeEventFactory.createInteractBlockEventPrimaryMainHand(frame.getCurrentCause(), HandTypes.MAIN_HAND,
+                event = SpongeEventFactory.createInteractBlockEventPrimaryMainHand(frame.getCurrentCause(), handType,
                         Optional.ofNullable(hitVec), blockSnapshot, direction);
             } else {
-                event = SpongeEventFactory.createInteractBlockEventPrimaryOffHand(frame.getCurrentCause(), HandTypes.OFF_HAND,
+                event = SpongeEventFactory.createInteractBlockEventPrimaryOffHand(frame.getCurrentCause(), handType,
                         Optional.ofNullable(hitVec), blockSnapshot, direction);
             }
             SpongeImpl.postEvent(event);
@@ -854,6 +860,8 @@ public class SpongeCommonEventFactory {
             if (!heldItem.isEmpty()) {
                 frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(heldItem));
             }
+            HandType handType = (HandType) (Object) hand;
+            frame.addContext(EventContextKeys.USED_HAND, handType);
             InteractBlockEvent.Secondary event;
             if (hand == EnumHand.MAIN_HAND) {
                 event = SpongeEventFactory.createInteractBlockEventSecondaryMainHand(frame.getCurrentCause(),

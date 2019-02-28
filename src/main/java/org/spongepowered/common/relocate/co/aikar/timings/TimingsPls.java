@@ -28,8 +28,6 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.registry.type.block.TileEntityTypeRegistryModule;
 
@@ -61,24 +59,6 @@ final class TimingsPls {
     }
 
     public static int getTileEntityId(final TileEntityType type) {
-        if (type instanceof SpongeTileEntityType) {
-            try {
-                return TILE_ENTITY_IDS.get(type);
-            } catch (NullPointerException e) {
-                SpongeImpl.getLogger().error("Got an impossible NPE: ", e);
-                SpongeImpl.getLogger().error("Type: " + type);
-                SpongeImpl.getLogger().error("ModId: " + type != null && type instanceof SpongeTileEntityType ? (((SpongeTileEntityType) type).getModId()) : "<NULL>");
-                SpongeImpl.getLogger().error("TILE_ENTITY_IDS: " + TILE_ENTITY_IDS);
-                SpongeImpl.getLogger().error("ENTITY_IDS: " + ENTITY_IDS);
-                SpongeImpl.getLogger().error("NOT_FOUND: " + NOT_FOUND);
-                SpongeImpl.getLogger().error("nextEntityId: " + nextEntityId);
-                SpongeImpl.getLogger().error("nextTileEntityId: " + nextTileEntityId);
-                SpongeImpl.getLogger().error("Class: " + TimingsPls.class);
-                SpongeImpl.getLogger().error("Classloader: " + TimingsPls.class.getClassLoader());
-                SpongeImpl.getLogger().error("Location: " + TimingsPls.class.getProtectionDomain().getCodeSource());
-                return -1;
-            }
-        }
         int fake;
         if ((fake = TILE_ENTITY_IDS.getInt(type)) == NOT_FOUND) {
             fake = nextTileEntityId++;

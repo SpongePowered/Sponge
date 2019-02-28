@@ -57,6 +57,7 @@ import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMapEntry;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.world.BlockChange;
@@ -64,10 +65,24 @@ import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 import javax.annotation.Nullable;
 
 class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
+
+    private final BiConsumer<CauseStackManager.StackFrame, BlockEventTickContext> FRAME_MODIFIER =
+            super.getFrameModifier().andThen((frame, context) -> {
+                final IMixinBlockEventData blockEventData = context.getSource(IMixinBlockEventData.class).orElse(null);
+                if (blockEventData != null) {
+                    if (blockEventData.getTickTileEntity() != null) {
+                        frame.pushCause(blockEventData.getTickTileEntity());
+                    } else {
+                        frame.pushCause(blockEventData.getTickBlock());
+                    }
+                    frame.addContext(EventContextKeys.BLOCK_EVENT_PROCESS, blockEventData.getTickBlock());
+                }
+            });
 
     BlockEventTickPhaseState() {
     }
@@ -77,6 +92,11 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
         return new BlockEventTickContext()
                 .addBlockCaptures()
                 .addEntityCaptures();
+    }
+
+    @Override
+    public BiConsumer<CauseStackManager.StackFrame, BlockEventTickContext> getFrameModifier() {
+        return this.FRAME_MODIFIER;
     }
 
     @Override

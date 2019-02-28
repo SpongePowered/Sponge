@@ -24,11 +24,39 @@
  */
 package org.spongepowered.common.mixin.core.block.properties;
 
+import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.properties.PropertyEnum;
 import org.spongepowered.api.block.trait.EnumTrait;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
+
+import java.util.Map;
 
 @Mixin(value = PropertyEnum.class)
 public abstract class MixinPropertyEnum<E extends Enum<E>> extends MixinPropertyHelper<E> implements EnumTrait<E> {
 
+    private Integer hashCode;
+    @Shadow @Final private ImmutableSet<E> allowedValues;
+    @Shadow @Final private Map<String, E> nameToValue;
+
+    /**
+     * @author blood - February 28th, 2019
+     * @reason Block properties are immutable so there is no reason
+     * to recompute the hashCode repeatedly. To improve performance, we
+     * compute the hashCode once then cache the result.
+     *
+     * @return The cached hashCode
+     */
+    @Overwrite
+    public int hashCode() {
+        if (this.hashCode == null) {
+            int i = super.hashCode();
+            i = 31 * i + this.allowedValues.hashCode();
+            i = 31 * i + this.nameToValue.hashCode();
+            this.hashCode = i;
+        }
+        return this.hashCode;
+    }
 }

@@ -27,6 +27,7 @@ package org.spongepowered.common.event.tracking.phase.packet;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -43,6 +44,7 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
     @Nullable private ItemStackSnapshot cursor;
     @Nullable private ItemStack itemUsed;
     @Nullable private BlockSnapshot targetBlock;
+    @Nullable private HandType handUsed;
     private boolean ignoreCreative;
     private boolean interactItemChanged;
 
@@ -115,6 +117,15 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
 
     public boolean getInteractItemChanged() {
         return this.interactItemChanged;
+    }
+
+    public P handUsed(HandType hand) {
+        this.handUsed = hand;
+        return (P) this;
+    }
+
+    public HandType getHandUsed() {
+        return this.handUsed;
     }
 
     @Override

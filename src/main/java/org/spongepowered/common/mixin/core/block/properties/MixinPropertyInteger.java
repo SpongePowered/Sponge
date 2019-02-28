@@ -24,11 +24,33 @@
  */
 package org.spongepowered.common.mixin.core.block.properties;
 
+import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.properties.PropertyInteger;
 import org.spongepowered.api.block.trait.IntegerTrait;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(value = PropertyInteger.class)
 public abstract class MixinPropertyInteger extends MixinPropertyHelper<Integer> implements IntegerTrait {
 
+    private Integer hashCode;
+    @Shadow @Final private ImmutableSet<Integer> allowedValues;
+
+    /**
+     * @author blood - February 28th, 2019
+     * @reason Block properties are immutable so there is no reason
+     * to recompute the hashCode repeatedly. To improve performance, we
+     * compute the hashCode once then cache the result.
+     *
+     * @return The cached hashCode
+     */
+    @Overwrite
+    public int hashCode() {
+        if (this.hashCode == null) {
+            this.hashCode = 31 * super.hashCode() + this.allowedValues.hashCode();
+        }
+        return this.hashCode;
+    }
 }

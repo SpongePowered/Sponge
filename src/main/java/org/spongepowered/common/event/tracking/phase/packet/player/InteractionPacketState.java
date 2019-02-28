@@ -34,6 +34,8 @@ import net.minecraft.network.play.client.CPacketPlayerDigging;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.data.type.HandType;
+import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.projectile.Projectile;
@@ -88,6 +90,7 @@ public final class InteractionPacketState extends BasicPacketState {
             context.itemUsed(stack);
         }
         context.targetBlock(new Location<>(((Player) playerMP).getWorld(), VecHelper.toVector3d(((CPacketPlayerDigging) packet).getPosition())).createSnapshot());
+        context.handUsed(HandTypes.MAIN_HAND);
     }
 
     @Override
@@ -127,6 +130,7 @@ public final class InteractionPacketState extends BasicPacketState {
 
         final EntityPlayerMP player = phaseContext.getPacketPlayer();
         final ItemStack usedStack = phaseContext.getItemUsed();
+        final HandType usedHand = phaseContext.getHandUsed();
         final ItemStackSnapshot usedSnapshot = ItemStackUtil.snapshotOf(usedStack);
         final Entity spongePlayer = EntityUtil.fromNative(player);
         final BlockSnapshot targetBlock = phaseContext.getTargetBlock();
@@ -135,6 +139,7 @@ public final class InteractionPacketState extends BasicPacketState {
             frame.pushCause(spongePlayer);
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
             frame.addContext(EventContextKeys.USED_ITEM, usedSnapshot);
+            frame.addContext(EventContextKeys.USED_HAND, usedHand);
             frame.addContext(EventContextKeys.BLOCK_HIT, targetBlock);
             final boolean hasBlocks = !phaseContext.getCapturedBlockSupplier().isEmpty();
             final List<SpongeBlockSnapshot> capturedBlcoks = phaseContext.getCapturedOriginalBlocksChanged();

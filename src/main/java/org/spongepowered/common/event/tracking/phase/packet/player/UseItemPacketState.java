@@ -33,6 +33,7 @@ import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
@@ -66,6 +67,8 @@ public final class UseItemPacketState extends BasicPacketState {
         final net.minecraft.item.ItemStack usedItem = playerMP.getHeldItem(placeBlock.getHand());
         final ItemStack itemstack = ItemStackUtil.cloneDefensive(usedItem);
         context.itemUsed(itemstack);
+        final HandType handType = (HandType) (Object) placeBlock.getHand();
+        context.handUsed(handType);
     }
 
     @Override
@@ -81,16 +84,19 @@ public final class UseItemPacketState extends BasicPacketState {
         spongeChunk.addTrackedBlockPosition((Block) transaction.getFinal().getState().getType(), pos, player, PlayerTracker.Type.NOTIFIER);
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public void unwind(BasicPacketContext context) {
         final EntityPlayerMP player = context.getPacketPlayer();
         final ItemStack itemStack = context.getItemUsed();
         final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(itemStack);
+        final HandType hand = context.getHandUsed();
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(player);
             frame.pushCause(snapshot);
             frame.addContext(EventContextKeys.SPAWN_TYPE,
                 itemStack.getType() == ItemTypes.SPAWN_EGG ? SpawnTypes.SPAWN_EGG : SpawnTypes.PLACEMENT);
+            frame.addContext(EventContextKeys.USED_HAND, hand);
             context.getCapturedEntitySupplier()
                 .acceptAndClearIfNotEmpty(entities -> {
                     SpongeCommonEventFactory.callSpawnEntity(entities, context);
@@ -101,8 +107,7 @@ public final class UseItemPacketState extends BasicPacketState {
                 boolean success = TrackingUtil.processBlockCaptures(this, context);
                 if (!success && snapshot != ItemTypeRegistryModule.NONE_SNAPSHOT) {
                     Sponge.getCauseStackManager().pushCause(player);
-                    EnumHand hand = ((CPacketPlayerTryUseItem) context.getPacket()).getHand();
-                    PacketPhaseUtil.handlePlayerSlotRestore(player, (net.minecraft.item.ItemStack) itemStack, hand);
+                    PacketPhaseUtil.handlePlayerSlotRestore(player, (net.minecraft.item.ItemStack) itemStack, (EnumHand) (Object) hand);
                 }
             }
         }

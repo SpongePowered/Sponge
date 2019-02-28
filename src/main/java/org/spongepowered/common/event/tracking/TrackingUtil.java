@@ -78,12 +78,14 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.context.MultiBlockCaptureSupplier;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
+import org.spongepowered.common.event.tracking.phase.tick.BlockEventTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.BlockTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.DimensionContext;
 import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.event.tracking.phase.tick.TileEntityTickContext;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
@@ -320,8 +322,7 @@ public final class TrackingUtil {
     public static boolean fireMinecraftBlockEvent(WorldServer worldIn, BlockEventData event) {
         IBlockState currentState = worldIn.getBlockState(event.getPosition());
         final IMixinBlockEventData blockEvent = (IMixinBlockEventData) event;
-        IPhaseState<?> phase = TickPhase.Tick.BLOCK_EVENT;
-        final PhaseContext<?> phaseContext = phase.createPhaseContext();
+        final BlockEventTickContext phaseContext = TickPhase.Tick.BLOCK_EVENT.createPhaseContext();
 
         Object source = blockEvent.getTickTileEntity() != null ? blockEvent.getTickTileEntity() : blockEvent.getTickBlock();
         if (source != null) {
@@ -331,11 +332,13 @@ public final class TrackingUtil {
             return currentState.onBlockEventReceived(worldIn, event.getPosition(), event.getEventID(), event.getEventParameter());
         }
 
-        if (blockEvent.getSourceUser() != null) {
-            phaseContext.notifier(blockEvent.getSourceUser());
+        final User user = ((IMixinBlockEventData) event).getSourceUser();
+        if (user != null) {
+            phaseContext.owner = user;
+            phaseContext.notifier = user;
         }
 
-        try (PhaseContext<?> o = phaseContext) {
+        try (BlockEventTickContext o = phaseContext) {
             o.buildAndSwitch();
             return currentState.onBlockEventReceived(worldIn, event.getPosition(), event.getEventID(), event.getEventParameter());
         }
@@ -482,9 +485,7 @@ public final class TrackingUtil {
         createTransactionLists(state, context, transactionArrays, transactionBuilders);
         ListMultimap<BlockPos, BlockEventData> scheduledEvents = snapshots.getScheduledEvents();
 
-        // Clear captured snapshots after creating the transactions. The transactions at this point will be dictating what blcoks are handled
-        // and when at this point, the capture object will be recycled in cases of being in Post State where we re-enter to unwind
-        // consistently
+        // Clear captured snapshots after processing them
         snapshots.clear();
 
         final ChangeBlockEvent[] mainEvents = new ChangeBlockEvent[BlockChange.values().length];
@@ -739,7 +740,11 @@ public final class TrackingUtil {
         final Block newBlock = newState.getBlock();
         final IPhaseState phaseState = phaseContext.state;
         if (changeFlag.updateNeighbors()) { // Notify neighbors only if the change flag allowed it.
+            // Append the snapshot being applied that is allowing us to keep track of which source is
+            // performing the notification, it's quick and dirty.
+            PhaseTracker.getInstance().getCurrentContext().neighborNotificationSource = newBlockSnapshot;
             mixinWorld.spongeNotifyNeighborsPostBlockChange(pos, originalState, newState, changeFlag);
+            PhaseTracker.getInstance().getCurrentContext().neighborNotificationSource = null;
         } else if (changeFlag.notifyObservers()) {
             ((net.minecraft.world.World) mixinWorld).updateObservingBlocksAt(pos, newBlock);
         }

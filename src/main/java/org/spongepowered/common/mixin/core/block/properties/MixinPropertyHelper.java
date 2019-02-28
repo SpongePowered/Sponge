@@ -27,7 +27,10 @@ package org.spongepowered.common.mixin.core.block.properties;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyHelper;
 import org.spongepowered.api.block.trait.BlockTrait;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.block.IMixinPropertyHolder;
 import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
 
@@ -42,7 +45,10 @@ import java.util.Optional;
 @Mixin(value = PropertyHelper.class)
 public abstract class MixinPropertyHelper<T extends Comparable<T>> implements BlockTrait<T>, IMixinPropertyHolder {
 
+    private Integer hashCode;
     private String idString;
+    @Shadow @Final private Class<T> valueClass;
+    @Shadow @Final private String name;
 
     @Override
     public String getId() {
@@ -58,5 +64,21 @@ public abstract class MixinPropertyHelper<T extends Comparable<T>> implements Bl
     @Override
     public Optional<T> parseValue(String value) {
         return Optional.ofNullable((T) ((IProperty) this).parseValue(value).orNull());
+    }
+
+    /**
+     * @author blood - February 28th, 2019
+     * @reason Block properties are immutable so there is no reason
+     * to recompute the hashCode repeatedly. To improve performance, we
+     * compute the hashCode once then cache the result.
+     *
+     * @return The cached hashCode
+     */
+    @Overwrite
+    public int hashCode() {
+        if (this.hashCode == null) {
+            this.hashCode = 31 * this.valueClass.hashCode() + this.name.hashCode();
+        }
+        return this.hashCode;
     }
 }

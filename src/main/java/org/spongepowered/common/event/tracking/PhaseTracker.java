@@ -640,6 +640,7 @@ public final class PhaseTracker {
                 .setNotifiedBlockPos(notifyPos)
                 .setNotifiedBlockState(iblockstate)
                 .setSourceNotification(sourcePos)
+                .setSourceNotification(peek.context.getNeighborNotificationSource())
                  .allowsCaptures(state) // We need to pass the previous state so we don't capture blocks when we're in world gen.
 
             ) {
