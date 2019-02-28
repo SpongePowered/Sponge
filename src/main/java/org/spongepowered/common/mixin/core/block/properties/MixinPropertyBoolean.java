@@ -27,8 +27,33 @@ package org.spongepowered.common.mixin.core.block.properties;
 import net.minecraft.block.properties.PropertyBool;
 import org.spongepowered.api.block.trait.BooleanTrait;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 
 @Mixin(value = PropertyBool.class)
 public abstract class MixinPropertyBoolean extends MixinPropertyHelper<Boolean> implements BooleanTrait {
 
+    /**
+     * @author blood - February 28th, 2019
+     * @reason Block properties are only initialized once per class so
+     * we can simply check the instance and avoid checking values.
+     *
+     * @return True if this object equals other
+     */
+    @Overwrite
+    public boolean equals(Object other) {
+        return this == other;
+    }
+
+    /**
+     * @author blood - February 28th, 2019
+     * @reason Block properties are immutable so there is no reason
+     * to recompute the hashCode repeatedly. To improve performance, we
+     * compute the hashCode once in super then cache the result.
+     *
+     * @return The cached hashCode
+     */
+    @Overwrite
+    public int hashCode() {
+        return super.hashCode();
+    }
 }
