@@ -76,12 +76,12 @@ public abstract class MixinTraitAdapter implements MinecraftInventoryAdapter {
             return this.reusableLens;
         }
         if (this instanceof ReusableLensProvider) {
-            return ((ReusableLensProvider) this).generateLens(this.getFabric(), this);
+            this.reusableLens = ((ReusableLensProvider) this).generateLens(this.getFabric(), this);
         }
         if (this instanceof LensProvider) {
             this.slots = ((LensProvider) this).slotProvider(this.getFabric(), this);
             Lens lens = ((LensProvider) this).rootLens(this.getFabric(), this);
-            return new ReusableLens<>(this.slots, lens);
+            this.reusableLens = new ReusableLens<>(this.slots, lens);
         }
         SlotCollection slots = new SlotCollection.Builder().add(this.getFabric().getSize()).build();
         Lens lens;
@@ -90,7 +90,8 @@ public abstract class MixinTraitAdapter implements MinecraftInventoryAdapter {
         } else {
             lens = new OrderedInventoryLensImpl(0, this.getFabric().getSize(), 1, slots);
         }
-        return new ReusableLens<>(slots, lens);
+        this.reusableLens = new ReusableLens<>(slots, lens);
+        return this.reusableLens;
     }
 
 }
