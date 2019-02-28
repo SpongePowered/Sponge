@@ -27,13 +27,14 @@ package org.spongepowered.common.mixin.core.block.properties;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyHelper;
 import org.spongepowered.api.block.trait.BlockTrait;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.block.IMixinPropertyHolder;
 import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
 
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * This is retained solely for simplification not having to perform any
@@ -44,10 +45,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Mixin(value = PropertyHelper.class)
 public abstract class MixinPropertyHelper<T extends Comparable<T>> implements BlockTrait<T>, IMixinPropertyHolder {
 
-    // cache
-    private static AtomicInteger hashId = new AtomicInteger(1);
-    private final int hashCode = 92821 * hashId.getAndIncrement();
+    private Integer hashCode;
     private String idString;
+    @Shadow @Final private Class<T> valueClass;
+    @Shadow @Final private String name;
 
     @Override
     public String getId() {
@@ -67,18 +68,6 @@ public abstract class MixinPropertyHelper<T extends Comparable<T>> implements Bl
 
     /**
      * @author blood - February 28th, 2019
-     * @reason Block properties are only initialized once per class so
-     * we can simply check the instance and avoid checking values.
-     *
-     * @return True if this object equals other
-     */
-    @Overwrite
-    public boolean equals(Object other) {
-        return this == other;
-    }
-
-    /**
-     * @author blood - February 28th, 2019
      * @reason Block properties are immutable so there is no reason
      * to recompute the hashCode repeatedly. To improve performance, we
      * compute the hashCode once then cache the result.
@@ -87,6 +76,9 @@ public abstract class MixinPropertyHelper<T extends Comparable<T>> implements Bl
      */
     @Overwrite
     public int hashCode() {
+        if (this.hashCode == null) {
+            this.hashCode = 31 * this.valueClass.hashCode() + this.name.hashCode();
+        }
         return this.hashCode;
     }
 }
