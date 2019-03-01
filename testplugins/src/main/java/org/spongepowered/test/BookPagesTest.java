@@ -50,7 +50,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Plugin(id = "book_pages_test", version = "1.0", description = "Tests reading and writing books.")
+@Plugin(id = "book_pages_test", name = "Book pages test", description = "Tests reading and writing books.", version = "1.0")
 public class BookPagesTest {
 
     @Listener

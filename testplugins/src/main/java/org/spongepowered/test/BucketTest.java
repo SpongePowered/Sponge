@@ -24,9 +24,11 @@
  */
 package org.spongepowered.test;
 
+import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
@@ -39,52 +41,47 @@ import org.spongepowered.api.event.filter.type.Exclude;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-@Plugin(id = "bucket_cancel_test", name = "Bucket Cancel Test", description = BucketTest.DESCRIPTION, version = "0.0.0")
-public class BucketTest {
+@Plugin(id = "bucket_cancel_test", name = "Bucket Cancel Test", description = "Bucket Cancel Test", version = "0.0.0")
+public class BucketTest implements LoadableModule {
 
-    public static final String DESCRIPTION = "Use /bucketcancel to toggle cancelling bucket usage, should be used to test for duplications";
-    public static final Text CANCELLED = Text.of(TextColors.RED, "cancelled");
-    public static final Text ALLOWED = Text.of(TextColors.GREEN, "allowed");
+    private final BucketListener listener = new BucketListener();
 
-    private boolean enabled = false;
-    @Listener
-    @Exclude(ChangeBlockEvent.Post.class)
-    public void onBlockChange(ChangeBlockEvent.Pre event, @Root Player player) {
-        if (this.enabled) {
+    @Inject private PluginContainer container;
+
+
+    @Override
+    public void enable(CommandSource src) {
+        Sponge.getEventManager().registerListeners(this.container, this.listener);
+    }
+
+    public static class BucketListener {
+
+
+        @Listener
+        @Exclude(ChangeBlockEvent.Post.class)
+        public void onBlockChange(ChangeBlockEvent.Pre event, @Root Player player) {
             if (event.getContext().containsKey(EventContextKeys.USED_ITEM)) {
                 event.setCancelled(true);
             }
-            // Technicallyh this should print twice, once for the Break and once for the Post.
+            // Technically this should print twice, once for the Break and once for the Post.
             System.err.println(event);
         }
-    }
 
-    // Now, due to the nature of buckets and how they're handled,
-    // we need to cancel the interactblockevent as well.
-    @Listener
-    public void onInteract(InteractBlockEvent.Secondary event, @Root Player player) {
-        event.getContext().get(EventContextKeys.USED_ITEM).ifPresent(used -> {
-            if (used.getType() == ItemTypes.WATER_BUCKET) {
-                event.setCancelled(true);
-            }
-        });
-
-    }
-
-    @Listener
-    public void onPreInit(GamePreInitializationEvent event) {
-        Sponge.getCommandManager().register(this, CommandSpec.builder()
-            .executor(((src, args) -> {
-                if (!(src instanceof Player)) {
-                    throw new CommandException(Text.of(TextColors.RED, "Must be a player to use this command!"));
+        // Now, due to the nature of buckets and how they're handled,
+        // we need to cancel the interactblockevent as well.
+        @Listener
+        public void onInteract(InteractBlockEvent.Secondary event, @Root Player player) {
+            event.getContext().get(EventContextKeys.USED_ITEM).ifPresent(used -> {
+                if (used.getType() == ItemTypes.WATER_BUCKET) {
+                    event.setCancelled(true);
                 }
-                this.enabled = !this.enabled;
-                src.sendMessage(Text.of(TextColors.DARK_AQUA, "Buckets are being ", this.enabled ? CANCELLED : ALLOWED));
-                return CommandResult.success();
-            })).build(), "bucketcancel");
+            });
+
+        }
     }
 
 }

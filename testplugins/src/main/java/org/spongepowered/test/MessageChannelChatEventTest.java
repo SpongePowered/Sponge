@@ -24,6 +24,7 @@
  */
 package org.spongepowered.test;
 
+import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -35,32 +36,27 @@ import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.message.MessageChannelEvent;
 import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 
 @Plugin(id = "msg-channel-event-test", name = "Message Channel Chat Event Test", description = MessageChannelChatEventTest.DESCRIPTION, version = "0.0.0")
-public class MessageChannelChatEventTest {
+public class MessageChannelChatEventTest implements LoadableModule {
 
-    public static final String DESCRIPTION = "Use /msgchatevent to toggle altering the chat of the sender";
-    private static final Text PARAMETER = Text.of("state");
+    @Inject private PluginContainer container;
 
-    private boolean enabled = false;
+    public static final String DESCRIPTION = "toggle altering the chat of the sender";
 
-    @Listener
-    public void onInit(GameInitializationEvent event) {
-        Sponge.getCommandManager().register(this,
-                CommandSpec.builder()
-                    .arguments(GenericArguments.bool(PARAMETER))
-                    .executor((source, context) -> {
-                        this.enabled = context.requireOne(PARAMETER);
-                        source.sendMessage(Text.of("Altering chat: ", this.enabled));
-                        return CommandResult.success();
-                    }).build(),
-                "spongemsgchatevent");
+    private final MessageChannelChatEventListener listener = new MessageChannelChatEventListener();
+
+    @Override
+    public void enable(CommandSource src) {
+        Sponge.getEventManager().registerListeners(this.container, this.listener);
     }
 
-    @Listener
-    public void onMessageChat(MessageChannelEvent.Chat event, @Root CommandSource source) {
-        if (this.enabled) {
+    public static class MessageChannelChatEventListener {
+
+        @Listener
+        public void onMessageChat(MessageChannelEvent.Chat event, @Root CommandSource source) {
             MessageEvent.MessageFormatter formatters = event.getFormatter();
             formatters.setHeader(Text.of("[", source.getName(), "]: "));
             formatters.setFooter(Text.of(" - Sponge"));

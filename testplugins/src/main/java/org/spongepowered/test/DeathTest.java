@@ -24,8 +24,10 @@
  */
 package org.spongepowered.test;
 
+import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
@@ -33,27 +35,26 @@ import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.filter.Getter;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 
-@Plugin(authors = "gabizou", name = "DeathTest", id = "deathtest", description = DeathTest.DESCRIPTION, version = "0.0.0")
-public class DeathTest {
+@Plugin(authors = "gabizou", name = "DeathTest", id = "deathtest", description = "test death event cancellation", version = "0.0.0")
+public class DeathTest implements LoadableModule {
 
-    public static final String DESCRIPTION = "Use /toggleDeath to toggle whether players can die";
-    private boolean allowDeathsOfPlayers = true;
+    @Inject private PluginContainer container;
 
-    @Listener
-    public void onInit(GameInitializationEvent event) {
-        Sponge.getCommandManager().register(this, CommandSpec.builder()
-            .executor((src, args) -> {
-                this.allowDeathsOfPlayers = !this.allowDeathsOfPlayers;
-                return CommandResult.success();
-            }
-            )
-            .build(), "toggledeath");
+    private final DeathListener listener = new DeathListener();
+
+    @Override
+    public void enable(CommandSource src) {
+        Sponge.getEventManager().registerListeners(this.container, this.listener);
     }
 
-    @Listener
-    public void onDeath(DestructEntityEvent.Death entityEvent, @Getter("getTargetEntity") Player player) {
-        if (!this.allowDeathsOfPlayers) {
+    public static class DeathListener {
+
+        @Listener
+        public void onDeath(DestructEntityEvent.Death entityEvent, @Getter("getTargetEntity") Player player) {
             entityEvent.setCancelled(true);
         }
     }

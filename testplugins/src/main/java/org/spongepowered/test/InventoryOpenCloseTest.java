@@ -24,13 +24,12 @@
  */
 package org.spongepowered.test;
 
+import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.filter.cause.First;
-import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -40,33 +39,28 @@ import org.spongepowered.api.text.Text;
 
 import java.util.Optional;
 
-@Plugin(id = "inventoryopenclosetest", name = "Inventory Open/Close Test", description = InventoryOpenCloseTest.DESCRIPTION, version = "0.0.0")
-public class InventoryOpenCloseTest {
+@Plugin(id = InventoryOpenCloseTest.ID, name = "Inventory Open/Close Test", description = InventoryOpenCloseTest.DESCRIPTION, version = "0.0.0")
+public class InventoryOpenCloseTest implements LoadableModule {
 
+    @Inject private PluginContainer container;
+    public static final String ID = "inventoryopenclosetest";
     public static final String DESCRIPTION = "A plugin to test open and close during inventory events.";
-    private final InventoryListener listener = new InventoryListener();
-    private boolean registered = false;
+    private final InventoryOpenCloseListener listener = new InventoryOpenCloseListener();
 
-    @Listener
-    public void onInit(GameInitializationEvent event) {
-        Sponge.getCommandManager().register(this,
-                CommandSpec.builder().executor((source, context) -> {
-                    if (this.registered) {
-                        this.registered = false;
-                        Sponge.getEventManager().unregisterListeners(this.listener);
-                    } else {
-                        this.registered = true;
-                        Sponge.getEventManager().registerListeners(this, this.listener);
-                    }
-                    return CommandResult.success();
-                }).build(), "toggleinventoryopenclosetest");
+
+
+    @Override
+    public void enable(CommandSource src) {
+        Sponge.getEventManager().registerListeners(this.container, this.listener);
     }
 
-    public class InventoryListener {
+    public static class InventoryOpenCloseListener {
+
+        private final PluginContainer container = Sponge.getPluginManager().getPlugin(ID).get();
 
         @Listener
         public void onInventoryPrimary(ClickInventoryEvent.Primary event, @First Player player) {
-            Inventory inv = Inventory.builder().build(InventoryOpenCloseTest.this);
+            Inventory inv = Inventory.builder().build(this.container);
             // This will open the inventory the next tick
             player.openInventory(inv);
         }

@@ -24,9 +24,11 @@
  */
 package org.spongepowered.test;
 
+import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.event.Listener;
@@ -34,28 +36,20 @@ import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.world.LocatableBlock;
 
 @Plugin(id = "dispenserfiretest", name = "Dispenser Fire Test", description = DispenserFireTest.DESCRIPTION, version = "0.0.0")
-public class DispenserFireTest {
+public class DispenserFireTest implements LoadableModule {
+
+    @Inject private PluginContainer container;
 
     public static final String DESCRIPTION = "A plugin to test the item dispense event fires for dispensers.";
     private final DispenserFireListener listener = new DispenserFireListener();
-    private boolean registered = false;
 
-    @Listener
-    public void onInit(GameInitializationEvent event) {
-        Sponge.getCommandManager().register(this,
-                CommandSpec.builder().executor((source, context) -> {
-                    if (this.registered) {
-                        this.registered = false;
-                        Sponge.getEventManager().unregisterListeners(this.listener);
-                    } else {
-                        this.registered = true;
-                        Sponge.getEventManager().registerListeners(this, this.listener);
-                    }
-                    return CommandResult.success();
-                }).build(), "dispensersound");
+    @Override
+    public void enable(CommandSource src) {
+        Sponge.getEventManager().registerListeners(this.container, this.listener);
     }
 
     public static class DispenserFireListener {

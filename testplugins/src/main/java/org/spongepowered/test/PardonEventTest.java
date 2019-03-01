@@ -24,27 +24,44 @@
  */
 package org.spongepowered.test;
 
+import com.google.inject.Inject;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.network.PardonIpEvent;
 import org.spongepowered.api.event.user.PardonUserEvent;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 
 @Plugin(id = "pardoneventtest", name = "Pardon Event Test", description = "A plugin to test PardonUserEvent and PardonIpEvent", version = "0.0.0")
-public class PardonEventTest {
+public class PardonEventTest implements LoadableModule {
 
-    @Listener
-    public void onPardonIpEvent(PardonIpEvent event) {
-        event.getCause().first(Player.class).ifPresent(player ->
-                player.sendMessage(Text.of(player.getName() + " removed a " +
-                        event.getBan().getType().getName() + " ban")));
+    @Inject private PluginContainer container;
+
+    private final PardonEventListener listener = new PardonEventListener();
+
+
+
+    @Override
+    public void enable(CommandSource src) {
+        Sponge.getEventManager().registerListeners(this.container, this.listener);
     }
 
-    @Listener
-    public void onPardonUserEvent(PardonUserEvent event) {
-        event.getCause().first(Player.class).ifPresent(player ->
-                player.sendMessage(Text.of(player.getName() + " removed a " +
-                        event.getBan().getType().getName() + " ban")));
+    public static class PardonEventListener {
+        @Listener
+        public void onPardonIpEvent(PardonIpEvent event) {
+            event.getCause().first(Player.class).ifPresent(player ->
+                    player.sendMessage(Text.of(player.getName() + " removed a " +
+                            event.getBan().getType().getName() + " ban")));
+        }
+
+        @Listener
+        public void onPardonUserEvent(PardonUserEvent event) {
+            event.getCause().first(Player.class).ifPresent(player ->
+                    player.sendMessage(Text.of(player.getName() + " removed a " +
+                            event.getBan().getType().getName() + " ban")));
+        }
     }
 }
