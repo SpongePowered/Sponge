@@ -182,7 +182,9 @@ public final class SpongeImpl {
     public static void setSpongePlugin(PluginContainer common) {
         checkState(spongecommon == null);
         spongecommon = common;
-        Sponge.getEventManager().registerListeners(spongecommon, new SpongeCommonEventHooks());
+        if (isInitialized()) {
+            Sponge.getEventManager().registerListeners(spongecommon, new SpongeCommonEventHooks());
+        }
     }
 
     public static PluginContainer getSpongePlugin() {
