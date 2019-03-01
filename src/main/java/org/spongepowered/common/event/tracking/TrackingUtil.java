@@ -630,6 +630,10 @@ public final class TrackingUtil {
     @SuppressWarnings("rawtypes")
     static boolean performTransactionProcess(Transaction<BlockSnapshot> transaction, IPhaseState<?> phaseState, PhaseContext<?> phaseContext,
         boolean noCancelledTransactions, int currentDepth) {
+        if (!transaction.isValid()) {
+            // Don't use invalidated block transactions during notifications, these only need to be restored
+            return noCancelledTransactions;
+        }
         // Handle custom replacements - these need to get actually set onto the chunk, but ignored as far as tracking
         // goes.
         if (transaction.getCustom().isPresent()) {
