@@ -82,40 +82,40 @@ public abstract class MixinBlock_Collisions implements IModData_Collisions {
 
     @Override
     public void initializeCollisionState(World worldIn) {
-        SpongeConfig<? extends GeneralConfigBase> activeConfig = ((IMixinWorldServer) worldIn).getActiveConfig();
+        SpongeConfig<? extends GeneralConfigBase> worldConfig = ((IMixinWorldServer) worldIn).getWorldConfig();
         SpongeConfig<? extends GeneralConfigBase> globalConfig = SpongeImpl.getGlobalConfig();
-        EntityCollisionCategory activeCollCat = activeConfig.getConfig().getEntityCollisionCategory();
+        EntityCollisionCategory worldCollCat = worldConfig.getConfig().getEntityCollisionCategory();
         EntityCollisionCategory globalCollCat = globalConfig.getConfig().getEntityCollisionCategory();
 
-        this.setMaxCollisions(activeCollCat.getMaxEntitiesWithinAABB());
+        this.setMaxCollisions(worldCollCat.getMaxEntitiesWithinAABB());
         
         boolean requiresSave = false;
         String[] ids = ((BlockType) this).getId().split(":");
         String modId = ids[0];
         String name = ids[1];
 
-        CollisionModCategory activeCollMod = activeCollCat.getModList().get(modId);
+        CollisionModCategory worldCollMod = worldCollCat.getModList().get(modId);
         CollisionModCategory globalCollMod = globalCollCat.getModList().get(modId);
-        if (activeCollMod == null && activeCollCat.autoPopulateData()) {
+        if (worldCollMod == null && worldCollCat.autoPopulateData()) {
             globalCollMod = new CollisionModCategory(modId);
             globalCollCat.getModList().put(modId, globalCollMod);
             globalCollMod.getBlockList().put(name, this.getMaxCollisions());
             globalConfig.save();
             return;
-        } else if (activeCollMod != null) {
-            if (!activeCollMod.isEnabled()) {
+        } else if (worldCollMod != null) {
+            if (!worldCollMod.isEnabled()) {
                 this.setMaxCollisions(-1);
                 return;
             }
             // check mod overrides
-            Integer modCollisionMax = activeCollMod.getDefaultMaxCollisions().get("blocks");
+            Integer modCollisionMax = worldCollMod.getDefaultMaxCollisions().get("blocks");
             if (modCollisionMax != null) {
                 this.setMaxCollisions(modCollisionMax);
             }
 
             // entity overrides
-            Integer blockMaxCollision = activeCollMod.getBlockList().get(name);
-            if (blockMaxCollision == null && activeCollCat.autoPopulateData()) {
+            Integer blockMaxCollision = worldCollMod.getBlockList().get(name);
+            if (blockMaxCollision == null && worldCollCat.autoPopulateData()) {
                 globalCollMod.getBlockList().put(name, this.getMaxCollisions());
                 requiresSave = true;
             } else if (blockMaxCollision != null) {

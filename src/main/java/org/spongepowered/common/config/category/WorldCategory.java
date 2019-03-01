@@ -222,7 +222,7 @@ public class WorldCategory extends ConfigCategory {
         return this.chunkGCTickInterval;
     }
 
-    public int getChunkLoadThreadhold() {
+    public int getChunkLoadThreshold() {
         return this.chunkGCLoadThreshold;
     }
 

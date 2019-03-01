@@ -101,8 +101,8 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
             return;
         }
         this.EMPTY_CHUNK = new SpongeEmptyChunk(worldObjIn, 0, 0);
-        SpongeConfig<? extends GeneralConfigBase> spongeConfig = SpongeHooks.getActiveConfig(worldObjIn);
-        ((IMixinWorldServer) worldObjIn).setActiveConfig(spongeConfig);
+        SpongeConfig<? extends GeneralConfigBase> spongeConfig = SpongeHooks.getWorldConfig(worldObjIn);
+        ((IMixinWorldServer) worldObjIn).updateConfigCache();
         this.denyChunkRequests = spongeConfig.getConfig().getWorld().getDenyChunkRequests();
         this.chunkUnloadDelay = spongeConfig.getConfig().getWorld().getChunkUnloadDelay() * 1000;
         this.maxChunkUnloads = spongeConfig.getConfig().getWorld().getMaxChunkUnloads();

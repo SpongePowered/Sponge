@@ -52,11 +52,7 @@ import javax.annotation.Nullable;
 
 public interface IMixinWorldServer extends IMixinWorld {
 
-    SpongeConfig<? extends GeneralConfigBase> getActiveConfig();
-
     SpongeConfig<WorldConfig> getWorldConfig();
-
-    void setActiveConfig(SpongeConfig<? extends GeneralConfigBase> config);
 
     Integer getDimensionId();
 
@@ -69,7 +65,6 @@ public interface IMixinWorldServer extends IMixinWorld {
     boolean setBlockState(BlockPos pos, IBlockState state, BlockChangeFlag flag);
 
     boolean forceSpawnEntity(org.spongepowered.api.entity.Entity entity);
-
 
     void onSpongeEntityAdded(Entity entity);
 
@@ -108,5 +103,9 @@ public interface IMixinWorldServer extends IMixinWorld {
     void playCustomSound(@Nullable EntityPlayer player, double x, double y, double z, String soundIn, SoundCategory category, float volume, float pitch);
 
     void doChunkGC();
+
+    void incrementChunkLoadCount();
+
+    void updateConfigCache();
 
 }

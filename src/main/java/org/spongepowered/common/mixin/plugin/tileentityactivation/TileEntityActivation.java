@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.plugin.tileentityactivation;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.management.PlayerChunkMap;
@@ -63,7 +61,7 @@ public class TileEntityActivation {
             return;
         }
 
-        TileEntityActivationCategory config = ((IMixinWorldServer) tileEntity.getWorld()).getActiveConfig().getConfig().getTileEntityActivationRange();
+        TileEntityActivationCategory config = ((IMixinWorldServer) tileEntity.getWorld()).getWorldConfig().getConfig().getTileEntityActivationRange();
         TileEntityType type = ((org.spongepowered.api.block.tileentity.TileEntity) tileEntity).getType();
 
         IModData_Activation spongeTileEntity = (IModData_Activation) tileEntity;
@@ -226,9 +224,9 @@ public class TileEntityActivation {
     }
 
     public static void addTileEntityToConfig(World world, SpongeTileEntityType type) {
-        SpongeConfig<? extends GeneralConfigBase> config = ((IMixinWorldServer) world).getActiveConfig();
+        SpongeConfig<? extends GeneralConfigBase> worldConfig = ((IMixinWorldServer) world).getWorldConfig();
         SpongeConfig<? extends GeneralConfigBase> globalConfig = SpongeImpl.getGlobalConfig();
-        if (config == null || globalConfig == null || type == null || !config.getConfig().getTileEntityActivationRange().autoPopulateData()) {
+        if (worldConfig == null || globalConfig == null || type == null || !worldConfig.getConfig().getTileEntityActivationRange().autoPopulateData()) {
             return;
         }
 

@@ -373,7 +373,7 @@ public final class EntityUtil {
             return null;
         }
 
-        final Map<String, String> portalAgents = fromMixinWorld.getActiveConfig().getConfig().getWorld().getPortalAgents();
+        final Map<String, String> portalAgents = fromMixinWorld.getWorldConfig().getConfig().getWorld().getPortalAgents();
         String worldName;
 
         // Check if we're to use a different teleporter for this world

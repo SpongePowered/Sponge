@@ -62,11 +62,9 @@ import org.spongepowered.api.util.file.DeleteFileVisitor;
 import org.spongepowered.api.util.file.ForwardingFileVisitor;
 import org.spongepowered.api.world.DimensionTypes;
 import org.spongepowered.api.world.WorldArchetype;
-import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.category.WorldCategory;
 import org.spongepowered.common.config.type.GeneralConfigBase;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -524,7 +522,7 @@ public final class WorldManager {
                     saveWorld(worldServer, true);
                 }
 
-                mixinWorldServer.getActiveConfig().save();
+                mixinWorldServer.getWorldConfig().save();
             } catch (MinecraftException e) {
                 e.printStackTrace();
             } finally {
@@ -691,8 +689,8 @@ public final class WorldManager {
 
             // Step 2 - See if we are allowed to load it
             if (dimensionId != 0) {
-                final SpongeConfig<? extends GeneralConfigBase> activeConfig = SpongeHooks.getActiveConfig(((IMixinDimensionType)(Object) dimensionType).getConfigPath(), worldFolderName);
-                if (!activeConfig.getConfig().getWorld().isWorldEnabled()) {
+                final SpongeConfig<? extends GeneralConfigBase> spongeConfig = SpongeHooks.getSpongeConfig(((IMixinDimensionType)(Object) dimensionType).getConfigPath(), worldFolderName);
+                if (!spongeConfig.getConfig().getWorld().isWorldEnabled()) {
                     SpongeImpl.getLogger().warn("World [{}] (DIM{}) is disabled. World will not be loaded...", worldFolder,
                             dimensionId);
                     continue;

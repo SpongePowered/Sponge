@@ -91,7 +91,7 @@ public abstract class MixinEntityItem extends MixinEntity implements Item, IMixi
             return originalRadius;
         }
         if (this.cachedRadius == -1) {
-            final double configRadius = ((IMixinWorldServer) this.world).getActiveConfig().getConfig().getWorld().getItemMergeRadius();
+            final double configRadius = ((IMixinWorldServer) this.world).getWorldConfig().getConfig().getWorld().getItemMergeRadius();
             this.cachedRadius = configRadius < 0 ? 0 : configRadius;
         }
         return this.cachedRadius;

@@ -646,8 +646,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                 // Sponge start - check auto save interval in world config
                 if (this.isDedicatedServer() && this.isServerRunning()) {
                     final IMixinWorldServer spongeWorld = (IMixinWorldServer) worldserver;
-                    final int autoSaveInterval = spongeWorld.getActiveConfig().getConfig().getWorld().getAutoSaveInterval();
-                    final boolean logAutoSave = spongeWorld.getActiveConfig().getConfig().getLogging().worldAutoSaveLogging();
+                    final int autoSaveInterval = spongeWorld.getWorldConfig().getConfig().getWorld().getAutoSaveInterval();
+                    final boolean logAutoSave = spongeWorld.getWorldConfig().getConfig().getLogging().worldAutoSaveLogging();
                     if (autoSaveInterval <= 0
                             || ((WorldProperties) worldserver.getWorldInfo()).getSerializationBehavior() != SerializationBehaviors.AUTOMATIC) {
                         if (logAutoSave) {

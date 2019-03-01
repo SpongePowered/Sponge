@@ -52,6 +52,7 @@ import org.spongepowered.common.config.type.TrackerConfig;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import org.spongepowered.common.event.SpongeCauseStackManager;
+import org.spongepowered.common.event.SpongeCommonEventHooks;
 import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.launch.SpongeLaunch;
@@ -181,6 +182,7 @@ public final class SpongeImpl {
     public static void setSpongePlugin(PluginContainer common) {
         checkState(spongecommon == null);
         spongecommon = common;
+        Sponge.getEventManager().registerListeners(spongecommon, new SpongeCommonEventHooks());
     }
 
     public static PluginContainer getSpongePlugin() {
