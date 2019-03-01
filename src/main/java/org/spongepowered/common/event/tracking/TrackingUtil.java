@@ -73,6 +73,7 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
@@ -85,7 +86,6 @@ import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.event.tracking.phase.tick.TileEntityTickContext;
 import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
@@ -637,6 +637,9 @@ public final class TrackingUtil {
             hasEvents = true;
         }
         for (Transaction<BlockSnapshot> transaction : transactions) {
+            if (!transaction.isValid()) {
+                continue;
+            }
             final BlockPos pos = hasEvents ? VecHelper.toBlockPos(transaction.getOriginal().getPosition()) : null;
             final List<BlockEventData> events =  hasEvents ? scheduledEvents.get(pos) : Collections.emptyList();
             noCancelledTransactions = performTransactionProcess(transaction, phaseState, phaseContext, events, noCancelledTransactions, currentDepth);
@@ -698,7 +701,7 @@ public final class TrackingUtil {
                     // Likewise, since this is an intermediary state, we don't wnat to notify clients or event listeners,
                     // because they'd be spammed too much, they'll be notified at the end of this transaction process,
                     // not during intermediary processing.
-                    performNeighborAndClientNotifications(transaction, phaseContext, currentDepth, oldBlockSnapshot, mixinWorld, pos, originalState, intermediaryState);
+                    performNeighborAndClientNotifications(transaction, phaseContext, currentDepth, oldBlockSnapshot, newBlockSnapshot, mixinWorld, pos, originalState, intermediaryState);
                 }
             }
 
@@ -718,7 +721,7 @@ public final class TrackingUtil {
             world.notifyBlockUpdate(pos, originalState, newState, changeFlag.getRawFlag());
         }
 
-        performNeighborAndClientNotifications(transaction, phaseContext, currentDepth, oldBlockSnapshot, mixinWorld, pos,
+        performNeighborAndClientNotifications(transaction, phaseContext, currentDepth, oldBlockSnapshot, newBlockSnapshot, mixinWorld, pos,
             originalState, newState);
         return noCancelledTransactions;
     }
@@ -733,8 +736,9 @@ public final class TrackingUtil {
         }
     }
 
-    public static void performNeighborAndClientNotifications(Transaction<BlockSnapshot> transaction,
-        PhaseContext<?> phaseContext, int currentDepth, SpongeBlockSnapshot oldBlockSnapshot, IMixinWorldServer mixinWorld, BlockPos pos,
+    private static void performNeighborAndClientNotifications(Transaction<BlockSnapshot> transaction,
+        PhaseContext<?> phaseContext, int currentDepth, SpongeBlockSnapshot oldBlockSnapshot,
+        SpongeBlockSnapshot newBlockSnapshot, IMixinWorldServer mixinWorld, BlockPos pos,
         IBlockState originalState, IBlockState newState) {
         final SpongeBlockChangeFlag changeFlag = oldBlockSnapshot.getChangeFlag();
         final Block newBlock = newState.getBlock();
@@ -742,6 +746,7 @@ public final class TrackingUtil {
         if (changeFlag.updateNeighbors()) { // Notify neighbors only if the change flag allowed it.
             // Append the snapshot being applied that is allowing us to keep track of which source is
             // performing the notification, it's quick and dirty.
+            // TODO - somehow make this more functional so we're not relying on fields.
             PhaseTracker.getInstance().getCurrentContext().neighborNotificationSource = newBlockSnapshot;
             mixinWorld.spongeNotifyNeighborsPostBlockChange(pos, originalState, newState, changeFlag);
             PhaseTracker.getInstance().getCurrentContext().neighborNotificationSource = null;
@@ -840,7 +845,7 @@ public final class TrackingUtil {
     @Nullable
     private static ChangeBlockEvent.Post throwMultiEventsAndCreatePost(IPhaseState<?> state,
         PhaseContext<?> context, ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays,
-        List<ChangeBlockEvent> blockEvents, ChangeBlockEvent[] mainEvents) {
+        final List<ChangeBlockEvent> blockEvents, ChangeBlockEvent[] mainEvents) {
         if (!blockEvents.isEmpty()) {
             final ImmutableList<Transaction<BlockSnapshot>> transactions = transactionArrays[MULTI_CHANGE_INDEX];
             try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
@@ -858,4 +863,13 @@ public final class TrackingUtil {
         return null;
     }
 
+    public static void associateTrackerToTarget(BlockChange blockChange, Transaction<BlockSnapshot> transaction, User user) {
+        final BlockSnapshot finalSnapshot = transaction.getFinal();
+        final SpongeBlockSnapshot spongeSnapshot = (SpongeBlockSnapshot) finalSnapshot;
+        final BlockPos pos = spongeSnapshot.getBlockPos();
+        final Block block = BlockUtil.toBlock(spongeSnapshot);
+        final IMixinChunk spongeChunk = (IMixinChunk) spongeSnapshot.getWorldServer().getChunk(pos);
+        final PlayerTracker.Type trackerType = blockChange == BlockChange.PLACE ? PlayerTracker.Type.OWNER : PlayerTracker.Type.NOTIFIER;
+        spongeChunk.addTrackedBlockPosition(block, pos, user, trackerType);
+    }
 }

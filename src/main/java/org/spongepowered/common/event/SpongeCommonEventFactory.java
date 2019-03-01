@@ -527,6 +527,7 @@ public class SpongeCommonEventFactory {
                 source = data.context.getSource() == null ? worldIn : data.context.getSource();
             }
 
+            // TODO - All of this bit should be nuked since PhaseContext has lazy initializing frames.
             EntityPlayer player = null;
             frame.pushCause(source);
             if (source instanceof Player) {

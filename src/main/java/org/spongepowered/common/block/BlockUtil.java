@@ -105,4 +105,11 @@ public final class BlockUtil {
     private BlockUtil() {
     }
 
+    public static IBlockState toNative(SpongeBlockSnapshot snapshot) {
+        return toNative(snapshot.getState());
+    }
+
+    public static Block toBlock(SpongeBlockSnapshot spongeSnapshot) {
+        return toNative(spongeSnapshot.getState()).getBlock();
+    }
 }

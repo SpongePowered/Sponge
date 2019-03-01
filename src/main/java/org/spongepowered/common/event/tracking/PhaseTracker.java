@@ -628,8 +628,7 @@ public final class PhaseTracker {
             if (state.capturesNeighborNotifications(peek.context, mixinWorld, notifyPos, sourceBlock, iblockstate, sourcePos)) {
                 return;
             }
-            state.associateNeighborStateNotifier(peek.context,
-                sourcePos, iblockstate.getBlock(), notifyPos, ((WorldServer) mixinWorld), PlayerTracker.Type.NOTIFIER);
+            state.associateNeighborStateNotifier(peek.context, sourcePos, iblockstate.getBlock(), notifyPos, ((WorldServer) mixinWorld), PlayerTracker.Type.NOTIFIER);
             final LocatableBlock block = new SpongeLocatableBlockBuilder()
                 .world(((World) mixinWorld))
                 .position(sourcePos.getX(), sourcePos.getY(), sourcePos.getZ())
@@ -640,7 +639,6 @@ public final class PhaseTracker {
                 .setNotifiedBlockPos(notifyPos)
                 .setNotifiedBlockState(iblockstate)
                 .setSourceNotification(sourcePos)
-                .setSourceNotification(peek.context.getNeighborNotificationSource())
                  .allowsCaptures(state) // We need to pass the previous state so we don't capture blocks when we're in world gen.
 
             ) {

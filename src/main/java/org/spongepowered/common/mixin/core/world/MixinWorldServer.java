@@ -909,6 +909,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         IMixinBlockEventData blockEvent = (IMixinBlockEventData) blockEventData;
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final PhaseData currentPhase = phaseTracker.getCurrentPhaseData();
+        final PhaseContext<?> currentContext = currentPhase.context;
         final IPhaseState phaseState = currentPhase.state;
         // Short circuit phase states who do not track during block events
         if (phaseState.ignoresBlockEvent()) {
@@ -916,7 +917,6 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
 
         if (((IMixinBlock) blockIn).shouldFireBlockEvents()) {
-            final PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
             blockEvent.setSourceUser(currentContext.getActiveUser());
             if (SpongeImplHooks.hasBlockTileEntity(blockIn, getBlockState(pos))) {
                 blockEvent.setTickTileEntity((TileEntity) getTileEntity(pos));
@@ -931,51 +931,48 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
             }
         }
+
+        // Short circuit any additional handling. We've associated enough with the BlockEvent to
+        // allow tracking to take place for other/future phases
+        if (!((IMixinBlock) blockIn).shouldFireBlockEvents()) {
+            return list.add((BlockEventData) obj);
+        }
+        // Occasionally, we have a phase state that will want to just capture the block events
+        // and then decides to "add" them after the fact.
+        if (phaseState.doesBulkBlockCapture(currentContext)) {
+            if (currentContext.getCapturedBlockSupplier().trackEvent(pos, blockEventData)) {
+                return true;
+            }
+        }
         try (PhaseContext<?> context = BlockPhase.State.BLOCK_EVENT_QUEUE.createPhaseContext()
                 .source(blockEvent)) {
             context.buildAndSwitch();
-            if (!((IMixinBlock) blockIn).shouldFireBlockEvents() || phaseState.ignoresBlockEvent()) {
-                return list.add((BlockEventData) obj);
-            }
+            phaseState.appendNotifierToBlockEvent(currentContext, context, this, pos, blockEvent);
+
             // We fire a Pre event to make sure our captures do not get stuck in a loop.
             // This is very common with pistons as they add block events while blocks are being notified.
-            if (blockIn instanceof BlockPistonBase) {
-                // We only fire pre events for pistons
-                if (SpongeCommonEventFactory.handlePistonEvent(this, list, obj, pos, blockIn, eventId, eventParam)) {
-                    return false;
-                }
+            if (ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
+                if (blockIn instanceof BlockPistonBase) {
+                    // We only fire pre events for pistons
+                    if (SpongeCommonEventFactory.handlePistonEvent(this, list, obj, pos, blockIn, eventId, eventParam)) {
+                        return false;
+                    }
 
-                blockEvent.setCaptureBlocks(false);
-            } else if (((IMixinBlock) blockIn).shouldFireBlockEvents()) {
-                final EventContext currentContext = Sponge.getCauseStackManager().getCurrentContext();
-                BlockSnapshot notifySource = null;
-                // TODO - nuke this out of orbit. It's costly.
-                // This is required for mod blocks, such as OpenBlocks blockbreaker, that do the following sequence:
-                // 1. Player places block
-                // 2. Placed block notifies blockbreaker.
-                // 3. Blockbreaker TE (TileEntityBlockManipulator) receives notification and adds a blockevent to world.
-                // 4. At end of world tick, all queued block events are triggered
-                // 5. Blockbreaker TE (TileEntityBlockManipulator) receives event and destroys placed block
-                // Note: All steps occur in same tick
-                if (!((IMixinBlock) blockIn).isVanilla() && currentContext.containsKey(EventContextKeys.PLAYER_PLACE)) {
-                    notifySource = Sponge.getCauseStackManager().getContext(EventContextKeys.NEIGHBOR_NOTIFY_SOURCE).orElse(null);;
-                }
-                if (SpongeCommonEventFactory.callChangeBlockEventPre(this, notifySource != null ? VecHelper.toBlockPos(notifySource.getLocation().get()) : pos).isCancelled()) {
-                    return false;
+                } else {
+                    BlockSnapshot notifySource = null;
+                    if (!((IMixinBlock) blockIn).isVanilla() && currentContext.getNeighborNotificationSource() != null) {
+                        notifySource = currentContext.getNeighborNotificationSource();
+                    }
+                    final BlockPos notificationPos = notifySource != null ? VecHelper.toBlockPos(notifySource.getLocation().get()) : pos;
+                    if (SpongeCommonEventFactory.callChangeBlockEventPre(this, notificationPos).isCancelled()) {
+                        return false;
+                    }
                 }
             }
 
-            phaseState.appendNotifierToBlockEvent(context, this, pos, blockEvent);
             // If we are capturing block positions, we need to check if the block position has any scheduled events
             // so they will be properly added after the fact.
-            if (phaseState.doesBulkBlockCapture(currentPhase.context)) {
-                if (!context.getCapturedBlockSupplier().trackEvent(pos, blockEventData)) {
-                    return list.add(blockEventData);
-                }
-                return true;
-            } else {
-                return list.add(blockEventData);
-            }
+            return list.add(blockEventData);
         }
     }
 
@@ -1005,8 +1002,9 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             return super.getTileEntityForRemoval(thisWorld, pos);
         }
         final net.minecraft.tileentity.TileEntity tileEntity = getTileEntity(pos);
-        if (tileEntity != null && !((IMixinTileEntity) tileEntity).isCaptured()) {
-            ((IMixinTileEntity) tileEntity).setCaptured(true);
+        final IMixinTileEntity mixinTile = (IMixinTileEntity) tileEntity;
+        if (tileEntity != null && !mixinTile.isCaptured()) {
+            mixinTile.setCaptured(true);
             currentState.captureTileEntityReplacement(currentContext, this, pos, tileEntity, null);
         }
         return tileEntity;

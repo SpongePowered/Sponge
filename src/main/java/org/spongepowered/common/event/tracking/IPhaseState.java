@@ -52,7 +52,6 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.BlockChangeFlag;
-import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.common.SpongeImplHooks;
@@ -769,13 +768,14 @@ public interface IPhaseState<C extends PhaseContext<C>> {
 
     /**
      * Appends any additional information to the block tick context from this context.
-     *
-     * @param context
+     *  @param context
+     * @param currentContext
      * @param mixinWorldServer
      * @param pos
      * @param blockEvent
      */
-    default void appendNotifierToBlockEvent(C context, IMixinWorldServer mixinWorldServer, BlockPos pos, IMixinBlockEventData blockEvent) {
+    default void appendNotifierToBlockEvent(C context, PhaseContext<?> currentContext,
+        IMixinWorldServer mixinWorldServer, BlockPos pos, IMixinBlockEventData blockEvent) {
 
     }
 
@@ -793,6 +793,9 @@ public interface IPhaseState<C extends PhaseContext<C>> {
 
 
     default void provideNotifierForNeighbors(C context, NeighborNotificationContext notification) {
+        if (context.neighborNotificationSource != null) {
+            notification.setSourceNotification(context.neighborNotificationSource);
+        }
         if (context.notifier != null) {
             notification.notifier(context.notifier);
             return;

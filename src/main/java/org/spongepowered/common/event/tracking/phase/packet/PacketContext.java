@@ -33,17 +33,19 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
 
 import javax.annotation.Nullable;
 
 @SuppressWarnings("unchecked")
 public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
 
-    @Nullable protected EntityPlayerMP packetPlayer;
+    @SuppressWarnings("NullableProblems") protected EntityPlayerMP packetPlayer; // Set by packetPlayer(EntityPlayerMP)
     @Nullable Packet<?> packet;
-    @Nullable private ItemStackSnapshot cursor;
-    @Nullable private ItemStack itemUsed;
-    @Nullable private BlockSnapshot targetBlock;
+    private ItemStackSnapshot cursor = ItemStackSnapshot.NONE;
+    private ItemStack itemUsed = ItemStack.empty();
+    private SpongeItemStackSnapshot itemUsedSnapshot = (SpongeItemStackSnapshot) ItemStackSnapshot.NONE;
+    private BlockSnapshot targetBlock = BlockSnapshot.NONE;
     @Nullable private HandType handUsed;
     private boolean ignoreCreative;
     private boolean interactItemChanged;
@@ -81,6 +83,7 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
         return this.packetPlayer;
     }
 
+    @SuppressWarnings("ConstantConditions")
     public Player getSpongePlayer() {
         return (Player) this.packetPlayer;
     }
@@ -103,11 +106,16 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
 
     public P itemUsed(ItemStack stack) {
         this.itemUsed = stack;
+        this.itemUsedSnapshot = (SpongeItemStackSnapshot) this.itemUsed.createSnapshot();
         return (P) this;
     }
 
     public ItemStack getItemUsed() {
         return this.itemUsed;
+    }
+
+    public SpongeItemStackSnapshot getItemUsedSnapshot() {
+        return this.itemUsedSnapshot;
     }
 
     public P interactItemChanged(boolean changed) {

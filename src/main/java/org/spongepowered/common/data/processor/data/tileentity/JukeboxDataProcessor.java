@@ -106,12 +106,12 @@ public class JukeboxDataProcessor extends
 
     @Override
     protected Value<ItemStackSnapshot> constructValue(ItemStackSnapshot value) {
-        return new SpongeValue<>(Keys.REPRESENTED_ITEM, ItemTypeRegistryModule.NONE_SNAPSHOT, value);
+        return new SpongeValue<>(Keys.REPRESENTED_ITEM, ItemTypeRegistryModule.getInstance().NONE_SNAPSHOT, value);
     }
 
     @Override
     protected ImmutableValue<ItemStackSnapshot> constructImmutableValue(ItemStackSnapshot value) {
-        return new ImmutableSpongeValue<>(Keys.REPRESENTED_ITEM, ItemTypeRegistryModule.NONE_SNAPSHOT, value);
+        return new ImmutableSpongeValue<>(Keys.REPRESENTED_ITEM, ItemTypeRegistryModule.getInstance().NONE_SNAPSHOT, value);
     }
 
 }

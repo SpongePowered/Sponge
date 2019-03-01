@@ -28,6 +28,7 @@ import com.google.common.base.MoreObjects;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.world.BlockChange;
 
@@ -35,6 +36,7 @@ import javax.annotation.Nullable;
 
 final class EventTransaction {
 
+    @Nullable BlockSnapshot notificationSnapshot;
     @Nullable SpongeBlockSnapshot changedSnapshot;
     @Nullable TileEntity removedTileEntity;
     @Nullable TileEntity addedTileEntity;

@@ -45,6 +45,7 @@ import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -359,10 +360,13 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
     This is achieved through captureNeighborNotification and logTileChange.
      */
 
-    public void captureNeighborNotification(IMixinWorldServer mixinWorldServer, BlockPos notifyPos, IBlockState iblockstate,
+    public void captureNeighborNotification(IPhaseState<?> blockEventTickPhaseState,
+        PhaseContext<?> context, IMixinWorldServer mixinWorldServer, BlockPos notifyPos,
+        IBlockState iblockstate,
         Block sourceBlock, BlockPos sourcePos) {
         final EventTransaction transaction = createEvent();
         // Finally, set the notification to the transaction
+        transaction.notificationSnapshot = context.getNeighborNotificationSource();
         transaction.notification = new NeighborNotification(mixinWorldServer, iblockstate, notifyPos, sourceBlock, sourcePos);
 
         getTransactions().add(transaction);

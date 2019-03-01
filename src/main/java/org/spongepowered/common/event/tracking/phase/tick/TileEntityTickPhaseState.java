@@ -251,7 +251,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
     @Override
     public boolean capturesNeighborNotifications(TileEntityTickContext context, IMixinWorldServer mixinWorld, BlockPos notifyPos, Block sourceBlock,
         IBlockState iblockstate, BlockPos sourcePos) {
-        context.getCapturedBlockSupplier().captureNeighborNotification(mixinWorld, notifyPos, iblockstate, sourceBlock, sourcePos);
+        context.getCapturedBlockSupplier().captureNeighborNotification(this, context, mixinWorld, notifyPos, iblockstate, sourceBlock, sourcePos);
         return true;
     }
 

@@ -102,7 +102,7 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
     @Override
     public boolean capturesNeighborNotifications(BlockEventTickContext context, IMixinWorldServer mixinWorld, BlockPos notifyPos, Block sourceBlock,
         IBlockState iblockstate, BlockPos sourcePos) {
-        context.getCapturedBlockSupplier().captureNeighborNotification(mixinWorld, notifyPos, iblockstate, sourceBlock, sourcePos);
+        context.getCapturedBlockSupplier().captureNeighborNotification(this, context, mixinWorld, notifyPos, iblockstate, sourceBlock, sourcePos);
         return true;
     }
 
