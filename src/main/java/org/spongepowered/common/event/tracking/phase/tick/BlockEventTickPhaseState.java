@@ -31,6 +31,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.User;
@@ -38,6 +39,7 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
+import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.entity.EntityUtil;
@@ -61,12 +63,19 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
             super.getFrameModifier().andThen((frame, context) -> {
                 final IMixinBlockEventData blockEventData = context.getSource(IMixinBlockEventData.class).orElse(null);
                 if (blockEventData != null) {
-                    if (blockEventData.getTickTileEntity() != null) {
-                        frame.pushCause(blockEventData.getTickTileEntity());
-                    } else {
-                        frame.pushCause(blockEventData.getTickBlock());
+                    final TileEntity tileEntity = blockEventData.getTickTileEntity();
+                    final LocatableBlock locatableBlock = blockEventData.getTickBlock();
+                    if (tileEntity == null && locatableBlock == null) {
+                        return;
                     }
-                    frame.addContext(EventContextKeys.BLOCK_EVENT_PROCESS, blockEventData.getTickBlock());
+                    if (tileEntity != null) {
+                        frame.pushCause(tileEntity);
+                    } else {
+                        frame.pushCause(locatableBlock);
+                    }
+                    if (locatableBlock != null) {
+                        frame.addContext(EventContextKeys.BLOCK_EVENT_PROCESS, locatableBlock);
+                    }
                 }
             });
 
