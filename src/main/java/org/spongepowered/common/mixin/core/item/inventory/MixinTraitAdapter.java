@@ -77,11 +77,13 @@ public abstract class MixinTraitAdapter implements MinecraftInventoryAdapter {
         }
         if (this instanceof ReusableLensProvider) {
             this.reusableLens = ((ReusableLensProvider) this).generateLens(this.getFabric(), this);
+            return this.reusableLens;
         }
         if (this instanceof LensProvider) {
             this.slots = ((LensProvider) this).slotProvider(this.getFabric(), this);
             Lens lens = ((LensProvider) this).rootLens(this.getFabric(), this);
             this.reusableLens = new ReusableLens<>(this.slots, lens);
+            return this.reusableLens;
         }
         SlotCollection slots = new SlotCollection.Builder().add(this.getFabric().getSize()).build();
         Lens lens;
