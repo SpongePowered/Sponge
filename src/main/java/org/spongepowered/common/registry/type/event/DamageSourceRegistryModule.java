@@ -55,7 +55,6 @@ public final class DamageSourceRegistryModule implements RegistryModule {
             DamageSources.class.getDeclaredField("STARVATION").set(null, DamageSource.STARVE);
             DamageSources.class.getDeclaredField("WITHER").set(null, DamageSource.WITHER);
             DamageSources.class.getDeclaredField("VOID").set(null, DamageSource.OUT_OF_WORLD);
-            DamageSources.class.getDeclaredField("WALL_COLLISION").set(null, DamageSource.FLY_INTO_WALL);
         } catch (Exception e) {
             e.printStackTrace();
         }
