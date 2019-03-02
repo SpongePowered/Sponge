@@ -4,7 +4,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.menu.SlotChangeHandler;
 import org.spongepowered.api.item.inventory.menu.SlotClickHandler;
-import org.spongepowered.api.item.inventory.property.ContainerType;
+import org.spongepowered.api.item.inventory.custom.ContainerType;
 import org.spongepowered.api.item.inventory.slot.SlotIndex;
 import org.spongepowered.api.item.inventory.menu.InventoryMenu;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;

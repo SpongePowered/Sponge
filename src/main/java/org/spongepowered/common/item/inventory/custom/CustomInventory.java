@@ -44,7 +44,7 @@ import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryProperties;
 import org.spongepowered.api.item.inventory.gui.ContainerType;
 import org.spongepowered.api.item.inventory.gui.ContainerTypes;
-import org.spongepowered.api.item.inventory.property.ContainerType;
+import org.spongepowered.api.item.inventory.custom.ContainerType;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.TranslatableText;

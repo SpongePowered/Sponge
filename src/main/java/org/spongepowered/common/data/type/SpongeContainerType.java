@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.type;
 
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.item.inventory.property.ContainerType;
+import org.spongepowered.api.item.inventory.custom.ContainerType;
 import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.registry.RegistryHelper;
 
