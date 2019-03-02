@@ -710,6 +710,7 @@ public class SpongeCommonEventFactory {
     public static InteractEntityEvent.Primary callInteractEntityEventPrimary(EntityPlayerMP player, ItemStack stack, net.minecraft.entity.Entity entity, EnumHand
             hand, @Nullable Vector3d hitVec) {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(player);
             frame.addContext(EventContextKeys.OWNER, (User) player);
             frame.addContext(EventContextKeys.NOTIFIER, (User) player);
             frame.addContext(EventContextKeys.ENTITY_HIT, ((Entity) entity));
@@ -735,6 +736,7 @@ public class SpongeCommonEventFactory {
     public static InteractEntityEvent.Secondary callInteractEntityEventSecondary(EntityPlayerMP player, ItemStack stack, net.minecraft.entity.Entity entity,
             EnumHand hand, @Nullable Vector3d hitVec) {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(player);
             frame.addContext(EventContextKeys.OWNER, (User) player);
             frame.addContext(EventContextKeys.NOTIFIER, (User) player);
             frame.addContext(EventContextKeys.ENTITY_HIT, (Entity) entity);
@@ -757,6 +759,7 @@ public class SpongeCommonEventFactory {
     public static InteractItemEvent.Primary callInteractItemEventPrimary(EntityPlayer player, ItemStack stack, EnumHand hand,
         @Nullable Vector3d hitVec, Object hitTarget) {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(player);
             frame.addContext(EventContextKeys.OWNER, (User) player);
             frame.addContext(EventContextKeys.NOTIFIER, (User) player);
             if (hitTarget instanceof Entity) {
@@ -785,6 +788,7 @@ public class SpongeCommonEventFactory {
     public static InteractItemEvent.Secondary callInteractItemEventSecondary(EntityPlayer player, ItemStack stack, EnumHand hand,
             @Nullable Vector3d hitVec, Object hitTarget) {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(player);
             frame.addContext(EventContextKeys.OWNER, (User) player);
             frame.addContext(EventContextKeys.NOTIFIER, (User) player);
             if (hitTarget instanceof Entity) {
@@ -818,6 +822,7 @@ public class SpongeCommonEventFactory {
             @Nullable EnumFacing side, @Nullable Vector3d hitVec) {
         HandType handType = (HandType) (Object) hand;
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(player);
             frame.addContext(EventContextKeys.OWNER, (User) player);
             frame.addContext(EventContextKeys.NOTIFIER, (User) player);
             frame.addContext(EventContextKeys.BLOCK_HIT, blockSnapshot);
@@ -854,6 +859,7 @@ public class SpongeCommonEventFactory {
             Tristate originalUseItemResult, Tristate useItemResult, @Nullable Vector3d hitVec, BlockSnapshot targetBlock,
             Direction targetSide, EnumHand hand) {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(player);
             frame.addContext(EventContextKeys.OWNER, (User) player);
             frame.addContext(EventContextKeys.NOTIFIER, (User) player);
             frame.addContext(EventContextKeys.BLOCK_HIT, targetBlock);
