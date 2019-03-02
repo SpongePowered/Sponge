@@ -44,6 +44,7 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
@@ -54,7 +55,19 @@ import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 
+import java.util.function.BiConsumer;
+
 public final class UseItemPacketState extends BasicPacketState {
+
+    private BiConsumer<CauseStackManager.StackFrame, BasicPacketContext> USE_ITEM_MODIFIER = super.getFrameModifier().andThen((frame, ctx) -> {
+        frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(ctx.getItemUsed()));
+        frame.addContext(EventContextKeys.USED_HAND, ctx.getHandUsed());
+    });
+
+    @Override
+    public BiConsumer<CauseStackManager.StackFrame, BasicPacketContext> getFrameModifier() {
+        return this.USE_ITEM_MODIFIER;
+    }
 
     @Override
     public boolean isInteraction() {
@@ -95,7 +108,6 @@ public final class UseItemPacketState extends BasicPacketState {
             frame.pushCause(snapshot);
             frame.addContext(EventContextKeys.SPAWN_TYPE,
                 itemStack.getType() == ItemTypes.SPAWN_EGG ? SpawnTypes.SPAWN_EGG : SpawnTypes.PLACEMENT);
-            frame.addContext(EventContextKeys.USED_HAND, hand);
             context.getCapturedEntitySupplier()
                 .acceptAndClearIfNotEmpty(entities -> {
                     SpongeCommonEventFactory.callSpawnEntity(entities, context);
