@@ -44,10 +44,11 @@ import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryProperties;
 import org.spongepowered.api.item.inventory.gui.ContainerType;
 import org.spongepowered.api.item.inventory.gui.ContainerTypes;
+import org.spongepowered.api.item.inventory.property.ContainerType;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.TranslatableText;
-import org.spongepowered.common.data.type.SpongeGuiId;
+import org.spongepowered.common.data.type.SpongeContainerType;
 import org.spongepowered.common.item.inventory.archetype.CompositeInventoryArchetype;
 import org.spongepowered.common.text.SpongeTexts;
 
@@ -63,7 +64,6 @@ import javax.annotation.Nullable;
 public class CustomInventory implements IInventory, IInteractionObject {
 
     private InventoryBasic inv;
-    protected InventoryArchetype archetype;
     private Map<Property<?>, Object> properties;
     private Carrier carrier;
     private final boolean isVirtual;
@@ -156,18 +156,18 @@ public class CustomInventory implements IInventory, IInteractionObject {
 
     @Override
     public String getGuiID() {
-        GuiId guiId = (GuiId) this.properties.get(InventoryProperties.GUI_ID);
-        if (guiId != null) {
-            if (guiId instanceof SpongeGuiId) {
-                return ((SpongeGuiId) guiId).getInternalId(); // Handle Vanilla EntityHorse GuiId
+        ContainerType containerType = (ContainerType) this.properties.get(InventoryProperties.GUI_ID);
+        if (containerType != null) {
+            if (containerType instanceof SpongeContainerType) {
+                return ((SpongeContainerType) containerType).getInternalId(); // Handle Vanilla EntityHorse GuiId
             }
-            return guiId.getKey().toString();
+            return containerType.getKey().toString();
         }
-        guiId = this.archetype.getProperty(InventoryProperties.GUI_ID).orElse(GuiIds.CHEST);
-        if (guiId instanceof SpongeGuiId) {
-            return ((SpongeGuiId) guiId).getInternalId(); // Handle Vanilla EntityHorse GuiId
+        containerType = this.archetype.getProperty(InventoryProperties.GUI_ID).orElse(GuiIds.CHEST);
+        if (containerType instanceof SpongeContainerType) {
+            return ((SpongeContainerType) containerType).getInternalId(); // Handle Vanilla EntityHorse GuiId
         }
-        return guiId.getKey().toString();
+        return containerType.getKey().toString();
     }
 
     // IInventory delegation

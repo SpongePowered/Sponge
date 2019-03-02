@@ -26,7 +26,6 @@ package org.spongepowered.common.registry.type.item;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.item.inventory.gui.GuiId;
 import org.spongepowered.api.item.inventory.gui.GuiIds;
 import org.spongepowered.api.CatalogKey;
@@ -34,7 +33,7 @@ import org.spongepowered.api.item.inventory.property.ContainerType;
 import org.spongepowered.api.item.inventory.property.ContainerTypes;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.common.data.type.SpongeGuiId;
+import org.spongepowered.common.data.type.SpongeContainerType;
 import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 
 @RegisterCatalog(ContainerTypes.class)
@@ -61,11 +60,11 @@ public class GuiIdRegistryModule extends AbstractCatalogRegistryModule<Container
     }
 
     private void register(final CatalogKey key) {
-        this.map.put(key, new SpongeGuiId(key));
+        this.map.put(key, new SpongeContainerType(key));
     }
 
     private void register(final CatalogKey key, final String internalId) {
-        this.map.put(key, new SpongeGuiId(key, internalId));
+        this.map.put(key, new SpongeContainerType(key, internalId));
     }
 
     @Override
