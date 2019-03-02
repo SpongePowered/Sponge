@@ -28,7 +28,7 @@ import net.minecraft.stats.IStatFormater;
 import net.minecraft.stats.Stat;
 import net.minecraft.stats.StatType;
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.scoreboard.critieria.Criterion;
+import org.spongepowered.api.scoreboard.criteria.Criterion;
 import org.spongepowered.api.statistic.Statistic;
 import org.spongepowered.api.statistic.StatisticCategory;
 import org.spongepowered.api.text.translation.Translation;

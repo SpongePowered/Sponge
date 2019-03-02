@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.scoreboard;
 import com.google.common.base.CaseFormat;
 import net.minecraft.scoreboard.ScoreCriteria;
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.scoreboard.critieria.Criterion;
+import org.spongepowered.api.scoreboard.criteria.Criterion;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
