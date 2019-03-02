@@ -93,7 +93,8 @@ public abstract class MixinCooldownTracker implements org.spongepowered.api.enti
                     target = "Ljava/util/Map;put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",
                     remap = false
             ),
-            locals = LocalCapture.CAPTURE_FAILHARD
+            locals = LocalCapture.CAPTURE_FAILHARD,
+            cancellable = true
     )
     private void catchIt(final Item item, final int ticks, final CallbackInfo ci) {
         this.lastSetCooldownResult = this.throwSetCooldownEvent((ItemType) item, ticks);
