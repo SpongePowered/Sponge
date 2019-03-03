@@ -340,8 +340,10 @@ public final class TrackingUtil {
 
         try (BlockEventTickContext o = phaseContext) {
             o.buildAndSwitch();
-            return currentState.onBlockEventReceived(worldIn, event.getPosition(), event.getEventID(), event.getEventParameter());
-        }
+            phaseContext.setEventSucceeded(currentState.onBlockEventReceived(worldIn, event.getPosition(), event.getEventID(), event.getEventParameter()));
+        } // We can't return onBlockEventReceived because the phase state may have cancelled all transactions
+        // at which point we want to keep track of the return value from the target, and from the block events.
+        return phaseContext.wasNotCancelled();
     }
 
     @SuppressWarnings("rawtypes")
@@ -650,6 +652,13 @@ public final class TrackingUtil {
         if (!scheduledEvents.isEmpty()) {
             hasEvents = true;
         }
+        if (phaseState.hasSpecificBlockProcess()) {
+            // In some states, we need to be taking advantage of processing the transactions in the order in which they
+            // were processed. This means recycling some usage of how transactions are processed, but at the same time
+            // processing the ORDER of them differently (since some notifications or block events can be thrown around
+            // from time to time
+            return phaseContext.getCapturedBlockSupplier().processTransactions(transactions, phaseContext, noCancelledTransactions, scheduledEvents, currentDepth);
+        }
         for (Transaction<BlockSnapshot> transaction : transactions) {
             if (!transaction.isValid()) {
                 continue;
@@ -680,7 +689,7 @@ public final class TrackingUtil {
      * @return True if the block transaction was successful
      */
     @SuppressWarnings("rawtypes")
-    static boolean performTransactionProcess(Transaction<BlockSnapshot> transaction, IPhaseState<?> phaseState, PhaseContext<?> phaseContext,
+    public static boolean performTransactionProcess(Transaction<BlockSnapshot> transaction, IPhaseState<?> phaseState, PhaseContext<?> phaseContext,
         List<BlockEventData> events, boolean noCancelledTransactions, int currentDepth) {
         // Handle custom replacements - these need to get actually set onto the chunk, but ignored as far as tracking
         // goes.
@@ -703,23 +712,6 @@ public final class TrackingUtil {
         final SpongeBlockChangeFlag changeFlag = oldBlockSnapshot.getChangeFlag();
         final IBlockState originalState = (IBlockState) oldBlockSnapshot.getState();
         final IBlockState newState = (IBlockState) newBlockSnapshot.getState();
-        // Time to pause, because while the new state is the "final", we need to check if there were any intermediary block changes
-        // that were associated with the transaction, if and only if the custom replacement was not set
-        if (!transaction.getCustom().isPresent()) {
-            final List<SpongeBlockSnapshot> intermediary = (List<SpongeBlockSnapshot>) transaction.getIntermediary();
-            if (!intermediary.isEmpty()) {
-                for (SpongeBlockSnapshot spongeBlockSnapshot : intermediary) {
-                    final IBlockState intermediaryState = BlockUtil.toNative(spongeBlockSnapshot.getState());
-                    performOnBlockAdded(phaseState, phaseContext, currentDepth, pos, world, changeFlag, originalState, intermediaryState);
-                    // Normally, we'd do a post transaction application, but that will be done on the final placement.
-                    // Likewise, since this is an intermediary state, we don't wnat to notify clients or event listeners,
-                    // because they'd be spammed too much, they'll be notified at the end of this transaction process,
-                    // not during intermediary processing.
-                    performNeighborAndClientNotifications(transaction, phaseContext, currentDepth, oldBlockSnapshot, newBlockSnapshot, mixinWorld, pos, originalState, intermediaryState);
-                }
-            }
-
-        }
 
         // We call onBlockAdded here for blocks without a TileEntity.
         // MixinChunk#setBlockState will call onBlockAdded for blocks
@@ -728,19 +720,16 @@ public final class TrackingUtil {
 
         ((IPhaseState) phaseState).postBlockTransactionApplication(oldBlockSnapshot.blockChange, transaction, phaseContext);
 
-        // Now we can apply the block events on the world
-        mixinWorld.addPostEventBlockEvents(events);
-
         if (changeFlag.isNotifyClients()) { // Always try to notify clients of the change.
             world.notifyBlockUpdate(pos, originalState, newState, changeFlag.getRawFlag());
         }
 
-        performNeighborAndClientNotifications(transaction, phaseContext, currentDepth, oldBlockSnapshot, newBlockSnapshot, mixinWorld, pos,
-            originalState, newState);
+        performNeighborAndClientNotifications(phaseContext, currentDepth, oldBlockSnapshot, newBlockSnapshot, mixinWorld, pos,
+            originalState, newState, changeFlag);
         return noCancelledTransactions;
     }
 
-    private static void performOnBlockAdded(IPhaseState phaseState, PhaseContext<?> phaseContext, int currentDepth, BlockPos pos, WorldServer world,
+    public static void performOnBlockAdded(IPhaseState phaseState, PhaseContext<?> phaseContext, int currentDepth, BlockPos pos, WorldServer world,
         SpongeBlockChangeFlag changeFlag, IBlockState originalState, IBlockState newState) {
         final Block newBlock = newState.getBlock();
         if (originalState.getBlock() != newBlock && changeFlag.performBlockPhysics()
@@ -750,11 +739,9 @@ public final class TrackingUtil {
         }
     }
 
-    private static void performNeighborAndClientNotifications(Transaction<BlockSnapshot> transaction,
-        PhaseContext<?> phaseContext, int currentDepth, SpongeBlockSnapshot oldBlockSnapshot,
+    public static void performNeighborAndClientNotifications(PhaseContext<?> phaseContext, int currentDepth, SpongeBlockSnapshot oldBlockSnapshot,
         SpongeBlockSnapshot newBlockSnapshot, IMixinWorldServer mixinWorld, BlockPos pos,
-        IBlockState originalState, IBlockState newState) {
-        final SpongeBlockChangeFlag changeFlag = oldBlockSnapshot.getChangeFlag();
+        IBlockState originalState, IBlockState newState, SpongeBlockChangeFlag changeFlag) {
         final Block newBlock = newState.getBlock();
         final IPhaseState phaseState = phaseContext.state;
         if (changeFlag.updateNeighbors()) { // Notify neighbors only if the change flag allowed it.
@@ -768,10 +755,11 @@ public final class TrackingUtil {
             ((net.minecraft.world.World) mixinWorld).updateObservingBlocksAt(pos, newBlock);
         }
 
-        phaseState.performPostBlockNotificationsAndNeighborUpdates(phaseContext, oldBlockSnapshot, newState, changeFlag, transaction, currentDepth + 1);
+        phaseState.performPostBlockNotificationsAndNeighborUpdates(phaseContext, oldBlockSnapshot, newState, changeFlag, currentDepth + 1);
     }
 
-    private static void performBlockEntitySpawns(IPhaseState<?> state, PhaseContext<?> phaseContext, SpongeBlockSnapshot oldBlockSnapshot, BlockPos pos) {
+    public static void performBlockEntitySpawns(IPhaseState<?> state, PhaseContext<?> phaseContext, SpongeBlockSnapshot oldBlockSnapshot,
+        BlockPos pos) {
         // This is for pre-merged items
         if (state.doesCaptureEntitySpawns() || ((IPhaseState) state).doesCaptureEntityDrops(phaseContext)) {
             phaseContext.getBlockDropSupplier().acceptAndRemoveIfPresent(pos, items ->

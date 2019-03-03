@@ -331,12 +331,10 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param oldBlockSnapshot
      * @param newState
      * @param changeFlag
-     * @param transaction
      * @param currentDepth The current processing depth, to prevenet stack overflows
      */
     default void performPostBlockNotificationsAndNeighborUpdates(C context,
         SpongeBlockSnapshot oldBlockSnapshot, IBlockState newState, SpongeBlockChangeFlag changeFlag,
-        Transaction<BlockSnapshot> transaction,
         int currentDepth) {
 
     }
@@ -881,5 +879,12 @@ public interface IPhaseState<C extends PhaseContext<C>> {
 
     default Transaction<BlockSnapshot> createTransaction(C context, SpongeBlockSnapshot snapshot) {
         return context.getCapturedBlockSupplier().createTransaction(snapshot);
+    }
+    default boolean hasSpecificBlockProcess() {
+        return false;
+    }
+    default boolean processTransactions(List<Transaction<BlockSnapshot>> transactions, PhaseContext<?> phaseContext, boolean noCancelledTransactions, ListMultimap<BlockPos, BlockEventData> scheduledEvents,
+        int currentDepth) {
+        throw new IllegalStateException("Nope");
     }
 }

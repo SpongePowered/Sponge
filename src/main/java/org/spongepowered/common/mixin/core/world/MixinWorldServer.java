@@ -233,7 +233,9 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     private static final String PROFILER_SS = "Lnet/minecraft/profiler/Profiler;startSection(Ljava/lang/String;)V";
     private static final String PROFILER_ESS = "Lnet/minecraft/profiler/Profiler;endStartSection(Ljava/lang/String;)V";
 
-    private static final EnumSet<EnumFacing> NOTIFY_DIRECTIONS = EnumSet.of(EnumFacing.WEST, EnumFacing.EAST, EnumFacing.DOWN, EnumFacing.UP, EnumFacing.NORTH, EnumFacing.SOUTH);
+    private static final EnumFacing[] NOTIFY_DIRECTIONS = {EnumFacing.WEST, EnumFacing.EAST, EnumFacing.DOWN, EnumFacing.UP, EnumFacing.NORTH, EnumFacing.SOUTH};
+    // This is unordered, rather, it's naturally ordered by the enum, not by the order in which we notify neighbors.
+    private static final EnumSet<EnumFacing> NOTIFY_DIRECTION_SET = EnumSet.of(EnumFacing.WEST, EnumFacing.EAST, EnumFacing.DOWN, EnumFacing.UP, EnumFacing.NORTH, EnumFacing.SOUTH);
 
     private final Map<net.minecraft.entity.Entity, Vector3d> rotationUpdates = new HashMap<>();
     private SpongeChunkGenerator spongegen;
@@ -1530,14 +1532,14 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             return;
         }
 
-        EnumSet<EnumFacing> directions = EnumSet.copyOf(NOTIFY_DIRECTIONS);
-        directions.remove(skipSide);
         // Check for listeners.
         if (ShouldFire.NOTIFY_NEIGHBOR_BLOCK_EVENT) {
+            EnumSet<EnumFacing> directions = EnumSet.of(EnumFacing.WEST, EnumFacing.EAST, EnumFacing.DOWN, EnumFacing.UP, EnumFacing.NORTH, EnumFacing.SOUTH);
+            directions.remove(skipSide);
             final NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent(this, pos, directions);
             if (event == null || !event.isCancelled()) {
                 final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-                for (EnumFacing facing : EnumFacing.values()) {
+                for (EnumFacing facing : NOTIFY_DIRECTIONS) { // ORDER MATTERS, we have to keep order in which directions are notified.
                     if (event != null) {
                         final Direction direction = DirectionFacingProvider.getInstance().getKey(facing).get();
                         if (!event.getNeighbors().keySet().contains(direction)) {
@@ -1552,7 +1554,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
 
         // Else, we just do vanilla. If there's no listeners, we don't want to spam the notification event
-        for (EnumFacing direction : NOTIFY_DIRECTIONS) {
+        for (EnumFacing direction : NOTIFY_DIRECTIONS) { // ORDER MATTERS, we have to keep order in which directions are notified.
             if (direction == skipSide) {
                 continue;
             }
@@ -1581,7 +1583,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
 
         if (ShouldFire.NOTIFY_NEIGHBOR_BLOCK_EVENT) {
-            final NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent(this, pos, NOTIFY_DIRECTIONS);
+            final NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent(this, pos, NOTIFY_DIRECTION_SET);
             if (event == null || !event.isCancelled()) {
                 final PhaseTracker phaseTracker = PhaseTracker.getInstance();
                 for (EnumFacing facing : EnumFacing.values()) {
@@ -1598,7 +1600,10 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         } else {
             // Else, we just do vanilla. If there's no listeners, we don't want to spam the notification event
             for (EnumFacing direction : NOTIFY_DIRECTIONS) {
-                PhaseTracker.getInstance().notifyBlockOfStateChange(this, pos.offset(direction), blockType, pos);
+                final BlockPos notifyPos = pos.offset(direction);
+                IBlockState notifyState = this.getBlockState(notifyPos);
+//                notifyState.neighborChanged((WorldServer) (Object) this, notifyPos, blockType, pos);
+                PhaseTracker.getInstance().notifyBlockOfStateChange(this, notifyPos, blockType, pos);
             }
         }
 

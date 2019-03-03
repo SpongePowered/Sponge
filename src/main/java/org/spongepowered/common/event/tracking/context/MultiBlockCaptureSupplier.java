@@ -37,6 +37,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.WorldServerMulti;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
@@ -49,7 +50,11 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.mixin.core.block.state.MixinStateImplementation;
+import org.spongepowered.common.util.SpongeHooks;
+import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
+import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -61,6 +66,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
@@ -68,14 +74,13 @@ import javax.annotation.Nullable;
 
 public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
 
-    @Nullable private LinkedList<EventTransaction> transactions;
-    @Nullable private ListMultimap<BlockPos, SpongeBlockSnapshot> multimap;
+    @Nullable private LinkedListMultimap<BlockPos, SpongeBlockSnapshot> multimap;
     @Nullable private ListMultimap<BlockPos, BlockEventData> scheduledEvents;
+    @Nullable private LinkedListMultimap<BlockPos, EventTransaction> orderedTransactions;
     @Nullable private List<SpongeBlockSnapshot> snapshots;
     @Nullable private Set<BlockPos> usedBlocks;
     private int transactionIndex = -1; // These are used to keep track of which snapshot is being referred to as "most recent change"
     private int snapshotIndex = -1;    // so that we can appropriately cancel or discard or apply specific event transactions
-    private int lastTransactionWithSnapshot = -1;
     private boolean hasMulti = false;
     @Nullable private EventTransaction lastTransaction;
 
@@ -342,10 +347,6 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
         }
     }
 
-    public final List<SpongeBlockSnapshot> orEmptyList() {
-        return this.snapshots == null ? Collections.emptyList() : this.snapshots;
-    }
-
     /*
     Begin the more enhanced block tracking. This is only used by states that absolutely need to be able to track certain changes
     that involve more "physics" related transactions, such as neighbor notification tracking, tile entity tracking, and
@@ -360,57 +361,66 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
     This is achieved through captureNeighborNotification and logTileChange.
      */
 
-    public void captureNeighborNotification(IPhaseState<?> blockEventTickPhaseState,
-        PhaseContext<?> context, IMixinWorldServer mixinWorldServer, BlockPos notifyPos,
-        IBlockState iblockstate,
-        Block sourceBlock, BlockPos sourcePos) {
-        final EventTransaction transaction = createEvent();
-        // Finally, set the notification to the transaction
-        transaction.notificationSnapshot = context.getNeighborNotificationSource();
-        transaction.notification = new NeighborNotification(mixinWorldServer, iblockstate, notifyPos, sourceBlock, sourcePos);
-
-        getTransactions().add(transaction);
+    private EventTransaction createEvent() {
+        return createEvent((BlockChange) null);
     }
 
-    private EventTransaction createEvent() {
-        return createEvent(null);
+    private EventTransaction createEvent(BlockPos sourcePos) {
+        final List<EventTransaction> eventTransactions = this.orderedTransactions.get(sourcePos);
+        final SpongeBlockSnapshot attached = eventTransactions.isEmpty() ? (SpongeBlockSnapshot) BlockSnapshot.NONE : eventTransactions.get(eventTransactions.size() - 1).changedSnapshot; // get the last element as our latest snapshot
+        final int transactionIndex = ++this.transactionIndex;
+        final EventTransaction transaction = new EventTransaction(transactionIndex, this.snapshotIndex, attached, null);
+        this.lastTransaction = transaction;
+        return transaction;
     }
 
     private EventTransaction createEvent(@Nullable BlockChange change) {
-        final SpongeBlockSnapshot attachedSnapshot = this.snapshotIndex != -1 ? this.snapshots.get(this.snapshotIndex) : (SpongeBlockSnapshot) BlockSnapshot.NONE;
+        final SpongeBlockSnapshot attachedSnapshot = this.hasMulti // Sanity check here if we have multiple captures
+                                                     ? this.multimap.entries().get(this.multimap.entries().size() - 1).getValue() // If we do, get the last logged block change
+                                                     : this.snapshots != null // Otherwise, check if the list of snapshots is not null
+                                                       ? this.snapshots.get(this.snapshots.size() - 1) // And get the last captured snapshot.
+                                                       : (SpongeBlockSnapshot) BlockSnapshot.NONE; // Otherwise, well, we're kinda sol.
         final int transactionIndex = ++this.transactionIndex;
-        if (this.lastTransaction != null) {
-            if (this.lastTransaction.snapshotIndex != this.snapshotIndex) {
-                this.lastTransactionWithSnapshot = transactionIndex;
-            }
-        }
         final EventTransaction transaction = new EventTransaction(transactionIndex, this.snapshotIndex, attachedSnapshot, change);
         this.lastTransaction = transaction;
         return transaction;
     }
 
-    private LinkedList<EventTransaction> getTransactions() {
-        if (this.transactions == null) {
-            this.transactions = new LinkedList<>();
+    private void logTransaction(BlockPos target, EventTransaction transaction) {
+        if (this.orderedTransactions == null) {
+            this.orderedTransactions = LinkedListMultimap.create();
         }
-        return this.transactions;
+        this.orderedTransactions.put(target, transaction);
+    }
+
+    public void captureNeighborNotification(PhaseContext<?> context, IMixinWorldServer mixinWorldServer, BlockPos notifyPos,
+        IBlockState iblockstate,
+        Block sourceBlock, BlockPos sourcePos) {
+        final EventTransaction transaction = createEvent(sourcePos);
+        // Finally, set the notification to the transaction
+        transaction.notificationSnapshot = context.getNeighborNotificationSource();
+        transaction.notification = new NeighborNotification(mixinWorldServer, iblockstate, notifyPos, sourceBlock, sourcePos);
+        if (notifyPos.getX() == -1100 && notifyPos.getY() == 58 && notifyPos.getZ() == -496 && sourcePos.getX() == -1099 && sourcePos.getY() == -58 && sourcePos.getZ() == -496) {
+            System.err.println("derp");
+        }
+        logTransaction(sourcePos, transaction);
     }
 
     public void logBlockChange(SpongeBlockSnapshot originalBlockSnapshot, IBlockState newState, BlockPos pos, @Nullable TileEntity tileEntity) {
         this.put(originalBlockSnapshot, newState); // Always update the snapshot index before the block change is tracked
         final EventTransaction transaction = createEvent(tileEntity != null ? BlockChange.BREAK : null);
-        transaction.changedSnapshot = originalBlockSnapshot;
         if (tileEntity != null) {
             transaction.removedTileEntity = tileEntity; // The tile entity is going to be removed by the transaction if successfully handled
         }
-        getTransactions().add(transaction);
+        transaction.newState = newState;
+        logTransaction(pos, transaction);
     }
 
     public void logTileChange(IMixinWorldServer mixinWorldServer, BlockPos pos, @Nullable TileEntity currenTile, @Nullable TileEntity tileEntity) {
         final WorldServer world = (WorldServer) mixinWorldServer;
         final IBlockState current = world.getBlockState(pos);
 
-        final SpongeBlockSnapshot snapshot = mixinWorldServer.createSpongeSnapshotForTileEntity(current, pos, BlockChangeFlags.NONE, currenTile);
+        final SpongeBlockSnapshot snapshot = mixinWorldServer.createSpongeSnapshotForTileEntity(current, pos, BlockChangeFlags.ALL, currenTile);
         final BlockChange flag = currenTile != null
                                  ? tileEntity != null
                                    ? BlockChange.MODIFY // If both new and old are not null, it's a modification
@@ -423,56 +433,19 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
         final EventTransaction transaction = createEvent(flag);
         transaction.removedTileEntity = currenTile;
         transaction.addedTileEntity = tileEntity;
-        getTransactions().add(transaction);
+        logTransaction(pos, transaction);
     }
 
-    public void processTransactionsUpTo(SpongeBlockSnapshot oldBlockSnapshot, Transaction<BlockSnapshot> transaction,
-        IBlockState newState, int currentDepth) {
-        if (this.transactions == null || this.transactions.isEmpty()) {
-            return;
-        }
-        if (!transaction.isValid()) {
-            return;
-        }
-        boolean hasBeenFound = false;
-        for (Iterator<EventTransaction> iterator = this.transactions.iterator(); iterator.hasNext();) {
-            final EventTransaction next = iterator.next();
-            iterator.remove();
-            if (next.changedSnapshot == oldBlockSnapshot) {
-                hasBeenFound = true;
-            } else if (transaction.getIntermediary().contains(next.changedSnapshot)) {
-                hasBeenFound = true;
-            }
-            final NeighborNotification notification = next.notification;
-            if (notification != null) {
-                final IMixinWorldServer worldServer = notification.worldServer;
-                final IBlockState sourceState = notification.source;
-                final BlockPos notifyPos = notification.notifyPos;
-                final Block sourceBlock = notification.sourceBlock;
-                final BlockPos sourcePos = notification.sourcePos;
-
-                PhaseTracker.getInstance().performNeighborNotificationOnTarget(worldServer, notifyPos, sourceBlock, sourcePos, sourceState);
-            }
-            if (hasBeenFound) {
-                break;
-            }
-
-        }
-        if (!hasBeenFound && !this.transactions.isEmpty()) {
-            // uh oh....
-            System.err.println("Uhoh...");
-        }
-    }
-
-    public void cancelTransaction(Transaction<BlockSnapshot> transaction, BlockSnapshot original) {
-        if (this.transactions == null || this.transactions.isEmpty()) {
+    public void cancelTransaction(BlockSnapshot original) {
+        if (this.orderedTransactions == null || this.orderedTransactions.isEmpty()) {
             return;
         }
 
         final BlockPos blockPos = ((SpongeBlockSnapshot) original).getBlockPos();
 
         final WorldServer worldServer = ((SpongeBlockSnapshot) original).getWorldServer();
-        for (ListIterator<EventTransaction> iterator = this.transactions.listIterator(this.transactions.size()); iterator.hasPrevious();) {
+        final List<EventTransaction> values = this.orderedTransactions.values();
+        for (ListIterator<EventTransaction> iterator = values.listIterator(values.size()); iterator.hasPrevious();) {
             final EventTransaction next = iterator.previous(); // We have to iterate in reverse order due to rollbacks
             if (!next.isCancelled) {
                 next.cancel(worldServer, blockPos);
@@ -522,6 +495,9 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
         if (this.scheduledEvents != null) {
             this.scheduledEvents.clear();
         }
+        this.lastTransaction = null;
+        this.snapshotIndex = -1;
+        this.transactionIndex = -1;
     }
 
     public void restoreOriginals() {
@@ -569,7 +545,83 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
         return this.scheduledEvents == null ? ArrayListMultimap.create(4, 4) : ArrayListMultimap.create(this.scheduledEvents);
     }
 
-    public boolean hasCapturedRemovedTileEntity(BlockPos pos) {
-        return this.usedBlocks != null && this.usedBlocks.contains(pos);
+    @SuppressWarnings("unchecked")
+    public boolean processTransactions(List<Transaction<BlockSnapshot>> transactions, PhaseContext<?> phaseContext, boolean noCancelledTransactions,
+        ListMultimap<BlockPos, BlockEventData> scheduledEvents, int currentDepth) {
+
+        final IPhaseState phaseState = phaseContext.state;
+        int targetIndex = 0;
+        if (this.orderedTransactions == null || this.orderedTransactions.isEmpty()) {
+            boolean hasEvents = false;
+            if (!scheduledEvents.isEmpty()) {
+                hasEvents = true;
+            }
+            for (Transaction<BlockSnapshot> transaction : transactions) {
+                if (!transaction.isValid()) {
+                    continue;
+                }
+                final BlockPos pos = hasEvents ? VecHelper.toBlockPos(transaction.getOriginal().getPosition()) : null;
+                final List<BlockEventData> events =  hasEvents ? scheduledEvents.get(pos) : Collections.emptyList();
+                noCancelledTransactions = TrackingUtil.performTransactionProcess(transaction, phaseState, phaseContext, events, noCancelledTransactions, currentDepth);
+            }
+            return noCancelledTransactions;
+        }
+        Transaction<BlockSnapshot> eventTransaction = transactions.get(targetIndex);
+        for (Map.Entry<BlockPos, EventTransaction> entry : this.orderedTransactions.entries()) {
+            final EventTransaction transaction = entry.getValue();
+            final SpongeBlockSnapshot oldSnapshot = transaction.changedSnapshot;
+
+            if (transaction.snapshotIndex > targetIndex) {
+                targetIndex++;
+                eventTransaction = transactions.get(targetIndex);
+            }
+            if (oldSnapshot == null) {
+                // Check for neighbor notifications?
+                final NeighborNotification notification = transaction.notification;
+                if (notification == null) {
+                    continue;
+                }
+                // Otherwise, we have a neighbor notification to process.
+                final IMixinWorldServer worldServer = notification.worldServer;
+                final IBlockState sourceState = notification.source;
+                final BlockPos notifyPos = notification.notifyPos;
+                final Block sourceBlock = notification.sourceBlock;
+                final BlockPos sourcePos = notification.sourcePos;
+                PhaseTracker.getInstance().performNeighborNotificationOnTarget(worldServer, notifyPos, sourceBlock, sourcePos, sourceState);
+                // And then we don't want to continue trying on null objects...
+                // If there were tile entities being added/removed, whatever, we don't care about "processing" them, because they just add/remove
+                // from the world/chunk and then possibly throw some extra neighbor notifications, which are caught.
+                continue;
+            }
+
+            if (!eventTransaction.isValid()) {
+                continue;
+            }
+            final SpongeBlockSnapshot newBlockSnapshot = (SpongeBlockSnapshot) eventTransaction.getFinal();
+            final IBlockState newState = (IBlockState) newBlockSnapshot.getState();
+            final WorldServer worldServer = oldSnapshot.getWorldServer();
+            final BlockPos targetPosition = oldSnapshot.getBlockPos();
+            TrackingUtil.performBlockEntitySpawns(phaseState, phaseContext, oldSnapshot, targetPosition);
+            SpongeHooks.logBlockAction(worldServer, oldSnapshot.blockChange, eventTransaction);
+            final IBlockState oldState = (IBlockState) oldSnapshot.getState();
+
+
+            // We call onBlockAdded here for blocks without a TileEntity.
+            // MixinChunk#setBlockState will call onBlockAdded for blocks
+            // with a TileEntity or when capturing is not being done.
+            final SpongeBlockChangeFlag changeFlag = oldSnapshot.getChangeFlag();
+            TrackingUtil.performOnBlockAdded(phaseState, phaseContext, currentDepth, targetPosition, worldServer, changeFlag, oldState, newState);
+            phaseState.postBlockTransactionApplication(oldSnapshot.blockChange, eventTransaction, phaseContext);
+
+            phaseState.performPostBlockNotificationsAndNeighborUpdates(phaseContext, oldSnapshot, newState, changeFlag, currentDepth + 1);
+
+            if (changeFlag.isNotifyClients()) { // Always try to notify clients of the change.
+                worldServer.notifyBlockUpdate(targetPosition, oldState, newState, changeFlag.getRawFlag());
+            }
+
+            TrackingUtil.performNeighborAndClientNotifications(phaseContext, currentDepth, oldSnapshot, newBlockSnapshot,
+                ((IMixinWorldServer) worldServer), targetPosition, oldState, newState, changeFlag);
+        }
+        return noCancelledTransactions;
     }
 }

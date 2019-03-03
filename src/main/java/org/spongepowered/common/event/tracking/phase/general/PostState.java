@@ -199,9 +199,7 @@ public final class PostState extends GeneralState<UnwindingPhaseContext> {
 
     @Override
     public void performPostBlockNotificationsAndNeighborUpdates(UnwindingPhaseContext context,
-        SpongeBlockSnapshot oldBlockSnapshot, IBlockState newState, SpongeBlockChangeFlag changeFlag,
-        Transaction<BlockSnapshot> transaction,
-        int depth) {
+        SpongeBlockSnapshot oldBlockSnapshot, IBlockState newState, SpongeBlockChangeFlag changeFlag, int depth) {
         if (PhaseTracker.checkMaxBlockProcessingDepth(this, context, depth)) {
             return;
         }

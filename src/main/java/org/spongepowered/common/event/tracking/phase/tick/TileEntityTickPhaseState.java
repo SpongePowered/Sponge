@@ -60,7 +60,6 @@ import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMapEntry;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -163,14 +162,12 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
                     // Now to clean up the list that is tied to the entity, so that this phase context isn't continuously wrapped
                     EntityUtil.toMixin(nestedEntity).clearWrappedCaptureList();
                 });
-        } catch (Exception e) {
-            throw new RuntimeException(String.format("Exception occurred while processing tile entity %s at %s", tickingTile, tickingTile.getLocation()), e);
         }
     }
 
     @Override
     public boolean tracksTileEntityChanges(TileEntityTickContext currentContext, World thisWorld, BlockPos pos) {
-        return this.doesBulkBlockCapture(currentContext) && currentContext.getSource(net.minecraft.tileentity.TileEntity.class).get().getPos().equals(pos);
+        return this.doesBulkBlockCapture(currentContext);
     }
 
     @Override
@@ -255,21 +252,13 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
     @Override
     public boolean capturesNeighborNotifications(TileEntityTickContext context, IMixinWorldServer mixinWorld, BlockPos notifyPos, Block sourceBlock,
         IBlockState iblockstate, BlockPos sourcePos) {
-        context.getCapturedBlockSupplier().captureNeighborNotification(this, context, mixinWorld, notifyPos, iblockstate, sourceBlock, sourcePos);
+        context.getCapturedBlockSupplier().captureNeighborNotification(context, mixinWorld, notifyPos, iblockstate, sourceBlock, sourcePos);
         return true;
     }
 
     @Override
-    public void performPostBlockNotificationsAndNeighborUpdates(TileEntityTickContext context,
-        SpongeBlockSnapshot oldBlockSnapshot, IBlockState newState, SpongeBlockChangeFlag changeFlag,
-        Transaction<BlockSnapshot> transaction,
-        int currentDepth) {
-        context.getCapturedBlockSupplier().processTransactionsUpTo(oldBlockSnapshot, transaction, newState, currentDepth);
-    }
-
-    @Override
     public void processCancelledTransaction(TileEntityTickContext context, Transaction<BlockSnapshot> transaction, BlockSnapshot original) {
-        context.getCapturedBlockSupplier().cancelTransaction(transaction, original);
+        context.getCapturedBlockSupplier().cancelTransaction(original);
         final WorldServer worldServer = ((SpongeBlockSnapshot) original).getWorldServer();
         final Chunk chunk = worldServer.getChunk(((SpongeBlockSnapshot) original).getBlockPos());
         final PlayerChunkMapEntry entry = worldServer.getPlayerChunkMap().getEntry(chunk.x, chunk.z);
@@ -295,6 +284,16 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
         return context.allowsBlockEvents();
     }
 
+    @Override
+    public boolean hasSpecificBlockProcess() {
+        return true;
+    }
+
+    @Override
+    public boolean processTransactions(List<Transaction<BlockSnapshot>> transactions, PhaseContext<?> phaseContext, boolean noCancelledTransactions,
+        ListMultimap<BlockPos, BlockEventData> scheduledEvents, int currentDepth) {
+        return phaseContext.getCapturedBlockSupplier().processTransactions(transactions, phaseContext, noCancelledTransactions, scheduledEvents, currentDepth);
+    }
     @Override
     public String toString() {
         return this.name;

@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking.context;
 
 import com.google.common.base.MoreObjects;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
@@ -36,6 +37,7 @@ import javax.annotation.Nullable;
 
 final class EventTransaction {
 
+    public IBlockState newState;
     @Nullable BlockSnapshot notificationSnapshot;
     @Nullable SpongeBlockSnapshot changedSnapshot;
     @Nullable TileEntity removedTileEntity;

@@ -100,7 +100,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
 
 
 
-    protected final IPhaseState<? extends P> state; // Only temporary to verify the state creation with constructors
+    public final IPhaseState<? extends P> state; // Only temporary to verify the state creation with constructors
     protected boolean isCompleted = false;
     // Only used in hard debugging instances.
     @Nullable private StackTraceElement[] stackTrace;
@@ -425,7 +425,6 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
      *     <li>{@link MultiBlockCaptureSupplier#clear()} - To clear the captured lists</li>
      *     <li>{@link MultiBlockCaptureSupplier#put(BlockSnapshot, IBlockState)} to add a new snapshot/change</li>
      *     <li>{@link MultiBlockCaptureSupplier#prune(BlockSnapshot)} to remove a block snapshot change</li>
-     *     <li>{@link MultiBlockCaptureSupplier#acceptAndClearIfNotEmpty(BiConsumer)} To process the lists and captured intermediary snapshots if multi is used</li>
      * </ul>
      * Provided functionality through the supplier is aimed for common manipulation in
      * {@link IPhaseState}s and for the obvious reasons of capturing block changes, as long
@@ -434,9 +433,8 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
      * </p>
      *
      * <p>If post phase processing requires constant updating of the list and/or intermediary
-     * {@link SpongeBlockSnapshot} changes to be pruned, it is advised to utilize
-     * {@link MultiBlockCaptureSupplier#acceptAndClearIfNotEmpty(BiConsumer)} to avoid having
-     * to recreate functionality already provided by the supplier.</p>
+     * {@link SpongeBlockSnapshot} changes to be pruned, it is advised to do so via
+     * a post state since internal tracked event transactions are not clearable.</p>
      *
      * @return A list of original block snapshots that are now changed
      * @throws IllegalStateException If there is no capture supplier set up for this context

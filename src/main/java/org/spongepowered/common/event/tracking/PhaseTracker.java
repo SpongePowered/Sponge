@@ -440,6 +440,9 @@ public final class PhaseTracker {
         if (t != null) {
             printer.add("Stacktrace:")
                     .add(t);
+            if (t.getCause() != null) {
+                printer.add(t.getCause());
+            }
         }
         printer.add();
         this.generateVersionInfo(printer);
@@ -614,9 +617,8 @@ public final class PhaseTracker {
     @SuppressWarnings("rawtypes")
     public void performNeighborNotificationOnTarget(IMixinWorldServer mixinWorld, BlockPos notifyPos, Block sourceBlock, BlockPos sourcePos,
         IBlockState iblockstate) {
-        if (iblockstate.getBlock() == Blocks.AIR) {
-            // Super fasts. Air doesn't do anything about neighbor notifications
-            return;
+        if (notifyPos.getX() == -1100 && notifyPos.getY() == 58 && notifyPos.getZ() == -496) {
+            System.err.println("derp");
         }
         try {
             // Sponge start - prepare notification
@@ -701,6 +703,9 @@ public final class PhaseTracker {
         // If chunk is empty, we simply return to avoid any further logic.
         if (chunk.isEmpty()) {
             return false;
+        }
+        if (pos.getX() == -1077 && pos.getY() == 58 && pos.getZ() == -502 && newState.getBlock() == Blocks.WOOL) {
+            System.err.println("derp");
         }
 
         final Block block = newState.getBlock();

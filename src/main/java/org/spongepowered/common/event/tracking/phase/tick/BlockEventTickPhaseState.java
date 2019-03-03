@@ -55,13 +55,13 @@ import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMapEntry;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.world.BlockChange;
-import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -102,7 +102,7 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
     @Override
     public boolean capturesNeighborNotifications(BlockEventTickContext context, IMixinWorldServer mixinWorld, BlockPos notifyPos, Block sourceBlock,
         IBlockState iblockstate, BlockPos sourcePos) {
-        context.getCapturedBlockSupplier().captureNeighborNotification(this, context, mixinWorld, notifyPos, iblockstate, sourceBlock, sourcePos);
+        context.getCapturedBlockSupplier().captureNeighborNotification(context, mixinWorld, notifyPos, iblockstate, sourceBlock, sourcePos);
         return true;
     }
 
@@ -191,8 +191,10 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
             // Basically, if the source was a tile entity, and during the block event, it changed?
             // and if any of the transaction cancelled, the whole thing should be cancelled.
             if (SpongeImplHooks.hasBlockTileEntity(BlockUtil.toBlock(source.getBlockState()), BlockUtil.toNative(source.getBlockState()))) {
+                context.setWasNotCancelled(noCancelledTransactions);
                 return !noCancelledTransactions;
             }
+            context.setWasNotCancelled(noCancelledTransactions);
             return !noCancelledTransactions;
         }
         if (!postEvent.getTransactions().isEmpty()) {
@@ -204,12 +206,16 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
                     return transaction.getIntermediary().stream().anyMatch(inter -> {
                         final BlockState iterState = inter.getState();
                         final BlockType interType = state.getType();
-                        return SpongeImplHooks.hasBlockTileEntity((Block) interType, BlockUtil.toNative(iterState));
+                        final boolean interMediaryHasTile = SpongeImplHooks.hasBlockTileEntity((Block) interType, BlockUtil.toNative(iterState));
+                        context.setWasNotCancelled(!interMediaryHasTile);
+                        return interMediaryHasTile;
                     });
                 }
+                context.setWasNotCancelled(!hasTile);
                 return hasTile;
             });
         }
+        context.setWasNotCancelled(noCancelledTransactions);
         return !noCancelledTransactions;
     }
 
@@ -226,16 +232,8 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
     }
 
     @Override
-    public void performPostBlockNotificationsAndNeighborUpdates(BlockEventTickContext context,
-        SpongeBlockSnapshot oldBlockSnapshot, IBlockState newState, SpongeBlockChangeFlag changeFlag,
-        Transaction<BlockSnapshot> transaction,
-        int currentDepth) {
-        context.getCapturedBlockSupplier().processTransactionsUpTo(oldBlockSnapshot, transaction, newState, currentDepth);
-    }
-
-    @Override
     public void processCancelledTransaction(BlockEventTickContext context, Transaction<BlockSnapshot> transaction, BlockSnapshot original) {
-        context.getCapturedBlockSupplier().cancelTransaction(transaction, original);
+        context.getCapturedBlockSupplier().cancelTransaction(original);
         final WorldServer worldServer = ((SpongeBlockSnapshot) original).getWorldServer();
         final Chunk chunk = worldServer.getChunk(((SpongeBlockSnapshot) original).getBlockPos());
         final PlayerChunkMapEntry entry = worldServer.getPlayerChunkMap().getEntry(chunk.x, chunk.z);
@@ -245,6 +243,16 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
         super.processCancelledTransaction(context, transaction, original);
     }
 
+    @Override
+    public boolean hasSpecificBlockProcess() {
+        return true;
+    }
+
+    @Override
+    public boolean processTransactions(List<Transaction<BlockSnapshot>> transactions, PhaseContext<?> phaseContext, boolean noCancelledTransactions,
+        ListMultimap<BlockPos, BlockEventData> scheduledEvents, int currentDepth) {
+        return phaseContext.getCapturedBlockSupplier().processTransactions(transactions, phaseContext, noCancelledTransactions, scheduledEvents, currentDepth);
+    }
 
     @Override
     public String toString() {
