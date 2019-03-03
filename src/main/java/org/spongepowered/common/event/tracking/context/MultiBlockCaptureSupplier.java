@@ -431,6 +431,9 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
         if (this.transactions == null || this.transactions.isEmpty()) {
             return;
         }
+        if (!transaction.isValid()) {
+            return;
+        }
         boolean hasBeenFound = false;
         for (Iterator<EventTransaction> iterator = this.transactions.iterator(); iterator.hasNext();) {
             final EventTransaction next = iterator.next();
@@ -469,7 +472,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
         final BlockPos blockPos = ((SpongeBlockSnapshot) original).getBlockPos();
 
         final WorldServer worldServer = ((SpongeBlockSnapshot) original).getWorldServer();
-        for (ListIterator<EventTransaction> iterator = this.transactions.listIterator(this.transactions.size() - 1); iterator.hasPrevious();) {
+        for (ListIterator<EventTransaction> iterator = this.transactions.listIterator(this.transactions.size()); iterator.hasPrevious();) {
             final EventTransaction next = iterator.previous(); // We have to iterate in reverse order due to rollbacks
             if (!next.isCancelled) {
                 next.cancel(worldServer, blockPos);

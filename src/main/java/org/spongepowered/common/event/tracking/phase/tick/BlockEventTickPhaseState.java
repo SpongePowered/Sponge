@@ -193,13 +193,22 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
             if (SpongeImplHooks.hasBlockTileEntity(BlockUtil.toBlock(source.getBlockState()), BlockUtil.toNative(source.getBlockState()))) {
                 return !noCancelledTransactions;
             }
-            return false;
+            return !noCancelledTransactions;
         }
-        if (!noCancelledTransactions && !postEvent.getTransactions().isEmpty()) {
-            final Transaction<BlockSnapshot> first = postEvent.getTransactions().get(0);
-            final BlockState state = first.getOriginal().getState();
-            final BlockType type = state.getType();
-            return SpongeImplHooks.hasBlockTileEntity((Block) type, BlockUtil.toNative(state));
+        if (!postEvent.getTransactions().isEmpty()) {
+            return postEvent.getTransactions().stream().anyMatch(transaction -> {
+                final BlockState state = transaction.getOriginal().getState();
+                final BlockType type = state.getType();
+                final boolean hasTile = SpongeImplHooks.hasBlockTileEntity((Block) type, BlockUtil.toNative(state));
+                if (!hasTile && !transaction.getIntermediary().isEmpty()) { // Check intermediary
+                    return transaction.getIntermediary().stream().anyMatch(inter -> {
+                        final BlockState iterState = inter.getState();
+                        final BlockType interType = state.getType();
+                        return SpongeImplHooks.hasBlockTileEntity((Block) interType, BlockUtil.toNative(iterState));
+                    });
+                }
+                return hasTile;
+            });
         }
         return !noCancelledTransactions;
     }

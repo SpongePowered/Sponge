@@ -229,23 +229,27 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
     @Override
     public boolean getShouldCancelAllTransactions(TileEntityTickContext context, List<ChangeBlockEvent> blockEvents, ChangeBlockEvent.Post postEvent,
         ListMultimap<BlockPos, BlockEventData> scheduledEvents, boolean noCancelledTransactions) {
-        if (!(context.getSource() instanceof net.minecraft.tileentity.TileEntity)) {
-            // we have a LocatableBlock.
-            final LocatableBlock source = (LocatableBlock) context.getSource();
-            // Basically, if the source was a tile entity, and during the block event, it changed?
-            // and if any of the transaction cancelled, the whole thing should be cancelled.
-            if (SpongeImplHooks.hasBlockTileEntity(BlockUtil.toBlock(source.getBlockState()), BlockUtil.toNative(source.getBlockState()))) {
-                return !noCancelledTransactions;
-            }
-            return false;
+        if (!postEvent.getTransactions().isEmpty()) {
+            return postEvent.getTransactions().stream().anyMatch(transaction -> {
+                final BlockState state = transaction.getOriginal().getState();
+                final BlockType type = state.getType();
+                final boolean hasTile = SpongeImplHooks.hasBlockTileEntity((Block) type, BlockUtil.toNative(state));
+                final BlockPos pos = context.getSource(net.minecraft.tileentity.TileEntity.class).get().getPos();
+                final BlockPos blockPos = ((SpongeBlockSnapshot) transaction.getOriginal()).getBlockPos();
+                if (pos.equals(blockPos) && !transaction.isValid()) {
+                    return true;
+                }
+                if (!hasTile && !transaction.getIntermediary().isEmpty()) { // Check intermediary
+                    return transaction.getIntermediary().stream().anyMatch(inter -> {
+                        final BlockState iterState = inter.getState();
+                        final BlockType interType = state.getType();
+                        return SpongeImplHooks.hasBlockTileEntity((Block) interType, BlockUtil.toNative(iterState));
+                    });
+                }
+                return hasTile;
+            });
         }
-        if (!noCancelledTransactions && !postEvent.getTransactions().isEmpty()) {
-            final Transaction<BlockSnapshot> first = postEvent.getTransactions().get(0);
-            final BlockState state = first.getOriginal().getState();
-            final BlockType type = state.getType();
-            return SpongeImplHooks.hasBlockTileEntity((Block) type, BlockUtil.toNative(state));
-        }
-        return !noCancelledTransactions;
+        return false;
     }
 
     @Override

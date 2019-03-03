@@ -511,7 +511,7 @@ public final class TrackingUtil {
 
             // Iterate through the block events to mark any transactions as invalid to accumilate after (since the post event contains all
             // transactions of the preceeding block events)
-            boolean noCancelledTransactions = checkCancelledEvents(blockEvents, postEvent, scheduledEvents, state, context);
+            boolean noCancelledTransactions = checkCancelledEvents(blockEvents, postEvent, scheduledEvents, state, context, invalid);
 
             // Now we can gather the invalid transactions that either were marked as invalid from an event listener - OR - cancelled.
             // Because after, we will restore all the invalid transactions in reverse order.
@@ -545,7 +545,7 @@ public final class TrackingUtil {
     }
 
     private static boolean checkCancelledEvents(List<ChangeBlockEvent> blockEvents, ChangeBlockEvent.Post postEvent,
-        ListMultimap<BlockPos, BlockEventData> scheduledEvents, IPhaseState<?> state, PhaseContext<?> context) {
+        ListMultimap<BlockPos, BlockEventData> scheduledEvents, IPhaseState<?> state, PhaseContext<?> context, List<Transaction<BlockSnapshot>> invalid) {
         boolean noCancelledTransactions = true;
         for (ChangeBlockEvent blockEvent : blockEvents) { // Need to only check if the event is cancelled, If it is, restore
             if (blockEvent.isCancelled()) {
@@ -565,14 +565,28 @@ public final class TrackingUtil {
                 transaction.setValid(false);
             }
         }
-        // Now to check, if any of the transactions being cancelled means cancelling the entire event.
-        boolean cancelAll = ((IPhaseState) state).getShouldCancelAllTransactions(context, blockEvents, postEvent, scheduledEvents, noCancelledTransactions);
-        if (cancelAll) {
-            for (Transaction<BlockSnapshot> transaction : postEvent.getTransactions()) {
-                scheduledEvents.removeAll(VecHelper.toBlockPos(transaction.getOriginal().getPosition()));
-                transaction.setValid(false);
+        for (Transaction<BlockSnapshot> transaction : postEvent.getTransactions()) {
+            if (!transaction.isValid()) {
+                noCancelledTransactions = false;
             }
-            noCancelledTransactions = false;
+        }
+        // Now to check, if any of the transactions being cancelled means cancelling the entire event.
+        if (!noCancelledTransactions) {
+            // This is available to verify only when necessary that a state
+            // absolutely needs to cancel the entire transaction chain, this is mostly for more fasts
+            // since we don't want to iterate over the transaction list multiple times.
+            boolean cancelAll = ((IPhaseState) state).getShouldCancelAllTransactions(context, blockEvents, postEvent, scheduledEvents, noCancelledTransactions);
+
+            for (Transaction<BlockSnapshot> transaction : postEvent.getTransactions()) {
+                if (cancelAll) {
+                    scheduledEvents.removeAll(VecHelper.toBlockPos(transaction.getOriginal().getPosition()));
+                    transaction.setValid(false);
+                    noCancelledTransactions = false;
+                }
+                if (!transaction.isValid()) {
+                    invalid.add(transaction);
+                }
+            }
         }
 
         return noCancelledTransactions;

@@ -30,6 +30,9 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
+import org.spongepowered.api.block.tileentity.TileEntity;
+import org.spongepowered.api.block.tileentity.TileEntityType;
+import org.spongepowered.api.block.tileentity.TileEntityTypes;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
@@ -46,6 +49,7 @@ import org.spongepowered.api.text.format.TextColors;
 public class PistonTest {
 
     boolean cancelPistons = false;
+    boolean debugLog = false;
 
     @Listener
     public void onGamePreInitialization(GamePreInitializationEvent event) {
@@ -67,6 +71,11 @@ public class PistonTest {
         if (!cancelPistons) {
             return;
         }
+        final TileEntityType tileEntityType = event.getCause().first(TileEntity.class).map(TileEntity::getType).orElse(TileEntityTypes.CHEST);
+        if (tileEntityType == TileEntityTypes.PISTON) {
+            event.setCancelled(true);
+            return;
+        }
         event.getTransactions().forEach(transaction -> {
             final BlockSnapshot original = transaction.getOriginal();
             final BlockState state = original.getState();
@@ -75,6 +84,12 @@ public class PistonTest {
                 event.setCancelled(true);
             }
         });
+        if (event.isCancelled()) {
+            // Centralized line to link to other breakpoints for testing/debugging
+            if (this.debugLog) {
+                System.err.println("Cancelling");
+            }
+        }
 
     }
 

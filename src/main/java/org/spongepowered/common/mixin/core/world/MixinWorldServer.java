@@ -1003,7 +1003,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
         final net.minecraft.tileentity.TileEntity tileEntity = getTileEntity(pos);
         final IMixinTileEntity mixinTile = (IMixinTileEntity) tileEntity;
-        if (tileEntity != null && !mixinTile.isCaptured()) {
+        if (tileEntity != null) {
             mixinTile.setCaptured(true);
             currentState.captureTileEntityReplacement(currentContext, this, pos, tileEntity, null);
         }
@@ -1855,18 +1855,19 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         if (notifier.isPresent()) {
             this.builder.notifier(notifier.get());
         }
-        if (SpongeImplHooks.hasBlockTileEntity(state.getBlock(), state)) {
+        final boolean hasTileEntity = SpongeImplHooks.hasBlockTileEntity(state.getBlock(), state);
+        final net.minecraft.tileentity.TileEntity tileEntity = this.getChunk(pos).getTileEntity(pos, Chunk.EnumCreateEntityType.CHECK);
+        if (hasTileEntity || tileEntity != null) {
             // We MUST only check to see if a TE exists to avoid creating a new one.
-            final net.minecraft.tileentity.TileEntity te = this.getChunk(pos).getTileEntity(pos, net.minecraft.world.chunk.Chunk.EnumCreateEntityType.CHECK);
-            if (te != null) {
-                TileEntity tile = (TileEntity) te;
+            if (tileEntity != null) {
+                TileEntity tile = (TileEntity) tileEntity;
                 for (DataManipulator<?, ?> manipulator : ((IMixinCustomDataHolder) tile).getCustomManipulators()) {
                     this.builder.add(manipulator);
                 }
                 NBTTagCompound nbt = new NBTTagCompound();
                 // Some mods like OpenComputers assert if attempting to save robot while moving
                 try {
-                    te.writeToNBT(nbt);
+                    tileEntity.writeToNBT(nbt);
                     this.builder.unsafeNbt(nbt);
                 }
                 catch(Throwable t) {
