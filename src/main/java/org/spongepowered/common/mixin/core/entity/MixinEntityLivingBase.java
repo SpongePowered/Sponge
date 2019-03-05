@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.entity;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3d;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
@@ -34,6 +35,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.attributes.AbstractAttributeMap;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
+import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.passive.EntityWolf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -451,8 +453,9 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             return false;
         }
         // Sponge - This hook is for forge use mainly
-        if (!this.hookModAttack((EntityLivingBase) (Object) this, source, amount))
+        if (!this.hookModAttack((EntityLivingBase) (Object) this, source, amount)) {
             return false;
+        }
         // Sponge end
         if (this.isEntityInvulnerable(source)) {
             return false;
@@ -468,11 +471,13 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             } else if (source.isFireDamage() && this.isPotionActive(MobEffects.FIRE_RESISTANCE)) {
                 return false;
             } else {
+
+                float f = amount;
+
                 // Sponge - ignore as this is handled in our damageEntityHookge
-//                if (false && (source == DamageSource.anvil || source == DamageSource.fallingBlock)
-//                    && this.getEquipmentInSlot(4) != null) {
-//                    this.getEquipmentInSlot(4).damageItem((int) (amount * 4.0F + this.rand.nextFloat() * amount * 2.0F),
-//                            (EntityLivingBase) (Object) this);
+//                if ((source == DamageSource.ANVIL || source == DamageSource.FALLING_BLOCK) && !this.getItemStackFromSlot(EntityEquipmentSlot.HEAD).isEmpty())
+//                {
+//                    this.getItemStackFromSlot(EntityEquipmentSlot.HEAD).damageItem((int)(amount * 4.0F + this.rand.nextFloat() * amount * 2.0F), this);
 //                    amount *= 0.75F;
 //                }
                 // Sponge End
@@ -482,23 +487,25 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                 boolean flag = amount > 0.0F && this.canBlockDamageSource(source);
 
                 // Sponge start - this is handled in our damageEntityHook
-                /*boolean flag = false;
-
-                if (amount > 0.0F && this.canBlockDamageSource(source)) {
-                    this.damageShield(amount);
-
-                    if (!source.isProjectile())
-                    {
-                        Entity entity = source.getSourceOfDamage();
-
-                        if (entity instanceof EntityLivingBase)
-                        {
-                            this.blockUsingShield((EntityLivingBase)entity);
-                        }
-                    }
-
-                    flag = true;
-                }*/
+//                boolean flag = false;
+//
+//                if (amount > 0.0F && this.canBlockDamageSource(source))
+//                {
+//                    this.damageShield(amount);
+//                    amount = 0.0F;
+//
+//                    if (!source.isProjectile())
+//                    {
+//                        Entity entity = source.getImmediateSource();
+//
+//                        if (entity instanceof EntityLivingBase)
+//                        {
+//                            this.blockUsingShield((EntityLivingBase)entity);
+//                        }
+//                    }
+//
+//                    flag = true;
+//                }
                 // Sponge end
 
                 this.limbSwingAmount = 1.5F;
@@ -513,8 +520,9 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                     if (!this.damageEntityHook(source, amount - this.lastDamage)) {
                         return false;
                     }
-                    // Sponge end
 
+                    // this.damageEntity(source, amount - this.lastDamage); // handled above
+                    // Sponge end
                     this.lastDamage = amount;
                     flag1 = false;
                 } else {
@@ -540,10 +548,11 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                     if (entity instanceof EntityPlayer) {
                         this.recentlyHit = 100;
                         this.attackingPlayer = (EntityPlayer) entity;
-                    } else if (entity instanceof EntityWolf) {
-                        EntityWolf entityWolf = (EntityWolf) entity;
+                    } else if (entity instanceof EntityTameable) {
 
-                        if (entityWolf.isTamed()) {
+                        net.minecraft.entity.passive.EntityTameable entitywolf = (net.minecraft.entity.passive.EntityTameable)entity;
+
+                        if (entitywolf.isTamed()) {
                             this.recentlyHit = 100;
                             this.attackingPlayer = null;
                         }
@@ -556,7 +565,17 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                     } else if (source instanceof net.minecraft.util.EntityDamageSource && ((net.minecraft.util.EntityDamageSource) source).getIsThornsDamage()) {
                         this.world.setEntityState((EntityLivingBase) (Object) this, (byte) 33);
                     } else {
-                        this.world.setEntityState((EntityLivingBase) (Object) this, (byte) 2);
+                        byte b0;
+
+                        if (source == DamageSource.DROWN) {
+                            b0 = 36;
+                        } else if (source.isFireDamage()) {
+                            b0 = 37;
+                        } else {
+                            b0 = 2;
+                        }
+
+                        this.world.setEntityState((EntityLivingBase) (Object) this, (byte) b0);
                     }
 
 
@@ -605,6 +624,14 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                 {
                     this.lastDamageSource = source;
                     this.lastDamageStamp = this.world.getTotalWorldTime();
+                }
+
+                if ((Object) this instanceof EntityPlayerMP) {
+                    CriteriaTriggers.ENTITY_HURT_PLAYER.trigger((EntityPlayerMP) (Object) this, source, f, amount, flag);
+                }
+
+                if (entity instanceof EntityPlayerMP) {
+                    CriteriaTriggers.PLAYER_HURT_ENTITY.trigger((EntityPlayerMP) entity, (Entity) (Object) this, source, f, amount, flag);
                 }
 
                 return !flag; // Sponge - remove 'amount > 0.0F'
