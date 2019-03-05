@@ -24,10 +24,6 @@
  */
 package org.spongepowered.common.block;
 
-import com.flowpowered.math.vector.Vector3i;
-import com.google.common.collect.ComparisonChain;
-import com.google.common.collect.MapDifference;
-import com.google.common.collect.Maps;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
@@ -35,38 +31,15 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.block.trait.BlockTrait;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
-import org.spongepowered.common.util.VecHelper;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 public final class BlockUtil {
 
     public static final UUID INVALID_WORLD_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
-
-
-    public static boolean setBlockState(World world, BlockPos position, BlockState state, boolean notifyNeighbors) {
-        return world.setBlockState(position, toNative(state), notifyNeighbors ? 3 : 2);
-    }
-
-    public static boolean setBlockState(Chunk chunk, int x, int y, int z, BlockState state, boolean notifyNeighbors) {
-        return setBlockState(chunk, new BlockPos(x, y, z), state, notifyNeighbors);
-    }
-
-    public static boolean setBlockState(Chunk chunk, BlockPos position, BlockState state, boolean notifyNeighbors) {
-        if (notifyNeighbors) { // delegate to world
-            return setBlockState(chunk.getWorld(), position, state, true);
-        }
-        return ((IMixinChunk) chunk).setBlockState(position, toNative(state), chunk.getBlockState(position), null, BlockChangeFlags.ALL.withUpdateNeighbors(notifyNeighbors)) != null;
-    }
 
     public static IBlockState toNative(BlockState state) {
         if (state instanceof IBlockState) {
@@ -86,12 +59,16 @@ public final class BlockUtil {
         throw new UnsupportedOperationException("Custom BlockState implementations are not supported");
     }
 
-    public static BlockType toBlock(IBlockState state) {
+    public static BlockType toBlockType(IBlockState state) {
         return fromNative(state).getType();
     }
 
     public static Block toBlock(BlockState state) {
         return toNative(state).getBlock();
+    }
+
+    public static Block toBlock(SpongeBlockSnapshot spongeSnapshot) {
+        return toNative(spongeSnapshot.getState()).getBlock();
     }
 
     public static IMixinBlock toMixin(BlockState blockState) {
@@ -107,9 +84,5 @@ public final class BlockUtil {
 
     public static IBlockState toNative(SpongeBlockSnapshot snapshot) {
         return toNative(snapshot.getState());
-    }
-
-    public static Block toBlock(SpongeBlockSnapshot spongeSnapshot) {
-        return toNative(spongeSnapshot.getState()).getBlock();
     }
 }

@@ -45,23 +45,5 @@ public abstract class MixinBlockRedstoneDiode extends BlockHorizontal {
         super(materialIn);
     }
 
-    @Inject(method = "notifyNeighbors", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/BlockPos;offset(Lnet/minecraft/util/EnumFacing;)Lnet/minecraft/util/math/BlockPos;", shift = At.Shift.AFTER), cancellable = true)
-    public void onNotifyNeighbors(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, CallbackInfo ci) {
-        EnumFacing enumfacing = state.getValue(BlockHorizontal.FACING);
-        BlockPos blockpos = pos.offset(enumfacing.getOpposite());
-        if (worldIn.isRemote) {
-            worldIn.neighborChanged(blockpos, this, pos);
-            worldIn.notifyNeighborsOfStateExcept(blockpos, this, enumfacing);
-            ci.cancel();
-            return;
-        }
 
-        NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent((World) worldIn, pos, java.util.EnumSet.of(enumfacing.getOpposite()));
-        if (event == null || (!event.isCancelled() && !event.getNeighbors().isEmpty())) {
-            worldIn.neighborChanged(blockpos, (BlockRedstoneDiode) (Object) this, pos);
-            worldIn.notifyNeighborsOfStateExcept(blockpos, (BlockRedstoneDiode) (Object) this, enumfacing);
-        }
-        // We cancel here to avoid Forge event call in SF
-        ci.cancel();
-    }
 }

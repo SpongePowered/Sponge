@@ -666,7 +666,7 @@ public class SpongeCommonEventFactory {
 
     @SuppressWarnings("rawtypes")
     @Nullable
-    public static NotifyNeighborBlockEvent callNotifyNeighborEvent(World world, BlockPos sourcePos, EnumSet notifiedSides) {
+    public static NotifyNeighborBlockEvent callNotifyNeighborEvent(World world, BlockPos sourcePos, EnumSet<EnumFacing> notifiedSides) {
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final PhaseData peek = phaseTracker.getCurrentPhaseData();
         final PhaseContext<?> context = peek.context;
@@ -690,15 +690,11 @@ public class SpongeCommonEventFactory {
             Sponge.getCauseStackManager().pushCause(locatable);
 
             final Map<Direction, BlockState> neighbors = new HashMap<>();
-            for (Object obj : notifiedSides) {
-                EnumFacing notifiedSide = (EnumFacing) obj;
-                BlockPos offset = sourcePos.offset(notifiedSide);
-
-                Direction direction = DirectionFacingProvider.getInstance().getKey(notifiedSide).get();
-                Location<World> location = new Location<>(world, VecHelper.toVector3i(offset));
-                if (location.getBlockY() >= 0 && location.getBlockY() <= 255) {
-                    neighbors.put(direction, location.getBlock());
-                }
+            for (EnumFacing notificationSide : notifiedSides) {
+                BlockPos offset = sourcePos.offset(notificationSide);
+                Direction direction = DirectionFacingProvider.getInstance().getKey(notificationSide).get();
+                final IBlockState notificationState = ((WorldServer) world).getBlockState(offset);
+                neighbors.put(direction, (BlockState) notificationState);
             }
 
             NotifyNeighborBlockEvent event =

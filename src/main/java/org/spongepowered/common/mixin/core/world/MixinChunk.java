@@ -107,9 +107,12 @@ import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMapEntry;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
+import org.spongepowered.common.registry.type.world.BlockChangeFlagRegistryModule;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.common.world.extent.ExtentViewDownsize;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBiomeVolumeWorker;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
@@ -420,13 +423,13 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     @Override
     public boolean setBlock(int x, int y, int z, BlockState block) {
         checkBlockBounds(x, y, z);
-        return BlockUtil.setBlockState((net.minecraft.world.chunk.Chunk) (Object) this, x, y, z, block, false);
+        return this.world.setBlockState(new BlockPos(x, y, z), (IBlockState) block, BlockChangeFlagRegistryModule.Flags.ALL);
     }
 
     @Override
     public boolean setBlock(int x, int y, int z, BlockState block, BlockChangeFlag flag) {
-        return BlockUtil.setBlockState((net.minecraft.world.chunk.Chunk) (Object) this, (this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15),
-                block, flag.updateNeighbors());
+        checkBlockBounds(x, y, z);
+        return this.world.setBlockState(new BlockPos(x, y, z), (IBlockState) block, ((SpongeBlockChangeFlag) flag).getRawFlag());
     }
 
     @Override
@@ -593,32 +596,25 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         IBlockState iblockstate1 = this.getBlockState(pos);
 
         // Sponge - reroute to new method that accepts snapshot to prevent a second snapshot from being created.
-        return setBlockState(pos, state, iblockstate1, null, BlockChangeFlags.ALL);
-    }
-
-    @Nullable
-    @Override
-    public IBlockState setBlockState(BlockPos pos, IBlockState newState, IBlockState currentState, @Nullable BlockSnapshot originalBlockSnapshot) {
-        return this.setBlockState(pos, newState, currentState, originalBlockSnapshot, BlockChangeFlags.ALL);
+        return setBlockState(pos, state, iblockstate1, BlockChangeFlags.ALL);
     }
 
     /**
      * @author blood - November 2015
      * @author gabizou - updated April 10th, 2016 - Add cause tracking refactor changes
      * @author gabizou - Updated June 26th, 2018 - Bulk capturing changes
+     * @author gabizou - March 4th, 2019 - Refactoring and cleanup with multipos captures
      *
      *
      * @param pos The position changing
      * @param newState The new state
      * @param currentState The current state - passed in from either chunk or world
-     * @param newBlockSnapshot The new snapshot. This can be null when calling {@link MixinChunk#setBlockState(BlockPos, IBlockState)} directly,
-     *      as there's no block snapshot to change.
      * @return The changed block state if not null
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     @Nullable
-    public IBlockState setBlockState(BlockPos pos, IBlockState newState, IBlockState currentState, @Nullable BlockSnapshot newBlockSnapshot, BlockChangeFlag flag) {
+    public IBlockState setBlockState(BlockPos pos, IBlockState newState, IBlockState currentState, BlockChangeFlag flag) {
         int xPos = pos.getX() & 15;
         int yPos = pos.getY();
         int zPos = pos.getZ() & 15;
@@ -668,15 +664,21 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         // if (block1 != block) // Sponge - Forge removes this change.
         {
             if (!this.world.isRemote) {
+                final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
+                final IPhaseState state = peek.state;
                 // Sponge - Forge adds this change for block changes to only fire events when necessary
-                if (currentBlock != newBlock) {
+                if (currentBlock != newBlock && !state.tracksTileEntityChanges(peek.context)) { // cache the block break in the event we're capturing tiles
                     currentBlock.breakBlock(this.world, pos, currentState);
                 }
                 // Sponge - Add several tile entity hook checks. Mainly for forge added hooks, but these
                 // still work by themselves in vanilla.
                 TileEntity te = this.getTileEntity(pos, EnumCreateEntityType.CHECK);
                 if (te != null && SpongeImplHooks.shouldRefresh(te, this.world, pos, currentState, newState)) {
-                    this.world.removeTileEntity(pos);
+                    if (state.tracksTileEntityChanges(peek.context)) {
+                        state.captureTileEntityReplacement(peek.context, (IMixinWorldServer) this.world, pos, te, null);
+                    } else {
+                        this.world.removeTileEntity(pos);
+                    }
                 }
             // } else if (currentBlock instanceof ITileEntityProvider) { // Sponge - remove since forge has a special hook we need to add here
             } else if (SpongeImplHooks.hasBlockTileEntity(currentBlock, currentState)) {
@@ -725,7 +727,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
             // a BlockContainer. Prevents blocks such as TNT from activating when cancelled.
             // Occasionally, certain phase states will need to prevent onBlockAdded to be called until after the tile entity tracking
             // has been done, in the event of restores needing to re-override the block changes.
-            if (!isBulkCapturing || (SpongeImplHooks.hasBlockTileEntity(newBlock, newState) && !state.tracksTileEntityChanges(peek.context, this.world, pos))) {
+            if (!isBulkCapturing || (SpongeImplHooks.hasBlockTileEntity(newBlock, newState) && !state.tracksTileEntityChanges(peek.context))) {
                 // The new block state is null if called directly from Chunk#setBlockState(BlockPos, IBlockState)
                 // If it is null, then directly call the onBlockAdded logic.
                 if (flag.performBlockPhysics()) {

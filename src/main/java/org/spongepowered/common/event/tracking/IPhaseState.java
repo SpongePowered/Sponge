@@ -844,12 +844,11 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         return false;
     }
 
-    default boolean capturesNeighborNotifications(C context, IMixinWorldServer mixinWorld, BlockPos notifyPos, Block sourceBlock,
+    default void capturesNeighborNotifications(C context, IMixinWorldServer mixinWorld, BlockPos notifyPos, Block sourceBlock,
         IBlockState iblockstate, BlockPos sourcePos) {
-        return false;
     }
     default void captureBlockChange(C phaseContext, BlockPos pos, SpongeBlockSnapshot originalBlockSnapshot, IBlockState newState,
-        @Nullable TileEntity tileEntity) {
+        BlockChangeFlag flags, @Nullable TileEntity tileEntity) {
         phaseContext.getCapturedBlockSupplier().put(originalBlockSnapshot, newState);
 
     }
@@ -858,7 +857,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
 
     }
 
-    default boolean tracksTileEntityChanges(C currentContext, net.minecraft.world.World thisWorld, BlockPos pos) {
+    default boolean tracksTileEntityChanges(C currentContext) {
         return false;
     }
 
@@ -883,8 +882,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     default boolean hasSpecificBlockProcess() {
         return false;
     }
-    default boolean processTransactions(List<Transaction<BlockSnapshot>> transactions, PhaseContext<?> phaseContext, boolean noCancelledTransactions, ListMultimap<BlockPos, BlockEventData> scheduledEvents,
-        int currentDepth) {
-        throw new IllegalStateException("Nope");
+    default boolean doesCaptureNeighborNotifications(C context) {
+        return false;
     }
 }

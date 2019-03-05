@@ -32,7 +32,6 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.Sponge;
@@ -47,6 +46,7 @@ import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
+import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.BlockUtil;
@@ -166,7 +166,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
     }
 
     @Override
-    public boolean tracksTileEntityChanges(TileEntityTickContext currentContext, World thisWorld, BlockPos pos) {
+    public boolean tracksTileEntityChanges(TileEntityTickContext currentContext) {
         return this.doesBulkBlockCapture(currentContext);
     }
 
@@ -250,10 +250,9 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
     }
 
     @Override
-    public boolean capturesNeighborNotifications(TileEntityTickContext context, IMixinWorldServer mixinWorld, BlockPos notifyPos, Block sourceBlock,
+    public void capturesNeighborNotifications(TileEntityTickContext context, IMixinWorldServer mixinWorld, BlockPos notifyPos, Block sourceBlock,
         IBlockState iblockstate, BlockPos sourcePos) {
-        context.getCapturedBlockSupplier().captureNeighborNotification(context, mixinWorld, notifyPos, iblockstate, sourceBlock, sourcePos);
-        return true;
+        context.getCapturedBlockSupplier().captureNeighborNotification(mixinWorld, notifyPos, iblockstate, sourceBlock, sourcePos);
     }
 
     @Override
@@ -270,8 +269,13 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
 
     @Override
     public void captureBlockChange(TileEntityTickContext phaseContext, BlockPos pos, SpongeBlockSnapshot originalBlockSnapshot,
-        IBlockState newState, @Nullable net.minecraft.tileentity.TileEntity tileEntity) {
-        phaseContext.getCapturedBlockSupplier().logBlockChange(originalBlockSnapshot, newState, pos, tileEntity);
+        IBlockState newState, BlockChangeFlag flags, @Nullable net.minecraft.tileentity.TileEntity tileEntity) {
+        phaseContext.getCapturedBlockSupplier().logBlockChange(originalBlockSnapshot, newState, pos, flags, tileEntity);
+    }
+
+    @Override
+    public boolean doesCaptureNeighborNotifications(TileEntityTickContext context) {
+        return context.allowsBulkBlockCaptures();
     }
 
     @Override
@@ -289,11 +293,6 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
         return true;
     }
 
-    @Override
-    public boolean processTransactions(List<Transaction<BlockSnapshot>> transactions, PhaseContext<?> phaseContext, boolean noCancelledTransactions,
-        ListMultimap<BlockPos, BlockEventData> scheduledEvents, int currentDepth) {
-        return phaseContext.getCapturedBlockSupplier().processTransactions(transactions, phaseContext, noCancelledTransactions, scheduledEvents, currentDepth);
-    }
     @Override
     public String toString() {
         return this.name;

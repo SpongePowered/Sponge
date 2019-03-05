@@ -609,9 +609,9 @@ public final class PhaseTracker {
             // Maybe? I don't think this is wise to try and sync back a notification on the main thread.
             return;
         }
-        final IBlockState iblockstate = ((WorldServer) mixinWorld).getBlockState(notifyPos);
+        final IBlockState notifyState = ((WorldServer) mixinWorld).getBlockState(notifyPos);
 
-        performNeighborNotificationOnTarget(mixinWorld, notifyPos, sourceBlock, sourcePos, iblockstate);
+        performNeighborNotificationOnTarget(mixinWorld, notifyPos, sourceBlock, sourcePos, notifyState);
     }
 
     @SuppressWarnings("rawtypes")
@@ -627,14 +627,15 @@ public final class PhaseTracker {
             // If the phase state does not want to allow neighbor notifications to leak while processing,
             // it needs to be able to do so. It will replay the notifications in the order in which they were received,
             // such that the notification will be sent out in the same order as the block changes that may have taken place.
-            if (state.capturesNeighborNotifications(peek.context, mixinWorld, notifyPos, sourceBlock, iblockstate, sourcePos)) {
+            if (state.doesCaptureNeighborNotifications(peek.context)) {
+                state.capturesNeighborNotifications(peek.context, mixinWorld, notifyPos, sourceBlock, iblockstate, sourcePos);
                 return;
             }
             state.associateNeighborStateNotifier(peek.context, sourcePos, iblockstate.getBlock(), notifyPos, ((WorldServer) mixinWorld), PlayerTracker.Type.NOTIFIER);
             final LocatableBlock block = new SpongeLocatableBlockBuilder()
                 .world(((World) mixinWorld))
                 .position(sourcePos.getX(), sourcePos.getY(), sourcePos.getZ())
-                .state((BlockState) iblockstate).build();
+                .state((BlockState) sourceBlock.getDefaultState()).build();
             try (final NeighborNotificationContext context = TickPhase.Tick.NEIGHBOR_NOTIFY.createPhaseContext()
                 .source(block)
                 .sourceBlock(sourceBlock)
@@ -704,9 +705,6 @@ public final class PhaseTracker {
         if (chunk.isEmpty()) {
             return false;
         }
-        if (pos.getX() == -1077 && pos.getY() == 58 && pos.getZ() == -502 && newState.getBlock() == Blocks.WOOL) {
-            System.err.println("derp");
-        }
 
         final Block block = newState.getBlock();
         // Sponge Start - Up to this point, we've copied exactly what Vanilla minecraft does.
@@ -745,7 +743,7 @@ public final class PhaseTracker {
                     // Sponge End - continue with vanilla mechanics
                     // Also, call the direct method instead of letting the overwrites do their job, because we want to
                     // reduce the amount of nested calls
-                    final IBlockState iblockstate = ((IMixinChunk) chunk).setBlockState(pos, newState, chunk.getBlockState(pos), null, flag);
+                    final IBlockState iblockstate = ((IMixinChunk) chunk).setBlockState(pos, newState, chunk.getBlockState(pos), flag);
 
                     if (iblockstate == null) {
                         return false;
@@ -785,7 +783,7 @@ public final class PhaseTracker {
                 TrackingUtil.associateBlockChangeWithSnapshot(phaseState, newBlock, currentState, originalBlockSnapshot);
                 capturedSnapshots.add(originalBlockSnapshot);
                 final IMixinChunk mixinChunk = (IMixinChunk) chunk;
-                final IBlockState originalBlockState = mixinChunk.setBlockState(pos, newState, currentState, originalBlockSnapshot, BlockChangeFlags.ALL);
+                final IBlockState originalBlockState = mixinChunk.setBlockState(pos, newState, currentState, BlockChangeFlags.ALL);
                 if (originalBlockState == null) {
                     return false; // Return fast
                 }
@@ -817,7 +815,7 @@ public final class PhaseTracker {
             }
         }
         // Sponge End - continue with vanilla mechanics
-        final IBlockState iblockstate = ((IMixinChunk) chunk).setBlockState(pos, newState, currentState, null, flag);
+        final IBlockState iblockstate = ((IMixinChunk) chunk).setBlockState(pos, newState, currentState, flag);
 
         if (iblockstate == null) {
             return false;

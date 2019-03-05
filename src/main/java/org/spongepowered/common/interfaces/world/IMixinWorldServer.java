@@ -26,6 +26,7 @@ package org.spongepowered.common.interfaces.world;
 
 import net.minecraft.block.Block;
 import net.minecraft.tileentity.TileEntity;
+import org.spongepowered.common.event.tracking.context.BlockTransaction;
 import org.spongepowered.common.relocate.co.aikar.timings.WorldTimingsHandler;
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.BlockEventData;
@@ -116,4 +117,6 @@ public interface IMixinWorldServer extends IMixinWorld {
 
     void addPostEventBlockEvents(List<BlockEventData> events);
     void spongeNotifyNeighborsWithoutObservers(BlockPos sourcePos, Block sourceBlock, boolean b);
+
+    void setProxyAccess(@Nullable BlockTransaction changeBlock);
 }

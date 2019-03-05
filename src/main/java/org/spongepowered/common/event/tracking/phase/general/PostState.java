@@ -24,13 +24,18 @@
  */
 package org.spongepowered.common.event.tracking.phase.general;
 
+import com.google.common.collect.ListMultimap;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockEventData;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.event.block.ChangeBlockEvent;
+import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -39,6 +44,7 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.MultiBlockCaptureSupplier;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
@@ -50,6 +56,7 @@ import javax.annotation.Nullable;
 @SuppressWarnings("rawtypes")
 public final class PostState extends GeneralState<UnwindingPhaseContext> {
 
+    boolean requiresPost = false;
     @SuppressWarnings("unchecked")
     private static void postBlockAddedSpawns(UnwindingPhaseContext postContext, IPhaseState<?> unwindingState, PhaseContext<?> unwindingPhaseContext,
         MultiBlockCaptureSupplier capturedBlockSupplier, int depth) {
@@ -107,6 +114,47 @@ public final class PostState extends GeneralState<UnwindingPhaseContext> {
     @Override
     public boolean alreadyProcessingBlockItemDrops() {
         return true;
+    }
+
+    @Override
+    public boolean hasSpecificBlockProcess() {
+        return false;
+    }
+
+    @Override
+    public void captureBlockChange(UnwindingPhaseContext phaseContext, BlockPos pos, SpongeBlockSnapshot originalBlockSnapshot, IBlockState newState,
+        BlockChangeFlag flags, @Nullable TileEntity tileEntity) {
+        if (phaseContext.isPostingSpecialProcess()) {
+            phaseContext.getCapturedBlockSupplier().logBlockChange(originalBlockSnapshot, newState, pos, flags, tileEntity);
+        } else {
+            super.captureBlockChange(phaseContext, pos, originalBlockSnapshot, newState, flags, tileEntity);
+        }
+    }
+
+    @Override
+    public void captureTileEntityReplacement(UnwindingPhaseContext currentContext, IMixinWorldServer mixinWorldServer, BlockPos pos,
+        @Nullable TileEntity currenTile, @Nullable TileEntity tileEntity) {
+        currentContext.getCapturedBlockSupplier().logTileChange(mixinWorldServer, pos, currenTile, tileEntity);
+    }
+
+    @Override
+    public void capturesNeighborNotifications(UnwindingPhaseContext context, IMixinWorldServer mixinWorld, BlockPos notifyPos, Block sourceBlock,
+        IBlockState iblockstate, BlockPos sourcePos) {
+        context.getCapturedBlockSupplier().captureNeighborNotification(mixinWorld, notifyPos, iblockstate, sourceBlock, sourcePos);
+    }
+
+    @Override
+    public boolean getShouldCancelAllTransactions(UnwindingPhaseContext context, List<ChangeBlockEvent> blockEvents, ChangeBlockEvent.Post postEvent,
+        ListMultimap<BlockPos, BlockEventData> scheduledEvents, boolean noCancelledTransactions) {
+        return context.getUnwindingState().getShouldCancelAllTransactions(context.getUnwindingContext(), blockEvents, postEvent, scheduledEvents, noCancelledTransactions);
+    }
+
+    @Override
+    public void processCancelledTransaction(UnwindingPhaseContext context, Transaction<BlockSnapshot> transaction, BlockSnapshot original) {
+        if (context.isPostingSpecialProcess()) {
+            context.getCapturedBlockSupplier().cancelTransaction(original);
+        }
+        super.processCancelledTransaction(context, transaction, original);
     }
 
     @SuppressWarnings("unchecked")
@@ -200,6 +248,9 @@ public final class PostState extends GeneralState<UnwindingPhaseContext> {
     @Override
     public void performPostBlockNotificationsAndNeighborUpdates(UnwindingPhaseContext context,
         SpongeBlockSnapshot oldBlockSnapshot, IBlockState newState, SpongeBlockChangeFlag changeFlag, int depth) {
+        if (context.isPostingSpecialProcess()) {
+            return; // it will keep on going internally.
+        }
         if (PhaseTracker.checkMaxBlockProcessingDepth(this, context, depth)) {
             return;
         }
@@ -210,7 +261,7 @@ public final class PostState extends GeneralState<UnwindingPhaseContext> {
 
     @Override
     public boolean doesBulkBlockCapture(UnwindingPhaseContext context) {
-        return context.allowsBulkBlockCaptures();
+        return !context.isPostingSpecialProcess() && context.allowsBulkBlockCaptures();
     }
 
     /**

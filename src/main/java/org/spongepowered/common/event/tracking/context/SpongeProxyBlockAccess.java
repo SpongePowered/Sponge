@@ -22,51 +22,49 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world;
+package org.spongepowered.common.event.tracking.context;
 
-import com.google.common.collect.ImmutableList;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.WorldServer;
-import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.data.Transaction;
-import org.spongepowered.common.interfaces.world.IMixinLocation;
-import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Optional;
 
 public final class SpongeProxyBlockAccess implements IBlockAccess {
 
-    private final List<Transaction<BlockSnapshot>> transactions;
-    private final List<BlockPos> poses;
     private final LinkedHashMap<BlockPos, IBlockState> processed = new LinkedHashMap<>();
     private int index;
     private WorldServer processingWorld;
+    private BlockTransaction processingTransaction;
 
-    public SpongeProxyBlockAccess(List<Transaction<BlockSnapshot>> snapshotTransaction) {
-        this.transactions = snapshotTransaction;
-        this.poses = this.transactions.stream()
-            .map(transaction -> transaction.getOriginal().getLocation())
-            .filter(Optional::isPresent)
-            .map(Optional::get)
-            .map(VecHelper::toBlockPos)
-            .collect(ImmutableList.toImmutableList());
+    public SpongeProxyBlockAccess(IMixinWorldServer worldServer) {
         this.index = 0;
-        this.processingWorld = ((WorldServer) snapshotTransaction.get(0).getOriginal().getLocation().get().getExtent());
+        this.processingWorld = ((WorldServer) worldServer);
     }
 
-    public void proceed() {
-        this.processed.put(this.poses.get(this.index), ((IBlockState) this.transactions.get(this.index).getFinal().getState()));
+    public void proceed(BlockTransaction transaction, BlockPos pos, IBlockState state) {
+        this.processed.put(pos, state);
+        this.processingTransaction = transaction;
         this.index++;
     }
 
     @Override
     public TileEntity getTileEntity(BlockPos pos) {
+        if (this.processingTransaction instanceof BlockTransaction.TileEntityAdd) {
+            final TileEntity added = ((BlockTransaction.TileEntityAdd) this.processingTransaction).added;
+            if (added.getPos().equals(pos)) {
+                return added;
+            }
+        } else if (this.processingTransaction instanceof BlockTransaction.ReplaceTileEntity) {
+            final TileEntity added = ((BlockTransaction.ReplaceTileEntity) this.processingTransaction).added;
+            if (added.getPos().equals(pos)) {
+                return added;
+            }
+        }
         return this.processingWorld != null ? this.processingWorld.getTileEntity(pos) : null;
     }
 
@@ -75,14 +73,17 @@ public final class SpongeProxyBlockAccess implements IBlockAccess {
         if (this.processed.containsKey(pos)) { // first just check if there's already a pos list built.
             return this.processed.get(pos);
         }
-        Transaction<BlockSnapshot> unknown = this.transactions.get(this.index);
-        if (unknown != null) {
-            final BlockPos actualPos = this.poses.get(this.index);
-            if (pos.equals(actualPos)) {
-                return (IBlockState) unknown.getFinal().getState();
+        if (this.processingTransaction instanceof BlockTransaction.ChangeBlock) {
+            final BlockTransaction.ChangeBlock changeBlock = (BlockTransaction.ChangeBlock) this.processingTransaction;
+            if (changeBlock.original.getBlockPos().equals(pos)) {
+                return changeBlock.newState;
+            }
+        } else if (this.processingTransaction instanceof BlockTransaction.RemoveTileEntity) {
+            final BlockTransaction.RemoveTileEntity removeTile = (BlockTransaction.RemoveTileEntity) this.processingTransaction;
+            if (removeTile.removed.getPos().equals(pos)) {
+                return removeTile.newState;
             }
         }
-
         return this.processingWorld.getBlockState(pos);
     }
 
