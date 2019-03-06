@@ -38,7 +38,7 @@ public class TeleportingContext extends EntityContext<TeleportingContext> {
     }
 
     public WorldServer getTargetWorld() {
-        return targetWorld;
+        return this.targetWorld;
     }
 
     public TeleportingContext setTargetWorld(WorldServer targetWorld) {

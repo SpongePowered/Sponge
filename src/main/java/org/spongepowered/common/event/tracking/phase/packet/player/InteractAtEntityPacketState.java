@@ -165,8 +165,9 @@ public final class InteractAtEntityPacketState extends BasicPacketState {
 
             });
         }
-        context.getCapturedBlockSupplier()
-            .acceptAndClearIfNotEmpty(snapshots -> TrackingUtil.processBlockCaptures(snapshots, this, context));
+        // TODO - Determine if we need to pass the supplier or perform some parameterized
+        //  process if not empty method on the capture object.
+        TrackingUtil.processBlockCaptures(this, context);
     }
 
     @Override

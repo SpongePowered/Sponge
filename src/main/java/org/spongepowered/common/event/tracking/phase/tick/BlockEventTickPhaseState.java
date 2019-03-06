@@ -24,31 +24,41 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
-import com.flowpowered.math.vector.Vector3d;
+import com.google.common.collect.ListMultimap;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockEventData;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.server.management.PlayerChunkMapEntry;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.block.tileentity.TileEntity;
+import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
+import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.block.BlockUtil;
+import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
-import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMapEntry;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.world.BlockChange;
 
 import java.util.ArrayList;
@@ -63,18 +73,11 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
             super.getFrameModifier().andThen((frame, context) -> {
                 final IMixinBlockEventData blockEventData = context.getSource(IMixinBlockEventData.class).orElse(null);
                 if (blockEventData != null) {
-                    final TileEntity tileEntity = blockEventData.getTickTileEntity();
-                    final LocatableBlock locatableBlock = blockEventData.getTickBlock();
-                    if (tileEntity == null && locatableBlock == null) {
-                        return;
-                    }
-                    if (tileEntity != null) {
-                        frame.pushCause(tileEntity);
-                    } else {
-                        frame.pushCause(locatableBlock);
-                    }
-                    if (locatableBlock != null) {
-                        frame.addContext(EventContextKeys.BLOCK_EVENT_PROCESS, locatableBlock);
+                    if (blockEventData.getTickTileEntity() != null) {
+                        frame.pushCause(blockEventData.getTickTileEntity());
+                    } else if (blockEventData.getTickBlock() != null) {
+                        frame.pushCause(blockEventData.getTickBlock());
+                        frame.addContext(EventContextKeys.BLOCK_EVENT_PROCESS, blockEventData.getTickBlock());
                     }
                 }
             });
@@ -92,6 +95,26 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
     @Override
     public BiConsumer<CauseStackManager.StackFrame, BlockEventTickContext> getFrameModifier() {
         return this.FRAME_MODIFIER;
+    }
+
+    @Override
+    public void capturesNeighborNotifications(BlockEventTickContext context, IMixinWorldServer mixinWorld, BlockPos notifyPos, Block sourceBlock,
+        IBlockState iblockstate, BlockPos sourcePos) {
+        context.getCapturedBlockSupplier().captureNeighborNotification(mixinWorld, notifyPos, iblockstate, sourceBlock, sourcePos);
+    }
+
+    @Override
+    public boolean shouldCaptureBlockChangeOrSkip(BlockEventTickContext phaseContext, BlockPos pos,
+        IBlockState currentState, IBlockState newState,
+        BlockChangeFlag flags) {
+
+        return true;
+    }
+
+    @Override
+    public void captureBlockChange(BlockEventTickContext phaseContext, BlockPos pos, SpongeBlockSnapshot originalBlockSnapshot,
+        IBlockState newState, BlockChangeFlag flags, @Nullable TileEntity tileEntity) {
+        phaseContext.getCapturedBlockSupplier().logBlockChange(originalBlockSnapshot, newState, pos, flags);
     }
 
     @Override
@@ -116,6 +139,11 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
     }
 
     @Override
+    public boolean doesBulkBlockCapture(BlockEventTickContext context) {
+        return true;
+    }
+
+    @Override
     public boolean doesCaptureEntitySpawns() {
         return false;
     }
@@ -124,13 +152,12 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
     public void postBlockTransactionApplication(BlockChange blockChange,
         Transaction<BlockSnapshot> snapshotTransaction, BlockEventTickContext context) {
         final Block block = (Block) snapshotTransaction.getOriginal().getState().getType();
-        final Location<World> changedLocation = snapshotTransaction.getOriginal().getLocation().get();
-        final Vector3d changedPosition = changedLocation.getPosition();
-        final BlockPos changedBlockPos = VecHelper.toBlockPos(changedPosition);
-        final IMixinChunk changedMixinChunk = (IMixinChunk) ((WorldServer) changedLocation.getExtent()).getChunk(changedBlockPos);
+        final SpongeBlockSnapshot original = (SpongeBlockSnapshot) snapshotTransaction.getOriginal();
+        final BlockPos changedBlockPos = original.getBlockPos();
+        final IMixinChunk changedMixinChunk = (IMixinChunk) original.getWorldServer().getChunk(changedBlockPos);
         changedMixinChunk.getBlockOwner(changedBlockPos)
                 .ifPresent(owner -> changedMixinChunk.addTrackedBlockPosition(block, changedBlockPos, owner, PlayerTracker.Type.OWNER));
-        final User user = TrackingUtil.getNotifierOrOwnerFromBlock(changedLocation);
+        final User user = TrackingUtil.getNotifierOrOwnerFromBlock(original.getWorldServer(), changedBlockPos);
         if (user != null) {
             changedMixinChunk.addTrackedBlockPosition(block, changedBlockPos, user, PlayerTracker.Type.NOTIFIER);
         }
@@ -140,8 +167,7 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
     public void unwind(BlockEventTickContext context) {
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.CUSTOM);
-            context.getCapturedBlockSupplier()
-                    .acceptAndClearIfNotEmpty(blockSnapshots -> TrackingUtil.processBlockCaptures(blockSnapshots, this, context));
+            TrackingUtil.processBlockCaptures(this, context);
             context.getCapturedItemsSupplier()
                     .acceptAndClearIfNotEmpty(items -> {
                         final ArrayList<Entity> capturedEntities = new ArrayList<>();
@@ -151,6 +177,76 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
                         SpongeCommonEventFactory.callSpawnEntity(capturedEntities, context);
                     });
         }
+    }
+
+    @Override
+    public boolean getShouldCancelAllTransactions(BlockEventTickContext context, List<ChangeBlockEvent> blockEvents, ChangeBlockEvent.Post postEvent,
+        ListMultimap<BlockPos, BlockEventData> scheduledEvents, boolean noCancelledTransactions) {
+        if (!(context.getSource() instanceof TileEntity)) {
+            // we have a LocatableBlock.
+            final LocatableBlock source = (LocatableBlock) context.getSource();
+            // Basically, if the source was a tile entity, and during the block event, it changed?
+            // and if any of the transaction cancelled, the whole thing should be cancelled.
+            if (SpongeImplHooks.hasBlockTileEntity(BlockUtil.toBlock(source.getBlockState()), BlockUtil.toNative(source.getBlockState()))) {
+                context.setWasNotCancelled(noCancelledTransactions);
+                return !noCancelledTransactions;
+            }
+            context.setWasNotCancelled(noCancelledTransactions);
+            return !noCancelledTransactions;
+        }
+        if (!postEvent.getTransactions().isEmpty()) {
+            return postEvent.getTransactions().stream().anyMatch(transaction -> {
+                final BlockState state = transaction.getOriginal().getState();
+                final BlockType type = state.getType();
+                final boolean hasTile = SpongeImplHooks.hasBlockTileEntity((Block) type, BlockUtil.toNative(state));
+                if (!hasTile && !transaction.getIntermediary().isEmpty()) { // Check intermediary
+                    return transaction.getIntermediary().stream().anyMatch(inter -> {
+                        final BlockState iterState = inter.getState();
+                        final BlockType interType = state.getType();
+                        final boolean interMediaryHasTile = SpongeImplHooks.hasBlockTileEntity((Block) interType, BlockUtil.toNative(iterState));
+                        context.setWasNotCancelled(!interMediaryHasTile);
+                        return interMediaryHasTile;
+                    });
+                }
+                context.setWasNotCancelled(!hasTile);
+                return hasTile;
+            });
+        }
+        context.setWasNotCancelled(noCancelledTransactions);
+        return !noCancelledTransactions;
+    }
+
+    @Override
+    public boolean tracksTileEntityChanges(BlockEventTickContext currentContext) {
+        return true;
+    }
+
+    @Override
+    public void captureTileEntityReplacement(BlockEventTickContext currentContext, IMixinWorldServer mixinWorldServer, BlockPos pos,
+        @Nullable TileEntity currenTile, @Nullable TileEntity tileEntity) {
+        currentContext.getCapturedBlockSupplier().logTileChange(mixinWorldServer, pos, currenTile, tileEntity);
+    }
+
+    @Override
+    public void processCancelledTransaction(BlockEventTickContext context, Transaction<BlockSnapshot> transaction, BlockSnapshot original) {
+        context.getCapturedBlockSupplier().cancelTransaction(original);
+        final WorldServer worldServer = ((SpongeBlockSnapshot) original).getWorldServer();
+        final Chunk chunk = worldServer.getChunk(((SpongeBlockSnapshot) original).getBlockPos());
+        final PlayerChunkMapEntry entry = worldServer.getPlayerChunkMap().getEntry(chunk.x, chunk.z);
+        if (entry != null) {
+            ((IMixinPlayerChunkMapEntry) entry).markBiomesForUpdate();
+        }
+        super.processCancelledTransaction(context, transaction, original);
+    }
+
+    @Override
+    public boolean hasSpecificBlockProcess() {
+        return true;
+    }
+
+    @Override
+    public boolean doesCaptureNeighborNotifications(BlockEventTickContext context) {
+        return true;
     }
 
     @Override

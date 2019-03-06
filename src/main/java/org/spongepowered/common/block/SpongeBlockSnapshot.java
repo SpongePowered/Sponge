@@ -25,6 +25,7 @@
 package org.spongepowered.common.block;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.MoreObjects;
@@ -72,10 +73,12 @@ import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.block.TileEntityTypeRegistryModule;
+import org.spongepowered.common.registry.type.world.BlockChangeFlagRegistryModule;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
+import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -105,9 +108,10 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     // Internal use only
     private final BlockPos blockPos;
     private SpongeBlockChangeFlag changeFlag;
+    @Nullable private WeakReference<WorldServer> world;
     public BlockChange blockChange; // used for post event
 
-    public SpongeBlockSnapshot(SpongeBlockSnapshotBuilder builder) {
+    SpongeBlockSnapshot(SpongeBlockSnapshotBuilder builder) {
         this.blockState = checkNotNull(builder.blockState, "The block state was null!");
         this.extendedState = builder.extendedState;
         this.worldUniqueId = checkNotNull(builder.worldUuid, "The world UUID was null");
@@ -188,8 +192,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
             }
             IBlockState current = world.getBlockState(pos);
             IBlockState replaced = (IBlockState) this.blockState;
-            if (!force && (current.getBlock() != replaced.getBlock() || current.getBlock().getMetaFromState(current) != replaced.getBlock()
-                .getMetaFromState(replaced))) {
+            if (!force && (current.getBlock() != replaced.getBlock() || current != replaced)) {
                 return false;
             }
 
@@ -198,8 +201,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
 //                world.removeTileEntity(pos);
 //            }
             world.removeTileEntity(pos);
-            PhaseTracker.getInstance().setBlockState(mixinWorldServer, pos, replaced, flag);
-            world.getPlayerChunkMap().markBlockForUpdate(pos);
+            PhaseTracker.getInstance().setBlockState(mixinWorldServer, pos, replaced, BlockChangeFlagRegistryModule.andNotifyClients(flag));
             if (this.compound != null) {
                 TileEntity te = world.getTileEntity(pos);
                 if (te != null) {
@@ -244,6 +246,8 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
                 }
 
             }
+            // Finally, mark the location as being updated.
+            world.getPlayerChunkMap().markBlockForUpdate(pos);
             return true;
         }
     }
@@ -265,6 +269,13 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
             return Optional.of(new Location<>(worldOptional.get(), this.getPosition()));
         }
         return Optional.empty();
+    }
+
+    public WorldServer getWorldServer() {
+        if (this.world == null) {
+            this.world = new WeakReference<>((WorldServer) SpongeImpl.getGame().getServer().getWorld(this.worldUniqueId).orElseThrow(() -> new IllegalStateException("WorldServer not found for UUID: " + this.worldUniqueId)));
+        }
+        return checkNotNull(this.world.get(), "WeakReference to WorldServer is null!");
     }
 
     @Override

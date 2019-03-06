@@ -32,7 +32,6 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.event.forge.IMixinWorldTickEvent;
 
 import javax.annotation.Nullable;
 
@@ -44,9 +43,10 @@ final class PreWorldTickListenerState extends ListenerPhaseState {
     @Override
     public void unwind(ListenerPhaseContext phaseContext) {
 
-        phaseContext.getCapturedBlockSupplier().acceptAndClearIfNotEmpty(blocks -> {
-            TrackingUtil.processBlockCaptures(blocks, this, phaseContext);
-        });    }
+        // TODO - Determine if we need to pass the supplier or perform some parameterized
+        //  process if not empty method on the capture object.
+        TrackingUtil.processBlockCaptures(this, phaseContext);
+    }
 
     @Override
     public void associateNeighborBlockNotifier(ListenerPhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,

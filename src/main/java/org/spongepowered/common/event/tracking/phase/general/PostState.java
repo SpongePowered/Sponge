@@ -24,20 +24,29 @@
  */
 package org.spongepowered.common.event.tracking.phase.general;
 
+import com.google.common.collect.ListMultimap;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockEventData;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.event.block.ChangeBlockEvent;
+import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.context.CapturedSupplier;
+import org.spongepowered.common.event.tracking.context.MultiBlockCaptureSupplier;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.world.BlockChange;
+import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,9 +56,10 @@ import javax.annotation.Nullable;
 @SuppressWarnings("rawtypes")
 public final class PostState extends GeneralState<UnwindingPhaseContext> {
 
+    boolean requiresPost = false;
     @SuppressWarnings("unchecked")
     private static void postBlockAddedSpawns(UnwindingPhaseContext postContext, IPhaseState<?> unwindingState, PhaseContext<?> unwindingPhaseContext,
-        CapturedSupplier<BlockSnapshot> capturedBlockSupplier, int depth) {
+        MultiBlockCaptureSupplier capturedBlockSupplier, int depth) {
         if (PhaseTracker.checkMaxBlockProcessingDepth(GeneralPhase.Post.UNWINDING, postContext, depth)) {
             return;
         }
@@ -58,10 +68,7 @@ public final class PostState extends GeneralState<UnwindingPhaseContext> {
             final ArrayList<Entity> capturedEntities = new ArrayList<>(entities);
             ((IPhaseState) unwindingState).postProcessSpawns(unwindingPhaseContext, capturedEntities);
         });
-        capturedBlockSupplier.acceptAndClearIfNotEmpty(blocks -> {
-            final List<BlockSnapshot> blockSnapshots = new ArrayList<>(blocks);
-            TrackingUtil.processBlockCaptures(blockSnapshots, GeneralPhase.Post.UNWINDING, postContext, depth);
-        });
+        TrackingUtil.processBlockCaptures(GeneralPhase.Post.UNWINDING, postContext, depth);
     }
 
     @Override
@@ -107,6 +114,47 @@ public final class PostState extends GeneralState<UnwindingPhaseContext> {
     @Override
     public boolean alreadyProcessingBlockItemDrops() {
         return true;
+    }
+
+    @Override
+    public boolean hasSpecificBlockProcess() {
+        return false;
+    }
+
+    @Override
+    public void captureBlockChange(UnwindingPhaseContext phaseContext, BlockPos pos, SpongeBlockSnapshot originalBlockSnapshot, IBlockState newState,
+        BlockChangeFlag flags, @Nullable TileEntity tileEntity) {
+        if (phaseContext.isPostingSpecialProcess()) {
+            phaseContext.getCapturedBlockSupplier().logBlockChange(originalBlockSnapshot, newState, pos, flags);
+        } else {
+            super.captureBlockChange(phaseContext, pos, originalBlockSnapshot, newState, flags, tileEntity);
+        }
+    }
+
+    @Override
+    public void captureTileEntityReplacement(UnwindingPhaseContext currentContext, IMixinWorldServer mixinWorldServer, BlockPos pos,
+        @Nullable TileEntity currenTile, @Nullable TileEntity tileEntity) {
+        currentContext.getCapturedBlockSupplier().logTileChange(mixinWorldServer, pos, currenTile, tileEntity);
+    }
+
+    @Override
+    public void capturesNeighborNotifications(UnwindingPhaseContext context, IMixinWorldServer mixinWorld, BlockPos notifyPos, Block sourceBlock,
+        IBlockState iblockstate, BlockPos sourcePos) {
+        context.getCapturedBlockSupplier().captureNeighborNotification(mixinWorld, notifyPos, iblockstate, sourceBlock, sourcePos);
+    }
+
+    @Override
+    public boolean getShouldCancelAllTransactions(UnwindingPhaseContext context, List<ChangeBlockEvent> blockEvents, ChangeBlockEvent.Post postEvent,
+        ListMultimap<BlockPos, BlockEventData> scheduledEvents, boolean noCancelledTransactions) {
+        return context.getUnwindingState().getShouldCancelAllTransactions(context.getUnwindingContext(), blockEvents, postEvent, scheduledEvents, noCancelledTransactions);
+    }
+
+    @Override
+    public void processCancelledTransaction(UnwindingPhaseContext context, Transaction<BlockSnapshot> transaction, BlockSnapshot original) {
+        if (context.isPostingSpecialProcess()) {
+            context.getCapturedBlockSupplier().cancelTransaction(original);
+        }
+        super.processCancelledTransaction(context, transaction, original);
     }
 
     @SuppressWarnings("unchecked")
@@ -161,16 +209,13 @@ public final class PostState extends GeneralState<UnwindingPhaseContext> {
      */
     @SuppressWarnings("unchecked")
     private void postDispatch(IPhaseState<?> unwindingState, PhaseContext<?> unwindingContext, UnwindingPhaseContext postContext) {
-        final List<BlockSnapshot> contextBlocks = postContext.getCapturedBlocksOrEmptyList();
         final List<Entity> contextEntities = postContext.getCapturedEntitiesOrEmptyList();
         final List<Entity> contextItems = (List<Entity>) (List<?>) postContext.getCapturedItemsOrEmptyList();
-        if (contextBlocks.isEmpty() && contextEntities.isEmpty() && contextItems.isEmpty()) {
+        if (postContext.getCapturedBlockSupplier().isEmpty() && contextEntities.isEmpty() && contextItems.isEmpty()) {
             return;
         }
-        if (!contextBlocks.isEmpty()) {
-            final List<BlockSnapshot> blockSnapshots = new ArrayList<>(contextBlocks);
-            contextBlocks.clear();
-            TrackingUtil.processBlockCaptures(blockSnapshots, this, postContext);
+        if (!postContext.getCapturedBlockSupplier().isEmpty()) {
+            TrackingUtil.processBlockCaptures(this, postContext);
         }
         if (!contextEntities.isEmpty()) {
             final ArrayList<Entity> entities = new ArrayList<>(contextEntities);
@@ -201,22 +246,22 @@ public final class PostState extends GeneralState<UnwindingPhaseContext> {
     }
 
     @Override
-    public void performPostBlockNotificationsAndNeighborUpdates(UnwindingPhaseContext context, int depth) {
+    public void performPostBlockNotificationsAndNeighborUpdates(UnwindingPhaseContext context,
+        SpongeBlockSnapshot oldBlockSnapshot, IBlockState newState, SpongeBlockChangeFlag changeFlag, int depth) {
+        if (context.isPostingSpecialProcess()) {
+            return; // it will keep on going internally.
+        }
         if (PhaseTracker.checkMaxBlockProcessingDepth(this, context, depth)) {
             return;
         }
         context.setBulkBlockCaptures(false);
-        final CapturedSupplier<BlockSnapshot> capturedBlockSupplier = context.getCapturedBlockSupplier();
-        capturedBlockSupplier.acceptAndClearIfNotEmpty(blocks -> {
-            final List<BlockSnapshot> blockSnapshots = new ArrayList<>(blocks);
-            blocks.clear();
-            TrackingUtil.processBlockCaptures(blockSnapshots, this, context, depth);
-        });
+        TrackingUtil.processBlockCaptures(this, context, depth);
+
     }
 
     @Override
     public boolean doesBulkBlockCapture(UnwindingPhaseContext context) {
-        return context.allowsBulkBlockCaptures();
+        return !context.isPostingSpecialProcess() && context.allowsBulkBlockCaptures();
     }
 
     /**

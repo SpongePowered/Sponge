@@ -111,11 +111,15 @@ public interface IMixinTileEntity extends IMixinTrackable {
 
     @Nullable IMixinChunk getActiveChunk();
 
-    void setActiveChunk(IMixinChunk chunk);
+    void setActiveChunk(@Nullable IMixinChunk chunk);
 
     boolean shouldTick();
 
     boolean isTicking();
 
     void setIsTicking(boolean ticking);
+
+    boolean isCaptured();
+
+    void setCaptured(boolean captured);
 }

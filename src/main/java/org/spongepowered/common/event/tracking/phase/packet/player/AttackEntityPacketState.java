@@ -85,11 +85,8 @@ public final class AttackEntityPacketState extends BasicPacketState {
 
     @Override
     public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, BasicPacketContext context) {
-        final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.getHeldItemMainhand());
-        if(stack != null) {
-            context.itemUsed(stack);
-        }
-        context.handUsed(HandTypes.MAIN_HAND);
+        context.itemUsed(ItemStackUtil.cloneDefensive(playerMP.getHeldItemMainhand()))
+            .handUsed(HandTypes.MAIN_HAND);
     }
 
 
@@ -118,8 +115,9 @@ public final class AttackEntityPacketState extends BasicPacketState {
                 printer.add(new Exception("Stack trace"));
                 printer.trace(System.err, SpongeImpl.getLogger(), Level.TRACE);
             });
-        context.getCapturedBlockSupplier()
-            .acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
+        // TODO - Determine if we need to pass the supplier or perform some parameterized
+        //  process if not empty method on the capture object.
+        TrackingUtil.processBlockCaptures(this, context);
         context.getPerEntityItemDropSupplier().acceptAndClearIfNotEmpty(map -> {
             for (Map.Entry<UUID, Collection<ItemDropData>> entry : map.asMap().entrySet()) {
                 final UUID key = entry.getKey();

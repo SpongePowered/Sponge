@@ -45,9 +45,8 @@ import java.util.Optional;
 
 public final class ItemTypeRegistryModule implements SpongeAdditionalCatalogRegistryModule<ItemType>, AlternateCatalogRegistryModule<ItemType> {
 
-    public static Item NONE_ITEM;
-    public static ItemStack NONE;
-    public static ItemStackSnapshot NONE_SNAPSHOT;
+    public final ItemStack NONE = (ItemStack) net.minecraft.item.ItemStack.EMPTY;
+    public final ItemStackSnapshot NONE_SNAPSHOT = NONE.createSnapshot();
 
     public static ItemTypeRegistryModule getInstance() {
         return Holder.INSTANCE;
@@ -62,7 +61,7 @@ public final class ItemTypeRegistryModule implements SpongeAdditionalCatalogRegi
         for (Map.Entry<String, ItemType> entry : this.itemTypeMappings.entrySet()) {
             itemTypeMap.put(entry.getKey().replace("minecraft:", ""), entry.getValue());
         }
-        itemTypeMap.put("none", ((ItemType) ItemTypeRegistryModule.NONE_ITEM));
+        itemTypeMap.put("none", ((ItemType) this.NONE.getType()));
         return itemTypeMap;
     }
 
@@ -96,10 +95,6 @@ public final class ItemTypeRegistryModule implements SpongeAdditionalCatalogRegi
 
     @Override
     public void registerDefaults() {
-        ItemTypeRegistryModule.NONE_ITEM = net.minecraft.item.ItemStack.EMPTY.getItem();;
-        ItemTypeRegistryModule.NONE = (ItemStack) net.minecraft.item.ItemStack.EMPTY;
-        ItemTypeRegistryModule.NONE_SNAPSHOT = NONE.createSnapshot();
-
         setItemNone();
     }
 

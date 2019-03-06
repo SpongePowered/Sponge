@@ -36,8 +36,8 @@ import javax.annotation.Nullable;
 public final class UnwindingPhaseContext extends GeneralPhaseContext<UnwindingPhaseContext> {
 
     @Nullable
-    public static UnwindingPhaseContext unwind(IPhaseState<?> state, PhaseContext<?> context) {
-        if (!state.requiresPost() || !context.hasCaptures()) {
+    public static UnwindingPhaseContext unwind(IPhaseState<?> state, PhaseContext<?> context, boolean hasCaptures) {
+        if (!state.requiresPost() || !hasCaptures) {
             return null;
         }
         return new UnwindingPhaseContext(state, context)
@@ -46,14 +46,19 @@ public final class UnwindingPhaseContext extends GeneralPhaseContext<UnwindingPh
                 .buildAndSwitch();
     }
 
-    private IPhaseState<?> unwindingState;
+    private final IPhaseState<?> unwindingState;
 
-    private PhaseContext<?> unwindingContext;
+    private final PhaseContext<?> unwindingContext;
 
+    private boolean tracksTiles;
+
+    @SuppressWarnings("unchecked")
     private UnwindingPhaseContext(IPhaseState<?> unwindingState, PhaseContext<?> unwindingContext) {
         super(GeneralPhase.Post.UNWINDING);
         this.unwindingState = unwindingState;
         this.unwindingContext = unwindingContext;
+        this.tracksTiles = unwindingState.hasSpecificBlockProcess();
+        setBulkBlockCaptures(!this.tracksTiles);
     }
 
     @Override
@@ -75,12 +80,17 @@ public final class UnwindingPhaseContext extends GeneralPhaseContext<UnwindingPh
         return this.unwindingState;
     }
 
+    public boolean isPostingSpecialProcess() {
+        return this.tracksTiles;
+    }
+
     @Override
     public PrettyPrinter printCustom(PrettyPrinter printer, int indent) {
         String s = String.format("%1$" + indent + "s", "");
         super.printCustom(printer, indent)
             .add(s + "- %s: %s", "UnwindingState", this.unwindingState)
-            .add(s + "- %s: %s", "UnwindingContext", this.unwindingContext);
+            .add(s + "- %s: %s", "UnwindingContext", this.unwindingContext)
+            .add(s + "- %s: %s", "IsPostingSpecial", this.tracksTiles);
         this.unwindingContext.printCustom(printer, indent * 2);
         return printer;
     }

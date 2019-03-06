@@ -639,8 +639,9 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
 
         // If a plugin or mod has changed the item, avoid restoring
-        if (!((PacketContext<?>) peek.context).getInteractItemChanged()) {
-            final ItemStack itemStack = ItemStackUtil.toNative(((PacketContext<?>) peek.context).getItemUsed());
+        final PacketContext<?> packetContext = (PacketContext<?>) peek.context;
+        if (!packetContext.getInteractItemChanged()) {
+            final ItemStack itemStack = ItemStackUtil.toNative(packetContext.getItemUsed());
 
             // Only do a restore if something actually changed. The client does an identity check ('==')
             // to determine if it should continue using an itemstack. If we always resend the itemstack, we end up
@@ -649,7 +650,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                 PacketPhaseUtil.handlePlayerSlotRestore((EntityPlayerMP) player, itemStack, hand);
             }
         }
-        ((PacketContext<?>) peek.context).interactItemChanged(false);
+        packetContext.interactItemChanged(false);
         SpongeCommonEventFactory.interactBlockRightClickEventCancelled = false;
         return actionResult;
     }

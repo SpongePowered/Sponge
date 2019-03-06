@@ -24,7 +24,9 @@
  */
 package org.spongepowered.common.event.tracking.phase.general;
 
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
+import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 
@@ -37,7 +39,8 @@ public class WorldUnload extends GeneralState<GeneralizedContext> {
 
 
     @Override
-    public boolean shouldCaptureBlockChangeOrSkip(GeneralizedContext phaseContext, BlockPos pos) {
+    public boolean shouldCaptureBlockChangeOrSkip(GeneralizedContext phaseContext, BlockPos pos, IBlockState currentState,
+        IBlockState newState, BlockChangeFlag flags) {
         return false;
     }
 

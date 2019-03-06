@@ -111,7 +111,7 @@ public final class PacketPhaseUtil {
     }
 
     public static void handlePlayerSlotRestore(EntityPlayerMP player, ItemStack itemStack, EnumHand hand) {
-        if (itemStack.isEmpty() || itemStack == ItemTypeRegistryModule.NONE) {
+        if (itemStack.isEmpty()) { // No need to check if it's NONE, NONE is checked by isEmpty.
             return;
         }
 

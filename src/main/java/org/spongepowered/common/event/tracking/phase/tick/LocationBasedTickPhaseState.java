@@ -34,6 +34,7 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -80,10 +81,10 @@ abstract class LocationBasedTickPhaseState<T extends LocationBasedTickContext<T>
         Transaction<BlockSnapshot> snapshotTransaction, T context) {
         // If we do not have a notifier at this point then there is no need to attempt to retrieve one from the chunk
         context.applyNotifierIfAvailable(user -> {
-            final Block block = (Block) snapshotTransaction.getOriginal().getState().getType();
-            final Location<World> changedLocation = snapshotTransaction.getOriginal().getLocation().get();
-            final BlockPos changedBlockPos = VecHelper.toBlockPos(changedLocation);
-            final IMixinChunk changedMixinChunk = (IMixinChunk) ((WorldServer) changedLocation.getExtent()).getChunk(changedBlockPos);
+            final SpongeBlockSnapshot original = (SpongeBlockSnapshot) snapshotTransaction.getOriginal();
+            final Block block = (Block) original.getState().getType();
+            final BlockPos changedBlockPos = original.getBlockPos();
+            final IMixinChunk changedMixinChunk = (IMixinChunk) original.getWorldServer().getChunk(changedBlockPos);
             changedMixinChunk.addTrackedBlockPosition(block, changedBlockPos, user, PlayerTracker.Type.NOTIFIER);
             // and check for owner, if it's available, only if the block change was placement
             // We don't want to set owners on modify because that would mean the current context owner

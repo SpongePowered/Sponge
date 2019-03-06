@@ -27,11 +27,14 @@ package org.spongepowered.common.event.tracking;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ListMultimap;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockEventData;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -48,10 +51,11 @@ import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.Populator;
-import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.SpongeEventManager;
@@ -62,7 +66,6 @@ import org.spongepowered.common.event.tracking.phase.general.PostState;
 import org.spongepowered.common.event.tracking.phase.general.UnwindingPhaseContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
-import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase.Listener;
 import org.spongepowered.common.event.tracking.phase.tick.BlockTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.NeighborNotificationContext;
@@ -72,6 +75,7 @@ import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.mixin.tracking.world.MixinChunk_Tracker;
 import org.spongepowered.common.world.BlockChange;
+import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.common.world.WorldUtil;
 
 import java.util.ArrayDeque;
@@ -323,11 +327,15 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * To avoid a StackOverflowError (which causes us to lose all of the associated context),
      * we track the current depth . If the processing depth exceeeds a configurable threshold,
      * processing is aborted, and the current tracker state and phase data are logged.
-     *
      * @param context The context to re-check for captures
+     * @param oldBlockSnapshot
+     * @param newState
+     * @param changeFlag
      * @param currentDepth The current processing depth, to prevenet stack overflows
      */
-    default void performPostBlockNotificationsAndNeighborUpdates(C context, int currentDepth) {
+    default void performPostBlockNotificationsAndNeighborUpdates(C context,
+        SpongeBlockSnapshot oldBlockSnapshot, IBlockState newState, SpongeBlockChangeFlag changeFlag,
+        int currentDepth) {
 
     }
 
@@ -347,7 +355,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     /**
      * Performs any necessary custom logic after the provided {@link BlockSnapshot}
      * {@link Transaction} has taken place. The provided {@link BlockChange} is usually
-     * provided from either {@link TrackingUtil#performTransactionProcess(Transaction, IPhaseState, PhaseContext, boolean, int)}
+     * provided from either {@link TrackingUtil#performTransactionProcess(Transaction, IPhaseState, PhaseContext, List, boolean, int)}
      * or {@link PostState#postBlockTransactionApplication(BlockChange, Transaction, UnwindingPhaseContext)} due to
      * delegation to the underlying context during post processing of reactionary
      * side effects (like water spread from a bucket).
@@ -599,9 +607,13 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      *
      * @param phaseContext
      * @param pos
+     * @param currentState
+     * @param newState
+     * @param flags
      * @return
      */
-    default boolean shouldCaptureBlockChangeOrSkip(C phaseContext, BlockPos pos) {
+    default boolean shouldCaptureBlockChangeOrSkip(C phaseContext, BlockPos pos, IBlockState currentState,
+        IBlockState newState, BlockChangeFlag flags) {
         return true;
     }
 
@@ -754,13 +766,14 @@ public interface IPhaseState<C extends PhaseContext<C>> {
 
     /**
      * Appends any additional information to the block tick context from this context.
-     *
-     * @param context
+     *  @param context
+     * @param currentContext
      * @param mixinWorldServer
      * @param pos
      * @param blockEvent
      */
-    default void appendNotifierToBlockEvent(C context, IMixinWorldServer mixinWorldServer, BlockPos pos, IMixinBlockEventData blockEvent) {
+    default void appendNotifierToBlockEvent(C context, PhaseContext<?> currentContext,
+        IMixinWorldServer mixinWorldServer, BlockPos pos, IMixinBlockEventData blockEvent) {
 
     }
 
@@ -778,6 +791,9 @@ public interface IPhaseState<C extends PhaseContext<C>> {
 
 
     default void provideNotifierForNeighbors(C context, NeighborNotificationContext notification) {
+        if (context.neighborNotificationSource != null) {
+            notification.setSourceNotification(context.neighborNotificationSource);
+        }
         if (context.notifier != null) {
             notification.notifier(context.notifier);
             return;
@@ -821,6 +837,52 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     }
 
     default boolean isRegeneration() {
+        return false;
+    }
+
+    default boolean getShouldCancelAllTransactions(C context, List<ChangeBlockEvent> blockEvents, ChangeBlockEvent.Post postEvent, ListMultimap<BlockPos, BlockEventData> scheduledEvents, boolean noCancelledTransactions) {
+        return false;
+    }
+
+    default void capturesNeighborNotifications(C context, IMixinWorldServer mixinWorld, BlockPos notifyPos, Block sourceBlock,
+        IBlockState iblockstate, BlockPos sourcePos) {
+    }
+    default void captureBlockChange(C phaseContext, BlockPos pos, SpongeBlockSnapshot originalBlockSnapshot, IBlockState newState,
+        BlockChangeFlag flags, @Nullable TileEntity tileEntity) {
+        phaseContext.getCapturedBlockSupplier().put(originalBlockSnapshot, newState);
+
+    }
+    default void captureTileEntityReplacement(C currentContext, IMixinWorldServer mixinWorldServer, BlockPos pos, @Nullable TileEntity currenTile, @Nullable TileEntity tileEntity) {
+        // Default, do nothing.
+
+    }
+
+    default boolean tracksTileEntityChanges(C currentContext) {
+        return false;
+    }
+
+    default void processCancelledTransaction(C context, Transaction<BlockSnapshot> transaction, BlockSnapshot original) {
+        if (this.tracksBlockSpecificDrops(context)) {
+            // Cancel any block drops or harvests for the block change.
+            // This prevents unnecessary spawns.
+            if (transaction.getOriginal() instanceof SpongeBlockSnapshot) {
+                final BlockPos pos = ((SpongeBlockSnapshot) transaction.getOriginal()).getBlockPos();
+                context.getBlockDropSupplier().removeAllIfNotEmpty(pos);
+            }
+        }
+    }
+
+    default void postRestoreTransactions(C context, List<Transaction<BlockSnapshot>> invalid) {
+
+    }
+
+    default Transaction<BlockSnapshot> createTransaction(C context, SpongeBlockSnapshot snapshot) {
+        return context.getCapturedBlockSupplier().createTransaction(snapshot);
+    }
+    default boolean hasSpecificBlockProcess() {
+        return false;
+    }
+    default boolean doesCaptureNeighborNotifications(C context) {
         return false;
     }
 }

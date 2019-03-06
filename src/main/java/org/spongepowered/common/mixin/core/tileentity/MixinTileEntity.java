@@ -97,6 +97,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     private boolean allowsEntityBulkCapture = true;
     private boolean allowsBlockEventCreation = true;
     private boolean allowsEntityEventCreation = true;
+    private boolean isCaptured = false;
 
     @Shadow protected boolean tileEntityInvalid;
     @Shadow protected net.minecraft.world.World world;
@@ -390,6 +391,16 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     @Override
     public boolean allowsEntityEventCreation() {
         return this.allowsEntityEventCreation;
+    }
+
+    @Override
+    public boolean isCaptured() {
+        return this.isCaptured;
+    }
+
+    @Override
+    public void setCaptured(boolean captured) {
+        this.isCaptured = captured;
     }
 
     @Override

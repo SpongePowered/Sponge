@@ -117,6 +117,7 @@ import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.extent.worker.MutableBiomeVolumeWorker;
 import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
 import org.spongepowered.api.world.storage.WorldProperties;
+import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -127,6 +128,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.BlockUtil;
@@ -659,6 +661,72 @@ public abstract class MixinWorld implements World, IMixinWorld {
         if (!this.isFake() || EntityUtil.toMixin(entityIn).isTrackedInWorld()) {
             EntityUtil.toMixin(entityIn).setTrackedInWorld(false);
         }
+    }
+
+    /**
+     * @author gabizou - January 29th, 2019
+     * @reason During block events, or other random cases, a TileEntity
+     * may be removed/invalidated without the block itself being changed.
+     * This can cause issues when cancelling events caused by block events
+     * such that the tile entity is no longer processing on valid information,
+     * so, we need to soft capture the block snapshot as a modify for later
+     * possible restoration. Note that this is only overridden in worldserver.
+     *
+     * @param pos The position of the tile entity being removed
+     */
+    @Nullable
+    @Redirect(method = "removeTileEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getTileEntity(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/tileentity/TileEntity;"))
+    protected net.minecraft.tileentity.TileEntity getTileEntityForRemoval(net.minecraft.world.World world, BlockPos pos) {
+        return world.getTileEntity(pos); // Overridden in MixinWorldServer
+    }
+
+    /**
+     * @author gabizou - March 5th, 2019 - 1.12.2
+     * @reason During block processing of block events, sometimes, we need
+     * to be able to cancel a TileEntity removal from the world and chunk
+     * since it's already been processed, or will be processed by the end
+     * of the phase (that is, removals of added tile entities).
+     */
+    @Inject(
+        method = "removeTileEntity",
+        at = @At(
+            value = "JUMP",
+            opcode = Opcodes.IFNULL
+        ),
+        slice = @Slice(
+            from = @At(
+                value = "INVOKE",
+                target = "Lnet/minecraft/world/World;getTileEntity(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/tileentity/TileEntity;"
+            ),
+            to = @At(
+                value = "FIELD",
+                target = "Lnet/minecraft/world/World;processingLoadedTiles:Z",
+                opcode = Opcodes.GETFIELD
+            )
+        ),
+        locals = LocalCapture.CAPTURE_FAILEXCEPTION,
+        cancellable = true
+    )
+    protected void onCheckTileEntityForRemoval(BlockPos pos, CallbackInfo ci, net.minecraft.tileentity.TileEntity found, net.minecraft.world.World thisWorld, BlockPos samePos) {
+
+    }
+
+    /**
+     * @author gabizou - February 25th, 2019
+     * @reason During block events, or really any events where TileEntities
+     * are being replaced, during processing, we need to be able to track
+     * those TileEntities. In some cases, this is not used as often, whereas
+     * others, like Pistons movement, we need to be able to capture and
+     * "play back" what's going on, without performing the live changes.
+     *
+     * @param world The world, this
+     * @param pos The position of the tile entity
+     * @param tileEntity The tile entity being set onto that position
+     * @return The processing tiles field, used as a hook
+     */
+    @Redirect(method = "setTileEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntity;isInvalid()Z"))
+    protected boolean onSetTileEntityForCapture(net.minecraft.tileentity.TileEntity tileEntity, BlockPos pos, net.minecraft.tileentity.TileEntity sameEntity) {
+        return tileEntity.isInvalid();
     }
 
     @SuppressWarnings({"unchecked"})
@@ -1368,6 +1436,13 @@ public abstract class MixinWorld implements World, IMixinWorld {
             if (!this.isFake() && !SpongeImpl.getServer().isCallingFromMinecraftThread()) {
                 return this.getChunk(pos).getTileEntity(pos, net.minecraft.world.chunk.Chunk.EnumCreateEntityType.CHECK);
             }
+            if (this.isTileMarkedForRemoval(pos)) {
+                return null;
+            }
+            tileentity = this.getProcessingTileFromProxy(pos);
+            if (tileentity != null) {
+                return tileentity;
+            }
             // Sponge end
 
             if (this.processingLoadedTiles) {
@@ -1384,6 +1459,15 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
             return tileentity;
         }
+    }
+
+    protected boolean isTileMarkedForRemoval(BlockPos pos) {
+        return false;
+    }
+
+    @Nullable
+    protected net.minecraft.tileentity.TileEntity getProcessingTileFromProxy(BlockPos pos) {
+        return null;
     }
 
 
@@ -1655,7 +1739,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             this.profiler.endSection();
         }
 
-        // this.profiler.endStartSection("blockEntities"); // Sponge - Don't use the profiler
+         this.profiler.endStartSection("blockEntities");
         spongeTileEntityActivation();
         this.processingLoadedTiles = true;
         Iterator<net.minecraft.tileentity.TileEntity> iterator = this.tickableTileEntities.iterator();
@@ -1672,7 +1756,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                         this.profiler.func_194340_a(() -> String.valueOf(net.minecraft.tileentity.TileEntity.getKey(tileentity.getClass())));
                         SpongeImplHooks.onTETickStart(tileentity);
                         ((ITickable) tileentity).update();
-                        //this.profiler.endSection();
+                        this.profiler.endSection();
                         SpongeImplHooks.onTETickEnd(tileentity);
                     } catch (Throwable throwable) {
                         this.stopTimingTickTileEntityCrash(tileentity); // Sponge

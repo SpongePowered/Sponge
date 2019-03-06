@@ -199,8 +199,9 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
         this.coords = holder.getPosition();
         this.manipulators = Lists.newArrayList(holder.getManipulators());
         if (holder instanceof SpongeBlockSnapshot) {
-            if (((SpongeBlockSnapshot) holder).compound != null) {
-                this.compound = ((SpongeBlockSnapshot) holder).compound.copy();
+            final NBTTagCompound compound = ((SpongeBlockSnapshot) holder).compound;
+            if (compound != null) {
+                this.compound = compound.copy();
             }
         }
         return this;
@@ -219,7 +220,7 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
     }
 
     @Override
-    public BlockSnapshot build() {
+    public SpongeBlockSnapshot build() {
         checkState(this.blockState != null);
         if (this.extendedState == null) {
             this.extendedState = this.blockState;
@@ -268,6 +269,6 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
             final List<DataView> dataViews = container.getViewList(DataQueries.SNAPSHOT_TILE_DATA).get();
             DataUtil.deserializeImmutableManipulatorList(dataViews).stream().forEach(builder::add);
         }
-        return Optional.of(new SpongeBlockSnapshot(builder));
+        return Optional.of(builder.build());
     }
 }

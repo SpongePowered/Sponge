@@ -56,6 +56,7 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.SpongeGameDictionaryEntry;
+import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 
 import java.util.Collection;
 import java.util.List;
@@ -77,10 +78,22 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     private final ImmutableSet<Key<?>> keys;
     private final ImmutableSet<ImmutableValue<?>> values;
     @Nullable private final NBTTagCompound compound;
-    @Nullable private Optional<UUID> creatorUniqueId;
+    @Nullable private UUID creatorUniqueId;
 
+    @SuppressWarnings({"EqualsBetweenInconvertibleTypes", "ConstantConditions"})
     public SpongeItemStackSnapshot(ItemStack itemStack) {
         checkNotNull(itemStack);
+        if (itemStack == net.minecraft.item.ItemStack.EMPTY) {
+            this.itemType = (ItemType) null; // Empty itemstack has an invalid item type that we have to have null.
+            this.quantity = 0;
+            this.damageValue = 0;
+            this.manipulators = ImmutableList.of();
+            this.privateStack = itemStack;
+            this.keys = ImmutableSet.of();
+            this.values = ImmutableSet.of();
+            this.compound = null;
+            return;
+        }
         this.itemType = itemStack.getType();
         this.quantity = itemStack.getQuantity();
         ImmutableList.Builder<ImmutableDataManipulator<?, ?>> builder = ImmutableList.builder();
@@ -142,7 +155,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
     @Override
     public ItemType getType() {
-        return this.itemType;
+        return this.itemType == null ? (ItemType) net.minecraft.item.ItemStack.EMPTY.getItem() : this.itemType;
     }
 
     @Override
@@ -153,6 +166,10 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     @Override
     public boolean isEmpty() {
         return this.privateStack.isEmpty();
+    }
+
+    public boolean isNone() {
+        return this == ItemTypeRegistryModule.getInstance().NONE_SNAPSHOT;
     }
 
     @Override
@@ -373,12 +390,12 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     }
 
     public Optional<UUID> getCreator() {
-        return this.creatorUniqueId;
+        return Optional.ofNullable(this.creatorUniqueId);
     }
 
     public void setCreator(@Nullable UUID uuid) {
         if (uuid != null) {
-            this.creatorUniqueId = Optional.of(uuid);
+            this.creatorUniqueId = uuid;
         }
     }
 

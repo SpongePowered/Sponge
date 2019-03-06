@@ -49,12 +49,29 @@ import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 
+import java.util.function.BiConsumer;
+
 public final class UseItemPacketState extends BasicPacketState {
+    private BiConsumer<CauseStackManager.StackFrame, BasicPacketContext> BASIC_PACKET_MODIFIER = super.getFrameModifier().andThen((frame, ctx) -> {
+        frame.addContext(EventContextKeys.PLAYER_PLACE, ctx.getSpongePlayer().getWorld());
+        frame.addContext(EventContextKeys.USED_HAND, ctx.getHandUsed());
+        frame.addContext(EventContextKeys.USED_ITEM, ctx.getItemUsedSnapshot());
+        final ItemStack itemStack = ctx.getItemUsed();
+        frame.addContext(EventContextKeys.SPAWN_TYPE,
+            itemStack.getType() == ItemTypes.SPAWN_EGG ? SpawnTypes.SPAWN_EGG : SpawnTypes.PLACEMENT);
+        frame.pushCause(ctx.getItemUsedSnapshot());
+        frame.pushCause(ctx.getSpongePlayer());
+    });
+    @Override
+    public BiConsumer<CauseStackManager.StackFrame, BasicPacketContext> getFrameModifier() {
+        return this.BASIC_PACKET_MODIFIER;
+    }
 
     @Override
     public boolean isInteraction() {
@@ -84,32 +101,29 @@ public final class UseItemPacketState extends BasicPacketState {
         spongeChunk.addTrackedBlockPosition((Block) transaction.getFinal().getState().getType(), pos, player, PlayerTracker.Type.NOTIFIER);
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public void unwind(BasicPacketContext context) {
         final EntityPlayerMP player = context.getPacketPlayer();
         final ItemStack itemStack = context.getItemUsed();
-        final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(itemStack);
+        final SpongeItemStackSnapshot snapshot = context.getItemUsedSnapshot();
         final HandType hand = context.getHandUsed();
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(player);
-            frame.pushCause(snapshot);
             frame.addContext(EventContextKeys.SPAWN_TYPE,
                 itemStack.getType() == ItemTypes.SPAWN_EGG ? SpawnTypes.SPAWN_EGG : SpawnTypes.PLACEMENT);
-            frame.addContext(EventContextKeys.USED_HAND, hand);
             context.getCapturedEntitySupplier()
                 .acceptAndClearIfNotEmpty(entities -> {
                     SpongeCommonEventFactory.callSpawnEntity(entities, context);
                 });
-            context.getCapturedBlockSupplier()
-                .acceptAndClearIfNotEmpty(
-                    originalBlocks -> {
-                        boolean success = TrackingUtil.processBlockCaptures(originalBlocks, this, context);
-                        if (!success && snapshot != ItemTypeRegistryModule.NONE_SNAPSHOT) {
-                            Sponge.getCauseStackManager().pushCause(player);
-                            PacketPhaseUtil.handlePlayerSlotRestore(player, (net.minecraft.item.ItemStack) itemStack, (EnumHand) (Object) hand);
-                        }
-                    });
+            if (!context.getCapturedBlockSupplier().isEmpty()) {
+                // TODO - Determine if we need to pass the supplier or perform some parameterized
+                //  process if not empty method on the capture object.
+                boolean success = TrackingUtil.processBlockCaptures(this, context);
+                if (!success && snapshot.isNone()) {
+                    Sponge.getCauseStackManager().pushCause(player);
+                    PacketPhaseUtil.handlePlayerSlotRestore(player, (net.minecraft.item.ItemStack) itemStack, (EnumHand) (Object) hand);
+                }
+            }
         }
-
     }
 }

@@ -44,22 +44,17 @@ import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.api.util.Identifiable;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhaseState;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
-import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.WorldManager;
 
@@ -109,15 +104,7 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
         // without player interaction.
         // Fixes https://github.com/SpongePowered/SpongeForge/issues/2442
         Sponge.getCauseStackManager().getCurrentCause().first(User.class).ifPresent(user -> {
-            final Location<World> location = transaction.getFinal().getLocation().get();
-            final BlockPos pos = VecHelper.toBlockPos(location);
-            final IMixinChunk spongeChunk = (IMixinChunk) ((WorldServer) location.getExtent()).getChunk(pos);
-
-            if (blockChange == BlockChange.PLACE) {
-                spongeChunk.addTrackedBlockPosition((Block) transaction.getFinal().getState().getType(), pos, user, PlayerTracker.Type.OWNER);
-            }
-
-            spongeChunk.addTrackedBlockPosition((Block) transaction.getFinal().getState().getType(), pos, user, PlayerTracker.Type.NOTIFIER);
+            TrackingUtil.associateTrackerToTarget(blockChange, transaction, user);
         });
    }
 
@@ -147,8 +134,9 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
         }
         final CommandSource sender = phaseContext.getSource(CommandSource.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a Command Sender, but none found!", phaseContext));
-        phaseContext.getCapturedBlockSupplier()
-            .acceptAndClearIfNotEmpty(list -> TrackingUtil.processBlockCaptures(list, this, phaseContext));
+        // TODO - Determine if we need to pass the supplier or perform some parameterized
+        //  process if not empty method on the capture object.
+        TrackingUtil.processBlockCaptures(this, phaseContext);
         phaseContext.getCapturedEntitySupplier()
             .acceptAndClearIfNotEmpty(entities ->
             {

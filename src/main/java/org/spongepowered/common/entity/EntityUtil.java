@@ -31,7 +31,6 @@ import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityHanging;
 import net.minecraft.entity.EntityLivingBase;
@@ -69,7 +68,6 @@ import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldProviderEnd;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.type.Profession;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntitySnapshot;
@@ -90,7 +88,6 @@ import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.PortalAgent;
@@ -104,6 +101,7 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.context.MultiBlockCaptureSupplier;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.entity.TeleportingContext;
 import org.spongepowered.common.interfaces.IMixinPlayerList;
@@ -445,7 +443,7 @@ public final class EntityUtil {
             final MoveEntityEvent.Teleport.Portal event = SpongeEventFactory.createMoveEntityEventTeleportPortal(frame.getCurrentCause(), fromTransform, portalExitTransform, (PortalAgent) teleporter, mixinEntity, true);
             SpongeImpl.postEvent(event);
             final Vector3i chunkPosition = mixinEntity.getLocation().getChunkPosition();
-            final List<BlockSnapshot> capturedBlocks = context.getCapturedBlocks();
+            final MultiBlockCaptureSupplier blockSupplier = context.getCapturedBlockSupplier();
             final Transform<World> toTransform = event.getToTransform();
 
             if (event.isCancelled()) {
@@ -456,12 +454,8 @@ public final class EntityUtil {
                     if (teleporter instanceof IMixinTeleporter) {
                         ((IMixinTeleporter) teleporter).removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
                     }
-                    if (!capturedBlocks.isEmpty()) {
-                        for (BlockSnapshot original : Lists.reverse(capturedBlocks)) {
-                            original.restore(true, BlockChangeFlags.NONE);
-                        }
-                        capturedBlocks.clear();
-                    }
+                    blockSupplier.restoreOriginals();
+
                     mixinEntity.setLocationAndAngles(fromTransform);
                 } else {
                     // Call setTransform to let plugins know mods changed the position
@@ -483,12 +477,8 @@ public final class EntityUtil {
                     }
 
                     // Undo created portal
-                    if (!capturedBlocks.isEmpty()) {
-                        for (BlockSnapshot original : Lists.reverse(capturedBlocks)) {
-                            original.restore(true, BlockChangeFlags.NONE);
-                        }
-                    }
-                    capturedBlocks.clear();
+                    blockSupplier.restoreOriginals();
+
                     mixinEntity.setLocationAndAngles(toTransform);
                     return event;
                 }
@@ -499,7 +489,7 @@ public final class EntityUtil {
                 }
             }
 
-            if (teleporter instanceof IMixinTeleporter && !capturedBlocks.isEmpty() && !TrackingUtil.processBlockCaptures(capturedBlocks, EntityPhase.State.CHANGING_DIMENSION, context)) {
+            if (teleporter instanceof IMixinTeleporter && !blockSupplier.isEmpty() && !TrackingUtil.processBlockCaptures(EntityPhase.State.CHANGING_DIMENSION, context)) {
                 ((IMixinTeleporter) teleporter).removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
             }
 

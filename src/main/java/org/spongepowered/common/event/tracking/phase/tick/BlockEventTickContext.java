@@ -24,9 +24,33 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
-public class BlockEventTickContext extends TickContext<BlockEventTickContext> {
+public class BlockEventTickContext extends LocationBasedTickContext<BlockEventTickContext> {
+
+    private boolean wasNotCancelled = true;
+    private boolean eventSucceeded;
 
     BlockEventTickContext() {
         super(TickPhase.Tick.BLOCK_EVENT);
+    }
+
+    @Override
+    public BlockEventTickContext source(Object owner) {
+        return super.source(owner);
+    }
+
+    public void setWasNotCancelled(boolean wasNotCancelled) {
+        this.wasNotCancelled = wasNotCancelled;
+    }
+
+    public boolean wasNotCancelled() {
+        return this.eventSucceeded && this.wasNotCancelled;
+    }
+
+    public void setEventSucceeded(boolean eventSucceeded) {
+        this.eventSucceeded = eventSucceeded;
+    }
+
+    public boolean getEventSucceeded() {
+        return this.eventSucceeded;
     }
 }

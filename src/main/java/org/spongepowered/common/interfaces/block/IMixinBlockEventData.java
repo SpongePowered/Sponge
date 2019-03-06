@@ -54,7 +54,7 @@ public interface IMixinBlockEventData {
 
     void setTickTileEntity(@Nullable TileEntity tickTileEntity);
 
-    void setSourceUser(User user);
+    void setSourceUser(@Nullable User user);
 
     void setCaptureBlocks(boolean capture);
 }
