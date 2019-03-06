@@ -93,7 +93,6 @@ import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -658,6 +657,9 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
 
         // Sponge Start
         final int modifiedY = yPos & 15;
+        if (pos.getX() == 1892 && pos.getZ() == -131 && currentState == Blocks.DIAMOND_BLOCK.getDefaultState()) {
+            System.err.println("derp");
+        }
         extendedblockstorage.set(xPos, modifiedY, zPos, newState);
 
 
@@ -723,6 +725,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
             final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
             final IPhaseState state = peek.state;
             final boolean isBulkCapturing = state.doesBulkBlockCapture(peek.context);
+            // Reset the proxy access
+            ((IMixinWorldServer) this.world).getProxyAccess().onChunkChanged(pos);
             // Sponge start - Ignore block activations during block placement captures unless it's
             // a BlockContainer. Prevents blocks such as TNT from activating when cancelled.
             // Occasionally, certain phase states will need to prevent onBlockAdded to be called until after the tile entity tracking

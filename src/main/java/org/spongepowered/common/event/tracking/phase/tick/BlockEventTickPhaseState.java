@@ -114,7 +114,7 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
     @Override
     public void captureBlockChange(BlockEventTickContext phaseContext, BlockPos pos, SpongeBlockSnapshot originalBlockSnapshot,
         IBlockState newState, BlockChangeFlag flags, @Nullable TileEntity tileEntity) {
-        phaseContext.getCapturedBlockSupplier().logBlockChange(originalBlockSnapshot, newState, pos, flags, tileEntity);
+        phaseContext.getCapturedBlockSupplier().logBlockChange(originalBlockSnapshot, newState, pos, flags);
     }
 
     @Override

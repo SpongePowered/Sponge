@@ -125,7 +125,7 @@ public final class PostState extends GeneralState<UnwindingPhaseContext> {
     public void captureBlockChange(UnwindingPhaseContext phaseContext, BlockPos pos, SpongeBlockSnapshot originalBlockSnapshot, IBlockState newState,
         BlockChangeFlag flags, @Nullable TileEntity tileEntity) {
         if (phaseContext.isPostingSpecialProcess()) {
-            phaseContext.getCapturedBlockSupplier().logBlockChange(originalBlockSnapshot, newState, pos, flags, tileEntity);
+            phaseContext.getCapturedBlockSupplier().logBlockChange(originalBlockSnapshot, newState, pos, flags);
         } else {
             super.captureBlockChange(phaseContext, pos, originalBlockSnapshot, newState, flags, tileEntity);
         }

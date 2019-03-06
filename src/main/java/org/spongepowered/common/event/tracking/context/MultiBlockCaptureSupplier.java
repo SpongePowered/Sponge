@@ -37,7 +37,6 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
-import net.minecraft.world.WorldServerMulti;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
@@ -51,7 +50,6 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -76,7 +74,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
     @Nullable private ListMultimap<BlockPos, BlockEventData> scheduledEvents;
     @Nullable private LinkedListMultimap<BlockPos, BlockTransaction> orderedTransactions;
     @Nullable private List<SpongeBlockSnapshot> snapshots;
-    @Nullable private LinkedHashMap<BlockPos, IBlockState> processingBlocks;
+    @Nullable private LinkedHashMap<WorldServer, SpongeProxyBlockAccess.Proxy> processingBlocks;
     @Nullable private Set<BlockPos> usedBlocks;
     private int transactionIndex = -1; // These are used to keep track of which snapshot is being referred to as "most recent change"
     private int snapshotIndex = -1;    // so that we can appropriately cancel or discard or apply specific event transactions
@@ -372,16 +370,18 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
         Block sourceBlock, BlockPos sourcePos) {
         final int transactionIndex = ++this.transactionIndex;
         final BlockTransaction.NeighborNotification notification = new BlockTransaction.NeighborNotification(transactionIndex, this.snapshotIndex, mixinWorldServer, iblockstate, notifyPos, sourceBlock, sourcePos);
+        notification.enqueueChanges(mixinWorldServer.getProxyAccess(), getProxyOrCreate(mixinWorldServer));
         logTransaction(sourcePos, notification);
     }
 
     public void logBlockChange(SpongeBlockSnapshot originalBlockSnapshot, IBlockState newState, BlockPos pos,
-        BlockChangeFlag flags, @Nullable TileEntity tileEntity) {
+        BlockChangeFlag flags) {
         this.put(originalBlockSnapshot, newState); // Always update the snapshot index before the block change is tracked
         final int transactionIndex = ++this.transactionIndex;
         final BlockTransaction.ChangeBlock changeBlock = new BlockTransaction.ChangeBlock(transactionIndex, this.snapshotIndex,
-            originalBlockSnapshot, newState, (SpongeBlockChangeFlag) flags, tileEntity != null ? BlockChange.BREAK : null);
-        ((IMixinWorldServer) originalBlockSnapshot.getWorldServer()).setProxyAccess(changeBlock);
+            originalBlockSnapshot, newState, (SpongeBlockChangeFlag) flags);
+        final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) originalBlockSnapshot.getWorldServer();
+        changeBlock.enqueueChanges(mixinWorldServer.getProxyAccess(), getProxyOrCreate(mixinWorldServer));
         logTransaction(pos, changeBlock);
     }
 
@@ -397,11 +397,12 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
                 // replacing a tile.
                 final BlockTransaction.ReplaceTileEntity transaction = new BlockTransaction.ReplaceTileEntity(transactionIndex, this.snapshotIndex, newTile, oldTile, snapshot);
                 logTransaction(pos, transaction);
+                transaction.enqueueChanges(mixinWorldServer.getProxyAccess(), getProxyOrCreate(mixinWorldServer));
                 return;
             }
             final IBlockState newState = ((WorldServer) mixinWorldServer).getBlockState(pos);
             final BlockTransaction.RemoveTileEntity transaction = new BlockTransaction.RemoveTileEntity(transactionIndex, this.snapshotIndex, oldTile, snapshot, newState);
-            mixinWorldServer.setProxyAccess(transaction);
+            transaction.enqueueChanges(mixinWorldServer.getProxyAccess(), getProxyOrCreate(mixinWorldServer));
             logTransaction(pos, transaction);
             return;
         }
@@ -409,7 +410,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
             final SpongeBlockSnapshot snapshot = mixinWorldServer.createSpongeSnapshotForTileEntity(current, pos, BlockChangeFlags.NONE, newTile);
             final IBlockState newState = ((WorldServer) mixinWorldServer).getBlockState(pos);
             final BlockTransaction.TileEntityAdd transaction = new BlockTransaction.TileEntityAdd(transactionIndex, this.snapshotIndex, newTile, snapshot, newState);
-            mixinWorldServer.setProxyAccess(transaction);
+            transaction.enqueueChanges(mixinWorldServer.getProxyAccess(), getProxyOrCreate(mixinWorldServer));
             logTransaction(pos, transaction);
         }
     }
@@ -523,7 +524,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
         return this.scheduledEvents == null ? ArrayListMultimap.create(4, 4) : ArrayListMultimap.create(this.scheduledEvents);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "ReturnInsideFinallyBlock"})
     public boolean processTransactions(List<Transaction<BlockSnapshot>> transactions, PhaseContext<?> phaseContext, boolean noCancelledTransactions,
         ListMultimap<BlockPos, BlockEventData> scheduledEvents, int currentDepth) {
 
@@ -545,26 +546,46 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
             return noCancelledTransactions;
         }
         Transaction<BlockSnapshot> eventTransaction = transactions.get(targetIndex);
-        this.processingBlocks = new LinkedHashMap<>();
-        for (Map.Entry<BlockPos, BlockTransaction> entry : this.orderedTransactions.entries()) {
-            final BlockTransaction transaction = entry.getValue();
+        try {
+            for (Map.Entry<BlockPos, BlockTransaction> entry : this.orderedTransactions.entries()) {
+                final BlockTransaction transaction = entry.getValue();
 
-            if (transaction.snapshotIndex > targetIndex) {
-                targetIndex++;
-                eventTransaction = transactions.get(targetIndex);
+                if (transaction.snapshotIndex > targetIndex) {
+                    targetIndex++;
+                    eventTransaction = transactions.get(targetIndex);
+                }
+                if (!eventTransaction.isValid()) {
+                    continue;
+                }
+                final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) ((SpongeBlockSnapshot) eventTransaction.getOriginal()).getWorldServer();
+                try (final SpongeProxyBlockAccess.Proxy transactionProxy = transaction.getProxy(mixinWorldServer)) {
+                    transaction.process(eventTransaction, phaseState, phaseContext, currentDepth);
+                }
             }
-            if (!eventTransaction.isValid()) {
-                continue;
+        } finally {
+            if (this.processingBlocks == null) {
+                return noCancelledTransactions;
             }
-            transaction.process(eventTransaction, phaseState, phaseContext, this.processingBlocks, currentDepth);
+            for (Map.Entry<WorldServer, SpongeProxyBlockAccess.Proxy> entry : this.processingBlocks.entrySet()) {
+                try {
+                    entry.getValue().close();
+                } catch (Exception e) {
+                    PhaseTracker.getInstance().printMessageWithCaughtException("Forcibly Closing Proxy", "Proxy Access could not be popped", e);
+                }
+            }
         }
         return noCancelledTransactions;
     }
 
-    public IBlockState fetchCurrentProcessingBlock(BlockPos pos) {
-        if (this.processingBlocks != null && !this.processingBlocks.isEmpty()) {
-            return this.processingBlocks.get(pos);
+    public SpongeProxyBlockAccess.Proxy getProxyOrCreate(IMixinWorldServer mixinWorldServer) {
+        if (this.processingBlocks == null) {
+            this.processingBlocks = new LinkedHashMap<>();
         }
-        return null;
+        SpongeProxyBlockAccess.Proxy existing = this.processingBlocks.get((WorldServer) mixinWorldServer);
+        if (existing == null) {
+            existing = mixinWorldServer.getProxyAccess().pushProxy();
+            this.processingBlocks.put((WorldServer) mixinWorldServer, existing);
+        }
+        return existing;
     }
 }

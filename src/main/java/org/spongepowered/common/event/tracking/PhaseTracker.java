@@ -617,9 +617,6 @@ public final class PhaseTracker {
     @SuppressWarnings("rawtypes")
     public void performNeighborNotificationOnTarget(IMixinWorldServer mixinWorld, BlockPos notifyPos, Block sourceBlock, BlockPos sourcePos,
         IBlockState iblockstate) {
-        if (notifyPos.getX() == -1100 && notifyPos.getY() == 58 && notifyPos.getZ() == -496) {
-            System.err.println("derp");
-        }
         try {
             // Sponge start - prepare notification
             final PhaseData peek = this.stack.peek();
@@ -783,7 +780,7 @@ public final class PhaseTracker {
                 TrackingUtil.associateBlockChangeWithSnapshot(phaseState, newBlock, currentState, originalBlockSnapshot);
                 capturedSnapshots.add(originalBlockSnapshot);
                 final IMixinChunk mixinChunk = (IMixinChunk) chunk;
-                final IBlockState originalBlockState = mixinChunk.setBlockState(pos, newState, currentState, BlockChangeFlags.ALL);
+                final IBlockState originalBlockState = mixinChunk.setBlockState(pos, newState, currentState, spongeFlag);
                 if (originalBlockState == null) {
                     return false; // Return fast
                 }

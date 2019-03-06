@@ -24,26 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.tileentity;
 
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntityPiston;
 import org.spongepowered.api.block.tileentity.Piston;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(TileEntityPiston.class)
 public abstract class MixinTileEntityPiston extends MixinTileEntity implements Piston {
-
-    @Shadow private IBlockState pistonState;
-
-    @Inject(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;I)Z"))
-    private void onSetState(CallbackInfo ci) {
-        if (this.pistonState.getBlock() == Blocks.DIAMOND_BLOCK) {
-            System.err.println("Derp");
-        }
-    }
 
 }

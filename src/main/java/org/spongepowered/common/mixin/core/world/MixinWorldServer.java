@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.common.event.tracking.context.BlockTransaction;
+import org.spongepowered.common.event.tracking.context.MultiBlockCaptureSupplier;
 import org.spongepowered.common.event.tracking.context.SpongeProxyBlockAccess;
 import org.spongepowered.common.relocate.co.aikar.timings.TimingHistory;
 import org.spongepowered.common.relocate.co.aikar.timings.WorldTimingsHandler;
@@ -997,20 +998,67 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         if (this.isFake()) {
             return super.getTileEntityForRemoval(thisWorld, pos); // do nothing if we're not a sponge managed world
         }
+        // We use the proxy access to proceed whether a TileEntity is marked as "there" or "not", because
+        // transactions and processing neighbors/blockbreaks will end up causing chain reactions to
+        // occur where we may end up losing a tile entity in place.
+        // This has to occur before phase state checks because the tile entity could be unintentionally removed
+        // from the world before we are able to capture it.
+        net.minecraft.tileentity.TileEntity tileEntity =  this.proxyBlockAccess.getTileEntity(pos);
+        if (tileEntity == null && !this.proxyBlockAccess.isTileEntityRemoved(pos)) {
+            tileEntity = this.getTileEntity(pos);
+        }
+
+
+
         final PhaseTracker tracker = PhaseTracker.getInstance();
         final IPhaseState currentState = tracker.getCurrentState();
         final PhaseContext<?> currentContext = tracker.getCurrentContext();
         // More fast checks - bulk block capture is normally faster to be false than checking tile entity changes (certain block ticks don't capture changes)
         if (!currentState.doesBulkBlockCapture(currentContext) || !currentState.tracksTileEntityChanges(currentContext)) {
-            return super.getTileEntityForRemoval(thisWorld, pos);
+            return tileEntity;
         }
-        final net.minecraft.tileentity.TileEntity tileEntity = getTileEntity(pos);
-        final IMixinTileEntity mixinTile = (IMixinTileEntity) tileEntity;
+
         if (tileEntity != null) {
-            mixinTile.setCaptured(true);
+            ((IMixinTileEntity) tileEntity).setCaptured(true);
             currentState.captureTileEntityReplacement(currentContext, this, pos, tileEntity, null);
         }
         return tileEntity;
+    }
+
+    /**
+     * @author gabizou - March 5th, 2019 - 1.12.2
+     * @reason We can check the proxy block access whether the tile
+     * entity is available and if it is available, if it's queued.
+     * Note that we can take advantage of the fact that the tile
+     * entity provided as a parameter will be possibly null, but
+     * nonetheless, we'll be able to check for enqueuing at the
+     * proxy level.
+     *
+     * @param pos The position
+     * @param ci The cancellable
+     * @param foundTile The found tile
+     */
+    @Override
+    protected void onCheckTileEntityForRemoval(BlockPos pos, CallbackInfo ci, @Nullable net.minecraft.tileentity.TileEntity foundTile, net.minecraft.world.World thisWorld, BlockPos samePos) {
+        if (foundTile != null) {
+            // Easy short circuit.
+            if (((IMixinTileEntity) foundTile).isCaptured()) {
+                ci.cancel();
+                return;
+            }
+            if (this.proxyBlockAccess.isTileQueued(pos, foundTile)) {
+                ci.cancel();
+                return;
+            }
+        }
+        if (foundTile == null) {
+            if (!this.proxyBlockAccess.getQueuedTiles(pos).isEmpty()) {
+                ci.cancel();
+            }
+            if (this.proxyBlockAccess.isTileEntityRemoved(pos)) {
+                ci.cancel();
+            }
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -1023,17 +1071,38 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         final PhaseTracker tracker = PhaseTracker.getInstance();
         final IPhaseState currentState = tracker.getCurrentState();
         final PhaseContext<?> currentContext = tracker.getCurrentContext();
+        final IMixinTileEntity mixinTile = (IMixinTileEntity) tileEntity;
+        if (mixinTile.isCaptured()) {
+            // Don't do anything. If the tile entity is captured, it will have
+            // addToWorld before the end of whatever phasestate.
+            return true;
+        }
+        if (this.proxyBlockAccess.hasTileEntity(pos, tileEntity)) {
+            if (this.proxyBlockAccess.succeededInAdding(pos, tileEntity)) {
+                this.addTileEntity(tileEntity);
+            }
+            // The chunk already has the tile entity at this point.
+            return true;
+        }
         // More fast checks - bulk block capture is normally faster to be false than checking tile entity changes (certain block ticks don't capture changes)
         if (!currentState.doesBulkBlockCapture(currentContext) || !currentState.tracksTileEntityChanges(currentContext)) {
             return tileEntity.isInvalid();
         }
-        final IMixinTileEntity mixinTile = (IMixinTileEntity) tileEntity;
         if (!mixinTile.isCaptured()) {
             mixinTile.setCaptured(true);
         }
         final net.minecraft.tileentity.TileEntity currenTile = getTileEntity(pos);
         currentState.captureTileEntityReplacement(currentContext, this, pos, currenTile, tileEntity);
         return tileEntity.isInvalid();
+    }
+
+    protected boolean isTileMarkedForRemoval(BlockPos pos) {
+        return this.proxyBlockAccess.isTileEntityRemoved(pos);
+    }
+
+    @Nullable
+    protected net.minecraft.tileentity.TileEntity getProcessingTileFromProxy(BlockPos pos) {
+        return this.proxyBlockAccess.getTileEntity(pos);
     }
 
     @Override
@@ -1753,7 +1822,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     public void spongeNotifyNeighborsPostBlockChange(BlockPos pos, IBlockState oldState, IBlockState newState, BlockChangeFlag flags) {
         if (flags.updateNeighbors()) {
-            this.notifyNeighborsRespectDebug(pos, newState.getBlock(), true);
+            this.notifyNeighborsRespectDebug(pos, newState.getBlock(), flags.notifyObservers());
 
             if (newState.hasComparatorInputOverride()) {
                 this.updateComparatorOutputLevel(pos, newState.getBlock());
@@ -1931,11 +2000,11 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         return explosion;
     }
 
-    @Nullable private BlockTransaction proxyBlockAccess;
+    private SpongeProxyBlockAccess proxyBlockAccess = new SpongeProxyBlockAccess(this);
 
     @Override
-    public void setProxyAccess(BlockTransaction changeBlock) {
-        this.proxyBlockAccess = changeBlock;
+    public SpongeProxyBlockAccess getProxyAccess() {
+        return this.proxyBlockAccess;
     }
 
     /**
@@ -1962,11 +2031,10 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             if (currentState == TickPhase.Tick.TILE_ENTITY) {
                 ((IMixinChunkProviderServer) this.getChunkProvider()).setForceChunkRequests(true);
             }
-            if (this.proxyBlockAccess != null) {
-                final IBlockState state = this.proxyBlockAccess.getBlockState(pos);
-                if (state != null) {
-                    return state;
-                }
+            // Proxies have block changes for bulk special captures
+            final IBlockState blockState = this.proxyBlockAccess.getBlockState(pos);
+            if (blockState != null) {
+                return blockState;
             }
             net.minecraft.world.chunk.Chunk chunk = this.getChunk(pos);
             ((IMixinChunkProviderServer) this.getChunkProvider()).setForceChunkRequests(forceChunkRequests);

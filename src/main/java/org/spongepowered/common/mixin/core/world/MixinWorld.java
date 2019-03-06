@@ -128,6 +128,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.BlockUtil;
@@ -677,6 +678,37 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Redirect(method = "removeTileEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getTileEntity(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/tileentity/TileEntity;"))
     protected net.minecraft.tileentity.TileEntity getTileEntityForRemoval(net.minecraft.world.World world, BlockPos pos) {
         return world.getTileEntity(pos); // Overridden in MixinWorldServer
+    }
+
+    /**
+     * @author gabizou - March 5th, 2019 - 1.12.2
+     * @reason During block processing of block events, sometimes, we need
+     * to be able to cancel a TileEntity removal from the world and chunk
+     * since it's already been processed, or will be processed by the end
+     * of the phase (that is, removals of added tile entities).
+     */
+    @Inject(
+        method = "removeTileEntity",
+        at = @At(
+            value = "JUMP",
+            opcode = Opcodes.IFNULL
+        ),
+        slice = @Slice(
+            from = @At(
+                value = "INVOKE",
+                target = "Lnet/minecraft/world/World;getTileEntity(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/tileentity/TileEntity;"
+            ),
+            to = @At(
+                value = "FIELD",
+                target = "Lnet/minecraft/world/World;processingLoadedTiles:Z",
+                opcode = Opcodes.GETFIELD
+            )
+        ),
+        locals = LocalCapture.CAPTURE_FAILEXCEPTION,
+        cancellable = true
+    )
+    protected void onCheckTileEntityForRemoval(BlockPos pos, CallbackInfo ci, net.minecraft.tileentity.TileEntity found, net.minecraft.world.World thisWorld, BlockPos samePos) {
+
     }
 
     /**
@@ -1404,6 +1436,13 @@ public abstract class MixinWorld implements World, IMixinWorld {
             if (!this.isFake() && !SpongeImpl.getServer().isCallingFromMinecraftThread()) {
                 return this.getChunk(pos).getTileEntity(pos, net.minecraft.world.chunk.Chunk.EnumCreateEntityType.CHECK);
             }
+            if (this.isTileMarkedForRemoval(pos)) {
+                return null;
+            }
+            tileentity = this.getProcessingTileFromProxy(pos);
+            if (tileentity != null) {
+                return tileentity;
+            }
             // Sponge end
 
             if (this.processingLoadedTiles) {
@@ -1420,6 +1459,15 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
             return tileentity;
         }
+    }
+
+    protected boolean isTileMarkedForRemoval(BlockPos pos) {
+        return false;
+    }
+
+    @Nullable
+    protected net.minecraft.tileentity.TileEntity getProcessingTileFromProxy(BlockPos pos) {
+        return null;
     }
 
 
@@ -1691,7 +1739,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             this.profiler.endSection();
         }
 
-        // this.profiler.endStartSection("blockEntities"); // Sponge - Don't use the profiler
+         this.profiler.endStartSection("blockEntities");
         spongeTileEntityActivation();
         this.processingLoadedTiles = true;
         Iterator<net.minecraft.tileentity.TileEntity> iterator = this.tickableTileEntities.iterator();
@@ -1708,7 +1756,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                         this.profiler.func_194340_a(() -> String.valueOf(net.minecraft.tileentity.TileEntity.getKey(tileentity.getClass())));
                         SpongeImplHooks.onTETickStart(tileentity);
                         ((ITickable) tileentity).update();
-                        //this.profiler.endSection();
+                        this.profiler.endSection();
                         SpongeImplHooks.onTETickEnd(tileentity);
                     } catch (Throwable throwable) {
                         this.stopTimingTickTileEntityCrash(tileentity); // Sponge

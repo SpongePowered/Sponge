@@ -356,9 +356,6 @@ public final class TrackingUtil {
             // Mark the tile entity as captured so when it is being removed during the chunk setting, it won't be
             // re-captured again.
             final net.minecraft.tileentity.TileEntity tileEntity = ((WorldServer) mixinWorld).getTileEntity(pos);
-            if (tileEntity != null) {
-                ((IMixinTileEntity) tileEntity).setCaptured(true);
-            }
             final Block newBlock = newState.getBlock();
 
             associateBlockChangeWithSnapshot(phaseState, newBlock, currentState, originalBlockSnapshot);
@@ -696,7 +693,6 @@ public final class TrackingUtil {
         // Handle item drops captured
         final IMixinWorldServer mixinWorld = (IMixinWorldServer) oldBlockSnapshot.getWorldServer();
         // Reset any previously set transactions
-        mixinWorld.setProxyAccess(null);
         final BlockPos pos = oldBlockSnapshot.getBlockPos();
         performBlockEntitySpawns(phaseState, phaseContext, oldBlockSnapshot, pos);
 
@@ -741,9 +737,11 @@ public final class TrackingUtil {
             // Append the snapshot being applied that is allowing us to keep track of which source is
             // performing the notification, it's quick and dirty.
             // TODO - somehow make this more functional so we're not relying on fields.
-            PhaseTracker.getInstance().getCurrentContext().neighborNotificationSource = newBlockSnapshot;
+            final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
+            final BlockSnapshot previousNeighbor = context.neighborNotificationSource;
+            context.neighborNotificationSource = newBlockSnapshot;
             mixinWorld.spongeNotifyNeighborsPostBlockChange(pos, originalState, newState, changeFlag);
-            PhaseTracker.getInstance().getCurrentContext().neighborNotificationSource = null;
+            context.neighborNotificationSource = previousNeighbor;
         } else if (changeFlag.notifyObservers()) {
             ((net.minecraft.world.World) mixinWorld).updateObservingBlocksAt(pos, newBlock);
         }

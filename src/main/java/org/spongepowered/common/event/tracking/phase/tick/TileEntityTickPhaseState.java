@@ -270,7 +270,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
     @Override
     public void captureBlockChange(TileEntityTickContext phaseContext, BlockPos pos, SpongeBlockSnapshot originalBlockSnapshot,
         IBlockState newState, BlockChangeFlag flags, @Nullable net.minecraft.tileentity.TileEntity tileEntity) {
-        phaseContext.getCapturedBlockSupplier().logBlockChange(originalBlockSnapshot, newState, pos, flags, tileEntity);
+        phaseContext.getCapturedBlockSupplier().logBlockChange(originalBlockSnapshot, newState, pos, flags);
     }
 
     @Override

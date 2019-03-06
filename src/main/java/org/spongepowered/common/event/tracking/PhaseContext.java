@@ -85,7 +85,7 @@ import javax.annotation.Nullable;
 public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
 
     @Nullable private static PhaseContext<?> EMPTY;
-    @Nullable BlockSnapshot neighborNotificationSource;
+    @Nullable public BlockSnapshot neighborNotificationSource;
 
     /**
      * Default flagged empty PhaseContext that can be used for stubbing in corner cases.
