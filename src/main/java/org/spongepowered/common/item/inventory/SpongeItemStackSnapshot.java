@@ -44,6 +44,7 @@ import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.text.translation.Translation;
@@ -203,7 +204,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     public DataContainer toContainer() {
         final DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, getContentVersion())
-            .set(DataQueries.ITEM_TYPE, this.itemType.getId())
+            .set(DataQueries.ITEM_TYPE, this.isNone() ? ItemTypes.NONE.getId() : this.itemType.getId())
             .set(DataQueries.ITEM_COUNT, this.quantity)
             .set(DataQueries.ITEM_DAMAGE_VALUE, this.damageValue);
         if (!this.manipulators.isEmpty()) {
@@ -358,7 +359,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("itemType", this.itemType.getId())
+                .add("itemType", this.isNone() ? ItemTypes.NONE.getId() : this.itemType.getId())
                 .add("quantity", this.quantity)
                 .toString();
     }

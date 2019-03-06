@@ -34,6 +34,7 @@ import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataBuilder;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.persistence.NbtTranslator;
@@ -41,6 +42,7 @@ import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.DataVersions;
 import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
+import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 
 import java.util.Optional;
 
@@ -57,6 +59,9 @@ public class SpongeItemStackSnapshotBuilder extends AbstractDataBuilder<ItemStac
         if (container.contains(DataQueries.ITEM_TYPE, DataQueries.ITEM_COUNT)) {
             final String itemString = getData(container, DataQueries.ITEM_TYPE, String.class);
             final ItemType itemType = SpongeImpl.getRegistry().getType(ItemType.class, itemString).get();
+            if (itemType == ItemTypes.NONE) {
+                return Optional.of(ItemTypeRegistryModule.getInstance().NONE_SNAPSHOT);
+            }
             final int count = getData(container, DataQueries.ITEM_COUNT, Integer.class);
             final int damage = container.getInt(DataQueries.ITEM_DAMAGE_VALUE).orElse(0);
             final ImmutableList<ImmutableDataManipulator<?, ?>> manipulators;
