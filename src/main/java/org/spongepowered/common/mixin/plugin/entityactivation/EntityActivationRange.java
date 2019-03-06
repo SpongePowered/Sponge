@@ -146,7 +146,7 @@ public class EntityActivationRange {
             return;
         }
 
-        EntityActivationRangeCategory config = ((IMixinWorldServer) entity.world).getActiveConfig().getConfig().getEntityActivationRange();
+        EntityActivationRangeCategory config = ((IMixinWorldServer) entity.world).getWorldConfig().getConfig().getEntityActivationRange();
         EntityType type = ((org.spongepowered.api.entity.Entity) entity).getType();
         if (type == EntityTypes.UNKNOWN || !(type instanceof SpongeEntityType)) {
             spongeEntity.setDefaultActivationState(true);
@@ -432,13 +432,13 @@ public class EntityActivationRange {
         checkNotNull(world, "world");
         checkNotNull(type, "type");
 
-        SpongeConfig<? extends GeneralConfigBase> config = ((IMixinWorldServer) world).getActiveConfig();
+        SpongeConfig<? extends GeneralConfigBase> worldConfig = ((IMixinWorldServer) world).getWorldConfig();
         SpongeConfig<? extends GeneralConfigBase> globalConfig = SpongeImpl.getGlobalConfig();
-        if (config == null || globalConfig == null || type == null) {
+        if (worldConfig == null || globalConfig == null || type == null) {
             return;
         }
 
-        final boolean autoPopulate = config.getConfig().getEntityActivationRange().autoPopulateData();
+        final boolean autoPopulate = worldConfig.getConfig().getEntityActivationRange().autoPopulateData();
         boolean requiresSave = false;
         String entityType = "misc";
         entityType = EntityActivationRange.activationTypeMappings.get(activationType);

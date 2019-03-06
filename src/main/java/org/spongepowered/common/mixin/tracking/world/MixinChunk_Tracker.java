@@ -133,7 +133,7 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
             }
         }
 
-        final SpongeConfig<? extends GeneralConfigBase> activeConfig = SpongeHooks.getActiveConfig((WorldServer) this.world);
+        final SpongeConfig<? extends GeneralConfigBase> activeConfig = SpongeHooks.getWorldConfig((WorldServer) this.world);
         if (activeConfig.getConfig().getLogging().blockTrackLogging()) {
             if (!activeConfig.getConfig().getBlockTracking().getBlockBlacklist().contains(((BlockType) block).getId())) {
                 SpongeHooks.logBlockTrack(this.world, block, pos, user, true);

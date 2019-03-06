@@ -22,33 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.entityactivation;
+package org.spongepowered.test;
 
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.item.ItemStack;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandSource;
 
-@NonnullByDefault
-@Mixin(EntityItem.class)
-public abstract class MixinEntityItem_Activation extends MixinEntity_Activation {
+public interface LoadableModule {
 
-    @Shadow public abstract ItemStack getItem();
-
-    @Shadow private int pickupDelay;
-    @Shadow private int age;
-
-    @Override
-    public void inactiveTick() {
-        if (this.pickupDelay > 0 && this.pickupDelay != 32767) {
-            --this.pickupDelay;
-        }
-
-        if (!this.world.isRemote && this.age >= ((IMixinWorldServer) this.world).getWorldConfig().getConfig().getEntity().getItemDespawnRate()) {
-            this.setDead();
-        }
+    default void disable(CommandSource src) {
+        Sponge.getEventManager().unregisterPluginListeners(this);
     }
+
+    void enable(CommandSource src);
 
 }

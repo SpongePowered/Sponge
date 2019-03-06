@@ -241,18 +241,18 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     private final Map<net.minecraft.entity.Entity, Vector3d> rotationUpdates = new HashMap<>();
     private SpongeChunkGenerator spongegen;
-    private SpongeConfig<? extends GeneralConfigBase> activeConfig;
+    private SpongeConfig<WorldConfig> worldConfig;
     private long weatherStartTime;
     private Weather prevWeather;
     protected WorldTimingsHandler timings;
     private int chunkGCTickCount = 0;
     private int chunkGCLoadThreshold = 0;
     private int chunkGCTickInterval = 600;
+    private int chunkLoadCount = 0;
     private long chunkUnloadDelay = 30000;
     private boolean weatherThunderEnabled = true;
     private boolean weatherIceAndSnowEnabled = true;
     private int dimensionId;
-    private IMixinChunkProviderServer mixinChunkProviderServer;
     @Nullable private NextTickListEntry tmpScheduledObj;
 
     @Shadow @Final private MinecraftServer server;
@@ -317,12 +317,12 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
         this.updateWorldGenerator();
         // Need to set the active config before we call it.
-        this.chunkGCLoadThreshold = SpongeHooks.getActiveConfig((WorldServer) (Object) this).getConfig().getWorld().getChunkLoadThreadhold();
-        this.chunkGCTickInterval = this.getActiveConfig().getConfig().getWorld().getTickInterval();
-        this.weatherIceAndSnowEnabled = this.getActiveConfig().getConfig().getWorld().getWeatherIceAndSnow();
-        this.weatherThunderEnabled = this.getActiveConfig().getConfig().getWorld().getWeatherThunder();
+        this.chunkGCLoadThreshold = SpongeHooks.getWorldConfig((WorldServer) (Object) this).getConfig().getWorld().getChunkLoadThreshold();
+        this.chunkGCTickInterval = this.getWorldConfig().getConfig().getWorld().getTickInterval();
+        this.weatherIceAndSnowEnabled = this.getWorldConfig().getConfig().getWorld().getWeatherIceAndSnow();
+        this.weatherThunderEnabled = this.getWorldConfig().getConfig().getWorld().getWeatherThunder();
         this.updateEntityTick = 0;
-        this.setMemoryViewDistance(this.chooseViewDistanceValue(this.getActiveConfig().getConfig().getWorld().getViewDistance()));
+        this.setMemoryViewDistance(this.chooseViewDistanceValue(this.getWorldConfig().getConfig().getWorld().getViewDistance()));
     }
 
     @Redirect(method = "init", at = @At(value = "NEW", target = "net/minecraft/world/storage/MapStorage"))
@@ -402,28 +402,24 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @Override
     public SpongeConfig<WorldConfig> getWorldConfig() {
-        return ((IMixinWorldInfo) this.worldInfo).getOrCreateWorldConfig();
-    }
-
-
-    @Override
-    public SpongeConfig<? extends GeneralConfigBase> getActiveConfig() {
-        return this.activeConfig;
+        if (this.worldConfig == null) {
+            this.worldConfig = ((IMixinWorldInfo) this.worldInfo).getOrCreateWorldConfig();
+        }
+        return this.worldConfig;
     }
 
     @Override
-    public void setActiveConfig(SpongeConfig<? extends GeneralConfigBase> config) {
-        this.activeConfig = config;
+    public void updateConfigCache() {
         // update cached settings
-        this.chunkGCLoadThreshold = this.activeConfig.getConfig().getWorld().getChunkLoadThreadhold();
-        this.chunkGCTickInterval = this.activeConfig.getConfig().getWorld().getTickInterval();
-        this.weatherIceAndSnowEnabled = this.activeConfig.getConfig().getWorld().getWeatherIceAndSnow();
-        this.weatherThunderEnabled = this.activeConfig.getConfig().getWorld().getWeatherThunder();
-        this.chunkUnloadDelay = this.activeConfig.getConfig().getWorld().getChunkUnloadDelay() * 1000;
+        this.chunkGCLoadThreshold = this.worldConfig.getConfig().getWorld().getChunkLoadThreshold();
+        this.chunkGCTickInterval = this.worldConfig.getConfig().getWorld().getTickInterval();
+        this.weatherIceAndSnowEnabled = this.worldConfig.getConfig().getWorld().getWeatherIceAndSnow();
+        this.weatherThunderEnabled = this.worldConfig.getConfig().getWorld().getWeatherThunder();
+        this.chunkUnloadDelay = this.worldConfig.getConfig().getWorld().getChunkUnloadDelay() * 1000;
         if (this.getChunkProvider() != null) {
-            final int maxChunkUnloads = this.activeConfig.getConfig().getWorld().getMaxChunkUnloads();
+            final int maxChunkUnloads = this.worldConfig.getConfig().getWorld().getMaxChunkUnloads();
             ((IMixinChunkProviderServer) this.getChunkProvider()).setMaxChunkUnloads(maxChunkUnloads < 1 ? 1 : maxChunkUnloads);
-            ((IMixinChunkProviderServer) this.getChunkProvider()).setDenyChunkRequests(this.activeConfig.getConfig().getWorld().getDenyChunkRequests());
+            ((IMixinChunkProviderServer) this.getChunkProvider()).setDenyChunkRequests(this.worldConfig.getConfig().getWorld().getDenyChunkRequests());
             for (net.minecraft.entity.Entity entity : this.loadedEntityList) {
                 if (entity instanceof IModData_Activation) {
                     ((IModData_Activation) entity).requiresActivationCacheRefresh(true);
@@ -432,6 +428,13 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                     ((IModData_Collisions) entity).requiresCollisionsCacheRefresh(true);
                 }
             }
+        }
+    }
+
+    @Override
+    public void incrementChunkLoadCount() {
+        if (this.chunkGCLoadThreshold > 0) {
+            this.chunkLoadCount++;
         }
     }
 
@@ -1115,16 +1118,15 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     public void doChunkGC() {
         this.chunkGCTickCount++;
 
-        ChunkProviderServer chunkProviderServer = this.getChunkProvider();
-        int chunkLoadCount = this.getChunkProvider().getLoadedChunkCount();
-        if (chunkLoadCount >= this.chunkGCLoadThreshold && this.chunkGCLoadThreshold > 0) {
-            chunkLoadCount = 0;
+        if (this.chunkLoadCount >= this.chunkGCLoadThreshold && this.chunkGCLoadThreshold > 0) {
+            this.chunkLoadCount = 0;
         } else if (this.chunkGCTickCount >= this.chunkGCTickInterval && this.chunkGCTickInterval > 0) {
             this.chunkGCTickCount = 0;
         } else {
             return;
         }
 
+        final ChunkProviderServer chunkProviderServer = this.getChunkProvider();
         for (net.minecraft.world.chunk.Chunk chunk : chunkProviderServer.getLoadedChunks()) {
             IMixinChunk spongeChunk = (IMixinChunk) chunk;
             if (chunk.unloadQueued || spongeChunk.isPersistedChunk() || !this.provider.canDropChunk(chunk.x, chunk.z)) {
@@ -2686,7 +2688,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     public void setViewDistance(final int viewDistance) {
         this.setMemoryViewDistance(viewDistance);
-        final SpongeConfig<? extends GeneralConfigBase> config = this.getActiveConfig();
+        final SpongeConfig<? extends GeneralConfigBase> config = this.getWorldConfig();
         // don't use the parameter, use the field that has been clamped
         config.getConfig().getWorld().setViewDistance(this.playerChunkMap.playerViewRadius);
         config.save();

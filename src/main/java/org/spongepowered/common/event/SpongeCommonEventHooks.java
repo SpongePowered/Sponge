@@ -22,33 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.entityactivation;
+package org.spongepowered.common.event;
 
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.item.ItemStack;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.world.chunk.LoadChunkEvent;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
-@NonnullByDefault
-@Mixin(EntityItem.class)
-public abstract class MixinEntityItem_Activation extends MixinEntity_Activation {
+public class SpongeCommonEventHooks {
 
-    @Shadow public abstract ItemStack getItem();
-
-    @Shadow private int pickupDelay;
-    @Shadow private int age;
-
-    @Override
-    public void inactiveTick() {
-        if (this.pickupDelay > 0 && this.pickupDelay != 32767) {
-            --this.pickupDelay;
+    @Listener
+    public void onChunkLoad(LoadChunkEvent event) {
+        final IMixinWorld world = (IMixinWorld) event.getTargetChunk().getWorld();
+        if (world.isFake()) {
+            return;
         }
 
-        if (!this.world.isRemote && this.age >= ((IMixinWorldServer) this.world).getWorldConfig().getConfig().getEntity().getItemDespawnRate()) {
-            this.setDead();
-        }
+        final IMixinWorldServer worldServer = (IMixinWorldServer) event.getTargetChunk().getWorld();
+        worldServer.incrementChunkLoadCount();
     }
-
 }

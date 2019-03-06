@@ -24,26 +24,42 @@
  */
 package org.spongepowered.test;
 
+import com.google.inject.Inject;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.Villager;
 import org.spongepowered.api.entity.living.monster.Enderman;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 
-@Plugin(id = "villager_grief", name = "Villager Test", description = "Type /villagergrief to toggle allowing villagers to farm crops", version = "0.0.0")
-public class VillagerGriefTest {
+@Plugin(id = "villager_grief", name = "Villager Test", description = "test villagers and enderman grief", version = "0.0.0")
+public class VillagerGriefTest implements LoadableModule {
 
-    private boolean canGrief = false;
+    @Inject private PluginContainer container;
 
-//    @Listener
-    public void villagerPlant(ChangeBlockEvent event, @Root Villager villager) {
-        event.setCancelled(true);
+    private final VillagerGriefListener listener = new VillagerGriefListener();
+
+
+
+    @Override
+    public void enable(CommandSource src) {
+        Sponge.getEventManager().registerListeners(this.container, this.listener);
     }
 
-//    @Listener
-    public void endermanCancel(ChangeBlockEvent event, @Root Enderman enderman) {
-        event.setCancelled(true);
+    public static class VillagerGriefListener {
+
+        @Listener
+        public void villagerPlant(ChangeBlockEvent event, @Root Villager villager) {
+            event.setCancelled(true);
+        }
+
+        @Listener
+        public void endermanCancel(ChangeBlockEvent event, @Root Enderman enderman) {
+            event.setCancelled(true);
+        }
     }
 
 }

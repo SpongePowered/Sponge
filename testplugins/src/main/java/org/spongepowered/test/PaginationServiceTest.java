@@ -44,8 +44,7 @@ import java.util.Optional;
 @Plugin(id = "paginationtest", name = "Pagination Test", description = "A plugin to test the pagination service.", version = "0.0.0")
 public class PaginationServiceTest {
 
-    @Inject
-    private Logger logger;
+    @Inject private Logger logger;
 
     private PaginationList paginationList;
 

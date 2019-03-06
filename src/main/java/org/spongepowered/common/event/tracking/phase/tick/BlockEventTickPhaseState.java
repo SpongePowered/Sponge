@@ -46,8 +46,8 @@ import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
-import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.LocatableBlock;
+import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
@@ -75,10 +75,10 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
                 if (blockEventData != null) {
                     if (blockEventData.getTickTileEntity() != null) {
                         frame.pushCause(blockEventData.getTickTileEntity());
-                    } else {
+                    } else if (blockEventData.getTickBlock() != null) {
                         frame.pushCause(blockEventData.getTickBlock());
+                        frame.addContext(EventContextKeys.BLOCK_EVENT_PROCESS, blockEventData.getTickBlock());
                     }
-                    frame.addContext(EventContextKeys.BLOCK_EVENT_PROCESS, blockEventData.getTickBlock());
                 }
             });
 

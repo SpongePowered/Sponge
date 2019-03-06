@@ -24,8 +24,10 @@
  */
 package org.spongepowered.test;
 
+import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.data.key.Keys;
@@ -40,12 +42,17 @@ import org.spongepowered.api.event.filter.Getter;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 
 @Plugin(id = "boat_type_test", name = "Boat Type Test", description = BoatTypeTest.DESCRIPTION, version = "0.0.0")
-public class BoatTypeTest {
+public class BoatTypeTest implements LoadableModule {
 
     public static final String DESCRIPTION = "Right click a boat to get the TreeType, run /makeboat <treetype> to make a boat.";
+
+    private final BoatTypeListener listener = new BoatTypeListener();
+
+    @Inject private PluginContainer container;
 
     @Listener
     public void onInit(GameInitializationEvent event) {
@@ -68,8 +75,16 @@ public class BoatTypeTest {
                 "makeboat");
     }
 
-    @Listener
-    public void onInteractEntity(InteractEntityEvent.Secondary.MainHand event, @Getter("getTargetEntity") Boat boat, @First Player player) {
-        player.sendMessage(Text.of("This boat is of type: " + boat.get(Keys.TREE_TYPE).orElse(TreeTypes.OAK).getName()));
+    @Override
+    public void enable(CommandSource src) {
+        Sponge.getEventManager().registerListeners(this.container, this.listener);
+    }
+
+    public static class BoatTypeListener {
+
+        @Listener
+        public void onInteractEntity(InteractEntityEvent.Secondary.MainHand event, @Getter("getTargetEntity") Boat boat, @First Player player) {
+            player.sendMessage(Text.of("This boat is of type: " + boat.get(Keys.TREE_TYPE).orElse(TreeTypes.OAK).getName()));
+        }
     }
 }

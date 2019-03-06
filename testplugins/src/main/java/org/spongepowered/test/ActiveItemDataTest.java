@@ -26,8 +26,10 @@ package org.spongepowered.test;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -39,38 +41,38 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nullable;
 
-@Plugin(id = "activeitemdatatest", name = "ActiveItemDataTEst", description = "Testing some nice active item data.", version = "0.0.0")
-public final class ActiveItemDataTest {
+@Plugin(id = "activeitemdatatest", name = "Active Item Data Test", description = "Testing some nice active item data.", version = "0.0.0")
+public final class ActiveItemDataTest implements LoadableModule {
 
     @Nullable private Task task;
 
-    @Listener
-    public void onPreInit(final GamePreInitializationEvent event) {
-        Sponge.getCommandManager().register(this, CommandSpec.builder()
-                .executor((src, args) -> {
-                    if (this.task != null) {
-                        this.task.cancel();
-                        src.sendMessage(Text.of("Active item task cancelled."));
-                    } else {
-                        Task.builder()
-                                .interval(5, TimeUnit.SECONDS)
-                                .name("activeitemtask")
-                                .execute(() -> {
-                                    Sponge.getServer().getOnlinePlayers().forEach(p -> {
-                                        p.sendMessage(Text.of(Text.of("Your active item is " +
-                                                p.get(Keys.ACTIVE_ITEM).orElse(ItemStackSnapshot.NONE).getType().getId())));
-                                        p.offer(Keys.ACTIVE_ITEM, ItemStackSnapshot.NONE);
-                                    });
-                                })
-                                .delay(5, TimeUnit.SECONDS)
-                                .submit(this);
+    @Override
+    public void disable(CommandSource src) {
+        if (this.task != null) {
+            this.task.cancel();
+            Sponge.getServer().getBroadcastChannel().send(Text.of("Active item task cancelled."));
+        }
+    }
 
-                        src.sendMessage(Text.of("Active item task set."));
+    @Override
+    public void enable(CommandSource src) {
+        if (this.task != null) {
+            this.task.cancel();
+        }
+        this.task = Task.builder()
+                .interval(5, TimeUnit.SECONDS)
+                .name("activeitemtask")
+                .execute(() -> {
+                    for (Player p : Sponge.getServer().getOnlinePlayers()) {
+                        p.sendMessage(Text.of(Text.of("Your active item is " +
+                                p.get(Keys.ACTIVE_ITEM).orElse(ItemStackSnapshot.NONE).getType().getId())));
+                        p.offer(Keys.ACTIVE_ITEM, ItemStackSnapshot.NONE);
                     }
-
-                    return CommandResult.success();
                 })
-                .build(), "activeitem");
+                .delay(5, TimeUnit.SECONDS)
+                .submit(this);
+
+        Sponge.getServer().getBroadcastChannel().send(Text.of("Active item task set."));
     }
 
 }

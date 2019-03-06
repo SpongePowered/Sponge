@@ -29,6 +29,7 @@ import com.google.inject.Inject;
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 import org.slf4j.Logger;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.advancement.AdvancementTypes;
@@ -41,6 +42,7 @@ import org.spongepowered.api.advancement.criteria.trigger.Trigger;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.tileentity.carrier.Furnace;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.entity.living.player.Player;
@@ -61,6 +63,7 @@ import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.scoreboard.critieria.Criterion;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.explosion.Explosion;
@@ -69,25 +72,23 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-import javax.annotation.Nullable;
+@Plugin(id = AdvancementTest.ID, name = "Advancement Test", version = "0.0.0", description = "test custom advancement")
+public class AdvancementTest implements LoadableModule {
 
-@Plugin(id = "advancement_test", name = "Advancement Test", version = "0.0.0", description = "sponge-test")
-public class AdvancementTest {
+    public static final String ID = "advancement_test";
+
+    private static final String ADVANCEMENT_TREE = "dirt";
+    private static final String ROOT_ADVANCEMENT = "dirt";
+    private static final String BREAK_DIRT_CRITERION = "broken_dirt";
+    private static final String BREAK_DIRT_ADVANCEMENT = "dirt_digger";
+    private static final String COOK_DIRT_ADVANCEMENT = "dirt_cooker";
+    private static final String SUICIDAL_ADVANCEMENT = "suicidal";
+    private static final String TRIGGER = "my_trigger";
 
     @Inject private Logger logger;
-
-    private AdvancementTree advancementTree;
-    private Advancement rootAdvancement;
-
-    private ScoreAdvancementCriterion breakDirtCriterion;
-    private Advancement breakDirtAdvancement;
-
-    private Advancement cookDirtAdvancement;
-    @Nullable private Advancement suicidalAdvancement;
-
     @Inject private PluginContainer pluginContainer;
 
-    private Trigger<MyTriggerConfig> trigger;
+    private final AdvancementListener listener = new AdvancementListener();
 
     @ConfigSerializable
     public static class MyTriggerConfig implements FilteredTriggerConfiguration {
@@ -98,37 +99,9 @@ public class AdvancementTest {
 
     @SuppressWarnings("rawtypes")
     @Listener
-    public void onRegister(GameRegistryEvent.Register event) {
-        this.logger.info("onRegister: " + event.getCatalogType().getName());
-    }
-
-    @Listener
-    public void onRegister2(GameRegistryEvent.Register<?> event) {
-        this.logger.info("onRegister<?>: " + event.getCatalogType().getName());
-    }
-
-    @SuppressWarnings("rawtypes")
-    @Listener
-    public void onRegister3(GameRegistryEvent.Register<? extends Trigger> event) {
-        this.logger.info("onRegister<? extends Trigger>: " + event.getCatalogType().getName());
-    }
-
-    @SuppressWarnings("rawtypes")
-    @Listener
-    public void onRegisterKeys1(GameRegistryEvent.Register<Key> event) {
-        this.logger.info("onRegister<Key>: " + event.getCatalogType().getName());
-    }
-
-    @Listener
-    public void onRegisterKeys(GameRegistryEvent.Register<Key<?>> event) {
-        this.logger.info("onRegister<Key<?>>: " + event.getCatalogType().getName());
-    }
-
-    @SuppressWarnings("rawtypes")
-    @Listener
     public void onRegisterTriggers(GameRegistryEvent.Register<Trigger> event) {
         this.logger.info("Advancements test source: " + this.pluginContainer.getSource().orElse(null));
-        this.trigger = Trigger.builder()
+        Trigger trigger = Trigger.builder()
                 .typeSerializableConfig(MyTriggerConfig.class)
                 .listener(triggerEvent -> {
                     final Random random = new Random();
@@ -137,57 +110,58 @@ public class AdvancementTest {
                     triggerEvent.setResult(value < chance);
                     triggerEvent.getTargetEntity().sendMessage(Text.of(value + " < " + chance + " -> " + triggerEvent.getResult()));
                 })
-                .id("my_trigger")
+                .id(TRIGGER)
                 .build();
-        event.register(this.trigger);
+        event.register(trigger);
     }
 
     @Listener
     public void onRegisterAdvancementTrees(GameRegistryEvent.Register<AdvancementTree> event) {
         this.logger.info("Loading advancement trees...");
         // Create the advancement tree
-        this.advancementTree = AdvancementTree.builder()
-                .rootAdvancement(this.rootAdvancement)
+        Advancement rootAdvancement = Sponge.getRegistry().getType(Advancement.class, ID + ":" + ROOT_ADVANCEMENT).get();
+        AdvancementTree advancementTree = AdvancementTree.builder()
+                .rootAdvancement(rootAdvancement)
                 .background("minecraft:textures/blocks/dirt.png")
-                .id("dirt")
+                .id(ADVANCEMENT_TREE)
                 .build();
-        event.register(this.advancementTree);
+        event.register(advancementTree);
     }
 
     @Listener
     public void onRegisterAdvancements(GameRegistryEvent.Register<Advancement> event) {
         this.logger.info("Loading advancements...");
         // Create the root advancement
-        this.rootAdvancement = Advancement.builder()
+        Advancement rootAdvancement = Advancement.builder()
                 .displayInfo(DisplayInfo.builder()
                         .icon(ItemTypes.DIRT)
                         .title(Text.of("Dirt? Dirt!"))
                         .build())
                 .criterion(AdvancementCriterion.DUMMY)
-                .id("dirt")
+                .id(ROOT_ADVANCEMENT)
                 .build();
-        event.register(this.rootAdvancement);
+        event.register(rootAdvancement);
 
         // Create the break dirt advancement and criterion
-        this.breakDirtCriterion = ScoreAdvancementCriterion.builder()
+        ScoreAdvancementCriterion breakDirtCriterion = ScoreAdvancementCriterion.builder()
                 .goal(10)
-                .name("broken_dirt")
+                .name(BREAK_DIRT_CRITERION)
                 .build();
-        this.breakDirtAdvancement = Advancement.builder()
-                .parent(this.rootAdvancement)
+        Advancement breakDirtAdvancement = Advancement.builder()
+                .parent(rootAdvancement)
                 .displayInfo(DisplayInfo.builder()
                         .icon(ItemTypes.STONE_SHOVEL)
                         .title(Text.of("Digger"))
                         .description(Text.of("Start digging."))
                         .build())
-                .criterion(this.breakDirtCriterion)
-                .id("dirt_digger")
+                .criterion(breakDirtCriterion)
+                .id(BREAK_DIRT_ADVANCEMENT)
                 .build();
-        event.register(this.breakDirtAdvancement);
+        event.register(breakDirtAdvancement);
 
         // Create the cook dirt advancement
-        this.cookDirtAdvancement = Advancement.builder()
-                .parent(this.rootAdvancement)
+        Advancement cookDirtAdvancement = Advancement.builder()
+                .parent(rootAdvancement)
                 .criterion(AdvancementCriterion.DUMMY)
                 .displayInfo(DisplayInfo.builder()
                         .icon(ItemTypes.FURNACE)
@@ -195,14 +169,13 @@ public class AdvancementTest {
                         .description(Text.of("Try to cook dirt"))
                         .type(AdvancementTypes.CHALLENGE)
                         .build())
-                .id("dirt_cooker")
+                .id(COOK_DIRT_ADVANCEMENT)
                 .build();
-        event.register(this.cookDirtAdvancement);
+        event.register(cookDirtAdvancement);
 
-        this.suicidalAdvancement = null;
         event.getRegistryModule().getById("minecraft:adventure_root").ifPresent(parent -> {
             // Create the suicidal advancement
-            this.suicidalAdvancement = Advancement.builder()
+            Advancement suicidalAdvancement = Advancement.builder()
                     .parent(parent)
                     .criterion(AdvancementCriterion.DUMMY)
                     .displayInfo(DisplayInfo.builder()
@@ -212,44 +185,53 @@ public class AdvancementTest {
                             .type(AdvancementTypes.CHALLENGE)
                             .hidden(true)
                             .build())
-                    .id("suicidal")
+                    .id(SUICIDAL_ADVANCEMENT)
                     .build();
-            event.register(this.suicidalAdvancement);
+            event.register(suicidalAdvancement);
         });
     }
 
-    @Listener
-    public void onPlayerJoin(ClientConnectionEvent.Join event) {
-        event.getTargetEntity().getProgress(this.rootAdvancement).grant();
+    @Override
+    public void enable(CommandSource src) {
+        Sponge.getEventManager().registerListeners(this.pluginContainer, this.listener);
     }
 
-    @Listener
-    public void onGenerateTreeLayout(AdvancementTreeEvent.GenerateLayout event) {
-        if (event.getTree() != this.advancementTree) {
-            return;
+    public static class AdvancementListener {
+
+        @Listener
+        public void onPlayerJoin(ClientConnectionEvent.Join event) {
+            Advancement rootAdvancement = Sponge.getRegistry().getType(Advancement.class, ID + ":" + ROOT_ADVANCEMENT).get();
+            event.getTargetEntity().getProgress(rootAdvancement).grant();
         }
-        this.logger.info("Updating advancement tree layout...");
-        // Make the tree start at y 0, for every level within the tree
-        // The min y position mapped by the used x positions
-        // For example:
-        //    |- y
-        // x -|- z
-        //    |- w
-        // to
-        // x -|- y
-        //    |- z
-        //    |- w
-        final Map<Double, Double> values = new HashMap<>();
-        for (TreeLayoutElement element : event.getLayout().getElements()) {
-            final Vector2d pos = element.getPosition();
-            if (!values.containsKey(pos.getX()) || pos.getY() < values.get(pos.getX())) {
-                values.put(pos.getX(), pos.getY());
+
+        @Listener
+        public void onGenerateTreeLayout(AdvancementTreeEvent.GenerateLayout event) {
+            AdvancementTree advancementTree = Sponge.getRegistry().getType(AdvancementTree.class, ID + ":" + ADVANCEMENT_TREE).get();
+            if (event.getTree() != advancementTree) {
+                return;
             }
-        }
-        for (TreeLayoutElement element : event.getLayout().getElements()) {
-            final Vector2d pos = element.getPosition();
-            element.setPosition(pos.getX(), pos.getY() - values.get(pos.getX()));
-        }
+            Sponge.getServer().getBroadcastChannel().send(Text.of("Updating advancement tree layout..."));
+            // Make the tree start at y 0, for every level within the tree
+            // The min y position mapped by the used x positions
+            // For example:
+            //    |- y
+            // x -|- z
+            //    |- w
+            // to
+            // x -|- y
+            //    |- z
+            //    |- w
+            final Map<Double, Double> values = new HashMap<>();
+            for (TreeLayoutElement element : event.getLayout().getElements()) {
+                final Vector2d pos = element.getPosition();
+                if (!values.containsKey(pos.getX()) || pos.getY() < values.get(pos.getX())) {
+                    values.put(pos.getX(), pos.getY());
+                }
+            }
+            for (TreeLayoutElement element : event.getLayout().getElements()) {
+                final Vector2d pos = element.getPosition();
+                element.setPosition(pos.getX(), pos.getY() - values.get(pos.getX()));
+            }
         /*
         // Rotate the advancement tree
         // The lines are currently drawn wrongly, that might be something
@@ -263,67 +245,74 @@ public class AdvancementTest {
             element.setPosition(maxY - pos.getY(), pos.getX());
         }
         */
-    }
+        }
 
-    @Listener
-    public void onChangeBlock(ChangeBlockEvent.Break event, @First Player player) {
-        for (Transaction<BlockSnapshot> transaction : event.getTransactions()) {
-            if (transaction.getFinal().getState().getType() == BlockTypes.AIR &&
-                    (transaction.getOriginal().getState().getType() == BlockTypes.DIRT ||
-                            transaction.getOriginal().getState().getType() == BlockTypes.GRASS)) {
-                player.getProgress(this.breakDirtAdvancement).get(this.breakDirtCriterion).get().add(1);
-            } else if (transaction.getFinal().getState().getType() == BlockTypes.AIR &&
-                    (transaction.getOriginal().getState().getType() == BlockTypes.LEAVES ||
-                            transaction.getOriginal().getState().getType() == BlockTypes.LEAVES2)) {
-                this.trigger.trigger(player);
-            }
-        }
-    }
+        @Listener
+        public void onChangeBlock(ChangeBlockEvent.Break event, @First Player player) {
+            Trigger trigger = Sponge.getRegistry().getType(Trigger.class, ID + ":" + TRIGGER).get();
+            Advancement breakDirtAdvancement = Sponge.getRegistry().getType(Advancement.class, ID + ":" + BREAK_DIRT_ADVANCEMENT).get();
+            Criterion breakDirtCriterion = Sponge.getRegistry().getType(Criterion.class, ID + ":" + BREAK_DIRT_CRITERION).get();
+            for (Transaction<BlockSnapshot> transaction : event.getTransactions()) {
+                if (transaction.getFinal().getState().getType() == BlockTypes.AIR &&
+                        (transaction.getOriginal().getState().getType() == BlockTypes.DIRT ||
+                                transaction.getOriginal().getState().getType() == BlockTypes.GRASS)) {
 
-    @SuppressWarnings("ConstantConditions")
-    @Listener
-    public void onChangeInventory(ChangeInventoryEvent event, @First Player player,
-            @Getter("getTargetInventory") CarriedInventory<?> container) {
-        if (!container.getName().get().equals("Furnace")) {
-            return;
-        }
-        final Carrier carrier = container.getCarrier().orElse(null);
-        if (!(carrier instanceof Furnace)) {
-            return;
-        }
-        final Furnace furnace = (Furnace) carrier;
-        final int passed = furnace.passedBurnTime().get();
-        final int max = furnace.maxBurnTime().get();
-        if (max <= 0 || passed >= max) {
-            return;
-        }
-        for (SlotTransaction transaction : event.getTransactions()) {
-            if (transaction.getSlot().getInventoryProperty(SlotIndex.class).get().getValue() == 0) {
-                if (transaction.getFinal().getType() == ItemTypes.DIRT) {
-                    player.getProgress(this.cookDirtAdvancement).grant();
-                } else if (this.suicidalAdvancement != null && (transaction.getFinal().getType() == ItemTypes.TNT ||
-                        transaction.getFinal().getType() == ItemTypes.TNT_MINECART)) {
-                    player.getProgress(this.suicidalAdvancement).grant();
-                    final Explosion explosion = Explosion.builder()
-                            .location(furnace.getLocation())
-                            .shouldBreakBlocks(true)
-                            .canCauseFire(true)
-                            .shouldDamageEntities(true)
-                            .radius(7)
-                            .build();
-                    explosion.getWorld().triggerExplosion(explosion);
+                    player.getProgress(breakDirtAdvancement).get((ScoreAdvancementCriterion) breakDirtCriterion).get().add(1);
+                } else if (transaction.getFinal().getState().getType() == BlockTypes.AIR &&
+                        (transaction.getOriginal().getState().getType() == BlockTypes.LEAVES ||
+                                transaction.getOriginal().getState().getType() == BlockTypes.LEAVES2)) {
+                    trigger.trigger(player);
                 }
             }
         }
-    }
 
-    @Listener
-    public void onCriterionGrant(CriterionEvent.Grant event) {
-        event.getTargetEntity().sendMessage(Text.of(TextColors.GREEN, "Congratulations on achieving criterion " + event.getCriterion().getName()));
-    }
+        @SuppressWarnings("ConstantConditions")
+        @Listener
+        public void onChangeInventory(ChangeInventoryEvent event, @First Player player,
+                                      @Getter("getTargetInventory") CarriedInventory<?> container) {
+            if (!container.getName().get().equals("Furnace")) {
+                return;
+            }
+            final Carrier carrier = container.getCarrier().orElse(null);
+            if (!(carrier instanceof Furnace)) {
+                return;
+            }
+            final Furnace furnace = (Furnace) carrier;
+            final int passed = furnace.passedBurnTime().get();
+            final int max = furnace.maxBurnTime().get();
+            if (max <= 0 || passed >= max) {
+                return;
+            }
+            Advancement cookDirtAdvancement = Sponge.getRegistry().getType(Advancement.class, ID + ":" + COOK_DIRT_ADVANCEMENT).get();
+            Advancement suicidalAdvancement = Sponge.getRegistry().getType(Advancement.class, ID + ":" + SUICIDAL_ADVANCEMENT).get();
+            for (SlotTransaction transaction : event.getTransactions()) {
+                if (transaction.getSlot().getInventoryProperty(SlotIndex.class).get().getValue() == 0) {
+                    if (transaction.getFinal().getType() == ItemTypes.DIRT) {
+                        player.getProgress(cookDirtAdvancement).grant();
+                    } else if (suicidalAdvancement != null && (transaction.getFinal().getType() == ItemTypes.TNT ||
+                            transaction.getFinal().getType() == ItemTypes.TNT_MINECART)) {
+                        player.getProgress(suicidalAdvancement).grant();
+                        final Explosion explosion = Explosion.builder()
+                                .location(furnace.getLocation())
+                                .shouldBreakBlocks(true)
+                                .canCauseFire(true)
+                                .shouldDamageEntities(true)
+                                .radius(7)
+                                .build();
+                        explosion.getWorld().triggerExplosion(explosion);
+                    }
+                }
+            }
+        }
 
-    @Listener
-    public void onAdvancementGrant(AdvancementEvent.Grant event) {
-        event.getTargetEntity().sendMessage(Text.of(TextColors.BLUE, "You achieved advancement " + event.getAdvancement().getName()));
+        @Listener
+        public void onCriterionGrant(CriterionEvent.Grant event) {
+            event.getTargetEntity().sendMessage(Text.of(TextColors.GREEN, "Congratulations on achieving criterion " + event.getCriterion().getName()));
+        }
+
+        @Listener
+        public void onAdvancementGrant(AdvancementEvent.Grant event) {
+            event.getTargetEntity().sendMessage(Text.of(TextColors.BLUE, "You achieved advancement " + event.getAdvancement().getName()));
+        }
     }
 }

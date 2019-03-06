@@ -25,10 +25,12 @@
 package org.spongepowered.test;
 
 import com.google.common.collect.ImmutableList;
+import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.property.block.InstrumentProperty;
@@ -39,35 +41,21 @@ import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 @SuppressWarnings("ConstantConditions")
 @Plugin(id = "instrumenttest", name = "InstrumentTest", description = "Tests instrument types and properties.", version = "0.0.0")
-public class InstrumentTestPlugin {
+public class InstrumentTestPlugin implements LoadableModule {
 
-    private static boolean enabled = false;
+    @Inject private PluginContainer container;
+
+    private final InstrumentListener listener = new InstrumentListener();
 
     @Listener
     public void onInitialization(final GameInitializationEvent event) {
-        Sponge.getCommandManager().register(this,
-                CommandSpec.builder()
-                        .arguments()
-                        .executor((src, args) -> {
-                            enabled = !enabled;
-
-                            if (enabled) {
-                                src.sendMessage(Text.of(TextColors.DARK_GREEN,
-                                        "You have enabled instrument type testing. Shift right-click a block to use."));
-                            } else {
-                                src.sendMessage(Text.of(TextColors.DARK_GREEN, "You have disabled instrument type testing."));
-                            }
-
-                            return CommandResult.success();
-                        })
-                        .build(),
-                "instrumenttest");
         Sponge.getCommandManager().register(this,
                 CommandSpec.builder()
                         .executor((src, args) -> {
@@ -86,27 +74,35 @@ public class InstrumentTestPlugin {
                 "instrumenttypes");
     }
 
-    @Listener
-    public void onUseItem(InteractBlockEvent.Secondary.MainHand event, @First Player player) {
-        if (!enabled || !player.get(Keys.IS_SNEAKING).get()) {
-            return;
-        }
-        final BlockSnapshot snapshot = event.getTargetBlock();
-        if (snapshot.getState().getType().equals(BlockTypes.NOTEBLOCK)) {
-            final InstrumentProperty instrumentProperty = player.getWorld().getBlock(snapshot.getPosition().sub(0, 1, 0)).getProperty(InstrumentProperty.class).orElse(null);
-            if (instrumentProperty != null) {
-                final InstrumentType instrument = instrumentProperty.getValue();
-                player.sendMessage(Text.of(TextColors.DARK_GREEN, "Clicked on a note block with instrument: ", TextColors.GREEN, instrument.getName()));
-            } else {
-                player.sendMessage(Text.of(TextColors.DARK_GREEN, "Clicked on a note block that strangely did not have any instrument type."));
+    @Override
+    public void enable(CommandSource src) {
+        Sponge.getEventManager().registerListeners(this.container, this.listener);
+    }
+
+    public static class InstrumentListener {
+
+        @Listener
+        public void onUseItem(InteractBlockEvent.Secondary.MainHand event, @First Player player) {
+            if (!player.get(Keys.IS_SNEAKING).get()) {
+                return;
             }
-        } else {
-            final InstrumentProperty instrumentProperty = snapshot.getProperty(InstrumentProperty.class).orElse(null);
-            if (instrumentProperty != null) {
-                final InstrumentType instrument = instrumentProperty.getValue();
-                player.sendMessage(Text.of(TextColors.DARK_GREEN, "Clicked on a block with instrument type: ", TextColors.GREEN, instrument.getName()));
+            final BlockSnapshot snapshot = event.getTargetBlock();
+            if (snapshot.getState().getType().equals(BlockTypes.NOTEBLOCK)) {
+                final InstrumentProperty instrumentProperty = player.getWorld().getBlock(snapshot.getPosition().sub(0, 1, 0)).getProperty(InstrumentProperty.class).orElse(null);
+                if (instrumentProperty != null) {
+                    final InstrumentType instrument = instrumentProperty.getValue();
+                    player.sendMessage(Text.of(TextColors.DARK_GREEN, "Clicked on a note block with instrument: ", TextColors.GREEN, instrument.getName()));
+                } else {
+                    player.sendMessage(Text.of(TextColors.DARK_GREEN, "Clicked on a note block that strangely did not have any instrument type."));
+                }
             } else {
-                player.sendMessage(Text.of(TextColors.DARK_GREEN, "Clicked on a block which had no instrument type."));
+                final InstrumentProperty instrumentProperty = snapshot.getProperty(InstrumentProperty.class).orElse(null);
+                if (instrumentProperty != null) {
+                    final InstrumentType instrument = instrumentProperty.getValue();
+                    player.sendMessage(Text.of(TextColors.DARK_GREEN, "Clicked on a block with instrument type: ", TextColors.GREEN, instrument.getName()));
+                } else {
+                    player.sendMessage(Text.of(TextColors.DARK_GREEN, "Clicked on a block which had no instrument type."));
+                }
             }
         }
     }

@@ -24,6 +24,9 @@
  */
 package org.spongepowered.test;
 
+import com.google.inject.Inject;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
@@ -31,19 +34,32 @@ import org.spongepowered.api.event.entity.IgniteEntityEvent;
 import org.spongepowered.api.event.filter.Getter;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 
 @Plugin(authors = "gabizou", name = "Ignite Test", id = "ignitetest", description = IgniteEventTest.DESCRIPTION, version = "0.0.0")
-public class IgniteEventTest {
+public class IgniteEventTest implements LoadableModule {
 
     public static final String DESCRIPTION = "A test plugin to test setting the ignited entities on command";
 
-    @Listener
-    public void onIgnite(IgniteEntityEvent entityEvent, @Getter("getTargetEntity") Player player) {
-        player.getItemInHand(HandTypes.MAIN_HAND).ifPresent(item -> {
-            if (item.getType() == ItemTypes.BLAZE_ROD) {
-                entityEvent.setFireTicks(600);
-            }
-        });
+    @Inject private PluginContainer container;
+
+    private final IgniteEventListener listener = new IgniteEventListener();
+
+    @Override
+    public void enable(CommandSource src) {
+        Sponge.getEventManager().registerListeners(this.container, this.listener);
+    }
+
+    public static class IgniteEventListener {
+
+        @Listener
+        public void onIgnite(IgniteEntityEvent entityEvent, @Getter("getTargetEntity") Player player) {
+            player.getItemInHand(HandTypes.MAIN_HAND).ifPresent(item -> {
+                if (item.getType() == ItemTypes.BLAZE_ROD) {
+                    entityEvent.setFireTicks(600);
+                }
+            });
+        }
     }
 
 }

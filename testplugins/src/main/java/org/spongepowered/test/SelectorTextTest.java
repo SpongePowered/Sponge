@@ -52,8 +52,7 @@ public class SelectorTextTest {
     private static final Text ONE = Text.of(TextColors.GREEN, Text.of("1."));
     private static final Text TWO = Text.of(TextColors.GREEN, Text.of("2."));
 
-    @Inject
-    private Logger logger;
+    @Inject private Logger logger;
 
     @Listener
     public void onGameStartingServer(GameStartingServerEvent event) {

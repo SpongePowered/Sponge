@@ -119,7 +119,7 @@ public class SpongeHooks {
             return;
         }
 
-        SpongeConfig<? extends GeneralConfigBase> config = getActiveConfig((WorldServer) entity.world);
+        SpongeConfig<? extends GeneralConfigBase> config = getWorldConfig((WorldServer) entity.world);
         if (config.getConfig().getLogging().entityDeathLogging()) {
             logInfo("Dim: {0} setDead(): {1}", ((IMixinWorldServer) entity.world).getDimensionId(), entity);
             logStack(config);
@@ -131,7 +131,7 @@ public class SpongeHooks {
             return;
         }
 
-        SpongeConfig<? extends GeneralConfigBase> config = getActiveConfig((WorldServer) entity.world);
+        SpongeConfig<? extends GeneralConfigBase> config = getWorldConfig((WorldServer) entity.world);
         if (config.getConfig().getLogging().entityDespawnLogging()) {
             logInfo("Dim: {0} Despawning ({1}): {2}", ((IMixinWorldServer) entity.world).getDimensionId(), reason, entity);
             logStack(config);
@@ -149,7 +149,7 @@ public class SpongeHooks {
 
         String spawnName = entity.getName();
 
-        SpongeConfig<? extends GeneralConfigBase> config = getActiveConfig((WorldServer) entity.world);
+        SpongeConfig<? extends GeneralConfigBase> config = getWorldConfig((WorldServer) entity.world);
         if (config.getConfig().getLogging().entitySpawnLogging()) {
             logInfo("SPAWNED " + spawnName + " [World: {2}][DimId: {3}]",
                     entity.world.getWorldInfo().getWorldName(),
@@ -163,7 +163,7 @@ public class SpongeHooks {
             return;
         }
 
-        SpongeConfig<? extends GeneralConfigBase> config = getActiveConfig((WorldServer) world);
+        SpongeConfig<? extends GeneralConfigBase> config = getWorldConfig((WorldServer) world);
         if (config.getConfig().getLogging().blockTrackLogging() && allowed) {
             logInfo("Tracking Block " + "[RootCause: {0}][World: {1}][Block: {2}][Pos: {3}]",
                     user.getName(),
@@ -186,7 +186,7 @@ public class SpongeHooks {
             return;
         }
 
-        SpongeConfig<? extends GeneralConfigBase> config = getActiveConfig((WorldServer) world);
+        SpongeConfig<? extends GeneralConfigBase> config = getWorldConfig((WorldServer) world);
 
         LoggingCategory logging = config.getConfig().getLogging();
         if (type != null && type.allowsLogging(logging)) {
@@ -204,7 +204,7 @@ public class SpongeHooks {
             return;
         }
 
-        SpongeConfig<? extends GeneralConfigBase> config = getActiveConfig((WorldServer) world);
+        SpongeConfig<? extends GeneralConfigBase> config = getWorldConfig((WorldServer) world);
         if (config.getConfig().getLogging().chunkLoadLogging()) {
             logInfo("Load Chunk At [{0}] ({1}, {2})", ((IMixinWorldServer) world).getDimensionId(), chunkPos.getX(),
                     chunkPos.getZ());
@@ -217,7 +217,7 @@ public class SpongeHooks {
             return;
         }
 
-        SpongeConfig<? extends GeneralConfigBase> config = getActiveConfig((WorldServer) world);
+        SpongeConfig<? extends GeneralConfigBase> config = getWorldConfig((WorldServer) world);
         if (config.getConfig().getLogging().chunkUnloadLogging()) {
             logInfo("Unload Chunk At [{0}] ({1}, {2})", ((IMixinWorldServer) world).getDimensionId(), chunkPos.getX(),
                     chunkPos.getZ());
@@ -230,7 +230,7 @@ public class SpongeHooks {
             return;
         }
 
-        SpongeConfig<? extends GeneralConfigBase> config = getActiveConfig(world);
+        SpongeConfig<? extends GeneralConfigBase> config = getWorldConfig(world);
         if (config.getConfig().getLogging().chunkGCQueueUnloadLogging()) {
             logInfo("Chunk GC Queued Chunk At [{0}] ({1}, {2} for unload)", ((IMixinWorldServer) world).getDimensionId(), chunk.x, chunk.z);
             logStack(config);
@@ -242,7 +242,7 @@ public class SpongeHooks {
             return;
         }
 
-        SpongeConfig<? extends GeneralConfigBase> config = getActiveConfig((WorldServer) player.world);
+        SpongeConfig<? extends GeneralConfigBase> config = getWorldConfig((WorldServer) player.world);
         if (config.getConfig().getLogging().logExploitSignCommandUpdates) {
             logInfo("[EXPLOIT] Player ''{0}'' attempted to exploit sign in world ''{1}'' located at ''{2}'' with command ''{3}''",
                     player.getName(),
@@ -258,7 +258,7 @@ public class SpongeHooks {
             return;
         }
 
-        SpongeConfig<? extends GeneralConfigBase> config = getActiveConfig((WorldServer) player.world);
+        SpongeConfig<? extends GeneralConfigBase> config = getWorldConfig((WorldServer) player.world);
         if (config.getConfig().getLogging().logExploitItemStackNameOverflow) {
             logInfo("[EXPLOIT] Player ''{0}'' attempted to send a creative itemstack update with a display name length of ''{1}'' (Max allowed length is 32767). This has been blocked to avoid server overflow.",
                     player.getName(),
@@ -272,7 +272,7 @@ public class SpongeHooks {
             return;
         }
 
-        SpongeConfig<? extends GeneralConfigBase> config = getActiveConfig((WorldServer) player.world);
+        SpongeConfig<? extends GeneralConfigBase> config = getWorldConfig((WorldServer) player.world);
         if (config.getConfig().getLogging().logExploitRespawnInvisibility) {
             logInfo("[EXPLOIT] Player ''{0}'' attempted to perform a respawn invisibility exploit to surrounding players.",
                     player.getName());
@@ -285,7 +285,7 @@ public class SpongeHooks {
             return false;
         }
 
-        SpongeConfig<? extends GeneralConfigBase> config = getActiveConfig((WorldServer) entity.world);
+        SpongeConfig<? extends GeneralConfigBase> config = getWorldConfig((WorldServer) entity.world);
         if (!(entity instanceof EntityLivingBase) || entity instanceof EntityPlayer || entity instanceof IEntityMultiPart) {
             return false; // only check living entities, so long as they are not a player or multipart entity
         }
@@ -324,7 +324,7 @@ public class SpongeHooks {
             return false;
         }
 
-        SpongeConfig<? extends GeneralConfigBase> config = getActiveConfig((WorldServer) entity.world);
+        SpongeConfig<? extends GeneralConfigBase> config = getWorldConfig((WorldServer) entity.world);
         int maxSpeed = config.getConfig().getEntity().getMaxSpeed();
         if (maxSpeed > 0) {
             double distance = x * x + z * z;
@@ -370,7 +370,7 @@ public class SpongeHooks {
             return;
         }
 
-        SpongeConfig<? extends GeneralConfigBase> config = getActiveConfig((WorldServer) entity.world);
+        SpongeConfig<? extends GeneralConfigBase> config = getWorldConfig((WorldServer) entity.world);
         if (!config.getConfig().getLogging().logEntityCollisionChecks()) {
             return;
         }
@@ -444,22 +444,12 @@ public class SpongeHooks {
         mbean.setThreadContentionMonitoringEnabled(true);
     }
 
-    public static SpongeConfig<? extends GeneralConfigBase> getActiveConfig(WorldServer world, boolean refresh) {
+    public static SpongeConfig<? extends GeneralConfigBase> getWorldConfig(WorldServer world) {
         final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) world;
-        SpongeConfig<? extends GeneralConfigBase> activeConfig = mixinWorldServer.getActiveConfig();
-        if (activeConfig == null || refresh) {
-            activeConfig = mixinWorldServer.getWorldConfig();
-            mixinWorldServer.setActiveConfig(activeConfig);
-        }
-
-        return activeConfig;
+        return mixinWorldServer.getWorldConfig();
     }
 
-    public static SpongeConfig<? extends GeneralConfigBase> getActiveConfig(WorldServer world) {
-        return getActiveConfig(world, false);
-    }
-
-    public static SpongeConfig<? extends GeneralConfigBase> getActiveConfig(Path dimensionPath, String worldFolder) {
+    public static SpongeConfig<? extends GeneralConfigBase> getSpongeConfig(Path dimensionPath, String worldFolder) {
         if (dimensionPath == null) {
             // If no dimension type, go global
             return SpongeImpl.getGlobalConfig();
@@ -470,7 +460,7 @@ public class SpongeHooks {
 
             // If this is a loaded world then we only return configs on the loaded objects. Don't go to disk.
             if (optWorld.isPresent()) {
-                return ((IMixinWorldServer) optWorld.get()).getActiveConfig();
+                return ((IMixinWorldServer) optWorld.get()).getWorldConfig();
             }
         }
 
@@ -503,7 +493,10 @@ public class SpongeHooks {
         }
 
         for (WorldServer world : WorldManager.getWorlds()) {
-            ((IMixinWorldServer) world).setActiveConfig(SpongeHooks.getActiveConfig(world, true));
+            final SpongeConfig<? extends GeneralConfigBase> worldConfig = getWorldConfig(world);
+            // Reload before updating world config cache
+            worldConfig.reload();
+            ((IMixinWorldServer) world).updateConfigCache();
             for (Entity entity : world.loadedEntityList) {
                 if (entity instanceof IModData_Activation) {
                     ((IModData_Activation) entity).requiresActivationCacheRefresh(true);

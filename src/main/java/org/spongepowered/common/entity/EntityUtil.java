@@ -118,7 +118,6 @@ import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.registry.type.entity.ProfessionRegistryModule;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.common.world.VirtualPortalAgent;
 import org.spongepowered.common.world.WorldManager;
 
 import java.util.ArrayList;
@@ -371,7 +370,7 @@ public final class EntityUtil {
             return null;
         }
 
-        final Map<String, String> portalAgents = fromMixinWorld.getActiveConfig().getConfig().getWorld().getPortalAgents();
+        final Map<String, String> portalAgents = fromMixinWorld.getWorldConfig().getConfig().getWorld().getPortalAgents();
         String worldName;
 
         // Check if we're to use a different teleporter for this world
@@ -441,7 +440,7 @@ public final class EntityUtil {
             final Transform<World> portalExitTransform = mixinEntity.getTransform().setExtent((World) toWorld);
             // Use setLocationAndAngles to avoid firing MoveEntityEvent to plugins
             mixinEntity.setLocationAndAngles(fromTransform);
-            final MoveEntityEvent.Teleport.Portal event = SpongeEventFactory.createMoveEntityEventTeleportPortal(frame.getCurrentCause(), fromTransform, portalExitTransform, VirtualPortalAgent.workaround(teleporter), mixinEntity, true);
+            final MoveEntityEvent.Teleport.Portal event = SpongeEventFactory.createMoveEntityEventTeleportPortal(frame.getCurrentCause(), fromTransform, portalExitTransform, (PortalAgent) teleporter, mixinEntity, true);
             SpongeImpl.postEvent(event);
             final Vector3i chunkPosition = mixinEntity.getLocation().getChunkPosition();
             final MultiBlockCaptureSupplier blockSupplier = context.getCapturedBlockSupplier();

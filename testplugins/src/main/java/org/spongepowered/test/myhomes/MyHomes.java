@@ -28,6 +28,7 @@ import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataRegistration;
@@ -45,6 +46,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.chat.ChatTypes;
 import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.api.util.generator.dummy.DummyObjectProvider;
+import org.spongepowered.test.LoadableModule;
 import org.spongepowered.test.myhomes.data.friends.FriendsData;
 import org.spongepowered.test.myhomes.data.friends.ImmutableFriendsData;
 import org.spongepowered.test.myhomes.data.friends.impl.FriendsDataBuilder;
@@ -61,7 +63,7 @@ import org.spongepowered.test.myhomes.data.home.impl.ImmutableHomeDataImpl;
 import java.util.UUID;
 
 @Plugin(id = "myhomes", name = "MyHomes", version = "0.0.0", description = "A simple homes plugin")
-public class MyHomes {
+public class MyHomes implements LoadableModule {
 
     // TODO - make this an actual home plugin that would work...
     // for now it just registers data and data related stuff.
@@ -75,6 +77,8 @@ public class MyHomes {
 
     private DataRegistration<FriendsData, ImmutableFriendsData> friendsDataRegistration;
     private DataRegistration<HomeData, ImmutableHomeData> homeDataRegistration;
+
+    private final MyHomeListener listener = new MyHomeListener();
 
     @Listener
     public void onKeyRegistration(GameRegistryEvent.Register<Key<?>> event) {
@@ -119,9 +123,9 @@ public class MyHomes {
             .dataImplementation(HomeDataImpl.class)
             .immutableImplementation(ImmutableHomeDataImpl.class)
             .builder(new HomeDataBuilder())
-            .dataName("Home Data")
-            .manipulatorId("home")
-            .buildAndRegister(this.container);
+            .name("Home Data")
+            .id("home")
+            .build();
 
         // Friends stuff
         this.friendsDataRegistration = DataRegistration.builder()
@@ -130,18 +134,28 @@ public class MyHomes {
             .dataImplementation(FriendsDataImpl.class)
             .immutableImplementation(ImmutableFriendsDataImpl.class)
             .builder(new FriendsDataBuilder())
-            .dataName("Friends Data")
-            .manipulatorId("friends")
-            .buildAndRegister(this.container);
+            .name("Friends Data")
+            .id("friends")
+            .build();
     }
 
-    @Listener
-    public void onClientConnectionJoin(ClientConnectionEvent.Join event) {
-        Player player = event.getTargetEntity();
-        player.get(DEFAULT_HOME).ifPresent(home -> {
-            player.setTransform(home.getTransform());
-            player.sendMessage(ChatTypes.ACTION_BAR,
-                    Text.of("Teleported to home - ", TextStyles.BOLD, home.getName()));
-        });
+
+
+    @Override
+    public void enable(CommandSource src) {
+        Sponge.getEventManager().registerListeners(this.container, this.listener);
+    }
+
+    public static class MyHomeListener {
+
+        @Listener
+        public void onClientConnectionJoin(ClientConnectionEvent.Join event) {
+            Player player = event.getTargetEntity();
+            player.get(DEFAULT_HOME).ifPresent(home -> {
+                player.setTransform(home.getTransform());
+                player.sendMessage(ChatTypes.ACTION_BAR, Text.of("Teleported to home - ", TextStyles.BOLD, home.getName()));
+            });
+        }
+
     }
 }

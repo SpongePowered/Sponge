@@ -25,7 +25,10 @@
 package org.spongepowered.test;
 
 import com.google.common.base.Preconditions;
+import com.google.inject.Inject;
 import org.slf4j.Logger;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.filter.cause.Root;
@@ -41,40 +44,25 @@ import org.spongepowered.api.item.inventory.type.GridInventory;
 import org.spongepowered.api.item.inventory.type.InventoryColumn;
 import org.spongepowered.api.item.inventory.type.InventoryRow;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 
-import javax.inject.Inject;
 
 /**
  * Tests intersect union on and containsInventory
  */
 @Plugin(id = "inventorysetoperationstest", name = "Inventory Set Operations Test", description = InventorySetOpsTest.DESCRIPTION, version = "0.0.0")
-public class InventorySetOpsTest {
+public class InventorySetOpsTest implements LoadableModule {
 
     public static final String DESCRIPTION = "A plugin to test inventory set operations";
     @Inject private Logger logger;
+    @Inject private PluginContainer container;
+
+    private final InventorySetOpsListener listener = new InventorySetOpsListener();
 
     @Listener
     public void onStart(GameStartedServerEvent event) {
         testIntersect();
         testUnion();
-    }
-
-    @SuppressWarnings("deprecation")
-    @Listener
-    public void onMidas(ChangeInventoryEvent.Held event, @Root Player player) {
-        // Checks if Slots are contained in the hotbar then may transform iron to gold
-        Inventory hotbar = event.getTargetInventory().query(Hotbar.class);
-        boolean nugget = false;
-        for (SlotTransaction transaction : event.getTransactions()) {
-            if (hotbar.containsInventory(transaction.getSlot())) {
-                if (ItemTypes.GOLD_NUGGET.equals(transaction.getOriginal().getType())) {
-                    nugget = true;
-                }
-                if (nugget && ItemTypes.IRON_INGOT.equals(transaction.getOriginal().getType())) {
-                    transaction.setCustom(ItemStack.of(ItemTypes.GOLD_INGOT, transaction.getOriginal().getQuantity()));
-                }
-            }
-        }
     }
 
     @SuppressWarnings("deprecation")
@@ -102,6 +90,35 @@ public class InventorySetOpsTest {
         Preconditions.checkState(union.capacity() == 11, "This should include all eleven slot of the first row and column!");
         Preconditions.checkState(union2.capacity() == 11, "This should include all eleven slot of the first row and column!");
         Preconditions.checkState(union3.capacity() == 6, "This should include all six slot of the first 2 columns!");
+    }
+
+
+
+
+    @Override
+    public void enable(CommandSource src) {
+        Sponge.getEventManager().registerListeners(this.container, this.listener);
+    }
+
+    public static class InventorySetOpsListener {
+
+        @SuppressWarnings("deprecation")
+        @Listener
+        public void onMidas(ChangeInventoryEvent.Held event, @Root Player player) {
+            // Checks if Slots are contained in the hotbar then may transform iron to gold
+            Inventory hotbar = event.getTargetInventory().query(Hotbar.class);
+            boolean nugget = false;
+            for (SlotTransaction transaction : event.getTransactions()) {
+                if (hotbar.containsInventory(transaction.getSlot())) {
+                    if (ItemTypes.GOLD_NUGGET.equals(transaction.getOriginal().getType())) {
+                        nugget = true;
+                    }
+                    if (nugget && ItemTypes.IRON_INGOT.equals(transaction.getOriginal().getType())) {
+                        transaction.setCustom(ItemStack.of(ItemTypes.GOLD_INGOT, transaction.getOriginal().getQuantity()));
+                    }
+                }
+            }
+        }
     }
 
 }

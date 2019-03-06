@@ -24,8 +24,10 @@
  */
 package org.spongepowered.test;
 
+import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
@@ -35,29 +37,30 @@ import org.spongepowered.api.event.filter.Getter;
 import org.spongepowered.api.event.filter.type.Exclude;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 
 @Plugin(id = "moveentitytest", name = "MoveEntityTest", description = "A plugin to test movement events", version = "0.0.0")
-public class MoveEntitytest {
+public class MoveEntitytest implements LoadableModule {
 
-    private boolean allowEntityMovement = true;
+    @Inject private PluginContainer container;
 
-    @Listener
-    @Exclude(MoveEntityEvent.Teleport.class)
-    public void onMove(MoveEntityEvent entityEvent, @Getter("getTargetEntity") Entity entity) {
-        if (!this.allowEntityMovement && !(entity instanceof Player)) {
-            entityEvent.setCancelled(true);
+    private final MoveEntityListener listener = new MoveEntityListener();
+
+    @Override
+    public void enable(CommandSource src) {
+        Sponge.getEventManager().registerListeners(this.container, this.listener);
+    }
+
+    public static class MoveEntityListener {
+
+        @Listener
+        @Exclude(MoveEntityEvent.Teleport.class)
+        public void onMove(MoveEntityEvent entityEvent, @Getter("getTargetEntity") Entity entity) {
+            if (!(entity instanceof Player)) {
+                entityEvent.setCancelled(true);
+            }
         }
     }
 
-    @Listener
-    public void onInit(GameInitializationEvent event) {
-        Sponge.getCommandManager().register(this, CommandSpec.builder()
-            .executor((src, args) -> {
-                    this.allowEntityMovement = !this.allowEntityMovement;
-                    return CommandResult.success();
-                }
-            )
-            .build(), "toggleEntityMovement");
-    }
 
 }

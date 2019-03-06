@@ -24,8 +24,10 @@
  */
 package org.spongepowered.test;
 
+import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
@@ -34,27 +36,20 @@ import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 
 @Plugin(id = "inventoryplugintest", name = "Inventory Test", description = "A plugin to test the owner of an inventory.", version = "0.0.0")
-public class InventoryPluginTest {
+public class InventoryPluginTest implements LoadableModule {
 
+    @Inject private PluginContainer container;
     private final InventoryPluginListener listener = new InventoryPluginListener();
-    private boolean registered = false;
 
-    @Listener
-    public void onInit(GameInitializationEvent event) {
-        Sponge.getCommandManager().register(this,
-                CommandSpec.builder().executor((source, context) -> {
-                    if (this.registered) {
-                        this.registered = false;
-                        Sponge.getEventManager().unregisterListeners(this.listener);
-                    } else {
-                        this.registered = true;
-                        Sponge.getEventManager().registerListeners(this, this.listener);
-                    }
-                    return CommandResult.success();
-                }).build(), "toggleinventoryplugintest");
+
+
+    @Override
+    public void enable(CommandSource src) {
+        Sponge.getEventManager().registerListeners(this.container, this.listener);
     }
 
     public static class InventoryPluginListener {
