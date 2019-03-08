@@ -1093,8 +1093,21 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         if (!mixinTile.isCaptured()) {
             mixinTile.setCaptured(true);
         }
-        final net.minecraft.tileentity.TileEntity currenTile = getTileEntity(pos);
-        currentState.captureTileEntityReplacement(currentContext, this, pos, currenTile, tileEntity);
+
+        // We cannot call getTileEntity because we run the risk of recursive re-entrance
+        // when the chunk is being told to create the tile entity immediately, which calls
+        // another set. So, this is done strictly to call getting the tile entity by proxy,
+        // or calling to get the tile entity from the chunk as a CHECK
+        net.minecraft.tileentity.TileEntity currentTile = this.getProcessingTileFromProxy(pos);
+
+        if (currentTile == null && !this.proxyBlockAccess.isTileEntityRemoved(pos)) { // Make sure we're not getting a tile while it's being removed.
+            currentTile = this.getChunk(pos).getTileEntity(pos, Chunk.EnumCreateEntityType.CHECK);
+        }
+        if (this.processingLoadedTiles) {
+            currentTile = ((MixinWorld_Accessor) this).accessPendingTileEntityAt(pos);
+        }
+
+        currentState.captureTileEntityReplacement(currentContext, this, pos, currentTile, tileEntity);
         return tileEntity.isInvalid();
     }
 

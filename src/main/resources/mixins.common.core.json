@@ -500,6 +500,7 @@
         "world.MixinTeleporter",
         "world.MixinWorldEntitySpawner",
         "world.MixinWorld",
+        "world.MixinWorld_Accessor",
         "world.MixinWorld_Data",
         "world.MixinWorldBorder",
         "world.MixinWorldProvider",
