@@ -327,6 +327,7 @@ public final class WorldManager {
         worldPropertiesByWorldUuid.put(properties.getUniqueId(), properties);
         worldUuidByFolderName.put(properties.getWorldName(), properties.getUniqueId());
         worldFolderByDimensionId.put(((IMixinWorldInfo) properties).getDimensionId(), properties.getWorldName());
+        dimensionBits.set(((IMixinWorldInfo) properties).getDimensionId());
     }
 
     public static void unregisterWorldProperties(WorldProperties properties, boolean freeDimensionId) {
