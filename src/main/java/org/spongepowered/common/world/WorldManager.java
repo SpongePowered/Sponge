@@ -327,7 +327,9 @@ public final class WorldManager {
         worldPropertiesByWorldUuid.put(properties.getUniqueId(), properties);
         worldUuidByFolderName.put(properties.getWorldName(), properties.getUniqueId());
         worldFolderByDimensionId.put(((IMixinWorldInfo) properties).getDimensionId(), properties.getWorldName());
-        dimensionBits.set(((IMixinWorldInfo) properties).getDimensionId());
+        // Normally, this would fix worlds being recreated, but it causes issues when the world's dimension id
+        // is negative. See https://gist.github.com/1eebcea18664c24f170dc0042b562033 for example stacktrace.
+//        dimensionBits.set(((IMixinWorldInfo) properties).getDimensionId());
     }
 
     public static void unregisterWorldProperties(WorldProperties properties, boolean freeDimensionId) {
