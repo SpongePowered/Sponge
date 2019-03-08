@@ -38,10 +38,13 @@ public class BlockEventQueuePhaseState extends BlockPhaseState {
         if (blockEventData != null) {
             if (blockEventData.getTickTileEntity() != null) {
                 frame.pushCause(blockEventData.getTickTileEntity());
-            } else {
-                frame.pushCause(blockEventData.getTickBlock());
             }
-            frame.addContext(EventContextKeys.BLOCK_EVENT_QUEUE, blockEventData.getTickBlock());
+            if (blockEventData.getTickBlock() != null) {
+                if (blockEventData.getTickTileEntity() == null) {
+                    frame.pushCause(blockEventData.getTickBlock());
+                }
+                frame.addContext(EventContextKeys.BLOCK_EVENT_QUEUE, blockEventData.getTickBlock());
+            }
         }
     });
 

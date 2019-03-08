@@ -927,15 +927,14 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             blockEvent.setSourceUser(currentContext.getActiveUser());
             if (SpongeImplHooks.hasBlockTileEntity(blockIn, getBlockState(pos))) {
                 blockEvent.setTickTileEntity((TileEntity) getTileEntity(pos));
-            } else {
-
+            }
+            if (blockEvent.getTickTileEntity() == null) {
                 final LocatableBlock locatable = new SpongeLocatableBlockBuilder()
                     .world(this)
                     .position(pos.getX(), pos.getY(), pos.getZ())
                     .state(this.getBlock(pos.getX(), pos.getY(), pos.getZ()))
                     .build();
                 blockEvent.setTickBlock(locatable);
-
             }
         }
 
