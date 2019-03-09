@@ -31,6 +31,8 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryLargeChest;
 import net.minecraft.tileentity.TileEntityLockable;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.item.inventory.custom.ContainerType;
+import org.spongepowered.api.item.inventory.menu.InventoryMenu;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.entity.player.SpongeUserInventory;
@@ -38,6 +40,8 @@ import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinInteractable;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.custom.CustomInventory;
+import org.spongepowered.common.item.inventory.custom.SpongeInventoryMenu;
+import org.spongepowered.common.item.inventory.custom.ViewableCustomInventory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +59,8 @@ import java.util.stream.Collectors;
         CustomInventory.class,
         EntityVillager.class,
         SpongeUserInventory.class,
-        EntityMinecartContainer.class
+        EntityMinecartContainer.class,
+        ViewableCustomInventory.class
 }, priority = 999)
 public abstract class MixinTraitViewable implements ViewableInventory, IMixinInteractable {
 
@@ -92,6 +97,16 @@ public abstract class MixinTraitViewable implements ViewableInventory, IMixinInt
     @Override
     public void removeContainer(Container container) {
         this.openContainers.remove(container);
+    }
+
+    @Override
+    public ContainerType getContainerType() {
+        return // TODO implement this somewhere;
+    }
+
+    @Override
+    public InventoryMenu asMenu() {
+        return new SpongeInventoryMenu(this);
     }
 }
 

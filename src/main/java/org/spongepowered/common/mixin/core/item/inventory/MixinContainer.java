@@ -44,7 +44,6 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.item.inventory.CraftItemEvent;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
 import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
@@ -73,6 +72,7 @@ import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.SlotCollection;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
+import org.spongepowered.common.item.inventory.custom.SpongeInventoryMenu;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
@@ -116,6 +116,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     private boolean inUse = false;
 
     private boolean captureSuccess = false;
+    @Nullable private SpongeInventoryMenu menu;
 
     @Shadow
     public abstract NonNullList<ItemStack> getInventory();
@@ -141,7 +142,6 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     @Nullable private Lens lens;
     private boolean initialized;
     private Map<Integer, SlotAdapter> adapters = new HashMap<>();
-    private InventoryArchetype archetype;
     protected Optional<Carrier> carrier = Optional.empty();
     protected Optional<Predicate<EntityPlayer>> canInteractWithPredicate = Optional.empty();
     @Nullable private PluginContainer plugin = null;
@@ -168,7 +168,6 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
         this.slots = ContainerUtil.countSlots((Container) (Object) this, this.fabric);
         this.lens = null;
         this.lens = this.spectatorChest ? null : ContainerUtil.getLens(this.fabric, (Container) (Object) this, this.slots); // TODO handle spectator
-        this.archetype = ContainerUtil.getArchetype((Container) (Object) this);
         this.carrier = Optional.ofNullable(ContainerUtil.getCarrier(this));
 
         // If we know the lens, we can cache the adapters now
@@ -181,12 +180,6 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
         this.allInventories.clear();
         this.inventorySlots.forEach(slot -> this.allInventories.computeIfAbsent(slot.inventory, (i) -> new HashSet<>()).add(slot));
 
-    }
-
-    @Override
-    public InventoryArchetype getArchetype() {
-        this.spongeInit();
-        return this.archetype;
     }
 
     /**
@@ -240,6 +233,15 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
             if (!ItemStack.areItemStacksEqual(itemstack1, itemstack)) {
 
                 // Sponge start
+
+                // Menu Change callback
+                if (this.menu != null) {
+                    if (!this.menu.onChange(itemstack, itemstack1, this, i, slot)) {
+                        slot.putStack(itemstack1); // revert changes
+                        continue;
+                    }
+                }
+
                 if (this.captureInventory) {
 
                     final ItemStackSnapshot originalItem = ItemStackUtil.snapshotOf(itemstack1);
@@ -305,6 +307,15 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
 
                 org.spongepowered.api.item.inventory.Slot adapter = this.getContainerSlot(slotId);
                 this.capturedSlotTransactions.add(new SlotTransaction(adapter, originalItem, newItem));
+            }
+        }
+    }
+
+    @Inject(method = "slotClick", at = @At(value = "HEAD"), cancellable = true)
+    private void onClick(int slotId, int dragType, ClickType clickTypeIn, EntityPlayer player, CallbackInfoReturnable<ItemStack> cir) {
+        if (this.menu != null) {
+            if (!this.menu.onClick(slotId, dragType, clickTypeIn, player, this)) {
+                cir.setReturnValue(ItemStack.EMPTY);
             }
         }
     }
@@ -674,6 +685,10 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     @Inject(method = "onContainerClosed", at = @At(value = "HEAD"))
     private void onOnContainerClosed(EntityPlayer player, CallbackInfo ci) {
         this.unTrackInteractable(this.viewed);
+        if (this.menu != null) {
+            this.menu.onClose(this);
+        }
+        this.menu = null;
         this.viewed = null;
     }
 
@@ -687,4 +702,8 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
         // TODO else unknown inventory - try to provide wrapper Interactable
     }
 
+    @Override
+    public void setMenu(SpongeInventoryMenu menu) {
+        this.menu = menu;
+    }
 }

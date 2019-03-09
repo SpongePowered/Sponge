@@ -44,6 +44,10 @@ public class GridInventoryLensImpl extends Inventory2DLensImpl implements GridIn
     protected List<LensHandle> rows;
     protected List<LensHandle> cols;
 
+    public GridInventoryLensImpl(int width, int height, SlotProvider slots) {
+        this(0, width, height, GridInventoryAdapter.class, slots);
+    }
+
     public GridInventoryLensImpl(int base, int width, int height, SlotProvider slots) {
         this(base, width, height, GridInventoryAdapter.class, slots);
     }

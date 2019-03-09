@@ -51,6 +51,8 @@ import javax.annotation.Nullable;
 public class CustomInventory implements IInventory {
 
     private final List<Inventory> inventories;
+
+    // shadow usage
     private SlotProvider slots;
     private Lens lens;
     private Fabric fabric;
@@ -167,6 +169,13 @@ public class CustomInventory implements IInventory {
     }
 
     @Override
+    public void clear() {
+        for (Inventory inventory : this.inventories) {
+            inventory.clear();
+        }
+    }
+
+    @Override
     public boolean isUsableByPlayer(EntityPlayer player) {
         return true;
     }
@@ -198,12 +207,7 @@ public class CustomInventory implements IInventory {
         return 0;
     }
 
-    @Override
-    public void clear() {
-        for (Inventory inventory : this.inventories) {
-            inventory.clear();
-        }
-    }
+    // Custom Inventory
 
     public Map<Property<?>, ?> getProperties() {
         return this.properties;

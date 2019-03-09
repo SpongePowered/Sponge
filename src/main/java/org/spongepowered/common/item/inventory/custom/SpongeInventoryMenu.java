@@ -1,25 +1,32 @@
 package org.spongepowered.common.item.inventory.custom;
 
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.ClickType;
+import net.minecraft.inventory.Slot;
+import net.minecraft.item.ItemStack;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.Container;
+import org.spongepowered.api.item.inventory.custom.ContainerType;
+import org.spongepowered.api.item.inventory.menu.InventoryMenu;
 import org.spongepowered.api.item.inventory.menu.SlotChangeHandler;
 import org.spongepowered.api.item.inventory.menu.SlotClickHandler;
-import org.spongepowered.api.item.inventory.custom.ContainerType;
 import org.spongepowered.api.item.inventory.slot.SlotIndex;
-import org.spongepowered.api.item.inventory.menu.InventoryMenu;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.common.interfaces.IMixinContainer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 
 public class SpongeInventoryMenu implements InventoryMenu {
 
     private ViewableInventory inventory;
 
-    private Map<SlotIndex, List<SpongeMenuCallback>> callbacks = new HashMap<>();
+    private Map<Container, Player> tracked = new HashMap<>();
+    private Text title;
 
     public SpongeInventoryMenu(ViewableInventory inventory) {
         this.inventory = inventory;
@@ -38,61 +45,82 @@ public class SpongeInventoryMenu implements InventoryMenu {
     @Override
     public void setCurrentInventory(ViewableInventory inventory) {
         if (this.getType().equals(inventory.getContainerType())) {
+            // ideally we would just swap out the IInventory from existing slots
             // TODO handle container changes
+            this.reopen(); // if not possible reopen
         } else {
-            // TODO close and reopen with new container
+            // Get all distinct players and reopen inventory for them
+            this.reopen();
         }
         this.inventory = inventory;
     }
 
-    @Override
-    public MenuCallback registerClick(SlotClickHandler handler, SlotIndex... slotIndices) {
-        SpongeMenuCallback cb = new SpongeMenuCallback(); // TODO handler
-        return registerCallback(cb, slotIndices);
+    private void reopen() {
+        new ArrayList<>(tracked.values()).stream().distinct().forEach(this::open);
     }
 
     @Override
-    public MenuCallback registerChange(SlotChangeHandler handler, SlotIndex... slotIndices) {
-        SpongeMenuCallback cb = new SpongeMenuCallback(); // TODO handler
-        return registerCallback(cb, slotIndices);
+    public void setTitle(Text title) {
+        this.title = title;
+        this.reopen();
     }
 
-    private MenuCallback registerCallback(SpongeMenuCallback cb, SlotIndex[] slotIndices) {
-        for (SlotIndex slotIndex : slotIndices) {
-            this.callbacks.computeIfAbsent(slotIndex, si -> new ArrayList<>()).add(cb);
-        }
-        return cb;
+    @Override
+    public void registerClose(BiConsumer<Container, Player> handler) {
+        // TODO
+    }
+
+    @Override
+    public InventoryMenu setReadOnly(boolean readOnly) {
+        // TODO
+        return this;
+    }
+
+    @Override
+    public void registerClick(SlotClickHandler handler, SlotIndex... slotIndices) {
+        // TODO
+    }
+
+    @Override
+    public void registerChange(SlotChangeHandler handler, SlotIndex... slotIndices) {
+        // TODO
     }
 
     @Override
     public void unregisterAt(SlotIndex... slotIndices) {
         for (SlotIndex slotIndex : slotIndices) {
-            this.callbacks.remove(slotIndex);
-        }
-    }
-
-    @Override
-    public boolean unregister(MenuCallback callback) {
-        boolean removed = false;
-        for (Map.Entry<SlotIndex, List<SpongeMenuCallback>> entry : this.callbacks.entrySet()) {
-            if (entry.getValue().remove(callback)) {
-                removed = true;
-            }
-        }
-        return removed;
+        }// TODO
     }
 
     @Override
     public void unregisterAll() {
-        this.callbacks.clear();
+        // TODO
     }
 
     @Override
     public Optional<Container> open(Player player) {
-        return player.openInventory(this.inventory);
+        Optional<Container> container = player.openInventory(this.inventory, this.title);
+        container.ifPresent(c -> {
+            if (c instanceof IMixinContainer) {
+                ((IMixinContainer)c).setMenu(this);
+                tracked.put(c, player);
+            }
+        });
+        return container;
     }
 
-    public class SpongeMenuCallback implements MenuCallback {
+    public void onClose(Container container) {
+        // TODO close callbacks
+        this.tracked.remove(container);
+    }
 
+    public boolean onClick(int slotId, int dragType, ClickType clickTypeIn, EntityPlayer player, Container container) {
+        // TODO click callbacks
+        return true;
+    }
+
+    public boolean onChange(ItemStack itemstack, ItemStack oldStack, Container mixinContainer, int slotIndex, Slot slot) {
+        // TODO change callbacks
+        return true;
     }
 }

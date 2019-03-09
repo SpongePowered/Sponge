@@ -61,7 +61,6 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.common.item.inventory.SpongeInventoryBuilder;
 import org.spongepowered.common.item.inventory.archetype.SlotArchetype;
 import org.spongepowered.common.item.inventory.archetype.SpongeInventoryArchetypeBuilder;
-import org.spongepowered.common.item.inventory.custom.CustomInventory;
 import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.registry.type.text.TextColorRegistryModule;
@@ -69,7 +68,7 @@ import org.spongepowered.common.registry.type.text.TextStyleRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 @RegisterCatalog(InventoryArchetypes.class)
-@RegistrationDependency({GuiIdRegistryModule.class, TextColorRegistryModule.class, TextStyleRegistryModule.class})
+@RegistrationDependency({ContainerTypeRegistryModule.class, TextColorRegistryModule.class, TextStyleRegistryModule.class})
 public class InventoryArchetypeRegistryModule extends AbstractCatalogRegistryModule<InventoryArchetype>
     implements AlternateCatalogRegistryModule<InventoryArchetype>, SpongeAdditionalCatalogRegistryModule<InventoryArchetype> {
 

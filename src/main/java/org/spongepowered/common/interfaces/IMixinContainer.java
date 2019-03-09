@@ -31,6 +31,7 @@ import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.world.Location;
+import org.spongepowered.common.item.inventory.custom.SpongeInventoryMenu;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -76,4 +77,5 @@ public interface IMixinContainer extends IMixinInventory {
 
     boolean capturePossible();
 
+    void setMenu(SpongeInventoryMenu menu);
 }

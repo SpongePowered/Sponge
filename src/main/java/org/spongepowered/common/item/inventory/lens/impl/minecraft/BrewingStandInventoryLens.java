@@ -27,6 +27,7 @@ package org.spongepowered.common.item.inventory.lens.impl.minecraft;
 import static org.spongepowered.api.item.ItemTypes.BLAZE_POWDER;
 
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.item.inventory.adapter.impl.VanillaAdapter;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.DefaultIndexedLens;
 import org.spongepowered.common.item.inventory.lens.impl.RealLens;
@@ -46,6 +47,11 @@ public class BrewingStandInventoryLens extends RealLens {
 
     public BrewingStandInventoryLens(int base, InventoryAdapter adapter, SlotProvider slots) {
         super(base, adapter.getFabric().getSize(), adapter.getClass());
+        this.init(slots);
+    }
+
+    public BrewingStandInventoryLens(SlotProvider slots) {
+        super(0, 5, VanillaAdapter.class);
         this.init(slots);
     }
 

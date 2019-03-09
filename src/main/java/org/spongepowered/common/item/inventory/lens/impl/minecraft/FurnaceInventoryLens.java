@@ -26,6 +26,7 @@ package org.spongepowered.common.item.inventory.lens.impl.minecraft;
 
 import org.spongepowered.common.item.inventory.PropertyEntry;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.item.inventory.adapter.impl.VanillaAdapter;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.DefaultIndexedLens;
 import org.spongepowered.common.item.inventory.lens.impl.RealLens;
@@ -46,6 +47,11 @@ public class FurnaceInventoryLens extends RealLens {
     public FurnaceInventoryLens(int base, InventoryAdapter adapter, SlotProvider slots) {
         super(base, adapter.getFabric().getSize(), adapter.getClass());
         this.init(slots);
+    }
+
+    public FurnaceInventoryLens(SlotProvider sp) {
+        super(0, 3, VanillaAdapter.class);
+        this.init(sp);
     }
 
     protected void init(SlotProvider slots) {

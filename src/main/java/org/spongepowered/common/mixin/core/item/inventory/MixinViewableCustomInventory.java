@@ -22,50 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.type;
+package org.spongepowered.common.mixin.core.item.inventory;
 
-import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.item.inventory.custom.ContainerType;
-import org.spongepowered.common.SpongeCatalogType;
-import org.spongepowered.common.item.inventory.lens.LensCreator;
-import org.spongepowered.common.registry.RegistryHelper;
+import org.spongepowered.api.item.inventory.type.ViewableInventory;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.item.inventory.custom.ViewableCustomInventory;
 
-import javax.annotation.Nullable;
+@SuppressWarnings("rawtypes")
+@Mixin(ViewableCustomInventory.class)
+public abstract class MixinViewableCustomInventory extends MixinCustomInventory implements ViewableInventory {
 
-public class SpongeContainerType extends SpongeCatalogType implements ContainerType {
+    @Shadow(remap = false) private ContainerType type;
 
-    @Nullable private final String internalId;
-    private final int size;
-    private final int width;
-    private final int height;
-    private LensCreator lensCreator;
-
-    public SpongeContainerType(final CatalogKey key, int size, int width, int height, LensCreator lensCreator, @Nullable final String internalId) {
-        super(key, RegistryHelper.name(key));
-        this.internalId = internalId;
-        this.lensCreator = lensCreator;
-        this.size = size;
-        this.width = width;
-        this.height = height;
+    @Override
+    public ContainerType getContainerType() {
+        return this.type;
     }
 
-    public String getInternalId() {
-        return this.internalId == null ? this.getKey().toString() : this.internalId;
-    }
-
-    public LensCreator getLensCreator() {
-        return this.lensCreator;
-    }
-
-    public int getSize() {
-        return size;
-    }
-
-    public int getWidth() {
-        return width;
-    }
-
-    public int getHeight() {
-        return height;
-    }
 }

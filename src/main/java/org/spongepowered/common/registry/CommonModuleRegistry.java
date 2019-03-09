@@ -202,7 +202,6 @@ import org.spongepowered.common.item.enchantment.SpongeEnchantmentBuilder;
 import org.spongepowered.common.item.inventory.InventoryTransactionResultImpl;
 import org.spongepowered.common.item.inventory.SpongeInventoryBuilder;
 import org.spongepowered.common.item.inventory.SpongeItemStackBuilder;
-import org.spongepowered.common.item.inventory.archetype.SpongeInventoryArchetypeBuilder;
 import org.spongepowered.common.item.inventory.custom.SpongeViewableInventoryBuilder;
 import org.spongepowered.common.item.inventory.generation.SpongeItemStackGenerator;
 import org.spongepowered.common.item.inventory.query.SpongeTransformationBuilder;
@@ -523,7 +522,7 @@ public final class CommonModuleRegistry {
             .registerModule(CollisionRule.class, new CollisionRuleRegistryModule())
             .registerModule(DismountType.class, new DismountTypeRegistryModule())
             .registerModule((Class<Key<?>>) (Class<?>) Key.class, KeyRegistryModule.getInstance())
-            .registerModule(ContainerType.class, GuiIdRegistryModule.getInstance())
+            .registerModule(ContainerType.class, ContainerTypeRegistryModule.getInstance())
             .registerModule(InventoryArchetype.class, InventoryArchetypeRegistryModule.getInstance())
             .registerModule(TransformationRegistryModule.getInstance())
             .registerModule(StructureMode.class, new StructureModeRegistryModule())

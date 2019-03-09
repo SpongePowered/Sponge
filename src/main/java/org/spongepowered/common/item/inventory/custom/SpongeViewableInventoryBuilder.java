@@ -1,5 +1,8 @@
 package org.spongepowered.common.item.inventory.custom;
 
+import com.flowpowered.math.vector.Vector2i;
+import net.minecraft.inventory.InventoryBasic;
+import net.minecraft.util.text.TextComponentString;
 import org.apache.commons.lang3.Validate;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.ItemTypes;
@@ -8,43 +11,42 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
-import org.spongepowered.api.item.inventory.equipment.EquipmentInventory;
 import org.spongepowered.api.item.inventory.custom.ContainerType;
 import org.spongepowered.api.item.inventory.custom.ContainerTypes;
+import org.spongepowered.api.item.inventory.equipment.EquipmentInventory;
+import org.spongepowered.api.item.inventory.menu.InventoryMenu;
 import org.spongepowered.api.item.inventory.slot.SlotIndex;
 import org.spongepowered.api.item.inventory.type.GridInventory;
-import org.spongepowered.api.item.inventory.menu.InventoryMenu;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.common.data.type.SpongeContainerType;
+import org.spongepowered.common.item.inventory.lens.Lens;
+import org.spongepowered.common.item.inventory.lens.SlotProvider;
+import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
+import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
+import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
-// TODO move to IMPL
 public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder,
                                                        ViewableInventory.Builder.SingleStep,
                                                        ViewableInventory.Builder.EndStep
-
 {
 
     // Helper classes
     private class SlotDefinition {
 
-        @Nullable ItemStackSnapshot item;
+        Inventory source;
+        @Nullable Integer index; // index in source
 
-        @Nullable Inventory source;
-        @Nullable Integer index;
-
-        public SlotDefinition(ItemStackSnapshot item) {
-            this.item = item;
-        }
-
-        public SlotDefinition(Inventory source) {
+        SlotDefinition(Inventory source) {
             this.source = source;
         }
     }
@@ -75,7 +77,11 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
     private int sizeY;
     private int currentSlot;
 
-    private Inventory source; // not null when calling on StepSource
+    private Inventory source; // not null when calling on inventory source steps
+
+    private Carrier carrier;
+    private UUID identity;
+
     private int sourceSize;
     private int sourceSizeX;
     private int sourceSizeY;
@@ -83,6 +89,10 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
 
     private Map<Integer, SlotDefinition> slotDefinitions;
     private Buffer buffer = new Buffer();
+
+    private List<Inventory> finalInventories;
+    private Lens finalLens;
+    private CustomSlotProvider finalProvider;
 
     private void writeSlots() {
         if (!buffer.slots.isEmpty()) {
@@ -118,7 +128,6 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
 
         }
         this.buffer.clear();
-
     }
 
     @Override
@@ -126,10 +135,9 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
         this.type = type;
         this.slotDefinitions = new HashMap<>();
         this.currentSlot = 0;
-        // TODO ContainerType sizes
-        this.sizeX = type.getSizeX();
-        this.sizeY = type.getSizeY();
-        this.size = type.getSize();
+        this.sizeX = ((SpongeContainerType) type).getWidth();
+        this.sizeY = ((SpongeContainerType) type).getHeight();
+        this.size = ((SpongeContainerType) type).getSize();
         return this;
     }
 
@@ -142,7 +150,6 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
 
     // Slots and dummies
 
-
     @Override
     public SourceStep dummySource() {
         return this.dummySource(ItemStackSnapshot.NONE);
@@ -150,59 +157,29 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
 
     @Override
     public SourceStep dummySource(ItemStackSnapshot item) {
-        this.source = null;
-        this.item = item;
+        InventoryBasic dummyInv = new InventoryBasic(new TextComponentString("Dummy Inventory"), 1);
+        this.source = ((Inventory) dummyInv);
+        dummyInv.setInventorySlotContents(0, ItemStackUtil.fromSnapshotToNative(item));
         return this;
     }
 
     @Override
-    public ViewableInventory.Builder.StepDummy dummy(ItemStackSnapshot item) {
-        return this.dummy(1, item);
-    }
-
-    @Override
-    public ViewableInventory.Builder.StepDummy dummy() {
-        return this.dummy(ItemStackSnapshot.NONE);
-    }
-
-    @Override
-    public ViewableInventory.Builder.StepDummy dummy(int amount) {
-        return this.dummy(amount, ItemStackSnapshot.NONE);
-    }
-
-    @Override
-    public ViewableInventory.Builder.StepDummy dummy(int amount, ItemStackSnapshot item) {
-        writeSlots();
-        Validate.isTrue(this.sourceSize >= amount, "Source Inventory is too small");
-        Validate.isTrue(this.size >= amount, "Target Inventory is too small");
-        for (int i = 0; i < amount; i++) {
-            this.buffer.slots.add(new SlotDefinition(item));
-        }
-        return (ViewableInventory.Builder.StepDummy) from(0);
-    }
-
-    @Override
-    public ViewableInventory.Builder.StepDummy fillDummy(ItemStackSnapshot item) {
+    public ViewableInventory.Builder.BuildingStep fillDummy() {
         for (int i = 0; i < this.size; i++) {
             if (!this.slotDefinitions.containsKey(i)) {
-                this.dummy(item).at(i);
+                this.slot().at(i);
             }
         }
         return this;
     }
 
     @Override
-    public ViewableInventory.Builder.StepDummy fillDummy() {
-        return this.fillDummy(ItemStackSnapshot.NONE);
-    }
-
-    @Override
-    public ViewableInventory.Builder.StepSlot slot() {
+    public ViewableInventory.Builder.SingleStep slot() {
         return this.slots(1);
     }
 
     @Override
-    public ViewableInventory.Builder.StepSlot slots(int amount) {
+    public ViewableInventory.Builder.SingleStep slots(int amount) {
         writeSlots();
         this.sourceSize = this.source.capacity();
         Validate.isTrue(this.sourceSize >= amount, "Source Inventory is too small");
@@ -212,11 +189,41 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
             this.buffer.slots.add(def);
         }
         this.buffer.grid = false;
-        return (ViewableInventory.Builder.StepSlot) from(0);
+        return from(0);
     }
 
     @Override
-    public ViewableInventory.Builder.StepSlot from(int index) {
+    public SourceStep slots(Vector2i[] positionsFrom, Vector2i[] positionsAt) {
+        for (int i = 0; i < positionsFrom.length; i++) {
+            Vector2i fromPos = positionsFrom[i];
+            Vector2i atPos = positionsAt[i];
+            this.slot().from(fromPos.getX(), fromPos.getY()).at(atPos.getX(), atPos.getY());
+        }
+        return this;
+    }
+
+    @Override
+    public SourceStep slots(int[] indizesFrom, int startingAt) {
+        int atIdx = startingAt;
+        for (int fromIdx : indizesFrom) {
+            this.slot().from(fromIdx).at(atIdx);
+            atIdx++;
+        }
+        return this;
+    }
+
+    @Override
+    public SourceStep slots(Vector2i[] positionsFrom, int startingAt) {
+        int atIdx = startingAt;
+        for (Vector2i fromPos : positionsFrom) {
+            this.slot().from(fromPos.getX(), fromPos.getY()).at(atIdx);
+            atIdx++;
+        }
+        return this;
+    }
+
+    @Override
+    public ViewableInventory.Builder.SingleStep from(int index) {
         Validate.isTrue(this.sourceSize >= this.buffer.slots.size() + index, "Source Inventory is too small");
         int curIndex = index;
         for (SlotDefinition def : this.buffer.slots) {
@@ -226,7 +233,7 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
     }
 
     @Override
-    public ViewableInventory.Builder.StepSlot at(int index) {
+    public ViewableInventory.Builder.SingleStep at(int index) {
         Validate.isTrue(this.size >= this.buffer.slots.size() + index, "Target Inventory is too small");
         this.buffer.atSlot = index;
         return this;
@@ -235,10 +242,10 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
     // Grid
 
     @Override
-    public ViewableInventory.Builder.StepGrid grid(int sizeX, int sizeY) {
+    public ViewableInventory.Builder.SingleStep grid(int sizeX, int sizeY) {
         writeSlots();
         Validate.isTrue(this.source instanceof GridInventory, "Source Inventory is not a grid");
-        // TODO type supports grids Validate.isTrue(type is a grid, "Target Inventory is not a grid");
+        Validate.isTrue(this.sizeX != 0 && this.sizeY != 0, "Target Inventory is not a grid");
         this.sourceSizeX = ((GridInventory) this.source).getColumns();
         this.sourceSizeY = ((GridInventory) this.source).getRows();
         Validate.isTrue(this.sizeX >= sizeX, "Target Inventory is too small");
@@ -252,11 +259,9 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
     }
 
     @Override
-    public ViewableInventory.Builder.StepGrid from(int x, int y) {
-
+    public ViewableInventory.Builder.SingleStep from(int x, int y) {
         Validate.isTrue(this.sourceSizeX >= this.buffer.sizeX + x, "Source Inventory is too small");
         Validate.isTrue(this.sourceSizeY >= this.buffer.sizeY + y, "Source Inventory is too small");
-
         int index = 0;
         for (int yy = 0; yy < this.buffer.sizeY; yy++) {
             for (int xx = 0; xx < this.buffer.sizeX; xx++) {
@@ -273,7 +278,7 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
     }
 
     @Override
-    public ViewableInventory.Builder.StepGrid at(int x, int y) {
+    public ViewableInventory.Builder.SingleStep at(int x, int y) {
         Validate.isTrue(this.sizeX >= this.buffer.sizeX + x, "Target Inventory is too small");
         Validate.isTrue(this.sizeY >= this.buffer.sizeY + y, "Target Inventory is too small");
         this.buffer.atGridX = x;
@@ -283,9 +288,7 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
 
     @Override
     public EndStep carrier(Carrier carrier) {
-        for (SlotDefinition def : this.buffer.slots) {
-            // TODO
-        }
+        this.carrier = carrier;
         return this;
     }
 
@@ -293,31 +296,56 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
 
     @Override
     public EndStep completeStructure() {
-        // TODO build lens
+        this.finalInventories = this.slotDefinitions.values().stream().map(sd -> sd.source).distinct().collect(Collectors.toList());
+        this.finalProvider = new CustomSlotProvider();
+        for (Map.Entry<Integer, SlotDefinition> entry : this.slotDefinitions.entrySet()) {
+            SlotDefinition slotDef = entry.getValue();
+            int idx = slotDef.index;
+            int offset = 0;
+            for (int i = 0; i < this.finalInventories.indexOf(slotDef.source); i++) {
+                offset += this.finalInventories.get(i).size();
+            }
+            this.finalProvider.add(new SlotLensImpl(idx + offset));
+        }
+
+        this.finalLens = ((SpongeContainerType) this.type).getLensCreator().createLens(this.finalProvider);
         return this;
     }
 
     @Override
-    public EndStep ofViewable(Inventory inventory) {
-        // TODO copy type from inventory
-        return null;
-    }
-
-    @Override
-    public EndStep title(Text title) {
-        // TODO
-        return null;
-    }
-
-    @Override public EndStep identity(UUID uuid) {
-        // TODO
-        return null;
+    public EndStep identity(UUID uuid) {
+        this.identity = uuid;
+        return this;
     }
 
     @Override
     public ViewableInventory build() {
-        // TODO
-        return null;
+        return (ViewableInventory) new ViewableCustomInventory(this.type, this.size, this.finalLens, this.finalProvider, this.finalInventories, this.identity, this.carrier);
+    }
+
+    @Override
+    public EndStep ofViewable(ViewableInventory inventory) {
+        return null; // TODO
+    }
+
+
+    @Override
+    public ViewableInventory.Builder reset() {
+        return null; // TODO
+    }
+
+    public static class CustomSlotProvider implements SlotProvider {
+
+        private List<SlotLens> lenses = new ArrayList<>();
+
+        public void add(SlotLens toAdd) {
+            this.lenses.add(toAdd);
+        }
+
+        @Override
+        public SlotLens getSlotLens(int index) {
+            return this.lenses.get(index);
+        }
     }
 
     // ---------------------------------------------------------------------------------------------------------------------------
@@ -371,7 +399,7 @@ menu.open(player2);
 
 menu.setCurrentInventory(display2); // matching ContainerType so the inventory is silently swapped
 menu.setTitle(Text.of("This reopens containers"));
-menu.registerClick((container, slot, slotIndex, clickType) -> checkClick(), SlotIndex.of(4));
+menu.registerClick((container, slot, slotIndex, clickType, slot2) -> checkClick(), SlotIndex.of(4));
 
 menu.setReadOnly(false);
 menu.registerChange((container, slot, slotIndex) -> checkAllChange());
