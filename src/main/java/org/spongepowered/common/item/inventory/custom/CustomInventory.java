@@ -46,8 +46,10 @@ import org.spongepowered.api.item.inventory.property.InventoryCapacity;
 import org.spongepowered.api.item.inventory.property.InventoryDimension;
 import org.spongepowered.api.item.inventory.property.InventoryTitle;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.TranslatableText;
 import org.spongepowered.api.text.serializer.TextSerializers;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.type.SpongeGuiId;
 import org.spongepowered.common.item.inventory.archetype.CompositeInventoryArchetype;
 
@@ -255,8 +257,12 @@ public class CustomInventory implements IInventory, IInteractionObject {
         this.viewers.remove(player);
         this.inv.closeInventory(player);
         if (this.viewers.isEmpty()) {
-            Sponge.getEventManager().unregisterListeners(this);
-            this.registered = false;
+            Task.builder().execute(() -> {
+                if (this.viewers.isEmpty()) {
+                    Sponge.getEventManager().unregisterListeners(this);
+                    this.registered = false;
+                }
+            }).delayTicks(1).submit(SpongeImpl.getPlugin());
         }
     }
 
