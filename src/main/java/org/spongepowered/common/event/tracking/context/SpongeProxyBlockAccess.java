@@ -146,6 +146,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess {
         if (proxy.hasNew()) {
             for (BlockPos pos : proxy.newBlocks) {
                 this.processed.remove(pos);
+                unmarkRemoval(pos);
             }
         }
         if (proxy.hasStored()) {
@@ -256,6 +257,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess {
             // someone else popped for us?
             System.err.println("Unknown removal for: " + targetPos + " with tile entity: " + added);
         }
+        unmarkRemoval(targetPos);
         final TileEntity existing = this.processedTiles.put(targetPos, added);
         if (existing != null && existing != added) {
             existing.invalidate();

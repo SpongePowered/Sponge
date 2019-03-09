@@ -561,6 +561,9 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
                 try (final SpongeProxyBlockAccess.Proxy transactionProxy = transaction.getProxy(mixinWorldServer)) {
                     transaction.process(eventTransaction, phaseState, phaseContext, currentDepth);
                 }
+                if (this.processingBlocks != null) {
+                    this.processingBlocks.remove(mixinWorldServer);
+                }
             }
         } finally {
             if (this.processingBlocks == null) {
