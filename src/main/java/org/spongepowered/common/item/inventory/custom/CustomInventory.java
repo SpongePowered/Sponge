@@ -26,49 +26,42 @@ package org.spongepowered.common.item.inventory.custom;
 
 import com.flowpowered.math.vector.Vector2i;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraft.world.IInteractionObject;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.event.item.inventory.container.InteractContainerEvent;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryProperties;
-import org.spongepowered.api.item.inventory.gui.ContainerType;
-import org.spongepowered.api.item.inventory.gui.ContainerTypes;
-import org.spongepowered.api.item.inventory.custom.ContainerType;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.TranslatableText;
-import org.spongepowered.common.data.type.SpongeContainerType;
-import org.spongepowered.common.item.inventory.archetype.CompositeInventoryArchetype;
+import org.spongepowered.common.item.inventory.lens.Fabric;
+import org.spongepowered.common.item.inventory.lens.Lens;
+import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.text.SpongeTexts;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
-public class CustomInventory implements IInventory, IInteractionObject {
+public class CustomInventory implements IInventory {
 
-    private InventoryBasic inv;
+    private SlotProvider slots;
+    private Lens lens;
+    private Fabric fabric;
+
     private Map<Property<?>, Object> properties;
     private Carrier carrier;
-    private final boolean isVirtual;
 
-    private Set<EntityPlayer> viewers = new HashSet<>();
+    private PluginContainer plugin;
 
     @SuppressWarnings("deprecation")
     public CustomInventory(InventoryArchetype archetype, Map<Property<?>, Object> properties, Carrier carrier,
@@ -100,75 +93,17 @@ public class CustomInventory implements IInventory, IInteractionObject {
             v.openContainer.detectAndSendChanges();
         }));
 
-        for (Map.Entry<Class<? extends InteractContainerEvent>, List<Consumer<? extends InteractContainerEvent>>> entry: listeners.entrySet()) {
-            Sponge.getEventManager().registerListener(plugin, entry.getKey(), new CustomInventoryListener((Inventory) this, entry.getValue()));
-        }
     }
 
-    private static int getSlotCount(InventoryArchetype archetype) {
-        Optional<Vector2i> dimension = archetype.getProperty(InventoryProperties.DIMENSION);
-        if (dimension.isPresent()) {
-            return dimension.get().getX() * dimension.get().getY();
-        }
-        Optional<Integer> capacity = archetype.getProperty(InventoryProperties.CAPACITY);
-        if (capacity.isPresent()) {
-            return capacity.get();
-        }
+    public CustomInventory(int size, Lens lens, List<Inventory> inventories, @Nullable UUID identity, @Nullable Carrier carrier) {
 
-        int count = 0;
-        List<InventoryArchetype> childs = archetype.getChildArchetypes();
-        if (childs.isEmpty()) {
-            throw new IllegalArgumentException("Missing dimensions!");
-        }
-        for (InventoryArchetype childArchetype : childs) {
-            count += getSlotCount(childArchetype);
-        }
-        return count;
+        // TODO identity
+        this.carrier = carrier;
+        this.lens = lens;
+        this.slots = slots; // TODO we need the provider
+        // TODO get current plugin
     }
 
-    public InventoryArchetype getArchetype() {
-        return this.archetype;
-    }
-
-    @Override
-    public Container createContainer(InventoryPlayer playerInventory, EntityPlayer playerIn) {
-
-        // To be viewable the Inventory has to implement IInteractionObject and thus provide a Container
-        // displayChest falls back to Chest for IInventory instance
-
-        // if the ArcheType given is CHEST or DOUBLECHEST
-        // TODO how can this be checked? ContainerProperty? (Class<? extends Container>)
-        // vanilla ContainerChest takes the Size of the InventoryBasic / 9 as rows
-
-
-        // Display property?
-        // TODO custom container including filters and other slot stuff
-        this.viewers.add(playerIn);
-
-        if (this.archetype instanceof CompositeInventoryArchetype) {
-            CompositeInventoryArchetype.ContainerProvider provider = ((CompositeInventoryArchetype) this.archetype).getContainerProvider();
-            if (provider != null) {
-                return provider.provide(this, playerIn);
-            }
-        }
-        return new CustomContainer(playerIn, this);
-    }
-
-    @Override
-    public String getGuiID() {
-        ContainerType containerType = (ContainerType) this.properties.get(InventoryProperties.GUI_ID);
-        if (containerType != null) {
-            if (containerType instanceof SpongeContainerType) {
-                return ((SpongeContainerType) containerType).getInternalId(); // Handle Vanilla EntityHorse GuiId
-            }
-            return containerType.getKey().toString();
-        }
-        containerType = this.archetype.getProperty(InventoryProperties.GUI_ID).orElse(GuiIds.CHEST);
-        if (containerType instanceof SpongeContainerType) {
-            return ((SpongeContainerType) containerType).getInternalId(); // Handle Vanilla EntityHorse GuiId
-        }
-        return containerType.getKey().toString();
-    }
 
     // IInventory delegation
 

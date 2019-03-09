@@ -49,6 +49,7 @@ import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.api.entity.living.complex.dragon.phase.EnderDragonPhaseType;
+import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.api.item.potion.PotionType;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.data.meta.PatternLayer;
@@ -202,6 +203,7 @@ import org.spongepowered.common.item.inventory.InventoryTransactionResultImpl;
 import org.spongepowered.common.item.inventory.SpongeInventoryBuilder;
 import org.spongepowered.common.item.inventory.SpongeItemStackBuilder;
 import org.spongepowered.common.item.inventory.archetype.SpongeInventoryArchetypeBuilder;
+import org.spongepowered.common.item.inventory.custom.SpongeViewableInventoryBuilder;
 import org.spongepowered.common.item.inventory.generation.SpongeItemStackGenerator;
 import org.spongepowered.common.item.inventory.query.SpongeTransformationBuilder;
 import org.spongepowered.common.item.merchant.SpongeTradeOfferBuilder;
@@ -399,8 +401,8 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(Schematic.Builder.class, SpongeSchematicBuilder::new)
             .registerBuilderSupplier(VirtualBiomeType.Builder.class, SpongeVirtualBiomeTypeBuilder::new)
             .registerBuilderSupplier(BiomeGenerationSettings.Builder.class, SpongeBiomeGenerationSettingsBuilder::new)
-            .registerBuilderSupplier(InventoryArchetype.Builder.class, SpongeInventoryArchetypeBuilder::new)
             .registerBuilderSupplier(Inventory.Builder.class, SpongeInventoryBuilder::new)
+            .registerBuilderSupplier(ViewableInventory.Builder.class, SpongeViewableInventoryBuilder::new)
             .registerBuilderSupplier(InventoryTransformation.Builder.class, SpongeTransformationBuilder::new)
             .registerBuilderSupplier(SoundType.Builder.class, SpongeSoundBuilder::new)
             .registerBuilderSupplier(LocatableBlock.Builder.class, SpongeLocatableBlockBuilder::new)

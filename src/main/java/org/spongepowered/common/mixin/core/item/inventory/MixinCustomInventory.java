@@ -57,9 +57,9 @@ public abstract class MixinCustomInventory implements MinecraftInventoryAdapter,
     @Shadow(remap = false) private InventoryBasic inv;
     @Shadow(remap = false) private Carrier carrier;
 
+    @Shadow private PluginContainer plugin;
     private SlotLensCollection slots;
     private CustomLens lens;
-    private PluginContainer plugin;
 
     @SuppressWarnings("unchecked")
     @Inject(method = "<init>*", at = @At("RETURN"), remap = false)
