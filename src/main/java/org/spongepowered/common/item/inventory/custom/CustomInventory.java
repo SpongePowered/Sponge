@@ -24,190 +24,185 @@
  */
 package org.spongepowered.common.item.inventory.custom;
 
-import com.flowpowered.math.vector.Vector2i;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextComponentTranslation;
 import org.spongepowered.api.data.property.Property;
-import org.spongepowered.api.event.item.inventory.container.InteractContainerEvent;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryProperties;
+import org.spongepowered.api.item.inventory.slot.SlotIndex;
 import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.TranslatableText;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
-import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
 public class CustomInventory implements IInventory {
 
+    private final List<Inventory> inventories;
     private SlotProvider slots;
     private Lens lens;
     private Fabric fabric;
 
-    private Map<Property<?>, Object> properties;
+    private Map<Property<?>, Object> properties = new HashMap<>();
+    private final int size;
     private Carrier carrier;
 
     private PluginContainer plugin;
 
-    @SuppressWarnings("deprecation")
-    public CustomInventory(InventoryArchetype archetype, Map<Property<?>, Object> properties, Carrier carrier,
-            Map<Class<? extends InteractContainerEvent>, List<Consumer<? extends InteractContainerEvent>>> listeners, boolean isVirtual,
-            PluginContainer plugin) {
-        this.archetype = archetype;
-        this.properties = properties;
-        this.carrier = carrier;
-        this.isVirtual = isVirtual;
+    private ITextComponent customInventory = new TextComponentString("Custom Inventory");
 
-        int count;
-        Vector2i size = (Vector2i) properties.get(InventoryProperties.DIMENSION); // TODO INVENTORY_CAPACITY
-        if (size != null) {
-            count = size.getX() * size.getY();
-        } else {
-            count = getSlotCount(archetype);
-        }
-
-        Text title = (Text) properties.getOrDefault(InventoryProperties.TITLE, archetype.getProperty(InventoryProperties.TITLE).orElse(null));
-        boolean isCustom = !(title instanceof TranslatableText); // TODO: Check minecraft/custom translation
-
-        ITextComponent componentTitle = title == null ? new TextComponentString("") :
-                isCustom ? SpongeTexts.toComponent(title)
-                        : new TextComponentTranslation(((TranslatableText) title).getTranslation().getId());
-        this.inv = new InventoryBasic(componentTitle, count);
-
-        // Updates the Inventory for all viewers on any change
-        this.inv.addListener(i -> this.viewers.forEach(v -> {
-            v.openContainer.detectAndSendChanges();
-        }));
-
-    }
-
-    public CustomInventory(int size, Lens lens, List<Inventory> inventories, @Nullable UUID identity, @Nullable Carrier carrier) {
-
-        // TODO identity
+    public CustomInventory(int size, Lens lens, SlotProvider provider, List<Inventory> inventories, @Nullable UUID identity, @Nullable Carrier carrier) {
+        this.size = size;
+        this.properties.put(InventoryProperties.UNIQUE_ID, identity);
         this.carrier = carrier;
         this.lens = lens;
-        this.slots = slots; // TODO we need the provider
-        // TODO get current plugin
+        this.slots = provider;
+        this.inventories = inventories;
+        this.plugin = SpongeImplHooks.getActiveModContainer();
     }
-
 
     // IInventory delegation
-
-    @Override
-    public ITextComponent getDisplayName() {
-        return this.inv.getDisplayName();
-    }
 
     @Nullable
     @Override
     public ITextComponent getCustomName() {
-        return this.inv.getDisplayName();
+        return this.customInventory;
     }
 
     @Override
     public ITextComponent getName() {
-        return this.inv.getName();
+        return this.customInventory;
     }
 
     @Override
     public boolean hasCustomName() {
-        return this.inv.hasCustomName();
+        return false;
     }
 
     @Override
     public int getSizeInventory() {
-        return this.inv.getSizeInventory();
+        return this.size;
     }
 
     @Override
     public boolean isEmpty() {
-        return this.inv.isEmpty();
+        return this.size != 0;
     }
 
     @Override
     public ItemStack getStackInSlot(int index) {
-        return this.inv.getStackInSlot(index);
+        int offset = 0;
+        for (Inventory inv : this.inventories) {
+            if (inv.capacity() > index - offset) {
+                offset += inv.capacity();
+                continue;
+            }
+            return inv.peek(SlotIndex.of(index - offset)).map(ItemStackUtil::toNative).orElse(ItemStack.EMPTY);
+        }
+        return ItemStack.EMPTY;
     }
 
     @Override
     public ItemStack decrStackSize(int index, int count) {
-        return this.inv.decrStackSize(index, count);
+        int offset = 0;
+        for (Inventory inv : this.inventories) {
+            if (inv.capacity() > index - offset) {
+                offset += inv.capacity();
+                continue;
+            }
+            return inv.poll(SlotIndex.of(index - offset), count).map(ItemStackUtil::toNative).orElse(ItemStack.EMPTY);
+        }
+        return ItemStack.EMPTY;
     }
 
     @Override
     public ItemStack removeStackFromSlot(int index) {
-        return this.inv.removeStackFromSlot(index);
+        int offset = 0;
+        for (Inventory inv : this.inventories) {
+            if (inv.capacity() > index - offset) {
+                offset += inv.capacity();
+                continue;
+            }
+            return inv.poll(SlotIndex.of(index - offset)).map(ItemStackUtil::toNative).orElse(ItemStack.EMPTY);
+        }
+        return ItemStack.EMPTY;
     }
 
     @Override
     public void setInventorySlotContents(int index, ItemStack stack) {
-        this.inv.setInventorySlotContents(index, stack);
+        int offset = 0;
+        for (Inventory inv : this.inventories) {
+            if (inv.capacity() > index - offset) {
+                offset += inv.capacity();
+                continue;
+            }
+            inv.set(SlotIndex.of(index - offset), ItemStackUtil.fromNative(stack));
+        }
     }
 
     @Override
     public int getInventoryStackLimit() {
-        return this.inv.getInventoryStackLimit();
+        return 64;
     }
 
     @Override
     public void markDirty() {
-        this.inv.markDirty();
+        for (Inventory inventory : this.inventories) {
+            if (inventory instanceof IInventory) {
+                ((IInventory) inventory).markDirty();
+            }
+        }
     }
 
     @Override
     public boolean isUsableByPlayer(EntityPlayer player) {
-        return this.inv.isUsableByPlayer(player);
+        return true;
     }
 
     @Override
     public void openInventory(EntityPlayer player) {
-        this.viewers.add(player);
-        this.inv.openInventory(player);
     }
 
     @Override
     public void closeInventory(EntityPlayer player) {
-        this.viewers.remove(player);
-        this.inv.closeInventory(player);
     }
 
     @Override
     public boolean isItemValidForSlot(int index, ItemStack stack) {
-        return this.inv.isItemValidForSlot(index, stack);
+        return true;
     }
 
     @Override
     public int getField(int id) {
-        return this.inv.getField(id);
+        return 0;
     }
 
     @Override
     public void setField(int id, int value) {
-        this.inv.setField(id, value);
     }
 
     @Override
     public int getFieldCount() {
-        return this.inv.getFieldCount();
+        return 0;
     }
 
     @Override
     public void clear() {
-        this.inv.clear();
+        for (Inventory inventory : this.inventories) {
+            inventory.clear();
+        }
     }
 
     public Map<Property<?>, ?> getProperties() {
@@ -216,9 +211,5 @@ public class CustomInventory implements IInventory {
 
     public Carrier getCarrier() {
         return this.carrier;
-    }
-
-    public boolean isVirtual() {
-        return isVirtual;
     }
 }

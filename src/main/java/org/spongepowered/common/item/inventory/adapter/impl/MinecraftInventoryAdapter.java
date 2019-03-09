@@ -28,8 +28,6 @@ import com.google.common.collect.ImmutableSet;
 import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryArchetype;
-import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.query.QueryOperation;
@@ -230,11 +228,6 @@ public interface MinecraftInventoryAdapter extends InventoryAdapter {
     default boolean containsInventory(Inventory inventory) {
         Inventory result = Query.compile(this, new LensQueryOperation(((InventoryAdapter) inventory).getRootLens())).execute();
         return result.capacity() == inventory.capacity() && ((InventoryAdapter) result).getRootLens() == ((InventoryAdapter) inventory).getRootLens();
-    }
-
-    @Override
-    default InventoryArchetype getArchetype() {
-        return InventoryArchetypes.UNKNOWN;
     }
 
     @Override

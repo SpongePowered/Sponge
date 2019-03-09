@@ -24,60 +24,31 @@
  */
 package org.spongepowered.common.mixin.core.item.inventory;
 
-import net.minecraft.inventory.InventoryBasic;
-import org.spongepowered.api.data.property.Property;
-import org.spongepowered.api.event.item.inventory.container.InteractContainerEvent;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
 import org.spongepowered.common.item.inventory.custom.CustomInventory;
-import org.spongepowered.common.item.inventory.custom.CustomLens;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
-import org.spongepowered.common.item.inventory.lens.impl.collections.SlotLensCollection;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 @SuppressWarnings("rawtypes")
 @Mixin(CustomInventory.class)
 public abstract class MixinCustomInventory implements MinecraftInventoryAdapter, Inventory, CarriedInventory<Carrier> {
 
-    @Shadow(remap = false) protected InventoryArchetype archetype;
-    @Shadow(remap = false) private InventoryBasic inv;
     @Shadow(remap = false) private Carrier carrier;
-
-    @Shadow private PluginContainer plugin;
-    private SlotLensCollection slots;
-    private CustomLens lens;
-
-    @SuppressWarnings("unchecked")
-    @Inject(method = "<init>*", at = @At("RETURN"), remap = false)
-    private void onConstructed(InventoryArchetype archetype, Map<Property<?>, ?> properties, Carrier carrier, Map<Class<? extends
-            InteractContainerEvent>, List<Consumer<? extends InteractContainerEvent>>> listeners, boolean isVirtual, PluginContainer plugin,CallbackInfo ci) {
-        this.slots = new SlotLensCollection.Builder().add(this.inv.getSizeInventory()).build();
-        this.lens = new CustomLens(this, this.slots, archetype, properties);
-        this.plugin = plugin;
-    }
+    @Shadow(remap = false) private PluginContainer plugin;
+    @Shadow(remap = false) private SlotProvider slots;
+    @Shadow(remap = false) private Lens lens;
 
     @Override
     public Lens getRootLens() {
         return this.lens;
-    }
-
-    @Override
-    public InventoryArchetype getArchetype() {
-        return this.archetype;
     }
 
     @Override
@@ -90,7 +61,6 @@ public abstract class MixinCustomInventory implements MinecraftInventoryAdapter,
         return this.plugin;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public SlotProvider getSlotProvider() {
         return this.slots;

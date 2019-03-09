@@ -50,6 +50,7 @@ public class SpongeInventoryBuilder implements Inventory.Builder, Inventory.Buil
     private Lens finalLens; // always set before build
     @Nullable private UUID identity;
     @Nullable private Carrier carrier;
+    private CompoundSlotProvider finalProvider;
 
     @Override
     public BuildingStep slots(int amount) {
@@ -88,6 +89,7 @@ public class SpongeInventoryBuilder implements Inventory.Builder, Inventory.Buil
         for (Inventory inventory : this.inventories) {
             provider.add(((InventoryAdapter) inventory));
         }
+        this.finalProvider = provider;
         this.finalLens = lensBuilder.build(provider);
         return this;
     }
@@ -106,7 +108,7 @@ public class SpongeInventoryBuilder implements Inventory.Builder, Inventory.Buil
 
     @Override
     public Inventory build() {
-        return ((Inventory) new CustomInventory(this.size, this.finalLens, this.inventories, this.identity, this.carrier));
+        return ((Inventory) new CustomInventory(this.size, this.finalLens, this.finalProvider, this.inventories, this.identity, this.carrier));
     }
 
     @Override
@@ -117,6 +119,7 @@ public class SpongeInventoryBuilder implements Inventory.Builder, Inventory.Buil
         this.size = 0;
 
         this.finalLens = null;
+        this.finalProvider = null;
         this.identity = null;
         this.carrier = null;
 
