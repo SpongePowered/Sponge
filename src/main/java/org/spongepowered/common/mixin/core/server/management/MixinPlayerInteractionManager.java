@@ -330,11 +330,13 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
         // } // Sponge - Remove unecessary else bracket
         // Sponge Start - complete the method with the micro change of resetting item damage and quantity from the copied stack.
 
-        if (event.getUseItemResult() != Tristate.FALSE) {
+        if ((result != EnumActionResult.SUCCESS && event.getUseItemResult() != Tristate.FALSE || result == EnumActionResult.SUCCESS && event.getUseItemResult() == Tristate.TRUE)) {
+            int meta = stack.getMetadata();
+            int size = stack.getCount();
             result = stack.onItemUse(player, worldIn, pos, hand, facing, hitX, hitY, hitZ);
             if (this.isCreative()) {
-                stack.setItemDamage(oldStack.getItemDamage());
-                stack.setCount(oldStack.getCount());
+                stack.setItemDamage(meta);
+                stack.setCount(size);
             }
         }
 
