@@ -130,12 +130,6 @@ public class SpongeInventoryMenu implements InventoryMenu {
     }
 
     @Override
-    public void unregisterAt(SlotIndex... slotIndices) {
-        for (SlotIndex slotIndex : slotIndices) {
-        }// TODO
-    }
-
-    @Override
     public void unregisterAll() {
         // TODO
     }

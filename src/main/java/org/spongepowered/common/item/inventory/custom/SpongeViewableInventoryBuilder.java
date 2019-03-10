@@ -7,6 +7,7 @@ import org.apache.commons.lang3.Validate;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Carrier;
+import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -14,7 +15,14 @@ import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.custom.ContainerType;
 import org.spongepowered.api.item.inventory.custom.ContainerTypes;
 import org.spongepowered.api.item.inventory.equipment.EquipmentInventory;
+import org.spongepowered.api.item.inventory.menu.ClickHandler;
+import org.spongepowered.api.item.inventory.menu.ClickType;
+import org.spongepowered.api.item.inventory.menu.CloseHandler;
 import org.spongepowered.api.item.inventory.menu.InventoryMenu;
+import org.spongepowered.api.item.inventory.menu.KeySwapHandler;
+import org.spongepowered.api.item.inventory.menu.SlotChangeHandler;
+import org.spongepowered.api.item.inventory.menu.SlotClickHandler;
+import org.spongepowered.api.item.inventory.slot.SlotIndex;
 import org.spongepowered.api.item.inventory.type.GridInventory;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.api.text.Text;
@@ -401,6 +409,8 @@ menu.setTitle(Text.of("This reopens containers"));
 menu.registerSlotClick((container, slot, slotIndex, clickType) -> checkClick());
 
 menu.setReadOnly(false);
+MyHandler handler = new MyHandler();
+menu.registerHandler(handler);
 menu.registerChange((container, slot, slotIndex) -> checkAllChange());
 
 menu.setReadOnly(true);
@@ -422,5 +432,32 @@ ViewableInventory.builder().type(ContainerTypes.CHEST)
     static boolean checkClick() { return true; }
     static boolean checkAllChange() { return false; }
 
+    static class MyHandler implements CloseHandler, KeySwapHandler, SlotChangeHandler, SlotClickHandler, ClickHandler {
+
+        @Override
+        public boolean handle(Container container, ClickType clickType) {
+            return true;
+        }
+
+        @Override
+        public void handle(Container container, Player player) {
+
+        }
+
+        @Override
+        public boolean handle(Container container, Slot slot, SlotIndex slotIndex, ClickType clickType, Slot slot2) {
+            return true;
+        }
+
+        @Override
+        public boolean handle(Container container, Slot slot, SlotIndex slotIndex) {
+            return true;
+        }
+
+        @Override
+        public boolean handle(Container container, Slot slot, SlotIndex slotIndex, ClickType clickType) {
+            return true;
+        }
+    }
 
 }
