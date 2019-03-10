@@ -9,6 +9,7 @@ import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.custom.ContainerType;
 import org.spongepowered.api.item.inventory.menu.ClickHandler;
 import org.spongepowered.api.item.inventory.menu.ClickTypes;
+import org.spongepowered.api.item.inventory.menu.CloseHandler;
 import org.spongepowered.api.item.inventory.menu.InventoryMenu;
 import org.spongepowered.api.item.inventory.menu.KeySwapHandler;
 import org.spongepowered.api.item.inventory.menu.SlotChangeHandler;
@@ -37,7 +38,7 @@ public class SpongeInventoryMenu implements InventoryMenu {
     @Nullable private ClickHandler clickHandler;
     @Nullable private KeySwapHandler keySwapHandler;
     @Nullable private SlotChangeHandler changeHandler;
-    @Nullable private BiConsumer<Container, Player> closeHandler;
+    @Nullable private CloseHandler closeHandler;
 
     private boolean readonly;
 
@@ -79,7 +80,7 @@ public class SpongeInventoryMenu implements InventoryMenu {
     }
 
     @Override
-    public void registerClose(BiConsumer<Container, Player> handler) {
+    public void registerClose(CloseHandler handler) {
         this.closeHandler = handler;
     }
 
@@ -90,7 +91,7 @@ public class SpongeInventoryMenu implements InventoryMenu {
     }
 
     @Override
-    public <T> void registerClickHandler(T handler) {
+    public void registerHandler(Object handler) {
         if (handler instanceof ClickHandler) {
             this.registerClick(((ClickHandler) handler));
         }
@@ -99,6 +100,12 @@ public class SpongeInventoryMenu implements InventoryMenu {
         }
         if (handler instanceof KeySwapHandler) {
             this.registerKeySwap(((KeySwapHandler) handler));
+        }
+        if (handler instanceof CloseHandler) {
+            this.registerClose(((CloseHandler) handler));
+        }
+        if (handler instanceof SlotChangeHandler) {
+            this.registerChange(((SlotChangeHandler) handler));
         }
     }
 
