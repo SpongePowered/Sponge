@@ -316,6 +316,8 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
         if (this.menu != null) {
             if (!this.menu.onClick(slotId, dragType, clickTypeIn, player, this)) {
                 cir.setReturnValue(ItemStack.EMPTY);
+
+                // TODO maybe need to send rollback packets to client
             }
         }
     }

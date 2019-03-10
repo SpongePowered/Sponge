@@ -399,7 +399,7 @@ menu.open(player2);
 
 menu.setCurrentInventory(display2); // matching ContainerType so the inventory is silently swapped
 menu.setTitle(Text.of("This reopens containers"));
-menu.registerClick((container, slot, slotIndex, clickType, slot2) -> checkClick(), SlotIndex.of(4));
+menu.registerSlotClick((container, slot, slotIndex, clickType) -> checkClick(), SlotIndex.of(4));
 
 menu.setReadOnly(false);
 menu.registerChange((container, slot, slotIndex) -> checkAllChange());
