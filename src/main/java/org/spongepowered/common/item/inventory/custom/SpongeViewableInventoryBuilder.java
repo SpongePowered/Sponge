@@ -15,7 +15,6 @@ import org.spongepowered.api.item.inventory.custom.ContainerType;
 import org.spongepowered.api.item.inventory.custom.ContainerTypes;
 import org.spongepowered.api.item.inventory.equipment.EquipmentInventory;
 import org.spongepowered.api.item.inventory.menu.InventoryMenu;
-import org.spongepowered.api.item.inventory.slot.SlotIndex;
 import org.spongepowered.api.item.inventory.type.GridInventory;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.api.text.Text;
@@ -399,7 +398,7 @@ menu.open(player2);
 
 menu.setCurrentInventory(display2); // matching ContainerType so the inventory is silently swapped
 menu.setTitle(Text.of("This reopens containers"));
-menu.registerSlotClick((container, slot, slotIndex, clickType) -> checkClick(), SlotIndex.of(4));
+menu.registerSlotClick((container, slot, slotIndex, clickType) -> checkClick());
 
 menu.setReadOnly(false);
 menu.registerChange((container, slot, slotIndex) -> checkAllChange());
