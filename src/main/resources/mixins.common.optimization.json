@@ -18,6 +18,7 @@
         "mapoptimization.MixinMapData_MapOptimization",
         "mapoptimization.MixinMapInfo_MapOptimization",
         "mapoptimization.MixinMinecraftServer_MapOptimization",
+        "network.play.server.MixinSPacketChunkData_Async_Lighting",
         "world.MixinChunk_Async_Lighting",
         "world.MixinWorldServer_Async_Lighting",
         "world.gen.MixinChunkProviderServer_Async_Lighting",

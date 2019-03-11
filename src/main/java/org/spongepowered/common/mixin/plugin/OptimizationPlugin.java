@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.plugin;
 
 import com.google.common.collect.ImmutableMap;
-import org.checkerframework.checker.nullness.Opt;
 import org.spongepowered.asm.lib.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -101,6 +100,8 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
                     OptimizationCategory::usePandaRedstone)
             .put("org.spongepowered.common.mixin.optimization.entity.MixinEntityTameable_Cached_Owner",
                     OptimizationCategory::useCacheTameableOwners)
+            .put("org.spongepowered.common.mixin.optimization.network.play.server.MixinSPacketChunkData_Async_Lighting",
+                    OptimizationCategory::useAsyncLighting)
             .put("org.spongepowered.common.mixin.optimization.world.MixinChunk_Async_Lighting",
                     OptimizationCategory::useAsyncLighting)
             .put("org.spongepowered.common.mixin.optimization.world.MixinWorldServer_Async_Lighting",
