@@ -389,8 +389,34 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
         final WorldServer world = (WorldServer) mixinWorldServer;
         final IBlockState current = world.getBlockState(pos);
 
+        if (newTile != null) {
+            // Double check previous changes, if there's a remove tile entity, and previous to that, a change block, and this is an add tile entity,
+            // well, we need to flip the ChangeBlock to avoid doing a breakBlock logic
+            if (this.orderedTransactions != null && this.orderedTransactions.size() > 1) { // need at least 2 entries.
+                final List<BlockTransaction> entries = this.orderedTransactions.get(pos);
+                boolean isSame = false;
+                for (ListIterator<BlockTransaction> iterator = entries.listIterator(entries.size()); iterator.hasPrevious(); ) {
+                    final BlockTransaction prevChange = iterator.previous();
+                    if (prevChange instanceof BlockTransaction.RemoveTileEntity && iterator.hasPrevious()) {
+                        final BlockTransaction further = iterator.previous();
+                        if (further instanceof BlockTransaction.ChangeBlock) {
+                            isSame = ((BlockTransaction.RemoveTileEntity) prevChange).removed == newTile;
+                            if (isSame) {
+                                ((BlockTransaction.ChangeBlock) further).ignoreBreakBlockLogic = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (isSame) {
+                    mixinWorldServer.getProxyAccess().unmarkRemoval(pos);
+                    return;
+                }
+            }
+        }
         final int transactionIndex = ++this.transactionIndex;
         if (oldTile != null) {
+
             final SpongeBlockSnapshot snapshot = mixinWorldServer.createSpongeSnapshotForTileEntity(current, pos, BlockChangeFlags.NONE, oldTile);
             this.put(snapshot, current);
             if (newTile != null) {
@@ -560,9 +586,6 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
                 final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) ((SpongeBlockSnapshot) eventTransaction.getOriginal()).getWorldServer();
                 try (final SpongeProxyBlockAccess.Proxy transactionProxy = transaction.getProxy(mixinWorldServer)) {
                     transaction.process(eventTransaction, phaseState, phaseContext, currentDepth);
-                }
-                if (this.processingBlocks != null) {
-                    this.processingBlocks.remove(mixinWorldServer);
                 }
             }
         } finally {

@@ -212,11 +212,11 @@ public final class SpongeProxyBlockAccess implements IBlockAccess {
         }
     }
 
-    private void unmarkRemoval(BlockPos pos) {
+    public void unmarkRemoval(BlockPos pos) {
         final boolean removed = this.markedRemoved.remove(pos);
-        if (removed && !this.proxies.isEmpty()) {
+        if (!removed && !this.proxies.isEmpty()) {
             final Proxy peek = this.proxies.peek();
-            if (peek.toBeRemoved != null && pos.equals(peek.toBeRemoved)) {
+            if (peek.toBeRemoved != null && pos.equals(peek.tileEntityChange)) {
                 peek.toBeRemoved = null;
             }
         }
