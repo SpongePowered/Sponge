@@ -213,6 +213,7 @@ public abstract class BlockTransaction {
         final SpongeBlockSnapshot original;
         final IBlockState newState;
         final SpongeBlockChangeFlag blockChangeFlag;
+        boolean ignoreBreakBlockLogic = false;
 
         ChangeBlock(int i, int snapshotIndex, SpongeBlockSnapshot attachedSnapshot, IBlockState newState, SpongeBlockChangeFlag blockChange) {
             super(i, snapshotIndex);
@@ -247,7 +248,7 @@ public abstract class BlockTransaction {
             ((IMixinWorldServer) worldServer).getProxyAccess().proceed(targetPosition, newState);
 
             // We can proceed to calling the break block logic since the new state has been "proxied" onto the world
-            if (oldState.getBlock() != newState.getBlock()) {
+            if (!ignoreBreakBlockLogic && oldState.getBlock() != newState.getBlock()) {
                 PhaseTracker.getInstance().getCurrentContext().neighborNotificationSource = original;
                 oldState.getBlock().breakBlock(worldServer, targetPosition, oldState);
                 PhaseTracker.getInstance().getCurrentContext().neighborNotificationSource = null;
