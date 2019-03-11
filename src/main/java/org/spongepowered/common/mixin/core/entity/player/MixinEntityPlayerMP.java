@@ -76,13 +76,13 @@ import net.minecraft.network.play.server.SPacketSpawnPosition;
 import net.minecraft.network.play.server.SPacketUpdateHealth;
 import net.minecraft.network.play.server.SPacketWorldBorder;
 import net.minecraft.potion.PotionEffect;
-import net.minecraft.scoreboard.IScoreCriteria;
 import net.minecraft.scoreboard.Score;
+import net.minecraft.scoreboard.ScoreCriteria;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerInteractionManager;
 import net.minecraft.server.management.PlayerList;
-import net.minecraft.stats.StatBase;
+import net.minecraft.stats.Stat;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
@@ -92,6 +92,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.event.HoverEvent;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.GameType;
 import net.minecraft.world.IInteractionObject;
@@ -122,8 +124,8 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.tab.TabList;
-import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.entity.living.player.tab.TabListEntry;
+import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -266,7 +268,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow public abstract Entity getSpectatingEntity();
     @Shadow public abstract void setSpectatingEntity(Entity entity);
     @Shadow public abstract void sendPlayerAbilities();
-    @Shadow @Override public abstract void takeStat(StatBase stat);
+    @Shadow @Override public abstract void takeStat(Stat<?> stat);
     @Shadow public abstract void displayGUIChest(IInventory chestInventory);
     @Shadow public abstract void displayGui(IInteractionObject guiOwner);
 
@@ -379,9 +381,20 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             // Sponge end
 
             boolean flag = this.world.getGameRules().getBoolean("showDeathMessages");
-            this.connection.sendPacket(new SPacketCombatEvent(this.getCombatTracker(), SPacketCombatEvent.Event.ENTITY_DIED, flag));
 
             if (flag) {
+                ITextComponent deathMessage = this.getCombatTracker().getDeathMessage();
+                this.connection.sendPacket(new SPacketCombatEvent(this.getCombatTracker(), SPacketCombatEvent.Event.ENTITY_DIED, deathMessage), future -> {
+                    if (!future.isSuccess()) {
+                        String deathMessagePlain = deathMessage.func_212636_a(256);
+                        ITextComponent tooltip = new TextComponentTranslation("death.attack.message_too_long",
+                                new TextComponentString(deathMessagePlain).applyTextStyle(TextFormatting.YELLOW));
+                        ITextComponent deathMessage2 = new TextComponentTranslation("death.attack.even_more_magic", this.getDisplayName())
+                                .applyTextStyle(x -> x.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, tooltip)));
+                        this.connection.sendPacket(new SPacketCombatEvent(this.getCombatTracker(), SPacketCombatEvent.Event.ENTITY_DIED, deathMessage2));
+                    }
+
+                });
                 Team team = this.getTeam();
 
                 if (team != null && team.getDeathMessageVisibility() != Team.EnumVisible.ALWAYS) {
@@ -395,6 +408,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
                 } else {
                     this.server.getPlayerList().sendMessage(this.getCombatTracker().getDeathMessage());
                 }
+            } else {
+                this.connection.sendPacket(new SPacketCombatEvent(this.getCombatTracker(), SPacketCombatEvent.Event.ENTITY_DIED));
             }
 
             this.spawnShoulderEntities();
@@ -405,7 +420,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
                 this.inventory.dropAllItems();
             }
 
-            this.getWorldScoreboard().forAllObjectives(IScoreCriteria.DEATH_COUNT, this.getScoreboardName(), Score::incrementScore);
+            this.getWorldScoreboard().forAllObjectives(ScoreCriteria.DEATH_COUNT, this.getScoreboardName(), Score::incrementScore);
 
             EntityLivingBase entitylivingbase = this.getAttackingEntity();
 
@@ -440,12 +455,12 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         // Allows plugins to specify data that persists after players respawn.
         IMixinEntity oldEntity = (IMixinEntity) oldPlayer;
         NBTTagCompound old = oldEntity.getEntityData();
-        if (old.hasKey(NbtDataUtil.SPONGE_DATA)) {
-            this.getEntityData().setTag(NbtDataUtil.SPONGE_DATA, old.getCompound(NbtDataUtil.SPONGE_DATA));
+        if (old.contains(NbtDataUtil.SPONGE_DATA)) {
+            this.getEntityData().put(NbtDataUtil.SPONGE_DATA, old.getCompound(NbtDataUtil.SPONGE_DATA));
             this.readFromNbt(this.getSpongeData());
         }
         // Copy overworld spawn pos
-        ((IMixinEntityPlayer) this).setOverworldSpawnPoint(SpongeImplHooks.getBedLocation(oldPlayer, 0));
+        ((IMixinEntityPlayer) this).setOverworldSpawnPoint(SpongeImplHooks.getBedLocation(oldPlayer, DimensionType.OVERWORLD));
 
         // Get old tab list.
         // We remove the tab list from the old player in MixinPlayerList,

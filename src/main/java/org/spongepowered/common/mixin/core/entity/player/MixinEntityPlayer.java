@@ -51,7 +51,7 @@ import net.minecraft.item.ItemSword;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.play.server.SPacketEntityVelocity;
 import net.minecraft.scoreboard.Scoreboard;
-import net.minecraft.stats.StatBase;
+import net.minecraft.stats.Stat;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.CooldownTracker;
 import net.minecraft.util.DamageSource;
@@ -152,11 +152,11 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow public abstract void onCriticalHit(net.minecraft.entity.Entity entityHit);
     @Shadow public abstract void onEnchantmentCritical(net.minecraft.entity.Entity entityHit); // onEnchantmentCritical
     @Shadow public abstract void addExhaustion(float p_71020_1_);
-    @Shadow public abstract void addStat(@Nullable StatBase stat, int amount);
-    @Shadow public abstract void addStat(StatBase stat);
+    @Shadow public abstract void addStat(@Nullable Stat<?> stat, int amount);
+    @Shadow public abstract void addStat(Stat<?> stat);
     @Shadow public abstract void resetCooldown();
     @Shadow public abstract void spawnSweepParticles(); //spawnSweepParticles()
-    @Shadow public abstract void takeStat(StatBase stat);
+    @Shadow public abstract void takeStat(Stat<?> stat);
     @Shadow protected abstract void destroyVanishingCursedItems(); // Filter vanishing curse enchanted items
     @Shadow public void wakeUpPlayer(boolean immediately, boolean updateWorldFlag, boolean setSpawn) {};
     @Shadow public abstract EntityItem dropItem(boolean dropAll);
@@ -179,6 +179,8 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow public abstract void addStat(ResourceLocation p_195067_1_, int p_195067_2_);
 
     @Shadow public abstract String getScoreboardName();
+
+    @Shadow public abstract ITextComponent getDisplayName();
 
     private boolean affectsSpawning = true;
     private UUID collidingEntityUuid = null;
