@@ -29,7 +29,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.EnumSkyBlock;
+import net.minecraft.world.EnumLightType;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
@@ -172,8 +172,8 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
         return this.isAreaLoaded();
     }
 
-    @Redirect(method = "updateSkylightNeighborHeight", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;checkLightFor(Lnet/minecraft/world/EnumSkyBlock;Lnet/minecraft/util/math/BlockPos;)Z"))
-    private boolean onCheckLightForSkylightNeighbor(World world, EnumSkyBlock enumSkyBlock, BlockPos pos) {
+    @Redirect(method = "updateSkylightNeighborHeight", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;checkLightFor(Lnet/minecraft/world/EnumLightType;Lnet/minecraft/util/math/BlockPos;)Z"))
+    private boolean onCheckLightForSkylightNeighbor(World world, EnumLightType enumSkyBlock, BlockPos pos) {
         if (!this.isServerChunk) {
             return world.checkLightFor(enumSkyBlock, pos);
         }
@@ -643,7 +643,7 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
                 if (chunk == null) {
                     continue;
                 }
-                ((IMixinWorldServer) this.world).updateLightAsync(EnumSkyBlock.SKY, new BlockPos(x1, j, z1), (Chunk)(Object) chunk);
+                ((IMixinWorldServer) this.world).updateLightAsync(EnumLightType.SKY, new BlockPos(x1, j, z1), (Chunk)(Object) chunk);
             }
         }
 
@@ -657,7 +657,7 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
      * @param pos The block position
      * @return True if light update was successful, false if not
      */
-    private boolean checkWorldLightFor(EnumSkyBlock lightType, BlockPos pos) {
+    private boolean checkWorldLightFor(EnumLightType lightType, BlockPos pos) {
         final Chunk chunk = this.getLightChunk(pos.getX() >> 4, pos.getZ() >> 4, null);
         if (chunk == null) {
             return false;
@@ -686,10 +686,10 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
 
         if (this.world.provider.hasSkyLight())
         {
-            flag |= ((IMixinWorldServer) this.world).updateLightAsync(EnumSkyBlock.SKY, pos, (Chunk)(Object) chunk);
+            flag |= ((IMixinWorldServer) this.world).updateLightAsync(EnumLightType.SKY, pos, (Chunk)(Object) chunk);
         }
 
-        flag = flag | ((IMixinWorldServer) this.world).updateLightAsync(EnumSkyBlock.BLOCK, pos, (Chunk)(Object) chunk);
+        flag = flag | ((IMixinWorldServer) this.world).updateLightAsync(EnumLightType.BLOCK, pos, (Chunk)(Object) chunk);
         return flag;
     }
 
@@ -700,8 +700,8 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
      * @return The list of queued block positions, empty if none
      */
     @Override
-    public CopyOnWriteArrayList<Short> getQueuedLightingUpdates(EnumSkyBlock type) {
-        if (type == EnumSkyBlock.SKY) {
+    public CopyOnWriteArrayList<Short> getQueuedLightingUpdates(EnumLightType type) {
+        if (type == EnumLightType.SKY) {
             return this.queuedSkyLightingUpdates;
         }
         return this.queuedBlockLightingUpdates;

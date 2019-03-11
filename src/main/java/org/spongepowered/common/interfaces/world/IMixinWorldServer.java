@@ -32,6 +32,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.EnumLightType;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.world.BlockChangeFlag;
@@ -81,9 +82,9 @@ public interface IMixinWorldServer extends IMixinWorld {
 
     boolean isLightLevel(Chunk chunk, BlockPos pos, int level);
 
-    boolean updateLightAsync(EnumSkyBlock lightType, BlockPos pos, Chunk chunk);
+    boolean updateLightAsync(EnumLightType lightType, BlockPos pos, Chunk chunk);
 
-    boolean checkLightAsync(EnumSkyBlock lightType, BlockPos pos, Chunk chunk, List<Chunk> neighbors);
+    boolean checkLightAsync(EnumLightType lightType, BlockPos pos, Chunk chunk, List<Chunk> neighbors);
 
     ExecutorService getLightingExecutor();
 

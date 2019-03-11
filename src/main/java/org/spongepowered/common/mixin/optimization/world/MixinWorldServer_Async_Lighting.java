@@ -29,7 +29,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.EnumSkyBlock;
+import net.minecraft.world.EnumLightType;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.asm.mixin.Mixin;
@@ -59,12 +59,12 @@ public abstract class MixinWorldServer_Async_Lighting extends MixinWorld impleme
                 Executors.newFixedThreadPool(SpongeImpl.getGlobalConfig().getConfig().getOptimizations().getAsyncLightingCategory().getNumThreads(), new ThreadFactoryBuilder().setNameFormat("Sponge - Async Light Thread").build());
 
     @Override
-    public boolean checkLightFor(EnumSkyBlock lightType, BlockPos pos) {
+    public boolean checkLightFor(EnumLightType lightType, BlockPos pos) {
         return this.updateLightAsync(lightType, pos, null);
     }
 
     @Override
-    public boolean checkLightAsync(EnumSkyBlock lightType, BlockPos pos, net.minecraft.world.chunk.Chunk currentChunk, List<Chunk> neighbors) {
+    public boolean checkLightAsync(EnumLightType lightType, BlockPos pos, net.minecraft.world.chunk.Chunk currentChunk, List<Chunk> neighbors) {
         // Sponge - This check is not needed as neighbors are checked in updateLightAsync
         if (false && !this.isAreaLoaded(pos, 17, false)) {
             return false;
@@ -199,7 +199,7 @@ public abstract class MixinWorldServer_Async_Lighting extends MixinWorld impleme
     }
 
     @Override
-    public boolean updateLightAsync(EnumSkyBlock lightType, BlockPos pos, @Nullable Chunk currentChunk) {
+    public boolean updateLightAsync(EnumLightType lightType, BlockPos pos, @Nullable Chunk currentChunk) {
         if (this.getMinecraftServer().isServerStopped() || this.lightExecutorService.isShutdown()) {
             return false;
         }
@@ -286,7 +286,7 @@ public abstract class MixinWorldServer_Async_Lighting extends MixinWorld impleme
         return null;
     }
 
-    private int getLightForAsync(EnumSkyBlock lightType, BlockPos pos, Chunk currentChunk, List<Chunk> neighbors) {
+    private int getLightForAsync(EnumLightType lightType, BlockPos pos, Chunk currentChunk, List<Chunk> neighbors) {
         if (pos.getY() < 0) {
             pos = new BlockPos(pos.getX(), 0, pos.getZ());
         }
@@ -302,17 +302,17 @@ public abstract class MixinWorldServer_Async_Lighting extends MixinWorld impleme
         return chunk.getLightFor(lightType, pos);
     }
 
-    private int getRawBlockLightAsync(EnumSkyBlock lightType, BlockPos pos, Chunk currentChunk, List<Chunk> neighbors) {
+    private int getRawBlockLightAsync(EnumLightType lightType, BlockPos pos, Chunk currentChunk, List<Chunk> neighbors) {
         final Chunk chunk = getLightChunk(pos, currentChunk, neighbors);
         if (chunk == null || chunk.unloadQueued) {
             return lightType.defaultLightValue;
         }
-        if (lightType == EnumSkyBlock.SKY && chunk.canSeeSky(pos)) {
+        if (lightType == EnumLightType.SKY && chunk.canSeeSky(pos)) {
             return 15;
         } else {
             IBlockState blockState = chunk.getBlockState(pos);
             int blockLight = SpongeImplHooks.getChunkPosLight(blockState, (net.minecraft.world.World) (Object) this, pos);
-            int i = lightType == EnumSkyBlock.SKY ? 0 : blockLight;
+            int i = lightType == EnumLightType.SKY ? 0 : blockLight;
             int j = SpongeImplHooks.getBlockLightOpacity(blockState, (net.minecraft.world.World) (Object) this, pos);
 
             if (j >= 15 && blockLight > 0) {
@@ -346,7 +346,7 @@ public abstract class MixinWorldServer_Async_Lighting extends MixinWorld impleme
         }
     }
 
-    public void setLightForAsync(EnumSkyBlock type, BlockPos pos, int lightValue, Chunk currentChunk, List<Chunk> neighbors) {
+    public void setLightForAsync(EnumLightType type, BlockPos pos, int lightValue, Chunk currentChunk, List<Chunk> neighbors) {
         if (((IMixinBlockPos) pos).isValidPosition()) {
             final Chunk chunk = this.getLightChunk(pos, currentChunk, neighbors);
             if (chunk != null && !chunk.unloadQueued) {

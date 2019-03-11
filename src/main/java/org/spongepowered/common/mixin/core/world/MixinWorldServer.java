@@ -70,7 +70,6 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.EnumLightType;
-import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.GameType;
 import net.minecraft.world.MinecraftException;
@@ -1864,7 +1863,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      * @return True if the chunk is loaded and neighbors are loaded
      */
     @Override
-    public boolean spongeIsAreaLoadedForCheckingLight(World thisWorld, BlockPos pos, int radius, boolean allowEmtpy, EnumSkyBlock lightType,
+    public boolean spongeIsAreaLoadedForCheckingLight(World thisWorld, BlockPos pos, int radius, boolean allowEmtpy, EnumLightType lightType,
             BlockPos samePosition) {
         final Chunk chunk = this.mixinChunkProviderServer.getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
         return !(chunk == null || !((IMixinChunk) chunk).areNeighborsLoaded());

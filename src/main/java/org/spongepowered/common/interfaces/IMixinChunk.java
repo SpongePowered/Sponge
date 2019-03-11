@@ -28,6 +28,7 @@ import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.EnumLightType;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkPrimer;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -116,7 +117,7 @@ public interface IMixinChunk {
 
     boolean isQueuedForUnload();
 
-    CopyOnWriteArrayList<Short> getQueuedLightingUpdates(EnumSkyBlock type);
+    CopyOnWriteArrayList<Short> getQueuedLightingUpdates(EnumLightType type);
 
     void markChunkDirty();
 
