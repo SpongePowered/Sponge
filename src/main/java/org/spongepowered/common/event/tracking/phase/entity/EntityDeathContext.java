@@ -27,7 +27,7 @@ package org.spongepowered.common.event.tracking.phase.entity;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseData;
+import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
 public class EntityDeathContext extends EntityContext<EntityDeathContext> {
@@ -45,13 +45,13 @@ public class EntityDeathContext extends EntityContext<EntityDeathContext> {
      */
     @Override
     public void close() {
-        PhaseData currentPhaseData = PhaseTracker.getInstance().getCurrentPhaseData();
+        PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
         // The current phase data may not be this phase data, which would ultimately
         // lead to having to close off another on top of this one.
-        if (!currentPhaseData.context.equals(this)) {
+        if (!context.equals(this)) {
             // at most we should be at a depth of 1.
             // should attempt to complete the existing one to wrap up, before exiting fully.
-            currentPhaseData.context.close();
+            context.close();
         }
         super.close();
     }

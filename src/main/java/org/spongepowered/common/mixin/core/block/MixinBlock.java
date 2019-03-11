@@ -90,7 +90,6 @@ import org.spongepowered.common.config.category.BlockTrackerModCategory;
 import org.spongepowered.common.config.type.TrackerConfig;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
@@ -350,7 +349,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
         }
     }
 
-    @Nullable private PhaseData data = null; // Soft reference for the methods between this
+    @Nullable private PhaseContext<?> data = null; // Soft reference for the methods between this
 
     @Inject(method = "dropBlockAsItemWithChance", at = @At(value = "RETURN"), cancellable = true)
     private void onDropBlockAsItemWithChanceReturn(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, float chance, int fortune,
@@ -361,14 +360,14 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
                 return;
             }
             final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-            if (phaseTracker.getCurrentPhaseData() != this.data) {
+            if (phaseTracker.getCurrentContext() != this.data) {
                 // illegal state exception maybe?
                 this.data = null;
                 return;
             }
-            final PhaseData data = this.data;
-            final IPhaseState<?> currentState = data.state;
-            final boolean shouldEnterBlockDropPhase = !data.context.isCapturingBlockItemDrops() && !currentState.alreadyProcessingBlockItemDrops() && !currentState.isWorldGeneration();
+            final PhaseContext<?> context = this.data;
+            final IPhaseState<?> currentState = context.state;
+            final boolean shouldEnterBlockDropPhase = !context.isCapturingBlockItemDrops() && !currentState.alreadyProcessingBlockItemDrops() && !currentState.isWorldGeneration();
             if (shouldEnterBlockDropPhase) {
                 phaseTracker.getCurrentContext().close();
             }

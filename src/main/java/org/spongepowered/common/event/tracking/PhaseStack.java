@@ -43,10 +43,9 @@ import java.util.function.Consumer;
  */
 final class PhaseStack {
 
-    private static final PhaseData EMPTY_DATA = new PhaseData(PhaseContext.empty(), GeneralPhase.State.COMPLETE);
     private static final int DEFAULT_QUEUE_SIZE = 16;
 
-    private final Deque<PhaseData> phases;
+    private final Deque<PhaseContext<?>> phases;
 
     PhaseStack() {
         this(DEFAULT_QUEUE_SIZE);
@@ -56,37 +55,34 @@ final class PhaseStack {
         this.phases = new ArrayDeque<>(size);
     }
 
-    PhaseData peek() {
-        final PhaseData phase = this.phases.peek();
-        return phase == null ? PhaseStack.EMPTY_DATA : phase;
+    PhaseContext<?> peek() {
+        final PhaseContext<?> phase = this.phases.peek();
+        return phase == null ? PhaseContext.empty() : phase;
     }
 
     IPhaseState<?> peekState() {
-        final PhaseData peek = this.phases.peek();
+        final PhaseContext<?> peek = this.phases.peek();
         return peek == null ? GeneralPhase.State.COMPLETE : peek.state;
     }
 
     PhaseContext<?> peekContext() {
-        final PhaseData peek = this.phases.peek();
-        return peek == null ? PhaseContext.empty() : peek.context;
+        final PhaseContext<?> peek = this.phases.peek();
+        return peek == null ? PhaseContext.empty() : peek;
     }
 
-    PhaseData pop() {
+    PhaseContext<?> pop() {
         return this.phases.pop();
     }
 
-    private PhaseStack push(PhaseData tuple) {
-        checkNotNull(tuple, "Tuple cannot be null!");
-        checkArgument(tuple.context.isComplete(), "Phase context must be complete: %s", tuple);
-        this.phases.push(tuple);
+    PhaseStack push(IPhaseState<?> state, PhaseContext<?> context) {
+        checkNotNull(context, "Tuple cannot be null!");
+        checkArgument(context.state == state, "Illegal IPhaseState not matching PhaseContext: %s", context);
+        checkArgument(context.isComplete(), "Phase context must be complete: %s", context);
+        this.phases.push(context);
         return this;
     }
 
-    PhaseStack push(IPhaseState<?> state, PhaseContext<?> context) {
-        return push(new PhaseData(context, state));
-    }
-
-    public void forEach(Consumer<PhaseData> consumer) {
+    public void forEach(Consumer<PhaseContext<?>> consumer) {
         this.phases.forEach(consumer);
     }
 
@@ -138,7 +134,7 @@ final class PhaseStack {
         int i = 0;
         // So first, we want to collect all the states into an array as they are pushed to the stack,
         // which means that we should see the re-entrant phase pretty soon.
-        for (PhaseData data : this.phases) {
+        for (PhaseContext<?> data : this.phases) {
             allStates[i++] = data.state;
         }
         // Now we can actually iterate through the array

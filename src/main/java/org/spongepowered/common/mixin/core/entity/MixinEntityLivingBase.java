@@ -390,7 +390,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         if (((IMixinWorld) this.world).isFake() || !isMainThread) { // Short circuit to avoid erroring on handling
             return null;
         }
-        final IPhaseState<?> state = PhaseTracker.getInstance().getCurrentPhaseData().state;
+        final IPhaseState<?> state = PhaseTracker.getInstance().getCurrentContext().state;
         tracksEntityDeaths = !state.tracksEntityDeaths() && state != EntityPhase.State.DEATH;
         if (tracksEntityDeaths) {
             final EntityDeathContext context = EntityPhase.State.DEATH.createPhaseContext()

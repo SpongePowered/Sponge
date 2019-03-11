@@ -97,8 +97,8 @@ import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.interfaces.IMixinCachable;
 import org.spongepowered.common.interfaces.IMixinChunk;
@@ -534,7 +534,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     @Inject(method = "getEntitiesWithinAABBForEntity", at = @At(value = "RETURN"))
     public void onGetEntitiesWithinAABBForEntity(Entity entityIn, AxisAlignedBB aabb, List<Entity> listToFill, Predicate<Entity> p_177414_4_,
             CallbackInfo ci) {
-        if (this.world.isRemote || PhaseTracker.getInstance().getCurrentPhaseData().state.ignoresEntityCollisions()) {
+        if (((IMixinWorld) this.world).isFake() || PhaseTracker.getInstance().getCurrentState().ignoresEntityCollisions()) {
             return;
         }
 
@@ -547,10 +547,9 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         }
 
         CollideEntityEvent event = SpongeCommonEventFactory.callCollideEntityEvent(this.world, entityIn, listToFill);
-        final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
 
         if (event == null || event.isCancelled()) {
-            if (event == null && !peek.state.isTicking()) {
+            if (event == null && !PhaseTracker.getInstance().getCurrentState().isTicking()) {
                 return;
             }
             listToFill.clear();
@@ -561,7 +560,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     @Inject(method = "getEntitiesOfTypeWithinAABB", at = @At(value = "RETURN"))
     public void onGetEntitiesOfTypeWithinAAAB(Class<? extends Entity> entityClass, AxisAlignedBB aabb, List listToFill, Predicate<Entity> p_177430_4_,
             CallbackInfo ci) {
-        if (this.world.isRemote || PhaseTracker.getInstance().getCurrentPhaseData().state.ignoresEntityCollisions()) {
+        if (((IMixinWorld) this.world).isFake() || PhaseTracker.getInstance().getCurrentState().ignoresEntityCollisions()) {
             return;
         }
 
@@ -570,10 +569,9 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         }
 
         CollideEntityEvent event = SpongeCommonEventFactory.callCollideEntityEvent(this.world, null, listToFill);
-        final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
 
         if (event == null || event.isCancelled()) {
-            if (event == null && !peek.state.isTicking()) {
+            if (event == null && !PhaseTracker.getInstance().getCurrentState().isTicking()) {
                 return;
             }
             listToFill.clear();
@@ -666,23 +664,25 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         // if (block1 != block) // Sponge - Forge removes this change.
         {
             if (!this.world.isRemote) {
-                final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
+                final PhaseContext peek = PhaseTracker.getInstance().getCurrentContext();
                 final IPhaseState state = peek.state;
                 // Sponge - Forge adds this change for block changes to only fire events when necessary
-                if (currentBlock != newBlock && !state.tracksTileEntityChanges(peek.context)) { // cache the block break in the event we're capturing tiles
+                if (currentBlock != newBlock && !state.tracksTileEntityChanges(peek)) { // cache the block break in the event we're capturing tiles
                     currentBlock.breakBlock(this.world, pos, currentState);
                 }
                 // Sponge - Add several tile entity hook checks. Mainly for forge added hooks, but these
-                // still work by themselves in vanilla.
+                // still work by themselves in vanilla. In all intents and purposes, the remove tile entity could
+                // occur before we have a chance to
                 TileEntity te = this.getTileEntity(pos, EnumCreateEntityType.CHECK);
                 if (te != null && SpongeImplHooks.shouldRefresh(te, this.world, pos, currentState, newState)) {
-                    if (state.tracksTileEntityChanges(peek.context)) {
-                        state.captureTileEntityReplacement(peek.context, (IMixinWorldServer) this.world, pos, te, null);
+                    if (state.tracksTileEntityChanges(peek)) {
+                        state.captureTileEntityReplacement(peek, (IMixinWorldServer) this.world, pos, te, null);
                     } else {
                         this.world.removeTileEntity(pos);
                     }
                 }
             // } else if (currentBlock instanceof ITileEntityProvider) { // Sponge - remove since forge has a special hook we need to add here
+                //Forge's hook is currentBlock.hasTileEntity(iblockstate) we add it on to SpongeImplHooks via mixins.
             } else if (SpongeImplHooks.hasBlockTileEntity(currentBlock, currentState)) {
                 TileEntity tileEntity = this.getTileEntity(pos, EnumCreateEntityType.CHECK);
                 // Sponge - Add hook for refreshing, because again, forge hooks.
@@ -722,16 +722,16 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
 
         final boolean isFakeWorld = ((IMixinWorld) this.world).isFake();
         if (!isFakeWorld && currentBlock != newBlock) {
-            final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
-            final IPhaseState state = peek.state;
-            final boolean isBulkCapturing = state.doesBulkBlockCapture(peek.context);
+            final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
+            final IPhaseState state = context.state;
+            final boolean isBulkCapturing = state.doesBulkBlockCapture(context);
             // Reset the proxy access
             ((IMixinWorldServer) this.world).getProxyAccess().onChunkChanged(pos);
             // Sponge start - Ignore block activations during block placement captures unless it's
             // a BlockContainer. Prevents blocks such as TNT from activating when cancelled.
             // Occasionally, certain phase states will need to prevent onBlockAdded to be called until after the tile entity tracking
             // has been done, in the event of restores needing to re-override the block changes.
-            if (!isBulkCapturing || (SpongeImplHooks.hasBlockTileEntity(newBlock, newState) && !state.tracksTileEntityChanges(peek.context))) {
+            if (!isBulkCapturing || (SpongeImplHooks.hasBlockTileEntity(newBlock, newState) && !state.tracksTileEntityChanges(context))) {
                 // The new block state is null if called directly from Chunk#setBlockState(BlockPos, IBlockState)
                 // If it is null, then directly call the onBlockAdded logic.
                 if (flag.performBlockPhysics()) {

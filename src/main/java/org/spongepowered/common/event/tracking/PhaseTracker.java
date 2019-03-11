@@ -149,11 +149,11 @@ public final class PhaseTracker {
     public static final BiConsumer<PrettyPrinter, PhaseContext<?>> CONTEXT_PRINTER = (printer, context) ->
         context.printCustom(printer, 4);
 
-    private static final BiConsumer<PrettyPrinter, PhaseData> PHASE_PRINTER = (printer, data) -> {
-        printer.add("  - Phase: %s", data.state);
+    private static final BiConsumer<PrettyPrinter, PhaseContext<?>> PHASE_PRINTER = (printer, context) -> {
+        printer.add("  - Phase: %s", context.state);
         printer.add("    Context:");
-        data.context.printCustom(printer, 4);
-        data.context.printTrace(printer);
+        context.printCustom(printer, 4);
+        context.printTrace(printer);
     };
 
     private final PhaseStack stack = new PhaseStack();
@@ -227,8 +227,8 @@ public final class PhaseTracker {
                 .log(SpongeImpl.getLogger(), Level.ERROR);
             return;
         }
-        final PhaseData currentPhaseData = this.stack.peek();
-        final IPhaseState<?> state = currentPhaseData.state;
+        final PhaseContext<?> currentContext = this.stack.peek();
+        final IPhaseState<?> state = currentContext.state;
         final boolean isEmpty = this.stack.isEmpty();
         if (isEmpty) {
             // The random occurrence that we're told to complete a phase
@@ -256,9 +256,8 @@ public final class PhaseTracker {
         }
 
         final TrackingPhase phase = state.getPhase();
-        final PhaseContext<?> context = currentPhaseData.context;
-        final boolean hasCaptures = context.hasCaptures();
-        try (final UnwindingPhaseContext unwinding = UnwindingPhaseContext.unwind(state, context, hasCaptures) ) {
+        final boolean hasCaptures = currentContext.hasCaptures();
+        try (final UnwindingPhaseContext unwinding = UnwindingPhaseContext.unwind(state, currentContext, hasCaptures) ) {
             // With UnwindingPhaseContext#unwind checking for post, if it is null, the try
             // will not attempt to close the phase context. If it is required,
             // it already automatically pushes onto the phase stack, along with
@@ -267,15 +266,16 @@ public final class PhaseTracker {
                 // at least unwind UNWINDING to process any captured objects so we're not totally without
                 // loss of objects
                 if (hasCaptures) {
-                    ((IPhaseState) state).unwind(context);
+                    ((IPhaseState) state).unwind(currentContext);
                 }
             } catch (Exception e) {
-                this.printMessageWithCaughtException("Exception Exiting Phase", "Something happened when trying to unwind", state, context, e);
+                this.printMessageWithCaughtException("Exception Exiting Phase", "Something happened when trying to unwind", state, currentContext, e);
             }
         } catch (Exception e) {
-            this.printMessageWithCaughtException("Exception Post Dispatching Phase", "Something happened when trying to post dispatch state", state, context, e);
+            this.printMessageWithCaughtException("Exception Post Dispatching Phase", "Something happened when trying to post dispatch state", state,
+                currentContext, e);
         }
-        this.checkPhaseContextProcessed(state, context);
+        this.checkPhaseContextProcessed(state, currentContext);
         // If pop is called, the Deque will already throw an exception if there is no element
         // so it's an error properly handled.
         this.stack.pop();
@@ -497,7 +497,7 @@ public final class PhaseTracker {
                 state, context, null);
     }
 
-    private void printBlockTrackingException(PhaseData phaseData, IPhaseState<?> phaseState, Throwable e) {
+    private void printBlockTrackingException(PhaseContext<?> phaseData, IPhaseState<?> phaseState, Throwable e) {
         if (!SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().isVerbose() && !this.printedExceptionsForBlocks.isEmpty()) {
             if (this.printedExceptionsForBlocks.contains(phaseState)) {
                 return;
@@ -505,7 +505,7 @@ public final class PhaseTracker {
         }
         final PrettyPrinter printer = new PrettyPrinter(60).add("Exception attempting to capture a block change!").centre().hr();
         printer.addWrapped(60, "%s :", "PhaseContext");
-        CONTEXT_PRINTER.accept(printer, phaseData.context);
+        CONTEXT_PRINTER.accept(printer, phaseData);
         printer.addWrapped(60, "%s :", "Phases remaining");
         this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
         printer.add("Stacktrace:");
@@ -573,10 +573,6 @@ public final class PhaseTracker {
 
     // ----------------- SIMPLE GETTERS --------------------------------------
 
-    public PhaseData getCurrentPhaseData() {
-        return this.stack.peek();
-    }
-
     public IPhaseState<?> getCurrentState() {
         return this.stack.peekState();
     }
@@ -619,16 +615,16 @@ public final class PhaseTracker {
         IBlockState iblockstate) {
         try {
             // Sponge start - prepare notification
-            final PhaseData peek = this.stack.peek();
+            final PhaseContext<?> peek = this.stack.peek();
             final IPhaseState state = peek.state;
             // If the phase state does not want to allow neighbor notifications to leak while processing,
             // it needs to be able to do so. It will replay the notifications in the order in which they were received,
             // such that the notification will be sent out in the same order as the block changes that may have taken place.
-            if (state.doesCaptureNeighborNotifications(peek.context)) {
-                state.capturesNeighborNotifications(peek.context, mixinWorld, notifyPos, sourceBlock, iblockstate, sourcePos);
+            if (state.doesCaptureNeighborNotifications(peek)) {
+                state.capturesNeighborNotifications(peek, mixinWorld, notifyPos, sourceBlock, iblockstate, sourcePos);
                 return;
             }
-            state.associateNeighborStateNotifier(peek.context, sourcePos, iblockstate.getBlock(), notifyPos, ((WorldServer) mixinWorld), PlayerTracker.Type.NOTIFIER);
+            state.associateNeighborStateNotifier(peek, sourcePos, iblockstate.getBlock(), notifyPos, ((WorldServer) mixinWorld), PlayerTracker.Type.NOTIFIER);
             final LocatableBlock block = new SpongeLocatableBlockBuilder()
                 .world(((World) mixinWorld))
                 .position(sourcePos.getX(), sourcePos.getY(), sourcePos.getZ())
@@ -644,7 +640,7 @@ public final class PhaseTracker {
             ) {
                 // Since the notifier may have just been set from the previous state, we can
                 // ask it to contribute to our state
-                state.provideNotifierForNeighbors(peek.context, context);
+                state.provideNotifierForNeighbors(peek, context);
                 context.buildAndSwitch();
                 // Sponge End
 
@@ -713,9 +709,8 @@ public final class PhaseTracker {
         }
 
         // Now we need to do some of our own logic to see if we need to capture.
-        final PhaseData phaseData = this.stack.peek();
-        final IPhaseState<?> phaseState = phaseData.state;
-        final PhaseContext<?> context = phaseData.context;
+        final PhaseContext<?> context = this.stack.peek();
+        final IPhaseState<?> phaseState = context.state;
         final boolean isComplete = phaseState == GeneralPhase.State.COMPLETE;
         if (isComplete && SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().isVerbose()) { // Fail fast.
             // The random occurrence that we're told to complete a phase
@@ -728,7 +723,7 @@ public final class PhaseTracker {
                 // of the original method where true means it successfully changed.
                 return TrackingUtil.captureBulkBlockChange(mixinWorld, chunk, currentState, newState, pos, flag, context, phaseState);
             } catch (Exception | NoClassDefFoundError e) {
-                this.printBlockTrackingException(phaseData, phaseState, e);
+                this.printBlockTrackingException(context, phaseState, e);
                 return false;
             }
         }
@@ -807,7 +802,7 @@ public final class PhaseTracker {
                     return TrackingUtil.performTransactionProcess(transaction, phaseState, context, Collections.emptyList(), true, 0);
                 }
             } catch (Exception | NoClassDefFoundError e) {
-                this.printBlockTrackingException(phaseData, phaseState, e);
+                this.printBlockTrackingException(context, phaseState, e);
                 return false;
             }
         }
@@ -870,9 +865,8 @@ public final class PhaseTracker {
         final net.minecraft.entity.Entity minecraftEntity = EntityUtil.toNative(entity);
         final WorldServer minecraftWorld = (WorldServer) world;
         final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) minecraftWorld;
-        final PhaseData phaseData = this.stack.peek();
-        final IPhaseState<?> phaseState = phaseData.state;
-        final PhaseContext<?> context = phaseData.context;
+        final PhaseContext<?> context = this.stack.peek();
+        final IPhaseState<?> phaseState = context.state;
         final boolean isForced = minecraftEntity.forceSpawn || minecraftEntity instanceof EntityPlayer;
 
         // Certain phases disallow entity spawns (such as block restoration)

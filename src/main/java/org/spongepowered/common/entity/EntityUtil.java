@@ -98,7 +98,6 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.MultiBlockCaptureSupplier;
@@ -337,9 +336,6 @@ public final class EntityUtil {
     public static MoveEntityEvent.Teleport handleDisplaceEntityTeleportEvent(Entity entityIn, Transform<World> fromTransform, Transform<World> toTransform) {
 
         // Use origin world to get correct cause
-        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-        final PhaseData peek = phaseTracker.getCurrentPhaseData();
-
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(entityIn);
 
@@ -1035,9 +1031,8 @@ public final class EntityUtil {
         original.add(snapshot);
 
         // Gather phase states to determine whether we're merging or capturing later
-        final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
-        final IPhaseState<?> currentState = peek.state;
-        final PhaseContext<?> phaseContext = peek.context;
+        final PhaseContext<?> phaseContext = PhaseTracker.getInstance().getCurrentContext();
+        final IPhaseState<?> currentState = phaseContext.state;
 
         // We want to frame ourselves here, because of the two events we have to throw, first for the drop item event, then the constructentityevent.
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
@@ -1080,9 +1075,8 @@ public final class EntityUtil {
         final List<ItemStackSnapshot> original = new ArrayList<>();
         original.add(snapshot);
 
-        final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
-        final IPhaseState currentState = peek.state;
-        final PhaseContext<?> phaseContext = peek.context;
+        final PhaseContext<?> phaseContext = PhaseTracker.getInstance().getCurrentContext();
+        final IPhaseState currentState = phaseContext.state;
 
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
 

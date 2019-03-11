@@ -81,6 +81,7 @@ public final class NbtDataUtil {
         public static final String ENDERCHEST_INVENTORY = "EnderItems";
 
         public static final String SELECTED_ITEM_SLOT = "SelectedItemSlot";
+        public static final String BLOCK_ENTITY_TAG = "BlockEntityTag";
     }
 
     // These are the various tag compound id's for getting to various places

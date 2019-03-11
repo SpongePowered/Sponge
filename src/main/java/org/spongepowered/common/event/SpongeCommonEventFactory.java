@@ -126,7 +126,6 @@ import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.inventory.UpdateAnvilEventCost;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase.State;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
@@ -521,10 +520,9 @@ public class SpongeCommonEventFactory {
      */
     private static ChangeBlockEvent.Pre callChangeBlockEventPre(IMixinWorldServer worldIn, ImmutableList<Location<World>> locations, @Nullable Object source) {
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-            final PhaseData data = phaseTracker.getCurrentPhaseData();
+            final PhaseContext<?> phaseContext = PhaseTracker.getInstance().getCurrentContext();
             if (source == null) {
-                source = data.context.getSource() == null ? worldIn : data.context.getSource();
+                source = phaseContext.getSource() == null ? worldIn : phaseContext.getSource();
             }
 
             // TODO - All of this bit should be nuked since PhaseContext has lazy initializing frames.
@@ -537,12 +535,12 @@ public class SpongeCommonEventFactory {
                 }
             }
 
-            final User owner = data.context.getOwner().orElse((User) player);
+            final User owner = phaseContext.getOwner().orElse((User) player);
             if (owner != null) {
                 frame.addContext(EventContextKeys.OWNER, owner);
             }
 
-            data.context.applyNotifierIfAvailable(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
+            phaseContext.applyNotifierIfAvailable(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
 
             ChangeBlockEvent.Pre event =
                 SpongeEventFactory.createChangeBlockEventPre(frame.getCurrentCause(), locations);
@@ -552,8 +550,7 @@ public class SpongeCommonEventFactory {
     }
 
     public static ChangeBlockEvent.Modify callChangeBlockEventModifyLiquidMix(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, @Nullable Object source) {
-        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-        final PhaseData data = phaseTracker.getCurrentPhaseData();
+        final PhaseContext<?> phaseContext = PhaseTracker.getInstance().getCurrentContext();
 
         BlockState fromState = BlockUtil.fromNative(worldIn.getBlockState(pos));
         BlockState toState = BlockUtil.fromNative(state);
@@ -566,8 +563,8 @@ public class SpongeCommonEventFactory {
             frame.pushCause(source);
             frame.addContext(EventContextKeys.LIQUID_MIX, (World) worldIn);
 
-            data.context.applyOwnerIfAvailable(owner -> frame.addContext(EventContextKeys.OWNER, owner));
-            data.context.applyNotifierIfAvailable(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
+            phaseContext.applyOwnerIfAvailable(owner -> frame.addContext(EventContextKeys.OWNER, owner));
+            phaseContext.applyNotifierIfAvailable(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
 
             WorldProperties world = ((World) worldIn).getProperties();
             Vector3i position = new Vector3i(pos.getX(), pos.getY(), pos.getZ());
@@ -583,12 +580,11 @@ public class SpongeCommonEventFactory {
     }
 
     public static ChangeBlockEvent.Break callChangeBlockEventModifyLiquidBreak(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, int flags) {
-        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-        final PhaseData data = phaseTracker.getCurrentPhaseData();
+        final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
 
         BlockState fromState = BlockUtil.fromNative(worldIn.getBlockState(pos));
         BlockState toState = BlockUtil.fromNative(state);
-        Object source = data.context.getSource(LocatableBlock.class).orElse(null);
+        Object source =context.getSource(LocatableBlock.class).orElse(null);
         if (source == null) {
             source = worldIn; // Fallback
         }
@@ -596,8 +592,8 @@ public class SpongeCommonEventFactory {
             frame.pushCause(source);
             frame.addContext(EventContextKeys.LIQUID_BREAK, (World) worldIn);
 
-            data.context.applyOwnerIfAvailable(owner -> frame.addContext(EventContextKeys.OWNER, owner));
-            data.context.applyNotifierIfAvailable(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
+            context.applyOwnerIfAvailable(owner -> frame.addContext(EventContextKeys.OWNER, owner));
+            context.applyNotifierIfAvailable(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
 
             WorldProperties world = ((World) worldIn).getProperties();
             Vector3i position = new Vector3i(pos.getX(), pos.getY(), pos.getZ());
@@ -667,11 +663,9 @@ public class SpongeCommonEventFactory {
     @SuppressWarnings("rawtypes")
     @Nullable
     public static NotifyNeighborBlockEvent callNotifyNeighborEvent(World world, BlockPos sourcePos, EnumSet<EnumFacing> notifiedSides) {
-        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-        final PhaseData peek = phaseTracker.getCurrentPhaseData();
-        final PhaseContext<?> context = peek.context;
+        final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
         // Don't fire notify events during world gen or while restoring
-        if (peek.state.isWorldGeneration() || peek.state == State.RESTORING_BLOCKS) {
+        if (context.state.isWorldGeneration() || context.state == State.RESTORING_BLOCKS) {
             return null;
         }
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
@@ -1004,7 +998,6 @@ public class SpongeCommonEventFactory {
             return false;
         }
 
-        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause( entity);
 
@@ -1023,8 +1016,8 @@ public class SpongeCommonEventFactory {
             if (!cancelled) {
                 IMixinEntity spongeEntity = (IMixinEntity) entity;
                 if (!pos.equals(spongeEntity.getLastCollidedBlockPos())) {
-                    final PhaseData peek = phaseTracker.getCurrentPhaseData();
-                    peek.context.applyNotifierIfAvailable(notifier -> {
+                    final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
+                    context.applyNotifierIfAvailable(notifier -> {
                         IMixinChunk spongeChunk = spongeEntity.getActiveChunk();
                         if (spongeChunk == null) {
                             spongeChunk = (IMixinChunk) world.getChunk(pos);
@@ -1040,14 +1033,13 @@ public class SpongeCommonEventFactory {
 
     public static boolean handleCollideImpactEvent(net.minecraft.entity.Entity projectile, @Nullable ProjectileSource projectileSource,
             RayTraceResult movingObjectPosition) {
-        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         RayTraceResult.Type movingObjectType = movingObjectPosition.typeOfHit;
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(projectile);
             frame.addContext(EventContextKeys.PROJECTILE_SOURCE, projectileSource == null
                     ? ProjectileSource.UNKNOWN
                     : projectileSource);
-            final Optional<User> owner = phaseTracker.getCurrentPhaseData().context.getOwner();
+            final Optional<User> owner = PhaseTracker.getInstance().getCurrentContext().getOwner();
             owner.ifPresent(user -> frame.addContext(EventContextKeys.OWNER, user));
 
             Location<World> impactPoint = new Location<>((World) projectile.world, VecHelper.toVector3d(movingObjectPosition.hitVec));

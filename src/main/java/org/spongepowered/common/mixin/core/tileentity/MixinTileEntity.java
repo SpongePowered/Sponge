@@ -123,7 +123,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     public void onMarkDirty(CallbackInfo ci) {
         if (this.world != null && !this.world.isRemote) {
             // This handles transfers to this TE from a source such as a Hopper
-            PhaseTracker.getInstance().getCurrentPhaseData().context.getSource(TileEntity.class).ifPresent(currentTick -> {
+            PhaseTracker.getInstance().getCurrentContext().getSource(TileEntity.class).ifPresent(currentTick -> {
                 if (currentTick != this) {
                     net.minecraft.tileentity.TileEntity te = (net.minecraft.tileentity.TileEntity) currentTick;
 //                    world.getCauseTracker().trackTargetBlockFromSource(te, te.getPos(), this.getBlockType(), this.pos, PlayerTracker.Type.NOTIFIER);

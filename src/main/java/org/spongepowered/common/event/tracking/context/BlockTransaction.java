@@ -150,8 +150,6 @@ public abstract class BlockTransaction {
             proxyAccess.proceed(targetPosition, newState);
             proxyAccess.proceedWithRemoval(targetPosition, removed);
             // Reset captured state since we want it to be removed
-            ((IMixinTileEntity) removed).setCaptured(false);
-            worldServer.removeTileEntity(targetPosition);
             worldServer.updateComparatorOutputLevel(targetPosition, newState.getBlock());
         }
 

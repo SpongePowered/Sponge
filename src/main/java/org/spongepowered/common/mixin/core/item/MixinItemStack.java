@@ -60,7 +60,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.util.PrettyPrinter;
@@ -71,9 +70,9 @@ import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.item.IMixinItem;
 import org.spongepowered.common.interfaces.item.IMixinItemStack;
@@ -163,10 +162,9 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
     @Inject(method = "onBlockDestroyed", at = @At("HEAD"))
     private void capturePlayerOnBlockDestroyed(World worldIn, IBlockState blockIn, BlockPos pos, EntityPlayer playerIn, CallbackInfo ci) {
         if (!((IMixinWorld) worldIn).isFake()) {
-            final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-            final PhaseData peek = phaseTracker.getCurrentPhaseData();
-            final IPhaseState state = peek.state;
-            state.capturePlayerUsingStackToBreakBlock((ItemStack) this, (EntityPlayerMP) playerIn, peek.context);
+            final PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
+            final IPhaseState state = currentContext.state;
+            state.capturePlayerUsingStackToBreakBlock((ItemStack) this, (EntityPlayerMP) playerIn, currentContext);
         }
     }
 

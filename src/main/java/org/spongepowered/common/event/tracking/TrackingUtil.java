@@ -258,12 +258,10 @@ public final class TrackingUtil {
         final LocatableBlock locatable = new SpongeLocatableBlockBuilder().world(apiWorld).position(pos.getX(), pos.getY(), pos.getZ()).state((BlockState)state).build();
         final BlockTickContext phaseContext = TickPhase.Tick.BLOCK.createPhaseContext().source(locatable);
 
-        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-
         // We have to associate any notifiers in case of scheduled block updates from other sources
-        final PhaseData current = phaseTracker.getCurrentPhaseData();
-        final IPhaseState<?> currentState = current.state;
-        ((IPhaseState) currentState).appendNotifierPreBlockTick(mixinWorld, pos, current.context, phaseContext);
+        final PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
+        final IPhaseState<?> currentState = currentContext.state;
+        ((IPhaseState) currentState).appendNotifierPreBlockTick(mixinWorld, pos, currentContext, phaseContext);
         // Now actually switch to the new phase
 
         try (final PhaseContext<?> context = phaseContext;
@@ -272,14 +270,14 @@ public final class TrackingUtil {
             context.buildAndSwitch();
             block.updateTick(world, pos, state, random);
         } catch (Exception | NoClassDefFoundError e) {
-            phaseTracker.printExceptionFromPhase(e, phaseContext);
+            PhaseTracker.getInstance().printExceptionFromPhase(e, phaseContext);
 
         }
     }
 
     @SuppressWarnings("rawtypes")
-    public static void randomTickBlock(PhaseTracker phaseTracker, IMixinWorldServer mixinWorld, Block block,
-                                       BlockPos pos, IBlockState state, Random random) {
+    public static void randomTickBlock(IMixinWorldServer mixinWorld, Block block,
+        BlockPos pos, IBlockState state, Random random) {
         final WorldServer world = WorldUtil.asNative(mixinWorld);
         final World apiWorld = WorldUtil.fromNative(world);
 
@@ -298,15 +296,15 @@ public final class TrackingUtil {
         final BlockTickContext phaseContext = TickPhase.Tick.RANDOM_BLOCK.createPhaseContext().source(locatable);
 
         // We have to associate any notifiers in case of scheduled block updates from other sources
-        final PhaseData current = phaseTracker.getCurrentPhaseData();
-        final IPhaseState<?> currentState = current.state;
-        ((IPhaseState) currentState).appendNotifierPreBlockTick(mixinWorld, pos, current.context, phaseContext);
+        final PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
+        final IPhaseState<?> currentState = currentContext.state;
+        ((IPhaseState) currentState).appendNotifierPreBlockTick(mixinWorld, pos, currentContext, phaseContext);
         // Now actually switch to the new phase
         try (PhaseContext<?> context = phaseContext) {
             context.buildAndSwitch();
             block.randomTick(world, pos, state, random);
         } catch (Exception | NoClassDefFoundError e) {
-            phaseTracker.printExceptionFromPhase(e, phaseContext);
+            PhaseTracker.getInstance().printExceptionFromPhase(e, phaseContext);
         }
     }
 

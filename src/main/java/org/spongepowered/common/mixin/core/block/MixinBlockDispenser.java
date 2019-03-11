@@ -58,7 +58,6 @@ import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirectionalData;
 import org.spongepowered.common.data.util.DirectionResolver;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
@@ -135,8 +134,7 @@ public abstract class MixinBlockDispenser extends MixinBlock {
 
     @Redirect(method = "dispense", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntityDispenser;setInventorySlotContents(ILnet/minecraft/item/ItemStack;)V"))
     public void onSetInventoryContents(TileEntityDispenser dispenser, int index, @Nullable ItemStack stack) {
-        final PhaseData phaseData = PhaseTracker.getInstance().getCurrentPhaseData();
-        final PhaseContext<?> context = phaseData.context;
+        final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
         // If we captured nothing, simply set the slot contents and return
         if (context.getCapturedItemsOrEmptyList().isEmpty()) {
             dispenser.setInventorySlotContents(index, stack);

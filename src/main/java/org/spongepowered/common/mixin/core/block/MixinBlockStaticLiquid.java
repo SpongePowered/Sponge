@@ -61,8 +61,7 @@ public class MixinBlockStaticLiquid {
                 return world.setBlockState(pos, blockState);
             }
         }
-        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-        final PhaseContext<?> context = phaseTracker.getCurrentPhaseData().context;
+        final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
 
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(pos);
@@ -72,7 +71,7 @@ public class MixinBlockStaticLiquid {
 
             ChangeBlockEvent.Pre event = SpongeEventFactory.createChangeBlockEventPre(frame.getCurrentCause(), Collections.singletonList(new Location<>((org.spongepowered.api.world.World) world, VecHelper.toVector3i(pos))));
             if (!SpongeImpl.postEvent(event)) {
-                phaseTracker.setBlockState((IMixinWorldServer) world, pos, blockState, BlockChangeFlags.ALL);
+                PhaseTracker.getInstance().setBlockState((IMixinWorldServer) world, pos, blockState, BlockChangeFlags.ALL);
                 return true;
             }
             return false;

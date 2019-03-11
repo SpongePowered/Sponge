@@ -27,8 +27,6 @@ package org.spongepowered.common.mixin.core.world;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.spongepowered.common.event.tracking.context.BlockTransaction;
-import org.spongepowered.common.event.tracking.context.MultiBlockCaptureSupplier;
 import org.spongepowered.common.event.tracking.context.SpongeProxyBlockAccess;
 import org.spongepowered.common.relocate.co.aikar.timings.TimingHistory;
 import org.spongepowered.common.relocate.co.aikar.timings.WorldTimingsHandler;
@@ -168,7 +166,6 @@ import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
@@ -575,24 +572,22 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         int i = this.shadow$getGameRules().getInt("randomTickSpeed");
         boolean flag = this.isRaining();
         boolean flag1 = this.isThundering();
-        // this.profiler.startSection("pollingChunks"); // Sponge - Don't use the profiler
-
-        final PhaseTracker phaseTracker = PhaseTracker.getInstance(); // Sponge - get the cause tracker
+        this.profiler.startSection("pollingChunks");
 
         // Sponge: Use SpongeImplHooks for Forge
         for (Iterator<net.minecraft.world.chunk.Chunk> iterator =
              SpongeImplHooks.getChunkIterator((WorldServer) (Object) this); iterator.hasNext(); ) // this.profiler.endSection()) // Sponge - don't use the profiler
         {
-            // this.profiler.startSection("getChunk"); // Sponge - Don't use the profiler
+            this.profiler.startSection("getChunk");
             net.minecraft.world.chunk.Chunk chunk = iterator.next();
             final net.minecraft.world.World world = chunk.getWorld();
             int j = chunk.x * 16;
             int k = chunk.z * 16;
-            // this.profiler.endStartSection("checkNextLight"); // Sponge - Don't use the profiler
+            this.profiler.endStartSection("checkNextLight");
             this.timings.updateBlocksCheckNextLight.startTiming(); // Sponge - Timings
             chunk.enqueueRelightChecks();
             this.timings.updateBlocksCheckNextLight.stopTiming(); // Sponge - Timings
-            // this.profiler.endStartSection("tickChunk"); // Sponge - Don't use the profiler
+            this.profiler.endStartSection("tickChunk");
             this.timings.updateBlocksChunkTick.startTiming(); // Sponge - Timings
             chunk.onTick(false);
             this.timings.updateBlocksChunkTick.stopTiming(); // Sponge - Timings
@@ -601,7 +596,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                 continue;
             }
             // Sponge end
-            // this.profiler.endStartSection("thunder"); // Sponge - Don't use the profiler
+            this.profiler.endStartSection("thunder");
             // Sponge start
             this.timings.updateBlocksThunder.startTiming();
 
@@ -689,7 +684,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
                 this.timings.updateBlocksThunder.stopTiming(); // Sponge - Stop thunder timing
                 this.timings.updateBlocksIceAndSnow.startTiming(); // Sponge - Start thunder timing
-                // this.profiler.endStartSection("iceandsnow"); // Sponge - don't use the profiler
+                this.profiler.endStartSection("iceandsnow");
 
                 // if (this.rand.nextInt(16) == 0) // Sponge - Rewrite to use our boolean, and forge hook
                 if (this.weatherIceAndSnowEnabled && SpongeImplHooks.canDoRainSnowIce(this.provider, chunk) && this.rand.nextInt(16) == 0) {
@@ -716,7 +711,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
             this.timings.updateBlocksIceAndSnow.stopTiming(); // Sponge - Stop ice and snow timing
             this.timings.updateBlocksRandomTick.startTiming(); // Sponge - Start random block tick timing
-            // this.profiler.endStartSection("tickBlocks"); // Sponge - Don't use the profiler
+            this.profiler.endStartSection("tickBlocks");
 
             if (i > 0)
             {
@@ -733,7 +728,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                             int i2 = j1 >> 16 & 15;
                             IBlockState iblockstate = extendedblockstorage.get(k1, i2, l1);
                             Block block = iblockstate.getBlock();
-                            // this.profiler.startSection("randomTick"); // Sponge - Don't use the profiler
+                            this.profiler.startSection("randomTick");
 
                             if (block.getTickRandomly())
                             {
@@ -744,18 +739,18 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                                 BlockPos pos = new BlockPos(k1 + j, i2 + extendedblockstorage.getYLocation(), l1 + k);
                                 IMixinBlock spongeBlock = (IMixinBlock) block;
                                 spongeBlock.getTimingsHandler().startTiming();
-                                final PhaseData currentTuple = phaseTracker.getCurrentPhaseData();
-                                final IPhaseState phaseState = currentTuple.state;
-                                if (phaseState.alreadyCapturingBlockTicks(currentTuple.context)) {
+                                final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
+                                final IPhaseState phaseState = context.state;
+                                if (phaseState.alreadyCapturingBlockTicks(context)) {
                                     block.randomTick(world, pos, iblockstate, this.rand);
                                 } else {
-                                    TrackingUtil.randomTickBlock(phaseTracker, this, block, pos, iblockstate, this.rand);
+                                    TrackingUtil.randomTickBlock(this, block, pos, iblockstate, this.rand);
                                 }
                                 spongeBlock.getTimingsHandler().stopTiming();
                                 // Sponge end
                             }
 
-                            // this.profiler.endSection(); // Sponge - Don't use the profiler
+                            this.profiler.endSection();
                         }
                     }
                 }
@@ -763,7 +758,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
 
         this.timings.updateBlocksRandomTick.stopTiming(); // Sponge - Stop random block timing
-        // this.profiler.endSection(); // Sponge - Don't use the profiler
+         this.profiler.endSection();
         // } // Sponge- Remove unecessary else
     }
 
@@ -818,9 +813,9 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
              */
             this.scheduledUpdatesAreImmediate = false;
         }
-        final PhaseData data = PhaseTracker.getInstance().getCurrentPhaseData();
-        final IPhaseState<?> phaseState = data.state;
-        if (((IPhaseState) phaseState).alreadyCapturingBlockTicks(data.context) || ((IPhaseState) phaseState).ignoresBlockUpdateTick(data.context)) {
+        final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
+        final IPhaseState<?> phaseState = context.state;
+        if (((IPhaseState) phaseState).alreadyCapturingBlockTicks(context) || ((IPhaseState) phaseState).ignoresBlockUpdateTick(context)) {
             block.updateTick(worldIn, pos, state, rand);
             return;
         }
@@ -889,9 +884,9 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Redirect(method = "tickUpdates", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))
     private void onUpdateTick(Block block, net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand) {
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-        final PhaseData phaseData = phaseTracker.getCurrentPhaseData();
-        final IPhaseState phaseState = phaseData.state;
-        if (phaseState.alreadyCapturingBlockTicks(phaseData.context) || phaseState.ignoresBlockUpdateTick(phaseData.context)) {
+        final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
+        final IPhaseState phaseState = context.state;
+        if (phaseState.alreadyCapturingBlockTicks(context) || phaseState.ignoresBlockUpdateTick(context)) {
             block.updateTick(worldIn, pos, state, rand);
             return;
         }
@@ -914,10 +909,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     private boolean onAddBlockEvent(WorldServer.ServerBlockEventList list, Object obj, BlockPos pos, Block blockIn, int eventId, int eventParam) {
         final BlockEventData blockEventData = (BlockEventData) obj;
         IMixinBlockEventData blockEvent = (IMixinBlockEventData) blockEventData;
-        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-        final PhaseData currentPhase = phaseTracker.getCurrentPhaseData();
-        final PhaseContext<?> currentContext = currentPhase.context;
-        final IPhaseState phaseState = currentPhase.state;
+        final PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
+        final IPhaseState phaseState = currentContext.state;
         // Short circuit phase states who do not track during block events
         if (phaseState.ignoresBlockEvent()) {
             return list.add(blockEventData);
@@ -1279,10 +1272,9 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     public boolean setBlock(int x, int y, int z, BlockState blockState, BlockChangeFlag flag) {
         checkBlockBounds(x, y, z);
-        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-        final PhaseData peek = phaseTracker.getCurrentPhaseData();
-        boolean isWorldGen = peek.state.isWorldGeneration();
-        boolean handlesOwnCompletion = peek.state.handlesOwnStateCompletion();
+        final IPhaseState<?> state = PhaseTracker.getInstance().getCurrentState();
+        boolean isWorldGen = state.isWorldGeneration();
+        boolean handlesOwnCompletion = state.handlesOwnStateCompletion();
         if (!isWorldGen) {
             checkArgument(flag != null, "BlockChangeFlag cannot be null!");
         }
@@ -1794,9 +1786,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             // Short circuit here if we're not on the main thread. Don't bother with the PhaseTracker off thread.
             return list;
         }
-        final PhaseData currentPhase = PhaseTracker.getInstance().getCurrentPhaseData();
-        final PhaseContext<?> context = currentPhase.context;
-        final IPhaseState<?> state = currentPhase.state;
+        final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
+        final IPhaseState<?> state = context.state;
         if (((IPhaseState) state).doesCaptureEntityDrops(context) || state.doesAllowEntitySpawns()) {
             // We need to check for entity spawns and entity drops. If either are used, we need to offer them up in the lsit, provided
             // they pass the predicate check

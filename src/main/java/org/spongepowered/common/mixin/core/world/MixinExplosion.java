@@ -61,10 +61,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.interfaces.world.IMixinExplosion;
-import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.util.VecHelper;
 
@@ -377,31 +376,29 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
                 if (iblockstate.getMaterial() != Material.AIR) {
                     if (block.canDropFromExplosion((net.minecraft.world.Explosion) (Object) this)) {
                         // Sponge Start - Track the block position being destroyed
-                        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-                        final PhaseData peek = phaseTracker.getCurrentPhaseData();
+                        final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
                         // We need to capture this block position if necessary
-                        if (peek.state.requiresBlockPosTracking()) {
-                            peek.context.getCaptureBlockPos().setPos(blockpos);
+                        if (context.state.requiresBlockPosTracking()) {
+                            context.getCaptureBlockPos().setPos(blockpos);
                         }
                         block.dropBlockAsItemWithChance(this.world, blockpos, this.world.getBlockState(blockpos), 1.0F / this.size, 0);
                         // And then un-set the captured block position
-                        if (peek.state.requiresBlockPosTracking()) {
-                            peek.context.getCaptureBlockPos().setPos(null);
+                        if (context.state.requiresBlockPosTracking()) {
+                            context.getCaptureBlockPos().setPos(null);
                         }
                     }
 
                     // Sponge Start - Track the block position being destroyed
-                    final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-                    final PhaseData peek = phaseTracker.getCurrentPhaseData();
+                    final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
                     // We need to capture this block position if necessary
-                    if (peek.state.requiresBlockPosTracking()) {
-                        peek.context.getCaptureBlockPos().setPos(blockpos);
+                    if (context.state.requiresBlockPosTracking()) {
+                        context.getCaptureBlockPos().setPos(blockpos);
                     }
                     // Because we need to hook into forge.
                     SpongeImplHooks.blockExploded(block, this.world, blockpos, (net.minecraft.world.Explosion) (Object) this);
                     // And then un-set the captured block position
-                    if (peek.state.requiresBlockPosTracking()) {
-                        peek.context.getCaptureBlockPos().setPos(null);
+                    if (context.state.requiresBlockPosTracking()) {
+                        context.getCaptureBlockPos().setPos(null);
                     }
                     // Sponge End
                 }
@@ -413,16 +410,15 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
                 if (this.world.getBlockState(blockpos1).getMaterial() == Material.AIR && this.world.getBlockState(blockpos1.down()).isFullBlock()
                     && this.random.nextInt(3) == 0) {
                     // Sponge Start - Track the block position being destroyed
-                    final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-                    final PhaseData peek = phaseTracker.getCurrentPhaseData();
+                    final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
                     // We need to capture this block position if necessary
-                    if (peek.state.requiresBlockPosTracking()) {
-                        peek.context.getCaptureBlockPos().setPos(blockpos1);
+                    if (context.state.requiresBlockPosTracking()) {
+                        context.getCaptureBlockPos().setPos(blockpos1);
                     }
-                    phaseTracker.setBlockState((IMixinWorldServer) this.world, blockpos1, Blocks.FIRE.getDefaultState(), BlockChangeFlags.ALL);
+                    PhaseTracker.getInstance().setBlockState((IMixinWorldServer) this.world, blockpos1, Blocks.FIRE.getDefaultState(), BlockChangeFlags.ALL);
                     // And then un-set the captured block position
-                    if (peek.state.requiresBlockPosTracking()) {
-                        peek.context.getCaptureBlockPos().setPos(null);
+                    if (context.state.requiresBlockPosTracking()) {
+                        context.getCaptureBlockPos().setPos(null);
                     }
                 }
             }

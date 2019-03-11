@@ -49,6 +49,7 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
@@ -403,6 +404,9 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
                             isSame = ((BlockTransaction.RemoveTileEntity) prevChange).removed == newTile;
                             if (isSame) {
                                 ((BlockTransaction.ChangeBlock) further).ignoreBreakBlockLogic = true;
+                                ((IMixinTileEntity) newTile).setCaptured(false);
+                                iterator.next(); // Go back forward to the prevChange
+                                iterator.remove(); // Then prune the prevChange.
                                 break;
                             }
                         }

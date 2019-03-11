@@ -36,7 +36,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.inventory.Container;
-import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
@@ -62,8 +61,6 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.item.inventory.InteractItemEvent;
-import org.spongepowered.api.item.inventory.slot.EquipmentSlot;
-import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -72,20 +69,16 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.PacketContext;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerInteractionManager;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.util.VecHelper;
 
@@ -236,8 +229,7 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
         SpongeImpl.postEvent(event);
 
         if (!ItemStack.areItemStacksEqual(oldStack, this.player.getHeldItem(hand))) {
-            final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
-            ((PacketContext<?>) peek.context).interactItemChanged(true);
+            ((PacketContext<?>) PhaseTracker.getInstance().getCurrentContext()).interactItemChanged(true);
         }
 
         SpongeCommonEventFactory.lastInteractItemOnBlockCancelled = event.isCancelled() || event.getUseItemResult() == Tristate.FALSE;
@@ -290,8 +282,7 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
 
                 // if itemstack changed, avoid restore
                 if (!ItemStack.areItemStacksEqual(oldStack, this.player.getHeldItem(hand))) {
-                    final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
-                    ((PacketContext<?>) peek.context).interactItemChanged(true);
+                    ((PacketContext<?>) PhaseTracker.getInstance().getCurrentContext()).interactItemChanged(true);
                 }
 
                 result = this.handleOpenEvent(lastOpenContainer, this.player, currentSnapshot, result);
@@ -376,8 +367,7 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
         final InteractItemEvent.Secondary event = SpongeCommonEventFactory.callInteractItemEventSecondary(player, oldStack, hand, null, currentSnapshot);
 
         if (!ItemStack.areItemStacksEqual(oldStack, this.player.getHeldItem(hand))) {
-            final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
-            ((PacketContext<?>) peek.context).interactItemChanged(true);
+            ((PacketContext<?>) PhaseTracker.getInstance().getCurrentContext()).interactItemChanged(true);
         }
 
         SpongeCommonEventFactory.lastInteractItemOnBlockCancelled = event.isCancelled(); //|| event.getUseItemResult() == Tristate.FALSE;

@@ -91,7 +91,6 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.tileentity.Sign;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
 import org.spongepowered.api.data.type.HandType;
-import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.Humanoid;
@@ -126,10 +125,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.PacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
@@ -358,14 +357,13 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         PacketThreadUtil.checkThreadAndEnqueue(packetIn, (NetHandlerPlayServer) (Object) this, this.player.getServerWorld());
 
         if (this.player.interactionManager.isCreative()) {
-            final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
-            final PacketContext<?> context = (PacketContext<?>) peek.context;
+            final PacketContext<?> context = (PacketContext<?>) PhaseTracker.getInstance().getCurrentContext();
             final boolean ignoresCreative = context.getIgnoringCreative();
             boolean clickedOutside = packetIn.getSlotId() < 0;
             ItemStack itemstack = packetIn.getStack();
 
-            if (!itemstack.isEmpty() && itemstack.hasTagCompound() && itemstack.getTagCompound().hasKey("BlockEntityTag", 10)) {
-                NBTTagCompound nbttagcompound = itemstack.getTagCompound().getCompoundTag("BlockEntityTag");
+            if (!itemstack.isEmpty() && itemstack.hasTagCompound() && itemstack.getTagCompound().hasKey(NbtDataUtil.Minecraft.BLOCK_ENTITY_TAG, 10)) {
+                NBTTagCompound nbttagcompound = itemstack.getTagCompound().getCompoundTag(NbtDataUtil.Minecraft.BLOCK_ENTITY_TAG);
 
                 if (nbttagcompound.hasKey("x") && nbttagcompound.hasKey("y") && nbttagcompound.hasKey("z")) {
                     BlockPos blockpos = new BlockPos(nbttagcompound.getInteger("x"), nbttagcompound.getInteger("y"), nbttagcompound.getInteger("z"));
@@ -377,7 +375,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                         nbttagcompound1.removeTag("x");
                         nbttagcompound1.removeTag("y");
                         nbttagcompound1.removeTag("z");
-                        itemstack.setTagInfo("BlockEntityTag", nbttagcompound1);
+                        itemstack.setTagInfo(NbtDataUtil.Minecraft.BLOCK_ENTITY_TAG, nbttagcompound1);
                     }
                 }
             }
@@ -614,11 +612,11 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     public EnumActionResult onProcessRightClickBlock(PlayerInteractionManager interactionManager, EntityPlayer player, net.minecraft.world.World worldIn, @Nullable ItemStack stack, EnumHand hand, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ) {
         EnumActionResult actionResult = interactionManager.processRightClickBlock(this.player, worldIn, stack, hand, pos, facing, hitX, hitY, hitZ);
 
-        final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
+        final PacketContext<?> context = ((PacketContext<?>) PhaseTracker.getInstance().getCurrentContext());
 
         // If a plugin or mod has changed the item, avoid restoring
-        if (!((PacketContext<?>) peek.context).getInteractItemChanged()) {
-            final ItemStack itemStack = ItemStackUtil.toNative(((PacketContext<?>) peek.context).getItemUsed());
+        if (!context.getInteractItemChanged()) {
+            final ItemStack itemStack = ItemStackUtil.toNative(context.getItemUsed());
 
             // Only do a restore if something actually changed. The client does an identity check ('==')
             // to determine if it should continue using an itemstack. If we always resend the itemstack, we end up
@@ -627,7 +625,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                 PacketPhaseUtil.handlePlayerSlotRestore((EntityPlayerMP) player, itemStack, hand);
             }
         }
-        ((PacketContext<?>) peek.context).interactItemChanged(false);
+        context.interactItemChanged(false);
         SpongeCommonEventFactory.interactBlockRightClickEventCancelled = false;
         return actionResult;
     }
@@ -635,11 +633,8 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     @Redirect(method = "processTryUseItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerInteractionManager;processRightClick(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/EnumHand;)Lnet/minecraft/util/EnumActionResult;"))
     public EnumActionResult onProcessRightClick(PlayerInteractionManager interactionManager, EntityPlayer player, net.minecraft.world.World worldIn, @Nullable ItemStack stack, EnumHand hand) {
         EnumActionResult actionResult = interactionManager.processRightClick(this.player, worldIn, stack, hand);
-
-        final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
-
         // If a plugin or mod has changed the item, avoid restoring
-        final PacketContext<?> packetContext = (PacketContext<?>) peek.context;
+        final PacketContext<?> packetContext = (PacketContext<?>) PhaseTracker.getInstance().getCurrentContext();
         if (!packetContext.getInteractItemChanged()) {
             final ItemStack itemStack = ItemStackUtil.toNative(packetContext.getItemUsed());
 

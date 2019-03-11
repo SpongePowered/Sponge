@@ -39,7 +39,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.event.damage.MinecraftFallingBlockDamageSource;
-import org.spongepowered.common.event.tracking.PhaseData;
+import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
@@ -73,10 +73,10 @@ public abstract class MixinEntityFallingBlock extends MixinEntity implements Fal
         // be changing. What we need to do here is throw the block event specifically for setting air
         // and THEN if this one cancels, we should kill this entity off, unless we want some duplication
         // of falling blocks
-        final PhaseData currentPhaseData = PhaseTracker.getInstance().getCurrentPhaseData();
+        final PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
         this.world.setBlockToAir(pos);
         // By this point, we should have one captured block at least.
-        if (!TrackingUtil.processBlockCaptures(currentPhaseData.state, currentPhaseData.context)) {
+        if (!TrackingUtil.processBlockCaptures(currentContext.state, currentContext)) {
             // So, it's been cancelled, we want to absolutely remove this entity.
             // And we want to stop the entity update at this point.
             this.setDead();

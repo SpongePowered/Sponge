@@ -39,7 +39,6 @@ import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IMerchant;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.ai.attributes.AbstractAttributeMap;
 import net.minecraft.entity.ai.attributes.AttributeMap;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
@@ -173,9 +172,7 @@ import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.entity.player.PlayerKickHelper;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.entity.BasicEntityContext;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
@@ -333,9 +330,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         // Double check that the PhaseTracker is already capturing the Death phase
         final boolean tracksEntityDeaths;
         if (isMainThread && !this.world.isRemote) {
-            final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
-            final IPhaseState<?> state = peek.state;
-            tracksEntityDeaths = state.tracksEntityDeaths();
+            tracksEntityDeaths = PhaseTracker.getInstance().getCurrentState().tracksEntityDeaths();
         } else {
             tracksEntityDeaths = false;
         }

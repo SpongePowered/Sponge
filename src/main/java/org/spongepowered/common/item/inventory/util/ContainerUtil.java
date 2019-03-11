@@ -67,7 +67,6 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinSingleBlockCarrier;
@@ -149,9 +148,8 @@ public final class ContainerUtil {
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static void performBlockInventoryDrops(WorldServer worldServer, double x, double y, double z, IInventory inventory) {
-        final PhaseData currentPhase = PhaseTracker.getInstance().getCurrentPhaseData();
-        final IPhaseState<?> currentState = currentPhase.state;
-        final PhaseContext<?> context = currentPhase.context;
+        final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
+        final IPhaseState<?> currentState = context.state;
         if (((IPhaseState) currentState).tracksBlockSpecificDrops(context)) {
             // this is where we could perform item stack pre-merging.
             // For development reasons, not performing any pre-merging except after the entity item spawns.

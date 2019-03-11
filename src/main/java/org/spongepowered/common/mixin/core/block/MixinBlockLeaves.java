@@ -41,8 +41,6 @@ import org.spongepowered.api.data.type.TreeType;
 import org.spongepowered.api.data.type.TreeTypes;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -57,7 +55,6 @@ import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSponge
 import org.spongepowered.common.data.util.TreeTypeResolver;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
@@ -78,9 +75,9 @@ public abstract class MixinBlockLeaves extends MixinBlock {
 
     @Redirect(method = "updateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;I)Z"))
     private boolean onUpdateDecayState(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, int flags) {
-        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-        final boolean isBlockAlready = phaseTracker.getCurrentState().getPhase() != TrackingPhases.BLOCK;
-        final IPhaseState<?> currentState = phaseTracker.getCurrentPhaseData().state;
+        final PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
+        final IPhaseState<?> currentState = currentContext.state;
+        final boolean isBlockAlready = currentState.getPhase() != TrackingPhases.BLOCK;
         final boolean isWorldGen = currentState.isWorldGeneration();
         try (PhaseContext<?> context = isBlockAlready && !isWorldGen
                                        ? BlockPhase.State.BLOCK_DECAY.createPhaseContext()
@@ -114,11 +111,10 @@ public abstract class MixinBlockLeaves extends MixinBlock {
         final IBlockState state = worldIn.getBlockState(pos);
         // Sponge Start - Cause tracking
         if (!((IMixinWorld) worldIn).isFake()) {
-            final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-            final PhaseData peek = phaseTracker.getCurrentPhaseData();
+            final PhaseContext<?> peek = PhaseTracker.getInstance().getCurrentContext();
             final IPhaseState<?> currentState = peek.state;
             final boolean isWorldGen = currentState.isWorldGeneration();
-            final boolean isBlockAlready = phaseTracker.getCurrentState().getPhase() != TrackingPhases.BLOCK;
+            final boolean isBlockAlready = currentState.getPhase() != TrackingPhases.BLOCK;
             try (PhaseContext<?> context = isBlockAlready && !isWorldGen ? BlockPhase.State.BLOCK_DECAY.createPhaseContext()
                 .source(new SpongeLocatableBlockBuilder()
                     .world((World) worldIn)
