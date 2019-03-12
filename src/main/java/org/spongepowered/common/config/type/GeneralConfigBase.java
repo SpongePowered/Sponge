@@ -37,6 +37,9 @@ import org.spongepowered.common.config.category.TileEntityActivationCategory;
 import org.spongepowered.common.config.category.TimingsCategory;
 import org.spongepowered.common.config.category.WorldCategory;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class GeneralConfigBase extends ConfigBase {
 
     @Setting
@@ -62,6 +65,8 @@ public class GeneralConfigBase extends ConfigBase {
     private TileEntityActivationCategory tileEntityActivationCategory = new TileEntityActivationCategory();
     @Setting
     private TimingsCategory timings = new TimingsCategory();
+    @Setting(value = "world-generation-modifiers", comment = "World Generation Modifiers to apply to the world")
+    private final List<String> worldModifiers = new ArrayList<>();
 
     public PlayerBlockTracker getBlockTracking() {
         return this.playerBlockTracker;
@@ -105,5 +110,9 @@ public class GeneralConfigBase extends ConfigBase {
 
     public TimingsCategory getTimings() {
         return this.timings;
+    }
+
+    public List<String> getWorldGenModifiers() {
+        return this.worldModifiers;
     }
 }
