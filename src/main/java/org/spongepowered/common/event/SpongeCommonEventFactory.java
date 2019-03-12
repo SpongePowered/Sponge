@@ -1249,6 +1249,14 @@ public class SpongeCommonEventFactory {
             return null;
         }
 
+        // We need to call ensureListenersRegistered both before and after
+        // we fire the InteractInventoryEvent.Open event
+        // Calling it before the event is fired ensures that we've registered
+        // any listeners that we need to before the event is fired
+        if (inventory instanceof CustomInventory) {
+            ((CustomInventory) inventory).ensureListenersRegistered();
+        }
+
         if (!callInteractInventoryOpenEvent(player)) {
             return null;
         }
@@ -1265,7 +1273,8 @@ public class SpongeCommonEventFactory {
         }
 
         // This call must go at the end of this method,
-        // to ensure that it runs after any new viewers are added.
+        // to ensure that it runs after any new viewers are added,
+        // since the inventory can be closed/reopned by event listeners
         if (inventory instanceof CustomInventory) {
             ((CustomInventory) inventory).ensureListenersRegistered();
         }
