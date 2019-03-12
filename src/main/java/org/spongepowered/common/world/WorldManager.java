@@ -33,6 +33,8 @@ import com.google.common.collect.HashBiMap;
 import com.google.common.collect.MapMaker;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.CompressedStreamTools;
@@ -92,7 +94,6 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.BitSet;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -123,7 +124,7 @@ public final class WorldManager {
     private static final Map<UUID, WorldProperties> worldPropertiesByWorldUuid =  new HashMap<>(3);
     private static final Map<Integer, String> worldFolderByDimensionId = new HashMap<>();
     private static final BiMap<String, UUID> worldUuidByFolderName =  HashBiMap.create(3);
-    private static final BitSet dimensionBits = new BitSet(Long.SIZE << 4);
+    private static final IntSet usedDimensionIds = new IntOpenHashSet();
     private static final Map<WorldServer, WorldServer> weakWorldByWorld = new MapMaker().weakKeys().weakValues().concurrencyLevel(1).makeMap();
     private static final Queue<WorldServer> unloadQueue = new ArrayDeque<>();
     private static final Comparator<WorldServer>
@@ -140,6 +141,7 @@ public final class WorldManager {
             };
 
     private static boolean isVanillaRegistered = false;
+    private static int lastUsedDimensionId = 0;
 
     public static void registerVanillaTypesAndDimensions() {
         if (!isVanillaRegistered) {
@@ -186,8 +188,25 @@ public final class WorldManager {
         return Optional.empty();
     }
 
-    public static Integer getNextFreeDimensionId() {
-        return dimensionBits.nextClearBit(0);
+    /**
+     * Return the next free dimension ID. Note: you are not guaranteed a contiguous
+     * block of free ids. Always call for each individual ID you wish to get.
+     * @return the next free dimension ID
+     */
+    public static int getNextFreeDimensionId() {
+        int next = lastUsedDimensionId;
+        while (usedDimensionIds.contains(next) || !checkAvailable(next)) {
+            next++;
+        }
+        return lastUsedDimensionId = next;
+    }
+
+    private static boolean checkAvailable(int dimensionId) {
+        if (worldByDimensionId.containsKey(dimensionId)) {
+            usedDimensionIds.add(dimensionId);
+            return false;
+        }
+        return true;
     }
 
     public static void registerDimension(int dimensionId, DimensionType type) {
@@ -201,7 +220,7 @@ public final class WorldManager {
         }
         dimensionTypeByDimensionId.put(dimensionId, type);
         if (dimensionId >= 0) {
-            dimensionBits.set(dimensionId);
+            usedDimensionIds.add(dimensionId);
         }
     }
 
@@ -327,9 +346,7 @@ public final class WorldManager {
         worldPropertiesByWorldUuid.put(properties.getUniqueId(), properties);
         worldUuidByFolderName.put(properties.getWorldName(), properties.getUniqueId());
         worldFolderByDimensionId.put(((IMixinWorldInfo) properties).getDimensionId(), properties.getWorldName());
-        // Normally, this would fix worlds being recreated, but it causes issues when the world's dimension id
-        // is negative. See https://gist.github.com/1eebcea18664c24f170dc0042b562033 for example stacktrace.
-//        dimensionBits.set(((IMixinWorldInfo) properties).getDimensionId());
+        usedDimensionIds.add(((IMixinWorldInfo) properties).getDimensionId());
     }
 
     public static void unregisterWorldProperties(WorldProperties properties, boolean freeDimensionId) {
@@ -339,7 +356,7 @@ public final class WorldManager {
         worldUuidByFolderName.remove(properties.getWorldName());
         worldFolderByDimensionId.remove(((IMixinWorldInfo) properties).getDimensionId());
         if (((IMixinWorldInfo) properties).getDimensionId() != null && freeDimensionId) {
-            dimensionBits.clear(((IMixinWorldInfo) properties).getDimensionId());
+            usedDimensionIds.remove(((IMixinWorldInfo) properties).getDimensionId());
         }
     }
 
@@ -352,7 +369,7 @@ public final class WorldManager {
         worldFolderByDimensionId.clear();
         dimensionTypeByDimensionId.clear();
         dimensionPathByDimensionId.clear();
-        dimensionBits.clear();
+        usedDimensionIds.clear();
         weakWorldByWorld.clear();
 
         isVanillaRegistered = false;
@@ -1205,30 +1222,31 @@ public final class WorldManager {
     }
 
     public static void loadDimensionDataMap(@Nullable NBTTagCompound compound) {
-        dimensionBits.clear();
+        usedDimensionIds.clear();
+        lastUsedDimensionId = 0;
+
         if (compound == null) {
-            dimensionTypeByDimensionId.keySet().stream().filter(dimensionId -> dimensionId >= 0).forEach(dimensionBits::set);
+            dimensionTypeByDimensionId.keySet().stream().filter(dimensionId -> dimensionId >= 0).forEach(usedDimensionIds::add);
         } else {
-            final int[] intArray = compound.getIntArray("DimensionArray");
+            for (int id : compound.getIntArray("UsedIDs")) {
+                usedDimensionIds.add(id);
+            }
+
+            // legacy data (load but don't save)
+            int[] intArray = compound.getIntArray("DimensionArray");
             for (int i = 0; i < intArray.length; i++) {
+                int data = intArray[i];
+                if (data == 0) continue;
                 for (int j = 0; j < Integer.SIZE; j++) {
-                    dimensionBits.set(i * Integer.SIZE + j, (intArray[i] & (1 << j)) != 0);
+                    if ((data & (1 << j)) != 0) usedDimensionIds.add(i * Integer.SIZE + j);
                 }
             }
         }
     }
 
     public static NBTTagCompound saveDimensionDataMap() {
-        int[] data = new int[(dimensionBits.length() + Integer.SIZE - 1 )/ Integer.SIZE];
         NBTTagCompound dimMap = new NBTTagCompound();
-        for (int i = 0; i < data.length; i++) {
-            int val = 0;
-            for (int j = 0; j < Integer.SIZE; j++) {
-                val |= dimensionBits.get(i * Integer.SIZE + j) ? (1 << j) : 0;
-            }
-            data[i] = val;
-        }
-        dimMap.setIntArray("DimensionArray", data);
+        dimMap.setIntArray("UsedIDs", usedDimensionIds.toIntArray());
         return dimMap;
     }
 
