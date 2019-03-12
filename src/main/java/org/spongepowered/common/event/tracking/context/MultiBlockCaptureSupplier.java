@@ -51,6 +51,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.mixin.core.world.MixinChunk;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -375,15 +376,27 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
         logTransaction(sourcePos, notification);
     }
 
-    public void logBlockChange(SpongeBlockSnapshot originalBlockSnapshot, IBlockState newState, BlockPos pos,
+    /**
+     * Specifically called by {@link MixinChunk#setBlockState(BlockPos, IBlockState, IBlockState, BlockChangeFlag)} while it is preparing
+     * various transactional aspects, such as potential tile entity removals, replacements, etc. Specifically should never be called outside
+     * of that reaction since {@link BlockTransaction#enqueueChanges(SpongeProxyBlockAccess, SpongeProxyBlockAccess.Proxy)}
+     * does not get called automatically, it is called prior to queueing potential tile replacements, and prior to calling to
+     * {@link #logTileChange(IMixinWorldServer, BlockPos, TileEntity, TileEntity)} in the event a tile entity is going to be removed.
+     *
+     * @param originalBlockSnapshot
+     * @param newState
+     * @param pos
+     * @param flags
+     * @return
+     */
+    public BlockTransaction.ChangeBlock logBlockChange(SpongeBlockSnapshot originalBlockSnapshot, IBlockState newState, BlockPos pos,
         BlockChangeFlag flags) {
         this.put(originalBlockSnapshot, newState); // Always update the snapshot index before the block change is tracked
         final int transactionIndex = ++this.transactionIndex;
         final BlockTransaction.ChangeBlock changeBlock = new BlockTransaction.ChangeBlock(transactionIndex, this.snapshotIndex,
             originalBlockSnapshot, newState, (SpongeBlockChangeFlag) flags);
-        final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) originalBlockSnapshot.getWorldServer();
-        changeBlock.enqueueChanges(mixinWorldServer.getProxyAccess(), getProxyOrCreate(mixinWorldServer));
         logTransaction(pos, changeBlock);
+        return changeBlock;
     }
 
     public void logTileChange(IMixinWorldServer mixinWorldServer, BlockPos pos, @Nullable TileEntity oldTile, @Nullable TileEntity newTile) {
@@ -588,7 +601,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
                     continue;
                 }
                 final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) ((SpongeBlockSnapshot) eventTransaction.getOriginal()).getWorldServer();
-                try (final SpongeProxyBlockAccess.Proxy transactionProxy = transaction.getProxy(mixinWorldServer)) {
+                try (final SpongeProxyBlockAccess.Proxy ignored = transaction.getProxy(mixinWorldServer)) {
                     transaction.process(eventTransaction, phaseState, phaseContext, currentDepth);
                 }
             }

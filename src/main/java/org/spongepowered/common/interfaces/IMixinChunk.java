@@ -27,6 +27,7 @@ package org.spongepowered.common.interfaces;
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.chunk.ChunkPrimer;
@@ -118,4 +119,6 @@ public interface IMixinChunk {
     void markChunkDirty();
 
     boolean isActive();
+
+    void removeTileEntity(TileEntity removed);
 }

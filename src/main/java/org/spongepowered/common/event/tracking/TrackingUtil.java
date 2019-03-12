@@ -348,30 +348,11 @@ public final class TrackingUtil {
     static boolean captureBulkBlockChange(IMixinWorldServer mixinWorld, Chunk chunk, IBlockState currentState,
         IBlockState newState, BlockPos pos, BlockChangeFlag flags, PhaseContext<?> phaseContext, IPhaseState<?> phaseState) {
         final WorldServer world = WorldUtil.asNative(mixinWorld);
-        if (((IPhaseState) phaseState).shouldCaptureBlockChangeOrSkip(phaseContext, pos, currentState, newState, flags)) {
-            // final IBlockState actualState = currentState.getActualState(world, pos);
-            final SpongeBlockSnapshot originalBlockSnapshot = mixinWorld.createSpongeBlockSnapshot(currentState, currentState, pos, flags);
-            // Mark the tile entity as captured so when it is being removed during the chunk setting, it won't be
-            // re-captured again.
-            final net.minecraft.tileentity.TileEntity tileEntity = ((WorldServer) mixinWorld).getTileEntity(pos);
-            final Block newBlock = newState.getBlock();
 
-            associateBlockChangeWithSnapshot(phaseState, newBlock, currentState, originalBlockSnapshot);
-            // Make sure the phase state is aware it is capturing the block change
-            ((IPhaseState) phaseState).captureBlockChange(phaseContext, pos, originalBlockSnapshot, newState, flags, tileEntity);
-            final IMixinChunk mixinChunk = (IMixinChunk) chunk;
-            final IBlockState originalBlockState = mixinChunk.setBlockState(pos, newState, currentState, flags);
-            if (originalBlockState == null) {
-                phaseContext.getCapturedBlockSupplier().prune(originalBlockSnapshot);
-                return false;
-            }
-            ((IPhaseState) phaseState).postTrackBlock(originalBlockSnapshot, phaseContext);
-        } else {
-            final IMixinChunk mixinChunk = (IMixinChunk) chunk;
-            final IBlockState originalBlockState = mixinChunk.setBlockState(pos, newState, currentState, flags);
-            if (originalBlockState == null) {
-                return false;
-            }
+        final IMixinChunk mixinChunk = (IMixinChunk) chunk;
+        final IBlockState originalBlockState = mixinChunk.setBlockState(pos, newState, currentState, flags);
+        if (originalBlockState == null) {
+            return false;
         }
 
 
@@ -720,7 +701,7 @@ public final class TrackingUtil {
         SpongeBlockChangeFlag changeFlag, IBlockState originalState, IBlockState newState) {
         final Block newBlock = newState.getBlock();
         if (originalState.getBlock() != newBlock && changeFlag.performBlockPhysics()
-            && (!SpongeImplHooks.hasBlockTileEntity(newBlock, newState) || phaseState.tracksTileEntityChanges(phaseContext))) {
+            && (!SpongeImplHooks.hasBlockTileEntity(newBlock, newState))) {
             newBlock.onBlockAdded(world, pos, newState);
             phaseState.performOnBlockAddedSpawns(phaseContext, currentDepth + 1);
         }

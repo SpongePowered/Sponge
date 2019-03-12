@@ -59,6 +59,7 @@ import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.SpongeEventManager;
+import org.spongepowered.common.event.tracking.context.BlockTransaction;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
@@ -73,6 +74,7 @@ import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.mixin.core.world.MixinChunk;
 import org.spongepowered.common.mixin.tracking.world.MixinChunk_Tracker;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -847,9 +849,28 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     default void capturesNeighborNotifications(C context, IMixinWorldServer mixinWorld, BlockPos notifyPos, Block sourceBlock,
         IBlockState iblockstate, BlockPos sourcePos) {
     }
-    default void captureBlockChange(C phaseContext, BlockPos pos, SpongeBlockSnapshot originalBlockSnapshot, IBlockState newState,
+    /**
+     * Specifically captures a block change by {@link MixinChunk#setBlockState(BlockPos, IBlockState, IBlockState, BlockChangeFlag)}
+     * such that the change of a {@link IBlockState} will be appropriately logged, along with any changes of tile entities being removed
+     * or added, likewise, this will avoid duplicating transactions later after the fact, in the event that multiple changes are taking
+     * place, including but not withstanding, tile entity replacements after the fact.
+     *
+     * @param phaseContext
+     * @param pos
+     * @param originalBlockSnapshot
+     * @param newState
+     * @param flags
+     * @param tileEntity
+     * @return
+     */
+    @Nullable
+    default BlockTransaction.ChangeBlock captureBlockChange(C phaseContext, BlockPos pos, SpongeBlockSnapshot originalBlockSnapshot, IBlockState newState,
         BlockChangeFlag flags, @Nullable TileEntity tileEntity) {
+        if (this.tracksTileEntityChanges(phaseContext)) {
+            return phaseContext.getCapturedBlockSupplier().logBlockChange(originalBlockSnapshot, newState, pos, flags);
+        }
         phaseContext.getCapturedBlockSupplier().put(originalBlockSnapshot, newState);
+        return null;
 
     }
     default void captureTileEntityReplacement(C currentContext, IMixinWorldServer mixinWorldServer, BlockPos pos, @Nullable TileEntity currenTile, @Nullable TileEntity tileEntity) {

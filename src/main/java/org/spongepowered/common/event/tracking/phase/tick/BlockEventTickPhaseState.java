@@ -55,6 +55,7 @@ import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.context.BlockTransaction;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMapEntry;
@@ -109,12 +110,6 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
         BlockChangeFlag flags) {
 
         return true;
-    }
-
-    @Override
-    public void captureBlockChange(BlockEventTickContext phaseContext, BlockPos pos, SpongeBlockSnapshot originalBlockSnapshot,
-        IBlockState newState, BlockChangeFlag flags, @Nullable TileEntity tileEntity) {
-        phaseContext.getCapturedBlockSupplier().logBlockChange(originalBlockSnapshot, newState, pos, flags);
     }
 
     @Override

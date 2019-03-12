@@ -56,10 +56,12 @@ import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.context.BlockTransaction;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMapEntry;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.world.BlockChange;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -267,11 +269,6 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
         super.processCancelledTransaction(context, transaction, original);
     }
 
-    @Override
-    public void captureBlockChange(TileEntityTickContext phaseContext, BlockPos pos, SpongeBlockSnapshot originalBlockSnapshot,
-        IBlockState newState, BlockChangeFlag flags, @Nullable net.minecraft.tileentity.TileEntity tileEntity) {
-        phaseContext.getCapturedBlockSupplier().logBlockChange(originalBlockSnapshot, newState, pos, flags);
-    }
 
     @Override
     public boolean doesCaptureNeighborNotifications(TileEntityTickContext context) {

@@ -36,6 +36,8 @@ import net.minecraft.world.WorldServer;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.util.Deque;
@@ -51,7 +53,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess {
     private static final boolean DEBUG_PROXY = Boolean.valueOf(System.getProperty("sponge.debugProxyChanges", "false"));
 
     private final LinkedHashMap<BlockPos, IBlockState> processed = new LinkedHashMap<>();
-    private final LinkedHashMap<BlockPos, TileEntity> processedTiles = new LinkedHashMap<>();
+    private final LinkedHashMap<BlockPos, TileEntity> affectedTileEntities = new LinkedHashMap<>();
     private final ListMultimap<BlockPos, TileEntity> queuedTiles = LinkedListMultimap.create();
     private final Set<BlockPos> markedRemoved = new HashSet<>();
     private final Deque<Proxy> proxies = Queues.newArrayDeque();
@@ -81,10 +83,10 @@ public final class SpongeProxyBlockAccess implements IBlockAccess {
                 proxy.store(pos, state);
             }
             if (proxy.toBeRemoved != null) {
-                this.processedTiles.remove(proxy.tileEntityChange);
+                this.affectedTileEntities.remove(proxy.tileEntityChange);
             }
             if (proxy.toBeAdded != null) {
-                this.processedTiles.put(proxy.tileEntityChange, proxy.toBeAdded);
+                this.affectedTileEntities.put(proxy.tileEntityChange, proxy.toBeAdded);
             }
         }
         return this;
@@ -156,14 +158,14 @@ public final class SpongeProxyBlockAccess implements IBlockAccess {
         }
         if (proxy.tileEntityChange != null) {
             if (proxy.toBeRemoved != null) {
-                this.processedTiles.remove(proxy.tileEntityChange);
+                this.affectedTileEntities.remove(proxy.tileEntityChange);
                 if (proxy.toBeAdded == null) {
                     this.markedRemoved.add(proxy.tileEntityChange);
                 }
             }
             if (proxy.toBeAdded != null) {
                 this.queuedTiles.remove(proxy.tileEntityChange, proxy.toBeAdded);
-                this.processedTiles.put(proxy.tileEntityChange, proxy.toBeAdded);
+                this.affectedTileEntities.put(proxy.tileEntityChange, proxy.toBeAdded);
             }
         }
 
@@ -172,15 +174,15 @@ public final class SpongeProxyBlockAccess implements IBlockAccess {
 
     @Override
     public TileEntity getTileEntity(BlockPos pos) {
-        return this.processedTiles.get(pos);
+        return this.affectedTileEntities.get(pos);
     }
 
     public boolean hasTileEntity(BlockPos pos) {
-        return this.processedTiles.containsKey(pos);
+        return this.affectedTileEntities.containsKey(pos);
     }
 
     public boolean hasTileEntity(BlockPos pos, TileEntity tileEntity) {
-        return this.processedTiles.get(pos) == tileEntity;
+        return this.affectedTileEntities.get(pos) == tileEntity;
     }
 
     public boolean isTileEntityRemoved(BlockPos pos) {
@@ -222,33 +224,31 @@ public final class SpongeProxyBlockAccess implements IBlockAccess {
         }
     }
 
-    private void storeRemovedTile(BlockPos pos, TileEntity tileEntity) {
-        if (tileEntity != null && !this.proxies.isEmpty()) {
-            final Proxy peek = this.proxies.peek();
-            if (peek.toBeRemoved == tileEntity) {
-                peek.toBeRemoved = null;
-                peek.tileEntityChange = null;
-            } else {
-                peek.toBeRemoved = tileEntity;
-                peek.tileEntityChange = pos;
+    void proceedWithRemoval(BlockPos targetPosition, TileEntity removed) {
+        boolean existed = this.markedRemoved.remove(targetPosition);
+        final TileEntity existing = this.affectedTileEntities.remove(targetPosition);
+        if (existing != removed) {
+            // Put it back in, might be a different tile that was being placed back in, potentially
+            this.affectedTileEntities.put(targetPosition, existing);
+            if (!existed) {
+                this.markedRemoved.add(targetPosition);
             }
         }
-    }
+        // Always remove the tile entity from various lists.
+        if (removed != null) {
+            if (this.processingWorld.processingLoadedTiles) {
+                this.processingWorld.addedTileEntityList.remove(removed);
+            } else {
+                this.processingWorld.addedTileEntityList.remove(removed);
+                this.processingWorld.loadedTileEntityList.remove(removed);
+                this.processingWorld.tickableTileEntities.remove(removed);
+                IMixinChunk activeChunk = ((IMixinTileEntity) removed).getActiveChunk();
+                if (activeChunk != null) {
+                    activeChunk.removeTileEntity(removed);
+                }
+            }
 
-    public void onTileReplace(BlockPos pos, TileEntity replacing) {
-        unmarkRemoval(pos);
-        if (this.queuedTiles.containsEntry(pos, replacing)) {
-            proceedWithAdd(pos, replacing);
-            return;
         }
-        final TileEntity removedTile = this.processedTiles.remove(pos);
-        storeRemovedTile(pos, removedTile);
-    }
-
-    void proceedWithRemoval(BlockPos targetPosition, TileEntity removed) {
-        final TileEntity existing = this.processedTiles.remove(targetPosition);
-        this.markedRemoved.add(targetPosition);
-        storeRemovedTile(targetPosition, existing);
     }
 
     void proceedWithAdd(BlockPos targetPos, TileEntity added) {
@@ -258,7 +258,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess {
             System.err.println("Unknown removal for: " + targetPos + " with tile entity: " + added);
         }
         unmarkRemoval(targetPos);
-        final TileEntity existing = this.processedTiles.put(targetPos, added);
+        final TileEntity existing = this.affectedTileEntities.put(targetPos, added);
         if (existing != null && existing != added) {
             existing.invalidate();
         }
@@ -284,17 +284,18 @@ public final class SpongeProxyBlockAccess implements IBlockAccess {
     }
 
     public void queueRemoval(TileEntity removed) {
-        if (!this.proxies.isEmpty()) {
-            final Proxy peek = this.proxies.peek();
-            if (peek.toBeRemoved == null) {
+        if (removed != null) {
+            if (!this.proxies.isEmpty()) {
+                final Proxy peek = this.proxies.peek();
                 peek.toBeRemoved = removed;
                 peek.tileEntityChange = removed.getPos();
             }
+            this.markedRemoved.add(removed.getPos());
         }
     }
 
     public void queueReplacement(TileEntity added, TileEntity removed) {
-        final TileEntity existing = this.processedTiles.get(removed.getPos());
+        final TileEntity existing = this.affectedTileEntities.get(removed.getPos());
         if (existing != removed) {
             // ok, looks like the tile entity to be removed will be queued for placement later.
             final boolean exists = this.queuedTiles.put(removed.getPos(), removed);
@@ -311,7 +312,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess {
     }
 
     public boolean succeededInAdding(BlockPos pos, TileEntity tileEntity) {
-        final TileEntity removed = this.processedTiles.remove(pos);
+        final TileEntity removed = this.affectedTileEntities.remove(pos);
         if (removed != tileEntity) {
             System.err.println("Removed a tile entity that wasn't expected to be removed: " + removed);
             return false;
@@ -330,7 +331,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess {
         @Nullable TileEntity toBeAdded;
 
         Proxy(SpongeProxyBlockAccess spongeProxyBlockAccess) {
-            proxyAccess = spongeProxyBlockAccess;
+            this.proxyAccess = spongeProxyBlockAccess;
         }
 
         @Override

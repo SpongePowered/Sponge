@@ -43,6 +43,7 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.context.BlockTransaction;
 import org.spongepowered.common.event.tracking.context.MultiBlockCaptureSupplier;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.world.BlockChange;
@@ -122,13 +123,13 @@ public final class PostState extends GeneralState<UnwindingPhaseContext> {
     }
 
     @Override
-    public void captureBlockChange(UnwindingPhaseContext phaseContext, BlockPos pos, SpongeBlockSnapshot originalBlockSnapshot, IBlockState newState,
+    public BlockTransaction.ChangeBlock captureBlockChange(UnwindingPhaseContext phaseContext, BlockPos pos, SpongeBlockSnapshot originalBlockSnapshot, IBlockState newState,
         BlockChangeFlag flags, @Nullable TileEntity tileEntity) {
         if (phaseContext.isPostingSpecialProcess()) {
-            phaseContext.getCapturedBlockSupplier().logBlockChange(originalBlockSnapshot, newState, pos, flags);
-        } else {
-            super.captureBlockChange(phaseContext, pos, originalBlockSnapshot, newState, flags, tileEntity);
+            return phaseContext.getCapturedBlockSupplier().logBlockChange(originalBlockSnapshot, newState, pos, flags);
         }
+        phaseContext.getCapturedBlockSupplier().put(originalBlockSnapshot, newState);
+        return null;
     }
 
     @Override
@@ -277,7 +278,7 @@ public final class PostState extends GeneralState<UnwindingPhaseContext> {
 
     /**
      * Specifically overridden to delegate to the unwinding state. Since the block physics processing is all handled in
-     * {@link TrackingUtil#performBlockAdditions(List, IPhaseState, PhaseContext, boolean, int)}.
+     * {@link TrackingUtil#performBlockAdditions(List, IPhaseState, PhaseContext, boolean, ListMultimap, int)} .
      *
      * @param blockChange change
      * @param snapshotTransaction the transaction
