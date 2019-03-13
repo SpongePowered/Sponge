@@ -188,12 +188,7 @@ public final class WorldManager {
         return Optional.empty();
     }
 
-    /**
-     * Return the next free dimension ID. Note: you are not guaranteed a contiguous
-     * block of free ids. Always call for each individual ID you wish to get.
-     * @return the next free dimension ID
-     */
-    public static int getNextFreeDimensionId() {
+    public static Integer getNextFreeDimensionId() {
         int next = lastUsedDimensionId;
         while (usedDimensionIds.contains(next) || !checkAvailable(next)) {
             next++;
@@ -1228,12 +1223,12 @@ public final class WorldManager {
         if (compound == null) {
             dimensionTypeByDimensionId.keySet().stream().filter(dimensionId -> dimensionId >= 0).forEach(usedDimensionIds::add);
         } else {
-            for (int id : compound.getIntArray("UsedIDs")) {
+            for (int id : compound.getIntArray(NbtDataUtil.USED_DIMENSION_IDS)) {
                 usedDimensionIds.add(id);
             }
 
             // legacy data (load but don't save)
-            int[] intArray = compound.getIntArray("DimensionArray");
+            int[] intArray = compound.getIntArray(NbtDataUtil.LEGACY_DIMENSION_ARRAY);
             for (int i = 0; i < intArray.length; i++) {
                 int data = intArray[i];
                 if (data == 0) continue;
@@ -1246,7 +1241,7 @@ public final class WorldManager {
 
     public static NBTTagCompound saveDimensionDataMap() {
         NBTTagCompound dimMap = new NBTTagCompound();
-        dimMap.setIntArray("UsedIDs", usedDimensionIds.toIntArray());
+        dimMap.setIntArray(NbtDataUtil.USED_DIMENSION_IDS, usedDimensionIds.toIntArray());
         return dimMap;
     }
 
