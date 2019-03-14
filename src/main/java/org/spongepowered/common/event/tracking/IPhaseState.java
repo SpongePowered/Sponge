@@ -370,17 +370,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     default void postBlockTransactionApplication(BlockChange blockChange, Transaction<BlockSnapshot> snapshotTransaction, C context) { }
 
     /**
-     * During the block change process, some cases (like block ticks) need to be processed immediately, and not
-     * performed during the delay for the end of the phase state to be unwound.
-     *
-     * @param snapshot The block snapshot being processed
-     * @param context The context for any potentially captured blocks
-     */
-    default void postTrackBlock(BlockSnapshot snapshot, C context) {
-
-    }
-
-    /**
      * During {@link UnwindingState#unwind(UnwindingPhaseContext)}, this delegates to the "unwinding" state to perform
      * any extra handling with contexts to spawn entities that were captured.
      *
@@ -854,6 +843,10 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     @Nullable
     default BlockTransaction.ChangeBlock captureBlockChange(C phaseContext, BlockPos pos, SpongeBlockSnapshot originalBlockSnapshot, IBlockState newState,
         BlockChangeFlag flags, @Nullable TileEntity tileEntity) {
+        if (!this.doesBulkBlockCapture(phaseContext)) {
+            phaseContext.singleSnapshot = originalBlockSnapshot;
+            return null;
+        }
         if (this.hasSpecificBlockProcess(phaseContext)) {
             return phaseContext.getCapturedBlockSupplier().logBlockChange(originalBlockSnapshot, newState, pos, flags);
         }

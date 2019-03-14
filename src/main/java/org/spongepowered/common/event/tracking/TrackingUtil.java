@@ -355,7 +355,6 @@ public final class TrackingUtil {
             return false;
         }
 
-
         if (newState.getLightOpacity() != currentState.getLightOpacity() || newState.getLightValue() != currentState.getLightValue()) {
             world.profiler.startSection("checkLight");
             world.checkLight(pos);
@@ -437,7 +436,7 @@ public final class TrackingUtil {
      * @return True if no events or transactions were cancelled
      */
     @SuppressWarnings({"unchecked", "ConstantConditions", "rawtypes"})
-    public static boolean processBlockCaptures(IPhaseState<?> state, PhaseContext<?> context, int currentDepth) {
+    static boolean processBlockCaptures(IPhaseState<?> state, PhaseContext<?> context, int currentDepth) {
         final MultiBlockCaptureSupplier snapshots = context.getCapturedBlockSupplier();
         // Fail fast and check if it's empty.
         if (snapshots.isEmpty()) {

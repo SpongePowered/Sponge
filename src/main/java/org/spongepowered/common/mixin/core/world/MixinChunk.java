@@ -665,7 +665,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         // Set up some default information variables for later processing
         final boolean isFake = ((IMixinWorld) this.world).isFake();
         final TileEntity existing = this.getTileEntity(pos, EnumCreateEntityType.CHECK);
-        final SpongeBlockSnapshot snapshot = isFake ? null : createSpongeBlockSnapshot(currentState, currentState, pos, flag, existing);
+        final SpongeBlockSnapshot snapshot = isFake || !ShouldFire.CHANGE_BLOCK_EVENT ? null : createSpongeBlockSnapshot(currentState, currentState, pos, flag, existing);
         final BlockTransaction.ChangeBlock transaction;
         final PhaseContext<?> peek = isFake ? null : PhaseTracker.getInstance().getCurrentContext();
         final IPhaseState state = isFake ? null : peek.state;
@@ -680,8 +680,9 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         // { // Sponge - remove unnecessary braces
         if (!this.world.isRemote) {
             // Sponge - Redirect phase checks to use isFake in the event we have mods worlds doing silly things....
-            // i.e. fake worlds.
-            if (!isFake && state.shouldCaptureBlockChangeOrSkip(peek, pos, currentState, newState, flag)) {
+            // i.e. fake worlds. Likewise, avoid creating unecessary snapshots/transactions
+            // or triggering unprocessed captures when there are no events being thrown.
+            if (!isFake && ShouldFire.CHANGE_BLOCK_EVENT && state.shouldCaptureBlockChangeOrSkip(peek, pos, currentState, newState, flag)) {
 
                 // Mark the tile entity as captured so when it is being removed during the chunk setting, it won't be
                 // re-captured again.
@@ -850,7 +851,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         builder.reset();
         builder.blockState((BlockState) state)
             .extendedState((BlockState) extended)
-            .worldId(this.getUniqueId())
+            .worldId(this.sponge_world.getUniqueId())
             .position(VecHelper.toVector3i(pos));
         Optional<UUID> creator = getBlockOwnerUUID(pos);
         Optional<UUID> notifier = getBlockNotifierUUID(pos);

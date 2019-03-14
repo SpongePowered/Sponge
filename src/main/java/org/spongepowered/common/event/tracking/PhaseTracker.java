@@ -71,6 +71,7 @@ import org.spongepowered.common.config.category.PhaseTrackerCategory;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.ShouldFire;
+import org.spongepowered.common.event.tracking.context.MultiBlockCaptureSupplier;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.tick.NeighborNotificationContext;
@@ -726,58 +727,20 @@ public final class PhaseTracker {
                 return false;
             }
         }
-        if (((IPhaseState) phaseState).doesBlockEventTracking(context)) {
+        if (((IPhaseState) phaseState).doesBlockEventTracking(context) && ShouldFire.CHANGE_BLOCK_EVENT) {
             try {
-                final Block block1 = newState.getBlock();
-
-                if (!ShouldFire.CHANGE_BLOCK_EVENT) { // If we don't have to worry about any block events, don't bother
-                    // Sponge End - continue with vanilla mechanics
-                    // Also, call the direct method instead of letting the overwrites do their job, because we want to
-                    // reduce the amount of nested calls
-                    final IBlockState iblockstate = ((IMixinChunk) chunk).setBlockState(pos, newState, chunk.getBlockState(pos), flag);
-
-                    if (iblockstate == null) {
-                        return false;
-                    }
-                    // else { // Sponge - unnecessary formatting
-                    // Continue doing neighbor notification
-                    if (newState.getLightOpacity() != iblockstate.getLightOpacity() || newState.getLightValue() != iblockstate.getLightValue()) {
-                        minecraftWorld.profiler.startSection("checkLight"); // Sponge - we don't need to us the profiler
-                        minecraftWorld.checkLight(pos);
-                        minecraftWorld.profiler.endSection(); // Sponge - We don't need to use the profiler
-                    }
-
-                    if (spongeFlag.isNotifyClients() && chunk.isPopulated()) {
-                        minecraftWorld.notifyBlockUpdate(pos, iblockstate, newState, spongeFlag.getRawFlag());
-                    }
-
-                    if (flag.updateNeighbors()) {
-                        minecraftWorld.notifyNeighborsRespectDebug(pos, iblockstate.getBlock(), true);
-
-                        if (newState.hasComparatorInputOverride()) {
-                            minecraftWorld.updateComparatorOutputLevel(pos, block1);
-                        }
-                    } else if (flag.notifyObservers()) {
-                        minecraftWorld.updateObservingBlocksAt(pos, block1);
-                    }
-
-                    return true;
-                }
                 // Sponge Start - Fall back to performing a singular block capture and throwing an event with all the
                 // reprocussions, such as neighbor notifications and whatnot. Entity spawns should also be
                 // properly handled since bulk captures technically should be disabled if reaching
                 // this point.
-                final SpongeBlockSnapshot originalBlockSnapshot= mixinWorld.createSpongeBlockSnapshot(currentState, currentState, pos, flag);
-                final List<BlockSnapshot> capturedSnapshots = new ArrayList<>(1); // only need tone
-                final Block newBlock = newState.getBlock();
-
-                TrackingUtil.associateBlockChangeWithSnapshot(phaseState, newBlock, currentState, originalBlockSnapshot);
-                capturedSnapshots.add(originalBlockSnapshot);
                 final IMixinChunk mixinChunk = (IMixinChunk) chunk;
-                final IBlockState originalBlockState = mixinChunk.setBlockState(pos, newState, currentState, spongeFlag);
+                final IBlockState originalBlockState = mixinChunk.setBlockState(pos, newState, currentState, flag);
                 if (originalBlockState == null) {
-                    return false; // Return fast
+                    return false;
                 }
+
+                final SpongeBlockSnapshot originalBlockSnapshot = context.singleSnapshot;
+
                 final Transaction<BlockSnapshot> transaction = TrackingUtil.TRANSACTION_CREATION.apply(originalBlockSnapshot);
                 final ImmutableList<Transaction<BlockSnapshot>> transactions = ImmutableList.of(transaction);
                 // Create and throw normal event

@@ -86,6 +86,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
 
     @Nullable private static PhaseContext<?> EMPTY;
     @Nullable public BlockSnapshot neighborNotificationSource;
+    SpongeBlockSnapshot singleSnapshot;
 
     /**
      * Default flagged empty PhaseContext that can be used for stubbing in corner cases.

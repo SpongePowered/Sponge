@@ -27,7 +27,6 @@ package org.spongepowered.common.event.tracking.phase.tick;
 import com.google.common.collect.ListMultimap;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.server.management.PlayerChunkMapEntry;
@@ -44,7 +43,6 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
-import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.BlockUtil;
@@ -61,8 +59,6 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
-
-import javax.annotation.Nullable;
 
 class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> {
     private final BiConsumer<CauseStackManager.StackFrame, BlockTickContext> LOCATION_MODIFIER =
@@ -88,7 +84,7 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
 
     @Override
     public boolean tracksTileEntityChanges(BlockTickContext currentContext) {
-        return currentContext.allowsBulkBlockCaptures();
+        return false;
     }
 
 
@@ -195,10 +191,6 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
     @Override
     public boolean doesCaptureEntitySpawns() {
         return false;
-    }
-
-    @Override
-    public void postTrackBlock(BlockSnapshot snapshot, BlockTickContext context) {
     }
 
     /**
