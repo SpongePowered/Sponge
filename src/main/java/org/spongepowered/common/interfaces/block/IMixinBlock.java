@@ -34,12 +34,16 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.interfaces.IMixinTrackable;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.mixin.core.block.state.MixinStateImplementation;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 /**
  * A quasi interface to mix into every possible {@link Block} such that their
@@ -149,4 +153,7 @@ public interface IMixinBlock extends IMixinTrackable {
     ImmutableMap<Class<? extends Property<?,?>>,Property<?,?>> getProperties(IBlockState mixinStateImplementation);
 
     void initializeTrackerState();
+    default BiConsumer<CauseStackManager.StackFrame, IMixinWorldServer> getTickFrameModifier() {
+        return (frame, world) -> {};
+    }
 }

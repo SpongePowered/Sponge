@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.general;
+package org.spongepowered.common.event.tracking;
 
 import com.google.common.collect.ListMultimap;
 import net.minecraft.block.Block;
@@ -39,13 +39,12 @@ import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.BlockTransaction;
 import org.spongepowered.common.event.tracking.context.MultiBlockCaptureSupplier;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.event.tracking.phase.TrackingPhase;
+import org.spongepowered.common.event.tracking.phase.TrackingPhases;
+import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
+import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
@@ -55,9 +54,23 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 @SuppressWarnings("rawtypes")
-public final class PostState extends GeneralState<UnwindingPhaseContext> {
+public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> {
 
-    boolean requiresPost = false;
+    public static UnwindingState getInstance() {
+        return Holder.INSTANCE;
+    }
+
+    private UnwindingState() { }
+
+    private static final class Holder {
+        static final UnwindingState INSTANCE = new UnwindingState();
+    }
+
+    @Override
+    public final TrackingPhase getPhase() {
+        return TrackingPhases.GENERAL;
+    }
+
     @SuppressWarnings("unchecked")
     private static void postBlockAddedSpawns(UnwindingPhaseContext postContext, IPhaseState<?> unwindingState, PhaseContext<?> unwindingPhaseContext,
         MultiBlockCaptureSupplier capturedBlockSupplier, int depth) {
@@ -118,14 +131,14 @@ public final class PostState extends GeneralState<UnwindingPhaseContext> {
     }
 
     @Override
-    public boolean hasSpecificBlockProcess() {
-        return false;
+    public boolean hasSpecificBlockProcess(UnwindingPhaseContext context) {
+        return context.usesMulti;
     }
 
     @Override
     public BlockTransaction.ChangeBlock captureBlockChange(UnwindingPhaseContext phaseContext, BlockPos pos, SpongeBlockSnapshot originalBlockSnapshot, IBlockState newState,
         BlockChangeFlag flags, @Nullable TileEntity tileEntity) {
-        if (phaseContext.isPostingSpecialProcess()) {
+        if (!phaseContext.isPostingSpecialProcess()) { // If we're posting special, we need to
             return phaseContext.getCapturedBlockSupplier().logBlockChange(originalBlockSnapshot, newState, pos, flags);
         }
         phaseContext.getCapturedBlockSupplier().put(originalBlockSnapshot, newState);
@@ -133,15 +146,13 @@ public final class PostState extends GeneralState<UnwindingPhaseContext> {
     }
 
     @Override
-    public void captureTileEntityReplacement(UnwindingPhaseContext currentContext, IMixinWorldServer mixinWorldServer, BlockPos pos,
-        @Nullable TileEntity currenTile, @Nullable TileEntity tileEntity) {
-        currentContext.getCapturedBlockSupplier().logTileChange(mixinWorldServer, pos, currenTile, tileEntity);
+    public boolean tracksTileEntityChanges(UnwindingPhaseContext context) {
+        return !context.isPostingSpecialProcess() && context.tracksTiles;
     }
 
     @Override
-    public void capturesNeighborNotifications(UnwindingPhaseContext context, IMixinWorldServer mixinWorld, BlockPos notifyPos, Block sourceBlock,
-        IBlockState iblockstate, BlockPos sourcePos) {
-        context.getCapturedBlockSupplier().captureNeighborNotification(mixinWorld, notifyPos, iblockstate, sourceBlock, sourcePos);
+    public boolean doesCaptureNeighborNotifications(UnwindingPhaseContext context) {
+        return !context.isPostingSpecialProcess() && context.tracksNeighborNotifications;
     }
 
     @Override
@@ -155,7 +166,7 @@ public final class PostState extends GeneralState<UnwindingPhaseContext> {
         if (context.isPostingSpecialProcess()) {
             context.getCapturedBlockSupplier().cancelTransaction(original);
         }
-        super.processCancelledTransaction(context, transaction, original);
+        IPhaseState.super.processCancelledTransaction(context, transaction, original);
     }
 
     @SuppressWarnings("unchecked")
@@ -180,7 +191,11 @@ public final class PostState extends GeneralState<UnwindingPhaseContext> {
     public void unwind(UnwindingPhaseContext context) {
         final IPhaseState<?> unwindingState = context.getUnwindingState();
         final PhaseContext<?> unwindingContext = context.getUnwindingContext();
-        this.postDispatch(unwindingState, unwindingContext, context);
+        try {
+            this.postDispatch(unwindingState, unwindingContext, context);
+        } catch (Exception e) {
+            PhaseTracker.getInstance().printExceptionFromPhase(e, context);
+        }
     }
 
     /**
@@ -209,14 +224,18 @@ public final class PostState extends GeneralState<UnwindingPhaseContext> {
      * @param postContext The post dispatch context captures containing any
      */
     @SuppressWarnings("unchecked")
-    private void postDispatch(IPhaseState<?> unwindingState, PhaseContext<?> unwindingContext, UnwindingPhaseContext postContext) {
+    private void postDispatch(IPhaseState<?> unwindingState, PhaseContext<?> unwindingContext, UnwindingPhaseContext postContext) throws Exception {
         final List<Entity> contextEntities = postContext.getCapturedEntitiesOrEmptyList();
         final List<Entity> contextItems = (List<Entity>) (List<?>) postContext.getCapturedItemsOrEmptyList();
-        if (postContext.getCapturedBlockSupplier().isEmpty() && contextEntities.isEmpty() && contextItems.isEmpty()) {
+        final MultiBlockCaptureSupplier capturedBlockSupplier = postContext.getCapturedBlockSupplier();
+        if (capturedBlockSupplier.isEmpty() && contextEntities.isEmpty() && contextItems.isEmpty()) {
             return;
         }
-        if (!postContext.getCapturedBlockSupplier().isEmpty()) {
-            TrackingUtil.processBlockCaptures(this, postContext);
+        if (!capturedBlockSupplier.isEmpty()) {
+            try (AutoCloseable auto = postContext::popBlockSupplier) {
+                postContext.pushNewCaptureSupplier();
+                TrackingUtil.processBlockCaptures(this, postContext);
+            }
         }
         if (!contextEntities.isEmpty()) {
             final ArrayList<Entity> entities = new ArrayList<>(contextEntities);
@@ -228,6 +247,26 @@ public final class PostState extends GeneralState<UnwindingPhaseContext> {
             contextItems.clear();
             SpongeCommonEventFactory.callSpawnEntity(items, unwindingContext);
 
+        }
+    }
+
+    @Override
+    public void postProcessSpecificBlockChange(UnwindingPhaseContext currentContext, BlockTransaction.ChangeBlock changeBlock, int depth) {
+        if (PhaseTracker.checkMaxBlockProcessingDepth(this, currentContext, depth)) {
+            return;
+        }
+
+        currentContext.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> {
+            final ArrayList<Entity> capturedEntities = new ArrayList<>(entities);
+            currentContext.getUnwindingState().postProcessSpawns(currentContext.getUnwindingContext(), capturedEntities);
+        });
+        try {
+            try (AutoCloseable closeable = currentContext::popBlockSupplier) {
+                currentContext.pushNewCaptureSupplier();
+                TrackingUtil.processBlockCaptures(this, currentContext, depth);
+            }
+        } catch (Exception e) {
+            PhaseTracker.getInstance().printExceptionFromPhase(e, currentContext);
         }
     }
 
@@ -278,7 +317,7 @@ public final class PostState extends GeneralState<UnwindingPhaseContext> {
 
     /**
      * Specifically overridden to delegate to the unwinding state. Since the block physics processing is all handled in
-     * {@link TrackingUtil#performBlockAdditions(List, IPhaseState, PhaseContext, boolean, ListMultimap, int)} .
+     * {@link TrackingUtil#performBlockAdditions(List, IPhaseState, PhaseContext, boolean, ListMultimap, int)}.
      *
      * @param blockChange change
      * @param snapshotTransaction the transaction
@@ -291,6 +330,12 @@ public final class PostState extends GeneralState<UnwindingPhaseContext> {
         final IPhaseState<?> unwindingState = context.getUnwindingState();
         final PhaseContext unwindingContext = context.getUnwindingContext();
         ((IPhaseState) unwindingState).postBlockTransactionApplication(blockChange, snapshotTransaction, unwindingContext);
+    }
+
+
+    @Override
+    public String toString() {
+        return "GeneralPhase{UnwindingState}";
     }
 
 }

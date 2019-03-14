@@ -80,7 +80,7 @@ public abstract class BlockTransaction {
     }
 
     @SuppressWarnings("rawtypes")
-    public static class TileEntityAdd extends BlockTransaction {
+    public static final class TileEntityAdd extends BlockTransaction {
 
         final TileEntity added;
         final SpongeBlockSnapshot addedSnapshot;
@@ -126,7 +126,7 @@ public abstract class BlockTransaction {
     }
 
     @SuppressWarnings("rawtypes")
-    public static class RemoveTileEntity extends BlockTransaction {
+    public static final class RemoveTileEntity extends BlockTransaction {
 
         final TileEntity removed;
         final SpongeBlockSnapshot tileSnapshot;
@@ -170,7 +170,7 @@ public abstract class BlockTransaction {
     }
 
     @SuppressWarnings("rawtypes")
-    public static class ReplaceTileEntity extends BlockTransaction {
+    public static final class ReplaceTileEntity extends BlockTransaction {
 
         final TileEntity added;
         final TileEntity removed;
@@ -212,7 +212,7 @@ public abstract class BlockTransaction {
     }
 
     @SuppressWarnings("rawtypes")
-    public static class ChangeBlock extends BlockTransaction {
+    public static final class ChangeBlock extends BlockTransaction {
 
         final SpongeBlockSnapshot original;
         final IBlockState newState;
@@ -268,14 +268,16 @@ public abstract class BlockTransaction {
             }
 
             // We can proceed to calling the break block logic since the new state has been "proxied" onto the world
+            PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
+
             if (!this.ignoreBreakBlockLogic && this.queueBreak) {
-                BlockSnapshot currentNeighborSource = PhaseTracker.getInstance().getCurrentContext().neighborNotificationSource;
-                PhaseTracker.getInstance().getCurrentContext().neighborNotificationSource = this.original;
+                BlockSnapshot currentNeighborSource = currentContext.neighborNotificationSource;
+                currentContext.neighborNotificationSource = this.original;
                 if (this.queuedRemoval != null) {
                     proxyAccess.proceedWithRemoval(targetPosition, this.queuedRemoval);
                 }
                 oldState.getBlock().breakBlock(worldServer, targetPosition, oldState);
-                PhaseTracker.getInstance().getCurrentContext().neighborNotificationSource = currentNeighborSource;
+                currentContext.neighborNotificationSource = currentNeighborSource;
             } else if (this.queuedRemoval != null) {
                 proxyAccess.proceedWithRemoval(targetPosition, this.queuedRemoval);
                 worldServer.removeTileEntity(targetPosition);
@@ -292,6 +294,7 @@ public abstract class BlockTransaction {
                 proxyAccess.proceedWithAdd(targetPosition, this.queueTileSet);
             }
             phaseState.postBlockTransactionApplication(this.original.blockChange, eventTransaction, phaseContext);
+            ((IPhaseState) currentContext.state).postProcessSpecificBlockChange(currentContext, this, currentDepth + 1);
 
             if (this.blockChangeFlag.isNotifyClients()) { // Always try to notify clients of the change.
                 worldServer.notifyBlockUpdate(targetPosition, oldState, this.newState, this.blockChangeFlag.getRawFlag());

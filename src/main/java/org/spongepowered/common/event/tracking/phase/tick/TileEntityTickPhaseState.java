@@ -60,8 +60,6 @@ import org.spongepowered.common.event.tracking.context.BlockTransaction;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMapEntry;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.world.BlockChange;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -173,12 +171,6 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
     }
 
     @Override
-    public void captureTileEntityReplacement(TileEntityTickContext currentContext, IMixinWorldServer mixinWorldServer, BlockPos pos,
-        @Nullable net.minecraft.tileentity.TileEntity currenTile, @Nullable net.minecraft.tileentity.TileEntity tileEntity) {
-        currentContext.getCapturedBlockSupplier().logTileChange(mixinWorldServer, pos, currenTile, tileEntity);
-    }
-
-    @Override
     public void appendContextPreExplosion(ExplosionContext explosionContext, TileEntityTickContext context) {
         context.applyNotifierIfAvailable(explosionContext::notifier);
         context.applyOwnerIfAvailable(explosionContext::owner);
@@ -252,12 +244,6 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
     }
 
     @Override
-    public void capturesNeighborNotifications(TileEntityTickContext context, IMixinWorldServer mixinWorld, BlockPos notifyPos, Block sourceBlock,
-        IBlockState iblockstate, BlockPos sourcePos) {
-        context.getCapturedBlockSupplier().captureNeighborNotification(mixinWorld, notifyPos, iblockstate, sourceBlock, sourcePos);
-    }
-
-    @Override
     public void processCancelledTransaction(TileEntityTickContext context, Transaction<BlockSnapshot> transaction, BlockSnapshot original) {
         context.getCapturedBlockSupplier().cancelTransaction(original);
         final WorldServer worldServer = ((SpongeBlockSnapshot) original).getWorldServer();
@@ -268,7 +254,6 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
         }
         super.processCancelledTransaction(context, transaction, original);
     }
-
 
     @Override
     public boolean doesCaptureNeighborNotifications(TileEntityTickContext context) {
@@ -286,7 +271,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
     }
 
     @Override
-    public boolean hasSpecificBlockProcess() {
+    public boolean hasSpecificBlockProcess(TileEntityTickContext context) {
         return true;
     }
 

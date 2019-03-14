@@ -60,15 +60,24 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 import javax.annotation.Nullable;
 
 class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> {
-
+    private final BiConsumer<CauseStackManager.StackFrame, BlockTickContext> LOCATION_MODIFIER =
+        super.getFrameModifier().andThen((frame, context) ->
+            context.tickingBlock.getTickFrameModifier().accept(frame, (IMixinWorldServer) context.world)
+        );
     private final String name;
 
     BlockTickPhaseState(String name) {
         this.name = name;
+    }
+
+    @Override
+    public BiConsumer<CauseStackManager.StackFrame, BlockTickContext> getFrameModifier() {
+        return this.LOCATION_MODIFIER;
     }
 
     @Override
@@ -78,15 +87,68 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
     }
 
     @Override
+    public boolean tracksTileEntityChanges(BlockTickContext currentContext) {
+        return currentContext.allowsBulkBlockCaptures();
+    }
+
+
+    @Override
+    public boolean getShouldCancelAllTransactions(BlockTickContext context, List<ChangeBlockEvent> blockEvents, ChangeBlockEvent.Post postEvent,
+        ListMultimap<BlockPos, BlockEventData> scheduledEvents, boolean noCancelledTransactions) {
+        if (!postEvent.getTransactions().isEmpty()) {
+            return postEvent.getTransactions().stream().anyMatch(transaction -> {
+                final BlockState state = transaction.getOriginal().getState();
+                final BlockType type = state.getType();
+                final boolean hasTile = SpongeImplHooks.hasBlockTileEntity((Block) type, BlockUtil.toNative(state));
+                final BlockPos pos = context.getSource(net.minecraft.tileentity.TileEntity.class).get().getPos();
+                final BlockPos blockPos = ((SpongeBlockSnapshot) transaction.getOriginal()).getBlockPos();
+                if (pos.equals(blockPos) && !transaction.isValid()) {
+                    return true;
+                }
+                if (!hasTile && !transaction.getIntermediary().isEmpty()) { // Check intermediary
+                    return transaction.getIntermediary().stream().anyMatch(inter -> {
+                        final BlockState iterState = inter.getState();
+                        final BlockType interType = state.getType();
+                        return SpongeImplHooks.hasBlockTileEntity((Block) interType, BlockUtil.toNative(iterState));
+                    });
+                }
+                return hasTile;
+            });
+        }
+        return false;
+    }
+
+
+    @Override
+    public void processCancelledTransaction(BlockTickContext context, Transaction<BlockSnapshot> transaction, BlockSnapshot original) {
+        context.getCapturedBlockSupplier().cancelTransaction(original);
+        final WorldServer worldServer = ((SpongeBlockSnapshot) original).getWorldServer();
+        final Chunk chunk = worldServer.getChunk(((SpongeBlockSnapshot) original).getBlockPos());
+        final PlayerChunkMapEntry entry = worldServer.getPlayerChunkMap().getEntry(chunk.x, chunk.z);
+        if (entry != null) {
+            ((IMixinPlayerChunkMapEntry) entry).markBiomesForUpdate();
+        }
+        super.processCancelledTransaction(context, transaction, original);
+    }
+
+    @Override
+    public boolean doesCaptureNeighborNotifications(BlockTickContext context) {
+        return context.allowsBulkBlockCaptures();
+    }
+
+    @Override
     LocatableBlock getLocatableBlockSourceFromContext(PhaseContext<?> context) {
         return context.getSource(LocatableBlock.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over at a location!", context));
     }
 
     @Override
+    public boolean hasSpecificBlockProcess(BlockTickContext context) {
+        return true;
+    }
+
+    @Override
     public void unwind(BlockTickContext context) {
-        // TODO - Determine if we need to pass the supplier or perform some parameterized
-        //  process if not empty method on the capture object.
         TrackingUtil.processBlockCaptures(this, context);
             context.getCapturedItemsSupplier()
                     .acceptAndClearIfNotEmpty(items -> {
@@ -190,19 +252,7 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
 //        }
 //        return false;
 //    }
-//
-//    @Override
-//    public void captureTileEntityReplacement(BlockTickContext currentContext, IMixinWorldServer mixinWorldServer, BlockPos pos,
-//        @Nullable net.minecraft.tileentity.TileEntity currenTile, @Nullable net.minecraft.tileentity.TileEntity tileEntity) {
-//        currentContext.getCapturedBlockSupplier().logTileChange(mixinWorldServer, pos, currenTile, tileEntity);
-//    }
-//
-//    @Override
-//    public void capturesNeighborNotifications(BlockTickContext context, IMixinWorldServer mixinWorld, BlockPos notifyPos, Block sourceBlock,
-//        IBlockState iblockstate, BlockPos sourcePos) {
-//        context.getCapturedBlockSupplier().captureNeighborNotification(mixinWorld, notifyPos, iblockstate, sourceBlock, sourcePos);
-//    }
-//
+
 //    @Override
 //    public void processCancelledTransaction(BlockTickContext context, Transaction<BlockSnapshot> transaction, BlockSnapshot original) {
 //        context.getCapturedBlockSupplier().cancelTransaction(original);

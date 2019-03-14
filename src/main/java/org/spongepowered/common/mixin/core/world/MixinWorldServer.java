@@ -1015,7 +1015,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
         if (tileEntity != null) {
             ((IMixinTileEntity) tileEntity).setCaptured(true);
-            currentState.captureTileEntityReplacement(currentContext, this, pos, tileEntity, null);
+            currentContext.getCapturedBlockSupplier().logTileChange(this, pos, tileEntity, null);
         }
         return tileEntity;
     }
@@ -1058,30 +1058,30 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @SuppressWarnings("unchecked")
     @Override
-    protected boolean onSetTileEntityForCapture(net.minecraft.tileentity.TileEntity tileEntity, BlockPos pos, net.minecraft.tileentity.TileEntity sameEntity) {
+    protected boolean onSetTileEntityForCapture(net.minecraft.tileentity.TileEntity newTile, BlockPos pos, net.minecraft.tileentity.TileEntity sameEntity) {
         if (this.isFake()) {
             // Short Circuit for fake worlds
-            return tileEntity.isInvalid();
+            return newTile.isInvalid();
         }
         final PhaseTracker tracker = PhaseTracker.getInstance();
         final IPhaseState currentState = tracker.getCurrentState();
         final PhaseContext<?> currentContext = tracker.getCurrentContext();
-        final IMixinTileEntity mixinTile = (IMixinTileEntity) tileEntity;
+        final IMixinTileEntity mixinTile = (IMixinTileEntity) newTile;
         if (mixinTile.isCaptured()) {
             // Don't do anything. If the tile entity is captured, it will have
             // addToWorld before the end of whatever phasestate.
             return true;
         }
-        if (this.proxyBlockAccess.hasTileEntity(pos, tileEntity)) {
-            if (this.proxyBlockAccess.succeededInAdding(pos, tileEntity)) {
-                this.addTileEntity(tileEntity);
+        if (this.proxyBlockAccess.hasTileEntity(pos, newTile)) {
+            if (this.proxyBlockAccess.succeededInAdding(pos, newTile)) {
+                this.addTileEntity(newTile);
             }
             // The chunk already has the tile entity at this point.
             return true;
         }
         // More fast checks - bulk block capture is normally faster to be false than checking tile entity changes (certain block ticks don't capture changes)
         if (!currentState.doesBulkBlockCapture(currentContext) || !currentState.tracksTileEntityChanges(currentContext)) {
-            return tileEntity.isInvalid();
+            return newTile.isInvalid();
         }
         if (!mixinTile.isCaptured()) {
             mixinTile.setCaptured(true);
@@ -1100,8 +1100,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             currentTile = ((MixinWorld_Accessor) this).accessPendingTileEntityAt(pos);
         }
 
-        currentState.captureTileEntityReplacement(currentContext, this, pos, currentTile, tileEntity);
-        return tileEntity.isInvalid();
+        currentContext.getCapturedBlockSupplier().logTileChange(this, pos, currentTile, newTile);
+        return newTile.isInvalid();
     }
 
     protected boolean isTileMarkedForRemoval(BlockPos pos) {

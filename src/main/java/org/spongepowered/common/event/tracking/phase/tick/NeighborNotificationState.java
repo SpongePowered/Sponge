@@ -95,7 +95,6 @@ class NeighborNotificationState extends LocationBasedTickPhaseState<NeighborNoti
         }
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(locatableBlock);
-            associateAdditionalCauses(context, frame);
             if (entity instanceof EntityXPOrb) {
                 frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
                 final ArrayList<Entity> entities = new ArrayList<>(1);

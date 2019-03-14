@@ -590,6 +590,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
         }
         Transaction<BlockSnapshot> eventTransaction = transactions.get(targetIndex);
         try {
+            final IPhaseState<?> currentState = PhaseTracker.getInstance().getCurrentState();
             for (Map.Entry<BlockPos, BlockTransaction> entry : this.orderedTransactions.entries()) {
                 final BlockTransaction transaction = entry.getValue();
 

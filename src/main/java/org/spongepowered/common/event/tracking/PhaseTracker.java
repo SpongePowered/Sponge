@@ -38,7 +38,6 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityThrowable;
-import net.minecraft.init.Blocks;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -54,6 +53,7 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.plugin.PluginContainer;
@@ -73,7 +73,6 @@ import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
-import org.spongepowered.common.event.tracking.phase.general.UnwindingPhaseContext;
 import org.spongepowered.common.event.tracking.phase.tick.NeighborNotificationContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
@@ -621,7 +620,7 @@ public final class PhaseTracker {
             // it needs to be able to do so. It will replay the notifications in the order in which they were received,
             // such that the notification will be sent out in the same order as the block changes that may have taken place.
             if (state.doesCaptureNeighborNotifications(peek)) {
-                state.capturesNeighborNotifications(peek, mixinWorld, notifyPos, sourceBlock, iblockstate, sourcePos);
+                peek.getCapturedBlockSupplier().captureNeighborNotification(mixinWorld, notifyPos, iblockstate, sourceBlock, sourcePos);
                 return;
             }
             state.associateNeighborStateNotifier(peek, sourcePos, iblockstate.getBlock(), notifyPos, ((WorldServer) mixinWorld), PlayerTracker.Type.NOTIFIER);
@@ -785,10 +784,10 @@ public final class PhaseTracker {
                 final ChangeBlockEvent normalEvent =
                     originalBlockSnapshot.blockChange.createEvent(Sponge.getCauseStackManager().getCurrentCause(), transactions);
                 try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                    phaseState.associateAdditionalCauses(context, frame);
                     SpongeImpl.postEvent(normalEvent);
-                    frame.pushCause(normalEvent); // Because of our contract for post events
-                    final ChangeBlockEvent.Post post = ((IPhaseState) phaseState).createChangeBlockPostEvent(context, transactions);
+                    // We put the normal event at the end
+                    final Cause normalizedEvent = frame.getCurrentCause().with(normalEvent);
+                    final ChangeBlockEvent.Post post = ((IPhaseState) phaseState).createChangeBlockPostEvent(context, transactions, normalizedEvent);
                     SpongeImpl.postEvent(post);
                     if (!transaction.isValid()) {
                         transaction.getOriginal().restore(true, BlockChangeFlags.NONE);

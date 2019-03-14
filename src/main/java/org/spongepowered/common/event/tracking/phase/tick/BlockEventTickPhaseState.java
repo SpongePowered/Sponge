@@ -59,7 +59,6 @@ import org.spongepowered.common.event.tracking.context.BlockTransaction;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMapEntry;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.world.BlockChange;
 
 import java.util.ArrayList;
@@ -96,12 +95,6 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
     @Override
     public BiConsumer<CauseStackManager.StackFrame, BlockEventTickContext> getFrameModifier() {
         return this.FRAME_MODIFIER;
-    }
-
-    @Override
-    public void capturesNeighborNotifications(BlockEventTickContext context, IMixinWorldServer mixinWorld, BlockPos notifyPos, Block sourceBlock,
-        IBlockState iblockstate, BlockPos sourcePos) {
-        context.getCapturedBlockSupplier().captureNeighborNotification(mixinWorld, notifyPos, iblockstate, sourceBlock, sourcePos);
     }
 
     @Override
@@ -217,12 +210,6 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
     }
 
     @Override
-    public void captureTileEntityReplacement(BlockEventTickContext currentContext, IMixinWorldServer mixinWorldServer, BlockPos pos,
-        @Nullable TileEntity currenTile, @Nullable TileEntity tileEntity) {
-        currentContext.getCapturedBlockSupplier().logTileChange(mixinWorldServer, pos, currenTile, tileEntity);
-    }
-
-    @Override
     public void processCancelledTransaction(BlockEventTickContext context, Transaction<BlockSnapshot> transaction, BlockSnapshot original) {
         context.getCapturedBlockSupplier().cancelTransaction(original);
         final WorldServer worldServer = ((SpongeBlockSnapshot) original).getWorldServer();
@@ -235,7 +222,7 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
     }
 
     @Override
-    public boolean hasSpecificBlockProcess() {
+    public boolean hasSpecificBlockProcess(BlockEventTickContext context) {
         return true;
     }
 

@@ -36,6 +36,7 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.world.BlockChangeFlag;
@@ -111,8 +112,9 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
     }
 
     @Override
-    public ChangeBlockEvent.Post createChangeBlockPostEvent(ExplosionContext context, ImmutableList<Transaction<BlockSnapshot>> transactions) {
-        return SpongeEventFactory.createExplosionEventPost(Sponge.getCauseStackManager().getCurrentCause(), context.getSpongeExplosion(), transactions);
+    public ChangeBlockEvent.Post createChangeBlockPostEvent(ExplosionContext context, ImmutableList<Transaction<BlockSnapshot>> transactions,
+        Cause cause) {
+        return SpongeEventFactory.createExplosionEventPost(cause, context.getSpongeExplosion(), transactions);
     }
 
     @Override

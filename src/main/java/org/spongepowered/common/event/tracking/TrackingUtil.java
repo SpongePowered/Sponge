@@ -54,10 +54,10 @@ import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.TickBlockEvent;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
@@ -461,12 +461,6 @@ public final class TrackingUtil {
         // This likely needs to delegate to the phase in the event we don't use the source object as the main object causing the block changes
         // case in point for WorldTick event listeners since the players are captured non-deterministically
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            try {
-                state.associateAdditionalCauses(context, frame);
-            } catch (Exception e) {
-                // TODO - this should be a thing to associate additional objects in the cause, or context, but for now it's just a simple
-                // try catch to avoid bombing on performing block changes.
-            }
             // Creates the block events accordingly to the transaction arrays
             iterateChangeBlockEvents(transactionArrays, blockEvents, mainEvents); // Needs to throw events
             // We create the post event and of course post it in the method, regardless whether any transactions are invalidated or not
@@ -585,7 +579,6 @@ public final class TrackingUtil {
             transaction.getOriginal().restore(true, BlockChangeFlags.NONE);
             ((IPhaseState) state).processCancelledTransaction(context, transaction, transaction.getOriginal());
         }
-        ((IPhaseState) state).postRestoreTransactions(context, invalid);
     }
 
     private static void iterateChangeBlockEvents(ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays, List<ChangeBlockEvent> blockEvents,
@@ -619,7 +612,7 @@ public final class TrackingUtil {
         if (!scheduledEvents.isEmpty()) {
             hasEvents = true;
         }
-        if (phaseState.hasSpecificBlockProcess()) {
+        if (((IPhaseState) phaseState).hasSpecificBlockProcess(phaseContext)) {
             // In some states, we need to be taking advantage of processing the transactions in the order in which they
             // were processed. This means recycling some usage of how transactions are processed, but at the same time
             // processing the ORDER of them differently (since some notifications or block events can be thrown around
@@ -820,17 +813,19 @@ public final class TrackingUtil {
         final List<ChangeBlockEvent> blockEvents, ChangeBlockEvent[] mainEvents) {
         if (!blockEvents.isEmpty()) {
             final ImmutableList<Transaction<BlockSnapshot>> transactions = transactionArrays[MULTI_CHANGE_INDEX];
-            try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                for (BlockChange blockChange : BlockChange.values()) {
-                    final ChangeBlockEvent mainEvent = mainEvents[blockChange.ordinal()];
-                    if (mainEvent != null) {
-                        frame.pushCause(mainEvent);
-                    }
+            // We suffix the cause with the extra events, without modifying the cause stack manager to avoid adding extra
+            // contexts or resetting the caches, this allows us to avoid adding extra frames when unnecessary.
+            final Cause currentCause = Sponge.getCauseStackManager().getCurrentCause();
+            final Cause.Builder builder = Cause.builder().from(currentCause);
+            for (BlockChange blockChange : BlockChange.values()) {
+                final ChangeBlockEvent mainEvent = mainEvents[blockChange.ordinal()];
+                if (mainEvent != null) {
+                    builder.append(mainEvent);
                 }
-                final ChangeBlockEvent.Post post = ((IPhaseState) state).createChangeBlockPostEvent(context, transactions);
-                SpongeImpl.postEvent(post);
-                return post;
             }
+            final ChangeBlockEvent.Post post = ((IPhaseState) state).createChangeBlockPostEvent(context, transactions, builder.build(currentCause.getContext()));
+            SpongeImpl.postEvent(post);
+            return post;
         }
         return null;
     }

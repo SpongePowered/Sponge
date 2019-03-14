@@ -47,6 +47,7 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
@@ -63,8 +64,6 @@ import org.spongepowered.common.event.tracking.context.BlockTransaction;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
-import org.spongepowered.common.event.tracking.phase.general.PostState;
-import org.spongepowered.common.event.tracking.phase.general.UnwindingPhaseContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase.Listener;
@@ -348,17 +347,19 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      *
      * @param context
      * @param transactions
+     * @param cause
      * @return
      */
-    default ChangeBlockEvent.Post createChangeBlockPostEvent(C context, ImmutableList<Transaction<BlockSnapshot>> transactions) {
-        return SpongeEventFactory.createChangeBlockEventPost(Sponge.getCauseStackManager().getCurrentCause(), transactions);
+    default ChangeBlockEvent.Post createChangeBlockPostEvent(C context, ImmutableList<Transaction<BlockSnapshot>> transactions,
+        Cause cause) {
+        return SpongeEventFactory.createChangeBlockEventPost(cause, transactions);
     }
 
     /**
      * Performs any necessary custom logic after the provided {@link BlockSnapshot}
      * {@link Transaction} has taken place. The provided {@link BlockChange} is usually
      * provided from either {@link TrackingUtil#performTransactionProcess(Transaction, IPhaseState, PhaseContext, List, boolean, int)}
-     * or {@link PostState#postBlockTransactionApplication(BlockChange, Transaction, UnwindingPhaseContext)} due to
+     * or {@link UnwindingState#postBlockTransactionApplication(BlockChange, Transaction, UnwindingPhaseContext)} due to
      * delegation to the underlying context during post processing of reactionary
      * side effects (like water spread from a bucket).
      *
@@ -380,7 +381,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     }
 
     /**
-     * During {@link PostState#unwind(UnwindingPhaseContext)}, this delegates to the "unwinding" state to perform
+     * During {@link UnwindingState#unwind(UnwindingPhaseContext)}, this delegates to the "unwinding" state to perform
      * any extra handling with contexts to spawn entities that were captured.
      *
      * @param unwindingContext
@@ -707,19 +708,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     }
 
     /**
-     * Appends the stack frame with any additional objects needed from the phase context. Currently
-     * only used for notifiers and owners. May expand further.
-     *
-     * @param context The context to populate from
-     * @param frame The frame to populate
-     */
-    default void associateAdditionalCauses(PhaseContext<?> context, CauseStackManager.StackFrame frame) {
-        context.applyOwnerIfAvailable(owner -> frame.addContext(EventContextKeys.OWNER, owner));
-        context.applyNotifierIfAvailable(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
-
-    }
-
-    /**
      * Associates any notifier/owner information from expected states that will assuredly provide
      * said information. In some states, like world gen, there is no information to provide.
      *
@@ -866,7 +854,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     @Nullable
     default BlockTransaction.ChangeBlock captureBlockChange(C phaseContext, BlockPos pos, SpongeBlockSnapshot originalBlockSnapshot, IBlockState newState,
         BlockChangeFlag flags, @Nullable TileEntity tileEntity) {
-        if (this.tracksTileEntityChanges(phaseContext)) {
+        if (this.hasSpecificBlockProcess(phaseContext)) {
             return phaseContext.getCapturedBlockSupplier().logBlockChange(originalBlockSnapshot, newState, pos, flags);
         }
         phaseContext.getCapturedBlockSupplier().put(originalBlockSnapshot, newState);
@@ -893,17 +881,18 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         }
     }
 
-    default void postRestoreTransactions(C context, List<Transaction<BlockSnapshot>> invalid) {
-
-    }
-
     default Transaction<BlockSnapshot> createTransaction(C context, SpongeBlockSnapshot snapshot) {
         return context.getCapturedBlockSupplier().createTransaction(snapshot);
     }
-    default boolean hasSpecificBlockProcess() {
+    default boolean hasSpecificBlockProcess(C context) {
         return false;
     }
     default boolean doesCaptureNeighborNotifications(C context) {
         return false;
     }
+
+    default void postProcessSpecificBlockChange(C currentContext, BlockTransaction.ChangeBlock changeBlock, int i) {
+
+    }
+
 }
