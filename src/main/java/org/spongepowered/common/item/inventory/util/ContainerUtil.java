@@ -333,7 +333,7 @@ public final class ContainerUtil {
             crafting.base = index;
             crafting.grid = ((InventoryCrafting) subInventory);
         }
-        return new DelegatingLens(index, adapterLens, slots);
+        return new DelegatingLens(index, slotList, adapterLens, slots);
     }
 
     /**
