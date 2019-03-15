@@ -124,4 +124,12 @@ public interface IMixinChunk {
     boolean isActive();
 
     boolean isEmpty();
+
+    default Optional<UUID> getBlockNotifierUUID(int x, int y, int z) {
+        return getBlockNotifierUUID(new BlockPos(x, y, z));
+    }
+
+    default Optional<UUID> getBlockOwnerUUID(int x, int y, int z) {
+        return getBlockOwnerUUID(new BlockPos(x, y, z));
+    }
 }

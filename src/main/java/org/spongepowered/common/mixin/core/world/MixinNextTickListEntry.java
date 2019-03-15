@@ -28,8 +28,11 @@ import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.NextTickListEntry;
+import net.minecraft.world.TickPriority;
 import net.minecraft.world.World;
 import org.spongepowered.api.scheduler.ScheduledUpdate;
+import org.spongepowered.api.scheduler.TaskPriority;
+import org.spongepowered.api.util.TemporalUnits;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
@@ -44,12 +47,12 @@ import java.time.Duration;
 
 @Mixin(NextTickListEntry.class)
 @Implements(@Interface(iface = ScheduledUpdate.class, prefix = "update$"))
-public abstract class MixinNextTickListEntry implements IMixinNextTickListEntry {
+public abstract class MixinNextTickListEntry<T> implements IMixinNextTickListEntry {
 
-    @Shadow public abstract Object getTarget();
+    @Shadow public abstract Object shadow$getTarget();
     @Shadow @Final public BlockPos position;
-    @Shadow public int priority;
-    @Shadow public long scheduledTime;
+    @Shadow @Final public long scheduledTime;
+    @Shadow @Final public TickPriority priority;
 
     private Location location;
     private World world;
@@ -57,35 +60,58 @@ public abstract class MixinNextTickListEntry implements IMixinNextTickListEntry 
     @Override
     public void setWorld(World world) {
         checkState(this.location == null, "World already known");
-        this.location = new Location<>((org.spongepowered.api.world.World) world, VecHelper.toVector3i(this.position));
+        this.location = new Location((org.spongepowered.api.world.World) world, VecHelper.toVector3i(this.position));
         this.world = world;
     }
 
-    @Override
-    public Location getLocation() {
-        checkState(this.location != null, "Unable to determine location at this time");
+    public Location update$getLocation() {
         return this.location;
     }
 
-    @Override
-    public int getTicks() {
-        if (this.world == null) {
-            return Integer.MAX_VALUE;
-        }
-        return (int) (this.scheduledTime - this.world.getWorldInfo().getTime());
+    /**
+     * Gets the target of this scheduled update.
+     *
+     * @return The target
+     */
+    public T update$getTarget() {
+        return (T) shadow$getTarget();
     }
 
-    @Override
-    public void setTicks(int ticks) {
-        if (this.world == null) {
-            return;
-        }
-        this.scheduledTime = this.world.getWorldInfo().getWorldTotalTime() + ticks;
+    /**
+     * Gets the {@link Duration delay} until this update
+     * should cause the block to update.
+     *
+     * @return The delay until this SBU should cause the block to update
+     */
+    public Duration update$getDelay() {
+
     }
 
-    @Intrinsic
-    public Object update$getTarget() {
-        return this.getTarget();
+    /**
+     * Gets the priority of this scheduled block update.
+     *
+     * @return The priority of this scheduled block update
+     */
+    public TaskPriority update$getPriority() {
+
+    }
+
+    /**
+     * Gets the {@link ScheduledUpdate.State} of this scheduled update.
+     *
+     * @return The state
+     */
+    public ScheduledUpdate.State update$getState() {
+
+    }
+
+    /**
+     * Cancels this scheduled update.
+     *
+     * @return Returns if the scheduled update was successfully cancelled
+     */
+    public boolean update$cancel() {
+
     }
 
 }

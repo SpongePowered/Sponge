@@ -89,7 +89,7 @@ public abstract class MixinBlockDropper {
             IMixinInventory capture = forCapture(tileentitydispenser);
             Inventory sourceInv = toInventory(tileentitydispenser);
             SpongeCommonEventFactory.captureTransaction(capture, sourceInv, i, itemstack);
-            EnumFacing enumfacing = worldIn.getBlockState(pos).getValue(BlockDispenser.FACING);
+            EnumFacing enumfacing = worldIn.getBlock(pos).getValue(BlockDispenser.FACING);
             BlockPos blockpos = pos.offset(enumfacing);
             IInventory iinventory = TileEntityHopper.getInventoryAtPosition(worldIn, (double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ());
             SpongeCommonEventFactory.callTransferPost(capture, sourceInv, toInventory(iinventory));

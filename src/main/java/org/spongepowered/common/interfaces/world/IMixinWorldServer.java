@@ -96,8 +96,6 @@ public interface IMixinWorldServer extends IMixinWorld {
 
     net.minecraft.world.Explosion triggerInternalExplosion(Explosion explosion, Function<net.minecraft.world.Explosion, PhaseContext<?>> contextCreator);
 
-    void playCustomSound(@Nullable EntityPlayer player, double x, double y, double z, ResourceLocation soundIn, SoundCategory category, float volume, float pitch);
-
     void doChunkGC();
 
 }

@@ -673,7 +673,8 @@ public final class EntityUtil {
         return (World) player.world;
     }
 
-    public static Player toPlayer(EntityPlayer player) {
+    @Nullable
+    public static Player toPlayer(@Nullable EntityPlayer player) {
         return (Player) player;
     }
 

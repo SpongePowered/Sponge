@@ -856,7 +856,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      */
     @Override
     @Overwrite
-    public void updateEntities() {
+    public void tickEntities() {
         // Sponge start
         /*
         if (this.playerEntities.isEmpty()) {
@@ -2263,118 +2263,6 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     /**************************** EFFECT ****************************************/
-
-    @Override
-    public void playSound(SoundType sound, SoundCategory category, Vector3d position, double volume) {
-        this.playSound(sound, category, position, volume, 1);
-    }
-
-    @Override
-    public void playSound(SoundType sound,  SoundCategory category, Vector3d position, double volume, double pitch) {
-        this.playSound(sound, category, position, volume, pitch, 0);
-    }
-
-    @Override
-    public void playSound(SoundType sound,  SoundCategory category, Vector3d position, double volume, double pitch, double minVolume) {
-        SoundEvent event;
-        try {
-            // Check if the event is registered (ie has an integer ID)
-            event = SoundEvents.getRegisteredSoundEvent(sound.getKey().toString());
-        } catch (IllegalStateException e) {
-            // Otherwise send it as a custom sound
-            this.playCustomSound(null, position.getX(), position.getY(), position.getZ(), (ResourceLocation) (Object) sound.getKey(),
-                    (net.minecraft.util.SoundCategory) (Object) category, (float) Math.max(minVolume, volume), (float) pitch);
-            return;
-        }
-
-        this.playSound(null, position.getX(), position.getY(), position.getZ(), event, (net.minecraft.util.SoundCategory) (Object) category,
-                (float) Math.max(minVolume, volume), (float) pitch);
-    }
-
-    @Override
-    public void playCustomSound(@Nullable EntityPlayer player, double x, double y, double z, ResourceLocation soundIn, net.minecraft.util.SoundCategory category,
-            float volume, float pitch) {
-
-        if (player instanceof IMixinEntity) {
-            if (((IMixinEntity) player).isVanished()) {
-                return;
-            }
-        }
-
-        this.eventListeners.stream()
-                .filter(listener -> listener instanceof IMixinServerWorldEventHandler)
-                .map(listener -> (IMixinServerWorldEventHandler) listener)
-                .forEach(listener -> {
-                    // There's no method for playing a custom sound to all, so I made one -_-
-                    listener.playCustomSoundToAllNearExcept(null, soundIn, category, x, y, z, volume, pitch);
-                });
-    }
-
-    @Override
-    public void stopSounds() {
-        stopSounds0(null, null);
-    }
-
-    @Override
-    public void stopSounds(SoundType sound) {
-        stopSounds0(checkNotNull(sound, "sound"), null);
-    }
-
-    @Override
-    public void stopSounds(SoundCategory category) {
-        stopSounds0(null, checkNotNull(category, "category"));
-    }
-
-    @Override
-    public void stopSounds(SoundType sound, SoundCategory category) {
-        stopSounds0(checkNotNull(sound, "sound"), checkNotNull(category, "category"));
-    }
-
-    private void stopSounds0(@Nullable SoundType sound, @Nullable SoundCategory category) {
-        this.server.getPlayerList().sendPacketToAllPlayersInDimension(
-                SoundEffectHelper.createStopSoundPacket(sound, category), getDimensionId());
-    }
-
-    @Override
-    public void spawnParticles(ParticleEffect particleEffect, Vector3d position) {
-        this.spawnParticles(particleEffect, position, Integer.MAX_VALUE);
-    }
-
-    @Override
-    public void spawnParticles(ParticleEffect particleEffect, Vector3d position, int radius) {
-        checkNotNull(particleEffect, "The particle effect cannot be null!");
-        checkNotNull(position, "The position cannot be null");
-        checkArgument(radius > 0, "The radius has to be greater then zero!");
-
-        List<Packet<?>> packets = SpongeParticleHelper.toPackets((SpongeParticleEffect) particleEffect, position);
-
-        if (!packets.isEmpty()) {
-            PlayerList playerList = this.server.getPlayerList();
-
-            double x = position.getX();
-            double y = position.getY();
-            double z = position.getZ();
-
-            for (Packet<?> packet : packets) {
-                playerList.sendToAllNearExcept(null, x, y, z, radius, this.getDimensionId(), packet);
-            }
-        }
-    }
-
-    @Override
-    public void playRecord(Vector3i position, RecordType recordType) {
-        playRecord0(position, checkNotNull(recordType, "recordType"));
-    }
-
-    @Override
-    public void stopRecord(Vector3i position) {
-        playRecord0(position, null);
-    }
-
-    private void playRecord0(Vector3i position, @Nullable RecordType recordType) {
-        this.server.getPlayerList().sendPacketToAllPlayersInDimension(
-                SpongeMusicDisc.createPacket(position, recordType), getDimensionId());
-    }
 
     @Override
     public Weather getWeather() {

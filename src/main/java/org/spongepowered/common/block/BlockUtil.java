@@ -27,6 +27,7 @@ package org.spongepowered.common.block;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.block.BlockState;
@@ -41,6 +42,9 @@ public final class BlockUtil {
 
     public static final UUID INVALID_WORLD_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
+    public static IBlockReader readerOf(IBlockState state, BlockPos pos) {
+        return new SingleBlockReader(state, pos);
+    }
 
     public static boolean setBlockState(World world, BlockPos position, BlockState state, boolean notifyNeighbors) {
         return world.setBlockState(position, toNative(state), notifyNeighbors ? 3 : 2);

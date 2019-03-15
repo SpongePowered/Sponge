@@ -24,10 +24,13 @@
  */
 package org.spongepowered.common.mixin.core.world;
 
+import static com.google.common.base.Preconditions.checkState;
+
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.world.IWorld;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
@@ -39,13 +42,17 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.persistence.InvalidDataException;
+import org.spongepowered.api.data.property.LocationBasePropertyHolder;
 import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.data.property.store.PropertyStore;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.ProtoWorld;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.volume.LocationCompositeValueStore;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 
@@ -58,64 +65,85 @@ import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.Set;
 
+/**
+ * Specifically all of the Data API related implementation methods are
+ * gathered here, instead of {@link MixinIWorld_API}, because a majority
+ * of all of this implementation will still function the same way on
+ * any ProtoWorld (IWorld) type, including client worlds, chunk caches,
+ * etc. because they are based on
+ * @param <P>
+ */
 @SuppressWarnings({"unchecked", "rawtypes"})
-@Mixin(net.minecraft.world.World.class)
-public abstract class MixinWorld_Data implements World {
+@Mixin(IWorld.class)
+public abstract class MixinIWorld_Data<P extends ProtoWorld<P>> implements ProtoWorld<P>, LocationBasePropertyHolder, LocationCompositeValueStore {
+
+    @Shadow public abstract net.minecraft.world.World shadow$getWorld();
 
     @Override
     public Map<Property<?>, ?> getProperties(Vector3i coords) {
-        return SpongeImpl.getPropertyRegistry().getPropertiesFor(new Location(this, coords));
+        checkState(shadow$getWorld() instanceof World, "Not a valid type of world!");
+        return SpongeImpl.getPropertyRegistry().getPropertiesFor(new Location(getWorld(), coords));
     }
 
     @Override
     public Map<Property<?>, ?> getProperties(int x, int y, int z) {
-        return SpongeImpl.getPropertyRegistry().getPropertiesFor(new Location(this, x, y, z));
+        checkState(shadow$getWorld() instanceof World, "Not a valid type of world!");
+        return SpongeImpl.getPropertyRegistry().getPropertiesFor(new Location(getWorld(), x, y, z));
     }
 
     @Override
     public <V> Optional<V> getProperty(Vector3i coords, Property<V> property) {
-        return SpongeImpl.getPropertyRegistry().getStore(property).getFor(new Location(this, coords));
+        checkState(shadow$getWorld() instanceof World, "Not a valid type of world!");
+        return SpongeImpl.getPropertyRegistry().getStore(property).getFor(new Location(getWorld(), coords));
     }
 
     @Override
     public <V> Optional<V> getProperty(int x, int y, int z, Property<V> property) {
-        return SpongeImpl.getPropertyRegistry().getStore(property).getFor(new Location(this, x, y, z));
+        checkState(shadow$getWorld() instanceof World, "Not a valid type of world!");
+        return SpongeImpl.getPropertyRegistry().getStore(property).getFor(new Location(getWorld(), x, y, z));
     }
 
     @Override
     public <V> Optional<V> getProperty(Vector3i coords, Direction direction, Property<V> property) {
-        return SpongeImpl.getPropertyRegistry().getStore(property).getFor(new Location(this, coords), direction);
+        checkState(shadow$getWorld() instanceof World, "Not a valid type of world!");
+        return SpongeImpl.getPropertyRegistry().getStore(property).getFor(new Location(getWorld(), coords), direction);
     }
 
     @Override
     public <V> Optional<V> getProperty(int x, int y, int z, Direction direction, Property<V> property) {
-        return SpongeImpl.getPropertyRegistry().getStore(property).getFor(new Location(this, x, y, z), direction);
+        checkState(shadow$getWorld() instanceof World, "Not a valid type of world!");
+        return SpongeImpl.getPropertyRegistry().getStore(property).getFor(new Location(getWorld(), x, y, z), direction);
     }
 
     @Override
     public OptionalDouble getDoubleProperty(Vector3i coords, Property<Double> property) {
-        return SpongeImpl.getPropertyRegistry().getDoubleStore(property).getDoubleFor(new Location(this, coords));
+        checkState(shadow$getWorld() instanceof World, "Not a valid type of world!");
+        return SpongeImpl.getPropertyRegistry().getDoubleStore(property).getDoubleFor(new Location(getWorld(), coords));
     }
 
     @Override
     public OptionalDouble getDoubleProperty(int x, int y, int z, Property<Double> property) {
-        return SpongeImpl.getPropertyRegistry().getDoubleStore(property).getDoubleFor(new Location(this, x, y, z));
+        checkState(shadow$getWorld() instanceof World, "Not a valid type of world!");
+        return SpongeImpl.getPropertyRegistry().getDoubleStore(property).getDoubleFor(new Location(getWorld(), x, y, z));
     }
 
     @Override
     public OptionalInt getIntProperty(Vector3i coords, Property<Integer> property) {
-        return SpongeImpl.getPropertyRegistry().getIntStore(property).getIntFor(new Location(this, coords));
+        checkState(shadow$getWorld() instanceof World, "Not a valid type of world!");
+        return SpongeImpl.getPropertyRegistry().getIntStore(property).getIntFor(new Location(getWorld(), coords));
     }
 
     @Override
     public OptionalInt getIntProperty(int x, int y, int z, Property<Integer> property) {
-        return SpongeImpl.getPropertyRegistry().getIntStore(property).getIntFor(new Location(this, x, y, z));
+        checkState(shadow$getWorld() instanceof World, "Not a valid type of world!");
+        return SpongeImpl.getPropertyRegistry().getIntStore(property).getIntFor(new Location(getWorld(), x, y, z));
     }
 
     @Override
     public Collection<Direction> getFacesWithProperty(Vector3i coords, Property<?> property) {
+        checkState(shadow$getWorld() instanceof World, "Not a valid type of world!");
         final PropertyStore<?> store = Sponge.getPropertyRegistry().getStore(property);
-        final Location<World> loc = new Location<>(this, coords);
+        final Location loc = new Location(getWorld(), coords);
         final ImmutableList.Builder<Direction> faces = ImmutableList.builder();
         for (EnumFacing facing : EnumFacing.values()) {
             final Direction direction = DirectionFacingProvider.getInstance().getKey(facing).get();
@@ -133,7 +161,8 @@ public abstract class MixinWorld_Data implements World {
 
     @Override
     public <E> Optional<E> get(int x, int y, int z, Key<? extends Value<E>> key) {
-        final Optional<E> optional = getBlock(x, y, z).withExtendedProperties(new Location<>(this, x, y, z)).get(key);
+        checkState(shadow$getWorld() instanceof World, "Not a valid type of world!");
+        final Optional<E> optional = getBlock(x, y, z).get(key);
         if (optional.isPresent()) {
             return optional;
         }
@@ -165,7 +194,7 @@ public abstract class MixinWorld_Data implements World {
 
     @Override
     public <E, V extends Value<E>> Optional<V> getValue(int x, int y, int z, Key<V> key) {
-        final BlockState blockState = getBlock(x, y, z).withExtendedProperties(new Location<>(this, x, y, z));
+        final BlockState blockState = getBlock(x, y, z);
         if (blockState.supports(key)) {
             return blockState.getValue(key);
         }
@@ -208,7 +237,7 @@ public abstract class MixinWorld_Data implements World {
     @Override
     public Set<Key<?>> getKeys(int x, int y, int z) {
         final ImmutableSet.Builder<Key<?>> builder = ImmutableSet.builder();
-        final BlockState blockState = getBlock(x, y, z).withExtendedProperties(new Location<>(this, x, y, z));
+        final BlockState blockState = getBlock(x, y, z);
         builder.addAll(blockState.getKeys());
         final Optional<TileEntity> tileEntity = getTileEntity(x, y, z);
         tileEntity.ifPresent(tileEntity1 -> builder.addAll(tileEntity1.getKeys()));
@@ -218,7 +247,7 @@ public abstract class MixinWorld_Data implements World {
     @Override
     public Set<Value.Immutable<?>> getValues(int x, int y, int z) {
         final ImmutableSet.Builder<Value.Immutable<?>> builder = ImmutableSet.builder();
-        final BlockState blockState = getBlock(x, y, z).withExtendedProperties(new Location<>(this, x, y, z));
+        final BlockState blockState = getBlock(x, y, z);
         builder.addAll(blockState.getValues());
         final Optional<TileEntity> tileEntity = getTileEntity(x, y, z);
         tileEntity.ifPresent(tileEntity1 -> builder.addAll(tileEntity1.getValues()));
@@ -227,7 +256,7 @@ public abstract class MixinWorld_Data implements World {
 
     @Override
     public <E> DataTransactionResult offer(int x, int y, int z, Key<? extends Value<E>> key, E value) {
-        final BlockState blockState = getBlock(x, y, z).withExtendedProperties(new Location<>(this, x, y, z));
+        final BlockState blockState = getBlock(x, y, z);
         if (blockState.supports(key)) {
             Value.Immutable<E> old = ((Value.Mutable<E>) getValue(x, y, z, (Key) key).get()).asImmutable();
             setBlock(x, y, z, blockState.with(key, value).get());
@@ -241,7 +270,7 @@ public abstract class MixinWorld_Data implements World {
 
     @Override
     public DataTransactionResult offer(int x, int y, int z, DataManipulator<?, ?> manipulator, MergeFunction function) {
-        final BlockState blockState = getBlock(x, y, z).withExtendedProperties(new Location<>(this, x, y, z));
+        final BlockState blockState = getBlock(x, y, z);
         final ImmutableDataManipulator<?, ?> immutableDataManipulator = manipulator.asImmutable();
         if (blockState.supports((Class) immutableDataManipulator.getClass())) {
             final List<Value.Immutable<?>> old = new ArrayList<>(blockState.getValues());
@@ -293,14 +322,13 @@ public abstract class MixinWorld_Data implements World {
 
     @Override
     public DataTransactionResult copyFrom(int xTo, int yTo, int zTo, int xFrom, int yFrom, int zFrom, MergeFunction function) {
-        return copyFrom(xTo, yTo, zTo, new Location<World>(this, xFrom, yFrom, zFrom), function);
+        return copyFrom(xTo, yTo, zTo, new Location(getWorld(), xFrom, yFrom, zFrom), function);
     }
 
     @Override
     public Collection<DataManipulator<?, ?>> getManipulators(int x, int y, int z) {
         final List<DataManipulator<?, ?>> list = new ArrayList<>();
-        final Collection<ImmutableDataManipulator<?, ?>> manipulators = this.getBlock(x, y, z)
-            .withExtendedProperties(new Location<>(this, x, y, z))
+        final Collection<ImmutableDataManipulator<?, ?>> manipulators = getBlock(x, y, z)
             .getManipulators();
         for (ImmutableDataManipulator<?, ?> immutableDataManipulator : manipulators) {
             list.add(immutableDataManipulator.asMutable());

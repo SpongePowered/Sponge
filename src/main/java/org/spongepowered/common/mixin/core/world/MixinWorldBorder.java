@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.world;
 
 import com.flowpowered.math.vector.Vector3d;
+import org.spongepowered.api.util.TemporalUnits;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.asm.mixin.Implements;
@@ -32,6 +33,8 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+
+import java.time.Duration;
 
 @NonnullByDefault
 @Mixin(net.minecraft.world.border.WorldBorder.class)
@@ -46,37 +49,16 @@ public abstract class MixinWorldBorder implements WorldBorder {
     @Shadow public abstract long getTimeUntilTarget();
     @Shadow public abstract double getDamageBuffer();
     @Shadow public abstract void setDamageBuffer(double buffer);
-    @Shadow(prefix = "shadow$")
-    public abstract void shadow$setCenter(double x, double z);
-    @Shadow(prefix = "shadow$")
-    public abstract int shadow$getWarningTime();
-    @Shadow(prefix = "shadow$")
-    public abstract void shadow$setWarningTime(int time);
-    @Shadow(prefix = "shadow$")
-    public abstract int shadow$getWarningDistance();
-    @Shadow(prefix = "shadow$")
-    public abstract void shadow$setWarningDistance(int distance);
-    @Shadow(prefix = "shadow$")
-    public abstract double shadow$getDiameter();
+    @Shadow public abstract void shadow$setCenter(double x, double z);
+    @Shadow public abstract int shadow$getWarningTime();
+    @Shadow public abstract void shadow$setWarningTime(int time);
+    @Shadow public abstract int shadow$getWarningDistance();
+    @Shadow public abstract void shadow$setWarningDistance(int distance);
+    @Shadow public abstract double shadow$getDiameter();
 
     @Intrinsic
-    public int border$getWarningTime() {
-        return shadow$getWarningTime();
-    }
-
-    @Intrinsic
-    public void border$setWarningTime(int time) {
-        shadow$setWarningTime(time);
-    }
-
-    @Intrinsic
-    public int border$getWarningDistance() {
-        return shadow$getWarningDistance();
-    }
-
-    @Intrinsic
-    public void border$setWarningDistance(int distance) {
-        shadow$setWarningDistance(distance);
+    public Duration border$getWarningTime() {
+        return Duration.of(shadow$getWarningTime(), TemporalUnits.MINECRAFT_TICKS);
     }
 
     @Override
@@ -95,18 +77,18 @@ public abstract class MixinWorldBorder implements WorldBorder {
     }
 
     @Override
-    public void setDiameter(double diameter, long time) {
-        setTransition(getDiameter(), diameter, time);
+    public void setDiameter(double diameter, Duration time) {
+        setTransition(getDiameter(), diameter, time.get(TemporalUnits.MINECRAFT_TICKS));
     }
 
     @Override
-    public void setDiameter(double startDiameter, double endDiameter, long time) {
-        setTransition(startDiameter, endDiameter, time);
+    public void setDiameter(double startDiameter, double endDiameter, Duration time) {
+        setTransition(startDiameter, endDiameter, time.getNano() % 50);
     }
 
     @Override
-    public long getTimeRemaining() {
-        return getTimeUntilTarget();
+    public Duration getTimeRemaining() {
+        return null;// todo - implement
     }
 
     @Override

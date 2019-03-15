@@ -162,6 +162,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     @Shadow @Final private ChunkSection[] sections;
     @Shadow @Final private ClassInheritanceMultiMap<Entity>[] entityLists;
     @Shadow @Final private Map<BlockPos, TileEntity> tileEntities;
+    @Shadow @Final private Map<Heightmap.Type, Heightmap> heightMap;
     @Shadow private long inhabitedTime;
     @Shadow private boolean loaded;
     @Shadow private boolean isTerrainPopulated;
@@ -170,29 +171,17 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
 
     // @formatter:off
     @Shadow @Nullable public abstract TileEntity getTileEntity(BlockPos pos, EnumCreateEntityType p_177424_2_);
+    @Shadow public abstract boolean isEmpty();
     @Shadow public abstract void generateSkylightMap();
     @Shadow public abstract IBlockState getBlockState(BlockPos pos);
-    @Shadow public abstract IBlockState getBlockState(int x, int y, int z);
-    @Shadow public abstract byte[] getBiomeArray();
-    @Shadow public abstract void setBiomeArray(byte[] biomeArray);
-    @Shadow public abstract void checkLight();
-    @Shadow public abstract <T extends Entity> void getEntitiesOfTypeWithinAABB(Class <? extends T > entityClass, AxisAlignedBB aabb,
-    List<T> listToFill, Predicate <? super T > p_177430_4_);
     @Shadow private void propagateSkylightOcclusion(int x, int z) { };
-    @Shadow private void relightBlock(int x, int y, int z) { };
-    @Shadow public abstract BlockPos getPrecipitationHeight(BlockPos pos);
+
     // @formatter:on
-
-    @Shadow @Override public abstract boolean isEmpty();
-
     @Shadow public abstract Biome getBiome(BlockPos p_201600_1_);
-
-    @Shadow @Final private Map<Heightmap.Type, Heightmap> heightMap;
-
     @Shadow public abstract int getLightFor(EnumLightType p_177413_1_, BlockPos p_177413_2_);
 
-    @Inject(method = "<init>(Lnet/minecraft/world/World;II)V", at = @At("RETURN"), remap = false)
-    public void onConstructed(World world, int x, int z, CallbackInfo ci) {
+    @Inject(method = "<init>(Lnet/minecraft/world/World;Lnet/minecraft/world/chunk/ChunkPrimer;II)V", at = @At("RETURN"), remap = false)
+    public void onConstructed(World world, ChunkPrimer primer, int x, int z, CallbackInfo ci) {
         this.chunkPos = new Vector3i(x, 0, z);
         this.blockMin = SpongeChunkLayout.instance.forceToChunk(this.chunkPos);
         this.blockMax = this.blockMin.add(SpongeChunkLayout.CHUNK_SIZE).sub(1, 1, 1);
@@ -430,7 +419,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     @Override
     public BlockType getBlockType(int x, int y, int z) {
         checkBlockBounds(x, y, z);
-        return (BlockType) getBlockState(x, y, z).getBlock();
+        return (BlockType) this.getBlock(x, y, z).getBlock();
     }
 
     @Override
@@ -438,39 +427,10 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         return this.sponge_world.createSnapshot((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15));
     }
 
-    @Override
-    public boolean restoreSnapshot(BlockSnapshot snapshot, boolean force, BlockChangeFlag flag) {
-        return this.sponge_world.restoreSnapshot(snapshot, force, flag);
-    }
-
-    @Override
-    public boolean restoreSnapshot(int x, int y, int z, BlockSnapshot snapshot, boolean force, BlockChangeFlag flag) {
-        return this.sponge_world.restoreSnapshot((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), snapshot, force, flag);
-    }
 
     @Override
     public int getHighestYAt(int x, int z) {
         return this.sponge_world.getHighestYAt((this.x << 4) + (x & 15), (this.z << 4) + (z & 15));
-    }
-
-    @Override
-    public int getPrecipitationLevelAt(int x, int z) {
-        return this.getPrecipitationHeight(new BlockPos(x, 0, z)).getY();
-    }
-
-    @Override
-    public Vector3i getBiomeMin() {
-        return this.biomeMin;
-    }
-
-    @Override
-    public Vector3i getBiomeMax() {
-        return this.biomeMax;
-    }
-
-    @Override
-    public Vector3i getBiomeSize() {
-        return BIOME_SIZE;
     }
 
     @Override
