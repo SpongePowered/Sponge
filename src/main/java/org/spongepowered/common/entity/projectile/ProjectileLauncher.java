@@ -56,6 +56,8 @@ import org.spongepowered.api.block.tileentity.carrier.Dispenser;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.entity.ShulkerBullet;
+import org.spongepowered.api.entity.living.golem.Shulker;
 import org.spongepowered.api.entity.projectile.Egg;
 import org.spongepowered.api.entity.projectile.EnderPearl;
 import org.spongepowered.api.entity.projectile.EyeOfEnder;
@@ -85,12 +87,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 
+import javax.annotation.Nullable;
+
 public class ProjectileLauncher {
 
     private static final Map<Class<? extends Projectile>, ProjectileLogic<?>> projectileLogic = Maps.newHashMap();
     private static final Map<Class<? extends ProjectileSource>, ProjectileSourceLogic<?>> projectileSourceLogic = Maps.newHashMap();
 
-    public static <T extends Projectile> Optional<T> launch(Class<T> projectileClass, ProjectileSource source, Vector3d vel) {
+    public static <T extends Projectile> Optional<T> launch(Class<T> projectileClass, ProjectileSource source, @Nullable Vector3d vel) {
         ProjectileLogic<T> logic = getLogic(projectileClass);
         if (logic == null) {
             return Optional.empty();
@@ -102,12 +106,28 @@ public class ProjectileLauncher {
             }
             t.setShooter(source);
         });
-        if (projectile.isPresent()) {
-            if (vel != null) {
-                projectile.get().offer(Keys.VELOCITY, vel);
-            }
-            projectile.get().setShooter(source);
+        return projectile;
+    }
+
+    public static <T extends Projectile, S extends ProjectileSource> Optional<T> launchWithArgs(Class<T> projectileClass,
+            Class<S> projectileSourceClass, S source, @Nullable Vector3d vel, Object... args) {
+        ProjectileSourceLogic<S> sourceLogic = getSourceLogic(projectileSourceClass);
+        if (sourceLogic == null) {
+            return Optional.empty();
         }
+
+        ProjectileLogic<T> logic = getLogic(projectileClass);
+        if (logic == null) {
+            return Optional.empty();
+        }
+
+        Optional<T> projectile = sourceLogic.launch(logic, source, projectileClass, args);
+        projectile.ifPresent(t -> {
+            if (vel != null) {
+                t.offer(Keys.VELOCITY, vel);
+            }
+            t.setShooter(source);
+        });
         return projectile;
     }
 
@@ -176,6 +196,8 @@ public class ProjectileLauncher {
 
     static {
         registerProjectileSourceLogic(Dispenser.class, new DispenserSourceLogic());
+
+        registerProjectileSourceLogic(Shulker.class, new ShulkerSourceLogic());
 
         registerProjectileLogic(TippedArrow.class, new SimpleItemLaunchLogic<TippedArrow>(TippedArrow.class, Items.ARROW) {
 
@@ -350,6 +372,6 @@ public class ProjectileLauncher {
                 return doLaunch(loc.getExtent(), fireball);
             }
         });
+        registerProjectileLogic(ShulkerBullet.class, new SimpleEntityLaunchLogic<>(ShulkerBullet.class));
     }
-
 }
