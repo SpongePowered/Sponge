@@ -29,24 +29,25 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTargeted
 import org.spongepowered.api.data.manipulator.mutable.entity.TargetedEntityData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeTargetedEntityData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 import javax.annotation.Nullable;
 
-public final class ImmutableSpongeTargetedEntityData extends AbstractImmutableSingleData<Entity, ImmutableTargetedEntityData, TargetedEntityData>
+public final class ImmutableSpongeTargetedEntityData extends AbstractImmutableSingleData<EntitySnapshot, ImmutableTargetedEntityData, TargetedEntityData>
         implements ImmutableTargetedEntityData {
 
-    private final ImmutableValue<Entity> immutableValue;
+    private final ImmutableValue<EntitySnapshot> immutableValue;
 
-    public ImmutableSpongeTargetedEntityData(@Nullable Entity value) {
+    public ImmutableSpongeTargetedEntityData(@Nullable EntitySnapshot value) {
         super(ImmutableTargetedEntityData.class, value, Keys.TARGETED_ENTITY);
         this.immutableValue = new ImmutableSpongeValue<>(this.usedKey, value);
     }
 
     @Override
-    protected ImmutableValue<Entity> getValueGetter() {
+    protected ImmutableValue<EntitySnapshot> getValueGetter() {
         return this.value();
     }
 
@@ -56,7 +57,7 @@ public final class ImmutableSpongeTargetedEntityData extends AbstractImmutableSi
     }
 
     @Override
-    public ImmutableValue<Entity> value() {
+    public ImmutableValue<EntitySnapshot> value() {
         return this.immutableValue;
     }
 }

@@ -40,26 +40,30 @@ import org.spongepowered.common.interfaces.IEntityTargetingEntity;
 
 import java.util.Optional;
 
-public final class EntityTargetedEntityDataProcessor extends AbstractEntitySingleDataProcessor<Entity, org.spongepowered.api.entity.Entity,
-        Value<org.spongepowered.api.entity.Entity>, TargetedEntityData, ImmutableTargetedEntityData> {
+public final class EntityTargetedEntityDataProcessor extends AbstractEntitySingleDataProcessor<Entity, org.spongepowered.api.entity.EntitySnapshot,
+        Value<org.spongepowered.api.entity.EntitySnapshot>, TargetedEntityData, ImmutableTargetedEntityData> {
 
     public EntityTargetedEntityDataProcessor() {
         super(Entity.class, Keys.TARGETED_ENTITY);
     }
 
     @Override
-    protected boolean set(Entity dataHolder, org.spongepowered.api.entity.Entity value) {
+    protected boolean set(Entity dataHolder, org.spongepowered.api.entity.EntitySnapshot value) {
         ((IEntityTargetingEntity) dataHolder).setTargetedEntity((Entity) value);
         return true;
     }
 
     @Override
-    protected Optional<org.spongepowered.api.entity.Entity> getVal(Entity dataHolder) {
-        return Optional.ofNullable((org.spongepowered.api.entity.Entity) ((IEntityTargetingEntity) dataHolder).getTargetedEntity());
+    protected Optional<org.spongepowered.api.entity.EntitySnapshot> getVal(Entity dataHolder) {
+        Entity entity = ((IEntityTargetingEntity) dataHolder).getTargetedEntity();
+        if (entity == null) {
+            return Optional.empty();
+        }
+        return Optional.of(((org.spongepowered.api.entity.Entity) entity).createSnapshot());
     }
 
     @Override
-    protected ImmutableValue<org.spongepowered.api.entity.Entity> constructImmutableValue(org.spongepowered.api.entity.Entity value) {
+    protected ImmutableValue<org.spongepowered.api.entity.EntitySnapshot> constructImmutableValue(org.spongepowered.api.entity.EntitySnapshot value) {
         return new ImmutableSpongeValue<>(this.key, value);
     }
 
@@ -69,13 +73,13 @@ public final class EntityTargetedEntityDataProcessor extends AbstractEntitySingl
     }
 
     @Override
-    protected Value<org.spongepowered.api.entity.Entity> constructValue(org.spongepowered.api.entity.Entity actualValue) {
+    protected Value<org.spongepowered.api.entity.EntitySnapshot> constructValue(org.spongepowered.api.entity.EntitySnapshot actualValue) {
         return new SpongeValue<>(this.key, actualValue);
     }
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        Optional<org.spongepowered.api.entity.Entity> maybeTargetedEntity = container.get(Keys.TARGETED_ENTITY);
+        Optional<org.spongepowered.api.entity.EntitySnapshot> maybeTargetedEntity = container.get(Keys.TARGETED_ENTITY);
         if (maybeTargetedEntity.isPresent()) {
             ((IEntityTargetingEntity) container).setTargetedEntity(null);
             return DataTransactionResult.successRemove(new ImmutableSpongeValue<>(Keys.TARGETED_ENTITY, maybeTargetedEntity.get()));
