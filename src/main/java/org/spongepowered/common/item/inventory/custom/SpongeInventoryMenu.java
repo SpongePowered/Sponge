@@ -7,13 +7,13 @@ import net.minecraft.item.ItemStack;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.custom.ContainerType;
-import org.spongepowered.api.item.inventory.menu.ClickHandler;
+import org.spongepowered.api.item.inventory.menu.handler.ClickHandler;
 import org.spongepowered.api.item.inventory.menu.ClickTypes;
-import org.spongepowered.api.item.inventory.menu.CloseHandler;
+import org.spongepowered.api.item.inventory.menu.handler.CloseHandler;
 import org.spongepowered.api.item.inventory.menu.InventoryMenu;
-import org.spongepowered.api.item.inventory.menu.KeySwapHandler;
-import org.spongepowered.api.item.inventory.menu.SlotChangeHandler;
-import org.spongepowered.api.item.inventory.menu.SlotClickHandler;
+import org.spongepowered.api.item.inventory.menu.handler.KeySwapHandler;
+import org.spongepowered.api.item.inventory.menu.handler.SlotChangeHandler;
+import org.spongepowered.api.item.inventory.menu.handler.SlotClickHandler;
 import org.spongepowered.api.item.inventory.slot.SlotIndex;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.api.text.Text;
@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.BiConsumer;
 
 import javax.annotation.Nullable;
 
@@ -47,18 +46,18 @@ public class SpongeInventoryMenu implements InventoryMenu {
     }
 
     @Override
-    public ViewableInventory getCurrentInventory() {
+    public ViewableInventory getInventory() {
         return this.inventory;
     }
 
     @Override
     public ContainerType getType() {
-        return this.inventory.getContainerType();
+        return this.inventory.getType();
     }
 
     @Override
     public void setCurrentInventory(ViewableInventory inventory) {
-        if (this.getType().equals(inventory.getContainerType())) {
+        if (this.getType().equals(inventory.getType())) {
             // ideally we would just swap out the IInventory from existing slots
             // TODO handle container changes
             this.reopen(); // if not possible reopen

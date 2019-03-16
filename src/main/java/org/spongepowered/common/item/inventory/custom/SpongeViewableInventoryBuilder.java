@@ -15,13 +15,13 @@ import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.custom.ContainerType;
 import org.spongepowered.api.item.inventory.custom.ContainerTypes;
 import org.spongepowered.api.item.inventory.equipment.EquipmentInventory;
-import org.spongepowered.api.item.inventory.menu.ClickHandler;
+import org.spongepowered.api.item.inventory.menu.handler.ClickHandler;
 import org.spongepowered.api.item.inventory.menu.ClickType;
-import org.spongepowered.api.item.inventory.menu.CloseHandler;
+import org.spongepowered.api.item.inventory.menu.handler.CloseHandler;
 import org.spongepowered.api.item.inventory.menu.InventoryMenu;
-import org.spongepowered.api.item.inventory.menu.KeySwapHandler;
-import org.spongepowered.api.item.inventory.menu.SlotChangeHandler;
-import org.spongepowered.api.item.inventory.menu.SlotClickHandler;
+import org.spongepowered.api.item.inventory.menu.handler.KeySwapHandler;
+import org.spongepowered.api.item.inventory.menu.handler.SlotChangeHandler;
+import org.spongepowered.api.item.inventory.menu.handler.SlotClickHandler;
 import org.spongepowered.api.item.inventory.slot.SlotIndex;
 import org.spongepowered.api.item.inventory.type.GridInventory;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
@@ -369,7 +369,7 @@ Inventory inv2 = Inventory.builder().grid(3, 3).completeStructure().build();
 Inventory inv3 = Inventory.builder().grid(9, 3).completeStructure().build();
 
 ViewableInventory inv = ViewableInventory.builder()
-        .type(ContainerTypes.CHEST)
+        .type(ContainerTypes.CHEST_3X9)
         .source(inv1).grid(3, 3)
         .source(inv2).grid(3, 3).at(3, 1)
         .source(inv3).grid(3, 3).from(3, 0).at(6, 3)
@@ -381,7 +381,7 @@ ViewableInventory inv = ViewableInventory.builder()
         .build();
 
 ViewableInventory basicChest = ViewableInventory.builder()
-        .type(ContainerTypes.CHEST)
+        .type(ContainerTypes.CHEST_3X9)
         .completeStructure()
         .build();
 
@@ -421,7 +421,7 @@ EquipmentInventory armor = null;
 GridInventory mainGrid = null;
 Slot offhand = null;
 
-ViewableInventory.builder().type(ContainerTypes.CHEST)
+ViewableInventory.builder().type(ContainerTypes.CHEST_3X9)
 .source(armor).slots(4)
 .source(mainGrid).slots(5)
 .source(offhand).slot()

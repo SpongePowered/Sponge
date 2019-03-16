@@ -37,7 +37,7 @@ public abstract class MixinViewableCustomInventory extends MixinCustomInventory 
     @Shadow(remap = false) private ContainerType type;
 
     @Override
-    public ContainerType getContainerType() {
+    public ContainerType getType() {
         return this.type;
     }
 
