@@ -64,6 +64,7 @@ import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -463,6 +464,33 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
             builder.entityData(NbtTranslator.getInstance().translate(this.compound));
         }
         return builder.build();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.entityUuid, this.worldUuid, this.entityType, this.position, this.rotation, this.scale, this.manipulators, this.keys, this.values);
+    }
+
+    @SuppressWarnings("rawtypes")
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+
+        final SpongeEntitySnapshot other = (SpongeEntitySnapshot) obj;
+        return Objects.equals(this.entityUuid, other.entityUuid)
+                && Objects.equals(this.worldUuid, other.worldUuid)
+                && Objects.equals(this.entityType, other.entityType)
+                && Objects.equals(this.position, other.position)
+                && Objects.equals(this.rotation, other.rotation)
+                && Objects.equals(this.scale, other.scale)
+                && Objects.equals(this.manipulators, other.manipulators)
+                && Objects.equals(this.keys, other.keys)
+                && Objects.equals(this.values, other.values);
     }
 
     @Override
