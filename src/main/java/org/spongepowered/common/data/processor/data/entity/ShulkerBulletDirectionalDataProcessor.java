@@ -50,7 +50,8 @@ public class ShulkerBulletDirectionalDataProcessor extends AbstractEntitySingleD
 
     @Override
     protected boolean set(EntityShulkerBullet dataHolder, Direction value) {
-        return false;
+        ((IMixinShulkerBullet) dataHolder).setBulletDirection(value);
+        return true;
     }
 
     @Override
