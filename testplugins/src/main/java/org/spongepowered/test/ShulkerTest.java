@@ -1,8 +1,10 @@
 package org.spongepowered.test;
 
+import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.DyeColor;
@@ -17,6 +19,7 @@ import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.World;
 
@@ -25,12 +28,11 @@ import java.util.Iterator;
 import java.util.Random;
 
 @Plugin(id = "shulkertest", version = "0.0.0", name = "ShulkerTest", description = "Play with Shulkers!")
-public class ShulkerTest {
+public class ShulkerTest implements LoadableModule {
 
-    private Random random = new Random();
+    @Inject private PluginContainer container;
 
-    private boolean cancelImpacts;
-    private boolean colorShulker;
+    private final ShulkerListener listener = new ShulkerListener();
 
     @Listener
     public void onInit(GameInitializationEvent event) {
@@ -47,18 +49,6 @@ public class ShulkerTest {
 
             return CommandResult.success();
         }).build(), "untarget");
-
-        Sponge.getCommandManager().register(this, CommandSpec.builder().executor((src, args) -> {
-            this.cancelImpacts = !this.cancelImpacts;
-
-            return CommandResult.success();
-        }).build(), "toggle_impacts");
-
-        Sponge.getCommandManager().register(this, CommandSpec.builder().executor((src, args) -> {
-            this.colorShulker = !this.colorShulker;
-
-            return CommandResult.success();
-        }).build(), "color_shulkers");
 
         Sponge.getCommandManager().register(this, CommandSpec.builder().executor((src, args) -> {
             if (!(src instanceof Player)) {
@@ -94,29 +84,37 @@ public class ShulkerTest {
         }).build(), "target");
     }
 
-    @Listener
-    public void onEntitySpawn(SpawnEntityEvent event) {
-        if (!this.colorShulker)
-            return;
 
-        event.getEntities().forEach(entity -> {
-            if (entity instanceof Shulker) {
-                Collection<DyeColor> dyeColors = Sponge.getRegistry().getAllOf(DyeColor.class);
-                DyeColor dyeColor = dyeColors.toArray(new DyeColor[]{})[this.random.nextInt(dyeColors.size())];
-                entity.offer(Keys.DYE_COLOR, dyeColor);
-            }
-        });
+
+    @Override
+    public void enable(CommandSource src) {
+        Sponge.getEventManager().registerListeners(this.container, this.listener);
     }
 
-    @Listener
-    public void onBlockImpact(CollideBlockEvent.Impact event) {
-        if (this.cancelImpacts)
-            event.setCancelled(true);
-    }
+    public static class ShulkerListener {
 
-    @Listener
-    public void onEntityImpact(CollideEntityEvent.Impact event) {
-        if (this.cancelImpacts)
+        private final Random random = new Random();
+
+        @Listener
+        public void onEntitySpawn(SpawnEntityEvent event) {
+
+            event.getEntities().forEach(entity -> {
+                if (entity instanceof Shulker) {
+                    Collection<DyeColor> dyeColors = Sponge.getRegistry().getAllOf(DyeColor.class);
+                    DyeColor dyeColor = dyeColors.toArray(new DyeColor[]{})[this.random.nextInt(dyeColors.size())];
+                    entity.offer(Keys.DYE_COLOR, dyeColor);
+                }
+            });
+        }
+
+        @Listener
+        public void onBlockImpact(CollideBlockEvent.Impact event) {
             event.setCancelled(true);
+        }
+
+        @Listener
+        public void onEntityImpact(CollideEntityEvent.Impact event) {
+            event.setCancelled(true);
+        }
     }
 }
