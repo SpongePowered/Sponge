@@ -26,6 +26,7 @@ package org.spongepowered.common.registry;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
@@ -134,7 +135,7 @@ import javax.annotation.Nullable;
 @Singleton
 public class SpongeGameRegistry implements GameRegistry {
 
-    public static final boolean PRINT_CATALOG_TYPES = Boolean.parseBoolean(System.getProperty("sponge.print_all_catalog_types"));
+    private static final boolean PRINT_CATALOG_TYPES = Boolean.parseBoolean(System.getProperty("sponge.print_all_catalog_types"));
 
     static {
         TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(CatalogType.class), new CatalogTypeTypeSerializer());
@@ -149,9 +150,10 @@ public class SpongeGameRegistry implements GameRegistry {
     private RegistrationPhase phase = RegistrationPhase.PRE_REGISTRY; // Needed for module phase registrations
 
     protected final Map<Class<? extends CatalogType>, CatalogRegistryModule<?>> catalogRegistryMap = new IdentityHashMap<>();
-    private List<Class<? extends RegistryModule>> orderedModules = new ArrayList<>();
-    final Map<Class<? extends RegistryModule>, RegistryModule> classMap = new IdentityHashMap<>();
     private final Map<Class<?>, Supplier<?>> builderSupplierMap = new IdentityHashMap<>();
+
+    private final List<Class<? extends RegistryModule>> orderedModules = new ArrayList<>();
+    private final Map<Class<? extends RegistryModule>, RegistryModule> classMap = new IdentityHashMap<>();
     private final Set<RegistryModule> registryModules = new HashSet<>();
 
     @Inject
@@ -165,46 +167,20 @@ public class SpongeGameRegistry implements GameRegistry {
 
     public void preRegistryInit() {
         CommonModuleRegistry.getInstance().registerDefaultModules();
-        final DirectedGraph<Class<? extends RegistryModule>> graph = new DirectedGraph<>();
-        for (RegistryModule module : this.registryModules) {
-            this.classMap.put(module.getClass(), module);
-            addToGraph(module, graph);
-        }
-        // Now we need ot do the catalog ones
-        for (CatalogRegistryModule<?> module : this.catalogRegistryMap.values()) {
-            this.classMap.put(module.getClass(), module);
-            addToGraph(module, graph);
-        }
-
-        try {
-            this.orderedModules.addAll(TopologicalOrder.createOrderedLoad(graph));
-        } catch (CyclicGraphException e) {
-            StringBuilder msg = new StringBuilder();
-            msg.append("Registry module dependencies are cyclical!\n");
-            msg.append("Dependency loops are:\n");
-            for (DataNode<?>[] cycle : e.getCycles()) {
-                msg.append("[");
-                for (DataNode<?> node : cycle) {
-                    msg.append(node.getData().toString()).append(" ");
-                }
-                msg.append("]\n");
-            }
-            SpongeImpl.getLogger().fatal(msg.toString());
-            throw new RuntimeException("Registry modules dependencies error.");
-        }
+        syncModules();
 
         registerModulePhase();
         SpongeVillagerRegistry.registerVanillaTrades();
         DataRegistrar.setupSerialization();
-        final List<Tuple<Class<? extends CatalogType>, CatalogRegistryModule<?>>> modules = new ArrayList<>();
-        for (Map.Entry<Class<? extends CatalogType>, CatalogRegistryModule<?>> entry : this.catalogRegistryMap.entrySet()) {
-            modules.add(new Tuple<>(entry.getKey(), entry.getValue()));
-        }
-        modules.sort(Comparator.comparing(tuple -> tuple.getFirst().getSimpleName()));
         if (PRINT_CATALOG_TYPES) { // Lol... this gets spammy really fast.... Probably at some point should be put to file.
+            final List<Tuple<Class<? extends CatalogType>, CatalogRegistryModule<?>>> modules = new ArrayList<>();
+            for (Map.Entry<Class<? extends CatalogType>, CatalogRegistryModule<?>> entry : this.catalogRegistryMap.entrySet()) {
+                modules.add(new Tuple<>(entry.getKey(), entry.getValue()));
+            }
+            modules.sort(Comparator.comparing(tuple -> tuple.getFirst().getSimpleName()));
             final PrettyPrinter printer = new PrettyPrinter(100).add("Printing all Catalogs and their ID's").centre().hr()
-                .addWrapped(
-                    "This is a test to print out all registered catalogs during initialization for their mapping, id's, and objects themselves.");
+                    .addWrapped(
+                            "This is a test to print out all registered catalogs during initialization for their mapping, id's, and objects themselves.");
             for (Tuple<Class<? extends CatalogType>, CatalogRegistryModule<?>> module : modules) {
                 printer.add(" %s : %s", "CatalogType", module.getFirst().getSimpleName());
 
@@ -241,8 +217,8 @@ public class SpongeGameRegistry implements GameRegistry {
 
     @Override
     public SpongeGameRegistry registerModule(RegistryModule module) {
-        checkArgument(!this.registryModules.contains(module));
-        this.registryModules.add(checkNotNull(module));
+        checkNotNull(module);
+        checkArgument(this.registryModules.add(module));
         if (!this.orderedModules.isEmpty()) {
             syncModules();
         }
@@ -303,7 +279,6 @@ public class SpongeGameRegistry implements GameRegistry {
         return Optional.ofNullable((CatalogRegistryModule<T>) this.catalogRegistryMap.get(catalogClass));
     }
 
-    @SuppressWarnings("unchecked")
     public <TUnknown, T extends CatalogType> T getTranslated(Class<TUnknown> clazz, Class<T> catalogClazz) {
         CatalogRegistryModule<T> module = getRegistryModuleFor(catalogClazz).orElse(null);
         checkArgument(module instanceof ExtraClassCatalogRegistryModule);
@@ -350,21 +325,18 @@ public class SpongeGameRegistry implements GameRegistry {
     public <T extends ResettableBuilder<?, ? super T>> T createBuilder(Class<T> builderClass) {
         checkNotNull(builderClass, "Builder class was null!");
         final Supplier<?> supplier = this.builderSupplierMap.get(builderClass);
-        if (supplier == null) {
-            throw new IllegalArgumentException("Could not find a Supplier for the provided builder class: " + builderClass.getCanonicalName());
-        }
+        checkArgument(supplier != null, "Could not find a Supplier for the provided builder class: " + builderClass.getCanonicalName());
         return (T) supplier.get();
     }
 
     @Override
-    @SuppressWarnings("deprecation")
     public <T extends CatalogType> T register(Class<T> type, T obj) throws IllegalArgumentException, UnsupportedOperationException {
         CatalogRegistryModule<T> registryModule = getRegistryModuleFor(type).orElse(null);
         if (registryModule == null) {
             throw new UnsupportedOperationException("Failed to find a RegistryModule for that type");
         }
         if (registryModule instanceof SpongeAdditionalCatalogRegistryModule) {
-            if(((SpongeAdditionalCatalogRegistryModule<T>) registryModule).allowsApiRegistration()) {
+            if (((SpongeAdditionalCatalogRegistryModule<T>) registryModule).allowsApiRegistration()) {
                 ((SpongeAdditionalCatalogRegistryModule<T>) registryModule).registerAdditionalCatalog(obj);
                 return obj;
             }
@@ -467,7 +439,6 @@ public class SpongeGameRegistry implements GameRegistry {
         return SpongeFavicon.load(image);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public CraftingRecipeRegistry getCraftingRecipeRegistry() {
         return SpongeCraftingRecipeRegistry.getInstance();
@@ -508,13 +479,11 @@ public class SpongeGameRegistry implements GameRegistry {
         return SpongeVillagerRegistry.getInstance();
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public TextSerializerFactory getTextSerializerFactory() {
         return SpongeTextSerializerFactory.INSTANCE;
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public SpongeSelectorFactory getSelectorFactory() {
         return SpongeSelectorFactory.INSTANCE;
@@ -527,10 +496,8 @@ public class SpongeGameRegistry implements GameRegistry {
 
     private void registerModulePhase() {
         for (Class<? extends RegistryModule> moduleClass : this.orderedModules) {
-            if (!this.classMap.containsKey(moduleClass)) {
-                throw new IllegalStateException("Something funky happened!");
-            }
             final RegistryModule module = this.classMap.get(moduleClass);
+            checkState(module != null, "Something funky happened!");
             RegistryModuleLoader.tryModulePhaseRegistration(module);
             throwRegistryEvent(module);
         }
@@ -545,11 +512,12 @@ public class SpongeGameRegistry implements GameRegistry {
     }
 
     private void addToGraph(RegistryModule module, DirectedGraph<Class<? extends RegistryModule>> graph) {
+        checkNotNull(module.getClass(), "Dependency class was null!");
         graph.add(module.getClass());
         RegistrationDependency dependency = module.getClass().getAnnotation(RegistrationDependency.class);
         if (dependency != null) {
             for (Class<? extends RegistryModule> dependent : dependency.value()) {
-                graph.addEdge(checkNotNull(module.getClass(), "Dependency class was null!"), dependent);
+                graph.addEdge(module.getClass(), dependent);
             }
         }
     }
