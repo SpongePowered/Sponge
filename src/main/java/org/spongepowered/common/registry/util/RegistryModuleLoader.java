@@ -49,23 +49,31 @@ public final class RegistryModuleLoader {
     private RegistryModuleLoader() {
     }
 
-    public static void tryModulePhaseRegistration(RegistryModule module) {
+    public static boolean tryModulePhaseRegistration(RegistryModule module) {
         try {
             if (requiresCustomRegistration(module)) {
                 if (isCustomProperPhase(module)) {
                     Method method = getCustomRegistration(module);
                     invokeCustomRegistration(module, checkNotNull(method, "Custom registration module was null!"));
+                    return true;
+                } else {
+                    return false;
                 }
-            } else if (isDefaultProperPhase(module)) {
-                module.registerDefaults();
-                if (hasCatalogRegistration(module)) {
-                    Map<String, ?> map = getCatalogMap(module);
-                    if (map.isEmpty()) {
-                        return;
+            } else {
+                if (isDefaultProperPhase(module)) {
+                    module.registerDefaults();
+                    if (hasCatalogRegistration(module)) {
+                        Map<String, ?> map = getCatalogMap(module);
+                        if (map.isEmpty()) {
+                            return true;
+                        }
+                        RegisterCatalog regAnnot = getRegisterCatalogAnnot(module);
+                        Set<String> ignored = regAnnot.ignoredFields().length == 0 ? null : Sets.newHashSet(regAnnot.ignoredFields());
+                        RegistryHelper.mapFields(regAnnot.value(), map, ignored);
                     }
-                    RegisterCatalog regAnnot = getRegisterCatalogAnnot(module);
-                    Set<String> ignored = regAnnot.ignoredFields().length == 0 ? null : Sets.newHashSet(regAnnot.ignoredFields());
-                    RegistryHelper.mapFields(regAnnot.value(), map, ignored);
+                    return true;
+                } else {
+                    return false;
                 }
             }
         } catch (Exception e) {
