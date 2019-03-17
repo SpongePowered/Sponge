@@ -210,7 +210,6 @@ public class SpongeGameRegistry implements GameRegistry {
             if (catalogClass.getName().contains("org.spongepowered.api") && catalogClass.getAnnotation(PluginProvidedRegistryModule.class) == null) {
                 throw new UnsupportedOperationException("Cannot register a module for an API defined class! That's the implementation's job!");
             }
-            syncModules();
         }
         return this;
     }
@@ -219,9 +218,6 @@ public class SpongeGameRegistry implements GameRegistry {
     public SpongeGameRegistry registerModule(RegistryModule module) {
         checkNotNull(module);
         checkArgument(this.registryModules.add(module));
-        if (!this.orderedModules.isEmpty()) {
-            syncModules();
-        }
         return this;
     }
 
@@ -524,16 +520,19 @@ public class SpongeGameRegistry implements GameRegistry {
 
     public void preInit() {
         this.phase = RegistrationPhase.PRE_INIT;
+        syncModules();
         registerModulePhase();
     }
 
     public void init() {
         this.phase = RegistrationPhase.INIT;
+        syncModules();
         registerModulePhase();
     }
 
     public void postInit() {
         this.phase = RegistrationPhase.POST_INIT;
+        syncModules();
         registerModulePhase();
         this.propertyRegistry.completeRegistration();
         SpongeDataManager.finalizeRegistration();
