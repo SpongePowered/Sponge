@@ -251,6 +251,11 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
 
     @Override
     public EntitySnapshot build() {
+        checkNotNull(this.worldId);
+        checkNotNull(this.position);
+        checkNotNull(this.rotation);
+        checkNotNull(this.scale);
+        checkNotNull(this.entityType);
         EntitySnapshot snapshot = new SpongeEntitySnapshot(this);
         if(this.values != null) {
             for (ImmutableValue<?> value : this.values) {

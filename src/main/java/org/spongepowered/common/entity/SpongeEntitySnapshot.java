@@ -91,7 +91,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
 
     SpongeEntitySnapshot(SpongeEntitySnapshotBuilder builder) {
         this.entityType = builder.entityType;
-        this.entityUuid = builder.entityId == null ? null : builder.entityId;
+        this.entityUuid = builder.entityId;
         if (builder.manipulators == null) {
             this.manipulators = ImmutableList.of();
         } else {
@@ -112,12 +112,11 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
             this.keys = keyBuilder.build();
             this.values = valueBuilder.build();
         }
-        // TODO cleanup: sensible defaults?
         this.compound = builder.compound == null ? null : builder.compound.copy();
-        this.worldUuid = builder.worldId == null ? null : builder.worldId;
-        this.position = builder.position == null ? Vector3d.ZERO : builder.position;
-        this.rotation = builder.rotation == null ? Vector3d.ZERO : builder.rotation;
-        this.scale = builder.scale == null ? Vector3d.ZERO : builder.scale;
+        this.worldUuid = builder.worldId;
+        this.position = builder.position;
+        this.rotation = builder.rotation;
+        this.scale = builder.scale;
         this.entityReference = builder.entityReference;
         if (this.compound != null) {
             this.compound.setTag("Pos", NbtDataUtil.newDoubleNBTList(this.position.getX(), this.position.getY(), this.position.getZ()));
@@ -137,9 +136,6 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
 
     @Override
     public Optional<Transform<World>> getTransform() {
-        if (this.worldUuid == null) {
-            return Optional.empty();
-        }
         Optional<World> optional = SpongeImpl.getGame().getServer().getWorld(this.worldUuid);
         if (optional.isPresent()) {
             final Transform<World> transform = new Transform<>(optional.get(), this.position, this.rotation);
@@ -155,9 +151,6 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
 
     @Override
     public Optional<Location<World>> getLocation() {
-        if (this.worldUuid == null) {
-            return Optional.empty();
-        }
         Optional<World> optional = SpongeImpl.getGame().getServer().getWorld(this.worldUuid);
         if (optional.isPresent()) {
             final Location<World> location = new Location<>(optional.get(), this.position);
@@ -278,7 +271,6 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         return transform(key, input -> value);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public Optional<EntitySnapshot> with(BaseValue<?> value) {
         return with((Key<? extends BaseValue<Object>>) value.getKey(), value.get());
