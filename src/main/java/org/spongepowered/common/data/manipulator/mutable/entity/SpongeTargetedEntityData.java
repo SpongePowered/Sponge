@@ -29,18 +29,15 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTargetedEntityData;
 import org.spongepowered.api.data.manipulator.mutable.entity.TargetedEntityData;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeTargetedEntityData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
+import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
+@ImplementationRequiredForTest
 public final class SpongeTargetedEntityData extends AbstractSingleData<EntitySnapshot, TargetedEntityData, ImmutableTargetedEntityData>
         implements TargetedEntityData {
-
-    public SpongeTargetedEntityData() {
-        this(null);
-    }
 
     public SpongeTargetedEntityData(EntitySnapshot value) {
         super(TargetedEntityData.class, value, Keys.TARGETED_ENTITY);
