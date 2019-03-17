@@ -215,15 +215,20 @@ public class SpongeGameRegistry implements GameRegistry {
         this.propertyRegistry.completeRegistration();
         SpongeDataManager.finalizeRegistration();
         this.phase = RegistrationPhase.LOADED;
+        for (RegistryModule module : this.registryModules) {
+            SpongeImpl.getLogger().error("Failed to register {}", module);
+        }
     }
 
     private void registerModulePhase() {
         for (Class<? extends RegistryModule> moduleClass : this.orderedModules) {
             final RegistryModule module = this.classMap.get(moduleClass);
             checkState(module != null, "Something funky happened!");
-            RegistryModuleLoader.tryModulePhaseRegistration(module);
-            throwRegistryEvent(module);
+            if (RegistryModuleLoader.tryModulePhaseRegistration(module)) {
+                this.registryModules.remove(module);
+            }
         }
+        throwRegistryEvents();
         registerAdditionalPhase();
     }
 
@@ -257,7 +262,8 @@ public class SpongeGameRegistry implements GameRegistry {
     @Override
     public SpongeGameRegistry registerModule(RegistryModule module) {
         checkNotNull(module);
-        checkArgument(this.registryModules.add(module));
+        checkArgument(!this.classMap.containsKey(module.getClass()));
+        this.registryModules.add(module);
         this.classMap.put(module.getClass(), module);
         return this;
     }
@@ -536,20 +542,19 @@ public class SpongeGameRegistry implements GameRegistry {
         registerAdditionalPhase();
     }
 
+    private void throwRegistryEvents() {
+        for (Map.Entry<Class<? extends CatalogType>, CatalogRegistryModule<?>> entry : this.catalogRegistryMap.entrySet()) {
+            throwRegistryEvent(entry.getKey(), entry.getValue());
+        }
+    }
+
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private void throwRegistryEvent(RegistryModule module) {
+    private void throwRegistryEvent(Class<? extends CatalogType> catalogClass, RegistryModule module) {
         if (this.phase == RegistrationPhase.INIT
             && module instanceof AdditionalCatalogRegistryModule
             && (!(module instanceof SpongeAdditionalCatalogRegistryModule)
                 || ((SpongeAdditionalCatalogRegistryModule) module).allowsApiRegistration())
             && module.getClass().getAnnotation(CustomRegistrationPhase.class) == null) {
-            Class<? extends CatalogType> catalogClass = null;
-            for (Map.Entry<Class<? extends CatalogType>, CatalogRegistryModule<?>> entry : this.catalogRegistryMap
-                .entrySet()) {
-                if (entry.getValue() == module) {
-                    catalogClass = entry.getKey();
-                }
-            }
             if (catalogClass == null) {
                 // This isn't a valid registered registry
                 // We should throw an exception or print out an exception, but otherwise, not going to bother at this moment.
