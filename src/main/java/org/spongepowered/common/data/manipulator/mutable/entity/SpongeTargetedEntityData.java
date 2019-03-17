@@ -31,41 +31,61 @@ import org.spongepowered.api.data.manipulator.mutable.entity.TargetedEntityData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeTargetedEntityData;
-import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
+import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
+import javax.annotation.Nullable;
+
 @ImplementationRequiredForTest
-public final class SpongeTargetedEntityData extends AbstractSingleData<EntitySnapshot, TargetedEntityData, ImmutableTargetedEntityData>
+public final class SpongeTargetedEntityData extends AbstractData<TargetedEntityData, ImmutableTargetedEntityData>
         implements TargetedEntityData {
 
+    @Nullable private EntitySnapshot value;
+
+    public SpongeTargetedEntityData() {
+        this(null);
+    }
+
     public SpongeTargetedEntityData(EntitySnapshot value) {
-        super(TargetedEntityData.class, value, Keys.TARGETED_ENTITY);
+        super(TargetedEntityData.class);
+        this.value = value;
+        registerGettersAndSetters();
     }
 
     @Override
     public TargetedEntityData copy() {
-        return new SpongeTargetedEntityData(this.getValue());
-    }
-
-    @Override
-    protected Value<?> getValueGetter() {
-        return this.value();
+        return new SpongeTargetedEntityData(this.value);
     }
 
     @Override
     public ImmutableTargetedEntityData asImmutable() {
-        return new ImmutableSpongeTargetedEntityData(this.getValue());
+        return new ImmutableSpongeTargetedEntityData(this.value);
     }
 
     @Override
     public Value<EntitySnapshot> value() {
-        return new SpongeValue<>(this.usedKey, this.getValue());
+        return new SpongeValue<>(Keys.TARGETED_ENTITY, this.value);
     }
 
     @Override
     public DataContainer toContainer() {
         return super.toContainer()
-                .set(this.usedKey, this.getValue());
+                .set(Keys.TARGETED_ENTITY, this.value);
+    }
+
+    public EntitySnapshot getValue() {
+        return this.value;
+    }
+
+    public void setValue(EntitySnapshot value) {
+        this.value = value;
+    }
+
+    @Override
+    protected void registerGettersAndSetters() {
+        registerFieldGetter(Keys.TARGETED_ENTITY, SpongeTargetedEntityData.this::getValue);
+        registerFieldSetter(Keys.TARGETED_ENTITY, SpongeTargetedEntityData.this::setValue);
+        registerKeyValue(Keys.TARGETED_ENTITY, SpongeTargetedEntityData.this::value);
     }
 }
