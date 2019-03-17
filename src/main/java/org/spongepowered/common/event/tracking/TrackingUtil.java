@@ -344,26 +344,6 @@ public final class TrackingUtil {
         return phaseContext.wasNotCancelled();
     }
 
-    @SuppressWarnings("rawtypes")
-    static boolean captureBulkBlockChange(IMixinWorldServer mixinWorld, Chunk chunk, IBlockState currentState,
-        IBlockState newState, BlockPos pos, BlockChangeFlag flags, PhaseContext<?> phaseContext, IPhaseState<?> phaseState) {
-        final WorldServer world = WorldUtil.asNative(mixinWorld);
-
-        final IMixinChunk mixinChunk = (IMixinChunk) chunk;
-        final IBlockState originalBlockState = mixinChunk.setBlockState(pos, newState, currentState, flags);
-        if (originalBlockState == null) {
-            return false;
-        }
-
-        if (newState.getLightOpacity() != currentState.getLightOpacity() || newState.getLightValue() != currentState.getLightValue()) {
-            world.profiler.startSection("checkLight");
-            world.checkLight(pos);
-            world.profiler.endSection();
-        }
-
-        return true;
-    }
-
     public static void associateBlockChangeWithSnapshot(IPhaseState<?> phaseState, Block newBlock, IBlockState currentState, SpongeBlockSnapshot snapshot) {
         Block originalBlock = currentState.getBlock();
         if (phaseState == BlockPhase.State.BLOCK_DECAY) {

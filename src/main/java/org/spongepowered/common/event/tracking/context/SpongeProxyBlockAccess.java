@@ -33,6 +33,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.chunk.Chunk;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
@@ -55,6 +56,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess {
     private final LinkedHashMap<BlockPos, IBlockState> processed = new LinkedHashMap<>();
     private final LinkedHashMap<BlockPos, TileEntity> affectedTileEntities = new LinkedHashMap<>();
     private final ListMultimap<BlockPos, TileEntity> queuedTiles = LinkedListMultimap.create();
+    private final ListMultimap<BlockPos, TileEntity> queuedRemovals = LinkedListMultimap.create();
     private final Set<BlockPos> markedRemoved = new HashSet<>();
     private final Deque<Proxy> proxies = Queues.newArrayDeque();
     private WorldServer processingWorld;
@@ -81,12 +83,6 @@ public final class SpongeProxyBlockAccess implements IBlockAccess {
                 proxy.markNew(pos);
             } else if (!proxy.isNew(pos) && !proxy.isStored(pos)) {
                 proxy.store(pos, state);
-            }
-            if (proxy.toBeRemoved != null) {
-                this.affectedTileEntities.remove(proxy.tileEntityChange);
-            }
-            if (proxy.toBeAdded != null) {
-                this.affectedTileEntities.put(proxy.tileEntityChange, proxy.toBeAdded);
             }
         }
         return this;
@@ -148,7 +144,6 @@ public final class SpongeProxyBlockAccess implements IBlockAccess {
         if (proxy.hasNew()) {
             for (BlockPos pos : proxy.newBlocks) {
                 this.processed.remove(pos);
-                unmarkRemoval(pos);
             }
         }
         if (proxy.hasStored()) {
@@ -156,20 +151,6 @@ public final class SpongeProxyBlockAccess implements IBlockAccess {
                 this.processed.put(entry.getKey(), entry.getValue());
             }
         }
-        if (proxy.tileEntityChange != null) {
-            if (proxy.toBeRemoved != null) {
-                this.affectedTileEntities.remove(proxy.tileEntityChange);
-                if (proxy.toBeAdded == null) {
-                    this.markedRemoved.add(proxy.tileEntityChange);
-                }
-            }
-            if (proxy.toBeAdded != null) {
-                this.queuedTiles.remove(proxy.tileEntityChange, proxy.toBeAdded);
-                this.affectedTileEntities.put(proxy.tileEntityChange, proxy.toBeAdded);
-            }
-        }
-
-
     }
 
     @Override
@@ -214,40 +195,38 @@ public final class SpongeProxyBlockAccess implements IBlockAccess {
         }
     }
 
-    public void unmarkRemoval(BlockPos pos) {
-        final boolean removed = this.markedRemoved.remove(pos);
-        if (!removed && !this.proxies.isEmpty()) {
-            final Proxy peek = this.proxies.peek();
-            if (peek.toBeRemoved != null && pos.equals(peek.tileEntityChange)) {
-                peek.toBeRemoved = null;
-            }
+    public void unmarkRemoval(BlockPos pos, TileEntity tileEntity) {
+        this.markedRemoved.remove(pos);
+        if (tileEntity != null) {
+            this.queuedRemovals.remove(pos, tileEntity);
         }
     }
 
     void proceedWithRemoval(BlockPos targetPosition, TileEntity removed) {
-        boolean existed = this.markedRemoved.remove(targetPosition);
+        this.markedRemoved.remove(targetPosition);
         final TileEntity existing = this.affectedTileEntities.remove(targetPosition);
-        if (existing != removed) {
+        if (existing != null && existing != removed) {
             // Put it back in, might be a different tile that was being placed back in, potentially
             this.affectedTileEntities.put(targetPosition, existing);
-            if (!existed) {
-                this.markedRemoved.add(targetPosition);
-            }
         }
         // Always remove the tile entity from various lists.
         if (removed != null) {
-            if (this.processingWorld.processingLoadedTiles) {
-                this.processingWorld.addedTileEntityList.remove(removed);
-            } else {
-                this.processingWorld.addedTileEntityList.remove(removed);
-                this.processingWorld.loadedTileEntityList.remove(removed);
-                this.processingWorld.tickableTileEntities.remove(removed);
-                IMixinChunk activeChunk = ((IMixinTileEntity) removed).getActiveChunk();
-                if (activeChunk != null) {
-                    activeChunk.removeTileEntity(removed);
-                }
-            }
+            this.queuedRemovals.remove(targetPosition, removed);
+            removeTileEntityFromWorldAndChunk(removed);
+        }
+    }
 
+    private void removeTileEntityFromWorldAndChunk(TileEntity removed) {
+        if (this.processingWorld.processingLoadedTiles) {
+            this.processingWorld.addedTileEntityList.remove(removed);
+        } else {
+            this.processingWorld.addedTileEntityList.remove(removed);
+            this.processingWorld.loadedTileEntityList.remove(removed);
+            this.processingWorld.tickableTileEntities.remove(removed);
+            IMixinChunk activeChunk = ((IMixinTileEntity) removed).getActiveChunk();
+            if (activeChunk != null) {
+                activeChunk.removeTileEntity(removed);
+            }
         }
     }
 
@@ -257,10 +236,26 @@ public final class SpongeProxyBlockAccess implements IBlockAccess {
             // someone else popped for us?
             System.err.println("Unknown removal for: " + targetPos + " with tile entity: " + added);
         }
-        unmarkRemoval(targetPos);
-        final TileEntity existing = this.affectedTileEntities.put(targetPos, added);
+        unmarkRemoval(targetPos, added);
+        final TileEntity existing = this.affectedTileEntities.remove(targetPos);
         if (existing != null && existing != added) {
+            ((IMixinTileEntity) existing).setCaptured(false);
             existing.invalidate();
+            removeTileEntityFromWorldAndChunk(existing);
+        }
+        ((IMixinTileEntity) added).setCaptured(false);
+        if (this.processingWorld.processingLoadedTiles) {
+            added.setPos(targetPos);
+            if (added.getWorld() != this.processingWorld) {
+                added.setWorld(this.processingWorld);
+            }
+            this.processingWorld.addedTileEntityList.add(added);
+        } else {
+            final Chunk chunk = this.processingWorld.getChunk(targetPos);
+            if (!chunk.isEmpty()) {
+                chunk.addTileEntity(targetPos, added);
+            }
+            this.processingWorld.addTileEntity(added);
         }
     }
 
@@ -272,43 +267,43 @@ public final class SpongeProxyBlockAccess implements IBlockAccess {
         return this.queuedTiles.containsEntry(pos, tileEntity);
     }
 
-    public void queueTileAddition(BlockPos pos, TileEntity added) {
-        final boolean existing = this.queuedTiles.put(pos, added);
-        if (!existing) {
-            if (!this.proxies.isEmpty()) {
-                final Proxy peek = this.proxies.peek();
-                peek.tileEntityChange = pos;
-                peek.toBeAdded = added;
-            }
-        }
+    public boolean isTileQueuedForRemoval(BlockPos pos, TileEntity tileEntity) {
+        return this.queuedRemovals.containsEntry(pos, tileEntity);
     }
 
-    public void queueRemoval(TileEntity removed) {
+    void queueTileAddition(BlockPos pos, TileEntity added) {
+        // We want to provide the "added tile entity" to the proxy so any requests for this
+        // new tile entity will succeed in returning the appropriate one.
+        this.affectedTileEntities.put(pos, added);
+        // Also, remove the position from being marked as removed.
+        this.markedRemoved.remove(pos);
+        this.queuedTiles.put(pos, added);
+    }
+
+    void queueRemoval(TileEntity removed) {
         if (removed != null) {
-            if (!this.proxies.isEmpty()) {
-                final Proxy peek = this.proxies.peek();
-                peek.toBeRemoved = removed;
-                peek.tileEntityChange = removed.getPos();
-            }
+            // Set the tile entity to the affected tile entities so it is retrieved
+            // by the hooks in MixinWorldServer for getting tiles for removal.
+            this.affectedTileEntities.put(removed.getPos(), removed);
             this.markedRemoved.add(removed.getPos());
+            this.queuedRemovals.put(removed.getPos(), removed);
         }
     }
 
-    public void queueReplacement(TileEntity added, TileEntity removed) {
-        final TileEntity existing = this.affectedTileEntities.get(removed.getPos());
-        if (existing != removed) {
-            // ok, looks like the tile entity to be removed will be queued for placement later.
-            final boolean exists = this.queuedTiles.put(removed.getPos(), removed);
-            if (!exists && !this.proxies.isEmpty()) {
-                final Proxy peek = this.proxies.peek();
-                peek.toBeRemoved = removed;
-                peek.toBeAdded = added;
-                peek.tileEntityChange = removed.getPos();
-            }
-        } else {
-            // Otherwise, it's just queued to be added/replaced later.
-            this.queuedTiles.put(added.getPos(), added);
+    void queueReplacement(TileEntity added, TileEntity removed) {
+        // Go ahead and remove the "removed" tile entity, it will be invalidated
+        // later. Likewise, it will be removed from the world's ticking list
+        // later, once processed. The goal here is that the "existing" tile entity
+        // retrieved by the target world will return the new added tile entity
+        // without it actually being added yet to the world/chunk. Likewise, it will
+        // not be removed from the world/chunk until the BlockTransaction is processed.
+        final TileEntity existing = this.affectedTileEntities.put(removed.getPos(), added);
+        this.markedRemoved.remove(removed.getPos());
+        if (existing != null && existing != removed) {
+            // Someone went and changed? Maybe it's already removed?
+            this.queuedRemovals.put(existing.getPos(), existing);
         }
+        this.queuedTiles.put(added.getPos(), added);
     }
 
     public boolean succeededInAdding(BlockPos pos, TileEntity tileEntity) {
@@ -326,9 +321,6 @@ public final class SpongeProxyBlockAccess implements IBlockAccess {
         @Nullable Exception stack_debug;
         @Nullable private LinkedHashMap<BlockPos, IBlockState> processed;
         @Nullable private Set<BlockPos> newBlocks;
-        @Nullable BlockPos tileEntityChange;
-        @Nullable TileEntity toBeRemoved;
-        @Nullable TileEntity toBeAdded;
 
         Proxy(SpongeProxyBlockAccess spongeProxyBlockAccess) {
             this.proxyAccess = spongeProxyBlockAccess;

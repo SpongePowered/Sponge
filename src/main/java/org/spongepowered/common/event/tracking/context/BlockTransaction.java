@@ -80,13 +80,13 @@ public abstract class BlockTransaction {
     }
 
     @SuppressWarnings("rawtypes")
-    public static final class TileEntityAdd extends BlockTransaction {
+    public static final class AddTileEntity extends BlockTransaction {
 
         final TileEntity added;
         final SpongeBlockSnapshot addedSnapshot;
         final IBlockState newState;
 
-        TileEntityAdd(int i, int snapshotIndex, TileEntity added, SpongeBlockSnapshot attachedSnapshot, IBlockState newState) {
+        AddTileEntity(int i, int snapshotIndex, TileEntity added, SpongeBlockSnapshot attachedSnapshot, IBlockState newState) {
             super(i, snapshotIndex);
 
             this.added = added;
@@ -109,7 +109,6 @@ public abstract class BlockTransaction {
             proxyAccess.proceed(targetPos, this.newState);
             proxyAccess.proceedWithAdd(targetPos, this.added);
             ((IMixinTileEntity) this.added).setCaptured(false);
-            worldServer.setTileEntity(targetPos, this.added);
         }
 
         @Override
@@ -193,10 +192,11 @@ public abstract class BlockTransaction {
             int currentDepth) {
             final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) this.added.getWorld();
             final BlockPos position = this.added.getPos();
-            mixinWorldServer.getProxyAccess().proceedWithAdd(position, this.added);
+            final SpongeProxyBlockAccess proxyAccess = mixinWorldServer.getProxyAccess();
             ((IMixinTileEntity) this.removed).setCaptured(false);
+            proxyAccess.proceedWithRemoval(position, this.removed);
             ((IMixinTileEntity) this.added).setCaptured(false);
-            this.added.getWorld().setTileEntity(position, this.added);
+            proxyAccess.proceedWithAdd(position, this.added);
         }
 
         @Override
@@ -240,10 +240,19 @@ public abstract class BlockTransaction {
 
         @Override
         public void enqueueChanges(SpongeProxyBlockAccess proxyBlockAccess, SpongeProxyBlockAccess.Proxy proxy) {
-            proxyBlockAccess.queueRemoval(this.queuedRemoval);
             BlockPos target = this.original.getBlockPos();
             proxyBlockAccess.proceed(target, this.newState);
-            proxyBlockAccess.queueTileAddition(target, this.queueTileSet);
+            if (this.queuedRemoval != null) {
+                if (this.queueTileSet != null) {
+                    // Make sure the new tile entity has the correct position
+                    this.queueTileSet.setPos(target);
+                    proxyBlockAccess.queueReplacement(this.queueTileSet, this.queuedRemoval);
+                } else {
+                    proxyBlockAccess.queueRemoval(this.queuedRemoval);
+                }
+            } else if (this.queueTileSet != null) {
+                proxyBlockAccess.queueTileAddition(target, this.queueTileSet);
+            }
         }
 
         @SuppressWarnings("unchecked")
@@ -280,7 +289,6 @@ public abstract class BlockTransaction {
                 currentContext.neighborNotificationSource = currentNeighborSource;
             } else if (this.queuedRemoval != null) {
                 proxyAccess.proceedWithRemoval(targetPosition, this.queuedRemoval);
-                worldServer.removeTileEntity(targetPosition);
             }
 
             // We call onBlockAdded here for blocks without a TileEntity.

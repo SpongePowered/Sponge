@@ -403,30 +403,29 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
         final WorldServer world = (WorldServer) mixinWorldServer;
         final IBlockState current = world.getBlockState(pos);
 
-        if (newTile != null) {
+        if (newTile != null && oldTile == newTile) {
             // Double check previous changes, if there's a remove tile entity, and previous to that, a change block, and this is an add tile entity,
             // well, we need to flip the ChangeBlock to avoid doing a breakBlock logic
-            if (this.orderedTransactions != null && this.orderedTransactions.size() > 1) { // need at least 2 entries.
+            if (this.orderedTransactions != null && !this.orderedTransactions.isEmpty()) { // need at least 2 entries.
                 final List<BlockTransaction> entries = this.orderedTransactions.get(pos);
                 boolean isSame = false;
                 for (ListIterator<BlockTransaction> iterator = entries.listIterator(entries.size()); iterator.hasPrevious(); ) {
                     final BlockTransaction prevChange = iterator.previous();
-                    if (prevChange instanceof BlockTransaction.RemoveTileEntity && iterator.hasPrevious()) {
-                        final BlockTransaction further = iterator.previous();
-                        if (further instanceof BlockTransaction.ChangeBlock) {
-                            isSame = ((BlockTransaction.RemoveTileEntity) prevChange).removed == newTile;
-                            if (isSame) {
-                                ((BlockTransaction.ChangeBlock) further).ignoreBreakBlockLogic = true;
-                                ((IMixinTileEntity) newTile).setCaptured(false);
-                                iterator.next(); // Go back forward to the prevChange
-                                iterator.remove(); // Then prune the prevChange.
-                                break;
-                            }
+                    if (prevChange instanceof BlockTransaction.ChangeBlock) {
+                        final BlockTransaction.ChangeBlock changeBlock = (BlockTransaction.ChangeBlock) prevChange;
+                        isSame = changeBlock.queuedRemoval == newTile;
+                        if (isSame) {
+                            changeBlock.ignoreBreakBlockLogic = true;
+                            changeBlock.queuedRemoval = null;
+                            ((IMixinTileEntity) newTile).setCaptured(false);
+                            break;
                         }
                     }
                 }
                 if (isSame) {
-                    mixinWorldServer.getProxyAccess().unmarkRemoval(pos);
+                    if (mixinWorldServer.getProxyAccess().isTileQueuedForRemoval(pos, newTile)) {
+                        mixinWorldServer.getProxyAccess().unmarkRemoval(pos, newTile);
+                    }
                     return;
                 }
             }
@@ -452,7 +451,8 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
         if (newTile != null) {
             final SpongeBlockSnapshot snapshot = mixinWorldServer.createSpongeSnapshotForTileEntity(current, pos, BlockChangeFlags.NONE, newTile);
             final IBlockState newState = ((WorldServer) mixinWorldServer).getBlockState(pos);
-            final BlockTransaction.TileEntityAdd transaction = new BlockTransaction.TileEntityAdd(transactionIndex, this.snapshotIndex, newTile, snapshot, newState);
+            final BlockTransaction.AddTileEntity
+                transaction = new BlockTransaction.AddTileEntity(transactionIndex, this.snapshotIndex, newTile, snapshot, newState);
             transaction.enqueueChanges(mixinWorldServer.getProxyAccess(), getProxyOrCreate(mixinWorldServer));
             logTransaction(pos, transaction);
         }

@@ -1039,18 +1039,13 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             // Easy short circuit.
             if (((IMixinTileEntity) foundTile).isCaptured()) {
                 ci.cancel();
-                return;
-            }
-            if (this.proxyBlockAccess.isTileQueued(pos, foundTile)) {
+            } else if (this.proxyBlockAccess.isTileQueuedForRemoval(pos, foundTile)) {
                 ci.cancel();
-                return;
             }
-        }
-        if (foundTile == null) {
+        } else {
             if (!this.proxyBlockAccess.getQueuedTiles(pos).isEmpty()) {
                 ci.cancel();
-            }
-            if (this.proxyBlockAccess.isTileEntityRemoved(pos)) {
+            } else if (this.proxyBlockAccess.isTileEntityRemoved(pos)) {
                 ci.cancel();
             }
         }
@@ -1068,11 +1063,19 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         final PhaseContext<?> currentContext = tracker.getCurrentContext();
         final IMixinTileEntity mixinTile = (IMixinTileEntity) newTile;
         if (mixinTile.isCaptured()) {
-            // Don't do anything. If the tile entity is captured, it will have
-            // addToWorld before the end of whatever phasestate.
-            return true;
-        }
-        if (this.proxyBlockAccess.hasTileEntity(pos, newTile)) {
+            // Don't do anything. If the tile entity is captured,
+            // We return true to mark the tile entity as invalid, that way
+            // no logic is performed until the transaction is processed.
+            // Except in the circumstance that a tile entity is being re-set back onto
+            // itself, at which point we'd want to double check that it's
+            // not queued for removal. If it is queued for removal, then
+            // we need to re-capture the tile entity replacement.
+            if (this.proxyBlockAccess.hasTileEntity(pos, newTile)) {
+                if (!this.proxyBlockAccess.isTileQueuedForRemoval(pos, newTile)) {
+                    return true;
+                }
+            }
+        } else if (this.proxyBlockAccess.hasTileEntity(pos, newTile)) {
             if (this.proxyBlockAccess.succeededInAdding(pos, newTile)) {
                 this.addTileEntity(newTile);
             }
@@ -1096,12 +1099,15 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         if (currentTile == null && !this.proxyBlockAccess.isTileEntityRemoved(pos)) { // Make sure we're not getting a tile while it's being removed.
             currentTile = this.getChunk(pos).getTileEntity(pos, Chunk.EnumCreateEntityType.CHECK);
         }
-        if (this.processingLoadedTiles) {
-            currentTile = ((MixinWorld_Accessor) this).accessPendingTileEntityAt(pos);
+        newTile.setPos(pos);
+        if (newTile.getWorld() != (WorldServer) (Object) this) {
+            newTile.setWorld((WorldServer) (Object) this);
         }
-
         currentContext.getCapturedBlockSupplier().logTileChange(this, pos, currentTile, newTile);
-        return newTile.isInvalid();
+        // We want to mark the tile as "invalid" only so that it does not get added to the world/chunk
+        // just yet. Otherwise, some extra logic is involved in invalidating/revalidating the tile entity
+        // after the fact.
+        return true;
     }
 
     protected boolean isTileMarkedForRemoval(BlockPos pos) {

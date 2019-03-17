@@ -695,7 +695,14 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
                         transaction.queueBreak = true;
                         // queue the existing tile anyways, just in case a block does decide to break the tile entity
                         // without bothering to see if there's the right tile entity at the position.
-                        transaction.queuedRemoval = existing;
+                        if (existing != null) {
+                            // Set tile to be captured, if it's showing up in removals later, it will
+                            // be ignored since the transaction process will actually process
+                            // the removal.
+                            ((IMixinTileEntity) existing).setCaptured(true);
+                            transaction.queuedRemoval = existing;
+                        }
+                        transaction.enqueueChanges(mixinWorld.getProxyAccess(), peek.getCapturedBlockSupplier().getProxyOrCreate(mixinWorld));
                     } else {
                         currentBlock.breakBlock(this.world, pos, currentState);
                     }
@@ -704,6 +711,11 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
                     // And likewise, we want to queue the tile entity being removed, while
                     // the transaction is processed.
                     if (transaction != null) {
+                        // Set tile to be captured, if it's showing up in removals later, it will
+                        // be ignored since the transaction process will actually process
+                        // the removal.
+                        ((IMixinTileEntity) existing).setCaptured(true);
+                        transaction.enqueueChanges(mixinWorld.getProxyAccess(), peek.getCapturedBlockSupplier().getProxyOrCreate(mixinWorld));
                         transaction.queuedRemoval = existing;
                     } else {
                         this.world.removeTileEntity(pos);
@@ -771,23 +783,28 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
             }
         }
 
+        // Sponge Start - Handle block physics only if we're actually the server world
         if (!isFake && currentBlock != newBlock) {
             final boolean isBulkCapturing = state.doesBulkBlockCapture(peek);
             // Reset the proxy access
             ((IMixinWorldServer) this.world).getProxyAccess().onChunkChanged(pos);
             // Sponge start - Ignore block activations during block placement captures unless it's
             // a BlockContainer. Prevents blocks such as TNT from activating when cancelled.
-            if (!isBulkCapturing || (SpongeImplHooks.hasBlockTileEntity(newBlock, newState))) {
-                // The new block state is null if called directly from Chunk#setBlockState(BlockPos, IBlockState)
-                // If it is null, then directly call the onBlockAdded logic.
-                if (flag.performBlockPhysics()) {
-                    // Occasionally, certain phase states will need to prevent onBlockAdded to be called until after the tile entity tracking
-                    // has been done, in the event of restores needing to re-override the block changes.
-                    if (transaction != null) {
-                        transaction.queueOnAdd = true;
-                    } else {
-                        newBlock.onBlockAdded(this.world, pos, newState);
-                    }
+            // Forge changes this check from
+            // if (!this.world.isRemote && block1 != block)
+            // to
+            //  if (!this.world.isRemote && block1 != block && (!this.world.captureBlockSnapshots || block.hasTileEntity(state)))
+            // which would normally translate to
+            // if (!isFake && currentBlock != newBlock && (!isBulkCapturing || SpongeImplHooks.hasBlockTileEntity(newBlock, newState))
+            // but, because we have transactions to deal with, we have to still set the transaction to
+            // queue on add as long as the flag deems it so.
+            if (flag.performBlockPhysics()) {
+                // Occasionally, certain phase states will need to prevent onBlockAdded to be called until after the tile entity tracking
+                // has been done, in the event of restores needing to re-override the block changes.
+                if (transaction != null) {
+                    transaction.queueOnAdd = true;
+                } else if (!isBulkCapturing || SpongeImplHooks.hasBlockTileEntity(newBlock, newState)) {
+                    newBlock.onBlockAdded(this.world, pos, newState);
                 }
             }
             // Sponge end
@@ -815,6 +832,10 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
                 if (transaction != null) {
                     // Go ahead and log the tile being replaced, the tile being removed will be at least already notified of removal
                     transaction.queueTileSet = tileentity;
+                    if (tileentity != null) {
+                        ((IMixinTileEntity) tileentity).setCaptured(true);
+                        tileentity.setPos(pos);// Set the position
+                    }
                     transaction.enqueueChanges(mixinWorld.getProxyAccess(), peek.getCapturedBlockSupplier().getProxyOrCreate(mixinWorld));
                 } else {
                     this.world.setTileEntity(pos, tileentity);
