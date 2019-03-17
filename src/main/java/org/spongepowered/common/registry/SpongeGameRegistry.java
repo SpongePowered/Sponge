@@ -228,7 +228,9 @@ public class SpongeGameRegistry implements GameRegistry {
                 this.registryModules.remove(module);
             }
         }
-        throwRegistryEvents();
+        if (this.phase == RegistrationPhase.INIT) {
+            throwRegistryEvents();
+        }
         registerAdditionalPhase();
     }
 
@@ -549,8 +551,7 @@ public class SpongeGameRegistry implements GameRegistry {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private void throwRegistryEvent(Class<? extends CatalogType> catalogClass, RegistryModule module) {
-        if (this.phase == RegistrationPhase.INIT
-            && module instanceof AdditionalCatalogRegistryModule
+        if (module instanceof AdditionalCatalogRegistryModule
             && (!(module instanceof SpongeAdditionalCatalogRegistryModule)
                 || ((SpongeAdditionalCatalogRegistryModule) module).allowsApiRegistration())
             && module.getClass().getAnnotation(CustomRegistrationPhase.class) == null) {
