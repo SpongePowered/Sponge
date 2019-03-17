@@ -233,8 +233,7 @@ public class SpongeGameRegistry implements GameRegistry {
     }
 
     private void registerAdditionalPhase() {
-        for (Class<? extends RegistryModule> moduleClass : this.orderedModules) {
-            final RegistryModule module = this.classMap.get(moduleClass);
+        for (RegistryModule module : this.classMap.values()) {
             RegistryModuleLoader.tryAdditionalRegistration(module);
         }
     }
