@@ -51,6 +51,7 @@ public final class RegistryHelper {
 
     public static boolean mapFields(Class<?> apiClass, Function<String, ?> mapFunction, @Nullable Set<String> ignoredFields, boolean ignore) {
         boolean mappingSuccess = true;
+        boolean custom = !apiClass.getName().startsWith("org.spongepowered.api");
         for (Field f : apiClass.getDeclaredFields()) {
             final String fieldName = f.getName();
             if (ignoredFields != null && ignoredFields.contains(fieldName)) {
@@ -66,7 +67,11 @@ public final class RegistryHelper {
                     SpongeImpl.getLogger().warn("Skipping {}.{}", f.getDeclaringClass().getName(), fieldName);
                     continue;
                 }
-                f.set(null, value);
+                if (custom) {
+                    setFinalStatic(f, value);
+                } else {
+                    f.set(null, value);
+                }
             } catch (Exception e) {
                 if (!ignore) {
                     SpongeImpl.getLogger().error("Error while mapping {}.{}", f.getDeclaringClass().getName(), fieldName, e);
@@ -90,13 +95,23 @@ public final class RegistryHelper {
     public static void setFinalStatic(Class<?> clazz, String fieldName, Object newValue) {
         try {
             Field field = clazz.getDeclaredField(fieldName);
+            setFinalStatic(field, newValue);
+        } catch (Exception e) {
+            SpongeImpl.getLogger().error("Error while setting field {}.{}", clazz.getName(), fieldName, e);
+        }
+    }
+
+    private static void setFinalStatic(Field field, Object newValue) {
+        try {
             field.setAccessible(true);
             Field modifiers = field.getClass().getDeclaredField("modifiers");
             modifiers.setAccessible(true);
             modifiers.setInt(field, field.getModifiers() & ~Modifier.FINAL);
             field.set(null, newValue);
         } catch (Exception e) {
-            SpongeImpl.getLogger().error("Error while setting field {}.{}", clazz.getName(), fieldName, e);
+            SpongeImpl.getLogger().error("Error while setting field {}.{}", field.getClass().getName(), field.getName(), e);
         }
     }
+
+
 }

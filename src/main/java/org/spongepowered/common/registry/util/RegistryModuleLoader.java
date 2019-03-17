@@ -120,7 +120,7 @@ public final class RegistryModuleLoader {
             Method method = module.getClass().getMethod("registerDefaults");
             DelayedRegistration delay = method.getDeclaredAnnotation(DelayedRegistration.class);
             if (delay == null) {
-                return SpongeImpl.getRegistry().getPhase() == RegistrationPhase.PRE_REGISTRY;
+                return true;
             }
             return SpongeImpl.getRegistry().getPhase() == delay.value();
         } catch (NoSuchMethodException e) {
