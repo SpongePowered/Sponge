@@ -244,6 +244,8 @@ public class SpongeGameRegistry implements GameRegistry {
         }
 
         this.catalogRegistryMap.put(catalogClass, registryModule);
+        this.registryModules.add(registryModule);
+        this.classMap.put(registryModule.getClass(), registryModule);
         if (!this.orderedModules.isEmpty()) {
             if (catalogClass.getName().contains("org.spongepowered.api") && catalogClass.getAnnotation(PluginProvidedRegistryModule.class) == null) {
                 throw new UnsupportedOperationException("Cannot register a module for an API defined class! That's the implementation's job!");
@@ -256,23 +258,14 @@ public class SpongeGameRegistry implements GameRegistry {
     public SpongeGameRegistry registerModule(RegistryModule module) {
         checkNotNull(module);
         checkArgument(this.registryModules.add(module));
+        this.classMap.put(module.getClass(), module);
         return this;
     }
 
     private void syncModules() {
         final DirectedGraph<Class<? extends RegistryModule>> graph = new DirectedGraph<>();
-        for (RegistryModule aModule : this.registryModules) {
-            if (!this.classMap.containsKey(aModule.getClass())) {
-                this.classMap.put(aModule.getClass(), aModule);
-            }
-            addToGraph(aModule, graph);
-        }
-        // Now we need ot do the catalog ones
-        for (CatalogRegistryModule<?> aModule : this.catalogRegistryMap.values()) {
-            if (!this.classMap.containsKey(aModule.getClass())) {
-                this.classMap.put(aModule.getClass(), aModule);
-            }
-            addToGraph(aModule, graph);
+        for (RegistryModule module : this.registryModules) {
+            addToGraph(module, graph);
         }
         this.orderedModules.clear();
         try {
