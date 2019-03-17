@@ -196,6 +196,44 @@ public class SpongeGameRegistry implements GameRegistry {
         }
     }
 
+    public void preInit() {
+        this.phase = RegistrationPhase.PRE_INIT;
+        syncModules();
+        registerModulePhase();
+    }
+
+    public void init() {
+        this.phase = RegistrationPhase.INIT;
+        syncModules();
+        registerModulePhase();
+    }
+
+    public void postInit() {
+        this.phase = RegistrationPhase.POST_INIT;
+        syncModules();
+        registerModulePhase();
+        this.propertyRegistry.completeRegistration();
+        SpongeDataManager.finalizeRegistration();
+        this.phase = RegistrationPhase.LOADED;
+    }
+
+    private void registerModulePhase() {
+        for (Class<? extends RegistryModule> moduleClass : this.orderedModules) {
+            final RegistryModule module = this.classMap.get(moduleClass);
+            checkState(module != null, "Something funky happened!");
+            RegistryModuleLoader.tryModulePhaseRegistration(module);
+            throwRegistryEvent(module);
+        }
+        registerAdditionalPhase();
+    }
+
+    private void registerAdditionalPhase() {
+        for (Class<? extends RegistryModule> moduleClass : this.orderedModules) {
+            final RegistryModule module = this.classMap.get(moduleClass);
+            RegistryModuleLoader.tryAdditionalRegistration(module);
+        }
+    }
+
 
     @SuppressWarnings("unchecked")
     @Override
@@ -490,23 +528,6 @@ public class SpongeGameRegistry implements GameRegistry {
         return LocaleCache.getLocale(locale);
     }
 
-    private void registerModulePhase() {
-        for (Class<? extends RegistryModule> moduleClass : this.orderedModules) {
-            final RegistryModule module = this.classMap.get(moduleClass);
-            checkState(module != null, "Something funky happened!");
-            RegistryModuleLoader.tryModulePhaseRegistration(module);
-            throwRegistryEvent(module);
-        }
-        registerAdditionalPhase();
-    }
-
-    private void registerAdditionalPhase() {
-        for (Class<? extends RegistryModule> moduleClass : this.orderedModules) {
-            final RegistryModule module = this.classMap.get(moduleClass);
-            RegistryModuleLoader.tryAdditionalRegistration(module);
-        }
-    }
-
     private void addToGraph(RegistryModule module, DirectedGraph<Class<? extends RegistryModule>> graph) {
         checkNotNull(module.getClass(), "Dependency class was null!");
         graph.add(module.getClass());
@@ -516,27 +537,6 @@ public class SpongeGameRegistry implements GameRegistry {
                 graph.addEdge(module.getClass(), dependent);
             }
         }
-    }
-
-    public void preInit() {
-        this.phase = RegistrationPhase.PRE_INIT;
-        syncModules();
-        registerModulePhase();
-    }
-
-    public void init() {
-        this.phase = RegistrationPhase.INIT;
-        syncModules();
-        registerModulePhase();
-    }
-
-    public void postInit() {
-        this.phase = RegistrationPhase.POST_INIT;
-        syncModules();
-        registerModulePhase();
-        this.propertyRegistry.completeRegistration();
-        SpongeDataManager.finalizeRegistration();
-        this.phase = RegistrationPhase.LOADED;
     }
 
     public void registerAdditionals() {
