@@ -47,6 +47,7 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.effect.potion.PotionEffect;
+import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.event.SpongeEventFactoryTest;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.text.Text;
@@ -212,6 +213,12 @@ public class ManipulatorTest {
         // The 'child' methods on Text.Builder interact oddly
         // with our code, so skip building Text for now
         if (type == Text.class) {
+            return false;
+        }
+        // EntitySnapshot can't be built with null values
+        // We need a dummy EntitySnapshot
+        // Skip building EntitySnapshot for now
+        if (type == EntitySnapshot.class) {
             return false;
         }
         try {
