@@ -31,12 +31,16 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.chunk.ChunkPrimer;
+import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.extent.EntityUniverse;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.context.BlockTransaction;
 
 import java.util.List;
 import java.util.Map;
@@ -121,4 +125,16 @@ public interface IMixinChunk {
     boolean isActive();
 
     void removeTileEntity(TileEntity removed);
+
+    /**
+     * Specifically similar to {@link net.minecraft.world.chunk.Chunk#addTileEntity(BlockPos, TileEntity)}
+     * except without the validation check of {@link net.minecraft.world.chunk.Chunk#getBlockState(BlockPos)}
+     * equality due to delayed tracking. This will allow the tracker to perform delayed tile entity additions
+     * and removals with physics without causing issues. Should not be called in any other fashion except from
+     * {@link BlockTransaction#process(Transaction, IPhaseState, PhaseContext, int)}.
+     *
+     * @param targetPos
+     * @param added
+     */
+    void setTileEntity(BlockPos targetPos, TileEntity added);
 }

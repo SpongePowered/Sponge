@@ -206,6 +206,9 @@ public final class TrackingUtil {
         if (!mixinTileEntity.shouldTick()) {
             return;
         }
+        if (chunk == null) {
+            mixinTileEntity.setActiveChunk((IMixinChunk) tileEntity.getWorld().getChunk(tileEntity.getPos()));
+        }
 
         final TileEntityTickContext context = TickPhase.Tick.TILE_ENTITY.createPhaseContext().source(mixinTileEntity);
         try (final PhaseContext<?> phaseContext = context) {

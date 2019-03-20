@@ -42,8 +42,10 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.util.SpongeHooks;
-import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
@@ -53,10 +55,17 @@ public abstract class BlockTransaction {
     final int transactionIndex;
     final int snapshotIndex;
     boolean isCancelled = false;
+    boolean appliedPreChange = false;
+    final BlockPos affectedPosition;
+    @Nullable Map<BlockPos, TileEntity> tilesAtTransaction;
+    @Nullable Map<BlockPos, IBlockState> blocksNotAffected;
+    @Nullable BlockTransaction previous;
+    @Nullable BlockTransaction next;
 
-    BlockTransaction(int i, int snapshotIndex) {
+    BlockTransaction(int i, int snapshotIndex, BlockPos affectedPosition) {
         this.transactionIndex = i;
         this.snapshotIndex = snapshotIndex;
+        this.affectedPosition = affectedPosition;
     }
 
     @Override
@@ -70,14 +79,31 @@ public abstract class BlockTransaction {
     abstract void process(Transaction<BlockSnapshot> eventTransaction, IPhaseState phaseState, PhaseContext<?> phaseContext,
         int currentDepth);
 
-    public void enqueueChanges(SpongeProxyBlockAccess proxyBlockAccess, SpongeProxyBlockAccess.Proxy proxy) {
+    void provideExistingBlockState(BlockTransaction prevChange, IBlockState newState) {
+        if (prevChange.blocksNotAffected == null) {
+            prevChange.blocksNotAffected = new LinkedHashMap<>();
+        }
+        if (this.appliedPreChange) {
+            return;
+        }
+        final IBlockState iBlockState = prevChange.blocksNotAffected.putIfAbsent(this.affectedPosition, newState);
+        if (newState == iBlockState) {
+            this.appliedPreChange = true;
+        }
+    }
 
+    public void enqueueChanges(SpongeProxyBlockAccess proxyBlockAccess, MultiBlockCaptureSupplier supplier) {
+        supplier.getProxyOrCreate(proxyBlockAccess.getWorld());
+        supplier.queuePreviousStates(this);
     }
 
     @Nullable
     public SpongeProxyBlockAccess.Proxy getProxy(IMixinWorldServer mixinWorldServer) {
         return null;
     }
+
+    public void provideUnchangedStates(BlockTransaction prevChange) { }
+
 
     @SuppressWarnings("rawtypes")
     public static final class AddTileEntity extends BlockTransaction {
@@ -87,7 +113,7 @@ public abstract class BlockTransaction {
         final IBlockState newState;
 
         AddTileEntity(int i, int snapshotIndex, TileEntity added, SpongeBlockSnapshot attachedSnapshot, IBlockState newState) {
-            super(i, snapshotIndex);
+            super(i, snapshotIndex, attachedSnapshot.getBlockPos());
 
             this.added = added;
             this.addedSnapshot = attachedSnapshot;
@@ -107,12 +133,29 @@ public abstract class BlockTransaction {
             final SpongeProxyBlockAccess proxyAccess = ((IMixinWorldServer) worldServer).getProxyAccess();
             final BlockPos targetPos = this.addedSnapshot.getBlockPos();
             proxyAccess.proceed(targetPos, this.newState);
-            proxyAccess.proceedWithAdd(targetPos, this.added);
+            proxyAccess.proceedWithAdd(targetPos, this.added, this.newState);
             ((IMixinTileEntity) this.added).setCaptured(false);
         }
 
         @Override
-        public void enqueueChanges(SpongeProxyBlockAccess proxyBlockAccess, SpongeProxyBlockAccess.Proxy proxy) {
+        public void provideUnchangedStates(BlockTransaction prevChange) {
+            if (this.appliedPreChange) {
+                return;
+            }
+            if (prevChange.tilesAtTransaction == null) {
+                prevChange.tilesAtTransaction = new LinkedHashMap<>();
+            }
+            if (!prevChange.tilesAtTransaction.containsKey(this.affectedPosition)) {
+                // We want to have a null tile entity, because the tile is going to be added to the proxy
+                prevChange.tilesAtTransaction.put(this.affectedPosition, this.added);
+                provideExistingBlockState(prevChange, this.newState);
+                this.appliedPreChange = true;
+            }
+        }
+
+        @Override
+        public void enqueueChanges(SpongeProxyBlockAccess proxyBlockAccess, MultiBlockCaptureSupplier supplier) {
+            super.enqueueChanges(proxyBlockAccess, supplier);
             proxyBlockAccess.queueTileAddition(this.addedSnapshot.getBlockPos(), this.added);
         }
 
@@ -132,7 +175,7 @@ public abstract class BlockTransaction {
         final IBlockState newState;
 
         RemoveTileEntity(int i, int snapshotIndex, TileEntity removed, SpongeBlockSnapshot attachedSnapshot, IBlockState newState) {
-            super(i, snapshotIndex);
+            super(i, snapshotIndex, attachedSnapshot.getBlockPos());
             this.removed = removed;
             this.tileSnapshot = attachedSnapshot;
             this.newState = newState;
@@ -157,7 +200,23 @@ public abstract class BlockTransaction {
         }
 
         @Override
-        public void enqueueChanges(SpongeProxyBlockAccess proxyBlockAccess, SpongeProxyBlockAccess.Proxy proxy) {
+        public void provideUnchangedStates(BlockTransaction prevChange) {
+            if (this.appliedPreChange) {
+                return;
+            }
+            if (prevChange.tilesAtTransaction == null) {
+                prevChange.tilesAtTransaction = new LinkedHashMap<>();
+            }
+            if (!prevChange.tilesAtTransaction.containsKey(this.affectedPosition)) {
+                provideExistingBlockState(prevChange, this.newState);
+                prevChange.tilesAtTransaction.put(this.affectedPosition, this.removed);
+                this.appliedPreChange = true;
+            }
+        }
+
+        @Override
+        public void enqueueChanges(SpongeProxyBlockAccess proxyBlockAccess, MultiBlockCaptureSupplier supplier) {
+            super.enqueueChanges(proxyBlockAccess, supplier);
             proxyBlockAccess.queueRemoval(this.removed);
         }
 
@@ -176,7 +235,7 @@ public abstract class BlockTransaction {
         final SpongeBlockSnapshot removedSnapshot;
 
         ReplaceTileEntity(int i, int snapshotIndex, TileEntity added, TileEntity removed, SpongeBlockSnapshot attachedSnapshot) {
-            super(i, snapshotIndex);
+            super(i, snapshotIndex, attachedSnapshot.getBlockPos());
             this.added = added;
             this.removed = removed;
             this.removedSnapshot = attachedSnapshot;
@@ -196,11 +255,30 @@ public abstract class BlockTransaction {
             ((IMixinTileEntity) this.removed).setCaptured(false);
             proxyAccess.proceedWithRemoval(position, this.removed);
             ((IMixinTileEntity) this.added).setCaptured(false);
-            proxyAccess.proceedWithAdd(position, this.added);
+            proxyAccess.proceedWithAdd(position, this.added, (IBlockState) this.removedSnapshot.getState());
         }
 
         @Override
-        public void enqueueChanges(SpongeProxyBlockAccess proxyBlockAccess, SpongeProxyBlockAccess.Proxy proxy) {
+        public void provideUnchangedStates(BlockTransaction prevChange) {
+            if (this.appliedPreChange) {
+                return;
+            }
+            provideExistingBlockState(prevChange, (IBlockState) this.removedSnapshot.getState());
+            if (prevChange.tilesAtTransaction == null) {
+                prevChange.tilesAtTransaction = new LinkedHashMap<>();
+            }
+            // Basically, if the position is already populated with a tile entity, don't
+            // override the change, because that'd be contaminating with a new change.
+            if (!prevChange.tilesAtTransaction.containsKey(this.affectedPosition)) {
+                prevChange.tilesAtTransaction.put(this.affectedPosition, this.removed);
+                this.appliedPreChange = true;
+            }
+
+        }
+
+        @Override
+        public void enqueueChanges(SpongeProxyBlockAccess proxyBlockAccess, MultiBlockCaptureSupplier supplier) {
+            super.enqueueChanges(proxyBlockAccess, supplier);
             proxyBlockAccess.queueReplacement(this.added, this.removed);
         }
 
@@ -224,7 +302,7 @@ public abstract class BlockTransaction {
         public boolean queueOnAdd = false;
 
         ChangeBlock(int i, int snapshotIndex, SpongeBlockSnapshot attachedSnapshot, IBlockState newState, SpongeBlockChangeFlag blockChange) {
-            super(i, snapshotIndex);
+            super(i, snapshotIndex, attachedSnapshot.getBlockPos());
             this.original = attachedSnapshot;
             this.newState = newState;
             this.blockChangeFlag = blockChange;
@@ -239,7 +317,8 @@ public abstract class BlockTransaction {
         }
 
         @Override
-        public void enqueueChanges(SpongeProxyBlockAccess proxyBlockAccess, SpongeProxyBlockAccess.Proxy proxy) {
+        public void enqueueChanges(SpongeProxyBlockAccess proxyBlockAccess, MultiBlockCaptureSupplier supplier) {
+            super.enqueueChanges(proxyBlockAccess, supplier);
             BlockPos target = this.original.getBlockPos();
             proxyBlockAccess.proceed(target, this.newState);
             if (this.queuedRemoval != null) {
@@ -282,14 +361,10 @@ public abstract class BlockTransaction {
             if (!this.ignoreBreakBlockLogic && this.queueBreak) {
                 BlockSnapshot currentNeighborSource = currentContext.neighborNotificationSource;
                 currentContext.neighborNotificationSource = this.original;
-                if (this.queuedRemoval != null) {
-                    proxyAccess.proceedWithRemoval(targetPosition, this.queuedRemoval);
-                }
                 oldState.getBlock().breakBlock(worldServer, targetPosition, oldState);
                 currentContext.neighborNotificationSource = currentNeighborSource;
-            } else if (this.queuedRemoval != null) {
-                proxyAccess.proceedWithRemoval(targetPosition, this.queuedRemoval);
             }
+
 
             // We call onBlockAdded here for blocks without a TileEntity.
             // MixinChunk#setBlockState will call onBlockAdded for blocks
@@ -299,7 +374,7 @@ public abstract class BlockTransaction {
                 phaseState.performOnBlockAddedSpawns(phaseContext, currentDepth + 1);
             }
             if (this.queueTileSet != null) {
-                proxyAccess.proceedWithAdd(targetPosition, this.queueTileSet);
+                proxyAccess.proceedWithAdd(targetPosition, this.queueTileSet, this.newState);
             }
             phaseState.postBlockTransactionApplication(this.original.blockChange, eventTransaction, phaseContext);
             ((IPhaseState) currentContext.state).postProcessSpecificBlockChange(currentContext, this, currentDepth + 1);
@@ -312,6 +387,23 @@ public abstract class BlockTransaction {
                 ((IMixinWorldServer) worldServer), targetPosition, oldState, this.newState, this.blockChangeFlag);
         }
 
+        @Override
+        public void provideUnchangedStates(BlockTransaction prevChange) {
+            if (this.appliedPreChange) {
+                return;
+            }
+            provideExistingBlockState(prevChange, (IBlockState) this.original.getState());
+            if (prevChange.tilesAtTransaction == null) {
+                prevChange.tilesAtTransaction = new LinkedHashMap<>();
+            }
+            // Basically, we don't want to override what position potentially had before.
+            // if there was already an entry, some other state before this one has already populated it.
+            if (!prevChange.tilesAtTransaction.containsKey(this.affectedPosition)) {
+                prevChange.tilesAtTransaction.put(this.affectedPosition, this.queuedRemoval);
+                this.appliedPreChange = true;
+            }
+        }
+
         @Nullable
         @Override
         public SpongeProxyBlockAccess.Proxy getProxy(IMixinWorldServer mixinWorldServer) {
@@ -321,30 +413,46 @@ public abstract class BlockTransaction {
 
     static final class NeighborNotification extends BlockTransaction {
         final IMixinWorldServer worldServer;
-        final IBlockState source;
+        final IBlockState notifyState;
         final BlockPos notifyPos;
         final Block sourceBlock;
         final BlockPos sourcePos;
+        private final IBlockState actualSourceState;
 
-        NeighborNotification(int transactionIndex, int snapshotIndex, IMixinWorldServer worldServer, IBlockState source, BlockPos notifyPos, Block sourceBlock,
-            BlockPos sourcePos) {
-            super(transactionIndex, snapshotIndex);
+        NeighborNotification(int transactionIndex, int snapshotIndex, IMixinWorldServer worldServer, IBlockState notifyState, BlockPos notifyPos,
+            Block sourceBlock, BlockPos sourcePos, IBlockState sourceState) {
+            super(transactionIndex, snapshotIndex, sourcePos);
             this.worldServer = worldServer;
-            this.source = source;
+            this.notifyState = notifyState;
             this.notifyPos = notifyPos;
             this.sourceBlock = sourceBlock;
             this.sourcePos = sourcePos;
+            this.actualSourceState = sourceState;
         }
 
         @Override
         public String toString() {
             return MoreObjects.toStringHelper(this)
                 .add("worldServer", ((World) this.worldServer).getProperties().getWorldName())
-                .add("source", this.source)
+                .add("notifyState", this.notifyState)
                 .add("notifyPos", this.notifyPos)
                 .add("sourceBlock", this.sourceBlock)
                 .add("sourcePos", this.sourcePos)
+                .add("actualSourceState", this.actualSourceState)
                 .toString();
+        }
+
+        @Override
+        public void provideUnchangedStates(BlockTransaction prevChange) {
+            if (this.appliedPreChange) {
+                return;
+            }
+            provideExistingBlockState(prevChange, this.actualSourceState);
+        }
+
+        @Override
+        public void enqueueChanges(SpongeProxyBlockAccess proxyBlockAccess, MultiBlockCaptureSupplier supplier) {
+            super.enqueueChanges(proxyBlockAccess, supplier);
         }
 
         @Override
@@ -360,7 +468,8 @@ public abstract class BlockTransaction {
             final BlockPos notifyPos = this.notifyPos;
             final Block sourceBlock = this.sourceBlock;
             final BlockPos sourcePos = this.sourcePos;
-            PhaseTracker.getInstance().performNeighborNotificationOnTarget(worldServer, notifyPos, sourceBlock, sourcePos, this.source);
+            worldServer.getProxyAccess().proceed(notifyPos, this.actualSourceState);
+            PhaseTracker.getInstance().performNeighborNotificationOnTarget(worldServer, this.notifyState, notifyPos, sourceBlock, sourcePos);
         }
     }
 }

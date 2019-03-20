@@ -27,9 +27,6 @@ package org.spongepowered.common.mixin.core.world;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.spongepowered.common.event.tracking.context.SpongeProxyBlockAccess;
-import org.spongepowered.common.relocate.co.aikar.timings.TimingHistory;
-import org.spongepowered.common.relocate.co.aikar.timings.WorldTimingsHandler;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.MoreObjects;
@@ -168,6 +165,7 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.context.SpongeProxyBlockAccess;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
@@ -193,6 +191,8 @@ import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModDat
 import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.IModData_Collisions;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.registry.type.world.BlockChangeFlagRegistryModule;
+import org.spongepowered.common.relocate.co.aikar.timings.TimingHistory;
+import org.spongepowered.common.relocate.co.aikar.timings.WorldTimingsHandler;
 import org.spongepowered.common.util.NonNullArrayList;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
@@ -1000,7 +1000,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         // from the world before we are able to capture it.
         net.minecraft.tileentity.TileEntity tileEntity =  this.proxyBlockAccess.getTileEntity(pos);
         if (tileEntity == null && !this.proxyBlockAccess.isTileEntityRemoved(pos)) {
-            tileEntity = this.getTileEntity(pos);
+            tileEntity = this.onChunkGetTileDuringRemoval(pos);
         }
 
 
@@ -1039,7 +1039,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             // Easy short circuit.
             if (((IMixinTileEntity) foundTile).isCaptured()) {
                 ci.cancel();
-            } else if (this.proxyBlockAccess.isTileQueuedForRemoval(pos, foundTile)) {
+            }
+            if (this.proxyBlockAccess.isTileQueuedForRemoval(pos, foundTile)) {
                 ci.cancel();
             }
         } else {
@@ -1573,6 +1574,32 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
         // Sponge - reduce the call stack by calling the more direct method.
         return this.setBlockState(pos, Blocks.AIR.getDefaultState(), BlockChangeFlags.ALL);
+    }
+
+    private net.minecraft.tileentity.TileEntity onChunkGetTileDuringRemoval(BlockPos pos) {
+
+        if (this.isOutsideBuildHeight(pos)) {
+            return null;
+        } else {
+            net.minecraft.tileentity.TileEntity tileentity2 = null;
+
+            if (this.processingLoadedTiles) {
+                tileentity2 = ((MixinWorld_Accessor) this).accessPendingTileEntityAt(pos);
+            }
+
+            if (tileentity2 == null) {
+                // Sponge - Instead of creating the tile entity, just check if it's there. If the
+                // tile entity doesn't exist, don't create it since we're about to just wholesale remove it...
+                // tileentity2 = this.getChunk(pos).getTileEntity(pos, Chunk.EnumCreateEntityType.IMMEDIATE);
+                tileentity2 = this.getChunk(pos).getTileEntity(pos, Chunk.EnumCreateEntityType.CHECK);
+            }
+
+            if (tileentity2 == null) {
+                tileentity2 =  ((MixinWorld_Accessor) this).accessPendingTileEntityAt(pos);
+            }
+
+            return tileentity2;
+        }
     }
 
     /**

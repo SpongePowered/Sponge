@@ -37,6 +37,7 @@ import net.minecraft.world.chunk.Chunk;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -205,14 +206,14 @@ public final class SpongeProxyBlockAccess implements IBlockAccess {
     void proceedWithRemoval(BlockPos targetPosition, TileEntity removed) {
         this.markedRemoved.remove(targetPosition);
         final TileEntity existing = this.affectedTileEntities.remove(targetPosition);
-        if (existing != null && existing != removed) {
-            // Put it back in, might be a different tile that was being placed back in, potentially
-            this.affectedTileEntities.put(targetPosition, existing);
-        }
         // Always remove the tile entity from various lists.
         if (removed != null) {
             this.queuedRemovals.remove(targetPosition, removed);
-            removeTileEntityFromWorldAndChunk(removed);
+            if (this.queuedTiles.containsEntry(targetPosition, removed)) {
+                this.markedRemoved.add(targetPosition);
+            } else {
+                removeTileEntityFromWorldAndChunk(removed);
+            }
         }
     }
 
@@ -230,7 +231,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess {
         }
     }
 
-    void proceedWithAdd(BlockPos targetPos, TileEntity added) {
+    void proceedWithAdd(BlockPos targetPos, TileEntity added, IBlockState newState) {
         final boolean removed = this.queuedTiles.remove(targetPos, added);
         if (!removed) {
             // someone else popped for us?
@@ -253,7 +254,9 @@ public final class SpongeProxyBlockAccess implements IBlockAccess {
         } else {
             final Chunk chunk = this.processingWorld.getChunk(targetPos);
             if (!chunk.isEmpty()) {
-                chunk.addTileEntity(targetPos, added);
+                if (SpongeImplHooks.hasBlockTileEntity(newState.getBlock(), newState)) {
+                    ((IMixinChunk) chunk).setTileEntity(targetPos, added);
+                }
             }
             this.processingWorld.addTileEntity(added);
         }
@@ -284,7 +287,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess {
         if (removed != null) {
             // Set the tile entity to the affected tile entities so it is retrieved
             // by the hooks in MixinWorldServer for getting tiles for removal.
-            this.affectedTileEntities.put(removed.getPos(), removed);
+            this.affectedTileEntities.put(removed.getPos(), null);
             this.markedRemoved.add(removed.getPos());
             this.queuedRemovals.put(removed.getPos(), removed);
         }
@@ -308,11 +311,24 @@ public final class SpongeProxyBlockAccess implements IBlockAccess {
 
     public boolean succeededInAdding(BlockPos pos, TileEntity tileEntity) {
         final TileEntity removed = this.affectedTileEntities.remove(pos);
-        if (removed != tileEntity) {
+        if (removed != null && removed != tileEntity) {
             System.err.println("Removed a tile entity that wasn't expected to be removed: " + removed);
             return false;
         }
         return true;
+    }
+
+    public void pushTile(BlockPos pos, TileEntity tile) {
+        this.affectedTileEntities.put(pos, tile);
+        if (tile == null) {
+            this.markedRemoved.add(pos);
+        } else {
+            this.markedRemoved.remove(pos);
+        }
+    }
+
+    public IMixinWorldServer getWorld() {
+        return (IMixinWorldServer) this.processingWorld;
     }
 
     public static final class Proxy implements AutoCloseable {

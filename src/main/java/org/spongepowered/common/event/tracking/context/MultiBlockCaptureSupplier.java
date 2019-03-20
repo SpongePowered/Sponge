@@ -62,7 +62,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -74,14 +73,21 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
 
     @Nullable private LinkedListMultimap<BlockPos, SpongeBlockSnapshot> multimap;
     @Nullable private ListMultimap<BlockPos, BlockEventData> scheduledEvents;
-    @Nullable private LinkedListMultimap<BlockPos, BlockTransaction> orderedTransactions;
     @Nullable private List<SpongeBlockSnapshot> snapshots;
-    @Nullable private LinkedHashMap<WorldServer, SpongeProxyBlockAccess.Proxy> processingBlocks;
+    @Nullable private LinkedHashMap<WorldServer, SpongeProxyBlockAccess.Proxy> processingWorlds;
     @Nullable private Set<BlockPos> usedBlocks;
     private int transactionIndex = -1; // These are used to keep track of which snapshot is being referred to as "most recent change"
     private int snapshotIndex = -1;    // so that we can appropriately cancel or discard or apply specific event transactions
     private boolean hasMulti = false;
-    @Nullable private BlockTransaction lastTransaction;
+    // We made BlockTransaction a Node and this is a pseudo LinkedList due to the nature of needing
+    // to be able to track what block states exist at the time of the transaction while other transactions
+    // are processing (because future transactions performing logic based on what exists at that state,
+    // will potentially get contaminated information based on the last transaction prior to transaction
+    // processing). Example: When starting to perform neighbor notifications during piston movement, one
+    // can feasibly see that the block state is changed already without being able to get the appropriate
+    // block state.
+    @Nullable private BlockTransaction tail;
+    @Nullable private BlockTransaction head;
 
     public MultiBlockCaptureSupplier() {
     }
@@ -361,25 +367,28 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
      */
 
     private void logTransaction(BlockPos target, BlockTransaction transaction) {
-        if (this.orderedTransactions == null) {
-            this.orderedTransactions = LinkedListMultimap.create();
+        if (this.tail != null) {
+            this.tail.next = transaction;
+        } else {
+            this.head = transaction;
         }
-        this.orderedTransactions.put(target, transaction);
+        transaction.previous = this.tail;
+        this.tail = transaction;
     }
 
-    public void captureNeighborNotification(IMixinWorldServer mixinWorldServer, BlockPos notifyPos,
-        IBlockState iblockstate,
-        Block sourceBlock, BlockPos sourcePos) {
+    public void captureNeighborNotification(IMixinWorldServer mixinWorldServer, IBlockState notifyState, BlockPos notifyPos, Block sourceBlock, BlockPos sourcePos) {
         final int transactionIndex = ++this.transactionIndex;
-        final BlockTransaction.NeighborNotification notification = new BlockTransaction.NeighborNotification(transactionIndex, this.snapshotIndex, mixinWorldServer, iblockstate, notifyPos, sourceBlock, sourcePos);
-        notification.enqueueChanges(mixinWorldServer.getProxyAccess(), getProxyOrCreate(mixinWorldServer));
+        final IBlockState actualSourceState = ((WorldServer) mixinWorldServer).getBlockState(sourcePos);
+        final BlockTransaction.NeighborNotification notification = new BlockTransaction.NeighborNotification(transactionIndex, this.snapshotIndex, mixinWorldServer,
+            notifyState, notifyPos, sourceBlock, sourcePos, actualSourceState);
+        notification.enqueueChanges(mixinWorldServer.getProxyAccess(), this);
         logTransaction(sourcePos, notification);
     }
 
     /**
      * Specifically called by {@link MixinChunk#setBlockState(BlockPos, IBlockState, IBlockState, BlockChangeFlag)} while it is preparing
      * various transactional aspects, such as potential tile entity removals, replacements, etc. Specifically should never be called outside
-     * of that reaction since {@link BlockTransaction#enqueueChanges(SpongeProxyBlockAccess, SpongeProxyBlockAccess.Proxy)}
+     * of that reaction since {@link BlockTransaction#enqueueChanges(SpongeProxyBlockAccess, MultiBlockCaptureSupplier)}
      * does not get called automatically, it is called prior to queueing potential tile replacements, and prior to calling to
      * {@link #logTileChange(IMixinWorldServer, BlockPos, TileEntity, TileEntity)} in the event a tile entity is going to be removed.
      *
@@ -406,11 +415,9 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
         if (newTile != null && oldTile == newTile) {
             // Double check previous changes, if there's a remove tile entity, and previous to that, a change block, and this is an add tile entity,
             // well, we need to flip the ChangeBlock to avoid doing a breakBlock logic
-            if (this.orderedTransactions != null && !this.orderedTransactions.isEmpty()) { // need at least 2 entries.
-                final List<BlockTransaction> entries = this.orderedTransactions.get(pos);
+            if (this.tail != null && this.tail.previous != null) { // need at least 2 entries.
                 boolean isSame = false;
-                for (ListIterator<BlockTransaction> iterator = entries.listIterator(entries.size()); iterator.hasPrevious(); ) {
-                    final BlockTransaction prevChange = iterator.previous();
+                for (BlockTransaction prevChange = this.tail; prevChange != null; prevChange = prevChange.previous) {
                     if (prevChange instanceof BlockTransaction.ChangeBlock) {
                         final BlockTransaction.ChangeBlock changeBlock = (BlockTransaction.ChangeBlock) prevChange;
                         isSame = changeBlock.queuedRemoval == newTile;
@@ -437,69 +444,64 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
             this.put(snapshot, current);
             if (newTile != null) {
                 // replacing a tile.
+                snapshot.blockChange = BlockChange.MODIFY;
                 final BlockTransaction.ReplaceTileEntity transaction = new BlockTransaction.ReplaceTileEntity(transactionIndex, this.snapshotIndex, newTile, oldTile, snapshot);
                 logTransaction(pos, transaction);
-                transaction.enqueueChanges(mixinWorldServer.getProxyAccess(), getProxyOrCreate(mixinWorldServer));
+                transaction.enqueueChanges(mixinWorldServer.getProxyAccess(),this);
                 return;
             }
+            // Removing the tile
+            snapshot.blockChange = BlockChange.BREAK;
             final IBlockState newState = ((WorldServer) mixinWorldServer).getBlockState(pos);
             final BlockTransaction.RemoveTileEntity transaction = new BlockTransaction.RemoveTileEntity(transactionIndex, this.snapshotIndex, oldTile, snapshot, newState);
-            transaction.enqueueChanges(mixinWorldServer.getProxyAccess(), getProxyOrCreate(mixinWorldServer));
+            transaction.enqueueChanges(mixinWorldServer.getProxyAccess(), this);
             logTransaction(pos, transaction);
             return;
         }
         if (newTile != null) {
             final SpongeBlockSnapshot snapshot = mixinWorldServer.createSpongeSnapshotForTileEntity(current, pos, BlockChangeFlags.NONE, newTile);
+            snapshot.blockChange = BlockChange.PLACE;
             final IBlockState newState = ((WorldServer) mixinWorldServer).getBlockState(pos);
             final BlockTransaction.AddTileEntity
                 transaction = new BlockTransaction.AddTileEntity(transactionIndex, this.snapshotIndex, newTile, snapshot, newState);
-            transaction.enqueueChanges(mixinWorldServer.getProxyAccess(), getProxyOrCreate(mixinWorldServer));
+            transaction.enqueueChanges(mixinWorldServer.getProxyAccess(), this);
             logTransaction(pos, transaction);
         }
     }
 
+    protected void queuePreviousStates(BlockTransaction transaction) {
+        if (this.head != null) {
+            if (transaction == this.head) {
+                return;
+            }
+            for (BlockTransaction prevChange = this.head; prevChange != null; prevChange = prevChange.next) {
+                if (transaction.appliedPreChange) {
+                    return;
+                }
+                if (!transaction.affectedPosition.equals(prevChange.affectedPosition)) {
+                    transaction.provideUnchangedStates(prevChange);
+                }
+            }
+        }
+    }
+
     public void cancelTransaction(BlockSnapshot original) {
-        if (this.orderedTransactions == null || this.orderedTransactions.isEmpty()) {
+        if (this.tail == null) {
             return;
         }
 
         final BlockPos blockPos = ((SpongeBlockSnapshot) original).getBlockPos();
 
         final WorldServer worldServer = ((SpongeBlockSnapshot) original).getWorldServer();
-        final List<BlockTransaction> values = this.orderedTransactions.values();
-        for (ListIterator<BlockTransaction> iterator = values.listIterator(values.size()); iterator.hasPrevious();) {
-            final BlockTransaction next = iterator.previous(); // We have to iterate in reverse order due to rollbacks
-            if (!next.isCancelled) {
-                next.cancel(worldServer, blockPos);
+        for (BlockTransaction prevChange = this.tail; prevChange != null; prevChange = prevChange.previous) {
+            if (!prevChange.isCancelled) {
+                prevChange.cancel(worldServer, blockPos);
             }
 
         }
     }
 
-        @Override
-    public int hashCode() {
-        return Objects.hashCode(this.snapshots);
-    }
 
-    @Override
-    public boolean equals(@Nullable Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null || getClass() != obj.getClass()) {
-            return false;
-        }
-        final MultiBlockCaptureSupplier other = (MultiBlockCaptureSupplier) obj;
-        return Objects.equals(this.multimap, other.multimap);
-    }
-
-
-    @Override
-    public String toString() {
-        return com.google.common.base.MoreObjects.toStringHelper(this)
-            .add("Captured", this.snapshots == null ? 0 : this.snapshots.size())
-            .toString();
-    }
 
     public void clear() {
         this.hasMulti = false;
@@ -517,7 +519,6 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
         if (this.scheduledEvents != null) {
             this.scheduledEvents.clear();
         }
-        this.lastTransaction = null;
         this.snapshotIndex = -1;
         this.transactionIndex = -1;
     }
@@ -573,7 +574,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
 
         final IPhaseState phaseState = phaseContext.state;
         int targetIndex = 0;
-        if (this.orderedTransactions == null || this.orderedTransactions.isEmpty()) {
+        if (this.tail == null) {
             boolean hasEvents = false;
             if (!scheduledEvents.isEmpty()) {
                 hasEvents = true;
@@ -590,9 +591,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
         }
         Transaction<BlockSnapshot> eventTransaction = transactions.get(targetIndex);
         try {
-            final IPhaseState<?> currentState = PhaseTracker.getInstance().getCurrentState();
-            for (Map.Entry<BlockPos, BlockTransaction> entry : this.orderedTransactions.entries()) {
-                final BlockTransaction transaction = entry.getValue();
+            for (BlockTransaction transaction = this.head; transaction != null; transaction = transaction.next) {
 
                 if (transaction.snapshotIndex > targetIndex) {
                     targetIndex++;
@@ -603,14 +602,20 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
                 }
                 final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) ((SpongeBlockSnapshot) eventTransaction.getOriginal()).getWorldServer();
                 try (final SpongeProxyBlockAccess.Proxy ignored = transaction.getProxy(mixinWorldServer)) {
+                    if (transaction.blocksNotAffected != null) {
+                        transaction.blocksNotAffected.forEach((pos, block) -> mixinWorldServer.getProxyAccess().proceed(pos, block));
+                    }
+                    if (transaction.tilesAtTransaction != null) {
+                        transaction.tilesAtTransaction.forEach((pos, tile) -> mixinWorldServer.getProxyAccess().pushTile(pos, tile));
+                    }
                     transaction.process(eventTransaction, phaseState, phaseContext, currentDepth);
                 }
             }
         } finally {
-            if (this.processingBlocks == null) {
+            if (this.processingWorlds == null) {
                 return noCancelledTransactions;
             }
-            for (Map.Entry<WorldServer, SpongeProxyBlockAccess.Proxy> entry : this.processingBlocks.entrySet()) {
+            for (Map.Entry<WorldServer, SpongeProxyBlockAccess.Proxy> entry : this.processingWorlds.entrySet()) {
                 try {
                     entry.getValue().close();
                 } catch (Exception e) {
@@ -621,15 +626,39 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
         return noCancelledTransactions;
     }
 
-    public SpongeProxyBlockAccess.Proxy getProxyOrCreate(IMixinWorldServer mixinWorldServer) {
-        if (this.processingBlocks == null) {
-            this.processingBlocks = new LinkedHashMap<>();
+    SpongeProxyBlockAccess.Proxy getProxyOrCreate(IMixinWorldServer mixinWorldServer) {
+        if (this.processingWorlds == null) {
+            this.processingWorlds = new LinkedHashMap<>();
         }
-        SpongeProxyBlockAccess.Proxy existing = this.processingBlocks.get((WorldServer) mixinWorldServer);
+        SpongeProxyBlockAccess.Proxy existing = this.processingWorlds.get((WorldServer) mixinWorldServer);
         if (existing == null) {
             existing = mixinWorldServer.getProxyAccess().pushProxy();
-            this.processingBlocks.put((WorldServer) mixinWorldServer, existing);
+            this.processingWorlds.put((WorldServer) mixinWorldServer, existing);
         }
         return existing;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(this.snapshots);
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        final MultiBlockCaptureSupplier other = (MultiBlockCaptureSupplier) obj;
+        return Objects.equals(this.multimap, other.multimap);
+    }
+
+    @Override
+    public String toString() {
+        return com.google.common.base.MoreObjects.toStringHelper(this)
+            .add("Captured", this.snapshots == null ? 0 : this.snapshots.size())
+            .toString();
     }
 }

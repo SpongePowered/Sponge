@@ -105,7 +105,6 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.BlockTransaction;
-import org.spongepowered.common.event.tracking.context.MultiBlockCaptureSupplier;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.interfaces.IMixinCachable;
 import org.spongepowered.common.interfaces.IMixinChunk;
@@ -702,7 +701,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
                             ((IMixinTileEntity) existing).setCaptured(true);
                             transaction.queuedRemoval = existing;
                         }
-                        transaction.enqueueChanges(mixinWorld.getProxyAccess(), peek.getCapturedBlockSupplier().getProxyOrCreate(mixinWorld));
+                        transaction.enqueueChanges(mixinWorld.getProxyAccess(), peek.getCapturedBlockSupplier());
                     } else {
                         currentBlock.breakBlock(this.world, pos, currentState);
                     }
@@ -715,7 +714,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
                         // be ignored since the transaction process will actually process
                         // the removal.
                         ((IMixinTileEntity) existing).setCaptured(true);
-                        transaction.enqueueChanges(mixinWorld.getProxyAccess(), peek.getCapturedBlockSupplier().getProxyOrCreate(mixinWorld));
+                        transaction.enqueueChanges(mixinWorld.getProxyAccess(), peek.getCapturedBlockSupplier());
                         transaction.queuedRemoval = existing;
                     } else {
                         this.world.removeTileEntity(pos);
@@ -836,7 +835,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
                         ((IMixinTileEntity) tileentity).setCaptured(true);
                         tileentity.setPos(pos);// Set the position
                     }
-                    transaction.enqueueChanges(mixinWorld.getProxyAccess(), peek.getCapturedBlockSupplier().getProxyOrCreate(mixinWorld));
+                    transaction.enqueueChanges(mixinWorld.getProxyAccess(), peek.getCapturedBlockSupplier());
                 } else {
                     this.world.setTileEntity(pos, tileentity);
                 }
@@ -848,7 +847,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         } else if (transaction != null) {
             // We still want to enqueue any changes to the transaction, including any tiles removed
             // if there was a tile entity added, it will be logged above
-            transaction.enqueueChanges(mixinWorld.getProxyAccess(), peek.getCapturedBlockSupplier().getProxyOrCreate(mixinWorld));
+            transaction.enqueueChanges(mixinWorld.getProxyAccess(), peek.getCapturedBlockSupplier());
         }
 
         this.dirty = true;
@@ -865,6 +864,21 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         }
         ((IMixinTileEntity) removed).setActiveChunk(null);
         removed.invalidate();
+    }
+
+    @Override
+    public void setTileEntity(BlockPos pos, TileEntity added) {
+        if (added.getWorld() != this.world) {
+            // Forge adds this because some mods do stupid things....
+            added.setWorld(this.world);
+        }
+        added.setPos(pos);
+        if (this.tileEntities.containsKey(pos)) {
+            this.tileEntities.get(pos).invalidate();
+        }
+        added.validate();
+        ((IMixinTileEntity) added).setActiveChunk(this);
+        this.tileEntities.put(pos, added);
     }
 
     private SpongeBlockSnapshot createSpongeBlockSnapshot(IBlockState state, IBlockState extended, BlockPos pos, BlockChangeFlag updateFlag, @Nullable TileEntity existing) {
