@@ -60,7 +60,7 @@ public class DelegatingLens extends AbstractLens {
             slotProvider.add(slots.getSlot(this.base + slot.slotIndex));
         }
         // Provide indexed access over the Container to the slots in the base inventory
-        this.addSpanningChild(new OrderedInventoryLensImpl(this.base, containerSlots.size(), 1, slotProvider));
+        this.addSpanningChild(new OrderedInventoryLensImpl(0, containerSlots.size(), 1, slotProvider));
         this.addChild(delegate);
     }
 
