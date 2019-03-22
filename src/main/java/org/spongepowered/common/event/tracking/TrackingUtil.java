@@ -348,24 +348,6 @@ public final class TrackingUtil {
         return phaseContext.wasNotCancelled();
     }
 
-    public static void associateBlockChangeWithSnapshot(PhaseContext<?> phaseContext, Block newBlock, IBlockState currentState, SpongeBlockSnapshot snapshot) {
-        Block originalBlock = currentState.getBlock();
-        ((IPhaseState) phaseContext.state).associateBlockChangeWithSnapshot(phaseContext, newBlock, currentState, snapshot, originalBlock);
-        if (phaseContext == BlockPhase.State.BLOCK_DECAY) {
-            if (newBlock == Blocks.AIR) {
-                snapshot.blockChange = BlockChange.DECAY;
-                return;
-            }
-        }
-        if (newBlock == Blocks.AIR) {
-            snapshot.blockChange = BlockChange.BREAK;
-        } else if (newBlock != originalBlock && !forceModify(originalBlock, newBlock)) {
-            snapshot.blockChange = BlockChange.PLACE;
-        } else {
-            snapshot.blockChange = BlockChange.MODIFY;
-        }
-    }
-
     static boolean forceModify(Block originalBlock, Block newBlock) {
         if (originalBlock instanceof BlockRedstoneRepeater && newBlock instanceof BlockRedstoneRepeater) {
             return true;

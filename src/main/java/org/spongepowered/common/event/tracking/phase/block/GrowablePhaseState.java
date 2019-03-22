@@ -80,9 +80,9 @@ public class GrowablePhaseState implements IPhaseState<GrowablePhaseContext> {
     }
 
     @Override
-    public void associateBlockChangeWithSnapshot(GrowablePhaseContext phaseContext,
-        Block newBlock, IBlockState currentState, SpongeBlockSnapshot snapshot, Block originalBlock) {
-        snapshot.blockChange = BlockChange.GROW;
+    public BlockChange associateBlockChangeWithSnapshot(GrowablePhaseContext phaseContext,
+        IBlockState newState, Block newBlock, IBlockState currentState, SpongeBlockSnapshot snapshot, Block originalBlock) {
+        return BlockChange.GROW;
     }
 
     @Override

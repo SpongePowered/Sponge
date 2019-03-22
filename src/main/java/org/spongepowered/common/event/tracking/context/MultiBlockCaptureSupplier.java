@@ -195,12 +195,14 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
      * @param newState The incoming block change to compare to change
      * @param blockPos The block position to get the backing list from the multimap
      */
+    @SuppressWarnings("unchecked")
     private void associateBlockChangeForPosition(IBlockState newState, BlockPos blockPos) {
         final List<SpongeBlockSnapshot> list = this.multimap.get(blockPos);
         if (list != null && !list.isEmpty()) {
             final SpongeBlockSnapshot originalSnapshot = list.get(0);
-            TrackingUtil.associateBlockChangeWithSnapshot(PhaseTracker.getInstance().getCurrentContext(), newState.getBlock(),
-                BlockUtil.toNative(originalSnapshot.getState()), originalSnapshot);
+            final PhaseContext<?> peek = PhaseTracker.getInstance().getCurrentContext();
+            final IBlockState currentState = BlockUtil.toNative(originalSnapshot.getState());
+            originalSnapshot.blockChange = ((IPhaseState) peek.state).associateBlockChangeWithSnapshot(peek, newState, newState.getBlock(), currentState, originalSnapshot, currentState.getBlock());
         }
     }
 
@@ -256,6 +258,9 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
             return;
         }
         pruneSingle(backingSnapshot, blockPos);
+        if (this.head != null) {
+            pruneTransaction(getBackingSnapshot(snapshot));
+        }
     }
 
     private void pruneSingle(final SpongeBlockSnapshot backingSnapshot, final BlockPos blockPos) {

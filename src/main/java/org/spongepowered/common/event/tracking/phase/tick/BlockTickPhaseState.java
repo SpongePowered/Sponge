@@ -223,20 +223,17 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
     }
 
     @Override
-    public void associateBlockChangeWithSnapshot(BlockTickContext phaseContext, Block newBlock,
+    public BlockChange associateBlockChangeWithSnapshot(BlockTickContext phaseContext, IBlockState newState, Block newBlock,
         IBlockState currentState, SpongeBlockSnapshot snapshot, Block originalBlock) {
         if (phaseContext.tickingBlock instanceof IGrowable) {
             if (newBlock == Blocks.AIR) {
-                snapshot.blockChange = BlockChange.BREAK;
-            } else if (!(newBlock instanceof IGrowable)) {
-                super.associateBlockChangeWithSnapshot(phaseContext, newBlock, currentState, snapshot, originalBlock);
-            } else {
-                snapshot.blockChange = BlockChange.GROW;
-                return;
+                return BlockChange.BREAK;
             }
-        } else {
-            super.associateBlockChangeWithSnapshot(phaseContext, newBlock, currentState, snapshot, originalBlock);
+            if (newBlock instanceof IGrowable || newState.getMaterial().getCanBurn()) {
+                return BlockChange.GROW;
+            }
         }
+        return super.associateBlockChangeWithSnapshot(phaseContext, newState, newBlock, currentState, snapshot, originalBlock);
     }
 
     @Override

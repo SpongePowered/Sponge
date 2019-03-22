@@ -88,7 +88,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
             final Proxy proxy = this.proxies.peek();
             if (existing == null) {
                 proxy.markNew(pos);
-            } else if (!proxy.isNew(pos)) {
+            } else if ((this.processingTransaction != null || !proxy.isStored(pos)) && !proxy.isNew(pos)) {
                 proxy.store(pos, state);
             }
         }
@@ -157,6 +157,10 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
             if (!this.proxies.isEmpty()) {
                 for (Map.Entry<BlockPos, IBlockState> entry : proxy.processed.entrySet()) {
                     this.processed.put(entry.getKey(), entry.getValue());
+                }
+            } else {
+                for (BlockPos blockPos : proxy.processed.keySet()) {
+                    this.processed.remove(blockPos);
                 }
             }
         }
@@ -252,6 +256,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
     void proceedWithRemoval(BlockPos targetPosition, TileEntity removed) {
         this.markedRemoved.remove(targetPosition);
         final TileEntity existing = this.affectedTileEntities.remove(targetPosition);
+        // existing should be removed
         // Always remove the tile entity from various lists.
         if (removed != null) {
             this.queuedRemovals.remove(targetPosition, removed);

@@ -198,6 +198,8 @@ public abstract class BlockTransaction {
             this.removed = removed;
             this.tileSnapshot = attachedSnapshot;
             this.newState = newState;
+            this.applyTileAtTransaction(this.affectedPosition, this.removed);
+            this.appliedPreChange = false;
         }
 
         @Override
@@ -221,7 +223,7 @@ public abstract class BlockTransaction {
         @Override
         public void addToPrinter(PrettyPrinter printer) {
             printer.add("RemoveTileEntity")
-                .add(" %s : %s", this.affectedPosition, this.removed)
+                .add(" %s : %s", this.affectedPosition, ((IMixinTileEntity) this.removed).getPrettyPrinterString())
                 .add(" %s : %s", this.affectedPosition, this.newState)
             ;
         }
@@ -259,6 +261,8 @@ public abstract class BlockTransaction {
             this.added = added;
             this.removed = removed;
             this.removedSnapshot = attachedSnapshot;
+            this.applyTileAtTransaction(this.affectedPosition, this.removed);
+            this.appliedPreChange = false;
         }
 
         @Override
@@ -423,10 +427,6 @@ public abstract class BlockTransaction {
             return mixinWorldServer.getProxyAccess().pushProxy();
         }
 
-        @Override
-        public void postProcessBlocksAffected(SpongeProxyBlockAccess proxyAccess) {
-            proxyAccess.proceed(this.affectedPosition, this.newState);
-        }
 
         @Override
         public void addToPrinter(PrettyPrinter printer) {
@@ -462,6 +462,7 @@ public abstract class BlockTransaction {
             this.sourceBlock = sourceBlock;
             this.sourcePos = sourcePos;
             this.actualSourceState = sourceState;
+            provideExistingBlockState(this, this.actualSourceState);
         }
 
         @Override

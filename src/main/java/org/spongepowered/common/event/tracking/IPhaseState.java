@@ -889,14 +889,14 @@ public interface IPhaseState<C extends PhaseContext<C>> {
 
     }
 
-    default void associateBlockChangeWithSnapshot(C phaseContext, Block newBlock, IBlockState currentState, SpongeBlockSnapshot snapshot,
+    default BlockChange associateBlockChangeWithSnapshot(C phaseContext, IBlockState newState, Block newBlock,
+        IBlockState currentState, SpongeBlockSnapshot snapshot,
         Block originalBlock) {
         if (newBlock == Blocks.AIR) {
-            snapshot.blockChange = BlockChange.BREAK;
+            return BlockChange.BREAK;
         } else if (newBlock != originalBlock && !TrackingUtil.forceModify(originalBlock, newBlock)) {
-            snapshot.blockChange = BlockChange.PLACE;
-        } else {
-            snapshot.blockChange = BlockChange.MODIFY;
+            return BlockChange.PLACE;
         }
+        return BlockChange.MODIFY;
     }
 }

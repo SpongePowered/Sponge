@@ -664,10 +664,10 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         // Set up some default information variables for later processing
         final boolean isFake = ((IMixinWorld) this.world).isFake();
         final TileEntity existing = this.getTileEntity(pos, EnumCreateEntityType.CHECK);
-        final SpongeBlockSnapshot snapshot = isFake || !ShouldFire.CHANGE_BLOCK_EVENT ? null : createSpongeBlockSnapshot(currentState, currentState, pos, flag, existing);
-        final BlockTransaction.ChangeBlock transaction;
         final PhaseContext<?> peek = isFake ? null : PhaseTracker.getInstance().getCurrentContext();
         final IPhaseState state = isFake ? null : peek.state;
+        final SpongeBlockSnapshot snapshot = (isFake || (!ShouldFire.CHANGE_BLOCK_EVENT || !state.shouldCaptureBlockChangeOrSkip(peek, pos, currentState, newState, flag))) ? null : createSpongeBlockSnapshot(currentState, currentState, pos, flag, existing);
+        final BlockTransaction.ChangeBlock transaction;
         final IMixinWorldServer mixinWorld = isFake ? null : (IMixinWorldServer) this.world;
 
         final int modifiedY = yPos & 15;
@@ -679,13 +679,13 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         // { // Sponge - remove unnecessary braces
         if (!this.world.isRemote) {
             // Sponge - Redirect phase checks to use isFake in the event we have mods worlds doing silly things....
-            // i.e. fake worlds. Likewise, avoid creating unecessary snapshots/transactions
+            // i.e. fake worlds. Likewise, avoid creating unnecessary snapshots/transactions
             // or triggering unprocessed captures when there are no events being thrown.
-            if (!isFake && ShouldFire.CHANGE_BLOCK_EVENT && state.shouldCaptureBlockChangeOrSkip(peek, pos, currentState, newState, flag)) {
+            if (!isFake && ShouldFire.CHANGE_BLOCK_EVENT && snapshot != null) {
 
                 // Mark the tile entity as captured so when it is being removed during the chunk setting, it won't be
                 // re-captured again.
-                TrackingUtil.associateBlockChangeWithSnapshot(peek, newBlock, currentState, snapshot);
+                snapshot.blockChange = ((IPhaseState) peek.state).associateBlockChangeWithSnapshot(peek, newState, newBlock, currentState, snapshot, currentBlock);
                 transaction = state.captureBlockChange(peek, pos, snapshot, newState, flag, existing);
 
                 if (currentBlock != newBlock) {

@@ -103,8 +103,80 @@ import javax.annotation.Nullable;
  */
 @SuppressWarnings("unchecked")
 public final class PhaseTracker {
+    public static final PhaseTracker CLIENT = new PhaseTracker();
+    public static final PhaseTracker SERVER = new PhaseTracker();
 
-    private static final PhaseTracker INSTANCE = new PhaseTracker();
+    public void init() {
+        if (this != SERVER) {
+            return;
+        }
+        if (this.hasRun) {
+            return;
+        }
+        this.hasRun = true;
+        Task.builder()
+            .name("Sponge Async To Sync Entity Spawn Task")
+            .intervalTicks(1)
+            .execute(() -> {
+                if (ASYNC_CAPTURED_ENTITIES.isEmpty()) {
+                    return;
+                }
+
+                final List<net.minecraft.entity.Entity> entities = new ArrayList<>(ASYNC_CAPTURED_ENTITIES);
+                ASYNC_CAPTURED_ENTITIES.removeAll(entities);
+                try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                    // We are forcing the spawn, as we can't throw the proper event at the proper time, so
+                    // we'll just mark it as "forced".
+                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypeRegistryModule.FORCED);
+                    for (net.minecraft.entity.Entity entity : entities) {
+                        // At this point, we don't care what the causes are...
+                        PhaseTracker.getInstance().spawnEntityWithCause((World) entity.getEntityWorld(), (Entity) entity);
+                    }
+                }
+
+            })
+            .submit(SpongeImpl.getPlugin());
+    }
+
+    public static final String MINECRAFT_CLIENT = "net.minecraft.client.Minecraft";
+    public static final String DEDICATED_SERVER = "net.minecraft.server.dedicated.DedicatedServer";
+    public static final String MINECRAFT_SERVER = "net.minecraft.server.MinecraftServer";
+    public static final String INTEGRATED_SERVER = "net.minecraft.server.integrated.IntegratedServer";
+    @Nullable private Thread sidedThread;
+    private boolean hasRun = false;
+
+
+    @SuppressWarnings("ThrowableNotThrown")
+    public void setThread(@Nullable Thread thread) throws IllegalAccessException {
+        final StackTraceElement[] stackTrace = new Throwable().getStackTrace();
+        if ((stackTrace.length < 3)) {
+            throw new IllegalAccessException("Cannot call directly to change thread.");
+        }
+
+        String callingClass = stackTrace[1].getClassName();
+        String callingParent = stackTrace[2].getClassName();
+        if (
+            !(
+                (MINECRAFT_CLIENT.equals(callingClass) && MINECRAFT_CLIENT.equals(callingParent))
+                || (MINECRAFT_SERVER.equals(callingClass) && MINECRAFT_SERVER.equals(callingParent))
+                || (DEDICATED_SERVER.equals(callingClass) && MINECRAFT_CLIENT.equals(callingParent))
+                || (INTEGRATED_SERVER.equals(callingClass) && MINECRAFT_CLIENT.equals(callingParent))
+            )
+        ) {
+            throw new IllegalAccessException("Illegal Attempts to re-assign PhaseTracker threads on Sponge");
+        }
+
+        this.sidedThread = thread;
+
+    }
+
+
+
+    @Nullable
+    public Thread getSidedThread() {
+        return this.sidedThread;
+    }
+
     public static final String ASYNC_BLOCK_CHANGE_MESSAGE = "Sponge adapts the vanilla handling of block changes to power events and plugins "
                                                 + "such that it follows the known fact that block changes MUST occur on the server "
                                                 + "thread (even on clients, this exists as the InternalServer thread). It is NOT "
@@ -117,34 +189,12 @@ public final class PhaseTracker {
                                                       + "performing these sort of changes.";
 
     public static PhaseTracker getInstance() {
-        return checkNotNull(INSTANCE, "PhaseTracker instance was illegally set to null!");
+        return SERVER;
     }
 
     private static final CopyOnWriteArrayList<net.minecraft.entity.Entity> ASYNC_CAPTURED_ENTITIES = new CopyOnWriteArrayList<>();
 
-    @SuppressWarnings("unused")
-    private static final Task ASYNC_TO_SYNC_SPAWNER = Task.builder()
-        .name("Sponge Async To Sync Entity Spawn Task")
-        .intervalTicks(1)
-        .execute(() -> {
-            if (ASYNC_CAPTURED_ENTITIES.isEmpty()) {
-                return;
-            }
 
-            final List<net.minecraft.entity.Entity> entities = new ArrayList<>(ASYNC_CAPTURED_ENTITIES);
-            ASYNC_CAPTURED_ENTITIES.removeAll(entities);
-            try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                // We are forcing the spawn, as we can't throw the proper event at the proper time, so
-                // we'll just mark it as "forced".
-                frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypeRegistryModule.FORCED);
-                for (net.minecraft.entity.Entity entity : entities) {
-                    // At this point, we don't care what the causes are...
-                    PhaseTracker.getInstance().spawnEntityWithCause((World) entity.getEntityWorld(), (Entity) entity);
-                }
-            }
-
-        })
-        .submit(SpongeImpl.getPlugin());
 
     public static final BiConsumer<PrettyPrinter, PhaseContext<?>> CONTEXT_PRINTER = (printer, context) ->
         context.printCustom(printer, 4);
@@ -1096,4 +1146,5 @@ public final class PhaseTracker {
 
         return true;
     }
+
 }
