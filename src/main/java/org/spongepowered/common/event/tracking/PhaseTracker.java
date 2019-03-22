@@ -644,6 +644,9 @@ public final class PhaseTracker {
                 // Since the notifier may have just been set from the previous state, we can
                 // ask it to contribute to our state
                 state.provideNotifierForNeighbors(peek, context);
+                if (PhaseTracker.checkMaxBlockProcessingDepth(state, peek, context.getDepth())) {
+                    return;
+                }
                 context.buildAndSwitch();
                 // Sponge End
 
@@ -783,13 +786,20 @@ public final class PhaseTracker {
                     // will not replace the root causes. Likewise, this does not leak into the cause stack
                     // for plugin event listeners performing other operations that could potentially alter
                     // the cause stack (CauseStack:[Player, ScheduledTask] vs. CauseStack:[ChangeBlockEvent, Player, ScheduledTask])
-                    final Cause normalizedEvent = currentCause.with(normalEvent);
+                    final Cause normalizedEvent;
+                    if (ShouldFire.CHANGE_BLOCK_EVENT_POST) {
+                        normalizedEvent = currentCause.with(normalEvent);
+                    } else {
+                        normalizedEvent = currentCause;
+                    }
                     if (normalEvent.isCancelled()) {
                         // If the normal event is cancelled, mark the transaction as invalid already
                         transaction.setValid(false);
                     }
                     final ChangeBlockEvent.Post post = ((IPhaseState) phaseState).createChangeBlockPostEvent(context, transactions, normalizedEvent);
-                    SpongeImpl.postEvent(post);
+                    if (ShouldFire.CHANGE_BLOCK_EVENT_POST) {
+                        SpongeImpl.postEvent(post);
+                    }
                     if (post.isCancelled()) {
                         // And finally, if the post event is cancelled, mark the transaction as invalid.
                         transaction.setValid(false);

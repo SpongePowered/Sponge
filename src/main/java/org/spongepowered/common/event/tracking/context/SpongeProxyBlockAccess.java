@@ -42,6 +42,7 @@ import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
+import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -51,7 +52,7 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
-public final class SpongeProxyBlockAccess implements IBlockAccess {
+public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable {
     private static final boolean DEBUG_PROXY = Boolean.valueOf(System.getProperty("sponge.debugProxyChanges", "false"));
 
     private final LinkedHashMap<BlockPos, IBlockState> processed = new LinkedHashMap<>();
@@ -61,12 +62,14 @@ public final class SpongeProxyBlockAccess implements IBlockAccess {
     private final Set<BlockPos> markedRemoved = new HashSet<>();
     private final Deque<Proxy> proxies = Queues.newArrayDeque();
     private WorldServer processingWorld;
+    @Nullable private BlockTransaction processingTransaction;
+    @Nullable private Deque<BlockTransaction> processingStack;
 
     public SpongeProxyBlockAccess(IMixinWorldServer worldServer) {
         this.processingWorld = ((WorldServer) worldServer);
     }
 
-    public Proxy pushProxy() {
+    Proxy pushProxy() {
         final Proxy proxy = new Proxy(this);
         this.proxies.push(proxy);
         if (DEBUG_PROXY) {
@@ -76,13 +79,16 @@ public final class SpongeProxyBlockAccess implements IBlockAccess {
     }
 
     SpongeProxyBlockAccess proceed(BlockPos pos, IBlockState state) {
+        if (this.proxies.isEmpty()) {
+            throw new IllegalStateException("Cannot push a new block change without having proxies!");
+        }
         IBlockState existing = this.processed.put(pos, state);
 
         if (!this.proxies.isEmpty()) {
             final Proxy proxy = this.proxies.peek();
             if (existing == null) {
                 proxy.markNew(pos);
-            } else if (!proxy.isNew(pos) && !proxy.isStored(pos)) {
+            } else if (!proxy.isNew(pos)) {
                 proxy.store(pos, state);
             }
         }
@@ -148,8 +154,38 @@ public final class SpongeProxyBlockAccess implements IBlockAccess {
             }
         }
         if (proxy.hasStored()) {
-            for (Map.Entry<BlockPos, IBlockState> entry : proxy.processed.entrySet()) {
-                this.processed.put(entry.getKey(), entry.getValue());
+            if (!this.proxies.isEmpty()) {
+                for (Map.Entry<BlockPos, IBlockState> entry : proxy.processed.entrySet()) {
+                    this.processed.put(entry.getKey(), entry.getValue());
+                }
+            }
+        }
+        if (proxy.hasRemovals()) {
+            for (BlockPos removedTile : proxy.markedRemovedTiles) {
+                this.markedRemoved.remove(removedTile);
+            }
+        }
+        if (this.proxies.isEmpty()) {
+            if (!this.processed.isEmpty()) {
+                final PrettyPrinter printer = new PrettyPrinter(60)
+                    .add("Untrimmed block states in proxy left after all proxies are popped.").centre().hr()
+                    .addWrapped(60, "There are not supposed to be any BlockStates remaining in the Proxy access, but there are.")
+                    .add("%s : %s", "Remaining", this.processed.size());
+                this.processed.forEach(((pos, state) -> printer.add("- %s : %s", "Pos", pos).addWrapped(60, "  %s : %s", "State", state)));
+                printer.print(System.err);
+                this.processed.clear();
+            }
+            if (!this.markedRemoved.isEmpty()) {
+                this.markedRemoved.clear();
+            }
+            if (!this.queuedTiles.isEmpty()) {
+                this.queuedTiles.clear();
+            }
+            if (!this.queuedRemovals.isEmpty()) {
+                this.queuedRemovals.clear();
+            }
+            if (!this.affectedTileEntities.isEmpty()) {
+                this.affectedTileEntities.clear();
             }
         }
     }
@@ -186,18 +222,28 @@ public final class SpongeProxyBlockAccess implements IBlockAccess {
         return this.processingWorld.getStrongPower(pos, direction);
     }
 
-    public void onChunkChanged(BlockPos pos) {
-        final IBlockState existing = this.processed.remove(pos);
-        if (existing != null && !this.proxies.isEmpty()) {
-            final Proxy peek = this.proxies.peek();
-            if (!peek.isNew(pos)) {
-                peek.store(pos, existing);
+    public void onChunkChanged(BlockPos pos, IBlockState newState) {
+        // We can prune the existing block state.
+        if (this.proxies.isEmpty()) {
+            // Don't push any changes to the proxy when we're not actually
+            // capturing changes or using proxies.
+            return;
+        }
+        proceed(pos, newState);
+    }
+
+    private void unmarkRemoval(BlockPos pos) {
+        this.markedRemoved.remove(pos);
+        if (!this.proxies.isEmpty()) {
+            final Proxy proxy = this.proxies.peek();
+            if (proxy.isMarkedForRemoval(pos)) {
+                proxy.unmarkRemoval(pos);
             }
         }
     }
 
-    public void unmarkRemoval(BlockPos pos, TileEntity tileEntity) {
-        this.markedRemoved.remove(pos);
+    void unmarkRemoval(BlockPos pos, TileEntity tileEntity) {
+        unmarkRemoval(pos);
         if (tileEntity != null) {
             this.queuedRemovals.remove(pos, tileEntity);
         }
@@ -210,7 +256,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess {
         if (removed != null) {
             this.queuedRemovals.remove(targetPosition, removed);
             if (this.queuedTiles.containsEntry(targetPosition, removed)) {
-                this.markedRemoved.add(targetPosition);
+                markRemovedTile(targetPosition);
             } else {
                 removeTileEntityFromWorldAndChunk(removed);
             }
@@ -287,9 +333,10 @@ public final class SpongeProxyBlockAccess implements IBlockAccess {
         if (removed != null) {
             // Set the tile entity to the affected tile entities so it is retrieved
             // by the hooks in MixinWorldServer for getting tiles for removal.
-            this.affectedTileEntities.put(removed.getPos(), null);
-            this.markedRemoved.add(removed.getPos());
-            this.queuedRemovals.put(removed.getPos(), removed);
+            final BlockPos pos = removed.getPos();
+            this.affectedTileEntities.put(pos, null);
+            markRemovedTile(pos);
+            this.queuedRemovals.put(pos, removed);
         }
     }
 
@@ -318,17 +365,81 @@ public final class SpongeProxyBlockAccess implements IBlockAccess {
         return true;
     }
 
-    public void pushTile(BlockPos pos, TileEntity tile) {
+    void pushTile(BlockPos pos, TileEntity tile) {
         this.affectedTileEntities.put(pos, tile);
         if (tile == null) {
-            this.markedRemoved.add(pos);
+            markRemovedTile(pos);
         } else {
-            this.markedRemoved.remove(pos);
+            unmarkRemoval(pos);
+        }
+    }
+
+    private void markRemovedTile(BlockPos pos) {
+        final boolean added = this.markedRemoved.add(pos);
+        if (added) {
+            // We want the tile entity to be null at the position, without being able to retrieve it
+            // because if there's a queued tile being added, well, then it's marked for addition later,
+            // but we do not want to be showing that tile entity if there's supposed to be an "empty"
+            // or "null" tile entity at the processing time.
+            this.affectedTileEntities.put(pos, null);
+        }
+        if (!this.proxies.isEmpty()) {
+            final Proxy proxy = this.proxies.peek();
+            if (!proxy.isMarkedForRemoval(pos)) {
+                proxy.storeMarkedRemoval(pos);
+            }
         }
     }
 
     public IMixinWorldServer getWorld() {
         return (IMixinWorldServer) this.processingWorld;
+    }
+
+    public void addToPrinter(PrettyPrinter printer) {
+        printer.add(" BlockStates");
+        this.processed.forEach((pos, state) -> printer.add("  %s : %s", pos, state));
+        printer.add()
+            .add(" MarkedRemoved");
+        this.markedRemoved.forEach(pos -> printer.add("  - %s", pos));
+        printer.add()
+            .add(" Affected Tiles");
+        this.affectedTileEntities.forEach((pos, tileEntity) -> printer.add("  - %s : %s", pos, ((IMixinTileEntity) tileEntity).getPrettyPrinterString()));
+        printer.add()
+            .add(" QueuedTiles");
+        this.queuedTiles.forEach((pos, tileEntity) -> printer.add("  - %s : %s", pos, ((IMixinTileEntity) tileEntity).getPrettyPrinterString()));
+        printer.add().add(" QueuedRemovals");
+        this.queuedRemovals.forEach(((pos, tileEntity) -> printer.add("  - %s: %s", pos, ((IMixinTileEntity) tileEntity).getPrettyPrinterString())));
+    }
+
+    @Override
+    public void close() {
+        if (this.processingStack == null) {
+            this.processingTransaction = null;
+            return;
+        }
+        final BlockTransaction peek = this.processingStack.peek();
+        if (this.processingTransaction != peek) {
+            // error... pop them all?
+            return;
+        }
+        this.processingStack.pop();
+        if (!this.processingStack.isEmpty()) {
+            this.processingTransaction = this.processingStack.peek();
+        }
+        this.processingTransaction = null;
+    }
+
+    public SpongeProxyBlockAccess switchTo(BlockTransaction transaction) {
+        if (this.processingTransaction != null) {
+            if (this.processingStack == null) {
+                this.processingStack = new ArrayDeque<>();
+            }
+            this.processingStack.push(this.processingTransaction);
+            // Basically will push the previous and new one, so we can pop the old one to verify we're popping the right one.
+            this.processingStack.push(transaction);
+        }
+        this.processingTransaction = transaction;
+        return this;
     }
 
     public static final class Proxy implements AutoCloseable {
@@ -337,6 +448,8 @@ public final class SpongeProxyBlockAccess implements IBlockAccess {
         @Nullable Exception stack_debug;
         @Nullable private LinkedHashMap<BlockPos, IBlockState> processed;
         @Nullable private Set<BlockPos> newBlocks;
+        @Nullable private Set<BlockPos> markedRemovedTiles;
+        @Nullable private LinkedHashMap<BlockPos, TileEntity> removedTiles;
 
         Proxy(SpongeProxyBlockAccess spongeProxyBlockAccess) {
             this.proxyAccess = spongeProxyBlockAccess;
@@ -379,5 +492,27 @@ public final class SpongeProxyBlockAccess implements IBlockAccess {
             this.processed.put(pos, state);
         }
 
+        boolean isMarkedForRemoval(BlockPos pos) {
+            return this.markedRemovedTiles != null && this.markedRemovedTiles.contains(pos);
+        }
+
+        public boolean isStoredRemoval(BlockPos pos) {
+            return this.removedTiles != null && this.removedTiles.containsKey(pos);
+        }
+
+        void storeMarkedRemoval(BlockPos pos) {
+            if (this.markedRemovedTiles == null) {
+                this.markedRemovedTiles = new HashSet<>();
+            }
+            this.markedRemovedTiles.add(pos);
+        }
+
+        boolean hasRemovals() {
+            return this.markedRemovedTiles != null && !this.markedRemovedTiles.isEmpty();
+        }
+
+        void unmarkRemoval(BlockPos pos) {
+            this.markedRemovedTiles.remove(pos);
+        }
     }
 }

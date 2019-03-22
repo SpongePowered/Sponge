@@ -34,6 +34,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -888,4 +889,14 @@ public interface IPhaseState<C extends PhaseContext<C>> {
 
     }
 
+    default void associateBlockChangeWithSnapshot(C phaseContext, Block newBlock, IBlockState currentState, SpongeBlockSnapshot snapshot,
+        Block originalBlock) {
+        if (newBlock == Blocks.AIR) {
+            snapshot.blockChange = BlockChange.BREAK;
+        } else if (newBlock != originalBlock && !TrackingUtil.forceModify(originalBlock, newBlock)) {
+            snapshot.blockChange = BlockChange.PLACE;
+        } else {
+            snapshot.blockChange = BlockChange.MODIFY;
+        }
+    }
 }

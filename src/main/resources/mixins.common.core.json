@@ -359,6 +359,7 @@
         "item.MixinItem",
         "item.MixinItemArmorMaterial",
         "item.MixinItemBlock",
+        "item.MixinItemDye",
         "item.MixinItemEnderEye",
         "item.MixinItemFirework",
         "item.MixinItemFishingRod",

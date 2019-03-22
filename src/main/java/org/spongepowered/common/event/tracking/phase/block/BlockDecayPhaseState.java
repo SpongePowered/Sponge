@@ -24,7 +24,10 @@
  */
 package org.spongepowered.common.event.tracking.phase.block;
 
+import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.init.Blocks;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
@@ -36,11 +39,13 @@ import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.WorldUtil;
 
 import java.util.List;
@@ -111,5 +116,15 @@ final class BlockDecayPhaseState extends BlockPhaseState {
                 }
             });
 
+    }
+
+    @Override
+    public void associateBlockChangeWithSnapshot(GeneralizedContext phaseContext, Block newBlock,
+        IBlockState currentState, SpongeBlockSnapshot snapshot, Block originalBlock) {
+        if (newBlock == Blocks.AIR) {
+            snapshot.blockChange = BlockChange.DECAY;
+        } else {
+            super.associateBlockChangeWithSnapshot(phaseContext, newBlock, currentState, snapshot, originalBlock);
+        }
     }
 }

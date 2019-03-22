@@ -416,10 +416,22 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-            .add("tileType", this.tileType)
+            .add("tileType", this.tileType.getId())
             .add("world", this.world)
             .add("pos", this.pos)
             .add("blockMetadata", this.blockMetadata)
             .toString();
+    }
+
+    protected MoreObjects.ToStringHelper getPrettyPrinterStringHelper() {
+        return MoreObjects.toStringHelper(this)
+            .add("type", this.tileType.getId())
+            .add("world", this.world.getWorldInfo().getWorldName())
+            .add("pos", this.pos);
+    }
+
+    @Override
+    public String getPrettyPrinterString() {
+        return getPrettyPrinterStringHelper().toString();
     }
 }

@@ -35,6 +35,7 @@ import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 
@@ -107,6 +108,11 @@ class NeighborNotificationState extends LocationBasedTickPhaseState<NeighborNoti
         }
     }
 
+    @Override
+    public void provideNotifierForNeighbors(NeighborNotificationContext context, NeighborNotificationContext notification) {
+        super.provideNotifierForNeighbors(context, notification);
+        notification.setDepth(context.getDepth() + 1);
+    }
 
     @Override
     public boolean doesCaptureEntitySpawns() {

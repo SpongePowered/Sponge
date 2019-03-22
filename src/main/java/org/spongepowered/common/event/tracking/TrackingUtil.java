@@ -58,11 +58,12 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.TickBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.EventContext;
+import org.spongepowered.api.event.cause.EventContextKey;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
@@ -117,11 +118,12 @@ import javax.annotation.Nullable;
 @SuppressWarnings("unchecked")
 public final class TrackingUtil {
 
-    public static final int BREAK_BLOCK_INDEX = 0;
-    public static final int PLACE_BLOCK_INDEX = 1;
-    public static final int DECAY_BLOCK_INDEX = 2;
-    public static final int CHANGE_BLOCK_INDEX = 3;
-    private static final int MULTI_CHANGE_INDEX = 4;
+    public static final int BREAK_BLOCK_INDEX = BlockChange.BREAK.ordinal();
+    public static final int PLACE_BLOCK_INDEX = BlockChange.PLACE.ordinal();
+    public static final int DECAY_BLOCK_INDEX = BlockChange.DECAY.ordinal();
+    public static final int CHANGE_BLOCK_INDEX = BlockChange.MODIFY.ordinal();
+    private static final int MULTI_CHANGE_INDEX = BlockChange.values().length;
+    private static final int EVENT_COUNT = BlockChange.values().length + 1;
     private static final Function<ImmutableList.Builder<Transaction<BlockSnapshot>>[], Consumer<Transaction<BlockSnapshot>>> TRANSACTION_PROCESSOR =
             builders ->
                     transaction -> {
@@ -130,7 +132,6 @@ public final class TrackingUtil {
                         builders[MULTI_CHANGE_INDEX].add(transaction);
                     }
             ;
-    private static final int EVENT_COUNT = 5;
     static final Function<SpongeBlockSnapshot, Transaction<BlockSnapshot>> TRANSACTION_CREATION = (blockSnapshot) -> {
         final WorldServer worldServer =  blockSnapshot.getWorldServer();
         final BlockPos blockPos = blockSnapshot.getBlockPos();
@@ -347,9 +348,10 @@ public final class TrackingUtil {
         return phaseContext.wasNotCancelled();
     }
 
-    public static void associateBlockChangeWithSnapshot(IPhaseState<?> phaseState, Block newBlock, IBlockState currentState, SpongeBlockSnapshot snapshot) {
+    public static void associateBlockChangeWithSnapshot(PhaseContext<?> phaseContext, Block newBlock, IBlockState currentState, SpongeBlockSnapshot snapshot) {
         Block originalBlock = currentState.getBlock();
-        if (phaseState == BlockPhase.State.BLOCK_DECAY) {
+        ((IPhaseState) phaseContext.state).associateBlockChangeWithSnapshot(phaseContext, newBlock, currentState, snapshot, originalBlock);
+        if (phaseContext == BlockPhase.State.BLOCK_DECAY) {
             if (newBlock == Blocks.AIR) {
                 snapshot.blockChange = BlockChange.DECAY;
                 return;
@@ -364,7 +366,7 @@ public final class TrackingUtil {
         }
     }
 
-    private static boolean forceModify(Block originalBlock, Block newBlock) {
+    static boolean forceModify(Block originalBlock, Block newBlock) {
         if (originalBlock instanceof BlockRedstoneRepeater && newBlock instanceof BlockRedstoneRepeater) {
             return true;
         } else if (originalBlock instanceof BlockRedstoneTorch && newBlock instanceof BlockRedstoneTorch) {
@@ -799,13 +801,16 @@ public final class TrackingUtil {
             // contexts or resetting the caches, this allows us to avoid adding extra frames when unnecessary.
             final Cause currentCause = Sponge.getCauseStackManager().getCurrentCause();
             final Cause.Builder builder = Cause.builder().from(currentCause);
+            final EventContext.Builder modified = EventContext.builder();
+            modified.from(currentCause.getContext());
             for (BlockChange blockChange : BlockChange.values()) {
                 final ChangeBlockEvent mainEvent = mainEvents[blockChange.ordinal()];
                 if (mainEvent != null) {
                     builder.append(mainEvent);
+                    modified.add((EventContextKey<? super ChangeBlockEvent>) blockChange.getKey(), mainEvent);
                 }
             }
-            final ChangeBlockEvent.Post post = ((IPhaseState) state).createChangeBlockPostEvent(context, transactions, builder.build(currentCause.getContext()));
+            final ChangeBlockEvent.Post post = ((IPhaseState) state).createChangeBlockPostEvent(context, transactions, builder.build(modified.build()));
             SpongeImpl.postEvent(post);
             return post;
         }

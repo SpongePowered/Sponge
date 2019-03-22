@@ -31,9 +31,9 @@ import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.EventContextKey;
+import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.common.config.category.LoggingCategory;
-
-import javax.annotation.Nullable;
 
 public enum BlockChange {
 
@@ -43,6 +43,10 @@ public enum BlockChange {
             return SpongeEventFactory.createChangeBlockEventBreak(cause, transactions);
         }
 
+        @Override
+        public EventContextKey<? extends ChangeBlockEvent> getKey() {
+            return EventContextKeys.BREAK_EVENT;
+        }
 
         @Override
         public boolean allowsLogging(LoggingCategory category) {
@@ -54,11 +58,21 @@ public enum BlockChange {
         public ChangeBlockEvent createEvent(Cause cause, ImmutableList<Transaction<BlockSnapshot>> transactions) {
             return SpongeEventFactory.createChangeBlockEventDecay(cause, transactions);
         }
+
+        @Override
+        public EventContextKey<? extends ChangeBlockEvent> getKey() {
+            return EventContextKeys.DECAY_EVENT;
+        }
     },
     MODIFY() {
         @Override
         public ChangeBlockEvent createEvent(Cause cause, ImmutableList<Transaction<BlockSnapshot>> transactions) {
             return SpongeEventFactory.createChangeBlockEventModify(cause, transactions);
+        }
+
+        @Override
+        public EventContextKey<? extends ChangeBlockEvent> getKey() {
+            return EventContextKeys.MODIFY_EVENT;
         }
 
         @Override
@@ -73,8 +87,24 @@ public enum BlockChange {
         }
 
         @Override
+        public EventContextKey<? extends ChangeBlockEvent> getKey() {
+            return EventContextKeys.PLACE_EVENT;
+        }
+
+        @Override
         public boolean allowsLogging(LoggingCategory category) {
             return category.blockPlaceLogging();
+        }
+    },
+    GROW() {
+        @Override
+        public ChangeBlockEvent createEvent(Cause cause, ImmutableList<Transaction<BlockSnapshot>> transactions) {
+            return SpongeEventFactory.createChangeBlockEventGrow(cause, transactions);
+        }
+
+        @Override
+        public EventContextKey<? extends ChangeBlockEvent> getKey() {
+            return EventContextKeys.GROW_EVENT;
         }
     };
 
@@ -87,4 +117,5 @@ public enum BlockChange {
 
     public abstract ChangeBlockEvent createEvent(Cause cause, ImmutableList<Transaction<BlockSnapshot>> transactions);
 
+    public abstract EventContextKey<? extends ChangeBlockEvent> getKey();
 }

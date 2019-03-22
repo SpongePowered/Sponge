@@ -42,6 +42,7 @@ public final class BlockPhase extends TrackingPhase {
          * changes or entity spawns as a chunk unloads.
          */
         public static final IPhaseState<?> TILE_CHUNK_UNLOAD = new TileChunkUnloadState();
+        public static final IPhaseState<GrowablePhaseContext> GROWING = new GrowablePhaseState();
 
         private State() {
         }

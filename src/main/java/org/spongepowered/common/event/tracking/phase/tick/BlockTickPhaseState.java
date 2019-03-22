@@ -27,8 +27,11 @@ package org.spongepowered.common.event.tracking.phase.tick;
 import com.google.common.collect.ListMultimap;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
+import net.minecraft.block.IGrowable;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
+import net.minecraft.init.Blocks;
 import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
@@ -55,6 +58,7 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMapEntry;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.world.BlockChange;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -218,59 +222,22 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
         return true; // Maybe make this configurable as well.
     }
 
-//
-//    @Override
-//    public boolean getShouldCancelAllTransactions(BlockTickContext context, List<ChangeBlockEvent> blockEvents, ChangeBlockEvent.Post postEvent,
-//        ListMultimap<BlockPos, BlockEventData> scheduledEvents, boolean noCancelledTransactions) {
-//        if (!postEvent.getTransactions().isEmpty()) {
-//            return postEvent.getTransactions().stream().anyMatch(transaction -> {
-//                final BlockState state = transaction.getOriginal().getState();
-//                final BlockType type = state.getType();
-//                final boolean hasTile = SpongeImplHooks.hasBlockTileEntity((Block) type, BlockUtil.toNative(state));
-//                final BlockPos pos = context.getSource(net.minecraft.tileentity.TileEntity.class).get().getPos();
-//                final BlockPos blockPos = ((SpongeBlockSnapshot) transaction.getOriginal()).getBlockPos();
-//                if (pos.equals(blockPos) && !transaction.isValid()) {
-//                    return true;
-//                }
-//                if (!hasTile && !transaction.getIntermediary().isEmpty()) { // Check intermediary
-//                    return transaction.getIntermediary().stream().anyMatch(inter -> {
-//                        final BlockState iterState = inter.getState();
-//                        final BlockType interType = state.getType();
-//                        return SpongeImplHooks.hasBlockTileEntity((Block) interType, BlockUtil.toNative(iterState));
-//                    });
-//                }
-//                return hasTile;
-//            });
-//        }
-//        return false;
-//    }
-
-//    @Override
-//    public void processCancelledTransaction(BlockTickContext context, Transaction<BlockSnapshot> transaction, BlockSnapshot original) {
-//        context.getCapturedBlockSupplier().cancelTransaction(original);
-//        super.processCancelledTransaction(context, transaction, original);
-//    }
-//
-//    @Override
-//    public void captureBlockChange(BlockTickContext phaseContext, BlockPos pos, SpongeBlockSnapshot originalBlockSnapshot,
-//        IBlockState newState, BlockChangeFlag flags, @Nullable net.minecraft.tileentity.TileEntity tileEntity) {
-//        phaseContext.getCapturedBlockSupplier().logBlockChange(originalBlockSnapshot, newState, pos, flags, tileEntity);
-//    }
-//
-//    @Override
-//    public boolean doesCaptureNeighborNotifications(BlockTickContext context) {
-//        return context.allowsBulkBlockCaptures();
-//    }
-//
-//    @Override
-//    public boolean tracksTileEntityChanges(BlockTickContext currentContext) {
-//        return currentContext.allowsBulkBlockCaptures();
-//    }
-//
-//    @Override
-//    public boolean hasSpecificBlockProcess() {
-//        return true;
-//    }
+    @Override
+    public void associateBlockChangeWithSnapshot(BlockTickContext phaseContext, Block newBlock,
+        IBlockState currentState, SpongeBlockSnapshot snapshot, Block originalBlock) {
+        if (phaseContext.tickingBlock instanceof IGrowable) {
+            if (newBlock == Blocks.AIR) {
+                snapshot.blockChange = BlockChange.BREAK;
+            } else if (!(newBlock instanceof IGrowable)) {
+                super.associateBlockChangeWithSnapshot(phaseContext, newBlock, currentState, snapshot, originalBlock);
+            } else {
+                snapshot.blockChange = BlockChange.GROW;
+                return;
+            }
+        } else {
+            super.associateBlockChangeWithSnapshot(phaseContext, newBlock, currentState, snapshot, originalBlock);
+        }
+    }
 
     @Override
     public String toString() {

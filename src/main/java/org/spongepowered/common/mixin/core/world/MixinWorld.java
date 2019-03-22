@@ -719,7 +719,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
      * others, like Pistons movement, we need to be able to capture and
      * "play back" what's going on, without performing the live changes.
      *
-     * @param world The world, this
      * @param pos The position of the tile entity
      * @param tileEntity The tile entity being set onto that position
      * @return The processing tiles field, used as a hook

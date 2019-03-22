@@ -685,7 +685,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
 
                 // Mark the tile entity as captured so when it is being removed during the chunk setting, it won't be
                 // re-captured again.
-                TrackingUtil.associateBlockChangeWithSnapshot(state, newBlock, currentState, snapshot);
+                TrackingUtil.associateBlockChangeWithSnapshot(peek, newBlock, currentState, snapshot);
                 transaction = state.captureBlockChange(peek, pos, snapshot, newState, flag, existing);
 
                 if (currentBlock != newBlock) {
@@ -714,8 +714,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
                         // be ignored since the transaction process will actually process
                         // the removal.
                         ((IMixinTileEntity) existing).setCaptured(true);
-                        transaction.enqueueChanges(mixinWorld.getProxyAccess(), peek.getCapturedBlockSupplier());
                         transaction.queuedRemoval = existing;
+                        transaction.enqueueChanges(mixinWorld.getProxyAccess(), peek.getCapturedBlockSupplier());
                     } else {
                         this.world.removeTileEntity(pos);
                     }
@@ -785,8 +785,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         // Sponge Start - Handle block physics only if we're actually the server world
         if (!isFake && currentBlock != newBlock) {
             final boolean isBulkCapturing = state.doesBulkBlockCapture(peek);
-            // Reset the proxy access
-            ((IMixinWorldServer) this.world).getProxyAccess().onChunkChanged(pos);
+            // Reset the proxy access or add to the proxy state during processing.
+            ((IMixinWorldServer) this.world).getProxyAccess().onChunkChanged(pos, newState);
             // Sponge start - Ignore block activations during block placement captures unless it's
             // a BlockContainer. Prevents blocks such as TNT from activating when cancelled.
             // Forge changes this check from

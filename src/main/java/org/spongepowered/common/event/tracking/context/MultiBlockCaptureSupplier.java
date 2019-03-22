@@ -42,6 +42,7 @@ import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
+import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
@@ -70,6 +71,8 @@ import java.util.function.BiConsumer;
 import javax.annotation.Nullable;
 
 public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
+
+    public static final boolean PRINT_TRANSACTIONS = Boolean.valueOf(System.getProperty("sponge.debugBlockTransactions", "false"));
 
     @Nullable private LinkedListMultimap<BlockPos, SpongeBlockSnapshot> multimap;
     @Nullable private ListMultimap<BlockPos, BlockEventData> scheduledEvents;
@@ -196,7 +199,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
         final List<SpongeBlockSnapshot> list = this.multimap.get(blockPos);
         if (list != null && !list.isEmpty()) {
             final SpongeBlockSnapshot originalSnapshot = list.get(0);
-            TrackingUtil.associateBlockChangeWithSnapshot(PhaseTracker.getInstance().getCurrentState(), newState.getBlock(),
+            TrackingUtil.associateBlockChangeWithSnapshot(PhaseTracker.getInstance().getCurrentContext(), newState.getBlock(),
                 BlockUtil.toNative(originalSnapshot.getState()), originalSnapshot);
         }
     }
@@ -376,6 +379,31 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
         this.tail = transaction;
     }
 
+    private void pruneTransaction(SpongeBlockSnapshot snapshot) {
+        if (this.head == null) {
+            return;
+        }
+        for (BlockTransaction transaction = this.head; transaction != null; transaction = transaction.next) {
+            if (transaction.equalsSnapshot(snapshot)) {
+                final BlockTransaction previous = transaction.previous;
+                final BlockTransaction next = transaction.next;
+                if (previous == null) {
+                    this.head = next;
+                } else {
+                    previous.next = next;
+                    transaction.previous = null;
+                }
+                if (next == null) {
+                    this.tail = previous;
+                } else {
+                    next.previous = previous;
+                    transaction.next = null;
+                }
+            }
+        }
+
+    }
+
     public void captureNeighborNotification(IMixinWorldServer mixinWorldServer, IBlockState notifyState, BlockPos notifyPos, Block sourceBlock, BlockPos sourcePos) {
         final int transactionIndex = ++this.transactionIndex;
         final IBlockState actualSourceState = ((WorldServer) mixinWorldServer).getBlockState(sourcePos);
@@ -476,11 +504,11 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
             }
             for (BlockTransaction prevChange = this.head; prevChange != null; prevChange = prevChange.next) {
                 if (transaction.appliedPreChange) {
+                    // Short circuit. It will not have already applied changes to the previous
+                    // changes until it at least applies them to the first entry (head).
                     return;
                 }
-                if (!transaction.affectedPosition.equals(prevChange.affectedPosition)) {
-                    transaction.provideUnchangedStates(prevChange);
-                }
+                transaction.provideUnchangedStates(prevChange);
             }
         }
     }
@@ -601,15 +629,41 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
                     continue;
                 }
                 final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) ((SpongeBlockSnapshot) eventTransaction.getOriginal()).getWorldServer();
-                try (final SpongeProxyBlockAccess.Proxy ignored = transaction.getProxy(mixinWorldServer)) {
+                try (final SpongeProxyBlockAccess access = mixinWorldServer.getProxyAccess().switchTo(transaction);
+                     final SpongeProxyBlockAccess.Proxy proxy = transaction.getProxy(mixinWorldServer)){
+                    final PrettyPrinter printer;
+                    if (PRINT_TRANSACTIONS) {
+                        printer = new PrettyPrinter(60).add("Debugging BlockTransaction").centre().hr()
+                            .addWrapped(60, "This is a process printout of the information passed along from the Proxy and the world.")
+                            .add()
+                            .add("Proxy Container:");
+                    } else { printer = null; }
                     if (transaction.blocksNotAffected != null) {
-                        transaction.blocksNotAffected.forEach((pos, block) -> mixinWorldServer.getProxyAccess().proceed(pos, block));
+                        transaction.blocksNotAffected.forEach((pos, block) -> {
+                            if (PRINT_TRANSACTIONS) {
+                                printer.addWrapped(120, "  %s : %s, %s", "UnaffectedBlock", pos, block);
+                            }
+                            access.proceed(pos, block);
+                        });
                     }
                     if (transaction.tilesAtTransaction != null) {
-                        transaction.tilesAtTransaction.forEach((pos, tile) -> mixinWorldServer.getProxyAccess().pushTile(pos, tile));
+                        transaction.tilesAtTransaction.forEach((pos, tile) -> {
+                            if (PRINT_TRANSACTIONS) {
+                                printer.addWrapped(120, "  %s : %s, %s", "UnaffectedTile", pos, ((IMixinTileEntity) tile).getPrettyPrinterString());
+                            }
+                            access.pushTile(pos, tile);
+                        });
+                    }
+                    if (PRINT_TRANSACTIONS) {
+                        access.addToPrinter(printer);
+                        transaction.addToPrinter(printer);
+                        printer.print(System.err);
                     }
                     transaction.process(eventTransaction, phaseState, phaseContext, currentDepth);
+                } catch (Exception e) {
+                    // do nothing for now?
                 }
+                transaction.postProcessBlocksAffected(mixinWorldServer.getProxyAccess());
             }
         } finally {
             if (this.processingWorlds == null) {
