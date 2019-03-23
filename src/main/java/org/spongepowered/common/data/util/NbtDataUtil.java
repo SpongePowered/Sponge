@@ -176,6 +176,8 @@ public final class NbtDataUtil {
     public static final String INVALID_TITLE = "invalid";
     public static final String IS_MOD = "isMod";
     public static final String FORGE_ENTITY_TYPE = "entity_name";
+    public static final String LEGACY_DIMENSION_ARRAY = "DimensionArray";
+    public static final String USED_DIMENSION_IDS = "UsedIDs";
 
     // Legacy migration tags from Bukkit
     public static final String BUKKIT = "bukkit";
