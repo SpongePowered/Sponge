@@ -22,8 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.config.type;
+package org.spongepowered.common.interfaces;
 
-public final class WorldConfig extends GeneralConfigBase {
+import net.minecraft.entity.Entity;
 
+import javax.annotation.Nullable;
+
+public interface IEntityTargetingEntity {
+
+    @Nullable
+    Entity getTargetedEntity();
+
+    void setTargetedEntity(@Nullable Entity entity);
 }

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl;
 
+import net.minecraft.inventory.Slot;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.VanillaAdapter;
@@ -31,6 +32,10 @@ import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
+import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A delegating Lens used in Containers. Provides ordered inventory access.
@@ -46,6 +51,19 @@ public class DelegatingLens extends AbstractLens {
         this.init(slots);
     }
 
+    public DelegatingLens(int base, List<Slot> containerSlots, Lens lens, SlotProvider slots) {
+        super(base, containerSlots.size(), VanillaAdapter.class, slots);
+        this.delegate = lens;
+        CustomSlotProvider slotProvider = new CustomSlotProvider();
+        for (Slot slot : containerSlots) {
+            // Get slots from original slot provider and add them to custom slot provider in order of actual containerSlots.
+            slotProvider.add(slots.getSlot(this.base + slot.slotIndex));
+        }
+        // Provide indexed access over the Container to the slots in the base inventory
+        this.addSpanningChild(new OrderedInventoryLensImpl(0, containerSlots.size(), 1, slotProvider));
+        this.addChild(delegate);
+    }
+
     @Override
     protected void init(SlotProvider slots) {
         this.addSpanningChild(new OrderedInventoryLensImpl(this.base, this.size, 1, slots));
@@ -56,5 +74,19 @@ public class DelegatingLens extends AbstractLens {
     @Override
     public InventoryAdapter getAdapter(Fabric inv, Inventory parent) {
         return new VanillaAdapter(inv, this, parent);
+    }
+
+    public static class CustomSlotProvider implements SlotProvider {
+
+        private List<SlotLens> lenses = new ArrayList<>();
+
+        public void add(SlotLens toAdd) {
+            this.lenses.add(toAdd);
+        }
+
+        @Override
+        public SlotLens getSlot(int index) {
+            return this.lenses.get(index);
+        }
     }
 }

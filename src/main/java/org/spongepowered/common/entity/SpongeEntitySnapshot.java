@@ -64,6 +64,7 @@ import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -90,7 +91,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
 
     SpongeEntitySnapshot(SpongeEntitySnapshotBuilder builder) {
         this.entityType = builder.entityType;
-        this.entityUuid = builder.entityId == null ? null : builder.entityId;
+        this.entityUuid = builder.entityId;
         if (builder.manipulators == null) {
             this.manipulators = ImmutableList.of();
         } else {
@@ -111,12 +112,11 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
             this.keys = keyBuilder.build();
             this.values = valueBuilder.build();
         }
-        // TODO cleanup: sensible defaults?
         this.compound = builder.compound == null ? null : builder.compound.copy();
-        this.worldUuid = builder.worldId == null ? null : builder.worldId;
-        this.position = builder.position == null ? Vector3d.ZERO : builder.position;
-        this.rotation = builder.rotation == null ? Vector3d.ZERO : builder.rotation;
-        this.scale = builder.scale == null ? Vector3d.ZERO : builder.scale;
+        this.worldUuid = builder.worldId;
+        this.position = builder.position;
+        this.rotation = builder.rotation;
+        this.scale = builder.scale;
         this.entityReference = builder.entityReference;
         if (this.compound != null) {
             this.compound.setTag("Pos", NbtDataUtil.newDoubleNBTList(this.position.getX(), this.position.getY(), this.position.getZ()));
@@ -136,9 +136,6 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
 
     @Override
     public Optional<Transform<World>> getTransform() {
-        if (this.worldUuid == null) {
-            return Optional.empty();
-        }
         Optional<World> optional = SpongeImpl.getGame().getServer().getWorld(this.worldUuid);
         if (optional.isPresent()) {
             final Transform<World> transform = new Transform<>(optional.get(), this.position, this.rotation);
@@ -154,9 +151,6 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
 
     @Override
     public Optional<Location<World>> getLocation() {
-        if (this.worldUuid == null) {
-            return Optional.empty();
-        }
         Optional<World> optional = SpongeImpl.getGame().getServer().getWorld(this.worldUuid);
         if (optional.isPresent()) {
             final Location<World> location = new Location<>(optional.get(), this.position);
@@ -277,7 +271,6 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         return transform(key, input -> value);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public Optional<EntitySnapshot> with(BaseValue<?> value) {
         return with((Key<? extends BaseValue<Object>>) value.getKey(), value.get());
@@ -463,6 +456,33 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
             builder.entityData(NbtTranslator.getInstance().translate(this.compound));
         }
         return builder.build();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.entityUuid, this.worldUuid, this.entityType, this.position, this.rotation, this.scale, this.manipulators, this.keys, this.values);
+    }
+
+    @SuppressWarnings("rawtypes")
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+
+        final SpongeEntitySnapshot other = (SpongeEntitySnapshot) obj;
+        return Objects.equals(this.entityUuid, other.entityUuid)
+                && Objects.equals(this.worldUuid, other.worldUuid)
+                && Objects.equals(this.entityType, other.entityType)
+                && Objects.equals(this.position, other.position)
+                && Objects.equals(this.rotation, other.rotation)
+                && Objects.equals(this.scale, other.scale)
+                && Objects.equals(this.manipulators, other.manipulators)
+                && Objects.equals(this.keys, other.keys)
+                && Objects.equals(this.values, other.values);
     }
 
     @Override

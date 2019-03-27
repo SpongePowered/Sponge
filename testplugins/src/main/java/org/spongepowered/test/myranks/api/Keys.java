@@ -22,8 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.config.type;
+package org.spongepowered.test.myranks.api;
 
-public final class WorldConfig extends GeneralConfigBase {
+import com.google.common.reflect.TypeToken;
+import org.spongepowered.api.data.DataQuery;
+import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.value.mutable.Value;
 
+public class Keys {
+
+    public static final Key<Value<Rank>> RANK =
+            Key.builder().id("rank")
+                    .name("Rank")
+                    .query(DataQuery.of("Rank"))
+                    .type(new TypeToken<Value<Rank>>() {})
+                    .build();
 }

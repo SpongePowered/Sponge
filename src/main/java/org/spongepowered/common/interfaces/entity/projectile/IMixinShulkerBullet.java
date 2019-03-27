@@ -22,8 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.config.type;
+package org.spongepowered.common.interfaces.entity.projectile;
 
-public final class WorldConfig extends GeneralConfigBase {
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.util.Direction;
 
+import javax.annotation.Nullable;
+
+public interface IMixinShulkerBullet {
+
+    Direction getBulletDirection();
+
+    void setBulletDirection(Direction direction);
+
+    void setBulletTarget(@Nullable Entity target);
 }

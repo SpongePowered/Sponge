@@ -231,6 +231,7 @@ public class MemoryDataView implements DataView {
         checkNotNull(path, "path");
         checkNotNull(value, "value");
         checkState(this.container != null);
+        checkState(!path.getParts().isEmpty(), "The path is empty");
 
         @Nullable DataManager manager;
 

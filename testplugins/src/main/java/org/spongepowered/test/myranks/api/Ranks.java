@@ -22,8 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.config.type;
+package org.spongepowered.test.myranks.api;
 
-public final class WorldConfig extends GeneralConfigBase {
+import org.spongepowered.api.util.generator.dummy.DummyObjectProvider;
 
+public class Ranks {
+
+    public static final Rank USER = DummyObjectProvider.createFor(Rank.class, "USER");
+    public static final Rank STAFF = DummyObjectProvider.createFor(Rank.class, "STAFF");
+
+
+    private Ranks() {
+    }
 }

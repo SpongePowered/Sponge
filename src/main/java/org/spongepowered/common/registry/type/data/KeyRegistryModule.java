@@ -472,6 +472,8 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
 
         this.register("beacon_secondary_effect", Key.builder().type(TypeTokens.OPTIONAL_POTION_VALUE_TOKEN).id("beacon_secondary_effect").name("Beacon Secondary Effect").query(of("BeaconSecondaryEffect")).build());
 
+        this.register("targeted_entity", Key.builder().type(TypeTokens.ENTITY_VALUE_TOKEN).id("targeted_entity").name("Targeted Entity").query(of("TargetedEntity")).build());
+
         this.register("targeted_location", Key.builder().type(TypeTokens.VECTOR_3D_VALUE_TOKEN).id("targeted_vector_3d").name("Targeted Vector3d").query(of("TargetedVector3d")).build());
 
         this.register("fuse_duration", Key.builder().type(TypeTokens.INTEGER_VALUE_TOKEN).id("fuse_duration").name("Fuse Duration").query(of("FuseDuration")).build());
@@ -495,6 +497,7 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
         this.register("pickup_rule", Key.builder().type(TypeTokens.PICKUP_VALUE_TOKEN).id("pickup_rule").name("Pickup Rule").query(of("PickupRule")).build());
 
         this.register("invulnerability_ticks", Key.builder().type(TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN).id("invulnerability_ticks").name("Invulnerability Ticks").query(of("HurtTime")).build());
+
         this.register("invulnerable", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("invulnerable").name("Invulnerable").query(of("Invulnerable")).build());
 
         this.register("has_gravity", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("has_gravity").name("Has Gravity").query(of("HasGravity")).build());

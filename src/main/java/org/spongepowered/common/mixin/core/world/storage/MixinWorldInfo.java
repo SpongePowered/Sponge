@@ -207,7 +207,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         }
         this.setDoesGenerateBonusChest(archetype.doesGenerateBonusChest());
         this.setSerializationBehavior(archetype.getSerializationBehavior());
-        this.getOrCreateWorldConfig().save();
+        this.createWorldConfig();
     }
 
     //     public WorldInfo(WorldInfo worldInformation)
@@ -676,7 +676,6 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     @Override
     public void setGenerateSpawnOnLoad(boolean state) {
         this.getOrCreateWorldConfig().getConfig().getWorld().setGenerateSpawnOnLoad(state);
-        this.saveConfig();
     }
 
     @Override

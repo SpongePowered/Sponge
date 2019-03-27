@@ -22,8 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.config.type;
+package org.spongepowered.common.interfaces.entity.monster;
 
-public final class WorldConfig extends GeneralConfigBase {
+import org.spongepowered.api.data.type.DyeColor;
+import org.spongepowered.api.util.Direction;
 
+public interface IMixinShulker {
+
+    DyeColor getColor();
+
+    void setColor(DyeColor color);
+
+    Direction getDirection();
+
+    void setDirection(Direction direction);
 }

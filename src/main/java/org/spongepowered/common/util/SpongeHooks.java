@@ -495,7 +495,7 @@ public class SpongeHooks {
         for (WorldServer world : WorldManager.getWorlds()) {
             final SpongeConfig<? extends GeneralConfigBase> worldConfig = getWorldConfig(world);
             // Reload before updating world config cache
-            worldConfig.reload();
+            worldConfig.load();
             ((IMixinWorldServer) world).updateConfigCache();
             for (Entity entity : world.loadedEntityList) {
                 if (entity instanceof IModData_Activation) {

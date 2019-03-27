@@ -437,7 +437,7 @@ public class SpongeCommandFactory {
                     @Override
                     protected Text process(SpongeConfig<? extends ConfigBase> config, CommandSource source, CommandContext args)
                             throws CommandException {
-                        config.reload();
+                        config.load();
                         SpongeHooks.refreshActiveConfigs();
                         return Text.of("Reloaded configuration");
                     }

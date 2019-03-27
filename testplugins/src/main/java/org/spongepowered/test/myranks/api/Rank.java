@@ -22,8 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.config.type;
+package org.spongepowered.test.myranks.api;
 
-public final class WorldConfig extends GeneralConfigBase {
+import org.spongepowered.api.CatalogType;
+import org.spongepowered.api.util.annotation.CatalogedBy;
 
+@CatalogedBy(Ranks.class)
+public interface Rank extends CatalogType {
 }
