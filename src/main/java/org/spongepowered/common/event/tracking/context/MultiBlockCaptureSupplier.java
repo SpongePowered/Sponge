@@ -577,11 +577,24 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
         if (this.hasMulti) { // But we need to check if there's any intermediary block changes...
             // And because multi is true, we can be sure the multimap is populated at least somewhere.
             final List<SpongeBlockSnapshot> intermediary = this.multimap.get(blockPos);
-            if (!intermediary.isEmpty()) {
+            if (!intermediary.isEmpty() && intermediary.size() > 1) {
                 // We need to make a carbon copy of the list since it's technically a key view list
                 // within the multimap, so, if the multimap is cleared, at the very least, the list will
-                // not be cleared.
-                return new Transaction<>(snapshot, newSnapshot, ImmutableList.copyOf(intermediary));
+                // not be cleared. Likewise, we also need to skip over the first element since the snapshots
+                // list will have that element anyways (we don't want to be providing duplicate snapshots
+                // for plugins to witness and come to expect that they are intermediary states, when they're still the original positions
+                ImmutableList.Builder<SpongeBlockSnapshot> builder = ImmutableList.builder();
+                boolean movedPastFirst = false;
+                for (Iterator<SpongeBlockSnapshot> iterator = intermediary.iterator(); iterator.hasNext(); ) {
+                    if (!movedPastFirst) {
+                        iterator.next();
+                        movedPastFirst = true;
+                        continue;
+                    }
+                    builder.add(iterator.next());
+
+                }
+                return new Transaction<>(snapshot, newSnapshot, builder.build());
             }
         }
         return new Transaction<>(snapshot, newSnapshot);
@@ -730,5 +743,18 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
         return com.google.common.base.MoreObjects.toStringHelper(this)
             .add("Captured", this.snapshots == null ? 0 : this.snapshots.size())
             .toString();
+    }
+
+    public void clearProxies() {
+        if (this.processingWorlds == null || this.processingWorlds.isEmpty()) {
+            return;
+        }
+        for (Map.Entry<WorldServer, SpongeProxyBlockAccess.Proxy> entry : this.processingWorlds.entrySet()) {
+            try {
+                entry.getValue().close();
+            } catch (Exception e) {
+                PhaseTracker.getInstance().printMessageWithCaughtException("Forcibly Closing Proxy", "Proxy Access could not be popped", e);
+            }
+        }
     }
 }

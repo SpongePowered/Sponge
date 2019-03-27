@@ -90,6 +90,8 @@ import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.mixin.core.block.state.MixinIBlockState;
+import org.spongepowered.common.mixin.core.block.state.MixinStateImplementation;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
@@ -100,6 +102,7 @@ import org.spongepowered.common.world.WorldUtil;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Consumer;
@@ -479,7 +482,9 @@ public final class TrackingUtil {
                 noCancelledTransactions = false;
                 // Don't restore the transactions just yet, since we're just marking them as invalid for now
                 for (Transaction<BlockSnapshot> transaction : Lists.reverse(blockEvent.getTransactions())) {
+                    if (!scheduledEvents.isEmpty()) {
                         scheduledEvents.removeAll(VecHelper.toBlockPos(transaction.getOriginal().getPosition()));
+                    }
                     transaction.setValid(false);
                 }
             }
@@ -506,7 +511,9 @@ public final class TrackingUtil {
 
             for (Transaction<BlockSnapshot> transaction : postEvent.getTransactions()) {
                 if (cancelAll) {
-                    scheduledEvents.removeAll(VecHelper.toBlockPos(transaction.getOriginal().getPosition()));
+                    if (!scheduledEvents.isEmpty()) {
+                        scheduledEvents.removeAll(VecHelper.toBlockPos(transaction.getOriginal().getPosition()));
+                    }
                     transaction.setValid(false);
                     noCancelledTransactions = false;
                 }
@@ -591,6 +598,7 @@ public final class TrackingUtil {
             final List<BlockEventData> events =  hasEvents ? scheduledEvents.get(pos) : Collections.emptyList();
             noCancelledTransactions = performTransactionProcess(transaction, phaseState, phaseContext, events, noCancelledTransactions, currentDepth);
         }
+        phaseContext.getCapturedBlockSupplier().clearProxies();
         return noCancelledTransactions;
     }
 
@@ -634,23 +642,57 @@ public final class TrackingUtil {
 
         final WorldServer world = WorldUtil.asNative(mixinWorld);
         SpongeHooks.logBlockAction(world, oldBlockSnapshot.blockChange, transaction);
-        final SpongeBlockChangeFlag changeFlag = oldBlockSnapshot.getChangeFlag();
+        final SpongeBlockChangeFlag originalChangeFlag = oldBlockSnapshot.getChangeFlag();
         final IBlockState originalState = (IBlockState) oldBlockSnapshot.getState();
         final IBlockState newState = (IBlockState) newBlockSnapshot.getState();
+        // So basically, the gist is this: If we have intermediary states during captures, we want to process the states
+        // in the order in which they were applied. The issue is that since some changes end up having "don't tell clients about this, but tell clients about that"
+        // flags, we have to abide by the changes accordingly. Likewise, this interacts with neighbor notifications being performed.
+        if (transaction.getIntermediary().isEmpty()) {
+            // We call onBlockAdded here for blocks without a TileEntity.
+            // MixinChunk#setBlockState will call onBlockAdded for blocks
+            // with a TileEntity or when capturing is not being done.
+            performOnBlockAdded(phaseState, phaseContext, currentDepth, pos, world, originalChangeFlag, originalState, newState);
 
-        // We call onBlockAdded here for blocks without a TileEntity.
-        // MixinChunk#setBlockState will call onBlockAdded for blocks
-        // with a TileEntity or when capturing is not being done.
-        performOnBlockAdded(phaseState, phaseContext, currentDepth, pos, world, changeFlag, originalState, newState);
+            ((IPhaseState) phaseState).postBlockTransactionApplication(oldBlockSnapshot.blockChange, transaction, phaseContext);
 
-        ((IPhaseState) phaseState).postBlockTransactionApplication(oldBlockSnapshot.blockChange, transaction, phaseContext);
+            if (originalChangeFlag.isNotifyClients()) { // Always try to notify clients of the change.
+                world.notifyBlockUpdate(pos, originalState, newState, originalChangeFlag.getRawFlag());
+            }
 
-        if (changeFlag.isNotifyClients()) { // Always try to notify clients of the change.
-            world.notifyBlockUpdate(pos, originalState, newState, changeFlag.getRawFlag());
+            performNeighborAndClientNotifications(phaseContext, currentDepth, newBlockSnapshot, mixinWorld, pos, newState, originalChangeFlag);
+        }
+        IBlockState previousIntermediary = originalState;
+        boolean processedOriginal = false;
+        for (Iterator<? extends BlockSnapshot> iterator = transaction.getIntermediary().iterator(); iterator.hasNext();) {
+            final SpongeBlockSnapshot intermediary = (SpongeBlockSnapshot) iterator.next();
+            final SpongeBlockChangeFlag intermediaryChangeFlag = intermediary.getChangeFlag();
+            final IBlockState intermediaryState = (IBlockState) intermediary.getState();
+            // We have to process the original block change (since it's not part of the intermediary changes)
+            // as a original -> intermediary
+            if (!processedOriginal) {
+                performOnBlockAdded(phaseState, phaseContext, currentDepth, pos, world, originalChangeFlag, originalState, intermediaryState);
+                if (originalChangeFlag.isNotifyClients()) {
+                    world.notifyBlockUpdate(pos, originalState, intermediaryState, originalChangeFlag.getRawFlag());
+                }
+                performNeighborAndClientNotifications(phaseContext, currentDepth, intermediary, mixinWorld, pos, intermediaryState, originalChangeFlag);
+                processedOriginal = true;
+            }
+            // Then, we can process the intermediary to final potentially if there is only the original -> intermediary -> final,
+            // whereas if there's more than one intermediary, the intermediary will refer to the previous intermediary
+            // block state for appropriate physics.
+            boolean isFinal = !iterator.hasNext();
+            performOnBlockAdded(phaseState, phaseContext, currentDepth, pos, world, intermediaryChangeFlag, isFinal ? intermediaryState : previousIntermediary, isFinal ? newState : intermediaryState);
+            if (intermediaryChangeFlag.isNotifyClients()) {
+                world.notifyBlockUpdate(pos, isFinal ? intermediaryState :  previousIntermediary, isFinal ? newState : intermediaryState, intermediaryChangeFlag.getRawFlag());
+            }
+            performNeighborAndClientNotifications(phaseContext, currentDepth, isFinal ? newBlockSnapshot : intermediary, mixinWorld, pos, isFinal ? newState : intermediaryState, intermediaryChangeFlag);
+            if (isFinal) {
+                return noCancelledTransactions;
+            }
+            previousIntermediary = intermediaryState;
         }
 
-        performNeighborAndClientNotifications(phaseContext, currentDepth, newBlockSnapshot, mixinWorld, pos,
-            newState, changeFlag);
         return noCancelledTransactions;
     }
 

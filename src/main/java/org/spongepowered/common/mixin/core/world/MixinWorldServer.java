@@ -1035,6 +1035,9 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      */
     @Override
     protected void onCheckTileEntityForRemoval(BlockPos pos, CallbackInfo ci, @Nullable net.minecraft.tileentity.TileEntity foundTile, net.minecraft.world.World thisWorld, BlockPos samePos) {
+        if (PhaseTracker.getInstance().getCurrentState() == BlockPhase.State.RESTORING_BLOCKS) {
+            return;
+        }
         if (foundTile != null) {
             // Easy short circuit.
             if (((IMixinTileEntity) foundTile).isCaptured()) {

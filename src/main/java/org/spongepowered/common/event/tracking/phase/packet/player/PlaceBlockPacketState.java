@@ -95,8 +95,7 @@ public final class PlaceBlockPacketState extends BasicPacketState {
     @Override
     public void postBlockTransactionApplication(BlockChange blockChange, Transaction<BlockSnapshot> transaction,
         BasicPacketContext context) {
-        Player player = Sponge.getCauseStackManager().getCurrentCause().first(Player.class).get();
-        TrackingUtil.associateTrackerToTarget(blockChange, transaction, player);
+        TrackingUtil.associateTrackerToTarget(blockChange, transaction, (Player) context.getPacketPlayer());
     }
 
     @Override
