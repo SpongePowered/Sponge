@@ -593,7 +593,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         return (P) this;
     }
 
-    private boolean isEmpty() {
+    public boolean isEmpty() {
         if (this == PhaseContext.EMPTY) {
             return true;
         }

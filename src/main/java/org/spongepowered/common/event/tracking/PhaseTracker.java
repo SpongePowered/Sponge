@@ -71,6 +71,7 @@ import org.spongepowered.common.config.category.PhaseTrackerCategory;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.ShouldFire;
+import org.spongepowered.common.event.tracking.context.SpongeProxyBlockAccess;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.tick.NeighborNotificationContext;
@@ -267,7 +268,7 @@ public final class PhaseTracker {
     }
 
     @SuppressWarnings({"rawtypes", "unused", "try"})
-    public void completePhase(IPhaseState<?> prevState) {
+    void completePhase(IPhaseState<?> prevState) {
         if (!SpongeImplHooks.isMainThread()) {
             // lol no, report the block change properly
             new PrettyPrinter(60).add("Illegal Async PhaseTracker Access").centre().hr()
@@ -637,13 +638,13 @@ public final class PhaseTracker {
      * Replacement of {@link net.minecraft.world.World#neighborChanged(BlockPos, Block, BlockPos)}
      * that adds tracking into play.
      *
-     * @param mixinWorld THe world
+     *  @param mixinWorld THe world
      * @param notifyPos The original notification position
      * @param sourceBlock The source block type
      * @param sourcePos The source block position
      */
     @SuppressWarnings("rawtypes")
-    public void notifyBlockOfStateChange(final IMixinWorldServer mixinWorld, final BlockPos notifyPos, final Block sourceBlock, final BlockPos sourcePos) {
+    public void notifyBlockOfStateChange(final IMixinWorldServer mixinWorld, final IBlockState notifyState, final BlockPos notifyPos, final Block sourceBlock, final BlockPos sourcePos) {
         if (!SpongeImplHooks.isMainThread()) {
             // lol no, report the block change properly
             new PrettyPrinter(60).add("Illegal Async PhaseTracker Access").centre().hr()
@@ -654,18 +655,11 @@ public final class PhaseTracker {
             // Maybe? I don't think this is wise to try and sync back a notification on the main thread.
             return;
         }
-        final IBlockState notifyState = ((WorldServer) mixinWorld).getBlockState(notifyPos);
-
-        performNeighborNotificationOnTarget(mixinWorld, notifyState, notifyPos, sourceBlock, sourcePos);
-    }
-
-    @SuppressWarnings("rawtypes")
-    public void performNeighborNotificationOnTarget(IMixinWorldServer mixinWorld, IBlockState iblockstate, BlockPos notifyPos, Block sourceBlock, BlockPos sourcePos) {
         try {
             // Sponge start - prepare notification
             final PhaseContext<?> peek = this.stack.peek();
             final IPhaseState state = peek.state;
-            if (!((IMixinBlock) iblockstate.getBlock()).hasNeighborChangedLogic()) {
+            if (!((IMixinBlock) notifyState.getBlock()).hasNeighborChangedLogic()) {
                 // A little short-circuit so we do not waste expense to call neighbor notifications on blocks that do
                 // not override the method neighborChanged
                 return;
@@ -674,10 +668,10 @@ public final class PhaseTracker {
             // it needs to be able to do so. It will replay the notifications in the order in which they were received,
             // such that the notification will be sent out in the same order as the block changes that may have taken place.
             if (state.doesCaptureNeighborNotifications(peek)) {
-                peek.getCapturedBlockSupplier().captureNeighborNotification(mixinWorld, iblockstate, notifyPos, sourceBlock, sourcePos);
+                peek.getCapturedBlockSupplier().captureNeighborNotification(mixinWorld, notifyState, notifyPos, sourceBlock, sourcePos);
                 return;
             }
-            state.associateNeighborStateNotifier(peek, sourcePos, iblockstate.getBlock(), notifyPos, ((WorldServer) mixinWorld), PlayerTracker.Type.NOTIFIER);
+            state.associateNeighborStateNotifier(peek, sourcePos, notifyState.getBlock(), notifyPos, ((WorldServer) mixinWorld), PlayerTracker.Type.NOTIFIER);
             final LocatableBlock block = new SpongeLocatableBlockBuilder()
                 .world(((World) mixinWorld))
                 .position(sourcePos.getX(), sourcePos.getY(), sourcePos.getZ())
@@ -686,9 +680,9 @@ public final class PhaseTracker {
                 .source(block)
                 .sourceBlock(sourceBlock)
                 .setNotifiedBlockPos(notifyPos)
-                .setNotifiedBlockState(iblockstate)
+                .setNotifiedBlockState(notifyState)
                 .setSourceNotification(sourcePos)
-                 .allowsCaptures(state) // We need to pass the previous state so we don't capture blocks when we're in world gen.
+                .allowsCaptures(state) // We need to pass the previous state so we don't capture blocks when we're in world gen.
 
             ) {
                 // Since the notifier may have just been set from the previous state, we can
@@ -700,7 +694,7 @@ public final class PhaseTracker {
                 context.buildAndSwitch();
                 // Sponge End
 
-                iblockstate.neighborChanged(((WorldServer) mixinWorld), notifyPos, sourceBlock, sourcePos);
+                notifyState.neighborChanged(((WorldServer) mixinWorld), notifyPos, sourceBlock, sourcePos);
             }
         } catch (Throwable throwable) {
             CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Exception while updating neighbours");
@@ -708,12 +702,12 @@ public final class PhaseTracker {
             crashreportcategory.addDetail("Source block type", () -> {
                 try {
                     return String.format("ID #%d (%s // %s)", Block.getIdFromBlock(sourceBlock),
-                            sourceBlock.getTranslationKey(), sourceBlock.getClass().getCanonicalName());
+                        sourceBlock.getTranslationKey(), sourceBlock.getClass().getCanonicalName());
                 } catch (Throwable var2) {
                     return "ID #" + Block.getIdFromBlock(sourceBlock);
                 }
             });
-            CrashReportCategory.addBlockInfo(crashreportcategory, notifyPos, iblockstate);
+            CrashReportCategory.addBlockInfo(crashreportcategory, notifyPos, notifyState);
             throw new ReportedException(crashreport);
         }
     }
@@ -766,6 +760,10 @@ public final class PhaseTracker {
         // Sponge Start - micro optimization to avoid calling extra stuff on the same block state instance
         if (currentState == newState) {
             // Some micro optimization in case someone is trying to set the new state to the same as current
+            final SpongeProxyBlockAccess proxyAccess = mixinWorld.getProxyAccess();
+            if (proxyAccess.isProcessingNeighbors() && proxyAccess.getBlockState(pos) != currentState) {
+                proxyAccess.onChunkChanged(pos, newState);
+            }
             return false;
         }
 
@@ -778,7 +776,7 @@ public final class PhaseTracker {
         if (isComplete && SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().isVerbose()) { // Fail fast.
             // The random occurrence that we're told to complete a phase
             // while a world is being changed unknowingly.
-            this.printUnexpectedBlockChange(mixinWorld, pos, currentState, newState);
+//            this.printUnexpectedBlockChange(mixinWorld, pos, currentState, newState);
         }
         // We can allow the block to get changed, regardless how it's captured, not captured, etc.
         // because MixinChunk will perform the necessary changes, and appropriately prevent any specific

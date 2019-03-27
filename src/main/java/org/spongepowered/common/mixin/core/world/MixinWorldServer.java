@@ -1115,6 +1115,11 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         return this.proxyBlockAccess.isTileEntityRemoved(pos);
     }
 
+    @Override
+    protected boolean isTileMarkedAsNull(BlockPos pos, net.minecraft.tileentity.TileEntity tileentity) {
+        return this.proxyBlockAccess.hasTileEntity(pos) && this.proxyBlockAccess.getTileEntity(pos) == null;
+    }
+
     @Nullable
     protected net.minecraft.tileentity.TileEntity getProcessingTileFromProxy(BlockPos pos) {
         return this.proxyBlockAccess.getTileEntity(pos);
@@ -1618,7 +1623,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             return;
         }
 
-        PhaseTracker.getInstance().notifyBlockOfStateChange(this, pos, blockIn, otherPos);
+        PhaseTracker.getInstance().notifyBlockOfStateChange(this, this.getBlockState(pos), pos, blockIn, otherPos);
     }
 
     /**
@@ -1636,19 +1641,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         if (ShouldFire.NOTIFY_NEIGHBOR_BLOCK_EVENT) {
             EnumSet<EnumFacing> directions = EnumSet.of(EnumFacing.WEST, EnumFacing.EAST, EnumFacing.DOWN, EnumFacing.UP, EnumFacing.NORTH, EnumFacing.SOUTH);
             directions.remove(skipSide);
-            final NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent(this, pos, directions);
-            if (event == null || !event.isCancelled()) {
-                for (EnumFacing facing : NOTIFY_DIRECTIONS) { // ORDER MATTERS, we have to keep order in which directions are notified.
-                    if (event != null) {
-                        final Direction direction = DirectionFacingProvider.getInstance().getKey(facing).get();
-                        if (!event.getNeighbors().keySet().contains(direction)) {
-                            continue;
-                        }
-                    }
-
-                    PhaseTracker.getInstance().notifyBlockOfStateChange(this, pos.offset(facing), blockType, pos);
-                }
-            }
+            throwNotifyNeighborAndCall(pos, blockType, directions);
             return;
         }
 
@@ -1657,7 +1650,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             if (direction == skipSide) {
                 continue;
             }
-            PhaseTracker.getInstance().notifyBlockOfStateChange(this, pos.offset(direction), blockType, pos);
+            final BlockPos offset = pos.offset(direction);
+            PhaseTracker.getInstance().notifyBlockOfStateChange(this, this.getBlockState(offset), offset, blockType, pos);
         }
 
     }
@@ -1674,31 +1668,35 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
 
         if (ShouldFire.NOTIFY_NEIGHBOR_BLOCK_EVENT) {
-            final NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent(this, sourcePos, NOTIFY_DIRECTION_SET);
-            if (event == null || !event.isCancelled()) {
-                for (EnumFacing facing : NOTIFY_DIRECTIONS) {
-                    if (event != null) {
-                        final Direction direction = DirectionFacingProvider.getInstance().getKey(facing).get();
-                        if (!event.getNeighbors().keySet().contains(direction)) {
-                            continue;
-                        }
-                    }
-
-                    final BlockPos notifyPos = sourcePos.offset(facing);
-                    PhaseTracker.getInstance().notifyBlockOfStateChange(this, notifyPos, sourceBlock, sourcePos);
-                }
-            }
+            throwNotifyNeighborAndCall(sourcePos, sourceBlock, NOTIFY_DIRECTION_SET);
         } else {
             // Else, we just do vanilla. If there's no listeners, we don't want to spam the notification event
             for (EnumFacing direction : NOTIFY_DIRECTIONS) {
                 final BlockPos notifyPos = sourcePos.offset(direction);
-                PhaseTracker.getInstance().notifyBlockOfStateChange(this, notifyPos, sourceBlock, sourcePos);
+                PhaseTracker.getInstance().notifyBlockOfStateChange(this, this.getBlockState(notifyPos), notifyPos, sourceBlock, sourcePos);
             }
         }
 
         // Copied over to ensure observers retain functionality.
         if (updateObserverBlocks) {
             this.updateObservingBlocksAt(sourcePos, sourceBlock);
+        }
+    }
+
+    private void throwNotifyNeighborAndCall(BlockPos sourcePos, Block sourceBlock, EnumSet<EnumFacing> notifyDirectionSet) {
+        final NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent(this, sourcePos, notifyDirectionSet);
+        if (event == null || !event.isCancelled()) {
+            for (EnumFacing facing : NOTIFY_DIRECTIONS) {
+                if (event != null) {
+                    final Direction direction = DirectionFacingProvider.getInstance().getKey(facing).get();
+                    if (!event.getNeighbors().keySet().contains(direction)) {
+                        continue;
+                    }
+                }
+
+                final BlockPos notifyPos = sourcePos.offset(facing);
+                PhaseTracker.getInstance().notifyBlockOfStateChange(this, this.getBlockState(notifyPos), notifyPos, sourceBlock, sourcePos);
+            }
         }
     }
 
@@ -1858,7 +1856,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     // IMixinWorld method
     @Override
-    public void spongeNotifyNeighborsPostBlockChange(BlockPos pos, IBlockState oldState, IBlockState newState, BlockChangeFlag flags) {
+    public void spongeNotifyNeighborsPostBlockChange(BlockPos pos, IBlockState newState, BlockChangeFlag flags) {
         if (flags.updateNeighbors()) {
             this.notifyNeighborsRespectDebug(pos, newState.getBlock(), flags.notifyObservers());
 

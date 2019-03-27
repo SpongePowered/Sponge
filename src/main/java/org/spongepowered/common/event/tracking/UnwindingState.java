@@ -44,7 +44,6 @@ import org.spongepowered.common.event.tracking.context.MultiBlockCaptureSupplier
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
-import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
@@ -255,7 +254,7 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
 
     @Override
     public void performPostBlockNotificationsAndNeighborUpdates(UnwindingPhaseContext context,
-        SpongeBlockSnapshot oldBlockSnapshot, IBlockState newState, SpongeBlockChangeFlag changeFlag, int depth) {
+        IBlockState newState, SpongeBlockChangeFlag changeFlag, int depth) {
         if (context.isPostingSpecialProcess()) {
             return; // it will keep on going internally.
         }

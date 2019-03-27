@@ -30,14 +30,20 @@ import com.google.common.collect.Queues;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.WorldServerMulti;
 import net.minecraft.world.chunk.Chunk;
 import org.apache.logging.log4j.Level;
+import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -64,6 +70,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
     private WorldServer processingWorld;
     @Nullable private BlockTransaction processingTransaction;
     @Nullable private Deque<BlockTransaction> processingStack;
+    private boolean isNeighbor = false;
 
     public SpongeProxyBlockAccess(IMixinWorldServer worldServer) {
         this.processingWorld = ((WorldServer) worldServer);
@@ -78,7 +85,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
         return proxy;
     }
 
-    SpongeProxyBlockAccess proceed(BlockPos pos, IBlockState state) {
+    SpongeProxyBlockAccess proceed(BlockPos pos, IBlockState state, boolean b) {
         if (this.proxies.isEmpty()) {
             throw new IllegalStateException("Cannot push a new block change without having proxies!");
         }
@@ -92,8 +99,13 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
                 proxy.store(pos, state);
             }
         }
+        if (b && this.processingTransaction != null) {
+            PhaseTracker.getInstance().setBlockState((IMixinWorldServer) this.processingWorld, pos, state, BlockChangeFlags.NONE);
+        }
         return this;
     }
+
+    private boolean hasTile = false;
 
     private void popProxy(Proxy oldProxy) {
         if (oldProxy == null) {
@@ -170,26 +182,66 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
             }
         }
         if (this.proxies.isEmpty()) {
+            PrettyPrinter pretty = null;
             if (!this.processed.isEmpty()) {
-                final PrettyPrinter printer = new PrettyPrinter(60)
-                    .add("Untrimmed block states in proxy left after all proxies are popped.").centre().hr()
-                    .addWrapped(60, "There are not supposed to be any BlockStates remaining in the Proxy access, but there are.")
+                pretty = new PrettyPrinter(60)
                     .add("%s : %s", "Remaining", this.processed.size());
+                final PrettyPrinter printer = pretty;
                 this.processed.forEach(((pos, state) -> printer.add("- %s : %s", "Pos", pos).addWrapped(60, "  %s : %s", "State", state)));
-                printer.print(System.err);
                 this.processed.clear();
             }
             if (!this.markedRemoved.isEmpty()) {
+                if (pretty == null) {
+                    pretty = new PrettyPrinter(60);
+                }
+                pretty.add("Unclaimed Removed Tile Positions");
+                final PrettyPrinter printer = pretty;
+                this.markedRemoved.forEach(pos -> printer.add("  -%s", pos));
+                pretty.add();
                 this.markedRemoved.clear();
             }
             if (!this.queuedTiles.isEmpty()) {
+                if (pretty == null) {
+                    pretty = new PrettyPrinter(60);
+                }
+                pretty.add("Unadded TileEntities queued for addition");
+                final PrettyPrinter printer = pretty;
+                this.queuedTiles.forEach((pos, tile) -> printer.add(" - %s : %s", pos, tile == null ? "null" : ((IMixinTileEntity) tile).getPrettyPrinterString()));
                 this.queuedTiles.clear();
             }
             if (!this.queuedRemovals.isEmpty()) {
+                if (pretty == null) {
+                    pretty = new PrettyPrinter(60);
+                }
+                pretty.add("Unremoved TileEntities queued for removal!");
+                final PrettyPrinter printer = pretty;
+                this.queuedRemovals.forEach((pos, tile) -> printer.add(" - %s : %s", pos, tile == null ? "null" : ((IMixinTileEntity) tile).getPrettyPrinterString()));
                 this.queuedRemovals.clear();
             }
             if (!this.affectedTileEntities.isEmpty()) {
+                if (pretty == null) {
+                    pretty = new PrettyPrinter(60);
+                }
+                final PrettyPrinter printer = pretty;
+                this.affectedTileEntities.forEach(((pos, tileEntity) -> {
+                    if (tileEntity == null) {
+                        return;
+                    }
+                    if (!this.hasTile) {
+                        printer.add("Unremoved TileEntities affected by the proxy, likely will cause issues if these are meant to be added to the world!");
+                    }
+                    hasTile = true;
+                    printer.add(" - %s : %s", pos, ((IMixinTileEntity) tileEntity).getPrettyPrinterString());
+                }));
                 this.affectedTileEntities.clear();
+            }
+
+            if (pretty != null) {
+                if (this.hasTile) {
+                    pretty.add("Following the necessary steps to ahve removed the above entries, the proxy is now being cleared.");
+                    this.hasTile = false;
+                    pretty.trace(System.err);
+                }
             }
         }
     }
@@ -233,7 +285,14 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
             // capturing changes or using proxies.
             return;
         }
-        proceed(pos, newState);
+        if (this.processingTransaction != null) {
+            for (BlockTransaction transaction = this.processingTransaction; transaction != null; transaction = transaction.next) {
+                if (transaction.acceptChunkChange(pos, newState)) {
+                    IBlockState existing = transaction.blocksNotAffected.put(pos, newState);
+                }
+            }
+        }
+        proceed(pos, newState, false);
     }
 
     private void unmarkRemoval(BlockPos pos) {
@@ -271,6 +330,9 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
     private void removeTileEntityFromWorldAndChunk(TileEntity removed) {
         if (this.processingWorld.processingLoadedTiles) {
             this.processingWorld.addedTileEntityList.remove(removed);
+            if (!(removed instanceof ITickable)) { //Forge: If they are not tickable they wont be removed in the update loop.
+                this.processingWorld.loadedTileEntityList.remove(removed);
+            }
         } else {
             this.processingWorld.addedTileEntityList.remove(removed);
             this.processingWorld.loadedTileEntityList.remove(removed);
@@ -282,7 +344,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
         }
     }
 
-    void proceedWithAdd(BlockPos targetPos, TileEntity added, IBlockState newState) {
+    void proceedWithAdd(BlockPos targetPos, TileEntity added) {
         final boolean removed = this.queuedTiles.remove(targetPos, added);
         if (!removed) {
             // someone else popped for us?
@@ -305,9 +367,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
         } else {
             final Chunk chunk = this.processingWorld.getChunk(targetPos);
             if (!chunk.isEmpty()) {
-                if (SpongeImplHooks.hasBlockTileEntity(newState.getBlock(), newState)) {
-                    ((IMixinChunk) chunk).setTileEntity(targetPos, added);
-                }
+                ((IMixinChunk) chunk).setTileEntity(targetPos, added);
             }
             this.processingWorld.addTileEntity(added);
         }
@@ -408,12 +468,12 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
         this.markedRemoved.forEach(pos -> printer.add("  - %s", pos));
         printer.add()
             .add(" Affected Tiles");
-        this.affectedTileEntities.forEach((pos, tileEntity) -> printer.add("  - %s : %s", pos, ((IMixinTileEntity) tileEntity).getPrettyPrinterString()));
+        this.affectedTileEntities.forEach((pos, tileEntity) -> printer.add("  - %s : %s", pos, tileEntity == null ? "null" : ((IMixinTileEntity) tileEntity).getPrettyPrinterString()));
         printer.add()
             .add(" QueuedTiles");
-        this.queuedTiles.forEach((pos, tileEntity) -> printer.add("  - %s : %s", pos, ((IMixinTileEntity) tileEntity).getPrettyPrinterString()));
+        this.queuedTiles.forEach((pos, tileEntity) -> printer.add("  - %s : %s", pos, tileEntity == null ? "null" : ((IMixinTileEntity) tileEntity).getPrettyPrinterString()));
         printer.add().add(" QueuedRemovals");
-        this.queuedRemovals.forEach(((pos, tileEntity) -> printer.add("  - %s: %s", pos, ((IMixinTileEntity) tileEntity).getPrettyPrinterString())));
+        this.queuedRemovals.forEach(((pos, tileEntity) -> printer.add("  - %s: %s", pos, tileEntity == null ? "null" :  ((IMixinTileEntity) tileEntity).getPrettyPrinterString())));
     }
 
     @Override
@@ -430,8 +490,12 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
         this.processingStack.pop();
         if (!this.processingStack.isEmpty()) {
             this.processingTransaction = this.processingStack.peek();
+            if (this.processingTransaction instanceof BlockTransaction.NeighborNotification) {
+                this.isNeighbor = true;
+            }
         }
         this.processingTransaction = null;
+        this.isNeighbor = false;
     }
 
     public SpongeProxyBlockAccess switchTo(BlockTransaction transaction) {
@@ -444,7 +508,14 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
             this.processingStack.push(transaction);
         }
         this.processingTransaction = transaction;
+        if (transaction instanceof BlockTransaction.NeighborNotification) {
+            this.isNeighbor = true;
+        }
         return this;
+    }
+
+    public boolean isProcessingNeighbors() {
+        return this.isNeighbor;
     }
 
     public static final class Proxy implements AutoCloseable {
@@ -520,4 +591,5 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
             this.markedRemovedTiles.remove(pos);
         }
     }
+
 }

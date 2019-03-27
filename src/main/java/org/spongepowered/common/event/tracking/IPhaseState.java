@@ -330,13 +330,12 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * we track the current depth . If the processing depth exceeeds a configurable threshold,
      * processing is aborted, and the current tracker state and phase data are logged.
      * @param context The context to re-check for captures
-     * @param oldBlockSnapshot
      * @param newState
      * @param changeFlag
      * @param currentDepth The current processing depth, to prevenet stack overflows
      */
     default void performPostBlockNotificationsAndNeighborUpdates(C context,
-        SpongeBlockSnapshot oldBlockSnapshot, IBlockState newState, SpongeBlockChangeFlag changeFlag,
+        IBlockState newState, SpongeBlockChangeFlag changeFlag,
         int currentDepth) {
 
     }

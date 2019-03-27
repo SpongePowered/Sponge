@@ -39,7 +39,6 @@ import net.minecraft.block.BlockRedstoneRepeater;
 import net.minecraft.block.BlockRedstoneTorch;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItem;
-import net.minecraft.init.Blocks;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldProvider;
@@ -79,7 +78,6 @@ import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.context.MultiBlockCaptureSupplier;
-import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.tick.BlockEventTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.BlockTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.DimensionContext;
@@ -481,7 +479,7 @@ public final class TrackingUtil {
                 noCancelledTransactions = false;
                 // Don't restore the transactions just yet, since we're just marking them as invalid for now
                 for (Transaction<BlockSnapshot> transaction : Lists.reverse(blockEvent.getTransactions())) {
-                    scheduledEvents.removeAll(VecHelper.toBlockPos(transaction.getOriginal().getPosition()));
+                        scheduledEvents.removeAll(VecHelper.toBlockPos(transaction.getOriginal().getPosition()));
                     transaction.setValid(false);
                 }
             }
@@ -651,8 +649,8 @@ public final class TrackingUtil {
             world.notifyBlockUpdate(pos, originalState, newState, changeFlag.getRawFlag());
         }
 
-        performNeighborAndClientNotifications(phaseContext, currentDepth, oldBlockSnapshot, newBlockSnapshot, mixinWorld, pos,
-            originalState, newState, changeFlag);
+        performNeighborAndClientNotifications(phaseContext, currentDepth, newBlockSnapshot, mixinWorld, pos,
+            newState, changeFlag);
         return noCancelledTransactions;
     }
 
@@ -666,9 +664,9 @@ public final class TrackingUtil {
         }
     }
 
-    public static void performNeighborAndClientNotifications(PhaseContext<?> phaseContext, int currentDepth, SpongeBlockSnapshot oldBlockSnapshot,
+    public static void performNeighborAndClientNotifications(PhaseContext<?> phaseContext, int currentDepth,
         SpongeBlockSnapshot newBlockSnapshot, IMixinWorldServer mixinWorld, BlockPos pos,
-        IBlockState originalState, IBlockState newState, SpongeBlockChangeFlag changeFlag) {
+        IBlockState newState, SpongeBlockChangeFlag changeFlag) {
         final Block newBlock = newState.getBlock();
         final IPhaseState phaseState = phaseContext.state;
         if (changeFlag.updateNeighbors()) { // Notify neighbors only if the change flag allowed it.
@@ -678,13 +676,13 @@ public final class TrackingUtil {
             final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
             final BlockSnapshot previousNeighbor = context.neighborNotificationSource;
             context.neighborNotificationSource = newBlockSnapshot;
-            mixinWorld.spongeNotifyNeighborsPostBlockChange(pos, originalState, newState, changeFlag);
+            mixinWorld.spongeNotifyNeighborsPostBlockChange(pos, newState, changeFlag);
             context.neighborNotificationSource = previousNeighbor;
         } else if (changeFlag.notifyObservers()) {
             ((net.minecraft.world.World) mixinWorld).updateObservingBlocksAt(pos, newBlock);
         }
 
-        phaseState.performPostBlockNotificationsAndNeighborUpdates(phaseContext, oldBlockSnapshot, newState, changeFlag, currentDepth + 1);
+        phaseState.performPostBlockNotificationsAndNeighborUpdates(phaseContext, newState, changeFlag, currentDepth + 1);
     }
 
     public static void performBlockEntitySpawns(IPhaseState<?> state, PhaseContext<?> phaseContext, SpongeBlockSnapshot oldBlockSnapshot,

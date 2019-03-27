@@ -26,6 +26,7 @@ package org.spongepowered.common.event.tracking.context;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
@@ -598,7 +599,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
     }
 
     public ListMultimap<BlockPos, BlockEventData> getScheduledEvents() {
-        return this.scheduledEvents == null ? ArrayListMultimap.create(4, 4) : ArrayListMultimap.create(this.scheduledEvents);
+        return this.scheduledEvents == null || this.scheduledEvents.isEmpty() ? ImmutableListMultimap.of() : ArrayListMultimap.create(this.scheduledEvents);
     }
 
     @SuppressWarnings({"unchecked", "ReturnInsideFinallyBlock"})
@@ -648,13 +649,13 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
                             if (PRINT_TRANSACTIONS) {
                                 printer.addWrapped(120, "  %s : %s, %s", "UnaffectedBlock", pos, block);
                             }
-                            access.proceed(pos, block);
+                            access.proceed(pos, block, false);
                         });
                     }
                     if (transaction.tilesAtTransaction != null) {
                         transaction.tilesAtTransaction.forEach((pos, tile) -> {
                             if (PRINT_TRANSACTIONS) {
-                                printer.addWrapped(120, "  %s : %s, %s", "UnaffectedTile", pos, ((IMixinTileEntity) tile).getPrettyPrinterString());
+                                printer.addWrapped(120, "  %s : %s, %s", "UnaffectedTile", pos, tile == null ? "null" : ((IMixinTileEntity) tile).getPrettyPrinterString());
                             }
                             access.pushTile(pos, tile);
                         });
@@ -666,7 +667,17 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
                     }
                     transaction.process(eventTransaction, phaseState, phaseContext, currentDepth);
                 } catch (Exception e) {
-                    // do nothing for now?
+                    final PrettyPrinter printer = new PrettyPrinter(60).add("Exception while trying to apply transaction").centre().hr()
+                        .addWrapped(60,
+                            "BlockTransactions failing to process can lead to unintended consequences. If the exception is *directly* coming from Sponge's code, please report to Sponge.")
+                        .add();
+                    mixinWorldServer.getProxyAccess().addToPrinter(printer);
+                    transaction.addToPrinter(printer);
+                    printer.add();
+                    printer
+                        .add("Exception: ")
+                        .add(e)
+                        .trace(System.err);
                 }
                 transaction.postProcessBlocksAffected(mixinWorldServer.getProxyAccess());
             }
