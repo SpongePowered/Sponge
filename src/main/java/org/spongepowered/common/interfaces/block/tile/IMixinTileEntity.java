@@ -122,4 +122,7 @@ public interface IMixinTileEntity extends IMixinTrackable {
     boolean isCaptured();
 
     void setCaptured(boolean captured);
+    default String getPrettyPrinterString() {
+        return  this.toString();
+    }
 }

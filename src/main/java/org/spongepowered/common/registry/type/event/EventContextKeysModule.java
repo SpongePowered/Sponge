@@ -32,6 +32,7 @@ import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
+import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.EventContextKey;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
@@ -110,6 +111,12 @@ public final class EventContextKeysModule
         this.createKey("sponge:used_item", "Used Item", ItemStackSnapshot.class);
         this.createKey("sponge:used_hand", "Used Hand", HandType.class);
         this.createKey("sponge:plugin", "Plugin", PluginContainer.class);
+        this.createKey("sponge:break_event", "Break Event", ChangeBlockEvent.Break.class);
+        this.createKey("sponge:place_event", "Place Event", ChangeBlockEvent.Place.class);
+        this.createKey("sponge:modify_event", "Modify Event", ChangeBlockEvent.Modify.class);
+        this.createKey("sponge:decay_event", "Decay Event", ChangeBlockEvent.Decay.class);
+        this.createKey("sponge:grow_event", "Decay Event", ChangeBlockEvent.Grow.class);
+        this.createKey("sponge:growth_origin", "Growth Origin", BlockSnapshot.class);
     }
 
     private void createKey(String id, String name, Class<?> usedClass) {

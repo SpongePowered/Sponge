@@ -25,6 +25,8 @@
 package org.spongepowered.common.event.tracking.phase.general;
 
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.UnwindingState;
+import org.spongepowered.common.event.tracking.UnwindingPhaseContext;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 
@@ -40,7 +42,7 @@ public final class GeneralPhase extends TrackingPhase {
     }
 
     public static final class Post {
-        public static final IPhaseState<UnwindingPhaseContext> UNWINDING = new PostState();
+        public static final IPhaseState<UnwindingPhaseContext> UNWINDING = UnwindingState.getInstance();
 
         private Post() { }
     }

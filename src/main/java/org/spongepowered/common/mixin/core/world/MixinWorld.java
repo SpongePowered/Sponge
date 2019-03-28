@@ -719,7 +719,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
      * others, like Pistons movement, we need to be able to capture and
      * "play back" what's going on, without performing the live changes.
      *
-     * @param world The world, this
      * @param pos The position of the tile entity
      * @param tileEntity The tile entity being set onto that position
      * @return The processing tiles field, used as a hook
@@ -1451,6 +1450,10 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
             if (tileentity == null) {
                  tileentity = this.getChunk(pos).getTileEntity(pos, net.minecraft.world.chunk.Chunk.EnumCreateEntityType.IMMEDIATE);
+                 // Sponge - Make sure the tile entity is not actually marked for being "empty"
+                if (this.isTileMarkedAsNull(pos, tileentity)) {
+                    tileentity = null;
+                }
             }
 
             if (tileentity == null) {
@@ -1459,6 +1462,10 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
             return tileentity;
         }
+    }
+
+    protected boolean isTileMarkedAsNull(BlockPos pos, net.minecraft.tileentity.TileEntity tileentity) {
+        return false;
     }
 
     protected boolean isTileMarkedForRemoval(BlockPos pos) {

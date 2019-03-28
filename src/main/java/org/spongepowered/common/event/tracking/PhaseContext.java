@@ -86,6 +86,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
 
     @Nullable private static PhaseContext<?> EMPTY;
     @Nullable public BlockSnapshot neighborNotificationSource;
+    SpongeBlockSnapshot singleSnapshot;
 
     /**
      * Default flagged empty PhaseContext that can be used for stubbing in corner cases.
@@ -112,10 +113,10 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     @Nullable private CapturedItemStackSupplier capturedItemStackSupplier;
 
     // Per block captures (useful for things like explosions to capture multiple targets at a time)
-    @Nullable private CapturedMultiMapSupplier<BlockPos, net.minecraft.entity.Entity> blockEntitySpawnSupplier;
-    @Nullable private BlockItemDropsSupplier blockItemDropsSupplier;
-    @Nullable private BlockItemEntityDropsSupplier blockItemEntityDropsSupplier;
-    @Nullable private CaptureBlockPos captureBlockPos;
+    @Nullable CapturedMultiMapSupplier<BlockPos, net.minecraft.entity.Entity> blockEntitySpawnSupplier;
+    @Nullable BlockItemDropsSupplier blockItemDropsSupplier;
+    @Nullable BlockItemEntityDropsSupplier blockItemEntityDropsSupplier;
+    @Nullable CaptureBlockPos captureBlockPos;
 
     // Per entity captures (useful for things like explosions to capture multiple targets at a time)
     @Nullable private EntityItemDropsSupplier entityItemDropsSupplier;
@@ -592,7 +593,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         return (P) this;
     }
 
-    private boolean isEmpty() {
+    public boolean isEmpty() {
         if (this == PhaseContext.EMPTY) {
             return true;
         }

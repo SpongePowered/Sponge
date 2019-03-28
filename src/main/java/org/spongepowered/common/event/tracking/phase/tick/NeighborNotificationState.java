@@ -26,7 +26,6 @@ package org.spongepowered.common.event.tracking.phase.tick;
 
 import net.minecraft.entity.item.EntityXPOrb;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.cause.EventContextKeys;
@@ -36,6 +35,7 @@ import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 
@@ -95,7 +95,6 @@ class NeighborNotificationState extends LocationBasedTickPhaseState<NeighborNoti
         }
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(locatableBlock);
-            associateAdditionalCauses(context, frame);
             if (entity instanceof EntityXPOrb) {
                 frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
                 final ArrayList<Entity> entities = new ArrayList<>(1);
@@ -109,6 +108,11 @@ class NeighborNotificationState extends LocationBasedTickPhaseState<NeighborNoti
         }
     }
 
+    @Override
+    public void provideNotifierForNeighbors(NeighborNotificationContext context, NeighborNotificationContext notification) {
+        super.provideNotifierForNeighbors(context, notification);
+        notification.setDepth(context.getDepth() + 1);
+    }
 
     @Override
     public boolean doesCaptureEntitySpawns() {
@@ -118,10 +122,6 @@ class NeighborNotificationState extends LocationBasedTickPhaseState<NeighborNoti
     @Override
     public boolean isNotReEntrant() {
         return false;
-    }
-
-    @Override
-    public void postTrackBlock(BlockSnapshot snapshot, NeighborNotificationContext context) {
     }
 
     /**

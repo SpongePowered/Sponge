@@ -611,7 +611,9 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     @Redirect(method = "processTryUseItemOnBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerInteractionManager;processRightClickBlock(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/EnumHand;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/EnumFacing;FFF)Lnet/minecraft/util/EnumActionResult;"))
     public EnumActionResult onProcessRightClickBlock(PlayerInteractionManager interactionManager, EntityPlayer player, net.minecraft.world.World worldIn, @Nullable ItemStack stack, EnumHand hand, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ) {
         EnumActionResult actionResult = interactionManager.processRightClickBlock(this.player, worldIn, stack, hand, pos, facing, hitX, hitY, hitZ);
-
+        if (PhaseTracker.getInstance().getCurrentContext().isEmpty()) {
+            return actionResult;
+        }
         final PacketContext<?> context = ((PacketContext<?>) PhaseTracker.getInstance().getCurrentContext());
 
         // If a plugin or mod has changed the item, avoid restoring
@@ -634,6 +636,9 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     public EnumActionResult onProcessRightClick(PlayerInteractionManager interactionManager, EntityPlayer player, net.minecraft.world.World worldIn, @Nullable ItemStack stack, EnumHand hand) {
         EnumActionResult actionResult = interactionManager.processRightClick(this.player, worldIn, stack, hand);
         // If a plugin or mod has changed the item, avoid restoring
+        if (PhaseTracker.getInstance().getCurrentContext().isEmpty()) {
+            return actionResult;
+        }
         final PacketContext<?> packetContext = (PacketContext<?>) PhaseTracker.getInstance().getCurrentContext();
         if (!packetContext.getInteractItemChanged()) {
             final ItemStack itemStack = ItemStackUtil.toNative(packetContext.getItemUsed());
@@ -717,6 +722,9 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     @Inject(method = "handleAnimation", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;markPlayerActive()V"), cancellable = true)
     public void onHandleAnimation(CPacketAnimation packetIn, CallbackInfo ci)
     {
+        if (PhaseTracker.getInstance().getCurrentContext().isEmpty()) {
+            return;
+        }
         SpongeCommonEventFactory.lastAnimationPacketTick = SpongeImpl.getServer().getTickCounter();
         SpongeCommonEventFactory.lastAnimationPlayer = new WeakReference<>(this.player);
         if (ShouldFire.ANIMATE_HAND_EVENT) {
@@ -734,6 +742,9 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
 
     @Inject(method = "processPlayerDigging", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getWorld(I)Lnet/minecraft/world/WorldServer;"))
     public void onProcessPlayerDigging(CPacketPlayerDigging packetIn, CallbackInfo ci) {
+        if (PhaseTracker.getInstance().getCurrentContext().isEmpty()) {
+            return;
+        }
         SpongeCommonEventFactory.lastPrimaryPacketTick = SpongeImpl.getServer().getTickCounter();
     }
 

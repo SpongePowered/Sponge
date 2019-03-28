@@ -122,6 +122,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     private boolean allowsEntityBulkCapture = true;
     private boolean allowsBlockEventCreation = true;
     private boolean allowsEntityEventCreation = true;
+    private boolean hasNeighborOverride = false;
 
     @Shadow private boolean needsRandomTick;
     @Shadow protected SoundType blockSoundType;
@@ -391,6 +392,11 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     }
 
     @Override
+    public boolean hasNeighborChangedLogic() {
+        return this.hasNeighborOverride;
+    }
+
+    @Override
     public Timing getTimingsHandler() {
         if (this.timing == null) {
             this.timing = SpongeTimings.getBlockTiming((net.minecraft.block.Block) (Object) this);
@@ -510,6 +516,16 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
                 this.hasCollideWithStateLogic = false;
             }
         } catch (Throwable ex) {
+            // ignore
+        }
+
+        // neighborChanged
+        try {
+            String mapping = SpongeImplHooks.isDeobfuscatedEnvironment() ? "neighborChanged" : "neighborChanged";
+            Class<?>[] argTypes = {IBlockState.class, net.minecraft.world.World.class, BlockPos.class, Block.class, BlockPos.class};
+            Class<?> clazz = this.getClass().getMethod(mapping, argTypes).getDeclaringClass();
+            this.hasNeighborOverride = !clazz.equals(Block.class);
+        } catch (Throwable e) {
             // ignore
         }
 

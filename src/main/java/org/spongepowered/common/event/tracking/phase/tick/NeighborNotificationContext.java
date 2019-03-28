@@ -43,6 +43,7 @@ public final class NeighborNotificationContext extends LocationBasedTickContext<
     @Nullable private BlockPos notifiedBlockPos;
     @Nullable private IBlockState notifiedBlockState;
     @Nullable BlockSnapshot notificationSnapshot;
+    private int depth;
 
     NeighborNotificationContext(IPhaseState<NeighborNotificationContext> phaseState) {
         super(phaseState);
@@ -113,5 +114,13 @@ public final class NeighborNotificationContext extends LocationBasedTickContext<
     public NeighborNotificationContext setSourceNotification(@Nullable BlockSnapshot neighborNotificationSource) {
         this.notificationSnapshot = neighborNotificationSource;
         return this;
+    }
+
+    public int getDepth() {
+        return this.depth;
+    }
+
+    public void setDepth(int depth) {
+        this.depth = depth;
     }
 }

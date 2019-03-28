@@ -41,7 +41,7 @@ import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 
 @Mixin(BlockLiquid.class)
-public class MixinBlockLiquid {
+public abstract class MixinBlockLiquid extends MixinBlock {
 
     // Capture Lava and Water mixing forming CobbleStone or Obsidian
     @Inject(method = "checkForMixing", cancellable = true, locals = LocalCapture.CAPTURE_FAILSOFT, at = @At(value = "INVOKE",

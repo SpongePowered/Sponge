@@ -35,6 +35,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.world.LocatableBlock;
@@ -48,17 +49,25 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 
 import java.util.Random;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 @Mixin(BlockDynamicLiquid.class)
-public abstract class MixinBlockDynamicLiquid {
+public abstract class MixinBlockDynamicLiquid extends MixinBlockLiquid {
+
+    @Override
+    public BiConsumer<CauseStackManager.StackFrame, IMixinWorldServer> getTickFrameModifier() {
+        return (frame, world) -> frame.addContext(EventContextKeys.LIQUID_FLOW, (World) world);
+    }
 
     @Inject(method = "canFlowInto", at = @At("HEAD"), cancellable = true)
-    public void onCanFlowInto(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, CallbackInfoReturnable<Boolean> cir) {
+    private void onCanFlowInto(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, CallbackInfoReturnable<Boolean> cir) {
         if (!((IMixinWorld) worldIn).isFake() && ShouldFire.CHANGE_BLOCK_EVENT_PRE &&
             SpongeCommonEventFactory.callChangeBlockEventPre((IMixinWorldServer) worldIn, pos).isCancelled()) {
             cir.setReturnValue(false);
@@ -66,21 +75,14 @@ public abstract class MixinBlockDynamicLiquid {
     }
 
     @Inject(method = "updateTick", at = @At("HEAD"), cancellable = true)
-    public void onUpdateTickHead(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand, CallbackInfo ci) {
+    private void onUpdateTickHead(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand, CallbackInfo ci) {
         if (!((IMixinWorld) worldIn).isFake() && ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
-            Sponge.getCauseStackManager().addContext(EventContextKeys.LIQUID_FLOW, (org.spongepowered.api.world.World) worldIn);
             if (SpongeCommonEventFactory.callChangeBlockEventPre((IMixinWorldServer) worldIn, pos).isCancelled()) {
                 ci.cancel();
             }
         }
     }
 
-    @Inject(method = "updateTick", at = @At("RETURN"), cancellable = true)
-    public void onUpdateTickReturn(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand, CallbackInfo ci) {
-        if (!((IMixinWorld) worldIn).isFake() && ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
-            Sponge.getCauseStackManager().removeContext(EventContextKeys.LIQUID_FLOW);
-        }
-    }
 
     // Capture Lava falling on Water forming Stone
     @Inject(method = "updateTick", cancellable = true, at = @At(value = "INVOKE",
@@ -89,15 +91,16 @@ public abstract class MixinBlockDynamicLiquid {
         if (!ShouldFire.CHANGE_BLOCK_EVENT_MODIFY) {
             return;
         }
+        final BlockPos targetPos = sourcePos.down();
         LocatableBlock source = new SpongeLocatableBlockBuilder().world((World) worldIn).position(sourcePos.getX(), sourcePos.getY(), sourcePos.getZ()).state((BlockState) state).build();
         IBlockState newState = Blocks.STONE.getDefaultState();
-        ChangeBlockEvent.Modify event = SpongeCommonEventFactory.callChangeBlockEventModifyLiquidMix(worldIn, sourcePos, newState, source);
+        ChangeBlockEvent.Modify event = SpongeCommonEventFactory.callChangeBlockEventModifyLiquidMix(worldIn, targetPos, newState, source);
         Transaction<BlockSnapshot> transaction = event.getTransactions().get(0);
         if (event.isCancelled() || !transaction.isValid()) {
             ci.cancel();
             return;
         }
-        if (!worldIn.setBlockState(sourcePos.down(), BlockUtil.toNative(transaction.getFinal().getState()))) {
+        if (!worldIn.setBlockState(targetPos, BlockUtil.toNative(transaction.getFinal().getState()))) {
             ci.cancel();
         }
     }
@@ -122,7 +125,7 @@ public abstract class MixinBlockDynamicLiquid {
             }
 
             // Transaction modified?
-            if (transaction.getDefault() != transaction.getFinal()) {
+            if (transaction.getCustom().isPresent()) {
                 worldIn.setBlockState(pos, BlockUtil.toNative(transaction.getFinal().getState()));
                 ci.cancel();
             }

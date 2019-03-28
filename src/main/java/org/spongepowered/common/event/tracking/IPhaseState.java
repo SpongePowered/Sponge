@@ -34,6 +34,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -47,6 +48,7 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
@@ -57,13 +59,13 @@ import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.SpongeCauseStackManager;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.SpongeEventManager;
+import org.spongepowered.common.event.tracking.context.BlockTransaction;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
-import org.spongepowered.common.event.tracking.phase.general.PostState;
-import org.spongepowered.common.event.tracking.phase.general.UnwindingPhaseContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase.Listener;
@@ -73,6 +75,7 @@ import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.mixin.core.world.MixinChunk;
 import org.spongepowered.common.mixin.tracking.world.MixinChunk_Tracker;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -328,13 +331,12 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * we track the current depth . If the processing depth exceeeds a configurable threshold,
      * processing is aborted, and the current tracker state and phase data are logged.
      * @param context The context to re-check for captures
-     * @param oldBlockSnapshot
      * @param newState
      * @param changeFlag
      * @param currentDepth The current processing depth, to prevenet stack overflows
      */
     default void performPostBlockNotificationsAndNeighborUpdates(C context,
-        SpongeBlockSnapshot oldBlockSnapshot, IBlockState newState, SpongeBlockChangeFlag changeFlag,
+        IBlockState newState, SpongeBlockChangeFlag changeFlag,
         int currentDepth) {
 
     }
@@ -346,17 +348,19 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      *
      * @param context
      * @param transactions
+     * @param cause
      * @return
      */
-    default ChangeBlockEvent.Post createChangeBlockPostEvent(C context, ImmutableList<Transaction<BlockSnapshot>> transactions) {
-        return SpongeEventFactory.createChangeBlockEventPost(Sponge.getCauseStackManager().getCurrentCause(), transactions);
+    default ChangeBlockEvent.Post createChangeBlockPostEvent(C context, ImmutableList<Transaction<BlockSnapshot>> transactions,
+        Cause cause) {
+        return SpongeEventFactory.createChangeBlockEventPost(cause, transactions);
     }
 
     /**
      * Performs any necessary custom logic after the provided {@link BlockSnapshot}
      * {@link Transaction} has taken place. The provided {@link BlockChange} is usually
      * provided from either {@link TrackingUtil#performTransactionProcess(Transaction, IPhaseState, PhaseContext, List, boolean, int)}
-     * or {@link PostState#postBlockTransactionApplication(BlockChange, Transaction, UnwindingPhaseContext)} due to
+     * or {@link UnwindingState#postBlockTransactionApplication(BlockChange, Transaction, UnwindingPhaseContext)} due to
      * delegation to the underlying context during post processing of reactionary
      * side effects (like water spread from a bucket).
      *
@@ -367,18 +371,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     default void postBlockTransactionApplication(BlockChange blockChange, Transaction<BlockSnapshot> snapshotTransaction, C context) { }
 
     /**
-     * During the block change process, some cases (like block ticks) need to be processed immediately, and not
-     * performed during the delay for the end of the phase state to be unwound.
-     *
-     * @param snapshot The block snapshot being processed
-     * @param context The context for any potentially captured blocks
-     */
-    default void postTrackBlock(BlockSnapshot snapshot, C context) {
-
-    }
-
-    /**
-     * During {@link PostState#unwind(UnwindingPhaseContext)}, this delegates to the "unwinding" state to perform
+     * During {@link UnwindingState#unwind(UnwindingPhaseContext)}, this delegates to the "unwinding" state to perform
      * any extra handling with contexts to spawn entities that were captured.
      *
      * @param unwindingContext
@@ -705,19 +698,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     }
 
     /**
-     * Appends the stack frame with any additional objects needed from the phase context. Currently
-     * only used for notifiers and owners. May expand further.
-     *
-     * @param context The context to populate from
-     * @param frame The frame to populate
-     */
-    default void associateAdditionalCauses(PhaseContext<?> context, CauseStackManager.StackFrame frame) {
-        context.applyOwnerIfAvailable(owner -> frame.addContext(EventContextKeys.OWNER, owner));
-        context.applyNotifierIfAvailable(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
-
-    }
-
-    /**
      * Associates any notifier/owner information from expected states that will assuredly provide
      * said information. In some states, like world gen, there is no information to provide.
      *
@@ -847,9 +827,32 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     default void capturesNeighborNotifications(C context, IMixinWorldServer mixinWorld, BlockPos notifyPos, Block sourceBlock,
         IBlockState iblockstate, BlockPos sourcePos) {
     }
-    default void captureBlockChange(C phaseContext, BlockPos pos, SpongeBlockSnapshot originalBlockSnapshot, IBlockState newState,
+    /**
+     * Specifically captures a block change by {@link MixinChunk#setBlockState(BlockPos, IBlockState, IBlockState, BlockChangeFlag)}
+     * such that the change of a {@link IBlockState} will be appropriately logged, along with any changes of tile entities being removed
+     * or added, likewise, this will avoid duplicating transactions later after the fact, in the event that multiple changes are taking
+     * place, including but not withstanding, tile entity replacements after the fact.
+     *
+     * @param phaseContext
+     * @param pos
+     * @param originalBlockSnapshot
+     * @param newState
+     * @param flags
+     * @param tileEntity
+     * @return
+     */
+    @Nullable
+    default BlockTransaction.ChangeBlock captureBlockChange(C phaseContext, BlockPos pos, SpongeBlockSnapshot originalBlockSnapshot, IBlockState newState,
         BlockChangeFlag flags, @Nullable TileEntity tileEntity) {
+        if (!this.doesBulkBlockCapture(phaseContext)) {
+            phaseContext.singleSnapshot = originalBlockSnapshot;
+            return null;
+        }
+        if (this.hasSpecificBlockProcess(phaseContext)) {
+            return phaseContext.getCapturedBlockSupplier().logBlockChange(originalBlockSnapshot, newState, pos, flags);
+        }
         phaseContext.getCapturedBlockSupplier().put(originalBlockSnapshot, newState);
+        return null;
 
     }
     default void captureTileEntityReplacement(C currentContext, IMixinWorldServer mixinWorldServer, BlockPos pos, @Nullable TileEntity currenTile, @Nullable TileEntity tileEntity) {
@@ -872,17 +875,44 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         }
     }
 
-    default void postRestoreTransactions(C context, List<Transaction<BlockSnapshot>> invalid) {
-
-    }
-
     default Transaction<BlockSnapshot> createTransaction(C context, SpongeBlockSnapshot snapshot) {
         return context.getCapturedBlockSupplier().createTransaction(snapshot);
     }
-    default boolean hasSpecificBlockProcess() {
+    default boolean hasSpecificBlockProcess(C context) {
         return false;
     }
     default boolean doesCaptureNeighborNotifications(C context) {
         return false;
+    }
+
+    default void postProcessSpecificBlockChange(C currentContext, BlockTransaction.ChangeBlock changeBlock, int i) {
+
+    }
+
+    default BlockChange associateBlockChangeWithSnapshot(C phaseContext, IBlockState newState, Block newBlock,
+        IBlockState currentState, SpongeBlockSnapshot snapshot,
+        Block originalBlock) {
+        if (newBlock == Blocks.AIR) {
+            return BlockChange.BREAK;
+        } else if (newBlock != originalBlock && !TrackingUtil.forceModify(originalBlock, newBlock)) {
+            return BlockChange.PLACE;
+        }
+        return BlockChange.MODIFY;
+    }
+
+    /**
+     * Gets whether this {@link IPhaseState} entry with a provided {@link PhaseContext}
+     * will be allowed to register it's {@link #getFrameModifier()} to push along the
+     * {@link CauseStackManager}. In certain cases, there are states that can have
+     * excessive modifiers being pushed and popped with and without causes that may cause
+     * performance degredation due to the excessive amounts of how many recyclings occur
+     * with {@link SpongeCauseStackManager#getCurrentCause()} lacking a cached context
+     * and therefor needing to re-create the context each and every time.
+     *
+     * @param phaseContext The appropriate phase context
+     * @return True if the modifiers should be pushed to the manager
+     */
+    default boolean shouldProvideModifiers(C phaseContext) {
+        return true;
     }
 }

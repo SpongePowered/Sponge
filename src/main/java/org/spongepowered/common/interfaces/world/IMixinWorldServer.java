@@ -26,8 +26,6 @@ package org.spongepowered.common.interfaces.world;
 
 import net.minecraft.block.Block;
 import net.minecraft.tileentity.TileEntity;
-import org.spongepowered.common.event.tracking.context.BlockTransaction;
-import org.spongepowered.common.event.tracking.context.MultiBlockCaptureSupplier;
 import org.spongepowered.common.event.tracking.context.SpongeProxyBlockAccess;
 import org.spongepowered.common.relocate.co.aikar.timings.WorldTimingsHandler;
 import com.flowpowered.math.vector.Vector3d;
@@ -44,7 +42,6 @@ import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.type.GeneralConfigBase;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.world.gen.SpongeChunkGenerator;
@@ -66,7 +63,7 @@ public interface IMixinWorldServer extends IMixinWorld {
 
     void updateRotation(Entity entityIn);
 
-    void spongeNotifyNeighborsPostBlockChange(BlockPos pos, IBlockState oldState, IBlockState newState, BlockChangeFlag flags);
+    void spongeNotifyNeighborsPostBlockChange(BlockPos pos, IBlockState newState, BlockChangeFlag flags);
 
     boolean setBlockState(BlockPos pos, IBlockState state, BlockChangeFlag flag);
 

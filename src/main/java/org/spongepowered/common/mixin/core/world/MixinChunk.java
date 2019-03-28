@@ -39,6 +39,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ClassInheritanceMultiMap;
@@ -63,6 +64,7 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.ScheduledBlockUpdate;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.User;
@@ -93,16 +95,21 @@ import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.context.BlockTransaction;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.interfaces.IMixinCachable;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
+import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMapEntry;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
@@ -654,36 +661,86 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         // Sponge end
 
         // Sponge Start
+        // Set up some default information variables for later processing
+        final boolean isFake = ((IMixinWorld) this.world).isFake();
+        final TileEntity existing = this.getTileEntity(pos, EnumCreateEntityType.CHECK);
+        final PhaseContext<?> peek = isFake ? null : PhaseTracker.getInstance().getCurrentContext();
+        final IPhaseState state = isFake ? null : peek.state;
+        final SpongeBlockSnapshot snapshot = (isFake || (!ShouldFire.CHANGE_BLOCK_EVENT || !state.shouldCaptureBlockChangeOrSkip(peek, pos, currentState, newState, flag))) ? null : createSpongeBlockSnapshot(currentState, currentState, pos, flag, existing);
+        final BlockTransaction.ChangeBlock transaction;
+        final IMixinWorldServer mixinWorld = isFake ? null : (IMixinWorldServer) this.world;
+
         final int modifiedY = yPos & 15;
-        if (pos.getX() == 1892 && pos.getZ() == -131 && currentState == Blocks.DIAMOND_BLOCK.getDefaultState()) {
-            System.err.println("derp");
-        }
+
         extendedblockstorage.set(xPos, modifiedY, zPos, newState);
 
 
         // if (block1 != block) // Sponge - Forge removes this change.
-        {
-            if (!this.world.isRemote) {
-                final PhaseContext peek = PhaseTracker.getInstance().getCurrentContext();
-                final IPhaseState state = peek.state;
+        // { // Sponge - remove unnecessary braces
+        if (!this.world.isRemote) {
+            // Sponge - Redirect phase checks to use isFake in the event we have mods worlds doing silly things....
+            // i.e. fake worlds. Likewise, avoid creating unnecessary snapshots/transactions
+            // or triggering unprocessed captures when there are no events being thrown.
+            if (!isFake && ShouldFire.CHANGE_BLOCK_EVENT && snapshot != null) {
+
+                // Mark the tile entity as captured so when it is being removed during the chunk setting, it won't be
+                // re-captured again.
+                snapshot.blockChange = ((IPhaseState) peek.state).associateBlockChangeWithSnapshot(peek, newState, newBlock, currentState, snapshot, currentBlock);
+                transaction = state.captureBlockChange(peek, pos, snapshot, newState, flag, existing);
+
+                if (currentBlock != newBlock) {
+                    // We want to queue the break logic later, while the transaction is processed
+                    if (transaction != null) {
+                        transaction.queueBreak = true;
+                        // queue the existing tile anyways, just in case a block does decide to break the tile entity
+                        // without bothering to see if there's the right tile entity at the position.
+                        if (existing != null) {
+                            // Set tile to be captured, if it's showing up in removals later, it will
+                            // be ignored since the transaction process will actually process
+                            // the removal.
+                            ((IMixinTileEntity) existing).setCaptured(true);
+                            transaction.queuedRemoval = existing;
+                        }
+                        transaction.enqueueChanges(mixinWorld.getProxyAccess(), peek.getCapturedBlockSupplier());
+                    } else {
+                        currentBlock.breakBlock(this.world, pos, currentState);
+                    }
+                }
+                if (existing != null && SpongeImplHooks.shouldRefresh(existing, this.world, pos, currentState, newState)) {
+                    // And likewise, we want to queue the tile entity being removed, while
+                    // the transaction is processed.
+                    if (transaction != null) {
+                        // Set tile to be captured, if it's showing up in removals later, it will
+                        // be ignored since the transaction process will actually process
+                        // the removal.
+                        ((IMixinTileEntity) existing).setCaptured(true);
+                        transaction.queuedRemoval = existing;
+                        transaction.enqueueChanges(mixinWorld.getProxyAccess(), peek.getCapturedBlockSupplier());
+                    } else {
+                        this.world.removeTileEntity(pos);
+                    }
+                }
+
+            } else {
+                transaction = null;
                 // Sponge - Forge adds this change for block changes to only fire events when necessary
-                if (currentBlock != newBlock && !state.tracksTileEntityChanges(peek)) { // cache the block break in the event we're capturing tiles
+                if (currentBlock != newBlock) { // cache the block break in the event we're capturing tiles
                     currentBlock.breakBlock(this.world, pos, currentState);
                 }
                 // Sponge - Add several tile entity hook checks. Mainly for forge added hooks, but these
                 // still work by themselves in vanilla. In all intents and purposes, the remove tile entity could
                 // occur before we have a chance to
-                TileEntity te = this.getTileEntity(pos, EnumCreateEntityType.CHECK);
-                if (te != null && SpongeImplHooks.shouldRefresh(te, this.world, pos, currentState, newState)) {
-                    if (state.tracksTileEntityChanges(peek)) {
-                        state.captureTileEntityReplacement(peek, (IMixinWorldServer) this.world, pos, te, null);
-                    } else {
-                        this.world.removeTileEntity(pos);
-                    }
+                if (existing != null && SpongeImplHooks.shouldRefresh(existing, this.world, pos, currentState, newState)) {
+                    this.world.removeTileEntity(pos);
                 }
+            }
             // } else if (currentBlock instanceof ITileEntityProvider) { // Sponge - remove since forge has a special hook we need to add here
-                //Forge's hook is currentBlock.hasTileEntity(iblockstate) we add it on to SpongeImplHooks via mixins.
-            } else if (SpongeImplHooks.hasBlockTileEntity(currentBlock, currentState)) {
+        } else { // Sponge - Add transaction initializer before checking for tile entities
+            transaction = null; // Set the value to null
+
+            // Forge's hook is currentBlock.hasTileEntity(iblockstate) we add it on to SpongeImplHooks via mixins.
+            // We don't have to check for transactions or phases or capturing because the world is obviously not being managed
+            if (SpongeImplHooks.hasBlockTileEntity(currentBlock, currentState)) {
                 TileEntity tileEntity = this.getTileEntity(pos, EnumCreateEntityType.CHECK);
                 // Sponge - Add hook for refreshing, because again, forge hooks.
                 if (tileEntity != null && SpongeImplHooks.shouldRefresh(tileEntity, this.world, pos, currentState, newState)) {
@@ -691,9 +748,14 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
                 }
             }
         }
+        // } // Sponge - Remove unnecessary braces
 
         final IBlockState blockAfterSet = extendedblockstorage.get(xPos, modifiedY, zPos);
         if (blockAfterSet.getBlock() != newBlock) {
+            // Sponge Start - prune tracked change
+            if (!isFake && state.shouldCaptureBlockChangeOrSkip(peek, pos, currentState, newState, flag)) {
+                peek.getCapturedBlockSupplier().prune(snapshot);
+            }
             return null;
         }
 
@@ -720,21 +782,27 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
             }
         }
 
-        final boolean isFakeWorld = ((IMixinWorld) this.world).isFake();
-        if (!isFakeWorld && currentBlock != newBlock) {
-            final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
-            final IPhaseState state = context.state;
-            final boolean isBulkCapturing = state.doesBulkBlockCapture(context);
-            // Reset the proxy access
-            ((IMixinWorldServer) this.world).getProxyAccess().onChunkChanged(pos);
+        // Sponge Start - Handle block physics only if we're actually the server world
+        if (!isFake && currentBlock != newBlock) {
+            final boolean isBulkCapturing = state.doesBulkBlockCapture(peek);
+            // Reset the proxy access or add to the proxy state during processing.
+            ((IMixinWorldServer) this.world).getProxyAccess().onChunkChanged(pos, newState);
             // Sponge start - Ignore block activations during block placement captures unless it's
             // a BlockContainer. Prevents blocks such as TNT from activating when cancelled.
-            // Occasionally, certain phase states will need to prevent onBlockAdded to be called until after the tile entity tracking
-            // has been done, in the event of restores needing to re-override the block changes.
-            if (!isBulkCapturing || (SpongeImplHooks.hasBlockTileEntity(newBlock, newState) && !state.tracksTileEntityChanges(context))) {
-                // The new block state is null if called directly from Chunk#setBlockState(BlockPos, IBlockState)
-                // If it is null, then directly call the onBlockAdded logic.
-                if (flag.performBlockPhysics()) {
+            // Forge changes this check from
+            // if (!this.world.isRemote && block1 != block)
+            // to
+            //  if (!this.world.isRemote && block1 != block && (!this.world.captureBlockSnapshots || block.hasTileEntity(state)))
+            // which would normally translate to
+            // if (!isFake && currentBlock != newBlock && (!isBulkCapturing || SpongeImplHooks.hasBlockTileEntity(newBlock, newState))
+            // but, because we have transactions to deal with, we have to still set the transaction to
+            // queue on add as long as the flag deems it so.
+            if (flag.performBlockPhysics()) {
+                // Occasionally, certain phase states will need to prevent onBlockAdded to be called until after the tile entity tracking
+                // has been done, in the event of restores needing to re-override the block changes.
+                if (transaction != null) {
+                    transaction.queueOnAdd = true;
+                } else if (!isBulkCapturing || SpongeImplHooks.hasBlockTileEntity(newBlock, newState)) {
                     newBlock.onBlockAdded(this.world, pos, newState);
                 }
             }
@@ -750,28 +818,98 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
 
             if (tileentity == null) {
                 // Sponge Start - use SpongeImplHooks for forge compatibility
-                if (!isFakeWorld) { // Surround with a server check
+                if (!isFake) { // Surround with a server check
                     // tileentity = ((ITileEntityProvider)block).createNewTileEntity(this.worldObj, block.getMetaFromState(state)); // Sponge
                     tileentity = SpongeImplHooks.createTileEntity(newBlock, this.world, newState);
-                    final User owner = PhaseTracker.getInstance().getCurrentContext().getOwner().orElse(null);
+                    final User owner = peek.getOwner().orElse(null);
                     // If current owner exists, transfer it to newly created TE pos
                     // This is required for TE's that get created during move such as pistons and ComputerCraft turtles.
                     if (owner != null) {
                         this.addTrackedBlockPosition(newBlock, pos, owner, PlayerTracker.Type.OWNER);
                     }
                 }
-                
-                // Sponge End
-                this.world.setTileEntity(pos, tileentity);
+                if (transaction != null) {
+                    // Go ahead and log the tile being replaced, the tile being removed will be at least already notified of removal
+                    transaction.queueTileSet = tileentity;
+                    if (tileentity != null) {
+                        ((IMixinTileEntity) tileentity).setCaptured(true);
+                        tileentity.setPos(pos);// Set the position
+                    }
+                    transaction.enqueueChanges(mixinWorld.getProxyAccess(), peek.getCapturedBlockSupplier());
+                } else {
+                    this.world.setTileEntity(pos, tileentity);
+                }
             }
 
             if (tileentity != null) {
                 tileentity.updateContainingBlockInfo();
             }
+        } else if (transaction != null) {
+            // We still want to enqueue any changes to the transaction, including any tiles removed
+            // if there was a tile entity added, it will be logged above
+            transaction.enqueueChanges(mixinWorld.getProxyAccess(), peek.getCapturedBlockSupplier());
         }
 
         this.dirty = true;
         return currentState;
+    }
+
+    @Override
+    public void removeTileEntity(TileEntity removed) {
+        TileEntity tileentity = this.tileEntities.remove(removed.getPos());
+        if (tileentity != removed) {
+            // Replace the pre-existing tile entity in case we remove a tile entity
+            // we don't want to be removing.
+            this.tileEntities.put(removed.getPos(), tileentity);
+        }
+        ((IMixinTileEntity) removed).setActiveChunk(null);
+        removed.invalidate();
+    }
+
+    @Override
+    public void setTileEntity(BlockPos pos, TileEntity added) {
+        if (added.getWorld() != this.world) {
+            // Forge adds this because some mods do stupid things....
+            added.setWorld(this.world);
+        }
+        added.setPos(pos);
+        if (this.tileEntities.containsKey(pos)) {
+            this.tileEntities.get(pos).invalidate();
+        }
+        added.validate();
+        ((IMixinTileEntity) added).setActiveChunk(this);
+        this.tileEntities.put(pos, added);
+    }
+
+    private SpongeBlockSnapshot createSpongeBlockSnapshot(IBlockState state, IBlockState extended, BlockPos pos, BlockChangeFlag updateFlag, @Nullable TileEntity existing) {
+        final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
+        builder.reset();
+        builder.blockState((BlockState) state)
+            .extendedState((BlockState) extended)
+            .worldId(this.sponge_world.getUniqueId())
+            .position(VecHelper.toVector3i(pos));
+        Optional<UUID> creator = getBlockOwnerUUID(pos);
+        Optional<UUID> notifier = getBlockNotifierUUID(pos);
+        creator.ifPresent(builder::creator);
+        notifier.ifPresent(builder::notifier);
+        if (existing != null) {
+            // We MUST only check to see if a TE exists to avoid creating a new one.
+            org.spongepowered.api.block.tileentity.TileEntity tile = (org.spongepowered.api.block.tileentity.TileEntity) existing;
+            for (DataManipulator<?, ?> manipulator : ((IMixinCustomDataHolder) tile).getCustomManipulators()) {
+                builder.add(manipulator);
+            }
+            NBTTagCompound nbt = new NBTTagCompound();
+            // Some mods like OpenComputers assert if attempting to save robot while moving
+            try {
+                existing.writeToNBT(nbt);
+                builder.unsafeNbt(nbt);
+            }
+            catch(Throwable t) {
+                // ignore
+            }
+        }
+        builder.flag(updateFlag);
+        return builder.build();
     }
 
     // These methods are enabled in MixinChunk_Tracker as a Mixin plugin

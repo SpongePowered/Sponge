@@ -262,9 +262,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
         if (!context.applyNotifierIfAvailable(explosionContext::owner)) {
             context.applyOwnerIfAvailable(explosionContext::owner);
         }
-        final Entity tickingEntity = context.getSource(Entity.class)
-                .orElseThrow(TrackingUtil.throwWithContext("Expected to be processing over a ticking entity!", context));
-        Sponge.getCauseStackManager().pushCause(tickingEntity);
+        explosionContext.source(context.getSource(Entity.class).orElseThrow(() -> new IllegalStateException("Ticking a non Entity")));
     }
 
     @Override

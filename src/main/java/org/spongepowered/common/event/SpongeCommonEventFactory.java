@@ -550,21 +550,19 @@ public class SpongeCommonEventFactory {
     }
 
     public static ChangeBlockEvent.Modify callChangeBlockEventModifyLiquidMix(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, @Nullable Object source) {
-        final PhaseContext<?> phaseContext = PhaseTracker.getInstance().getCurrentContext();
 
         BlockState fromState = BlockUtil.fromNative(worldIn.getBlockState(pos));
         BlockState toState = BlockUtil.fromNative(state);
-
+        boolean pushSource = false;
         if (source == null) {
             // If source is null the source is the block itself
+            pushSource = true;
             source = new SpongeLocatableBlockBuilder().state(fromState).world((World) worldIn).position(pos.getX(), pos.getY(), pos.getZ()).build();
         }
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(source);
-            frame.addContext(EventContextKeys.LIQUID_MIX, (World) worldIn);
-
-            phaseContext.applyOwnerIfAvailable(owner -> frame.addContext(EventContextKeys.OWNER, owner));
-            phaseContext.applyNotifierIfAvailable(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
+            if (!pushSource) {
+                frame.pushCause(source);
+            }
 
             WorldProperties world = ((World) worldIn).getProperties();
             Vector3i position = new Vector3i(pos.getX(), pos.getY(), pos.getZ());
@@ -591,9 +589,6 @@ public class SpongeCommonEventFactory {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(source);
             frame.addContext(EventContextKeys.LIQUID_BREAK, (World) worldIn);
-
-            context.applyOwnerIfAvailable(owner -> frame.addContext(EventContextKeys.OWNER, owner));
-            context.applyNotifierIfAvailable(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
 
             WorldProperties world = ((World) worldIn).getProperties();
             Vector3i position = new Vector3i(pos.getX(), pos.getY(), pos.getZ());

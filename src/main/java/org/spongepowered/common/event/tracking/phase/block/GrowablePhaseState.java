@@ -24,70 +24,75 @@
  */
 package org.spongepowered.common.event.tracking.phase.block;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
-import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.context.GeneralizedContext;
+import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.phase.TrackingPhase;
+import org.spongepowered.common.event.tracking.phase.TrackingPhases;
+import org.spongepowered.common.world.BlockChange;
 
 import java.util.ArrayList;
 import java.util.function.BiConsumer;
 
-final class RestoringBlockPhaseState extends BlockPhaseState {
+@SuppressWarnings({"unchecked", "rawTypes"})
+public class GrowablePhaseState implements IPhaseState<GrowablePhaseContext> {
 
-    RestoringBlockPhaseState() {
-    }
+    private final BiConsumer<CauseStackManager.StackFrame, GrowablePhaseContext> FRAME_MODIFIER = IPhaseState.super.getFrameModifier()
+        .andThen((stackFrame, growablePhaseContext) -> {
+            if (!growablePhaseContext.usedItem.isEmpty()) {
+                stackFrame.addContext(EventContextKeys.USED_ITEM, growablePhaseContext.usedItem);
+            }
+            stackFrame.addContext(EventContextKeys.GROWTH_ORIGIN, growablePhaseContext.snapshot);
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public BiConsumer<CauseStackManager.StackFrame, GeneralizedContext> getFrameModifier() {
-        return (BiConsumer<CauseStackManager.StackFrame, GeneralizedContext>) IPhaseState.DEFAULT_OWNER_NOTIFIER;
-    }
-
-    @Override
-    public void unwind(GeneralizedContext phaseContext) {
-
-    }
+        });
 
     @Override
-    public boolean shouldCaptureBlockChangeOrSkip(GeneralizedContext phaseContext, BlockPos pos, IBlockState currentState, IBlockState newState,
-        BlockChangeFlag flags) {
-        return false;
+    public TrackingPhase getPhase() {
+        return TrackingPhases.BLOCK;
     }
 
     @Override
-    public boolean doesAllowEntitySpawns() {
-        return false;
+    public GrowablePhaseContext createPhaseContext() {
+        return new GrowablePhaseContext(this).addBlockCaptures();
     }
 
     @Override
-    public boolean spawnEntityOrCapture(GeneralizedContext context, Entity entity, int chunkX, int chunkZ) {
+    public void unwind(GrowablePhaseContext phaseContext) {
+        TrackingUtil.processBlockCaptures(this, phaseContext);
+    }
+
+    @Override
+    public boolean spawnEntityOrCapture(GrowablePhaseContext context, Entity entity, int chunkX, int chunkZ) {
         final ArrayList<Entity> entities = new ArrayList<>(1);
         entities.add(entity);
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()){
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.STRUCTURE);
             return SpongeCommonEventFactory.callSpawnEntity(entities, context);
         }
     }
 
     @Override
-    public boolean doesCaptureEntitySpawns() {
-        return false; // Since we throw the spawn event directly
+    public BlockChange associateBlockChangeWithSnapshot(GrowablePhaseContext phaseContext,
+        IBlockState newState, Block newBlock, IBlockState currentState, SpongeBlockSnapshot snapshot, Block originalBlock) {
+        return BlockChange.GROW;
     }
 
     @Override
-    public boolean doesBulkBlockCapture(GeneralizedContext context) {
-        return false;
+    public BiConsumer<CauseStackManager.StackFrame, GrowablePhaseContext> getFrameModifier() {
+        return this.FRAME_MODIFIER;
     }
 
     @Override
-    public boolean doesBlockEventTracking(GeneralizedContext context) {
-        return false;
+    public boolean doesBulkBlockCapture(GrowablePhaseContext context) {
+        return true;
     }
+
 }

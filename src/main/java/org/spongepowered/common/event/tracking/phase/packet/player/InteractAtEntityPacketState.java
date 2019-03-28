@@ -170,6 +170,8 @@ public final class InteractAtEntityPacketState extends BasicPacketState {
         TrackingUtil.processBlockCaptures(this, context);
     }
 
+
+
     @Override
     public boolean tracksEntitySpecificDrops() {
         return true;

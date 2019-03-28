@@ -27,9 +27,6 @@ package org.spongepowered.common.mixin.core.world;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.spongepowered.common.event.tracking.context.SpongeProxyBlockAccess;
-import org.spongepowered.common.relocate.co.aikar.timings.TimingHistory;
-import org.spongepowered.common.relocate.co.aikar.timings.WorldTimingsHandler;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.MoreObjects;
@@ -168,6 +165,7 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.context.SpongeProxyBlockAccess;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
@@ -193,6 +191,8 @@ import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModDat
 import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.IModData_Collisions;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.registry.type.world.BlockChangeFlagRegistryModule;
+import org.spongepowered.common.relocate.co.aikar.timings.TimingHistory;
+import org.spongepowered.common.relocate.co.aikar.timings.WorldTimingsHandler;
 import org.spongepowered.common.util.NonNullArrayList;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
@@ -1000,7 +1000,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         // from the world before we are able to capture it.
         net.minecraft.tileentity.TileEntity tileEntity =  this.proxyBlockAccess.getTileEntity(pos);
         if (tileEntity == null && !this.proxyBlockAccess.isTileEntityRemoved(pos)) {
-            tileEntity = this.getTileEntity(pos);
+            tileEntity = this.onChunkGetTileDuringRemoval(pos);
         }
 
 
@@ -1015,7 +1015,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
         if (tileEntity != null) {
             ((IMixinTileEntity) tileEntity).setCaptured(true);
-            currentState.captureTileEntityReplacement(currentContext, this, pos, tileEntity, null);
+            currentContext.getCapturedBlockSupplier().logTileChange(this, pos, tileEntity, null);
         }
         return tileEntity;
     }
@@ -1035,22 +1035,21 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      */
     @Override
     protected void onCheckTileEntityForRemoval(BlockPos pos, CallbackInfo ci, @Nullable net.minecraft.tileentity.TileEntity foundTile, net.minecraft.world.World thisWorld, BlockPos samePos) {
+        if (PhaseTracker.getInstance().getCurrentState() == BlockPhase.State.RESTORING_BLOCKS) {
+            return;
+        }
         if (foundTile != null) {
             // Easy short circuit.
             if (((IMixinTileEntity) foundTile).isCaptured()) {
                 ci.cancel();
-                return;
             }
-            if (this.proxyBlockAccess.isTileQueued(pos, foundTile)) {
+            if (this.proxyBlockAccess.isTileQueuedForRemoval(pos, foundTile)) {
                 ci.cancel();
-                return;
             }
-        }
-        if (foundTile == null) {
+        } else {
             if (!this.proxyBlockAccess.getQueuedTiles(pos).isEmpty()) {
                 ci.cancel();
-            }
-            if (this.proxyBlockAccess.isTileEntityRemoved(pos)) {
+            } else if (this.proxyBlockAccess.isTileEntityRemoved(pos)) {
                 ci.cancel();
             }
         }
@@ -1058,30 +1057,38 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @SuppressWarnings("unchecked")
     @Override
-    protected boolean onSetTileEntityForCapture(net.minecraft.tileentity.TileEntity tileEntity, BlockPos pos, net.minecraft.tileentity.TileEntity sameEntity) {
+    protected boolean onSetTileEntityForCapture(net.minecraft.tileentity.TileEntity newTile, BlockPos pos, net.minecraft.tileentity.TileEntity sameEntity) {
         if (this.isFake()) {
             // Short Circuit for fake worlds
-            return tileEntity.isInvalid();
+            return newTile.isInvalid();
         }
         final PhaseTracker tracker = PhaseTracker.getInstance();
         final IPhaseState currentState = tracker.getCurrentState();
         final PhaseContext<?> currentContext = tracker.getCurrentContext();
-        final IMixinTileEntity mixinTile = (IMixinTileEntity) tileEntity;
+        final IMixinTileEntity mixinTile = (IMixinTileEntity) newTile;
         if (mixinTile.isCaptured()) {
-            // Don't do anything. If the tile entity is captured, it will have
-            // addToWorld before the end of whatever phasestate.
-            return true;
-        }
-        if (this.proxyBlockAccess.hasTileEntity(pos, tileEntity)) {
-            if (this.proxyBlockAccess.succeededInAdding(pos, tileEntity)) {
-                this.addTileEntity(tileEntity);
+            // Don't do anything. If the tile entity is captured,
+            // We return true to mark the tile entity as invalid, that way
+            // no logic is performed until the transaction is processed.
+            // Except in the circumstance that a tile entity is being re-set back onto
+            // itself, at which point we'd want to double check that it's
+            // not queued for removal. If it is queued for removal, then
+            // we need to re-capture the tile entity replacement.
+            if (this.proxyBlockAccess.hasTileEntity(pos, newTile)) {
+                if (!this.proxyBlockAccess.isTileQueuedForRemoval(pos, newTile)) {
+                    return true;
+                }
+            }
+        } else if (this.proxyBlockAccess.hasTileEntity(pos, newTile)) {
+            if (this.proxyBlockAccess.succeededInAdding(pos, newTile)) {
+                this.addTileEntity(newTile);
             }
             // The chunk already has the tile entity at this point.
             return true;
         }
         // More fast checks - bulk block capture is normally faster to be false than checking tile entity changes (certain block ticks don't capture changes)
         if (!currentState.doesBulkBlockCapture(currentContext) || !currentState.tracksTileEntityChanges(currentContext)) {
-            return tileEntity.isInvalid();
+            return newTile.isInvalid();
         }
         if (!mixinTile.isCaptured()) {
             mixinTile.setCaptured(true);
@@ -1096,16 +1103,24 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         if (currentTile == null && !this.proxyBlockAccess.isTileEntityRemoved(pos)) { // Make sure we're not getting a tile while it's being removed.
             currentTile = this.getChunk(pos).getTileEntity(pos, Chunk.EnumCreateEntityType.CHECK);
         }
-        if (this.processingLoadedTiles) {
-            currentTile = ((MixinWorld_Accessor) this).accessPendingTileEntityAt(pos);
+        newTile.setPos(pos);
+        if (newTile.getWorld() != (WorldServer) (Object) this) {
+            newTile.setWorld((WorldServer) (Object) this);
         }
-
-        currentState.captureTileEntityReplacement(currentContext, this, pos, currentTile, tileEntity);
-        return tileEntity.isInvalid();
+        currentContext.getCapturedBlockSupplier().logTileChange(this, pos, currentTile, newTile);
+        // We want to mark the tile as "invalid" only so that it does not get added to the world/chunk
+        // just yet. Otherwise, some extra logic is involved in invalidating/revalidating the tile entity
+        // after the fact.
+        return true;
     }
 
     protected boolean isTileMarkedForRemoval(BlockPos pos) {
         return this.proxyBlockAccess.isTileEntityRemoved(pos);
+    }
+
+    @Override
+    protected boolean isTileMarkedAsNull(BlockPos pos, net.minecraft.tileentity.TileEntity tileentity) {
+        return this.proxyBlockAccess.hasTileEntity(pos) && this.proxyBlockAccess.getTileEntity(pos) == null;
     }
 
     @Nullable
@@ -1569,6 +1584,32 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         return this.setBlockState(pos, Blocks.AIR.getDefaultState(), BlockChangeFlags.ALL);
     }
 
+    private net.minecraft.tileentity.TileEntity onChunkGetTileDuringRemoval(BlockPos pos) {
+
+        if (this.isOutsideBuildHeight(pos)) {
+            return null;
+        } else {
+            net.minecraft.tileentity.TileEntity tileentity2 = null;
+
+            if (this.processingLoadedTiles) {
+                tileentity2 = ((MixinWorld_Accessor) this).accessPendingTileEntityAt(pos);
+            }
+
+            if (tileentity2 == null) {
+                // Sponge - Instead of creating the tile entity, just check if it's there. If the
+                // tile entity doesn't exist, don't create it since we're about to just wholesale remove it...
+                // tileentity2 = this.getChunk(pos).getTileEntity(pos, Chunk.EnumCreateEntityType.IMMEDIATE);
+                tileentity2 = this.getChunk(pos).getTileEntity(pos, Chunk.EnumCreateEntityType.CHECK);
+            }
+
+            if (tileentity2 == null) {
+                tileentity2 =  ((MixinWorld_Accessor) this).accessPendingTileEntityAt(pos);
+            }
+
+            return tileentity2;
+        }
+    }
+
     /**
      * @author gabizou - March 12th, 2016
      *
@@ -1585,7 +1626,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             return;
         }
 
-        PhaseTracker.getInstance().notifyBlockOfStateChange(this, pos, blockIn, otherPos);
+        PhaseTracker.getInstance().notifyBlockOfStateChange(this, this.getBlockState(pos), pos, blockIn, otherPos);
     }
 
     /**
@@ -1603,19 +1644,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         if (ShouldFire.NOTIFY_NEIGHBOR_BLOCK_EVENT) {
             EnumSet<EnumFacing> directions = EnumSet.of(EnumFacing.WEST, EnumFacing.EAST, EnumFacing.DOWN, EnumFacing.UP, EnumFacing.NORTH, EnumFacing.SOUTH);
             directions.remove(skipSide);
-            final NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent(this, pos, directions);
-            if (event == null || !event.isCancelled()) {
-                for (EnumFacing facing : NOTIFY_DIRECTIONS) { // ORDER MATTERS, we have to keep order in which directions are notified.
-                    if (event != null) {
-                        final Direction direction = DirectionFacingProvider.getInstance().getKey(facing).get();
-                        if (!event.getNeighbors().keySet().contains(direction)) {
-                            continue;
-                        }
-                    }
-
-                    PhaseTracker.getInstance().notifyBlockOfStateChange(this, pos.offset(facing), blockType, pos);
-                }
-            }
+            throwNotifyNeighborAndCall(pos, blockType, directions);
             return;
         }
 
@@ -1624,7 +1653,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             if (direction == skipSide) {
                 continue;
             }
-            PhaseTracker.getInstance().notifyBlockOfStateChange(this, pos.offset(direction), blockType, pos);
+            final BlockPos offset = pos.offset(direction);
+            PhaseTracker.getInstance().notifyBlockOfStateChange(this, this.getBlockState(offset), offset, blockType, pos);
         }
 
     }
@@ -1641,31 +1671,35 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
 
         if (ShouldFire.NOTIFY_NEIGHBOR_BLOCK_EVENT) {
-            final NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent(this, sourcePos, NOTIFY_DIRECTION_SET);
-            if (event == null || !event.isCancelled()) {
-                for (EnumFacing facing : NOTIFY_DIRECTIONS) {
-                    if (event != null) {
-                        final Direction direction = DirectionFacingProvider.getInstance().getKey(facing).get();
-                        if (!event.getNeighbors().keySet().contains(direction)) {
-                            continue;
-                        }
-                    }
-
-                    final BlockPos notifyPos = sourcePos.offset(facing);
-                    PhaseTracker.getInstance().notifyBlockOfStateChange(this, notifyPos, sourceBlock, sourcePos);
-                }
-            }
+            throwNotifyNeighborAndCall(sourcePos, sourceBlock, NOTIFY_DIRECTION_SET);
         } else {
             // Else, we just do vanilla. If there's no listeners, we don't want to spam the notification event
             for (EnumFacing direction : NOTIFY_DIRECTIONS) {
                 final BlockPos notifyPos = sourcePos.offset(direction);
-                PhaseTracker.getInstance().notifyBlockOfStateChange(this, notifyPos, sourceBlock, sourcePos);
+                PhaseTracker.getInstance().notifyBlockOfStateChange(this, this.getBlockState(notifyPos), notifyPos, sourceBlock, sourcePos);
             }
         }
 
         // Copied over to ensure observers retain functionality.
         if (updateObserverBlocks) {
             this.updateObservingBlocksAt(sourcePos, sourceBlock);
+        }
+    }
+
+    private void throwNotifyNeighborAndCall(BlockPos sourcePos, Block sourceBlock, EnumSet<EnumFacing> notifyDirectionSet) {
+        final NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent(this, sourcePos, notifyDirectionSet);
+        if (event == null || !event.isCancelled()) {
+            for (EnumFacing facing : NOTIFY_DIRECTIONS) {
+                if (event != null) {
+                    final Direction direction = DirectionFacingProvider.getInstance().getKey(facing).get();
+                    if (!event.getNeighbors().keySet().contains(direction)) {
+                        continue;
+                    }
+                }
+
+                final BlockPos notifyPos = sourcePos.offset(facing);
+                PhaseTracker.getInstance().notifyBlockOfStateChange(this, this.getBlockState(notifyPos), notifyPos, sourceBlock, sourcePos);
+            }
         }
     }
 
@@ -1825,7 +1859,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     // IMixinWorld method
     @Override
-    public void spongeNotifyNeighborsPostBlockChange(BlockPos pos, IBlockState oldState, IBlockState newState, BlockChangeFlag flags) {
+    public void spongeNotifyNeighborsPostBlockChange(BlockPos pos, IBlockState newState, BlockChangeFlag flags) {
         if (flags.updateNeighbors()) {
             this.notifyNeighborsRespectDebug(pos, newState.getBlock(), flags.notifyObservers());
 
