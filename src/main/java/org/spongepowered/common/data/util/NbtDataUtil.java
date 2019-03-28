@@ -178,6 +178,7 @@ public final class NbtDataUtil {
     public static final String FORGE_ENTITY_TYPE = "entity_name";
     public static final String LEGACY_DIMENSION_ARRAY = "DimensionArray";
     public static final String USED_DIMENSION_IDS = "UsedIDs";
+    public static final String FORGE_CAPS = "ForgeCaps";
 
     // Legacy migration tags from Bukkit
     public static final String BUKKIT = "bukkit";

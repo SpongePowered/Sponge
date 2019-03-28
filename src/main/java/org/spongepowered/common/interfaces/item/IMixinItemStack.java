@@ -26,6 +26,8 @@ package org.spongepowered.common.interfaces.item;
 
 import net.minecraft.nbt.NBTTagCompound;
 
+import javax.annotation.Nullable;
+
 public interface IMixinItemStack {
 
     /**
@@ -41,5 +43,10 @@ public interface IMixinItemStack {
      * @param compound The SpongeData compound to write to
      */
     void writeToNbt(NBTTagCompound compound);
+
+    @Nullable
+    default NBTTagCompound getCapabitilitiesForSpongeContainer() {
+        return null;
+    }
 
 }

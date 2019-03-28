@@ -64,6 +64,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.persistence.SerializedDataTransaction;
 import org.spongepowered.common.data.util.DataQueries;
@@ -245,6 +246,15 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
         final Collection<DataManipulator<?, ?>> manipulators = getCustomManipulators();
         if (!manipulators.isEmpty()) {
             container.set(DataQueries.DATA_MANIPULATORS, DataUtil.getSerializedManipulatorList(manipulators));
+        }
+        try {
+            final NBTTagCompound caps = this.getCapabitilitiesForSpongeContainer();
+            if (caps != null && !caps.isEmpty()) {
+                final DataContainer capsView = NbtTranslator.getInstance().translate(caps);
+                container.set(DataQueries.UNSAFE_NBT.then(NbtDataUtil.FORGE_CAPS), capsView);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return container;
     }
