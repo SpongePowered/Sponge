@@ -109,8 +109,6 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
     @Shadow public abstract net.minecraft.item.ItemStack shadow$copy();
     @Shadow public abstract Item shadow$getItem();
 
-    @Shadow private boolean isEmpty;
-
     // We deliberate do not check isEmpty in onWrite, onRead, and onCopy
     // Because Vanilla may set an ItemStack's size to 0, and then
     // back to a positive number, we need to keep the raw manipulator data
@@ -191,7 +189,21 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
 
     @Override
     public void setRawData(DataView container) throws InvalidDataException {
-
+        if (this.shadow$isEmpty()) {
+            throw new IllegalArgumentException("Cannot set data on empty item stacks!");
+        }
+        if (!container.contains(DataQueries.UNSAFE_NBT)) {
+            throw new InvalidDataException("There's no NBT Data set in the provided container");
+        }
+        final DataView nbtData = container.getView(DataQueries.UNSAFE_NBT).get();
+        try {
+            final int integer = container.getInt(DataQueries.ITEM_DAMAGE_VALUE).orElse(this.getItemDamage());
+            this.setItemDamage(integer);
+            final NBTTagCompound stackCompound = NbtTranslator.getInstance().translate(nbtData);
+            this.setTagCompound(stackCompound);
+        } catch (Exception e) {
+            throw new InvalidDataException("Unable to set raw data or translate raw data for ItemStack setting", e);
+        }
     }
 
     @Override
@@ -259,7 +271,7 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
 
     @Override
     public Collection<DataManipulator<?, ?>> getContainers() {
-        if (this.isEmpty) {
+        if (this.shadow$isEmpty()) {
             return Lists.newArrayList();
         }
         final List<DataManipulator<?, ?>> manipulators = Lists.newArrayList();
@@ -347,7 +359,7 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
     @SuppressWarnings("rawtypes")
     @Override
     public DataTransactionResult offerCustom(DataManipulator<?, ?> manipulator, MergeFunction function) {
-        if (this.isEmpty) {
+        if (this.shadow$isEmpty()) {
             return DataTransactionResult.failResult(manipulator.getValues());
         }
 
@@ -385,7 +397,7 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
     @SuppressWarnings("unchecked")
     @Override
     public <T extends DataManipulator<?, ?>> Optional<T> getCustom(Class<T> customClass) {
-        if (this.isEmpty) {
+        if (this.shadow$isEmpty()) {
             return Optional.empty();
         }
         for (DataManipulator<?, ?> existing : this.manipulators) {
@@ -424,7 +436,7 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
 
     @Override
     public DataTransactionResult removeCustom(Class<? extends DataManipulator<?, ?>> customClass) {
-        if (this.isEmpty) {
+        if (this.shadow$isEmpty()) {
             return DataTransactionResult.failNoData();
         }
         @Nullable DataManipulator<?, ?> manipulator = null;
@@ -456,7 +468,7 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public <E> DataTransactionResult offerCustom(Key<? extends BaseValue<E>> key, E value) {
-        if (this.isEmpty) {
+        if (this.shadow$isEmpty()) {
             return DataTransactionResult.failNoData();
         }
         for (DataManipulator<?, ?> manipulator : this.manipulators) {
@@ -491,7 +503,7 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
 
     @Override
     public boolean supportsCustom(Key<?> key) {
-        if (this.isEmpty) {
+        if (this.shadow$isEmpty()) {
             return false;
         }
         return this.manipulators.stream()
@@ -500,7 +512,7 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
 
     @Override
     public <E> Optional<E> getCustom(Key<? extends BaseValue<E>> key) {
-        if (this.isEmpty) {
+        if (this.shadow$isEmpty()) {
             return Optional.empty();
         }
         return this.manipulators.stream()
@@ -511,7 +523,7 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
 
     @Override
     public <E, V extends BaseValue<E>> Optional<V> getCustomValue(Key<V> key) {
-        if (this.isEmpty) {
+        if (this.shadow$isEmpty()) {
             return Optional.empty();
         }
         return this.manipulators.stream()
