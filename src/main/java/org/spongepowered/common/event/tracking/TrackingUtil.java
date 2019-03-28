@@ -822,17 +822,23 @@ public final class TrackingUtil {
             // We suffix the cause with the extra events, without modifying the cause stack manager to avoid adding extra
             // contexts or resetting the caches, this allows us to avoid adding extra frames when unnecessary.
             final Cause currentCause = Sponge.getCauseStackManager().getCurrentCause();
-            final Cause.Builder builder = Cause.builder().from(currentCause);
-            final EventContext.Builder modified = EventContext.builder();
-            modified.from(currentCause.getContext());
-            for (BlockChange blockChange : BlockChange.values()) {
-                final ChangeBlockEvent mainEvent = mainEvents[blockChange.ordinal()];
-                if (mainEvent != null) {
-                    builder.append(mainEvent);
-                    modified.add((EventContextKey<? super ChangeBlockEvent>) blockChange.getKey(), mainEvent);
+            final Cause causeToUse;
+            if (((IPhaseState) state).shouldProvideModifiers(context)) {
+                final Cause.Builder builder = Cause.builder().from(currentCause);
+                final EventContext.Builder modified = EventContext.builder();
+                modified.from(currentCause.getContext());
+                for (BlockChange blockChange : BlockChange.values()) {
+                    final ChangeBlockEvent mainEvent = mainEvents[blockChange.ordinal()];
+                    if (mainEvent != null) {
+                        builder.append(mainEvent);
+                        modified.add((EventContextKey<? super ChangeBlockEvent>) blockChange.getKey(), mainEvent);
+                    }
                 }
+                causeToUse = builder.build(modified.build());
+            } else {
+                causeToUse = currentCause;
             }
-            final ChangeBlockEvent.Post post = ((IPhaseState) state).createChangeBlockPostEvent(context, transactions, builder.build(modified.build()));
+            final ChangeBlockEvent.Post post = ((IPhaseState) state).createChangeBlockPostEvent(context, transactions, causeToUse);
             SpongeImpl.postEvent(post);
             return post;
         }

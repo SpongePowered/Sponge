@@ -59,6 +59,7 @@ import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.SpongeCauseStackManager;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.event.tracking.context.BlockTransaction;
@@ -897,5 +898,21 @@ public interface IPhaseState<C extends PhaseContext<C>> {
             return BlockChange.PLACE;
         }
         return BlockChange.MODIFY;
+    }
+
+    /**
+     * Gets whether this {@link IPhaseState} entry with a provided {@link PhaseContext}
+     * will be allowed to register it's {@link #getFrameModifier()} to push along the
+     * {@link CauseStackManager}. In certain cases, there are states that can have
+     * excessive modifiers being pushed and popped with and without causes that may cause
+     * performance degredation due to the excessive amounts of how many recyclings occur
+     * with {@link SpongeCauseStackManager#getCurrentCause()} lacking a cached context
+     * and therefor needing to re-create the context each and every time.
+     *
+     * @param phaseContext The appropriate phase context
+     * @return True if the modifiers should be pushed to the manager
+     */
+    default boolean shouldProvideModifiers(C phaseContext) {
+        return true;
     }
 }

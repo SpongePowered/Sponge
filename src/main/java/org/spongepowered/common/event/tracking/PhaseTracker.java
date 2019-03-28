@@ -252,7 +252,7 @@ public final class PhaseTracker {
             }
         }
 
-        if (Sponge.isServerAvailable()) {
+        if (Sponge.isServerAvailable() && ((IPhaseState) state).shouldProvideModifiers(phaseContext)) {
             SpongeImpl.getCauseStackManager().registerPhaseContextProvider(phaseContext, ((IPhaseState) state).getFrameModifier());
         }
         this.stack.push(state, phaseContext);

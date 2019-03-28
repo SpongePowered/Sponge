@@ -26,6 +26,7 @@ package org.spongepowered.common.event.tracking.phase.tick;
 
 import com.google.common.collect.ListMultimap;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockDynamicLiquid;
 import net.minecraft.block.BlockEventData;
 import net.minecraft.block.IGrowable;
 import net.minecraft.block.state.IBlockState;
@@ -91,6 +92,11 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
         return false;
     }
 
+
+    @Override
+    public boolean shouldProvideModifiers(BlockTickContext phaseContext) {
+        return phaseContext.providesModifier;
+    }
 
     @Override
     public boolean getShouldCancelAllTransactions(BlockTickContext context, List<ChangeBlockEvent> blockEvents, ChangeBlockEvent.Post postEvent,
