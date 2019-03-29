@@ -915,4 +915,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     default boolean shouldProvideModifiers(C phaseContext) {
         return true;
     }
+    default boolean isRestoring() {
+        return false;
+    }
 }

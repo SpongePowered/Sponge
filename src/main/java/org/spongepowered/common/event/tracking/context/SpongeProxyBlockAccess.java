@@ -394,6 +394,14 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
         this.queuedTiles.put(pos, added);
     }
 
+    void unQueueTileAddition(BlockPos pos, TileEntity added) {
+        final TileEntity remove = this.affectedTileEntities.remove(pos);
+        if (remove != added) {
+            this.affectedTileEntities.put(pos, remove);
+        }
+        this.queuedTiles.remove(pos, added);
+    }
+
     void queueRemoval(TileEntity removed) {
         if (removed != null) {
             // Set the tile entity to the affected tile entities so it is retrieved

@@ -660,7 +660,7 @@ public class SpongeCommonEventFactory {
     public static NotifyNeighborBlockEvent callNotifyNeighborEvent(World world, BlockPos sourcePos, EnumSet<EnumFacing> notifiedSides) {
         final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
         // Don't fire notify events during world gen or while restoring
-        if (context.state.isWorldGeneration() || context.state == State.RESTORING_BLOCKS) {
+        if (context.state.isWorldGeneration() || context.state.isRestoring()) {
             return null;
         }
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {

@@ -529,7 +529,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
         final WorldServer worldServer = ((SpongeBlockSnapshot) original).getWorldServer();
         for (BlockTransaction prevChange = this.tail; prevChange != null; prevChange = prevChange.previous) {
             if (!prevChange.isCancelled) {
-                prevChange.cancel(worldServer, blockPos);
+                prevChange.cancel(worldServer, blockPos, ((IMixinWorldServer) worldServer).getProxyAccess());
             }
 
         }

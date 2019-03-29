@@ -724,7 +724,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
             } else {
                 transaction = null;
                 // Sponge - Forge adds this change for block changes to only fire events when necessary
-                if (currentBlock != newBlock) { // cache the block break in the event we're capturing tiles
+                if (currentBlock != newBlock && !state.isRestoring()) { // cache the block break in the event we're capturing tiles
                     currentBlock.breakBlock(this.world, pos, currentState);
                 }
                 // Sponge - Add several tile entity hook checks. Mainly for forge added hooks, but these

@@ -329,7 +329,7 @@ public final class SpongeImplHooks {
      */
     @SuppressWarnings("unused") // overridden to be used in MixinSpongeImplHooks.
     public static boolean isRestoringBlocks(World world) {
-        return PhaseTracker.getInstance().getCurrentState() == BlockPhase.State.RESTORING_BLOCKS;
+        return PhaseTracker.getInstance().getCurrentState().isRestoring();
 
     }
 

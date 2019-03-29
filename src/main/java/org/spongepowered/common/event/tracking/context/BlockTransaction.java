@@ -82,7 +82,7 @@ public abstract class BlockTransaction {
             .toString();
     }
 
-    abstract void cancel(WorldServer worldServer, BlockPos blockPos);
+    abstract void cancel(WorldServer worldServer, BlockPos blockPos, SpongeProxyBlockAccess proxyBlockAccess);
 
     abstract void process(Transaction<BlockSnapshot> eventTransaction, IPhaseState phaseState, PhaseContext<?> phaseContext,
         int currentDepth);
@@ -153,8 +153,8 @@ public abstract class BlockTransaction {
         }
 
         @Override
-        void cancel(WorldServer worldServer, BlockPos blockPos) {
-
+        void cancel(WorldServer worldServer, BlockPos blockPos, SpongeProxyBlockAccess proxyBlockAccess) {
+            proxyBlockAccess.unQueueTileAddition(this.added.getPos(), this.added);
         }
 
         @Override
@@ -210,7 +210,8 @@ public abstract class BlockTransaction {
         }
 
         @Override
-        void cancel(WorldServer worldServer, BlockPos blockPos) {
+        void cancel(WorldServer worldServer, BlockPos blockPos, SpongeProxyBlockAccess proxyBlockAccess) {
+            proxyBlockAccess.unmarkRemoval(this.removed.getPos(), this.removed);
 
         }
 
@@ -271,7 +272,10 @@ public abstract class BlockTransaction {
         }
 
         @Override
-        void cancel(WorldServer worldServer, BlockPos blockPos) {
+        void cancel(WorldServer worldServer, BlockPos blockPos,
+            SpongeProxyBlockAccess proxyBlockAccess) {
+            proxyBlockAccess.unQueueTileAddition(this.removed.getPos(), this.added);
+            proxyBlockAccess.unmarkRemoval(this.removed.getPos(), this.removed);
 
         }
 
@@ -339,7 +343,7 @@ public abstract class BlockTransaction {
         }
 
         @Override
-        void cancel(WorldServer worldServer, BlockPos blockPos) {
+        void cancel(WorldServer worldServer, BlockPos blockPos, SpongeProxyBlockAccess proxyBlockAccess) {
 
         }
 
@@ -498,7 +502,8 @@ public abstract class BlockTransaction {
         }
 
         @Override
-        void cancel(WorldServer worldServer, BlockPos blockPos) {
+        void cancel(WorldServer worldServer, BlockPos blockPos,
+            SpongeProxyBlockAccess proxyBlockAccess) {
             // We don't do anything, we just ignore the neighbor notification at this point.
         }
 
@@ -566,6 +571,11 @@ public abstract class BlockTransaction {
         @Override
         public void unwind(TransactionContext phaseContext) {
 
+        }
+
+        @Override
+        public boolean isRestoring() {
+            return true;
         }
 
         @Override

@@ -56,6 +56,11 @@ final class RestoringBlockPhaseState extends BlockPhaseState {
     }
 
     @Override
+    public boolean isRestoring() {
+        return true;
+    }
+
+    @Override
     public boolean shouldCaptureBlockChangeOrSkip(GeneralizedContext phaseContext, BlockPos pos, IBlockState currentState, IBlockState newState,
         BlockChangeFlag flags) {
         return false;

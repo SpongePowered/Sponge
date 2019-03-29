@@ -284,7 +284,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
             return;
         }
         // Double check we aren't performing drops during restores.
-        if (PhaseTracker.getInstance().getCurrentState() == BlockPhase.State.RESTORING_BLOCKS) {
+        if (PhaseTracker.getInstance().getCurrentState().isRestoring()) {
             return;
         }
         // Sponge Start - make some of these local variables so we have them prepped already.
@@ -328,7 +328,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     private void onDropBlockAsItemWithChanceHead(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, float chance, int fortune,
         CallbackInfo ci) {
         if (!((IMixinWorld) worldIn).isFake() && !SpongeImplHooks.isRestoringBlocks(worldIn)) {
-            if (PhaseTracker.getInstance().getCurrentState() == BlockPhase.State.RESTORING_BLOCKS) {
+            if (PhaseTracker.getInstance().getCurrentState().isRestoring()) {
                 ci.cancel();
                 return;
             }
