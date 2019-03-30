@@ -33,6 +33,7 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 
@@ -71,9 +72,14 @@ public interface IMixinCustomDataHolder {
             if (spongeData.hasKey(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_LIST)) {
                 final NBTTagList tagList = spongeData.getTagList(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_COMPOUND);
                 if (!tagList.isEmpty()) {
+                    String id = DataUtil.getRegistrationFor(manipulator).getId();
                     for (int i = 0; i < tagList.tagCount(); i++) {
                         final NBTTagCompound tag = tagList.getCompoundTagAt(i);
-                        final String dataClass = tag.getString("DataClass");
+                        if (id.equals(tag.getString(NbtDataUtil.MANIPULATOR_ID))) {
+                            tagList.removeTag(i);
+                            break;
+                        }
+                        final String dataClass = tag.getString(NbtDataUtil.CUSTOM_DATA_CLASS);
                         if (dataClass.equalsIgnoreCase(manipulator.getClass().getName())) {
                             tagList.removeTag(i);
                             break;

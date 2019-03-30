@@ -156,6 +156,7 @@ public final class NbtDataUtil {
     public static final String SPONGE_BLOCK_POS_TABLE = "BlockPosTable";
     public static final String SPONGE_PLAYER_UUID_TABLE = "PlayerIdTable";
     public static final String CUSTOM_MANIPULATOR_TAG_LIST = "CustomManipulators";
+    public static final String MANIPULATOR_ID = "ManipulatorId";
     public static final String PROJECTILE_DAMAGE_AMOUNT = "damageAmount";
     public static final String BOAT_MAX_SPEED = "maxSpeed";
     public static final String BOAT_MOVE_ON_LAND = "moveOnLand";

@@ -93,7 +93,7 @@ public final class DataQueries {
     public static final DataQuery UNSAFE_NBT = of("UnsafeData");
     public static final DataQuery DATA_MANIPULATORS = of("Data");
     @Deprecated public static final DataQuery DATA_CLASS = of(NbtDataUtil.CUSTOM_DATA_CLASS);
-    public static final DataQuery DATA_ID = of("ManipulatorId");
+    public static final DataQuery DATA_ID = of(NbtDataUtil.MANIPULATOR_ID);
     public static final DataQuery FAILED_SERIALIZED_DATA = of("DataUnableToDeserialize");
     public static final DataQuery INTERNAL_DATA = of(NbtDataUtil.CUSTOM_DATA);
 
