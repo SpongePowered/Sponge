@@ -54,14 +54,14 @@ public final class RegistryHelper {
     }
 
     public static boolean mapFields(Class<?> apiClass, Map<String, ?> mapping, @Nullable Set<String> ignoredFields) {
-        return mapFields(apiClass, fieldName -> mapping.get(fieldName.toLowerCase(Locale.ENGLISH)), ignoredFields, false);
+        return mapFields(apiClass, fieldName -> mapping.get(fieldName.toLowerCase(Locale.ENGLISH)), ignoredFields);
     }
 
     public static boolean mapFields(Class<?> apiClass, Function<String, ?> mapFunction) {
-        return mapFields(apiClass, mapFunction, null, false);
+        return mapFields(apiClass, mapFunction, null);
     }
 
-    public static boolean mapFields(Class<?> apiClass, Function<String, ?> mapFunction, @Nullable Set<String> ignoredFields, boolean ignore) {
+    public static boolean mapFields(Class<?> apiClass, Function<String, ?> mapFunction, @Nullable Set<String> ignoredFields) {
         boolean mappingSuccess = true;
         boolean custom = !apiClass.getName().startsWith("org.spongepowered.api");
         for (Field f : apiClass.getDeclaredFields()) {
@@ -75,7 +75,7 @@ public final class RegistryHelper {
                     // check for minecraft id
                     value = mapFunction.apply("minecraft:" + fieldName);
                 }
-                if (value == null && !ignore) {
+                if (value == null) {
                     SpongeImpl.getLogger().warn("Skipping {}.{}", f.getDeclaringClass().getName(), fieldName);
                     continue;
                 }
@@ -85,9 +85,7 @@ public final class RegistryHelper {
                     f.set(null, value);
                 }
             } catch (Exception e) {
-                if (!ignore) {
-                    SpongeImpl.getLogger().error("Error while mapping {}.{}", f.getDeclaringClass().getName(), fieldName, e);
-                }
+                SpongeImpl.getLogger().error("Error while mapping {}.{}", f.getDeclaringClass().getName(), fieldName, e);
                 mappingSuccess = false;
             }
         }
