@@ -63,12 +63,12 @@ public final class RegistryModuleLoader {
             } else {
                 if (isDefaultProperPhase(module)) {
                     module.registerDefaults();
-                    if (hasCatalogRegistration(module)) {
+                    RegisterCatalog regAnnot = getRegisterCatalogAnnot(module);
+                    if (regAnnot != null) {
                         Map<String, ?> map = getCatalogMap(module);
                         if (map.isEmpty()) {
                             return true;
                         }
-                        RegisterCatalog regAnnot = getRegisterCatalogAnnot(module);
                         Set<String> ignored = regAnnot.ignoredFields().length == 0 ? null : Sets.newHashSet(regAnnot.ignoredFields());
                         RegistryHelper.mapFields(regAnnot.value(), map, ignored);
                     }
@@ -93,18 +93,19 @@ public final class RegistryModuleLoader {
         return null;
     }
 
-    private static boolean hasCatalogRegistration(RegistryModule module) {
+    @Nullable
+    private static RegisterCatalog getRegisterCatalogAnnot(RegistryModule module) {
         final RegisterCatalog catalog = module.getClass().getAnnotation(RegisterCatalog.class);
         if (catalog != null) {
-            return true;
+            return catalog;
         }
         for (Field field : module.getClass().getDeclaredFields()) {
             RegisterCatalog annotation = field.getAnnotation(RegisterCatalog.class);
             if (annotation != null) {
-                return true;
+                return annotation;
             }
         }
-        return false;
+        return null;
     }
 
     private static boolean isDefaultProperPhase(RegistryModule module) {
@@ -149,20 +150,6 @@ public final class RegistryModuleLoader {
             }
         }
         throw new IllegalStateException("Registry module does not have a catalog map! Registry: " + module.getClass().getCanonicalName());
-    }
-
-    private static RegisterCatalog getRegisterCatalogAnnot(RegistryModule module) {
-        final RegisterCatalog catalog = module.getClass().getAnnotation(RegisterCatalog.class);
-        if (catalog != null) {
-            return catalog;
-        }
-        for (Field field : module.getClass().getDeclaredFields()) {
-            RegisterCatalog annotation = field.getAnnotation(RegisterCatalog.class);
-            if (annotation != null) {
-                return annotation;
-            }
-        }
-        throw new IllegalArgumentException("The module does not have a registry to register! " + module.getClass().getCanonicalName());
     }
 
     private static void invokeCustomRegistration(RegistryModule module, Method method) {
