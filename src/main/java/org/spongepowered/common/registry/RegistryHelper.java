@@ -111,14 +111,10 @@ public final class RegistryHelper {
         }
     }
 
-    private static void setFinalStatic(Field field, Object newValue) {
-        try {
-            field.setAccessible(true);
-            MODIFIERS.setInt(field, field.getModifiers() & ~Modifier.FINAL);
-            field.set(null, newValue);
-        } catch (Exception e) {
-            SpongeImpl.getLogger().error("Error while setting field {}.{}", field.getClass().getName(), field.getName(), e);
-        }
+    private static void setFinalStatic(Field field, Object newValue) throws Exception {
+        field.setAccessible(true);
+        MODIFIERS.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+        field.set(null, newValue);
     }
 
 
