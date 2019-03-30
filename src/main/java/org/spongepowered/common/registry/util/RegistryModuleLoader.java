@@ -38,6 +38,7 @@ import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.registry.RegistryHelper;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -51,10 +52,10 @@ public final class RegistryModuleLoader {
 
     public static boolean tryModulePhaseRegistration(RegistryModule module) {
         try {
-            if (requiresCustomRegistration(module)) {
-                if (isCustomProperPhase(module)) {
-                    Method method = getCustomRegistration(module);
-                    invokeCustomRegistration(module, checkNotNull(method, "Custom registration module was null!"));
+            Method method = getCustomRegistration(module);
+            if (method != null) {
+                if (isCustomProperPhase(method)) {
+                    invokeCustomRegistration(module, method);
                     return true;
                 } else {
                     return false;
@@ -81,6 +82,7 @@ public final class RegistryModuleLoader {
         }
     }
 
+    @Nullable
     private static Method getCustomRegistration(RegistryModule module) {
         for (Method method : module.getClass().getMethods()) {
             CustomCatalogRegistration registration = method.getDeclaredAnnotation(CustomCatalogRegistration.class);
@@ -89,16 +91,6 @@ public final class RegistryModuleLoader {
             }
         }
         return null;
-    }
-
-    private static boolean requiresCustomRegistration(RegistryModule module) {
-        for (Method method : module.getClass().getMethods()) {
-            CustomCatalogRegistration registration = method.getDeclaredAnnotation(CustomCatalogRegistration.class);
-            if (registration != null) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private static boolean hasCatalogRegistration(RegistryModule module) {
@@ -129,18 +121,12 @@ public final class RegistryModuleLoader {
         return false;
     }
 
-    private static boolean isCustomProperPhase(RegistryModule module) {
-        for (Method method : module.getClass().getMethods()) {
-            CustomCatalogRegistration registration = method.getDeclaredAnnotation(CustomCatalogRegistration.class);
-            DelayedRegistration delay = method.getDeclaredAnnotation(DelayedRegistration.class);
-            if (registration != null) {
-                if (delay == null) {
-                    return SpongeImpl.getRegistry().getPhase() == RegistrationPhase.PRE_REGISTRY;
-                }
-                return SpongeImpl.getRegistry().getPhase() == delay.value();
-            }
+    private static boolean isCustomProperPhase(Method custom) {
+        DelayedRegistration delay = custom.getDeclaredAnnotation(DelayedRegistration.class);
+        if (delay == null) {
+            return SpongeImpl.getRegistry().getPhase() == RegistrationPhase.PRE_REGISTRY;
         }
-        return false;
+        return SpongeImpl.getRegistry().getPhase() == delay.value();
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -181,9 +167,7 @@ public final class RegistryModuleLoader {
 
     private static void invokeCustomRegistration(RegistryModule module, Method method) {
         try {
-            if (isCustomProperPhase(module)) {
-                method.invoke(module);
-            }
+            method.invoke(module);
         } catch (IllegalAccessException | InvocationTargetException e) {
             SpongeImpl.getLogger().error("Error when calling custom catalog registration for module: "
                     + module.getClass().getCanonicalName(), e);
