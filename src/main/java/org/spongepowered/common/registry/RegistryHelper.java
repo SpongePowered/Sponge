@@ -37,6 +37,18 @@ import javax.annotation.Nullable;
 
 public final class RegistryHelper {
 
+    private static final Field MODIFIERS;
+
+    static {
+        try {
+            MODIFIERS = Field.class.getDeclaredField("modifiers");
+            MODIFIERS.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            throw new RuntimeException("modifiers field not found", e);
+
+        }
+    }
+
     public static boolean mapFields(Class<?> apiClass, Map<String, ?> mapping) {
         return mapFields(apiClass, mapping, null);
     }
@@ -104,9 +116,7 @@ public final class RegistryHelper {
     private static void setFinalStatic(Field field, Object newValue) {
         try {
             field.setAccessible(true);
-            Field modifiers = field.getClass().getDeclaredField("modifiers");
-            modifiers.setAccessible(true);
-            modifiers.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+            MODIFIERS.setInt(field, field.getModifiers() & ~Modifier.FINAL);
             field.set(null, newValue);
         } catch (Exception e) {
             SpongeImpl.getLogger().error("Error while setting field {}.{}", field.getClass().getName(), field.getName(), e);
