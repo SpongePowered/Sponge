@@ -25,6 +25,7 @@
 package org.spongepowered.test;
 
 
+import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
@@ -33,64 +34,53 @@ import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.block.tileentity.TileEntityTypes;
-import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.spec.CommandSpec;
-import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.filter.type.Exclude;
-import org.spongepowered.api.event.game.state.GameInitializationEvent;
-import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.plugin.PluginContainer;
 
 @Plugin(id = "pistontest", name = "Piston Test", description = "A plugin to test cancelling pistons", version = "0.0.0")
-public class PistonTest {
+public class PistonTest implements LoadableModule {
 
-    boolean cancelPistons = false;
-    boolean debugLog = false;
+    @Inject
+    private PluginContainer container;
 
-    @Listener
-    public void onGamePreInitialization(GamePreInitializationEvent event) {
-        Sponge.getCommandManager().register(this, CommandSpec.builder()
-            .description(Text.of("Flips Pistons on and off"))
-            .executor((src, args) -> {
-                cancelPistons = !cancelPistons;
-                src.sendMessage(cancelPistons
-                                ? Text.of(TextColors.RED, "Cancelling Pistons")
-                                : Text.of(TextColors.GREEN, "No longer cancelling pistons"));
-                return CommandResult.success();
-            })
-            .build(), "flipPistons");
+    private final PistonListener listener = new PistonListener();
+
+    @Override
+    public void enable(CommandSource src) {
+        Sponge.getEventManager().registerListeners(this.container, this.listener);
     }
 
-    @Listener
-    @Exclude(ChangeBlockEvent.Post.class)
-    public void onChangeBlock(ChangeBlockEvent event) {
-        if (!cancelPistons) {
-            return;
-        }
-        final TileEntityType tileEntityType = event.getCause().first(TileEntity.class).map(TileEntity::getType).orElse(TileEntityTypes.CHEST);
-        if (tileEntityType == TileEntityTypes.PISTON) {
-            event.setCancelled(true);
-            return;
-        }
-        event.getTransactions().forEach(transaction -> {
-            final BlockSnapshot original = transaction.getOriginal();
-            final BlockState state = original.getState();
-            final BlockType type = state.getType();
-            if (type == BlockTypes.PISTON || type == BlockTypes.PISTON_EXTENSION || type == BlockTypes.PISTON_HEAD || type == BlockTypes.STICKY_PISTON) {
+    public static class PistonListener {
+
+        private boolean debugLog = false;
+
+        @Listener
+        @Exclude(ChangeBlockEvent.Post.class)
+        public void onChangeBlock(ChangeBlockEvent event) {
+            final TileEntityType tileEntityType = event.getCause().first(TileEntity.class).map(TileEntity::getType).orElse(TileEntityTypes.CHEST);
+            if (tileEntityType == TileEntityTypes.PISTON) {
                 event.setCancelled(true);
+                return;
             }
-        });
-        if (event.isCancelled()) {
-            // Centralized line to link to other breakpoints for testing/debugging
-            if (this.debugLog) {
-                System.err.println("Cancelling");
+            event.getTransactions().forEach(transaction -> {
+                final BlockSnapshot original = transaction.getOriginal();
+                final BlockState state = original.getState();
+                final BlockType type = state.getType();
+                if (type == BlockTypes.PISTON || type == BlockTypes.PISTON_EXTENSION || type == BlockTypes.PISTON_HEAD || type == BlockTypes.STICKY_PISTON) {
+                    event.setCancelled(true);
+                }
+            });
+            if (event.isCancelled()) {
+                // Centralized line to link to other breakpoints for testing/debugging
+                if (this.debugLog) {
+                    System.err.println("Cancelling");
+                }
             }
+
         }
-
     }
-
 }
