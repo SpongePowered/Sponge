@@ -804,7 +804,7 @@ public final class PhaseTracker {
         //  by short circuiting here, we avoid additional block processing that would otherwise
         //  have potential side effects (and MixinChunk#setBlockState does a wonderful job at avoiding
         //  unnecessary logic in those cases).
-        if (((IPhaseState) phaseState).doesBulkBlockCapture(context)) {
+        if (((IPhaseState) phaseState).doesBulkBlockCapture(context) && ShouldFire.CHANGE_BLOCK_EVENT) {
             // Basically at this point, there's nothing left for us to do since
             // MixinChunk will capture the block change, and submit it to be
             // "captured". It's only when there's immediate block event

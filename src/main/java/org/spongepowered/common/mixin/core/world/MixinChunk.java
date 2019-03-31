@@ -724,7 +724,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
             } else {
                 transaction = null;
                 // Sponge - Forge adds this change for block changes to only fire events when necessary
-                if (currentBlock != newBlock && !state.isRestoring()) { // cache the block break in the event we're capturing tiles
+                if (currentBlock != newBlock && (state == null || !state.isRestoring())) { // cache the block break in the event we're capturing tiles
                     currentBlock.breakBlock(this.world, pos, currentState);
                 }
                 // Sponge - Add several tile entity hook checks. Mainly for forge added hooks, but these
@@ -753,7 +753,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         final IBlockState blockAfterSet = extendedblockstorage.get(xPos, modifiedY, zPos);
         if (blockAfterSet.getBlock() != newBlock) {
             // Sponge Start - prune tracked change
-            if (!isFake && state.shouldCaptureBlockChangeOrSkip(peek, pos, currentState, newState, flag)) {
+            if (!isFake && ShouldFire.CHANGE_BLOCK_EVENT && state.shouldCaptureBlockChangeOrSkip(peek, pos, currentState, newState, flag)) {
                 peek.getCapturedBlockSupplier().prune(snapshot);
             }
             return null;
@@ -784,7 +784,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
 
         // Sponge Start - Handle block physics only if we're actually the server world
         if (!isFake && currentBlock != newBlock) {
-            final boolean isBulkCapturing = state.doesBulkBlockCapture(peek);
+            final boolean isBulkCapturing = ShouldFire.CHANGE_BLOCK_EVENT && state.doesBulkBlockCapture(peek);
             // Reset the proxy access or add to the proxy state during processing.
             ((IMixinWorldServer) this.world).getProxyAccess().onChunkChanged(pos, newState);
             // Sponge start - Ignore block activations during block placement captures unless it's
