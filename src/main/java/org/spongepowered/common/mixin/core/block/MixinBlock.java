@@ -521,7 +521,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
         // neighborChanged
         try {
-            String mapping = SpongeImplHooks.isDeobfuscatedEnvironment() ? "neighborChanged" : "neighborChanged";
+            String mapping = SpongeImplHooks.isDeobfuscatedEnvironment() ? "neighborChanged" : "func_189540_a";
             Class<?>[] argTypes = {IBlockState.class, net.minecraft.world.World.class, BlockPos.class, Block.class, BlockPos.class};
             Class<?> clazz = this.getClass().getMethod(mapping, argTypes).getDeclaringClass();
             this.hasNeighborOverride = !clazz.equals(Block.class);
