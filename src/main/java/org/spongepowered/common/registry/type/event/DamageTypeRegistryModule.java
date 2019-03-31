@@ -32,6 +32,7 @@ import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.event.damage.SpongeDamageType;
+import org.spongepowered.common.registry.provider.DamageSourceToTypeProvider;
 import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
 
 import java.util.Locale;

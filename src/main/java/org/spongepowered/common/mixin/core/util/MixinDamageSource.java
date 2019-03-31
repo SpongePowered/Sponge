@@ -31,8 +31,10 @@ import net.minecraft.util.EntityDamageSourceIndirect;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.Explosion;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
+import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -62,13 +64,17 @@ public abstract class MixinDamageSource implements DamageSource {
     private DamageType apiDamageType;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    public void onConstructed(String damageTypeIn, CallbackInfo ci) {
-        this.apiDamageType = DamageSourceToTypeProvider.getInstance().getOrCustom(damageTypeIn);
+    private void spongeSetDamageTypeFromConstructor(String damageTypeIn, CallbackInfo ci) {
+        if (damageTypeIn.contains(":")) {
+            this.apiDamageType = DamageSourceToTypeProvider.getInstance().getOrCustom(damageTypeIn);
+        } else {
+            this.apiDamageType = Sponge.getRegistry().getType(DamageType.class, damageTypeIn).orElse(DamageTypes.CUSTOM);
+        }
     }
 
     @Inject(method = "getDeathMessage(Lnet/minecraft/entity/EntityLivingBase;)Lnet/minecraft/util/text/ITextComponent;", cancellable = true,
             at = @At(value = "RETURN"))
-    public void beforeGetDeathMessageReturn(EntityLivingBase entityLivingBaseIn, CallbackInfoReturnable<ITextComponent> cir) {
+    private void beforeGetDeathMessageReturn(EntityLivingBase entityLivingBaseIn, CallbackInfoReturnable<ITextComponent> cir) {
         // This prevents untranslated keys from appearing in death messages, switching out those that are untranslated with the generic message.
         if (cir.getReturnValue().getUnformattedText().equals("death.attack." + this.damageType)) {
             cir.setReturnValue(new TextComponentTranslation("death.attack.generic", entityLivingBaseIn.getDisplayName()));
