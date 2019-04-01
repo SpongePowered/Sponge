@@ -667,7 +667,7 @@ public final class PhaseTracker {
             // If the phase state does not want to allow neighbor notifications to leak while processing,
             // it needs to be able to do so. It will replay the notifications in the order in which they were received,
             // such that the notification will be sent out in the same order as the block changes that may have taken place.
-            if (state.doesCaptureNeighborNotifications(peek)) {
+            if (ShouldFire.CHANGE_BLOCK_EVENT && ShouldFire.NOTIFY_NEIGHBOR_BLOCK_EVENT && state.doesCaptureNeighborNotifications(peek)) {
                 peek.getCapturedBlockSupplier().captureNeighborNotification(mixinWorld, notifyState, notifyPos, sourceBlock, sourcePos);
                 return;
             }
