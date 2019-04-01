@@ -1009,7 +1009,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         final IPhaseState currentState = tracker.getCurrentState();
         final PhaseContext<?> currentContext = tracker.getCurrentContext();
         // More fast checks - bulk block capture is normally faster to be false than checking tile entity changes (certain block ticks don't capture changes)
-        if (!currentState.doesBulkBlockCapture(currentContext) || !currentState.tracksTileEntityChanges(currentContext)) {
+        if (!ShouldFire.CHANGE_BLOCK_EVENT || !currentState.doesBulkBlockCapture(currentContext) || !currentState.tracksTileEntityChanges(currentContext)) {
             return tileEntity;
         }
 
@@ -1087,7 +1087,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             return true;
         }
         // More fast checks - bulk block capture is normally faster to be false than checking tile entity changes (certain block ticks don't capture changes)
-        if (!currentState.doesBulkBlockCapture(currentContext) || !currentState.tracksTileEntityChanges(currentContext)) {
+        if (!ShouldFire.CHANGE_BLOCK_EVENT || !currentState.doesBulkBlockCapture(currentContext) || !currentState.tracksTileEntityChanges(currentContext)) {
             return newTile.isInvalid();
         }
         if (!mixinTile.isCaptured()) {
