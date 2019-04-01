@@ -228,7 +228,7 @@ public interface MixinIWorld_API<P extends ProtoWorld<P>> extends MixinIWorldRea
     default Entity createEntityNaturally(EntityType type, Vector3d position) throws IllegalArgumentException, IllegalStateException {
         checkState(shadow$getWorld() != null, "Invalid World Type!");
         try {
-            final net.minecraft.entity.Entity entity = ((net.minecraft.entity.EntityType) type).makeEntity(shadow$getWorld(), null,
+            final net.minecraft.entity.Entity entity = ((net.minecraft.entity.EntityType) type).create(shadow$getWorld(), null,
                 null,
                 null,
                 VecHelper.toBlockPos(position),
@@ -257,7 +257,7 @@ public interface MixinIWorld_API<P extends ProtoWorld<P>> extends MixinIWorldRea
         }
         final NBTTagList position = translate.getList(NbtDataUtil.ENTITY_POSITION, NbtDataUtil.TAG_DOUBLE);
         final BlockPos entityPosition = new BlockPos(position.getDouble(0), position.getDouble(1), position.getDouble(2));
-        final net.minecraft.entity.Entity entity = type.makeEntity(shadow$getWorld(), translate, null, null, entityPosition, true, false);
+        final net.minecraft.entity.Entity entity = type.create(shadow$getWorld(), translate, null, null, entityPosition, true, false);
         return Optional.ofNullable((Entity) entity);
     }
 
@@ -272,7 +272,7 @@ public interface MixinIWorld_API<P extends ProtoWorld<P>> extends MixinIWorldRea
         if (type == null) {
             return Optional.empty();
         }
-        final net.minecraft.entity.Entity entity = type.makeEntity(shadow$getWorld(), translate, null, null, VecHelper.toBlockPos(position), true, false);
+        final net.minecraft.entity.Entity entity = type.create(shadow$getWorld(), translate, null, null, VecHelper.toBlockPos(position), true, false);
         return Optional.ofNullable((Entity) entity);
     }
 

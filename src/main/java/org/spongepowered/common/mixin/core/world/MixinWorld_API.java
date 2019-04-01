@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.world;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 import com.flowpowered.math.GenericMath;
 import com.flowpowered.math.vector.Vector2d;
@@ -36,7 +35,6 @@ import com.google.common.collect.Lists;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.init.Fluids;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
@@ -46,9 +44,9 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.registry.IRegistry;
 import net.minecraft.world.EnumLightType;
 import net.minecraft.world.GameType;
-import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorldEventListener;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
@@ -60,23 +58,17 @@ import net.minecraft.world.gen.Heightmap;
 import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.tileentity.TileEntity;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.SoundCategory;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.fluid.FluidState;
-import org.spongepowered.api.fluid.FluidType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.api.scheduler.ScheduledUpdateList;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.text.BookView;
 import org.spongepowered.api.text.Text;
@@ -89,11 +81,8 @@ import org.spongepowered.api.util.HeightType;
 import org.spongepowered.api.util.TemporalUnits;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.ChunkRegenerateFlag;
-import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.LightType;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.WorldBorder;
-import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.chunk.Chunk;
 import org.spongepowered.api.world.chunk.ProtoChunk;
 import org.spongepowered.api.world.explosion.Explosion;
@@ -102,15 +91,8 @@ import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.api.world.storage.WorldStorage;
 import org.spongepowered.api.world.teleport.PortalAgent;
 import org.spongepowered.api.world.volume.EntityHit;
-import org.spongepowered.api.world.volume.biome.ImmutableBiomeVolume;
 import org.spongepowered.api.world.volume.biome.UnmodifiableBiomeVolume;
 import org.spongepowered.api.world.volume.biome.worker.MutableBiomeVolumeStream;
-import org.spongepowered.api.world.volume.block.ImmutableBlockVolume;
-import org.spongepowered.api.world.volume.block.UnmodifiableBlockVolume;
-import org.spongepowered.api.world.volume.block.worker.MutableBlockVolumeStream;
-import org.spongepowered.api.world.volume.entity.ImmutableEntityVolume;
-import org.spongepowered.api.world.volume.entity.UnmodifiableEntityVolume;
-import org.spongepowered.api.world.volume.entity.worker.MutableEntityStream;
 import org.spongepowered.api.world.volume.tileentity.worker.TileEntityStream;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.Weathers;
@@ -123,15 +105,12 @@ import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.effect.record.SpongeMusicDisc;
 import org.spongepowered.common.effect.sound.SoundEffectHelper;
-import org.spongepowered.common.entity.EntityFactory;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinServerWorldEventHandler;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
-import org.spongepowered.common.mixin.tracking.world.MixinWorld_Tracker;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeEmptyChunk;
 import org.spongepowered.common.world.WorldUtil;
@@ -141,21 +120,16 @@ import org.spongepowered.common.world.volume.biome.UnmodifiableDownsizedBiomeVol
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.OptionalDouble;
-import java.util.OptionalInt;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import javax.annotation.Nullable;
 
@@ -288,7 +262,7 @@ public abstract class MixinWorld_API implements MixinIWorld_API<org.spongepowere
             throw new IllegalStateException(String.format("Invalid chunk position %s %s %s", cx, cy, cz));
         }
         final WorldServer worldserver = (WorldServer) (Object) this;
-        final net.minecraft.world.chunk.Chunk loadedChunk = worldserver.getChunkProvider().getLoadedChunk(cx, cz);
+        final net.minecraft.world.chunk.Chunk loadedChunk = worldserver.getChunkProvider().getChunk(cx, cz, false, false);
         final Vector3i chunkPos = SpongeChunkLayout.instance.forceToChunk(cx, cy, cz);
         return  loadedChunk == null ? (Chunk) new SpongeEmptyChunk((World) (Object) this, chunkPos.getX(), chunkPos.getZ()) : (Chunk) loadedChunk;
     }
@@ -299,11 +273,6 @@ public abstract class MixinWorld_API implements MixinIWorld_API<org.spongepowere
     }
 
     @Override
-    public boolean setBiome(int x, int y, int z, BiomeType biome) {
-        return getChunk(x, y, z).setBiome(x, y, z, biome);
-    }
-
-    @Override
     public MutableBiomeVolumeStream<org.spongepowered.api.world.World> toBiomeStream() {
         return null; // TODO - implement streams
     }
@@ -311,11 +280,6 @@ public abstract class MixinWorld_API implements MixinIWorld_API<org.spongepowere
     @Override
     public UnmodifiableBiomeVolume<?> asUnmodifiableBiomeVolume() {
         return new UnmodifiableDownsizedBiomeVolume(this, WorldUtil.BIOME_MIN, WorldUtil.BIOME_MAX);
-    }
-
-    @Override
-    public ImmutableBiomeVolume asImmutableBiomeVolume() {
-        return null; // TODO - implement buffers
     }
 
     @Override
@@ -341,23 +305,8 @@ public abstract class MixinWorld_API implements MixinIWorld_API<org.spongepowere
     }
 
     @Override
-    public UnmodifiableEntityVolume<?> asUnmodifiableEntityVolume() {
-        return null; // todo - implement
-    }
-
-    @Override
-    public ImmutableEntityVolume asImmutableEntityVolume() {
-        return null; // Todo - implement. I don't know if this will be possible though...
-    }
-
-    @Override
     public Collection<TileEntity> getTileEntities() {
         return Lists.newArrayList((List<TileEntity>) (Object) this.loadedTileEntityList);
-    }
-
-    @Override
-    public Optional<TileEntity> getTileEntity(int x, int y, int z) {
-        return Optional.ofNullable((TileEntity) getTileEntity(new BlockPos(x, y, z)));
     }
 
     @Override
@@ -411,12 +360,7 @@ public abstract class MixinWorld_API implements MixinIWorld_API<org.spongepowere
         if (!SpongeChunkLayout.instance.isValidChunk(cx, cy, cz)) {
             return Optional.empty();
         }
-        final WorldServer worldserver = (WorldServer) (Object) this;
-        // If we aren't generating, return the chunk
-        if (!shouldGenerate) {
-            return Optional.ofNullable((Chunk) worldserver.getChunkProvider().loadChunk(cx, cz));
-        }
-        return Optional.ofNullable((Chunk) worldserver.getChunkProvider().provideChunk(cx, cz));
+        return Optional.ofNullable((Chunk) this.getChunkProvider().getChunk(cx, cz, true, shouldGenerate));
     }
 
     @Override
@@ -505,7 +449,7 @@ public abstract class MixinWorld_API implements MixinIWorld_API<org.spongepowere
     @Override
     public void playSound(SoundType sound, SoundCategory category, Vector3d position, double volume, double pitch, double minVolume) {
         // Check if the event is registered (ie has an integer ID)
-        SoundEvent event = SoundEvent.REGISTRY.get(new ResourceLocation(sound.getKey().toString()));
+        SoundEvent event = IRegistry.SOUND_EVENT.get(new ResourceLocation(sound.getKey().toString()));
         if (event == null) {
             // Otherwise send it as a custom sound
             this.playCustomSound(null, position.getX(), position.getY(), position.getZ(), (ResourceLocation) (Object) sound.getKey(),
@@ -710,7 +654,7 @@ public abstract class MixinWorld_API implements MixinIWorld_API<org.spongepowere
 
     @Override
     public boolean canSeeSky(int x, int y, int z) {
-        final net.minecraft.world.chunk.Chunk loadedChunk = getChunkProvider().getLoadedChunk(x >> 4, z >> 4);
+        final net.minecraft.world.chunk.Chunk loadedChunk = getChunkProvider().getChunk(x >> 4, z >> 4, false, false);
         return (loadedChunk != null && !loadedChunk.isEmpty()) && loadedChunk.canSeeSky(new BlockPos(x, y, z));
     }
 
@@ -719,7 +663,7 @@ public abstract class MixinWorld_API implements MixinIWorld_API<org.spongepowere
         if (y < 0 || y >= 256) {
             return false;
         } else {
-            net.minecraft.world.chunk.Chunk chunk = this.getChunkProvider().getLoadedChunk(x >> 4, z >> 4);
+            net.minecraft.world.chunk.Chunk chunk = this.getChunkProvider().getChunk(x >> 4, z >> 4, false, false);
             if (chunk != null && !chunk.isEmpty()) {
                 return chunk.getFluidState(x, y, z).isTagged(FluidTags.WATER);
             }
@@ -734,7 +678,7 @@ public abstract class MixinWorld_API implements MixinIWorld_API<org.spongepowere
 
     @Override
     public int getHeight(HeightType type, int x, int z) {
-        net.minecraft.world.chunk.Chunk chunk = this.getChunkProvider().getLoadedChunk(x >> 4, z >> 4);
+        net.minecraft.world.chunk.Chunk chunk = this.getChunkProvider().getChunk(x >> 4, z >> 4, false, false);
         if (chunk != null && !chunk.isEmpty()) {
             return chunk.getTopBlockY((Heightmap.Type) (Object) type, x & 15, z & 15) + 1;
         }
@@ -746,7 +690,7 @@ public abstract class MixinWorld_API implements MixinIWorld_API<org.spongepowere
         if (!VecHelper.inBounds(x, y, z, getBlockMin(), getBlockMax())) {
             return ((EnumLightType) (Object) type).defaultLightValue;
         }
-        net.minecraft.world.chunk.Chunk chunk = this.getChunkProvider().getLoadedChunk(x >> 4, z >> 4);
+        net.minecraft.world.chunk.Chunk chunk = this.getChunkProvider().getChunk(x >> 4, z >> 4, false, false);
         if (chunk != null && !chunk.isEmpty()) {
             return chunk.getLightFor((EnumLightType) (Object) type, new BlockPos(x, y, z));
         }
@@ -800,14 +744,6 @@ public abstract class MixinWorld_API implements MixinIWorld_API<org.spongepowere
             .stream()
             .map(entity -> (Entity) entity)
             .collect(Collectors.toSet());
-    }
-
-    @Override
-    public Set<EntityHit> getIntersectingEntities(Vector3d start, Vector3d end, Predicate<EntityHit> filter) {
-        checkNotNull(start, "start");
-        checkNotNull(end, "end");
-        final Vector3d diff = end.sub(start);
-        return getIntersectingEntities(start, diff.normalize(), diff.length(), filter);
     }
 
     @Override
@@ -1015,71 +951,13 @@ public abstract class MixinWorld_API implements MixinIWorld_API<org.spongepowere
     }
 
     @Override
-    public Set<AABB> getIntersectingBlockCollisionBoxes(AABB box) {
-        return null;
-    }
-
-    @Override
-    public Set<AABB> getIntersectingCollisionBoxes(Entity owner, AABB box) {
-        return null;
-    }
-
-
-    @Override
-    public Entity createEntity(EntityType type, Vector3d position) throws IllegalArgumentException, IllegalStateException {
-        return this.createEntity(type, position, false);
-    }
-
-    @Override
-    public Entity createEntityNaturally(EntityType type, Vector3d position) throws IllegalArgumentException, IllegalStateException {
-        return this.createEntity(type, position, true);
-    }
-
-    private Entity createEntity(EntityType type, Vector3d position, boolean naturally) throws IllegalArgumentException, IllegalStateException {
-        checkNotNull(type, "The entity type cannot be null!");
-        checkNotNull(position, "The position cannot be null!");
-        checkState(type instanceof SpongeEntityType<?, ?>, "Don't know how to create a %s", type.getKey());
-        return (Entity) EntityFactory
-            .create((SpongeEntityType<?, ?>) type, (net.minecraft.world.World) (Object) this, position.getX(), position.getY(), position.getZ(), naturally);
-    }
-
-    @Override
-    public boolean spawnEntity(Entity entity) {
-        return false; // TODO - deterine when to use PhasseTracker for methods like these
-    }
-
-    @Override
-    public Collection<Entity> spawnEntities(Iterable<? extends Entity> entities) {
-        return StreamSupport.stream(entities.spliterator(), false)
-            .map(EntityUtil::toNative)
-            .filter(this::spawnEntity)
-            .map(EntityUtil::fromNative)
-            .collect(Collectors.toList());
-    }
-
-    @Override
-    public MutableEntityStream<org.spongepowered.api.world.World> toEntityStream() {
-        return null; // todo - implement streams
-    }
-
-    @Override
-    public boolean removeBlock(int x, int y, int z) {
-        return removeBlock(new BlockPos(x, y,  z));
-    }
-
-    @Override
-    public MutableBlockVolumeStream<org.spongepowered.api.world.World> toBlockStream() {
-        return null; // todo - implement streams
-    }
-
-    @Override
     public BlockState getBlock(int x, int y, int z) {
         if (y < 0 || y >= 256) {
            return BlockTypes.AIR.getDefaultState();
         }
-        final net.minecraft.world.chunk.Chunk loadedChunk = this.getChunkProvider().getLoadedChunk(x >> 4, z >> 4);
+        final IChunk loadedChunk = this.getChunkProvider().getChunkOrPrimer(x >> 4, z >> 4, true);
         if (loadedChunk != null) {
-            return BlockUtil.fromNative(loadedChunk.getBlockState(x, y, z));
+            return BlockUtil.fromNative(loadedChunk.getBlockState(new BlockPos(x, y, z)));
         }
         return BlockTypes.AIR.getDefaultState();
     }
@@ -1087,21 +965,6 @@ public abstract class MixinWorld_API implements MixinIWorld_API<org.spongepowere
     @Override
     public FluidState getFluid(int x, int y, int z) {
         return getBlock(x, y, z).getFluidState();
-    }
-
-    @Override
-    public UnmodifiableBlockVolume<?> asUnmodifiableBlockVolume() {
-        return null; // TODO - implement wrappers
-    }
-
-    @Override
-    public ImmutableBlockVolume asImmutableBlockVolume() {
-        return null; // Probably will never do it.
-    }
-
-    @Override
-    public int getHighestYAt(int x, int z) {
-        return getHeight(Heightmap.Type.WORLD_SURFACE, x, z);
     }
 
     @Override

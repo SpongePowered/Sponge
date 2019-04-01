@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.world;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -73,6 +75,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -254,7 +257,10 @@ public interface MixinIWorldReaderBase_API<R extends ReadableRegion<R>> extends 
 
     @Override
     default Set<EntityHit> getIntersectingEntities(Vector3d start, Vector3d end, Predicate<EntityHit> filter) {
-        return Collections.emptySet(); // TODO - Implement AABB's, maybe need to get VoxelShape representations too
+        checkNotNull(start, "start");
+        checkNotNull(end, "end");
+        final Vector3d diff = end.sub(start);
+        return getIntersectingEntities(start, diff.normalize(), diff.length(), filter);
     }
 
     @Override
