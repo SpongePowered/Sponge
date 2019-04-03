@@ -611,6 +611,12 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
             return;
         }
         PhaseTracker.getInstance().completePhase(this.state);
+        if (!((IPhaseState) this.state).shouldProvideModifiers(this)) {
+            if (this.usedFrame != null) {
+                this.usedFrame.iterator().forEachRemaining(Sponge.getCauseStackManager()::popCauseFrame);
+            }
+            return;
+        }
         if (this.usedFrame == null && SpongeImplHooks.isMainThread()) {
             // So, this part is interesting... Since the used frame is null, that means
             // the cause stack manager still has the refernce of this context/phase, we have
