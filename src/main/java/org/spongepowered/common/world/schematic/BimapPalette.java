@@ -26,37 +26,39 @@ package org.spongepowered.common.world.schematic;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.world.schematic.BlockPalette;
-import org.spongepowered.api.world.schematic.BlockPaletteType;
-import org.spongepowered.api.world.schematic.BlockPaletteTypes;
+import org.spongepowered.api.CatalogType;
+import org.spongepowered.api.world.schematic.Palette;
+import org.spongepowered.api.world.schematic.PaletteType;
 
 import java.util.BitSet;
 import java.util.Collection;
 import java.util.Optional;
 
-public class BimapPalette implements BlockPalette {
+public class BimapPalette<T extends CatalogType> implements Palette<T> {
 
     private static final int DEFAULT_ALLOCATION_SIZE = 64;
 
-    private final BiMap<Integer, BlockState> ids;
-    private final BiMap<BlockState, Integer> idsr;
+    private final BiMap<Integer, T> ids;
+    private final BiMap<T, Integer> idsr;
     private final BitSet allocation = new BitSet(DEFAULT_ALLOCATION_SIZE);
+    private final PaletteType<T> paletteType;
     private int maxId = 0;
 
-    public BimapPalette() {
+    public BimapPalette(PaletteType<T> paletteType) {
         this.ids = HashBiMap.create();
         this.idsr = this.ids.inverse();
+        this.paletteType = paletteType;
     }
 
-    public BimapPalette(int expectedSize) {
+    public BimapPalette(PaletteType<T> paletteType, int expectedSize) {
         this.ids = HashBiMap.create(expectedSize);
         this.idsr = this.ids.inverse();
+        this.paletteType = paletteType;
     }
 
     @Override
-    public BlockPaletteType getType() {
-        return BlockPaletteTypes.LOCAL;
+    public PaletteType<T> getType() {
+        return this.paletteType;
     }
 
     @Override
@@ -65,12 +67,12 @@ public class BimapPalette implements BlockPalette {
     }
 
     @Override
-    public Optional<Integer> get(BlockState state) {
+    public Optional<Integer> get(T state) {
         return Optional.ofNullable(this.idsr.get(state));
     }
 
     @Override
-    public int getOrAssign(BlockState state) {
+    public int getOrAssign(T state) {
         Integer id = this.idsr.get(state);
         if (id == null) {
             int next = this.allocation.nextClearBit(0);
@@ -85,11 +87,11 @@ public class BimapPalette implements BlockPalette {
     }
 
     @Override
-    public Optional<BlockState> get(int id) {
+    public Optional<T> get(int id) {
         return Optional.ofNullable(this.ids.get(id));
     }
 
-    public void assign(BlockState state, int id) {
+    public void assign(T state, int id) {
         if (this.maxId < id) {
             this.maxId = id;
         }
@@ -98,7 +100,7 @@ public class BimapPalette implements BlockPalette {
     }
 
     @Override
-    public boolean remove(BlockState state) {
+    public boolean remove(T state) {
         Integer id = this.idsr.get(state);
         if (id == null) {
             return false;
@@ -112,7 +114,7 @@ public class BimapPalette implements BlockPalette {
     }
 
     @Override
-    public Collection<BlockState> getEntries() {
+    public Collection<T> getEntries() {
         return this.idsr.keySet();
     }
 

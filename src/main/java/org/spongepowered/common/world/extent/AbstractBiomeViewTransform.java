@@ -31,6 +31,7 @@ import org.spongepowered.api.world.extent.BiomeVolume;
 import org.spongepowered.api.world.extent.MutableBiomeVolume;
 import org.spongepowered.api.world.extent.StorageType;
 import org.spongepowered.common.util.gen.ByteArrayMutableBiomeBuffer;
+import org.spongepowered.common.world.schematic.GlobalPalette;
 
 public abstract class AbstractBiomeViewTransform<V extends BiomeVolume> implements BiomeVolume {
 
@@ -85,7 +86,7 @@ public abstract class AbstractBiomeViewTransform<V extends BiomeVolume> implemen
     public MutableBiomeVolume getBiomeCopy(StorageType type) {
         switch (type) {
             case STANDARD:
-                return new ByteArrayMutableBiomeBuffer(ExtentBufferUtil.copyToArray(this, this.min, this.max, this.size), this.min, this.size);
+                return new ByteArrayMutableBiomeBuffer(GlobalPalette.getBiomePalette(), ExtentBufferUtil.copyToArray(this, this.min, this.max, this.size), this.min, this.size);
             case THREAD_SAFE:
             default:
                 throw new UnsupportedOperationException(type.name());

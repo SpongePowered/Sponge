@@ -29,8 +29,11 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
 import net.minecraft.block.Block;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.datafix.DataFixer;
+import net.minecraft.util.datafix.FixTypes;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.tileentity.TileEntityArchetype;
@@ -42,8 +45,9 @@ import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.DataTranslators;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.world.extent.worker.procedure.BlockVolumeVisitor;
-import org.spongepowered.api.world.schematic.BlockPalette;
+import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.api.world.schematic.Schematic;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeTileEntityArchetypeBuilder;
@@ -51,7 +55,7 @@ import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.registry.type.block.TileEntityTypeRegistryModule;
 import org.spongepowered.common.util.gen.ArrayMutableBlockBuffer;
 import org.spongepowered.common.world.schematic.GlobalPalette;
-import org.spongepowered.common.world.schematic.SpongeSchematic;
+import org.spongepowered.common.world.schematic.SpongeSchematicBuilder;
 
 import java.util.List;
 import java.util.Map;
@@ -63,6 +67,7 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
     private static final TypeToken<Schematic> TYPE_TOKEN = TypeToken.of(Schematic.class);
     private static final int MAX_SIZE = 65535;
     private static final DataQuery TILE_ID = DataQuery.of("id");
+    private static DataFixer VANILLA_FIXER;
 
     public static LegacySchematicTranslator get() {
         return INSTANCE;
@@ -89,11 +94,14 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
 
     @Override
     public Schematic translate(DataView view) throws InvalidDataException {
+        if (VANILLA_FIXER == null) {
+            VANILLA_FIXER = SpongeImpl.getDataFixer();
+        }
         // We default to sponge as the assumption should be that if this tag
         // (which is not in the sponge schematic specification) is not present
         // then it is more likely that its a sponge schematic than a legacy
         // schematic
-        String materials = view.getString(DataQueries.Schematic.LEGACY_MATERIALS).orElse("Sponge");
+        String materials = view.getString(DataQueries.Schematic.Legacy.LEGACY_MATERIALS).orElse("Sponge");
         if ("Sponge".equalsIgnoreCase(materials)) {
             // not a legacy schematic use the new loader instead.
             return DataTranslators.SCHEMATIC.translate(view);
@@ -107,15 +115,16 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
             throw new InvalidDataException(String.format(
                     "Schematic is larger than maximum allowable size (found: (%d, %d, %d) max: (%d, %<d, %<d)", width, height, length, MAX_SIZE));
         }
-        int offsetX = view.getInt(DataQueries.Schematic.LEGACY_OFFSET_X).orElse(0);
-        int offsetY = view.getInt(DataQueries.Schematic.LEGACY_OFFSET_Y).orElse(0);
-        int offsetZ = view.getInt(DataQueries.Schematic.LEGACY_OFFSET_Z).orElse(0);
-        BlockPalette palette = GlobalPalette.instance;
+        int offsetX = view.getInt(DataQueries.Schematic.Legacy.LEGACY_OFFSET_X).orElse(0);
+        int offsetY = view.getInt(DataQueries.Schematic.Legacy.LEGACY_OFFSET_Y).orElse(0);
+        int offsetZ = view.getInt(DataQueries.Schematic.Legacy.LEGACY_OFFSET_Z).orElse(0);
+        Palette<BlockState> palette = GlobalPalette.getBlockPalette();
+        final SpongeSchematicBuilder builder = new SpongeSchematicBuilder();
         ArrayMutableBlockBuffer buffer = new ArrayMutableBlockBuffer(new Vector3i(-offsetX, -offsetY, -offsetZ),
                 new Vector3i(width, height, length));
-        byte[] block_ids = (byte[]) view.get(DataQueries.Schematic.LEGACY_BLOCKS).get();
-        byte[] block_data = (byte[]) view.get(DataQueries.Schematic.LEGACY_BLOCK_DATA).get();
-        byte[] add_block = (byte[]) view.get(DataQueries.Schematic.LEGACY_ADD_BLOCKS).orElse(null);
+        byte[] block_ids = (byte[]) view.get(DataQueries.Schematic.Legacy.LEGACY_BLOCKS).get();
+        byte[] block_data = (byte[]) view.get(DataQueries.Schematic.Legacy.LEGACY_BLOCK_DATA).get();
+        byte[] add_block = (byte[]) view.get(DataQueries.Schematic.Legacy.LEGACY_ADD_BLOCKS).orElse(null);
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 for (int z = 0; z < length; z++) {
@@ -137,7 +146,7 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
             }
         }
         Map<Vector3i, TileEntityArchetype> tiles = Maps.newHashMap();
-        List<DataView> tiledata = view.getViewList(DataQueries.Schematic.LEGACY_TILEDATA).orElse(null);
+        List<DataView> tiledata = view.getViewList(DataQueries.Schematic.Legacy.LEGACY_TILEDATA).orElse(null);
         if (tiledata != null) {
             for (DataView tile : tiledata) {
                 int x = tile.getInt(DataQueries.X_POS).get();
@@ -150,18 +159,26 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
                 final BlockState state = buffer.getBlock(x - offsetX, y - offsetY, z - offsetZ);
                 // Somehow we need to get some DataFixers in here, because some data may be legacy from older versions before data
                 // fixers.
+                final DataView upgraded;
+
+                NBTTagCompound tileNbt = NbtTranslator.getInstance().translate(tile);
+                tileNbt = VANILLA_FIXER.process(FixTypes.BLOCK_ENTITY, tileNbt, 0);
+                upgraded = NbtTranslator.getInstance().translate(tileNbt);
+
                 if (type!= null && SpongeImplHooks.hasBlockTileEntity(((Block) state.getType()), BlockUtil.toNative(state))) {
                     TileEntityArchetype archetype = new SpongeTileEntityArchetypeBuilder()
                         .state(state)
-                        .tileData(tile)
+                        .tileData(upgraded)
                         .tile(type)
                         .build();
                     tiles.put(new Vector3i(x - offsetX, y - offsetY, z - offsetZ), archetype);
                 }
             }
         }
-        SpongeSchematic schematic = new SpongeSchematic(buffer, tiles);
-        return schematic;
+        builder.blockPalette(GlobalPalette.getBlockPalette());
+        builder.blocks(buffer)
+            .tiles(tiles);
+        return builder.build();
     }
 
     @Override
@@ -186,20 +203,20 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
         data.set(DataQueries.Schematic.WIDTH, width);
         data.set(DataQueries.Schematic.HEIGHT, height);
         data.set(DataQueries.Schematic.LENGTH, length);
-        data.set(DataQueries.Schematic.LEGACY_MATERIALS, "Alpha");
+        data.set(DataQueries.Schematic.Legacy.LEGACY_MATERIALS, "Alpha");
         // These are added for better interop with WorldEdit
-        data.set(DataQueries.Schematic.LEGACY_OFFSET_X, -xMin);
-        data.set(DataQueries.Schematic.LEGACY_OFFSET_Y, -yMin);
-        data.set(DataQueries.Schematic.LEGACY_OFFSET_Z, -zMin);
+        data.set(DataQueries.Schematic.Legacy.LEGACY_OFFSET_X, -xMin);
+        data.set(DataQueries.Schematic.Legacy.LEGACY_OFFSET_Y, -yMin);
+        data.set(DataQueries.Schematic.Legacy.LEGACY_OFFSET_Z, -zMin);
         SaveIterator itr = new SaveIterator(width, height, length);
         schematic.getBlockWorker().iterate(itr);
         byte[] blockids = itr.blockids;
         byte[] extraids = itr.extraids;
         byte[] blockdata = itr.blockdata;
-        data.set(DataQueries.Schematic.LEGACY_BLOCKS, blockids);
-        data.set(DataQueries.Schematic.LEGACY_BLOCK_DATA, blockdata);
+        data.set(DataQueries.Schematic.Legacy.LEGACY_BLOCKS, blockids);
+        data.set(DataQueries.Schematic.Legacy.LEGACY_BLOCK_DATA, blockdata);
         if (extraids != null) {
-            data.set(DataQueries.Schematic.LEGACY_ADD_BLOCKS, extraids);
+            data.set(DataQueries.Schematic.Legacy.LEGACY_ADD_BLOCKS, extraids);
         }
         List<DataView> tileEntities = Lists.newArrayList();
         for (Map.Entry<Vector3i, TileEntityArchetype> entry : schematic.getTileEntityArchetypes().entrySet()) {
@@ -210,7 +227,7 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
             tiledata.set(DataQueries.Z_POS, pos.getZ() - zMin);
             tileEntities.add(tiledata);
         }
-        data.set(DataQueries.Schematic.LEGACY_TILEDATA, tileEntities);
+        data.set(DataQueries.Schematic.Legacy.LEGACY_TILEDATA, tileEntities);
         return data;
     }
 
@@ -237,7 +254,7 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
             int x0 = x - volume.getBlockMin().getX();
             int y0 = y - volume.getBlockMin().getY();
             int z0 = z - volume.getBlockMin().getZ();
-            int id = GlobalPalette.instance.get(volume.getBlock(x, y, z)).get();
+            int id = GlobalPalette.getBlockPalette().get(volume.getBlock(x, y, z)).get();
             int blockid = id >> 4;
             int dataid = id & 0xF;
             int index = (y0 * this.length + z0) * this.width + x0;

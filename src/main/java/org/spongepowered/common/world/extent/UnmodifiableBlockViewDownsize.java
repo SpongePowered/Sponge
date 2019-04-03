@@ -55,7 +55,7 @@ public class UnmodifiableBlockViewDownsize extends AbstractBlockViewDownsize<Blo
     @Override
     public ImmutableBlockVolume getImmutableBlockCopy() {
         char[] data = ExtentBufferUtil.copyToArray(this, this.min, this.max, this.size);
-        return ArrayImmutableBlockBuffer.newWithoutArrayClone(GlobalPalette.instance, this.min, this.size, data);
+        return ArrayImmutableBlockBuffer.newWithoutArrayClone(GlobalPalette.getBlockPalette(), this.min, this.size, data);
     }
 
     @Override

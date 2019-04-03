@@ -36,15 +36,13 @@ import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.extent.StorageType;
 import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
 import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
-import org.spongepowered.api.world.schematic.BlockPalette;
+import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.common.world.extent.MutableBlockViewDownsize;
 import org.spongepowered.common.world.extent.MutableBlockViewTransform;
 import org.spongepowered.common.world.extent.UnmodifiableBlockVolumeWrapper;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
 import org.spongepowered.common.world.schematic.GlobalPalette;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
-
-import java.util.Optional;
 
 /**
  * Makes a {@link ChunkPrimer} usable as a {@link MutableBlockVolume}.
@@ -63,8 +61,8 @@ public final class ChunkPrimerBuffer extends AbstractBlockBuffer implements Muta
     }
 
     @Override
-    public BlockPalette getPalette() {
-        return GlobalPalette.instance;
+    public Palette<BlockState> getPalette() {
+        return GlobalPalette.getBlockPalette();
     }
 
     @Override
@@ -106,7 +104,7 @@ public final class ChunkPrimerBuffer extends AbstractBlockBuffer implements Muta
     public MutableBlockVolume getBlockCopy(StorageType type) {
         switch (type) {
             case STANDARD:
-                return new ArrayMutableBlockBuffer(GlobalPalette.instance, this.start, this.size, this.chunkPrimer.data.clone());
+                return new ArrayMutableBlockBuffer(GlobalPalette.getBlockPalette(), this.start, this.size, this.chunkPrimer.data.clone());
             case THREAD_SAFE:
             default:
                 throw new UnsupportedOperationException(type.name());
@@ -115,7 +113,7 @@ public final class ChunkPrimerBuffer extends AbstractBlockBuffer implements Muta
 
     @Override
     public ImmutableBlockVolume getImmutableBlockCopy() {
-        return new ArrayImmutableBlockBuffer(GlobalPalette.instance, this.start, this.size, this.chunkPrimer.data);
+        return new ArrayImmutableBlockBuffer(GlobalPalette.getBlockPalette(), this.start, this.size, this.chunkPrimer.data);
     }
 
 }

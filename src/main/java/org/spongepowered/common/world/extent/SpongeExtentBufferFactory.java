@@ -32,7 +32,10 @@ import org.spongepowered.api.world.extent.MutableBiomeVolume;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.common.util.gen.ArrayMutableBlockBuffer;
 import org.spongepowered.common.util.gen.ByteArrayMutableBiomeBuffer;
+import org.spongepowered.common.world.schematic.GlobalPalette;
 import org.spongepowered.common.world.schematic.SpongeArchetypeVolume;
+
+import java.util.Collections;
 
 public final class SpongeExtentBufferFactory implements ExtentBufferFactory {
 
@@ -43,7 +46,7 @@ public final class SpongeExtentBufferFactory implements ExtentBufferFactory {
 
     @Override
     public MutableBiomeVolume createBiomeBuffer(Vector3i min, Vector3i size) {
-        return new ByteArrayMutableBiomeBuffer(min, size);
+        return new ByteArrayMutableBiomeBuffer(GlobalPalette.getBiomePalette(), min, size);
     }
 
     @Override
@@ -64,7 +67,7 @@ public final class SpongeExtentBufferFactory implements ExtentBufferFactory {
     @Override
     public ArchetypeVolume createArchetypeVolume(Vector3i size, Vector3i origin) {
         MutableBlockVolume backing = new ArrayMutableBlockBuffer(origin.mul(-1), size);
-        return new SpongeArchetypeVolume(backing, ImmutableMap.of());
+        return new SpongeArchetypeVolume(backing, ImmutableMap.of(), Collections.emptyList());
     }
 
 }

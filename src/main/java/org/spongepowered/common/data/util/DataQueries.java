@@ -221,10 +221,32 @@ public final class DataQueries {
     }
     
     public static final class Schematic {
+
+        public static final class Versions {
+            public static final DataQuery V1_TILE_ENTITY_DATA = of("TileEntities");
+        }
+
+        /**
+         * The NBT structure of the legacy Schematic format used by MCEdit and WorldEdit etc.
+         *
+         * It's no longer updated due to the
+         */
+        public static final class Legacy {
+
+            public static final DataQuery LEGACY_MATERIALS = of("Materials");
+            public static final DataQuery LEGACY_OFFSET_X = of("WEOffsetX");
+            public static final DataQuery LEGACY_OFFSET_Y = of("WEOffsetY");
+            public static final DataQuery LEGACY_OFFSET_Z = of("WEOffsetZ");
+            public static final DataQuery LEGACY_BLOCKS = of("Blocks");
+            public static final DataQuery LEGACY_BLOCK_DATA = of("Data");
+            public static final DataQuery LEGACY_ADD_BLOCKS = of("AddBlocks");
+            public static final DataQuery LEGACY_TILEDATA = of("TileEntities");
+        }
         
         public static final DataQuery VERSION = of("Version");
+        public static final DataQuery DATA_VERSION = of("DataVersion");
         public static final DataQuery METADATA = of("Metadata");
-        
+
         public static final DataQuery WIDTH = of("Width");
         public static final DataQuery HEIGHT = of("Height");
         public static final DataQuery LENGTH = of("Length");
@@ -233,22 +255,19 @@ public final class DataQueries {
         public static final DataQuery PALETTE = of("Palette");
         public static final DataQuery PALETTE_MAX = of("PaletteMax");
         public static final DataQuery BLOCK_DATA = of("BlockData");
-        
-        public static final DataQuery TILEENTITY_DATA = of("TileEntities");
-        public static final DataQuery TILEENTITY_POS = of("Pos");
+        public static final DataQuery BIOME_DATA = of("BiomeData");
 
-        public static final DataQuery LEGACY_MATERIALS = of("Materials");
-        
-        public static final DataQuery LEGACY_OFFSET_X = of("WEOffsetX");
-        public static final DataQuery LEGACY_OFFSET_Y = of("WEOffsetY");
-        public static final DataQuery LEGACY_OFFSET_Z = of("WEOffsetZ");
+        public static final DataQuery BLOCKENTITY_DATA = of("BlockEntities");
+        public static final DataQuery BLOCKENTITY_ID = of("Id");
+        public static final DataQuery BLOCKENTITY_POS = of("Pos");
 
-        public static final DataQuery LEGACY_BLOCKS = of("Blocks");
-        public static final DataQuery LEGACY_BLOCK_DATA = of("Data");
-        public static final DataQuery LEGACY_ADD_BLOCKS = of("AddBlocks");
+        public static final DataQuery ENTITIES = of("Entities");
+        public static final DataQuery ENTITIES_ID = of("Id");
+        public static final DataQuery ENTITIES_POS = of("Pos");
 
-        public static final DataQuery LEGACY_TILEDATA = of("TileEntities");
-        
+        public static final DataQuery BIOME_PALETTE = of("BiomePalette");
+        public static final DataQuery BIOME_PALETTE_MAX = of("BiomePaletteMax");
+
         private Schematic() {
         }
     }

@@ -50,6 +50,7 @@ import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.DataVersions;
+import org.spongepowered.common.data.util.NbtDataUtil;
 
 import java.util.Optional;
 
@@ -117,6 +118,9 @@ public class SpongeTileEntityArchetypeBuilder extends AbstractDataBuilder<TileEn
         nbttagcompound.removeTag("x");
         nbttagcompound.removeTag("y");
         nbttagcompound.removeTag("z");
+        String tileId = nbttagcompound.getString("id");
+        nbttagcompound.removeTag("id");
+        nbttagcompound.setString(NbtDataUtil.Schematic.TILE_ENTITY_ID, tileId);
         this.tileData = NbtTranslator.getInstance().translate(nbttagcompound);
         this.blockState = tileEntity.getBlock();
         this.tileEntityType = tileEntity.getType();

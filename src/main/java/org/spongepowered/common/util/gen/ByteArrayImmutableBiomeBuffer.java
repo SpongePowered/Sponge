@@ -33,9 +33,11 @@ import org.spongepowered.api.world.extent.ImmutableBiomeVolume;
 import org.spongepowered.api.world.extent.MutableBiomeVolume;
 import org.spongepowered.api.world.extent.StorageType;
 import org.spongepowered.api.world.extent.worker.BiomeVolumeWorker;
+import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.common.world.extent.ImmutableBiomeViewDownsize;
 import org.spongepowered.common.world.extent.ImmutableBiomeViewTransform;
 import org.spongepowered.common.world.extent.worker.SpongeBiomeVolumeWorker;
+import org.spongepowered.common.world.schematic.GlobalPalette;
 
 /**
  * Immutable biome volume, backed by a byte array. The array passed to the
@@ -44,15 +46,18 @@ import org.spongepowered.common.world.extent.worker.SpongeBiomeVolumeWorker;
 public final class ByteArrayImmutableBiomeBuffer extends AbstractBiomeBuffer implements ImmutableBiomeVolume {
 
     private final byte[] biomes;
+    private final Palette<BiomeType> palette;
 
-    public ByteArrayImmutableBiomeBuffer(byte[] biomes, Vector3i start, Vector3i size) {
+    public ByteArrayImmutableBiomeBuffer(Palette<BiomeType> palette, byte[] biomes, Vector3i start, Vector3i size) {
         super(start, size);
         this.biomes = biomes.clone();
+        this.palette = palette;
     }
 
-    private ByteArrayImmutableBiomeBuffer(Vector3i start, Vector3i size, byte[] biomes) {
+    private ByteArrayImmutableBiomeBuffer(Palette<BiomeType> palette, Vector3i start, Vector3i size, byte[] biomes) {
         super(start, size);
         this.biomes = biomes;
+        this.palette = palette;
     }
 
     @Override
@@ -83,7 +88,7 @@ public final class ByteArrayImmutableBiomeBuffer extends AbstractBiomeBuffer imp
     public MutableBiomeVolume getBiomeCopy(StorageType type) {
         switch (type) {
             case STANDARD:
-                return new ByteArrayMutableBiomeBuffer(this.biomes.clone(), this.start, this.size);
+                return new ByteArrayMutableBiomeBuffer(this.palette, this.biomes.clone(), this.start, this.size);
             case THREAD_SAFE:
             default:
                 throw new UnsupportedOperationException(type.name());
@@ -100,7 +105,7 @@ public final class ByteArrayImmutableBiomeBuffer extends AbstractBiomeBuffer imp
      * @return A new buffer using the same array reference
      */
     public static ImmutableBiomeVolume newWithoutArrayClone(byte[] biomes, Vector3i start, Vector3i size) {
-        return new ByteArrayImmutableBiomeBuffer(start, size, biomes);
+        return new ByteArrayImmutableBiomeBuffer(GlobalPalette.getBiomePalette(), start, size, biomes);
     }
 
 }

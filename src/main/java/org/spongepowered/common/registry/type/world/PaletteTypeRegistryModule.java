@@ -30,24 +30,24 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.api.world.schematic.BlockPaletteType;
-import org.spongepowered.api.world.schematic.BlockPaletteTypes;
+import org.spongepowered.api.world.schematic.PaletteTypes;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.world.schematic.BimapPalette;
+import org.spongepowered.common.world.schematic.BlockPaletteWrapper;
 import org.spongepowered.common.world.schematic.GlobalPalette;
-import org.spongepowered.common.world.schematic.SpongePaletteType;
+import org.spongepowered.common.world.schematic.SpongeBlockPaletteType;
 
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-public class PaletteTypeRegistryModule implements SpongeAdditionalCatalogRegistryModule<BlockPaletteType> {
+public class PaletteTypeRegistryModule implements SpongeAdditionalCatalogRegistryModule<org.spongepowered.api.world.schematic.BlockPaletteType> {
 
-    @RegisterCatalog(BlockPaletteTypes.class) private final Map<String, BlockPaletteType> paletteMappings = Maps.newHashMap();
+    @RegisterCatalog(org.spongepowered.api.world.schematic.BlockPaletteTypes.class) private final Map<String, org.spongepowered.api.world.schematic.BlockPaletteType> paletteMappings = Maps.newHashMap();
 
     @Override
-    public void registerAdditionalCatalog(BlockPaletteType extraCatalog) {
+    public void registerAdditionalCatalog(org.spongepowered.api.world.schematic.BlockPaletteType extraCatalog) {
         checkNotNull(extraCatalog);
         String id = extraCatalog.getId();
         checkArgument(id.indexOf(' ') == -1, "Palette Type ID " + id + " may not contain a space");
@@ -55,19 +55,19 @@ public class PaletteTypeRegistryModule implements SpongeAdditionalCatalogRegistr
     }
 
     @Override
-    public Optional<BlockPaletteType> getById(String id) {
+    public Optional<org.spongepowered.api.world.schematic.BlockPaletteType> getById(String id) {
         return Optional.ofNullable(this.paletteMappings.get(id));
     }
 
     @Override
-    public Collection<BlockPaletteType> getAll() {
+    public Collection<org.spongepowered.api.world.schematic.BlockPaletteType> getAll() {
         return ImmutableList.copyOf(this.paletteMappings.values());
     }
 
     @Override
     public void registerDefaults() {
-        registerAdditionalCatalog(new SpongePaletteType("global", () -> GlobalPalette.instance));
-        registerAdditionalCatalog(new SpongePaletteType("local", BimapPalette::new));
+        registerAdditionalCatalog(new SpongeBlockPaletteType("global", () -> (org.spongepowered.api.world.schematic.BlockPalette) GlobalPalette.getBlockPalette()));
+        registerAdditionalCatalog(new SpongeBlockPaletteType("local", () -> new BlockPaletteWrapper(new BimapPalette<>(PaletteTypes.LOCAL_BLOCKS), org.spongepowered.api.world.schematic.BlockPaletteTypes.LOCAL)));
     }
 
     @Override

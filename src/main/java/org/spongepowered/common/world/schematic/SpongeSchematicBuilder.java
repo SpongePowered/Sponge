@@ -26,90 +26,207 @@ package org.spongepowered.common.world.schematic;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.Maps;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.block.tileentity.TileEntityArchetype;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.Queries;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntityArchetype;
+import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.extent.ArchetypeVolume;
+import org.spongepowered.api.world.extent.EntityUniverse;
 import org.spongepowered.api.world.extent.Extent;
+import org.spongepowered.api.world.extent.MutableBiomeVolume;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
-import org.spongepowered.api.world.schematic.BlockPalette;
-import org.spongepowered.api.world.schematic.BlockPaletteType;
-import org.spongepowered.api.world.schematic.BlockPaletteTypes;
+import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
+import org.spongepowered.api.world.schematic.Palette;
+import org.spongepowered.api.world.schematic.PaletteType;
+import org.spongepowered.api.world.schematic.PaletteTypes;
 import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.api.world.schematic.Schematic.Builder;
 import org.spongepowered.common.util.gen.ArrayMutableBlockBuffer;
+import org.spongepowered.common.util.gen.ByteArrayMutableBiomeBuffer;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+@SuppressWarnings("deprecation")
 public class SpongeSchematicBuilder implements Schematic.Builder {
 
     private ArchetypeVolume volume;
     private Extent view;
-    private BlockPalette palette;
-    private BlockPaletteType type = BlockPaletteTypes.LOCAL;
-    private DataView metadata;
+    Palette<BlockState> blockPalette;
+    Palette<BiomeType> biomePalette;
+    PaletteType<BlockState> blockType = PaletteTypes.LOCAL_BLOCKS;
+    PaletteType<BiomeType> biomeType = PaletteTypes.LOCAL_BIOMES;
+    Collection<EntityArchetype> entities;
+    DataView metadata;
     private Map<String, Object> metaValues = Maps.newHashMap();
 
+    // Package private accessors for the Schematic constructor
+    MutableBlockVolume backingVolume;
+    MutableBiomeVolume biomeVolume;
+    Map<Vector3i, TileEntityArchetype> tiles;
+
+
     @Override
-    public Builder volume(ArchetypeVolume volume) {
+    public SpongeSchematicBuilder volume(ArchetypeVolume volume) {
         this.volume = volume;
+        this.entities = this.volume.getEntityArchetypes();
+        this.tiles = volume.getTileEntityArchetypes();
         return this;
     }
 
     @Override
-    public Builder volume(Extent volume) {
+    public SpongeSchematicBuilder volume(Extent volume) {
         this.view = volume;
         return this;
     }
 
+    public SpongeSchematicBuilder blocks(MutableBlockVolume blocks) {
+        this.backingVolume = blocks;
+        return this;
+    }
+
+    public SpongeSchematicBuilder biomes(MutableBiomeVolume biomes) {
+        this.biomeVolume = biomes;
+        return this;
+    }
+
+    public SpongeSchematicBuilder tiles(Map<Vector3i, TileEntityArchetype> tiles) {
+        this.tiles = new HashMap<>(tiles);
+        return this;
+    }
+
+
     @Override
-    public Builder palette(BlockPalette palette) {
-        this.palette = palette;
-        this.type = palette.getType();
+    public SpongeSchematicBuilder palette(org.spongepowered.api.world.schematic.BlockPalette palette) {
+        this.blockPalette = palette;
+        this.blockType = palette.getType();
         return this;
     }
 
     @Override
-    public Builder paletteType(BlockPaletteType type) {
-        this.type = type;
-        this.palette = null;
+    public SpongeSchematicBuilder blockPalette(Palette<BlockState> palette) {
+        this.blockPalette = palette;
+        this.blockType = palette.getType();
         return this;
     }
 
     @Override
-    public Builder metadata(DataView metadata) {
+    public SpongeSchematicBuilder biomePalette(Palette<BiomeType> palette) {
+        this.biomePalette = palette;
+        this.biomeType = palette.getType();
+        return this;
+    }
+
+    @Override
+    public SpongeSchematicBuilder paletteType(org.spongepowered.api.world.schematic.BlockPaletteType type) {
+        this.blockType = type;
+        this.blockPalette = null;
+        return this;
+    }
+
+    @Override
+    public SpongeSchematicBuilder blockPaletteType(PaletteType<BlockState> type) {
+        this.blockType = type;
+        this.blockPalette = null;
+        return this;
+    }
+
+    @Override
+    public SpongeSchematicBuilder biomePaletteType(PaletteType<BiomeType> type) {
+        this.biomePalette = null;
+        this.biomeType = type;
+        return this;
+    }
+
+    @Override
+    public SpongeSchematicBuilder entity(EntityArchetype entityArchetype) {
+        if (this.entities == null) {
+            this.entities = new ArrayList<>();
+        }
+        checkArgument(entityArchetype.getEntityData().contains(Queries.POSITION), "EntityArchetype is missing position information!");
+        this.entities.add(entityArchetype);
+        return this;
+    }
+
+    @Override
+    public SpongeSchematicBuilder entity(EntityArchetype entityArchetype, Vector3d position) {
+        if (this.entities == null) {
+            this.entities = new ArrayList<>();
+        }
+        DataContainer entityData = entityArchetype.getEntityData();
+        if (!entityData.getDoubleList(Queries.POSITION).isPresent()) {
+            ArrayList<Double> value = new ArrayList<>();
+            value.add(position.getX());
+            value.add(position.getY());
+            value.add(position.getZ());
+            entityData.set(Queries.POSITION, value);
+            entityArchetype.setRawData(entityData);
+        }
+        this.entities.add(entityArchetype);
+        return this;
+    }
+
+    @Override
+    public SpongeSchematicBuilder entities(Collection<EntityArchetype> entities) {
+        if (this.entities == null) {
+            this.entities = new ArrayList<>();
+        }
+        for (EntityArchetype entity : entities) {
+            if (entity.getEntityData().contains(Queries.POSITION)) {
+                this.entities.add(entity);
+            }
+        }
+        return this;
+    }
+
+    @Override
+    public SpongeSchematicBuilder metadata(DataView metadata) {
         this.metadata = metadata;
         return this;
     }
 
     @Override
-    public Builder metaValue(String key, Object value) {
+    public SpongeSchematicBuilder metaValue(String key, Object value) {
         this.metaValues.put(key, value);
         return this;
     }
 
     @Override
-    public Builder from(Schematic value) {
+    public SpongeSchematicBuilder from(Schematic value) {
         this.volume = value;
         this.view = null;
-        this.palette = value.getPalette();
-        this.type = this.palette.getType();
+        this.blockPalette = value.getPalette();
+        this.biomePalette = value.getBiomePalette();
+        this.blockType = this.blockPalette.getType();
         this.metadata = value.getMetadata();
         this.metaValues.clear();
         return this;
     }
 
     @Override
-    public Builder reset() {
+    public SpongeSchematicBuilder reset() {
         this.volume = null;
         this.view = null;
-        this.palette = null;
-        this.type = BlockPaletteTypes.LOCAL;
+        this.blockPalette = null;
+        this.blockType = PaletteTypes.LOCAL_BLOCKS;
+        this.biomePalette = null;
+        this.biomeType = PaletteTypes.LOCAL_BIOMES;
         this.metadata = null;
         this.metaValues.clear();
         return this;
@@ -117,18 +234,21 @@ public class SpongeSchematicBuilder implements Schematic.Builder {
 
     @Override
     public Schematic build() throws IllegalArgumentException {
-        if (this.palette == null) {
-            this.palette = this.type.create();
+        if (this.blockPalette == null) {
+            this.blockPalette = this.blockType.create();
         }
-        checkArgument(this.volume != null || this.view != null);
+        checkArgument(this.volume != null || this.view != null || this.backingVolume != null, "Either Volume, Extent, or BlockVolume must be set!");
         Vector3i min;
         Vector3i size;
         if (this.volume != null) {
             min = this.volume.getBlockMin();
             size = this.volume.getBlockSize();
-        } else {
+        } else if (this.view != null){
             min = this.view.getBlockMin();
             size = this.view.getBlockSize();
+        } else {
+            min = this.backingVolume.getBlockMin();
+            size = this.backingVolume.getBlockSize();
         }
         if (this.metadata == null) {
             this.metadata = DataContainer.createNew();
@@ -136,19 +256,52 @@ public class SpongeSchematicBuilder implements Schematic.Builder {
         for (Map.Entry<String, Object> entry : this.metaValues.entrySet()) {
             this.metadata.set(DataQuery.of('.', entry.getKey()), entry.getValue());
         }
-        if (this.volume == null) {
-            final MutableBlockVolume volume = new ArrayMutableBlockBuffer(this.palette, min, size);
-            Map<Vector3i, TileEntityArchetype> tiles = Maps.newHashMap();
-            this.view.getBlockWorker().iterate((v, x, y, z) -> {
-                volume.setBlock(x, y, z, v.getBlock(x, y, z));
-                Optional<TileEntity> tile = v.getTileEntity(x, y, z);
-                if (tile.isPresent()) {
-                    tiles.put(new Vector3i(x, y, z), tile.get().createArchetype());
+        if (this.tiles == null) {
+            if (this.volume == null) {
+                if (this.view != null) {
+                    final MutableBlockVolume volume = new ArrayMutableBlockBuffer(this.blockPalette, min, size);
+                    Map<Vector3i, TileEntityArchetype> tiles = Maps.newHashMap();
+                    final MutableBlockVolumeWorker<? extends Extent> blockWorker = this.view.getBlockWorker();
+                    blockWorker.iterate((v, x, y, z) -> {
+                        volume.setBlock(x, y, z, v.getBlock(x, y, z));
+                        Optional<TileEntity> tile = v.getTileEntity(x, y, z);
+                        tile.map(TileEntity::createArchetype)
+                            .ifPresent(archetype -> tiles.put(new Vector3i(x, y, z), archetype));
+                    });
+                    this.backingVolume = volume;
+                    this.tiles = tiles;
+                } else {
+                    this.tiles = null;
                 }
-            });
-            return new SpongeSchematic(volume, tiles, this.metadata);
+            } else {
+                this.tiles = this.volume.getTileEntityArchetypes();
+            }
         }
-        return new SpongeSchematic((SpongeArchetypeVolume) this.volume, this.metadata);
+        if (this.biomeVolume == null) {
+            if (this.volume == null) {
+                if (this.view != null) {
+                    final MutableBiomeVolume biomes = new ByteArrayMutableBiomeBuffer(this.biomePalette, min, size);
+                    this.view.getBiomeWorker().iterate((v, x, y, z) -> biomes.setBiome(x, y, z, v.getBiome(x, y, z)));
+                    this.biomeVolume = biomes;
+                }
+            }
+        }
+        if (this.entities == null) {
+            if (this.volume != null) {
+                this.entities = this.volume.getEntityArchetypes();
+            } else if (this.view != null) {
+                this.entities = this.view.getIntersectingEntities(this.backingVolume.getBlockMin().toDouble(), this.backingVolume.getBlockMax().toDouble()).stream()
+                    .map(EntityUniverse.EntityHit::getEntity)
+                    .filter(Objects::nonNull)
+                    .map(Entity::createArchetype)
+                    .collect(Collectors.toList());
+            }
+        }
+        if (this.backingVolume == null) {
+            this.backingVolume = this.volume;
+        }
+        this.biomePalette = GlobalPalette.getBiomePalette();
+        return new SpongeSchematic(this);
     }
 
 }

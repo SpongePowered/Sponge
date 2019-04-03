@@ -37,6 +37,7 @@ import org.spongepowered.api.world.extent.MutableBiomeVolume;
 import org.spongepowered.api.world.extent.StorageType;
 import org.spongepowered.api.world.extent.UnmodifiableBiomeVolume;
 import org.spongepowered.api.world.extent.worker.MutableBiomeVolumeWorker;
+import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.common.world.extent.MutableBiomeViewDownsize;
 import org.spongepowered.common.world.extent.MutableBiomeViewTransform;
 import org.spongepowered.common.world.extent.UnmodifiableBiomeVolumeWrapper;
@@ -54,18 +55,20 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
 
     private boolean detached;
     private final byte[] biomes;
+    private final Palette<BiomeType> palette;
 
     private void checkOpen() {
         checkState(!this.detached, "trying to use buffer after it's closed");
     }
 
-    public ByteArrayMutableBiomeBuffer(Vector3i start, Vector3i size) {
-        this(new byte[size.getX() * size.getZ()], start, size);
+    public ByteArrayMutableBiomeBuffer(Palette<BiomeType> palette, Vector3i start, Vector3i size) {
+        this(palette, new byte[size.getX() * size.getZ()], start, size);
     }
 
-    public ByteArrayMutableBiomeBuffer(byte[] biomes, Vector3i start, Vector3i size) {
+    public ByteArrayMutableBiomeBuffer(Palette<BiomeType> palette, byte[] biomes, Vector3i start, Vector3i size) {
         super(start, size);
         this.biomes = biomes;
+        this.palette = palette;
     }
 
     @Override
@@ -73,7 +76,7 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
         checkOpen();
         checkRange(x, y, z);
 
-        this.biomes[getIndex(x, z)] = (byte) Biome.getIdForBiome((Biome) biome);
+        this.biomes[getIndex(x, z)] = (byte) this.palette.getOrAssign(biome);
     }
 
     @Override
@@ -82,8 +85,7 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
         checkRange(x, y, z);
 
         byte biomeId = this.biomes[getIndex(x, z)];
-        BiomeType biomeType = (BiomeType) Biome.getBiomeForId(biomeId & 255);
-        return biomeType == null ? BiomeTypes.OCEAN : biomeType;
+        return this.palette.get(biomeId & 255).orElse(BiomeTypes.OCEAN);
     }
 
     /**
@@ -152,7 +154,7 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
         checkOpen();
         switch (type) {
             case STANDARD:
-                return new ByteArrayMutableBiomeBuffer(this.biomes.clone(), this.start, this.size);
+                return new ByteArrayMutableBiomeBuffer(this.palette, this.biomes.clone(), this.start, this.size);
             case THREAD_SAFE:
             default:
                 throw new UnsupportedOperationException(type.name());
@@ -162,7 +164,7 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
     @Override
     public ImmutableBiomeVolume getImmutableBiomeCopy() {
         checkOpen();
-        return new ByteArrayImmutableBiomeBuffer(this.biomes, this.start, this.size);
+        return new ByteArrayImmutableBiomeBuffer(this.palette, this.biomes, this.start, this.size);
     }
 
 }

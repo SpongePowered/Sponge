@@ -24,34 +24,51 @@
  */
 package org.spongepowered.common.world.schematic;
 
-import com.flowpowered.math.vector.Vector3i;
-import org.spongepowered.api.block.tileentity.TileEntityArchetype;
-import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.world.extent.MutableBlockVolume;
+import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.biome.BiomeType;
+import org.spongepowered.api.world.extent.MutableBiomeVolume;
 import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
+import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
 
-import java.util.Map;
+import java.util.Optional;
 
+import javax.annotation.Nullable;
+
+@SuppressWarnings("deprecation")
 public class SpongeSchematic extends SpongeArchetypeVolume implements Schematic {
 
+    @Nullable
+    private final MutableBiomeVolume biomes;
+    private final Palette<BiomeType> biomePalette;
     private DataView metadata;
 
-    public SpongeSchematic(SpongeArchetypeVolume volume, DataView metadata) {
-        super(volume.getBacking(), volume.getTileEntityArchetypes());
-        this.metadata = metadata;
+    SpongeSchematic(SpongeSchematicBuilder builder) {
+        super(builder.backingVolume, builder.tiles, builder.entities);
+        this.metadata = builder.metadata;
+        this.biomes = builder.biomeVolume;
+        this.biomePalette = builder.biomePalette;
+
     }
 
-    public SpongeSchematic(MutableBlockVolume backing, Map<Vector3i, TileEntityArchetype> tiles) {
-        super(backing, tiles);
-        this.metadata = DataContainer.createNew();
+    @Override
+    public void apply(Location<World> location, BlockChangeFlag changeFlag) {
+        super.apply(location, changeFlag);
+        if (this.biomes != null) {
+            this.biomes.getBiomeWorker().iterate((v, x, y, z) -> {
+                location.getExtent().setBiome(x + location.getBlockX(), y + location.getBlockY(), z + location.getBlockZ(), v.getBiome(x, y, z));
+            });
+        }
     }
 
-    public SpongeSchematic(MutableBlockVolume backing, Map<Vector3i, TileEntityArchetype> tiles, DataView metadata) {
-        super(backing, tiles);
-        this.metadata = metadata;
+    @Override
+    public org.spongepowered.api.world.schematic.BlockPalette getPalette() {
+        return (org.spongepowered.api.world.schematic.BlockPalette) super.getPalette();
     }
 
     @Override
@@ -62,6 +79,21 @@ public class SpongeSchematic extends SpongeArchetypeVolume implements Schematic 
     @Override
     public MutableBlockVolumeWorker<Schematic> getBlockWorker() {
         return new SpongeMutableBlockVolumeWorker<>(this);
+    }
+
+    @Override
+    public Palette<BlockState> getBlockPalette() {
+        return getPalette();
+    }
+
+    @Override
+    public Palette<BiomeType> getBiomePalette() {
+        return this.biomePalette;
+    }
+
+    @Override
+    public Optional<MutableBiomeVolume> getBiomes() {
+        return Optional.ofNullable(this.biomes);
     }
 
 }
