@@ -420,15 +420,15 @@ public final class WorldManager {
 
         if (worldInfo == null) {
             worldInfo = new WorldInfo((WorldSettings) (Object) archetype, folderName);
+            // Don't want to randomize the seed if there is an existing save file!
+            if (archetype.isSeedRandomized()) {
+                ((WorldProperties) worldInfo).setSeed(SpongeImpl.random.nextLong());
+            }
         } else {
             // DimensionType must be set before world config is created to get proper path
             ((IMixinWorldInfo) worldInfo).setDimensionType(archetype.getDimensionType());
             ((IMixinWorldInfo) worldInfo).createWorldConfig();
             ((WorldProperties) worldInfo).setGeneratorModifiers(archetype.getGeneratorModifiers());
-        }
-
-        if (archetype.isSeedRandomized()) {
-            ((WorldProperties) worldInfo).setSeed(SpongeImpl.random.nextLong());
         }
 
         setUuidOnProperties(getCurrentSavesDirectory().get(), (WorldProperties) worldInfo);
