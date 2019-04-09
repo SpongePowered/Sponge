@@ -283,6 +283,9 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
         if (this.proxies.isEmpty()) {
             // Don't push any changes to the proxy when we're not actually
             // capturing changes or using proxies.
+            if (!this.processed.isEmpty()) {
+                this.processed.clear();
+            }
             return;
         }
         if (this.processingTransaction != null) {
@@ -524,6 +527,10 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
 
     public boolean isProcessingNeighbors() {
         return this.isNeighbor;
+    }
+
+    public boolean hasProxy() {
+        return !this.proxies.isEmpty();
     }
 
     public static final class Proxy implements AutoCloseable {

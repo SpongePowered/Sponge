@@ -761,7 +761,7 @@ public final class PhaseTracker {
         if (currentState == newState) {
             // Some micro optimization in case someone is trying to set the new state to the same as current
             final SpongeProxyBlockAccess proxyAccess = mixinWorld.getProxyAccess();
-            if (proxyAccess.isProcessingNeighbors() && proxyAccess.getBlockState(pos) != currentState) {
+            if (proxyAccess.hasProxy() && proxyAccess.getBlockState(pos) != currentState) {
                 proxyAccess.onChunkChanged(pos, newState);
             }
             return false;
