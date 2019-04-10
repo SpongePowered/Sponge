@@ -898,14 +898,14 @@ public final class DataSerializers {
             public DataContainer translate(LocalDate obj) throws InvalidDataException {
                 return DataContainer.createNew()
                         .set(DataQueries.LOCAL_DATE_YEAR, obj.getYear())
-                        .set(DataQueries.LOCAL_DATE_MONTH, obj.getMonth())
+                        .set(DataQueries.LOCAL_DATE_MONTH, obj.getMonthValue())
                         .set(DataQueries.LOCAL_DATE_DAY, obj.getDayOfMonth());
             }
 
             @Override
             public DataView addTo(LocalDate obj, DataView dataView) {
                 return dataView.set(DataQueries.LOCAL_DATE_YEAR, obj.getYear())
-                    .set(DataQueries.LOCAL_DATE_MONTH, obj.getMonth())
+                    .set(DataQueries.LOCAL_DATE_MONTH, obj.getMonthValue())
                     .set(DataQueries.LOCAL_DATE_DAY, obj.getDayOfMonth());
             }
 
@@ -965,7 +965,7 @@ public final class DataSerializers {
             public DataContainer translate(LocalDateTime obj) throws InvalidDataException {
                 return DataContainer.createNew()
                         .set(DataQueries.LOCAL_DATE_YEAR, obj.getYear())
-                        .set(DataQueries.LOCAL_DATE_MONTH, obj.getMonth())
+                        .set(DataQueries.LOCAL_DATE_MONTH, obj.getMonthValue())
                         .set(DataQueries.LOCAL_DATE_DAY, obj.getDayOfMonth())
                         .set(DataQueries.LOCAL_TIME_HOUR, obj.getHour())
                         .set(DataQueries.LOCAL_TIME_MINUTE, obj.getMinute())
@@ -976,7 +976,7 @@ public final class DataSerializers {
             @Override
             public DataView addTo(LocalDateTime obj, DataView dataView) {
                 return dataView.set(DataQueries.LOCAL_DATE_YEAR, obj.getYear())
-                    .set(DataQueries.LOCAL_DATE_MONTH, obj.getMonth())
+                    .set(DataQueries.LOCAL_DATE_MONTH, obj.getMonthValue())
                     .set(DataQueries.LOCAL_DATE_DAY, obj.getDayOfMonth())
                     .set(DataQueries.LOCAL_TIME_HOUR, obj.getHour())
                     .set(DataQueries.LOCAL_TIME_MINUTE, obj.getMinute())
@@ -1044,7 +1044,7 @@ public final class DataSerializers {
             public DataContainer translate(ZonedDateTime obj) throws InvalidDataException {
                 return DataContainer.createNew()
                         .set(DataQueries.LOCAL_DATE_YEAR, obj.getYear())
-                        .set(DataQueries.LOCAL_DATE_MONTH, obj.getMonth())
+                        .set(DataQueries.LOCAL_DATE_MONTH, obj.getMonthValue())
                         .set(DataQueries.LOCAL_DATE_DAY, obj.getDayOfMonth())
                         .set(DataQueries.LOCAL_TIME_HOUR, obj.getHour())
                         .set(DataQueries.LOCAL_TIME_MINUTE, obj.getMinute())
@@ -1056,7 +1056,7 @@ public final class DataSerializers {
             @Override
             public DataView addTo(ZonedDateTime obj, DataView dataView) {
                 return dataView.set(DataQueries.LOCAL_DATE_YEAR, obj.getYear())
-                    .set(DataQueries.LOCAL_DATE_MONTH, obj.getMonth())
+                    .set(DataQueries.LOCAL_DATE_MONTH, obj.getMonthValue())
                     .set(DataQueries.LOCAL_DATE_DAY, obj.getDayOfMonth())
                     .set(DataQueries.LOCAL_TIME_HOUR, obj.getHour())
                     .set(DataQueries.LOCAL_TIME_MINUTE, obj.getMinute())
@@ -1122,7 +1122,7 @@ public final class DataSerializers {
                 final LocalDateTime local = obj.atZone(ZoneOffset.UTC).toLocalDateTime();
                 return DataContainer.createNew()
                         .set(DataQueries.LOCAL_DATE_YEAR, local.getYear())
-                        .set(DataQueries.LOCAL_DATE_MONTH, local.getMonth())
+                        .set(DataQueries.LOCAL_DATE_MONTH, local.getMonthValue())
                         .set(DataQueries.LOCAL_DATE_DAY, local.getDayOfMonth())
                         .set(DataQueries.LOCAL_TIME_HOUR, local.getHour())
                         .set(DataQueries.LOCAL_TIME_MINUTE, local.getMinute())
@@ -1134,7 +1134,7 @@ public final class DataSerializers {
             public DataView addTo(Instant obj, DataView dataView) {
                 final LocalDateTime local = obj.atZone(ZoneOffset.UTC).toLocalDateTime();
                 return dataView.set(DataQueries.LOCAL_DATE_YEAR, local.getYear())
-                    .set(DataQueries.LOCAL_DATE_MONTH, local.getMonth())
+                    .set(DataQueries.LOCAL_DATE_MONTH, local.getMonthValue())
                     .set(DataQueries.LOCAL_DATE_DAY, local.getDayOfMonth())
                     .set(DataQueries.LOCAL_TIME_HOUR, local.getHour())
                     .set(DataQueries.LOCAL_TIME_MINUTE, local.getMinute())
