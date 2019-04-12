@@ -210,18 +210,6 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
     }
 
     @Override
-    public void processCancelledTransaction(BlockEventTickContext context, Transaction<BlockSnapshot> transaction, BlockSnapshot original) {
-        context.getCapturedBlockSupplier().cancelTransaction(original);
-        final WorldServer worldServer = ((SpongeBlockSnapshot) original).getWorldServer();
-        final Chunk chunk = worldServer.getChunk(((SpongeBlockSnapshot) original).getBlockPos());
-        final PlayerChunkMapEntry entry = worldServer.getPlayerChunkMap().getEntry(chunk.x, chunk.z);
-        if (entry != null) {
-            ((IMixinPlayerChunkMapEntry) entry).markBiomesForUpdate();
-        }
-        super.processCancelledTransaction(context, transaction, original);
-    }
-
-    @Override
     public boolean hasSpecificBlockProcess(BlockEventTickContext context) {
         return true;
     }

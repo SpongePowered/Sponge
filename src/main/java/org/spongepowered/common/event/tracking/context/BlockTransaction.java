@@ -82,6 +82,8 @@ public abstract class BlockTransaction {
             .toString();
     }
 
+    abstract IMixinWorldServer getWorldServer();
+
     abstract void cancel(WorldServer worldServer, BlockPos blockPos, SpongeProxyBlockAccess proxyBlockAccess);
 
     abstract void process(Transaction<BlockSnapshot> eventTransaction, IPhaseState phaseState, PhaseContext<?> phaseContext,
@@ -189,6 +191,11 @@ public abstract class BlockTransaction {
         }
 
         @Override
+        IMixinWorldServer getWorldServer() {
+            return (IMixinWorldServer) this.addedSnapshot.getWorldServer();
+        }
+
+        @Override
         public void addToPrinter(PrettyPrinter printer) {
             printer.add("AddTileEntity")
                 .addWrapped(120, " %s : %s", this.affectedPosition, ((IMixinTileEntity) this.added).getPrettyPrinterString());
@@ -253,6 +260,12 @@ public abstract class BlockTransaction {
         public SpongeProxyBlockAccess.Proxy getProxy(IMixinWorldServer mixinWorldServer) {
             return mixinWorldServer.getProxyAccess().pushProxy();
         }
+
+        @Override
+        IMixinWorldServer getWorldServer() {
+            return (IMixinWorldServer) this.tileSnapshot.getWorldServer();
+        }
+
     }
 
     @SuppressWarnings("rawtypes")
@@ -308,6 +321,11 @@ public abstract class BlockTransaction {
         @Override
         public SpongeProxyBlockAccess.Proxy getProxy(IMixinWorldServer mixinWorldServer) {
             return mixinWorldServer.getProxyAccess().pushProxy();
+        }
+
+        @Override
+        IMixinWorldServer getWorldServer() {
+            return (IMixinWorldServer) this.removedSnapshot.getWorldServer();
         }
 
         @Override
@@ -444,6 +462,10 @@ public abstract class BlockTransaction {
             return mixinWorldServer.getProxyAccess().pushProxy();
         }
 
+        @Override
+        IMixinWorldServer getWorldServer() {
+            return (IMixinWorldServer) this.original.getWorldServer();
+        }
 
         @Override
         public void addToPrinter(PrettyPrinter printer) {
@@ -548,6 +570,11 @@ public abstract class BlockTransaction {
             printer.add("NeighborNotification")
                 .add(" %s : %s, %s", "Source Pos", this.originalState, this.sourcePos)
                 .add(" %s : %s, %s", "Notification", this.notifyState, this.notifyPos);
+        }
+
+        @Override
+        IMixinWorldServer getWorldServer() {
+            return this.worldServer;
         }
     }
 

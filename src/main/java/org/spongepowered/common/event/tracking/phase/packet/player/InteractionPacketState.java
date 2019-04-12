@@ -108,6 +108,20 @@ public final class InteractionPacketState extends BasicPacketState {
         return true;
     }
 
+    @Override
+    public boolean tracksTileEntityChanges(BasicPacketContext currentContext) {
+        return true;
+    }
+
+    @Override
+    public boolean hasSpecificBlockProcess(BasicPacketContext context) {
+        return true;
+    }
+
+    @Override
+    public boolean doesCaptureNeighborNotifications(BasicPacketContext context) {
+        return true;
+    }
 
     @Override
     public boolean canSwitchTo(IPhaseState<?> state) {
@@ -156,12 +170,9 @@ public final class InteractionPacketState extends BasicPacketState {
             } else {
                 phaseContext.getBlockItemDropSupplier().acceptAndClearIfNotEmpty(map -> {
                     if (ShouldFire.DROP_ITEM_EVENT_DESTRUCT) {
-
-                        for (SpongeBlockSnapshot blockChange : capturedBlcoks) {
-                            final BlockPos blockPos = blockChange.getBlockPos();
-                            final Collection<EntityItem> entityItems = map.get(blockPos);
-                            if (!entityItems.isEmpty()) {
-                                final List<Entity> items = entityItems.stream().map(EntityUtil::fromNative).collect(Collectors.toList());
+                        for (Map.Entry<BlockPos, Collection<EntityItem>> entry : map.asMap().entrySet()) {
+                            if (!entry.getValue().isEmpty()) {
+                                final List<Entity> items = entry.getValue().stream().map(EntityUtil::fromNative).collect(Collectors.toList());
                                 final DropItemEvent.Destruct event =
                                     SpongeEventFactory.createDropItemEventDestruct(Sponge.getCauseStackManager().getCurrentCause(), items);
                                 SpongeImpl.postEvent(event);
@@ -171,11 +182,9 @@ public final class InteractionPacketState extends BasicPacketState {
                             }
                         }
                     } else {
-                        for (SpongeBlockSnapshot blockChange : capturedBlcoks) {
-                            final BlockPos blockPos = blockChange.getBlockPos();
-                            final Collection<EntityItem> entityItems = map.get(blockPos);
-                            if (!entityItems.isEmpty()) {
-                                processEntities(player, (Collection<Entity>) (Collection<?>) entityItems);
+                        for (Map.Entry<BlockPos, Collection<EntityItem>> entry : map.asMap().entrySet()) {
+                            if (!entry.getValue().isEmpty()) {
+                                processEntities(player, (Collection<Entity>) (Collection<?>) entry.getValue());
                             }
                         }
                     }

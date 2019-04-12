@@ -35,6 +35,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
+import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -74,6 +75,7 @@ import org.spongepowered.common.event.tracking.phase.tick.NeighborNotificationCo
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
+import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMapEntry;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.mixin.core.world.MixinChunk;
 import org.spongepowered.common.mixin.tracking.world.MixinChunk_Tracker;
@@ -865,6 +867,15 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     }
 
     default void processCancelledTransaction(C context, Transaction<BlockSnapshot> transaction, BlockSnapshot original) {
+        if (this.hasSpecificBlockProcess(context)) {
+            context.getCapturedBlockSupplier().cancelTransaction(original);
+            final WorldServer worldServer = ((SpongeBlockSnapshot) original).getWorldServer();
+            final Chunk chunk = worldServer.getChunk(((SpongeBlockSnapshot) original).getBlockPos());
+            final PlayerChunkMapEntry entry = worldServer.getPlayerChunkMap().getEntry(chunk.x, chunk.z);
+            if (entry != null) {
+                ((IMixinPlayerChunkMapEntry) entry).markBiomesForUpdate();
+            }
+        }
         if (this.tracksBlockSpecificDrops(context)) {
             // Cancel any block drops or harvests for the block change.
             // This prevents unnecessary spawns.

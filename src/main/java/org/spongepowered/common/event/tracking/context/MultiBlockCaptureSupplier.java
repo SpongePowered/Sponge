@@ -326,7 +326,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
      */
     @Override
     public final boolean isEmpty() {
-        return this.snapshots == null || this.snapshots.isEmpty();
+        return (this.snapshots == null || this.snapshots.isEmpty()) && this.head == null;
     }
 
     /**
@@ -636,7 +636,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
             }
             return noCancelledTransactions;
         }
-        Transaction<BlockSnapshot> eventTransaction = transactions.get(targetIndex);
+        Transaction<BlockSnapshot> eventTransaction = transactions.isEmpty() ? null : transactions.get(targetIndex);
         try {
             for (BlockTransaction transaction = this.head; transaction != null; transaction = transaction.next) {
 
@@ -644,10 +644,10 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
                     targetIndex++;
                     eventTransaction = transactions.get(targetIndex);
                 }
-                if (!eventTransaction.isValid()) {
+                if (eventTransaction != null && !eventTransaction.isValid()) {
                     continue;
                 }
-                final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) ((SpongeBlockSnapshot) eventTransaction.getOriginal()).getWorldServer();
+                final IMixinWorldServer mixinWorldServer = transaction.getWorldServer();
                 try (final SpongeProxyBlockAccess access = mixinWorldServer.getProxyAccess().switchTo(transaction);
                      final SpongeProxyBlockAccess.Proxy proxy = transaction.getProxy(mixinWorldServer)){
                     final PrettyPrinter printer;
@@ -705,6 +705,14 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
                     PhaseTracker.getInstance().printMessageWithCaughtException("Forcibly Closing Proxy", "Proxy Access could not be popped", e);
                 }
             }
+            for (BlockTransaction transaction = this.head; transaction != null; ) {
+                BlockTransaction next = transaction.next;
+                transaction.previous = null;
+                transaction.next = null;
+                transaction = next;
+            }
+            this.head = null;
+            this.tail = null;
         }
         return noCancelledTransactions;
     }
@@ -756,5 +764,13 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
                 PhaseTracker.getInstance().printMessageWithCaughtException("Forcibly Closing Proxy", "Proxy Access could not be popped", e);
             }
         }
+    }
+
+    public boolean hasTransactions() {
+        return this.head != null;
+    }
+
+    public boolean hasBlocksCaptured() {
+        return !(this.snapshots == null || this.snapshots.isEmpty());
     }
 }

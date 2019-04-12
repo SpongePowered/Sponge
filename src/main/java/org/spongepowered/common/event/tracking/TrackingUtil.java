@@ -407,7 +407,16 @@ public final class TrackingUtil {
     static boolean processBlockCaptures(IPhaseState<?> state, PhaseContext<?> context, int currentDepth) {
         final MultiBlockCaptureSupplier snapshots = context.getCapturedBlockSupplier();
         // Fail fast and check if it's empty.
-        if (snapshots.isEmpty()) {
+        if (!snapshots.hasBlocksCaptured()) {
+            if (((IPhaseState) state).hasSpecificBlockProcess(context) && snapshots.hasTransactions()) {
+                // Then we just need to process the transactions, there may be things that are not
+                // specifically block captured
+                ListMultimap<BlockPos, BlockEventData> scheduledEvents = snapshots.getScheduledEvents();
+                // Clear captured snapshots after processing them
+                snapshots.clear();
+                return snapshots.processTransactions(ImmutableList.of(), context, true, scheduledEvents, currentDepth);
+
+            }
             return false;
         }
         final List<ChangeBlockEvent> blockEvents = new ArrayList<>();
