@@ -45,6 +45,7 @@ import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
@@ -64,14 +65,18 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("unchecked")
 public final class PlaceBlockPacketState extends BasicPacketState {
 
-    private BiConsumer<CauseStackManager.StackFrame, BasicPacketContext> BASIC_PACKET_MODIFIER = super.getFrameModifier().andThen((frame, ctx) -> {
-        frame.addContext(EventContextKeys.PLAYER_PLACE, ctx.getSpongePlayer().getWorld());
-        frame.addContext(EventContextKeys.USED_HAND, ctx.getHandUsed());
-        frame.addContext(EventContextKeys.USED_ITEM, ctx.getItemUsedSnapshot());
-        frame.pushCause(ctx.getSpongePlayer());
-    });
+    private BiConsumer<CauseStackManager.StackFrame, BasicPacketContext> BASIC_PACKET_MODIFIER =
+            ((BiConsumer<CauseStackManager.StackFrame, BasicPacketContext>) IPhaseState.DEFAULT_OWNER_NOTIFIER)
+                    .andThen((frame, ctx) -> {
+                        frame.addContext(EventContextKeys.PLAYER_PLACE, ctx.getSpongePlayer().getWorld());
+                        frame.addContext(EventContextKeys.USED_HAND, ctx.getHandUsed());
+                        frame.addContext(EventContextKeys.USED_ITEM, ctx.getItemUsedSnapshot());
+                        frame.pushCause(ctx.getSpongePlayer());
+                    });
+
     @Override
     public BiConsumer<CauseStackManager.StackFrame, BasicPacketContext> getFrameModifier() {
         return this.BASIC_PACKET_MODIFIER;

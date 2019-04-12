@@ -44,6 +44,7 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
@@ -57,17 +58,21 @@ import org.spongepowered.common.world.BlockChange;
 
 import java.util.function.BiConsumer;
 
+@SuppressWarnings("unchecked")
 public final class UseItemPacketState extends BasicPacketState {
-    private BiConsumer<CauseStackManager.StackFrame, BasicPacketContext> BASIC_PACKET_MODIFIER = super.getFrameModifier().andThen((frame, ctx) -> {
-        frame.addContext(EventContextKeys.PLAYER_PLACE, ctx.getSpongePlayer().getWorld());
-        frame.addContext(EventContextKeys.USED_HAND, ctx.getHandUsed());
-        frame.addContext(EventContextKeys.USED_ITEM, ctx.getItemUsedSnapshot());
-        final ItemStack itemStack = ctx.getItemUsed();
-        frame.addContext(EventContextKeys.SPAWN_TYPE,
-            itemStack.getType() == ItemTypes.SPAWN_EGG ? SpawnTypes.SPAWN_EGG : SpawnTypes.PLACEMENT);
-        frame.pushCause(ctx.getItemUsedSnapshot());
-        frame.pushCause(ctx.getSpongePlayer());
-    });
+
+    private BiConsumer<CauseStackManager.StackFrame, BasicPacketContext> BASIC_PACKET_MODIFIER =
+            ((BiConsumer<CauseStackManager.StackFrame, BasicPacketContext>) IPhaseState.DEFAULT_OWNER_NOTIFIER)
+                    .andThen((frame, ctx) -> {
+                        frame.addContext(EventContextKeys.PLAYER_PLACE, ctx.getSpongePlayer().getWorld());
+                        frame.addContext(EventContextKeys.USED_HAND, ctx.getHandUsed());
+                        frame.addContext(EventContextKeys.USED_ITEM, ctx.getItemUsedSnapshot());
+                        final ItemStack itemStack = ctx.getItemUsed();
+                        frame.addContext(EventContextKeys.SPAWN_TYPE,
+                                itemStack.getType() == ItemTypes.SPAWN_EGG ? SpawnTypes.SPAWN_EGG : SpawnTypes.PLACEMENT);
+                        frame.pushCause(ctx.getSpongePlayer());
+                    });
+
     @Override
     public BiConsumer<CauseStackManager.StackFrame, BasicPacketContext> getFrameModifier() {
         return this.BASIC_PACKET_MODIFIER;
