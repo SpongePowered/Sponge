@@ -31,6 +31,7 @@ import net.minecraft.stats.StatisticsManager;
 import net.minecraft.util.TupleIntJsonSerializable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.statistic.ChangeStatisticEvent;
 import org.spongepowered.api.statistic.Statistic;
@@ -62,18 +63,20 @@ public abstract class MixinStatisticsManager implements IMixinStatisticsManager 
         }
 
         int prev = readStat(stat);
-        // TODO: Better cause here?
-        Sponge.getCauseStackManager().pushCause(player);
-        ChangeStatisticEvent.TargetPlayer event = SpongeEventFactory.createChangeStatisticEventTargetPlayer(
-                Sponge.getCauseStackManager().getCurrentCause(), prev, prev + amount, (Statistic) stat, (Player) player);
-        boolean cancelled = Sponge.getEventManager().post(event);
-        Sponge.getCauseStackManager().popCause();
-        this.statCaptured = true;
-        ci.cancel();
 
-        if (!cancelled) {
-            increaseStat(player, stat, (int) (event.getValue() - prev));
-            this.statCaptured = false;
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(player);
+            ChangeStatisticEvent.TargetPlayer event = SpongeEventFactory.createChangeStatisticEventTargetPlayer(
+                    Sponge.getCauseStackManager().getCurrentCause(), prev, prev + amount, (Statistic) stat, (Player) player);
+            boolean cancelled = Sponge.getEventManager().post(event);
+
+            this.statCaptured = true;
+            ci.cancel();
+
+            if (!cancelled) {
+                increaseStat(player, stat, (int) (event.getValue() - prev));
+                this.statCaptured = false;
+            }
         }
     }
 
