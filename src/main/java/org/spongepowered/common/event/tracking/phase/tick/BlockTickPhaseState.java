@@ -69,7 +69,10 @@ import java.util.function.BiConsumer;
 class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> {
     private final BiConsumer<CauseStackManager.StackFrame, BlockTickContext> LOCATION_MODIFIER =
         super.getFrameModifier().andThen((frame, context) ->
-            context.tickingBlock.getTickFrameModifier().accept(frame, (IMixinWorldServer) context.world)
+            {
+                frame.pushCause(this.getLocatableBlockSourceFromContext(context));
+                context.tickingBlock.getTickFrameModifier().accept(frame, (IMixinWorldServer) context.world);
+            }
         );
     private final String name;
 
