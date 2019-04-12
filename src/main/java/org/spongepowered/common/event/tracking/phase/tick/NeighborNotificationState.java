@@ -34,6 +34,7 @@ import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -43,13 +44,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 
+@SuppressWarnings("unchecked")
 class NeighborNotificationState extends LocationBasedTickPhaseState<NeighborNotificationContext> {
 
-    private final BiConsumer<StackFrame, NeighborNotificationContext> FRAME_MODIFIER = super.getFrameModifier().andThen((frame, context) -> {
-        if (context.notificationSnapshot != null) {
-            frame.addContext(EventContextKeys.NEIGHBOR_NOTIFY_SOURCE, context.notificationSnapshot);
-        }
-    });
+    private final BiConsumer<StackFrame, NeighborNotificationContext> FRAME_MODIFIER =
+        ((BiConsumer<StackFrame, NeighborNotificationContext>) IPhaseState.DEFAULT_OWNER_NOTIFIER)
+            .andThen((frame, context) -> {
+                if (context.notificationSnapshot != null) {
+                    frame.addContext(EventContextKeys.NEIGHBOR_NOTIFY_SOURCE, context.notificationSnapshot);
+                }
+            });
 
     private final String name;
 
