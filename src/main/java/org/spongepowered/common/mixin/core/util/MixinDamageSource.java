@@ -65,7 +65,7 @@ public abstract class MixinDamageSource implements DamageSource {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void spongeSetDamageTypeFromConstructor(String damageTypeIn, CallbackInfo ci) {
-        if (damageTypeIn.contains(":")) {
+        if (!damageTypeIn.contains(":")) {
             this.apiDamageType = DamageSourceToTypeProvider.getInstance().getOrCustom(damageTypeIn);
         } else {
             this.apiDamageType = Sponge.getRegistry().getType(DamageType.class, damageTypeIn).orElse(DamageTypes.CUSTOM);
