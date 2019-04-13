@@ -230,7 +230,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
                     if (!this.hasTile) {
                         printer.add("Unremoved TileEntities affected by the proxy, likely will cause issues if these are meant to be added to the world!");
                     }
-                    hasTile = true;
+                    this.hasTile = true;
                     printer.add(" - %s : %s", pos, ((IMixinTileEntity) tileEntity).getPrettyPrinterString());
                 }));
                 this.affectedTileEntities.clear();
@@ -340,10 +340,10 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
             this.processingWorld.addedTileEntityList.remove(removed);
             this.processingWorld.loadedTileEntityList.remove(removed);
             this.processingWorld.tickableTileEntities.remove(removed);
-            IMixinChunk activeChunk = ((IMixinTileEntity) removed).getActiveChunk();
-            if (activeChunk != null) {
-                activeChunk.removeTileEntity(removed);
-            }
+        }
+        IMixinChunk activeChunk = ((IMixinTileEntity) removed).getActiveChunk();
+        if (activeChunk != null) {
+            activeChunk.removeTileEntity(removed);
         }
     }
 
@@ -415,7 +415,9 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
             final BlockPos pos = removed.getPos();
             this.affectedTileEntities.put(pos, null);
             markRemovedTile(pos);
-            this.queuedRemovals.put(pos, removed);
+            if (!this.queuedRemovals.containsEntry(pos, removed)) {
+                this.queuedRemovals.put(pos, removed);
+            }
         }
     }
 
