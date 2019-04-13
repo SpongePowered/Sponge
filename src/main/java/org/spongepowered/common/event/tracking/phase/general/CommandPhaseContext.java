@@ -24,11 +24,45 @@
  */
 package org.spongepowered.common.event.tracking.phase.general;
 
+import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
+
+import javax.annotation.Nullable;
 
 public class CommandPhaseContext extends GeneralPhaseContext<CommandPhaseContext> {
-    public CommandPhaseContext(IPhaseState<CommandPhaseContext> state) {
+
+    @Nullable String command;
+    @Nullable private IMixinInventoryPlayer inventory;
+
+    CommandPhaseContext(IPhaseState<CommandPhaseContext> state) {
         super(state);
+    }
+
+    @Override
+    public boolean hasCaptures() {
+        return (this.inventory != null && !this.inventory.getCapturedTransactions().isEmpty()) || super.hasCaptures();
+    }
+
+    public CommandPhaseContext command(String command) {
+        this.command = command;
+        return this;
+    }
+
+    @Override
+    public PrettyPrinter printCustom(PrettyPrinter printer, int indent) {
+        String s = String.format("%1$"+indent+"s", "");
+        super.printCustom(printer, indent)
+            .add(s + "- %s: %s", "Command", this.command == null ? "empty command" : this.command);
+        if (this.inventory != null) {
+            printer.add(s + "-%s: %s", "Inventory", this.inventory.getCapturedTransactions());
+        }
+        return printer;
+    }
+
+    public CommandPhaseContext inventory(IMixinInventoryPlayer inventory) {
+        this.inventory = inventory;
+        return this;
     }
 
     // Maybe we could provide the command?

@@ -321,17 +321,23 @@ public class SpongeCommandManager implements CommandManager {
                  CommandPhaseContext context = GeneralPhase.State.COMMAND.createPhaseContext()
                          .source(source)
                          .addCaptures()
-                         .addEntityDropCaptures()) {
+                         .addEntityDropCaptures()
+                         .command(commandLine)) {
                 if (source instanceof User) {
                     context.owner((User) source);
                     context.notifier((User) source);
                 }
-                context.buildAndSwitch();
-                if (source instanceof EntityPlayer) {
+                final IMixinInventoryPlayer inventory = source instanceof EntityPlayer ? ((IMixinInventoryPlayer) ((EntityPlayer) source).inventory) : null;
+                if (inventory != null) {
                     // Enable player inventory capture
-                    ((IMixinInventoryPlayer) ((EntityPlayer) source).inventory).setCapture(true);
+                    context.inventory(inventory);
+                    inventory.setCapture(true);
                 }
+                context.buildAndSwitch();
                 final CommandResult result = this.dispatcher.process(source, commandLine);
+                if (inventory != null) {
+                    inventory.setCapture(false);
+                }
                 return result;
             } catch (InvocationCommandException ex) {
                 if (ex.getCause() != null) {
