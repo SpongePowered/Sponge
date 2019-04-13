@@ -51,7 +51,7 @@ public abstract class MixinEntityAgeable extends MixinEntityCreature implements 
     }
 
     private void callReadyToMateEvent() {
-        if (ShouldFire.BREED_ENTITY_EVENT_READY_TO_MATE && ((EntityAgeable) (Object) this) instanceof EntityAnimal) {
+        if (!this.world.isRemote && ShouldFire.BREED_ENTITY_EVENT_READY_TO_MATE && ((EntityAgeable) (Object) this) instanceof EntityAnimal) {
             final BreedEntityEvent.ReadyToMate event =
                 SpongeEventFactory.createBreedEntityEventReadyToMate(Sponge.getCauseStackManager().getCurrentCause(), Optional.empty(), (Animal)
                     this);
