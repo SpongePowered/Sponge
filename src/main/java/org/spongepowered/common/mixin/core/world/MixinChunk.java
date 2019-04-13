@@ -833,6 +833,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
                     transaction.queueTileSet = tileentity;
                     if (tileentity != null) {
                         ((IMixinTileEntity) tileentity).setCaptured(true);
+                        tileentity.setWorld(this.world);
                         tileentity.setPos(pos);// Set the position
                     }
                     transaction.enqueueChanges(mixinWorld.getProxyAccess(), peek.getCapturedBlockSupplier());

@@ -394,6 +394,9 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
         this.affectedTileEntities.put(pos, added);
         // Also, remove the position from being marked as removed.
         this.markedRemoved.remove(pos);
+        if (added != null && added.getWorld() != this.processingWorld) {
+            added.setWorld(this.processingWorld);
+        }
         this.queuedTiles.put(pos, added);
     }
 
