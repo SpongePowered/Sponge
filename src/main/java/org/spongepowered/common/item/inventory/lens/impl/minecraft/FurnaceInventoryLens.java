@@ -54,7 +54,9 @@ public class FurnaceInventoryLens extends RealLens {
 
         this.input = new InputSlotLensImpl(0, (i) -> true, (i) -> true);
         this.fuel = new FuelSlotLensImpl(1, (i) -> true, (i) -> true);       // TODO SlotFurnaceFuel
-        this.output = new OutputSlotLensImpl(2, (i) -> false, (i) -> false); // SlotFurnaceOutput
+
+        // TODO represent the filtering in the API somehow
+        this.output = new OutputSlotLensImpl(2, (i) -> true, (i) -> true); // SlotFurnaceOutput
 
         this.addSpanningChild(this.input, new SlotIndex(0));
         this.addSpanningChild(this.fuel, new SlotIndex(1));

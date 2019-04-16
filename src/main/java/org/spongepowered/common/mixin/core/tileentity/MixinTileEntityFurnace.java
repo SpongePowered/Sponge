@@ -68,7 +68,8 @@ public abstract class MixinTileEntityFurnace extends MixinTileEntityLockable imp
                     final ItemStack nmsStack = (ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(t, 1);
                     return TileEntityFurnace.isItemFuel(nmsStack) || isBucket(nmsStack);
                 }))
-                .add(OutputSlotAdapter.class, (i) -> new OutputSlotLensImpl(i, (s) -> false, (t) -> false))
+                // TODO represent the filtering in the API somehow
+                .add(OutputSlotAdapter.class, (i) -> new OutputSlotLensImpl(i, (s) -> true, (t) -> true))
                 .build();
     }
 
