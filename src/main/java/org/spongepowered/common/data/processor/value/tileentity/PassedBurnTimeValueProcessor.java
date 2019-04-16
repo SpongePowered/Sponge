@@ -69,6 +69,7 @@ public class PassedBurnTimeValueProcessor extends AbstractSpongeValueProcessor<T
         return SpongeValueFactory.boundedBuilder(Keys.PASSED_BURN_TIME)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
+                .defaultValue(value)
                 .build()
                 .asImmutable();
     }
