@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.processor.data.block;
 
 import net.minecraft.block.BlockStoneSlab;
+import net.minecraft.block.BlockStoneSlabNew;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableSlabData;
@@ -61,26 +62,19 @@ public class SlabDataProcessor extends AbstractCatalogDataProcessor<SlabType, Va
     @Override
     protected boolean set(ItemStack stack, SlabType value) {
         // TODO - the API needs to be refactored, as it's no longer possible to change the type of an ItemStack
-        return false;
-        /*
-        if (stack.getType() == ItemTypes.STONE_SLAB) {
-            if (!value.equals(SlabTypes.RED_SAND)) {
-                stack.setItemDamage(((BlockStoneSlab.EnumType) (Object) value).getMetadata());
-            } else {
-                stack.setItem(Item.getItemFromBlock(Blocks.STONE_SLAB2));
-                stack.setItemDamage(((BlockStoneSlabNew.EnumType) (Object) value).getMetadata());
+        Object oValue = value;
+        if (stack.getItem() == ItemTypes.STONE_SLAB) {
+            if (oValue instanceof BlockStoneSlab.EnumType) {
+                stack.setItemDamage(((BlockStoneSlab.EnumType) oValue).getMetadata());
+                return true;
             }
-        } else if (stack.getType() == ItemTypes.STONE_SLAB2) {
-            if (stack.getType() == ItemTypes.STONE_SLAB2) {
-                if (value.equals(SlabTypes.RED_SAND)) {
-                    stack.setItemDamage(((BlockStoneSlabNew.EnumType) (Object) value).getMetadata());
-                } else {
-                    stack.setItem(Item.getItemFromBlock(Blocks.STONE_SLAB));
-                    stack.setItemDamage(((BlockStoneSlab.EnumType) (Object) value).getMetadata());
-                }
+        } else if (stack.getItem() == ItemTypes.STONE_SLAB2) {
+            if (oValue instanceof BlockStoneSlabNew.EnumType) {
+                stack.setItemDamage(((BlockStoneSlab.EnumType) oValue).getMetadata());
+                return true;
             }
         }
-        return true;*/
+        return false;
     }
 
     @Override
