@@ -47,11 +47,9 @@ import org.spongepowered.common.inject.provider.config.PluginConfigurationModule
 public class PluginModule extends AbstractModule {
 
     private final PluginContainer container;
-    private final Class<?> pluginClass;
 
-    public PluginModule(final PluginContainer container, final Class<?> pluginClass) {
+    public PluginModule(final PluginContainer container) {
         this.container = container;
-        this.pluginClass = pluginClass;
     }
 
     @Override
