@@ -56,8 +56,6 @@ public class PluginModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        this.bind(this.pluginClass).in(Scopes.SINGLETON);
-
         this.install(new InjectionPointProvider());
 
         this.bind(PluginContainer.class).toInstance(this.container);
