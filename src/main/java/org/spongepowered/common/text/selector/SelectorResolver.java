@@ -261,9 +261,9 @@ public class SelectorResolver {
                 if (!value.isPresent()) return false;
 
                 if (min) {
-                    return ((Integer) arg.getValue()) < value.get().getScore();
+                    return ((Integer) arg.getValue()) <= value.get().getScore();
                 } else {
-                    return ((Integer) arg.getValue()) > value.get().getScore();
+                    return ((Integer) arg.getValue()) >= value.get().getScore();
                 }
             });
         }
