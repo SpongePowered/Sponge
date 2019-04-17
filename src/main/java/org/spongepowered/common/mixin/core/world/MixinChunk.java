@@ -858,7 +858,10 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     @Override
     public void removeTileEntity(TileEntity removed) {
         TileEntity tileentity = this.tileEntities.remove(removed.getPos());
-        if (tileentity != removed) {
+        if (tileentity != removed && tileentity != null) {
+            // Because multiple requests to remove a tile entity could cause for checks
+            // without actually knowing if the chunk doesn't have the tile entity, this
+            // avoids storing nulls.
             // Replace the pre-existing tile entity in case we remove a tile entity
             // we don't want to be removing.
             this.tileEntities.put(removed.getPos(), tileentity);

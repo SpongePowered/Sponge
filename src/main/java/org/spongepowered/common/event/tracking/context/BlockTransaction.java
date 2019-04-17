@@ -417,7 +417,7 @@ public abstract class BlockTransaction {
                 BlockSnapshot currentNeighborSource = currentContext.neighborNotificationSource;
                 currentContext.neighborNotificationSource = this.original;
                 if (proxiedOldState != oldState && this.previous != null) { // Only use the proxy state if the previous transaction set it.
-                    if (proxiedOldState.getBlock() != newState.getBlock()) {
+                    if (proxiedOldState.getBlock() != this.newState.getBlock()) {
                         proxiedOldState.getBlock().breakBlock(worldServer, targetPosition, proxiedOldState);
                     }
                 } else {

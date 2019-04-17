@@ -58,7 +58,7 @@ public final class UnwindingPhaseContext extends PhaseContext<UnwindingPhaseCont
 
     final boolean tracksTiles;
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private UnwindingPhaseContext(IPhaseState<?> unwindingState, PhaseContext<?> unwindingContext) {
         super(GeneralPhase.Post.UNWINDING);
         this.unwindingState = unwindingState;
@@ -71,7 +71,7 @@ public final class UnwindingPhaseContext extends PhaseContext<UnwindingPhaseCont
         // to worlds, AND we're potentially getting any neighbor notification requests OR tile entity requests,
         // we'll need to switch on to capture such objects. If for example, we do not track tile changes, but we track
         // neighbor notifications, that would be fine, but we cannot require that both are tracked unless specified.
-        this.usesMulti = this.allowsBulkBlockCaptures() && (this.tracksTiles || this.tracksNeighborNotifications);
+        this.usesMulti = this.allowsBulkBlockCaptures() && !this.isPostingSpecial;
         if (this.usesMulti) {
             // 8 is the minimum element size required by the ArrayDeque
             this.blockSuppliers = new ArrayDeque<>(8);

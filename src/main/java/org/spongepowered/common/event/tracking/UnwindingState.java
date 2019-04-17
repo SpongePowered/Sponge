@@ -117,7 +117,7 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
 
     @Override
     public boolean hasSpecificBlockProcess(UnwindingPhaseContext context) {
-        return context.usesMulti;
+        return !context.isPostingSpecialProcess();
     }
 
     @Override

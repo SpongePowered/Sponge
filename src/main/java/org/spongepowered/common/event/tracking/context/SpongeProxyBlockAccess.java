@@ -358,7 +358,6 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
         if (existing != null && existing != added) {
             ((IMixinTileEntity) existing).setCaptured(false);
             existing.invalidate();
-            removeTileEntityFromWorldAndChunk(existing);
         }
         ((IMixinTileEntity) added).setCaptured(false);
         if (this.processingWorld.processingLoadedTiles) {

@@ -88,7 +88,6 @@ import org.spongepowered.common.world.WorldUtil;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -861,7 +860,8 @@ public final class PhaseTracker {
                     }
                     // And now, proceed as normal.
                     // If we've gotten this far, the transaction wasn't cancelled, so pass 'noCancelledTransactions' as 'true'
-                    return TrackingUtil.performTransactionProcess(transaction, phaseState, context, Collections.emptyList(), true, 0);
+                    TrackingUtil.performTransactionProcess(transaction, phaseState, context, 0);
+                    return true;
                 }
             } catch (Exception | NoClassDefFoundError e) {
                 this.printBlockTrackingException(context, phaseState, e);

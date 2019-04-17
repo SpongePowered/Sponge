@@ -54,7 +54,6 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.mixin.core.world.MixinChunk;
-import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
@@ -71,6 +70,7 @@ import java.util.function.BiConsumer;
 
 import javax.annotation.Nullable;
 
+@SuppressWarnings("rawtypes")
 public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
 
     public static final boolean PRINT_TRANSACTIONS = Boolean.valueOf(System.getProperty("sponge.debugBlockTransactions", "false"));
@@ -630,15 +630,17 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
                 if (!transaction.isValid()) {
                     continue;
                 }
-                final BlockPos pos = hasEvents ? VecHelper.toBlockPos(transaction.getOriginal().getPosition()) : null;
-                final List<BlockEventData> events =  hasEvents ? scheduledEvents.get(pos) : Collections.emptyList();
-                noCancelledTransactions = TrackingUtil.performTransactionProcess(transaction, phaseState, phaseContext, events, noCancelledTransactions, currentDepth);
+                TrackingUtil.performTransactionProcess(transaction, phaseState, phaseContext, currentDepth);
             }
             return noCancelledTransactions;
         }
         Transaction<BlockSnapshot> eventTransaction = transactions.isEmpty() ? null : transactions.get(targetIndex);
         try {
-            for (BlockTransaction transaction = this.head; transaction != null; transaction = transaction.next) {
+            // now to clear this suppliers information before we start proceeding
+            final BlockTransaction head = this.head;
+            this.head = null;
+            this.tail = null;
+            for (BlockTransaction transaction = head; transaction != null; ) {
 
                 if (transaction.snapshotIndex > targetIndex) {
                     targetIndex++;
@@ -693,6 +695,13 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
                         .trace(System.err);
                 }
                 transaction.postProcessBlocksAffected(mixinWorldServer.getProxyAccess());
+
+                // Clean up
+                final BlockTransaction next = transaction.next;
+                transaction.next = null;
+                transaction.previous = null;
+                transaction = next;
+
             }
         } finally {
             if (this.processingWorlds == null) {
@@ -750,6 +759,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
     public String toString() {
         return com.google.common.base.MoreObjects.toStringHelper(this)
             .add("Captured", this.snapshots == null ? 0 : this.snapshots.size())
+            .add("Head", this.head == null ? "null" : this.head)
             .toString();
     }
 
