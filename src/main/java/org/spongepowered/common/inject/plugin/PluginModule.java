@@ -25,7 +25,7 @@
 package org.spongepowered.common.inject.plugin;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Scopes;
+import com.google.inject.Module;
 import org.slf4j.Logger;
 import org.spongepowered.api.asset.Asset;
 import org.spongepowered.api.asset.AssetId;
@@ -35,7 +35,6 @@ import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scheduler.AsynchronousExecutor;
 import org.spongepowered.api.scheduler.SpongeExecutorService;
 import org.spongepowered.api.scheduler.SynchronousExecutor;
-import org.spongepowered.common.inject.InjectionPointProvider;
 import org.spongepowered.common.inject.provider.ChannelBindingProvider;
 import org.spongepowered.common.inject.provider.PluginAssetProvider;
 import org.spongepowered.common.inject.provider.SpongeExecutorServiceProvider;
@@ -49,17 +48,15 @@ import java.util.List;
 public class PluginModule extends AbstractModule {
 
     private final PluginContainer container;
-    private final List<Class<?>> moduleClasses;
+    private final List<Class<? extends Module>> moduleClasses;
 
-    public PluginModule(final PluginContainer container, List<Class<?>> moduleClasses) {
+    public PluginModule(final PluginContainer container, List<Class<? extends Module>> moduleClasses) {
         this.container = container;
         this.moduleClasses = moduleClasses;
     }
 
     @Override
     protected void configure() {
-        this.install(new InjectionPointProvider());
-
         this.bind(PluginContainer.class).toInstance(this.container);
         this.bind(Logger.class).toInstance(this.container.getLogger());
 
@@ -70,7 +67,6 @@ public class PluginModule extends AbstractModule {
         this.bind(Asset.class).annotatedWith(AssetId.class).toProvider(PluginAssetProvider.class);
 
         this.install(new PluginConfigurationModule());
-
         this.moduleClasses.forEach(this::bind);
     }
 }
