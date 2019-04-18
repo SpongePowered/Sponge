@@ -24,18 +24,18 @@
  */
 package org.spongepowered.common.inject;
 
-import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
+import com.google.inject.PrivateModule;
 import com.google.inject.Provider;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.inject.provider.config.ConfigDirAnnotation;
 import org.spongepowered.common.inject.provider.PathAsFileProvider;
+import org.spongepowered.common.inject.provider.config.ConfigDirAnnotation;
 
 import java.io.File;
 import java.nio.file.Path;
 
-public class SpongeModule extends AbstractModule {
+public class SpongeModule extends PrivateModule {
 
     @Override
     protected void configure() {
