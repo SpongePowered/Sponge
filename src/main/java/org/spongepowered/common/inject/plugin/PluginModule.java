@@ -41,15 +41,19 @@ import org.spongepowered.common.inject.provider.PluginAssetProvider;
 import org.spongepowered.common.inject.provider.SpongeExecutorServiceProvider;
 import org.spongepowered.common.inject.provider.config.PluginConfigurationModule;
 
+import java.util.List;
+
 /**
  * A module installed for each plugin.
  */
 public class PluginModule extends AbstractModule {
 
     private final PluginContainer container;
+    private final List<Class<?>> moduleClasses;
 
-    public PluginModule(final PluginContainer container) {
+    public PluginModule(final PluginContainer container, List<Class<?>> moduleClasses) {
         this.container = container;
+        this.moduleClasses = moduleClasses;
     }
 
     @Override
@@ -66,5 +70,7 @@ public class PluginModule extends AbstractModule {
         this.bind(Asset.class).annotatedWith(AssetId.class).toProvider(PluginAssetProvider.class);
 
         this.install(new PluginConfigurationModule());
+
+        this.moduleClasses.forEach(this::bind);
     }
 }
