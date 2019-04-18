@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.feature.WorldGenBigMushroom;
 import net.minecraft.world.gen.feature.WorldGenBigTree;
 import net.minecraft.world.gen.feature.WorldGenBirchTree;
@@ -73,8 +74,11 @@ import net.minecraft.world.gen.feature.WorldGenWaterlily;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.util.CustomCatalogRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
+import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.interfaces.world.biome.IMixinBiome;
 import org.spongepowered.common.registry.RegistryHelper;
 import org.spongepowered.common.world.gen.InternalPopulatorTypes;
 import org.spongepowered.common.world.gen.SpongePopulatorType;
@@ -96,11 +100,17 @@ public final class PopulatorTypeRegistryModule implements AdditionalCatalogRegis
     @RegisterCatalog(PopulatorTypes.class)
     protected final Map<String, PopulatorType> populatorTypeMappings = Maps.newHashMap();
 
-    public Function<Class<?>, PopulatorType> customTypeFunction;
+    private final Function<Biome, PopulatorType> customTypeFunction;
+    private final Function<Class<?>, PopulatorType> classPopulatorTypeFunction;
+
 
     PopulatorTypeRegistryModule() {
         this.customTypeFunction = (type) -> {
-            return new SpongePopulatorType(type.getSimpleName(), type.getName().contains("net.minecraft.") ? "minecraft" : "unknown");
+            return new SpongePopulatorType(((BiomeType) type).getName(), ((BiomeType) type).getId());
+        };
+        this.classPopulatorTypeFunction = (cls) -> {
+            String biomeModifierId = SpongeImplHooks.getModIdFromClass(cls);
+            return new SpongePopulatorType(cls.getSimpleName(), biomeModifierId);
         };
     }
 
@@ -202,7 +212,7 @@ public final class PopulatorTypeRegistryModule implements AdditionalCatalogRegis
     public void registerAdditionalCatalog(PopulatorType extraCatalog) {
         checkNotNull(extraCatalog, "CatalogType cannot be null");
         checkArgument(!extraCatalog.getId().isEmpty(), "Id cannot be empty");
-        checkArgument(!this.populatorTypeMappings.containsKey(extraCatalog.getId()), "Duplicate Id");
+        checkArgument(!this.populatorTypeMappings.containsKey(extraCatalog.getId()), "Duplicate Id: " + extraCatalog.getId());
         this.populatorTypeMappings.put(extraCatalog.getId(), extraCatalog);
     }
 
@@ -225,11 +235,37 @@ public final class PopulatorTypeRegistryModule implements AdditionalCatalogRegis
         return this.populatorClassToTypeMappings.get(cls);
     }
 
+    public PopulatorType replaceFromForge(Biome biome) {
+        if (hasRegistrationFor(biome.getClass())) {
+            PopulatorType removed = this.populatorClassToTypeMappings.remove(biome.getClass());
+            this.populatorTypeMappings.remove(removed.getId());
+            SpongePopulatorType replacement = new SpongePopulatorType(((BiomeType) biome).getName(), ((IMixinBiome) biome).getModId());
+            this.populatorClassToTypeMappings.put(biome.getClass(), replacement);
+            registerAdditionalCatalog(replacement);
+            return replacement;
+        }
+        return getOrCreateForType(biome);
+    }
+
+    public PopulatorType getOrCreateForType(Biome biome) {
+        if (hasRegistrationFor(biome.getClass())) {
+            return getForClass(biome.getClass());
+        }
+        PopulatorType type = this.customTypeFunction.apply(biome);
+        if (type == null) {
+            return InternalPopulatorTypes.UNKNOWN;
+        }
+        registerAdditionalCatalog(type);
+        this.populatorClassToTypeMappings.put(biome.getClass(), type);
+        return type;
+    }
+
+
     public PopulatorType getOrCreateForType(Class<?> cls) {
         if (hasRegistrationFor(cls)) {
             return getForClass(cls);
         }
-        PopulatorType type = this.customTypeFunction.apply(cls);
+        PopulatorType type = this.classPopulatorTypeFunction.apply(cls);
         if (type == null) {
             return InternalPopulatorTypes.UNKNOWN;
         }

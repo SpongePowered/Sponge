@@ -351,7 +351,7 @@ public abstract class MixinBiome implements BiomeType, IMixinBiome {
 
     @Override
     public void setModId(String modId) {
-        checkState(this.modId == null, "Attempt made to set Mod ID!");
+        checkState(this.modId == null || "unknown".equals(this.modId), "Attempt made to set Mod ID!");
 
         this.modId = modId;
     }

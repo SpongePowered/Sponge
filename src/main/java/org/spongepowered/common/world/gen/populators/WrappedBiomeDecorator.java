@@ -44,7 +44,7 @@ public class WrappedBiomeDecorator implements Populator {
 
     public WrappedBiomeDecorator(Biome dec) {
         this.biome = dec;
-        this.type = PopulatorTypeRegistryModule.getInstance().getOrCreateForType(this.biome.getClass());
+        this.type = PopulatorTypeRegistryModule.getInstance().replaceFromForge(this.biome);
     }
 
     public WrappedBiomeDecorator(BiomeDecorator dec) {
