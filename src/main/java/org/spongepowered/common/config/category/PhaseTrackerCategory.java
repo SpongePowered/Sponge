@@ -53,6 +53,17 @@ public class PhaseTrackerCategory extends ConfigCategory {
                                                                 + "and emit a warning about said spawn anyways.")
     private boolean captureAndSpawnEntitiesSync = true;
 
+    @Setting(value = "resync-commands-from-async", comment = "If set to 'true', when a mod or plugin attempts to submit a command\n"
+                                                             + "asynchronously, Sponge will automatically capture said command\n"
+                                                             + "and submit it for processing on the server thread. The catch to\n"
+                                                             + "this is that some mods are performing these commands in vanilla\n"
+                                                             + "without considering the possible consequences of such commands\n"
+                                                             + "affecting any thread-unsafe parts of Minecraft, such as worlds,\n"
+                                                             + "block edits, entity spawns, etc. If this is set to false, Sponge\n"
+                                                             + "will politely ignore the command being executed, and emit a warning\n"
+                                                             + "about said command anyways.")
+    private boolean resyncAsyncCommands = true;
+
     @Setting(value = "generate-stacktrace-per-phase", comment = "If 'true', more thorough debugging for PhaseStates \n"
                                                               + "such that a StackTrace is created every time a PhaseState \n"
                                                               + "switches, allowing for more fine grained troubleshooting \n"
@@ -93,6 +104,10 @@ public class PhaseTrackerCategory extends ConfigCategory {
 
     public boolean captureEntitiesAsync() {
         return this.captureAndSpawnEntitiesSync;
+    }
+
+    public boolean resyncCommandsAsync() {
+        return this.resyncAsyncCommands;
     }
 
     public boolean generateStackTracePerStateEntry() {

@@ -31,19 +31,25 @@ import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.ServerCommandManager;
 import net.minecraft.util.math.BlockPos;
+import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.SubjectData;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.command.MinecraftCommandWrapper;
 import org.spongepowered.common.command.SpongeCommandManager;
 import org.spongepowered.common.command.WrapperCommandSource;
+import org.spongepowered.common.config.category.PhaseTrackerCategory;
 import org.spongepowered.common.interfaces.IMixinServerCommandManager;
 import org.spongepowered.common.service.permission.SpongePermissionService;
 import org.spongepowered.common.util.VecHelper;
@@ -52,6 +58,7 @@ import javax.annotation.Nullable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @NonnullByDefault
 @Mixin(ServerCommandManager.class)
@@ -59,6 +66,8 @@ public abstract class MixinServerCommandManager extends CommandHandler implement
 
     private List<MinecraftCommandWrapper> lowPriorityCommands = Lists.newArrayList();
     private List<MinecraftCommandWrapper> earlyRegisterCommands = Lists.newArrayList();
+
+    private static final CopyOnWriteArrayList<String> ASYNC_MOD_COMMAND_EXECUTORS = new CopyOnWriteArrayList<>();
 
     private void updateStat(ICommandSender sender, CommandResultStats.Type type, Optional<Integer> count) {
         if (count.isPresent()) {
@@ -68,9 +77,15 @@ public abstract class MixinServerCommandManager extends CommandHandler implement
 
     /**
      * @author zml
-     *
-     * Purpose: Reroute MC command handling through Sponge
-     * Reasoning: All commands should go through one system -- we need none of the MC handling code
+     * @author gabizou - April 18th, 2019 - 1.12.2
+     * @reason Reroute MC command handling through Sponge, all commands
+     * should flow through our systems for cause tracking, events, etc.
+     * instead of Sponge having to inject into all the underlying command
+     * handlers, potentially not targeting other command handlers.
+     * Update April 18th, 2019 - 1.12.2:
+     *  Force commands that are called asynchronously to be re-synced
+     *  to the main thread. Some mods will attempt to call commands off
+     *  their packet handling threads and end up causing exceptions
      */
     @Override
     public int executeCommand(ICommandSender sender, String command) {
@@ -78,9 +93,67 @@ public abstract class MixinServerCommandManager extends CommandHandler implement
         if (command.startsWith("/")) {
             command = command.substring(1);
         }
+        final String cleanedCommand = command;
+        if (!SpongeImplHooks.isMainThread()) {
+            final PhaseTrackerCategory trackerConfig = SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker();
+
+            PluginContainer activeModContainer = SpongeImplHooks.getActiveModContainer();
+            String id = activeModContainer.getId();
+            if (!trackerConfig.resyncCommandsAsync()) {
+                if (trackerConfig.isVerbose()) {
+                    new PrettyPrinter(60)
+                        .add("Async Command Execution Warning").centre().hr()
+                        .add("A plugin/mod attempted to perform a command asynchronously")
+                        .add()
+                        .add("Performing the command asynchronously and resycing it\n"
+                             + "is disabled in Sponge's main configuration, therefor the command\n"
+                             + "will be ignored. To enable re-submitting the command on the main\n"
+                             + "thread, please enable \"resync-commands-from-async\" in the global\n"
+                             + "config.")
+                        .add()
+                        .add("Details of the command:")
+                        .add("%s : %s", "Command", command)
+                        .add("%s : %s", "Offending Mod", id)
+                        .add("%s : %s", "Sender", sender.getDisplayName() == null ? "null" : sender.getDisplayName().getUnformattedText())
+                        .add("Stacktrace")
+                        .add(new Exception("Async Command Executor"))
+                        .trace(SpongeImpl.getLogger(), Level.WARN);
+                }
+                return 0;
+            }
+            if (!ASYNC_MOD_COMMAND_EXECUTORS.contains(id)) {
+                ASYNC_MOD_COMMAND_EXECUTORS.add(id);
+                if (trackerConfig.isVerbose()) {
+                    new PrettyPrinter(60)
+                        .add("Async Command Execution Warning").centre().hr()
+                        .add("A plugin/mod attempted to perform a command asynchronously")
+                        .add()
+                        .add("Performing the command asynchronously and resycing it\n"
+                             + "is enabled, so Sponge will resync the execution of the\n"
+                             + "command on the main thread. Some cases where a mod is\n"
+                             + "expecting the command to be run asynchronously to\n"
+                             + "modify other objects may cause issues in said mod.")
+                        .add()
+                        .add("Details of the command:")
+                        .add("%s : %s", "Command", command)
+                        .add("%s : %s", "Offending Mod", id)
+                        .add("%s : %s", "Sender", sender.getDisplayName() == null ? "null" : sender.getDisplayName().getUnformattedText())
+                        .add("Stacktrace")
+                        .add(new Exception("Async Command Executor"))
+                        .trace(SpongeImpl.getLogger(), Level.WARN);
+                }
+
+            }
+            Task.builder().name("Sponge Async to Sync Command Executor")
+                .execute(() -> {
+                    executeCommand(sender, cleanedCommand);
+                })
+                .submit(activeModContainer);
+            return 0;
+        }
 
         CommandSource source = WrapperCommandSource.of(sender);
-        CommandResult result = SpongeImpl.getGame().getCommandManager().process(source, command);
+        CommandResult result = SpongeImpl.getGame().getCommandManager().process(source, cleanedCommand);
         updateStat(sender, CommandResultStats.Type.AFFECTED_BLOCKS, result.getAffectedBlocks());
         updateStat(sender, CommandResultStats.Type.AFFECTED_ENTITIES, result.getAffectedEntities());
         updateStat(sender, CommandResultStats.Type.AFFECTED_ITEMS, result.getAffectedItems());
