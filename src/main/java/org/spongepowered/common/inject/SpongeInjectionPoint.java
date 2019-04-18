@@ -26,14 +26,14 @@ package org.spongepowered.common.inject;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.reflect.TypeToken;
+import org.spongepowered.api.inject.InjectionPoint;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedElement;
 import java.util.Arrays;
 
 import javax.annotation.Nullable;
 
-public final class SpongeInjectionPoint implements AnnotatedElement {
+final class SpongeInjectionPoint implements InjectionPoint {
 
     private final TypeToken<?> source;
     private final TypeToken<?> type;
@@ -45,10 +45,12 @@ public final class SpongeInjectionPoint implements AnnotatedElement {
         this.type = type;
     }
 
+    @Override
     public TypeToken<?> getSource() {
         return this.source;
     }
 
+    @Override
     public TypeToken<?> getType() {
         return this.type;
     }

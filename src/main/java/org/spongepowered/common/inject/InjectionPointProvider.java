@@ -34,6 +34,7 @@ import com.google.inject.spi.Dependency;
 import com.google.inject.spi.DependencyAndSource;
 import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProvisionListener;
+import org.spongepowered.api.inject.InjectionPoint;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Executable;
@@ -47,13 +48,13 @@ import javax.annotation.Nullable;
 /**
  * Allows injecting the {@link SpongeInjectionPoint} in {@link Provider}s.
  */
-public final class InjectionPointProvider extends AbstractMatcher<Binding<?>> implements Module, ProvisionListener, Provider<SpongeInjectionPoint> {
+public final class InjectionPointProvider extends AbstractMatcher<Binding<?>> implements Module, ProvisionListener, Provider<InjectionPoint> {
 
-    @Nullable private SpongeInjectionPoint injectionPoint;
+    @Nullable private InjectionPoint injectionPoint;
 
     @Nullable
     @Override
-    public SpongeInjectionPoint get() {
+    public InjectionPoint get() {
         return this.injectionPoint;
     }
 
@@ -73,7 +74,7 @@ public final class InjectionPointProvider extends AbstractMatcher<Binding<?>> im
     }
 
     @Nullable
-    private static SpongeInjectionPoint findInjectionPoint(List<DependencyAndSource> dependencyChain) {
+    private static InjectionPoint findInjectionPoint(List<DependencyAndSource> dependencyChain) {
         if (dependencyChain.size() < 3) {
             throw new AssertionError("Provider is not included in the dependency chain");
         }
@@ -108,7 +109,7 @@ public final class InjectionPointProvider extends AbstractMatcher<Binding<?>> im
 
     @Override
     public void configure(Binder binder) {
-        binder.bind(SpongeInjectionPoint.class).toProvider(this);
+        binder.bind(InjectionPoint.class).toProvider(this);
         binder.bindListener(this, this);
     }
 

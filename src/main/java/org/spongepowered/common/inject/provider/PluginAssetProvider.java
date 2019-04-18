@@ -29,8 +29,8 @@ import com.google.inject.Provider;
 import org.spongepowered.api.asset.Asset;
 import org.spongepowered.api.asset.AssetId;
 import org.spongepowered.api.asset.AssetManager;
+import org.spongepowered.api.inject.InjectionPoint;
 import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.common.inject.SpongeInjectionPoint;
 
 import java.util.NoSuchElementException;
 
@@ -38,11 +38,11 @@ public class PluginAssetProvider implements Provider<Asset> {
 
     @Inject private PluginContainer container;
     @Inject private AssetManager assetManager;
-    @Inject private SpongeInjectionPoint point;
+    @Inject private Provider<InjectionPoint> point;
 
     @Override
     public Asset get() {
-        String name = this.point.getAnnotation(AssetId.class).value();
+        String name = this.point.get().getAnnotation(AssetId.class).value();
         return this.assetManager.getAsset(this.container, name)
                 .orElseThrow(() -> new NoSuchElementException("Cannot find asset " + name));
     }

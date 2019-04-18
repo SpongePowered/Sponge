@@ -25,29 +25,23 @@
 package org.spongepowered.common.plugin;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Scopes;
 import org.spongepowered.api.plugin.PluginAdapter;
 import org.spongepowered.api.plugin.PluginContainer;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class DefaultPluginAdapter implements PluginAdapter.Default {
 
     public static DefaultPluginAdapter INSTANCE = new DefaultPluginAdapter();
 
     @Override
-    public <T> Injector createInjector(PluginContainer pluginContainer, Class<T> pluginClass, Injector defaultInjector, List<Module> pluginModules) {
-        final Module module = new AbstractModule() {
+    public <T> Module createPluginModule(PluginContainer pluginContainer, Class<T> pluginClass, Module defaultModule) {
+        return new AbstractModule() {
             @Override
             protected void configure() {
                 bind(pluginClass).in(Scopes.SINGLETON);
+                install(defaultModule);
             }
         };
-        final List<Module> modules = new ArrayList<>(pluginModules);
-        modules.add(0, module);
-        return defaultInjector.createChildInjector(modules);
     }
 }
