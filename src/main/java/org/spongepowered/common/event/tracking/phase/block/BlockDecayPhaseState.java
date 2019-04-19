@@ -48,6 +48,8 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.WorldUtil;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
@@ -91,12 +93,12 @@ final class BlockDecayPhaseState extends BlockPhaseState {
                     .map(EntityUtil::fromNative)
                     .collect(Collectors.toList());
                 Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-                SpongeCommonEventFactory.callSpawnEntity(entities, context);
+                SpongeCommonEventFactory.callDropItemDestruct(entities, context);
             });
         context.getCapturedEntitySupplier()
             .acceptAndClearIfNotEmpty(entities -> {
                 Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-                SpongeCommonEventFactory.callSpawnEntity(entities, context);
+                SpongeCommonEventFactory.callDropItemDestruct(entities, context);
 
             });
         context.getCapturedItemStackSupplier()
@@ -106,14 +108,16 @@ final class BlockDecayPhaseState extends BlockPhaseState {
                     .collect(Collectors.toList());
                 final List<Entity> entities = (List<Entity>) (List<?>) items;
                 if (!entities.isEmpty()) {
-                    DropItemEvent.Custom
-                        event =
-                        SpongeEventFactory.createDropItemEventCustom(Sponge.getCauseStackManager().getCurrentCause(), entities);
-                    SpongeImpl.postEvent(event);
-                    if (!event.isCancelled()) {
-                        EntityUtil.processEntitySpawnsFromEvent(context, event);
-                    }
+                    SpongeCommonEventFactory.callDropItemDestruct(entities, context);
                 }
+            });
+
+        context.getBlockItemDropSupplier()
+            .acceptAndClearIfNotEmpty(drops -> {
+                drops.asMap().forEach((key, value) -> {
+                    Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+                    SpongeCommonEventFactory.callDropItemDestruct(new ArrayList(value), context);
+                });
             });
 
 
