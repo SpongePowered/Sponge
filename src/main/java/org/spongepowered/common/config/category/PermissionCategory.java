@@ -30,10 +30,11 @@ import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 @ConfigSerializable
 public class PermissionCategory extends ConfigCategory {
 
-    @Setting(value = "force-handler", comment = "Forces the Sponge permission handler to be used rather than another mod's permission handler")
-    private boolean forceHandler = true;
+    @Setting(value = "forge-permissions-handler", comment = "If 'true', Sponge plugins will be used to handle permissions rather "
+            + "than any Forge mod")
+    private boolean enableHandler = false;
 
-    public boolean shouldForceHandler() {
-        return this.forceHandler;
+    public boolean shouldEnableHandler() {
+        return this.enableHandler;
     }
 }
