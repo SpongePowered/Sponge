@@ -73,6 +73,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.PacketContext;
 import org.spongepowered.common.interfaces.IMixinContainer;
@@ -228,8 +229,11 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
 
         SpongeImpl.postEvent(event);
 
-        if (!ItemStack.areItemStacksEqual(oldStack, this.player.getHeldItem(hand))) {
-            ((PacketContext<?>) PhaseTracker.getInstance().getCurrentContext()).interactItemChanged(true);
+        final PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
+        if (!SpongeImplHooks.isFakePlayer(this.player) && !ItemStack.areItemStacksEqual(oldStack, this.player.getHeldItem(hand))) {
+            if (currentContext instanceof PacketContext) {
+                ((PacketContext<?>) currentContext).interactItemChanged(true);
+            }
         }
 
         SpongeCommonEventFactory.lastInteractItemOnBlockCancelled = event.isCancelled() || event.getUseItemResult() == Tristate.FALSE;
@@ -281,8 +285,10 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
                 }
 
                 // if itemstack changed, avoid restore
-                if (!ItemStack.areItemStacksEqual(oldStack, this.player.getHeldItem(hand))) {
-                    ((PacketContext<?>) PhaseTracker.getInstance().getCurrentContext()).interactItemChanged(true);
+                if (!SpongeImplHooks.isFakePlayer(this.player) && !ItemStack.areItemStacksEqual(oldStack, this.player.getHeldItem(hand))) {
+                    if (currentContext instanceof PacketContext) {
+                        ((PacketContext<?>) currentContext).interactItemChanged(true);
+                    }
                 }
 
                 result = this.handleOpenEvent(lastOpenContainer, this.player, currentSnapshot, result);
