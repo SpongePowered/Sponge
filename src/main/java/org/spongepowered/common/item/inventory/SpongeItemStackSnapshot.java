@@ -387,7 +387,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
     @Override
     public GameDictionary.Entry createGameDictionaryEntry() {
-        return new SpongeGameDictionaryEntry.Specific((Item) this.itemType, this.damageValue);
+        return new SpongeGameDictionaryEntry.Specific((Item) (this.isNone() ? ItemTypes.NONE : this.itemType), this.damageValue);
     }
 
     public Optional<UUID> getCreator() {
