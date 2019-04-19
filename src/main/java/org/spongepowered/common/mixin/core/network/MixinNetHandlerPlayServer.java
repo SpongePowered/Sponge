@@ -60,6 +60,7 @@ import net.minecraft.network.play.client.CPacketPlayerDigging;
 import net.minecraft.network.play.client.CPacketPlayerTryUseItem;
 import net.minecraft.network.play.client.CPacketPlayerTryUseItemOnBlock;
 import net.minecraft.network.play.client.CPacketResourcePackStatus;
+import net.minecraft.network.play.client.CPacketSpectate;
 import net.minecraft.network.play.client.CPacketUpdateSign;
 import net.minecraft.network.play.client.CPacketUseEntity;
 import net.minecraft.network.play.client.CPacketVehicleMove;
@@ -68,6 +69,7 @@ import net.minecraft.network.play.server.SPacketKeepAlive;
 import net.minecraft.network.play.server.SPacketMoveVehicle;
 import net.minecraft.network.play.server.SPacketPlayerListItem;
 import net.minecraft.network.play.server.SPacketResourcePackSend;
+import net.minecraft.network.play.server.SPacketRespawn;
 import net.minecraft.network.play.server.SPacketSetExperience;
 import net.minecraft.network.play.server.SPacketSetSlot;
 import net.minecraft.server.MinecraftServer;
@@ -102,6 +104,7 @@ import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.tileentity.ChangeSignEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.RotateEntityEvent;
 import org.spongepowered.api.event.entity.living.humanoid.AnimateHandEvent;
@@ -126,6 +129,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -418,6 +422,73 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                 }
             }
             // Sponge end
+        }
+    }
+
+    /**
+     * @reason When a player use the spectator menu to teleport anyone,
+     * Sponge should fire the MoveEntityEvent.Teleport.
+     *
+     * @param packetIn The spectator packet
+     */
+    @Overwrite
+    public void handleSpectate(CPacketSpectate packetIn) {
+        PacketThreadUtil.checkThreadAndEnqueue(packetIn, (NetHandlerPlayServer) (Object) this, this.player.getServerWorld());
+
+        if (this.player.isSpectator()) {
+            Entity entity = null;
+
+            for (WorldServer worldserver : this.server.worlds) {
+                if (worldserver != null) {
+                    entity = packetIn.getEntity(worldserver);
+
+                    if (entity != null) {
+                        break;
+                    }
+                }
+            }
+
+            if (entity != null) {
+                this.player.setSpectatingEntity(this.player);
+                this.player.dismountRidingEntity();
+                // Sponge start - handle MoveEntityEvent.Teleport
+                double x = entity.posX;
+                double y = entity.posY;
+                double z = entity.posZ;
+                float yaw = entity.rotationYaw;
+                float pitch = entity.rotationPitch;
+
+                MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent(this.player, x, y, z, yaw, pitch);
+                if (event.isCancelled()) {
+                    return;
+                }
+                // Sponge end
+                if (entity.world == this.player.world) {
+                    this.player.setPositionAndUpdate(entity.posX, entity.posY, entity.posZ);
+                } else {
+                    WorldServer worldserver1 = this.player.getServerWorld();
+                    WorldServer worldserver2 = (WorldServer)entity.world;
+                    this.player.dimension = entity.dimension;
+                    this.sendPacket(new SPacketRespawn(this.player.dimension, worldserver1.getDifficulty(), worldserver1.getWorldInfo().getTerrainType(), this.player.interactionManager.getGameType()));
+                    this.server.getPlayerList().updatePermissionLevel(this.player);
+                    worldserver1.removeEntityDangerously(this.player);
+                    this.player.isDead = false;
+                    this.player.setLocationAndAngles(entity.posX, entity.posY, entity.posZ, entity.rotationYaw, entity.rotationPitch);
+
+                    if (this.player.isEntityAlive()) {
+                        worldserver1.updateEntityWithOptionalForce(this.player, false);
+                        worldserver2.spawnEntity(this.player);
+                        worldserver2.updateEntityWithOptionalForce(this.player, false);
+                    }
+
+                    this.player.setWorld(worldserver2);
+                    this.server.getPlayerList().preparePlayer(this.player, worldserver1);
+                    this.player.setPositionAndUpdate(entity.posX, entity.posY, entity.posZ);
+                    this.player.interactionManager.setWorld(worldserver2);
+                    this.server.getPlayerList().updateTimeAndWeatherForPlayer(this.player, worldserver2);
+                    this.server.getPlayerList().syncPlayerInventory(this.player);
+                }
+            }
         }
     }
 
