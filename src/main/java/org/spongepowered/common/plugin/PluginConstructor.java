@@ -76,8 +76,8 @@ public final class PluginConstructor {
                         continue;
                     }
                     bind((Key) entry.getKey()).toProvider(entry.getValue().getProvider());
-                    install(new InjectionPointProvider());
                 }
+                install(new InjectionPointProvider());
             }
         };
 
