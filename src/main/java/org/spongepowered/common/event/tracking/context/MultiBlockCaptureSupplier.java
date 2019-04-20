@@ -647,6 +647,10 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
                     eventTransaction = transactions.get(targetIndex);
                 }
                 if (eventTransaction != null && !eventTransaction.isValid()) {
+                    final BlockTransaction next = transaction.next;
+                    transaction.next = null;
+                    transaction.previous = null;
+                    transaction = next;
                     continue;
                 }
                 final IMixinWorldServer mixinWorldServer = transaction.getWorldServer();

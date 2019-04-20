@@ -450,7 +450,7 @@ public final class TrackingUtil {
 
         // Now we can gather the invalid transactions that either were marked as invalid from an event listener - OR - cancelled.
         // Because after, we will restore all the invalid transactions in reverse order.
-        clearInvalidTransactionDrops(context, postEvent, invalid);
+        clearInvalidTransactionDrops(context, postEvent);
 
         if (!invalid.isEmpty()) {
             // We need to set this value and return it to signify that some transactions were cancelled
@@ -529,11 +529,9 @@ public final class TrackingUtil {
         return noCancelledTransactions;
     }
 
-    private static void clearInvalidTransactionDrops(PhaseContext<?> context, ChangeBlockEvent.Post postEvent,
-        List<Transaction<BlockSnapshot>> invalid) {
+    private static void clearInvalidTransactionDrops(PhaseContext<?> context, ChangeBlockEvent.Post postEvent) {
         for (Transaction<BlockSnapshot> transaction : postEvent.getTransactions()) {
             if (!transaction.isValid()) {
-                invalid.add(transaction);
                 // Cancel any block drops performed, avoids any item drops, regardless
                 if (transaction.getOriginal() instanceof SpongeBlockSnapshot) {
                     final BlockPos pos = ((SpongeBlockSnapshot) transaction.getOriginal()).getBlockPos();
