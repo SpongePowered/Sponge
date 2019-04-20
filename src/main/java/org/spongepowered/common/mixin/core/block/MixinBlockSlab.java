@@ -25,53 +25,56 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.BlockQuartz;
+import net.minecraft.block.BlockPlanks;
+import net.minecraft.block.BlockSlab;
+import net.minecraft.block.BlockWoodSlab;
 import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableQuartzData;
-import org.spongepowered.api.data.type.QuartzType;
+import org.spongepowered.api.data.manipulator.immutable.ImmutablePortionData;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableTreeData;
+import org.spongepowered.api.data.type.PortionType;
+import org.spongepowered.api.data.type.TreeType;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongePortionData;
 
 import java.util.Optional;
 
-@Mixin(BlockQuartz.class)
-public abstract class MixinBlockQuartz extends MixinBlock {
+@Mixin(BlockSlab.class)
+public abstract class MixinBlockSlab extends MixinBlock {
 
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getQuartzTypeFor(blockState));
+        return ImmutableList.of(getPortionTypeFor(blockState));
     }
 
     @Override
     public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
-        return ImmutableQuartzData.class.isAssignableFrom(immutable);
+        return ImmutablePortionData.class.isAssignableFrom(immutable);
     }
 
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
-        if (manipulator instanceof ImmutableQuartzData) {
-            final BlockQuartz.EnumType quartzType = (BlockQuartz.EnumType) (Object) ((ImmutableQuartzData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.withProperty(BlockQuartz.VARIANT, quartzType));
+        if (manipulator instanceof ImmutablePortionData) {
+            final PortionType portionType = ((ImmutablePortionData) manipulator).type().get();
+            return Optional.of((BlockState) blockState.withProperty(BlockSlab.HALF, (BlockSlab.EnumBlockHalf) (Object) portionType));
         }
         return super.getStateWithData(blockState, manipulator);
     }
 
     @Override
     public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends Value<E>> key, E value) {
-        if (key.equals(Keys.QUARTZ_TYPE)) {
-            final BlockQuartz.EnumType quartzType = (BlockQuartz.EnumType) value;
-            return Optional.of((BlockState) blockState.withProperty(BlockQuartz.VARIANT, quartzType));
+        if (key.equals(Keys.PORTION_TYPE)) {
+            return Optional.of((BlockState) blockState.withProperty(BlockSlab.HALF, (BlockSlab.EnumBlockHalf) value));
         }
         return super.getStateWithValue(blockState, key, value);
     }
 
-    private ImmutableQuartzData getQuartzTypeFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeQuartzData.class,
-                (QuartzType) (Object) blockState.getValue(BlockQuartz.VARIANT));
+    private ImmutablePortionData getPortionTypeFor(IBlockState blockState) {
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePortionData.class, blockState.getValue(BlockSlab.HALF));
     }
 }

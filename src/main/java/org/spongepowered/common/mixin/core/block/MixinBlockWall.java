@@ -32,15 +32,11 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableConnectedDirectionData;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableWallData;
-import org.spongepowered.api.data.type.WallType;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeConnectedDirectionData;
-import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -51,20 +47,16 @@ public abstract class MixinBlockWall extends MixinBlock {
 
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getWallTypeFor(blockState), getConnectedDirectionData(blockState));
+        return ImmutableList.of(getConnectedDirectionData(blockState));
     }
 
     @Override
     public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
-        return ImmutableWallData.class.isAssignableFrom(immutable) || ImmutableConnectedDirectionData.class.isAssignableFrom(immutable);
+        return ImmutableConnectedDirectionData.class.isAssignableFrom(immutable);
     }
 
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
-        if (manipulator instanceof ImmutableWallData) {
-            final BlockWall.EnumType wallType = (BlockWall.EnumType) (Object) ((ImmutableWallData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.withProperty(BlockWall.VARIANT, wallType));
-        }
         if (manipulator instanceof ImmutableConnectedDirectionData) {
             return Optional.of((BlockState) blockState);
         }
@@ -73,10 +65,6 @@ public abstract class MixinBlockWall extends MixinBlock {
 
     @Override
     public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends Value<E>> key, E value) {
-        if (key.equals(Keys.WALL_TYPE)) {
-            final BlockWall.EnumType wallType = (BlockWall.EnumType) value;
-            return Optional.of((BlockState) blockState.withProperty(BlockWall.VARIANT, wallType));
-        }
         if (key.equals(Keys.CONNECTED_DIRECTIONS) || key.equals(Keys.CONNECTED_EAST) || key.equals(Keys.CONNECTED_NORTH)
                 || key.equals(Keys.CONNECTED_SOUTH) || key.equals(Keys.CONNECTED_WEST)) {
             return Optional.of((BlockState) blockState);
@@ -84,17 +72,13 @@ public abstract class MixinBlockWall extends MixinBlock {
         return super.getStateWithValue(blockState, key, value);
     }
 
-    private ImmutableWallData getWallTypeFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeWallData.class, (WallType) (Object) blockState.getValue(BlockWall.VARIANT));
-    }
-
     private ImmutableConnectedDirectionData getConnectedDirectionData(IBlockState blockState) {
         final Set<Direction> directions = new HashSet<>();
-        final Boolean north = blockState.getValue(BlockWall.NORTH);
-        final Boolean east = blockState.getValue(BlockWall.EAST);
-        final Boolean west = blockState.getValue(BlockWall.WEST);
-        final Boolean south = blockState.getValue(BlockWall.SOUTH);
-        final Boolean up = blockState.getValue(BlockWall.UP);
+        final Boolean north = blockState.get(BlockWall.NORTH);
+        final Boolean east = blockState.get(BlockWall.EAST);
+        final Boolean west = blockState.get(BlockWall.WEST);
+        final Boolean south = blockState.get(BlockWall.SOUTH);
+        final Boolean up = blockState.get(BlockWall.UP);
         if (north) {
             directions.add(Direction.NORTH);
         }
@@ -111,10 +95,5 @@ public abstract class MixinBlockWall extends MixinBlock {
             directions.add(Direction.UP);
         }
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeConnectedDirectionData.class, directions);
-    }
-
-    @Override
-    public Translation getTranslation() {
-        return new SpongeTranslation(this.getTranslationKey() + "." + BlockWall.EnumType.NORMAL.getTranslationKey() + ".name");
     }
 }

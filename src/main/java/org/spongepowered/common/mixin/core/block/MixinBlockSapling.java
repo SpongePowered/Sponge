@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.BlockPlanks;
 import net.minecraft.block.BlockSapling;
 import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
@@ -33,14 +32,10 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableGrowthData;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableStoneData;
-import org.spongepowered.api.data.type.TreeType;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeGrowthData;
-import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Optional;
 
@@ -49,56 +44,39 @@ public abstract class MixinBlockSapling extends MixinBlock {
 
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getTreeTypeFor(blockState), getGrowthData(blockState));
+        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getGrowthData(blockState));
     }
 
     @Override
     public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
-        return ImmutableStoneData.class.isAssignableFrom(immutable) || ImmutableGrowthData.class.isAssignableFrom(immutable);
+        return ImmutableGrowthData.class.isAssignableFrom(immutable);
     }
 
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
-        if (manipulator instanceof ImmutableStoneData) {
-            final BlockPlanks.EnumType treeType = (BlockPlanks.EnumType) (Object) ((ImmutableStoneData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.withProperty(BlockSapling.TYPE, treeType));
-        }
         if (manipulator instanceof ImmutableGrowthData) {
             int growth = ((ImmutableGrowthData) manipulator).growthStage().get();
             if (growth > 1) {
                 growth = 1;
             }
-            return Optional.of((BlockState) blockState.withProperty(BlockSapling.STAGE, growth));
+            return Optional.of((BlockState) blockState.with(BlockSapling.STAGE, growth));
         }
         return super.getStateWithData(blockState, manipulator);
     }
 
     @Override
     public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends Value<E>> key, E value) {
-        if (key.equals(Keys.TREE_TYPE)) {
-            final BlockPlanks.EnumType treeType = (BlockPlanks.EnumType) value;
-            return Optional.of((BlockState) blockState.withProperty(BlockSapling.TYPE, treeType));
-        }
         if (key.equals(Keys.GROWTH_STAGE)) {
             int growth = (Integer) value;
             if (growth > 1) {
                 growth = 1;
             }
-            return Optional.of((BlockState) blockState.withProperty(BlockSapling.STAGE, growth));
+            return Optional.of((BlockState) blockState.with(BlockSapling.STAGE, growth));
         }
         return super.getStateWithValue(blockState, key, value);
     }
 
-    private ImmutableSpongeTreeData getTreeTypeFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeTreeData.class, (TreeType) (Object) blockState.getValue(BlockSapling.TYPE));
-    }
-
     private ImmutableGrowthData getGrowthData(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.getValue(BlockSapling.STAGE), 0, 1);
-    }
-
-    @Override
-    public Translation getTranslation() {
-        return new SpongeTranslation(this.getTranslationKey() + "." + BlockPlanks.EnumType.OAK.getTranslationKey() + ".name");
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.get(BlockSapling.STAGE), 0, 1);
     }
 }

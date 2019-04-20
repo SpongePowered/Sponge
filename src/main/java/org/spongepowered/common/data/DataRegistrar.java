@@ -216,9 +216,6 @@ public class DataRegistrar {
         DataUtil.registerDataProcessorAndImpl(InvulnerabilityData.class, SpongeInvulnerabilityData.class,
                 ImmutableInvulnerabilityData.class, ImmutableSpongeInvulnerabilityData.class, new InvulnerabilityDataProcessor());
 
-        DataUtil.registerDataProcessorAndImpl(DamageableData.class, SpongeDamageableData.class,
-                ImmutableDamageableData.class, ImmutableSpongeDamageableData.class, new DamageableDataProcessor());
-
         DataUtil.registerDataProcessorAndImpl(FuseData.class, SpongeFuseData.class, ImmutableFuseData.class,
                 ImmutableSpongeFuseData.class, new FuseDataProcessor());
 
@@ -643,9 +640,6 @@ public class DataRegistrar {
 
         DataUtil.registerDualProcessor(RepresentedItemData.class, SpongeRepresentedItemData.class, ImmutableRepresentedItemData.class,
                 ImmutableSpongeRepresentedItemData.class, new JukeboxDataProcessor());
-
-        DataUtil.registerDualProcessor(RepresentedItemData.class, SpongeRepresentedItemData.class, ImmutableRepresentedItemData.class,
-                ImmutableSpongeRepresentedItemData.class, new FlowerPotDataProcessor());
 
         DataUtil.registerDataProcessorAndImpl(BannerData.class, SpongeBannerData.class, ImmutableBannerData.class,
                 ImmutableSpongeBannerData.class, new TileEntityBannerDataProcessor());

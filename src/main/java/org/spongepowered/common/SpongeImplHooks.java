@@ -278,7 +278,7 @@ public final class SpongeImplHooks {
     }
 
     public static WorldSavedDataStorage getWorldSavedDataStorage(World world) {
-        return world.getMapStorage();
+        return world.getSavedDataStorage();
     }
 
     public static int countEntities(WorldServer worldServer, net.minecraft.entity.EnumCreatureType type, boolean forSpawnCount) {

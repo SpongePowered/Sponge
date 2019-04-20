@@ -25,9 +25,9 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.BlockSlab;
 import net.minecraft.block.BlockTrapDoor;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.state.properties.Half;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -67,7 +67,7 @@ public abstract class MixinBlockTrapDoor extends MixinBlock {
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutablePortionData) {
             final PortionType portionType = ((ImmutablePortionData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.with(BlockTrapDoor.HALF, convertType((BlockSlab.EnumBlockHalf) (Object) portionType)));
+            return Optional.of((BlockState) blockState.with(BlockTrapDoor.HALF, convertType((PortionType) (Object) portionType)));
         }
         if (manipulator instanceof ImmutableOpenData) {
             final boolean isOpen = ((ImmutableOpenData) manipulator).open().get();
@@ -75,7 +75,7 @@ public abstract class MixinBlockTrapDoor extends MixinBlock {
         }
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction dir = DirectionChecker.checkDirectionToHorizontal(((ImmutableDirectionalData) manipulator).direction().get());
-            return Optional.of((BlockState) blockState.with(BlockTrapDoor.FACING, DirectionResolver.getFor(dir)));
+            return Optional.of((BlockState) blockState.with(BlockTrapDoor.HORIZONTAL_FACING, DirectionResolver.getFor(dir)));
         }
         return super.getStateWithData(blockState, manipulator);
     }
@@ -83,7 +83,7 @@ public abstract class MixinBlockTrapDoor extends MixinBlock {
     @Override
     public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends Value<E>> key, E value) {
         if (key.equals(Keys.PORTION_TYPE)) {
-            return Optional.of((BlockState) blockState.with(BlockTrapDoor.HALF, convertType((BlockSlab.EnumBlockHalf) value)));
+            return Optional.of((BlockState) blockState.with(BlockTrapDoor.HALF, convertType((PortionType) value)));
         }
         if (key.equals(Keys.OPEN)) {
             final boolean isOpen = (Boolean) value;
@@ -91,7 +91,7 @@ public abstract class MixinBlockTrapDoor extends MixinBlock {
         }
         if (key.equals(Keys.DIRECTION)) {
             final Direction dir = DirectionChecker.checkDirectionToHorizontal((Direction) value);
-            return Optional.of((BlockState) blockState.with(BlockTrapDoor.FACING, DirectionResolver.getFor(dir)));
+            return Optional.of((BlockState) blockState.with(BlockTrapDoor.HORIZONTAL_FACING, DirectionResolver.getFor(dir)));
         }
         return super.getStateWithValue(blockState, key, value);
     }
@@ -107,14 +107,14 @@ public abstract class MixinBlockTrapDoor extends MixinBlock {
 
     private ImmutableDirectionalData getDirectionalData(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                DirectionResolver.getFor(blockState.get(BlockTrapDoor.FACING)));
+                DirectionResolver.getFor(blockState.get(BlockTrapDoor.HORIZONTAL_FACING)));
     }
 
-    private PortionType convertType(BlockTrapDoor.DoorHalf type) {
-        return (PortionType) (Object) BlockSlab.EnumBlockHalf.valueOf(type.getName().toUpperCase());
+    private PortionType convertType(Half type) {
+        return (PortionType) (Object) Half.valueOf(type.getName().toUpperCase());
     }
 
-    private BlockTrapDoor.DoorHalf convertType(BlockSlab.EnumBlockHalf type) {
-        return BlockTrapDoor.DoorHalf.valueOf(type.getName().toUpperCase());
+    private Half convertType(PortionType type) {
+        return Half.valueOf(type.getName().toUpperCase());
     }
 }

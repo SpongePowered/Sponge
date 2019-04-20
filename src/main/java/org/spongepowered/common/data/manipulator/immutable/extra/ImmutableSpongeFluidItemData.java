@@ -26,10 +26,10 @@ package org.spongepowered.common.data.manipulator.immutable.extra;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableFluidItemData;
+import org.spongepowered.api.data.manipulator.mutable.FluidItemData;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.extra.fluid.FluidStackSnapshot;
-import org.spongepowered.api.extra.fluid.data.manipulator.immutable.ImmutableFluidItemData;
-import org.spongepowered.api.extra.fluid.data.manipulator.mutable.FluidItemData;
+import org.spongepowered.api.fluid.FluidStackSnapshot;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleData;
 import org.spongepowered.common.data.manipulator.mutable.extra.SpongeFluidItemData;
 import org.spongepowered.common.data.value.SpongeImmutableValue;

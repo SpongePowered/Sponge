@@ -26,10 +26,10 @@ package org.spongepowered.common.data.manipulator.immutable.extra;
 
 import com.google.common.collect.ImmutableMap;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableFluidTankData;
 import org.spongepowered.api.data.value.MapValue;
-import org.spongepowered.api.extra.fluid.FluidStackSnapshot;
-import org.spongepowered.api.extra.fluid.data.manipulator.immutable.ImmutableFluidTankData;
 import org.spongepowered.api.extra.fluid.data.manipulator.mutable.FluidTankData;
+import org.spongepowered.api.fluid.FluidStackSnapshot;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableMappedData;
 import org.spongepowered.common.data.manipulator.mutable.extra.SpongeFluidTankData;

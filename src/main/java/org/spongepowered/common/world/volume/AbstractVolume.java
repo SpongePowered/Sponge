@@ -41,7 +41,7 @@ public abstract class AbstractVolume implements Volume {
     protected AbstractVolume(Vector3i min, Vector3i max) {
         this.min = min;
         this.max = max;
-        this.size = this.min
+        this.size = this.max.sub(this.min);
     }
 
 
