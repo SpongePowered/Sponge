@@ -140,7 +140,6 @@
         "data.types.MixinEnumDifficulty",
         "data.types.MixinEnumDyeColor",
         "data.types.MixinEnumLogAxis",
-        "data.types.MixinFishType",
         "data.types.MixinGameType",
         "entity.IMixinAreaEffectCloud",
         "entity.MixinArmorEquipable",

@@ -463,7 +463,6 @@ public final class CommonModuleRegistry {
             .registerModule(EntityType.class, EntityTypeRegistryModule.getInstance())
             .registerModule(EquipmentType.class, new EquipmentTypeRegistryModule())
             .registerModule(FireworkShape.class, new FireworkShapeRegistryModule())
-            .registerModule(Fish.class, new FishRegistryModule())
             .registerModule(FluidType.class, FluidTypeRegistryModule.getInstance())
             .registerModule(GameMode.class, new GameModeRegistryModule())
             .registerModule(GeneratorType.class, GeneratorTypeRegistryModule.getInstance())
