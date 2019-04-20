@@ -25,60 +25,57 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.BlockStem;
+import net.minecraft.block.BlockAttachedStem;
 import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableDirectionalData;
-import org.spongepowered.api.data.manipulator.immutable.ImmutableGrowthData;
 import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeGrowthData;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirectionalData;
+import org.spongepowered.common.data.util.DirectionChecker;
+import org.spongepowered.common.data.util.DirectionResolver;
 
 import java.util.Optional;
 
-@Mixin(BlockStem.class)
-public abstract class MixinBlockStem extends MixinBlock {
+@Mixin(BlockAttachedStem.class)
+public abstract class MixinBlockAttachedStem extends MixinBlock {
 
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getGrowthData(blockState));
+        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getDirectionalData(blockState));
     }
 
     @Override
     public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
-        return ImmutableGrowthData.class.isAssignableFrom(immutable) || ImmutableDirectionalData.class.isAssignableFrom(immutable);
+        return ImmutableDirectionalData.class.isAssignableFrom(immutable);
     }
 
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
-        if (manipulator instanceof ImmutableGrowthData) {
-            int growth = ((ImmutableGrowthData) manipulator).growthStage().get();
-            if (growth > 7) {
-                growth = 7;
-            }
-            return Optional.of((BlockState) blockState.with(BlockStem.AGE, growth));
+        if (manipulator instanceof ImmutableDirectionalData) {
+            final Direction dir = DirectionChecker.checkDirectionNotDown(((ImmutableDirectionalData) manipulator).direction().get());
+            return Optional.of((BlockState) blockState.with(BlockAttachedStem.FACING, DirectionResolver.getFor(dir)));
         }
         return super.getStateWithData(blockState, manipulator);
     }
 
     @Override
     public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends Value<E>> key, E value) {
-        if (key.equals(Keys.GROWTH_STAGE)) {
-            int growth = (Integer) value;
-            if (growth > 7) {
-                growth = 7;
-            }
-            return Optional.of((BlockState) blockState.with(BlockStem.AGE, growth));
+        if (key.equals(Keys.DIRECTION)) {
+            final Direction dir = DirectionChecker.checkDirectionNotDown((Direction) value);
+            return Optional.of((BlockState) blockState.with(BlockAttachedStem.FACING, DirectionResolver.getFor(dir)));
         }
         return super.getStateWithValue(blockState, key, value);
     }
 
-    private ImmutableGrowthData getGrowthData(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.get(BlockStem.AGE), 0, 7);
+    private ImmutableDirectionalData getDirectionalData(IBlockState blockState) {
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
+                DirectionResolver.getFor(blockState.get(BlockAttachedStem.FACING)));
     }
 
 }

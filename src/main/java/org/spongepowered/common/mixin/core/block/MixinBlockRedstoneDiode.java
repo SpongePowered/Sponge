@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.block;
 
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.BlockRedstoneDiode;
-import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -41,13 +40,13 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 @Mixin(BlockRedstoneDiode.class)
 public abstract class MixinBlockRedstoneDiode extends BlockHorizontal {
 
-    protected MixinBlockRedstoneDiode(Material materialIn) {
-        super(materialIn);
+    protected MixinBlockRedstoneDiode(Properties props) {
+        super(props);
     }
 
     @Inject(method = "notifyNeighbors", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/BlockPos;offset(Lnet/minecraft/util/EnumFacing;)Lnet/minecraft/util/math/BlockPos;", shift = At.Shift.AFTER), cancellable = true)
     public void onNotifyNeighbors(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, CallbackInfo ci) {
-        EnumFacing enumfacing = state.getValue(BlockHorizontal.FACING);
+        EnumFacing enumfacing = state.get(BlockHorizontal.HORIZONTAL_FACING);
         BlockPos blockpos = pos.offset(enumfacing.getOpposite());
         if (worldIn.isRemote) {
             worldIn.neighborChanged(blockpos, this, pos);

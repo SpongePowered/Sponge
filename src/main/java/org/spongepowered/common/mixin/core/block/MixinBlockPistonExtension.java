@@ -33,8 +33,6 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableDirectionalData;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutablePistonData;
-import org.spongepowered.api.data.type.PistonType;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
@@ -49,48 +47,34 @@ public abstract class MixinBlockPistonExtension extends MixinBlock {
 
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getPistonTypeFor(blockState), getDirectionalData(blockState));
+        return ImmutableList.of(getDirectionalData(blockState));
     }
 
     @Override
     public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
-        return ImmutablePistonData.class.isAssignableFrom(immutable) || ImmutableDirectionalData.class.isAssignableFrom(immutable);
+        return ImmutableDirectionalData.class.isAssignableFrom(immutable);
     }
 
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
-        if (manipulator instanceof ImmutablePistonData) {
-            final BlockPistonExtension.EnumPistonType pistonType =
-                    (BlockPistonExtension.EnumPistonType) (Object) ((ImmutablePistonData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.withProperty(BlockPistonExtension.TYPE, pistonType));
-        }
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction dir = ((ImmutableDirectionalData) manipulator).direction().get();
-            return Optional.of((BlockState) blockState.withProperty(BlockDirectional.FACING, DirectionResolver.getFor(dir)));
+            return Optional.of((BlockState) blockState.with(BlockDirectional.FACING, DirectionResolver.getFor(dir)));
         }
         return super.getStateWithData(blockState, manipulator);
     }
 
     @Override
     public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends Value<E>> key, E value) {
-        if (key.equals(Keys.PISTON_TYPE)) {
-            final BlockPistonExtension.EnumPistonType pistonType = (BlockPistonExtension.EnumPistonType) value;
-            return Optional.of((BlockState) blockState.withProperty(BlockPistonExtension.TYPE, pistonType));
-        }
         if (key.equals(Keys.DIRECTION)) {
             final Direction dir = (Direction) value;
-            return Optional.of((BlockState) blockState.withProperty(BlockDirectional.FACING, DirectionResolver.getFor(dir)));
+            return Optional.of((BlockState) blockState.with(BlockDirectional.FACING, DirectionResolver.getFor(dir)));
         }
         return super.getStateWithValue(blockState, key, value);
     }
 
-    private ImmutablePistonData getPistonTypeFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePistonData.class,
-                (PistonType) (Object) blockState.getValue(BlockPistonExtension.TYPE));
-    }
-
     private ImmutableDirectionalData getDirectionalData(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                DirectionResolver.getFor(blockState.getValue(BlockDirectional.FACING)));
+                DirectionResolver.getFor(blockState.get(BlockDirectional.FACING)));
     }
 }

@@ -39,9 +39,7 @@ import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeAxisData;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
 import org.spongepowered.common.data.util.DirectionResolver;
-import org.spongepowered.common.registry.type.block.TreeTypeRegistryModule;
 
 import java.util.List;
 import java.util.Optional;
@@ -49,10 +47,6 @@ import java.util.Optional;
 @NonnullByDefault
 @Mixin(BlockLog.class)
 public abstract class MixinBlockLog extends MixinBlock {
-
-    protected ImmutableTreeData getTreeData(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeTreeData.class, TreeTypeRegistryModule.getTreeType(blockState).get());
-    }
 
     protected ImmutableAxisData getLogAxisData(IBlockState blockState) {
         final Axis axis = DirectionResolver.getFor(blockState.get(BlockLog.AXIS));
@@ -83,6 +77,6 @@ public abstract class MixinBlockLog extends MixinBlock {
 
     @Override
     public List<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.of(getTreeData(blockState), getLogAxisData(blockState));
+        return ImmutableList.of(getLogAxisData(blockState));
     }
 }

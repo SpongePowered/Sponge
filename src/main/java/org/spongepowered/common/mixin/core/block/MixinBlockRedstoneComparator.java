@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.block;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockRedstoneComparator;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.state.properties.ComparatorMode;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -64,12 +65,12 @@ public abstract class MixinBlockRedstoneComparator extends MixinBlock {
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableComparatorData) {
-            final BlockRedstoneComparator.Mode comparatorType =
-                    (BlockRedstoneComparator.Mode) (Object) ((ImmutableComparatorData) manipulator).type().get();
-            return Optional.of((BlockState) blockState.withProperty(BlockRedstoneComparator.MODE, comparatorType));
+            final ComparatorMode comparatorType =
+                    (ComparatorMode) (Object) ((ImmutableComparatorData) manipulator).type().get();
+            return Optional.of((BlockState) blockState.with(BlockRedstoneComparator.MODE, comparatorType));
         }
         if (manipulator instanceof ImmutablePoweredData) {
-            return Optional.of((BlockState) blockState.withProperty(BlockRedstoneComparator.POWERED, ((ImmutablePoweredData) manipulator).powered()
+            return Optional.of((BlockState) blockState.with(BlockRedstoneComparator.POWERED, ((ImmutablePoweredData) manipulator).powered()
                     .get()));
         }
         return super.getStateWithData(blockState, manipulator);
@@ -78,22 +79,22 @@ public abstract class MixinBlockRedstoneComparator extends MixinBlock {
     @Override
     public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends Value<E>> key, E value) {
         if (key.equals(Keys.COMPARATOR_TYPE)) {
-            final BlockRedstoneComparator.Mode comparatorType = (BlockRedstoneComparator.Mode) value;
-            return Optional.of((BlockState) blockState.withProperty(BlockRedstoneComparator.MODE, comparatorType));
+            final ComparatorMode comparatorType = (ComparatorMode) value;
+            return Optional.of((BlockState) blockState.with(BlockRedstoneComparator.MODE, comparatorType));
         }
         if (key.equals(Keys.POWERED)) {
-            return Optional.of((BlockState) blockState.withProperty(BlockRedstoneComparator.POWERED, (Boolean) value));
+            return Optional.of((BlockState) blockState.with(BlockRedstoneComparator.POWERED, (Boolean) value));
         }
         return super.getStateWithValue(blockState, key, value);
     }
 
     private ImmutableComparatorData getComparatorTypeFor(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeComparatorData.class,
-                (ComparatorType) (Object) blockState.getValue(BlockRedstoneComparator.MODE));
+                (ComparatorType) (Object) blockState.get(BlockRedstoneComparator.MODE));
     }
 
     private ImmutablePoweredData getIsPoweredFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class, blockState.getValue(BlockRedstoneComparator.POWERED));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class, blockState.get(BlockRedstoneComparator.POWERED));
     }
 
     @Override

@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.BlockTorch;
+import net.minecraft.block.BlockTorchWall;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import org.spongepowered.api.block.BlockState;
@@ -45,8 +45,8 @@ import org.spongepowered.common.data.util.DirectionResolver;
 
 import java.util.Optional;
 
-@Mixin(BlockTorch.class)
-public abstract class MixinBlockTorch extends MixinBlock {
+@Mixin(BlockTorchWall.class)
+public abstract class MixinBlockTorchWall extends MixinBlock {
 
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
@@ -65,7 +65,7 @@ public abstract class MixinBlockTorch extends MixinBlock {
         }
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction dir = DirectionChecker.checkDirectionNotDown(((ImmutableDirectionalData) manipulator).direction().get());
-            return Optional.of((BlockState) blockState.with(BlockTorch.FACING, DirectionResolver.getFor(dir)));
+            return Optional.of((BlockState) blockState.with(BlockTorchWall.HORIZONTAL_FACING, DirectionResolver.getFor(dir)));
         }
         return super.getStateWithData(blockState, manipulator);
     }
@@ -77,18 +77,18 @@ public abstract class MixinBlockTorch extends MixinBlock {
         }
         if (key.equals(Keys.DIRECTION)) {
             final Direction dir = DirectionChecker.checkDirectionNotDown((Direction) value);
-            return Optional.of((BlockState) blockState.with(BlockTorch.FACING, DirectionResolver.getFor(dir)));
+            return Optional.of((BlockState) blockState.with(BlockTorchWall.HORIZONTAL_FACING, DirectionResolver.getFor(dir)));
         }
         return super.getStateWithValue(blockState, key, value);
     }
 
     private ImmutableAttachedData getIsAttachedFor(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeAttachedData.class,
-                blockState.get(BlockTorch.FACING) != EnumFacing.UP);
+                blockState.get(BlockTorchWall.HORIZONTAL_FACING) != EnumFacing.UP);
     }
 
     private ImmutableDirectionalData getDirectionalData(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                DirectionResolver.getFor(blockState.get(BlockTorch.FACING)));
+                DirectionResolver.getFor(blockState.get(BlockTorchWall.HORIZONTAL_FACING)));
     }
 }

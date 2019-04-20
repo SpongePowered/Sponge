@@ -68,7 +68,7 @@ public abstract class MixinBlockLeaves extends MixinBlock {
 
     @Inject(method = "<init>", at = @At(value = "RETURN"))
     private void onLeavesConstruction(CallbackInfo ci) {
-        this.setTickRandomly(SpongeImpl.getGlobalConfig().getConfig().getWorld().getLeafDecay());
+        this.setUpdateRandomly(SpongeImpl.getGlobalConfig().getConfig().getWorld().getLeafDecay());
     }
 
     @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;"
@@ -139,7 +139,7 @@ public abstract class MixinBlockLeaves extends MixinBlock {
 
     private ImmutableDecayableData getIsDecayableFor(IBlockState blockState) {
         // TODO: Update data
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDecayableData.class, blockState.getValue(BlockLeaves.DECAYABLE));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDecayableData.class, blockState.get(BlockLeaves.PERSISTENT));
     }
 
     @Override
