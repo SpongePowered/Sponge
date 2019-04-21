@@ -46,18 +46,22 @@ import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.item.inventory.InventoryProperties;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
-import org.spongepowered.api.item.inventory.gui.ContainerTypes;
+import org.spongepowered.api.item.inventory.custom.ContainerTypes;
+import org.spongepowered.api.item.inventory.equipment.EquipmentInventory;
 import org.spongepowered.api.item.inventory.slot.SlotIndex;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
+import org.spongepowered.api.item.inventory.type.GridInventory;
+import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.Location;
 
+import java.util.Arrays;
 import java.util.UUID;
 
 /**
@@ -232,6 +236,52 @@ public class CustomInventoryTest {
         public void init(Inventory inventory) {
             this.inventory = inventory;
         }
+    }
+
+
+
+
+    // TODO actually make it do smth.
+    static void foobar()
+    {
+        Player player = null;
+        Player player2 = null;
+
+        Inventory inv1 = Inventory.builder().grid(3, 3).completeStructure().build();
+        Inventory inv2 = Inventory.builder().grid(3, 3).completeStructure().build();
+        Inventory inv3 = Inventory.builder().grid(9, 3).completeStructure().build();
+
+        ViewableInventory inv = ViewableInventory.builder()
+                .type(ContainerTypes.CHEST_3X9)
+                .grid(inv1.slots(), new Vector2i(3,3), 0)
+                .grid(inv2.slots(), new Vector2i(3,3), new Vector2i(3, 1))
+                .grid(inv3.slots() /*TODO query for grid*/, new Vector2i(3, 3), new Vector2i(6, 3))
+                .slots(Arrays.asList(inv3.getSlot(SlotIndex.of(0)).get()), 37)
+                .dummySlots(1, 16)
+                .fillDummy()
+                .completeStructure()
+                .identity(UUID.randomUUID())
+                .build();
+
+        ViewableInventory basicChest = ViewableInventory.builder()
+                .type(ContainerTypes.CHEST_3X9)
+                .completeStructure()
+                .build();
+
+        ItemStackSnapshot disabled = ItemStack.of(ItemTypes.LIGHT_GRAY_STAINED_GLASS_PANE, 1).createSnapshot();
+        ItemStackSnapshot emerald = ItemStack.of(ItemTypes.EMERALD, 1).createSnapshot();
+
+
+        EquipmentInventory armor = null;
+        GridInventory mainGrid = null;
+        Slot offhand = null;
+
+        ViewableInventory.builder().type(ContainerTypes.CHEST_3X9)
+                .slots(armor.slots(), 0)
+                .slots(mainGrid.slots(), armor.slots().size())
+                .slots(offhand.slots(), armor.slots().size() + mainGrid.slots().size())
+                .completeStructure();
+
     }
 
 }

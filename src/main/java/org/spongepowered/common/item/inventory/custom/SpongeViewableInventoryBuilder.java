@@ -4,34 +4,19 @@ import com.flowpowered.math.vector.Vector2i;
 import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.util.text.TextComponentString;
 import org.apache.commons.lang3.Validate;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.InventoryProperties;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.custom.ContainerType;
-import org.spongepowered.api.item.inventory.custom.ContainerTypes;
-import org.spongepowered.api.item.inventory.equipment.EquipmentInventory;
-import org.spongepowered.api.item.inventory.menu.handler.ClickHandler;
-import org.spongepowered.api.item.inventory.menu.ClickType;
-import org.spongepowered.api.item.inventory.menu.handler.CloseHandler;
-import org.spongepowered.api.item.inventory.menu.InventoryMenu;
-import org.spongepowered.api.item.inventory.menu.handler.KeySwapHandler;
-import org.spongepowered.api.item.inventory.menu.handler.SlotChangeHandler;
-import org.spongepowered.api.item.inventory.menu.handler.SlotClickHandler;
 import org.spongepowered.api.item.inventory.slot.SlotIndex;
-import org.spongepowered.api.item.inventory.type.GridInventory;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.common.data.type.SpongeContainerType;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
-import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,257 +24,164 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder,
-                                                       ViewableInventory.Builder.SingleStep,
+                                                       ViewableInventory.Builder.DummyStep,
                                                        ViewableInventory.Builder.EndStep
 {
-
-    // Helper classes
-    private class SlotDefinition {
-
-        Inventory source;
-        @Nullable Integer index; // index in source
-
-        SlotDefinition(Inventory source) {
-            this.source = source;
-        }
-    }
-
-    private class Buffer {
-
-        List<SlotDefinition> slots = new ArrayList<>();
-
-        boolean grid = false;
-        int sizeX;
-        int sizeY;
-
-        @Nullable private Integer atSlot;
-        int atGridX;
-        int atGridY;
-
-        public void clear() {
-            this.slots.clear();
-            this.atSlot = null;
-            this.atGridX = 0;
-            this.atGridY = 0;
-        }
-    }
-
     private ContainerType type;
     private int size;
     private int sizeX;
     private int sizeY;
-    private int currentSlot;
 
-    private Inventory source; // not null when calling on inventory source steps
+    private Map<Integer, Slot> slotDefinitions;
+    private Slot lastSlot;
 
     private Carrier carrier;
     private UUID identity;
-
-    private int sourceSize;
-    private int sourceSizeX;
-    private int sourceSizeY;
-    private int currentSourceSlot;
-
-    private Map<Integer, SlotDefinition> slotDefinitions;
-    private Buffer buffer = new Buffer();
 
     private List<Inventory> finalInventories;
     private Lens finalLens;
     private CustomSlotProvider finalProvider;
 
-    private void writeSlots() {
-        if (!buffer.slots.isEmpty()) {
-
-            if (buffer.grid) {
-
-                int index = 0;
-                for (int yy = 0; yy < this.buffer.sizeY; yy++) {
-                    for (int xx = 0; xx < this.buffer.sizeX; xx++) {
-
-                        SlotDefinition def = this.buffer.slots.get(index++);
-
-                        int slotX = buffer.atGridX + xx;
-                        int slotY = buffer.atGridY + yy;
-
-                        int slotIndex = slotY * this.sizeX + slotX;
-                        this.slotDefinitions.put(slotIndex, def);
-                    }
-                }
-            } else {
-
-                if (this.buffer.atSlot == null) {
-                    this.buffer.atSlot = currentSlot;
-                }
-
-                for (SlotDefinition def : buffer.slots) {
-                    this.slotDefinitions.put(this.buffer.atSlot++, def);
-                    if (def.source != null && def.index == null) {
-                        def.index = currentSourceSlot++;
-                    }
-                }
-            }
-
-        }
-        this.buffer.clear();
-    }
-
     @Override
     public BuildingStep type(ContainerType type) {
         this.type = type;
         this.slotDefinitions = new HashMap<>();
-        this.currentSlot = 0;
         this.sizeX = ((SpongeContainerType) type).getWidth();
         this.sizeY = ((SpongeContainerType) type).getHeight();
         this.size = ((SpongeContainerType) type).getSize();
         return this;
     }
 
-    @Override
-    public SourceStep source(Inventory inventory) {
-        this.source = inventory;
-        this.currentSourceSlot = 0;
-        return this;
+    // Helpers
+
+    private int posToIndex(Vector2i pos) {
+        return posToIndex(pos.getX(), pos.getY());
     }
 
-    // Slots and dummies
-
-    @Override
-    public SourceStep dummySource() {
-        return this.dummySource(ItemStackSnapshot.NONE);
+    private int posToIndex(int x, int y) {
+        Validate.isTrue(x <= this.sizeX, "Target inventory is too small: " + this.sizeX + " < " + x);
+        Validate.isTrue(y <= this.sizeY, "Target inventory is too small: " + this.sizeY + " < " + y);
+        return y * this.sizeX + x;
     }
 
-    @Override
-    public SourceStep dummySource(ItemStackSnapshot item) {
+    private Vector2i indexToPos(int offset) {
+        Validate.isTrue(offset <= this.sizeX * this.sizeY, "Target inventory is too small: " + this.sizeX * this.sizeY + " < " + offset);
+        int x = offset / this.sizeY;
+        int y = offset % this.sizeX;
+        return new Vector2i(x, y);
+    }
+
+    private Slot newDummySlot() {
         InventoryBasic dummyInv = new InventoryBasic(new TextComponentString("Dummy Inventory"), 1);
-        this.source = ((Inventory) dummyInv);
-        dummyInv.setInventorySlotContents(0, ItemStackUtil.fromSnapshotToNative(item));
+        return ((Inventory) dummyInv).getSlot(SlotIndex.of(0)).get();
+    }
+
+    // Slot definition Impl:
+
+    @Override
+    public BuildingStep slotsAtIndizes(List<Slot> source, List<Integer> at) {
+        Validate.isTrue(source.size() == at.size(), "Source and index list sizes differ");
+        for (int i = 0; i < at.size(); i++) {
+            Slot slot = source.get(i);
+            Integer index = at.get(i);
+            this.slotDefinitions.put(index, slot);
+            this.lastSlot = slot;
+        }
+        return this;
+    }
+
+    // complex redirects - (source/index list generation)
+
+    @Override
+    public BuildingStep slotsAtPositions(List<Slot> source, List<Vector2i> at) {
+        return this.slotsAtIndizes(source, at.stream().map(this::posToIndex).collect(Collectors.toList()));
+    }
+
+    @Override
+    public DummyStep fillDummy() {
+        Slot slot = newDummySlot();
+        List<Integer> indizes = IntStream.range(0, this.size).boxed().filter(idx -> !this.slotDefinitions.containsKey(idx)).collect(Collectors.toList());
+        List<Slot> source = Stream.generate(() -> slot).limit(indizes.size()).collect(Collectors.toList());
+        this.slotsAtIndizes(source, indizes);
         return this;
     }
 
     @Override
-    public ViewableInventory.Builder.BuildingStep fillDummy() {
-        for (int i = 0; i < this.size; i++) {
-            if (!this.slotDefinitions.containsKey(i)) {
-                this.slot().at(i);
+    public DummyStep dummySlots(int count, int offset) {
+        Slot slot = newDummySlot();
+        List<Slot> source = Stream.generate(() -> slot).limit(count).collect(Collectors.toList());
+        this.slots(source, offset);
+        return this;
+    }
+
+    @Override
+    public BuildingStep slots(List<Slot> source, int offset) {
+        List<Integer> indizes = IntStream.range(offset, offset + source.size()).boxed().collect(Collectors.toList());
+        return this.slotsAtIndizes(source, indizes);
+    }
+
+    @Override
+    public DummyStep dummyGrid(Vector2i size, Vector2i offset) {
+        Slot slot = newDummySlot();
+        List<Slot> source = Stream.generate(() -> slot).limit(size.getX() * size.getY()).collect(Collectors.toList());
+        this.grid(source, size, offset);
+        return this;
+    }
+
+    @Override
+    public BuildingStep grid(List<Slot> source, Vector2i size, Vector2i offset) {
+        int xMin = offset.getX();
+        int yMin = offset.getY();
+        int xMax = xMin + size.getX() - 1;
+        int yMax = yMin + size.getY() - 1;
+
+        List<Integer> indizes = new ArrayList<>();
+        for (int y = yMin; y <= yMax; y++) {
+            for (int x = xMin; x <= xMax; x++) {
+                indizes.add(posToIndex(x, y));
             }
         }
+
+        return this.slotsAtIndizes(source, indizes);
+    }
+
+    // simple redirects
+
+    @Override
+    public DummyStep dummySlots(int count, Vector2i offset) {
+        return this.dummySlots(count, posToIndex(offset));
+    }
+
+    @Override
+    public BuildingStep slots(List<Slot> source, Vector2i offset) {
+        return this.slots(source, posToIndex(offset));
+    }
+
+    @Override
+    public DummyStep dummyGrid(Vector2i size, int offset) {
+        return this.dummyGrid(size, indexToPos(offset));
+    }
+
+    @Override
+    public BuildingStep grid(List<Slot> source, Vector2i size, int offset) {
+        return this.grid(source, size, indexToPos(offset));
+    }
+
+    // dummy
+
+    @Override
+    public BuildingStep item(ItemStackSnapshot item) {
+        this.lastSlot.set(item.createStack());
         return this;
     }
 
     @Override
-    public ViewableInventory.Builder.SingleStep slot() {
-        return this.slots(1);
-    }
-
-    @Override
-    public ViewableInventory.Builder.SingleStep slots(int amount) {
-        writeSlots();
-        this.sourceSize = this.source.capacity();
-        Validate.isTrue(this.sourceSize >= amount, "Source Inventory is too small");
-        Validate.isTrue(this.size >= amount, "Target Inventory is too small");
-        for (int i = 0; i < amount; i++) {
-            SlotDefinition def = new SlotDefinition(this.source);
-            this.buffer.slots.add(def);
-        }
-        this.buffer.grid = false;
-        return from(0);
-    }
-
-    @Override
-    public SourceStep slots(Vector2i[] positionsFrom, Vector2i[] positionsAt) {
-        for (int i = 0; i < positionsFrom.length; i++) {
-            Vector2i fromPos = positionsFrom[i];
-            Vector2i atPos = positionsAt[i];
-            this.slot().from(fromPos.getX(), fromPos.getY()).at(atPos.getX(), atPos.getY());
-        }
-        return this;
-    }
-
-    @Override
-    public SourceStep slots(int[] indizesFrom, int startingAt) {
-        int atIdx = startingAt;
-        for (int fromIdx : indizesFrom) {
-            this.slot().from(fromIdx).at(atIdx);
-            atIdx++;
-        }
-        return this;
-    }
-
-    @Override
-    public SourceStep slots(Vector2i[] positionsFrom, int startingAt) {
-        int atIdx = startingAt;
-        for (Vector2i fromPos : positionsFrom) {
-            this.slot().from(fromPos.getX(), fromPos.getY()).at(atIdx);
-            atIdx++;
-        }
-        return this;
-    }
-
-    @Override
-    public ViewableInventory.Builder.SingleStep from(int index) {
-        Validate.isTrue(this.sourceSize >= this.buffer.slots.size() + index, "Source Inventory is too small");
-        int curIndex = index;
-        for (SlotDefinition def : this.buffer.slots) {
-            def.index = curIndex++;
-        }
-        return this;
-    }
-
-    @Override
-    public ViewableInventory.Builder.SingleStep at(int index) {
-        Validate.isTrue(this.size >= this.buffer.slots.size() + index, "Target Inventory is too small");
-        this.buffer.atSlot = index;
-        return this;
-    }
-
-    // Grid
-
-    @Override
-    public ViewableInventory.Builder.SingleStep grid(int sizeX, int sizeY) {
-        writeSlots();
-        Validate.isTrue(this.source instanceof GridInventory, "Source Inventory is not a grid");
-        Validate.isTrue(this.sizeX != 0 && this.sizeY != 0, "Target Inventory is not a grid");
-        this.sourceSizeX = ((GridInventory) this.source).getColumns();
-        this.sourceSizeY = ((GridInventory) this.source).getRows();
-        Validate.isTrue(this.sizeX >= sizeX, "Target Inventory is too small");
-        Validate.isTrue(this.sizeY >= sizeY, "Target Inventory is too small");
-        this.slots(sizeX * sizeY);
-        this.buffer.sizeX = sizeX;
-        this.buffer.sizeY = sizeY;
-        this.buffer.grid = true;
-        this.from(0, 0);
-        return this;
-    }
-
-    @Override
-    public ViewableInventory.Builder.SingleStep from(int x, int y) {
-        Validate.isTrue(this.sourceSizeX >= this.buffer.sizeX + x, "Source Inventory is too small");
-        Validate.isTrue(this.sourceSizeY >= this.buffer.sizeY + y, "Source Inventory is too small");
-        int index = 0;
-        for (int yy = 0; yy < this.buffer.sizeY; yy++) {
-            for (int xx = 0; xx < this.buffer.sizeX; xx++) {
-
-                SlotDefinition def = this.buffer.slots.get(index++);
-
-                int slotY = y + yy;
-                int slotX = x + xx;
-
-                def.index = slotY * this.sourceSizeX + slotX;
-            }
-        }
-        return this;
-    }
-
-    @Override
-    public ViewableInventory.Builder.SingleStep at(int x, int y) {
-        Validate.isTrue(this.sizeX >= this.buffer.sizeX + x, "Target Inventory is too small");
-        Validate.isTrue(this.sizeY >= this.buffer.sizeY + y, "Target Inventory is too small");
-        this.buffer.atGridX = x;
-        this.buffer.atGridY = y;
+    public EndStep identity(UUID uuid) {
+        this.identity = uuid;
         return this;
     }
 
@@ -303,13 +195,14 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
 
     @Override
     public EndStep completeStructure() {
-        this.finalInventories = this.slotDefinitions.values().stream().map(sd -> sd.source).distinct().collect(Collectors.toList());
+        this.finalInventories = this.slotDefinitions.values().stream().map(Inventory::parent).distinct().collect(Collectors.toList());
         this.finalProvider = new CustomSlotProvider();
-        for (Map.Entry<Integer, SlotDefinition> entry : this.slotDefinitions.entrySet()) {
-            SlotDefinition slotDef = entry.getValue();
-            int idx = slotDef.index;
+        for (Map.Entry<Integer, Slot> entry : this.slotDefinitions.entrySet()) {
+            Slot slot = entry.getValue();
+            int idx = slot.getProperty(InventoryProperties.SLOT_INDEX).get().getIndex();
+
             int offset = 0;
-            for (int i = 0; i < this.finalInventories.indexOf(slotDef.source); i++) {
+            for (int i = 0; i < this.finalInventories.indexOf(slot.parent()); i++) {
                 offset += this.finalInventories.get(i).size();
             }
             this.finalProvider.add(new SlotLensImpl(idx + offset));
@@ -320,25 +213,27 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
     }
 
     @Override
-    public EndStep identity(UUID uuid) {
-        this.identity = uuid;
-        return this;
-    }
-
-    @Override
     public ViewableInventory build() {
         return (ViewableInventory) new ViewableCustomInventory(this.type, this.size, this.finalLens, this.finalProvider, this.finalInventories, this.identity, this.carrier);
     }
 
     @Override
-    public EndStep ofViewable(ViewableInventory inventory) {
-        return null; // TODO
-    }
-
-
-    @Override
     public ViewableInventory.Builder reset() {
-        return null; // TODO
+        this.type = null;
+        this.size = 0;
+        this.sizeX = 0;
+        this.sizeY = 0;
+
+        this.slotDefinitions = null;
+        this.lastSlot = null;
+
+        this.carrier = null;
+        this.identity = null;
+
+        this.finalInventories = null;
+        this.finalLens = null;
+        this.finalProvider = null;
+        return this;
     }
 
     public static class CustomSlotProvider implements SlotProvider {
@@ -355,109 +250,5 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
         }
     }
 
-    // ---------------------------------------------------------------------------------------------------------------------------
-    // EXAMPLE USAGE:
-    // ---------------------------------------------------------------------------------------------------------------------------
-
-    static void foobar()
-    {
-Player player = null;
-Player player2 = null;
-
-Inventory inv1 = Inventory.builder().grid(3, 3).completeStructure().build();
-Inventory inv2 = Inventory.builder().grid(3, 3).completeStructure().build();
-Inventory inv3 = Inventory.builder().grid(9, 3).completeStructure().build();
-
-ViewableInventory inv = ViewableInventory.builder()
-        .type(ContainerTypes.CHEST_3X9)
-        .source(inv1).grid(3, 3)
-        .source(inv2).grid(3, 3).at(3, 1)
-        .source(inv3).grid(3, 3).from(3, 0).at(6, 3)
-                     .slot().from(0).at(37)
-        .dummySource().slot().at(16)
-        .fillDummy()
-        .completeStructure()
-        .identity(UUID.randomUUID())
-        .build();
-
-ViewableInventory basicChest = ViewableInventory.builder()
-        .type(ContainerTypes.CHEST_3X9)
-        .completeStructure()
-        .build();
-
-ItemStackSnapshot disabled = ItemStack.of(ItemTypes.LIGHT_GRAY_STAINED_GLASS_PANE, 1).createSnapshot();
-ItemStackSnapshot emerald = ItemStack.of(ItemTypes.EMERALD, 1).createSnapshot();
-
-ViewableInventory display = ViewableInventory.builder().type(ContainerTypes.DISPENSER)
-        .dummySource(disabled).fillDummy()
-        .source(inv2).grid(1,1).from(1,1).at(1,1)
-        .completeStructure().build();
-display.query(GridInventory.class).get().set(1,1, ItemStack.of(ItemTypes.DIAMOND, 1));
-
-ViewableInventory display2 = ViewableInventory.builder().type(ContainerTypes.DISPENSER)
-        .dummySource().fillDummy()
-        .dummySource(emerald).slot().at(1, 1)
-        .completeStructure().build();
-display.query(GridInventory.class).get().set(1,1, ItemStack.of(ItemTypes.DIAMOND, 1));
-
-InventoryMenu menu = InventoryMenu.of(display);
-menu.open(player);
-menu.open(player2);
-
-menu.setCurrentInventory(display2); // matching ContainerType so the inventory is silently swapped
-menu.setTitle(Text.of("This reopens containers"));
-menu.registerSlotClick((container, slot, slotIndex, clickType) -> checkClick());
-
-menu.setReadOnly(false);
-MyHandler handler = new MyHandler();
-menu.registerHandler(handler);
-menu.registerChange((container, slot, slotIndex) -> checkAllChange());
-
-menu.setReadOnly(true);
-menu.setCurrentInventory(basicChest);
-menu.unregisterAll(); // already done as changing the ContainerType clears all callbacks
-
-EquipmentInventory armor = null;
-GridInventory mainGrid = null;
-Slot offhand = null;
-
-ViewableInventory.builder().type(ContainerTypes.CHEST_3X9)
-.source(armor).slots(4)
-.source(mainGrid).slots(5)
-.source(offhand).slot()
-.completeStructure();
-
-    }
-
-    static boolean checkClick() { return true; }
-    static boolean checkAllChange() { return false; }
-
-    static class MyHandler implements CloseHandler, KeySwapHandler, SlotChangeHandler, SlotClickHandler, ClickHandler {
-
-        @Override
-        public boolean handle(Container container, ClickType clickType) {
-            return true;
-        }
-
-        @Override
-        public void handle(Container container, Player player) {
-
-        }
-
-        @Override
-        public boolean handle(Container container, Slot slot, SlotIndex slotIndex, ClickType clickType, Slot slot2) {
-            return true;
-        }
-
-        @Override
-        public boolean handle(Container container, Slot slot, SlotIndex slotIndex) {
-            return true;
-        }
-
-        @Override
-        public boolean handle(Container container, Slot slot, SlotIndex slotIndex, ClickType clickType) {
-            return true;
-        }
-    }
 
 }
