@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.item.inventory;
+package org.spongepowered.common.mixin.core.item.inventory.container;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ContainerBeacon;
@@ -41,6 +41,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.mixin.core.item.inventory.container.MixinContainer;
 
 @Mixin(value = {
         ContainerChest.class,

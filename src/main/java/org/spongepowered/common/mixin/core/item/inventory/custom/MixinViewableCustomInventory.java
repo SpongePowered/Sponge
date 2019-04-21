@@ -22,21 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.inventory;
+package org.spongepowered.common.mixin.core.item.inventory.custom;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.InventoryEnderChest;
+import org.spongepowered.api.item.inventory.custom.ContainerType;
+import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.item.inventory.custom.ViewableCustomInventory;
 
-@Mixin(InventoryEnderChest.class)
-public abstract class MixinInventoryEnderChest extends MixinInventoryBasic {
+@SuppressWarnings("rawtypes")
+@Mixin(ViewableCustomInventory.class)
+public abstract class MixinViewableCustomInventory extends MixinCustomInventory implements ViewableInventory {
+
+    @Shadow(remap = false) private ContainerType type;
 
     @Override
-    public Lens rootLens(Fabric fabric, InventoryAdapter adapter) {
-        return new GridInventoryLensImpl(0, 9, 3, adapter.getSlotProvider());
+    public ContainerType getType() {
+        return this.type;
     }
+
 }

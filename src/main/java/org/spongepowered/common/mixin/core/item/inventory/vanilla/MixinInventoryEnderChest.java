@@ -22,34 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.item.inventory;
+package org.spongepowered.common.mixin.core.item.inventory.vanilla;
 
-import com.flowpowered.math.vector.Vector3d;
-import net.minecraft.inventory.ContainerEnchantment;
-import net.minecraft.util.math.BlockPos;
-import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.type.CarriedInventory;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.inventory.InventoryEnderChest;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.IMixinSingleBlockCarrier;
+import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.item.inventory.lens.Fabric;
+import org.spongepowered.common.item.inventory.lens.Lens;
+import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
+import org.spongepowered.common.mixin.core.item.inventory.vanilla.MixinInventoryBasic;
 
-@Mixin(ContainerEnchantment.class)
-public class MixinCarrierContainerEnchantment implements IMixinSingleBlockCarrier {
-
-    @Shadow @Final public net.minecraft.world.World world;
-    @Shadow @Final public BlockPos position;
+@Mixin(InventoryEnderChest.class)
+public abstract class MixinInventoryEnderChest extends MixinInventoryBasic {
 
     @Override
-    public Location getLocation() {
-        return new Location(((World) this.world), new Vector3d(this.position.getX(), this.position.getY(), this.position.getZ()));
-    }
-
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    @Override
-    public CarriedInventory<? extends Carrier> getInventory() {
-        return ((CarriedInventory) this);
+    public Lens rootLens(Fabric fabric, InventoryAdapter adapter) {
+        return new GridInventoryLensImpl(0, 9, 3, adapter.getSlotProvider());
     }
 }

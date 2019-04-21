@@ -22,24 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.item.inventory;
+package org.spongepowered.common.mixin.core.item.inventory.custom;
 
-import net.minecraft.entity.item.EntityMinecartContainer;
-import net.minecraft.entity.passive.EntityVillager;
+import org.spongepowered.api.item.inventory.Carrier;
+import org.spongepowered.api.item.inventory.custom.ContainerType;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
+import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.item.inventory.custom.EmptyViewableCustomInventory;
 
 import java.util.Optional;
 
 @SuppressWarnings("rawtypes")
-@Mixin(value = {
-    EntityVillager.class,
-    EntityMinecartContainer.class
-})
-public abstract class MixinEntityCarriedInventory implements CarriedInventory {
+@Mixin(EmptyViewableCustomInventory.class)
+public abstract class MixinEmptyViewableCustomInventory implements ViewableInventory, CarriedInventory<Carrier> {
+
+    @Shadow(remap = false) private Carrier carrier;
+    @Shadow(remap = false) private ContainerType type;
 
     @Override
-    public Optional getCarrier() {
-        return Optional.of(this);
+    public ContainerType getType() {
+        return this.type;
+    }
+
+    @Override
+    public Optional<Carrier> getCarrier() {
+        return Optional.ofNullable(this.carrier);
     }
 }

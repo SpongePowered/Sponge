@@ -22,31 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.item.inventory;
+package org.spongepowered.common.mixin.core.item.inventory.container;
 
-import net.minecraft.inventory.ContainerHorseChest;
+import com.flowpowered.math.vector.Vector3d;
+import net.minecraft.inventory.ContainerRepair;
+import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.interfaces.inventory.IMixinCarriedInventory;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.interfaces.IMixinSingleBlockCarrier;
 
-import java.util.Optional;
+@Mixin(ContainerRepair.class)
+public class MixinCarrierContainerRepair implements IMixinSingleBlockCarrier {
 
-import javax.annotation.Nullable;
-
-@SuppressWarnings("rawtypes")
-@Mixin(ContainerHorseChest.class)
-public abstract class MixinContainerHorseChest implements CarriedInventory, IMixinCarriedInventory {
-
-    @Nullable private Carrier carrier;
+    @Shadow @Final private net.minecraft.world.World world;
+    @Shadow @Final private BlockPos pos;
 
     @Override
-    public Optional<Carrier> getCarrier() {
-        return Optional.ofNullable(this.carrier);
+    public Location getLocation() {
+        return new Location(((World) this.world), new Vector3d(this.pos.getX(), this.pos.getY(), this.pos.getZ()));
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public void setCarrier(Carrier carrier) {
-        this.carrier = carrier;
+    public CarriedInventory<? extends Carrier> getInventory() {
+        return ((CarriedInventory) this);
     }
 }

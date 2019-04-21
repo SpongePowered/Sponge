@@ -22,47 +22,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.item.inventory;
+package org.spongepowered.common.mixin.core.item.inventory.vanilla;
 
-import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.type.CarriedInventory;
-import org.spongepowered.api.plugin.PluginContainer;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.InventoryBasic;
+import net.minecraft.inventory.InventoryCraftResult;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
-import org.spongepowered.common.item.inventory.custom.CustomInventory;
+import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
+import org.spongepowered.common.item.inventory.lens.LensProvider;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
+import org.spongepowered.common.item.inventory.lens.impl.DefaultEmptyLens;
+import org.spongepowered.common.item.inventory.lens.impl.DefaultIndexedLens;
+import org.spongepowered.common.item.inventory.lens.impl.collections.SlotLensCollection;
 
-import java.util.Optional;
-
-@SuppressWarnings("rawtypes")
-@Mixin(CustomInventory.class)
-public abstract class MixinCustomInventory implements MinecraftInventoryAdapter, Inventory, CarriedInventory<Carrier> {
-
-    @Shadow(remap = false) private Carrier carrier;
-    @Shadow(remap = false) private PluginContainer plugin;
-    @Shadow(remap = false) private SlotProvider slots;
-    @Shadow(remap = false) private Lens lens;
+@Mixin(value = {InventoryBasic.class, InventoryCraftResult.class})
+@Implements(value = @Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$"))
+public abstract class MixinInventoryBasic implements IInventory, LensProvider {
 
     @Override
-    public Lens getRootLens() {
-        return this.lens;
+    public Lens rootLens(Fabric fabric, InventoryAdapter adapter) {
+        if (this.getSizeInventory() == 0) {
+            return new DefaultEmptyLens(adapter);
+        }
+        return new DefaultIndexedLens(0, this.getSizeInventory(), adapter.getSlotProvider());
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public Optional<Carrier> getCarrier() {
-        return Optional.ofNullable(this.carrier);
+    public SlotProvider slotProvider(Fabric fabric, InventoryAdapter adapter) {
+        return new SlotLensCollection.Builder().add(this.getSizeInventory()).build();
     }
 
-    @Override
-    public PluginContainer getPlugin() {
-        return this.plugin;
-    }
-
-    @Override
-    public SlotProvider getSlotProvider() {
-        return this.slots;
-    }
 }

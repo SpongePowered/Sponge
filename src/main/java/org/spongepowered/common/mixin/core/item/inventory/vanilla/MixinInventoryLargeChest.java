@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.inventory;
+package org.spongepowered.common.mixin.core.item.inventory.vanilla;
 
 import net.minecraft.inventory.InventoryLargeChest;
 import net.minecraft.world.ILockableContainer;

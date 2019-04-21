@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.item.inventory;
+package org.spongepowered.common.mixin.core.item.inventory.container;
 
 import net.minecraft.inventory.ContainerRepair;
 import net.minecraft.inventory.IInventory;
@@ -51,6 +51,7 @@ import org.spongepowered.common.item.inventory.lens.impl.minecraft.container.Con
 import org.spongepowered.common.item.inventory.lens.impl.slots.InputSlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.slots.OutputSlotLensImpl;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.mixin.core.item.inventory.container.MixinContainer;
 
 import java.util.ArrayList;
 import java.util.List;

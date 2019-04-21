@@ -22,5 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-@org.spongepowered.api.util.annotation.NonnullByDefault
-package org.spongepowered.common.mixin.core.inventory;
+package org.spongepowered.common.mixin.core.item.inventory.container;
+
+import com.flowpowered.math.vector.Vector3d;
+import net.minecraft.inventory.ContainerWorkbench;
+import net.minecraft.util.math.BlockPos;
+import org.spongepowered.api.item.inventory.Carrier;
+import org.spongepowered.api.item.inventory.type.CarriedInventory;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.interfaces.IMixinSingleBlockCarrier;
+
+@Mixin(ContainerWorkbench.class)
+public class MixinCarrierContainerWorkbench implements IMixinSingleBlockCarrier {
+
+
+    @Shadow @Final private net.minecraft.world.World world;
+    @Shadow @Final private BlockPos pos;
+
+    @Override
+    public Location getLocation() {
+        return new Location(((World) this.world), new Vector3d(this.pos.getX(), this.pos.getY(), this.pos.getZ()));
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Override
+    public CarriedInventory<? extends Carrier> getInventory() {
+        return ((CarriedInventory) this);
+    }
+}

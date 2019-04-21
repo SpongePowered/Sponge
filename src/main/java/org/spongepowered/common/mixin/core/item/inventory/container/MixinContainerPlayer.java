@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.item.inventory;
+package org.spongepowered.common.mixin.core.item.inventory.container;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ContainerPlayer;
@@ -43,6 +43,7 @@ import org.spongepowered.common.item.inventory.lens.impl.collections.SlotLensCol
 import org.spongepowered.common.item.inventory.lens.impl.minecraft.container.ContainerPlayerInventoryLens;
 import org.spongepowered.common.item.inventory.lens.impl.slots.CraftingOutputSlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.slots.EquipmentSlotLensImpl;
+import org.spongepowered.common.mixin.core.item.inventory.container.MixinContainer;
 
 @Mixin(ContainerPlayer.class)
 public abstract class MixinContainerPlayer extends MixinContainer implements IMixinContainerPlayer, LensProvider {

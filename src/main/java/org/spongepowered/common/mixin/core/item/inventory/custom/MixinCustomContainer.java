@@ -22,34 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.item.inventory;
+package org.spongepowered.common.mixin.core.item.inventory.custom;
 
-import com.flowpowered.math.vector.Vector3d;
-import net.minecraft.inventory.ContainerRepair;
-import net.minecraft.util.math.BlockPos;
-import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.type.CarriedInventory;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
-import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.IMixinSingleBlockCarrier;
+import org.spongepowered.common.item.inventory.custom.CustomContainer;
+import org.spongepowered.common.item.inventory.custom.CustomInventory;
+import org.spongepowered.common.mixin.core.item.inventory.container.MixinContainer;
 
-@Mixin(ContainerRepair.class)
-public class MixinCarrierContainerRepair implements IMixinSingleBlockCarrier {
+@Mixin(CustomContainer.class)
+public abstract class MixinCustomContainer extends MixinContainer {
 
-    @Shadow @Final private net.minecraft.world.World world;
-    @Shadow @Final private BlockPos pos;
+    @Shadow(remap = false) public CustomInventory inv;
 
     @Override
-    public Location getLocation() {
-        return new Location(((World) this.world), new Vector3d(this.pos.getX(), this.pos.getY(), this.pos.getZ()));
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    @Override
-    public CarriedInventory<? extends Carrier> getInventory() {
-        return ((CarriedInventory) this);
+    public PluginContainer getPlugin() {
+        // Fail fast to the base inventory
+        return ((Inventory) this.inv).getPlugin();
     }
 }

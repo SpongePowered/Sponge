@@ -22,23 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.item.inventory;
+package org.spongepowered.common.mixin.core.item.inventory.vanilla;
 
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.plugin.PluginContainer;
+import net.minecraft.entity.item.EntityMinecartContainer;
+import net.minecraft.entity.passive.EntityVillager;
+import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.item.inventory.custom.CustomContainer;
-import org.spongepowered.common.item.inventory.custom.CustomInventory;
 
-@Mixin(CustomContainer.class)
-public abstract class MixinCustomContainer extends MixinContainer {
+import java.util.Optional;
 
-    @Shadow(remap = false) public CustomInventory inv;
+@SuppressWarnings("rawtypes")
+@Mixin(value = {
+    EntityVillager.class,
+    EntityMinecartContainer.class
+})
+public abstract class MixinEntityCarriedInventory implements CarriedInventory {
 
     @Override
-    public PluginContainer getPlugin() {
-        // Fail fast to the base inventory
-        return ((Inventory) this.inv).getPlugin();
+    public Optional getCarrier() {
+        return Optional.of(this);
     }
 }

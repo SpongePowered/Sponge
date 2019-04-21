@@ -103,7 +103,7 @@ public abstract class MixinTraitViewable implements ViewableInventory, IMixinInt
 
     @Override
     public ContainerType getType() {
-        return // TODO implement this somewhere;
+        return null; // TODO implement for vanilla types;
     }
 
     @Override

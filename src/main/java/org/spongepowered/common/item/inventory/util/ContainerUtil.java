@@ -91,7 +91,7 @@ import org.spongepowered.common.item.inventory.lens.impl.minecraft.PlayerInvento
 import org.spongepowered.common.item.inventory.lens.impl.minecraft.container.ContainerLens;
 import org.spongepowered.common.item.inventory.lens.impl.slots.CraftingOutputSlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
-import org.spongepowered.common.mixin.core.inventory.MixinInventoryHelper;
+import org.spongepowered.common.mixin.core.item.inventory.MixinInventoryHelper;
 
 import java.util.ArrayList;
 import java.util.Collection;
