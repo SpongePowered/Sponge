@@ -30,6 +30,7 @@ import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.animal.Horse;
 import org.spongepowered.api.entity.living.animal.Llama;
 import org.spongepowered.api.entity.living.animal.Mule;
@@ -60,6 +61,7 @@ import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -91,10 +93,10 @@ public class CustomInventoryTest {
             return;
         }
         if (event.getEntity() instanceof Horse) {
-            ViewableInventory inventory = ViewableInventory.builder().type(ContainerTypes.HORSE)
-                    .completeStructure()
-                    .carrier(((Horse) event.getEntity()))
-                    .build();
+            World world = event.getEntity().getWorld();
+
+            Entity copyEntity = world.createEntity(event.getEntity().getType(), event.getEntity().getPosition());
+            CarriedInventory<? extends Carrier> inventory = ((Horse) copyEntity).getInventory();
 
             int i = 1;
             for (Inventory slot : inventory.slots()) {

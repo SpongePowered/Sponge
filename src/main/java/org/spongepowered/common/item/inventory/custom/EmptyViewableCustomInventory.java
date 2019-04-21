@@ -32,7 +32,7 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.IInteractionObject;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.custom.ContainerType;
-import org.spongepowered.common.data.type.SpongeContainerType;
+import org.spongepowered.common.data.type.SpongeContainerTypeEmpty;
 
 import java.util.UUID;
 
@@ -44,7 +44,7 @@ public class EmptyViewableCustomInventory extends InventoryBasic implements IInt
     @Nullable private UUID identity; // TODO property
     @Nullable private Carrier carrier; // for shadow
 
-    public EmptyViewableCustomInventory(ContainerType type, @Nullable UUID identity, @Nullable Carrier carrier) {
+    public EmptyViewableCustomInventory(SpongeContainerTypeEmpty type, @Nullable UUID identity, @Nullable Carrier carrier) {
         super(new TextComponentString("Empty Viewable Custom Inventory"), 0);
         this.type = type;
         this.identity = identity;
@@ -53,7 +53,7 @@ public class EmptyViewableCustomInventory extends InventoryBasic implements IInt
 
     @Override
     public Container createContainer(InventoryPlayer inventoryPlayer, EntityPlayer player) {
-        return ((SpongeContainerType) this.type).provideContainer(this, player);
+        return ((SpongeContainerTypeEmpty) this.type).provideContainer(this, player);
     }
 
     @Override
