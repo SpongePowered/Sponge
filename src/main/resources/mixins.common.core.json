@@ -323,6 +323,7 @@
         "item.inventory.MixinContainerWorkbench",
         "item.inventory.MixinCustomInventory",
         "item.inventory.MixinCustomContainer",
+        "item.inventory.MixinEmptyViewableCustomInventory",
         "item.inventory.MixinEntityCarriedInventory",
         "item.inventory.MixinTraitViewable",
         "item.inventory.MixinTraitInventory",

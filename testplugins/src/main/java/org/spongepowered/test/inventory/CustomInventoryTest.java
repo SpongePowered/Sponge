@@ -62,6 +62,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.Location;
 
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -89,86 +90,53 @@ public class CustomInventoryTest {
         if (!player.get(Keys.IS_SNEAKING).orElse(false)) {
             return;
         }
-        if (event.getEntity() instanceof Mule) {
-            Inventory.Builder builder;
-            if (((Mule) event.getEntity()).getInventory().capacity() <= 2) {
-                builder = Inventory.builder().of(InventoryArchetypes.HORSE);
-            } else {
-                builder = Inventory.builder().of(InventoryArchetypes.HORSE_WITH_CHEST);
-            }
-            Inventory inventory = builder.property(InventoryProperties.TITLE, Text.of("Custom Mule"))
-                    .withCarrier((Horse) event.getEntity())
-                    .build(this);
+        if (event.getEntity() instanceof Horse) {
+            ViewableInventory inventory = ViewableInventory.builder().type(ContainerTypes.HORSE)
+                    .completeStructure()
+                    .carrier(((Horse) event.getEntity()))
+                    .build();
+
             int i = 1;
             for (Inventory slot : inventory.slots()) {
                 slot.set(ItemStack.of(ItemTypes.APPLE, i++));
             }
-            Sponge.getCauseStackManager().pushCause(player);
-            player.openInventory(inventory);
-            Sponge.getCauseStackManager().popCause();
-            event.setCancelled(true);
-        } else if (event.getEntity() instanceof Llama) {
-            Inventory.Builder builder;
-            if (((Llama) event.getEntity()).getInventory().capacity() <= 2) {
-                builder = Inventory.builder().of(InventoryArchetypes.HORSE);
-            } else {
-                builder = Inventory.builder().of(InventoryArchetypes.HORSE_WITH_CHEST);
+
+            Text text = Text.of("Custom Horse");
+            if (event.getEntity() instanceof Mule) {
+                text = Text.of("Custom Mule");
+            } else if (event.getEntity() instanceof Llama) {
+                text = Text.of("Custom Llama");
             }
-            Inventory inventory = builder.property(InventoryProperties.TITLE, Text.of("Custom Llama"))
-                    .withCarrier((Horse) event.getEntity())
-                    .build(this);
-            int i = 1;
-            for (Inventory slot : inventory.slots()) {
-                slot.set(ItemStack.of(ItemTypes.APPLE, i++));
-            }
-            Sponge.getCauseStackManager().pushCause(player);
-            player.openInventory(inventory);
-            Sponge.getCauseStackManager().popCause();
-            event.setCancelled(true);
-        } else if (event.getEntity() instanceof Horse) {
-            Inventory inventory = Inventory.builder().of(InventoryArchetypes.HORSE)
-                    .property(InventoryProperties.TITLE, Text.of("Custom Horse"))
-                    .withCarrier(((Horse) event.getEntity()))
-                    .build(this);
-            int i = 1;
-            for (Inventory slot : inventory.slots()) {
-                slot.set(ItemStack.of(ItemTypes.APPLE, i++));
-            }
-            Sponge.getCauseStackManager().pushCause(player);
-            player.openInventory(inventory);
-            Sponge.getCauseStackManager().popCause();
+
+            player.openInventory(inventory, text);
             event.setCancelled(true);
         }
         if (event.getEntity() instanceof Slime) {
-            Inventory inventory = Inventory.builder().of(InventoryArchetypes.MENU_GRID)
-                    .property(InventoryProperties.DIMENSION, new Vector2i(1, 9))
-                    .property(InventoryProperties.TITLE, Text.of("Slime Content"))
-                    .property(InventoryProperties.UNIQUE_ID, UUID.randomUUID())
-                    .property(InventoryProperties.GUI_ID, GuiIds.DISPENSER)
-                    .build(this);
+            ViewableInventory inventory = ViewableInventory.builder().type(ContainerTypes.DISPENSER)
+                    .completeStructure()
+                    .identity(UUID.randomUUID())
+                    .build();
+
             ItemStack flard = ItemStack.of(ItemTypes.SLIME_BALL, 1);
             flard.offer(Keys.DISPLAY_NAME, Text.of("Flard?"));
             for (Inventory slot : inventory.slots()) {
                 slot.set(flard);
             }
-            Sponge.getCauseStackManager().pushCause(player);
-            player.openInventory(inventory);
-            Sponge.getCauseStackManager().popCause();
+            
+            player.openInventory(inventory, Text.of("Slime Content"));
+            event.setCancelled(true);
         }
     }
 
     private void interactOtherBlock(InteractBlockEvent.Primary event, Player player, Location loc) {
         if (loc.getBlock().getType() == BlockTypes.CRAFTING_TABLE) {
-            Inventory inventory = Inventory.builder().of(InventoryArchetypes.WORKBENCH)
-                    .property(InventoryProperties.TITLE, Text.of("Custom Workbench"))
-                    .build(this);
+            ViewableInventory inventory = ViewableInventory.builder().type(ContainerTypes.CRAFTING_TABLE).completeStructure().build();
+
             for (Inventory slot : inventory.slots()) {
                 slot.set(ItemStack.of(ItemTypes.IRON_NUGGET, 1));
             }
-            Sponge.getCauseStackManager().pushCause(player);
-            player.openInventory(inventory);
-            Sponge.getCauseStackManager().popCause();
 
+            player.openInventory(inventory, Text.of("Custom Workbench"));
             event.setCancelled(true);
         }
     }
@@ -177,15 +145,17 @@ public class CustomInventoryTest {
         loc.getTileEntity().ifPresent(te -> {
             if (te instanceof Carrier) {
                 BasicCarrier myCarrier = new BasicCarrier();
-                Inventory custom = Inventory.builder().from(((Carrier) te).getInventory())
-                        .property(InventoryProperties.TITLE, Text.of("Custom ", ((Carrier) te).getInventory().getName()))
-                        .withCarrier(myCarrier)
-                        .build(this);
-                myCarrier.init(custom);
-                Sponge.getCauseStackManager().pushCause(player);
-                player.openInventory(custom);
-                Sponge.getCauseStackManager().popCause();
-                event.setCancelled(true);
+
+                Optional<ViewableInventory> vi = ((Carrier) te).getInventory().asViewable();
+                if (vi.isPresent()) {
+                    ViewableInventory inventory = ViewableInventory.builder().typeFrom(vi.get()).completeStructure()
+                            .carrier(myCarrier)
+                            .build();
+
+                    myCarrier.init(inventory);
+                    player.openInventory(inventory, Text.of("Custom ", ((Carrier) te).getInventory().getName()));
+                    event.setCancelled(true);
+                }
             }
         });
     }

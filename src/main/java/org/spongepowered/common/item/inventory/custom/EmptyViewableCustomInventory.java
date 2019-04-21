@@ -27,72 +27,38 @@ package org.spongepowered.common.item.inventory.custom;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.InventoryBasic;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.IInteractionObject;
 import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.custom.ContainerType;
-import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.common.data.type.SpongeContainerType;
-import org.spongepowered.common.interfaces.IMixinInteractable;
-import org.spongepowered.common.item.inventory.archetype.CompositeInventoryArchetype;
-import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.lens.SlotProvider;
 
-import java.util.List;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-public class ViewableCustomInventory extends CustomInventory implements IInteractionObject {
+public class EmptyViewableCustomInventory extends InventoryBasic implements IInteractionObject {
 
     private ContainerType type;
-    private boolean vanilla = false;
+    @Nullable private UUID identity; // TODO property
+    @Nullable private Carrier carrier; // for shadow
 
-    public ViewableCustomInventory(ContainerType type, int size, Lens lens, SlotProvider provider, List<Inventory> inventories, @Nullable UUID identity, @Nullable Carrier carrier) {
-        super(size, lens, provider, inventories, identity, carrier);
+    public EmptyViewableCustomInventory(ContainerType type, @Nullable UUID identity, @Nullable Carrier carrier) {
+        super(new TextComponentString("Empty Viewable Custom Inventory"), 0);
         this.type = type;
-    }
-
-    public ViewableCustomInventory vanilla() {
-        this.vanilla = true;
-        return this;
-    }
-
-    @Override
-    public void openInventory(EntityPlayer player) {
-    }
-
-    @Override
-    public void closeInventory(EntityPlayer player) {
-    }
-
-    // TODO implement fields as properties?
-
-    @Override
-    public int getField(int id) {
-        return 0;
-    }
-
-    @Override
-    public void setField(int id, int value) {
-    }
-
-    @Override
-    public int getFieldCount() {
-        return 0;
+        this.identity = identity;
+        this.carrier = carrier;
     }
 
     @Override
     public Container createContainer(InventoryPlayer inventoryPlayer, EntityPlayer player) {
-        if (this.vanilla) {
-            return ((SpongeContainerType) this.type).provideContainer(this, player);
-        }
-        return new CustomContainer(player, this);
+        return ((SpongeContainerType) this.type).provideContainer(this, player);
     }
 
     @Override
     public String getGuiID() {
         return this.type.getKey().toString();
     }
+
 }

@@ -50,6 +50,8 @@ import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
 
+import javax.annotation.Nullable;
+
 /**
  * Bottom type / empty results set for inventory queries.
  */
@@ -78,8 +80,8 @@ public class EmptyInventoryImpl implements EmptyInventory {
 
     private final Inventory parent;
 
-    public EmptyInventoryImpl(Inventory parent) {
-        this.parent = parent;
+    public EmptyInventoryImpl(@Nullable Inventory parent) {
+        this.parent = parent == null ? this : parent;
     }
 
     @Override

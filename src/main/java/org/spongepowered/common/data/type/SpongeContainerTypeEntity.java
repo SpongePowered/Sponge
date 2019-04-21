@@ -24,51 +24,17 @@
  */
 package org.spongepowered.common.data.type;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IInventory;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.item.inventory.custom.ContainerType;
 import org.spongepowered.common.SpongeCatalogType;
-import org.spongepowered.common.item.inventory.lens.LensCreator;
 import org.spongepowered.common.registry.RegistryHelper;
-import org.spongepowered.common.registry.type.item.ContainerTypeRegistryModule;
 
-public class SpongeContainerType extends SpongeCatalogType implements ContainerType {
+/**
+ * Cannot be opened normally. Use the inventory of an actual entity to open Container.
+ */
+public class SpongeContainerTypeEntity extends SpongeCatalogType implements ContainerType {
 
-    private ContainerTypeRegistryModule.ContainerProvider containerProvider;
-    private final int size;
-    private final int width;
-    private final int height;
-    private LensCreator lensCreator;
-
-    public SpongeContainerType(final CatalogKey key, int size, int width, int height, LensCreator lensCreator, ContainerTypeRegistryModule.ContainerProvider containerProvider) {
+    public SpongeContainerTypeEntity(final CatalogKey key) {
         super(key, RegistryHelper.name(key));
-        this.containerProvider = containerProvider;
-        this.lensCreator = lensCreator;
-        this.size = size;
-        this.width = width;
-        this.height = height;
     }
-
-    public LensCreator getLensCreator() {
-        return this.lensCreator;
-    }
-
-    public int getSize() {
-        return size;
-    }
-
-    public int getWidth() {
-        return width;
-    }
-
-    public int getHeight() {
-        return height;
-    }
-
-    public Container provideContainer(IInventory viewed, EntityPlayer viewing) {
-        return this.containerProvider.provide(viewed, viewing);
-    }
-
 }

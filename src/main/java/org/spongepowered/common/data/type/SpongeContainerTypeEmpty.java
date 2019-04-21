@@ -30,41 +30,19 @@ import net.minecraft.inventory.IInventory;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.item.inventory.custom.ContainerType;
 import org.spongepowered.common.SpongeCatalogType;
-import org.spongepowered.common.item.inventory.lens.LensCreator;
 import org.spongepowered.common.registry.RegistryHelper;
 import org.spongepowered.common.registry.type.item.ContainerTypeRegistryModule;
 
-public class SpongeContainerType extends SpongeCatalogType implements ContainerType {
+/**
+ * Container is backed by internal Inventory
+ */
+public class SpongeContainerTypeEmpty extends SpongeCatalogType implements ContainerType {
 
     private ContainerTypeRegistryModule.ContainerProvider containerProvider;
-    private final int size;
-    private final int width;
-    private final int height;
-    private LensCreator lensCreator;
 
-    public SpongeContainerType(final CatalogKey key, int size, int width, int height, LensCreator lensCreator, ContainerTypeRegistryModule.ContainerProvider containerProvider) {
+    public SpongeContainerTypeEmpty(final CatalogKey key, ContainerTypeRegistryModule.ContainerProvider containerProvider) {
         super(key, RegistryHelper.name(key));
         this.containerProvider = containerProvider;
-        this.lensCreator = lensCreator;
-        this.size = size;
-        this.width = width;
-        this.height = height;
-    }
-
-    public LensCreator getLensCreator() {
-        return this.lensCreator;
-    }
-
-    public int getSize() {
-        return size;
-    }
-
-    public int getWidth() {
-        return width;
-    }
-
-    public int getHeight() {
-        return height;
     }
 
     public Container provideContainer(IInventory viewed, EntityPlayer viewing) {

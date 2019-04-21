@@ -40,6 +40,7 @@ import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinInteractable;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.custom.CustomInventory;
+import org.spongepowered.common.item.inventory.custom.EmptyViewableCustomInventory;
 import org.spongepowered.common.item.inventory.custom.SpongeInventoryMenu;
 import org.spongepowered.common.item.inventory.custom.ViewableCustomInventory;
 
@@ -60,7 +61,8 @@ import java.util.stream.Collectors;
         EntityVillager.class,
         SpongeUserInventory.class,
         EntityMinecartContainer.class,
-        ViewableCustomInventory.class
+        ViewableCustomInventory.class,
+        EmptyViewableCustomInventory.class,
 }, priority = 999)
 public abstract class MixinTraitViewable implements ViewableInventory, IMixinInteractable {
 

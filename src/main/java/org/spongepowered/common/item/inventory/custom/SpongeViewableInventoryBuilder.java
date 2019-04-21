@@ -13,12 +13,15 @@ import org.spongepowered.api.item.inventory.custom.ContainerType;
 import org.spongepowered.api.item.inventory.slot.SlotIndex;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.common.data.type.SpongeContainerType;
+import org.spongepowered.common.item.inventory.EmptyInventoryImpl;
+import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,15 +47,17 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
 
     private List<Inventory> finalInventories;
     private Lens finalLens;
-    private CustomSlotProvider finalProvider;
+    private SlotProvider finalProvider;
 
     @Override
     public BuildingStep type(ContainerType type) {
         this.type = type;
         this.slotDefinitions = new HashMap<>();
-        this.sizeX = ((SpongeContainerType) type).getWidth();
-        this.sizeY = ((SpongeContainerType) type).getHeight();
-        this.size = ((SpongeContainerType) type).getSize();
+        if (type instanceof SpongeContainerType) {
+            this.sizeX = ((SpongeContainerType) type).getWidth();
+            this.sizeY = ((SpongeContainerType) type).getHeight();
+            this.size = ((SpongeContainerType) type).getSize();
+        }
         return this;
     }
 
@@ -84,6 +89,7 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
 
     @Override
     public BuildingStep slotsAtIndizes(List<Slot> source, List<Integer> at) {
+        Validate.isTrue(this.size > 0, "Inventory has no slots");
         Validate.isTrue(source.size() == at.size(), "Source and index list sizes differ");
         for (int i = 0; i < at.size(); i++) {
             Slot slot = source.get(i);
@@ -195,26 +201,44 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
 
     @Override
     public EndStep completeStructure() {
-        this.finalInventories = this.slotDefinitions.values().stream().map(Inventory::parent).distinct().collect(Collectors.toList());
-        this.finalProvider = new CustomSlotProvider();
-        for (Map.Entry<Integer, Slot> entry : this.slotDefinitions.entrySet()) {
-            Slot slot = entry.getValue();
-            int idx = slot.getProperty(InventoryProperties.SLOT_INDEX).get().getIndex();
-
-            int offset = 0;
-            for (int i = 0; i < this.finalInventories.indexOf(slot.parent()); i++) {
-                offset += this.finalInventories.get(i).size();
+        if (this.slotDefinitions.isEmpty()) {
+            if (this.size == 0) {
+                return this;
+            } else {
+                InventoryAdapter inventory = (InventoryAdapter) Inventory.builder().slots(this.size).completeStructure().build();
+                this.finalInventories = Arrays.asList(inventory);
+                this.finalProvider = inventory.getSlotProvider();
             }
-            this.finalProvider.add(new SlotLensImpl(idx + offset));
-        }
+        } else {
+            this.fillDummy();
+            this.finalInventories = this.slotDefinitions.values().stream().map(Inventory::parent).distinct().collect(Collectors.toList());
+            CustomSlotProvider slotProvider = new CustomSlotProvider();
+            for (Map.Entry<Integer, Slot> entry : this.slotDefinitions.entrySet()) {
+                Slot slot = entry.getValue();
+                int idx = slot.getProperty(InventoryProperties.SLOT_INDEX).get().getIndex();
 
+                int offset = 0;
+                for (int i = 0; i < this.finalInventories.indexOf(slot.parent()); i++) {
+                    offset += this.finalInventories.get(i).size();
+                }
+                slotProvider.add(new SlotLensImpl(idx + offset));
+            }
+            this.finalProvider = slotProvider;
+        }
         this.finalLens = ((SpongeContainerType) this.type).getLensCreator().createLens(this.finalProvider);
         return this;
     }
 
     @Override
     public ViewableInventory build() {
-        return (ViewableInventory) new ViewableCustomInventory(this.type, this.size, this.finalLens, this.finalProvider, this.finalInventories, this.identity, this.carrier);
+        if (this.size == 0) {
+            return (ViewableInventory) new EmptyViewableCustomInventory(this.type, this.identity, this.carrier);
+        }
+        ViewableCustomInventory inventory = new ViewableCustomInventory(this.type, this.size, this.finalLens, this.finalProvider, this.finalInventories, this.identity, this.carrier);
+        if (this.slotDefinitions.isEmpty()) {
+            inventory.vanilla();
+        }
+        return ((ViewableInventory) inventory);
     }
 
     @Override
