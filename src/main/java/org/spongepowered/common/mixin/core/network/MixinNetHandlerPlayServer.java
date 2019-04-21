@@ -141,6 +141,7 @@ import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
 import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
+import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
@@ -426,69 +427,30 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     }
 
     /**
+     * @auther karayuu - June 21st, 2019 - MineCraft ver1.12.2
      * @reason When a player use the spectator menu to teleport anyone,
      * Sponge should fire the MoveEntityEvent.Teleport.
      *
-     * @param packetIn The spectator packet
+     * @param packet The spectator packet
+     * @param entity The entity to teleport to
      */
-    @Overwrite
-    public void handleSpectate(CPacketSpectate packetIn) {
-        PacketThreadUtil.checkThreadAndEnqueue(packetIn, (NetHandlerPlayServer) (Object) this, this.player.getServerWorld());
+    @Inject(
+            method = "handleSpectate",
+            at = @At(
+                    value = "FIELD",
+                    target = "Lnet/minecraft/entity/Entity;world:Lnet/minecraft/world/World;",
+                    ordinal = 0
+            ),
+            locals = LocalCapture.CAPTURE_FAILHARD,
+            cancellable = true
+    )
+    private void onHandleSpectateForSponge(CPacketSpectate packet, CallbackInfo ci, Entity entity) {
+        Transform<World> fromTransform = ((IMixinEntityPlayerMP) this.player).getTransform();
+        Transform<World> toTransform = ((IMixinEntity) entity).getTransform();
 
-        if (this.player.isSpectator()) {
-            Entity entity = null;
-
-            for (WorldServer worldserver : this.server.worlds) {
-                if (worldserver != null) {
-                    entity = packetIn.getEntity(worldserver);
-
-                    if (entity != null) {
-                        break;
-                    }
-                }
-            }
-
-            if (entity != null) {
-                this.player.setSpectatingEntity(this.player);
-                this.player.dismountRidingEntity();
-                // Sponge start - handle MoveEntityEvent.Teleport
-                double x = entity.posX;
-                double y = entity.posY;
-                double z = entity.posZ;
-                float yaw = entity.rotationYaw;
-                float pitch = entity.rotationPitch;
-
-                MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent(this.player, x, y, z, yaw, pitch);
-                if (event.isCancelled()) {
-                    return;
-                }
-                // Sponge end
-                if (entity.world == this.player.world) {
-                    this.player.setPositionAndUpdate(entity.posX, entity.posY, entity.posZ);
-                } else {
-                    WorldServer worldserver1 = this.player.getServerWorld();
-                    WorldServer worldserver2 = (WorldServer)entity.world;
-                    this.player.dimension = entity.dimension;
-                    this.sendPacket(new SPacketRespawn(this.player.dimension, worldserver1.getDifficulty(), worldserver1.getWorldInfo().getTerrainType(), this.player.interactionManager.getGameType()));
-                    this.server.getPlayerList().updatePermissionLevel(this.player);
-                    worldserver1.removeEntityDangerously(this.player);
-                    this.player.isDead = false;
-                    this.player.setLocationAndAngles(entity.posX, entity.posY, entity.posZ, entity.rotationYaw, entity.rotationPitch);
-
-                    if (this.player.isEntityAlive()) {
-                        worldserver1.updateEntityWithOptionalForce(this.player, false);
-                        worldserver2.spawnEntity(this.player);
-                        worldserver2.updateEntityWithOptionalForce(this.player, false);
-                    }
-
-                    this.player.setWorld(worldserver2);
-                    this.server.getPlayerList().preparePlayer(this.player, worldserver1);
-                    this.player.setPositionAndUpdate(entity.posX, entity.posY, entity.posZ);
-                    this.player.interactionManager.setWorld(worldserver2);
-                    this.server.getPlayerList().updateTimeAndWeatherForPlayer(this.player, worldserver2);
-                    this.server.getPlayerList().syncPlayerInventory(this.player);
-                }
-            }
+        MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent(this.player, fromTransform, toTransform);
+        if (event.isCancelled()) {
+            ci.cancel();
         }
     }
 
