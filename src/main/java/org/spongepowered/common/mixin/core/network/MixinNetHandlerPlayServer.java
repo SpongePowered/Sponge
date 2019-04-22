@@ -431,26 +431,76 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
      * @reason When a player use the spectator menu to teleport anyone,
      * Sponge should fire the MoveEntityEvent.Teleport.
      *
-     * @param packet The spectator packet
-     * @param entity The entity to teleport to
+     * @param packetIn The spectator packet
      */
-    @Inject(
-            method = "handleSpectate",
-            at = @At(
-                    value = "FIELD",
-                    target = "Lnet/minecraft/entity/Entity;world:Lnet/minecraft/world/World;",
-                    ordinal = 0
-            ),
-            locals = LocalCapture.CAPTURE_FAILHARD,
-            cancellable = true
-    )
-    private void onHandleSpectateForSponge(CPacketSpectate packet, CallbackInfo ci, Entity entity) {
-        Transform<World> fromTransform = ((IMixinEntityPlayerMP) this.player).getTransform();
-        Transform<World> toTransform = ((IMixinEntity) entity).getTransform();
+    @Overwrite
+    public void handleSpectate(CPacketSpectate packetIn) {
+        PacketThreadUtil.checkThreadAndEnqueue(packetIn, (NetHandlerPlayServer) (Object) this, this.player.getServerWorld());
 
-        MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent(this.player, fromTransform, toTransform);
-        if (event.isCancelled()) {
-            ci.cancel();
+        if (this.player.isSpectator()) {
+            Entity entity = null;
+
+            for (WorldServer worldserver : this.server.worlds) {
+                if (worldserver != null) {
+                    entity = packetIn.getEntity(worldserver);
+
+                    if (entity != null) {
+                        break;
+                    }
+                }
+            }
+
+            if (entity != null) {
+                //Sponge start - handle MoveEntityEvent.Teleport
+                final Transform<World> playerTransform = ((IMixinEntityPlayerMP) player).getTransform();
+                final Transform<World> entityTransform = ((IMixinEntity) entity).getTransform();
+
+                //fire event
+                final MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent(player, playerTransform, entityTransform);
+                if (event.isCancelled()) {
+                    return;
+                }
+
+                final Transform<World> toTransform = event.getToTransform();
+                final Vector3d position = toTransform.getPosition();
+                final Vector3d rotation = toTransform.getRotation();
+                //Sponge end
+                this.player.setSpectatingEntity(this.player);
+                this.player.dismountRidingEntity();
+
+                if (entity.world == this.player.world) {
+                    //Sponge start
+                    this.player.setPositionAndUpdate(position.getX(), position.getY(), position.getZ());
+                    //Sponge end
+                } else {
+                    WorldServer worldserver1 = this.player.getServerWorld();
+                    WorldServer worldserver2 = (WorldServer)entity.world;
+                    this.player.dimension = entity.dimension;
+                    this.sendPacket(new SPacketRespawn(this.player.dimension, worldserver1.getDifficulty(),
+                            worldserver1.getWorldInfo().getTerrainType(), this.player.interactionManager.getGameType()));
+                    this.server.getPlayerList().updatePermissionLevel(this.player);
+                    worldserver1.removeEntityDangerously(this.player);
+                    this.player.isDead = false;
+                    //Sponge start
+                    this.player.setLocationAndAngles(position.getX(), position.getY(), position.getZ(),
+                            (float) rotation.getX(), (float) rotation.getY());
+                    //Sponge end
+                    if (this.player.isEntityAlive()) {
+                        worldserver1.updateEntityWithOptionalForce(this.player, false);
+                        worldserver2.spawnEntity(this.player);
+                        worldserver2.updateEntityWithOptionalForce(this.player, false);
+                    }
+
+                    this.player.setWorld(worldserver2);
+                    this.server.getPlayerList().preparePlayer(this.player, worldserver1);
+                    //Sponge start
+                    this.player.setPositionAndUpdate(position.getX(), position.getY(), position.getZ());
+                    //Sponge end
+                    this.player.interactionManager.setWorld(worldserver2);
+                    this.server.getPlayerList().updateTimeAndWeatherForPlayer(this.player, worldserver2);
+                    this.server.getPlayerList().syncPlayerInventory(this.player);
+                }
+            }
         }
     }
 
