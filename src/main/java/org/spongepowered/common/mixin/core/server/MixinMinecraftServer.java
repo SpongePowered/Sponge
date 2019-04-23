@@ -328,7 +328,10 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
      */
     @Overwrite
     public void loadAllWorlds(String overworldFolder, String worldName, long seed, WorldType type, String generatorOptions) {
-        try (MapConversionContext context = GeneralPhase.State.MAP_CONVERSION.createPhaseContext().source(this).world(overworldFolder)) {
+        try (MapConversionContext context = GeneralPhase.State.MAP_CONVERSION.createPhaseContext()
+            .source(this)
+            .world(overworldFolder)) {
+            context.buildAndSwitch();
             this.convertMapIfNeeded(overworldFolder);
         }
         this.setUserMessage("menu.loadingLevel");
