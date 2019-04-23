@@ -237,7 +237,6 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
     @Overwrite
     public EnumActionResult processRightClickBlock(EntityPlayer player, net.minecraft.world.World worldIn, ItemStack stack, EnumHand hand, BlockPos
             pos, EnumFacing facing, float hitX, float hitY, float hitZ) {
-        // Overwritten in SpongeForge. Make sure to keep the two methods consistent.
         if (this.gameType == GameType.SPECTATOR) {
             TileEntity tileentity = worldIn.getTileEntity(pos);
 

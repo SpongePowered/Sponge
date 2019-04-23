@@ -818,9 +818,10 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
 
             if (tileentity == null) {
                 // Sponge Start - use SpongeImplHooks for forge compatibility
+                // tileentity = ((ITileEntityProvider)block).createNewTileEntity(this.worldObj, block.getMetaFromState(state)); // Sponge
+                tileentity = SpongeImplHooks.createTileEntity(newBlock, this.world, newState);
+
                 if (!isFake) { // Surround with a server check
-                    // tileentity = ((ITileEntityProvider)block).createNewTileEntity(this.worldObj, block.getMetaFromState(state)); // Sponge
-                    tileentity = SpongeImplHooks.createTileEntity(newBlock, this.world, newState);
                     final User owner = peek.getOwner().orElse(null);
                     // If current owner exists, transfer it to newly created TE pos
                     // This is required for TE's that get created during move such as pistons and ComputerCraft turtles.

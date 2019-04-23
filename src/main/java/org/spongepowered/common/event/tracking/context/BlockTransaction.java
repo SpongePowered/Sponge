@@ -397,11 +397,6 @@ public abstract class BlockTransaction {
             // Any requests to the world need to propogate to having the "changed" block, before
             // the block potentially changes from future changes.
             SpongeProxyBlockAccess proxyAccess = ((IMixinWorldServer) worldServer).getProxyAccess();
-            // The proxy sets up the various objects needed to properly remove the tile entity, including but not withtanding
-            // any tile entities that are already replaced at the position
-            if (this.queuedRemoval != null) {
-                proxyAccess.proceedWithRemoval(targetPosition, this.queuedRemoval);
-            }
 
             // We can proceed to calling the break block logic since the new state has been "proxied" onto the world
             PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
@@ -425,7 +420,11 @@ public abstract class BlockTransaction {
                 }
                 currentContext.neighborNotificationSource = currentNeighborSource;
             }
-
+            // The proxy sets up the various objects needed to properly remove the tile entity, including but not withtanding
+            // any tile entities that are already replaced at the position
+            if (this.queuedRemoval != null) {
+                proxyAccess.proceedWithRemoval(targetPosition, this.queuedRemoval);
+            }
 
             // We call onBlockAdded here for blocks without a TileEntity.
             // MixinChunk#setBlockState will call onBlockAdded for blocks

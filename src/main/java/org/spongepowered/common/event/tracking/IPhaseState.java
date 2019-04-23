@@ -933,4 +933,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     default boolean isConvertingMaps() {
         return false;
     }
+    default boolean allowsGettingQueuedRemovedTiles() {
+        return false;
+    }
 }
