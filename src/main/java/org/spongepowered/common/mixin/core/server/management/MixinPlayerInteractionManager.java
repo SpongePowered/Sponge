@@ -83,6 +83,8 @@ import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.util.VecHelper;
 
+import javax.annotation.Nullable;
+
 @Mixin(value = PlayerInteractionManager.class)
 public abstract class MixinPlayerInteractionManager implements IMixinPlayerInteractionManager {
 
@@ -226,6 +228,9 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
     /**
      * @author Aaron1011
      * @author gabizou - May 28th, 2016 - Rewritten for 1.9.4
+     * @author Morph - Bring the interactions up to date for 1.12.2 and in sync with Forge
+     * @author gabizou - April 23rd, 2019 - 1.12.2 - Re-merge the overwrite in common so we do not have to manually
+     *    sync the changes between SpongeForge and Common
      *
      * @reason Fire interact block event.
      */
@@ -266,7 +271,8 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
         final InteractBlockEvent.Secondary event = SpongeCommonEventFactory.createInteractBlockEventSecondary(player, oldStack,
                 hitVec, currentSnapshot, DirectionFacingProvider.getInstance().getKey(facing).get(), hand);
 
-        SpongeImpl.postEvent(event);
+        // Specifically this will be the SpongeToForgeEventData compatibility so we eliminate an extra overwrite.
+        @Nullable Object forgeEventObject = SpongeImplHooks.postForgeEventDataCompatForSponge(event);
 
         final PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
         if (!SpongeImplHooks.isFakePlayer(this.player) && !ItemStack.areItemStacksEqual(oldStack, this.player.getHeldItem(hand))) {
@@ -300,17 +306,29 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
                     this.player.connection.sendPacket(new SPacketBlockChange(worldIn, pos.up(2)));
                 }
             }
+            SpongeImplHooks.shouldCloseScreen(worldIn, pos, forgeEventObject, this.player);
 
-            this.interactBlockRightClickEventCancelled = true;
+            ((IMixinPlayerInteractionManager) this.player.interactionManager).setInteractBlockRightClickCancelled(true);
 
             ((EntityPlayerMP) player).sendContainerToPlayer(player.inventoryContainer);
-            return EnumActionResult.FAIL;
+            return SpongeImplHooks.getInteractionCancellationResult(forgeEventObject);
         }
         // Sponge End
 
         EnumActionResult result = EnumActionResult.PASS;
 
-        if (!player.isSneaking() || (player.getHeldItemMainhand().isEmpty() && player.getHeldItemOffhand().isEmpty()) || event.getUseBlockResult() == Tristate.TRUE) {
+        if (event.getUseItemResult() != Tristate.FALSE) {
+            result = SpongeImplHooks.onForgeItemUseFirst(player, stack, worldIn, pos, hand, facing, hitX, hitY, hitZ);
+            if (result != EnumActionResult.PASS) {
+                return result ;
+            }
+        }
+
+        // Sponge Start - Replace main hand and offhand empty checks with bypass flag, Forge has extra hooks
+        boolean bypass = SpongeImplHooks.doesItemSneakBypass(worldIn, pos, player, player.getHeldItemMainhand(), player.getHeldItemOffhand());
+
+        // if (!player.isSneaking() || (player.getHeldItemMainhand().isEmpty() && player.getHeldItemOffhand().isEmpty()) || event.getUseBlockResult == Tristate.TRUE) {
+        if (!player.isSneaking() || bypass || event.getUseBlockResult() == Tristate.TRUE) {
             // Sponge start - check event useBlockResult, and revert the client if it's FALSE.
             // also, store the result instead of returning immediately
             if (event.getUseBlockResult() != Tristate.FALSE) {
@@ -337,7 +355,10 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
                 this.player.connection.sendPacket(new SPacketBlockChange(this.world, pos));
                 // Since the event was explicitly set to fail, we need to respect it and treat it as if
                 // it wasn't cancelled, but perform no further processing.
-                return EnumActionResult.FAIL;
+                @Nullable EnumActionResult modifiedResult = SpongeImplHooks.getEnumResultForProcessRightClickBlock(this.player, event, result, worldIn, pos, hand);
+                if (modifiedResult != null) {
+                    return modifiedResult;
+                }
             }
             // Sponge End
         }
