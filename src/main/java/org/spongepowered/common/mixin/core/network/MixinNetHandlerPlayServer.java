@@ -142,6 +142,7 @@ import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 import org.spongepowered.common.interfaces.inventory.IMixinContainerPlayer;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
+import org.spongepowered.common.interfaces.server.management.IMixinPlayerInteractionManager;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
@@ -623,12 +624,12 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             // Only do a restore if something actually changed. The client does an identity check ('==')
             // to determine if it should continue using an itemstack. If we always resend the itemstack, we end up
             // cancelling item usage (e.g. eating food) that occurs while targeting a block
-            if (!ItemStack.areItemStacksEqual(itemStack, player.getHeldItem(hand)) && SpongeCommonEventFactory.interactBlockRightClickEventCancelled) {
+            if (!ItemStack.areItemStacksEqual(itemStack, player.getHeldItem(hand)) && ((IMixinPlayerInteractionManager) this.player.interactionManager).isInteractBlockRightClickCancelled()) {
                 PacketPhaseUtil.handlePlayerSlotRestore((EntityPlayerMP) player, itemStack, hand);
             }
         }
         context.interactItemChanged(false);
-        SpongeCommonEventFactory.interactBlockRightClickEventCancelled = false;
+        ((IMixinPlayerInteractionManager) this.player.interactionManager).setInteractBlockRightClickCancelled(false);
         return actionResult;
     }
 
@@ -646,12 +647,12 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             // Only do a restore if something actually changed. The client does an identity check ('==')
             // to determine if it should continue using an itemstack. If we always resend the itemstack, we end up
             // cancelling item usage (e.g. eating food) that occurs while targeting a block
-            if (!ItemStack.areItemStacksEqual(itemStack, player.getHeldItem(hand)) && SpongeCommonEventFactory.interactBlockRightClickEventCancelled) {
+            if (!ItemStack.areItemStacksEqual(itemStack, player.getHeldItem(hand))  && ((IMixinPlayerInteractionManager) this.player.interactionManager).isInteractBlockRightClickCancelled()) {
                 PacketPhaseUtil.handlePlayerSlotRestore((EntityPlayerMP) player, itemStack, hand);
             }
         }
         packetContext.interactItemChanged(false);
-        SpongeCommonEventFactory.interactBlockRightClickEventCancelled = false;
+        ((IMixinPlayerInteractionManager) this.player.interactionManager).setInteractBlockRightClickCancelled(false);
         return actionResult;
     }
 

@@ -27,6 +27,9 @@ package org.spongepowered.common.mixin.core.server;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
+import org.spongepowered.common.event.tracking.phase.general.MapConversionContext;
+import org.spongepowered.common.mixin.core.world.storage.MixinWorldInfo;
 import org.spongepowered.common.relocate.co.aikar.timings.TimingsManager;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -316,16 +319,18 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     /**
      * @author blood - December 23rd, 2015
      * @author Zidane - March 13th, 2016
+     * @author gabizou - April 22nd, 2019 - Minecraft 1.12.2
      *
-     * Sponge re-writes this method because we take control of loading existing Sponge dimensions, migrate old worlds to our standard, and
-     * configuration checks.
-     * @reason Add multiworld support
+     * @reason Sponge rewrites the method to use the Sponge {@link WorldManager} to load worlds,
+     * migrating old worlds, upgrading worlds to our standard, and configuration loading. Also
+     * validates that the {@link MixinWorldInfo onConstruction} will not be doing anything
+     * silly during map conversions.
      */
     @Overwrite
     public void loadAllWorlds(String overworldFolder, String worldName, long seed, WorldType type, String generatorOptions) {
-        SpongeCommonEventFactory.convertingMapFormat = true;
-        this.convertMapIfNeeded(overworldFolder);
-        SpongeCommonEventFactory.convertingMapFormat = false;
+        try (MapConversionContext context = GeneralPhase.State.MAP_CONVERSION.createPhaseContext().source(this).world(overworldFolder)) {
+            this.convertMapIfNeeded(overworldFolder);
+        }
         this.setUserMessage("menu.loadingLevel");
 
         WorldManager.loadAllWorlds(seed, type, generatorOptions);

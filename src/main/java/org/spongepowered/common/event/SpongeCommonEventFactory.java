@@ -169,10 +169,7 @@ import javax.annotation.Nullable;
 
 public class SpongeCommonEventFactory {
 
-    public static boolean convertingMapFormat = false;
     // Set if any of the events fired during interaction with a block (open
-    public static boolean interactBlockLeftClickEventCancelled = false;
-    public static boolean interactBlockRightClickEventCancelled = false;
 
     public static int lastAnimationPacketTick = 0;
     // For animation packet

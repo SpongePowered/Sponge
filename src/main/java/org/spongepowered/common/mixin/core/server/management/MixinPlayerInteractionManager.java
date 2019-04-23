@@ -98,10 +98,29 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
     @Shadow public abstract boolean isCreative();
     @Shadow public abstract boolean tryHarvestBlock(BlockPos pos);
 
+    private boolean interactBlockLeftClickEventCancelled = false;
+    private boolean interactBlockRightClickEventCancelled = false;
+
+    @Override
+    public boolean isInteractBlockRightClickCancelled() {
+        return this.interactBlockRightClickEventCancelled;
+    }
+
+    @Override
+    public void setInteractBlockRightClickCancelled(boolean cancelled) {
+        this.interactBlockRightClickEventCancelled = cancelled;
+    }
+
+    /*
+        We have to check for cancelled left click events because they occur from different packets
+        or processing branches such that there's no clear "context" of where we can store these variables.
+        So, we store it to the interaction manager's fields, to avoid contaminating other interaction
+        manager's processes.
+         */
     @Inject(method = "blockRemoving", at = @At("HEAD"), cancellable = true)
-    public void onBlockRemoving(final BlockPos pos, final CallbackInfo ci) {
-        if (SpongeCommonEventFactory.interactBlockLeftClickEventCancelled) {
-            SpongeCommonEventFactory.interactBlockLeftClickEventCancelled = false;
+    private void onBlockRemovingSpongeCheckForCancelledBlockEvent(final BlockPos pos, final CallbackInfo ci) {
+        if (this.interactBlockLeftClickEventCancelled) {
+            this.interactBlockLeftClickEventCancelled = false;
             ci.cancel();
         }
     }
@@ -125,10 +144,9 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
                 SpongeCommonEventFactory.callInteractBlockEventPrimary(this.player, stack, blockSnapshot, EnumHand.MAIN_HAND, side, vec);
 
         boolean isCancelled = blockEvent.isCancelled();
-        SpongeCommonEventFactory.interactBlockLeftClickEventCancelled = isCancelled;
+        this.interactBlockLeftClickEventCancelled = isCancelled;
 
         if (isCancelled) {
-            SpongeCommonEventFactory.interactBlockLeftClickEventCancelled = true;
 
             final IBlockState state = this.player.world.getBlockState(pos);
             ((IMixinEntityPlayerMP) this.player).sendBlockChange(pos, state);
@@ -262,7 +280,7 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
                 }
             }
 
-            SpongeCommonEventFactory.interactBlockRightClickEventCancelled = true;
+            this.interactBlockRightClickEventCancelled = true;
 
             ((EntityPlayerMP) player).sendContainerToPlayer(player.inventoryContainer);
             return EnumActionResult.FAIL;
@@ -379,7 +397,7 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
         SpongeCommonEventFactory.lastInteractItemOnBlockCancelled = event.isCancelled(); //|| event.getUseItemResult() == Tristate.FALSE;
 
         if (event.isCancelled()) {
-            SpongeCommonEventFactory.interactBlockRightClickEventCancelled = true;
+            this.interactBlockRightClickEventCancelled = true;
 
             ((EntityPlayerMP) player).sendContainerToPlayer(player.inventoryContainer);
             return EnumActionResult.FAIL;
@@ -472,7 +490,7 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
                 ((IMixinContainer) player.openContainer).setOpenLocation(blockSnapshot.getLocation().orElse(null));
                 if (!SpongeCommonEventFactory.callInteractInventoryOpenEvent(player)) {
                     result = EnumActionResult.FAIL;
-                    SpongeCommonEventFactory.interactBlockRightClickEventCancelled = true;
+                    this.interactBlockRightClickEventCancelled = true;
                 }
             }
         }
