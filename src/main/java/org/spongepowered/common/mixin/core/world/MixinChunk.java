@@ -830,6 +830,15 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
                     }
                     transaction.enqueueChanges(mixinWorld.getProxyAccess(), peek.getCapturedBlockSupplier());
                 } else {
+                    // Some mods are relying on the world being set prior to setting the tile
+                    // world prior to the position. It's weird, but during block restores, this can
+                    // cause an exception.
+                    // See https://github.com/SpongePowered/SpongeForge/issues/2677 for reference.
+                    // Note that vanilla will set the world later, and forge sets the world
+                    // after setting the position, but a mod has expectations that defy both of these...
+                    if (tileentity != null && tileentity.getWorld() != this.world) {
+                        tileentity.setWorld(this.world);
+                    }
                     this.world.setTileEntity(pos, tileentity);
                 }
             }
