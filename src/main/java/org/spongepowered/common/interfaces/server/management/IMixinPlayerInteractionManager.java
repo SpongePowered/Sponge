@@ -37,4 +37,12 @@ public interface IMixinPlayerInteractionManager {
 
     void setInteractBlockRightClickCancelled(boolean cancelled);
 
+    boolean isInteractBlockLeftClickCancelled();
+
+    void setInteractBlockLeftClickCancelled(boolean cancelled);
+
+    boolean isLastInteractItemOnBlockCancelled();
+
+    void setLastInteractItemOnBlockCancelled(boolean lastInteractItemOnBlockCancelled);
+
 }

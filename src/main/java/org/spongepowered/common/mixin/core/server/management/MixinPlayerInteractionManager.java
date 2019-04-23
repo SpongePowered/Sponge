@@ -100,6 +100,7 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
 
     private boolean interactBlockLeftClickEventCancelled = false;
     private boolean interactBlockRightClickEventCancelled = false;
+    private boolean lastInteractItemOnBlockCancelled = false;
 
     @Override
     public boolean isInteractBlockRightClickCancelled() {
@@ -111,12 +112,32 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
         this.interactBlockRightClickEventCancelled = cancelled;
     }
 
+    @Override
+    public boolean isInteractBlockLeftClickCancelled() {
+        return this.interactBlockLeftClickEventCancelled;
+    }
+
+    @Override
+    public void setInteractBlockLeftClickCancelled(boolean cancelled) {
+        this.interactBlockLeftClickEventCancelled = cancelled;
+    }
+
+    @Override
+    public boolean isLastInteractItemOnBlockCancelled() {
+        return this.lastInteractItemOnBlockCancelled;
+    }
+
+    @Override
+    public void setLastInteractItemOnBlockCancelled(boolean lastInteractItemOnBlockCancelled) {
+        this.lastInteractItemOnBlockCancelled = lastInteractItemOnBlockCancelled;
+    }
+
     /*
-        We have to check for cancelled left click events because they occur from different packets
-        or processing branches such that there's no clear "context" of where we can store these variables.
-        So, we store it to the interaction manager's fields, to avoid contaminating other interaction
-        manager's processes.
-         */
+                We have to check for cancelled left click events because they occur from different packets
+                or processing branches such that there's no clear "context" of where we can store these variables.
+                So, we store it to the interaction manager's fields, to avoid contaminating other interaction
+                manager's processes.
+                 */
     @Inject(method = "blockRemoving", at = @At("HEAD"), cancellable = true)
     private void onBlockRemovingSpongeCheckForCancelledBlockEvent(final BlockPos pos, final CallbackInfo ci) {
         if (this.interactBlockLeftClickEventCancelled) {
@@ -254,7 +275,7 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
             }
         }
 
-        SpongeCommonEventFactory.lastInteractItemOnBlockCancelled = event.isCancelled() || event.getUseItemResult() == Tristate.FALSE;
+        this.setLastInteractItemOnBlockCancelled(event.isCancelled() || event.getUseItemResult() == Tristate.FALSE);
 
         if (event.isCancelled()) {
             final IBlockState state = (IBlockState) currentSnapshot.getState();
@@ -394,7 +415,7 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
             ((PacketContext<?>) PhaseTracker.getInstance().getCurrentContext()).interactItemChanged(true);
         }
 
-        SpongeCommonEventFactory.lastInteractItemOnBlockCancelled = event.isCancelled(); //|| event.getUseItemResult() == Tristate.FALSE;
+        this.setLastInteractItemOnBlockCancelled(event.isCancelled()); //|| event.getUseItemResult() == Tristate.FALSE;
 
         if (event.isCancelled()) {
             this.interactBlockRightClickEventCancelled = true;

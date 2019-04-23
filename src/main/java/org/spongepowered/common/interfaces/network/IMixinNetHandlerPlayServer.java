@@ -43,4 +43,6 @@ public interface IMixinNetHandlerPlayServer {
     void captureCurrentPlayerPosition();
 
     void setLastMoveLocation(Location<World> location);
+
+    long getLastTryBlockPacketTimeStamp();
 }

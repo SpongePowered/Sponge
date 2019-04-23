@@ -591,11 +591,13 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
                 if (!player.getHeldItemMainhand().isEmpty() && SpongeCommonEventFactory.callInteractItemEventPrimary(player, player.getHeldItemMainhand(), EnumHand.MAIN_HAND, null, blockSnapshot).isCancelled()) {
                     SpongeCommonEventFactory.lastAnimationPacketTick = 0;
+                    SpongeCommonEventFactory.lastAnimationPlayer = null;
                     return;
                 }
 
                 SpongeCommonEventFactory.callInteractBlockEventPrimary(player, player.getHeldItemMainhand(), EnumHand.MAIN_HAND, null);
             }
+            SpongeCommonEventFactory.lastAnimationPlayer = null;
         }
         SpongeCommonEventFactory.lastAnimationPacketTick = 0;
         TimingsManager.FULL_SERVER_TICK.stopTiming();
