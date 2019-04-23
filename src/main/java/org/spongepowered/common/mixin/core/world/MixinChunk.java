@@ -692,6 +692,15 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
                     // We want to queue the break logic later, while the transaction is processed
                     if (transaction != null) {
                         transaction.queueBreak = true;
+                        // queue the existing tile anyways, just in case a block does decide to break the tile entity
+                        // without bothering to see if there's the right tile entity at the position.
+                        if (existing != null) {
+                            // Set tile to be captured, if it's showing up in removals later, it will
+                            // be ignored since the transaction process will actually process
+                            // the removal.
+                            ((IMixinTileEntity) existing).setCaptured(true);
+                            transaction.queuedRemoval = existing;
+                        }
                         transaction.enqueueChanges(mixinWorld.getProxyAccess(), peek.getCapturedBlockSupplier());
                     } else {
                         currentBlock.breakBlock(this.world, pos, currentState);
