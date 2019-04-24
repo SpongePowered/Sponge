@@ -44,6 +44,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.entity.player.IUserAdapter;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.interfaces.IMixinSubject;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
@@ -54,7 +55,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Mixin(value = SpongeUser.class, remap = false)
-public abstract class MixinSpongeUser implements User, IMixinSubject {
+public abstract class MixinSpongeUser implements User, IMixinSubject, IUserAdapter {
 
     @Shadow @Final private com.mojang.authlib.GameProfile profile;
 
@@ -64,6 +65,8 @@ public abstract class MixinSpongeUser implements User, IMixinSubject {
     @Shadow private int dimension;
     @Shadow private float rotationPitch;
     @Shadow private float rotationYaw;
+    @Shadow private boolean invulnerable;
+    @Shadow private boolean isVanished;
 
     @Shadow protected abstract void markDirty();
 
@@ -145,6 +148,28 @@ public abstract class MixinSpongeUser implements User, IMixinSubject {
     public Inventory getEnderChestInventory() {
         this.loadEnderInventory();
         return ((Inventory) this.enderChest);
+    }
+
+    @Override
+    public void setInvulnerable(boolean value) {
+        this.invulnerable = value;
+        this.markDirty();
+    }
+
+    @Override
+    public boolean getIsInvulnerable() {
+        return this.invulnerable;
+    }
+
+    @Override
+    public void setVanished(boolean vanished) {
+        this.isVanished = vanished;
+        this.markDirty();
+    }
+
+    @Override
+    public boolean isVanished() {
+        return this.isVanished;
     }
 
     @Override
