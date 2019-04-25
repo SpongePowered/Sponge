@@ -24,14 +24,15 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.entity.player.IUserAdapter;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 
 import java.util.Optional;
@@ -49,13 +50,20 @@ public class InvulnerableValueProcessor extends AbstractSpongeValueProcessor<Ent
 
     @Override
     protected boolean set(Entity container, Boolean value) {
-        ((IMixinEntity) container).setInvulnerable(value);
+        if (container instanceof IMixinEntity) {
+            ((IMixinEntity) container).setInvulnerable(value);
+        } else {
+            ((IUserAdapter) container).setInvulnerable(value);
+        }
         return true;
     }
 
     @Override
     protected Optional<Boolean> getVal(Entity container) {
-        return Optional.of(container.getIsInvulnerable());
+        if (container instanceof net.minecraft.entity.Entity) {
+            return Optional.of(((net.minecraft.entity.Entity) container).getIsInvulnerable());
+        }
+        return Optional.of(((IUserAdapter) container).getIsInvulnerable());
     }
 
     @Override

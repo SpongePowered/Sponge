@@ -24,16 +24,17 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.entity.player.IUserAdapter;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 
 import java.util.Optional;
@@ -51,16 +52,22 @@ public class VanishValueProcessor extends AbstractSpongeValueProcessor<Entity, B
 
     @Override
     protected boolean set(Entity container, Boolean value) {
-        if (!container.world.isRemote) {
-            EntityUtil.toMixin(container).setVanished(value);
-            return true;
+        if (container instanceof net.minecraft.entity.Entity) {
+            if (!((net.minecraft.entity.Entity) container).world.isRemote) {
+                EntityUtil.toMixin(container).setVanished(value);
+                return true;
+            }
         }
-        return false;
+        ((IUserAdapter) container).setVanished(value);
+        return true;
     }
 
     @Override
     protected Optional<Boolean> getVal(Entity container) {
-        return Optional.of(((IMixinEntity) container).isVanished());
+        if (container instanceof net.minecraft.entity.Entity) {
+            return Optional.of(((IMixinEntity) container).isVanished());
+        }
+        return Optional.of(((IUserAdapter) container).isVanished());
     }
 
     @Override
