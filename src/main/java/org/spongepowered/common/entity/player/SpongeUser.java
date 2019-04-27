@@ -160,7 +160,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
             this.dimension = 0;
         }
 
-        this.invulnerable = compound.getBoolean("Invulnerable");
+        this.invulnerable = compound.getBoolean(NbtDataUtil.Minecraft.INVULNERABLE);
         //this.timeUntilPortal = compound.getInteger("PortalCooldown");
         //if (compound.hasUniqueId("UUID")) {
         //    this.entityUniqueID = compound.getUniqueId("UUID");
@@ -371,7 +371,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         compound.setInteger(NbtDataUtil.ENTITY_DIMENSION, this.dimension);
         compound.setTag(NbtDataUtil.ENTITY_ROTATION, NbtDataUtil.newFloatNBTList(this.rotationYaw, this.rotationPitch));
 
-        compound.setBoolean("Invulnerable", this.invulnerable);
+        compound.setBoolean(NbtDataUtil.Minecraft.INVULNERABLE, this.invulnerable);
 
         final NBTTagCompound forgeCompound = compound.getCompoundTag(NbtDataUtil.FORGE_DATA);
         final NBTTagCompound spongeCompound = forgeCompound.getCompoundTag(NbtDataUtil.SPONGE_DATA);

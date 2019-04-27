@@ -82,6 +82,8 @@ public final class NbtDataUtil {
 
         public static final String SELECTED_ITEM_SLOT = "SelectedItemSlot";
         public static final String BLOCK_ENTITY_TAG = "BlockEntityTag";
+
+        public static final String INVULNERABLE = "Invulnerable";
     }
 
     public static final class Schematic {
