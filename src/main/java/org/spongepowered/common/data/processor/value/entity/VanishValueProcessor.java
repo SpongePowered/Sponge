@@ -57,6 +57,7 @@ public class VanishValueProcessor extends AbstractSpongeValueProcessor<Entity, B
                 EntityUtil.toMixin(container).setVanished(value);
                 return true;
             }
+            return false;
         }
         ((IUserAdapter) container).setVanished(value);
         return true;
