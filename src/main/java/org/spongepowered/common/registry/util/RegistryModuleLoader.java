@@ -67,6 +67,7 @@ public final class RegistryModuleLoader {
                     if (regAnnot != null) {
                         Map<String, ?> map = getCatalogMap(module);
                         if (map.isEmpty()) {
+                            SpongeImpl.getLogger().warn("{} has an empty CatalogMap. Implement registerDefaults() or use the CustomCatalogRegistration annotation", module.getClass().getCanonicalName());
                             return true;
                         }
                         Set<String> ignored = regAnnot.ignoredFields().length == 0 ? null : Sets.newHashSet(regAnnot.ignoredFields());
@@ -133,7 +134,7 @@ public final class RegistryModuleLoader {
     @SuppressWarnings({"unchecked", "rawtypes"})
     private static Map<String, ?> getCatalogMap(RegistryModule module) {
         if (module instanceof AlternateCatalogRegistryModule) {
-            return checkNotNull(((AlternateCatalogRegistryModule) module).provideCatalogMap());
+            return checkNotNull(((AlternateCatalogRegistryModule) module).provideCatalogMap(), "Provided CatalogMap can't be null");
         }
         for (Field field : module.getClass().getDeclaredFields()) {
             RegisterCatalog annotation = field.getAnnotation(RegisterCatalog.class);
@@ -141,8 +142,6 @@ public final class RegistryModuleLoader {
                 try {
                     field.setAccessible(true);
                     Map<String, ?> map = (Map<String, ?>) field.get(module);
-                    checkState(!map.isEmpty(), "The registered module: "+ module.getClass().getSimpleName()
-                                               + " cannot have an empty mapping during registration!");
                     return checkNotNull(map);
                 } catch (Exception e) {
                     SpongeImpl.getLogger().error("Failed to retrieve a registry field from module: " + module.getClass().getCanonicalName());
