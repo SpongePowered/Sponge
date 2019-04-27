@@ -313,7 +313,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         // extra data
 
         if (!spongeCompound.isEmpty()) {
-            this.isVanished = spongeCompound.getBoolean(NbtDataUtil.VANISH);
+            this.isVanished = spongeCompound.getBoolean(NbtDataUtil.IS_VANISHED);
 
             final NBTTagList spawnList = spongeCompound.getTagList(NbtDataUtil.USER_SPAWN_LIST, NbtDataUtil.TAG_COMPOUND);
 
@@ -376,7 +376,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         final NBTTagCompound forgeCompound = compound.getCompoundTag(NbtDataUtil.FORGE_DATA);
         final NBTTagCompound spongeCompound = forgeCompound.getCompoundTag(NbtDataUtil.SPONGE_DATA);
         spongeCompound.removeTag(NbtDataUtil.USER_SPAWN_LIST);
-        spongeCompound.removeTag(NbtDataUtil.VANISH);
+        spongeCompound.removeTag(NbtDataUtil.IS_VANISHED);
 
         final NBTTagList spawnList = new NBTTagList();
         for (Entry<UUID, RespawnLocation> entry : this.spawnLocations.entrySet()) {
@@ -395,7 +395,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
             spongeCompound.setTag(NbtDataUtil.USER_SPAWN_LIST, spawnList);
         }
         if (this.isVanished) {
-            spongeCompound.setBoolean(NbtDataUtil.VANISH, true);
+            spongeCompound.setBoolean(NbtDataUtil.IS_VANISHED, true);
         }
         if (!spongeCompound.isEmpty()) {
             forgeCompound.setTag(NbtDataUtil.SPONGE_DATA, spongeCompound);
@@ -464,6 +464,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         this.loadEnderInventory();
         return ((Inventory) this.enderChest);
     }
+
 
     @Override
     public Optional<ItemStack> getItemInHand(HandType handType) {

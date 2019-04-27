@@ -930,8 +930,8 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
         if (this instanceof IMixinGriefer && ((IMixinGriefer) this).isGriefer() && compound.hasKey(NbtDataUtil.CAN_GRIEF)) {
             ((IMixinGriefer) this).setCanGrief(compound.getBoolean(NbtDataUtil.CAN_GRIEF));
         }
-        if (compound.hasKey(NbtDataUtil.VANISH, NbtDataUtil.TAG_BYTE)) {
-            this.setVanished(compound.getBoolean(NbtDataUtil.VANISH));
+        if (compound.hasKey(NbtDataUtil.IS_VANISHED, NbtDataUtil.TAG_BYTE)) {
+            this.setVanished(compound.getBoolean(NbtDataUtil.IS_VANISHED));
         }
     }
 
@@ -947,7 +947,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
             compound.setBoolean(NbtDataUtil.CAN_GRIEF, ((IMixinGriefer) this).canGrief());
         }
         if (this.isVanished) {
-            compound.setBoolean(NbtDataUtil.VANISH, true);
+            compound.setBoolean(NbtDataUtil.IS_VANISHED, true);
         }
     }
 
