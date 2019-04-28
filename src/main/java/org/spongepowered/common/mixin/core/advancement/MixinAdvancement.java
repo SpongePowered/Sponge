@@ -35,11 +35,13 @@ import net.minecraft.advancements.DisplayInfo;
 import net.minecraft.advancements.FrameType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
+import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.advancement.AdvancementType;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.AndCriterion;
 import org.spongepowered.api.advancement.criteria.OrCriterion;
+import org.spongepowered.api.event.game.GameRegistryEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.translation.FixedTranslation;
 import org.spongepowered.asm.mixin.Final;
@@ -54,6 +56,7 @@ import org.spongepowered.common.advancement.ICriterion;
 import org.spongepowered.common.advancement.SpongeAdvancementTree;
 import org.spongepowered.common.advancement.SpongeScoreCriterion;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.phase.plugin.ListenerPhaseContext;
 import org.spongepowered.common.interfaces.advancement.IMixinAdvancement;
 import org.spongepowered.common.interfaces.advancement.IMixinCriterion;
 import org.spongepowered.common.interfaces.advancement.IMixinDisplayInfo;
@@ -118,10 +121,17 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
             this.name = SpongeTexts.toPlain(displayIn.getTitle());
         }
         if (PhaseTracker.getInstance().getCurrentState().isEvent()) {
-            // Wait to set the parent until the advancement is registered
-            this.tempParent = parentIn;
-            this.parent = AdvancementRegistryModule.DUMMY_ROOT_ADVANCEMENT;
+            Object event = ((ListenerPhaseContext) PhaseTracker.getInstance().getCurrentContext()).getEvent();
+            if (event instanceof GameRegistryEvent.Register) {
+                Class<? extends CatalogType> catalogType = ((GameRegistryEvent.Register) event).getCatalogType();
+                if (catalogType.equals(org.spongepowered.api.advancement.Advancement.class) || catalogType.equals(AdvancementTree.class)) {
+                    // Wait to set the parent until the advancement is registered
+                    this.tempParent = parentIn;
+                    this.parent = AdvancementRegistryModule.DUMMY_ROOT_ADVANCEMENT;
+                }
+            }
         }
+
         // This is only possible when REGISTER_ADVANCEMENTS_ON_CONSTRUCT is true
         if (parentIn == null) {
             // Remove the root suffix from json file tree ids

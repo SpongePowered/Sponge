@@ -31,7 +31,6 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.interfaces.event.forge.IMixinWorldTickEvent;
 
 import java.util.Optional;
 
@@ -57,6 +56,10 @@ public class ListenerPhaseContext extends PluginPhaseContext<ListenerPhaseContex
         checkState(this.capturePlayer == null, "Already capturing a player object!");
         this.capturePlayer = new CapturePlayer();
         return this;
+    }
+
+    public Object getEvent() {
+        return this.object;
     }
 
     public CapturePlayer getCapturedPlayerSupplier() throws IllegalStateException {
