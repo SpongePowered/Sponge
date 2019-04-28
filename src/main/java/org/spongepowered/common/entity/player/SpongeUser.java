@@ -101,7 +101,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
     private SpongeUserInventory inventory; // lazy load when accessing inventory
     private InventoryEnderChest enderChest; // lazy load when accessing inventory
-    private NBTTagCompound nbt;
+    private NBTTagCompound nbt = new NBTTagCompound();
 
     public SpongeUser(GameProfile profile) {
         this.profile = profile;
