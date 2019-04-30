@@ -446,29 +446,27 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
         final WorldServer world = (WorldServer) mixinWorldServer;
         final IBlockState current = world.getBlockState(pos);
 
-        if (newTile != null && oldTile == newTile) {
+        if (newTile != null && this.tail != null) {
             // Double check previous changes, if there's a remove tile entity, and previous to that, a change block, and this is an add tile entity,
             // well, we need to flip the ChangeBlock to avoid doing a breakBlock logic
-            if (this.tail != null && this.tail.previous != null) { // need at least 2 entries.
-                boolean isSame = false;
-                for (BlockTransaction prevChange = this.tail; prevChange != null; prevChange = prevChange.previous) {
-                    if (prevChange instanceof BlockTransaction.ChangeBlock) {
-                        final BlockTransaction.ChangeBlock changeBlock = (BlockTransaction.ChangeBlock) prevChange;
-                        isSame = changeBlock.queuedRemoval == newTile;
-                        if (isSame) {
-                            changeBlock.ignoreBreakBlockLogic = true;
-                            changeBlock.queuedRemoval = null;
-                            ((IMixinTileEntity) newTile).setCaptured(false);
-                            break;
-                        }
+            boolean isSame = false;
+            for (BlockTransaction prevChange = this.tail; prevChange != null; prevChange = prevChange.previous) {
+                if (prevChange instanceof BlockTransaction.ChangeBlock) {
+                    final BlockTransaction.ChangeBlock changeBlock = (BlockTransaction.ChangeBlock) prevChange;
+                    isSame = changeBlock.queuedRemoval == newTile;
+                    if (isSame) {
+                        changeBlock.ignoreBreakBlockLogic = true;
+                        changeBlock.queuedRemoval = null;
+                        ((IMixinTileEntity) newTile).setCaptured(false);
+                        break;
                     }
                 }
-                if (isSame) {
-                    if (mixinWorldServer.getProxyAccess().isTileQueuedForRemoval(pos, newTile)) {
-                        mixinWorldServer.getProxyAccess().unmarkRemoval(pos, newTile);
-                    }
-                    return;
+            }
+            if (isSame) {
+                if (mixinWorldServer.getProxyAccess().isTileQueuedForRemoval(pos, newTile)) {
+                    mixinWorldServer.getProxyAccess().unmarkRemoval(pos, newTile);
                 }
+                return;
             }
         }
         final int transactionIndex = ++this.transactionIndex;
