@@ -86,7 +86,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
 
     @Nullable private static PhaseContext<?> EMPTY;
     @Nullable public BlockSnapshot neighborNotificationSource;
-    SpongeBlockSnapshot singleSnapshot;
+    @Nullable SpongeBlockSnapshot singleSnapshot;
 
     /**
      * Default flagged empty PhaseContext that can be used for stubbing in corner cases.
@@ -702,5 +702,13 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
 
     public List<SpongeBlockSnapshot> getCapturedBlockChanges() {
         return this.blocksSupplier.get();
+    }
+
+    public SpongeBlockSnapshot getSingleSnapshot() {
+        return checkNotNull(this.singleSnapshot, "Single Snapshot is null!");
+    }
+
+    public void setSingleSnapshot(SpongeBlockSnapshot singleSnapshot) {
+        this.singleSnapshot = singleSnapshot;
     }
 }

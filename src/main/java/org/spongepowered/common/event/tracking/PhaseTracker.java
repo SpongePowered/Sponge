@@ -821,7 +821,7 @@ public final class PhaseTracker {
                 // properly handled since bulk captures technically should be disabled if reaching
                 // this point.
 
-                final SpongeBlockSnapshot originalBlockSnapshot = context.singleSnapshot;
+                final SpongeBlockSnapshot originalBlockSnapshot = context.getSingleSnapshot();
 
                 final Transaction<BlockSnapshot> transaction = TrackingUtil.TRANSACTION_CREATION.apply(originalBlockSnapshot);
                 final ImmutableList<Transaction<BlockSnapshot>> transactions = ImmutableList.of(transaction);

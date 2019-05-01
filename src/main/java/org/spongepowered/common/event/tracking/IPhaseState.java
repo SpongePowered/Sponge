@@ -847,7 +847,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     default BlockTransaction.ChangeBlock captureBlockChange(C phaseContext, BlockPos pos, SpongeBlockSnapshot originalBlockSnapshot, IBlockState newState,
         BlockChangeFlag flags, @Nullable TileEntity tileEntity) {
         if (!this.doesBulkBlockCapture(phaseContext)) {
-            phaseContext.singleSnapshot = originalBlockSnapshot;
+            phaseContext.setSingleSnapshot(originalBlockSnapshot);
             return null;
         }
         if (this.hasSpecificBlockProcess(phaseContext)) {

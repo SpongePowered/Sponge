@@ -26,6 +26,7 @@ package org.spongepowered.common.event.tracking;
 
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.event.tracking.context.MultiBlockCaptureSupplier;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 
@@ -51,6 +52,7 @@ public final class UnwindingPhaseContext extends PhaseContext<UnwindingPhaseCont
     private final IPhaseState<?> unwindingState;
     private final PhaseContext<?> unwindingContext;
     @Nullable private Deque<MultiBlockCaptureSupplier> blockSuppliers;
+    @Nullable private Deque<SpongeBlockSnapshot> singleSnapshots;
     final boolean usesMulti;
     final boolean tracksNeighborNotifications;
     private final boolean isPostingSpecial;
@@ -114,6 +116,31 @@ public final class UnwindingPhaseContext extends PhaseContext<UnwindingPhaseCont
             throw new IllegalStateException("This post state is not meant to capture multiple changes with neighbor notifications or tile entity changes!");
         }
         this.blockSuppliers.pop();
+    }
+
+    @Override
+    public SpongeBlockSnapshot getSingleSnapshot() {
+        if (this.singleSnapshot == null) {
+            if (this.singleSnapshots == null) {
+                throw new IllegalStateException("Expected to be capturing single snapshots for immediate throwing, but we're not finding any!");
+            }
+            return this.singleSnapshots.pop();
+        }
+        return this.singleSnapshot;
+    }
+
+    @Override
+    public void setSingleSnapshot(SpongeBlockSnapshot singleSnapshot) {
+        if (this.singleSnapshot != null) {
+            if (this.singleSnapshots == null) {
+                this.singleSnapshots = new ArrayDeque<>();
+            }
+            this.singleSnapshots.push(this.singleSnapshot);
+            this.singleSnapshot = null;
+            this.singleSnapshots.push(singleSnapshot);
+        } else {
+            this.singleSnapshot = singleSnapshot;
+        }
     }
 
     /**

@@ -132,7 +132,7 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
             return phaseContext.getCapturedBlockSupplier().logBlockChange(originalBlockSnapshot, newState, pos, flags);
         }
         if (!doesBulkBlockCapture(phaseContext)) {
-            phaseContext.singleSnapshot = originalBlockSnapshot;
+            phaseContext.setSingleSnapshot(originalBlockSnapshot);
             return null;
         }
         phaseContext.getCapturedBlockSupplier().put(originalBlockSnapshot, newState);
