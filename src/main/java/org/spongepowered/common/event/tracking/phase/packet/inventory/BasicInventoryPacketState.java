@@ -42,6 +42,7 @@ import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.phase.packet.PacketConstants;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
@@ -106,6 +107,14 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
         return null;
     }
 
+    // Checks the proper ShouldFire flag for the event to be fired.
+    // This should be the most specific known event that will be fired.
+    // It's fine for this to be a supertype of the actual event - that will
+    // just result in unnecessarily firing events.
+    protected boolean shouldFire() {
+       return ShouldFire.CLICK_INVENTORY_EVENT;
+    }
+
     @Override
     public boolean matches(int packetState) {
         return this.stateMask != PacketConstants.MASK_NONE && ((packetState & this.stateMask & this.stateId) == (packetState & this.stateMask));
@@ -157,6 +166,30 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
         final List<Entity> capturedItems = new ArrayList<>();
         context.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(items -> items.stream().map(EntityUtil::fromNative).forEach(capturedItems::add));
         context.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(capturedItems::addAll);
+
+        // MAKE SURE THAT THIS IS KEPT IN SYNC WITH THE REST OF THE METHOD
+        // If you add any logic that does something even if no event listenres
+        // are registered, add it here.
+
+        // If there aren't any registered listeners,
+        // we can skip an enormous amount of logic (creating transactions,
+        // firing an event, checking for cancelled transaction, etc.)
+        if (!this.shouldFire()) {
+            if (ShouldFire.SPAWN_ENTITY_EVENT && !capturedItems.isEmpty()) {
+                for (Entity entiy: capturedItems) {
+                    entiy.setCreator(player.getUniqueID());
+                }
+                try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                    Sponge.getCauseStackManager().pushCause(openContainer);
+                    Sponge.getCauseStackManager().pushCause(player);
+                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
+                    SpongeCommonEventFactory.callSpawnEntity(capturedItems, context);
+                }
+            }
+            slotTransactions.clear();
+            mixinContainer.setCaptureInventory(false);
+            return;
+        }
 
         Slot slot = null;
         if (packetIn.getSlotId() >= 0) {

@@ -73,6 +73,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.PacketContext;
 import org.spongepowered.common.interfaces.IMixinContainer;
@@ -81,6 +82,8 @@ import org.spongepowered.common.interfaces.server.management.IMixinPlayerInterac
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.util.VecHelper;
+
+import javax.annotation.Nullable;
 
 @Mixin(value = PlayerInteractionManager.class)
 public abstract class MixinPlayerInteractionManager implements IMixinPlayerInteractionManager {
@@ -97,10 +100,50 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
     @Shadow public abstract boolean isCreative();
     @Shadow public abstract boolean tryHarvestBlock(BlockPos pos);
 
+    private boolean interactBlockLeftClickEventCancelled = false;
+    private boolean interactBlockRightClickEventCancelled = false;
+    private boolean lastInteractItemOnBlockCancelled = false;
+
+    @Override
+    public boolean isInteractBlockRightClickCancelled() {
+        return this.interactBlockRightClickEventCancelled;
+    }
+
+    @Override
+    public void setInteractBlockRightClickCancelled(boolean cancelled) {
+        this.interactBlockRightClickEventCancelled = cancelled;
+    }
+
+    @Override
+    public boolean isInteractBlockLeftClickCancelled() {
+        return this.interactBlockLeftClickEventCancelled;
+    }
+
+    @Override
+    public void setInteractBlockLeftClickCancelled(boolean cancelled) {
+        this.interactBlockLeftClickEventCancelled = cancelled;
+    }
+
+    @Override
+    public boolean isLastInteractItemOnBlockCancelled() {
+        return this.lastInteractItemOnBlockCancelled;
+    }
+
+    @Override
+    public void setLastInteractItemOnBlockCancelled(boolean lastInteractItemOnBlockCancelled) {
+        this.lastInteractItemOnBlockCancelled = lastInteractItemOnBlockCancelled;
+    }
+
+    /*
+                We have to check for cancelled left click events because they occur from different packets
+                or processing branches such that there's no clear "context" of where we can store these variables.
+                So, we store it to the interaction manager's fields, to avoid contaminating other interaction
+                manager's processes.
+                 */
     @Inject(method = "blockRemoving", at = @At("HEAD"), cancellable = true)
-    public void onBlockRemoving(final BlockPos pos, final CallbackInfo ci) {
-        if (SpongeCommonEventFactory.interactBlockLeftClickEventCancelled) {
-            SpongeCommonEventFactory.interactBlockLeftClickEventCancelled = false;
+    private void onBlockRemovingSpongeCheckForCancelledBlockEvent(final BlockPos pos, final CallbackInfo ci) {
+        if (this.interactBlockLeftClickEventCancelled) {
+            this.interactBlockLeftClickEventCancelled = false;
             ci.cancel();
         }
     }
@@ -124,10 +167,9 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
                 SpongeCommonEventFactory.callInteractBlockEventPrimary(this.player, stack, blockSnapshot, EnumHand.MAIN_HAND, side, vec);
 
         boolean isCancelled = blockEvent.isCancelled();
-        SpongeCommonEventFactory.interactBlockLeftClickEventCancelled = isCancelled;
+        this.interactBlockLeftClickEventCancelled = isCancelled;
 
         if (isCancelled) {
-            SpongeCommonEventFactory.interactBlockLeftClickEventCancelled = true;
 
             final IBlockState state = this.player.world.getBlockState(pos);
             ((IMixinEntityPlayerMP) this.player).sendBlockChange(pos, state);
@@ -186,13 +228,15 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
     /**
      * @author Aaron1011
      * @author gabizou - May 28th, 2016 - Rewritten for 1.9.4
+     * @author Morph - Bring the interactions up to date for 1.12.2 and in sync with Forge
+     * @author gabizou - April 23rd, 2019 - 1.12.2 - Re-merge the overwrite in common so we do not have to manually
+     *    sync the changes between SpongeForge and Common
      *
      * @reason Fire interact block event.
      */
     @Overwrite
     public EnumActionResult processRightClickBlock(EntityPlayer player, net.minecraft.world.World worldIn, ItemStack stack, EnumHand hand, BlockPos
             pos, EnumFacing facing, float hitX, float hitY, float hitZ) {
-        // Overwritten in SpongeForge. Make sure to keep the two methods consistent.
         if (this.gameType == GameType.SPECTATOR) {
             TileEntity tileentity = worldIn.getTileEntity(pos);
 
@@ -226,13 +270,17 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
         final InteractBlockEvent.Secondary event = SpongeCommonEventFactory.createInteractBlockEventSecondary(player, oldStack,
                 hitVec, currentSnapshot, DirectionFacingProvider.getInstance().getKey(facing).get(), hand);
 
-        SpongeImpl.postEvent(event);
+        // Specifically this will be the SpongeToForgeEventData compatibility so we eliminate an extra overwrite.
+        @Nullable Object forgeEventObject = SpongeImplHooks.postForgeEventDataCompatForSponge(event);
 
-        if (!ItemStack.areItemStacksEqual(oldStack, this.player.getHeldItem(hand))) {
-            ((PacketContext<?>) PhaseTracker.getInstance().getCurrentContext()).interactItemChanged(true);
+        final PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
+        if (!SpongeImplHooks.isFakePlayer(this.player) && !ItemStack.areItemStacksEqual(oldStack, this.player.getHeldItem(hand))) {
+            if (currentContext instanceof PacketContext) {
+                ((PacketContext<?>) currentContext).interactItemChanged(true);
+            }
         }
 
-        SpongeCommonEventFactory.lastInteractItemOnBlockCancelled = event.isCancelled() || event.getUseItemResult() == Tristate.FALSE;
+        this.setLastInteractItemOnBlockCancelled(event.isCancelled() || event.getUseItemResult() == Tristate.FALSE);
 
         if (event.isCancelled()) {
             final IBlockState state = (IBlockState) currentSnapshot.getState();
@@ -257,17 +305,29 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
                     this.player.connection.sendPacket(new SPacketBlockChange(worldIn, pos.up(2)));
                 }
             }
+            SpongeImplHooks.shouldCloseScreen(worldIn, pos, forgeEventObject, this.player);
 
-            SpongeCommonEventFactory.interactBlockRightClickEventCancelled = true;
+            ((IMixinPlayerInteractionManager) this.player.interactionManager).setInteractBlockRightClickCancelled(true);
 
             ((EntityPlayerMP) player).sendContainerToPlayer(player.inventoryContainer);
-            return EnumActionResult.FAIL;
+            return SpongeImplHooks.getInteractionCancellationResult(forgeEventObject);
         }
         // Sponge End
 
         EnumActionResult result = EnumActionResult.PASS;
 
-        if (!player.isSneaking() || (player.getHeldItemMainhand().isEmpty() && player.getHeldItemOffhand().isEmpty()) || event.getUseBlockResult() == Tristate.TRUE) {
+        if (event.getUseItemResult() != Tristate.FALSE) {
+            result = SpongeImplHooks.onForgeItemUseFirst(player, stack, worldIn, pos, hand, facing, hitX, hitY, hitZ);
+            if (result != EnumActionResult.PASS) {
+                return result ;
+            }
+        }
+
+        // Sponge Start - Replace main hand and offhand empty checks with bypass flag, Forge has extra hooks
+        boolean bypass = SpongeImplHooks.doesItemSneakBypass(worldIn, pos, player, player.getHeldItemMainhand(), player.getHeldItemOffhand());
+
+        // if (!player.isSneaking() || (player.getHeldItemMainhand().isEmpty() && player.getHeldItemOffhand().isEmpty()) || event.getUseBlockResult == Tristate.TRUE) {
+        if (!player.isSneaking() || bypass || event.getUseBlockResult() == Tristate.TRUE) {
             // Sponge start - check event useBlockResult, and revert the client if it's FALSE.
             // also, store the result instead of returning immediately
             if (event.getUseBlockResult() != Tristate.FALSE) {
@@ -281,8 +341,10 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
                 }
 
                 // if itemstack changed, avoid restore
-                if (!ItemStack.areItemStacksEqual(oldStack, this.player.getHeldItem(hand))) {
-                    ((PacketContext<?>) PhaseTracker.getInstance().getCurrentContext()).interactItemChanged(true);
+                if (!SpongeImplHooks.isFakePlayer(this.player) && !ItemStack.areItemStacksEqual(oldStack, this.player.getHeldItem(hand))) {
+                    if (currentContext instanceof PacketContext) {
+                        ((PacketContext<?>) currentContext).interactItemChanged(true);
+                    }
                 }
 
                 result = this.handleOpenEvent(lastOpenContainer, this.player, currentSnapshot, result);
@@ -292,7 +354,10 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
                 this.player.connection.sendPacket(new SPacketBlockChange(this.world, pos));
                 // Since the event was explicitly set to fail, we need to respect it and treat it as if
                 // it wasn't cancelled, but perform no further processing.
-                return EnumActionResult.FAIL;
+                @Nullable EnumActionResult modifiedResult = SpongeImplHooks.getEnumResultForProcessRightClickBlock(this.player, event, result, worldIn, pos, hand);
+                if (modifiedResult != null) {
+                    return modifiedResult;
+                }
             }
             // Sponge End
         }
@@ -370,10 +435,10 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
             ((PacketContext<?>) PhaseTracker.getInstance().getCurrentContext()).interactItemChanged(true);
         }
 
-        SpongeCommonEventFactory.lastInteractItemOnBlockCancelled = event.isCancelled(); //|| event.getUseItemResult() == Tristate.FALSE;
+        this.setLastInteractItemOnBlockCancelled(event.isCancelled()); //|| event.getUseItemResult() == Tristate.FALSE;
 
         if (event.isCancelled()) {
-            SpongeCommonEventFactory.interactBlockRightClickEventCancelled = true;
+            this.interactBlockRightClickEventCancelled = true;
 
             ((EntityPlayerMP) player).sendContainerToPlayer(player.inventoryContainer);
             return EnumActionResult.FAIL;
@@ -466,7 +531,7 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
                 ((IMixinContainer) player.openContainer).setOpenLocation(blockSnapshot.getLocation().orElse(null));
                 if (!SpongeCommonEventFactory.callInteractInventoryOpenEvent(player)) {
                     result = EnumActionResult.FAIL;
-                    SpongeCommonEventFactory.interactBlockRightClickEventCancelled = true;
+                    this.interactBlockRightClickEventCancelled = true;
                 }
             }
         }

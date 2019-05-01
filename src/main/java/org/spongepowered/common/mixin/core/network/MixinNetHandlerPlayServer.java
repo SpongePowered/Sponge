@@ -147,6 +147,7 @@ import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 import org.spongepowered.common.interfaces.inventory.IMixinContainerPlayer;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
+import org.spongepowered.common.interfaces.server.management.IMixinPlayerInteractionManager;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
@@ -202,6 +203,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     private final AtomicInteger numResourcePacksInTransit = new AtomicInteger();
     @Nullable private ResourcePack lastReceivedPack, lastAcceptedPack;
     private final LongObjectHashMap<Runnable> customKeepAliveCallbacks = new LongObjectHashMap<>();
+    private long lastTryBlockPacketTimeStamp = 0;
 
     // Store the last block right-clicked
     @Nullable private Item lastItem;
@@ -706,12 +708,12 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             // Only do a restore if something actually changed. The client does an identity check ('==')
             // to determine if it should continue using an itemstack. If we always resend the itemstack, we end up
             // cancelling item usage (e.g. eating food) that occurs while targeting a block
-            if (!ItemStack.areItemStacksEqual(itemStack, player.getHeldItem(hand)) && SpongeCommonEventFactory.interactBlockRightClickEventCancelled) {
+            if (!ItemStack.areItemStacksEqual(itemStack, player.getHeldItem(hand)) && ((IMixinPlayerInteractionManager) this.player.interactionManager).isInteractBlockRightClickCancelled()) {
                 PacketPhaseUtil.handlePlayerSlotRestore((EntityPlayerMP) player, itemStack, hand);
             }
         }
         context.interactItemChanged(false);
-        SpongeCommonEventFactory.interactBlockRightClickEventCancelled = false;
+        ((IMixinPlayerInteractionManager) this.player.interactionManager).setInteractBlockRightClickCancelled(false);
         return actionResult;
     }
 
@@ -729,12 +731,12 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             // Only do a restore if something actually changed. The client does an identity check ('==')
             // to determine if it should continue using an itemstack. If we always resend the itemstack, we end up
             // cancelling item usage (e.g. eating food) that occurs while targeting a block
-            if (!ItemStack.areItemStacksEqual(itemStack, player.getHeldItem(hand)) && SpongeCommonEventFactory.interactBlockRightClickEventCancelled) {
+            if (!ItemStack.areItemStacksEqual(itemStack, player.getHeldItem(hand))  && ((IMixinPlayerInteractionManager) this.player.interactionManager).isInteractBlockRightClickCancelled()) {
                 PacketPhaseUtil.handlePlayerSlotRestore((EntityPlayerMP) player, itemStack, hand);
             }
         }
         packetContext.interactItemChanged(false);
-        SpongeCommonEventFactory.interactBlockRightClickEventCancelled = false;
+        ((IMixinPlayerInteractionManager) this.player.interactionManager).setInteractBlockRightClickCancelled(false);
         return actionResult;
     }
 
@@ -840,23 +842,23 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     }
 
     @Inject(method = "processTryUseItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getWorld(I)Lnet/minecraft/world/WorldServer;"), cancellable = true)
-    public void onProcessTryUseItem(CPacketPlayerTryUseItem packetIn, CallbackInfo ci) {
+    private void onProcessTryUseItem(CPacketPlayerTryUseItem packetIn, CallbackInfo ci) {
         SpongeCommonEventFactory.lastSecondaryPacketTick = SpongeImpl.getServer().getTickCounter();
-        long packetDiff = System.currentTimeMillis() - SpongeCommonEventFactory.lastTryBlockPacketTimeStamp;
+        long packetDiff = System.currentTimeMillis() - this.lastTryBlockPacketTimeStamp;
         // If the time between packets is small enough, use the last result.
         if (packetDiff < 100) {
             // Use previous result and avoid firing a second event
-            if (SpongeCommonEventFactory.lastInteractItemOnBlockCancelled) {
+            if (((IMixinPlayerInteractionManager) this.player.interactionManager).isLastInteractItemOnBlockCancelled()) {
                 ci.cancel();
             }
         }
     }
 
     @Inject(method = "processTryUseItemOnBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getWorld(I)Lnet/minecraft/world/WorldServer;"))
-    public void onProcessTryUseItemOnBlock(CPacketPlayerTryUseItemOnBlock packetIn, CallbackInfo ci) {
+    private void onProcessTryUseItemOnBlockSetCountersForSponge(CPacketPlayerTryUseItemOnBlock packetIn, CallbackInfo ci) {
         // InteractItemEvent on block must be handled in PlayerInteractionManager to support item/block results.
         // Only track the timestamps to support our block animation events
-        SpongeCommonEventFactory.lastTryBlockPacketTimeStamp = System.currentTimeMillis();
+        this.lastTryBlockPacketTimeStamp = System.currentTimeMillis();
         SpongeCommonEventFactory.lastSecondaryPacketTick = SpongeImpl.getServer().getTickCounter();
 
     }

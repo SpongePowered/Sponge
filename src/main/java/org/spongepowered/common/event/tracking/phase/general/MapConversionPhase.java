@@ -22,27 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.server.management;
+package org.spongepowered.common.event.tracking.phase.general;
 
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.inventory.Container;
-import net.minecraft.util.EnumActionResult;
-import org.spongepowered.api.block.BlockSnapshot;
+public class MapConversionPhase extends GeneralState<MapConversionContext> {
 
-public interface IMixinPlayerInteractionManager {
 
-    EnumActionResult handleOpenEvent(Container lastOpenContainer, EntityPlayerMP player, BlockSnapshot blockSnapshot, EnumActionResult result);
+    @Override
+    public MapConversionContext createPhaseContext() {
+        return new MapConversionContext(this);
+    }
 
-    boolean isInteractBlockRightClickCancelled();
+    @Override
+    public void unwind(MapConversionContext context) {
 
-    void setInteractBlockRightClickCancelled(boolean cancelled);
+    }
 
-    boolean isInteractBlockLeftClickCancelled();
-
-    void setInteractBlockLeftClickCancelled(boolean cancelled);
-
-    boolean isLastInteractItemOnBlockCancelled();
-
-    void setLastInteractItemOnBlockCancelled(boolean lastInteractItemOnBlockCancelled);
-
+    @Override
+    public boolean isConvertingMaps() {
+        return true;
+    }
 }

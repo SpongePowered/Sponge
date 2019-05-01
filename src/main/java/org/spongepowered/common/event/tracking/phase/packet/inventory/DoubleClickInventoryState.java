@@ -35,6 +35,7 @@ import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.phase.packet.PacketConstants;
 import org.spongepowered.common.event.tracking.phase.packet.drag.DragInventoryStopState;
 import org.spongepowered.common.interfaces.IMixinContainer;
@@ -48,6 +49,11 @@ public final class DoubleClickInventoryState extends BasicInventoryPacketState {
 
     public DoubleClickInventoryState() {
         super(PacketConstants.MODE_DOUBLE_CLICK | PacketConstants.BUTTON_PRIMARY | PacketConstants.BUTTON_SECONDARY, PacketConstants.MASK_MODE | PacketConstants.MASK_BUTTON);
+    }
+
+    @Override
+    protected boolean shouldFire() {
+        return ShouldFire.CLICK_INVENTORY_EVENT_DOUBLE;
     }
 
     @Override

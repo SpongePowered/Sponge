@@ -537,6 +537,19 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
         return !this.proxies.isEmpty();
     }
 
+    public TileEntity getQueuedTileForRemoval(BlockPos pos) {
+        if (this.queuedRemovals.isEmpty()) {
+            return null;
+        }
+        List<TileEntity> tiles = this.queuedRemovals.get(pos);
+        if (tiles.isEmpty()) {
+            return null;
+        }
+        // We always want to return the first tile that was queued, because when it's actually processed
+        // for removal, it'll push the next queued removed tile entity forward.
+        return tiles.get(0);
+    }
+
     public static final class Proxy implements AutoCloseable {
 
         private final SpongeProxyBlockAccess proxyAccess;

@@ -136,7 +136,9 @@ import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
+import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
@@ -1435,7 +1437,10 @@ public abstract class MixinWorld implements World, IMixinWorld {
             if (!this.isFake() && !SpongeImpl.getServer().isCallingFromMinecraftThread()) {
                 return this.getChunk(pos).getTileEntity(pos, net.minecraft.world.chunk.Chunk.EnumCreateEntityType.CHECK);
             }
-            if (this.isTileMarkedForRemoval(pos)) {
+            if (this.isTileMarkedForRemoval(pos) && !this.isFake()) {
+                if (PhaseTracker.getInstance().getCurrentState().allowsGettingQueuedRemovedTiles()) {
+                    return this.getQueuedRemovedTileFromProxy(pos);
+                }
                 return null;
             }
             tileentity = this.getProcessingTileFromProxy(pos);
@@ -1462,6 +1467,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
             return tileentity;
         }
+    }
+
+    @Nullable
+    protected net.minecraft.tileentity.TileEntity getQueuedRemovedTileFromProxy(BlockPos pos) {
+        return null;
     }
 
     protected boolean isTileMarkedAsNull(BlockPos pos, net.minecraft.tileentity.TileEntity tileentity) {

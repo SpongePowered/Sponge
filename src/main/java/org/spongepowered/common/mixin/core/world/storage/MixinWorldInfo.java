@@ -82,6 +82,7 @@ import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
 import org.spongepowered.common.interfaces.world.IMixinGameRules;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
@@ -173,7 +174,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     //     public WorldInfo(NBTTagCompound nbt)
     @Inject(method = "<init>(Lnet/minecraft/nbt/NBTTagCompound;)V", at = @At("RETURN") )
     private void onConstruction(NBTTagCompound nbt, CallbackInfo ci) {
-        if (!SpongeCommonEventFactory.convertingMapFormat) {
+        if (SpongeImplHooks.isMainThread() && !PhaseTracker.getInstance().getCurrentContext().state.isConvertingMaps()) {
             this.onConstructionCommon();
         }
     }

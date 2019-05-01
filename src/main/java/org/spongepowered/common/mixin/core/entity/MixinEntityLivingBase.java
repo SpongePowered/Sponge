@@ -36,7 +36,6 @@ import net.minecraft.entity.ai.attributes.AbstractAttributeMap;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.passive.EntityTameable;
-import net.minecraft.entity.passive.EntityWolf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.MobEffects;
@@ -232,6 +231,8 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
     @Shadow public abstract EnumHand getActiveHand();
 
+    @Shadow public abstract void setRenderYawOffset(float offset);
+
     private int deathEventsPosted;
 
 
@@ -245,6 +246,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     public void setHeadRotation(Vector3d rotation) {
         setRotation(getRotation().mul(0, 1, 1).add(rotation.getX(), 0, 0));
         setRotationYawHead((float) rotation.getY());
+        setRenderYawOffset((float) rotation.getY());
     }
 
     @Override

@@ -818,9 +818,10 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
 
             if (tileentity == null) {
                 // Sponge Start - use SpongeImplHooks for forge compatibility
+                // tileentity = ((ITileEntityProvider)block).createNewTileEntity(this.worldObj, block.getMetaFromState(state)); // Sponge
+                tileentity = SpongeImplHooks.createTileEntity(newBlock, this.world, newState);
+
                 if (!isFake) { // Surround with a server check
-                    // tileentity = ((ITileEntityProvider)block).createNewTileEntity(this.worldObj, block.getMetaFromState(state)); // Sponge
-                    tileentity = SpongeImplHooks.createTileEntity(newBlock, this.world, newState);
                     final User owner = peek.getOwner().orElse(null);
                     // If current owner exists, transfer it to newly created TE pos
                     // This is required for TE's that get created during move such as pistons and ComputerCraft turtles.
@@ -838,6 +839,15 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
                     }
                     transaction.enqueueChanges(mixinWorld.getProxyAccess(), peek.getCapturedBlockSupplier());
                 } else {
+                    // Some mods are relying on the world being set prior to setting the tile
+                    // world prior to the position. It's weird, but during block restores, this can
+                    // cause an exception.
+                    // See https://github.com/SpongePowered/SpongeForge/issues/2677 for reference.
+                    // Note that vanilla will set the world later, and forge sets the world
+                    // after setting the position, but a mod has expectations that defy both of these...
+                    if (tileentity != null && tileentity.getWorld() != this.world) {
+                        tileentity.setWorld(this.world);
+                    }
                     this.world.setTileEntity(pos, tileentity);
                 }
             }

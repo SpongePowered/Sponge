@@ -95,4 +95,7 @@ ext.shadedDevProject = api
 
 test {
     systemProperty 'lwts.tweaker', 'org.spongepowered.common.launch.TestTweaker'
+    // If we try to generate HTML reports, we end up trying to generate a report
+    // for all of the catalog method subs-tests, which takes an incredibly long amount of time
+    reports.html.enabled = false
 }

@@ -1114,6 +1114,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         return true;
     }
 
+    @Override
     protected boolean isTileMarkedForRemoval(BlockPos pos) {
         return this.proxyBlockAccess.isTileEntityRemoved(pos);
     }
@@ -1123,9 +1124,16 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         return this.proxyBlockAccess.hasTileEntity(pos) && this.proxyBlockAccess.getTileEntity(pos) == null;
     }
 
+    @Override
     @Nullable
     protected net.minecraft.tileentity.TileEntity getProcessingTileFromProxy(BlockPos pos) {
         return this.proxyBlockAccess.getTileEntity(pos);
+    }
+
+    @Nullable
+    @Override
+    protected net.minecraft.tileentity.TileEntity getQueuedRemovedTileFromProxy(BlockPos pos) {
+        return this.proxyBlockAccess.getQueuedTileForRemoval(pos);
     }
 
     @Override

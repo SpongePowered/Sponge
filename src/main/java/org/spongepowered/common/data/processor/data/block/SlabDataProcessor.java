@@ -70,7 +70,7 @@ public class SlabDataProcessor extends AbstractCatalogDataProcessor<SlabType, Va
             }
         } else if (stack.getItem() == ItemTypes.STONE_SLAB2) {
             if (oValue instanceof BlockStoneSlabNew.EnumType) {
-                stack.setItemDamage(((BlockStoneSlab.EnumType) oValue).getMetadata());
+                stack.setItemDamage(((BlockStoneSlabNew.EnumType) oValue).getMetadata());
                 return true;
             }
         }

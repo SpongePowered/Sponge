@@ -22,27 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.server.management;
+package org.spongepowered.common.event.tracking.phase.general;
 
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.inventory.Container;
-import net.minecraft.util.EnumActionResult;
-import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.common.event.tracking.IPhaseState;
 
-public interface IMixinPlayerInteractionManager {
+public final class MapConversionContext extends GeneralPhaseContext<MapConversionContext> {
 
-    EnumActionResult handleOpenEvent(Container lastOpenContainer, EntityPlayerMP player, BlockSnapshot blockSnapshot, EnumActionResult result);
+    private String worldFolder;
 
-    boolean isInteractBlockRightClickCancelled();
+    public MapConversionContext(
+        IPhaseState<MapConversionContext> state) {
+        super(state);
+    }
 
-    void setInteractBlockRightClickCancelled(boolean cancelled);
+    public MapConversionContext world(String overworldFolder) {
+        this.worldFolder = overworldFolder;
+        return this;
+    }
 
-    boolean isInteractBlockLeftClickCancelled();
+    @Override
+    public PrettyPrinter printCustom(PrettyPrinter printer, int indent) {
+        String s = String.format("%1$"+indent+"s", "");
+        super.printCustom(printer, indent);
 
-    void setInteractBlockLeftClickCancelled(boolean cancelled);
-
-    boolean isLastInteractItemOnBlockCancelled();
-
-    void setLastInteractItemOnBlockCancelled(boolean lastInteractItemOnBlockCancelled);
-
+        return printer.add(s + "- %s: %s", "WorldFolder", this.worldFolder);
+    }
 }

@@ -116,6 +116,11 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
     }
 
     @Override
+    public boolean allowsGettingQueuedRemovedTiles() {
+        return true;
+    }
+
+    @Override
     public boolean hasSpecificBlockProcess(UnwindingPhaseContext context) {
         return !context.isPostingSpecialProcess();
     }

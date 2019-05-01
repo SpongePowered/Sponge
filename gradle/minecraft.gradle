@@ -78,7 +78,7 @@ jar {
 }
 
 // Don't upload temp jar to Maven repository
-configurations.archives.artifacts.removeAll { it.archiveTask.is jar }
+configurations.archives.artifacts.removeAll { it.type == 'jar' }
 
 task devJar(type: Jar) {
     classifier = 'dev'

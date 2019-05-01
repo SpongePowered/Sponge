@@ -294,7 +294,7 @@ public final class PhaseTracker {
             // Since we don't know when and where completePhase was intended to be called for it,
             // we simply pop it to allow processing to continue (somewhat) as normal
             this.stack.pop();
-
+            return;
         }
 
         if (SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().isVerbose() ) {
@@ -687,10 +687,13 @@ public final class PhaseTracker {
                 // Since the notifier may have just been set from the previous state, we can
                 // ask it to contribute to our state
                 state.provideNotifierForNeighbors(peek, context);
+                context.buildAndSwitch();  // We need to enter the phase state, otherwise if the context is not switched into,
+                // the try with resources will perform a close without the phase context being entered, leading to issues of closing
+                // other phase contexts.
+                // Refer to https://github.com/SpongePowered/SpongeForge/issues/2706
                 if (PhaseTracker.checkMaxBlockProcessingDepth(state, peek, context.getDepth())) {
                     return;
                 }
-                context.buildAndSwitch();
                 // Sponge End
 
                 notifyState.neighborChanged(((WorldServer) mixinWorld), notifyPos, sourceBlock, sourcePos);

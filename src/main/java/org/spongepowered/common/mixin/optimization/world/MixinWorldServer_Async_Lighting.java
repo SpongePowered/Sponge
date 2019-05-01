@@ -224,22 +224,29 @@ public abstract class MixinWorldServer_Async_Lighting extends MixinWorld impleme
         spongeChunk.setLightUpdateTime(chunk.getWorld().getTotalWorldTime());
 
         List<Chunk> neighbors = spongeChunk.getNeighbors();
+
         // add diagonal chunks
-        Chunk southEastChunk = ((IMixinChunk) spongeChunk.getNeighborChunk(0)).getNeighborChunk(2);
-        Chunk southWestChunk = ((IMixinChunk) spongeChunk.getNeighborChunk(0)).getNeighborChunk(3);
-        Chunk northEastChunk = ((IMixinChunk) spongeChunk.getNeighborChunk(1)).getNeighborChunk(2);
-        Chunk northWestChunk = ((IMixinChunk) spongeChunk.getNeighborChunk(1)).getNeighborChunk(3);
-        if (southEastChunk != null) {
-            neighbors.add(southEastChunk);
+        IMixinChunk southChunk = (IMixinChunk) spongeChunk.getNeighborChunk(0);
+        if (southChunk != null) {
+            Chunk southEastChunk = southChunk.getNeighborChunk(2);
+            Chunk southWestChunk = southChunk.getNeighborChunk(3);
+            if (southEastChunk != null) {
+                neighbors.add(southEastChunk);
+            }
+            if (southWestChunk != null) {
+                neighbors.add(southWestChunk);
+            }
         }
-        if (southWestChunk != null) {
-            neighbors.add(southWestChunk);
-        }
-        if (northEastChunk != null) {
-            neighbors.add(northEastChunk);
-        }
-        if (northWestChunk != null) {
-            neighbors.add(northWestChunk);
+        IMixinChunk northChunk = (IMixinChunk) spongeChunk.getNeighborChunk(1);
+        if (northChunk != null) {
+            Chunk northEastChunk = northChunk.getNeighborChunk(2);
+            Chunk northWestChunk = northChunk.getNeighborChunk(3);
+            if (northEastChunk != null) {
+                neighbors.add(northEastChunk);
+            }
+            if (northWestChunk != null) {
+                neighbors.add(northWestChunk);
+            }
         }
 
         for (net.minecraft.world.chunk.Chunk neighborChunk : neighbors) {
