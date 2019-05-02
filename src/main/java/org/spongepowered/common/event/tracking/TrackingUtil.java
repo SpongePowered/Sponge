@@ -496,7 +496,9 @@ public final class TrackingUtil {
             // Of course, if post is cancelled, just mark all transactions as invalid.
             noCancelledTransactions = false;
             for (Transaction<BlockSnapshot> transaction : postEvent.getTransactions()) {
-                scheduledEvents.removeAll(VecHelper.toBlockPos(transaction.getOriginal().getPosition()));
+                if (!scheduledEvents.isEmpty()) {
+                    scheduledEvents.removeAll(VecHelper.toBlockPos(transaction.getOriginal().getPosition()));
+                }
                 transaction.setValid(false);
             }
         }
