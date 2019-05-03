@@ -1143,7 +1143,7 @@ public final class PhaseTracker {
         tracker.printedExceptionForMaximumProcessDepth.add(state);
         final String message = String.format("Sponge is still trying to process captured blocks after %s iterations of depth-first processing."
                                             + " This is likely due to a mod doing something unusual.", currentDepth);
-        tracker.printMessageWithCaughtException("Maximum block processing depth exceeded!", message, state, context, null);
+        tracker.printMessageWithCaughtException("Maximum block processing depth exceeded!", message, state, context, new Exception("Maximum Block Processing Depth Reached"));
 
         return true;
     }
