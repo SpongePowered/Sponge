@@ -47,6 +47,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.player.IUserAdapter;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.interfaces.IMixinSubject;
+import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.mixin.core.world.storage.MixinWorldInfo;
 import org.spongepowered.common.world.WorldManager;
@@ -107,17 +108,29 @@ public abstract class MixinSpongeUser implements User, IMixinSubject, IUserAdapt
 
     @Override
     public Vector3d getPosition() {
+        Optional<Player> playerOpt = getPlayer();
+        if (playerOpt.isPresent()) {
+            return playerOpt.get().getPosition();
+        }
         return new Vector3d(this.posX, this.posY, this.posZ);
     }
 
     @Override
     public Optional<UUID> getWorldUniqueId() {
+        Optional<Player> playerOpt = getPlayer();
+        if (playerOpt.isPresent()) {
+            return playerOpt.get().getWorldUniqueId();
+        }
         Optional<String> folder = WorldManager.getWorldFolderByDimensionId(this.dimension);
         return folder.map(WorldManager::getWorldProperties).flatMap(e -> e.map(WorldProperties::getUniqueId));
     }
 
     @Override
     public boolean setLocation(Vector3d position, UUID world) {
+        Optional<Player> playerOpt = getPlayer();
+        if (playerOpt.isPresent()) {
+            return playerOpt.get().setLocation(position, world);
+        }
         WorldProperties prop = WorldManager.getWorldProperties(world).orElseThrow(() -> new IllegalArgumentException("Invalid World: No world found for UUID"));
         Integer dimensionId = ((IMixinWorldInfo) prop).getDimensionId();
         if (dimensionId == null) {
@@ -133,12 +146,21 @@ public abstract class MixinSpongeUser implements User, IMixinSubject, IUserAdapt
 
     @Override
     public Vector3d getRotation() {
+        Optional<Player> playerOpt = getPlayer();
+        if (playerOpt.isPresent()) {
+            return playerOpt.get().getRotation();
+        }
         return new Vector3d(this.rotationPitch, this.rotationYaw, 0);
     }
 
     @Override
     public void setRotation(Vector3d rotation) {
         checkNotNull(rotation, "Rotation was null!");
+        Optional<Player> playerOpt = getPlayer();
+        if (playerOpt.isPresent()) {
+            playerOpt.get().setRotation(rotation);
+            return;
+        }
         this.markDirty();
         this.rotationPitch = ((float) rotation.getX()) % 360.0F;
         this.rotationYaw = ((float) rotation.getY()) % 360.0F;
@@ -146,12 +168,21 @@ public abstract class MixinSpongeUser implements User, IMixinSubject, IUserAdapt
 
     @Override
     public Inventory getEnderChestInventory() {
+        Optional<Player> playerOpt = getPlayer();
+        if (playerOpt.isPresent()) {
+            return playerOpt.get().getEnderChestInventory();
+        }
         this.loadEnderInventory();
         return ((Inventory) this.enderChest);
     }
 
     @Override
     public void setInvulnerable(boolean value) {
+        Optional<Player> playerOpt = getPlayer();
+        if (playerOpt.isPresent()) {
+            ((IMixinEntity) playerOpt.get()).setInvulnerable(value);
+            return;
+        }
         this.invulnerable = value;
         this.markDirty();
     }
@@ -163,12 +194,21 @@ public abstract class MixinSpongeUser implements User, IMixinSubject, IUserAdapt
 
     @Override
     public void setVanished(boolean vanished) {
+        Optional<Player> playerOpt = getPlayer();
+        if (playerOpt.isPresent()) {
+            ((IMixinEntity) playerOpt.get()).setVanished(vanished);
+            return;
+        }
         this.isVanished = vanished;
         this.markDirty();
     }
 
     @Override
     public boolean isVanished() {
+        Optional<Player> playerOpt = getPlayer();
+        if (playerOpt.isPresent()) {
+            return ((IMixinEntity) playerOpt.get()).isVanished();
+        }
         return this.isVanished;
     }
 
