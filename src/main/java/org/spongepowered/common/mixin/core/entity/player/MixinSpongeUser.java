@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Preconditions;
 import net.minecraft.inventory.InventoryEnderChest;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -39,24 +38,24 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.entity.player.IUserAdapter;
+import org.spongepowered.common.entity.player.IUserOrEntity;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.interfaces.IMixinSubject;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
-import org.spongepowered.common.mixin.core.world.storage.MixinWorldInfo;
 import org.spongepowered.common.world.WorldManager;
 
 import java.util.Optional;
 import java.util.UUID;
 
 @Mixin(value = SpongeUser.class, remap = false)
-public abstract class MixinSpongeUser implements User, IMixinSubject, IUserAdapter {
+public abstract class MixinSpongeUser implements User, IMixinSubject, IUserOrEntity {
 
     @Shadow @Final private com.mojang.authlib.GameProfile profile;
 

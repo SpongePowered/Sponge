@@ -37,9 +37,11 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.entity.dismount.DismountType;
 import org.spongepowered.api.event.entity.IgniteEntityEvent;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.world.Locatable;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.entity.player.IUserOrEntity;
 import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinTrackable;
@@ -50,7 +52,7 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-public interface IMixinEntity extends org.spongepowered.api.entity.Entity, IMixinTrackable {
+public interface IMixinEntity extends org.spongepowered.api.entity.Entity, IMixinTrackable, IUserOrEntity {
 
     boolean isInConstructPhase();
 

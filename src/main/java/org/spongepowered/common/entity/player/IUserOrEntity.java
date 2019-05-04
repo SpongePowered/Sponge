@@ -24,9 +24,7 @@
  */
 package org.spongepowered.common.entity.player;
 
-import org.spongepowered.api.entity.living.Living;
-
-public interface IUserAdapter extends Living {
+public interface IUserOrEntity {
 
     void setInvulnerable(boolean value);
 

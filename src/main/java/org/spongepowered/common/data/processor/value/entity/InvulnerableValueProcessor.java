@@ -29,18 +29,16 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.entity.player.IUserAdapter;
-import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.entity.player.IUserOrEntity;
 
 import java.util.Optional;
 
-public class InvulnerableValueProcessor extends AbstractSpongeValueProcessor<Entity, Boolean, Value<Boolean>> {
+public class InvulnerableValueProcessor extends AbstractSpongeValueProcessor<IUserOrEntity, Boolean, Value<Boolean>> {
 
     public InvulnerableValueProcessor() {
-        super(Entity.class, Keys.INVULNERABLE);
+        super(IUserOrEntity.class, Keys.INVULNERABLE);
     }
 
     @Override
@@ -49,21 +47,14 @@ public class InvulnerableValueProcessor extends AbstractSpongeValueProcessor<Ent
     }
 
     @Override
-    protected boolean set(Entity container, Boolean value) {
-        if (container instanceof IMixinEntity) {
-            ((IMixinEntity) container).setInvulnerable(value);
-        } else {
-            ((IUserAdapter) container).setInvulnerable(value);
-        }
+    protected boolean set(IUserOrEntity container, Boolean value) {
+        container.setInvulnerable(value);
         return true;
     }
 
     @Override
-    protected Optional<Boolean> getVal(Entity container) {
-        if (container instanceof net.minecraft.entity.Entity) {
-            return Optional.of(((net.minecraft.entity.Entity) container).getIsInvulnerable());
-        }
-        return Optional.of(((IUserAdapter) container).getIsInvulnerable());
+    protected Optional<Boolean> getVal(IUserOrEntity container) {
+        return Optional.of(container.getIsInvulnerable());
     }
 
     @Override
