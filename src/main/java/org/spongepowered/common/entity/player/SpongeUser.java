@@ -533,8 +533,8 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
             tag = new NBTTagCompound();
         }
         writeToNbt(tag);
-        try {
-            CompressedStreamTools.writeCompressed(tag, new FileOutputStream(dataFile));
+        try (FileOutputStream out = new FileOutputStream(dataFile)) {
+            CompressedStreamTools.writeCompressed(tag, out);
             dirtyUsers.remove(this);
         } catch (IOException e) {
             SpongeImpl.getLogger().warn("Failed to save user file [{}]!", dataFile, e);
