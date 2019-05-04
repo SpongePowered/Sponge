@@ -514,7 +514,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         return locations;
     }
 
-    protected void markDirty() {
+    public void markDirty() {
         dirtyUsers.add(this);
     }
 
