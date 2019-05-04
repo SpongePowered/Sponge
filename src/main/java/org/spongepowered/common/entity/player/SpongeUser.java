@@ -460,12 +460,6 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         return this.getForInventory(Player::getInventory, u -> ((CarriedInventory) u.inventory));
     }
 
-    public Inventory getEnderChestInventory() {
-        this.loadEnderInventory();
-        return ((Inventory) this.enderChest);
-    }
-
-
     @Override
     public Optional<ItemStack> getItemInHand(HandType handType) {
         if (handType == HandTypes.MAIN_HAND) {
