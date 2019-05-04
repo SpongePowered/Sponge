@@ -38,6 +38,7 @@ import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.registry.RegistryHelper;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -49,23 +50,32 @@ public final class RegistryModuleLoader {
     private RegistryModuleLoader() {
     }
 
-    public static void tryModulePhaseRegistration(RegistryModule module) {
+    public static boolean tryModulePhaseRegistration(RegistryModule module) {
         try {
-            if (requiresCustomRegistration(module)) {
-                if (isCustomProperPhase(module)) {
-                    Method method = getCustomRegistration(module);
-                    invokeCustomRegistration(module, checkNotNull(method, "Custom registration module was null!"));
+            Method method = getCustomRegistration(module);
+            if (method != null) {
+                if (isCustomProperPhase(method)) {
+                    invokeCustomRegistration(module, method);
+                    return true;
+                } else {
+                    return false;
                 }
-            } else if (isDefaultProperPhase(module)) {
-                module.registerDefaults();
-                if (hasCatalogRegistration(module)) {
-                    Map<String, ?> map = getCatalogMap(module);
-                    if (map.isEmpty()) {
-                        return;
-                    }
+            } else {
+                if (isDefaultProperPhase(module)) {
+                    module.registerDefaults();
                     RegisterCatalog regAnnot = getRegisterCatalogAnnot(module);
-                    Set<String> ignored = regAnnot.ignoredFields().length == 0 ? null : Sets.newHashSet(regAnnot.ignoredFields());
-                    RegistryHelper.mapFields(regAnnot.value(), map, ignored);
+                    if (regAnnot != null) {
+                        Map<String, ?> map = getCatalogMap(module);
+                        if (map.isEmpty()) {
+                            SpongeImpl.getLogger().warn("{} has an empty CatalogMap. Implement registerDefaults() or use the CustomCatalogRegistration annotation", module.getClass().getCanonicalName());
+                            return true;
+                        }
+                        Set<String> ignored = regAnnot.ignoredFields().length == 0 ? null : Sets.newHashSet(regAnnot.ignoredFields());
+                        RegistryHelper.mapFields(regAnnot.value(), map, ignored);
+                    }
+                    return true;
+                } else {
+                    return false;
                 }
             }
         } catch (Exception e) {
@@ -73,6 +83,7 @@ public final class RegistryModuleLoader {
         }
     }
 
+    @Nullable
     private static Method getCustomRegistration(RegistryModule module) {
         for (Method method : module.getClass().getMethods()) {
             CustomCatalogRegistration registration = method.getDeclaredAnnotation(CustomCatalogRegistration.class);
@@ -83,80 +94,7 @@ public final class RegistryModuleLoader {
         return null;
     }
 
-    private static boolean requiresCustomRegistration(RegistryModule module) {
-        for (Method method : module.getClass().getMethods()) {
-            CustomCatalogRegistration registration = method.getDeclaredAnnotation(CustomCatalogRegistration.class);
-            if (registration != null) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static boolean hasCatalogRegistration(RegistryModule module) {
-        final RegisterCatalog catalog = module.getClass().getAnnotation(RegisterCatalog.class);
-        if (catalog != null) {
-            return true;
-        }
-        for (Field field : module.getClass().getDeclaredFields()) {
-            RegisterCatalog annotation = field.getAnnotation(RegisterCatalog.class);
-            if (annotation != null) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static boolean isDefaultProperPhase(RegistryModule module) {
-        try {
-            Method method = module.getClass().getMethod("registerDefaults");
-            DelayedRegistration delay = method.getDeclaredAnnotation(DelayedRegistration.class);
-            if (delay == null) {
-                return SpongeImpl.getRegistry().getPhase() == RegistrationPhase.PRE_REGISTRY;
-            }
-            return SpongeImpl.getRegistry().getPhase() == delay.value();
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    private static boolean isCustomProperPhase(RegistryModule module) {
-        for (Method method : module.getClass().getMethods()) {
-            CustomCatalogRegistration registration = method.getDeclaredAnnotation(CustomCatalogRegistration.class);
-            DelayedRegistration delay = method.getDeclaredAnnotation(DelayedRegistration.class);
-            if (registration != null) {
-                if (delay == null) {
-                    return SpongeImpl.getRegistry().getPhase() == RegistrationPhase.PRE_REGISTRY;
-                }
-                return SpongeImpl.getRegistry().getPhase() == delay.value();
-            }
-        }
-        return false;
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private static Map<String, ?> getCatalogMap(RegistryModule module) {
-        if (module instanceof AlternateCatalogRegistryModule) {
-            return checkNotNull(((AlternateCatalogRegistryModule) module).provideCatalogMap());
-        }
-        for (Field field : module.getClass().getDeclaredFields()) {
-            RegisterCatalog annotation = field.getAnnotation(RegisterCatalog.class);
-            if (annotation != null) {
-                try {
-                    field.setAccessible(true);
-                    Map<String, ?> map = (Map<String, ?>) field.get(module);
-                    checkState(!map.isEmpty(), "The registered module: "+ module.getClass().getSimpleName()
-                                               + " cannot have an empty mapping during registration!");
-                    return checkNotNull(map);
-                } catch (Exception e) {
-                    SpongeImpl.getLogger().error("Failed to retrieve a registry field from module: " + module.getClass().getCanonicalName());
-                }
-            }
-        }
-        throw new IllegalStateException("Registry module does not have a catalog map! Registry: " + module.getClass().getCanonicalName());
-    }
-
+    @Nullable
     private static RegisterCatalog getRegisterCatalogAnnot(RegistryModule module) {
         final RegisterCatalog catalog = module.getClass().getAnnotation(RegisterCatalog.class);
         if (catalog != null) {
@@ -168,14 +106,54 @@ public final class RegistryModuleLoader {
                 return annotation;
             }
         }
-        throw new IllegalArgumentException("The module does not have a registry to register! " + module.getClass().getCanonicalName());
+        return null;
+    }
+
+    private static boolean isDefaultProperPhase(RegistryModule module) {
+        try {
+            Method method = module.getClass().getMethod("registerDefaults");
+            DelayedRegistration delay = method.getDeclaredAnnotation(DelayedRegistration.class);
+            if (delay == null) {
+                return true;
+            }
+            return SpongeImpl.getRegistry().getPhase() == delay.value();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    private static boolean isCustomProperPhase(Method custom) {
+        DelayedRegistration delay = custom.getDeclaredAnnotation(DelayedRegistration.class);
+        if (delay == null) {
+            return SpongeImpl.getRegistry().getPhase() == RegistrationPhase.PRE_REGISTRY;
+        }
+        return SpongeImpl.getRegistry().getPhase() == delay.value();
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static Map<String, ?> getCatalogMap(RegistryModule module) {
+        if (module instanceof AlternateCatalogRegistryModule) {
+            return checkNotNull(((AlternateCatalogRegistryModule) module).provideCatalogMap(), "Provided CatalogMap can't be null");
+        }
+        for (Field field : module.getClass().getDeclaredFields()) {
+            RegisterCatalog annotation = field.getAnnotation(RegisterCatalog.class);
+            if (annotation != null) {
+                try {
+                    field.setAccessible(true);
+                    Map<String, ?> map = (Map<String, ?>) field.get(module);
+                    return checkNotNull(map);
+                } catch (Exception e) {
+                    SpongeImpl.getLogger().error("Failed to retrieve a registry field from module: " + module.getClass().getCanonicalName());
+                }
+            }
+        }
+        throw new IllegalStateException("Registry module does not have a catalog map! Registry: " + module.getClass().getCanonicalName());
     }
 
     private static void invokeCustomRegistration(RegistryModule module, Method method) {
         try {
-            if (isCustomProperPhase(module)) {
-                method.invoke(module);
-            }
+            method.invoke(module);
         } catch (IllegalAccessException | InvocationTargetException e) {
             SpongeImpl.getLogger().error("Error when calling custom catalog registration for module: "
                     + module.getClass().getCanonicalName(), e);
