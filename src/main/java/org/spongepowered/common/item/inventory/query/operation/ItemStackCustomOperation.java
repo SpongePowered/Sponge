@@ -25,14 +25,14 @@
 package org.spongepowered.common.item.inventory.query.operation;
 
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
+import org.spongepowered.api.item.inventory.query.QueryTypes;
 
 import java.util.function.Predicate;
 
 public final class ItemStackCustomOperation extends ItemStackQueryOperation<Predicate<ItemStack>> {
 
     public ItemStackCustomOperation(Predicate<ItemStack> predicate) {
-        super(QueryOperationTypes.ITEM_STACK_CUSTOM, predicate);
+        super(QueryTypes.ITEM_STACK_CUSTOM, predicate);
     }
 
     @Override

@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.registry.type.item;
 
-import org.spongepowered.api.item.inventory.query.QueryOperationType;
-import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
+import org.spongepowered.api.item.inventory.query.SingleParameterQueryType;
+import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.item.inventory.query.SpongeQueryOperationType;
@@ -41,9 +41,9 @@ import org.spongepowered.common.item.inventory.query.operation.TypeQueryOperatio
 import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
-@RegisterCatalog(QueryOperationTypes.class)
-public final class QueryOperationRegistryModule extends AbstractCatalogRegistryModule<QueryOperationType>
-    implements CatalogRegistryModule<QueryOperationType> {
+@RegisterCatalog(QueryTypes.class)
+public final class QueryOperationRegistryModule extends AbstractCatalogRegistryModule<SingleParameterQueryType>
+    implements CatalogRegistryModule<SingleParameterQueryType> {
 
     @Override
     public void registerDefaults() {

@@ -25,7 +25,7 @@
 package org.spongepowered.common.item.inventory.query.operation;
 
 import org.spongepowered.api.data.property.PropertyMatcher;
-import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
+import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.common.item.inventory.custom.CustomInventory;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
@@ -39,7 +39,7 @@ public final class InventoryPropertyMatcherQueryOperation extends SpongeQueryOpe
     private final PropertyMatcher propertyMatcher;
 
     public InventoryPropertyMatcherQueryOperation(PropertyMatcher propertyMatcher) {
-        super(QueryOperationTypes.PROPERTY);
+        super(QueryTypes.PROPERTY);
         this.propertyMatcher = propertyMatcher;
     }
 

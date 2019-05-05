@@ -25,7 +25,6 @@
 package org.spongepowered.common.item.inventory.query;
 
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.query.QueryOperation;
 import org.spongepowered.common.item.inventory.EmptyInventoryImpl;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
@@ -47,9 +46,9 @@ public class Query {
 
     private final Lens lens;
 
-    private final QueryOperation<?>[] queries;
+    private final org.spongepowered.api.item.inventory.query.Query<?>[] queries;
 
-    private Query(InventoryAdapter adapter, QueryOperation<?>[] queries) {
+    private Query(InventoryAdapter adapter, org.spongepowered.api.item.inventory.query.Query<?>[] queries) {
         this.adapter = adapter;
         this.fabric = adapter.getFabric();
         this.lens = adapter.getRootLens();
@@ -101,7 +100,7 @@ public class Query {
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     private boolean matches(Lens lens, Lens parent, Fabric inventory) {
-        for (QueryOperation<?> operation : this.queries) {
+        for (org.spongepowered.api.item.inventory.query.Query<?> operation : this.queries) {
             if (((SpongeQueryOperation) operation).matches(lens, parent, inventory)) {
                 return true;
             }
@@ -151,7 +150,7 @@ public class Query {
         return slots;
     }
 
-    public static Query compile(InventoryAdapter adapter, QueryOperation<?>... queries) {
+    public static Query compile(InventoryAdapter adapter, org.spongepowered.api.item.inventory.query.Query<?>... queries) {
         return new Query(adapter, queries);
     }
 

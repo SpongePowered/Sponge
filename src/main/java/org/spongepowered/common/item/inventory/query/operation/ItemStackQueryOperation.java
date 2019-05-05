@@ -25,7 +25,7 @@
 package org.spongepowered.common.item.inventory.query.operation;
 
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.query.QueryOperationType;
+import org.spongepowered.api.item.inventory.query.SingleParameterQueryType;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
@@ -36,7 +36,7 @@ public abstract class ItemStackQueryOperation<T> extends SpongeQueryOperation<T>
 
     private final T arg;
 
-    protected ItemStackQueryOperation(QueryOperationType<T> type, T arg) {
+    protected ItemStackQueryOperation(SingleParameterQueryType<T> type, T arg) {
         super(type);
         this.arg = arg;
     }

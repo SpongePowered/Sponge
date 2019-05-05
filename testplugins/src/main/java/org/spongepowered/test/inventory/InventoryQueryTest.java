@@ -40,12 +40,12 @@ import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryProperties;
-import org.spongepowered.api.item.inventory.InventoryTransformations;
+import org.spongepowered.api.item.inventory.query.InventoryTransformations;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.entity.Hotbar;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
-import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
+import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.item.inventory.slot.SlotIndex;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
@@ -58,16 +58,16 @@ public class InventoryQueryTest {
         CommandSpec inventoryType = CommandSpec.builder()
                 .executor((src, args) -> {
                     Inventory inventory = getPlayerInventory(src);
-                    Inventory hotbar = inventory.query(QueryOperationTypes.INVENTORY_TYPE.of(Hotbar.class));
-                    src.sendMessage(Text.of("You have ", hotbar.totalItems(), " items in your hotbar."));
+                    Inventory hotbar = inventory.query(QueryTypes.INVENTORY_TYPE.of(Hotbar.class));
+                    src.sendMessage(Text.of("You have ", hotbar.totalQuantity(), " items in your hotbar."));
                     return CommandResult.success();
                 }).build();
 
         CommandSpec itemType = CommandSpec.builder()
                 .executor((src, args) -> {
                     Inventory inventory = getPlayerInventory(src);
-                    Inventory sticks = inventory.query(QueryOperationTypes.ITEM_TYPE.of(ItemTypes.STICK));
-                    src.sendMessage(Text.of("You have ", sticks.totalItems(), " sticks in your inventory."));
+                    Inventory sticks = inventory.query(QueryTypes.ITEM_TYPE.of(ItemTypes.STICK));
+                    src.sendMessage(Text.of("You have ", sticks.totalQuantity(), " sticks in your inventory."));
                     return CommandResult.success();
                 }).build();
 
@@ -76,8 +76,8 @@ public class InventoryQueryTest {
                     Inventory inventory = getPlayerInventory(src);
                     ItemStack lapis = ItemStack.of(ItemTypes.LAPIS_LAZULI, 4);
                     lapis.offer(Keys.DYE_COLOR, DyeColors.BLUE);
-                    Inventory lapisItems = inventory.query(QueryOperationTypes.ITEM_STACK_IGNORE_QUANTITY.of(lapis));
-                    src.sendMessage(Text.of("You have ", lapisItems.totalItems(), " lapis lazuli in your inventory."));
+                    Inventory lapisItems = inventory.query(QueryTypes.ITEM_STACK_IGNORE_QUANTITY.of(lapis));
+                    src.sendMessage(Text.of("You have ", lapisItems.totalQuantity(), " lapis lazuli in your inventory."));
                     return CommandResult.success();
                 }).build();
 
@@ -86,17 +86,17 @@ public class InventoryQueryTest {
                     Inventory inventory = getPlayerInventory(src);
                     ItemStack lapis = ItemStack.of(ItemTypes.LAPIS_LAZULI, 4);
                     lapis.offer(Keys.DYE_COLOR, DyeColors.BLUE);
-                    Inventory lapisItems = inventory.query(QueryOperationTypes.ITEM_STACK_EXACT.of(lapis));
-                    src.sendMessage(Text.of("You have ", lapisItems.size(), " stacks of 4 lapis lazuli in your inventory."));
+                    Inventory lapisItems = inventory.query(QueryTypes.ITEM_STACK_EXACT.of(lapis));
+                    src.sendMessage(Text.of("You have ", lapisItems.freeCapacity(), " stacks of 4 lapis lazuli in your inventory."));
                     return CommandResult.success();
                 }).build();
 
         CommandSpec itemStackCustom = CommandSpec.builder()
                 .executor((src, args) -> {
                     Inventory inventory = getPlayerInventory(src);
-                    Inventory evenCountStacks = inventory.query(QueryOperationTypes.ITEM_STACK_CUSTOM.of(
+                    Inventory evenCountStacks = inventory.query(QueryTypes.ITEM_STACK_CUSTOM.of(
                             x -> x.getQuantity() > 0 && x.getQuantity() % 2 == 0));
-                    src.sendMessage(Text.of("You have ", evenCountStacks.size(), " stacks with an even number of items in your inventory."));
+                    src.sendMessage(Text.of("You have ", evenCountStacks.freeCapacity(), " stacks with an even number of items in your inventory."));
                     return CommandResult.success();
                 }).build();
 
@@ -105,7 +105,7 @@ public class InventoryQueryTest {
                     Inventory inventory = getPlayerInventory(src);
                     Inventory slots = ((PlayerInventory) inventory).getHotbar()
                             .query(PropertyMatcher.of(InventoryProperties.SLOT_INDEX, SlotIndex.of(3), PropertyMatcher.Operator.LESS));
-                    src.sendMessage(Text.of("You have ", slots.totalItems(), " items in the first 3 slots of your hotbar."));
+                    src.sendMessage(Text.of("You have ", slots.totalQuantity(), " items in the first 3 slots of your hotbar."));
                     return CommandResult.success();
                 }).build();
 
@@ -113,8 +113,8 @@ public class InventoryQueryTest {
                 .executor((src, args) -> {
                     Inventory inventory = getPlayerInventory(src);
                     Inventory slots = ((PlayerInventory) inventory).getHotbar()
-                            .query(QueryOperationTypes.INVENTORY_TRANSLATION.of(Sponge.getRegistry().getTranslationById("slot.name").get()));
-                    src.sendMessage(Text.of("You have ", slots.totalItems(), " items in your hotbar."));
+                            .query(QueryTypes.INVENTORY_TRANSLATION.of(Sponge.getRegistry().getTranslationById("slot.name").get()));
+                    src.sendMessage(Text.of("You have ", slots.totalQuantity(), " items in your hotbar."));
                     return CommandResult.success();
                 }).build();
 

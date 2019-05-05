@@ -46,7 +46,7 @@ import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
-import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
+import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
@@ -455,7 +455,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     private void afterSlotChangedCraftingGrid(World world, EntityPlayer player, IInventory craftingInventory, InventoryCraftResult output, CallbackInfo ci)
     {
         if (this.firePreview && !this.capturedCraftPreviewTransactions.isEmpty()) {
-            Inventory inv = this.query(QueryOperationTypes.INVENTORY_TYPE.of(CraftingInventory.class));
+            Inventory inv = this.query(QueryTypes.INVENTORY_TYPE.of(CraftingInventory.class));
             if (!(inv instanceof CraftingInventory)) {
                 SpongeImpl.getLogger().warn("Detected crafting but Sponge could not get a CraftingInventory for " + this.getClass().getName());
                 return;

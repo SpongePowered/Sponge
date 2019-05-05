@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.item.inventory.query;
 
-import org.spongepowered.api.item.inventory.InventoryTransformation;
-import org.spongepowered.api.item.inventory.query.QueryOperation;
+import org.spongepowered.api.item.inventory.query.InventoryTransformation;
+import org.spongepowered.api.item.inventory.query.Query;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,10 +34,10 @@ import java.util.List;
 @SuppressWarnings("rawtypes")
 public class SpongeTransformationBuilder implements InventoryTransformation.Builder {
 
-    private List<QueryOperation> operationList = new ArrayList<>();
+    private List<Query> operationList = new ArrayList<>();
 
     @Override
-    public InventoryTransformation.Builder append(QueryOperation... operations) {
+    public InventoryTransformation.Builder append(Query... operations) {
         this.operationList.addAll(Arrays.asList(operations));
         return this;
     }

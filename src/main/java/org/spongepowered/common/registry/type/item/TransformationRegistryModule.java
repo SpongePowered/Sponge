@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.registry.type.item;
 
-import org.spongepowered.api.item.inventory.InventoryTransformation;
-import org.spongepowered.api.item.inventory.InventoryTransformations;
+import org.spongepowered.api.item.inventory.query.InventoryTransformation;
+import org.spongepowered.api.item.inventory.query.InventoryTransformations;
 import org.spongepowered.api.item.inventory.entity.Hotbar;
 import org.spongepowered.api.item.inventory.entity.PrimaryPlayerInventory;
-import org.spongepowered.api.item.inventory.query.QueryOperation;
-import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
+import org.spongepowered.api.item.inventory.query.Query;
+import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.registry.RegistryModule;
 import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.common.item.inventory.EmptyInventoryImpl;
@@ -50,14 +50,14 @@ public class TransformationRegistryModule implements RegistryModule {
     @Override
     public void registerDefaults() {
         this.register("NO_OP", Collections.emptyList());
-        this.register("PLAYER_PRIMARY_HOTBAR_FIRST", Arrays.asList(QueryOperationTypes.INVENTORY_TYPE.of(Hotbar.class),
-                                                       QueryOperationTypes.INVENTORY_TYPE.of(PrimaryPlayerInventory.class)));
+        this.register("PLAYER_PRIMARY_HOTBAR_FIRST", Arrays.asList(QueryTypes.INVENTORY_TYPE.of(Hotbar.class),
+                                                       QueryTypes.INVENTORY_TYPE.of(PrimaryPlayerInventory.class)));
         this.register("REVERSE", new ReverseTransformation());
         this.register("EMPTY", EmptyInventoryImpl::new);
     }
 
     @SuppressWarnings("rawtypes")
-    private void register(String field, List<QueryOperation> operations) {
+    private void register(String field, List<Query> operations) {
         SpongeQueryTransformation transformation = new SpongeQueryTransformation(operations);
         register(field, transformation);
     }

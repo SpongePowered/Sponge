@@ -99,12 +99,12 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
-import org.spongepowered.api.item.inventory.InventoryTransformation;
+import org.spongepowered.api.item.inventory.query.InventoryTransformation;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackGenerator;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.gui.ContainerType;
-import org.spongepowered.api.item.inventory.query.QueryOperationType;
+import org.spongepowered.api.item.inventory.query.SingleParameterQueryType;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.item.merchant.TradeOfferGenerator;
@@ -485,7 +485,7 @@ public final class CommonModuleRegistry {
             .registerModule(PotionType.class, PotionTypeRegistryModule.getInstance())
             .registerModule(PotionEffectType.class, PotionEffectTypeRegistryModule.getInstance())
             .registerModule(Profession.class, ProfessionRegistryModule.getInstance())
-            .registerModule(QueryOperationType.class, new QueryOperationRegistryModule())
+            .registerModule(SingleParameterQueryType.class, new QueryOperationRegistryModule())
             .registerModule(RabbitType.class, new RabbitTypeRegistryModule())
             .registerModule(RailDirection.class, new RailDirectionRegistryModule())
             .registerModule(Rotation.class, RotationRegistryModule.getInstance())

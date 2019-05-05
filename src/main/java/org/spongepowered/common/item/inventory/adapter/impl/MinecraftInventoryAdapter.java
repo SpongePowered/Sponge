@@ -30,8 +30,8 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.Slot;
-import org.spongepowered.api.item.inventory.query.QueryOperation;
-import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
+import org.spongepowered.api.item.inventory.query.Query;
+import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.item.inventory.slot.SlotIndex;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
@@ -43,7 +43,6 @@ import org.spongepowered.common.item.inventory.lens.CompoundSlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.CompoundLens;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.CompoundFabric;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
-import org.spongepowered.common.item.inventory.query.Query;
 import org.spongepowered.common.item.inventory.query.operation.LensQueryOperation;
 import org.spongepowered.common.item.inventory.query.operation.SlotLensQueryOperation;
 
@@ -107,12 +106,12 @@ public interface MinecraftInventoryAdapter extends InventoryAdapter {
     }
 
     @Override
-    default int size() {
+    default int freeCapacity() {
         return AdapterLogic.countStacks(this);
     }
 
     @Override
-    default int totalItems() {
+    default int totalQuantity() {
         return AdapterLogic.countItems(this);
     }
 
@@ -188,14 +187,14 @@ public interface MinecraftInventoryAdapter extends InventoryAdapter {
 
     @SuppressWarnings("unchecked")
     @Override
-    default Inventory query(QueryOperation<?>... queries) {
-        return Query.compile(this, queries).execute();
+    default Inventory query(Query<?>... queries) {
+        return org.spongepowered.common.item.inventory.query.Query.compile(this, queries).execute();
     }
 
     @SuppressWarnings("unchecked")
     @Override
     default <T extends Inventory> Optional<T> query(Class<T> inventoryType) {
-        Inventory result = this.query(QueryOperationTypes.INVENTORY_TYPE.of(inventoryType));
+        Inventory result = this.query(QueryTypes.INVENTORY_TYPE.of(inventoryType));
         if (inventoryType.isAssignableFrom(result.getClass())) {
             return Optional.of((T) result);
         }
@@ -204,7 +203,7 @@ public interface MinecraftInventoryAdapter extends InventoryAdapter {
 
     @Override
     default Inventory intersect(Inventory inventory) {
-        return Query.compile(this, new SlotLensQueryOperation(ImmutableSet.of(inventory))).execute();
+        return org.spongepowered.common.item.inventory.query.Query.compile(this, new SlotLensQueryOperation(ImmutableSet.of(inventory))).execute();
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -220,13 +219,13 @@ public interface MinecraftInventoryAdapter extends InventoryAdapter {
         CompoundLens lens = lensBuilder.build(provider);
         InventoryAdapter compoundAdapter = lens.getAdapter(fabric, this);
 
-        return Query.compile(compoundAdapter, new SlotLensQueryOperation(ImmutableSet.of(compoundAdapter))).execute();
+        return org.spongepowered.common.item.inventory.query.Query.compile(compoundAdapter, new SlotLensQueryOperation(ImmutableSet.of(compoundAdapter))).execute();
     }
 
     @SuppressWarnings("rawtypes")
     @Override
     default boolean containsInventory(Inventory inventory) {
-        Inventory result = Query.compile(this, new LensQueryOperation(((InventoryAdapter) inventory).getRootLens())).execute();
+        Inventory result = org.spongepowered.common.item.inventory.query.Query.compile(this, new LensQueryOperation(((InventoryAdapter) inventory).getRootLens())).execute();
         return result.capacity() == inventory.capacity() && ((InventoryAdapter) result).getRootLens() == ((InventoryAdapter) inventory).getRootLens();
     }
 

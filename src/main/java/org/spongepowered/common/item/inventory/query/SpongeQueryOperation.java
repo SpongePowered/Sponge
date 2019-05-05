@@ -24,21 +24,21 @@
  */
 package org.spongepowered.common.item.inventory.query;
 
-import org.spongepowered.api.item.inventory.query.QueryOperation;
-import org.spongepowered.api.item.inventory.query.QueryOperationType;
+import org.spongepowered.api.item.inventory.query.Query;
+import org.spongepowered.api.item.inventory.query.SingleParameterQueryType;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 
-public abstract class SpongeQueryOperation<T> implements QueryOperation<T> {
+public abstract class SpongeQueryOperation<T> implements Query<T> {
 
-    protected final QueryOperationType<T> type;
+    protected final SingleParameterQueryType<T> type;
 
-    protected SpongeQueryOperation(QueryOperationType<T> type) {
+    protected SpongeQueryOperation(SingleParameterQueryType<T> type) {
         this.type = type;
     }
 
     @Override
-    public final QueryOperationType<T> getType() {
+    public final SingleParameterQueryType<T> getType() {
         return this.type;
     }
 

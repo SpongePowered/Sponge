@@ -142,7 +142,7 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryProperties;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.entity.Hotbar;
-import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
+import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.item.inventory.slot.SlotIndex;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
@@ -1153,7 +1153,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         // Add SlotTransaction to PlayerContainer
         // TODO direct access instead of queries
         org.spongepowered.api.item.inventory.Slot slot = (org.spongepowered.api.item.inventory.Slot)((Inventory) this.inventoryContainer)
-                .query(QueryOperationTypes.INVENTORY_TYPE.of(Hotbar.class))
+                .query(QueryTypes.INVENTORY_TYPE.of(Hotbar.class))
                 .query(PropertyMatcher.of(InventoryProperties.SLOT_INDEX, SlotIndex.of(this.inventory.currentItem)));
         final ItemStackSnapshot originalItem = ItemStackUtil.snapshotOf(currentItem);
         ItemStack itemToDrop = this.inventory.decrStackSize(this.inventory.currentItem, dropAll && !currentItem.isEmpty() ? currentItem.getCount() : 1);

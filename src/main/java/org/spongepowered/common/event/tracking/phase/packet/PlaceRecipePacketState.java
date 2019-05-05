@@ -40,7 +40,7 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingOutput;
-import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
+import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.recipe.Recipe;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
@@ -74,7 +74,7 @@ public class PlaceRecipePacketState extends BasicInventoryPacketState {
 
         IRecipe recipe = player.getEntityWorld().getRecipeManager().getRecipe(recipeID);
 
-        Inventory craftInv = ((Inventory) player.openContainer).query(QueryOperationTypes.INVENTORY_TYPE.of(CraftingInventory.class));
+        Inventory craftInv = ((Inventory) player.openContainer).query(QueryTypes.INVENTORY_TYPE.of(CraftingInventory.class));
         if (!(craftInv instanceof CraftingInventory)) {
             SpongeImpl.getLogger().warn("Detected crafting without a InventoryCrafting!? Crafting Event will not fire.");
             return;

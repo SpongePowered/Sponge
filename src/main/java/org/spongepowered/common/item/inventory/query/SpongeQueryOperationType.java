@@ -27,13 +27,13 @@ package org.spongepowered.common.item.inventory.query;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.item.inventory.query.QueryOperation;
-import org.spongepowered.api.item.inventory.query.QueryOperationType;
+import org.spongepowered.api.item.inventory.query.Query;
+import org.spongepowered.api.item.inventory.query.SingleParameterQueryType;
 import org.spongepowered.common.SpongeCatalogType;
 
 import java.util.function.Function;
 
-public final class SpongeQueryOperationType<T> extends SpongeCatalogType implements QueryOperationType<T> {
+public final class SpongeQueryOperationType<T> extends SpongeCatalogType implements SingleParameterQueryType<T> {
 
     private final Function<T, SpongeQueryOperation<T>> newInstance;
 
@@ -43,7 +43,7 @@ public final class SpongeQueryOperationType<T> extends SpongeCatalogType impleme
     }
 
     @Override
-    public QueryOperation<T> of(T arg) {
+    public Query<T> of(T arg) {
         checkNotNull(arg);
         return this.newInstance.apply(arg);
     }

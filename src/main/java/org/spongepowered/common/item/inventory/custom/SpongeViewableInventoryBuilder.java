@@ -221,7 +221,7 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
 
                 int offset = 0;
                 for (int i = 0; i < this.finalInventories.indexOf(slot.parent()); i++) {
-                    offset += this.finalInventories.get(i).size();
+                    offset += this.finalInventories.get(i).freeCapacity();
                 }
                 slotProvider.add(new SlotLensImpl(idx + offset));
             }

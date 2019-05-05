@@ -25,14 +25,14 @@
 package org.spongepowered.common.item.inventory;
 
 import org.spongepowered.api.data.property.Property;
+import org.spongepowered.api.data.property.PropertyMatcher;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.EmptyInventory;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryArchetype;
-import org.spongepowered.api.item.inventory.InventoryArchetypes;
+import org.spongepowered.api.item.inventory.query.InventoryTransformation;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.Slot;
-import org.spongepowered.api.item.inventory.query.QueryOperation;
+import org.spongepowered.api.item.inventory.query.Query;
 import org.spongepowered.api.item.inventory.slot.SlotIndex;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult.Type;
@@ -119,12 +119,12 @@ public class EmptyInventoryImpl implements EmptyInventory {
     }
 
     @Override
-    public int size() {
+    public int freeCapacity() {
         return 0;
     }
 
     @Override
-    public int totalItems() {
+    public int totalQuantity() {
         return 0;
     }
 
@@ -189,7 +189,7 @@ public class EmptyInventoryImpl implements EmptyInventory {
 
     @SuppressWarnings("unchecked")
     @Override
-    public Inventory query(QueryOperation<?>... operations) {
+    public Inventory query(Query<?>... operations) {
         return this;
     }
 
@@ -268,6 +268,21 @@ public class EmptyInventoryImpl implements EmptyInventory {
     }
 
     @Override
+    public InventoryTransactionResult offer(ItemStack... stack) {
+        return InventoryTransactionResult.builder().type(Type.FAILURE).reject(stack).build();
+    }
+
+    @Override
+    public Inventory query(PropertyMatcher<?> propertyMatcher) {
+        return this;
+    }
+
+    @Override
+    public Inventory transform(InventoryTransformation transformation) {
+        return this;
+    }
+
+    @Override
     public boolean canFit(ItemStack stack) {
         return false;
     }
@@ -285,11 +300,6 @@ public class EmptyInventoryImpl implements EmptyInventory {
     @Override
     public PluginContainer getPlugin() {
         return this.parent.getPlugin();
-    }
-
-    @Override
-    public InventoryArchetype getArchetype() {
-        return InventoryArchetypes.UNKNOWN;
     }
 
     @Override

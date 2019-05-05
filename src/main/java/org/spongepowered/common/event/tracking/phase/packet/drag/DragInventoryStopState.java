@@ -28,7 +28,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
-import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
+import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.api.world.World;
@@ -62,7 +62,7 @@ public abstract class DragInventoryStopState extends NamedInventoryState {
         final EntityPlayerMP player = context.getPacketPlayer();
         ((IMixinContainer) player.openContainer).setFirePreview(true);
 
-        Inventory craftInv = ((Inventory) player.openContainer).query(QueryOperationTypes.INVENTORY_TYPE.of(CraftingInventory.class));
+        Inventory craftInv = ((Inventory) player.openContainer).query(QueryTypes.INVENTORY_TYPE.of(CraftingInventory.class));
         if (craftInv instanceof CraftingInventory) {
             List<SlotTransaction> previewTransactions = ((IMixinContainer) player.openContainer).getPreviewTransactions();
             if (!previewTransactions.isEmpty()) {

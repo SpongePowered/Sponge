@@ -26,7 +26,7 @@ package org.spongepowered.common.item.inventory.query;
 
 import com.google.common.collect.ImmutableSet;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryTransformation;
+import org.spongepowered.api.item.inventory.query.InventoryTransformation;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.CompoundSlotProvider;

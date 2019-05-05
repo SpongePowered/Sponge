@@ -32,7 +32,7 @@ import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.item.inventory.TransferInventoryEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
+import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.plugin.Plugin;
 
 /**
@@ -64,7 +64,7 @@ public class TransferEventTest {
         @SuppressWarnings("deprecation")
         @Listener
         public void onPreTransferEvent(TransferInventoryEvent.Pre event) {
-            if (event.getSourceInventory().query(QueryOperationTypes.ITEM_STACK_IGNORE_QUANTITY.of(ItemStack.of(ItemTypes.BEDROCK, 1)))
+            if (event.getSourceInventory().query(QueryTypes.ITEM_STACK_IGNORE_QUANTITY.of(ItemStack.of(ItemTypes.BEDROCK, 1)))
                     .capacity() != 0) {
                 event.setCancelled(true);
             }
