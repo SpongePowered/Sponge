@@ -446,7 +446,15 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
         final WorldServer world = (WorldServer) mixinWorldServer;
         final IBlockState current = world.getBlockState(pos);
 
+        if (this.tail instanceof BlockTransaction.ChangeBlock) {
+            BlockTransaction.ChangeBlock changeBlock = (BlockTransaction.ChangeBlock) this.tail;
+            if (oldTile != null && newTile == null && changeBlock.queueBreak && changeBlock.queuedRemoval == null) {
+                changeBlock.queuedRemoval = oldTile;
+                return;
+            }
+        }
         if (newTile != null && this.tail != null) {
+
             // Double check previous changes, if there's a remove tile entity, and previous to that, a change block, and this is an add tile entity,
             // well, we need to flip the ChangeBlock to avoid doing a breakBlock logic
             boolean isSame = false;

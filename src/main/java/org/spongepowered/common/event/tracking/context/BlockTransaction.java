@@ -355,9 +355,6 @@ public abstract class BlockTransaction {
             this.original = attachedSnapshot;
             this.newState = newState;
             this.blockChangeFlag = blockChange;
-            if (this.newState.getBlock() != BlockUtil.toNative(this.original).getBlock()) {
-                this.queueBreak = true;
-            }
         }
 
         @Override
@@ -408,18 +405,6 @@ public abstract class BlockTransaction {
                 proxyAccess.proceed(targetPosition, this.newState, true); // Set the block state before we start working on invalidating the tile entity
             }
 
-            if (!this.ignoreBreakBlockLogic && this.queueBreak) {
-                BlockSnapshot currentNeighborSource = currentContext.neighborNotificationSource;
-                currentContext.neighborNotificationSource = this.original;
-                if (proxiedOldState != oldState && this.previous != null) { // Only use the proxy state if the previous transaction set it.
-                    if (proxiedOldState.getBlock() != this.newState.getBlock()) {
-                        proxiedOldState.getBlock().breakBlock(worldServer, targetPosition, proxiedOldState);
-                    }
-                } else {
-                    oldState.getBlock().breakBlock(worldServer, targetPosition, oldState);
-                }
-                currentContext.neighborNotificationSource = currentNeighborSource;
-            }
             // The proxy sets up the various objects needed to properly remove the tile entity, including but not withtanding
             // any tile entities that are already replaced at the position
             if (this.queuedRemoval != null) {
