@@ -37,6 +37,7 @@ import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 
 import java.util.Optional;
+import java.util.function.BiConsumer;
 
 public class HomeDataBuilder extends AbstractDataBuilder<HomeData> implements DataManipulatorBuilder<HomeData, ImmutableHomeData> {
 
@@ -62,13 +63,14 @@ public class HomeDataBuilder extends AbstractDataBuilder<HomeData> implements Da
 
         HomeData data = new HomeDataImpl();
 
-        container.getView(MyHomes.HOMES.getQuery())
-                .get().getKeys(false).forEach(name -> data.homes().put(name.toString(), container.getSerializable(name, Home.class)
+        DataView view = container.getView(MyHomes.HOMES.getQuery()).get();
+
+        view.getKeys(false)
+                .forEach(name -> data.homes().put(name.toString(), view.getSerializable(name, Home.class)
                 .orElseThrow(InvalidDataException::new)));
 
-        container.getSerializable(MyHomes.DEFAULT_HOME.getQuery(), Home.class).ifPresent(home -> {
-            data.set(MyHomes.DEFAULT_HOME, home);
-        });
+        container.getSerializable(MyHomes.DEFAULT_HOME.getQuery(), Home.class)
+                .ifPresent(home -> data.set(MyHomes.DEFAULT_HOME, home));
 
         return Optional.of(data);
     }
