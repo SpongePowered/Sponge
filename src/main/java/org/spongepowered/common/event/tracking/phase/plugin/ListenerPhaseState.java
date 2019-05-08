@@ -64,6 +64,11 @@ abstract class ListenerPhaseState extends PluginPhaseState<ListenerPhaseContext>
     }
 
     @Override
+    public boolean isNotReEntrant() {
+        return false;
+    }
+
+    @Override
     public boolean isEvent() {
         return true;
     }
