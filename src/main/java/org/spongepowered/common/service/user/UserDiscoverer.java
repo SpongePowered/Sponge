@@ -302,7 +302,9 @@ class UserDiscoverer {
         // now exists!
         final User user = create((GameProfile) profile);
         try {
-            ((SpongeUser) user).readFromNbt(CompressedStreamTools.readCompressed(new FileInputStream(dataFile)));
+            try (FileInputStream in = new FileInputStream(dataFile)) {
+                ((SpongeUser) user).readFromNbt(CompressedStreamTools.readCompressed(in));
+            }
         } catch (ReportedException | IOException e) {
             SpongeImpl.getLogger().warn("Corrupt user file {}", dataFile, e);
         }
