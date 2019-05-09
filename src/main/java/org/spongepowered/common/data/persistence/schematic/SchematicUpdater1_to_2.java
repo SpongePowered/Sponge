@@ -22,29 +22,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world.schematic;
+package org.spongepowered.common.data.persistence.schematic;
 
-import org.spongepowered.api.CatalogType;
-import org.spongepowered.api.world.schematic.BlockPalette;
-import org.spongepowered.api.world.schematic.BlockPaletteType;
-import org.spongepowered.api.world.schematic.Palette;
-import org.spongepowered.api.world.schematic.PaletteType;
-import org.spongepowered.common.SpongeCatalogType;
+import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.persistence.DataContentUpdater;
+import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.data.util.DataUtil;
 
-import java.util.function.Supplier;
+// TODO - Migrate this to DataFixer DSL in 1.14.
+public class SchematicUpdater1_to_2 implements DataContentUpdater {
 
-public class SpongePaletteType<T extends CatalogType> extends SpongeCatalogType implements PaletteType<T> {
-
-    private final Supplier<? extends Palette<T>> builder;
-
-    public SpongePaletteType(String id, Supplier<? extends Palette<T>> builder) {
-        super(id);
-        this.builder = builder;
+    @Override
+    public int getInputVersion() {
+        return 1;
     }
 
     @Override
-    public Palette<T> create() {
-        return this.builder.get();
+    public int getOutputVersion() {
+        return 2;
     }
 
+    @Override
+    public DataView update(DataView content) {
+        content.set(DataQueries.Schematic.VERSION, 2);
+        content.set(DataQueries.Schematic.DATA_VERSION, DataUtil.MINECRAFT_DATA_VERSION);
+        content.getViewList(DataQueries.Schematic.Versions.V1_TILE_ENTITY_DATA).ifPresent(tiles -> {
+            tiles.forEach(tile -> {
+                // Remove unnecessary version information.
+                tile.remove(DataQueries.CONTENT_VERSION);
+            });
+            content.remove(DataQueries.Schematic.Versions.V1_TILE_ENTITY_DATA);
+            content.set(DataQueries.Schematic.BLOCKENTITY_DATA, tiles);
+        });
+        return content;
+    }
 }

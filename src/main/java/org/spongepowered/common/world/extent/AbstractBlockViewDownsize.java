@@ -92,7 +92,7 @@ public abstract class AbstractBlockViewDownsize<V extends BlockVolume> implement
             case STANDARD:
                 // TODO: Optimize and use a local palette
                 char[] data = ExtentBufferUtil.copyToArray(this, this.min, this.max, this.size);
-                return new ArrayMutableBlockBuffer(GlobalPalette.instance, this.min, this.size, data);
+                return new ArrayMutableBlockBuffer(GlobalPalette.getBlockPalette(), this.min, this.size, data);
             case THREAD_SAFE:
             default:
                 throw new UnsupportedOperationException(type.name());

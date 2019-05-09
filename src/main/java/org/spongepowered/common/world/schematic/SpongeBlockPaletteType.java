@@ -24,27 +24,19 @@
  */
 package org.spongepowered.common.world.schematic;
 
-import org.spongepowered.api.CatalogType;
-import org.spongepowered.api.world.schematic.BlockPalette;
-import org.spongepowered.api.world.schematic.BlockPaletteType;
-import org.spongepowered.api.world.schematic.Palette;
-import org.spongepowered.api.world.schematic.PaletteType;
-import org.spongepowered.common.SpongeCatalogType;
+import org.spongepowered.api.block.BlockState;
 
 import java.util.function.Supplier;
 
-public class SpongePaletteType<T extends CatalogType> extends SpongeCatalogType implements PaletteType<T> {
+@SuppressWarnings("deprecation")
+public class SpongeBlockPaletteType extends SpongePaletteType<BlockState> implements org.spongepowered.api.world.schematic.BlockPaletteType {
 
-    private final Supplier<? extends Palette<T>> builder;
-
-    public SpongePaletteType(String id, Supplier<? extends Palette<T>> builder) {
-        super(id);
-        this.builder = builder;
+    public SpongeBlockPaletteType(String id, Supplier<org.spongepowered.api.world.schematic.BlockPalette> builder) {
+        super(id, builder);
     }
 
     @Override
-    public Palette<T> create() {
-        return this.builder.get();
+    public org.spongepowered.api.world.schematic.BlockPalette create() {
+        return (org.spongepowered.api.world.schematic.BlockPalette) super.create();
     }
-
 }

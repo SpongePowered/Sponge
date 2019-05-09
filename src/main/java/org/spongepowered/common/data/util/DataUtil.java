@@ -93,6 +93,7 @@ public final class DataUtil {
     // TODO Bump this when needing to fix sponge added file data
     public static final int DATA_VERSION = 1;
     public static final DataFixer spongeDataFixer = new DataFixer(DATA_VERSION);
+    public static final int MINECRAFT_DATA_VERSION = 1343;
     private static final Supplier<InvalidDataException> INVALID_DATA_EXCEPTION_SUPPLIER = InvalidDataException::new;
 
     static {

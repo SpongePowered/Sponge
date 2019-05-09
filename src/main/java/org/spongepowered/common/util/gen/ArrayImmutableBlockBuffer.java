@@ -33,7 +33,7 @@ import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.extent.StorageType;
 import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
 import org.spongepowered.api.world.extent.worker.BlockVolumeWorker;
-import org.spongepowered.api.world.schematic.BlockPalette;
+import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.common.util.gen.ArrayMutableBlockBuffer.BackingData;
 import org.spongepowered.common.util.gen.ArrayMutableBlockBuffer.CharBackingData;
 import org.spongepowered.common.world.extent.ImmutableBlockViewDownsize;
@@ -46,32 +46,31 @@ public class ArrayImmutableBlockBuffer extends AbstractBlockBuffer implements Im
     @SuppressWarnings("ConstantConditions")
     private static final BlockState AIR = BlockTypes.AIR.getDefaultState();
 
-    private final BlockPalette palette;
+    private final Palette<BlockState> palette;
     private final BackingData data;
 
     /**
      * Does not clone!
-     * 
-     * @param palette The palette
+     *  @param palette The palette
+     * @param data The backing data
      * @param start The start block position
      * @param size The block size
-     * @param data The backing data
      */
-    ArrayImmutableBlockBuffer(BlockPalette palette, BackingData data, Vector3i start, Vector3i size) {
+    ArrayImmutableBlockBuffer(Palette<BlockState> palette, BackingData data, Vector3i start, Vector3i size) {
         super(start, size);
         this.data = data;
         this.palette = palette;
     }
 
-    public ArrayImmutableBlockBuffer(BlockPalette palette, Vector3i start, Vector3i size, char[] blocks) {
+    public ArrayImmutableBlockBuffer(Palette<BlockState> palette, Vector3i start, Vector3i size, char[] blocks) {
         super(start, size);
         this.data = new CharBackingData(blocks.clone());
         this.palette = palette;
     }
 
     @Override
-    public BlockPalette getPalette() {
-        return GlobalPalette.instance;
+    public Palette<BlockState> getPalette() {
+        return GlobalPalette.getBlockPalette();
     }
 
     @Override
@@ -122,7 +121,7 @@ public class ArrayImmutableBlockBuffer extends AbstractBlockBuffer implements Im
      * @param size The size of the volume
      * @return A new buffer using the same array reference
      */
-    public static ImmutableBlockVolume newWithoutArrayClone(BlockPalette palette, Vector3i start, Vector3i size, char[] blocks) {
+    public static ImmutableBlockVolume newWithoutArrayClone(Palette<BlockState> palette, Vector3i start, Vector3i size, char[] blocks) {
         return new ArrayImmutableBlockBuffer(palette, new CharBackingData(blocks), start, size);
     }
 }

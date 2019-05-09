@@ -22,29 +22,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+@org.spongepowered.api.util.annotation.NonnullByDefault
 package org.spongepowered.common.world.schematic;
-
-import org.spongepowered.api.CatalogType;
-import org.spongepowered.api.world.schematic.BlockPalette;
-import org.spongepowered.api.world.schematic.BlockPaletteType;
-import org.spongepowered.api.world.schematic.Palette;
-import org.spongepowered.api.world.schematic.PaletteType;
-import org.spongepowered.common.SpongeCatalogType;
-
-import java.util.function.Supplier;
-
-public class SpongePaletteType<T extends CatalogType> extends SpongeCatalogType implements PaletteType<T> {
-
-    private final Supplier<? extends Palette<T>> builder;
-
-    public SpongePaletteType(String id, Supplier<? extends Palette<T>> builder) {
-        super(id);
-        this.builder = builder;
-    }
-
-    @Override
-    public Palette<T> create() {
-        return this.builder.get();
-    }
-
-}

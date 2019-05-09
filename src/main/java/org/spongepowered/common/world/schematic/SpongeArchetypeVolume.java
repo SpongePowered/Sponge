@@ -24,10 +24,21 @@
  */
 package org.spongepowered.common.world.schematic;
 
+import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Maps;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntityArchetype;
+import org.spongepowered.api.entity.EntityArchetype;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.Location;
@@ -38,10 +49,14 @@ import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.extent.StorageType;
 import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
 import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
-import org.spongepowered.api.world.schematic.BlockPalette;
+import org.spongepowered.api.world.schematic.Palette;
+import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.entity.SpongeEntityArchetype;
 import org.spongepowered.common.util.gen.AbstractBlockBuffer;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
@@ -49,15 +64,17 @@ public class SpongeArchetypeVolume extends AbstractBlockBuffer implements Archet
 
     private final MutableBlockVolume backing;
     private final Map<Vector3i, TileEntityArchetype> tiles;
+    private final Collection<EntityArchetype> entities;
 
-    public SpongeArchetypeVolume(MutableBlockVolume backing, Map<Vector3i, TileEntityArchetype> tiles) {
+    public SpongeArchetypeVolume(MutableBlockVolume backing, Map<Vector3i, TileEntityArchetype> tiles, Collection<EntityArchetype> entities) {
         super(backing.getBlockMin(), backing.getBlockSize());
         this.backing = backing;
         this.tiles = Maps.newHashMap(tiles);
+        this.entities = new ArrayList<>(entities);
     }
 
     @Override
-    public BlockPalette getPalette() {
+    public Palette<BlockState> getPalette() {
         return ((AbstractBlockBuffer) this.backing).getPalette();
     }
 
@@ -70,6 +87,41 @@ public class SpongeArchetypeVolume extends AbstractBlockBuffer implements Archet
     public Map<Vector3i, TileEntityArchetype> getTileEntityArchetypes() {
         return this.tiles;
     }
+
+    @Override
+    public Optional<EntityArchetype> getEntityArchetype(double x, double y, double z) {
+        if (this.entities.isEmpty()) {
+            return Optional.empty();
+        }
+        for (EntityArchetype entity : this.entities) {
+            Optional<Vector3d> position = ((SpongeEntityArchetype) entity).getPosition();
+            if (position.isPresent()) {
+                if (position.get().getX() == x && position.get().getY() == y && position.get().getZ() == z) {
+                    return Optional.of(entity);
+                }
+            }
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public ListMultimap<Vector3d, EntityArchetype> getEntitiesByPosition() {
+        if (this.entities.isEmpty()) {
+            return ImmutableListMultimap.of();
+        }
+        ListMultimap<Vector3d, EntityArchetype> multimap = ArrayListMultimap.create();
+        for (EntityArchetype entity : this.entities) {
+            multimap.put(((SpongeEntityArchetype) entity).getPosition().get(), entity);
+
+        }
+        return multimap;
+    }
+
+    @Override
+    public Collection<EntityArchetype> getEntityArchetypes() {
+        return this.entities;
+    }
+
     @Override
     public MutableBlockVolumeWorker<? extends ArchetypeVolume> getBlockWorker() {
         return new SpongeMutableBlockVolumeWorker<>(this);
@@ -83,6 +135,16 @@ public class SpongeArchetypeVolume extends AbstractBlockBuffer implements Archet
         for (Vector3i pos : this.tiles.keySet()) {
             TileEntityArchetype archetype = this.tiles.get(pos);
             archetype.apply(location.add(pos));
+        }
+        if (!this.entities.isEmpty()) {
+            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLUGIN);
+                for (EntityArchetype entity : this.entities) {
+                    final Vector3d vector3d = ((SpongeEntityArchetype) entity).getPosition().get();
+                    final Location<World> target = location.add(vector3d);
+                    entity.apply(target);
+                }
+            }
         }
     }
 

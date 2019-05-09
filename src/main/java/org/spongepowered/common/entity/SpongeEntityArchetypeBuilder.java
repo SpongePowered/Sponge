@@ -33,6 +33,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
@@ -55,6 +56,7 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
 
     EntityType entityType = UNKNOWN;
     DataContainer entityData;
+    NBTTagCompound compound;
 
     public SpongeEntityArchetypeBuilder() {
         super(EntityArchetype.class, DataVersions.EntityArchetype.BASE_VERSION);
@@ -111,8 +113,11 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
         final net.minecraft.entity.Entity minecraftEntity = EntityUtil.toNative(entity);
         final NBTTagCompound compound = new NBTTagCompound();
         minecraftEntity.writeToNBT(compound);
+        compound.setString(NbtDataUtil.Schematic.ENTITY_ID, entity.getType().getId());
         compound.removeTag(NbtDataUtil.UUID);
-        this.entityData = NbtTranslator.getInstance().translate(compound);
+        compound.removeTag(NbtDataUtil.UUID_MOST);
+        compound.removeTag(NbtDataUtil.UUID_LEAST);
+        this.compound = compound;
         return this;
     }
 
@@ -122,6 +127,7 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
         final DataContainer copy = view.copy();
         DataUtil.getValidators(Validations.ENTITY).validate(copy);
         this.entityData = copy;
+        this.compound = null;
         return this;
     }
 
@@ -130,6 +136,7 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
     public EntityArchetype.Builder setData(DataManipulator<?, ?> manipulator) {
         if (this.entityData == null) {
             this.entityData = DataContainer.createNew();
+            this.compound = null;
         }
         DataUtil.getRawNbtProcessor(NbtDataTypes.ENTITY, manipulator.getClass())
                 .ifPresent(processor -> processor.storeToView(this.entityData, manipulator));
@@ -141,8 +148,10 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
     public <E, V extends BaseValue<E>> EntityArchetype.Builder set(V value) {
         if (this.entityData == null) {
             this.entityData = DataContainer.createNew();
+            this.compound = null;
         }
-        DataUtil.getRawNbtProcessor(NbtDataTypes.TILE_ENTITY, value.getKey())
+        this.compound = null;
+        DataUtil.getRawNbtProcessor(NbtDataTypes.ENTITY, value.getKey())
                 .ifPresent(processor -> processor.offer(this.entityData, value));
         return this;
     }
@@ -153,7 +162,8 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
         if (this.entityData == null) {
             this.entityData = DataContainer.createNew();
         }
-        DataUtil.getRawNbtProcessor(NbtDataTypes.TILE_ENTITY, key)
+        this.compound = null;
+        DataUtil.getRawNbtProcessor(NbtDataTypes.ENTITY, key)
                 .ifPresent(processor -> processor.offer(this.entityData, value));
         return this;
     }
@@ -162,11 +172,8 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
     public EntityArchetype build() {
         checkNotNull(this.entityType);
         checkState(this.entityType != UNKNOWN);
-        if(this.entityData == null) {
-            this.entityData = DataContainer.createNew();
-        } else {
-            this.entityData.remove(DataQuery.of("Pos"));
-            this.entityData.remove(DataQuery.of("UUID"));
+        if (this.entityData != null) {
+            this.entityData.remove(DataQueries.USER_UUID);
         }
         return new SpongeEntityArchetype(this);
     }

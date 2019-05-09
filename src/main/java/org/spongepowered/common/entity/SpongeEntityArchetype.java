@@ -28,6 +28,7 @@ import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
@@ -57,15 +58,44 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntitySnapshot, org.spongepowered.api.entity.Entity> implements EntityArchetype {
 
+    @Nullable
+    private Vector3d position;
+
     SpongeEntityArchetype(SpongeEntityArchetypeBuilder builder) {
-        super(builder.entityType, NbtTranslator.getInstance().translateData(builder.entityData));
+        super(builder.entityType, builder.compound != null ? builder.compound : builder.entityData == null ? new NBTTagCompound() : NbtTranslator.getInstance().translateData(builder.entityData));
     }
 
     @Override
     public EntityType getType() {
         return this.type;
+    }
+
+    @Nullable
+    public NBTTagCompound getData() {
+        return this.data;
+    }
+
+    public Optional<Vector3d> getPosition() {
+        if (this.position != null) {
+            return Optional.of(this.position);
+        }
+        if (!this.data.hasKey(NbtDataUtil.ENTITY_POSITION, NbtDataUtil.TAG_LIST)) {
+            return Optional.empty();
+        }
+        try {
+            NBTTagList pos = this.data.getTagList(NbtDataUtil.ENTITY_POSITION, NbtDataUtil.TAG_DOUBLE);
+            double x = pos.getDoubleAt(0);
+            double y = pos.getDoubleAt(1);
+            double z = pos.getDoubleAt(2);
+            this.position = new Vector3d(x, y, z);
+            return Optional.of(this.position);
+        } catch (Exception e) {
+            return Optional.empty();
+        }
     }
 
     @Override
@@ -172,4 +202,5 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
         builder.entityData = NbtTranslator.getInstance().translate(this.data);
         return builder.build();
     }
+
 }

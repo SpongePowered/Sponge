@@ -24,27 +24,56 @@
  */
 package org.spongepowered.common.world.schematic;
 
-import org.spongepowered.api.CatalogType;
-import org.spongepowered.api.world.schematic.BlockPalette;
-import org.spongepowered.api.world.schematic.BlockPaletteType;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.world.schematic.Palette;
-import org.spongepowered.api.world.schematic.PaletteType;
-import org.spongepowered.common.SpongeCatalogType;
 
-import java.util.function.Supplier;
+import java.util.Collection;
+import java.util.Optional;
 
-public class SpongePaletteType<T extends CatalogType> extends SpongeCatalogType implements PaletteType<T> {
+@SuppressWarnings("deprecation")
+public class BlockPaletteWrapper implements org.spongepowered.api.world.schematic.BlockPalette {
 
-    private final Supplier<? extends Palette<T>> builder;
+    private final Palette<BlockState> palette;
+    private final org.spongepowered.api.world.schematic.BlockPaletteType type;
 
-    public SpongePaletteType(String id, Supplier<? extends Palette<T>> builder) {
-        super(id);
-        this.builder = builder;
+    public BlockPaletteWrapper(Palette<BlockState> palette, org.spongepowered.api.world.schematic.BlockPaletteType type) {
+        this.palette = palette;
+        this.type = type;
+    }
+
+
+    @Override
+    public org.spongepowered.api.world.schematic.BlockPaletteType getType() {
+        return this.type;
     }
 
     @Override
-    public Palette<T> create() {
-        return this.builder.get();
+    public int getHighestId() {
+        return this.palette.getHighestId();
     }
 
+    @Override
+    public Optional<BlockState> get(int id) {
+        return this.palette.get(id);
+    }
+
+    @Override
+    public Optional<Integer> get(BlockState state) {
+        return this.palette.get(state);
+    }
+
+    @Override
+    public int getOrAssign(BlockState state) {
+        return this.palette.getOrAssign(state);
+    }
+
+    @Override
+    public boolean remove(BlockState state) {
+        return this.palette.remove(state);
+    }
+
+    @Override
+    public Collection<BlockState> getEntries() {
+        return this.palette.getEntries();
+    }
 }

@@ -34,12 +34,14 @@ import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.extent.StorageType;
 import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
 import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
-import org.spongepowered.api.world.schematic.BlockPalette;
+import org.spongepowered.api.world.schematic.Palette;
+import org.spongepowered.api.world.schematic.PaletteTypes;
 import org.spongepowered.common.world.extent.MutableBlockViewDownsize;
 import org.spongepowered.common.world.extent.MutableBlockViewTransform;
 import org.spongepowered.common.world.extent.UnmodifiableBlockVolumeWrapper;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
 import org.spongepowered.common.world.schematic.BimapPalette;
+import org.spongepowered.common.world.schematic.BlockPaletteWrapper;
 import org.spongepowered.common.world.schematic.GlobalPalette;
 
 public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements MutableBlockVolume {
@@ -54,15 +56,16 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
     @SuppressWarnings("ConstantConditions")
     private static final BlockState AIR = BlockTypes.AIR.getDefaultState();
 
-    private BlockPalette palette;
+    private Palette<BlockState> palette;
     private BackingData data;
 
+    @SuppressWarnings("deprecation")
     public ArrayMutableBlockBuffer(Vector3i start, Vector3i size) {
         this(size.getX() * size.getY() * size.getZ() > SMALL_AREA_THRESHOLD ?
-                new BimapPalette() : GlobalPalette.instance, start, size);
+             new BlockPaletteWrapper(new BimapPalette<>(PaletteTypes.LOCAL_BLOCKS), org.spongepowered.api.world.schematic.BlockPaletteTypes.LOCAL) : GlobalPalette.getBlockPalette(), start, size);
     }
 
-    public ArrayMutableBlockBuffer(BlockPalette palette, Vector3i start, Vector3i size) {
+    public ArrayMutableBlockBuffer(Palette<BlockState> palette, Vector3i start, Vector3i size) {
         super(start, size);
         this.palette = palette;
         int airId = palette.getOrAssign(AIR);
@@ -78,7 +81,7 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
         }
     }
 
-    public ArrayMutableBlockBuffer(BlockPalette palette, Vector3i start, Vector3i size, char[] blocks) {
+    public ArrayMutableBlockBuffer(Palette<BlockState> palette, Vector3i start, Vector3i size, char[] blocks) {
         super(start, size);
         this.palette = palette;
         this.data = new CharBackingData(blocks);
@@ -86,20 +89,20 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
 
     /**
      * Does not clone!
-     * 
+     *
      * @param palette The palette
+     * @param blocks The backing data
      * @param start The start block position
      * @param size The block size
-     * @param data The backing data
      */
-    ArrayMutableBlockBuffer(BlockPalette palette, BackingData blocks, Vector3i start, Vector3i size) {
+    ArrayMutableBlockBuffer(Palette<BlockState> palette, BackingData blocks, Vector3i start, Vector3i size) {
         super(start, size);
         this.palette = palette;
         this.data = blocks;
     }
 
     @Override
-    public BlockPalette getPalette() {
+    public Palette<BlockState> getPalette() {
         return this.palette;
     }
 
@@ -112,9 +115,9 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
             int highId = this.palette.getHighestId();
             int dataSize = area();
             BackingData newdata;
-            if (highId * 2 > GlobalPalette.instance.getHighestId()) {
+            if (highId * 2 > GlobalPalette.getBlockPalette().getHighestId()) {
                 // we are only saving about 1 bit at this point, so transition to a global palette
-                BlockPalette newpalette = GlobalPalette.instance;
+                Palette<BlockState> newpalette = GlobalPalette.getBlockPalette();
                 id = newpalette.getOrAssign(block);
                 highId = newpalette.getHighestId();
 
