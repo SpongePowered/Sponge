@@ -60,6 +60,7 @@ import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
+import org.spongepowered.common.interfaces.item.IMixinItemStack;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -308,7 +309,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         return this;
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"unchecked", "rawtypes", "ConstantConditions"})
     @Override
     public ItemStack build() throws IllegalStateException {
         checkState(this.type != null, "Item type has not been set");
@@ -327,7 +328,13 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         }
 
         if (this.keyValues != null) {
-            this.keyValues.entrySet().forEach(entry -> stack.offer((Key) entry.getKey(), entry.getValue()));
+            this.keyValues.forEach((key, value) -> stack.offer((Key) key, value));
+        }
+        if (this.compound != null) {
+            final NBTTagCompound compoundTag = this.compound.getCompoundTag(NbtDataUtil.FORGE_CAPS);
+            if (compoundTag != null) {
+                ((IMixinItemStack) stack).setCapabilitiesFromSpongeBuilder(compoundTag);
+            }
         }
 
         return stack;

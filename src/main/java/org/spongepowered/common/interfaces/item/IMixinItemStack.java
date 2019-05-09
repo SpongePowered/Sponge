@@ -49,4 +49,8 @@ public interface IMixinItemStack {
         return null;
     }
 
+    default void setCapabilitiesFromSpongeBuilder(NBTTagCompound compound) {
+
+    }
+
 }
