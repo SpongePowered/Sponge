@@ -743,8 +743,12 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         final IBlockState blockAfterSet = extendedblockstorage.get(xPos, modifiedY, zPos);
         if (blockAfterSet.getBlock() != newBlock) {
             // Sponge Start - prune tracked change
-            if (!isFake && ShouldFire.CHANGE_BLOCK_EVENT && state.shouldCaptureBlockChangeOrSkip(peek, pos, currentState, newState, flag)) {
-                peek.getCapturedBlockSupplier().prune(snapshot);
+            if (!isFake && snapshot != null) {
+                if (state.doesBulkBlockCapture(peek)) {
+                    peek.getCapturedBlockSupplier().prune(snapshot);
+                } else {
+                    peek.setSingleSnapshot(null);
+                }
             }
             return null;
         }

@@ -118,13 +118,6 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
     }
 
     @Override
-    public boolean shouldCaptureBlockChangeOrSkip(ExplosionContext phaseContext,
-        BlockPos pos, IBlockState currentState, IBlockState newState,
-        BlockChangeFlag flags) {
-        return true;
-    }
-
-    @Override
     public boolean spawnEntityOrCapture(ExplosionContext context, Entity entity, int chunkX, int chunkZ) {
         return context.getBlockPosition().map(blockPos -> {
             // TODO - this needs to be guaranteed. can't be bothered to figure out why it isn't

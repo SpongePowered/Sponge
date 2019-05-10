@@ -130,7 +130,14 @@ public final class UnwindingPhaseContext extends PhaseContext<UnwindingPhaseCont
     }
 
     @Override
-    public void setSingleSnapshot(SpongeBlockSnapshot singleSnapshot) {
+    public void setSingleSnapshot(@Nullable SpongeBlockSnapshot singleSnapshot) {
+        if (singleSnapshot == null) {
+            if (this.singleSnapshots != null && !this.singleSnapshots.isEmpty()) {
+                this.singleSnapshots.pop();
+            } else {
+                this.singleSnapshot = null;
+            }
+        }
         if (this.singleSnapshot != null) {
             if (this.singleSnapshots == null) {
                 this.singleSnapshots = new ArrayDeque<>();
@@ -139,7 +146,11 @@ public final class UnwindingPhaseContext extends PhaseContext<UnwindingPhaseCont
             this.singleSnapshot = null;
             this.singleSnapshots.push(singleSnapshot);
         } else {
-            this.singleSnapshot = singleSnapshot;
+            if (this.singleSnapshots != null) {
+                this.singleSnapshots.push(singleSnapshot);
+            } else {
+                this.singleSnapshot = singleSnapshot;
+            }
         }
     }
 

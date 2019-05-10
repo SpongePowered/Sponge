@@ -97,13 +97,6 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
         return this.FRAME_MODIFIER;
     }
 
-    @Override
-    public boolean shouldCaptureBlockChangeOrSkip(BlockEventTickContext phaseContext, BlockPos pos,
-        IBlockState currentState, IBlockState newState,
-        BlockChangeFlag flags) {
-
-        return true;
-    }
 
     @Override
     public void associateNeighborStateNotifier(BlockEventTickContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,

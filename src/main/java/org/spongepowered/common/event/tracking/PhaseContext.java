@@ -708,7 +708,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         return checkNotNull(this.singleSnapshot, "Single Snapshot is null!");
     }
 
-    public void setSingleSnapshot(SpongeBlockSnapshot singleSnapshot) {
+    public void setSingleSnapshot(@Nullable SpongeBlockSnapshot singleSnapshot) {
         this.singleSnapshot = singleSnapshot;
     }
 }
