@@ -25,13 +25,27 @@
 package org.spongepowered.common.event.tracking.phase.plugin;
 
 import net.minecraft.block.Block;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.world.LocatableBlock;
+import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -46,6 +60,24 @@ final class PreWorldTickListenerState extends ListenerPhaseState {
         // TODO - Determine if we need to pass the supplier or perform some parameterized
         //  process if not empty method on the capture object.
         TrackingUtil.processBlockCaptures(this, phaseContext);
+
+        // This could be happening regardless whether block bulk captures are done or not.
+        // Would depend on whether entity captures are done.
+        phaseContext.getBlockItemDropSupplier()
+            .acceptAndClearIfNotEmpty(map -> {
+                map.asMap().entrySet().forEach(entry -> {
+                    final BlockPos key = entry.getKey();
+                    try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+                        final List<Entity> items = entry.getValue().stream().map(EntityUtil::fromNative).collect(Collectors.toList());
+                        SpongeCommonEventFactory.callDropItemDestruct(items, phaseContext);
+
+                        frame.popCause();
+                    }
+
+                });
+
+            });
     }
 
     @Override
