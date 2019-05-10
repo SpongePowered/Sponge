@@ -448,8 +448,19 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
 
         if (this.tail instanceof BlockTransaction.ChangeBlock) {
             BlockTransaction.ChangeBlock changeBlock = (BlockTransaction.ChangeBlock) this.tail;
-            if (oldTile != null && newTile == null && changeBlock.queueBreak && changeBlock.queuedRemoval == null) {
+            if (oldTile != null && newTile == null && changeBlock.queueBreak) {
+                if (changeBlock.queuedRemoval == oldTile) {
+                    return; // Duplicate requests need to be silenced because multiple attempts to assure a tile is removed can be made
+                    // during breaking blocks.
+                }
                 changeBlock.queuedRemoval = oldTile;
+                if (changeBlock.queueTileSet == null) {
+                    mixinWorldServer.getProxyAccess().queueRemoval(oldTile);
+                } else {
+                    // Make sure the new tile entity has the correct position
+                    changeBlock.queueTileSet.setPos(pos);
+                    mixinWorldServer.getProxyAccess().queueReplacement(changeBlock.queueTileSet, changeBlock.queuedRemoval);
+                }
                 return;
             }
         }
