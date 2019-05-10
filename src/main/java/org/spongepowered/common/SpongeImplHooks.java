@@ -638,4 +638,14 @@ public final class SpongeImplHooks {
         float hitY, float hitZ) {
         return EnumActionResult.PASS;
     }
+
+    /**
+     * @author gabizou - May 10th, 2019 - 1.12.2
+     * @reason Forge events are getting wrapped in various cases that end up causing corner cases where the effective side
+     * @param object The event
+     * @return False by default, means all server sided events or common events are allowed otherwise.
+     */
+    public static boolean isEventClientEvent(Object object) {
+        return false;
+    }
 }
