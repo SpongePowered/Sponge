@@ -61,13 +61,6 @@ public class TileChunkUnloadState extends BlockPhaseState {
     }
 
     @Override
-    public boolean shouldCaptureBlockChangeOrSkip(GeneralizedContext phaseContext,
-        BlockPos pos, IBlockState currentState, IBlockState newState,
-        BlockChangeFlag flags) {
-        return false;
-    }
-
-    @Override
     public boolean tracksBlockSpecificDrops(GeneralizedContext context) {
         return false;
     }
