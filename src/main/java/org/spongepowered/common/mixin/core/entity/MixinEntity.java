@@ -561,6 +561,9 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
             if (isTeleporting) {
                 // Re-attach passengers
                 for (net.minecraft.entity.Entity passenger : passengers) {
+                    if (((World) passenger.getEntityWorld()).getUniqueId() != ((World) this.world).getUniqueId()) {
+                        ((IMixinEntity) passenger).setLocation(location);
+                    }
                     passenger.startRiding(thisEntity, true);
                 }
             }
