@@ -22,26 +22,47 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.query;
+package org.spongepowered.common.item.inventory.query.type;
 
 import org.spongepowered.api.item.inventory.query.Query;
-import org.spongepowered.api.item.inventory.query.SingleParameterQueryType;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
+import org.spongepowered.common.item.inventory.query.SpongeDepthQuery;
 
-public abstract class SpongeQueryOperation<T> implements Query<T> {
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
-    protected final SingleParameterQueryType<T> type;
+public class OrQuery extends SpongeDepthQuery {
 
-    protected SpongeQueryOperation(SingleParameterQueryType<T> type) {
-        this.type = type;
+    private final List<Query> orQueries;
+
+    public OrQuery(List<Query> orQueries) {
+        this.orQueries = Collections.unmodifiableList(orQueries);
     }
 
-    @Override
-    public final SingleParameterQueryType<T> getType() {
-        return this.type;
+    public static Query of(Query query, Query[] queries) {
+        List<Query> newQueries = new ArrayList<>();
+        if (query instanceof OrQuery) {
+            newQueries.addAll(((OrQuery) query).orQueries);
+        } else {
+            newQueries.add(query);
+        }
+        newQueries.addAll(Arrays.asList(queries));
+        return new OrQuery(newQueries);
+
     }
 
-    public abstract boolean matches(Lens lens, Lens parent, Fabric inventory);
-
+    public boolean matches(Lens lens, Lens parent, Fabric inventory) {
+        for (Query orQuery : orQueries) {
+            if (orQuery instanceof SpongeDepthQuery) {
+                if (((SpongeDepthQuery) orQuery).matches(lens, parent, inventory)) {
+                    return true;
+                }
+            }
+            // else ?
+        }
+        return false;
+    }
 }

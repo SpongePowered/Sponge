@@ -29,7 +29,7 @@ import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.custom.CustomInventory;
-import org.spongepowered.common.item.inventory.lens.CompoundSlotProvider;
+import org.spongepowered.common.item.inventory.lens.UniqueCustomSlotProvider;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.impl.CompoundLens;
 import org.spongepowered.common.item.inventory.lens.impl.DefaultIndexedLens;
@@ -50,7 +50,7 @@ public class SpongeInventoryBuilder implements Inventory.Builder, Inventory.Buil
     private Lens finalLens; // always set before build
     @Nullable private UUID identity;
     @Nullable private Carrier carrier;
-    private CompoundSlotProvider finalProvider;
+    private UniqueCustomSlotProvider finalProvider;
 
     @Override
     public BuildingStep slots(int amount) {
@@ -85,7 +85,7 @@ public class SpongeInventoryBuilder implements Inventory.Builder, Inventory.Buil
         for (Lens lens : this.lenses) {
             lensBuilder.add(lens);
         }
-        CompoundSlotProvider provider = new CompoundSlotProvider();
+        UniqueCustomSlotProvider provider = new UniqueCustomSlotProvider();
         for (Inventory inventory : this.inventories) {
             provider.add(((InventoryAdapter) inventory));
         }

@@ -29,23 +29,19 @@ import org.spongepowered.api.data.property.PropertyMatcher;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.EmptyInventory;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.query.InventoryTransformation;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.query.Query;
-import org.spongepowered.api.item.inventory.slot.SlotIndex;
+import org.spongepowered.api.item.inventory.query.QueryType;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult.Type;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
@@ -57,26 +53,7 @@ import javax.annotation.Nullable;
  */
 public class EmptyInventoryImpl implements EmptyInventory {
 
-    public static final Translation EMPTY_NAME = new SpongeTranslation("inventory.empty.title");
-
-    static final class EmptyIterator implements Iterator<Inventory> {
-
-        @Override
-        public boolean hasNext() {
-            return false;
-        }
-
-        @Override
-        public Inventory next() {
-            throw new NoSuchElementException("Attempted to iterate over an empty Inventory");
-        }
-
-        @Override
-        public void remove() {
-            throw new NoSuchElementException("Attempted to remove an element from an empty collection");
-        }
-
-    }
+    private static final Translation EMPTY_NAME = new SpongeTranslation("inventory.empty.title");
 
     private final Inventory parent;
 
@@ -90,22 +67,17 @@ public class EmptyInventoryImpl implements EmptyInventory {
     }
 
     @Override
-    public ItemStack poll() {
-        return ItemStack.empty();
+    public InventoryTransactionResult poll() {
+        return InventoryTransactionResult.failNoTransactions();
     }
 
     @Override
-    public ItemStack poll(int limit) {
-        return ItemStack.empty();
+    public InventoryTransactionResult poll(int limit) {
+        return InventoryTransactionResult.failNoTransactions();
     }
 
     @Override
     public ItemStack peek() {
-        return ItemStack.empty();
-    }
-
-    @Override
-    public ItemStack peek(int limit) {
         return ItemStack.empty();
     }
 
@@ -154,15 +126,6 @@ public class EmptyInventoryImpl implements EmptyInventory {
     }
 
     @Override
-    public int getMaxStackSize() {
-        return 0;
-    }
-
-    @Override
-    public void setMaxStackSize(int size) {
-    }
-
-    @Override
     public <V> Optional<V> getProperty(Inventory child, Property<V> property) {
         return Optional.empty();
     }
@@ -187,9 +150,23 @@ public class EmptyInventoryImpl implements EmptyInventory {
         return Collections.emptyMap();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public Inventory query(Query<?>... operations) {
+    public Inventory query(Query query) {
+        return this;
+    }
+
+    @Override
+    public Inventory query(PropertyMatcher<?> propertyMatcher) {
+        return this;
+    }
+
+    @Override
+    public <P> Inventory query(QueryType.OneParam<P> type, P param) {
+        return this;
+    }
+
+    @Override
+    public <P1, P2> Inventory query(QueryType.TwoParam<P1, P2> type, P1 param1, P2 param2) {
         return this;
     }
 
@@ -233,53 +210,33 @@ public class EmptyInventoryImpl implements EmptyInventory {
     }
 
     @Override
-    public InventoryTransactionResult set(ItemStack stack) {
-        return InventoryTransactionResult.builder().type(Type.FAILURE).reject(stack).build();
+    public InventoryTransactionResult pollFrom(int index) {
+        return InventoryTransactionResult.builder().type(Type.NO_SLOT).build();
     }
 
     @Override
-    public Optional<ItemStack> poll(SlotIndex index) {
+    public InventoryTransactionResult pollFrom(int index, int limit) {
+        return InventoryTransactionResult.builder().type(Type.NO_SLOT).build();
+    }
+
+    @Override
+    public Optional<ItemStack> peekAt(int index) {
         return Optional.empty();
     }
 
     @Override
-    public Optional<ItemStack> poll(SlotIndex index, int limit) {
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<ItemStack> peek(SlotIndex index) {
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<ItemStack> peek(SlotIndex index, int limit) {
-        return Optional.empty();
-    }
-
-    @Override
-    public InventoryTransactionResult offer(SlotIndex index, ItemStack stack) {
+    public InventoryTransactionResult offer(int index, ItemStack stack) {
         return InventoryTransactionResult.builder().type(Type.FAILURE).reject(stack).build();
     }
 
     @Override
-    public InventoryTransactionResult set(SlotIndex index, ItemStack stack) {
+    public InventoryTransactionResult set(int index, ItemStack stack) {
         return InventoryTransactionResult.builder().type(Type.FAILURE).reject(stack).build();
     }
 
     @Override
-    public InventoryTransactionResult offer(ItemStack... stack) {
-        return InventoryTransactionResult.builder().type(Type.FAILURE).reject(stack).build();
-    }
-
-    @Override
-    public Inventory query(PropertyMatcher<?> propertyMatcher) {
-        return this;
-    }
-
-    @Override
-    public Inventory transform(InventoryTransformation transformation) {
-        return this;
+    public InventoryTransactionResult offer(ItemStack... stacks) {
+        return InventoryTransactionResult.builder().type(Type.FAILURE).reject(stacks).build();
     }
 
     @Override
@@ -288,18 +245,13 @@ public class EmptyInventoryImpl implements EmptyInventory {
     }
 
     @Override
-    public Optional<Slot> getSlot(SlotIndex index) {
+    public Optional<Slot> getSlot(int index) {
         return Optional.empty();
     }
 
     @Override
     public Translation getName() {
         return EmptyInventoryImpl.EMPTY_NAME;
-    }
-
-    @Override
-    public PluginContainer getPlugin() {
-        return this.parent.getPlugin();
     }
 
     @Override

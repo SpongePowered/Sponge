@@ -22,36 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.query;
+package org.spongepowered.common.item.inventory.query.type;
 
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.query.InventoryTransformation;
-import org.spongepowered.api.item.inventory.query.Query;
-import org.spongepowered.common.item.inventory.EmptyInventoryImpl;
+import org.spongepowered.common.item.inventory.lens.Fabric;
+import org.spongepowered.common.item.inventory.lens.Lens;
+import org.spongepowered.common.item.inventory.query.SpongeDepthQuery;
 
-import java.util.List;
+public final class InventoryTypeQuery extends SpongeDepthQuery {
 
-/**
- * Queries the inventory for slots in order of the query operations.
- */
-@SuppressWarnings("rawtypes")
-public class SpongeQueryTransformation implements InventoryTransformation {
+    private final Class<? extends Inventory> targetType;
 
-    private final List<Query> operations;
-
-    public SpongeQueryTransformation(List<Query> operations) {
-        this.operations = operations;
+    public InventoryTypeQuery(Class<? extends Inventory> targetType) {
+        this.targetType = targetType;
     }
 
     @Override
-    public Inventory transform(Inventory inventory) {
-        if (this.operations.isEmpty()) {
-            return inventory;
-        }
-        Inventory result = new EmptyInventoryImpl(inventory);
-        for (Query operation : this.operations) {
-            result = result.union(inventory.query(operation));
-        }
-        return result;
+    public boolean matches(Lens lens, Lens parent, Fabric inventory) {
+        return this.targetType.isAssignableFrom(lens.getAdapterType());
     }
+
 }

@@ -22,36 +22,60 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.query.operation;
+package org.spongepowered.common.item.inventory.lens;
 
-import com.google.common.collect.ImmutableSet;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
-import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.query.SpongeQueryOperation;
-import org.spongepowered.common.item.inventory.query.SpongeQueryOperationTypes;
+import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 
-public final class SlotLensQueryOperation extends SpongeQueryOperation<ImmutableSet<Inventory>> {
+import java.util.ArrayList;
+import java.util.List;
 
-    private final ImmutableSet<Inventory> inventories;
+/**
+ * A custom slot provider without duplicate slot-lenses.
+ */
+public class UniqueCustomSlotProvider implements SlotProvider {
 
-    public SlotLensQueryOperation(ImmutableSet<Inventory> inventories) {
-        super(SpongeQueryOperationTypes.SLOT_LENS);
-        this.inventories = inventories;
-    }
+    private final List<SlotLens> slotList = new ArrayList<>();
 
-    @SuppressWarnings("rawtypes")
-    @Override
-    public boolean matches(Lens lens, Lens parent, Fabric inventory) {
-        for (Inventory inv : this.inventories) {
-            for (Inventory slot : inv.slots()) {
-                if (((SlotAdapter) slot).getRootLens().equals(lens)) {
-                    return true;
-                }
+    /**
+     * Adds all slots from this inventory adapter.
+     *
+     * @param adapter The adapter
+     *
+     * @return this provider for chaining
+     */
+    public UniqueCustomSlotProvider add(InventoryAdapter adapter) {
+        for (Inventory slot : adapter.slots()) {
+            SlotLens slotLens = ((SlotLens) ((SlotAdapter) slot).getRootLens());
+            if (!this.slotList.contains(slotLens)) {
+                this.slotList.add(slotLens);
             }
         }
-        return false;
+        return this;
     }
 
+    /**
+     * Adds a single slot-lens.
+     *
+     * @param slotLens The slot-lens
+     *
+     * @return This provider for chaining
+     */
+    public UniqueCustomSlotProvider add(SlotLens slotLens) {
+        if (!this.slotList.contains(slotLens)) {
+            this.slotList.add(slotLens);
+        }
+        return this;
+    }
+
+    @Override
+    public SlotLens getSlotLens(int index) {
+        return this.slotList.get(index);
+    }
+
+    public int size() {
+        return this.slotList.size();
+    }
 }

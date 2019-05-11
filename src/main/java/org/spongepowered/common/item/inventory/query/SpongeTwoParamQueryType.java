@@ -24,38 +24,29 @@
  */
 package org.spongepowered.common.item.inventory.query;
 
-import org.spongepowered.api.item.inventory.query.InventoryTransformation;
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.item.inventory.query.Query;
-import org.spongepowered.common.item.inventory.query.type.SpongeQueryTransformation;
+import org.spongepowered.api.item.inventory.query.QueryType;
+import org.spongepowered.common.SpongeCatalogType;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.function.BiFunction;
 
-@SuppressWarnings("rawtypes")
-public class SpongeTransformationBuilder implements InventoryTransformation.Builder {
+public final class SpongeTwoParamQueryType<T1, T2> extends SpongeCatalogType implements QueryType.TwoParam<T1, T2> {
 
-    private List<Query> operationList = new ArrayList<>();
+    private final BiFunction<T1, T2, Query> newInstance;
 
-    @Override
-    public InventoryTransformation.Builder append(Query... operations) {
-        this.operationList.addAll(Arrays.asList(operations));
-        return this;
+    public SpongeTwoParamQueryType(String id, BiFunction<T1, T2, Query> newInstance) {
+        super(CatalogKey.sponge(id), id);
+        this.newInstance = newInstance;
     }
 
     @Override
-    public InventoryTransformation build() {
-        return new SpongeQueryTransformation(this.operationList);
+    public Query of(T1 arg1, T2 arg2) {
+        checkNotNull(arg1);
+        checkNotNull(arg2);
+        return this.newInstance.apply(arg1, arg2);
     }
 
-    @Override
-    public InventoryTransformation.Builder from(InventoryTransformation value) {
-        return this;
-    }
-
-    @Override
-    public InventoryTransformation.Builder reset() {
-        this.operationList.clear();
-        return this;
-    }
 }

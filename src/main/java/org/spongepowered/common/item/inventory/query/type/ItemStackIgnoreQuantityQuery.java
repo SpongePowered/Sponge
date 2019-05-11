@@ -22,26 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.query.operation;
+package org.spongepowered.common.item.inventory.query.type;
 
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.query.QueryTypes;
-import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.query.SpongeQueryOperation;
+import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
-public final class InventoryTypeQueryOperation extends SpongeQueryOperation<Class<? extends Inventory>> {
+public final class ItemStackIgnoreQuantityQuery extends ItemStackQuery<ItemStack> {
 
-    private final Class<? extends Inventory> targetType;
-
-    public InventoryTypeQueryOperation(Class<? extends Inventory> targetType) {
-        super(QueryTypes.INVENTORY_TYPE);
-        this.targetType = targetType;
+    public ItemStackIgnoreQuantityQuery(ItemStack itemStack) {
+        super(itemStack.copy());
     }
 
     @Override
-    public boolean matches(Lens lens, Lens parent, Fabric inventory) {
-        return this.targetType.isAssignableFrom(lens.getAdapterType());
+    protected boolean matches(ItemStack itemStack, ItemStack arg) {
+        return ItemStackUtil.compareIgnoreQuantity(itemStack, arg);
     }
 
 }

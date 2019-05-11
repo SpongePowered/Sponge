@@ -22,15 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.query.operation;
+package org.spongepowered.common.item.inventory.query.type;
 
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.query.QueryTypes;
 
-public final class ItemStackExactQueryOperation extends ItemStackQueryOperation<ItemStack> {
+public final class ItemStackExactQuery extends ItemStackQuery<ItemStack> {
 
-    public ItemStackExactQueryOperation(ItemStack itemStack) {
-        super(QueryTypes.ITEM_STACK_EXACT, itemStack.copy());
+    public ItemStackExactQuery(ItemStack itemStack) {
+        super(itemStack.copy());
     }
 
     @Override

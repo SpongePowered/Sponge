@@ -22,39 +22,47 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.query.operation;
+package org.spongepowered.common.item.inventory.query.type;
 
-import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.query.SingleParameterQueryType;
+import org.spongepowered.api.data.property.PropertyMatcher;
+import org.spongepowered.common.item.inventory.custom.CustomInventory;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
-import org.spongepowered.common.item.inventory.query.SpongeQueryOperation;
-import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.item.inventory.query.SpongeDepthQuery;
 
-public abstract class ItemStackQueryOperation<T> extends SpongeQueryOperation<T> {
+import java.util.Collection;
 
-    private final T arg;
+@SuppressWarnings("unchecked")
+public final class InventoryPropertyMatcherQuery extends SpongeDepthQuery {
 
-    protected ItemStackQueryOperation(SingleParameterQueryType<T> type, T arg) {
-        super(type);
-        this.arg = arg;
+    private final PropertyMatcher propertyMatcher;
+
+    public InventoryPropertyMatcherQuery(PropertyMatcher propertyMatcher) {
+        this.propertyMatcher = propertyMatcher;
     }
 
     @Override
     public boolean matches(Lens lens, Lens parent, Fabric inventory) {
-        if (lens instanceof SlotLens) {
-            ItemStack stack = ItemStackUtil.fromNative(((SlotLens) lens).getStack(inventory));
-            if (stack == null) {
-                return false;
-            }
-            if (this.matches(stack, this.arg)) {
-                return true;
+        if (parent == null) {
+            return false;
+        }
+
+        // Check for custom inventory properties first
+        // TODO check if this works
+        Collection<?> invs = inventory.allInventories();
+        if (invs.size() > 0) {
+            Object inv = invs.iterator().next();
+            if (inv instanceof CustomInventory) {
+                Object value = ((CustomInventory) inv).getProperties().get(this.propertyMatcher.getProperty());
+                if (this.propertyMatcher.matches(value)) {
+                    return true;
+                }
             }
         }
-        return false;
-    }
 
-    protected abstract boolean matches(ItemStack itemStack, T arg);
+        // Check for lens properties
+        final Object value = parent.getProperties(lens).get(this.propertyMatcher.getProperty());
+        return this.propertyMatcher.matches(value);
+    }
 
 }

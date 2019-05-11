@@ -38,44 +38,37 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-public class Query {
+/**
+ * Checks immediate child for matches first.
+ * If no match is found matching continues using a depth-first search.
+ */
+public abstract class SpongeDepthQuery extends SpongeQuery {
 
-    private final InventoryAdapter adapter;
+    public abstract boolean matches(Lens lens, Lens parent, Fabric inventory);
 
-    private final Fabric fabric;
+    public Inventory execute(InventoryAdapter adapter) {
+        Fabric fabric = adapter.getFabric();
+        Lens lens = adapter.getRootLens();
 
-    private final Lens lens;
-
-    private final org.spongepowered.api.item.inventory.query.Query<?>[] queries;
-
-    private Query(InventoryAdapter adapter, org.spongepowered.api.item.inventory.query.Query<?>[] queries) {
-        this.adapter = adapter;
-        this.fabric = adapter.getFabric();
-        this.lens = adapter.getRootLens();
-        this.queries = queries;
-    }
-
-    public Inventory execute() {
-        if (this.matches(this.lens, null, this.fabric)) {
-            return this.lens.getAdapter(this.fabric, this.adapter);
+        if (this.matches(lens, null, fabric)) {
+            return lens.getAdapter(fabric, adapter);
         }
 
-        return this.toResult(this.reduce(this.lens, this.depthFirstSearch(this.lens)));
+        return this.toResult(adapter, fabric, this.reduce(lens, this.depthFirstSearch(fabric, lens)));
     }
 
-    @SuppressWarnings("unchecked")
-    private Inventory toResult(Set<Lens> matches) {
+    private Inventory toResult(InventoryAdapter adapter, Fabric fabric, Set<Lens> matches) {
         if (matches.isEmpty()) {
-            return new EmptyInventoryImpl(this.adapter);
+            return new EmptyInventoryImpl(adapter);
         }
         if (matches.size() == 1) {
-            return matches.iterator().next().getAdapter(this.fabric, this.adapter);
+            return matches.iterator().next().getAdapter(fabric, adapter);
         }
 
-        return new QueryResultAdapter(this.fabric, this.adapter, matches);
+        return new QueryResultAdapter(fabric, adapter, matches);
     }
 
-    private Set<Lens> depthFirstSearch(Lens lens) {
+    private Set<Lens> depthFirstSearch(Fabric fabric, Lens lens) {
         Set<Lens> matches = new LinkedHashSet<>();
 
         for (Lens child : lens.getChildren()) {
@@ -83,29 +76,14 @@ public class Query {
                 continue;
             }
             if (!child.getChildren().isEmpty()) {
-                matches.addAll(this.depthFirstSearch(child));
+                matches.addAll(this.depthFirstSearch(fabric, child));
             }
-            if (this.matches(child, lens, this.fabric)) {
+            if (this.matches(child, lens, fabric)) {
                 matches.add(child);
             }
         }
 
-        // Only a single match or no matches
-        if (matches.size() < 2) {
-            return matches;
-        }
-
         return matches;
-    }
-
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    private boolean matches(Lens lens, Lens parent, Fabric inventory) {
-        for (org.spongepowered.api.item.inventory.query.Query<?> operation : this.queries) {
-            if (((SpongeQueryOperation) operation).matches(lens, parent, inventory)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private Set<Lens> reduce(Lens lens, Set<Lens> matches) {
@@ -150,8 +128,5 @@ public class Query {
         return slots;
     }
 
-    public static Query compile(InventoryAdapter adapter, org.spongepowered.api.item.inventory.query.Query<?>... queries) {
-        return new Query(adapter, queries);
-    }
 
 }

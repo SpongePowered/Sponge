@@ -22,40 +22,49 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.query;
+package org.spongepowered.common.item.inventory.query.type;
 
-import org.spongepowered.api.item.inventory.query.InventoryTransformation;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.query.Query;
-import org.spongepowered.common.item.inventory.query.type.SpongeQueryTransformation;
+import org.spongepowered.common.item.inventory.EmptyInventoryImpl;
+import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.item.inventory.query.SpongeQuery;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
-@SuppressWarnings("rawtypes")
-public class SpongeTransformationBuilder implements InventoryTransformation.Builder {
+public class AppendQuery extends SpongeQuery {
 
-    private List<Query> operationList = new ArrayList<>();
+    private final List<Query> queryList;
 
-    @Override
-    public InventoryTransformation.Builder append(Query... operations) {
-        this.operationList.addAll(Arrays.asList(operations));
-        return this;
+    public AppendQuery(List<Query> queryList) {
+        this.queryList = Collections.unmodifiableList(queryList);
+    }
+
+    public static Query of(Query query, Query[] queries) {
+        List<Query> newQueries = new ArrayList<>();
+        if (query instanceof AppendQuery) {
+            newQueries.addAll(((AppendQuery) query).queryList);
+        } else {
+            newQueries.add(query);
+        }
+        newQueries.addAll(Arrays.asList(queries));
+        return new OrQuery(newQueries);
     }
 
     @Override
-    public InventoryTransformation build() {
-        return new SpongeQueryTransformation(this.operationList);
+    public Inventory execute(InventoryAdapter inventory) {
+        Inventory result = new EmptyInventoryImpl(inventory);
+        if (this.queryList.isEmpty()) {
+            return result;
+        }
+        for (Query operation : this.queryList) {
+            result = result.union(inventory.query(operation));
+        }
+        return result;
     }
 
-    @Override
-    public InventoryTransformation.Builder from(InventoryTransformation value) {
-        return this;
-    }
 
-    @Override
-    public InventoryTransformation.Builder reset() {
-        this.operationList.clear();
-        return this;
-    }
 }

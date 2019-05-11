@@ -22,21 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.query.operation;
+package org.spongepowered.common.item.inventory.query.type;
 
-import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.query.QueryTypes;
-import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.query.QueryType;
+import org.spongepowered.common.item.inventory.EmptyInventoryImpl;
+import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.item.inventory.query.SpongeQuery;
 
-public final class ItemStackIgnoreQuantityOperation extends ItemStackQueryOperation<ItemStack> {
+public class EmptyQuery extends SpongeQuery implements QueryType.NoParam {
 
-    public ItemStackIgnoreQuantityOperation(ItemStack itemStack) {
-        super(QueryTypes.ITEM_STACK_IGNORE_QUANTITY, itemStack.copy());
+    private CatalogKey key = CatalogKey.sponge("empty");
+
+    @Override
+    public CatalogKey getKey() {
+        return this.key;
+    }
+
+    public EmptyQuery() {
     }
 
     @Override
-    protected boolean matches(ItemStack itemStack, ItemStack arg) {
-        return ItemStackUtil.compareIgnoreQuantity(itemStack, arg);
+    public Inventory execute(InventoryAdapter inventory) {
+        return new EmptyInventoryImpl(inventory);
     }
-
 }

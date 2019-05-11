@@ -47,7 +47,7 @@ public class Inventory2DAdapter extends VanillaAdapter implements Inventory2D {
         this.lens2d = root;
     }
     
-    protected SlotLens getSlotLens(int x, int y) {
+    public SlotLens getSlotLens(int x, int y) {
         return this.getSlotLens(new Vector2i(x, y));
     }
 
@@ -65,23 +65,18 @@ public class Inventory2DAdapter extends VanillaAdapter implements Inventory2D {
     }
 
     @Override
-    public Optional<ItemStack> poll(Vector2i pos) {
-        return AdapterLogic.pollSequential(this.fabric, this.getSlotLens(pos));
+    public InventoryTransactionResult poll(Vector2i pos) {
+        return AdapterLogic.pollSequential(this.fabric, this.getSlotLens(pos), null);
     }
 
     @Override
-    public Optional<ItemStack> poll(Vector2i pos, int limit) {
+    public InventoryTransactionResult poll(Vector2i pos, int limit) {
         return AdapterLogic.pollSequential(this.fabric, this.getSlotLens(pos), limit);
     }
 
     @Override
     public Optional<ItemStack> peek(Vector2i pos) {
         return AdapterLogic.peekSequential(this.fabric, this.getSlotLens(pos));
-    }
-
-    @Override
-    public Optional<ItemStack> peek(Vector2i pos, int limit) {
-        return AdapterLogic.peekSequential(this.fabric, this.getSlotLens(pos), limit);
     }
 
     @Override

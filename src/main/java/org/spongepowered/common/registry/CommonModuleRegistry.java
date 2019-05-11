@@ -485,7 +485,7 @@ public final class CommonModuleRegistry {
             .registerModule(PotionType.class, PotionTypeRegistryModule.getInstance())
             .registerModule(PotionEffectType.class, PotionEffectTypeRegistryModule.getInstance())
             .registerModule(Profession.class, ProfessionRegistryModule.getInstance())
-            .registerModule(SingleParameterQueryType.class, new QueryOperationRegistryModule())
+            .registerModule(SingleParameterQueryType.class, new QueryTypeRegistryModule())
             .registerModule(RabbitType.class, new RabbitTypeRegistryModule())
             .registerModule(RailDirection.class, new RailDirectionRegistryModule())
             .registerModule(Rotation.class, RotationRegistryModule.getInstance())

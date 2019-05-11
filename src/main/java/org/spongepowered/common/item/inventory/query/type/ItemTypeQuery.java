@@ -22,25 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.query.operation;
+package org.spongepowered.common.item.inventory.query.type;
 
-import org.spongepowered.api.item.inventory.query.QueryTypes;
-import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.query.SpongeQueryOperation;
+import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.item.inventory.ItemStack;
 
-public final class TypeQueryOperation extends SpongeQueryOperation<Class<?>> {
+public final class ItemTypeQuery extends ItemStackQuery<ItemType> {
 
-    private final Class<?> targetType;
-
-    public TypeQueryOperation(Class<?> targetType) {
-        super(QueryTypes.TYPE);
-        this.targetType = targetType;
+    public ItemTypeQuery(ItemType type) {
+        super(type);
     }
 
     @Override
-    public boolean matches(Lens lens, Lens parent, Fabric inventory) {
-        return this.targetType.isAssignableFrom(lens.getAdapterType());
+    protected boolean matches(ItemStack itemStack, ItemType arg) {
+        return itemStack.getType().equals(arg);
     }
 
 }

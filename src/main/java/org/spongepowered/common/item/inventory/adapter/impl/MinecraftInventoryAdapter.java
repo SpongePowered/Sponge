@@ -25,37 +25,30 @@
 package org.spongepowered.common.item.inventory.adapter.impl;
 
 import com.google.common.collect.ImmutableSet;
-import org.spongepowered.api.data.property.Property;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.query.Query;
+import org.spongepowered.api.item.inventory.query.QueryType;
 import org.spongepowered.api.item.inventory.query.QueryTypes;
-import org.spongepowered.api.item.inventory.slot.SlotIndex;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.data.property.store.common.InventoryPropertyStore;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.lens.CompoundSlotProvider;
+import org.spongepowered.common.item.inventory.lens.UniqueCustomSlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.CompoundLens;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.CompoundFabric;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
-import org.spongepowered.common.item.inventory.query.operation.LensQueryOperation;
-import org.spongepowered.common.item.inventory.query.operation.SlotLensQueryOperation;
+import org.spongepowered.common.item.inventory.query.SpongeQueryTypes;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.OptionalDouble;
-import java.util.OptionalInt;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
-public interface MinecraftInventoryAdapter extends InventoryAdapter {
+public interface MinecraftInventoryAdapter extends InventoryPropertyHolder, InventoryAdapter {
 
     @Override
     default Translation getName() {
@@ -71,28 +64,33 @@ public interface MinecraftInventoryAdapter extends InventoryAdapter {
     }
 
     @Override
-    default ItemStack poll() {
-        return AdapterLogic.pollSequential(this).orElse(ItemStack.empty());
+    default InventoryTransactionResult poll() {
+        return AdapterLogic.pollSequential(this.getFabric(), this.getRootLens(), null);
     }
 
     @Override
-    default ItemStack poll(int limit) {
-        return AdapterLogic.pollSequential(this, limit).orElse(ItemStack.empty());
+    default InventoryTransactionResult poll(int limit) {
+        return AdapterLogic.pollSequential(this.getFabric(), this.getRootLens(), limit);
     }
 
     @Override
     default ItemStack peek() {
-        return AdapterLogic.peekSequential(this).orElse(ItemStack.empty());
-    }
-
-    @Override
-    default ItemStack peek(int limit) {
-        return AdapterLogic.peekSequential(this, limit).orElse(ItemStack.empty());
+        return AdapterLogic.peekSequential(this.getFabric(), this.getRootLens()).orElse(ItemStack.empty());
     }
 
     @Override
     default InventoryTransactionResult offer(ItemStack stack) {
-        return AdapterLogic.appendSequential(this, stack);
+        return AdapterLogic.appendSequential(this.getFabric(), this.getRootLens(), stack);
+    }
+
+    @Override
+    default InventoryTransactionResult offer(ItemStack... stacks) {
+        InventoryTransactionResult result = InventoryTransactionResult.successNoTransactions();
+        for (ItemStack stack : stacks) {
+            result = result.and(AdapterLogic.appendSequential(this.getFabric(), this.getRootLens(), stack));
+        }
+
+        return result;
     }
 
     @Override
@@ -101,23 +99,18 @@ public interface MinecraftInventoryAdapter extends InventoryAdapter {
     }
 
     @Override
-    default InventoryTransactionResult set(ItemStack stack) {
-        return AdapterLogic.insertSequential(this, stack);
-    }
-
-    @Override
     default int freeCapacity() {
-        return AdapterLogic.countStacks(this);
+        return AdapterLogic.countFreeCapacity(this.getFabric(), this.getRootLens());
     }
 
     @Override
     default int totalQuantity() {
-        return AdapterLogic.countItems(this);
+        return AdapterLogic.countQuantity(this.getFabric(), this.getRootLens());
     }
 
     @Override
     default int capacity() {
-        return AdapterLogic.getCapacity(this);
+        return AdapterLogic.getCapacity(this.getFabric(), this.getRootLens());
     }
 
     @Override
@@ -140,43 +133,10 @@ public interface MinecraftInventoryAdapter extends InventoryAdapter {
         return AdapterLogic.contains(this, type);
     }
 
-    @Override
-    default int getMaxStackSize() {
-        return this.getRootLens().getMaxStackSize(this.getFabric());
-    }
-
-    @Override
-    default void setMaxStackSize(int size) {
-        throw new UnsupportedOperationException("This inventory does not support stack limit adjustment");
-    }
-
-    @Override
-    default OptionalDouble getDoubleProperty(Property<Double> property) {
-        return getProperty(property).map(OptionalDouble::of).orElse(OptionalDouble.empty());
-    }
-
-    @Override
-    default OptionalInt getIntProperty(Property<Integer> property) {
-        return getProperty(property).map(OptionalInt::of).orElse(OptionalInt.empty());
-    }
-
-    @Override
-    default <V> Optional<V> getProperty(Inventory child, Property<V> property) {
-        return InventoryPropertyStore.getProperty(this, child, property);
-    }
-
-    @Override
-    default <V> Optional<V> getProperty(Property<V> property) {
-        if (parent() == this) {
-            return InventoryPropertyStore.getRootProperty(this, property);
-        }
-        return parent().getProperty(this, property);
-    }
-
-    @Override
-    default Map<Property<?>, ?> getProperties() {
-        return SpongeImpl.getPropertyRegistry().getPropertiesFor(this);
-    }
+//    @Override
+//    default int getMaxStackSize() {
+//        return this.getRootLens().getMaxStackSize(this.getFabric());
+//    }
 
     @Override
     default List<Inventory> children() {
@@ -187,8 +147,18 @@ public interface MinecraftInventoryAdapter extends InventoryAdapter {
 
     @SuppressWarnings("unchecked")
     @Override
-    default Inventory query(Query<?>... queries) {
-        return org.spongepowered.common.item.inventory.query.Query.compile(this, queries).execute();
+    default Inventory query(Query query) {
+        return query.execute(this);
+    }
+
+    @Override
+    default <P> Inventory query(QueryType.OneParam<P> type, P param) {
+        return type.of(param).execute(this);
+    }
+
+    @Override
+    default <P1, P2> Inventory query(QueryType.TwoParam<P1, P2> type, P1 param1, P2 param2) {
+        return type.of(param1, param2).execute(this);
     }
 
     @SuppressWarnings("unchecked")
@@ -203,29 +173,29 @@ public interface MinecraftInventoryAdapter extends InventoryAdapter {
 
     @Override
     default Inventory intersect(Inventory inventory) {
-        return org.spongepowered.common.item.inventory.query.Query.compile(this, new SlotLensQueryOperation(ImmutableSet.of(inventory))).execute();
+        return SpongeQueryTypes.SLOT_LENS.of(ImmutableSet.of(inventory)).execute(this);
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"rawtypes"})
     @Override
     default Inventory union(Inventory inventory) {
         CompoundLens.Builder lensBuilder = CompoundLens.builder().add(getRootLens());
         CompoundFabric fabric = new CompoundFabric(this.getFabric(), ((InventoryAdapter) inventory).getFabric());
-        CompoundSlotProvider provider = new CompoundSlotProvider().add(this);
+        UniqueCustomSlotProvider provider = new UniqueCustomSlotProvider().add(this);
         for (Object inv : inventory.children()) {
             lensBuilder.add(((InventoryAdapter) inv).getRootLens());
             provider.add((InventoryAdapter) inv);
         }
         CompoundLens lens = lensBuilder.build(provider);
-        InventoryAdapter compoundAdapter = lens.getAdapter(fabric, this);
 
-        return org.spongepowered.common.item.inventory.query.Query.compile(compoundAdapter, new SlotLensQueryOperation(ImmutableSet.of(compoundAdapter))).execute();
+        return lens.getAdapter(fabric, this);
     }
 
     @SuppressWarnings("rawtypes")
     @Override
     default boolean containsInventory(Inventory inventory) {
-        Inventory result = org.spongepowered.common.item.inventory.query.Query.compile(this, new LensQueryOperation(((InventoryAdapter) inventory).getRootLens())).execute();
+        // TODO fix this impl
+        Inventory result = SpongeQueryTypes.LENS.of(((InventoryAdapter) inventory).getRootLens()).execute(this);
         return result.capacity() == inventory.capacity() && ((InventoryAdapter) result).getRootLens() == ((InventoryAdapter) inventory).getRootLens();
     }
 
@@ -239,42 +209,37 @@ public interface MinecraftInventoryAdapter extends InventoryAdapter {
     }
 
     @Nullable
-    default SlotLens getSlotLens(SlotIndex index) {
-        return this.getRootLens().getSlot(index.getIndex());
+    default SlotLens getSlotLens(int index) {
+        return this.getRootLens().getSlot(index);
     }
 
     @Override
-    default Optional<Slot> getSlot(SlotIndex index) {
-        return VanillaAdapter.forSlot(this.getFabric(), this.getSlotLens(index), this);
+    default Optional<Slot> getSlot(int index) {
+        return BasicInventoryAdapter.forSlot(this.getFabric(), this.getSlotLens(index), this);
     }
 
     @Override
-    default Optional<org.spongepowered.api.item.inventory.ItemStack> poll(SlotIndex index) {
-        return AdapterLogic.pollSequential(this.getFabric(), this.getSlotLens(index));
+    default InventoryTransactionResult pollFrom(int index) {
+        return AdapterLogic.pollSequential(this.getFabric(), this.getSlotLens(index), null);
     }
 
     @Override
-    default Optional<org.spongepowered.api.item.inventory.ItemStack> poll(SlotIndex index, int limit) {
+    default InventoryTransactionResult pollFrom(int index, int limit) {
         return AdapterLogic.pollSequential(this.getFabric(), this.getSlotLens(index), limit);
     }
 
     @Override
-    default Optional<org.spongepowered.api.item.inventory.ItemStack> peek(SlotIndex index) {
+    default Optional<org.spongepowered.api.item.inventory.ItemStack> peekAt(int index) {
         return AdapterLogic.peekSequential(this.getFabric(), this.getSlotLens(index));
     }
 
     @Override
-    default Optional<org.spongepowered.api.item.inventory.ItemStack> peek(SlotIndex index, int limit) {
-        return AdapterLogic.peekSequential(this.getFabric(), this.getSlotLens(index), limit);
-    }
-
-    @Override
-    default InventoryTransactionResult set(SlotIndex index, org.spongepowered.api.item.inventory.ItemStack stack) {
+    default InventoryTransactionResult set(int index, org.spongepowered.api.item.inventory.ItemStack stack) {
         return AdapterLogic.insertSequential(this.getFabric(), this.getSlotLens(index), stack);
     }
 
     @Override
-    default InventoryTransactionResult offer(SlotIndex index, org.spongepowered.api.item.inventory.ItemStack stack) {
+    default InventoryTransactionResult offer(int index, org.spongepowered.api.item.inventory.ItemStack stack) {
         return AdapterLogic.appendSequential(this.getFabric(), this.getSlotLens(index), stack);
     }
 }

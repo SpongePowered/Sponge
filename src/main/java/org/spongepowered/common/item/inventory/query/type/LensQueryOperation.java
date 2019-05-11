@@ -22,20 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.query;
+package org.spongepowered.common.item.inventory.query.type;
 
-import com.google.common.collect.ImmutableSet;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.query.SingleParameterQueryType;
+import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.query.operation.LensQueryOperation;
-import org.spongepowered.common.item.inventory.query.operation.SlotLensQueryOperation;
+import org.spongepowered.common.item.inventory.query.SpongeDepthQuery;
+import org.spongepowered.common.item.inventory.query.SpongeQueryTypes;
 
-public final class SpongeQueryOperationTypes {
+public final class LensQueryOperation extends SpongeDepthQuery {
 
-    public static final SingleParameterQueryType<Lens> LENS = new SpongeQueryOperationType<>("lens", LensQueryOperation::new);
+    private final Lens lens;
 
-    public static final SingleParameterQueryType<ImmutableSet<Inventory>> SLOT_LENS = new SpongeQueryOperationType<>("slot_lens",
-            SlotLensQueryOperation::new);
+    public LensQueryOperation(Lens lens) {
+        this.lens = lens;
+    }
+
+    @Override
+    public boolean matches(Lens lens, Lens parent, Fabric inventory) {
+        return this.lens.equals(lens);
+    }
 
 }

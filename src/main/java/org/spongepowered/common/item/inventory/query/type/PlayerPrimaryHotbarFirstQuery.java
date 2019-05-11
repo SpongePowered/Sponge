@@ -22,37 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.lens;
+package org.spongepowered.common.item.inventory.query.type;
 
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
-import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
+import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.item.inventory.entity.Hotbar;
+import org.spongepowered.api.item.inventory.entity.PrimaryPlayerInventory;
+import org.spongepowered.api.item.inventory.query.QueryType;
+import org.spongepowered.api.item.inventory.query.QueryTypes;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
-public class CompoundSlotProvider implements SlotProvider {
+public class PlayerPrimaryHotbarFirstQuery extends AppendQuery implements QueryType.NoParam {
 
-    private final List<SlotLens> slotList = new ArrayList<>();
+    private CatalogKey key = CatalogKey.sponge("player_primary_hotbar_first");
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    public CompoundSlotProvider add(InventoryAdapter adapter) {
-        for (Inventory slot : adapter.slots()) {
-            SlotLens slotLens = ((SlotLens) ((SlotAdapter) slot).getRootLens());
-            if (!this.slotList.contains(slotLens)) {
-                this.slotList.add(slotLens);
-            }
-        }
-        return this;
+    public PlayerPrimaryHotbarFirstQuery() {
+        super(Arrays.asList(QueryTypes.INVENTORY_TYPE.of(Hotbar.class),
+                            QueryTypes.INVENTORY_TYPE.of(PrimaryPlayerInventory.class)));
     }
 
     @Override
-    public SlotLens getSlotLens(int index) {
-        return this.slotList.get(index);
-    }
-
-    public int size() {
-        return this.slotList.size();
+    public CatalogKey getKey() {
+        return this.key;
     }
 }

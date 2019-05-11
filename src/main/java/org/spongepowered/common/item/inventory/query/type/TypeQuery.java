@@ -22,49 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.query.operation;
+package org.spongepowered.common.item.inventory.query.type;
 
-import org.spongepowered.api.data.property.PropertyMatcher;
 import org.spongepowered.api.item.inventory.query.QueryTypes;
-import org.spongepowered.common.item.inventory.custom.CustomInventory;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.query.SpongeQueryOperation;
+import org.spongepowered.common.item.inventory.query.SpongeDepthQuery;
 
-import java.util.Collection;
+public final class TypeQuery extends SpongeDepthQuery {
 
-@SuppressWarnings("unchecked")
-public final class InventoryPropertyMatcherQueryOperation extends SpongeQueryOperation<PropertyMatcher<?>> {
+    private final Class<?> targetType;
 
-    private final PropertyMatcher propertyMatcher;
-
-    public InventoryPropertyMatcherQueryOperation(PropertyMatcher propertyMatcher) {
-        super(QueryTypes.PROPERTY);
-        this.propertyMatcher = propertyMatcher;
+    public TypeQuery(Class<?> targetType) {
+        this.targetType = targetType;
     }
 
     @Override
     public boolean matches(Lens lens, Lens parent, Fabric inventory) {
-        if (parent == null) {
-            return false;
-        }
-
-        // Check for custom inventory properties first
-        // TODO check if this works
-        Collection<?> invs = inventory.allInventories();
-        if (invs.size() > 0) {
-            Object inv = invs.iterator().next();
-            if (inv instanceof CustomInventory) {
-                Object value = ((CustomInventory) inv).getProperties().get(this.propertyMatcher.getProperty());
-                if (this.propertyMatcher.matches(value)) {
-                    return true;
-                }
-            }
-        }
-
-        // Check for lens properties
-        final Object value = parent.getProperties(lens).get(this.propertyMatcher.getProperty());
-        return this.propertyMatcher.matches(value);
+        return this.targetType.isAssignableFrom(lens.getAdapterType());
     }
 
 }

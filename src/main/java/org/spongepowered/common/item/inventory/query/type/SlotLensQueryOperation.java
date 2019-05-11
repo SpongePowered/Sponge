@@ -22,30 +22,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.query;
+package org.spongepowered.common.item.inventory.query.type;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import org.spongepowered.api.CatalogKey;
+import com.google.common.collect.ImmutableSet;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.query.Query;
-import org.spongepowered.api.item.inventory.query.SingleParameterQueryType;
-import org.spongepowered.common.SpongeCatalogType;
+import org.spongepowered.api.item.inventory.query.QueryType;
+import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
+import org.spongepowered.common.item.inventory.lens.Fabric;
+import org.spongepowered.common.item.inventory.lens.Lens;
+import org.spongepowered.common.item.inventory.query.SpongeDepthQuery;
+import org.spongepowered.common.item.inventory.query.SpongeQueryTypes;
 
-import java.util.function.Function;
+public final class SlotLensQueryOperation extends SpongeDepthQuery {
 
-public final class SpongeQueryOperationType<T> extends SpongeCatalogType implements SingleParameterQueryType<T> {
+    private final ImmutableSet<Inventory> inventories;
 
-    private final Function<T, SpongeQueryOperation<T>> newInstance;
-
-    public SpongeQueryOperationType(String id, Function<T, SpongeQueryOperation<T>> newInstance) {
-        super(CatalogKey.sponge(id), id);
-        this.newInstance = newInstance;
+    public SlotLensQueryOperation(ImmutableSet<Inventory> inventories) {
+        this.inventories = inventories;
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
-    public Query<T> of(T arg) {
-        checkNotNull(arg);
-        return this.newInstance.apply(arg);
+    public boolean matches(Lens lens, Lens parent, Fabric inventory) {
+        for (Inventory inv : this.inventories) {
+            for (Inventory slot : inv.slots()) {
+                if (((SlotAdapter) slot).getRootLens().equals(lens)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 }

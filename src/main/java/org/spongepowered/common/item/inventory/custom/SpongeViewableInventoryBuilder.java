@@ -16,10 +16,10 @@ import org.spongepowered.common.data.type.SpongeContainerType;
 import org.spongepowered.common.data.type.SpongeContainerTypeEmpty;
 import org.spongepowered.common.data.type.SpongeContainerTypeEntity;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.item.inventory.lens.UniqueCustomSlotProvider;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
-import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -214,7 +214,7 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
         } else {
             this.fillDummy();
             this.finalInventories = this.slotDefinitions.values().stream().map(Inventory::parent).distinct().collect(Collectors.toList());
-            CustomSlotProvider slotProvider = new CustomSlotProvider();
+            UniqueCustomSlotProvider slotProvider = new UniqueCustomSlotProvider();
             for (Map.Entry<Integer, Slot> entry : this.slotDefinitions.entrySet()) {
                 Slot slot = entry.getValue();
                 int idx = slot.getProperty(InventoryProperties.SLOT_INDEX).get().getIndex();
@@ -260,20 +260,6 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
         this.finalLens = null;
         this.finalProvider = null;
         return this;
-    }
-
-    public static class CustomSlotProvider implements SlotProvider {
-
-        private List<SlotLens> lenses = new ArrayList<>();
-
-        public void add(SlotLens toAdd) {
-            this.lenses.add(toAdd);
-        }
-
-        @Override
-        public SlotLens getSlotLens(int index) {
-            return this.lenses.get(index);
-        }
     }
 
 

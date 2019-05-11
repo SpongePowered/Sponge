@@ -22,25 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.query.operation;
+package org.spongepowered.common.item.inventory.query;
 
-import org.spongepowered.common.item.inventory.lens.Fabric;
+import com.google.common.collect.ImmutableSet;
+import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.query.QueryType;
 import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.query.SpongeQueryOperation;
-import org.spongepowered.common.item.inventory.query.SpongeQueryOperationTypes;
+import org.spongepowered.common.item.inventory.query.type.LensQueryOperation;
+import org.spongepowered.common.item.inventory.query.type.SlotLensQueryOperation;
 
-public final class LensQueryOperation extends SpongeQueryOperation<Lens> {
+public final class SpongeQueryTypes {
 
-    private final Lens lens;
+    public static final QueryType.OneParam<Lens> LENS = new SpongeOneParamQueryType<>("lens", LensQueryOperation::new);
 
-    public LensQueryOperation(Lens lens) {
-        super(SpongeQueryOperationTypes.LENS);
-        this.lens = lens;
-    }
-
-    @Override
-    public boolean matches(Lens lens, Lens parent, Fabric inventory) {
-        return this.lens.equals(lens);
-    }
+    public static final QueryType.OneParam<ImmutableSet<Inventory>> SLOT_LENS = new SpongeOneParamQueryType<>("slot_lens", SlotLensQueryOperation::new);
 
 }

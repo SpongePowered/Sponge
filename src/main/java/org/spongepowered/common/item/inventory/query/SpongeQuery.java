@@ -24,38 +24,32 @@
  */
 package org.spongepowered.common.item.inventory.query;
 
-import org.spongepowered.api.item.inventory.query.InventoryTransformation;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.query.Query;
-import org.spongepowered.common.item.inventory.query.type.SpongeQueryTransformation;
+import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.item.inventory.query.type.OrQuery;
+import org.spongepowered.common.item.inventory.query.type.AppendQuery;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-@SuppressWarnings("rawtypes")
-public class SpongeTransformationBuilder implements InventoryTransformation.Builder {
-
-    private List<Query> operationList = new ArrayList<>();
+public abstract class SpongeQuery implements Query {
 
     @Override
-    public InventoryTransformation.Builder append(Query... operations) {
-        this.operationList.addAll(Arrays.asList(operations));
-        return this;
+    public Query append(Query... queries) {
+        return AppendQuery.of(this, queries);
     }
 
     @Override
-    public InventoryTransformation build() {
-        return new SpongeQueryTransformation(this.operationList);
+    public Query or(Query... queries) {
+        return OrQuery.of(this, queries);
     }
 
     @Override
-    public InventoryTransformation.Builder from(InventoryTransformation value) {
-        return this;
+    public Inventory execute(Inventory inventory) {
+        if (!(inventory instanceof InventoryAdapter)) {
+            throw new IllegalArgumentException("Unsupported Inventory! " + inventory.getClass().getName());
+        }
+        return this.execute(((InventoryAdapter) inventory));
     }
 
-    @Override
-    public InventoryTransformation.Builder reset() {
-        this.operationList.clear();
-        return this;
-    }
+    public abstract Inventory execute(InventoryAdapter inventory);
 }
+

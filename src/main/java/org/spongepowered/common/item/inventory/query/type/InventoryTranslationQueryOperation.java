@@ -22,22 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.query.operation;
+package org.spongepowered.common.item.inventory.query.type;
 
-import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.query.QueryTypes;
+import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.common.item.inventory.lens.Fabric;
+import org.spongepowered.common.item.inventory.lens.Lens;
+import org.spongepowered.common.item.inventory.query.SpongeDepthQuery;
 
-import java.util.function.Predicate;
+import java.util.Objects;
 
-public final class ItemStackCustomOperation extends ItemStackQueryOperation<Predicate<ItemStack>> {
+public final class InventoryTranslationQueryOperation extends SpongeDepthQuery<Translation> {
 
-    public ItemStackCustomOperation(Predicate<ItemStack> predicate) {
-        super(QueryTypes.ITEM_STACK_CUSTOM, predicate);
+    private final Translation translation;
+
+    public InventoryTranslationQueryOperation(Translation translation) {
+        super(QueryTypes.INVENTORY_TRANSLATION);
+        this.translation = translation;
     }
 
     @Override
-    protected boolean matches(ItemStack itemStack, Predicate<ItemStack> arg) {
-        return arg.test(itemStack);
+    public boolean matches(Lens lens, Lens parent, Fabric inventory) {
+        return Objects.equals(lens.getName(inventory), translation);
     }
 
 }

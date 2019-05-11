@@ -100,23 +100,13 @@ public class GridInventoryAdapter extends Inventory2DAdapter implements GridInve
     }
 
     @Override
-    public Optional<ItemStack> poll(int x, int y) {
-        return AdapterLogic.pollSequential(this.fabric, this.getSlotLens(x, y));
-    }
-
-    @Override
-    public Optional<ItemStack> poll(int x, int y, int limit) {
-        return AdapterLogic.pollSequential(this.fabric, this.getSlotLens(x, y), limit);
+    public InventoryTransactionResult poll(int x, int y) {
+        return AdapterLogic.pollSequential(this.fabric, this.getSlotLens(x, y), null);
     }
 
     @Override
     public Optional<ItemStack> peek(int x, int y) {
         return AdapterLogic.peekSequential(this.fabric, this.getSlotLens(x, y));
-    }
-
-    @Override
-    public Optional<ItemStack> peek(int x, int y, int limit) {
-        return AdapterLogic.peekSequential(this.fabric, this.getSlotLens(x, y), limit);
     }
 
     @Override

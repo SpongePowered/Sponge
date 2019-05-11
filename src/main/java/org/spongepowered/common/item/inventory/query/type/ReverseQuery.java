@@ -22,16 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.query;
+package org.spongepowered.common.item.inventory.query.type;
 
-import com.google.common.collect.ImmutableSet;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.query.InventoryTransformation;
+import org.spongepowered.api.item.inventory.query.QueryType;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
-import org.spongepowered.common.item.inventory.lens.CompoundSlotProvider;
+import org.spongepowered.common.item.inventory.lens.UniqueCustomSlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.CompoundLens;
-import org.spongepowered.common.item.inventory.query.operation.SlotLensQueryOperation;
+import org.spongepowered.common.item.inventory.query.SpongeQuery;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,28 +40,31 @@ import java.util.List;
 /**
  * Reverses the slot order of an inventory.
  */
-public class ReverseTransformation implements InventoryTransformation {
+public class ReverseQuery extends SpongeQuery implements QueryType.NoParam {
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    private CatalogKey key = CatalogKey.sponge("reverse");
+
     @Override
-    public Inventory transform(Inventory inventory) {
+    public CatalogKey getKey() {
+        return this.key;
+    }
 
+    @Override
+    public Inventory execute(InventoryAdapter inventory) {
         List<InventoryAdapter> slots = new ArrayList<>();
         for (Inventory slot : inventory.slots()) {
             slots.add(((InventoryAdapter) slot));
         }
         Collections.reverse(slots);
 
-        CompoundSlotProvider slotProvider = new CompoundSlotProvider();
+        UniqueCustomSlotProvider slotProvider = new UniqueCustomSlotProvider();
         slots.forEach(slotProvider::add);
 
         MinecraftInventoryAdapter adapter = (MinecraftInventoryAdapter) inventory;
 
         CompoundLens lens = CompoundLens.builder().add(adapter.getRootLens()).build(slotProvider);
 
-        InventoryAdapter newAdapter = lens.getAdapter(adapter.getFabric(), inventory);
-
-        return Query.compile(newAdapter,
-                new SlotLensQueryOperation(ImmutableSet.of(newAdapter))).execute();
+        return lens.getAdapter(adapter.getFabric(), inventory);
     }
+
 }

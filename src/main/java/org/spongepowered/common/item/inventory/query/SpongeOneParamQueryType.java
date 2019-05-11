@@ -22,11 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.query.operation;
+package org.spongepowered.common.item.inventory.query;
 
-/**
- * Created by jbyoshi on 8/16/17.
- */
-public class IntersectionQueryOperation {
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.item.inventory.query.Query;
+import org.spongepowered.api.item.inventory.query.QueryType;
+import org.spongepowered.common.SpongeCatalogType;
+
+import java.util.function.Function;
+
+public final class SpongeOneParamQueryType<T> extends SpongeCatalogType implements QueryType.OneParam<T> {
+
+    private final Function<T, Query> newInstance;
+
+    public SpongeOneParamQueryType(String id, Function<T, Query> newInstance) {
+        super(CatalogKey.sponge(id), id);
+        this.newInstance = newInstance;
+    }
+
+    @Override
+    public Query of(T arg) {
+        checkNotNull(arg);
+        return this.newInstance.apply(arg);
+    }
 
 }

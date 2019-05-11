@@ -28,12 +28,11 @@ import net.minecraft.inventory.Slot;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.VanillaAdapter;
+import org.spongepowered.common.item.inventory.lens.UniqueCustomSlotProvider;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
-import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -58,7 +57,7 @@ public class DelegatingLens extends AbstractLens {
     public DelegatingLens(int base, List<Slot> containerSlots, Lens lens, SlotProvider slots) {
         super(base, containerSlots.size(), VanillaAdapter.class);
         this.delegate = lens;
-        CustomSlotProvider slotProvider = new CustomSlotProvider();
+        UniqueCustomSlotProvider slotProvider = new UniqueCustomSlotProvider();
         for (Slot slot : containerSlots) {
             // Get slots from original slot provider and add them to custom slot provider in order of actual containerSlots.
             slotProvider.add(slots.getSlotLens(this.base + slot.slotIndex));
@@ -74,17 +73,4 @@ public class DelegatingLens extends AbstractLens {
         return new VanillaAdapter(inv, this, parent);
     }
 
-    public static class CustomSlotProvider implements SlotProvider {
-
-        private List<SlotLens> lenses = new ArrayList<>();
-
-        public void add(SlotLens toAdd) {
-            this.lenses.add(toAdd);
-        }
-
-        @Override
-        public SlotLens getSlotLens(int index) {
-            return this.lenses.get(index);
-        }
-    }
 }
