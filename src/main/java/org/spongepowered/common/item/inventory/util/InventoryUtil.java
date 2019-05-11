@@ -108,17 +108,19 @@ public final class InventoryUtil {
     }
 
     // Utility
-    public static Inventory toInventory(Object inventory, @Nullable Object fallback) {
-        if (inventory instanceof TileEntityChest) {
-            inventory = getDoubleChestInventory(((TileEntityChest) inventory)).orElse(((Inventory) inventory));
+    public static Inventory toInventory(Object inventory, @Nullable Object forgeItemHandler) {
+        if (forgeItemHandler == null) {
+            if (inventory instanceof TileEntityChest) {
+                inventory = getDoubleChestInventory(((TileEntityChest) inventory)).orElse(((Inventory) inventory));
+            }
+            if (inventory instanceof Inventory) {
+                return ((Inventory) inventory);
+            }
         }
-        if (inventory instanceof Inventory) {
-            return ((Inventory) inventory);
+        if (forgeItemHandler instanceof Inventory) {
+            return ((Inventory) forgeItemHandler);
         }
-        if (fallback instanceof Inventory) {
-            return ((Inventory) fallback);
-        }
-        return SpongeImplHooks.toInventory(inventory, fallback);
+        return SpongeImplHooks.toInventory(inventory, forgeItemHandler);
     }
 
     public static IMixinInventory forCapture(Object toCapture) {

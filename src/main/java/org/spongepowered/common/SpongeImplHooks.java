@@ -433,7 +433,7 @@ public final class SpongeImplHooks {
         return ((IMixinEntityPlayer) playerIn).isSpawnForced(dimension);
     }
 
-    public static Inventory toInventory(Object inventory, @Nullable Object fallback) {
+    public static Inventory toInventory(Object inventory, @Nullable Object forgeItemHandler) {
         SpongeImpl.getLogger().error("Unknown inventory " + inventory.getClass().getName() + " report this to Sponge");
         return null;
     }
