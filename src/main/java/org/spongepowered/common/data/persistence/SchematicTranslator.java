@@ -44,6 +44,8 @@ import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.entity.EntityTypes;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.extent.MutableBiomeVolume;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
@@ -309,6 +311,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
                         (entity) -> entity.getString(DataQueries.Schematic.ENTITIES_ID)
                             .map(EntityTypeRegistryModule.getInstance()::getById))
                     .filter(((view, entityType) -> entityType.map(Optional::get).isPresent()))
+                    .filter((view, entityType) -> !Player.class.isAssignableFrom(entityType.map(Optional::get).get().getEntityClass()))
                     .map((view, type) -> {
                         final DataView upgraded;
                         if (needsFixers) {

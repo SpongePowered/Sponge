@@ -38,6 +38,7 @@ import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityArchetype;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.extent.ArchetypeVolume;
 import org.spongepowered.api.world.extent.EntityUniverse;
@@ -50,6 +51,7 @@ import org.spongepowered.api.world.schematic.PaletteType;
 import org.spongepowered.api.world.schematic.PaletteTypes;
 import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.api.world.schematic.Schematic.Builder;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.util.gen.ArrayMutableBlockBuffer;
 import org.spongepowered.common.util.gen.ByteArrayMutableBiomeBuffer;
 
@@ -293,6 +295,7 @@ public class SpongeSchematicBuilder implements Schematic.Builder {
                 this.entities = this.view.getIntersectingEntities(this.backingVolume.getBlockMin().toDouble(), this.backingVolume.getBlockMax().toDouble()).stream()
                     .map(EntityUniverse.EntityHit::getEntity)
                     .filter(Objects::nonNull)
+                    .filter(entity -> !(entity instanceof Player) || !SpongeImplHooks.isFakePlayer((net.minecraft.entity.Entity) entity))
                     .map(Entity::createArchetype)
                     .collect(Collectors.toList());
             }
