@@ -71,7 +71,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
@@ -271,7 +270,7 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
         // Sponge Start - Create an interact block event before something happens.
         // Store reference of current player's itemstack in case it changes
         final ItemStack oldStack = stack.copy();
-        final Vector3d hitVec = VecHelper.toVector3d(pos.add(hitX, hitY, hitZ));
+        final Vector3d hitVec = VecHelper.toVector3d(pos).add(hitX, hitY, hitZ);
         final BlockSnapshot currentSnapshot = ((org.spongepowered.api.world.World) worldIn).createSnapshot(pos.getX(), pos.getY(), pos.getZ());
         final InteractBlockEvent.Secondary event = SpongeCommonEventFactory.createInteractBlockEventSecondary(player, oldStack,
                 hitVec, currentSnapshot, DirectionFacingProvider.getInstance().getKey(facing).get(), hand);
