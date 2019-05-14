@@ -29,11 +29,27 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityFurnace;
+import net.minecraft.util.NonNullList;
+import net.minecraft.util.math.MathHelper;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.tileentity.carrier.Furnace;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.block.tileentity.SmeltEvent;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Slice;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.data.IMixinCustomNameable;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.FuelSlotAdapter;
@@ -47,12 +63,24 @@ import org.spongepowered.common.item.inventory.lens.impl.minecraft.FurnaceInvent
 import org.spongepowered.common.item.inventory.lens.impl.slots.FuelSlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.slots.InputSlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.slots.OutputSlotLensImpl;
+import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+
+import java.util.Collections;
 
 @NonnullByDefault
 @Mixin(TileEntityFurnace.class)
 public abstract class MixinTileEntityFurnace extends MixinTileEntityLockable implements Furnace, IMixinCustomNameable {
 
     @Shadow private String furnaceCustomName;
+
+    @Shadow private NonNullList<ItemStack> furnaceItemStacks;
+
+    @Shadow private int cookTime;
+    @Shadow private int furnaceBurnTime;
+    @Shadow private int currentItemBurnTime;
+
+    @Shadow protected abstract boolean canSmelt();
+
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
@@ -94,6 +122,101 @@ public abstract class MixinTileEntityFurnace extends MixinTileEntityLockable imp
     @Override
     public void setCustomDisplayName(String customName) {
         ((TileEntityFurnace) (Object) this).setCustomInventoryName(customName);
+    }
+
+    // Shrink Fuel
+    @Redirect(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;shrink(I)V"))
+    private void onShrinkFuelStack(ItemStack itemStack, int quantity) {
+        Cause cause = Sponge.getCauseStackManager().getCurrentCause();
+
+        ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(itemStack);
+        ItemStackSnapshot shrinkedFuel = ItemStackUtil.snapshotOf(ItemStackUtil.cloneDefensive(itemStack, itemStack.getCount() - 1));
+
+        Transaction<ItemStackSnapshot> transaction = new Transaction<>(fuel, shrinkedFuel);
+        SmeltEvent.ConsumeFuel event = SpongeEventFactory.createSmeltEventConsumeFuel(cause, fuel, this, Collections.singletonList(transaction));
+        SpongeImpl.postEvent(event);
+        if (event.isCancelled()) {
+            this.currentItemBurnTime = 0;
+            return;
+        }
+
+        if (!transaction.isValid()) {
+            return;
+        }
+
+        if (transaction.getCustom().isPresent()) {
+            this.furnaceItemStacks.set(1, ItemStackUtil.fromSnapshotToNative(transaction.getFinal()));
+        } else { // vanilla
+            itemStack.shrink(quantity);
+        }
+    }
+
+    // Tick up and Start
+    @Redirect(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntityFurnace;canSmelt()Z", ordinal = 1))
+    private boolean onCanSmeltTickUp(TileEntityFurnace furnace) {
+        if (!this.canSmelt()) {
+            return false;
+        }
+
+        ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(this.furnaceItemStacks.get(1));
+
+        Cause cause = Sponge.getCauseStackManager().getCurrentCause();
+        if (this.cookTime == 0) { // Start
+            SmeltEvent.Start event = SpongeEventFactory.createSmeltEventStart(cause, fuel, this, Collections.emptyList());
+            SpongeImpl.postEvent(event);
+            return !event.isCancelled();
+
+        } else { // Tick up
+            SmeltEvent.Tick event = SpongeEventFactory.createSmeltEventTick(cause, fuel, this, Collections.emptyList());
+            SpongeImpl.postEvent(event);
+            return !event.isCancelled();
+        }
+    }
+
+    // Tick down
+    @Redirect(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/MathHelper;clamp(III)I"))
+    private int onClampTickDown(int newCookTime, int zero, int totalCookTime) {
+        int clampedCookTime = MathHelper.clamp(newCookTime, zero, totalCookTime);
+        ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(this.furnaceItemStacks.get(1));
+        Cause cause = Sponge.getCauseStackManager().getCurrentCause();
+        SmeltEvent.Tick event = SpongeEventFactory.createSmeltEventTick(cause, fuel, this, Collections.emptyList());
+        SpongeImpl.postEvent(event);
+        if (event.isCancelled()) {
+            return this.cookTime; // dont tick down
+        }
+
+        return clampedCookTime;
+    }
+
+    // Interrupt-Active - e.g. a player removing the currently smelting item
+    @Inject(method = "setInventorySlotContents", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntityFurnace;getCookTime(Lnet/minecraft/item/ItemStack;)I"))
+    private void onResetCookTimeActive(CallbackInfo ci) {
+        callInteruptSmeltEvent();
+    }
+
+    // Interrupt-Passive - if the currently smelting item was removed in some other way
+    @Inject(method = "update", at = @At(shift = At.Shift.BEFORE, value = "FIELD", opcode = Opcodes.PUTFIELD, target = "Lnet/minecraft/tileentity/TileEntityFurnace;cookTime:I", ordinal = 0),
+            slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntityFurnace;smeltItem()V")))
+    private void onResetCookTimePassive(CallbackInfo ci) {
+        callInteruptSmeltEvent();
+    }
+
+    private void callInteruptSmeltEvent() {
+        if (this.cookTime > 0) {
+            ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(this.furnaceItemStacks.get(1));
+            Cause cause = Sponge.getCauseStackManager().getCurrentCause();
+            SmeltEvent.Interrupt event = SpongeEventFactory.createSmeltEventInterrupt(cause, fuel, Collections.emptyList(), this);
+            SpongeImpl.postEvent(event);
+        }
+    }
+
+    // Finish
+    @Inject(method = "smeltItem", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;shrink(I)V"))
+    private void afterSmeltItem(CallbackInfo ci, ItemStack itemStack, ItemStack result, ItemStack outputStack) {
+        ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(this.furnaceItemStacks.get(1));
+        Cause cause = Sponge.getCauseStackManager().getCurrentCause();
+        SmeltEvent.Finish event = SpongeEventFactory.createSmeltEventFinish(cause, fuel, Collections.singletonList(ItemStackUtil.snapshotOf(result)), this);
+        SpongeImpl.postEvent(event);
     }
 
 }
