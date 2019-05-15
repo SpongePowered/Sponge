@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
-import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -32,6 +31,7 @@ import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.CPacketPlayerDigging;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.type.HandType;
@@ -48,7 +48,6 @@ import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
@@ -222,87 +221,108 @@ public final class InteractionPacketState extends BasicPacketState {
                     printer.trace(System.err);
                 });
             phaseContext.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> {
-                final List<Entity> projectiles = new ArrayList<>(entities.size());
-                final List<Entity> spawnEggs = new ArrayList<>(entities.size());
-                final List<Entity> xpOrbs = new ArrayList<>(entities.size());
-                final List<Entity> normalPlacement = new ArrayList<>(entities.size());
-                final List<Entity> items = new ArrayList<>(entities.size());
-                for (Entity entity : entities) {
-                    if (entity instanceof Projectile || entity instanceof EntityThrowable) {
-                        projectiles.add(entity);
-                    } else if (usedSnapshot.getType() == ItemTypes.SPAWN_EGG) {
-                        spawnEggs.add(entity);
-                    } else if (entity instanceof EntityItem) {
-                        items.add(entity);
-                    } else if (entity instanceof EntityXPOrb) {
-                        xpOrbs.add(entity);
-                    } else {
-                        normalPlacement.add(entity);
-                    }
-                }
-                if (!projectiles.isEmpty()) {
-                    if (ShouldFire.SPAWN_ENTITY_EVENT) {
-                        try (CauseStackManager.StackFrame frame2 = Sponge.getCauseStackManager().pushCauseFrame()) {
-                            frame2.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PROJECTILE);
-                            frame2.pushCause(usedSnapshot);
-                            SpongeCommonEventFactory.callSpawnEntity(projectiles, phaseContext);
-                        }
-                    } else {
-                        processEntities(player, projectiles);
-                    }
-                }
-                if (!spawnEggs.isEmpty()) {
-                    if (ShouldFire.SPAWN_ENTITY_EVENT) {
-                        try (CauseStackManager.StackFrame frame2 = Sponge.getCauseStackManager().pushCauseFrame()) {
-                            frame2.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.SPAWN_EGG);
-                            frame2.pushCause(usedSnapshot);
-                            SpongeCommonEventFactory.callSpawnEntity(spawnEggs, phaseContext);
-                        }
-                    } else {
-                        processEntities(player, spawnEggs);
-                    }
-                }
-                if (!items.isEmpty()) {
-                    if (ShouldFire.DROP_ITEM_EVENT_DISPENSE) {
-                        final DropItemEvent.Dispense dispense = SpongeEventFactory
-                            .createDropItemEventDispense(Sponge.getCauseStackManager().getCurrentCause(), items);
-                        if (!SpongeImpl.postEvent(dispense)) {
-                            processSpawnedEntities(player, dispense);
-                        }
-                    } else {
-                        processEntities(player, items);
-                    }
-                }
-                if (!xpOrbs.isEmpty()) {
-                    if (ShouldFire.SPAWN_ENTITY_EVENT) {
-                        try (final CauseStackManager.StackFrame stackFrame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                            if (firstBlockChange != null) {
-                                stackFrame.pushCause(firstBlockChange);
-                            }
-                            stackFrame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
-                            SpongeCommonEventFactory.callSpawnEntity(xpOrbs, phaseContext);
-                        }
-                    } else {
-                        processEntities(player, xpOrbs);
-                    }
-                }
-                if (!normalPlacement.isEmpty()) {
-                    if (ShouldFire.SPAWN_ENTITY_EVENT) {
-                        try (final CauseStackManager.StackFrame stackFrame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                            if (firstBlockChange != null) {
-                                stackFrame.pushCause(firstBlockChange);
-                            }
-                            SpongeCommonEventFactory.callSpawnEntity(normalPlacement, phaseContext);
-                        }
-                    } else {
-                        processEntities(player, normalPlacement);
-                    }
-                }
+                throwEntitySpawnEvents(phaseContext, player, usedSnapshot, firstBlockChange, entities);
             });
+
+            phaseContext.getPerEntityItemEntityDropSupplier().acceptAndClearIfNotEmpty((multimap -> {
+                for (Map.Entry<UUID, Collection<EntityItem>> entry : multimap.asMap().entrySet()) {
+                    if (entry.getKey().equals(player.getUniqueID())) {
+                        throwEntitySpawnEvents(phaseContext, player, usedSnapshot, firstBlockChange, (Collection<Entity>) (Collection<?>) entry.getValue());
+                    } else {
+                        final net.minecraft.entity.Entity spawnedEntity = ((WorldServer) player.world).getEntityFromUuid(entry.getKey());
+                        if (spawnedEntity != null) {
+                            try (CauseStackManager.StackFrame entityFrame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                                entityFrame.pushCause(spawnedEntity);
+                                throwEntitySpawnEvents(phaseContext, player, usedSnapshot, firstBlockChange, (Collection<Entity>) (Collection<?>) entry.getValue());
+                            }
+                        }
+                    }
+                }
+            }));
 
             final IMixinContainer mixinContainer = ContainerUtil.toMixin(player.openContainer);
             mixinContainer.setCaptureInventory(false);
             mixinContainer.getCapturedTransactions().clear();
+        }
+    }
+
+    private void throwEntitySpawnEvents(BasicPacketContext phaseContext, EntityPlayerMP player, ItemStackSnapshot usedSnapshot,
+        BlockSnapshot firstBlockChange, Collection<Entity> entities) {
+        final List<Entity> projectiles = new ArrayList<>(entities.size());
+        final List<Entity> spawnEggs = new ArrayList<>(entities.size());
+        final List<Entity> xpOrbs = new ArrayList<>(entities.size());
+        final List<Entity> normalPlacement = new ArrayList<>(entities.size());
+        final List<Entity> items = new ArrayList<>(entities.size());
+        for (Entity entity : entities) {
+            if (entity instanceof Projectile || entity instanceof EntityThrowable) {
+                projectiles.add(entity);
+            } else if (usedSnapshot.getType() == ItemTypes.SPAWN_EGG) {
+                spawnEggs.add(entity);
+            } else if (entity instanceof EntityItem) {
+                items.add(entity);
+            } else if (entity instanceof EntityXPOrb) {
+                xpOrbs.add(entity);
+            } else {
+                normalPlacement.add(entity);
+            }
+        }
+        if (!projectiles.isEmpty()) {
+            if (ShouldFire.SPAWN_ENTITY_EVENT) {
+                try (CauseStackManager.StackFrame frame2 = Sponge.getCauseStackManager().pushCauseFrame()) {
+                    frame2.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PROJECTILE);
+                    frame2.pushCause(usedSnapshot);
+                    SpongeCommonEventFactory.callSpawnEntity(projectiles, phaseContext);
+                }
+            } else {
+                processEntities(player, projectiles);
+            }
+        }
+        if (!spawnEggs.isEmpty()) {
+            if (ShouldFire.SPAWN_ENTITY_EVENT) {
+                try (CauseStackManager.StackFrame frame2 = Sponge.getCauseStackManager().pushCauseFrame()) {
+                    frame2.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.SPAWN_EGG);
+                    frame2.pushCause(usedSnapshot);
+                    SpongeCommonEventFactory.callSpawnEntity(spawnEggs, phaseContext);
+                }
+            } else {
+                processEntities(player, spawnEggs);
+            }
+        }
+        if (!items.isEmpty()) {
+            if (ShouldFire.DROP_ITEM_EVENT_DISPENSE) {
+                final DropItemEvent.Dispense dispense = SpongeEventFactory
+                    .createDropItemEventDispense(Sponge.getCauseStackManager().getCurrentCause(), items);
+                if (!SpongeImpl.postEvent(dispense)) {
+                    processSpawnedEntities(player, dispense);
+                }
+            } else {
+                processEntities(player, items);
+            }
+        }
+        if (!xpOrbs.isEmpty()) {
+            if (ShouldFire.SPAWN_ENTITY_EVENT) {
+                try (final CauseStackManager.StackFrame stackFrame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                    if (firstBlockChange != null) {
+                        stackFrame.pushCause(firstBlockChange);
+                    }
+                    stackFrame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
+                    SpongeCommonEventFactory.callSpawnEntity(xpOrbs, phaseContext);
+                }
+            } else {
+                processEntities(player, xpOrbs);
+            }
+        }
+        if (!normalPlacement.isEmpty()) {
+            if (ShouldFire.SPAWN_ENTITY_EVENT) {
+                try (final CauseStackManager.StackFrame stackFrame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                    if (firstBlockChange != null) {
+                        stackFrame.pushCause(firstBlockChange);
+                    }
+                    SpongeCommonEventFactory.callSpawnEntity(normalPlacement, phaseContext);
+                }
+            } else {
+                processEntities(player, normalPlacement);
+            }
         }
     }
 
