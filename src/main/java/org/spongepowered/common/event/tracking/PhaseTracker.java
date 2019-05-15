@@ -83,6 +83,7 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.event.SpawnTypeRegistryModule;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
+import org.spongepowered.common.world.WorldManager;
 import org.spongepowered.common.world.WorldUtil;
 
 import java.io.ByteArrayOutputStream;
@@ -329,6 +330,21 @@ public final class PhaseTracker {
         // If pop is called, the Deque will already throw an exception if there is no element
         // so it's an error properly handled.
         this.stack.pop();
+
+        if (this.stack.isEmpty()) {
+            for (WorldServer world : WorldManager.getWorlds()) {
+                final IMixinWorldServer mixinWorld = (IMixinWorldServer) world;
+                if (mixinWorld.getProxyAccess().hasProxy()) {
+                    new PrettyPrinter().add("BlockPRoxy has extra proxies not pruned!").centre().hr()
+                        .add("When completing the Phase: %s, some foreign BlockProxy was pushed, but never pruned.", state)
+                        .add()
+                        .add("Please analyze the following exception from the proxy:")
+                        .add(new Exception())
+                        .print(System.err);
+
+                }
+            }
+        }
 
     }
 

@@ -386,7 +386,7 @@ public final class TrackingUtil {
     }
 
     public static boolean processBlockCaptures(IPhaseState<?> state, PhaseContext<?> context) {
-        return processBlockCaptures(state, context, 0);
+        return processBlockCaptures(state, context, 0, context.getCapturedBlockSupplier());
     }
 
     /**
@@ -399,20 +399,20 @@ public final class TrackingUtil {
      * @param state The phase state that is being processed, used to handle marking notifiers
      *  and block owners
      * @param context The phase context, only used by the phase for handling processes.
+     * @param supplier
      * @return True if no events or transactions were cancelled
      */
     @SuppressWarnings({"unchecked"})
-    static boolean processBlockCaptures(IPhaseState<?> state, PhaseContext<?> context, int currentDepth) {
-        final MultiBlockCaptureSupplier snapshots = context.getCapturedBlockSupplier();
+    static boolean processBlockCaptures(IPhaseState<?> state, PhaseContext<?> context, int currentDepth, MultiBlockCaptureSupplier supplier) {
         // Fail fast and check if it's empty.
-        if (!snapshots.hasBlocksCaptured()) {
-            if (((IPhaseState) state).hasSpecificBlockProcess(context) && snapshots.hasTransactions()) {
+        if (!supplier.hasBlocksCaptured()) {
+            if (((IPhaseState) state).hasSpecificBlockProcess(context) && supplier.hasTransactions()) {
                 // Then we just need to process the transactions, there may be things that are not
                 // specifically block captured
-                ListMultimap<BlockPos, BlockEventData> scheduledEvents = snapshots.getScheduledEvents();
+                ListMultimap<BlockPos, BlockEventData> scheduledEvents = supplier.getScheduledEvents();
                 // Clear captured snapshots after processing them
-                snapshots.clear();
-                return snapshots.processTransactions(ImmutableList.of(), context, true, scheduledEvents, currentDepth);
+                supplier.clear();
+                return supplier.processTransactions(ImmutableList.of(), context, true, scheduledEvents, currentDepth);
 
             }
             return false;
@@ -425,11 +425,11 @@ public final class TrackingUtil {
             transactionBuilders[i] = new ImmutableList.Builder<>();
         }
 
-        createTransactionLists(state, context, transactionArrays, transactionBuilders);
-        ListMultimap<BlockPos, BlockEventData> scheduledEvents = snapshots.getScheduledEvents();
+        createTransactionLists(state, context, supplier, transactionArrays, transactionBuilders);
+        ListMultimap<BlockPos, BlockEventData> scheduledEvents = supplier.getScheduledEvents();
 
         // Clear captured snapshots after processing them
-        snapshots.clear();
+        supplier.clear();
 
         final ChangeBlockEvent[] mainEvents = new ChangeBlockEvent[BlockChange.values().length];
 
@@ -463,9 +463,9 @@ public final class TrackingUtil {
 
     }
 
-    private static void createTransactionLists(IPhaseState state, PhaseContext<?> context,
+    private static void createTransactionLists(IPhaseState state, PhaseContext<?> context, MultiBlockCaptureSupplier supplier,
         ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays, ImmutableList.Builder<Transaction<BlockSnapshot>>[] transactionBuilders) {
-        final List<SpongeBlockSnapshot> snapshots = context.getCapturedOriginalBlocksChanged();
+        final List<SpongeBlockSnapshot> snapshots = supplier.get();
         for (SpongeBlockSnapshot snapshot : snapshots) {
             // This processes each snapshot to assign them to the correct event in the next area, with the
             // correct builder array entry.
