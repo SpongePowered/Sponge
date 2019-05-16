@@ -156,7 +156,7 @@ public final class InteractionPacketState extends BasicPacketState {
             frame.addContext(EventContextKeys.BLOCK_HIT, targetBlock);
             final boolean hasBlocks = !phaseContext.getCapturedBlockSupplier().isEmpty();
             final List<SpongeBlockSnapshot> capturedBlcoks = phaseContext.getCapturedOriginalBlocksChanged();
-            final @Nullable BlockSnapshot firstBlockChange = hasBlocks ? capturedBlcoks.get(0) : null;
+            final @Nullable BlockSnapshot firstBlockChange = hasBlocks ? capturedBlcoks.isEmpty()? null : capturedBlcoks.get(0) : null;
             if (hasBlocks) {
                 if (!TrackingUtil.processBlockCaptures(this, phaseContext)) {
                     // Stop entities like XP from being spawned
