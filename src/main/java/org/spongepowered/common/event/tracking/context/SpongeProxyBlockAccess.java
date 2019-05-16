@@ -43,6 +43,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.world.BlockChange;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -554,6 +555,15 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
         final TemporaryTileEntity temporaryTileEntity = new TemporaryTileEntity(this, replacement, pos, this.tileEntity);
         this.tileEntity = temporaryTileEntity;
         return temporaryTileEntity;
+    }
+
+    public boolean isProcessingTransactionWithNextHavingBreak(BlockPos pos, IBlockState state) {
+        if (this.processingTransaction == null || this.processingTransaction.next == null
+            || !(this.processingTransaction.next instanceof BlockTransaction.ChangeBlock)) {
+            return false;
+        }
+        final BlockTransaction.ChangeBlock changeblock = (BlockTransaction.ChangeBlock) this.processingTransaction.next;
+        return changeblock.queueBreak && changeblock.original.getState() == state && changeblock.original.blockChange == BlockChange.BREAK;
     }
 
     public static final class TemporaryTileEntity implements AutoCloseable {

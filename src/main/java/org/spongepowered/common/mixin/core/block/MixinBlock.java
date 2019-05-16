@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
+import org.spongepowered.common.event.tracking.context.SpongeProxyBlockAccess;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimings;
 import co.aikar.timings.Timing;
 import com.flowpowered.math.vector.Vector3d;
@@ -245,6 +246,17 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Override
     public Optional<BlockTrait<?>> getTrait(String blockTrait) {
         return getDefaultBlockState().getTrait(blockTrait);
+    }
+
+    @Inject(method = "dropBlockAsItem", at = @At("HEAD"), cancellable = true)
+    private void checkBlockDropForTransactions(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, int fortune, CallbackInfo ci) {
+        if (((IMixinWorld) worldIn).isFake()) {
+            return;
+        }
+        final SpongeProxyBlockAccess proxyAccess = ((IMixinWorldServer) worldIn).getProxyAccess();
+        if (proxyAccess.hasProxy() && proxyAccess.isProcessingTransactionWithNextHavingBreak(pos, state)) {
+            ci.cancel();
+        }
     }
 
     @Inject(method = "harvestBlock", at = @At(value = "HEAD"))
