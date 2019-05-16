@@ -41,9 +41,12 @@ import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.DataTranslators;
 import org.spongepowered.api.data.persistence.InvalidDataException;
+import org.spongepowered.api.entity.EntityArchetype;
+import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.world.extent.worker.procedure.BlockVolumeVisitor;
 import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.api.world.schematic.Schematic;
@@ -52,11 +55,14 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeTileEntityArchetypeBuilder;
 import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
 import org.spongepowered.common.registry.type.block.TileEntityTypeRegistryModule;
+import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.util.gen.ArrayMutableBlockBuffer;
 import org.spongepowered.common.world.schematic.GlobalPalette;
 import org.spongepowered.common.world.schematic.SpongeSchematicBuilder;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -174,6 +180,32 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
                     tiles.put(new Vector3i(x - offsetX, y - offsetY, z - offsetZ), archetype);
                 }
             }
+        }
+        final List<EntityArchetype> entities = new ArrayList<>();
+        view.getViewList(DataQueries.Schematic.Legacy.LEGACY_ENTITIES).ifPresent(entityViews -> {
+            for (DataView entity : entityViews) {
+                int x = entity.getInt(DataQueries.X_POS).get();
+                int y = entity.getInt(DataQueries.Y_POS).get();
+                int z = entity.getInt(DataQueries.Z_POS).get();
+                final String entityType = entity.getString(DataQueries.Schematic.Legacy.ENTITY_ID).get();
+                final ResourceLocation name = new ResourceLocation(entityType);
+                EntityType type = EntityTypeRegistryModule.getInstance().getById(entityType).orElse(null);
+                if (type != null) {
+                    final DataView upgraded;
+
+                    NBTTagCompound entityNbt = NbtTranslator.getInstance().translate(entity);
+                    entityNbt = VANILLA_FIXER.process(FixTypes.ENTITY, entityNbt, 0);
+                    upgraded = NbtTranslator.getInstance().translate(entityNbt);
+                    upgraded.set(Queries.POSITION, new Vector3i(x - offsetX, y - offsetY, z - offsetZ));
+                    final EntityArchetype build = new SpongeEntityArchetypeBuilder().type(type).entityData(upgraded).build();
+                    entities.add(build);
+
+
+                }
+            }
+        });
+        if (!entities.isEmpty()) {
+            builder.entities(entities);
         }
         builder.blockPalette(GlobalPalette.getBlockPalette());
         builder.blocks(buffer)

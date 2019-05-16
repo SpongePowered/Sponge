@@ -65,23 +65,25 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nullable;
+
 @SuppressWarnings("deprecation")
 public class SpongeSchematicBuilder implements Schematic.Builder {
 
-    private ArchetypeVolume volume;
-    private Extent view;
-    Palette<BlockState> blockPalette;
-    Palette<BiomeType> biomePalette;
-    PaletteType<BlockState> blockType = PaletteTypes.LOCAL_BLOCKS;
-    PaletteType<BiomeType> biomeType = PaletteTypes.LOCAL_BIOMES;
-    Collection<EntityArchetype> entities;
-    DataView metadata;
+    @Nullable private ArchetypeVolume volume;
+    @Nullable private Extent view;
+    @Nullable Palette<BlockState> blockPalette;
+    @Nullable Palette<BiomeType> biomePalette;
+    private PaletteType<BlockState> blockType = PaletteTypes.LOCAL_BLOCKS;
+    private PaletteType<BiomeType> biomeType = PaletteTypes.LOCAL_BIOMES;
+    @Nullable Collection<EntityArchetype> entities;
+    @Nullable DataView metadata;
     private Map<String, Object> metaValues = Maps.newHashMap();
 
     // Package private accessors for the Schematic constructor
-    MutableBlockVolume backingVolume;
-    MutableBiomeVolume biomeVolume;
-    Map<Vector3i, TileEntityArchetype> tiles;
+    @Nullable MutableBlockVolume backingVolume;
+    @Nullable MutableBiomeVolume biomeVolume;
+    @Nullable Map<Vector3i, TileEntityArchetype> tiles;
 
 
     @Override
@@ -273,7 +275,7 @@ public class SpongeSchematicBuilder implements Schematic.Builder {
                     this.backingVolume = volume;
                     this.tiles = tiles;
                 } else {
-                    this.tiles = null;
+                    this.tiles = Collections.emptyMap();
                 }
             } else {
                 this.tiles = this.volume.getTileEntityArchetypes();
@@ -291,13 +293,15 @@ public class SpongeSchematicBuilder implements Schematic.Builder {
         if (this.entities == null) {
             if (this.volume != null) {
                 this.entities = this.volume.getEntityArchetypes();
-            } else if (this.view != null) {
+            } else if (this.view != null && this.backingVolume != null) {
                 this.entities = this.view.getIntersectingEntities(this.backingVolume.getBlockMin().toDouble(), this.backingVolume.getBlockMax().toDouble()).stream()
                     .map(EntityUniverse.EntityHit::getEntity)
                     .filter(Objects::nonNull)
                     .filter(entity -> !(entity instanceof Player) || !SpongeImplHooks.isFakePlayer((net.minecraft.entity.Entity) entity))
                     .map(Entity::createArchetype)
                     .collect(Collectors.toList());
+            } else {
+                this.entities = Collections.emptyList();
             }
         }
         if (this.backingVolume == null) {

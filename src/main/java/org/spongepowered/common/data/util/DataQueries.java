@@ -241,6 +241,8 @@ public final class DataQueries {
             public static final DataQuery LEGACY_BLOCK_DATA = of("Data");
             public static final DataQuery LEGACY_ADD_BLOCKS = of("AddBlocks");
             public static final DataQuery LEGACY_TILEDATA = of("TileEntities");
+            public static final DataQuery LEGACY_ENTITIES = of("Entities");
+            public static final DataQuery ENTITY_ID = of("id");
         }
         
         public static final DataQuery VERSION = of("Version");
