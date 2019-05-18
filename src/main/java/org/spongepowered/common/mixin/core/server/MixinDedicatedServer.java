@@ -28,6 +28,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.dedicated.PropertyManager;
+import net.minecraft.server.management.PlayerProfileCache;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.Server;
@@ -43,6 +44,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.interfaces.server.management.IMixinPlayerProfileCache;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.net.InetSocketAddress;
@@ -122,5 +124,13 @@ public abstract class MixinDedicatedServer extends MinecraftServer implements Se
                && Math.max(Math.abs(pos.getX() - spawnPoint.getX()), Math.abs(pos.getZ() - spawnPoint.getZ())) <= protectionRadius
                && !((Player) playerIn).hasPermission("minecraft.spawn-protection.override");
     }
+
+    @Redirect(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerProfileCache;save()V"))
+    private void onSave(PlayerProfileCache cache) {
+        ((IMixinPlayerProfileCache) this.getPlayerProfileCache()).setCanSave(true);
+        this.getPlayerProfileCache().save();
+        ((IMixinPlayerProfileCache) this.getPlayerProfileCache()).setCanSave(false);
+    }
+
 
 }
