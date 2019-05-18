@@ -71,6 +71,7 @@ public final class SpongeUsernameCache {
     private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     private static boolean loaded = false;
+    private static boolean dirty = false;
 
     /**
      * Internal method used to set the proper server directory when it's available
@@ -109,6 +110,7 @@ public final class SpongeUsernameCache {
         }
 
         map.put(uuid, username);
+        dirty = true;
     }
 
     /**
@@ -125,6 +127,7 @@ public final class SpongeUsernameCache {
         }
 
         if (map.remove(uuid) != null) {
+            dirty = true;
             return true;
         }
 
@@ -214,9 +217,14 @@ public final class SpongeUsernameCache {
             return;
         }
 
+        if (!dirty) {
+            return;
+        }
+
         try {
             // Make sure we don't save when another thread is still saving
             Files.write(gson.toJson(map), saveFile, charset);
+            dirty = false;
         } catch (IOException e) {
             SpongeImpl.getLogger().error("Failed to save username cache to file!", e);
         }
