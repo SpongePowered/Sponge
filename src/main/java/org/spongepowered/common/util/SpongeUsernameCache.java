@@ -211,7 +211,7 @@ public final class SpongeUsernameCache {
      */
     public static void save() {
         if (!loaded) {
-            load();
+            return;
         }
 
         try {
