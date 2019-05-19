@@ -587,7 +587,11 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
         final WorldServer worldServer = snapshot.getWorldServer();
         final BlockPos blockPos = snapshot.getBlockPos();
         final IBlockState newState = worldServer.getBlockState(blockPos);
-        final IBlockState newActualState = newState.getActualState(worldServer, blockPos);
+        // Because enhanced tracking requires handling very specific proxying of block states
+        // so, the requests for the actual states sometimes may cause issues with mods and their
+        // extended state handling logic if what the world sees is different from what our tracker
+        // saw, so, we have to just provide the new state (extended states are calculated anyways).
+        final IBlockState newActualState = this.head != null ? newState : newState.getActualState(worldServer, blockPos);
         final BlockSnapshot newSnapshot =
             ((IMixinWorldServer) worldServer).createSpongeBlockSnapshot(newState, newActualState, blockPos, BlockChangeFlags.NONE);
         // Up until this point, we can create a default Transaction
