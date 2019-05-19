@@ -42,11 +42,6 @@ import java.util.function.BiConsumer;
 public final class TileEntityInvalidatingPhaseState extends BlockPhaseState {
 
     @Override
-    public boolean canSwitchTo(IPhaseState<?> state) {
-        return true;
-    }
-
-    @Override
     public void unwind(GeneralizedContext context) {
 
     }

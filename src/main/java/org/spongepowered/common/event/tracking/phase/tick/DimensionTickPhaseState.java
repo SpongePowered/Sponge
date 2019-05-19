@@ -32,9 +32,7 @@ import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 
 import java.util.ArrayList;
 
@@ -48,11 +46,6 @@ class DimensionTickPhaseState extends TickPhaseState<DimensionContext> {
                 .addBlockCaptures()
                 .addEntityCaptures()
                 .addEntityDropCaptures();
-    }
-
-    @Override
-    public boolean canSwitchTo(IPhaseState<?> state) {
-        return super.canSwitchTo(state) || state.getPhase() == TrackingPhases.DRAGON;
     }
 
     @Override

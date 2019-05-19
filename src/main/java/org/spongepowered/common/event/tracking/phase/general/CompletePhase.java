@@ -25,7 +25,6 @@
 package org.spongepowered.common.event.tracking.phase.general;
 
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 
 import java.util.function.BiConsumer;
@@ -36,11 +35,6 @@ final class CompletePhase extends GeneralState<GeneralizedContext> {
         EMPTY_MODIFIER =
         (stackFrame, generalizedContext) -> {
         };
-
-    @Override
-    public boolean canSwitchTo(IPhaseState<?> state) {
-        return true;
-    }
 
     @Override
     public GeneralizedContext createPhaseContext() {

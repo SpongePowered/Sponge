@@ -84,11 +84,6 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
 
 
     @Override
-    public final boolean canSwitchTo(IPhaseState<?> state) {
-        return this.compatibleStates.contains(state);
-    }
-
-    @Override
     public boolean requiresPost() {
         return false;
     }

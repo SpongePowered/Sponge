@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.block;
 
-import net.minecraft.entity.item.EntityItem;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.common.event.tracking.IPhaseState;
@@ -42,11 +41,6 @@ public class BlockPhaseState implements IPhaseState<GeneralizedContext> {
         });
 
     BlockPhaseState() {
-    }
-
-    @Override
-    public boolean canSwitchTo(IPhaseState<?> state) {
-        return false;
     }
 
     @Override

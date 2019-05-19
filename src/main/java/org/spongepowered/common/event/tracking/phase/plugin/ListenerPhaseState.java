@@ -30,11 +30,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.phase.block.BlockPhaseState;
-import org.spongepowered.common.event.tracking.phase.entity.EntityPhaseState;
-import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
@@ -51,11 +47,6 @@ abstract class ListenerPhaseState extends PluginPhaseState<ListenerPhaseContext>
         return new ListenerPhaseContext(this)
             .addCaptures()
             .player();
-    }
-
-    @Override
-    public boolean canSwitchTo(IPhaseState<?> state) {
-        return state instanceof BlockPhaseState || state instanceof EntityPhaseState || state == GenerationPhase.State.TERRAIN_GENERATION;
     }
 
     @Override

@@ -37,10 +37,7 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
-import org.spongepowered.common.event.tracking.phase.block.BlockPhaseState;
-import org.spongepowered.common.event.tracking.phase.entity.EntityPhaseState;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
-import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.util.ArrayList;
@@ -55,11 +52,6 @@ abstract class TickPhaseState<C extends TickContext<C>> implements IPhaseState<C
     @Override
     public final TrackingPhase getPhase() {
         return TrackingPhases.TICK;
-    }
-
-    @Override
-    public boolean canSwitchTo(IPhaseState<?> state) {
-        return state instanceof BlockPhaseState || state instanceof EntityPhaseState || state == GenerationPhase.State.TERRAIN_GENERATION;
     }
 
     @Override

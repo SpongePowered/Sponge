@@ -246,10 +246,6 @@ public final class PhaseTracker {
                 }
 
             }
-            if (state != GeneralPhase.Post.UNWINDING && currentState == GeneralPhase.Post.UNWINDING && !currentState.canSwitchTo(state)) {
-                // This is to detect incompatible phase switches.
-                this.printPhaseIncompatibility(currentState, state);
-            }
         }
 
         if (Sponge.isServerAvailable() && ((IPhaseState) state).shouldProvideModifiers(phaseContext)) {

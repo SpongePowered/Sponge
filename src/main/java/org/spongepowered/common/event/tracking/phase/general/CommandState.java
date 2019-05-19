@@ -48,10 +48,8 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
-import org.spongepowered.common.event.tracking.phase.block.BlockPhaseState;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
@@ -84,11 +82,6 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
     @Override
     public BiConsumer<StackFrame, CommandPhaseContext> getFrameModifier() {
         return this.COMMAND_MODIFIER;
-    }
-
-    @Override
-    public boolean canSwitchTo(IPhaseState<?> state) {
-        return state instanceof BlockPhaseState;
     }
 
     @Override

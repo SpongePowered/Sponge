@@ -54,10 +54,8 @@ import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
-import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
 import org.spongepowered.common.interfaces.IMixinContainer;
@@ -120,11 +118,6 @@ public final class InteractionPacketState extends BasicPacketState {
     @Override
     public boolean doesCaptureNeighborNotifications(BasicPacketContext context) {
         return true;
-    }
-
-    @Override
-    public boolean canSwitchTo(IPhaseState<?> state) {
-        return state == BlockPhase.State.BLOCK_DECAY || state == BlockPhase.State.BLOCK_DROP_ITEMS;
     }
 
     @Override

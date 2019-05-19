@@ -24,11 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.plugin;
 
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.phase.block.BlockPhaseState;
-import org.spongepowered.common.event.tracking.phase.entity.EntityPhaseState;
-import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 
 /**
  * Used for tasks scheduled with both the Sponge scheduler, and the built-in 'scheduled task' system in MinecraftServer
@@ -39,11 +35,6 @@ public class ScheduledTaskPhaseState extends BasicPluginState {
     public BasicPluginContext createPhaseContext() {
         return super.createPhaseContext()
             .addCaptures();
-    }
-
-    @Override
-    public boolean canSwitchTo(IPhaseState<?> state) {
-        return state instanceof BlockPhaseState || state instanceof EntityPhaseState || state == GenerationPhase.State.TERRAIN_GENERATION;
     }
 
     @Override

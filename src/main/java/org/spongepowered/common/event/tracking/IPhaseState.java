@@ -97,7 +97,7 @@ import javax.annotation.Nullable;
  * defines what to do upon
  * {@link IPhaseState#unwind(PhaseContext)}.
  * As these should be enums, there's no data that should be stored on
- * this state. It can have control flow with {@link #canSwitchTo(IPhaseState)}
+ * this state. It can have control flow with {@link #isNotReEntrant()}
  * where preventing switching to another state is possible (likely points out
  * either errors or runaway states not being unwound).
  */
@@ -146,19 +146,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         return (BiConsumer<CauseStackManager.StackFrame, C>) DEFAULT_OWNER_NOTIFIER; // Default does nothing
     }
 
-    /**
-     * A sanity check for phase states to be able to say "hey, I didn't expect to
-     * be entering this state, maybe something is wrong?" Legacy method that could
-     * be done away with, but in rare circumstances, we are still arriving at points
-     * where we may be running into corner cases of phase states not exiting in
-     * certain injections.
-     *
-     * @param state The state being entered
-     * @return True if it's allowed to enter the provided phase.
-     */
-    default boolean canSwitchTo(IPhaseState<?> state) {
-        return false;
-    }
     /**
      * Gets whether this phase is expected to potentially re-enter itself, in some cases where
      * other operations tend to cause extra operations being performed. Examples include but are

@@ -76,11 +76,6 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
     }
 
     @Override
-    public boolean canSwitchTo(IPhaseState<?> state) {
-        return state != this; // Basically, we don't want to cause issues if we're entering another state due to plugin listeners or anything else.
-    }
-
-    @Override
     public boolean requiresPost() {
         return false;
     }
