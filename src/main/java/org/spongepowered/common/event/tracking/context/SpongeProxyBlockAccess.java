@@ -236,7 +236,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
 
             if (pretty != null) {
                 if (this.hasTile) {
-                    pretty.add("Following the necessary steps to ahve removed the above entries, the proxy is now being cleared.");
+                    pretty.add("Following the necessary steps to have removed the above entries, the proxy is now being cleared.");
                     this.hasTile = false;
                     pretty.trace(System.err);
                 }
@@ -558,7 +558,9 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
     }
 
     public boolean isProcessingTransactionWithNextHavingBreak(BlockPos pos, IBlockState state) {
-        if (this.processingTransaction == null || this.processingTransaction.next == null
+        if (this.processingTransaction == null
+            || this.processingTransaction.next == null
+            || !this.processingTransaction.affectedPosition.equals(pos)
             || !(this.processingTransaction.next instanceof BlockTransaction.ChangeBlock)) {
             return false;
         }
