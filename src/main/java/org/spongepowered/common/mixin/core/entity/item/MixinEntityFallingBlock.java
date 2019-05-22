@@ -28,9 +28,9 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityFallingBlock;
 import net.minecraft.init.Blocks;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import org.spongepowered.api.entity.FallingBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -38,7 +38,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.damage.MinecraftFallingBlockDamageSource;
+import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -48,14 +50,31 @@ import org.spongepowered.common.mixin.core.entity.MixinEntity;
 @Mixin(EntityFallingBlock.class)
 public abstract class MixinEntityFallingBlock extends MixinEntity implements FallingBlock {
 
-
     @Shadow public IBlockState fallTile;
-    @Shadow public boolean hurtEntities;
-    @Shadow public int fallHurtMax;
-    @Shadow public float fallHurtAmount;
-    @Shadow public NBTTagCompound tileEntityData;
 
-
+    /**
+     * @author gabizou - January 9th, 2018 - 1.12.2
+     * @author gabizou - May 21st, 2019 - 1.12.2
+     *
+     * @reason Due to the need to fail fast and return out of this falling block
+     * entity's update if the block change is cancelled, we need to inject after
+     * the world.setBlockToAir is called and potentially tell the callback to
+     * cancel. Unfortunately, there's no way to just blindly checking if the block
+     * was changed, because the duality of bulk and single block tracking being
+     * a possibility. So, we have to do the following:
+     * - check if we're throwing the event that would otherwise trigger a block capture
+     * - If the current phase state allows for bulk capturing, the block will be
+     *   in the capture supplier, and we can just blindly throw the processing
+     *   of that block(s)
+     * - If the processing is cancelled, kill this entity
+     * - If we're doing single capture throws, well, double check the block state
+     *   on the world, and if it's not air, well, it's been either replaced, or
+     *   cancelled. If it's replaced/cancelled, then don't allow this entity to
+     *   live.
+     *
+     * @param ci
+     */
+    @SuppressWarnings("unchecked")
     @Inject(method = "onUpdate",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/World;setBlockToAir(Lnet/minecraft/util/math/BlockPos;)Z",
@@ -65,20 +84,35 @@ public abstract class MixinEntityFallingBlock extends MixinEntity implements Fal
     )
     private void onWorldSetBlockToAir(CallbackInfo ci) {
         final BlockPos pos = new BlockPos((EntityFallingBlock) (Object) this);
-        if (((IMixinWorld) this.world).isFake()) {
-            this.world.setBlockToAir(pos);
+        // So, there's two cases here: either the world is not cared for, or the
+        // ChangeBlockEvent is not being listened to. If it's not being listened to,
+        // we need to specifically just proceed as normal.
+        if (((IMixinWorld) this.world).isFake() || !ShouldFire.CHANGE_BLOCK_EVENT) {
             return;
         }
         // Ideally, at this point we should still be in the EntityTickState and only this block should
         // be changing. What we need to do here is throw the block event specifically for setting air
         // and THEN if this one cancels, we should kill this entity off, unless we want some duplication
-        // of falling blocks
+        // of falling blocks, but, since the world already supposedly set the block to air,
+        // we don't need to re-set the block state at the position, just need to check
+        // if the processing succeeded or not.
         final PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
-        this.world.setBlockToAir(pos);
-        // By this point, we should have one captured block at least.
-        if (!TrackingUtil.processBlockCaptures(currentContext.state, currentContext)) {
-            // So, it's been cancelled, we want to absolutely remove this entity.
-            // And we want to stop the entity update at this point.
+        // By this point, we should have some sort of captured block
+        if (((IPhaseState) currentContext.state).doesBulkBlockCapture(currentContext)) {
+            if (!TrackingUtil.processBlockCaptures(currentContext.state, currentContext)) {
+                // So, it's been cancelled, we want to absolutely remove this entity.
+                // And we want to stop the entity update at this point.
+                this.setDead();
+                ci.cancel();
+            }
+
+            // We have to check if the original set block state succeeded if we're doing
+            // single captures. If we're not doing bulk capturing (for whatever reason),
+            // we would simply check for the current block state on the world, if it's air,
+            // then it's been captured/processed for single events. And if it's not air,
+            // that means that single event was cancelled, so, the block needs to remain
+            // and this entity needs to die.
+        } else if (this.world.getBlockState(pos) != Blocks.AIR.getDefaultState()) {
             this.setDead();
             ci.cancel();
         }
