@@ -577,7 +577,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
                     layerDepth = 0;
                     GroundCoverLayer layer = groundcover.get(layerDepth);
                     currentPlacement = (IBlockState) layer.getBlockState().apply(stoneNoise);
-                    layerProgress = layer.getDepth().getFlooredAmount(rand, stoneNoise);
+                    layerProgress = layer.getDepth(currentY).getFlooredAmount(rand, stoneNoise);
                     if (layerProgress <= 0) {
                         continue;
                     }
@@ -587,7 +587,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
                         ++layerDepth;
                         if (layerDepth < groundcover.size()) {
                             layer = groundcover.get(layerDepth);
-                            layerProgress = layer.getDepth().getFlooredAmount(rand, stoneNoise);
+                            layerProgress = layer.getDepth(currentY - 1).getFlooredAmount(rand, stoneNoise);
                             currentPlacement = (IBlockState) layer.getBlockState().apply(stoneNoise);
                         }
                     } else if (currentY < seaLevel - 7 - layerProgress) {
@@ -597,7 +597,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
                         ++layerDepth;
                         if (layerDepth < groundcover.size()) {
                             layer = groundcover.get(layerDepth);
-                            layerProgress = layer.getDepth().getFlooredAmount(rand, stoneNoise);
+                            layerProgress = layer.getDepth(currentY).getFlooredAmount(rand, stoneNoise);
                             currentPlacement = (IBlockState) layer.getBlockState().apply(stoneNoise);
                             chunk.setBlockState(relativeX, currentY, relativeZ, currentPlacement);
                         }
@@ -610,7 +610,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
                         ++layerDepth;
                         if (layerDepth < groundcover.size()) {
                             GroundCoverLayer layer = groundcover.get(layerDepth);
-                            layerProgress = layer.getDepth().getFlooredAmount(rand, stoneNoise);
+                            layerProgress = layer.getDepth(currentY - 1).getFlooredAmount(rand, stoneNoise);
                             currentPlacement = (IBlockState) layer.getBlockState().apply(stoneNoise);
                         }
                     }

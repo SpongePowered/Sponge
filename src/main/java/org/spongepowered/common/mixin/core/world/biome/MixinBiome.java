@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.world.biome;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import net.minecraft.block.BlockSand;
 import net.minecraft.block.BlockStone;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
@@ -34,6 +35,8 @@ import net.minecraft.world.biome.BiomeDecorator;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.ChunkGeneratorSettings;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.type.PlantTypes;
 import org.spongepowered.api.data.type.ShrubTypes;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -70,6 +73,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.interfaces.world.biome.IMixinBiome;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
+import org.spongepowered.common.world.gen.SandstoneGroundCoverLayer;
 import org.spongepowered.common.world.gen.WorldGenConstants;
 import org.spongepowered.common.world.gen.populators.WrappedBiomeDecorator;
 
@@ -108,6 +112,15 @@ public abstract class MixinBiome implements BiomeType, IMixinBiome {
 
         gensettings.getGroundCoverLayers().add(new GroundCoverLayer((BlockState) this.topBlock, SeededVariableAmount.fixed(1)));
         gensettings.getGroundCoverLayers().add(new GroundCoverLayer((BlockState) this.fillerBlock, WorldGenConstants.GROUND_COVER_DEPTH));
+        if (this.fillerBlock.getBlock() == Blocks.SAND) {
+            BlockType type;
+            if (this.fillerBlock.getValue(BlockSand.VARIANT) == BlockSand.EnumType.RED_SAND) {
+                type = BlockTypes.RED_SANDSTONE;
+            } else {
+                type = BlockTypes.SANDSTONE;
+            }
+            gensettings.getGroundCoverLayers().add(new SandstoneGroundCoverLayer(type.getDefaultState()));
+        }
 
         String s = world.getWorldInfo().getGeneratorOptions();
         ChunkGeneratorSettings settings = ChunkGeneratorSettings.Factory.jsonToFactory(s).build();
