@@ -69,22 +69,16 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.context.BlockTransaction;
-import org.spongepowered.common.event.tracking.context.MultiBlockCaptureSupplier;
-import org.spongepowered.common.event.tracking.context.SpongeProxyBlockAccess;
 import org.spongepowered.common.event.tracking.phase.packet.PacketContext;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerInteractionManager;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.util.VecHelper;
 
@@ -541,41 +535,5 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
             }
         }
         return result;
-    }
-
-    /**
-     * @author gabizou - May 3rd, 2019 - 1.12.2
-     * @reason Due to the nature of {@link #removeBlock(BlockPos)} being called
-     * before the {@link Block#harvestBlock(net.minecraft.world.World, EntityPlayer, BlockPos, IBlockState, TileEntity, ItemStack)}
-     * call, the {@link TileEntity} may already be captured by the {@link MultiBlockCaptureSupplier}
-     * as a {@link BlockTransaction}, and the {@link SpongeProxyBlockAccess} would
-     * potentially have the tile masked as {@code null} when the block attempts to
-     * retrieve said tile. Because of this, we need to tell the proxy that it is
-     * possible to retrieve the tile, only during the method call of harvesting
-     * the block, and no where else in the method.
-     */
-    @Redirect(method = "tryHarvestBlock",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/block/Block;harvestBlock(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/tileentity/TileEntity;Lnet/minecraft/item/ItemStack;)V"
-        )
-    )
-    @SuppressWarnings({"rawTypes", "unchecked"})
-    private void proxyTileEntityWithBlockHarvesting(Block block, net.minecraft.world.World worldIn, EntityPlayer player, BlockPos pos,
-        IBlockState state, TileEntity te, ItemStack stack) {
-        // Sanity check, if it's an un-managed world, don't bother with it.
-        if (((IMixinWorld) worldIn).isFake() || !SpongeImplHooks.isMainThread()) {
-            block.harvestBlock(worldIn, player, pos, state, te, stack);
-            return;
-        }
-        final PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
-        final IPhaseState phaseState = currentContext.state;
-        // More often than not, most phases won't have tile tracking, it's a good fail fast.
-        final boolean tracksTiles = phaseState.tracksTileEntityChanges(currentContext) && phaseState.doesBulkBlockCapture(currentContext) && currentContext.getCapturedBlockSupplier().hasTransactions();
-        final SpongeProxyBlockAccess proxyAccess = ((IMixinWorldServer) worldIn).getProxyAccess();
-        try (SpongeProxyBlockAccess.TemporaryTileEntity temporary = tracksTiles ? proxyAccess.pushQueuedRemovedTile(pos, te) : null) {
-            block.harvestBlock(worldIn, player, pos, state, te, stack);
-        }
-
     }
 }

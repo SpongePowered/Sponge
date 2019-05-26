@@ -1441,7 +1441,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 if (PhaseTracker.getInstance().getCurrentState().allowsGettingQueuedRemovedTiles()) {
                     return this.getQueuedRemovedTileFromProxy(pos);
                 }
-
                 return null;
             }
             tileentity = this.getProcessingTileFromProxy(pos);

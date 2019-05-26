@@ -34,12 +34,16 @@ import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.WorldServerMulti;
 import net.minecraft.world.chunk.Chunk;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -68,7 +72,6 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
     @Nullable private BlockTransaction processingTransaction;
     @Nullable private Deque<BlockTransaction> processingStack;
     private boolean isNeighbor = false;
-    @Nullable private TemporaryTileEntity tileEntity;
 
     public SpongeProxyBlockAccess(IMixinWorldServer worldServer) {
         this.processingWorld = ((WorldServer) worldServer);
@@ -258,7 +261,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
     }
 
     public boolean isTileEntityRemoved(BlockPos pos) {
-        return this.markedRemoved.contains(pos) && (this.tileEntity == null || !pos.equals(this.tileEntity.position));
+        return this.markedRemoved.contains(pos);
     }
 
     @Override
@@ -548,15 +551,6 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
         return tiles.get(0);
     }
 
-    @Nullable
-    public TemporaryTileEntity pushQueuedRemovedTile(BlockPos pos, TileEntity te) {
-        final TileEntity replacement = this.affectedTileEntities.get(pos);
-        this.affectedTileEntities.put(pos, te);
-        final TemporaryTileEntity temporaryTileEntity = new TemporaryTileEntity(this, replacement, pos, this.tileEntity);
-        this.tileEntity = temporaryTileEntity;
-        return temporaryTileEntity;
-    }
-
     public boolean isProcessingTransactionWithNextHavingBreak(BlockPos pos, IBlockState state) {
         if (this.processingTransaction == null
             || this.processingTransaction.next == null
@@ -566,28 +560,6 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
         }
         final BlockTransaction.ChangeBlock changeblock = (BlockTransaction.ChangeBlock) this.processingTransaction.next;
         return changeblock.queueBreak && changeblock.original.getState() == state && changeblock.original.blockChange == BlockChange.BREAK;
-    }
-
-    public static final class TemporaryTileEntity implements AutoCloseable {
-
-        @Nullable private final TileEntity replacement;
-        private final BlockPos position;
-        private final SpongeProxyBlockAccess access;
-        @Nullable private final TemporaryTileEntity previous;
-
-        TemporaryTileEntity(SpongeProxyBlockAccess access, @Nullable TileEntity replacement, BlockPos position,
-            TemporaryTileEntity tileEntity) {
-            this.access = access;
-            this.replacement = replacement;
-            this.position = position;
-            this.previous = tileEntity;
-        }
-
-        @Override
-        public void close() {
-            this.access.affectedTileEntities.put(this.position, this.replacement);
-            this.access.tileEntity = this.previous;
-        }
     }
 
     public static final class Proxy implements AutoCloseable {
