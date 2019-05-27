@@ -35,6 +35,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.util.datafix.FixTypes;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.tileentity.TileEntityArchetype;
 import org.spongepowered.api.block.tileentity.TileEntityType;
@@ -144,7 +145,7 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
                     Optional<BlockState> blockState = palette.get(palette_id);
                     if (!blockState.isPresent()) {
                         // At the very least get the default state id
-                        blockState = Optional.of((BlockState) Block.REGISTRY.getObjectById(default_state_id));
+                        blockState = Optional.of(((BlockType) Block.REGISTRY.getObjectById(default_state_id)).getDefaultState());
                     }
                     BlockState block = blockState.orElseGet(BlockTypes.COBBLESTONE::getDefaultState);
                     buffer.setBlock(x - offsetX, y - offsetY, z - offsetZ, block);
