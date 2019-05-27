@@ -31,6 +31,8 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 
+import java.util.ArrayList;
+
 final class DispensePhaseState extends BlockPhaseState {
 
     DispensePhaseState() {
@@ -58,6 +60,13 @@ final class DispensePhaseState extends BlockPhaseState {
             .acceptAndClearIfNotEmpty(entities -> {
                 Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DISPENSE);
                 SpongeCommonEventFactory.callSpawnEntity(entities, phaseContext);
+            });
+        phaseContext.getBlockItemDropSupplier()
+            .acceptAndClearIfNotEmpty(drops -> {
+                drops.asMap().forEach((key, value) -> {
+                    Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+                    SpongeCommonEventFactory.callDropItemDestruct(new ArrayList(value), phaseContext);
+                });
             });
     }
 }
