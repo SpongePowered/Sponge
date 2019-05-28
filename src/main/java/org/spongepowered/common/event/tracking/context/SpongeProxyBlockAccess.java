@@ -552,14 +552,22 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
     }
 
     public boolean isProcessingTransactionWithNextHavingBreak(BlockPos pos, IBlockState state) {
-        if (this.processingTransaction == null
-            || this.processingTransaction.next == null
-            || !this.processingTransaction.affectedPosition.equals(pos)
-            || !(this.processingTransaction.next instanceof BlockTransaction.ChangeBlock)) {
+        if (this.processingTransaction == null) {
             return false;
         }
-        final BlockTransaction.ChangeBlock changeblock = (BlockTransaction.ChangeBlock) this.processingTransaction.next;
-        return changeblock.queueBreak && changeblock.original.getState() == state && changeblock.original.blockChange == BlockChange.BREAK;
+        for (BlockTransaction transaction = this.processingTransaction; transaction != null;) {
+            if (transaction.next == null) {
+                return false;
+            }
+            if (transaction.next.affectedPosition.equals(pos) && transaction.next instanceof BlockTransaction.ChangeBlock) {
+                final BlockTransaction.ChangeBlock change = (BlockTransaction.ChangeBlock) transaction.next;
+                if (change.queueBreak && change.original.getState() == state && change.original.blockChange == BlockChange.BREAK) {
+                    return true;
+                }
+            }
+            transaction = transaction.next;
+        }
+        return false;
     }
 
     public static final class Proxy implements AutoCloseable {
