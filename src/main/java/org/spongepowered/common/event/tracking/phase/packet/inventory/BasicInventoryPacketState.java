@@ -52,7 +52,9 @@ import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -137,6 +139,9 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
         return new InventoryPacketContext(this).addCaptures(); // if for whatever reason there's a capture.. i don't know...
     }
 
+
+    private static Set<Class> containersFailedCapture = new HashSet<>();
+
     @Override
     public void unwind(InventoryPacketContext context) {
         final EntityPlayerMP player = context.getPacketPlayer();
@@ -211,7 +216,10 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
                 if (!mixinContainer.capturePossible()) {
                     // TODO When this happens a mod probably overrides Container#detectAndSendChanges
                     // We are currently unable to detect changes in this case.
-                    SpongeImpl.getLogger().info("Container was not captured. No ClickInventoryEvent will be fired! Container: " + openContainer.getClass() + " PacketState: " + this.getClass().getSimpleName());
+                    if (!containersFailedCapture.contains(mixinContainer.getClass())) {
+                        containersFailedCapture.add(mixinContainer.getClass());
+                        SpongeImpl.getLogger().warn("Changes in modded Container were not captured. Inventory events will not fire for this. Container: " + openContainer.getClass());
+                    }
                     return;
                 }
                 // No SlotTransaction was captured. So we add the clicked slot as a transaction
