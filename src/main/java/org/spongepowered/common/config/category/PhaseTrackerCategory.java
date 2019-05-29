@@ -92,10 +92,14 @@ public class PhaseTrackerCategory extends ConfigCategory {
                                                             + "To prevent a stack overflow, Sponge tracks the current processing depth, and aborts processing when it exceeds\n"
                                                             + "this threshold.\n"
                                                             + "The default value should almost always work properly -  it's unlikely you'll ever have to change it.")
-    private int maxBlockProcessingDepth = 100;
+    private int maxBlockProcessingDepth = 1000;
 
     public int getMaxBlockProcessingDepth() {
         return this.maxBlockProcessingDepth;
+    }
+
+    public void resetMaxDepthTo1000() {
+        this.maxBlockProcessingDepth = 1000;
     }
 
     public boolean verboseErrors() {

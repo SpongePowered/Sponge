@@ -68,7 +68,9 @@ import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.PhaseTrackerCategory;
+import org.spongepowered.common.config.type.GlobalConfig;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.ShouldFire;
@@ -704,7 +706,7 @@ public final class PhaseTracker {
                 // the try with resources will perform a close without the phase context being entered, leading to issues of closing
                 // other phase contexts.
                 // Refer to https://github.com/SpongePowered/SpongeForge/issues/2706
-                if (!(sourceBlock instanceof BlockRedstoneWire) && PhaseTracker.checkMaxBlockProcessingDepth(state, peek, context.getDepth())) {
+                if (PhaseTracker.checkMaxBlockProcessingDepth(state, peek, context.getDepth())) {
                     return;
                 }
                 // Sponge End
@@ -1142,8 +1144,14 @@ public final class PhaseTracker {
     }
 
     public static boolean checkMaxBlockProcessingDepth(IPhaseState<?> state, PhaseContext<?> context, int currentDepth) {
-        final PhaseTrackerCategory trackerConfig = SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker();
+        final SpongeConfig<GlobalConfig> globalConfig = SpongeImpl.getGlobalConfig();
+        final PhaseTrackerCategory trackerConfig = globalConfig.getConfig().getPhaseTracker();
         int maxDepth = trackerConfig.getMaxBlockProcessingDepth();
+        if (maxDepth == 100 && state == TickPhase.Tick.NEIGHBOR_NOTIFY) {
+            maxDepth = 1000;
+            trackerConfig.resetMaxDepthTo1000();
+            globalConfig.save();
+        }
         if (currentDepth < maxDepth) {
             return false;
         }
