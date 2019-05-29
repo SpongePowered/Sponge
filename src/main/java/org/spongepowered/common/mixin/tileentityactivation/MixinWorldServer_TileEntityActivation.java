@@ -24,17 +24,12 @@
  */
 package org.spongepowered.common.mixin.tileentityactivation;
 
-import net.minecraft.util.ITickable;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.mixin.core.world.MixinWorld;
-import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModData_Activation;
 import org.spongepowered.common.mixin.plugin.tileentityactivation.TileEntityActivation;
 
-@Mixin(value = WorldServer.class, priority = 1300)
+@Mixin(value = WorldServer.class)
 public abstract class MixinWorldServer_TileEntityActivation extends MixinWorld {
 
     @Override
@@ -42,16 +37,4 @@ public abstract class MixinWorldServer_TileEntityActivation extends MixinWorld {
         TileEntityActivation.activateTileEntities((WorldServer) (Object) this);
     }
 
-    // Note: This method overrides our updateTileEntity method in MixinWorldServer
-    @Inject(method = "updateTileEntity", at = @At("HEAD"), cancellable = true, remap = false)
-    public void onUpdateTileEntityHead(ITickable tile, CallbackInfo ci) {
-        final net.minecraft.tileentity.TileEntity tileEntity = (net.minecraft.tileentity.TileEntity) tile;
-        final boolean canUpdate = TileEntityActivation.checkIfActive(tileEntity);
-
-        if (!canUpdate) {
-            ((IModData_Activation) tileEntity).incrementSpongeTicksExisted();
-            ((IModData_Activation) tileEntity).inactiveTick();
-            ci.cancel();
-        }
-    }
 }

@@ -5,8 +5,10 @@
     "refmap": "mixins.common.refmap.json",
     "target": "@env(DEFAULT)",
     "compatibilityLevel": "JAVA_8",
+    "mixinPriority": 1300,
     "server": [
         "MixinChunk_TileEntityActivation",
+        "MixinSpongeImplHooks_TileEntityActivation",
         "MixinTileEntity_Activation",
         "MixinWorldServer_TileEntityActivation"
     ],

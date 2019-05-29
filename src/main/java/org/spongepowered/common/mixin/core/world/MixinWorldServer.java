@@ -1742,6 +1742,9 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     // separated from onUpdateEntities for TileEntityActivation mixin
     private void updateTileEntity(ITickable tile) {
+        if (!SpongeImplHooks.shouldTickTile(tile)) {
+            return;
+        }
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final IPhaseState<?> state = phaseTracker.getCurrentState();
 

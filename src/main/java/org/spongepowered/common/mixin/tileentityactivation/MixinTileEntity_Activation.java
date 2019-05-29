@@ -28,7 +28,7 @@ import net.minecraft.tileentity.TileEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModData_Activation;
 
-@Mixin(value = TileEntity.class, priority = 1002)
+@Mixin(TileEntity.class)
 public class MixinTileEntity_Activation implements IModData_Activation {
 
     private boolean refreshCache = false;

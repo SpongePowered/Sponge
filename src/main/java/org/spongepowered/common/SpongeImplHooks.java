@@ -53,6 +53,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.ITickable;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
@@ -98,6 +99,7 @@ import org.spongepowered.common.item.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.tileentity.MixinTileEntity;
 import org.spongepowered.common.mixin.core.world.MixinWorldServer;
+import org.spongepowered.common.mixin.plugin.tileentityactivation.TileEntityActivation;
 import org.spongepowered.common.registry.type.entity.ProfessionRegistryModule;
 import org.spongepowered.common.util.SpawnerSpawnType;
 import org.spongepowered.common.world.WorldManager;
@@ -663,5 +665,15 @@ public final class SpongeImplHooks {
      */
     public static Entity getCustomEntityIfItem(Entity entity) {
         return entity;
+    }
+
+    /**
+     * For use with {@link TileEntityActivation}.
+     *
+     * @param tile The tile to tick
+     * @return True whether to tick or false, not to
+     */
+    public static boolean shouldTickTile(ITickable tile) {
+        return true;
     }
 }

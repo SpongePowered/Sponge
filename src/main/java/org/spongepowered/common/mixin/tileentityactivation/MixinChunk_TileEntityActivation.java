@@ -47,7 +47,7 @@ public class MixinChunk_TileEntityActivation {
     @Shadow @Final private World world;
 
     @Inject(method = "addTileEntity(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V", at = @At("RETURN"))
-    public void onAddTileEntity(BlockPos pos, net.minecraft.tileentity.TileEntity tileEntityIn, CallbackInfo ci) {
+    private void onAddTileEntityActivateCheck(BlockPos pos, net.minecraft.tileentity.TileEntity tileEntityIn, CallbackInfo ci) {
         if (tileEntityIn.getWorld() == null) {
             tileEntityIn.setWorld(this.world);
         }
