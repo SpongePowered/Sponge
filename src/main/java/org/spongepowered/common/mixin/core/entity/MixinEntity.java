@@ -26,6 +26,8 @@ package org.spongepowered.common.mixin.core.entity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import net.minecraft.server.MinecraftServer;
+import org.spongepowered.common.interfaces.world.IMixinTeleporter;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimings;
 import co.aikar.timings.Timing;
 import com.flowpowered.math.vector.Vector3d;
@@ -264,6 +266,8 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
 
     @Shadow protected boolean inPortal;
 
+    @Shadow @Nullable public abstract net.minecraft.entity.Entity changeDimension(int dimensionIn);
+
     @Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;dimension:I", opcode = Opcodes.PUTFIELD))
     private void onSet(net.minecraft.entity.Entity self, int dimensionId, net.minecraft.world.World worldIn) {
         if (worldIn instanceof IMixinWorldServer) {
@@ -491,17 +495,16 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
             return false;
         }
 
-        try (final BasicPluginContext context = PluginPhase.State.TELEPORT.createPhaseContext()) {
-            context.buildAndSwitch();
-            // TODO Add a 'Move' plugin phase or just keep it under Teleport?
-            try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();) {
+        try (final BasicPluginContext context = PluginPhase.State.TELEPORT.createPhaseContext().buildAndSwitch()) {
+
+            MoveEntityEvent event;
+
+            try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 if (!frame.getCurrentContext().containsKey(EventContextKeys.TELEPORT_TYPE)) {
                     frame.addContext(EventContextKeys.TELEPORT_TYPE, TeleportTypes.PLUGIN);
                 }
 
-                // TODO These methods need a Cause (maybe wait till Cause PR)
-                // TODO Need to not fire Teleport in all cases (especially when movement is local)
-                MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent((net.minecraft.entity.Entity) (Object) this, location);
+                event = EntityUtil.handleDisplaceEntityTeleportEvent((net.minecraft.entity.Entity) (Object) this, location);
                 if (event.isCancelled()) {
                     return false;
                 }
@@ -518,47 +521,52 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
             final List<net.minecraft.entity.Entity> passengers = thisEntity.getPassengers();
 
             boolean isTeleporting = true;
-
+            boolean isChangingDimension = false;
             if (location.getExtent().getUniqueId() != ((World) this.world).getUniqueId()) {
-                final net.minecraft.world.World nmsWorld = (net.minecraft.world.World) location.getExtent();
                 if ((net.minecraft.entity.Entity) (Object) this instanceof EntityPlayerMP) {
                     // Close open containers
                     final EntityPlayerMP entityPlayerMP = (EntityPlayerMP) (Object) this;
                     if (entityPlayerMP.openContainer != entityPlayerMP.inventoryContainer) {
                         ((Player) entityPlayerMP).closeInventory(); // Call API method to make sure we capture it
                     }
-                }
-                EntityUtil.changeWorld((net.minecraft.entity.Entity) (Object) this, location, ((IMixinWorldServer) this.world).getDimensionId(),
-                    ((IMixinWorldServer) nmsWorld).getDimensionId());
-            } else {
-                double distance = location.getPosition().distance(this.getPosition());
 
-                if (distance <= 4) {
-                    isTeleporting = false;
-                }
-
-                if (thisEntity instanceof EntityPlayerMP && ((EntityPlayerMP) thisEntity).connection != null) {
-                    final EntityPlayerMP entityPlayerMP = (EntityPlayerMP) thisEntity;
-
-                    // No reason to attempt to load chunks unless we're teleporting
-                    if (isTeleporting) {
-                        // Close open containers
-                        if (entityPlayerMP.openContainer != entityPlayerMP.inventoryContainer) {
-                            ((Player) entityPlayerMP).closeInventory(); // Call API method to make sure we capture it
-                        }
-
-                        ((WorldServer) location.getExtent()).getChunkProvider()
-                            .loadChunk(location.getChunkPosition().getX(), location.getChunkPosition().getZ());
-                    }
-                    entityPlayerMP.connection
-                        .setPlayerLocation(location.getX(), location.getY(), location.getZ(), thisEntity.rotationYaw, thisEntity.rotationPitch);
-                    ((IMixinNetHandlerPlayServer) entityPlayerMP.connection).setLastMoveLocation(null); // Set last move to teleport target
+                    EntityUtil.teleportPlayerToDimension(entityPlayerMP, ((IMixinWorldServer) location.getExtent()).getDimensionId(),
+                        (IMixinTeleporter) ((WorldServer) location.getExtent()).getDefaultTeleporter(), event);
                 } else {
-                    setPosition(location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ());
+                    EntityUtil.transferEntityToDimension(this, ((IMixinWorldServer) location.getExtent()).getDimensionId(),
+                        (IMixinTeleporter) ((WorldServer) location.getExtent()).getDefaultTeleporter(), event);
                 }
+
+                isChangingDimension = true;
             }
 
-            if (isTeleporting) {
+            double distance = location.getPosition().distance(this.getPosition());
+
+            if (distance <= 4) {
+                isTeleporting = false;
+            }
+
+            if (thisEntity instanceof EntityPlayerMP && ((EntityPlayerMP) thisEntity).connection != null) {
+                final EntityPlayerMP entityPlayerMP = (EntityPlayerMP) thisEntity;
+
+                // No reason to attempt to load chunks unless we're teleporting
+                if (isTeleporting || isChangingDimension) {
+                    // Close open containers
+                    if (entityPlayerMP.openContainer != entityPlayerMP.inventoryContainer) {
+                        ((Player) entityPlayerMP).closeInventory(); // Call API method to make sure we capture it
+                    }
+
+                    ((WorldServer) location.getExtent()).getChunkProvider()
+                        .loadChunk(location.getChunkPosition().getX(), location.getChunkPosition().getZ());
+                }
+                entityPlayerMP.connection
+                    .setPlayerLocation(location.getX(), location.getY(), location.getZ(), thisEntity.rotationYaw, thisEntity.rotationPitch);
+                ((IMixinNetHandlerPlayServer) entityPlayerMP.connection).setLastMoveLocation(null); // Set last move to teleport target
+            } else {
+                setPosition(location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ());
+            }
+
+            if (isTeleporting || isChangingDimension) {
                 // Re-attach passengers
                 for (net.minecraft.entity.Entity passenger : passengers) {
                     if (((World) passenger.getEntityWorld()).getUniqueId() != ((World) this.world).getUniqueId()) {
@@ -904,30 +912,6 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
         }
         return entity != null && entity.addPassenger(this);
     }
-
-    /*
-     // gabizou comment - Due to forge changes, this is now required to be injected/overwritten
-     // in either SpongeForge or SpongeVanilla respectively due to the signature change from Forge.
-     // The logic is still being processed as normal in vanilla, just the actual method calls are
-     // per project, and not in common.
-     * @author blood - May 30th, 2016
-     * @author gabizou - May 31st, 2016 - Update for 1.9.4
-     *
-     * @reason - rewritten to support {@link MoveEntityEvent.Teleport.Portal}
-     *
-     * @param toDimensionId The id of target dimension.
-     *
-    @Nullable
-    @Overwrite
-    public net.minecraft.entity.Entity changeDimension(int toDimensionId) {
-        if (!this.world.isRemote && !this.isDead) {
-            // Sponge Start - Handle teleportation solely in TrackingUtil where everything can be debugged.
-            return EntityUtil.transferEntityToDimension(this, toDimensionId);
-            // Sponge End
-        }
-        return null;
-    }
-    */
 
     /**
      * Hooks into vanilla's writeToNBT to call {@link #writeToNbt}.

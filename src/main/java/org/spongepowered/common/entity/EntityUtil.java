@@ -173,12 +173,16 @@ public final class EntityUtil {
      * @return The entity, if the teleport was not cancelled or something.
      */
     @Nullable
-    public static Entity transferEntityToDimension(IMixinEntity mixinEntity, int toSuggestedDimension, IMixinITeleporter teleporter) {
+    public static Entity transferEntityToDimension(IMixinEntity mixinEntity, int toSuggestedDimension, IMixinITeleporter teleporter,
+        @Nullable MoveEntityEvent event) {
         final Entity entity = toNative(mixinEntity);
-        // handle portal event
-        MoveEntityEvent.Teleport.Portal event = handleDisplaceEntityPortalEvent(entity, toSuggestedDimension, teleporter);
-        if (event == null || event.isCancelled()) {
-            return null;
+
+        if (event == null) {
+            // Assume portal
+            event = handleDisplaceEntityPortalEvent(entity, toSuggestedDimension, teleporter);
+            if (event == null || event.isCancelled()) {
+                return null;
+            }
         }
 
         entity.world.profiler.startSection("changeDimension");
@@ -218,13 +222,16 @@ public final class EntityUtil {
      * @return The player object, not re-created
      */
     @Nullable
-    public static Entity teleportPlayerToDimension(EntityPlayerMP entityPlayerMP, int suggestedDimensionId, IMixinITeleporter teleporter) {
-        // Fire teleport event here to support Forge's EntityTravelDimensionEvent
-        // This also prevents sending client wrong data if event is cancelled
-        MoveEntityEvent.Teleport.Portal event = EntityUtil.handleDisplaceEntityPortalEvent(entityPlayerMP, suggestedDimensionId, teleporter);
-        if (event == null || event.isCancelled()) {
-            return entityPlayerMP;
+    public static Entity teleportPlayerToDimension(EntityPlayerMP entityPlayerMP, int suggestedDimensionId, IMixinITeleporter teleporter,
+        @Nullable MoveEntityEvent event) {
+        if (event == null) {
+            // Assume portal
+            event = EntityUtil.handleDisplaceEntityPortalEvent(entityPlayerMP, suggestedDimensionId, teleporter);
+            if (event == null || event.isCancelled()) {
+                return entityPlayerMP;
+            }
         }
+
         entityPlayerMP.invulnerableDimensionChange = true;
 
         boolean sameDimension = entityPlayerMP.dimension == suggestedDimensionId;
@@ -240,7 +247,7 @@ public final class EntityUtil {
                 entityPlayerMP.seenCredits = true;
             }
             return entityPlayerMP;
-        } // else { // Sponge - Remove unecessary
+        } // else { // Sponge - Remove unnecessary
 
         final WorldServer toWorldServer = (WorldServer) event.getToTransform().getExtent();
         // If we attempted to travel a new dimension but were denied due to some reason such as world
@@ -264,7 +271,7 @@ public final class EntityUtil {
 
     // Used by PlayerList#transferPlayerToDimension and EntityPlayerMP#changeDimension.
     // This method should NOT fire a teleport event as that should always be handled by the caller.
-    public static void transferPlayerToDimension(MoveEntityEvent.Teleport.Portal event, EntityPlayerMP playerIn) {
+    public static void transferPlayerToDimension(MoveEntityEvent event, EntityPlayerMP playerIn) {
         WorldServer fromWorld = (WorldServer) event.getFromTransform().getExtent();
         WorldServer toWorld = (WorldServer) event.getToTransform().getExtent();
         playerIn.dimension = WorldManager.getClientDimensionId(playerIn, toWorld);
@@ -859,83 +866,6 @@ public final class EntityUtil {
 
     public static EntitySnapshot createSnapshot(Entity entity) {
         return fromNative(entity).createSnapshot();
-    }
-
-    public static void changeWorld(Entity entity, Location<World> location, int currentDim, int targetDim) {
-        final MinecraftServer mcServer = SpongeImpl.getServer();
-        final WorldServer fromWorld = mcServer.getWorld(currentDim);
-        final WorldServer toWorld = mcServer.getWorld(targetDim);
-        if (entity instanceof EntityPlayer) {
-            fromWorld.getEntityTracker().removePlayerFromTrackers((EntityPlayerMP) entity);
-            fromWorld.getPlayerChunkMap().removePlayer((EntityPlayerMP) entity);
-            mcServer.getPlayerList().getPlayers().remove(entity);
-        } else {
-            fromWorld.getEntityTracker().untrack(entity);
-        }
-
-        entity.dismountRidingEntity();
-        entity.world.removeEntityDangerously(entity);
-        entity.isDead = false;
-        entity.dimension = targetDim;
-        entity.setPositionAndRotation(location.getX(), location.getY(), location.getZ(), 0, 0);
-        while (!toWorld.getCollisionBoxes(entity, entity.getEntityBoundingBox()).isEmpty() && entity.posY < 256.0D) {
-            entity.setPosition(entity.posX, entity.posY + 1.0D, entity.posZ);
-        }
-
-        toWorld.getChunkProvider().loadChunk((int) entity.posX >> 4, (int) entity.posZ >> 4);
-
-        if (entity instanceof EntityPlayerMP && ((EntityPlayerMP) entity).connection != null) {
-            EntityPlayerMP entityPlayerMP = (EntityPlayerMP) entity;
-            // Support vanilla clients going into custom dimensions
-            final int toDimensionId = WorldManager.getClientDimensionId(entityPlayerMP, toWorld);
-            if (((IMixinEntityPlayerMP) entityPlayerMP).usesCustomClient()) {
-                WorldManager.sendDimensionRegistration(entityPlayerMP, toWorld.provider);
-            } else {
-                // Force vanilla client to refresh its chunk cache if same dimension type
-                if (fromWorld != toWorld && fromWorld.provider.getDimensionType() == toWorld.provider.getDimensionType()) {
-                    entityPlayerMP.connection.sendPacket(
-                            new SPacketRespawn(toDimensionId >= 0 ? -1 : 0, toWorld.getDifficulty(),
-                                    toWorld.getWorldInfo().getTerrainType(), entityPlayerMP.interactionManager.getGameType()));
-                }
-            }
-
-            // Prevent 'lastMoveLocation' from being set to the previous world.
-            ((IMixinNetHandlerPlayServer) entityPlayerMP.connection).setLastMoveLocation(null);
-
-            entityPlayerMP.connection.sendPacket(
-                    new SPacketRespawn(toDimensionId, toWorld.getDifficulty(), toWorld.getWorldInfo().getTerrainType(),
-                            entityPlayerMP.interactionManager.getGameType()));
-            entityPlayerMP.connection.sendPacket(new SPacketServerDifficulty(toWorld.getDifficulty(), toWorld.getWorldInfo().isDifficultyLocked()));
-            SpongeImpl.getServer().getPlayerList().updatePermissionLevel(entityPlayerMP);
-
-            entity.setWorld(toWorld);
-            entityPlayerMP.connection.setPlayerLocation(entityPlayerMP.posX, entityPlayerMP.posY, entityPlayerMP.posZ,
-                    entityPlayerMP.rotationYaw, entityPlayerMP.rotationPitch);
-            entityPlayerMP.setSneaking(false);
-            mcServer.getPlayerList().updateTimeAndWeatherForPlayer(entityPlayerMP, toWorld);
-            toWorld.getPlayerChunkMap().addPlayer(entityPlayerMP);
-            toWorld.spawnEntity(entityPlayerMP);
-            mcServer.getPlayerList().getPlayers().add(entityPlayerMP);
-            entityPlayerMP.interactionManager.setWorld(toWorld);
-            entityPlayerMP.addSelfToInternalCraftingInventory();
-
-            // Update reducedDebugInfo game rule
-            entityPlayerMP.connection.sendPacket(new SPacketEntityStatus(entityPlayerMP,
-                    toWorld.getGameRules().getBoolean(DefaultGameRules.REDUCED_DEBUG_INFO) ? (byte) 22 : 23));
-
-
-            ((IMixinEntityPlayerMP) entityPlayerMP).refreshXpHealthAndFood();
-            for (Object effect : entityPlayerMP.getActivePotionEffects()) {
-                entityPlayerMP.connection.sendPacket(new SPacketEntityEffect(entityPlayerMP.getEntityId(), (PotionEffect) effect));
-            }
-            entityPlayerMP.sendPlayerAbilities();
-        } else {
-            entity.setWorld(toWorld);
-            toWorld.spawnEntity(entity);
-        }
-
-        fromWorld.resetUpdateEntityTick();
-        toWorld.resetUpdateEntityTick();
     }
 
     private static void adjustEntityPostionForTeleport(IMixinPlayerList playerList, Entity entity, WorldServer fromWorld, WorldServer toWorld) {
