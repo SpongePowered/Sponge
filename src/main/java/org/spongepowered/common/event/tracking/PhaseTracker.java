@@ -295,7 +295,7 @@ public final class PhaseTracker {
         }
 
         if (SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().isVerbose() ) {
-            if (this.stack.checkForRunaways(GeneralPhase.Post.UNWINDING, phaseContext)) {
+            if (this.stack.checkForRunaways(GeneralPhase.Post.UNWINDING, null)) {
                 // This printing is to detect possibilities of a phase not being cleared properly
                 // and resulting in a "runaway" phase state accumulation.
                 this.printRunnawayPhaseCompletion(state);
@@ -1008,10 +1008,11 @@ public final class PhaseTracker {
                     }
                 }
             }
+            final net.minecraft.entity.Entity finalEntityToSpawn = SpongeImplHooks.getCustomEntityIfItem(minecraftEntity);
             // Sponge end - continue on with the checks.
-            minecraftWorld.getChunk(chunkX, chunkZ).addEntity(minecraftEntity);
-            minecraftWorld.loadedEntityList.add(minecraftEntity);
-            mixinWorldServer.onSpongeEntityAdded(minecraftEntity); // Sponge - Cannot add onEntityAdded to the access transformer because forge makes it public
+            minecraftWorld.getChunk(chunkX, chunkZ).addEntity(finalEntityToSpawn);
+            minecraftWorld.loadedEntityList.add(finalEntityToSpawn);
+            mixinWorldServer.onSpongeEntityAdded(finalEntityToSpawn); // Sponge - Cannot add onEntityAdded to the access transformer because forge makes it public
             return true;
 
     }

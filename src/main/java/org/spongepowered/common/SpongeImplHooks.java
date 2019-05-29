@@ -648,4 +648,20 @@ public final class SpongeImplHooks {
     public static boolean isEventClientEvent(Object object) {
         return false;
     }
+
+
+    /**
+     * @author gabizou - May 28th, 2019 - 1.12.2
+     * @reason Forge has custom items, and normally, we throw an event for any
+     * and all listeners. The problem is that since Forge just blindly calls
+     * events, and Sponge only throws events if there are listeners, the custom
+     * item hook does not get called for direct spawned entities, so, we need
+     * to explicitly call the custom item creation hooks here.
+     *
+     * @param entity The vanilla entity item
+     * @return The custom item entity for the dropped item
+     */
+    public static Entity getCustomEntityIfItem(Entity entity) {
+        return entity;
+    }
 }

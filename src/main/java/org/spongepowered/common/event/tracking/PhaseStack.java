@@ -34,6 +34,8 @@ import java.util.Deque;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+import javax.annotation.Nullable;
+
 /**
  * A simple stack that couples a {@link IPhaseState} and
  * {@link PhaseContext}. As states are pushed, they can likewise
@@ -122,10 +124,10 @@ final class PhaseStack {
      * We basically want to iterate through the phases to determine if there's multiple of one state re-entering
      * when it shouldn't. To do this, we have to build a miniature map based on arrays
      * @param state The phase state to check
-     * @param phaseContext
+     * @param phaseContext The phase context to check against for runaways
      */
     @SuppressWarnings("rawtypes")
-    boolean checkForRunaways(IPhaseState<?> state, PhaseContext<?> phaseContext) {
+    boolean checkForRunaways(IPhaseState<?> state, @Nullable PhaseContext<?> phaseContext) {
         // first, check if the state is expected for re-entrance:
         if (!state.isNotReEntrant()) {
             return false;
@@ -143,7 +145,7 @@ final class PhaseStack {
             if (index < allContexts.length - 1) { // We can't go further than the length, cause that's the top of the stack
                 final PhaseContext<?> latestContext = allContexts[index];
                 final IPhaseState<?> latestState = latestContext.state;
-                if (latestState == allContexts[index + 1].state && latestState == state && latestContext.isRunaway(phaseContext)) {
+                if (latestState == allContexts[index + 1].state && latestState == state && (phaseContext == null || latestContext.isRunaway(phaseContext))) {
                     // Found a consecutive duplicate and can now print out
                     return true;
                 }
