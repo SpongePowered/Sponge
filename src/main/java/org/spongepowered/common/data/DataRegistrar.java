@@ -776,6 +776,9 @@ public class DataRegistrar {
         DataUtil.registerDualProcessor(DyeableData.class, SpongeDyeableData.class, ImmutableDyeableData.class, ImmutableSpongeDyeableData.class,
                 new BedDyeColorDataProcessor());
 
+        DataUtil.registerDataProcessorAndImpl(DisabledSlotsData.class, SpongeDisabledSlotsData.class,
+                ImmutableDisabledSlotsData.class, ImmutableSpongeDisabledSlotsData.class, new DisabledSlotsDataProcessor());
+
         // Values
 
         DataUtil.registerValueProcessor(Keys.FUSE_DURATION, new FuseDurationValueProcessor());
@@ -890,7 +893,9 @@ public class DataRegistrar {
         DataUtil.registerValueProcessor(Keys.END_GATEWAY_AGE, new EndGatewayAgeValueProcessor());
         DataUtil.registerValueProcessor(Keys.EXIT_POSITION, new EndGatewayExitPositionValueProcessor());
         DataUtil.registerValueProcessor(Keys.EXACT_TELEPORT, new EndGatewayExactTeleportValueProcessor());
-
+        DataUtil.registerValueProcessor(Keys.ARMOR_STAND_TAKING_DISABLED, new TakingDisabledValueProcessor());
+        DataUtil.registerValueProcessor(Keys.ARMOR_STAND_PLACING_DISABLED, new PlacingDisabledValueProcessor());
+        
         // Properties
         final PropertyRegistry propertyRegistry = Sponge.getPropertyRegistry();
 

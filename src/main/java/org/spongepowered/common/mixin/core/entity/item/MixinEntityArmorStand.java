@@ -34,13 +34,17 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.ArmorStandData;
 import org.spongepowered.api.data.manipulator.mutable.entity.BodyPartRotationalData;
+import org.spongepowered.api.data.manipulator.mutable.entity.DisabledSlotsData;
 import org.spongepowered.api.data.type.BodyPart;
 import org.spongepowered.api.data.type.BodyParts;
+import org.spongepowered.api.data.value.mutable.SetValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
+import org.spongepowered.api.item.inventory.equipment.EquipmentType;
+import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -55,6 +59,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeArmorStandData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeBodyPartRotationalData;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeDisabledSlotsData;
+import org.spongepowered.common.data.value.mutable.SpongeSetValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.mixin.core.entity.MixinEntityLivingBase;
@@ -72,6 +78,7 @@ public abstract class MixinEntityArmorStand extends MixinEntityLivingBase implem
     @Shadow public Rotations rightArmRotation;
     @Shadow public Rotations leftLegRotation;
     @Shadow public Rotations rightLegRotation;
+    @Shadow public int disabledSlots;
 
     @Shadow public abstract boolean getShowArms(); // getShowArms
     @Shadow public abstract boolean hasNoBasePlate(); // hasNoBasePlate
@@ -105,6 +112,11 @@ public abstract class MixinEntityArmorStand extends MixinEntityLivingBase implem
     @Override
     public ArmorStandData getArmorStandData() {
         return new SpongeArmorStandData(this.hasMarker(), this.shadow$isSmall(), this.getShowArms(), !this.hasNoBasePlate());
+    }
+
+    @Override
+    public DisabledSlotsData getDisabledSlotsData() {
+        return new SpongeDisabledSlotsData(takingDisabled().get(), placingDisabled().get());
     }
 
     @Override
