@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockRedstoneWire;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
@@ -703,7 +704,7 @@ public final class PhaseTracker {
                 // the try with resources will perform a close without the phase context being entered, leading to issues of closing
                 // other phase contexts.
                 // Refer to https://github.com/SpongePowered/SpongeForge/issues/2706
-                if (PhaseTracker.checkMaxBlockProcessingDepth(state, peek, context.getDepth())) {
+                if (!(sourceBlock instanceof BlockRedstoneWire) && PhaseTracker.checkMaxBlockProcessingDepth(state, peek, context.getDepth())) {
                     return;
                 }
                 // Sponge End

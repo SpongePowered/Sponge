@@ -227,8 +227,7 @@ public class SpongeLocatableBlock implements LocatableBlock {
         return MoreObjects.toStringHelper(this)
                 .add("blockState", this.blockState)
                 .add("position", this.position)
-                .add("worldId", this.worldId)
-                .add("worldReference", this.worldReference)
+                .add("worldReference", this.worldReference.get() == null ? "null" : this.worldReference.get().getName())
                 .toString();
     }
 
