@@ -30,6 +30,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 
 import java.util.Optional;
@@ -44,6 +45,11 @@ public class ListenerPhaseContext extends PluginPhaseContext<ListenerPhaseContex
 
     ListenerPhaseContext(IPhaseState<ListenerPhaseContext> state) {
         super(state);
+    }
+
+    @Override
+    protected boolean isRunaway(PhaseContext<?> phaseContext) {
+        return phaseContext instanceof ListenerPhaseContext && ((ListenerPhaseContext) phaseContext).object == this.object;
     }
 
     public ListenerPhaseContext event(Object obj) {
@@ -77,15 +83,17 @@ public class ListenerPhaseContext extends PluginPhaseContext<ListenerPhaseContex
     @Override
     public PrettyPrinter printCustom(PrettyPrinter printer, int indent) {
         String s = String.format("%1$"+indent+"s", "");
-        return super.printCustom(printer, indent)
-            .add(s + "- %s: %s", "Listener", this.object)
-            .add(s + "- %s: %s", "CapturePlayer", this.capturePlayer)
-            ;
+        super.printCustom(printer, indent)
+            .add(s + "- %s: %s", "Listener", this.object);
+        if (this.capturePlayer != null && this.capturePlayer.player != null) {
+            printer.add(s + "- %s: %s", "CapturedPlayer", this.capturePlayer.player);
+        }
+        return printer;
     }
 
     public static final class CapturePlayer {
 
-        @Nullable private Player player;
+        @Nullable Player player;
 
         CapturePlayer() {
 

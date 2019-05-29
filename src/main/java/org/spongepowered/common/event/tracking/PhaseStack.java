@@ -122,25 +122,28 @@ final class PhaseStack {
      * We basically want to iterate through the phases to determine if there's multiple of one state re-entering
      * when it shouldn't. To do this, we have to build a miniature map based on arrays
      * @param state The phase state to check
+     * @param phaseContext
      */
     @SuppressWarnings("rawtypes")
-    boolean checkForRunaways(IPhaseState<?> state) {
+    boolean checkForRunaways(IPhaseState<?> state, PhaseContext<?> phaseContext) {
         // first, check if the state is expected for re-entrance:
         if (!state.isNotReEntrant()) {
             return false;
         }
         final int totalCount = this.phases.size();
-        final IPhaseState<?>[] allStates = new IPhaseState[totalCount];
+        final PhaseContext<?>[] allContexts = new PhaseContext[totalCount];
         int i = 0;
         // So first, we want to collect all the states into an array as they are pushed to the stack,
         // which means that we should see the re-entrant phase pretty soon.
         for (PhaseContext<?> data : this.phases) {
-            allStates[i++] = data.state;
+            allContexts[i++] = data;
         }
         // Now we can actually iterate through the array
-        for (int index = 0; index < allStates.length; index++) {
-            if (index < allStates.length - 1) { // We can't go further than the length, cause that's the top of the stack
-                if (allStates[index] == allStates[index + 1] && allStates[index] == state) {
+        for (int index = 0; index < allContexts.length; index++) {
+            if (index < allContexts.length - 1) { // We can't go further than the length, cause that's the top of the stack
+                final PhaseContext<?> latestContext = allContexts[index];
+                final IPhaseState<?> latestState = latestContext.state;
+                if (latestState == allContexts[index + 1].state && latestState == state && latestContext.isRunaway(phaseContext)) {
                     // Found a consecutive duplicate and can now print out
                     return true;
                 }

@@ -711,4 +711,8 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     public void setSingleSnapshot(@Nullable SpongeBlockSnapshot singleSnapshot) {
         this.singleSnapshot = singleSnapshot;
     }
+
+    protected boolean isRunaway(PhaseContext<?> phaseContext) {
+        return phaseContext.getClass() == this.getClass();
+    }
 }

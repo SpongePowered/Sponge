@@ -241,7 +241,7 @@ public final class PhaseTracker {
         final IPhaseState<?> currentState = this.stack.peek().state;
         if (SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().isVerbose()) {
             if (this.stack.size() > 6) {
-                if (this.stack.checkForRunaways(state)) {
+                if (this.stack.checkForRunaways(state, phaseContext)) {
                     this.printRunawayPhase(state, phaseContext);
                 }
 
@@ -295,7 +295,7 @@ public final class PhaseTracker {
         }
 
         if (SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().isVerbose() ) {
-            if (this.stack.checkForRunaways(GeneralPhase.Post.UNWINDING)) {
+            if (this.stack.checkForRunaways(GeneralPhase.Post.UNWINDING, phaseContext)) {
                 // This printing is to detect possibilities of a phase not being cleared properly
                 // and resulting in a "runaway" phase state accumulation.
                 this.printRunnawayPhaseCompletion(state);
