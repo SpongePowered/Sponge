@@ -115,7 +115,7 @@ public final class TileEntityTypeRegistryModule
             // ignore
         }
         final String modId = SpongeImplHooks.getModIdFromClass(clazz);
-        final String tileId = modId + ":" + id;
+        final String tileId = !id.contains(":") ? modId + ":" + id : id;
         final TileEntityType tileEntityType =
                 new SpongeTileEntityType((Class<? extends org.spongepowered.api.block.tileentity.TileEntity>) clazz, name, tileId, canTick, modId);
 

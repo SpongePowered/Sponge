@@ -224,6 +224,7 @@ public final class DataQueries {
 
         public static final class Versions {
             public static final DataQuery V1_TILE_ENTITY_DATA = of("TileEntities");
+            public static final DataQuery V1_TILE_ENTITY_ID = of("id");
         }
 
         /**

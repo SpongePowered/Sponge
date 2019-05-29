@@ -49,6 +49,13 @@ public class SchematicUpdater1_to_2 implements DataContentUpdater {
         content.getViewList(DataQueries.Schematic.Versions.V1_TILE_ENTITY_DATA).ifPresent(tiles -> {
             tiles.forEach(tile -> {
                 // Remove unnecessary version information.
+                tile.getString(DataQueries.Schematic.Versions.V1_TILE_ENTITY_ID).ifPresent(id -> {
+                    // This is a fix for v1 created schematics by SpongeCommon implementation that was
+                    // unfortunately breaking the rules on the schematic format. The format called for
+                    // using "Id", but the implementation was saving "id", and it was reading "id".
+                    tile.remove(DataQueries.Schematic.Versions.V1_TILE_ENTITY_ID);
+                    tile.set(DataQueries.Schematic.BLOCKENTITY_ID, id);
+                });
                 tile.remove(DataQueries.CONTENT_VERSION);
             });
             content.remove(DataQueries.Schematic.Versions.V1_TILE_ENTITY_DATA);

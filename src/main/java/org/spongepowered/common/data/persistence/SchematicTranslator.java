@@ -280,9 +280,9 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
                 tileData.forEach(tile -> {
                         int[] pos = (int[]) tile.get(DataQueries.Schematic.BLOCKENTITY_POS).get();
                         tile.getString(DataQueries.Schematic.BLOCKENTITY_ID)
-                            .map(ResourceLocation::new)
-                            .map(TileEntity.REGISTRY::getObject)
-                            .map(TileEntityTypeRegistryModule.getInstance()::getForClass)
+                            .map(TileEntityTypeRegistryModule.getInstance()::getById)
+                            .filter(Optional::isPresent)
+                            .map(Optional::get)
                             .ifPresent(type -> {
                                 final DataView upgraded;
                                 if (needsFixers) {
