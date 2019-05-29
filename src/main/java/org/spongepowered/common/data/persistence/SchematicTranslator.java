@@ -30,6 +30,8 @@ import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.util.datafix.FixTypes;
 import org.spongepowered.api.Sponge;
@@ -278,7 +280,9 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
                 tileData.forEach(tile -> {
                         int[] pos = (int[]) tile.get(DataQueries.Schematic.BLOCKENTITY_POS).get();
                         tile.getString(DataQueries.Schematic.BLOCKENTITY_ID)
-                            .flatMap(TileEntityTypeRegistryModule.getInstance()::getById)
+                            .map(ResourceLocation::new)
+                            .map(TileEntity.REGISTRY::getObject)
+                            .map(TileEntityTypeRegistryModule.getInstance()::getForClass)
                             .ifPresent(type -> {
                                 final DataView upgraded;
                                 if (needsFixers) {
