@@ -159,30 +159,29 @@ public final class InteractionPacketState extends BasicPacketState {
                     phaseContext.getCapturedEntities().clear();
                     return;
                 }
-            } else {
-                phaseContext.getBlockItemDropSupplier().acceptAndClearIfNotEmpty(map -> {
-                    if (ShouldFire.DROP_ITEM_EVENT_DESTRUCT) {
-                        for (Map.Entry<BlockPos, Collection<EntityItem>> entry : map.asMap().entrySet()) {
-                            if (!entry.getValue().isEmpty()) {
-                                final List<Entity> items = entry.getValue().stream().map(EntityUtil::fromNative).collect(Collectors.toList());
-                                final DropItemEvent.Destruct event =
-                                    SpongeEventFactory.createDropItemEventDestruct(Sponge.getCauseStackManager().getCurrentCause(), items);
-                                SpongeImpl.postEvent(event);
-                                if (!event.isCancelled()) {
-                                    processSpawnedEntities(player, event);
-                                }
-                            }
-                        }
-                    } else {
-                        for (Map.Entry<BlockPos, Collection<EntityItem>> entry : map.asMap().entrySet()) {
-                            if (!entry.getValue().isEmpty()) {
-                                processEntities(player, (Collection<Entity>) (Collection<?>) entry.getValue());
+            }
+            phaseContext.getBlockItemDropSupplier().acceptAndClearIfNotEmpty(map -> {
+                if (ShouldFire.DROP_ITEM_EVENT_DESTRUCT) {
+                    for (Map.Entry<BlockPos, Collection<EntityItem>> entry : map.asMap().entrySet()) {
+                        if (!entry.getValue().isEmpty()) {
+                            final List<Entity> items = entry.getValue().stream().map(EntityUtil::fromNative).collect(Collectors.toList());
+                            final DropItemEvent.Destruct event =
+                                SpongeEventFactory.createDropItemEventDestruct(Sponge.getCauseStackManager().getCurrentCause(), items);
+                            SpongeImpl.postEvent(event);
+                            if (!event.isCancelled()) {
+                                processSpawnedEntities(player, event);
                             }
                         }
                     }
-                });
+                } else {
+                    for (Map.Entry<BlockPos, Collection<EntityItem>> entry : map.asMap().entrySet()) {
+                        if (!entry.getValue().isEmpty()) {
+                            processEntities(player, (Collection<Entity>) (Collection<?>) entry.getValue());
+                        }
+                    }
+                }
+            });
 
-            }
 
             phaseContext.getCapturedItemsSupplier()
                 .acceptAndClearIfNotEmpty(items -> {
