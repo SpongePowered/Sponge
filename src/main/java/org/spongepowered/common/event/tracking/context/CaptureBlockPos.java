@@ -35,7 +35,7 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-public final class CaptureBlockPos {
+public final class CaptureBlockPos implements AutoCloseable {
 
     @Nullable private BlockPos pos;
     @Nullable private WeakReference<IMixinWorldServer> mixinWorldReference;
@@ -47,8 +47,9 @@ public final class CaptureBlockPos {
         return Optional.ofNullable(this.pos);
     }
 
-    public void setPos(@Nullable BlockPos pos) {
+    public CaptureBlockPos setPos(@Nullable BlockPos pos) {
         this.pos = pos;
+        return this;
     }
 
     public void setWorld(@Nullable IMixinWorldServer world) {
@@ -94,5 +95,10 @@ public final class CaptureBlockPos {
                 .add("pos", this.pos)
                 .add("world", this.getMixinWorld().map(w -> ((World) w).getName()))
                 .toString();
+    }
+
+    @Override
+    public void close() {
+        this.pos = null;
     }
 }

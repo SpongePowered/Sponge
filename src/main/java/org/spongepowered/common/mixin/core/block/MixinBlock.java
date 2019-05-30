@@ -358,6 +358,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
                 currentContext.applyNotifierIfAvailable(context::notifier);
                 currentContext.applyOwnerIfAvailable(context::owner);
                 context.buildAndSwitch();
+                this.data = context;
             }
         }
     }

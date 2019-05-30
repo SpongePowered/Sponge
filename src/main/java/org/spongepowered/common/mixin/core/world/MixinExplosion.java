@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.world;
 
 import com.flowpowered.math.vector.Vector3d;
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.Sets;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -61,9 +62,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.context.CaptureBlockPos;
 import org.spongepowered.common.interfaces.world.IMixinExplosion;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.util.VecHelper;
 
@@ -99,7 +103,7 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
     @Shadow public float size;
 
     @Inject(method = "<init>*", at = @At("RETURN"))
-    public void onConstructed(net.minecraft.world.World world, Entity entity, double originX, double originY,
+    private void onConstructed(net.minecraft.world.World world, Entity entity, double originX, double originY,
             double originZ, float radius, boolean isFlaming, boolean isSmoking,
             CallbackInfo ci) {
         this.origin = new Vector3d(this.x, this.y, this.z);
@@ -108,56 +112,6 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
         this.shouldBreakBlocks = this.damagesTerrain;
         this.shouldDamageEntities = true;
     }
-
-
-    // TODO fix this whereever it was called from?
-//    @Override
-//    public Cause createCause() {
-//        if (this.createdCause != null) {
-//            return this.createdCause;
-//        }
-//        Object source;
-//        Object projectileSource = null;
-//        Object igniter = null;
-//        if (this.exploder == null) {
-//            source = getWorld().getBlock(getLocation().getPosition().toInt());
-//        } else {
-//            source = this.exploder;
-//            if (source instanceof Projectile) {
-//                projectileSource = ((Projectile) this.exploder).getShooter();
-//            }
-//
-//            // Don't use the exploder itself as igniter
-//            igniter = getExplosivePlacedBy();
-//            if (this.exploder == igniter) {
-//                igniter = null;
-//            }
-//        }
-//
-//        final Cause.Builder builder = Cause.source(source);
-//        if (projectileSource != null) {
-//            if (igniter != null) {
-//                builder.named(NamedCause.of("ProjectileSource", projectileSource)).named(NamedCause.of("Igniter", igniter));
-//            } else {
-//                builder.named(NamedCause.of("ProjectileSource", projectileSource));
-//            }
-//        } else if (igniter != null) {
-//            builder.named(NamedCause.of("Igniter", igniter));
-//        }
-//        if (PhaseTracker.ENABLED) {
-//            final PhaseData phaseData = PhaseTracker.getInstance().getCurrentPhaseData();
-//            phaseData.state.getPhase().appendExplosionCause(phaseData);
-//        }
-//        return this.createdCause = builder.build();
-//    }
-//
-//    @Override
-//    public Cause getCreatedCause() {
-//        if (this.createdCause == null) {
-//            createCause();
-//        }
-//        return this.createdCause;
-//    }
 
     /**
      * @author gabizou - September 8th, 2016
@@ -230,34 +184,42 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
                             ? this.world.getEntitiesWithinAABBExcludingEntity(this.exploder, new AxisAlignedBB((double) k1, (double) i2, (double) j2, (double) l1, (double) i1, (double) j1))
                             : Collections.emptyList();
         // Now we can throw our Detonate Event
-        final List<Location<World>> blockPositions = new ArrayList<>(this.affectedBlockPositions.size());
-        final List<org.spongepowered.api.entity.Entity> entities = new ArrayList<>(list.size());
-        for (BlockPos pos : this.affectedBlockPositions) {
-            blockPositions.add(new Location<>((World) this.world, pos.getX(), pos.getY(), pos.getZ()));
-        }
-        for (Entity entity : list) {
-            entities.add((org.spongepowered.api.entity.Entity) entity);
-        }
-        ExplosionEvent.Detonate detonate = SpongeEventFactory.createExplosionEventDetonate(Sponge.getCauseStackManager().getCurrentCause(), blockPositions, entities, this, (World) this.world);
-        SpongeImpl.postEvent(detonate);
-        if (detonate.isCancelled()) {
-            this.affectedBlockPositions.clear();
-            return;
-        }
-        this.affectedBlockPositions.clear();
-        if (this.shouldBreakBlocks) {
-            for (Location<World> worldLocation : detonate.getAffectedLocations()) {
-                this.affectedBlockPositions.add(VecHelper.toBlockPos(worldLocation));
+        if (ShouldFire.EXPLOSION_EVENT_DETONATE) {
+            final List<Location<World>> blockPositions = new ArrayList<>(this.affectedBlockPositions.size());
+            final List<org.spongepowered.api.entity.Entity> entities = new ArrayList<>(list.size());
+            for (BlockPos pos : this.affectedBlockPositions) {
+                blockPositions.add(new Location<>((World) this.world, pos.getX(), pos.getY(), pos.getZ()));
             }
-        }
-        list.clear();
-
-        if (this.shouldDamageEntities) {
-            for (org.spongepowered.api.entity.Entity entity : detonate.getEntities()) {
-                try {
-                    list.add(EntityUtil.toNative(entity));
-                } catch (Exception e) {
-                    // Do nothing, a plugin tried to use the wrong entity somehow.
+            for (Entity entity : list) {
+                // Make sure to check the entity is immune first.
+                if (!entity.isImmuneToExplosions()) {
+                    entities.add((org.spongepowered.api.entity.Entity) entity);
+                }
+            }
+            ExplosionEvent.Detonate
+                detonate =
+                SpongeEventFactory.createExplosionEventDetonate(Sponge.getCauseStackManager().getCurrentCause(), blockPositions, entities, this,
+                    (World) this.world);
+            SpongeImpl.postEvent(detonate);
+            // Clear the positions so that they can be pulled from the event
+            this.affectedBlockPositions.clear();
+            if (detonate.isCancelled()) {
+                return;
+            }
+            if (this.shouldBreakBlocks) {
+                for (Location<World> worldLocation : detonate.getAffectedLocations()) {
+                    this.affectedBlockPositions.add(VecHelper.toBlockPos(worldLocation));
+                }
+            }
+            // Clear the list of entities so they can be pulled from the event.
+            list.clear();
+            if (this.shouldDamageEntities) {
+                for (org.spongepowered.api.entity.Entity entity : detonate.getEntities()) {
+                    try {
+                        list.add(EntityUtil.toNative(entity));
+                    } catch (Exception e) {
+                        // Do nothing, a plugin tried to use the wrong entity somehow.
+                    }
                 }
             }
         }
@@ -321,31 +283,30 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
         this.world.playSound((EntityPlayer) null, this.x, this.y, this.z, SoundEvents.ENTITY_GENERIC_EXPLODE,
             SoundCategory.BLOCKS, 4.0F, (1.0F + (this.world.rand.nextFloat() - this.world.rand.nextFloat()) * 0.2F) * 0.7F);
 
-        if (this.size >= 2.0F) {
+        if (this.size >= 2.0F && (this.damagesTerrain || this.shouldBreakBlocks)) {
+            // Sponge Start - Use WorldServer methods since we prune the explosion packets
+            // to avoid spamming/lagging the client out when some ~idiot~ decides to explode
+            // hundreds of explosions at once
             if (this.world instanceof WorldServer) {
-                ((WorldServer) this.world).spawnParticle(EnumParticleTypes.EXPLOSION_HUGE,
-                    this.x, this.y, this.z,
-                    1,
-                    0, 0, 0,
-                    0.1D);
+                ((WorldServer) this.world).spawnParticle(EnumParticleTypes.EXPLOSION_HUGE, this.x, this.y, this.z, 1, 0, 0, 0, 0.1D);
             } else {
-                this.world.spawnParticle(EnumParticleTypes.EXPLOSION_HUGE,
-                    this.x, this.y, this.z,
-                    1.0D, 0.0D, 0.0D);
-            }
+                // Sponge End
+                this.world.spawnParticle(EnumParticleTypes.EXPLOSION_HUGE, this.x, this.y, this.z, 1.0D, 0.0D, 0.0D);
+            } // Sponge - brackets.
         } else {
+            // Sponge Start - Use WorldServer methods since we prune the explosion packets
+            // to avoid spamming/lagging the client out when some ~idiot~ decides to explode
+            // hundreds of explosions at once
             if (this.world instanceof WorldServer) {
-                ((WorldServer) this.world).spawnParticle(EnumParticleTypes.EXPLOSION_LARGE,
-                    this.x, this.y, this.z,
-                    1,
-                    0, 0, 0,
-                    0.1D);
-            } else {
-                this.world.spawnParticle(EnumParticleTypes.EXPLOSION_LARGE,
-                    this.x, this.y, this.z,
-                    1.0D, 0.0D, 0.0D);
-            }
+                ((WorldServer) this.world).spawnParticle(EnumParticleTypes.EXPLOSION_LARGE, this.x, this.y, this.z, 1, 0, 0, 0, 0.1D);
+            } else { // Sponge end
+                this.world.spawnParticle(EnumParticleTypes.EXPLOSION_LARGE, this.x, this.y, this.z, 1.0D, 0.0D, 0.0D);
+            } // Sponge - brackets.
         }
+        // Sponge Start - set up some variables for more fasts
+        @Nullable final PhaseContext<?> context = !((IMixinWorld) this.world).isFake() ? PhaseTracker.getInstance().getCurrentContext() : null;
+        final boolean hasCapturePos = context != null && context.state.requiresBlockPosTracking();
+        // Sponge end
 
         if (this.shouldBreakBlocks) { // Sponge - use 'shouldBreakBlocks' instead of 'damagesTerrain'
             for (BlockPos blockpos : this.affectedBlockPositions) {
@@ -368,37 +329,34 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
                     d3 = d3 * d7;
                     d4 = d4 * d7;
                     d5 = d5 * d7;
-                    this.world.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL, (d0 + this.x) / 2.0D, (d1 + this.y) / 2.0D,
-                        (d2 + this.z) / 2.0D, d3, d4, d5, new int[0]);
+                    this.world.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL, (d0 + this.x) / 2.0D, (d1 + this.y) / 2.0D, (d2 + this.z) / 2.0D, d3, d4, d5, new int[0]);
                     this.world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, d0, d1, d2, d3, d4, d5, new int[0]);
                 }
 
                 if (iblockstate.getMaterial() != Material.AIR) {
                     if (block.canDropFromExplosion((net.minecraft.world.Explosion) (Object) this)) {
                         // Sponge Start - Track the block position being destroyed
-                        final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
                         // We need to capture this block position if necessary
-                        if (context.state.requiresBlockPosTracking()) {
-                            context.getCaptureBlockPos().setPos(blockpos);
-                        }
-                        block.dropBlockAsItemWithChance(this.world, blockpos, this.world.getBlockState(blockpos), 1.0F / this.size, 0);
-                        // And then un-set the captured block position
-                        if (context.state.requiresBlockPosTracking()) {
-                            context.getCaptureBlockPos().setPos(null);
-                        }
+                        try (CaptureBlockPos pos = hasCapturePos ? context.getCaptureBlockPos() : null) {
+                            if (pos != null) {
+                                pos.setPos(blockpos);
+                            }
+                            // Sponge End
+                            block.dropBlockAsItemWithChance(this.world, blockpos, this.world.getBlockState(blockpos), 1.0F / this.size, 0);
+                        } // Sponge - brackets
                     }
 
                     // Sponge Start - Track the block position being destroyed
-                    final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
                     // We need to capture this block position if necessary
-                    if (context.state.requiresBlockPosTracking()) {
-                        context.getCaptureBlockPos().setPos(blockpos);
-                    }
-                    // Because we need to hook into forge.
-                    SpongeImplHooks.blockExploded(block, this.world, blockpos, (net.minecraft.world.Explosion) (Object) this);
-                    // And then un-set the captured block position
-                    if (context.state.requiresBlockPosTracking()) {
-                        context.getCaptureBlockPos().setPos(null);
+                    try (CaptureBlockPos pos = hasCapturePos ? context.getCaptureBlockPos() : null) {
+                        if (pos != null) {
+                            pos.setPos(blockpos);
+                        }
+                        // this.world.setBlockState(blockpos, Blocks.AIR.getDefaultState(), 3); // Vanilla
+                        // block.onExplosionDestroy(this.world, blockpos, this); // Vanilla
+                        // block.onBlockExploded(this.world, blockpos, this); // Forge
+                        // Sponge - Use our universal hook.
+                        SpongeImplHooks.blockExploded(block, this.world, blockpos, (net.minecraft.world.Explosion) (Object) this);
                     }
                     // Sponge End
                 }
@@ -407,19 +365,15 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
 
         if (this.causesFire) {
             for (BlockPos blockpos1 : this.affectedBlockPositions) {
-                if (this.world.getBlockState(blockpos1).getMaterial() == Material.AIR && this.world.getBlockState(blockpos1.down()).isFullBlock()
-                    && this.random.nextInt(3) == 0) {
+                if (this.world.getBlockState(blockpos1).getMaterial() == Material.AIR && this.world.getBlockState(blockpos1.down()).isFullBlock() && this.random.nextInt(3) == 0) {
                     // Sponge Start - Track the block position being destroyed
-                    final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
-                    // We need to capture this block position if necessary
-                    if (context.state.requiresBlockPosTracking()) {
-                        context.getCaptureBlockPos().setPos(blockpos1);
-                    }
-                    PhaseTracker.getInstance().setBlockState((IMixinWorldServer) this.world, blockpos1, Blocks.FIRE.getDefaultState(), BlockChangeFlags.ALL);
-                    // And then un-set the captured block position
-                    if (context.state.requiresBlockPosTracking()) {
-                        context.getCaptureBlockPos().setPos(null);
-                    }
+                    try (CaptureBlockPos pos = hasCapturePos ? context.getCaptureBlockPos() : null) {
+                        if (pos != null) {
+                            pos.setPos(blockpos1);
+                        }
+                        // Sponge End
+                        this.world.setBlockState(blockpos1, Blocks.FIRE.getDefaultState());
+                    } // Sponge - brackets
                 }
             }
         }
@@ -479,5 +433,19 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
     @Override
     public void setShouldDamageEntities(boolean shouldDamageEntities) {
         this.shouldDamageEntities = shouldDamageEntities;
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+            .add("causesFire", this.causesFire)
+            .add("damagesTerrain", this.damagesTerrain)
+            .add("world", this.world.getWorldInfo() == null ? "null" : this.world.getWorldInfo().getWorldName())
+            .add("x", this.x)
+            .add("y", this.y)
+            .add("z", this.z)
+            .add("exploder", this.exploder)
+            .add("size", this.size)
+            .toString();
     }
 }

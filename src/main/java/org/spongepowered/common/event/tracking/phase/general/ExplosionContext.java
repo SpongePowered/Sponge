@@ -77,4 +77,13 @@ public final class ExplosionContext extends GeneralPhaseContext<ExplosionContext
         return super.printCustom(printer, indent)
             .add(s + "- %s: %s", "Explosion", this.explosion);
     }
+
+    @Override
+    protected boolean isRunaway(PhaseContext<?> phaseContext) {
+        if (phaseContext.getClass() != ExplosionContext.class) {
+            return false;
+        }
+        final Explosion otherExplosion = ((ExplosionContext) phaseContext).explosion;
+        return otherExplosion.world == this.explosion.world && otherExplosion.x == this.explosion.x && otherExplosion.y == this.explosion.y && otherExplosion.z == this.explosion.z;
+    }
 }
