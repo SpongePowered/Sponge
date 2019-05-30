@@ -62,18 +62,18 @@ import java.util.Set;
 public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistryModule<EntityType, Entity>, SpongeAdditionalCatalogRegistryModule<EntityType> {
 
     @RegisterCatalog(EntityTypes.class)
-    protected final Map<String, EntityType> entityTypeMappings = Maps.newHashMap();
+    protected final Map<String, SpongeEntityType> entityTypeMappings = Maps.newHashMap();
 
-    public final Map<Class<? extends Entity>, EntityType> entityClassToTypeMappings = Maps.newHashMap();
+    public final Map<Class<? extends Entity>, SpongeEntityType> entityClassToTypeMappings = Maps.newHashMap();
     private final Set<FutureRegistration> customEntities = new HashSet<>();
 
     public static EntityTypeRegistryModule getInstance() {
         return Holder.INSTANCE;
     }
 
-    public void registerEntityType(EntityType type) {
+    public void registerEntityType(SpongeEntityType type) {
         this.entityTypeMappings.put(type.getId(), type);
-        this.entityClassToTypeMappings.put(((SpongeEntityType) type).entityClass, type);
+        this.entityClassToTypeMappings.put((type).entityClass, type);
     }
 
     @Override
@@ -217,8 +217,8 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
             if (fieldName.equals("UNKNOWN")) {
                 return SpongeEntityType.UNKNOWN;
             }
-            EntityType entityType = this.entityTypeMappings.get(fieldName.toLowerCase(Locale.ENGLISH));
-            this.entityClassToTypeMappings.put(((SpongeEntityType) entityType).entityClass, entityType);
+            SpongeEntityType entityType = this.entityTypeMappings.get(fieldName.toLowerCase(Locale.ENGLISH));
+            this.entityClassToTypeMappings.put(entityType.entityClass, entityType);
             // remove old mapping
             this.entityTypeMappings.remove(fieldName.toLowerCase(Locale.ENGLISH));
             // add new mapping with minecraft id
@@ -236,8 +236,9 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
 
     @Override
     public void registerAdditionalCatalog(EntityType extraCatalog) {
-        this.entityTypeMappings.put(extraCatalog.getId(), extraCatalog);
-        this.entityClassToTypeMappings.put(((SpongeEntityType) extraCatalog).entityClass, extraCatalog);
+        final SpongeEntityType spongeEntityType = (SpongeEntityType) extraCatalog;
+        this.entityTypeMappings.put(extraCatalog.getId(), spongeEntityType);
+        this.entityClassToTypeMappings.put(spongeEntityType.entityClass, spongeEntityType);
     }
 
     @Override
@@ -246,12 +247,12 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
     }
 
     @Override
-    public EntityType getForClass(Class<? extends Entity> clazz) {
-        EntityType type = this.entityClassToTypeMappings.get(clazz);
+    public SpongeEntityType getForClass(Class<? extends Entity> clazz) {
+        SpongeEntityType type = this.entityClassToTypeMappings.get(clazz);
         if (type == null) {
             SpongeImpl.getLogger().warn(String.format("No entity type is registered for class %s", clazz.getName()));
 
-            type = EntityTypes.UNKNOWN;
+            type = (SpongeEntityType) EntityTypes.UNKNOWN;
             this.entityClassToTypeMappings.put(clazz, type);
         }
         return type;

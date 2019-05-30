@@ -442,7 +442,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     }
 
     @Override
-    public void refreshCache() {
+    public void refreshTrackerStates() {
         // not needed
     }
 

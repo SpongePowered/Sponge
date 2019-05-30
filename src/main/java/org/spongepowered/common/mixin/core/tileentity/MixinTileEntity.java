@@ -111,7 +111,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
 
     @Inject(method = "<init>*", at = @At("RETURN"))
     public void onConstruction(CallbackInfo ci) {
-        this.refreshCache();
+        this.refreshTrackerStates();
     }
 
     @Intrinsic
@@ -404,7 +404,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     }
 
     @Override
-    public void refreshCache() {
+    public void refreshTrackerStates() {
         if (this.tileType != null) {
             this.allowsBlockBulkCapture = ((SpongeTileEntityType) this.tileType).allowsBlockBulkCapture;
             this.allowsEntityBulkCapture = ((SpongeTileEntityType) this.tileType).allowsEntityBulkCapture;

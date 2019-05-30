@@ -24,17 +24,24 @@
  */
 package org.spongepowered.common.entity;
 
+import co.aikar.timings.Timing;
 import com.google.common.base.MoreObjects;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureType;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.util.DamageSource;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.EntityTrackerCategory;
 import org.spongepowered.common.config.category.EntityTrackerModCategory;
 import org.spongepowered.common.config.type.TrackerConfig;
+import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimings;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Locale;
@@ -43,14 +50,7 @@ import javax.annotation.Nullable;
 
 public class SpongeEntityType extends SpongeCatalogType.Translatable implements EntityType {
 
-    public static final EntityType UNKNOWN = new EntityType() {
-
-        private final Translation translation = new SpongeTranslation("entity.generic.name");
-
-        @Override
-        public Translation getTranslation() {
-            return this.translation;
-        }
+    public static final EntityType UNKNOWN = new SpongeEntityType(-999999, "Unknown", "unknown", Entity.class, new SpongeTranslation("entity.generic.name")) {
 
         @Override
         public String getName() {
@@ -58,32 +58,35 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
         }
 
         @Override
-        public String getId() {
-            return "unknown:unknown";
-        }
-
-        @Override
         public Class<? extends org.spongepowered.api.entity.Entity> getEntityClass() {
             throw new UnsupportedOperationException("Unknown entity type has no entity class");
         }
 
+        @Override
+        public void initializeTrackerState() {
+            // no need to initialize
+        }
+
+        @Override
+        public boolean isKnown() {
+            return false;
+        }
     };
 
     public final int entityTypeId;
     public final String entityName;
     public final String modId;
     public final Class<? extends Entity> entityClass;
+    private final boolean isVanilla;
     private EnumCreatureType creatureType;
     private boolean activationRangeInitialized = false;
-    // currently not used
-    public int trackingRange;
-    public int updateFrequency;
-    public boolean sendsVelocityUpdates;
+    @Nullable private Timing timing = null;
     // Used by tracker config
     public boolean allowsBlockBulkCapture = true;
     public boolean allowsEntityBulkCapture = true;
     public boolean allowsBlockEventCreation = true;
     public boolean allowsEntityEventCreation = true;
+    public boolean isModdedDamageEntityMethod = false;
 
     public SpongeEntityType(int id, String name, Class<? extends Entity> clazz, Translation translation) {
         this(id, name.toLowerCase(Locale.ENGLISH), "minecraft", clazz, translation);
@@ -95,6 +98,7 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
         this.entityName = name.toLowerCase(Locale.ENGLISH);
         this.entityClass = clazz;
         this.modId = modId.toLowerCase(Locale.ENGLISH);
+        this.isVanilla = this.entityClass.getName().startsWith("net.minecraft.");
         this.initializeTrackerState();
     }
 
@@ -114,6 +118,7 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
         return this.modId;
     }
 
+    @Nullable
     public EnumCreatureType getEnumCreatureType() {
         return this.creatureType;
     }
@@ -158,6 +163,17 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
         if (entityTracker.autoPopulateData()) {
             trackerConfig.save();
         }
+
+        try {
+            String mapping = SpongeImplHooks.isDeobfuscatedEnvironment() ? "damageEntity" : "func_70665_d";
+            Class<?>[] argTypes = {DamageSource.class, float.class };
+            Class<?> clazz = this.getClass().getMethod(mapping, argTypes).getDeclaringClass();
+            if (!(clazz.equals(EntityLivingBase.class) || clazz.equals(EntityPlayer.class) || clazz.equals(EntityPlayerMP.class))) {
+                this.isModdedDamageEntityMethod = true;
+            }
+        } catch (Throwable ex) {
+            // ignore
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -173,4 +189,18 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
                 .add("class", this.entityClass.getName());
     }
 
+    public Timing getTimingsHandler() {
+        if (this.timing == null) {
+            this.timing = SpongeTimings.getEntityTiming(this);
+        }
+        return this.timing;
+    }
+
+    public boolean isKnown() {
+        return true;
+    }
+
+    public boolean isVanilla() {
+        return this.isVanilla;
+    }
 }

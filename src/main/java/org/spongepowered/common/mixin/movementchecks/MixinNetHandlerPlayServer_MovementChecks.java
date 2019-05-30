@@ -41,7 +41,7 @@ public class MixinNetHandlerPlayServer_MovementChecks {
     @Shadow public EntityPlayerMP player;
 
     @Redirect(method = "processPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;isInvulnerableDimensionChange()Z", ordinal = 0))
-    public boolean onPlayerMovedTooQuicklyCheck(EntityPlayerMP player) {
+    private boolean onPlayerMovedTooQuicklyCheck(EntityPlayerMP player) {
         if (SpongeImpl.getGlobalConfig().getConfig().getMovementChecks().playerMovedTooQuickly()) {
             return player.isInvulnerableDimensionChange();
         }
@@ -49,7 +49,7 @@ public class MixinNetHandlerPlayServer_MovementChecks {
     }
 
     @Redirect(method = "processPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;isInvulnerableDimensionChange()Z", ordinal = 1))
-    public boolean onMovedWronglyCheck(EntityPlayerMP player) {
+    private boolean onMovedWronglyCheck(EntityPlayerMP player) {
         if (SpongeImpl.getGlobalConfig().getConfig().getMovementChecks().movedWrongly()) {
             return player.isInvulnerableDimensionChange();
         }
@@ -59,7 +59,7 @@ public class MixinNetHandlerPlayServer_MovementChecks {
     @ModifyConstant(method = "processVehicleMove", constant = @Constant(doubleValue = 100, ordinal = 0), slice = @Slice(
             from = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;motionZ:D", ordinal = 1),
             to = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;isSinglePlayer()Z", ordinal = 0)))
-    public double onVehicleMovedTooQuicklyCheck(double val) {
+    private double onVehicleMovedTooQuicklyCheck(double val) {
         if (SpongeImpl.getGlobalConfig().getConfig().getMovementChecks().playerVehicleMovedTooQuickly()) {
             return val;
         }
@@ -70,7 +70,7 @@ public class MixinNetHandlerPlayServer_MovementChecks {
             from = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;move(Lnet/minecraft/entity/MoverType;DDD)V", ordinal = 0),
             to  = @At(value = "INVOKE", target = "Lorg/apache/logging/log4j/Logger;warn(Ljava/lang/String;Ljava/lang/Object;)V", ordinal = 0, remap = false)
     ))
-    public double onMovedWronglySecond(double val) {
+    private double onMovedWronglySecond(double val) {
         if (SpongeImpl.getGlobalConfig().getConfig().getMovementChecks().movedWrongly()) {
             return val;
         }

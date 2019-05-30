@@ -137,104 +137,72 @@ import javax.annotation.Nullable;
 @Mixin(value = EntityLivingBase.class, priority = 999)
 public abstract class MixinEntityLivingBase extends MixinEntity implements Living, IMixinEntityLivingBase {
 
-    private static final String WORLD_SPAWN_PARTICLE = "Lnet/minecraft/world/World;spawnParticle(Lnet/minecraft/util/EnumParticleTypes;DDDDDD[I)V";
     private static final int MAX_DEATH_EVENTS_BEFORE_GIVING_UP = 3;
-
-    private int maxAir = 300;
-    private boolean runningCollideWithNearby = false;
 
     @Shadow public int maxHurtResistantTime;
     @Shadow public int hurtTime;
     @Shadow public int maxHurtTime;
-    @Shadow protected int scoreValue;
     @Shadow public float attackedAtYaw;
     @Shadow public float limbSwingAmount;
-    @Shadow public boolean potionsNeedUpdate;
     @Shadow public boolean dead;
-    @Shadow public CombatTracker combatTracker;
     @Shadow @Nullable public EntityLivingBase revengeTarget;
-    @Shadow protected AbstractAttributeMap attributeMap;
     @Shadow protected int idleTime;
+    @Shadow protected int scoreValue;
     @Shadow protected int recentlyHit;
+    @Shadow protected int activeItemStackUseCount;
     @Shadow protected float lastDamage;
     @Shadow @Nullable protected EntityPlayer attackingPlayer;
     @Shadow protected ItemStack activeItemStack;
     @Shadow private DamageSource lastDamageSource;
     @Shadow private long lastDamageStamp;
-    @Nullable private ItemStack activeItemStackCopy;
 
-    @Shadow public abstract int getItemInUseCount();
-    @Shadow public abstract void resetActiveHand();
-
-    @Shadow protected int activeItemStackUseCount;
-
-    // Empty body so that we can call super() in MixinEntityPlayer
-    @Shadow public void stopActiveHand() {
-
-    }
-
-    @Shadow protected abstract void markVelocityChanged();
-    @Shadow protected abstract SoundEvent getDeathSound();
-    @Shadow protected abstract float getSoundVolume();
-    @Shadow protected abstract float getSoundPitch();
-    @Shadow protected abstract SoundEvent getHurtSound(DamageSource cause);
+    @Shadow public void stopActiveHand() { }
     @Shadow public abstract void setHealth(float health);
-    @Shadow public abstract void addPotionEffect(net.minecraft.potion.PotionEffect potionEffect);
-    @Shadow protected abstract void markPotionsDirty();
-    @Shadow public abstract void clearActivePotions();
     @Shadow public abstract void setLastAttackedEntity(net.minecraft.entity.Entity entity);
-    @Shadow public abstract boolean isPotionActive(Potion potion);
-    @Shadow public abstract float getHealth();
-    @Shadow public abstract float getMaxHealth();
-    @Shadow public abstract float getRotationYawHead();
     @Shadow public abstract void setRotationYawHead(float rotation);
-    @Shadow public abstract Collection getActivePotionEffects();
-    @Shadow @Nullable public abstract EntityLivingBase getLastAttackedEntity();
-    @Shadow public abstract IAttributeInstance getEntityAttribute(IAttribute attribute);
-    @Shadow public abstract ItemStack getItemStackFromSlot(EntityEquipmentSlot slotIn);
-    @Shadow protected abstract void applyEntityAttributes();
-    @Shadow protected abstract void playHurtSound(net.minecraft.util.DamageSource p_184581_1_);
-    @Shadow protected abstract void damageShield(float p_184590_1_);
-    @Shadow public abstract void setActiveHand(EnumHand hand);
-    @Shadow public abstract ItemStack getHeldItem(EnumHand hand);
-    @Shadow public abstract void setHeldItem(EnumHand hand, @Nullable ItemStack stack);
-    @Shadow public abstract ItemStack getHeldItemMainhand();
-    @Shadow public abstract boolean isHandActive();
-    @Shadow protected abstract void onDeathUpdate();
+    @Shadow public abstract void setRenderYawOffset(float offset);
     @Shadow public abstract void knockBack(net.minecraft.entity.Entity entityIn, float p_70653_2_, double p_70653_3_, double p_70653_5_);
     @Shadow public abstract void shadow$setRevengeTarget(EntityLivingBase livingBase);
     @Shadow public abstract void setAbsorptionAmount(float amount);
-    @Shadow public abstract float getAbsorptionAmount();
-    @Shadow public abstract CombatTracker getCombatTracker();
+    @Shadow public abstract void setHeldItem(EnumHand hand, @Nullable ItemStack stack);
     @Shadow public abstract void setSprinting(boolean sprinting);
+    @Shadow public abstract void resetActiveHand();
+    @Shadow public abstract int getItemInUseCount();
+    @Shadow public abstract float getAbsorptionAmount();
+    @Shadow public abstract float getHealth();
+    @Shadow public abstract float getMaxHealth();
+    @Shadow public abstract float getRotationYawHead();
+    @Shadow public abstract boolean isPotionActive(Potion potion);
     @Shadow public abstract boolean isOnLadder();
-    @Shadow @Nullable public abstract EntityLivingBase getAttackingEntity();
-    @Shadow protected abstract void dropLoot(boolean wasRecentlyHit, int lootingModifier, DamageSource source);
-    @Shadow protected abstract boolean canDropLoot();
-    @Shadow public abstract Random getRNG();
-    @Shadow protected abstract void blockUsingShield(EntityLivingBase p_190629_1_);
     @Shadow public abstract boolean canBlockDamageSource(DamageSource p_184583_1_);
+    @Shadow public abstract IAttributeInstance getEntityAttribute(IAttribute attribute);
+    @Shadow public abstract ItemStack getItemStackFromSlot(EntityEquipmentSlot slotIn);
+    @Shadow public abstract ItemStack getHeldItem(EnumHand hand);
+    @Shadow public abstract ItemStack getHeldItemMainhand();
+    @Shadow public abstract CombatTracker getCombatTracker();
+    @Shadow @Nullable public abstract EntityLivingBase getAttackingEntity();
+    @Shadow public abstract Random getRNG();
+    @Shadow public void onKillCommand() { }
+    @Shadow public abstract AbstractAttributeMap getAttributeMap();
+    @Shadow public abstract EnumHand getActiveHand();
+    @Shadow protected abstract void onDeathUpdate();
+    @Shadow protected abstract void markVelocityChanged();
+    @Shadow protected abstract void damageShield(float p_184590_1_);
+    @Shadow protected abstract void playHurtSound(net.minecraft.util.DamageSource p_184581_1_);
+    @Shadow protected abstract void blockUsingShield(EntityLivingBase p_190629_1_);
+    @Shadow protected abstract void dropLoot(boolean wasRecentlyHit, int lootingModifier, DamageSource source);
+    @Shadow protected abstract int getExperiencePoints(EntityPlayer attackingPlayer);
+    @Shadow protected abstract float getSoundVolume();
+    @Shadow protected abstract float getSoundPitch();
+    @Shadow protected abstract boolean canDropLoot();
+    @Shadow protected abstract SoundEvent getDeathSound();
     @Shadow private boolean checkTotemDeathProtection(DamageSource p_190628_1_) {
         return false; // SHADOWED
     }
-    @Shadow public abstract AbstractAttributeMap getAttributeMap();
-    @Shadow public void onKillCommand() {
-        // Non-abstract for MixinEntityArmorStand
-    }
-    @Shadow protected abstract int getExperiencePoints(EntityPlayer attackingPlayer);
-
-    @Shadow @Nullable public abstract EntityLivingBase getRevengeTarget();
-
-    @Shadow public int deathTime;
-
-    @Shadow public abstract void heal(float healAmount);
-
-    @Shadow public abstract EnumHand getActiveHand();
-
-    @Shadow public abstract void setRenderYawOffset(float offset);
 
     private int deathEventsPosted;
-
+    private int maxAir = 300;
+    @Nullable private ItemStack activeItemStackCopy;
 
     @Override
     public Vector3d getHeadRotation() {
@@ -519,8 +487,14 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                     }
 
                     // Sponge start - reroute to our damage hook
-                    if (!this.damageEntityHook(source, amount - this.lastDamage)) {
-                        return false;
+                    // only if the class is unmodded. If it's a modded class, then it should be calling our
+                    // damageEntity method, which would re-run our damageEntityHook.
+                    if (this.entityType.isModdedDamageEntityMethod) {
+                        this.damageEntity(source, amount - this.lastDamage);
+                    } else {
+                        if (!this.damageEntityHook(source, amount - this.lastDamage)) {
+                            return false;
+                        }
                     }
 
                     // this.damageEntity(source, amount - this.lastDamage); // handled above
@@ -529,8 +503,12 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                     flag1 = false;
                 } else {
                     // Sponge start - reroute to our damage hook
-                    if (!this.damageEntityHook(source, amount)) {
-                        return false;
+                    if (this.entityType.isModdedDamageEntityMethod) {
+                        this.damageEntity(source, amount);
+                    } else {
+                        if (!this.damageEntityHook(source, amount)) {
+                            return false;
+                        }
                     }
                     this.lastDamage = amount;
                     this.hurtResistantTime = this.maxHurtResistantTime;
@@ -645,8 +623,8 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
      * @author gabizou - January 4th, 2016
      * This is necessary for invisibility checks so that vanish players don't actually send the particle stuffs.
      */
-    @Redirect(method = "updateItemUse", at = @At(value = "INVOKE", target = WORLD_SPAWN_PARTICLE))
-    public void spawnItemParticle(World world, EnumParticleTypes particleTypes, double xCoord, double yCoord, double zCoord, double xOffset,
+    @Redirect(method = "updateItemUse", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnParticle(Lnet/minecraft/util/EnumParticleTypes;DDDDDD[I)V"))
+    private void spawnItemParticle(World world, EnumParticleTypes particleTypes, double xCoord, double yCoord, double zCoord, double xOffset,
             double yOffset, double zOffset, int ... p_175688_14_) {
         if (!this.isVanished()) {
             this.world.spawnParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset, p_175688_14_);
@@ -715,9 +693,11 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                 damage = (float) event.getFinalDamage();
 
                 // Helmet
-                final ItemStack mainHandItem = this.getItemStackFromSlot(EntityEquipmentSlot.MAINHAND);
-                if ((damageSource instanceof FallingBlockDamageSource) && mainHandItem != null) {
-                    mainHandItem.damageItem((int) (event.getBaseDamage() * 4.0F + this.rand.nextFloat() * event.getBaseDamage() * 2.0F), (EntityLivingBase) (Object) this);
+                final ItemStack helmet = this.getItemStackFromSlot(EntityEquipmentSlot.HEAD);
+                // We still sanity check if a mod is calling to damage the entity with an anvil or falling block
+                // without using our mixin redirects in MixinEntityFallingBlock.
+                if ((damageSource instanceof FallingBlockDamageSource) || damageSource == DamageSource.ANVIL || damageSource == DamageSource.FALLING_BLOCK && !helmet.isEmpty()) {
+                    helmet.damageItem((int) (event.getBaseDamage() * 4.0F + this.rand.nextFloat() * event.getBaseDamage() * 2.0F), (EntityLivingBase) (Object) this);
                 }
 
                 // Shield

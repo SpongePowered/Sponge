@@ -33,6 +33,7 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scheduler.Task;
+import org.spongepowered.common.entity.SpongeEntityType;
 
 public final class SpongeTimings {
 
@@ -102,9 +103,8 @@ public final class SpongeTimings {
      * @param entity
      * @return
      */
-    public static Timing getEntityTiming(Entity entity) {
-        EntityType type = entity.getType();
-        String entityType = type != null ? type.getId() : entity.getClass().getName();
+    public static Timing getEntityTiming(SpongeEntityType entity) {
+        String entityType = entity != null ? entity.getId() : entity.getClass().getName();
         return SpongeTimingsFactory.ofSafe("Minecraft", "## tickEntity - " + entityType);
     }
 
