@@ -252,7 +252,8 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
                             .resolve(this.levelName)
                             .resolve("world.conf"),
                             SpongeImpl.ECOSYSTEM_ID,
-                            ((IMixinDimensionType) getDimensionType()).getDimensionConfig());
+                            ((IMixinDimensionType) getDimensionType()).getDimensionConfig(),
+                            false);
         } else {
             this.worldConfig = SpongeConfig.newDummyConfig(SpongeConfig.Type.WORLD);
         }

@@ -32,7 +32,6 @@ import org.spongepowered.common.config.category.TileEntityTrackerCategory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 
-@ConfigSerializable
 public class TrackerConfig extends ConfigBase {
 
     /**

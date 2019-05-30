@@ -137,7 +137,7 @@ public class SpongeConfig<T extends ConfigBase> {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public SpongeConfig(Type type, Path path, String modId, SpongeConfig<?> parent) {
+    public SpongeConfig(Type type, Path path, String modId, SpongeConfig<?> parent, boolean forceSaveOnLoad) {
         this.type = type;
         this.parent = parent;
         this.modId = modId;
@@ -161,7 +161,9 @@ public class SpongeConfig<T extends ConfigBase> {
             // cause duplicate nodes to not be removed properly as parent would have cleaned up
             // all duplicates prior.
             // To handle the above issue, we only call save for world configs during init.
-            if (parent != null && parent.parent != null) {
+            if (!forceSaveOnLoad && parent != null && parent.parent != null) {
+                saveNow();
+            } else if (forceSaveOnLoad) {
                 saveNow();
             }
         } catch (Exception e) {

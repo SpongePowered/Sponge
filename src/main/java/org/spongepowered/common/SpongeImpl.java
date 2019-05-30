@@ -218,7 +218,7 @@ public final class SpongeImpl {
 
     public static SpongeConfig<GlobalConfig> getGlobalConfig() {
         if (globalConfig == null) {
-            globalConfig = new SpongeConfig<>(GLOBAL, getSpongeConfigDir().resolve("global.conf"), ECOSYSTEM_ID, null);
+            globalConfig = new SpongeConfig<>(GLOBAL, getSpongeConfigDir().resolve("global.conf"), ECOSYSTEM_ID, null, false);
         }
 
         return globalConfig;
@@ -226,14 +226,14 @@ public final class SpongeImpl {
 
     public static SpongeConfig<CustomDataConfig> getDataConfig() {
         if (customDataConfig == null) {
-            customDataConfig = new SpongeConfig<>(CUSTOM_DATA, getSpongeConfigDir().resolve("custom_data.conf"), ECOSYSTEM_ID, null);
+            customDataConfig = new SpongeConfig<>(CUSTOM_DATA, getSpongeConfigDir().resolve("custom_data.conf"), ECOSYSTEM_ID, null, true);
         }
         return customDataConfig;
     }
 
     public static SpongeConfig<TrackerConfig> getTrackerConfig() {
         if (trackerConfig == null) {
-            trackerConfig = new SpongeConfig<>(TRACKER, getSpongeConfigDir().resolve("tracker.conf"), ECOSYSTEM_ID, null);
+            trackerConfig = new SpongeConfig<>(TRACKER, getSpongeConfigDir().resolve("tracker.conf"), ECOSYSTEM_ID, null, true);
         }
         return trackerConfig;
     }

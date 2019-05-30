@@ -466,11 +466,12 @@ public class SpongeHooks {
 
         // No in-memory config objects, lookup from disk.
         final Path dimConfPath = dimensionPath.resolve("dimension.conf");
-        final SpongeConfig<DimensionConfig> dimConfig = new SpongeConfig<>(SpongeConfig.Type.DIMENSION, dimConfPath, SpongeImpl.ECOSYSTEM_ID, SpongeImpl.getGlobalConfig());
+        final SpongeConfig<DimensionConfig> dimConfig = new SpongeConfig<>(SpongeConfig.Type.DIMENSION, dimConfPath, SpongeImpl.ECOSYSTEM_ID,
+            SpongeImpl.getGlobalConfig(), false);
 
         if (worldFolder != null) {
             final Path worldConfPath = dimensionPath.resolve(worldFolder).resolve("world.conf");
-            return new SpongeConfig<>(SpongeConfig.Type.WORLD, worldConfPath, SpongeImpl.ECOSYSTEM_ID, dimConfig);
+            return new SpongeConfig<>(SpongeConfig.Type.WORLD, worldConfPath, SpongeImpl.ECOSYSTEM_ID, dimConfig, false);
         }
 
         return dimConfig;
