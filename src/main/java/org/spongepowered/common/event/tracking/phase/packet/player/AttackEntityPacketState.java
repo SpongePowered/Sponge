@@ -64,7 +64,7 @@ public final class AttackEntityPacketState extends BasicPacketState {
 
     private BiConsumer<CauseStackManager.StackFrame, BasicPacketContext>
         ATTACK_MODIFIER = super.getFrameModifier().andThen((frame, ctx) -> {
-        frame.addContext(EventContextKeys.USED_ITEM, ctx.getItemUsed().createSnapshot());
+        frame.addContext(EventContextKeys.USED_ITEM, ctx.getItemUsedSnapshot());
         frame.addContext(EventContextKeys.USED_HAND, ctx.getHandUsed());
     });
 
