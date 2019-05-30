@@ -641,7 +641,7 @@ public final class WorldManager {
                 (dimensionId).get().getName());
 
         final WorldServer worldServer = createWorldFromProperties(dimensionId, saveHandler, (WorldInfo) properties, new WorldSettings((WorldInfo)
-                        properties), false);
+                        properties));
 
         // Set the worlds on the Minecraft server
         reorderWorldsVanillaFirst();
@@ -781,7 +781,7 @@ public final class WorldManager {
             }
 
             // Step 7 - Finally, we can create the world and tell it to load
-            final WorldServer worldServer = createWorldFromProperties(dimensionId, saveHandler, worldInfo, worldSettings, true);
+            final WorldServer worldServer = createWorldFromProperties(dimensionId, saveHandler, worldInfo, worldSettings);
 
             SpongeImpl.getLogger().info("Loading world [{}] ({})", ((org.spongepowered.api.world.World) worldServer).getName(), getDimensionType
                     (dimensionId).get().getName());
@@ -810,13 +810,13 @@ public final class WorldManager {
     }
 
     private static WorldServer createWorldFromProperties(int dimensionId, ISaveHandler saveHandler, WorldInfo worldInfo, @Nullable WorldSettings
-        worldSettings, boolean initializing) {
+        worldSettings) {
         final MinecraftServer server = SpongeImpl.getServer();
         final WorldServer worldServer = new WorldServer(server, saveHandler, worldInfo, dimensionId, server.profiler);
         worldServer.init();
 
         // WorldSettings is only non-null here if this is a newly generated WorldInfo and therefore we need to initialize to calculate spawn.
-        if (worldSettings != null && initializing) {
+        if (worldSettings != null) {
             worldServer.initialize(worldSettings);
         }
 
