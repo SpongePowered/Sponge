@@ -22,50 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.packet;
+package org.spongepowered.common.event.tracking.phase.packet.player;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.common.event.tracking.phase.packet.PacketContext;
+import org.spongepowered.common.event.tracking.phase.packet.PacketState;
 
-import net.minecraft.inventory.Container;
-import org.spongepowered.asm.util.PrettyPrinter;
+public final class InteractionPacketContext extends PacketContext<InteractionPacketContext> {
 
-import javax.annotation.Nullable;
+    private BlockSnapshot targetBlock = BlockSnapshot.NONE;
 
-public class BasicPacketContext extends PacketContext<BasicPacketContext> {
-
-    @Nullable private Container container;
-
-    public BasicPacketContext(PacketState<? extends BasicPacketContext> state) {
+    protected InteractionPacketContext(PacketState<? extends InteractionPacketContext> state) {
         super(state);
     }
 
-    public BasicPacketContext openContainer(Container openContainer) {
-        this.container = openContainer;
+    public InteractionPacketContext targetBlock(BlockSnapshot snapshot) {
+        this.targetBlock = snapshot;
         return this;
     }
 
-    public Container getOpenContainer() {
-        return checkNotNull(this.container, "Open Container was null!");
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public boolean hasCaptures() {
-        if (this.state == PacketPhase.General.RESOURCE_PACK) {
-            return true;
-        }
-        if (this.state == PacketPhase.General.CLOSE_WINDOW) {
-            return true;
-        }
-
-        return super.hasCaptures();
-    }
-
-    @Override
-    public PrettyPrinter printCustom(PrettyPrinter printer, int indent) {
-        String s = String.format("%1$"+indent+"s", "");
-        return super.printCustom(printer, indent)
-            .add(s + "- %s: %s", "OpenContainer", this.container)
-            ;
+    public BlockSnapshot getTargetBlock() {
+        return this.targetBlock;
     }
 }
