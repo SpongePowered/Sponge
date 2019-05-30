@@ -1218,7 +1218,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             this.addSelfToFrame(frame, activeItemStackSnapshot, handType);
             event = SpongeEventFactory.createUseItemStackEventReplace(Sponge.getCauseStackManager().getCurrentCause(),
                     this.activeItemStackUseCount, this.activeItemStackUseCount, activeItemStackSnapshot,
-                    new Transaction<>((org.spongepowered.api.item.inventory.ItemStack) this.activeItemStackCopy, snapshot));
+                    new Transaction<>(ItemStackUtil.snapshotOf(this.activeItemStackCopy), snapshot));
         }
 
         if (SpongeImpl.postEvent(event)) {
