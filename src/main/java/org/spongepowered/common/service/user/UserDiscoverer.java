@@ -37,6 +37,7 @@ import net.minecraft.server.management.UserListEntry;
 import net.minecraft.server.management.UserListEntryBan;
 import net.minecraft.server.management.UserListWhitelist;
 import net.minecraft.server.management.UserListWhitelistEntry;
+import net.minecraft.util.ReportedException;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.storage.SaveHandler;
 import org.spongepowered.api.Sponge;
@@ -302,7 +303,7 @@ class UserDiscoverer {
         final User user = create((GameProfile) profile);
         try {
             ((SpongeUser) user).readFromNbt(CompressedStreamTools.readCompressed(new FileInputStream(dataFile)));
-        } catch (IOException e) {
+        } catch (ReportedException | IOException e) {
             SpongeImpl.getLogger().warn("Corrupt user file {}", dataFile, e);
         }
 
