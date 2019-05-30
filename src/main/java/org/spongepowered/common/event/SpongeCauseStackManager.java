@@ -52,6 +52,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 
 import javax.annotation.Nullable;
@@ -69,7 +70,7 @@ public final class SpongeCauseStackManager implements CauseStackManager {
     private int[] duplicateCauses = new int[100];
     @Nullable private Cause cached_cause;
     @Nullable private EventContext cached_ctx;
-    private boolean pendingProviders = false;
+    private AtomicBoolean pendingProviders = new AtomicBoolean(false);
     /**
      * Specifically a Deque because we need to replicate
      * the stack iteration from the bottom of the stack
@@ -89,9 +90,7 @@ public final class SpongeCauseStackManager implements CauseStackManager {
                     ThreadUtil.getDescription(SpongeImpl.getServer().serverThread)
             ));
         }
-        if (this.pendingProviders) {
-            checkProviders();
-        }
+        checkProviders();
     }
 
     private static boolean isPermittedThread() {
@@ -112,12 +111,10 @@ public final class SpongeCauseStackManager implements CauseStackManager {
     }
 
     private void checkProviders() {
-        if (!this.pendingProviders) {
+        // Seriously, ok so, uh...
+        if (!this.pendingProviders.compareAndSet(true, false)) {
             return; // we've done our work already
         }
-        // This is the first time we're calling it, we want to reset it before
-        // we have the chance to re-enter and cause frame corruption.
-        this.pendingProviders = false;
         // Then, we want to inversely iterate the stack (from bottom to top)
         // to properly mimic as though the frames were created at the time of the
         // phase switches. It does not help the debugging of cause frames
@@ -372,7 +369,7 @@ public final class SpongeCauseStackManager implements CauseStackManager {
     public int registerPhaseContextProvider(PhaseContext<?> context, BiConsumer<StackFrame, PhaseContext<?>> consumer) {
         checkNotNull(consumer, "Consumer");
         // Reset our cached objects
-        this.pendingProviders = true; //I Reset the cache
+        this.pendingProviders.compareAndSet(false, true); //I Reset the cache
         this.cached_cause = null; // Reset the cache
         this.cached_ctx = null; // Reset the cache
         // Since we cannot rely on the PhaseStack being tied to this stack of providers,
@@ -394,7 +391,7 @@ public final class SpongeCauseStackManager implements CauseStackManager {
         if (this.phaseContextProviders.isEmpty()) {
             // if we're empty, we don't need to bother with the context providers
             // because there's nothing to push.
-            this.pendingProviders = false;
+            this.pendingProviders.compareAndSet(true, false);
         }
 
     }
