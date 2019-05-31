@@ -544,7 +544,8 @@ public final class WorldManager {
                 worldByDimensionId.remove(dimensionId);
                 weakWorldByWorld.remove(worldServer);
                 ((IMixinMinecraftServer) server).removeWorldTickTimes(dimensionId);
-                SpongeImpl.getLogger().info("Unloading world [{}] (DIM{})", worldServer.getWorldInfo().getWorldName(), dimensionId);
+                SpongeImpl.getLogger().info("Unloading world [{}] ({}/{})", worldServer.getWorldInfo().getWorldName(),
+                    ((org.spongepowered.api.world.World) worldServer).getDimension().getType().getId(), dimensionId);
                 reorderWorldsVanillaFirst();
             }
         }
@@ -637,8 +638,7 @@ public final class WorldManager {
         final int dimensionId = ((IMixinWorldInfo) properties).getDimensionId();
         registerDimension(dimensionId, (DimensionType) (Object) properties.getDimensionType());
         registerDimensionPath(dimensionId, worldFolder);
-        SpongeImpl.getLogger().info("Loading world [{}] ({})", properties.getWorldName(), getDimensionType
-                (dimensionId).get().getName());
+        SpongeImpl.getLogger().info("Loading world [{}] ({}/{})", properties.getWorldName(), properties.getDimensionType().getId(), dimensionId);
 
         final WorldServer worldServer = createWorldFromProperties(dimensionId, saveHandler, (WorldInfo) properties, new WorldSettings((WorldInfo)
                         properties));
@@ -681,7 +681,7 @@ public final class WorldManager {
 
             final int dimensionId = entry.getKey();
             final DimensionType dimensionType = entry.getValue();
-
+            final org.spongepowered.api.world.DimensionType apiDimensionType = (org.spongepowered.api.world.DimensionType) (Object) dimensionType;
             // Skip all worlds besides dimension 0 if multi-world is disabled
             if (dimensionId != 0 && !server.getAllowNether()) {
                 continue;
@@ -695,8 +695,8 @@ public final class WorldManager {
             // Step 1 - Grab the world's data folder
             final Path worldFolder = getWorldFolder(dimensionType, dimensionId);
             if (worldFolder == null) {
-                SpongeImpl.getLogger().error("An attempt was made to load a world with dimension id [{}] that has no registered world folder!",
-                        dimensionId);
+                SpongeImpl.getLogger().error("An attempt was made to load a world in dimension [{}] ({}) that has no registered world folder!",
+                        apiDimensionType.getId(), dimensionId);
                 continue;
             }
 
@@ -706,8 +706,8 @@ public final class WorldManager {
             if (dimensionId != 0) {
                 final SpongeConfig<? extends GeneralConfigBase> spongeConfig = SpongeHooks.getSpongeConfig(((IMixinDimensionType)(Object) dimensionType).getConfigPath(), worldFolderName);
                 if (!spongeConfig.getConfig().getWorld().isWorldEnabled()) {
-                    SpongeImpl.getLogger().warn("World [{}] (DIM{}) is disabled. World will not be loaded...", worldFolder,
-                            dimensionId);
+                    SpongeImpl.getLogger().warn("World [{}] ({}/{}) is disabled. World will not be loaded...", worldFolder,
+                        apiDimensionType.getId(), dimensionId);
                     continue;
                 }
             }
@@ -742,11 +742,11 @@ public final class WorldManager {
             if (worldInfo == null) {
                 // Step 4 - At this point, we have either have the WorldInfo or we have none. If we have none, we'll use the settings built above to
                 // create the WorldInfo
-                worldInfo = createWorldInfoFromSettings(currentSavesDir, (org.spongepowered.api.world.DimensionType) (Object) dimensionType,
+                worldInfo = createWorldInfoFromSettings(currentSavesDir, apiDimensionType,
                         dimensionId, worldFolderName, worldSettings, generatorOptions);
             } else {
                 // create config
-                ((IMixinWorldInfo) worldInfo).setDimensionType((org.spongepowered.api.world.DimensionType)(Object) dimensionType);
+                ((IMixinWorldInfo) worldInfo).setDimensionType(apiDimensionType);
                 ((IMixinWorldInfo) worldInfo).createWorldConfig();
                 ((WorldProperties) worldInfo).setGenerateSpawnOnLoad(((IMixinDimensionType) (Object) dimensionType).shouldGenerateSpawnOnLoad());
             }
@@ -775,16 +775,16 @@ public final class WorldManager {
             registerWorldProperties((WorldProperties) worldInfo);
 
             if (dimensionId != 0 && !((WorldProperties) worldInfo).loadOnStartup()) {
-                SpongeImpl.getLogger().warn("World [{}] (DIM{}) is set to not load on startup. To load it later, enable [load-on-startup] in config "
-                        + "or use a plugin", worldFolder, dimensionId);
+                SpongeImpl.getLogger().warn("World [{}] ({}/{}) is set to not load on startup. To load it later, enable [load-on-startup] in config "
+                        + "or use a plugin", worldFolder, dimensionType.getId(), dimensionId);
                 continue;
             }
 
             // Step 7 - Finally, we can create the world and tell it to load
             final WorldServer worldServer = createWorldFromProperties(dimensionId, saveHandler, worldInfo, worldSettings);
 
-            SpongeImpl.getLogger().info("Loading world [{}] ({})", ((org.spongepowered.api.world.World) worldServer).getName(), getDimensionType
-                    (dimensionId).get().getName());
+            SpongeImpl.getLogger().info("Loading world [{}] ({}/{})", ((org.spongepowered.api.world.World) worldServer).getName(),
+                apiDimensionType.getId(), dimensionId);
         }
 
         // Set the worlds on the Minecraft server
@@ -813,12 +813,15 @@ public final class WorldManager {
         worldSettings) {
         final MinecraftServer server = SpongeImpl.getServer();
         final WorldServer worldServer = new WorldServer(server, saveHandler, worldInfo, dimensionId, server.profiler);
-        worldServer.init();
 
-        // WorldSettings is only non-null here if this is a newly generated WorldInfo and therefore we need to initialize to calculate spawn.
-        if (worldSettings != null) {
-            worldServer.initialize(worldSettings);
-        }
+        worldByDimensionId.put(dimensionId, worldServer);
+        weakWorldByWorld.put(worldServer, worldServer);
+
+        WorldManager.reorderWorldsVanillaFirst();
+
+        ((IMixinMinecraftServer) SpongeImpl.getServer()).putWorldTickTimes(dimensionId, new long[100]);
+
+        worldServer.init();
 
         worldServer.addEventListener(new ServerWorldEventHandler(server, worldServer));
 
@@ -827,17 +830,15 @@ public final class WorldManager {
             worldServer.getWorldInfo().setGameType(server.getGameType());
         }
 
-        worldByDimensionId.put(dimensionId, worldServer);
-        weakWorldByWorld.put(worldServer, worldServer);
-
-        ((IMixinMinecraftServer) SpongeImpl.getServer()).putWorldTickTimes(dimensionId, new long[100]);
-
         ((IMixinChunkProviderServer) worldServer.getChunkProvider()).setForceChunkRequests(true);
-
-        WorldManager.reorderWorldsVanillaFirst();
 
         SpongeImpl.postEvent(SpongeEventFactory.createLoadWorldEvent(Sponge.getCauseStackManager().getCurrentCause(),
             (org.spongepowered.api.world.World) worldServer));
+
+        // WorldSettings is only non-null here if this is a newly generated WorldInfo and therefore we need to initialize to calculate spawn.
+        if (worldSettings != null) {
+            worldServer.initialize(worldSettings);
+        }
 
         if (((IMixinDimensionType) ((org.spongepowered.api.world.World) worldServer).getDimension().getType()).shouldLoadSpawn()) {
             ((IMixinMinecraftServer) server).prepareSpawnArea(worldServer);
