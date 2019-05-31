@@ -24,25 +24,20 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityThrowable;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.CPacketPlayerDigging;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
-import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -52,21 +47,18 @@ import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.world.BlockChangeFlags;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.Location;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
-import org.spongepowered.common.event.tracking.phase.packet.PacketState;
-import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
+import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
 import org.spongepowered.common.interfaces.IMixinContainer;
-import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.util.VecHelper;
@@ -75,18 +67,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
-public final class InteractionPacketState extends PacketState<InteractionPacketContext> {
+public final class InteractionPacketState extends BasicPacketState {
 
-    @Override
-    public InteractionPacketContext createPhaseContext() {
-        return new InteractionPacketContext(this);
-    }
 
     @Override
     public boolean isInteraction() {
@@ -94,48 +81,17 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
     }
 
     @Override
-    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, InteractionPacketContext context) {
+    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, BasicPacketContext context) {
         final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.getHeldItemMainhand());
         if (stack != null) {
             context.itemUsed(stack);
         }
-        final BlockPos targetPosition = ((CPacketPlayerDigging) packet).getPosition();
-        final Chunk chunk = playerMP.getServerWorld().getChunk(targetPosition);
-        final UUID uniqueId = ((World) playerMP.getServerWorld()).getUniqueId();
-        final IBlockState blockState = chunk.getBlockState(targetPosition);
-        final TileEntity tileEntity = chunk.getTileEntity(targetPosition, Chunk.EnumCreateEntityType.CHECK);
-        final IMixinChunk mixinChunk = (IMixinChunk) chunk;
-        final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
-        builder.reset();
-        builder.blockState((BlockState) blockState)
-            .worldId(uniqueId)
-            .position(VecHelper.toVector3i(targetPosition));
-        Optional<UUID> creator = mixinChunk.getBlockOwnerUUID(targetPosition);
-        Optional<UUID> notifier = mixinChunk.getBlockNotifierUUID(targetPosition);
-        creator.ifPresent(builder::creator);
-        notifier.ifPresent(builder::notifier);
-        if (tileEntity != null) {
-            // We MUST only check to see if a TE exists to avoid creating a new one.
-            for (DataManipulator<?, ?> manipulator : ((IMixinCustomDataHolder) tileEntity).getCustomManipulators()) {
-                builder.add(manipulator);
-            }
-            NBTTagCompound nbt = new NBTTagCompound();
-            // Some mods like OpenComputers assert if attempting to save robot while moving
-            try {
-                tileEntity.writeToNBT(nbt);
-                builder.unsafeNbt(nbt);
-            }
-            catch(Throwable t) {
-                // ignore
-            }
-        }
-        builder.flag(BlockChangeFlags.OBSERVER);
-        context.targetBlock(builder.build());
+        context.targetBlock(new Location<>(((Player) playerMP).getWorld(), VecHelper.toVector3d(((CPacketPlayerDigging) packet).getPosition())).createSnapshot());
         context.handUsed(HandTypes.MAIN_HAND);
     }
 
     @Override
-    public boolean spawnEntityOrCapture(InteractionPacketContext context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(BasicPacketContext context, Entity entity, int chunkX, int chunkZ) {
         return context.captureEntity(entity);
     }
 
@@ -145,27 +101,27 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
     }
 
     @Override
-    public boolean doesCaptureEntityDrops(InteractionPacketContext context) {
+    public boolean doesCaptureEntityDrops(BasicPacketContext context) {
         return true;
     }
 
     @Override
-    public boolean tracksTileEntityChanges(InteractionPacketContext currentContext) {
+    public boolean tracksTileEntityChanges(BasicPacketContext currentContext) {
         return true;
     }
 
     @Override
-    public boolean hasSpecificBlockProcess(InteractionPacketContext context) {
+    public boolean hasSpecificBlockProcess(BasicPacketContext context) {
         return true;
     }
 
     @Override
-    public boolean doesCaptureNeighborNotifications(InteractionPacketContext context) {
+    public boolean doesCaptureNeighborNotifications(BasicPacketContext context) {
         return true;
     }
 
     @Override
-    public boolean tracksBlockSpecificDrops(InteractionPacketContext context) {
+    public boolean tracksBlockSpecificDrops(BasicPacketContext context) {
         return true;
     }
 
@@ -176,7 +132,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
 
     @SuppressWarnings("unchecked")
     @Override
-    public void unwind(InteractionPacketContext phaseContext) {
+    public void unwind(BasicPacketContext phaseContext) {
 
         final EntityPlayerMP player = phaseContext.getPacketPlayer();
         final ItemStack usedStack = phaseContext.getItemUsed();
@@ -282,7 +238,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
         }
     }
 
-    private void throwEntitySpawnEvents(InteractionPacketContext phaseContext, EntityPlayerMP player, ItemStackSnapshot usedSnapshot,
+    private void throwEntitySpawnEvents(BasicPacketContext phaseContext, EntityPlayerMP player, ItemStackSnapshot usedSnapshot,
         BlockSnapshot firstBlockChange, Collection<Entity> entities) {
         final List<Entity> projectiles = new ArrayList<>(entities.size());
         final List<Entity> spawnEggs = new ArrayList<>(entities.size());

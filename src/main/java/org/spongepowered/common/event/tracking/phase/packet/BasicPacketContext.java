@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.inventory.Container;
 import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.common.interfaces.IMixinContainer;
 
 import javax.annotation.Nullable;
 

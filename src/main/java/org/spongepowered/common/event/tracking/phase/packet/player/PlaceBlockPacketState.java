@@ -128,7 +128,7 @@ public final class PlaceBlockPacketState extends BasicPacketState {
                 }
             });
         // We can rely on TrackingUtil.processBlockCaptures because it checks for empty contexts.
-        if (!TrackingUtil.processBlockCaptures(this, context) && !snapshot.isNone()) {
+        if (!TrackingUtil.processBlockCaptures(this, context) && snapshot.isNone()) {
             EnumHand hand = (EnumHand) (Object) context.getHandUsed();
             PacketPhaseUtil.handlePlayerSlotRestore(player, ItemStackUtil.toNative(itemStack), hand);
         }
