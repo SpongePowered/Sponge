@@ -224,7 +224,9 @@ public final class EntityUtil {
     @Nullable
     public static Entity teleportPlayerToDimension(EntityPlayerMP entityPlayerMP, int suggestedDimensionId, IMixinITeleporter teleporter,
         @Nullable MoveEntityEvent event) {
-        if (event == null) {
+        final boolean probablyAPortal = event == null;
+
+        if (probablyAPortal) {
             // Assume portal
             event = EntityUtil.handleDisplaceEntityPortalEvent(entityPlayerMP, suggestedDimensionId, teleporter);
             if (event == null || event.isCancelled()) {
@@ -257,7 +259,10 @@ public final class EntityUtil {
         }
 
         transferPlayerToDimension(event, entityPlayerMP);
-        entityPlayerMP.connection.sendPacket(new SPacketEffect(1032, BlockPos.ORIGIN, 0, false));
+
+        if (probablyAPortal) {
+            entityPlayerMP.connection.sendPacket(new SPacketEffect(1032, BlockPos.ORIGIN, 0, false));
+        }
 
         // Sponge Start - entityPlayerMP has been moved below to refreshXpHealthAndFood
         /*
