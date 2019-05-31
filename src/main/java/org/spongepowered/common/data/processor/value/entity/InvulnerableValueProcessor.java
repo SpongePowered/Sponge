@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -32,14 +31,14 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.entity.player.IUserOrEntity;
 
 import java.util.Optional;
 
-public class InvulnerableValueProcessor extends AbstractSpongeValueProcessor<Entity, Boolean, Value<Boolean>> {
+public class InvulnerableValueProcessor extends AbstractSpongeValueProcessor<IUserOrEntity, Boolean, Value<Boolean>> {
 
     public InvulnerableValueProcessor() {
-        super(Entity.class, Keys.INVULNERABLE);
+        super(IUserOrEntity.class, Keys.INVULNERABLE);
     }
 
     @Override
@@ -48,13 +47,13 @@ public class InvulnerableValueProcessor extends AbstractSpongeValueProcessor<Ent
     }
 
     @Override
-    protected boolean set(Entity container, Boolean value) {
-        ((IMixinEntity) container).setInvulnerable(value);
+    protected boolean set(IUserOrEntity container, Boolean value) {
+        container.setInvulnerable(value);
         return true;
     }
 
     @Override
-    protected Optional<Boolean> getVal(Entity container) {
+    protected Optional<Boolean> getVal(IUserOrEntity container) {
         return Optional.of(container.getIsInvulnerable());
     }
 

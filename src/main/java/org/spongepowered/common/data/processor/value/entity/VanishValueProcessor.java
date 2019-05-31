@@ -24,24 +24,22 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.entity.player.IUserOrEntity;
 
 import java.util.Optional;
 
-public class VanishValueProcessor extends AbstractSpongeValueProcessor<Entity, Boolean, Value<Boolean>> {
+public class VanishValueProcessor extends AbstractSpongeValueProcessor<IUserOrEntity, Boolean, Value<Boolean>> {
 
     public VanishValueProcessor() {
-        super(Entity.class, Keys.VANISH);
+        super(IUserOrEntity.class, Keys.VANISH);
     }
 
     @Override
@@ -50,17 +48,17 @@ public class VanishValueProcessor extends AbstractSpongeValueProcessor<Entity, B
     }
 
     @Override
-    protected boolean set(Entity container, Boolean value) {
-        if (!container.world.isRemote) {
-            EntityUtil.toMixin(container).setVanished(value);
-            return true;
+    protected boolean set(IUserOrEntity container, Boolean value) {
+        if (container instanceof net.minecraft.entity.Entity && ((net.minecraft.entity.Entity) container).world.isRemote) {
+            return false;
         }
-        return false;
+        container.setVanished(value);
+        return true;
     }
 
     @Override
-    protected Optional<Boolean> getVal(Entity container) {
-        return Optional.of(((IMixinEntity) container).isVanished());
+    protected Optional<Boolean> getVal(IUserOrEntity container) {
+        return Optional.of(container.isVanished());
     }
 
     @Override

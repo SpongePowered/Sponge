@@ -82,6 +82,8 @@ public final class NbtDataUtil {
 
         public static final String SELECTED_ITEM_SLOT = "SelectedItemSlot";
         public static final String BLOCK_ENTITY_TAG = "BlockEntityTag";
+
+        public static final String INVULNERABLE = "Invulnerable";
     }
 
     public static final class Schematic {
@@ -172,6 +174,7 @@ public final class NbtDataUtil {
     public static final String PORTAL_AGENT_TYPE = "portalAgentType";
     public static final String WORLD_SERIALIZATION_BEHAVIOR = "serializationBehavior";
     public static final String HEALTH_SCALE = "HealthScale";
+    public static final String IS_VANISHED = "IsVanished";
 
     // Compatibility tags for Forge
     public static final String FORGE_DATA = "ForgeData";

@@ -56,6 +56,7 @@ import org.spongepowered.common.data.nbt.CustomDataNbtUtil;
 import org.spongepowered.common.data.type.SpongeEquipmentType;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.world.WorldManager;
 
@@ -99,7 +100,8 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     private int dimension;
     private float rotationYaw;
     private float rotationPitch;
-
+    private boolean invulnerable;
+    private boolean isVanished;
 
     private SpongeUserInventory inventory; // lazy load when accessing inventory
     private InventoryEnderChest enderChest; // lazy load when accessing inventory
@@ -117,23 +119,202 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         this.reset();
         this.nbt = compound;
 
+        // net.minecraft.entity.Entity#readFromNBT
+
         NBTTagList position = compound.getTagList(NbtDataUtil.ENTITY_POSITION, NbtDataUtil.TAG_DOUBLE);
+        //NBTTagList motion = compound.getTagList("Motion", NbtDataUtil.TAG_DOUBLE);
+        NBTTagList rotation = compound.getTagList(NbtDataUtil.ENTITY_ROTATION, NbtDataUtil.TAG_FLOAT);
+        //this.motionX = motion.getDoubleAt(0);
+        //this.motionY = motion.getDoubleAt(1);
+        //this.motionZ = motion.getDoubleAt(2);
+        //if (Math.abs(this.motionX) > 10.0D) {
+        //    this.motionX = 0.0D;
+        //}
+        //if (Math.abs(this.motionY) > 10.0D) {
+        //    this.motionY = 0.0D;
+        //}
+        //if (Math.abs(this.motionZ) > 10.0D) {
+        //    this.motionZ = 0.0D;
+        //}
         this.posX = position.getDoubleAt(0);
         this.posY = position.getDoubleAt(1);
         this.posZ = position.getDoubleAt(2);
-        this.dimension = 0;
-        if (compound.hasKey(NbtDataUtil.ENTITY_DIMENSION)) {
-            this.dimension = compound.getInteger(NbtDataUtil.ENTITY_DIMENSION);
-        }
-        NBTTagList rotation = compound.getTagList(NbtDataUtil.ENTITY_ROTATION, NbtDataUtil.TAG_FLOAT);
+        //this.lastTickPosX = this.posX;
+        //this.lastTickPosY = this.posY;
+        //this.lastTickPosZ = this.posZ;
+        //this.prevPosX = this.posX;
+        //this.prevPosY = this.posY;
+        //this.prevPosZ = this.posZ;
         this.rotationYaw = rotation.getFloatAt(0);
         this.rotationPitch = rotation.getFloatAt(1);
+        //this.prevRotationYaw = this.rotationYaw;
+        //this.prevRotationPitch = this.rotationPitch;
+        //this.fallDistance = compound.getFloat("FallDistance");
+        //this.fire = compound.getShort("Fire");
+        //this.setAir(compound.getShort("Air"));
+        //this.onGround = compound.getBoolean("OnGround");
 
-        // See EntityPlayer#readEntityFromNBT
+        if (compound.hasKey(NbtDataUtil.ENTITY_DIMENSION)) {
+            this.dimension = compound.getInteger(NbtDataUtil.ENTITY_DIMENSION);
+        } else {
+            this.dimension = 0;
+        }
+
+        this.invulnerable = compound.getBoolean(NbtDataUtil.Minecraft.INVULNERABLE);
+        //this.timeUntilPortal = compound.getInteger("PortalCooldown");
+        //if (compound.hasUniqueId("UUID")) {
+        //    this.entityUniqueID = compound.getUniqueId("UUID");
+        //    this.cachedUniqueIdString = this.entityUniqueID.toString();
+        //}
+        //this.setPosition(this.posX, this.posY, this.posZ);
+        //this.setRotation(this.rotationYaw, this.rotationPitch);
+        //if (compound.hasKey("CustomName", 8)) {
+        //    this.setCustomNameTag(compound.getString("CustomName"));
+        //}
+        //this.setAlwaysRenderNameTag(compound.getBoolean("CustomNameVisible"));
+        //this.cmdResultStats.readStatsFromNBT(compound);
+        //this.setSilent(compound.getBoolean("Silent"));
+        //this.setNoGravity(compound.getBoolean("NoGravity"));
+        //this.setGlowing(compound.getBoolean("Glowing"));
+        //updateBlocked = compound.getBoolean("UpdateBlocked"); //Forge
+        //if (compound.hasKey("ForgeData")) customEntityData = compound.getCompoundTag("ForgeData"); //Forge
+        //if (this.capabilities != null && compound.hasKey("ForgeCaps")) this.capabilities.deserializeNBT(compound.getCompoundTag("ForgeCaps")); //Forge
+
+
+        // net.minecraft.entity.EntityLivingBase#readEntityFromNBT
+
+
+        //this.absorptionAmount = compound.getFloat("AbsorptionAmount");
+        //if (compound.hasKey("Attributes", 9) && this.world != null && !this.world.isRemote) {
+        //    SharedMonsterAttributes.setAttributeModifiers(this.getAttributeMap(), compound.getTagList("Attributes", 10));
+        //}
+        //if (compound.hasKey("ActiveEffects", 9)) {
+        //    NBTTagList nbttaglist = compound.getTagList("ActiveEffects", 10);
+        //    for (int i = 0; i < nbttaglist.tagCount(); ++i) {
+        //        NBTTagCompound nbttagcompound = nbttaglist.getCompoundTagAt(i);
+        //        PotionEffect potioneffect = PotionEffect.readCustomPotionEffectFromNBT(nbttagcompound);
+        //        if (potioneffect != null) {
+        //            this.activePotionsMap.put(potioneffect.getPotion(), potioneffect);
+        //        }
+        //    }
+        //}
+        //if (compound.hasKey("Health", 99)) {
+        //    this.setHealth(compound.getFloat("Health"));
+        //}
+        //this.hurtTime = compound.getShort("HurtTime");
+        //this.deathTime = compound.getShort("DeathTime");
+        //this.revengeTimer = compound.getInteger("HurtByTimestamp");
+        //if (compound.hasKey("Team", 8)) {
+        //    String s = compound.getString("Team");
+        //    boolean flag = this.world.getScoreboard().addPlayerToTeam(this.getCachedUniqueIdString(), s);
+        //    if (!flag) {
+        //        LOGGER.warn("Unable to add mob to team \"" + s + "\" (that team probably doesn't exist)");
+        //    }
+        //}
+        //if (compound.getBoolean("FallFlying")) {
+        //    this.setFlag(7, true);
+        //}
+
+
+        // net.minecraft.entity.player.EntityPlayer#readEntityFromNBT
+
+
+        //this.setUniqueId(getUUID(this.gameProfile));
+        //NBTTagList nbttaglist = compound.getTagList("Inventory", 10);
+        //this.inventory.readFromNBT(nbttaglist);
+        //this.inventory.currentItem = compound.getInteger("SelectedItemSlot");
+        //this.sleeping = compound.getBoolean("Sleeping");
+        //this.sleepTimer = compound.getShort("SleepTimer");
+        //this.experience = compound.getFloat("XpP");
+        //this.experienceLevel = compound.getInteger("XpLevel");
+        //this.experienceTotal = compound.getInteger("XpTotal");
+        //this.xpSeed = compound.getInteger("XpSeed");
+        //if (this.xpSeed == 0) {
+        //    this.xpSeed = this.rand.nextInt();
+        //}
+        //this.setScore(compound.getInteger("Score"));
+        //if (this.sleeping) {
+        //    this.bedLocation = new BlockPos(this);
+        //    this.wakeUpPlayer(true, true, false);
+        //}
+        //if (compound.hasKey("SpawnX", 99) && compound.hasKey("SpawnY", 99) && compound.hasKey("SpawnZ", 99)) {
+        //    this.spawnPos = new BlockPos(compound.getInteger("SpawnX"), compound.getInteger("SpawnY"), compound.getInteger("SpawnZ"));
+        //    this.spawnForced = compound.getBoolean("SpawnForced");
+        //}
+        //NBTTagList spawnlist = null;
+        //spawnlist = compound.getTagList("Spawns", 10);
+        //for (int i = 0; i < spawnlist.tagCount(); i++) {
+        //    NBTTagCompound spawndata = (NBTTagCompound)spawnlist.getCompoundTagAt(i);
+        //    int spawndim = spawndata.getInteger("Dim");
+        //    this.spawnChunkMap.put(spawndim, new BlockPos(spawndata.getInteger("SpawnX"), spawndata.getInteger("SpawnY"), spawndata.getInteger("SpawnZ")));
+        //    this.spawnForcedMap.put(spawndim, spawndata.getBoolean("SpawnForced"));
+        //}
+        //this.spawnDimension = compound.getBoolean("HasSpawnDimensionSet") ? compound.getInteger("SpawnDimension") : null;
+        //this.foodStats.readNBT(compound);
+        //this.capabilities.readCapabilitiesFromNBT(compound);
+        //if (compound.hasKey("EnderItems", 9)) {
+        //    NBTTagList nbttaglist1 = compound.getTagList("EnderItems", 10);
+        //    this.enderChest.loadInventoryFromNBT(nbttaglist1);
+        //}
+        //if (compound.hasKey("ShoulderEntityLeft", 10)) {
+        //    this.setLeftShoulderEntity(compound.getCompoundTag("ShoulderEntityLeft"));
+        //}
+        //if (compound.hasKey("ShoulderEntityRight", 10)) {
+        //    this.setRightShoulderEntity(compound.getCompoundTag("ShoulderEntityRight"));
+        //}
+
+
+        // net.minecraft.entity.player.EntityPlayerMP#readEntityFromNBT
+
+
+        //if (compound.hasKey("playerGameType", 99)) {
+        //    if (this.getServer().getForceGamemode()) {
+        //        this.interactionManager.setGameType(this.getServer().getGameType());
+        //    } else {
+        //        this.interactionManager.setGameType(GameType.getByID(compound.getInteger("playerGameType")));
+        //    }
+        //}
+        //if (compound.hasKey("enteredNetherPosition", 10)) {
+        //    NBTTagCompound nbttagcompound = compound.getCompoundTag("enteredNetherPosition");
+        //    this.enteredNetherPosition = new Vec3d(nbttagcompound.getDouble("x"), nbttagcompound.getDouble("y"), nbttagcompound.getDouble("z"));
+        //}
+        //this.seenCredits = compound.getBoolean("seenCredits");
+        //if (compound.hasKey("recipeBook", 10)) {
+        //    this.recipeBook.read(compound.getCompoundTag("recipeBook"));
+        //}
+
+
+        // org.spongepowered.common.mixin.core.entity.MixinEntity#readFromNbt
+
 
         final NBTTagCompound spongeCompound = compound.getCompoundTag(NbtDataUtil.FORGE_DATA).getCompoundTag(NbtDataUtil.SPONGE_DATA);
         CustomDataNbtUtil.readCustomData(spongeCompound, ((DataHolder) this));
+        //if (this instanceof IMixinGriefer && ((IMixinGriefer) this).isGriefer() && compound.hasKey(NbtDataUtil.CAN_GRIEF)) {
+        //    ((IMixinGriefer) this).setCanGrief(compound.getBoolean(NbtDataUtil.CAN_GRIEF));
+        //}
+
+
+        // org.spongepowered.common.mixin.core.entity.MixinEntityLivingBase#readFromNbt
+
+
+        //if (compound.hasKey("maxAir")) {
+        //    this.maxAir = compound.getInteger("maxAir");
+        //}
+
+
+        // org.spongepowered.common.mixin.core.entity.player.MixinEntityPlayerMP#readFromNbt
+
+
+        //if (compound.hasKey(NbtDataUtil.HEALTH_SCALE, NbtDataUtil.TAG_DOUBLE)) {
+        //    this.healthScaling = true;
+        //    this.healthScale = compound.getDouble(NbtDataUtil.HEALTH_SCALE);
+        //}
+
+        // extra data
+
         if (!spongeCompound.isEmpty()) {
+            this.isVanished = spongeCompound.getBoolean(NbtDataUtil.IS_VANISHED);
+
             final NBTTagList spawnList = spongeCompound.getTagList(NbtDataUtil.USER_SPAWN_LIST, NbtDataUtil.TAG_COMPOUND);
 
             for (int i = 0; i < spawnList.tagCount(); i++) {
@@ -154,9 +335,6 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
                 }
             }
         }
-
-
-        // TODO Read: any other data that should be available through data manipulators.
     }
 
     private SpongeUser loadInventory() {
@@ -193,9 +371,12 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         compound.setInteger(NbtDataUtil.ENTITY_DIMENSION, this.dimension);
         compound.setTag(NbtDataUtil.ENTITY_ROTATION, NbtDataUtil.newFloatNBTList(this.rotationYaw, this.rotationPitch));
 
+        compound.setBoolean(NbtDataUtil.Minecraft.INVULNERABLE, this.invulnerable);
+
         final NBTTagCompound forgeCompound = compound.getCompoundTag(NbtDataUtil.FORGE_DATA);
         final NBTTagCompound spongeCompound = forgeCompound.getCompoundTag(NbtDataUtil.SPONGE_DATA);
         spongeCompound.removeTag(NbtDataUtil.USER_SPAWN_LIST);
+        spongeCompound.removeTag(NbtDataUtil.IS_VANISHED);
 
         final NBTTagList spawnList = new NBTTagList();
         for (Entry<UUID, RespawnLocation> entry : this.spawnLocations.entrySet()) {
@@ -212,6 +393,11 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
         if (!spawnList.isEmpty()) {
             spongeCompound.setTag(NbtDataUtil.USER_SPAWN_LIST, spawnList);
+        }
+        if (this.isVanished) {
+            spongeCompound.setBoolean(NbtDataUtil.IS_VANISHED, true);
+        }
+        if (!spongeCompound.isEmpty()) {
             forgeCompound.setTag(NbtDataUtil.SPONGE_DATA, spongeCompound);
             compound.setTag(NbtDataUtil.FORGE_DATA, forgeCompound);
         }
@@ -274,11 +460,6 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         return this.getForInventory(Player::getInventory, u -> ((CarriedInventory) u.inventory));
     }
 
-    public Inventory getEnderChestInventory() {
-        this.loadEnderInventory();
-        return ((Inventory) this.enderChest);
-    }
-
     @Override
     public Optional<ItemStack> getItemInHand(HandType handType) {
         if (handType == HandTypes.MAIN_HAND) {
@@ -333,7 +514,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         return locations;
     }
 
-    protected void markDirty() {
+    public void markDirty() {
         dirtyUsers.add(this);
     }
 
@@ -352,8 +533,8 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
             tag = new NBTTagCompound();
         }
         writeToNbt(tag);
-        try {
-            CompressedStreamTools.writeCompressed(tag, new FileOutputStream(dataFile));
+        try (FileOutputStream out = new FileOutputStream(dataFile)) {
+            CompressedStreamTools.writeCompressed(tag, out);
             dirtyUsers.remove(this);
         } catch (IOException e) {
             SpongeImpl.getLogger().warn("Failed to save user file [{}]!", dataFile, e);
