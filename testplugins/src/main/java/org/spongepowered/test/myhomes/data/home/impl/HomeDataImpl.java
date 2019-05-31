@@ -24,7 +24,6 @@
  */
 package org.spongepowered.test.myhomes.data.home.impl;
 
-import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.test.myhomes.MyHomes;
 import org.spongepowered.test.myhomes.data.home.Home;
 import org.spongepowered.test.myhomes.data.home.HomeData;
@@ -55,19 +54,18 @@ public class HomeDataImpl extends AbstractData<HomeData, ImmutableHomeData> impl
     public HomeDataImpl(Home defaultHome, Map<String, Home> homes) {
         this.defaultHome = defaultHome;
         this.homes = homes;
-        registerGettersAndSetters();
     }
 
     // It's best to provide an empty constructor with "default" values
     public HomeDataImpl() {
-        this(Home.NONE, ImmutableMap.of());
+        this(null, ImmutableMap.of());
     }
 
     // Override if you have a separate interface
     @Override
     public Value<Home> defaultHome() {
         return Sponge.getRegistry().getValueFactory()
-                .createValue(MyHomes.DEFAULT_HOME, this.defaultHome, Home.NONE);
+                .createValue(MyHomes.DEFAULT_HOME, this.defaultHome, null);
     }
 
     // Override if you have a separate interface
@@ -138,11 +136,11 @@ public class HomeDataImpl extends AbstractData<HomeData, ImmutableHomeData> impl
 
         // Loads the map of homes
         this.homes = Maps.newHashMap();
-        DataView view = container.getView(MyHomes.HOMES.getQuery()).get();
-
-        view.getKeys(false)
-                .forEach(name -> this.homes.put(name.toString(), view.getSerializable(name, Home.class)
-                        .orElseThrow(InvalidDataException::new)));
+        DataView homes = container.getView(MyHomes.HOMES.getQuery()).get();
+        for (DataQuery homeQuery : homes.getKeys(false)) {
+            homes.getSerializable(homeQuery, Home.class)
+                    .ifPresent(home -> this.homes.put(homeQuery.toString(), home));
+        }
 
         return Optional.of(this);
     }
@@ -156,7 +154,7 @@ public class HomeDataImpl extends AbstractData<HomeData, ImmutableHomeData> impl
     public DataContainer toContainer() {
         DataContainer container = super.toContainer();
         // This is the simplest, but use whatever structure you want!
-        if(this.defaultHome != Home.NONE) {
+        if(this.defaultHome != null) {
             container.set(MyHomes.DEFAULT_HOME, this.defaultHome);
         }
         container.set(MyHomes.HOMES, this.homes);

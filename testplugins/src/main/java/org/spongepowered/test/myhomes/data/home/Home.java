@@ -24,28 +24,15 @@
  */
 package org.spongepowered.test.myhomes.data.home;
 
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataSerializable;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.entity.Transform;
-import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.test.myhomes.data.home.impl.HomeBuilder;
 
-import java.util.UUID;
-
 public class Home implements DataSerializable {
-
-    public static final Home NONE;
-    static {
-        WorldProperties defaultWorld = Sponge.getServer().getDefaultWorld().get();
-        World w = Sponge.getServer().getWorld(defaultWorld.getUniqueId()).get();
-        NONE = new Home(new Transform<World>(w, defaultWorld.getSpawnPosition().toDouble()), "NONE");
-    }
 
     public static final DataQuery WORLD_QUERY = DataQuery.of("WorldUUID");
     public static final DataQuery POSITION_QUERY = DataQuery.of("Position");
