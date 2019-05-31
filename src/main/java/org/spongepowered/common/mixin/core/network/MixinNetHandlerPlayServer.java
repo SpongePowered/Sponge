@@ -461,16 +461,25 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             // Sponge Start - Movement event
             Player player = (Player) this.player;
             IMixinEntityPlayerMP mixinPlayer = (IMixinEntityPlayerMP) this.player;
-            Vector3d fromrot = player.getRotation();
+            Vector3d fromRotation = player.getRotation();
 
             // If Sponge used the player's current location, the delta might never be triggered which could be exploited
-            Location<World> from = player.getLocation();
+            Location<World> fromLocation = player.getLocation();
             if (this.lastMoveLocation != null) {
-                from = this.lastMoveLocation;
+                fromLocation = this.lastMoveLocation;
             }
 
-            Vector3d torot = new Vector3d(packetIn.pitch, packetIn.yaw, 0);
-            Location<World> to = new Location<>(player.getWorld(), packetIn.x, packetIn.y, packetIn.z);
+            Location<World> toLocation = new Location<>(player.getWorld(), packetIn.x, packetIn.y, packetIn.z);
+            Vector3d toRotation = new Vector3d(packetIn.pitch, packetIn.yaw, 0);
+
+            // Minecraft does the same with rotation when it's only a positional update
+            boolean positionOnly = packetIn.moving && !packetIn.rotating;
+            if (positionOnly) {
+                // Correct the new rotation to match the old rotation
+                toRotation = fromRotation;
+
+                positionOnly = !toLocation.getPosition().equals(fromLocation.getPosition()) && ShouldFire.MOVE_ENTITY_EVENT_POSITION;
+            }
 
             // Minecraft sends a 0, 0, 0 position when rotation only update occurs, this needs to be recognized and corrected
             boolean rotationOnly = !packetIn.moving && packetIn.rotating;
@@ -478,61 +487,57 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             if (rotationOnly) {
                 // Correct the to location so it's not misrepresented to plugins, only when player rotates without moving
                 // In this case it's only a rotation update, which isn't related to the to location
-                from = player.getLocation();
-                to = from;
+                fromLocation = player.getLocation();
+                toLocation = fromLocation;
+
+                rotationOnly = ShouldFire.ROTATE_ENTITY_EVENT;
             }
 
-            // Minecraft does the same with rotation when it's only a positional update
-            boolean positionOnly = packetIn.moving && !packetIn.rotating;
-            if (positionOnly) {
-                // Correct the new rotation to match the old rotation
-                torot = fromrot;
+            if (packetIn.moving && packetIn.rotating) {
+                positionOnly = !toLocation.getPosition().equals(fromLocation.getPosition()) && ShouldFire.MOVE_ENTITY_EVENT_POSITION;
+                rotationOnly = ShouldFire.ROTATE_ENTITY_EVENT;
             }
 
-            ((IMixinEntityPlayerMP) this.player).setVelocityOverride(to.getPosition().sub(from.getPosition()));
+            mixinPlayer.setVelocityOverride(toLocation.getPosition().sub(fromLocation.getPosition()));
 
-            double deltaSquared = to.getPosition().distanceSquared(from.getPosition());
-            double deltaAngleSquared = fromrot.distanceSquared(torot);
+            double deltaSquared = toLocation.getPosition().distanceSquared(fromLocation.getPosition());
+            double deltaAngleSquared = fromRotation.distanceSquared(toRotation);
 
             // These magic numbers are sad but help prevent excessive lag from this event.
             // eventually it would be nice to not have them
             if (deltaSquared > ((1f / 16) * (1f / 16)) || deltaAngleSquared > (.15f * .15f)) {
-                Transform<World> fromTransform = player.getTransform().setLocation(from).setRotation(fromrot);
-                Transform<World> toTransform = player.getTransform().setLocation(to).setRotation(torot);
+                Transform<World> fromTransform = player.getTransform().setLocation(fromLocation).setRotation(fromRotation);
+                Transform<World> toTransform = player.getTransform().setLocation(toLocation).setRotation(toRotation);
                 Transform<World> originalToTransform = toTransform;
-                if ((rotationOnly && ShouldFire.ROTATE_ENTITY_EVENT) || (!rotationOnly && ShouldFire.MOVE_ENTITY_EVENT_POSITION)) {
-                    try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                        Sponge.getCauseStackManager().pushCause(player);
-                        Event event = null;
-                        Transform<World> eventToTransform = null;
-                        if (rotationOnly) {
-                            event = SpongeEventFactory.createRotateEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), fromTransform, toTransform, player);
-                            eventToTransform = ((RotateEntityEvent) event).getToTransform();
-                        } else {
-                            event = SpongeEventFactory.createMoveEntityEventPosition(Sponge.getCauseStackManager().getCurrentCause(), fromTransform, toTransform, player);
-                            eventToTransform = ((MoveEntityEvent) event).getToTransform();
-                        }
-                        SpongeImpl.postEvent(event);
-                        Sponge.getCauseStackManager().popCause();
-                        if (((Cancellable) event).isCancelled()) {
-                            mixinPlayer.setLocationAndAngles(fromTransform);
-                            this.lastMoveLocation = from;
-                            ((IMixinEntityPlayerMP) this.player).setVelocityOverride(null);
-                            return true;
-                        }
-                        toTransform = eventToTransform;
+                if (rotationOnly || positionOnly) {
+                    Event event;
+                    if (rotationOnly) {
+                        event = SpongeEventFactory.createRotateEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), fromTransform, toTransform, player);
+                    } else {
+                        event = SpongeEventFactory.createMoveEntityEventPosition(Sponge.getCauseStackManager().getCurrentCause(), fromTransform, toTransform, player);
+                    }
+                    if (SpongeImpl.postEvent(event)) {
+                        mixinPlayer.setLocationAndAngles(fromTransform);
+                        this.lastMoveLocation = fromLocation;
+                        mixinPlayer.setVelocityOverride(null);
+                        return true;
+                    }
+                    if (rotationOnly) {
+                        toTransform = ((RotateEntityEvent) event).getToTransform();
+                    } else {
+                        toTransform = ((MoveEntityEvent) event).getToTransform();
                     }
                 }
                 if (!toTransform.equals(originalToTransform)) {
                     mixinPlayer.setLocationAndAngles(toTransform);
                     this.lastMoveLocation = toTransform.getLocation();
-                    ((IMixinEntityPlayerMP) this.player).setVelocityOverride(null);
+                    mixinPlayer.setVelocityOverride(null);
                     return true;
-                } else if (!from.equals(player.getLocation()) && this.justTeleported) {
+                } else if (!fromTransform.getLocation().equals(player.getLocation()) && this.justTeleported) {
                     this.lastMoveLocation = player.getLocation();
                     // Prevent teleports during the move event from causing odd behaviors
                     this.justTeleported = false;
-                    ((IMixinEntityPlayerMP) this.player).setVelocityOverride(null);
+                    mixinPlayer.setVelocityOverride(null);
                     return true;
                 } else {
                     this.lastMoveLocation = toTransform.getLocation();
