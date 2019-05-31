@@ -26,7 +26,6 @@ package org.spongepowered.common.event.tracking.phase.packet;
 
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
-import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -45,7 +44,6 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
     private ItemStackSnapshot cursor = ItemStackSnapshot.NONE;
     private ItemStack itemUsed = ItemStack.empty();
     private SpongeItemStackSnapshot itemUsedSnapshot = (SpongeItemStackSnapshot) ItemStackSnapshot.NONE;
-    private BlockSnapshot targetBlock = BlockSnapshot.NONE;
     @Nullable private HandType handUsed;
     private boolean ignoreCreative;
     private boolean interactItemChanged;
@@ -61,11 +59,6 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
 
     public P packetPlayer(EntityPlayerMP playerMP) {
         this.packetPlayer = playerMP;
-        return (P) this;
-    }
-
-    public P targetBlock(BlockSnapshot snapshot) {
-        this.targetBlock = snapshot;
         return (P) this;
     }
 
@@ -94,10 +87,6 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
 
     public ItemStackSnapshot getCursor() {
         return this.cursor;
-    }
-
-    public BlockSnapshot getTargetBlock() {
-        return this.targetBlock;
     }
 
     public boolean getIgnoringCreative() {

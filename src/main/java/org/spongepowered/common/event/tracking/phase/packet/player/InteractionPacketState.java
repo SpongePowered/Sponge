@@ -56,8 +56,7 @@ import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
-import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
-import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
+import org.spongepowered.common.event.tracking.phase.packet.PacketState;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
@@ -72,8 +71,13 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
-public final class InteractionPacketState extends BasicPacketState {
+public final class InteractionPacketState extends PacketState<InteractionPacketContext> {
 
+
+    @Override
+    public InteractionPacketContext createPhaseContext() {
+        return new InteractionPacketContext(this);
+    }
 
     @Override
     public boolean isInteraction() {
@@ -81,7 +85,7 @@ public final class InteractionPacketState extends BasicPacketState {
     }
 
     @Override
-    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, BasicPacketContext context) {
+    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, InteractionPacketContext context) {
         final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.getHeldItemMainhand());
         if (stack != null) {
             context.itemUsed(stack);
@@ -91,7 +95,7 @@ public final class InteractionPacketState extends BasicPacketState {
     }
 
     @Override
-    public boolean spawnEntityOrCapture(BasicPacketContext context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(InteractionPacketContext context, Entity entity, int chunkX, int chunkZ) {
         return context.captureEntity(entity);
     }
 
@@ -101,27 +105,27 @@ public final class InteractionPacketState extends BasicPacketState {
     }
 
     @Override
-    public boolean doesCaptureEntityDrops(BasicPacketContext context) {
+    public boolean doesCaptureEntityDrops(InteractionPacketContext context) {
         return true;
     }
 
     @Override
-    public boolean tracksTileEntityChanges(BasicPacketContext currentContext) {
+    public boolean tracksTileEntityChanges(InteractionPacketContext currentContext) {
         return true;
     }
 
     @Override
-    public boolean hasSpecificBlockProcess(BasicPacketContext context) {
+    public boolean hasSpecificBlockProcess(InteractionPacketContext context) {
         return true;
     }
 
     @Override
-    public boolean doesCaptureNeighborNotifications(BasicPacketContext context) {
+    public boolean doesCaptureNeighborNotifications(InteractionPacketContext context) {
         return true;
     }
 
     @Override
-    public boolean tracksBlockSpecificDrops(BasicPacketContext context) {
+    public boolean tracksBlockSpecificDrops(InteractionPacketContext context) {
         return true;
     }
 
@@ -132,7 +136,7 @@ public final class InteractionPacketState extends BasicPacketState {
 
     @SuppressWarnings("unchecked")
     @Override
-    public void unwind(BasicPacketContext phaseContext) {
+    public void unwind(InteractionPacketContext phaseContext) {
 
         final EntityPlayerMP player = phaseContext.getPacketPlayer();
         final ItemStack usedStack = phaseContext.getItemUsed();
@@ -238,7 +242,7 @@ public final class InteractionPacketState extends BasicPacketState {
         }
     }
 
-    private void throwEntitySpawnEvents(BasicPacketContext phaseContext, EntityPlayerMP player, ItemStackSnapshot usedSnapshot,
+    private void throwEntitySpawnEvents(InteractionPacketContext phaseContext, EntityPlayerMP player, ItemStackSnapshot usedSnapshot,
         BlockSnapshot firstBlockChange, Collection<Entity> entities) {
         final List<Entity> projectiles = new ArrayList<>(entities.size());
         final List<Entity> spawnEggs = new ArrayList<>(entities.size());

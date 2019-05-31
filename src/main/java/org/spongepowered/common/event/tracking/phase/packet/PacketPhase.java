@@ -91,6 +91,7 @@ import org.spongepowered.common.event.tracking.phase.packet.player.AttackEntityP
 import org.spongepowered.common.event.tracking.phase.packet.player.IgnoredPacketState;
 import org.spongepowered.common.event.tracking.phase.packet.player.InteractAtEntityPacketState;
 import org.spongepowered.common.event.tracking.phase.packet.player.InteractEntityPacketState;
+import org.spongepowered.common.event.tracking.phase.packet.player.InteractionPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.player.InteractionPacketState;
 import org.spongepowered.common.event.tracking.phase.packet.player.InvalidPacketState;
 import org.spongepowered.common.event.tracking.phase.packet.player.MovementPacketState;
@@ -112,7 +113,7 @@ public final class PacketPhase extends TrackingPhase {
 
         public static final IPhaseState<BasicPacketContext> UNKNOWN = new UnknownPacketState();
         static final IPhaseState<BasicPacketContext> MOVEMENT = new MovementPacketState();
-        static final IPhaseState<BasicPacketContext> INTERACTION = new InteractionPacketState();
+        static final IPhaseState<InteractionPacketContext> INTERACTION = new InteractionPacketState();
         static final IPhaseState<BasicPacketContext> IGNORED = new IgnoredPacketState();
         static final IPhaseState<BasicPacketContext> INTERACT_ENTITY = new InteractEntityPacketState();
         static final IPhaseState<BasicPacketContext> ATTACK_ENTITY = new AttackEntityPacketState();
