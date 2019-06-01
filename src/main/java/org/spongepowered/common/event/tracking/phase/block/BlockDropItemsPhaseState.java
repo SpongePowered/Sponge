@@ -32,8 +32,6 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -84,6 +82,13 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
                     entities.add(EntityUtil.fromNative(item));
                 }
                 SpongeCommonEventFactory.callDropItemDestruct(entities, context);
+            });
+        context.getBlockItemDropSupplier()
+            .acceptAndClearIfNotEmpty(drops -> {
+                drops.asMap().forEach((key, value) -> {
+                    Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+                    SpongeCommonEventFactory.callDropItemDestruct(new ArrayList(value), context);
+                });
             });
         context.getCapturedEntitySupplier()
             .acceptAndClearIfNotEmpty(entities -> SpongeCommonEventFactory.callSpawnEntity(entities, context));
