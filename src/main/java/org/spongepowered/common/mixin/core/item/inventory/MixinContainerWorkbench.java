@@ -59,6 +59,7 @@ public abstract class MixinContainerWorkbench extends MixinContainer implements 
                 .add(1, CraftingOutputAdapter.class, (i) -> new CraftingOutputSlotLensImpl(i, (t) -> false, (t) -> false))
                 .add(9)
                 .add(36);
+        builder.add(this.inventorySlots.size() - 46);
         return builder.build();
     }
 }
