@@ -35,6 +35,7 @@ import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -72,15 +73,37 @@ public class ConfigurateTranslator implements DataTranslator<ConfigurationNode> 
         return dataContainer;
     }
 
-    @SuppressWarnings("unchecked")
-    private static void translateMapOrList(ConfigurationNode node, DataView container) {
-        Object value = node.getValue();
-        if (value instanceof Map) {
-            for (Map.Entry<Object, Object> entry : ((Map<Object, Object>) value).entrySet()) {
-                container.set(of('.', entry.getKey().toString()), entry.getValue());
+    private void translate(DataView container, Map<Object, ? extends ConfigurationNode> value) {
+        for (Map.Entry<Object, ? extends ConfigurationNode> o : value.entrySet()) {
+            translate(o.getValue(), container);
+        }
+    }
+
+    private void translate(ConfigurationNode node, DataView container, List<? extends ConfigurationNode> value) {
+        Object key = node.getKey();
+        List<DataView> list = new ArrayList<>(value.size());
+        for (int i = 0; i < value.size(); i++) {
+            DataContainer clean = DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED);
+            translate(clean, value.get(i).getChildrenMap());
+            list.add(clean);
+        }
+        container.set(of(key.toString()), list);
+    }
+
+    private void translate(ConfigurationNode node, DataView container) {
+        if (node.hasMapChildren()) {
+            Object key = node.getKey();
+            DataView view;
+            if (key != null) {
+                view = container.createView(of(key.toString()));
+            } else {
+                view = container;
             }
-        } else if (value != null) {
-            container.set(of(node.getKey().toString()), value);
+            translate(view, node.getChildrenMap());
+        } else if (node.hasListChildren()) {
+            translate(node, container, node.getChildrenList());
+        } else {
+            container.set(of('.', String.valueOf(node.getKey())), node.getValue());
         }
     }
 
@@ -117,15 +140,7 @@ public class ConfigurateTranslator implements DataTranslator<ConfigurationNode> 
 
     @Override
     public DataView addTo(ConfigurationNode node, DataView dataView) {
-        Object value = node.getValue();
-        Object key = node.getKey();
-        if (value != null) {
-            if (key == null || value instanceof Map || value instanceof List) {
-                translateMapOrList(node, dataView);
-            } else {
-                dataView.set(of('.', key.toString()), value);
-            }
-        }
+        translate(node, dataView);
         return dataView;
     }
 
