@@ -47,6 +47,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
+import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
@@ -213,6 +214,25 @@ public abstract class MixinTileEntityFurnace extends MixinTileEntityLockable imp
     // Finish
     @Inject(method = "smeltItem", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;shrink(I)V"))
     private void afterSmeltItem(CallbackInfo ci, ItemStack itemStack, ItemStack result, ItemStack outputStack) {
+        ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(this.furnaceItemStacks.get(1));
+        Cause cause = Sponge.getCauseStackManager().getCurrentCause();
+        SmeltEvent.Finish event = SpongeEventFactory.createSmeltEventFinish(cause, fuel, Collections.singletonList(ItemStackUtil.snapshotOf(result)), this);
+        SpongeImpl.postEvent(event);
+    }
+
+    /**
+     * The jvm can optimize the local variable table in production (in raw vanilla, not decompiled/recompiled)
+     * to where the local variable table ends up being trimmed. Because of that, development
+     * environments and recompiled environments (such as in a forge environment), we end up with
+     * the original three itemstacks still on the local variable table by the time shrink is called.
+     *
+     * Can be verified with <a href="https://i.imgur.com/IfeLzed.png">that image</a>.
+     *
+     * @param ci The callback injection
+     * @param outputStack The output
+     */
+    @Surrogate
+    private void afterSmeltItem(CallbackInfo ci, ItemStack outputStack) {
         ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(this.furnaceItemStacks.get(1));
         Cause cause = Sponge.getCauseStackManager().getCurrentCause();
         SmeltEvent.Finish event = SpongeEventFactory.createSmeltEventFinish(cause, fuel, Collections.singletonList(ItemStackUtil.snapshotOf(result)), this);
