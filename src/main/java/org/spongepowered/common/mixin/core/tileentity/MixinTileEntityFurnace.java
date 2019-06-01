@@ -28,6 +28,7 @@ import static net.minecraft.inventory.SlotFurnaceFuel.isBucket;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.MathHelper;
@@ -235,7 +236,8 @@ public abstract class MixinTileEntityFurnace extends MixinTileEntityLockable imp
     private void afterSmeltItem(CallbackInfo ci, ItemStack outputStack) {
         ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(this.furnaceItemStacks.get(1));
         Cause cause = Sponge.getCauseStackManager().getCurrentCause();
-        SmeltEvent.Finish event = SpongeEventFactory.createSmeltEventFinish(cause, fuel, Collections.singletonList(ItemStackUtil.snapshotOf(result)), this);
+        ItemStackSnapshot result = ItemStackUtil.snapshotOf(FurnaceRecipes.instance().getSmeltingResult(this.furnaceItemStacks.get(0)));
+        SmeltEvent.Finish event = SpongeEventFactory.createSmeltEventFinish(cause, fuel, Collections.singletonList(result), this);
         SpongeImpl.postEvent(event);
     }
 
