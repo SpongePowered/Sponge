@@ -373,18 +373,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
                 // means that we didn't need to capture before
                 return;
             }
-            final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-            if (phaseTracker.getCurrentContext() != this.data) {
-                // illegal state exception maybe?
-                this.data = null;
-                return;
-            }
-            final PhaseContext<?> context = this.data;
-            final IPhaseState<?> currentState = context.state;
-            final boolean shouldEnterBlockDropPhase = !context.isCapturingBlockItemDrops() && !currentState.alreadyProcessingBlockItemDrops() && !currentState.isWorldGeneration();
-            if (shouldEnterBlockDropPhase) {
-                phaseTracker.getCurrentContext().close();
-            }
+            this.data.close();
             this.data = null;
         }
     }
