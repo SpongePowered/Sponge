@@ -27,10 +27,6 @@ package org.spongepowered.common.mixin.core.server;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
-import org.spongepowered.common.event.tracking.phase.general.MapConversionContext;
-import org.spongepowered.common.mixin.core.world.storage.MixinWorldInfo;
-import org.spongepowered.common.relocate.co.aikar.timings.TimingsManager;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.command.ICommandManager;
@@ -94,6 +90,9 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.command.SpongeCommandManager;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTrackerCrashHandler;
+import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
+import org.spongepowered.common.event.tracking.phase.general.MapConversionContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.generation.GenericGenerationContext;
@@ -107,7 +106,9 @@ import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
+import org.spongepowered.common.mixin.core.world.storage.MixinWorldInfo;
 import org.spongepowered.common.profile.SpongeProfileManager;
+import org.spongepowered.common.relocate.co.aikar.timings.TimingsManager;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
@@ -600,6 +601,9 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             SpongeCommonEventFactory.lastAnimationPlayer = null;
         }
         SpongeCommonEventFactory.lastAnimationPacketTick = 0;
+
+        PhaseTracker.getInstance().ensureEmpty();
+
         TimingsManager.FULL_SERVER_TICK.stopTiming();
     }
 

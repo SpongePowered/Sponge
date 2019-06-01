@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockRedstoneWire;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
@@ -1170,4 +1169,20 @@ public final class PhaseTracker {
         return true;
     }
 
+    public void ensureEmpty() {
+        if (!this.stack.isEmpty()) {
+            PrettyPrinter printer = new PrettyPrinter(60);
+            printer.add("Phases Not Completed").centre().hr();
+            printer.add("One or more phases were started but were not properly completed by the end of the server tick. They will be automatically "
+                    + "closed, but this is an issue that should be reported to Sponge.");
+            this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
+            printer.add();
+            this.generateVersionInfo(printer);
+            printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
+
+            while (!this.stack.isEmpty()) {
+                this.getCurrentContext().close();
+            }
+        }
+    }
 }
