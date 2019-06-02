@@ -824,6 +824,11 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
     }
 
     @Override
+    public boolean getIsInvulnerable() {
+        return this.invulnerable;
+    }
+
+    @Override
     public Optional<org.spongepowered.api.entity.Entity> getVehicle() {
         return Optional.ofNullable((org.spongepowered.api.entity.Entity) getRidingEntity());
     }
