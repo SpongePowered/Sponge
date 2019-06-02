@@ -220,7 +220,9 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
      */
     @Inject(method = "Lnet/minecraft/tileentity/TileEntity;writeToNBT(Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/nbt/NBTTagCompound;", at = @At("HEAD"))
     public void onWriteToNBT(NBTTagCompound compound, CallbackInfoReturnable<NBTTagCompound> ci) {
-        this.writeToNbt(this.getSpongeData());
+        if (!((IMixinCustomDataHolder) this).getCustomManipulators().isEmpty()) {
+            this.writeToNbt(this.getSpongeData());
+        }
     }
 
     /**

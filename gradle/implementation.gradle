@@ -19,6 +19,13 @@ sourceSets {
     java6.compileClasspath += main.compileClasspath + main.output
 }
 
+configurations.all {
+    resolutionStrategy.dependencySubstitution {
+        substitute module("org.spongepowered:spongeapi") with project(":SpongeCommon:SpongeAPI")
+        substitute module("org.spongepowered:spongecommon") with project(":SpongeCommon")
+    }
+}
+
 // Include only asm-debug-all in the workspace
 configurations.compile {
     exclude module: 'asm'

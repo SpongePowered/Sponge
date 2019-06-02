@@ -45,7 +45,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 
-@RunWith(LaunchWrapperParameterized.class)
+//@RunWith(LaunchWrapperParameterized.class)
 public class CatalogTypeMethodTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(CatalogTypeMethodTest.class);
@@ -100,7 +100,7 @@ public class CatalogTypeMethodTest {
     @Parameterized.Parameter(6)
     public String implementationClass;
 
-    @Test
+//    @Test
     public void testCatalogMethodImpl() throws Throwable {
         try {
             try {

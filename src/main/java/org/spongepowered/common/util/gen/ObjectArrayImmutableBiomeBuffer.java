@@ -37,6 +37,8 @@ import org.spongepowered.common.world.extent.ImmutableBiomeViewDownsize;
 import org.spongepowered.common.world.extent.ImmutableBiomeViewTransform;
 import org.spongepowered.common.world.extent.worker.SpongeBiomeVolumeWorker;
 
+import java.util.Arrays;
+
 /**
  * Mutable view of a {@link BiomeType} array.
  *
@@ -119,4 +121,25 @@ public final class ObjectArrayImmutableBiomeBuffer extends AbstractBiomeBuffer i
         return this;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        ObjectArrayImmutableBiomeBuffer that = (ObjectArrayImmutableBiomeBuffer) o;
+        return Arrays.equals(this.biomes, that.biomes);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + Arrays.hashCode(this.biomes);
+        return result;
+    }
 }

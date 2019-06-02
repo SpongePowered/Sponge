@@ -180,4 +180,26 @@ public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer imp
         return new ObjectArrayImmutableBiomeBuffer(this.biomes, this.start, this.size);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        ObjectArrayMutableBiomeBuffer that = (ObjectArrayMutableBiomeBuffer) o;
+        return Arrays.equals(this.biomes, that.biomes);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + Arrays.hashCode(this.biomes);
+        return result;
+    }
+
 }

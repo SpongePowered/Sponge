@@ -27,6 +27,7 @@ package org.spongepowered.common.data.util;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataQuery;
+import org.spongepowered.api.world.schematic.Schematic;
 
 @SuppressWarnings("DeprecatedIsStillUsed")
 public final class DataQueries {
@@ -222,6 +223,9 @@ public final class DataQueries {
     
     public static final class Schematic {
 
+
+        public static final DataQuery NAME = of("Name");
+
         public static final class Versions {
             public static final DataQuery V1_TILE_ENTITY_DATA = of("TileEntities");
             public static final DataQuery V1_TILE_ENTITY_ID = of("id");
@@ -234,21 +238,22 @@ public final class DataQueries {
          */
         public static final class Legacy {
 
-            public static final DataQuery LEGACY_MATERIALS = of("Materials");
-            public static final DataQuery LEGACY_OFFSET_X = of("WEOffsetX");
-            public static final DataQuery LEGACY_OFFSET_Y = of("WEOffsetY");
-            public static final DataQuery LEGACY_OFFSET_Z = of("WEOffsetZ");
-            public static final DataQuery LEGACY_BLOCKS = of("Blocks");
-            public static final DataQuery LEGACY_BLOCK_DATA = of("Data");
-            public static final DataQuery LEGACY_ADD_BLOCKS = of("AddBlocks");
-            public static final DataQuery LEGACY_TILEDATA = of("TileEntities");
-            public static final DataQuery LEGACY_ENTITIES = of("Entities");
+            public static final DataQuery MATERIALS = of("Materials");
+            public static final DataQuery WE_OFFSET_X = of("WEOffsetX");
+            public static final DataQuery WE_OFFSET_Y = of("WEOffsetY");
+            public static final DataQuery WE_OFFSET_Z = of("WEOffsetZ");
+            public static final DataQuery BLOCKS = of("Blocks");
+            public static final DataQuery BLOCK_DATA = of("Data");
+            public static final DataQuery ADD_BLOCKS = of("AddBlocks");
+            public static final DataQuery TILE_ENTITIES = of("TileEntities");
+            public static final DataQuery ENTITIES = of("Entities");
             public static final DataQuery ENTITY_ID = of("id");
         }
         
         public static final DataQuery VERSION = of("Version");
         public static final DataQuery DATA_VERSION = of("DataVersion");
         public static final DataQuery METADATA = of("Metadata");
+        public static final DataQuery REQUIRED_MODS = of(org.spongepowered.api.world.schematic.Schematic.METADATA_REQUIRED_MODS);
 
         public static final DataQuery WIDTH = of("Width");
         public static final DataQuery HEIGHT = of("Height");

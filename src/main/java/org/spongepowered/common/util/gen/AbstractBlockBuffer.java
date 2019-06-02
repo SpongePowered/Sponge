@@ -33,6 +33,8 @@ import org.spongepowered.api.world.extent.BlockVolume;
 import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.common.util.VecHelper;
 
+import java.util.Objects;
+
 /**
  * Base class for block buffers.
  */
@@ -88,6 +90,27 @@ public abstract class AbstractBlockBuffer implements BlockVolume {
     @Override
     public BlockType getBlockType(int x, int y, int z) {
         return getBlock(x, y, z).getType();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        AbstractBlockBuffer that = (AbstractBlockBuffer) o;
+        return this.yLine == that.yLine &&
+               this.yzSlice == that.yzSlice &&
+               this.start.equals(that.start) &&
+               this.size.equals(that.size) &&
+               this.end.equals(that.end);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.start, this.size, this.end, this.yLine, this.yzSlice);
     }
 
     @Override

@@ -36,6 +36,7 @@ import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.util.datafix.FixTypes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.tileentity.TileEntityArchetype;
 import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.data.DataContainer;
@@ -55,11 +56,14 @@ import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.api.world.schematic.PaletteTypes;
 import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeTileEntityArchetypeBuilder;
 import org.spongepowered.common.data.persistence.schematic.SchematicUpdater1_to_2;
+import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
+import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.mixin.core.server.MixinDedicatedServer;
 import org.spongepowered.common.registry.type.block.TileEntityTypeRegistryModule;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
@@ -74,10 +78,12 @@ import org.spongepowered.common.world.schematic.SpongeSchematicBuilder;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -89,6 +95,8 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
     private static final TypeToken<Schematic> TYPE_TOKEN = TypeToken.of(Schematic.class);
     private static final int VERSION = 2;
     private static final int MAX_SIZE = 65535;
+
+    private static final ConcurrentSkipListSet<String> MISSING_MOD_IDS = new ConcurrentSkipListSet<>();
 
     private static final DataContentUpdater V1_TO_2 = new SchematicUpdater1_to_2();
 
@@ -155,6 +163,18 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
                 }
             }
         }
+        if (metadata != null) {
+            String schematicName = metadata.getString(DataQueries.Schematic.NAME).orElse("unknown");
+            metadata.getStringList(DataQueries.Schematic.REQUIRED_MODS).ifPresent(mods -> {
+                for (String modId : mods) {
+                    if (!Sponge.getPluginManager().getPlugin(modId).isPresent()) {
+                        if (MISSING_MOD_IDS.add(modId)) {
+                            SpongeImpl.getLogger().warn("When attempting to load the Schematic: " + schematicName + " there is a missing modid: " + modId + " some blocks/tiles/entities may not load correctly.");
+                        }
+                    }
+                }
+            });
+        }
 
         // TODO error handling for these optionals
         int width = updatedView.getShort(DataQueries.Schematic.WIDTH).get();
@@ -181,7 +201,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
             DataView paletteMap = paletteData.get();
             Set<DataQuery> paletteKeys = paletteMap.getKeys(false);
             for (DataQuery key : paletteKeys) {
-                BlockState state = Sponge.getRegistry().getType(BlockState.class, key.getParts().get(0)).get();
+                BlockState state = Sponge.getRegistry().getType(BlockState.class, key.getParts().get(0)).orElseGet(BlockTypes.BEDROCK::getDefaultState);
                 bimap.assign(state, paletteMap.getInt(key).get());
             }
         } else {
@@ -292,6 +312,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
                                 } else {
                                     upgraded = tile;
                                 }
+
                                 final TileEntityArchetype archetype = new SpongeTileEntityArchetypeBuilder()
                                     .state(buffer.getBlock(pos[0] - offset[0], pos[1] - offset[1], pos[2] - offset[2]))
                                     .tileData(upgraded)
@@ -370,6 +391,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
         for (DataQuery metaKey : schematic.getMetadata().getKeys(false)) {
             data.set(DataQueries.Schematic.METADATA.then(metaKey), schematic.getMetadata().get(metaKey).get());
         }
+        final Set<String> requiredMods = new HashSet<>();
 
         int[] offset = new int[] {-xMin, -yMin, -zMin};
         data.set(DataQueries.Schematic.OFFSET, offset);
@@ -413,11 +435,15 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
 
         });
 
-        if (palette.getType() == org.spongepowered.api.world.schematic.BlockPaletteTypes.LOCAL) {
+        if (palette.getType() == PaletteTypes.LOCAL_BLOCKS) {
             DataQuery paletteQuery = DataQueries.Schematic.PALETTE;
             for (BlockState state : palette.getEntries()) {
                 // getOrAssign to skip the optional, it will never assign
                 data.set(paletteQuery.then(state.getId()), palette.getOrAssign(state));
+                final String modId = state.getType().getId().split(":")[0];
+                if (!"minecraft".equals(modId) && modId != null && !modId.isEmpty()) {
+                    requiredMods.add(modId);
+                }
             }
             data.set(DataQueries.Schematic.PALETTE_MAX, palette.getHighestId());
         }
@@ -425,6 +451,10 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
             DataQuery paletteQuery = DataQueries.Schematic.BIOME_PALETTE;
             for (BiomeType biomeType : biomePalette.getEntries()) {
                 data.set(paletteQuery.then(biomeType.getId()), biomePalette.getOrAssign(biomeType));
+                final String modId = biomeType.getId().split(":")[0];
+                if (!"minecraft".equals(modId) && modId != null && !modId.isEmpty()) {
+                    requiredMods.add(modId);
+                }
             }
             data.set(DataQueries.Schematic.BIOME_PALETTE_MAX, biomePalette.getHighestId());
         }
@@ -435,6 +465,17 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
             DataContainer tiledata = entry.getValue().getTileData();
             int[] apos = new int[] {pos.getX() - xMin, pos.getY() - yMin, pos.getZ() - zMin};
             tiledata.set(DataQueries.Schematic.BLOCKENTITY_POS, apos);
+            final SpongeTileEntityType tileEntityType = (SpongeTileEntityType) entry.getValue().getTileEntityType();
+
+            final String modId = tileEntityType.getId().split(":")[0];
+            if ("minecraft".equalsIgnoreCase(modId) && !"minecraft".equalsIgnoreCase(tileEntityType.getModId())) {
+                if (!"sponge".equalsIgnoreCase(tileEntityType.getModId())) {
+                    requiredMods.add(modId);
+                }
+            }
+            if (!"minecraft".equalsIgnoreCase(modId) && modId != null && !modId.isEmpty()) {
+                requiredMods.add(modId);
+            }
             tileEntities.add(tiledata);
         }
         data.set(DataQueries.Schematic.BLOCKENTITY_DATA, tileEntities);
@@ -443,8 +484,22 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
         for (EntityArchetype entityArchetype : schematic.getEntityArchetypes()) {
             DataContainer entityData = entityArchetype.getEntityData();
             entities.add(entityData);
+            final SpongeEntityType type = (SpongeEntityType) entityArchetype.getType();
+            final String modId = type.getId().split(":")[0];
+            if ("minecraft".equalsIgnoreCase(modId) && !"minecraft".equalsIgnoreCase(type.getModId())) {
+                if (!"sponge".equalsIgnoreCase(type.getModId())) {
+                    requiredMods.add(modId);
+                }
+            }
+            if (!"minecraft".equals(modId) && modId != null && !modId.isEmpty()) {
+                requiredMods.add(modId);
+            }
         }
         data.set(DataQueries.Schematic.ENTITIES, entities);
+
+        if (!requiredMods.isEmpty()) {
+            data.set(DataQueries.Schematic.METADATA.then(DataQueries.Schematic.REQUIRED_MODS), requiredMods);
+        }
 
         return data;
     }

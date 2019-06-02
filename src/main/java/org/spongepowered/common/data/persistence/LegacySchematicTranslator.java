@@ -108,7 +108,7 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
         // (which is not in the sponge schematic specification) is not present
         // then it is more likely that its a sponge schematic than a legacy
         // schematic
-        String materials = view.getString(DataQueries.Schematic.Legacy.LEGACY_MATERIALS).orElse("Sponge");
+        String materials = view.getString(DataQueries.Schematic.Legacy.MATERIALS).orElse("Sponge");
         if ("Sponge".equalsIgnoreCase(materials)) {
             // not a legacy schematic use the new loader instead.
             return DataTranslators.SCHEMATIC.translate(view);
@@ -122,16 +122,16 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
             throw new InvalidDataException(String.format(
                     "Schematic is larger than maximum allowable size (found: (%d, %d, %d) max: (%d, %<d, %<d)", width, height, length, MAX_SIZE));
         }
-        int offsetX = view.getInt(DataQueries.Schematic.Legacy.LEGACY_OFFSET_X).orElse(0);
-        int offsetY = view.getInt(DataQueries.Schematic.Legacy.LEGACY_OFFSET_Y).orElse(0);
-        int offsetZ = view.getInt(DataQueries.Schematic.Legacy.LEGACY_OFFSET_Z).orElse(0);
+        int offsetX = view.getInt(DataQueries.Schematic.Legacy.WE_OFFSET_X).orElse(0);
+        int offsetY = view.getInt(DataQueries.Schematic.Legacy.WE_OFFSET_Y).orElse(0);
+        int offsetZ = view.getInt(DataQueries.Schematic.Legacy.WE_OFFSET_Z).orElse(0);
         Palette<BlockState> palette = GlobalPalette.getBlockPalette();
         final SpongeSchematicBuilder builder = new SpongeSchematicBuilder();
         ArrayMutableBlockBuffer buffer = new ArrayMutableBlockBuffer(new Vector3i(-offsetX, -offsetY, -offsetZ),
                 new Vector3i(width, height, length));
-        byte[] block_ids = (byte[]) view.get(DataQueries.Schematic.Legacy.LEGACY_BLOCKS).get();
-        byte[] block_data = (byte[]) view.get(DataQueries.Schematic.Legacy.LEGACY_BLOCK_DATA).get();
-        byte[] add_block = (byte[]) view.get(DataQueries.Schematic.Legacy.LEGACY_ADD_BLOCKS).orElse(null);
+        byte[] block_ids = (byte[]) view.get(DataQueries.Schematic.Legacy.BLOCKS).get();
+        byte[] block_data = (byte[]) view.get(DataQueries.Schematic.Legacy.BLOCK_DATA).get();
+        byte[] add_block = (byte[]) view.get(DataQueries.Schematic.Legacy.ADD_BLOCKS).orElse(null);
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 for (int z = 0; z < length; z++) {
@@ -153,7 +153,7 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
             }
         }
         Map<Vector3i, TileEntityArchetype> tiles = Maps.newHashMap();
-        List<DataView> tiledata = view.getViewList(DataQueries.Schematic.Legacy.LEGACY_TILEDATA).orElse(null);
+        List<DataView> tiledata = view.getViewList(DataQueries.Schematic.Legacy.TILE_ENTITIES).orElse(null);
         if (tiledata != null) {
             for (DataView tile : tiledata) {
                 int x = tile.getInt(DataQueries.X_POS).get();
@@ -183,7 +183,7 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
             }
         }
         final List<EntityArchetype> entities = new ArrayList<>();
-        view.getViewList(DataQueries.Schematic.Legacy.LEGACY_ENTITIES).ifPresent(entityViews -> {
+        view.getViewList(DataQueries.Schematic.Legacy.ENTITIES).ifPresent(entityViews -> {
             for (DataView entity : entityViews) {
                 int x = entity.getInt(DataQueries.X_POS).get();
                 int y = entity.getInt(DataQueries.Y_POS).get();
@@ -236,20 +236,20 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
         data.set(DataQueries.Schematic.WIDTH, width);
         data.set(DataQueries.Schematic.HEIGHT, height);
         data.set(DataQueries.Schematic.LENGTH, length);
-        data.set(DataQueries.Schematic.Legacy.LEGACY_MATERIALS, "Alpha");
+        data.set(DataQueries.Schematic.Legacy.MATERIALS, "Alpha");
         // These are added for better interop with WorldEdit
-        data.set(DataQueries.Schematic.Legacy.LEGACY_OFFSET_X, -xMin);
-        data.set(DataQueries.Schematic.Legacy.LEGACY_OFFSET_Y, -yMin);
-        data.set(DataQueries.Schematic.Legacy.LEGACY_OFFSET_Z, -zMin);
+        data.set(DataQueries.Schematic.Legacy.WE_OFFSET_X, -xMin);
+        data.set(DataQueries.Schematic.Legacy.WE_OFFSET_Y, -yMin);
+        data.set(DataQueries.Schematic.Legacy.WE_OFFSET_Z, -zMin);
         SaveIterator itr = new SaveIterator(width, height, length);
         schematic.getBlockWorker().iterate(itr);
         byte[] blockids = itr.blockids;
         byte[] extraids = itr.extraids;
         byte[] blockdata = itr.blockdata;
-        data.set(DataQueries.Schematic.Legacy.LEGACY_BLOCKS, blockids);
-        data.set(DataQueries.Schematic.Legacy.LEGACY_BLOCK_DATA, blockdata);
+        data.set(DataQueries.Schematic.Legacy.BLOCKS, blockids);
+        data.set(DataQueries.Schematic.Legacy.BLOCK_DATA, blockdata);
         if (extraids != null) {
-            data.set(DataQueries.Schematic.Legacy.LEGACY_ADD_BLOCKS, extraids);
+            data.set(DataQueries.Schematic.Legacy.ADD_BLOCKS, extraids);
         }
         List<DataView> tileEntities = Lists.newArrayList();
         for (Map.Entry<Vector3i, TileEntityArchetype> entry : schematic.getTileEntityArchetypes().entrySet()) {
@@ -260,7 +260,7 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
             tiledata.set(DataQueries.Z_POS, pos.getZ() - zMin);
             tileEntities.add(tiledata);
         }
-        data.set(DataQueries.Schematic.Legacy.LEGACY_TILEDATA, tileEntities);
+        data.set(DataQueries.Schematic.Legacy.TILE_ENTITIES, tileEntities);
         return data;
     }
 

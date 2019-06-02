@@ -140,20 +140,20 @@ public class SpongeSchematicBuilder implements Schematic.Builder {
     @Override
     public SpongeSchematicBuilder paletteType(org.spongepowered.api.world.schematic.BlockPaletteType type) {
         this.blockType = type;
-        this.blockPalette = null;
+        this.blockPalette = type.create();
         return this;
     }
 
     @Override
     public SpongeSchematicBuilder blockPaletteType(PaletteType<BlockState> type) {
         this.blockType = type;
-        this.blockPalette = null;
+        this.blockPalette = type.create();
         return this;
     }
 
     @Override
     public SpongeSchematicBuilder biomePaletteType(PaletteType<BiomeType> type) {
-        this.biomePalette = null;
+        this.biomePalette = type.create();
         this.biomeType = type;
         return this;
     }
@@ -241,6 +241,7 @@ public class SpongeSchematicBuilder implements Schematic.Builder {
         if (this.blockPalette == null) {
             this.blockPalette = this.blockType.create();
         }
+        checkArgument(this.blockType != null, "BlockPaletteType is null!");
         checkArgument(this.volume != null || this.view != null || this.backingVolume != null, "Either Volume, Extent, or BlockVolume must be set!");
         Vector3i min;
         Vector3i size;

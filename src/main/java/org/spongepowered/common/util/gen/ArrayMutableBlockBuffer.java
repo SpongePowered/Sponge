@@ -44,6 +44,9 @@ import org.spongepowered.common.world.schematic.BimapPalette;
 import org.spongepowered.common.world.schematic.BlockPaletteWrapper;
 import org.spongepowered.common.world.schematic.GlobalPalette;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements MutableBlockVolume {
 
     /**
@@ -187,6 +190,27 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
         return this.size.getX() * this.size.getY() * this.size.getZ();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        ArrayMutableBlockBuffer that = (ArrayMutableBlockBuffer) o;
+        return this.palette.equals(that.palette) &&
+               this.data.equals(that.data);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), this.palette, this.data);
+    }
+
     /**
      * Basically a fixed length list of non negative numbers/ids.
      */
@@ -239,6 +263,23 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
         @Override
         public int getMax() {
             return Character.MAX_VALUE;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            CharBackingData that = (CharBackingData) o;
+            return Arrays.equals(this.data, that.data);
+        }
+
+        @Override
+        public int hashCode() {
+            return Arrays.hashCode(this.data);
         }
     }
 
@@ -319,6 +360,28 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
         @Override
         public int getMax() {
             return (int) this.maxValue;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            PackedBackingData that = (PackedBackingData) o;
+            return this.bits == that.bits &&
+                   this.maxValue == that.maxValue &&
+                   this.arraySize == that.arraySize &&
+                   Arrays.equals(this.longArray, that.longArray);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = Objects.hash(this.bits, this.maxValue, this.arraySize);
+            result = 31 * result + Arrays.hashCode(this.longArray);
+            return result;
         }
     }
 }

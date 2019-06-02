@@ -41,6 +41,7 @@ import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogType
 
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 
 @RegisterCatalog(TileEntityTypes.class)
 public final class TileEntityTypeRegistryModule
@@ -59,7 +60,7 @@ public final class TileEntityTypeRegistryModule
         return Holder.INSTANCE;
     }
 
-    private final Map<Class<? extends TileEntity>, TileEntityType> tileClassToTypeMappings = Maps.newHashMap();
+    private final Map<Class<? extends TileEntity>, TileEntityType> tileClassToTypeMappings = Maps.newConcurrentMap();
 
     @Override
     public boolean allowsApiRegistration() {
@@ -92,6 +93,29 @@ public final class TileEntityTypeRegistryModule
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public Optional<TileEntityType> getById(String id) {
+        final Optional<TileEntityType> type = super.getById(id);
+        if (type.isPresent()) {
+            return type;
+        }
+        // Gotta try to see if it's a modid issue because of handling with forge.
+        // The issue with how forge merged tile entity registration handling mid cycle is that
+        // mods were previously not required to register their mod id namespace, they were just registering the
+        // tile entity name, so you'd potentially have a tile entity id of "mod.gabizou.superduperkillertileentity"
+        // and sponge would auto-prefix with the mod id, as it should. When forge merged their handling,
+        // those mod id's all the sudden became auto-prefixed with "minecraft" as the mod id, because you can't break
+        // pre-existing worlds, so you'd have "minecraft:mod.gabizou.superduperkillertileentity" as the id, but
+        // this registry wouldn't be recognizing it, so, we do try to recognize it by falling back on the original
+        // target TileEntity.REGISTRY by auto-prefixing with "minecraft".
+        if (id.contains(":")) {
+            final String[] split = id.split(":");
+            final String name = split[1];
+            return super.getById(name);
+        }
+        return Optional.empty();
     }
 
     public String getIdForName(String name) {

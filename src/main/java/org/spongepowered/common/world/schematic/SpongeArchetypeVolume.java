@@ -58,6 +58,7 @@ import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWork
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 public class SpongeArchetypeVolume extends AbstractBlockBuffer implements ArchetypeVolume {
@@ -188,4 +189,25 @@ public class SpongeArchetypeVolume extends AbstractBlockBuffer implements Archet
         return this.backing;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        SpongeArchetypeVolume that = (SpongeArchetypeVolume) o;
+        final boolean equals = this.backing.equals(that.backing);
+        final boolean equals1 = this.tiles.equals(that.tiles);
+        final boolean equals2 = this.entities.equals(that.entities);
+        return equals &&
+               equals1 &&
+               equals2;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.backing, this.tiles, this.entities);
+    }
 }

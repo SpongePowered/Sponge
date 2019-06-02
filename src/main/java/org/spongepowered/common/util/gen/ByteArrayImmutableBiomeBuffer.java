@@ -39,6 +39,9 @@ import org.spongepowered.common.world.extent.ImmutableBiomeViewTransform;
 import org.spongepowered.common.world.extent.worker.SpongeBiomeVolumeWorker;
 import org.spongepowered.common.world.schematic.GlobalPalette;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 /**
  * Immutable biome volume, backed by a byte array. The array passed to the
  * constructor is copied to ensure that the instance is immutable.
@@ -108,4 +111,26 @@ public final class ByteArrayImmutableBiomeBuffer extends AbstractBiomeBuffer imp
         return new ByteArrayImmutableBiomeBuffer(GlobalPalette.getBiomePalette(), start, size, biomes);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        ByteArrayImmutableBiomeBuffer that = (ByteArrayImmutableBiomeBuffer) o;
+        return Arrays.equals(this.biomes, that.biomes) &&
+               this.palette.equals(that.palette);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(super.hashCode(), this.palette);
+        result = 31 * result + Arrays.hashCode(this.biomes);
+        return result;
+    }
 }
