@@ -30,6 +30,7 @@ import static org.spongepowered.api.data.DataQuery.of;
 import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.SimpleConfigurationNode;
+import ninja.leaping.configurate.ValueType;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
@@ -74,42 +75,41 @@ public class ConfigurateTranslator implements DataTranslator<ConfigurationNode> 
         return dataContainer;
     }
 
-    private void translate(DataView container, Map<Object, ? extends ConfigurationNode> value) {
-        for (Map.Entry<Object, ? extends ConfigurationNode> o : value.entrySet()) {
-            translate(o.getValue(), container);
+    private void translate(Map<Object, ? extends ConfigurationNode> node, DataView container, Map<?, ?> value) {
+        for (Map.Entry<?, ?> o : value.entrySet()) {
+            translate(node.get(o.getKey()), container);
         }
     }
 
-    private void translate(ConfigurationNode node, DataView container, List<? extends ConfigurationNode> value) {
-        Object key = node.getKey();
-        List<DataView> list = new ArrayList<>(value.size());
+    private List<Object> translate(List<? extends ConfigurationNode> node, DataView container, List<?> value) {
+        List<Object> list = new ArrayList<>(value.size());
         for (int i = 0; i < value.size(); i++) {
-            DataContainer clean = DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED);
-            ConfigurationNode v = value.get(i);
-            if (v.hasMapChildren()) {
-                translate(clean, v.getChildrenMap());
+            ConfigurationNode n = node.get(i);
+            if (n.getValueType() == ValueType.SCALAR) {
+                list.add(n.getValue());
             } else {
-                DataQuery query = of('.', String.valueOf(node.getKey()));
-                clean.set(query, v.getValue());
-                clean = (DataContainer) clean.get(query).get();
+                DataContainer clean = DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED);
+                translate(n, clean);
+                list.add(clean);
             }
-            list.add(clean);
         }
-        container.set(of(key.toString()), list);
+        return list;
     }
 
     private void translate(ConfigurationNode node, DataView container) {
+        Object key = node.getKey();
+        Object value = node.getValue();
         if (node.hasMapChildren()) {
-            Object key = node.getKey();
             DataView view;
             if (key != null) {
                 view = container.createView(of(key.toString()));
             } else {
                 view = container;
             }
-            translate(view, node.getChildrenMap());
+            translate(node.getChildrenMap(), view, (Map<?, ?>) value);
         } else if (node.hasListChildren()) {
-            translate(node, container, node.getChildrenList());
+            List<Object> list = translate(node.getChildrenList(), container, (List<?>) node.getValue());
+            container.set(of(String.valueOf(key)), list);
         } else {
             container.set(of('.', String.valueOf(node.getKey())), node.getValue());
         }
