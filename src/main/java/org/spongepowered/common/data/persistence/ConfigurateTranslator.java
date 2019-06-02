@@ -87,6 +87,10 @@ public class ConfigurateTranslator implements DataTranslator<ConfigurationNode> 
             ConfigurationNode n = node.get(i);
             if (n.getValueType() == ValueType.SCALAR) {
                 list.add(n.getValue());
+            } else if (n.hasMapChildren()) {
+                DataContainer clean = DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED);
+                translate(n.getChildrenMap(), clean, (Map<?, ?>) n.getValue());
+                list.add(clean);
             } else {
                 DataContainer clean = DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED);
                 translate(n, clean);
