@@ -44,6 +44,7 @@ import org.spongepowered.common.world.extent.UnmodifiableBiomeVolumeWrapper;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBiomeVolumeWorker;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Mutable biome volume backed by a byte array. Reusable.
@@ -167,4 +168,27 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
         return new ByteArrayImmutableBiomeBuffer(this.palette, this.biomes, this.start, this.size);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        ByteArrayMutableBiomeBuffer that = (ByteArrayMutableBiomeBuffer) o;
+        return this.detached == that.detached &&
+               Arrays.equals(this.biomes, that.biomes) &&
+               this.palette.equals(that.palette);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(super.hashCode(), this.detached, this.palette);
+        result = 31 * result + Arrays.hashCode(this.biomes);
+        return result;
+    }
 }

@@ -27,11 +27,17 @@ package org.spongepowered.common.registry.type;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
+import net.minecraft.block.state.pattern.BlockStateMatcher;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.block.trait.BlockTrait;
 import org.spongepowered.api.registry.CatalogRegistryModule;
+import org.spongepowered.api.util.Tuple;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -44,9 +50,47 @@ public final class BlockStateRegistryModule implements CatalogRegistryModule<Blo
         return Holder.INSTANCE;
     }
 
+    @SuppressWarnings({"rawTypes", "unchecked"})
     @Override
     public Optional<BlockState> getById(String id) {
-        return Optional.ofNullable(this.blockStateMap.get(checkNotNull(id, "Id cannot be null!").toLowerCase(Locale.ENGLISH)));
+        final String state = checkNotNull(id, "Id cannot be null!").toLowerCase(Locale.ENGLISH);
+        final BlockState potential = this.blockStateMap.get(state);
+        if (potential != null) {
+            return Optional.of(potential);
+        }
+        if (state.contains("[")) {
+            final String[] split = state.split("\\[");
+            final Optional<BlockType> blockType = BlockTypeRegistryModule.getInstance().getById(split[0]);
+            if (!blockType.isPresent()) {
+                return Optional.empty();
+            }
+            final BlockType type = blockType.get();
+            final Collection<BlockTrait<?>> traits = type.getTraits();
+            final String properties = split[1].replace("[", "").replace("]", "");
+            final String[] propertyValuePairs = properties.split(",");
+            List<Tuple<BlockTrait<?>, ? extends Comparable<?>>> foundPairs = new ArrayList<>(propertyValuePairs.length);
+            for (String propertyValuePair : propertyValuePairs) {
+                final String name = propertyValuePair.split("=")[0];
+                final String value = propertyValuePair.split("=")[1];
+                type.getTrait(name).ifPresent(trait -> {
+                    trait.parseValue(value).ifPresent(propertyValue -> {
+                        foundPairs.add(Tuple.of(trait, propertyValue));
+                    });
+                });
+            }
+
+            final BlockState.MatcherBuilder matcher = BlockState.matcher(type);
+            for (Tuple<BlockTrait<?>, ? extends Comparable<?>> foundPair : foundPairs) {
+                //noinspection RedundantCast // Intellij will compile this, but the jdk won't.
+                matcher.trait((BlockTrait) foundPair.getFirst(), (Comparable) foundPair.getSecond());
+            }
+            final BlockState.StateMatcher build = matcher.build();
+            return type.getAllBlockStates().stream()
+                .filter(build::matches)
+                .findFirst();
+        } else {
+            return BlockTypeRegistryModule.getInstance().getById(state).map(BlockType::getDefaultState);
+        }
     }
 
     @Override

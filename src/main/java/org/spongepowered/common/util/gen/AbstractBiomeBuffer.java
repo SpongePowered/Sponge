@@ -32,6 +32,8 @@ import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.world.extent.BiomeVolume;
 import org.spongepowered.common.util.VecHelper;
 
+import java.util.Objects;
+
 /**
  * Base class for biome areas. This class provides methods for retrieving the
  * size and for range checking.
@@ -81,6 +83,26 @@ public abstract class AbstractBiomeBuffer implements BiomeVolume {
     @Override
     public boolean containsBiome(int x, int y, int z) {
         return VecHelper.inBounds(x, y, z, this.start, this.end);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        AbstractBiomeBuffer that = (AbstractBiomeBuffer) o;
+        return this.xLine == that.xLine &&
+               this.start.equals(that.start) &&
+               this.size.equals(that.size) &&
+               this.end.equals(that.end);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.start, this.size, this.end, this.xLine);
     }
 
     @Override

@@ -41,6 +41,8 @@ import org.spongepowered.common.world.extent.ImmutableBlockViewTransform;
 import org.spongepowered.common.world.extent.worker.SpongeBlockVolumeWorker;
 import org.spongepowered.common.world.schematic.GlobalPalette;
 
+import java.util.Objects;
+
 public class ArrayImmutableBlockBuffer extends AbstractBlockBuffer implements ImmutableBlockVolume {
 
     @SuppressWarnings("ConstantConditions")
@@ -123,5 +125,26 @@ public class ArrayImmutableBlockBuffer extends AbstractBlockBuffer implements Im
      */
     public static ImmutableBlockVolume newWithoutArrayClone(Palette<BlockState> palette, Vector3i start, Vector3i size, char[] blocks) {
         return new ArrayImmutableBlockBuffer(palette, new CharBackingData(blocks), start, size);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        ArrayImmutableBlockBuffer that = (ArrayImmutableBlockBuffer) o;
+        return this.palette.equals(that.palette) &&
+               this.data.equals(that.data);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), this.palette, this.data);
     }
 }

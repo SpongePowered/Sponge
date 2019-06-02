@@ -47,6 +47,7 @@ import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataVersions;
 import org.spongepowered.common.util.VecHelper;
 
+import java.util.Objects;
 import java.util.Optional;
 
 public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType, BlockSnapshot, org.spongepowered.api.block.tileentity.TileEntity> implements TileEntityArchetype {
@@ -139,6 +140,26 @@ public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType,
         builder.tileData = NbtTranslator.getInstance().translate(this.data);
         builder.blockState = this.blockState;
         return builder.build();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        SpongeTileEntityArchetype that = (SpongeTileEntityArchetype) o;
+        return this.blockState.equals(that.blockState);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), this.blockState);
     }
 
     @Override

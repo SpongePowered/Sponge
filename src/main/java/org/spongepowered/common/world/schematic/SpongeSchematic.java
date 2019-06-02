@@ -36,6 +36,7 @@ import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
@@ -46,6 +47,7 @@ public class SpongeSchematic extends SpongeArchetypeVolume implements Schematic 
     @Nullable
     private final MutableBiomeVolume biomes;
     private final Palette<BiomeType> biomePalette;
+    @Nullable private final Palette<BlockState> overriddenBlockPalette;
     private DataView metadata;
 
     SpongeSchematic(SpongeSchematicBuilder builder) {
@@ -53,6 +55,11 @@ public class SpongeSchematic extends SpongeArchetypeVolume implements Schematic 
         this.metadata = builder.metadata;
         this.biomes = builder.biomeVolume;
         this.biomePalette = builder.biomePalette;
+        if (this.getPalette().getType() != builder.blockPalette.getType()) {
+            this.overriddenBlockPalette = builder.blockPalette;
+        } else {
+            this.overriddenBlockPalette = null;
+        }
 
     }
 
@@ -68,7 +75,9 @@ public class SpongeSchematic extends SpongeArchetypeVolume implements Schematic 
 
     @Override
     public org.spongepowered.api.world.schematic.BlockPalette getPalette() {
-        return (org.spongepowered.api.world.schematic.BlockPalette) super.getPalette();
+        return (org.spongepowered.api.world.schematic.BlockPalette) (this.overriddenBlockPalette == null
+                                                                     ? super.getPalette()
+                                                                     : this.overriddenBlockPalette);
     }
 
     @Override
@@ -96,4 +105,26 @@ public class SpongeSchematic extends SpongeArchetypeVolume implements Schematic 
         return Optional.ofNullable(this.biomes);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        SpongeSchematic that = (SpongeSchematic) o;
+        return Objects.equals(this.biomes, that.biomes) &&
+               this.biomePalette.equals(that.biomePalette) &&
+               Objects.equals(this.overriddenBlockPalette, that.overriddenBlockPalette) &&
+               this.metadata.equals(that.metadata);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), this.biomes, this.biomePalette, this.overriddenBlockPalette, this.metadata);
+    }
 }

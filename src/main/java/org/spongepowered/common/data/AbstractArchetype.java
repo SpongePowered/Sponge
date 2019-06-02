@@ -50,6 +50,7 @@ import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataUtil;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -226,6 +227,24 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatab
                 .map(value -> (Value<?>) value)
                 .map(Value::asImmutable)
                 .collect(Collectors.toSet());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof AbstractArchetype)) {
+            return false;
+        }
+        AbstractArchetype<?, ?, ?> that = (AbstractArchetype<?, ?, ?>) o;
+        return this.type.equals(that.type) &&
+               this.data.equals(that.data);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.type, this.data);
     }
 
     @Override

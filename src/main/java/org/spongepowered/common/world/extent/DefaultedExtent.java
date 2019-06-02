@@ -182,6 +182,10 @@ public interface DefaultedExtent extends Extent {
                 tiles.put(new Vector3i(x - ox, y - oy, z - oz), tile.get().createArchetype());
             }
         });
+        if (backing.getBlockSize().equals(Vector3i.ONE)) {
+            // We can't get entities within a 1x1x1 block area because of AABB...
+            return new SpongeArchetypeVolume(backing, tiles, Collections.emptyList());
+        }
         Set<Entity> intersectingEntities = volume.getIntersectingEntities(new AABB(min, max));
         if (intersectingEntities.isEmpty()) {
             return new SpongeArchetypeVolume(backing, tiles, Collections.emptyList());

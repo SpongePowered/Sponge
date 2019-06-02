@@ -29,27 +29,28 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.api.registry.util.RegistrationDependency;
-import org.spongepowered.api.world.schematic.PaletteType;
 import org.spongepowered.api.world.schematic.PaletteTypes;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.world.schematic.BimapPalette;
+import org.spongepowered.common.world.schematic.BlockPaletteWrapper;
 import org.spongepowered.common.world.schematic.GlobalPalette;
-import org.spongepowered.common.world.schematic.SpongePaletteType;
+import org.spongepowered.common.world.schematic.SpongeBlockPaletteType;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-@RegistrationDependency(BlockPaletteTypeRegistryModule.class)
-public class PaletteTypeRegistryModule implements SpongeAdditionalCatalogRegistryModule<PaletteType<?>> {
+public class BlockPaletteTypeRegistryModule implements SpongeAdditionalCatalogRegistryModule<org.spongepowered.api.world.schematic.BlockPaletteType>,
+    AlternateCatalogRegistryModule<org.spongepowered.api.world.schematic.BlockPaletteType> {
 
-    @RegisterCatalog(PaletteTypes.class) private final Map<String, PaletteType<?>> paletteMappings = Maps.newConcurrentMap();
+    @RegisterCatalog(org.spongepowered.api.world.schematic.BlockPaletteTypes.class) private final Map<String, org.spongepowered.api.world.schematic.BlockPaletteType> paletteMappings = Maps.newHashMap();
 
     @Override
-    public void registerAdditionalCatalog(PaletteType<?> extraCatalog) {
+    public void registerAdditionalCatalog(org.spongepowered.api.world.schematic.BlockPaletteType extraCatalog) {
         checkNotNull(extraCatalog);
         String id = extraCatalog.getId();
         checkArgument(id.indexOf(' ') == -1, "Palette Type ID " + id + " may not contain a space");
@@ -57,21 +58,25 @@ public class PaletteTypeRegistryModule implements SpongeAdditionalCatalogRegistr
     }
 
     @Override
-    public Optional<PaletteType<?>> getById(String id) {
+    public Optional<org.spongepowered.api.world.schematic.BlockPaletteType> getById(String id) {
+        // Special casing because of the same API version.
+        if ("global".equalsIgnoreCase(id)) {
+            id = "global_blocks";
+        } else if ("local".equalsIgnoreCase(id)) {
+            id = "local_blocks";
+        }
         return Optional.ofNullable(this.paletteMappings.get(id));
     }
 
     @Override
-    public Collection<PaletteType<?>> getAll() {
+    public Collection<org.spongepowered.api.world.schematic.BlockPaletteType> getAll() {
         return ImmutableList.copyOf(this.paletteMappings.values());
     }
 
     @Override
     public void registerDefaults() {
-        registerAdditionalCatalog(org.spongepowered.api.world.schematic.BlockPaletteTypes.GLOBAL);
-        registerAdditionalCatalog(org.spongepowered.api.world.schematic.BlockPaletteTypes.LOCAL);
-        registerAdditionalCatalog(new SpongePaletteType<>("global_biomes", GlobalPalette::getBiomePalette));
-        registerAdditionalCatalog(new SpongePaletteType<>("local_biomes", () -> new BimapPalette<>(PaletteTypes.LOCAL_BIOMES)));
+        registerAdditionalCatalog(new SpongeBlockPaletteType("global_blocks", () -> (org.spongepowered.api.world.schematic.BlockPalette) GlobalPalette.getBlockPalette()));
+        registerAdditionalCatalog(new SpongeBlockPaletteType("local_blocks", () -> new BlockPaletteWrapper(new BimapPalette<>(PaletteTypes.LOCAL_BLOCKS), org.spongepowered.api.world.schematic.BlockPaletteTypes.LOCAL)));
     }
 
     @Override
@@ -79,4 +84,10 @@ public class PaletteTypeRegistryModule implements SpongeAdditionalCatalogRegistr
         return true;
     }
 
+    @Override
+    public Map<String, org.spongepowered.api.world.schematic.BlockPaletteType> provideCatalogMap() {
+        final HashMap<String, org.spongepowered.api.world.schematic.BlockPaletteType> map = new HashMap<>();
+        this.paletteMappings.forEach((key, value) -> map.put(key.split("_")[0], value));
+        return map;
+    }
 }

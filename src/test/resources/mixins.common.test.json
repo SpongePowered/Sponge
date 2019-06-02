@@ -4,9 +4,12 @@
     "package": "org.spongepowered.common.launch.mixin",
     "target": "@env(DEFAULT)",
     "compatibilityLevel": "JAVA_8",
+    "mixinPriority": 11111,
     "mixins": [
         "MixinAdvancement",
-        "MixinItem"
+        "MixinItem",
+        "MixinSchematicTranslator_test",
+        "MixinSpongeImplHooks_test"
     ],
     "injectors": {
         "defaultRequire": 1

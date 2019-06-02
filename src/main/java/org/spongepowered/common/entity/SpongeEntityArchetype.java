@@ -25,6 +25,7 @@
 package org.spongepowered.common.entity;
 
 import com.flowpowered.math.vector.Vector3d;
+import com.google.common.base.MoreObjects;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.nbt.NBTTagCompound;
@@ -56,6 +57,7 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
@@ -203,4 +205,31 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
         return builder.build();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        SpongeEntityArchetype that = (SpongeEntityArchetype) o;
+        return Objects.equals(this.position, that.position);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), this.position);
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+            .add("position", this.position)
+            .add("type", this.type)
+            .toString();
+    }
 }

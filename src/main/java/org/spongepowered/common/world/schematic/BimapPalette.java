@@ -32,6 +32,7 @@ import org.spongepowered.api.world.schematic.PaletteType;
 
 import java.util.BitSet;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Optional;
 
 public class BimapPalette<T extends CatalogType> implements Palette<T> {
@@ -118,4 +119,23 @@ public class BimapPalette<T extends CatalogType> implements Palette<T> {
         return this.idsr.keySet();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        BimapPalette<?> that = (BimapPalette<?>) o;
+        return this.maxId == that.maxId &&
+               this.ids.equals(that.ids) &&
+               this.allocation.equals(that.allocation) &&
+               this.paletteType.equals(that.paletteType);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.ids, this.allocation, this.paletteType, this.maxId);
+    }
 }

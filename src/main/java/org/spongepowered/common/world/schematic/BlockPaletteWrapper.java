@@ -28,6 +28,7 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.world.schematic.Palette;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Optional;
 
 @SuppressWarnings("deprecation")
@@ -75,5 +76,23 @@ public class BlockPaletteWrapper implements org.spongepowered.api.world.schemati
     @Override
     public Collection<BlockState> getEntries() {
         return this.palette.getEntries();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        BlockPaletteWrapper that = (BlockPaletteWrapper) o;
+        return this.palette.equals(that.palette) &&
+               this.type.equals(that.type);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.palette, this.type);
     }
 }
