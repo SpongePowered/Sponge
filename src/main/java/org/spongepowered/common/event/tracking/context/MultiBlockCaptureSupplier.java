@@ -82,7 +82,6 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
     @Nullable private Set<BlockPos> usedBlocks;
     private int transactionIndex = -1; // These are used to keep track of which snapshot is being referred to as "most recent change"
     private int snapshotIndex = -1;    // so that we can appropriately cancel or discard or apply specific event transactions
-    private boolean hasMulti = false;
     // We made BlockTransaction a Node and this is a pseudo LinkedList due to the nature of needing
     // to be able to track what block states exist at the time of the transaction while other transactions
     // are processing (because future transactions performing logic based on what exists at that state,
@@ -128,7 +127,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
         }
         // This isn't our first rodeo...
         final boolean added = this.usedBlocks.add(blockPos); // add it to the set of positions already used and use the boolean
-        if (this.hasMulti) {
+        if (this.multimap != null) {
             // Means we've already got multiple changes per position once before.
             // Likewise, the used blocks, snapshots and multimap will NOT be null.
             // more fasts, we know we have multiple block positions.
@@ -151,14 +150,11 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
         // We have not yet checked if this incoming snapshot is a duplicate position
         if (!added) {
             // Ok, means we have a multi change on a same position, now to use the multimap
-            // for probably the first time.
-            if (this.multimap == null) {
-                // If the multimap hasn't been populated yet, well, now we have to populate the multimap and eliminate the list.
-                this.multimap = LinkedListMultimap.create(); // LinkedListMultimap is insertion order respective, so the backed lists per
-                // Now to populate it from the previously used list of snapshots...
-                for (SpongeBlockSnapshot existing : this.snapshots) { // Ignore snapshots potentially being null, it will never be null at this point.
-                    this.multimap.put(existing.getBlockPos(), existing);
-                }
+            // for the first time.
+            this.multimap = LinkedListMultimap.create(); // LinkedListMultimap is insertion order respective, so the backed lists per
+            // Now to populate it from the previously used list of snapshots...
+            for (SpongeBlockSnapshot existing : this.snapshots) { // Ignore snapshots potentially being null, it will never be null at this point.
+                this.multimap.put(existing.getBlockPos(), existing);
             }
             // And place the snapshot into the multimap.
             this.multimap.put(blockPos, backingSnapshot);
@@ -166,8 +162,6 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
             // If the position is duplicated, we need to update the original snapshot of the now incoming block change
             // in relation to the original state (so if a block was set to air, then afterwards set to piston head, it should go from break to modify)
             associateBlockChangeForPosition(newState, blockPos);
-            // Flip the boolean to have fasts for next entry
-            this.hasMulti = true;
             return false;
         }
         // At this point, we haven't captured the block position yet.
@@ -190,8 +184,8 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
      * already guaranteed original {@link SpongeBlockSnapshot} for proper event
      * creation when multiple block changes exist for the provided {@link BlockPos}.
      *
-     * <p>Note: This method <strong>requires</strong> that {@link #hasMulti} is {@code true},
-     * otherwise the state of {@link #multimap} may be {@code null} and cause an NPE.</p>
+     * <p>Note: This method <strong>requires</strong> that {@link #multimap} is not
+     * {@code null}, otherwise it will cause an NPE.</p>
      *
      * @param newState The incoming block change to compare to change
      * @param blockPos The block position to get the backing list from the multimap
@@ -208,7 +202,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
     }
 
     public boolean hasMultiChanges() {
-        return this.hasMulti;
+        return this.multimap != null;
     }
 
     /**
@@ -254,7 +248,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
         // Get the key of the block position, we know this is a pure block pos and not a mutable one too.
         final BlockPos blockPos = backingSnapshot.getBlockPos();
         // Check if we have a multi-pos
-        if (this.hasMulti) {
+        if (this.multimap != null) {
             pruneFromMulti(backingSnapshot, blockPos);
             return;
         }
@@ -302,7 +296,6 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
                 }
                 if (this.snapshots.isEmpty()) {
                     this.multimap = null;
-
                 }
             }
         }
@@ -555,7 +548,6 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
 
 
     public void clear() {
-        this.hasMulti = false;
         if (this.multimap != null) {
             this.multimap.clear();
             this.multimap = null;
@@ -595,7 +587,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
         final BlockSnapshot newSnapshot =
             ((IMixinWorldServer) worldServer).createSpongeBlockSnapshot(newState, newActualState, blockPos, BlockChangeFlags.NONE);
         // Up until this point, we can create a default Transaction
-        if (this.hasMulti) { // But we need to check if there's any intermediary block changes...
+        if (this.multimap != null) { // But we need to check if there's any intermediary block changes...
             // And because multi is true, we can be sure the multimap is populated at least somewhere.
             final List<SpongeBlockSnapshot> intermediary = this.multimap.get(blockPos);
             if (!intermediary.isEmpty() && intermediary.size() > 1) {
