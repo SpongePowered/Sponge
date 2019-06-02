@@ -145,16 +145,19 @@ public final class JsonDataFormat extends SpongeCatalogType implements StringDat
         // Similar to https://github.com/zml2008/configurate/blob/master/configurate-gson/src/main/java/ninja/leaping/configurate/gson/GsonConfigurationLoader.java#L113
         // Not sure what's the best way to detect the type of number
         String str = reader.nextString();
-        try {
-            return Integer.parseInt(str);
-        } catch (NumberFormatException e) {
-            try {
-                return Double.parseDouble(str);
-            } catch (NumberFormatException ex) {
+        if (str.contains(".")) {
+            return Double.parseDouble(str);
+        } else {
+            int limit = str.charAt(0) == '-' ? 11 : 10;
+            if (str.length() < limit) {
+                return Integer.parseInt(str);
+            } else if (str.length() > limit) {
+                return Long.parseLong(str);
+            } else {
                 try {
+                    return Integer.parseInt(str);
+                } catch (NumberFormatException e) {
                     return Long.parseLong(str);
-                } catch (NumberFormatException exception) {
-                    throw new IOException(exception);
                 }
             }
         }
