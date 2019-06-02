@@ -31,6 +31,7 @@ import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.SimpleConfigurationNode;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.InvalidDataException;
@@ -84,7 +85,14 @@ public class ConfigurateTranslator implements DataTranslator<ConfigurationNode> 
         List<DataView> list = new ArrayList<>(value.size());
         for (int i = 0; i < value.size(); i++) {
             DataContainer clean = DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED);
-            translate(clean, value.get(i).getChildrenMap());
+            ConfigurationNode v = value.get(i);
+            if (v.hasMapChildren()) {
+                translate(clean, v.getChildrenMap());
+            } else {
+                DataQuery query = of('.', String.valueOf(node.getKey()));
+                clean.set(query, v.getValue());
+                clean = (DataContainer) clean.get(query).get();
+            }
             list.add(clean);
         }
         container.set(of(key.toString()), list);
