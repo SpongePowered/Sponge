@@ -69,7 +69,7 @@ public class SpongeArchetypeVolume extends AbstractBlockBuffer implements Archet
 
     public SpongeArchetypeVolume(MutableBlockVolume backing, Map<Vector3i, TileEntityArchetype> tiles, Collection<EntityArchetype> entities) {
         super(backing.getBlockMin(), backing.getBlockSize());
-        this.backing = backing;
+        this.backing = backing instanceof SpongeArchetypeVolume ? ((SpongeArchetypeVolume) backing).backing : backing;
         this.tiles = Maps.newHashMap(tiles);
         this.entities = new ArrayList<>(entities);
     }

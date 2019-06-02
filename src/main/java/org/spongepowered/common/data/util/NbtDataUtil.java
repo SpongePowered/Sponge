@@ -89,6 +89,7 @@ public final class NbtDataUtil {
     public static final class Schematic {
         public static final String TILE_ENTITY_ID = "Id";
         public static final String ENTITY_ID = "Id";
+        public static final String TILE_ENTITY_POS = "Pos";
     }
 
     // These are the various tag compound id's for getting to various places

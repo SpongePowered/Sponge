@@ -49,6 +49,7 @@ import org.spongepowered.api.world.extent.UnmodifiableBiomeVolume;
 import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
 import org.spongepowered.api.world.extent.worker.MutableBiomeVolumeWorker;
 import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
+import org.spongepowered.common.block.SpongeTileEntityArchetype;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.SpongeEntityArchetype;
@@ -179,7 +180,13 @@ public interface DefaultedExtent extends Extent {
             backing.setBlock(x - ox, y - oy, z - oz, state);
             Optional<TileEntity> tile = extent.getTileEntity(x, y, z);
             if (tile.isPresent()) {
-                tiles.put(new Vector3i(x - ox, y - oy, z - oz), tile.get().createArchetype());
+                final TileEntityArchetype archetype = tile.get().createArchetype();
+                if (archetype instanceof SpongeTileEntityArchetype) {
+                    final int[] apos = new int[] {(x - ox) - tmin.getX(), y - tmin.getY(), (z - oz) - tmin.getZ()};
+                    final SpongeTileEntityArchetype sponge = (SpongeTileEntityArchetype) archetype;
+                    sponge.getCompound().setIntArray(NbtDataUtil.Schematic.TILE_ENTITY_POS, apos);
+                }
+                tiles.put(new Vector3i(x - ox, y - oy, z - oz), archetype);
             }
         });
         if (backing.getBlockSize().equals(Vector3i.ONE)) {

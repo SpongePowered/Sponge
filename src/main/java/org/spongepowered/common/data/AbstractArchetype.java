@@ -251,4 +251,8 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatab
     public String toString() {
         return MoreObjects.toStringHelper(this).add("type", this.type).add("data", this.data).toString();
     }
+
+    public NBTTagCompound getCompound() {
+        return this.data;
+    }
 }

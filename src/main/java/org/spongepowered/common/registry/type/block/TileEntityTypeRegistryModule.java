@@ -24,12 +24,15 @@
  */
 package org.spongepowered.common.registry.type.block;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.tileentity.TileEntityEnderChest;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.block.tileentity.TileEntityTypes;
 import org.spongepowered.api.registry.ExtraClassCatalogRegistryModule;
@@ -97,7 +100,8 @@ public final class TileEntityTypeRegistryModule
 
     @Override
     public Optional<TileEntityType> getById(String id) {
-        final Optional<TileEntityType> type = super.getById(id);
+        String key = checkNotNull(id).toLowerCase(Locale.ENGLISH);
+        final Optional<TileEntityType> type = super.getById(key);
         if (type.isPresent()) {
             return type;
         }
@@ -110,10 +114,20 @@ public final class TileEntityTypeRegistryModule
         // pre-existing worlds, so you'd have "minecraft:mod.gabizou.superduperkillertileentity" as the id, but
         // this registry wouldn't be recognizing it, so, we do try to recognize it by falling back on the original
         // target TileEntity.REGISTRY by auto-prefixing with "minecraft".
-        if (id.contains(":")) {
-            final String[] split = id.split(":");
+        if (key.contains(":")) {
+            final int colonIndex = key.indexOf(':');
+            final String[] split = {key.substring(0, colonIndex), key.substring(colonIndex + 1)};
             final String name = split[1];
-            return super.getById(name);
+            return getById(name);
+        }
+        final ResourceLocation location = new ResourceLocation(id);
+        final Class<? extends TileEntity> object = TileEntity.REGISTRY.getObject(location);
+        if (object != null) {
+            final TileEntityType forClass = getForClass(object);
+            if (forClass != null) {
+                this.catalogTypeMap.put(location.toString(), forClass);
+                return Optional.of(forClass);
+            }
         }
         return Optional.empty();
     }

@@ -358,7 +358,11 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
         }
 
         if (metadata != null) {
-            builder.metadata(metadata);
+            DataContainer meta = DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED);
+            for (DataQuery key : metadata.getKeys(false)) {
+                meta.set(key, metadata.get(key).get());
+            }
+            builder.metadata(meta);
         }
         return builder.build();
     }

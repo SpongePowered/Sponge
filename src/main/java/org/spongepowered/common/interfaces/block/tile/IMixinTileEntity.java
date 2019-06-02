@@ -50,6 +50,10 @@ public interface IMixinTileEntity extends IMixinTrackable {
      */
     NBTTagCompound getTileData();
 
+    default boolean hasTileDataCompound() {
+        return true;
+    }
+
     /**
      * Gets the included {@link NBTTagCompound} for a tile entity. With Vanilla, this is
      * created by vanilla. With Forge, this is included.

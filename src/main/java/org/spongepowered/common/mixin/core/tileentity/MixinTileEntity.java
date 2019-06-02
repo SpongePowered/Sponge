@@ -235,7 +235,9 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
      */
     @Inject(method = "Lnet/minecraft/tileentity/TileEntity;readFromNBT(Lnet/minecraft/nbt/NBTTagCompound;)V", at = @At("RETURN"))
     public void onReadFromNBT(NBTTagCompound compound, CallbackInfo ci) {
-        this.readFromNbt(this.getSpongeData());
+        if (this.hasTileDataCompound()) {
+            this.readFromNbt(this.getSpongeData());
+        }
     }
 
     /**
