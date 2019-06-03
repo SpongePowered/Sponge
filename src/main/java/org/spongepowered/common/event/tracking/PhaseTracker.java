@@ -837,7 +837,7 @@ public final class PhaseTracker {
 
                 final SpongeBlockSnapshot originalBlockSnapshot = context.getSingleSnapshot();
 
-                final Transaction<BlockSnapshot> transaction = TrackingUtil.TRANSACTION_CREATION.apply(originalBlockSnapshot);
+                final Transaction<BlockSnapshot> transaction = TrackingUtil.TRANSACTION_CREATION.apply(originalBlockSnapshot).get();
                 final ImmutableList<Transaction<BlockSnapshot>> transactions = ImmutableList.of(transaction);
                 // Create and throw normal event
                 final Cause currentCause = Sponge.getCauseStackManager().getCurrentCause();

@@ -135,13 +135,13 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
         final Block block = (Block) snapshotTransaction.getOriginal().getState().getType();
         final SpongeBlockSnapshot original = (SpongeBlockSnapshot) snapshotTransaction.getOriginal();
         final BlockPos changedBlockPos = original.getBlockPos();
-        final IMixinChunk changedMixinChunk = (IMixinChunk) original.getWorldServer().getChunk(changedBlockPos);
-        changedMixinChunk.getBlockOwner(changedBlockPos)
+        original.getWorldServer().ifPresent(worldServer -> {
+            final IMixinChunk changedMixinChunk = (IMixinChunk) worldServer.getChunk(changedBlockPos);
+            changedMixinChunk.getBlockOwner(changedBlockPos)
                 .ifPresent(owner -> changedMixinChunk.addTrackedBlockPosition(block, changedBlockPos, owner, PlayerTracker.Type.OWNER));
-        final User user = TrackingUtil.getNotifierOrOwnerFromBlock(original.getWorldServer(), changedBlockPos);
-        if (user != null) {
-            changedMixinChunk.addTrackedBlockPosition(block, changedBlockPos, user, PlayerTracker.Type.NOTIFIER);
-        }
+            changedMixinChunk.getBlockNotifier(changedBlockPos)
+                .ifPresent(user -> changedMixinChunk.addTrackedBlockPosition(block, changedBlockPos, user, PlayerTracker.Type.NOTIFIER));
+        });
     }
 
     @Override

@@ -39,7 +39,6 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ClassInheritanceMultiMap;
@@ -64,7 +63,6 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.ScheduledBlockUpdate;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.User;
@@ -109,7 +107,6 @@ import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.interfaces.IMixinCachable;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
-import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMapEntry;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
@@ -901,20 +898,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         creator.ifPresent(builder::creator);
         notifier.ifPresent(builder::notifier);
         if (existing != null) {
-            // We MUST only check to see if a TE exists to avoid creating a new one.
-            org.spongepowered.api.block.tileentity.TileEntity tile = (org.spongepowered.api.block.tileentity.TileEntity) existing;
-            for (DataManipulator<?, ?> manipulator : ((IMixinCustomDataHolder) tile).getCustomManipulators()) {
-                builder.add(manipulator);
-            }
-            NBTTagCompound nbt = new NBTTagCompound();
-            // Some mods like OpenComputers assert if attempting to save robot while moving
-            try {
-                existing.writeToNBT(nbt);
-                builder.unsafeNbt(nbt);
-            }
-            catch(Throwable t) {
-                // ignore
-            }
+            TrackingUtil.addTileEntityToBuilder(existing, builder);
         }
         builder.flag(updateFlag);
         return builder.build();

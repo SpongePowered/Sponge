@@ -35,6 +35,7 @@ import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.event.tracking.IPhaseState;
@@ -50,6 +51,7 @@ import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -82,7 +84,7 @@ public abstract class BlockTransaction {
             .toString();
     }
 
-    abstract IMixinWorldServer getWorldServer();
+    abstract Optional<IMixinWorldServer> getWorldServer();
 
     abstract void cancel(WorldServer worldServer, BlockPos blockPos, SpongeProxyBlockAccess proxyBlockAccess);
 
@@ -148,7 +150,7 @@ public abstract class BlockTransaction {
         final TileEntity added;
         final SpongeBlockSnapshot addedSnapshot;
 
-        AddTileEntity(int i, int snapshotIndex, TileEntity added, SpongeBlockSnapshot attachedSnapshot, IBlockState newState) {
+        AddTileEntity(int i, int snapshotIndex, TileEntity added, SpongeBlockSnapshot attachedSnapshot) {
             super(i, snapshotIndex, attachedSnapshot.getBlockPos(), null);
             this.added = added;
             this.addedSnapshot = attachedSnapshot;
@@ -162,8 +164,22 @@ public abstract class BlockTransaction {
         @Override
         void process(Transaction<BlockSnapshot> eventTransaction, IPhaseState phaseState, PhaseContext<?> phaseContext,
             int currentDepth) {
-            final WorldServer worldServer = this.addedSnapshot.getWorldServer();
-
+            final Optional<WorldServer> maybeWorld = this.addedSnapshot.getWorldServer();
+            if (!maybeWorld.isPresent()) {
+                // Emit a log warning about a missing world
+                final String transactionForLogging = MoreObjects.toStringHelper("Tile Added")
+                    .add("World", this.addedSnapshot.getWorldUniqueId())
+                    .add("Position", this.addedSnapshot.getBlockPos())
+                    .add("Original State", this.addedSnapshot.getState())
+                    .add("Tile Entity", this.added)
+                    .toString();
+                SpongeImpl.getLogger().warn("Unloaded/Missing World for a captured Tile Entity adding! Skipping change: " + transactionForLogging);
+                //noinspection ConstantConditions
+                this.added.setWorld(null);
+                this.added.invalidate();
+                return;
+            }
+            final WorldServer worldServer = maybeWorld.get();
             final SpongeProxyBlockAccess proxyAccess = ((IMixinWorldServer) worldServer).getProxyAccess();
             final BlockPos targetPos = this.addedSnapshot.getBlockPos();
             proxyAccess.proceedWithAdd(targetPos, this.added);
@@ -190,9 +206,10 @@ public abstract class BlockTransaction {
             return proxyAccess.pushProxy();
         }
 
+        @SuppressWarnings("unchecked")
         @Override
-        IMixinWorldServer getWorldServer() {
-            return (IMixinWorldServer) this.addedSnapshot.getWorldServer();
+        Optional<IMixinWorldServer> getWorldServer() {
+            return (Optional<IMixinWorldServer>) (Optional<?>) this.addedSnapshot.getWorldServer();
         }
 
         @Override
@@ -208,7 +225,7 @@ public abstract class BlockTransaction {
         final TileEntity removed;
         final SpongeBlockSnapshot tileSnapshot;
 
-        RemoveTileEntity(int i, int snapshotIndex, TileEntity removed, SpongeBlockSnapshot attachedSnapshot, IBlockState newState) {
+        RemoveTileEntity(int i, int snapshotIndex, TileEntity removed, SpongeBlockSnapshot attachedSnapshot) {
             super(i, snapshotIndex, attachedSnapshot.getBlockPos(), null);
             this.removed = removed;
             this.tileSnapshot = attachedSnapshot;
@@ -226,7 +243,22 @@ public abstract class BlockTransaction {
         void process(Transaction<BlockSnapshot> eventTransaction, IPhaseState phaseState, PhaseContext<?> phaseContext,
             int currentDepth) {
             final BlockPos targetPosition = this.tileSnapshot.getBlockPos();
-            final WorldServer worldServer = this.tileSnapshot.getWorldServer();
+            final Optional<WorldServer> maybeWorld = this.tileSnapshot.getWorldServer();
+            if (!maybeWorld.isPresent()) {
+                // Emit a log warning about a missing world
+                final String transactionForLogging = MoreObjects.toStringHelper("Tile Removed")
+                    .add("World", this.tileSnapshot.getWorldUniqueId())
+                    .add("Position", this.tileSnapshot.getBlockPos())
+                    .add("Original State", this.tileSnapshot.getState())
+                    .add("Tile Entity", this.removed)
+                    .toString();
+                SpongeImpl.getLogger().warn("Unloaded/Missing World for a captured Tile Entity removal! Skipping change: " + transactionForLogging);
+                //noinspection ConstantConditions
+                this.removed.setWorld(null);
+                this.removed.invalidate();
+                return;
+            }
+            final WorldServer worldServer = maybeWorld.get();
             final SpongeProxyBlockAccess proxyAccess = ((IMixinWorldServer) worldServer).getProxyAccess();
             ((IMixinTileEntity) this.removed).setCaptured(false); // Disable the capture logic in other places.
             proxyAccess.proceedWithRemoval(targetPosition, this.removed);
@@ -261,9 +293,10 @@ public abstract class BlockTransaction {
             return mixinWorldServer.getProxyAccess().pushProxy();
         }
 
+        @SuppressWarnings("unchecked")
         @Override
-        IMixinWorldServer getWorldServer() {
-            return (IMixinWorldServer) this.tileSnapshot.getWorldServer();
+        Optional<IMixinWorldServer> getWorldServer() {
+            return (Optional<IMixinWorldServer>) (Optional<?>) this.tileSnapshot.getWorldServer();
         }
 
     }
@@ -323,9 +356,10 @@ public abstract class BlockTransaction {
             return mixinWorldServer.getProxyAccess().pushProxy();
         }
 
+        @SuppressWarnings("unchecked")
         @Override
-        IMixinWorldServer getWorldServer() {
-            return (IMixinWorldServer) this.removedSnapshot.getWorldServer();
+        Optional<IMixinWorldServer> getWorldServer() {
+            return (Optional<IMixinWorldServer>) (Optional<?>) this.removedSnapshot.getWorldServer();
         }
 
         @Override
@@ -385,7 +419,19 @@ public abstract class BlockTransaction {
         void process(Transaction<BlockSnapshot> eventTransaction, IPhaseState phaseState, PhaseContext<?> phaseContext,
             int currentDepth) {
             final BlockPos targetPosition = this.original.getBlockPos();
-            final WorldServer worldServer = this.original.getWorldServer();
+            final Optional<WorldServer> maybeWorld = this.original.getWorldServer();
+            if (!maybeWorld.isPresent()) {
+                // Emit a log warning about a missing world
+                final String transactionForLogging = MoreObjects.toStringHelper("Transaction")
+                    .add("World", this.original.getWorldUniqueId())
+                    .add("Position", this.original.getBlockPos())
+                    .add("Original State", this.original.getState())
+                    .add("Changed State", this.newState)
+                    .toString();
+                SpongeImpl.getLogger().warn("Unloaded/Missing World for a captured block change! Skipping change: " + transactionForLogging);
+                return;
+            }
+            final WorldServer worldServer = maybeWorld.get();
             final SpongeBlockSnapshot newBlockSnapshot = (SpongeBlockSnapshot) eventTransaction.getFinal();
 
             TrackingUtil.performBlockEntitySpawns(phaseState, phaseContext, this.original, targetPosition);
@@ -397,11 +443,11 @@ public abstract class BlockTransaction {
 
             // We can proceed to calling the break block logic since the new state has been "proxied" onto the world
             PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
-            IBlockState proxiedOldState = proxyAccess.getBlockState(this.affectedPosition);
             // Use the try to literally bypass any events, block notifications, neighbor switching, etc.
             // We can get away with making this phase switch because any tile entity accesses will
             // end up being ignored
-            try (TransactionContext context = new TransactionContext().buildAndSwitch()) {
+            try (TransactionContext context = new TransactionContext()) {
+                context.buildAndSwitch();
                 proxyAccess.proceed(targetPosition, this.newState, true); // Set the block state before we start working on invalidating the tile entity
             }
 
@@ -448,9 +494,10 @@ public abstract class BlockTransaction {
             return mixinWorldServer.getProxyAccess().pushProxy();
         }
 
+        @SuppressWarnings("unchecked")
         @Override
-        IMixinWorldServer getWorldServer() {
-            return (IMixinWorldServer) this.original.getWorldServer();
+        Optional<IMixinWorldServer> getWorldServer() {
+            return (Optional<IMixinWorldServer>) (Optional<?>) this.original.getWorldServer();
         }
 
         @Override
@@ -559,8 +606,8 @@ public abstract class BlockTransaction {
         }
 
         @Override
-        IMixinWorldServer getWorldServer() {
-            return this.worldServer;
+        Optional<IMixinWorldServer> getWorldServer() {
+            return Optional.of(this.worldServer);
         }
     }
 

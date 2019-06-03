@@ -43,6 +43,7 @@ import org.spongepowered.common.world.WorldUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
@@ -94,13 +95,13 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
             .acceptAndClearIfNotEmpty(entities -> SpongeCommonEventFactory.callSpawnEntity(entities, context));
         final SpongeBlockSnapshot blockSnapshot = context.getSource(SpongeBlockSnapshot.class)
             .orElseThrow(TrackingUtil.throwWithContext("Could not find a block dropping items!", context));
-        final IMixinWorldServer mixinWorld = (IMixinWorldServer) blockSnapshot.getWorldServer();
+        final Optional<IMixinWorldServer> maybeWorld = blockSnapshot.getWorldServer().map(worldserver -> (IMixinWorldServer) worldserver);
 
         // TODO - Determine if we need to pass the supplier or perform some parameterized
         //  process if not empty method on the capture object.
         TrackingUtil.processBlockCaptures(this, context);
         context.getCapturedItemStackSupplier()
-            .acceptAndClearIfNotEmpty(drops -> {
+            .acceptAndClearIfNotEmpty(drops -> maybeWorld.ifPresent(mixinWorld -> {
                 final List<EntityItem> items = drops.stream()
                     .map(drop -> drop.create(WorldUtil.asNative(mixinWorld)))
                     .collect(Collectors.toList());
@@ -110,8 +111,7 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
                     SpongeCommonEventFactory.callDropItemCustom(entities, context);
                 }
                 drops.clear();
-
-            });
+            }));
         context.getBlockDropSupplier()
             .acceptAndClearIfNotEmpty(drops -> {
                 for (BlockPos key : drops.asMap().keySet()) {

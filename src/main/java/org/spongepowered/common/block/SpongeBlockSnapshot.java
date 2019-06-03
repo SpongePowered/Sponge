@@ -33,10 +33,8 @@ import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import net.minecraft.block.BlockShulkerBox;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
@@ -58,7 +56,6 @@ import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.world.BlockChangeFlag;
-import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
@@ -81,7 +78,6 @@ import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -271,11 +267,11 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         return Optional.empty();
     }
 
-    public WorldServer getWorldServer() {
+    public Optional<WorldServer> getWorldServer() {
         if (this.world == null) {
             this.world = new WeakReference<>((WorldServer) SpongeImpl.getGame().getServer().getWorld(this.worldUniqueId).orElseThrow(() -> new IllegalStateException("WorldServer not found for UUID: " + this.worldUniqueId)));
         }
-        return checkNotNull(this.world.get(), "WeakReference to WorldServer is null!");
+        return Optional.ofNullable(this.world.get());
     }
 
     @Override

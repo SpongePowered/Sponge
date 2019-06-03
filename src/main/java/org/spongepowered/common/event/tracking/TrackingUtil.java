@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import co.aikar.timings.Timing;
 import com.flowpowered.math.vector.Vector3i;
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
@@ -39,6 +40,7 @@ import net.minecraft.block.BlockRedstoneRepeater;
 import net.minecraft.block.BlockRedstoneTorch;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldProvider;
@@ -50,6 +52,7 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.CauseStackManager;
@@ -72,6 +75,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.ShouldFire;
@@ -87,6 +91,7 @@ import org.spongepowered.common.event.tracking.phase.tick.TileEntityTickContext;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
+import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
@@ -101,6 +106,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -130,14 +136,28 @@ public final class TrackingUtil {
                         builders[MULTI_CHANGE_INDEX].add(transaction);
                     }
             ;
-    static final Function<SpongeBlockSnapshot, Transaction<BlockSnapshot>> TRANSACTION_CREATION = (blockSnapshot) -> {
-        final WorldServer worldServer =  blockSnapshot.getWorldServer();
-        final BlockPos blockPos = blockSnapshot.getBlockPos();
-        final IBlockState newState = worldServer.getBlockState(blockPos);
-        final IBlockState newActualState = newState.getActualState(worldServer, blockPos);
-        final BlockSnapshot newSnapshot = ((IMixinWorldServer) worldServer).createSpongeBlockSnapshot(newState, newActualState, blockPos, BlockChangeFlags.NONE);
-        return new Transaction<>(blockSnapshot, newSnapshot);
-    };
+    static final Function<SpongeBlockSnapshot, Optional<Transaction<BlockSnapshot>>> TRANSACTION_CREATION =
+        (blockSnapshot) -> blockSnapshot.getWorldServer().map(worldServer -> {
+            final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
+            final BlockPos blockPos = blockSnapshot.getBlockPos();
+            final Chunk chunk = worldServer.getChunk(blockPos);
+            final IBlockState newState = chunk.getBlockState(blockPos);
+            builder.blockState((BlockState) newState);
+            try {
+                builder.extendedState((BlockState) newState.getActualState(worldServer, blockPos));
+            } catch (Throwable e) {
+                // ignore
+            }
+            ((IMixinChunk) chunk).getBlockOwnerUUID(blockPos).ifPresent(builder::creator);
+            ((IMixinChunk) chunk).getBlockNotifierUUID(blockPos).ifPresent(builder::notifier);
+            final net.minecraft.tileentity.TileEntity tileEntity = chunk.getTileEntity(blockPos, Chunk.EnumCreateEntityType.CHECK);
+            if (tileEntity != null) {
+                // We MUST only check to see if a TE exists to avoid creating a new one.
+                addTileEntityToBuilder(tileEntity, builder);
+            }
+
+            return new Transaction<>(blockSnapshot, builder.build());
+        });
     public static final int WIDTH = 40;
 
     public static void tickEntity(net.minecraft.entity.Entity entity) {
@@ -469,7 +489,8 @@ public final class TrackingUtil {
         for (SpongeBlockSnapshot snapshot : snapshots) {
             // This processes each snapshot to assign them to the correct event in the next area, with the
             // correct builder array entry.
-            TRANSACTION_PROCESSOR.apply(transactionBuilders).accept(state.createTransaction(context, snapshot));
+            context.getCapturedBlockSupplier().createTransaction(snapshot)
+                .ifPresent(transaction -> TRANSACTION_PROCESSOR.apply(transactionBuilders).accept(transaction));
         }
         for (int i = 0; i < EVENT_COUNT; i++) {
             // Build each event array
@@ -629,7 +650,19 @@ public final class TrackingUtil {
         final SpongeBlockSnapshot newBlockSnapshot = (SpongeBlockSnapshot) transaction.getFinal();
 
         // Handle item drops captured
-        final IMixinWorldServer mixinWorld = (IMixinWorldServer) oldBlockSnapshot.getWorldServer();
+        final Optional<WorldServer> worldServer = oldBlockSnapshot.getWorldServer();
+        if (!worldServer.isPresent()) {
+            // Emit a log warning about a missing world
+            final String transactionForLogging = MoreObjects.toStringHelper("Transaction")
+                .add("World", oldBlockSnapshot.getWorldUniqueId())
+                .add("Position", oldBlockSnapshot.getBlockPos())
+                .add("Original State", oldBlockSnapshot.getState())
+                .add("Changed State", newBlockSnapshot.getState())
+                .toString();
+            SpongeImpl.getLogger().warn("Unloaded/Missing World for a captured block change! Skipping change: " + transactionForLogging);
+            return;
+        }
+        final IMixinWorldServer mixinWorld = (IMixinWorldServer) worldServer.get();
         // Reset any previously set transactions
         final BlockPos pos = oldBlockSnapshot.getBlockPos();
         performBlockEntitySpawns(phaseState, phaseContext, oldBlockSnapshot, pos);
@@ -842,8 +875,29 @@ public final class TrackingUtil {
         final SpongeBlockSnapshot spongeSnapshot = (SpongeBlockSnapshot) finalSnapshot;
         final BlockPos pos = spongeSnapshot.getBlockPos();
         final Block block = BlockUtil.toBlock(spongeSnapshot);
-        final IMixinChunk spongeChunk = (IMixinChunk) spongeSnapshot.getWorldServer().getChunk(pos);
-        final PlayerTracker.Type trackerType = blockChange == BlockChange.PLACE ? PlayerTracker.Type.OWNER : PlayerTracker.Type.NOTIFIER;
-        spongeChunk.addTrackedBlockPosition(block, pos, user, trackerType);
+        spongeSnapshot.getWorldServer()
+            .map(world -> world.getChunk(pos))
+            .map(chunk -> (IMixinChunk) chunk)
+            .ifPresent(spongeChunk -> {
+            final PlayerTracker.Type trackerType = blockChange == BlockChange.PLACE ? PlayerTracker.Type.OWNER : PlayerTracker.Type.NOTIFIER;
+            spongeChunk.addTrackedBlockPosition(block, pos, user, trackerType);
+        });
+    }
+
+    public static void addTileEntityToBuilder(@Nullable net.minecraft.tileentity.TileEntity existing, SpongeBlockSnapshotBuilder builder) {
+        // We MUST only check to see if a TE exists to avoid creating a new one.
+        TileEntity tile = (TileEntity) existing;
+        for (DataManipulator<?, ?> manipulator : ((IMixinCustomDataHolder) tile).getCustomManipulators()) {
+            builder.add(manipulator);
+        }
+        NBTTagCompound nbt = new NBTTagCompound();
+        // Some mods like OpenComputers assert if attempting to save robot while moving
+        try {
+            existing.writeToNBT(nbt);
+            builder.unsafeNbt(nbt);
+        }
+        catch(Throwable t) {
+            // ignore
+        }
     }
 }

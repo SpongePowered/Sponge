@@ -838,7 +838,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
             return null;
         }
         if (this.hasSpecificBlockProcess(phaseContext)) {
-            return phaseContext.getCapturedBlockSupplier().logBlockChange(originalBlockSnapshot, newState, pos, flags);
+            return phaseContext.getCapturedBlockSupplier().logBlockChange(originalBlockSnapshot, newState, flags);
         }
         phaseContext.getCapturedBlockSupplier().put(originalBlockSnapshot, newState);
         return null;
@@ -856,12 +856,13 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     default void processCancelledTransaction(C context, Transaction<BlockSnapshot> transaction, BlockSnapshot original) {
         if (this.hasSpecificBlockProcess(context)) {
             context.getCapturedBlockSupplier().cancelTransaction(original);
-            final WorldServer worldServer = ((SpongeBlockSnapshot) original).getWorldServer();
-            final Chunk chunk = worldServer.getChunk(((SpongeBlockSnapshot) original).getBlockPos());
-            final PlayerChunkMapEntry entry = worldServer.getPlayerChunkMap().getEntry(chunk.x, chunk.z);
-            if (entry != null) {
-                ((IMixinPlayerChunkMapEntry) entry).markBiomesForUpdate();
-            }
+            ((SpongeBlockSnapshot) original).getWorldServer().ifPresent(worldServer -> {
+                final Chunk chunk = worldServer.getChunk(((SpongeBlockSnapshot) original).getBlockPos());
+                final PlayerChunkMapEntry entry = worldServer.getPlayerChunkMap().getEntry(chunk.x, chunk.z);
+                if (entry != null) {
+                    ((IMixinPlayerChunkMapEntry) entry).markBiomesForUpdate();
+                }
+            });
         }
         if (this.tracksBlockSpecificDrops(context)) {
             // Cancel any block drops or harvests for the block change.
@@ -873,9 +874,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         }
     }
 
-    default Transaction<BlockSnapshot> createTransaction(C context, SpongeBlockSnapshot snapshot) {
-        return context.getCapturedBlockSupplier().createTransaction(snapshot);
-    }
     default boolean hasSpecificBlockProcess(C context) {
         return false;
     }
