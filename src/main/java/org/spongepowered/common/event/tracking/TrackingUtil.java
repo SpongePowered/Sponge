@@ -143,6 +143,7 @@ public final class TrackingUtil {
             final BlockPos blockPos = blockSnapshot.getBlockPos();
             final Chunk chunk = worldServer.getChunk(blockPos);
             final IBlockState newState = chunk.getBlockState(blockPos);
+            builder.position(blockSnapshot.getPosition());
             builder.blockState((BlockState) newState);
             try {
                 builder.extendedState((BlockState) newState.getActualState(worldServer, blockPos));
