@@ -679,16 +679,16 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                         LOGGER.info("Auto-saving chunks for level \'" + worldserver.getWorldInfo().getWorldName() + "\'/"
                                 + worldserver.provider.getDimensionType().getName());
                     }
-
-                    // Sponge end
-                    try {
-                        WorldManager.saveWorld(worldserver, false);
-                    } catch (MinecraftException ex) {
-                        ex.printStackTrace();
-                    }
                 } else if (!dontLog) {
                     LOGGER.info("Saving chunks for level \'" + worldserver.getWorldInfo().getWorldName() + "\'/"
                         + worldserver.provider.getDimensionType().getName());
+                }
+
+                // Sponge end
+                try {
+                    WorldManager.saveWorld(worldserver, false);
+                } catch (MinecraftException ex) {
+                    ex.printStackTrace();
                 }
             }
         }
