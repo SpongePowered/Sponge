@@ -139,6 +139,7 @@ public final class TrackingUtil {
     static final Function<SpongeBlockSnapshot, Optional<Transaction<BlockSnapshot>>> TRANSACTION_CREATION =
         (blockSnapshot) -> blockSnapshot.getWorldServer().map(worldServer -> {
             final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
+            builder.worldId(blockSnapshot.getWorldUniqueId());
             final BlockPos blockPos = blockSnapshot.getBlockPos();
             final Chunk chunk = worldServer.getChunk(blockPos);
             final IBlockState newState = chunk.getBlockState(blockPos);
