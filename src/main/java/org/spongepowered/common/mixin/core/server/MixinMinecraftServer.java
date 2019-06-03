@@ -656,7 +656,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             return;
         }
         for (WorldServer worldserver : this.worlds) {
-            if (worldserver != null && !worldserver.disableLevelSaving) {
+            if (worldserver != null && worldserver.getChunkProvider().canSave()) {
                 // Sponge start - check auto save interval in world config
                 if (this.isDedicatedServer() && this.isServerRunning()) {
                     final IMixinWorldServer spongeWorld = (IMixinWorldServer) worldserver;
@@ -679,15 +679,16 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                         LOGGER.info("Auto-saving chunks for level \'" + worldserver.getWorldInfo().getWorldName() + "\'/"
                                 + worldserver.provider.getDimensionType().getName());
                     }
+
+                    // Sponge end
+                    try {
+                        WorldManager.saveWorld(worldserver, false);
+                    } catch (MinecraftException ex) {
+                        ex.printStackTrace();
+                    }
                 } else if (!dontLog) {
                     LOGGER.info("Saving chunks for level \'" + worldserver.getWorldInfo().getWorldName() + "\'/"
-                            + worldserver.provider.getDimensionType().getName());
-                }
-                // Sponge end
-                try {
-                    WorldManager.saveWorld(worldserver, false);
-                } catch (MinecraftException ex) {
-                    ex.printStackTrace();
+                        + worldserver.provider.getDimensionType().getName());
                 }
             }
         }
