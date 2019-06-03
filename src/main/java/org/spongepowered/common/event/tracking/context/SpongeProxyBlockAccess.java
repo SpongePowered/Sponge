@@ -313,6 +313,10 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
         unmarkRemoval(pos);
         if (tileEntity != null) {
             this.queuedRemovals.remove(pos, tileEntity);
+            final TileEntity removed = this.affectedTileEntities.remove(pos);
+            if (removed != null) {
+                this.affectedTileEntities.put(pos, tileEntity);
+            }
         }
     }
 

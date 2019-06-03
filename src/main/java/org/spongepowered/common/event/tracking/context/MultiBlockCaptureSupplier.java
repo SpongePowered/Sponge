@@ -453,6 +453,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
                     // Make sure the new tile entity has the correct position
                     changeBlock.queueTileSet.setPos(pos);
                     mixinWorldServer.getProxyAccess().queueReplacement(changeBlock.queueTileSet, changeBlock.queuedRemoval);
+                    mixinWorldServer.getProxyAccess().unmarkRemoval(pos, oldTile);
                 }
                 return;
             }
