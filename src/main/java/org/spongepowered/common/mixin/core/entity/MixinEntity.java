@@ -139,6 +139,7 @@ import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.WorldManager;
 
 import java.lang.ref.WeakReference;
 import java.util.Collection;
@@ -455,6 +456,10 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
     public boolean setLocation(Location<World> location) {
         checkNotNull(location, "The location was null!");
         if (isRemoved()) {
+            return false;
+        }
+
+        if (!WorldManager.isKnownWorld((WorldServer) location.getExtent())) {
             return false;
         }
 

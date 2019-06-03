@@ -31,6 +31,7 @@ import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityHanging;
 import net.minecraft.entity.EntityLivingBase;
@@ -64,6 +65,7 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.DimensionType;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldProviderEnd;
 import net.minecraft.world.WorldServer;
@@ -224,9 +226,8 @@ public final class EntityUtil {
     @Nullable
     public static Entity teleportPlayerToDimension(EntityPlayerMP entityPlayerMP, int suggestedDimensionId, IMixinITeleporter teleporter,
         @Nullable MoveEntityEvent event) {
-        final boolean probablyAPortal = event == null;
 
-        if (probablyAPortal) {
+        if (event == null) {
             // Assume portal
             event = EntityUtil.handleDisplaceEntityPortalEvent(entityPlayerMP, suggestedDimensionId, teleporter);
             if (event == null || event.isCancelled()) {
@@ -240,6 +241,7 @@ public final class EntityUtil {
         // If leaving The End via End's Portal
         // Sponge Start - Check the provider, not the world's dimension
         final WorldServer fromWorldServer = (WorldServer) event.getFromTransform().getExtent();
+
         if (fromWorldServer.provider instanceof WorldProviderEnd && suggestedDimensionId == 1) { // if (this.dimension == 1 && dimensionIn == 1)
             // Sponge End
             fromWorldServer.removeEntity(entityPlayerMP);
@@ -260,7 +262,7 @@ public final class EntityUtil {
 
         transferPlayerToDimension(event, entityPlayerMP);
 
-        if (probablyAPortal) {
+        if (event instanceof MoveEntityEvent.Teleport.Portal) {
             entityPlayerMP.connection.sendPacket(new SPacketEffect(1032, BlockPos.ORIGIN, 0, false));
         }
 
@@ -303,7 +305,21 @@ public final class EntityUtil {
         playerIn.setWorld(toWorld);
         toWorld.spawnEntity(playerIn);
         toWorld.updateEntityWithOptionalForce(playerIn, false);
-        SpongeImpl.getServer().getPlayerList().preparePlayer(playerIn, fromWorld);
+
+        // PlayerList#preparePlayer but only reward advancements if they arrived here via Vanilla mechanics
+        fromWorld.getPlayerChunkMap().removePlayer(playerIn);
+
+        toWorld.getPlayerChunkMap().addPlayer(playerIn);
+
+        if (event instanceof MoveEntityEvent.Teleport.Portal) {
+            CriteriaTriggers.CHANGED_DIMENSION.trigger(playerIn, fromWorld.provider.getDimensionType(), toWorld.provider.getDimensionType());
+
+            if (fromWorld.provider.getDimensionType() == DimensionType.NETHER && playerIn.world.provider.getDimensionType() == DimensionType.OVERWORLD && playerIn.getEnteredNetherPosition() != null)
+            {
+                CriteriaTriggers.NETHER_TRAVEL.trigger(playerIn, playerIn.getEnteredNetherPosition());
+            }
+        }
+
         playerIn.connection.setPlayerLocation(playerIn.posX, playerIn.posY, playerIn.posZ, playerIn.rotationYaw, playerIn.rotationPitch);
         playerIn.interactionManager.setWorld(toWorld);
         SpongeImpl.getServer().getPlayerList().updateTimeAndWeatherForPlayer(playerIn, toWorld);

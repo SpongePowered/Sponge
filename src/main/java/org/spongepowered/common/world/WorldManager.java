@@ -1281,4 +1281,8 @@ public final class WorldManager {
     @Nullable public static Integer getDimensionId(WorldServer world) {
         return ((IMixinWorldInfo) world.getWorldInfo()).getDimensionId();
     }
+
+    public static boolean isKnownWorld(WorldServer world) {
+        return weakWorldByWorld.containsKey(world);
+    }
 }
