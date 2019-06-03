@@ -541,11 +541,11 @@ public final class WorldManager {
             } catch (MinecraftException e) {
                 e.printStackTrace();
             } finally {
+                SpongeImpl.getLogger().info("Unloading world [{}] ({}/{})", worldServer.getWorldInfo().getWorldName(),
+                    ((org.spongepowered.api.world.World) worldServer).getDimension().getType().getId(), dimensionId);
                 worldByDimensionId.remove(dimensionId);
                 weakWorldByWorld.remove(worldServer);
                 ((IMixinMinecraftServer) server).removeWorldTickTimes(dimensionId);
-                SpongeImpl.getLogger().info("Unloading world [{}] ({}/{})", worldServer.getWorldInfo().getWorldName(),
-                    ((org.spongepowered.api.world.World) worldServer).getDimension().getType().getId(), dimensionId);
                 reorderWorldsVanillaFirst();
             }
         }

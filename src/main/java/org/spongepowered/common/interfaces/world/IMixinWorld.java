@@ -28,6 +28,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
+import net.minecraft.world.storage.WorldInfo;
 
 import javax.annotation.Nullable;
 
@@ -52,7 +53,7 @@ public interface IMixinWorld {
 
     void setWeatherStartTime(long weatherStartTime);
 
-    void setCallingWorldEvent(boolean flag);
+    void setRedirectedWorldInfo(@Nullable WorldInfo info);
 
     @Nullable
     EntityPlayer getClosestPlayerToEntityWhoAffectsSpawning(net.minecraft.entity.Entity entity, double d1tance);
