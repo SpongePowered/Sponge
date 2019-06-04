@@ -904,7 +904,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
     /**
      * Hooks into vanilla's readFromNBT to call {@link #readFromNbt}.
      *
-     * <p> This makes it easier for other entity mixins to override readFromNbt
+     * <p> This makes it easier for other entity mixins to override readSpongeNBT
      * without having to specify the <code>@Inject</code> annotation. </p>
      *
      * @param compound The compound vanilla reads from (unused because we read

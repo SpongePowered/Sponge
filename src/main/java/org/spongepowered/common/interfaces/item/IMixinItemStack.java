@@ -35,14 +35,14 @@ public interface IMixinItemStack {
      *
      * @param compound The SpongeData compound to read from
      */
-    void readFromNbt(NBTTagCompound compound);
+    void readSpongeNBT(NBTTagCompound compound);
 
     /**
      * Write extra data (SpongeData) to the entity's NBT tag.
      *
      * @param compound The SpongeData compound to write to
      */
-    void writeToNbt(NBTTagCompound compound);
+    void writeSpongeNBT(NBTTagCompound compound);
 
     @Nullable
     default NBTTagCompound getCapabitilitiesForSpongeContainer() {

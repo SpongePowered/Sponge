@@ -64,7 +64,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.persistence.SerializedDataTransaction;
 import org.spongepowered.common.data.util.DataQueries;
@@ -110,6 +109,8 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
     @Shadow public abstract net.minecraft.item.ItemStack shadow$copy();
     @Shadow public abstract Item shadow$getItem();
 
+    @Shadow private NBTTagCompound stackTagCompound;
+
     // We deliberate do not check isEmpty in onWrite, onRead, and onCopy
     // Because Vanilla may set an ItemStack's size to 0, and then
     // back to a positive number, we need to keep the raw manipulator data
@@ -119,14 +120,14 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
     @Inject(method = "writeToNBT", at = @At(value = "HEAD"))
     private void onWrite(NBTTagCompound incoming, CallbackInfoReturnable<NBTTagCompound> info) {
         if (this.hasManipulators()) {
-            writeToNbt(incoming);
+            writeSpongeNBT(incoming);
         }
     }
 
     @Inject(method = "<init>(Lnet/minecraft/nbt/NBTTagCompound;)V", at = @At("RETURN"))
     private void onRead(NBTTagCompound compound, CallbackInfo info) {
         if (hasTagCompound() && getTagCompound().hasKey(NbtDataUtil.SPONGE_DATA, NbtDataUtil.TAG_COMPOUND)) {
-            readFromNbt(getTagCompound().getCompoundTag(NbtDataUtil.SPONGE_DATA));
+            readSpongeNBT(getTagCompound().getCompoundTag(NbtDataUtil.SPONGE_DATA));
         }
     }
 
@@ -151,9 +152,14 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
     }
 
     @Inject(method = "setTagCompound", at = @At("RETURN"))
-    private void onSet(NBTTagCompound compound, CallbackInfo callbackInfo) {
+    private void clearManipulatorsAndLoad(NBTTagCompound compound, CallbackInfo callbackInfo) {
+        // If the stack compound reference is changing, our manipulator list is stale and needs to be cleared
+        if (compound != this.stackTagCompound) {
+            this.manipulators.clear();
+        }
+
         if (hasTagCompound() && getTagCompound().hasKey(NbtDataUtil.SPONGE_DATA, NbtDataUtil.TAG_COMPOUND)) {
-            readFromNbt(getTagCompound().getCompoundTag(NbtDataUtil.SPONGE_DATA));
+            readSpongeNBT(getTagCompound().getCompoundTag(NbtDataUtil.SPONGE_DATA));
         }
     }
 
@@ -306,7 +312,7 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
     }
 
     @Override
-    public void readFromNbt(NBTTagCompound compound) {
+    public void readSpongeNBT(NBTTagCompound compound) {
         if (compound.hasKey(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_LIST)) {
             final NBTTagList list = compound.getTagList(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_COMPOUND);
             if (!list.isEmpty()) {
@@ -360,7 +366,7 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
     }
 
     @Override
-    public void writeToNbt(NBTTagCompound compound) {
+    public void writeSpongeNBT(NBTTagCompound compound) {
         resyncCustomToTag();
     }
 

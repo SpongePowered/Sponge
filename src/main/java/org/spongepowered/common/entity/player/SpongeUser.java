@@ -284,7 +284,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         //}
 
 
-        // org.spongepowered.common.mixin.core.entity.MixinEntity#readFromNbt
+        // org.spongepowered.common.mixin.core.entity.MixinEntity#readSpongeNBT
 
 
         final NBTTagCompound spongeCompound = compound.getCompoundTag(NbtDataUtil.FORGE_DATA).getCompoundTag(NbtDataUtil.SPONGE_DATA);
@@ -294,7 +294,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         //}
 
 
-        // org.spongepowered.common.mixin.core.entity.MixinEntityLivingBase#readFromNbt
+        // org.spongepowered.common.mixin.core.entity.MixinEntityLivingBase#readSpongeNBT
 
 
         //if (compound.hasKey("maxAir")) {
@@ -302,7 +302,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         //}
 
 
-        // org.spongepowered.common.mixin.core.entity.player.MixinEntityPlayerMP#readFromNbt
+        // org.spongepowered.common.mixin.core.entity.player.MixinEntityPlayerMP#readSpongeNBT
 
 
         //if (compound.hasKey(NbtDataUtil.HEALTH_SCALE, NbtDataUtil.TAG_DOUBLE)) {
