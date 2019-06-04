@@ -774,10 +774,13 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         }
 
         // Sponge Start - Handle block physics only if we're actually the server world
-        if (!isFake && currentBlock != newBlock) {
-            final boolean isBulkCapturing = ShouldFire.CHANGE_BLOCK_EVENT && state.doesBulkBlockCapture(peek);
+        if (!isFake && currentState != newState) {
             // Reset the proxy access or add to the proxy state during processing.
             ((IMixinWorldServer) this.world).getProxyAccess().onChunkChanged(pos, newState);
+        }
+        if (!isFake && currentBlock != newBlock) {
+            final boolean isBulkCapturing = ShouldFire.CHANGE_BLOCK_EVENT && state.doesBulkBlockCapture(peek);
+
             // Sponge start - Ignore block activations during block placement captures unless it's
             // a BlockContainer. Prevents blocks such as TNT from activating when cancelled.
             // Forge changes this check from
