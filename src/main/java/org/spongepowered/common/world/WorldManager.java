@@ -292,8 +292,16 @@ public final class WorldManager {
         HashMap<Integer, DimensionType> newMap = new LinkedHashMap<>();
 
         newMap.put(0, copy.remove(0));
-        newMap.put(-1, copy.remove(-1));
-        newMap.put(1, copy.remove(1));
+
+        DimensionType removed = copy.remove(-1);
+        if (removed != null) {
+            newMap.put(-1, removed);
+        }
+
+        removed = copy.remove(1);
+        if (removed != null) {
+            newMap.put(1, copy.remove(1));
+        }
 
         int[] ids = copy.keySet().toIntArray();
         Arrays.sort(ids);
