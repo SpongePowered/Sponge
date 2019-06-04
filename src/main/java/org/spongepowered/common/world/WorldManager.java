@@ -474,7 +474,7 @@ public final class WorldManager {
         WorldServer server;
 
         while ((server = unloadQueue.poll()) != null) {
-            unloadWorld(server, true);
+            unloadWorld(server, true, false);
         }
 
         unloadQueue.clear();
@@ -487,7 +487,7 @@ public final class WorldManager {
     }
 
     // TODO Result
-    public static boolean unloadWorld(WorldServer worldServer, boolean checkConfig) {
+    public static boolean unloadWorld(WorldServer worldServer, boolean checkConfig, boolean isShuttingDown) {
         checkNotNull(worldServer);
 
         final MinecraftServer server = SpongeImpl.getServer();
@@ -505,7 +505,7 @@ public final class WorldManager {
         }
 
         // Vanilla sometimes doesn't remove player entities from world first
-        if (server.isServerRunning()) {
+        if (!isShuttingDown) {
             if (!worldServer.playerEntities.isEmpty()) {
                 return false;
             }
@@ -524,7 +524,7 @@ public final class WorldManager {
                 (org.spongepowered.api.world.World) worldServer);
             final boolean isCancelled = SpongeImpl.postEvent(event);
 
-            if (server.isServerRunning() && isCancelled) {
+            if (!isShuttingDown && isCancelled) {
                 return false;
             }
 
@@ -533,7 +533,7 @@ public final class WorldManager {
 
             try {
                 // Don't save if server is stopping to avoid duplicate saving.
-                if (server.isServerRunning()) {
+                if (!isShuttingDown) {
                     saveWorld(worldServer, true);
                 }
 
