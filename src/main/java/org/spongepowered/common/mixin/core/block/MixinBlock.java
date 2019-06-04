@@ -139,6 +139,8 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     @Shadow protected boolean enableStats;
 
+    @Shadow protected boolean hasTileEntity;
+
     @Inject(method = "registerBlock(ILnet/minecraft/util/ResourceLocation;Lnet/minecraft/block/Block;)V", at = @At("RETURN"))
     private static void onRegisterBlock(int id, ResourceLocation location, Block block, CallbackInfo ci) {
         BlockTypeRegistryModule.getInstance().registerFromGameData(location.toString(), (BlockType) block);
@@ -505,6 +507,9 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
             if (clazz.equals(Block.class)) {
                 this.hasCollideLogic = false;
             }
+        } catch (NoClassDefFoundError err) {
+            //noinspection EqualsBetweenInconvertibleTypes
+            this.hasCollideLogic = !this.getClass().equals(Block.class);
         } catch (Throwable ex) {
             // ignore
         }
@@ -517,10 +522,12 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
             if (clazz.equals(Block.class)) {
                 this.hasCollideWithStateLogic = false;
             }
+        } catch (NoClassDefFoundError err) {
+            //noinspection EqualsBetweenInconvertibleTypes
+            this.hasCollideWithStateLogic = !this.getClass().equals(Block.class);
         } catch (Throwable ex) {
             // ignore
         }
-
         // neighborChanged
         try {
             String mapping = SpongeImplHooks.isDeobfuscatedEnvironment() ? "neighborChanged" : "func_189540_a";
@@ -528,7 +535,12 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
             Class<?> clazz = this.getClass().getMethod(mapping, argTypes).getDeclaringClass();
             this.hasNeighborOverride = !clazz.equals(Block.class);
         } catch (Throwable e) {
-            // ignore
+            if (e instanceof NoClassDefFoundError) {
+                // fall back to checking if class equals Block.
+                // Fixes https://github.com/SpongePowered/SpongeForge/issues/2770
+                //noinspection EqualsBetweenInconvertibleTypes
+                this.hasNeighborOverride = !this.getClass().equals(Block.class);
+            }
         }
 
         if (!modCapturing.isEnabled()) {
