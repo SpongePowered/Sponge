@@ -300,7 +300,7 @@ public final class WorldManager {
 
         removed = copy.remove(1);
         if (removed != null) {
-            newMap.put(1, copy.remove(1));
+            newMap.put(1, removed);
         }
 
         int[] ids = copy.keySet().toIntArray();
