@@ -25,6 +25,7 @@
 package org.spongepowered.common.config;
 
 import com.google.common.reflect.TypeToken;
+import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.Types;
 import ninja.leaping.configurate.ValueType;
@@ -48,6 +49,7 @@ import org.spongepowered.common.util.IpSet;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -354,9 +356,9 @@ public class SpongeConfig<T extends ConfigBase> {
         } else if (!key.contains(".") || key.indexOf('.') == key.length() - 1) {
             return null;
         } else {
-            String category = key.substring(0, key.indexOf('.'));
-            String prop = key.substring(key.indexOf('.') + 1);
-            return getRootNode().getNode(category, prop);
+            CommentedConfigurationNode node = getRootNode();
+            final String[] split = key.split("\\.");
+            return node.getNode((Object[]) split);
         }
     }
 
