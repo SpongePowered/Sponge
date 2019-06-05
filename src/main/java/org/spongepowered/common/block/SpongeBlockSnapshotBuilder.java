@@ -31,6 +31,7 @@ import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.Lists;
 import net.minecraft.block.ITileEntityProvider;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -95,6 +96,11 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
     @Override
     public SpongeBlockSnapshotBuilder blockState(BlockState blockState) {
         this.blockState = checkNotNull(blockState);
+        return this;
+    }
+
+    public SpongeBlockSnapshotBuilder blockState(IBlockState blockState) {
+        this.blockState = checkNotNull((BlockState) blockState);
         return this;
     }
 

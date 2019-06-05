@@ -122,6 +122,8 @@ import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.BlockUtil;
+import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.inventory.UpdateAnvilEventCost;
@@ -558,6 +560,7 @@ public class SpongeCommonEventFactory {
             if (!pushSource) {
                 frame.pushCause(source);
             }
+            frame.addContext(EventContextKeys.LIQUID_MIX, (World) worldIn);
 
             WorldProperties world = ((World) worldIn).getProperties();
             Vector3i position = new Vector3i(pos.getX(), pos.getY(), pos.getZ());
@@ -572,26 +575,28 @@ public class SpongeCommonEventFactory {
         }
     }
 
-    public static ChangeBlockEvent.Break callChangeBlockEventModifyLiquidBreak(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, int flags) {
-        final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
+    public static ChangeBlockEvent.Break callChangeBlockEventModifyLiquidBreak(net.minecraft.world.World worldIn, BlockPos pos, IBlockState targetState) {
+        return callChangeBlockEventModifyLiquidBreak(worldIn, pos, worldIn.getBlockState(pos), targetState);
+    }
 
-        BlockState fromState = BlockUtil.fromNative(worldIn.getBlockState(pos));
-        BlockState toState = BlockUtil.fromNative(state);
+    public static ChangeBlockEvent.Break callChangeBlockEventModifyLiquidBreak(net.minecraft.world.World worldIn, BlockPos pos, IBlockState fromState, IBlockState toState) {
+        final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
         Object source =context.getSource(LocatableBlock.class).orElse(null);
         if (source == null) {
             source = worldIn; // Fallback
         }
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(source);
             frame.addContext(EventContextKeys.LIQUID_BREAK, (World) worldIn);
 
             WorldProperties world = ((World) worldIn).getProperties();
             Vector3i position = new Vector3i(pos.getX(), pos.getY(), pos.getZ());
 
-            Transaction<BlockSnapshot> transaction = new Transaction<>(BlockSnapshot.builder().blockState(fromState).world(world).position(position).build(),
-                    BlockSnapshot.builder().blockState(toState).world(world).position(position).build());
-            ChangeBlockEvent.Break event = SpongeEventFactory.createChangeBlockEventBreak(frame.getCurrentCause(),
-                    Collections.singletonList(transaction));
+            final SpongeBlockSnapshot from = new SpongeBlockSnapshotBuilder().blockState(fromState).world(world).position(position).build();
+            final SpongeBlockSnapshot to = new SpongeBlockSnapshotBuilder().blockState(toState).world(world).position(position).build();
+            final Transaction<BlockSnapshot> transaction = new Transaction<>(from, to);
+            final ChangeBlockEvent.Break event = SpongeEventFactory.createChangeBlockEventBreak(frame.getCurrentCause(),
+                Collections.singletonList(transaction));
 
             SpongeImpl.postEvent(event);
             return event;

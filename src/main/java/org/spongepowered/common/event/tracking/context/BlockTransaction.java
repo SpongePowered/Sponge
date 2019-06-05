@@ -393,7 +393,7 @@ public abstract class BlockTransaction {
 
         @Override
         void cancel(WorldServer worldServer, BlockPos blockPos, SpongeProxyBlockAccess proxyBlockAccess) {
-
+            // Literally don't do anything, because the tile entity is being restored by the snapshot.
         }
 
         @Override

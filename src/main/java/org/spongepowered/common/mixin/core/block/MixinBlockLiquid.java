@@ -44,8 +44,15 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 public abstract class MixinBlockLiquid extends MixinBlock {
 
     // Capture Lava and Water mixing forming CobbleStone or Obsidian
-    @Inject(method = "checkForMixing", cancellable = true, locals = LocalCapture.CAPTURE_FAILSOFT, at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z"))
+    @Inject(
+        method = "checkForMixing",
+        cancellable = true,
+        locals = LocalCapture.CAPTURE_FAILSOFT,
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z"
+        )
+    )
     private void onSetBlockState(World worldIn, BlockPos pos, IBlockState state, CallbackInfoReturnable<Boolean> cir, boolean flag, Integer integer) {
         IBlockState newState = integer == 0 ? Blocks.OBSIDIAN.getDefaultState() : Blocks.COBBLESTONE.getDefaultState();
         ChangeBlockEvent.Modify event = SpongeCommonEventFactory.callChangeBlockEventModifyLiquidMix(worldIn, pos, newState, null);

@@ -33,6 +33,7 @@ import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.Block;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockStateBase;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
@@ -114,7 +115,7 @@ public abstract class MixinStateImplementation extends BlockStateBase implements
     @Override
     public BlockSnapshot snapshotFor(Location<World> location) {
         final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder()
-            .blockState(this)
+            .blockState((IBlockState) (Object) this)
             .position(location.getBlockPosition())
             .worldId(location.getExtent().getUniqueId());
         if (this.block.hasTileEntity() && location.getBlockType().equals(this.block)) {

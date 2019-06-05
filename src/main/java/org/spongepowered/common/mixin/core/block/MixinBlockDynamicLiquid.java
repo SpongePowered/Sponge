@@ -31,7 +31,6 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.Transaction;
@@ -39,24 +38,22 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 
 import java.util.Random;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 @Mixin(BlockDynamicLiquid.class)
 public abstract class MixinBlockDynamicLiquid extends MixinBlockLiquid {
@@ -85,9 +82,15 @@ public abstract class MixinBlockDynamicLiquid extends MixinBlockLiquid {
 
 
     // Capture Lava falling on Water forming Stone
-    @Inject(method = "updateTick", cancellable = true, at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z"))
-    private void beforeSetBlockState(net.minecraft.world.World worldIn, BlockPos sourcePos, IBlockState state, Random rand, CallbackInfo ci) {
+    @Inject(
+        method = "updateTick",
+        cancellable = true,
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z"
+        )
+    )
+    private void settingStoneThrowSpongeEvent(net.minecraft.world.World worldIn, BlockPos sourcePos, IBlockState state, Random rand, CallbackInfo ci) {
         if (!ShouldFire.CHANGE_BLOCK_EVENT_MODIFY) {
             return;
         }
@@ -106,17 +109,32 @@ public abstract class MixinBlockDynamicLiquid extends MixinBlockLiquid {
     }
 
     // Capture Fluids flowing into other blocks
-    @Inject(method = "tryFlowInto", cancellable = true, at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/block/state/IBlockState;getMaterial()Lnet/minecraft/block/material/Material;"))
+    @Inject(
+        method = "tryFlowInto",
+        cancellable = true,
+        at = @At(
+            value= "INVOKE",
+            target = "Lnet/minecraft/block/state/IBlockState;getMaterial()Lnet/minecraft/block/material/Material;"
+        ),
+        slice = @Slice(
+            from = @At(
+                value = "INVOKE",
+                target = "Lnet/minecraft/block/BlockDynamicLiquid;canFlowInto(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z"
+            ),
+            to = @At(
+                value = "FIELD",
+                target = "Lnet/minecraft/block/BlockDynamicLiquid;material:Lnet/minecraft/block/material/Material;"
+            )
+        )
+    )
     private void afterCanFlowInto(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, int level, CallbackInfo ci) {
-        IBlockState defaultState = ((Block) (Object) this).getDefaultState();
-        if (!ShouldFire.CHANGE_BLOCK_EVENT_MODIFY) { // Check if we even need to fire.
+        if (!ShouldFire.CHANGE_BLOCK_EVENT_BREAK) {
             return;
         }
         // Do not call events when just flowing into air or same liquid
-        if (state.getMaterial() != Material.AIR && state.getMaterial() != defaultState.getMaterial()) {
-            IBlockState newState = defaultState.withProperty(BlockLiquid.LEVEL, level);
-            ChangeBlockEvent.Break event = SpongeCommonEventFactory.callChangeBlockEventModifyLiquidBreak(worldIn, pos, newState, 3);
+        if (state.getMaterial() != Material.AIR && state.getMaterial() != this.shadow$getDefaultState().getMaterial()) {
+            IBlockState newState = this.shadow$getDefaultState().withProperty(BlockLiquid.LEVEL, level);
+            ChangeBlockEvent.Break event = SpongeCommonEventFactory.callChangeBlockEventModifyLiquidBreak(worldIn, pos, newState);
 
             Transaction<BlockSnapshot> transaction = event.getTransactions().get(0);
             if (event.isCancelled() || !transaction.isValid()) {
