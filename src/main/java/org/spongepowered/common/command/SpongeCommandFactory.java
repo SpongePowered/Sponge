@@ -141,6 +141,14 @@ public class SpongeCommandFactory {
     private static final Text DISABLED_TEXT = Text.of(TextColors.RED, "disabled");
     private static final Text FAILED_TEXT = Text.of(TextColors.RED, "Failed to set config entry.");
 
+    private static final String JAVA_VENDOR = System.getProperty("java.vendor");
+    private static final String JAVA_VERSION = System.getProperty("java.version");
+    private static final String JAVA_ARCH = System.getProperty("sun.arch.data.model");
+
+    private static final String OS_NAME = System.getProperty("os.name");
+    private static final String OS_VERSION = System.getProperty("os.version");
+    private static final String OS_ARCH = System.getProperty("os.arch", "UNKNOWN");
+
     private static final CommandElement DUMMY_ELEMENT = new CommandElement(Text.EMPTY) {
         @Nullable @Override protected Object parseValue(CommandSource source, CommandArgs args) throws ArgumentParseException {
             throw args.createError(t("No subcommand was specified")); // this will never be visible, but just in case
@@ -493,6 +501,12 @@ public class SpongeCommandFactory {
                                 () ? Text.of(container.getVersion().get()) : UNKNOWN);
                     }
 
+                    final String javaArch = !"UNKNOWN".equalsIgnoreCase(JAVA_ARCH) ? JAVA_ARCH + "-bit" : JAVA_ARCH;
+
+                    builder.append(NEWLINE_TEXT, Text.of(TextColors.GRAY, INDENT + "JVM", ": "), Text.of(JAVA_VERSION + "/" + javaArch +
+                            " (" + JAVA_VENDOR + ")"));
+                    builder.append(NEWLINE_TEXT, Text.of(TextColors.GRAY, INDENT + "OS", ": "), Text.of(OS_NAME + " (" + OS_VERSION + "/" + OS_ARCH +
+                        ")"));
                     src.sendMessage(builder.build());
                     return CommandResult.success();
                 })
