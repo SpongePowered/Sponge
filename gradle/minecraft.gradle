@@ -69,9 +69,8 @@ jar {
                 'Implementation-Title': project.name,
                 'Implementation-Version': "${-> project.version}",
                 'Implementation-Vendor': project.organization,
-
                 'Specification-Version': "${-> common.apiVersion}",
-
+                'MCP-Mappings-Version': common.mcpMappings,
                 'FMLAT': "${-> project.ats.join(' ')}"
         )
     }
