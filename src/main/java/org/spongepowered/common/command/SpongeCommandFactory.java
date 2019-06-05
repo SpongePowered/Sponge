@@ -143,7 +143,7 @@ public class SpongeCommandFactory {
 
     private static final String JAVA_VENDOR = System.getProperty("java.vendor");
     private static final String JAVA_VERSION = System.getProperty("java.version");
-    private static final String JAVA_ARCH = System.getProperty("sun.arch.data.model");
+    private static final String JAVA_ARCH = System.getProperty("sun.arch.data.model", "UNKNOWN");
 
     private static final String OS_NAME = System.getProperty("os.name");
     private static final String OS_VERSION = System.getProperty("os.version");
