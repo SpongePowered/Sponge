@@ -25,12 +25,12 @@
 package org.spongepowered.common.event.tracking.phase.plugin;
 
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 
 public final class PluginPhase extends TrackingPhase {
 
     public static final class State {
+
         public static final IPhaseState<BasicPluginContext> BLOCK_WORKER = new BlockWorkerPhaseState();
         public static final IPhaseState<BasicPluginContext> CUSTOM_SPAWN = new BasicPluginState();
         public static final IPhaseState<BasicPluginContext> SCHEDULED_TASK = new ScheduledTaskPhaseState();
@@ -41,12 +41,13 @@ public final class PluginPhase extends TrackingPhase {
     }
 
     public static final class Listener {
-        public static final IPhaseState<ListenerPhaseContext> GENERAL_LISTENER = new EventListenerPhaseState();
-        public static final IPhaseState<ListenerPhaseContext> PRE_WORLD_TICK_LISTENER = new PreWorldTickListenerState();
-        public static final IPhaseState<ListenerPhaseContext> POST_WORLD_TICK_LISTENER = new PostWorldTickListenerState();
-        public static final IPhaseState<ListenerPhaseContext> PRE_SERVER_TICK_LISTENER = new PreServerTickListenerState();
-        public static final IPhaseState<ListenerPhaseContext> POST_SERVER_TICK_LISTENER = new PostServerTickListenerState();
-        public static final IPhaseState<ListenerPhaseContext> EVENT_BUS = new EventListenerPhaseState();
+
+        public static final IPhaseState<EventListenerPhaseContext> GENERAL_LISTENER = new EventListenerPhaseState();
+        public static final IPhaseState<WorldTickContext> PRE_WORLD_TICK_LISTENER = new WorldTickPhaseState("PreWorldTickState");
+        public static final IPhaseState<WorldTickContext> POST_WORLD_TICK_LISTENER = new WorldTickPhaseState("PostWorldTickState");
+        public static final IPhaseState<ServerTickContext> PRE_SERVER_TICK_LISTENER = new ServerTickPhaseState("PreServerTickState");
+        public static final IPhaseState<ServerTickContext> POST_SERVER_TICK_LISTENER = new ServerTickPhaseState("PostServerTickState");
+        public static final IPhaseState<EventListenerPhaseContext> EVENT_BUS = new EventListenerPhaseState();
 
         private Listener() {
         }
@@ -61,6 +62,7 @@ public final class PluginPhase extends TrackingPhase {
     }
 
     private static final class Holder {
+
         static final PluginPhase INSTANCE = new PluginPhase();
     }
 

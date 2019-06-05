@@ -24,34 +24,33 @@
  */
 package org.spongepowered.common.event.tracking.phase.plugin;
 
-import net.minecraft.block.Block;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
-import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.interfaces.IMixinChunk;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nullable;
+final class ServerTickPhaseState extends ListenerPhaseState<ServerTickContext> {
 
-final class PreServerTickListenerState extends ListenerPhaseState {
+    private final String name;
 
-    PreServerTickListenerState() {
+    ServerTickPhaseState(String name) {
+        this.name = name;
     }
 
     @Override
-    public void unwind(ListenerPhaseContext phaseContext) {
+    public ServerTickContext createPhaseContext() {
+        return new ServerTickContext(this).addCaptures().player();
+    }
+
+    @Override
+    public void unwind(ServerTickContext phaseContext) {
 
         final Object listener = phaseContext.getSource(Object.class)
             .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a ServerTickEvent listener!", phaseContext));
@@ -62,35 +61,14 @@ final class PreServerTickListenerState extends ListenerPhaseState {
         // This could be happening regardless whether block bulk captures are done or not.
         // Would depend on whether entity captures are done.
         phaseContext.getBlockItemDropSupplier()
-            .acceptAndClearIfNotEmpty(map -> {
-                map.asMap().entrySet().forEach(entry -> {
-                    final BlockPos key = entry.getKey();
-                    try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                        frame.pushCause(listener);
-                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-                        final List<Entity> items = entry.getValue().stream().map(EntityUtil::fromNative).collect(Collectors.toList());
-                        SpongeCommonEventFactory.callDropItemDestruct(items, phaseContext);
-
-                        frame.popCause();
-                    }
-
-                });
-
-            });
-    }
-
-    @Override
-    public void associateNeighborBlockNotifier(ListenerPhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
-                                               WorldServer minecraftWorld, PlayerTracker.Type notifier) {
-        context.getCapturedPlayer().ifPresent(player ->
-                ((IMixinChunk) minecraftWorld.getChunk(notifyPos))
-                        .addTrackedBlockPosition(block, notifyPos, player, PlayerTracker.Type.NOTIFIER)
-        );
-    }
-
-    @Override
-    public void capturePlayerUsingStackToBreakBlock(@Nullable ItemStack stack, EntityPlayerMP playerMP, ListenerPhaseContext context) {
-        context.getCapturedPlayerSupplier().addPlayer(playerMP);
+            .acceptAndClearIfNotEmpty(map -> map.asMap().forEach((key, value) -> {
+                try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                    frame.pushCause(listener);
+                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+                    final List<Entity> items = value.stream().map(EntityUtil::fromNative).collect(Collectors.toList());
+                    SpongeCommonEventFactory.callDropItemDestruct(items, phaseContext);
+                }
+            }));
     }
 
     @Override
@@ -99,7 +77,7 @@ final class PreServerTickListenerState extends ListenerPhaseState {
     }
 
     @Override
-    public boolean doesBulkBlockCapture(ListenerPhaseContext context) {
+    public boolean doesBulkBlockCapture(ServerTickContext context) {
         return false;
     }
 
@@ -109,9 +87,12 @@ final class PreServerTickListenerState extends ListenerPhaseState {
     }
 
     @Override
-    public boolean doesCaptureEntityDrops(ListenerPhaseContext context) {
+    public boolean doesCaptureEntityDrops(ServerTickContext context) {
         return false;
     }
 
-
+    @Override
+    public String toString() {
+        return this.getPhase() + "{" + this.name + "}";
+    }
 }

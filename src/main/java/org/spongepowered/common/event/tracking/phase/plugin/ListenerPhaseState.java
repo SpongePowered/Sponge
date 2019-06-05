@@ -31,6 +31,7 @@ import net.minecraft.world.WorldServer;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
@@ -40,17 +41,10 @@ import javax.annotation.Nullable;
  * A specialized phase for forge event listeners during pre tick, may need to do the same
  * if SpongeAPI adds pre tick events.
  */
-abstract class ListenerPhaseState extends PluginPhaseState<ListenerPhaseContext> {
+abstract class ListenerPhaseState<L extends ListenerPhaseContext<L>> extends PluginPhaseState<L> {
 
     @Override
-    public ListenerPhaseContext createPhaseContext() {
-        return new ListenerPhaseContext(this)
-            .addCaptures()
-            .player();
-    }
-
-    @Override
-    public void unwind(ListenerPhaseContext phaseContext) {
+    public void unwind(L phaseContext) {
 
     }
 
@@ -71,19 +65,23 @@ abstract class ListenerPhaseState extends PluginPhaseState<ListenerPhaseContext>
 
 
     @Override
-    public void appendNotifierToBlockEvent(ListenerPhaseContext context, PhaseContext<?> currentContext,
+    public void appendNotifierToBlockEvent(L context, PhaseContext<?> currentContext,
         IMixinWorldServer mixinWorldServer, BlockPos pos, IMixinBlockEventData blockEvent) {
 
     }
 
-    public void associateNeighborBlockNotifier(ListenerPhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
-                                               WorldServer minecraftWorld, PlayerTracker.Type notifier) {
-
+    @Override
+    public void associateNeighborStateNotifier(L unwindingContext, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
+        WorldServer minecraftWorld, PlayerTracker.Type notifier) {
+        unwindingContext.getCapturedPlayer().ifPresent(player ->
+            ((IMixinChunk) minecraftWorld.getChunk(notifyPos))
+                .addTrackedBlockPosition(block, notifyPos, player, PlayerTracker.Type.NOTIFIER)
+        );
     }
 
     @Override
     public void capturePlayerUsingStackToBreakBlock(@Nullable ItemStack stack, EntityPlayerMP playerMP, ListenerPhaseContext context) {
-
+        context.getCapturedPlayerSupplier().addPlayer(playerMP);
     }
 
 

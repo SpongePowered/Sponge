@@ -37,13 +37,13 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-public class ListenerPhaseContext extends PluginPhaseContext<ListenerPhaseContext> {
+public class ListenerPhaseContext<L extends ListenerPhaseContext<L>> extends PluginPhaseContext<L> {
 
 
     Object object;
     private CapturePlayer capturePlayer;
 
-    ListenerPhaseContext(IPhaseState<ListenerPhaseContext> state) {
+    ListenerPhaseContext(IPhaseState<L> state) {
         super(state);
     }
 
@@ -52,16 +52,18 @@ public class ListenerPhaseContext extends PluginPhaseContext<ListenerPhaseContex
         return phaseContext instanceof ListenerPhaseContext && ((ListenerPhaseContext) phaseContext).object == this.object;
     }
 
-    public ListenerPhaseContext event(Object obj) {
+    @SuppressWarnings("unchecked")
+    public L event(Object obj) {
         this.object = obj;
-        return this;
+        return (L) this;
     }
 
-    public ListenerPhaseContext player() {
+    @SuppressWarnings("unchecked")
+    public L player() {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
         checkState(this.capturePlayer == null, "Already capturing a player object!");
         this.capturePlayer = new CapturePlayer();
-        return this;
+        return (L) this;
     }
 
     public Object getEvent() {
@@ -82,7 +84,7 @@ public class ListenerPhaseContext extends PluginPhaseContext<ListenerPhaseContex
 
     @Override
     public PrettyPrinter printCustom(PrettyPrinter printer, int indent) {
-        String s = String.format("%1$"+indent+"s", "");
+        String s = String.format("%1$" + indent + "s", "");
         super.printCustom(printer, indent)
             .add(s + "- %s: %s", "Listener", this.object);
         if (this.capturePlayer != null && this.capturePlayer.player != null) {
@@ -97,10 +99,6 @@ public class ListenerPhaseContext extends PluginPhaseContext<ListenerPhaseContex
 
         CapturePlayer() {
 
-        }
-
-        CapturePlayer(@Nullable Player player) {
-            this.player = player;
         }
 
         public Optional<Player> getPlayer() {
@@ -127,8 +125,8 @@ public class ListenerPhaseContext extends PluginPhaseContext<ListenerPhaseContex
         @Override
         public String toString() {
             return com.google.common.base.MoreObjects.toStringHelper(this)
-                    .add("player", this.player)
-                    .toString();
+                .add("player", this.player)
+                .toString();
         }
 
         public void addPlayer(EntityPlayerMP playerMP) {

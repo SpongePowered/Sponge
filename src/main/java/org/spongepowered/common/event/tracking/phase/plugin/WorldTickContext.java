@@ -24,39 +24,40 @@
  */
 package org.spongepowered.common.event.tracking.phase.plugin;
 
-import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.event.tracking.TrackingUtil;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-final class EventListenerPhaseState extends ListenerPhaseState<EventListenerPhaseContext> {
+import net.minecraft.world.World;
+import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 
-    private boolean hasPrintedEntities = false;
+public class WorldTickContext extends ListenerPhaseContext<WorldTickContext> {
 
-    EventListenerPhaseState() {
+    private World tickingWorld;
+
+    WorldTickContext(
+        IPhaseState<WorldTickContext> state) {
+        super(state);
     }
 
+    public WorldTickContext world(World world) {
+        this.tickingWorld = world;
+        return this;
+    }
+
+    public World getWorld() {
+        return checkNotNull(this.tickingWorld, "Ticking World is null");
+    }
 
     @Override
-    public EventListenerPhaseContext createPhaseContext() {
-        return new EventListenerPhaseContext(this)
-            .addCaptures()
-            .player();
+    public PrettyPrinter printCustom(PrettyPrinter printer, int indent) {
+        String s = String.format("%1$" + indent + "s", "");
+        super.printCustom(printer, indent);
+        if (!((IMixinWorld) this.tickingWorld).isFake()) {
+            printer.add(s + "- %s: %s", "TickingWorld", ((org.spongepowered.api.world.World) this.tickingWorld).getName());
+        } else {
+            printer.add(s + "- %s: %s", "Ticking World", "Pseudo Fake World?" + this.tickingWorld);
+        }
+        return printer;
     }
-
-    @Override
-    public void unwind(EventListenerPhaseContext phaseContext) {
-        // TODO - Determine if we need to pass the supplier or perform some parameterized
-        //  process if not empty method on the capture object.
-        TrackingUtil.processBlockCaptures(this, phaseContext);
-
-        // TODO - determine if entities are needed to be captured.
-        phaseContext.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> {
-            if (!this.hasPrintedEntities) {
-                SpongeImpl.getLogger()
-                    .warn("Unexpected entities captured during a plugin listener. If this message pops up, please let sponge developers know");
-                this.hasPrintedEntities = true;
-            }
-        });
-
-    }
-
 }
