@@ -575,33 +575,33 @@ public class SpongeGameRegistry implements GameRegistry {
     }
 
     private void throwRegistryEvent(RegistryModule module) {
-        if (module instanceof AdditionalCatalogRegistryModule
-                && (!(module instanceof SpongeAdditionalCatalogRegistryModule) || ((SpongeAdditionalCatalogRegistryModule) module).allowsApiRegistration())
-                && module.getClass().getAnnotation(CustomRegistrationPhase.class) == null) {
-            Class<? extends CatalogType> catalog = REGISTRY_CATALOG_MAP.get(module);
-            throwRegistryEvent(catalog, module);
-        }
+        final Class<? extends CatalogType> catalog = REGISTRY_CATALOG_MAP.get(module);
+        throwRegistryEvent(catalog, module);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes", "ConstantConditions"})
     private void throwRegistryEvent(Class<? extends CatalogType> catalogClass, RegistryModule module) {
-        if (catalogClass == null) {
-            // This isn't a valid registered registry
-            // We should throw an exception or print out an exception, but otherwise, not going to bother at this moment.
-            new PrettyPrinter(60).centre().add("Unregistered RegistryModule").hr()
-                    .addWrapped(60, "An unknown registry module was added to the ordered set of modules, but the "
-                            + "module itself is not registered with the GameRegistry!")
-                    .add()
-                    .add("%s : %s", "Registry Module", module.toString())
-                    .add()
-                    .add(new Exception())
-                    .add()
-                    .add("To fix this, the developer providing the module needs to register the module correctly.")
-                    .trace();
-            return;
+        if (module instanceof AdditionalCatalogRegistryModule
+                && (!(module instanceof SpongeAdditionalCatalogRegistryModule) || ((SpongeAdditionalCatalogRegistryModule) module).allowsApiRegistration())
+                && module.getClass().getAnnotation(CustomRegistrationPhase.class) == null) {
+            if (catalogClass == null) {
+                // This isn't a valid registered registry
+                // We should throw an exception or print out an exception, but otherwise, not going to bother at this moment.
+                new PrettyPrinter(60).centre().add("Unregistered RegistryModule").hr()
+                        .addWrapped(60, "An unknown registry module was added to the ordered set of modules, but the "
+                                + "module itself is not registered with the GameRegistry!")
+                        .add()
+                        .add("%s : %s", "Registry Module", module.toString())
+                        .add()
+                        .add(new Exception())
+                        .add()
+                        .add("To fix this, the developer providing the module needs to register the module correctly.")
+                        .trace();
+                return;
+            }
+            final AdditionalCatalogRegistryModule registryModule = (AdditionalCatalogRegistryModule) module;
+            SpongeImpl.postEvent(new SpongeGameRegistryRegisterEvent(
+                    Sponge.getCauseStackManager().getCurrentCause(), catalogClass, registryModule));
         }
-        final AdditionalCatalogRegistryModule registryModule = (AdditionalCatalogRegistryModule) module;
-        SpongeImpl.postEvent(new SpongeGameRegistryRegisterEvent(
-                Sponge.getCauseStackManager().getCurrentCause(), catalogClass, registryModule));
     }
 }
