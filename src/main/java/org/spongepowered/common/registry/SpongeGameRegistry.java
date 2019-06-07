@@ -147,7 +147,7 @@ public class SpongeGameRegistry implements GameRegistry {
     protected static final Map<Class<? extends CatalogType>, CatalogRegistryModule<?>> REGISTRY_MAP = new IdentityHashMap<>();
     private static final Map<Class<?>, Supplier<?>> BUILDER_SUPPLIERS = new IdentityHashMap<>();
 
-    private static final List<Class<? extends RegistryModule>> orderedModules = new ArrayList<>();
+    private static final List<Class<? extends RegistryModule>> ORDERED_MODULES = new ArrayList<>();
     private static final Map<Class<? extends RegistryModule>, RegistryModule> REGISTRY_CLASS_MAP = new IdentityHashMap<>();
     private static final Set<RegistryModule> REGISTRIES = new HashSet<>();
 
@@ -215,7 +215,7 @@ public class SpongeGameRegistry implements GameRegistry {
     }
 
     private void registerModulePhase() {
-        for (Class<? extends RegistryModule> moduleClass : orderedModules) {
+        for (Class<? extends RegistryModule> moduleClass : ORDERED_MODULES) {
             final RegistryModule module = REGISTRY_CLASS_MAP.get(moduleClass);
             checkState(module != null, "Something funky happened!");
             if (RegistryModuleLoader.tryModulePhaseRegistration(module)) {
@@ -246,7 +246,7 @@ public class SpongeGameRegistry implements GameRegistry {
         REGISTRY_MAP.put(catalogClass, registryModule);
         REGISTRIES.add(registryModule);
         REGISTRY_CLASS_MAP.put(registryModule.getClass(), registryModule);
-        if (!orderedModules.isEmpty()) {
+        if (!ORDERED_MODULES.isEmpty()) {
             if (catalogClass.getName().contains("org.spongepowered.api") && catalogClass.getAnnotation(PluginProvidedRegistryModule.class) == null) {
                 throw new UnsupportedOperationException("Cannot register a module for an API defined class! That's the implementation's job!");
             }
@@ -268,9 +268,9 @@ public class SpongeGameRegistry implements GameRegistry {
         for (RegistryModule module : REGISTRIES) {
             addToGraph(module, graph);
         }
-        orderedModules.clear();
+        ORDERED_MODULES.clear();
         try {
-            orderedModules.addAll(TopologicalOrder.createOrderedLoad(graph));
+            ORDERED_MODULES.addAll(TopologicalOrder.createOrderedLoad(graph));
         } catch (CyclicGraphException e) {
             StringBuilder msg = new StringBuilder();
             msg.append("Registry module dependencies are cyclical!\n");
