@@ -149,10 +149,10 @@ public class SpongeGameRegistry implements GameRegistry {
     protected static final Map<Class<? extends CatalogType>, CatalogRegistryModule<?>> REGISTRY_MAP = new IdentityHashMap<>();
     private static final Map<Class<?>, Supplier<?>> BUILDER_SUPPLIERS = new IdentityHashMap<>();
 
-    private static final List<Class<? extends RegistryModule>> ORDERED_MODULES = new ArrayList<>();
-    private static final Map<Class<? extends RegistryModule>, RegistryModule> REGISTRY_CLASS_MAP = new IdentityHashMap<>();
-    private static final Map<CatalogRegistryModule<?>, Class<? extends CatalogType>> REGISTRY_CATALOG_MAP = new HashMap<>();
-    private static final Set<RegistryModule> REGISTRIES = new HashSet<>();
+    private static List<Class<? extends RegistryModule>> ORDERED_MODULES = new ArrayList<>();
+    private static Map<Class<? extends RegistryModule>, RegistryModule> REGISTRY_CLASS_MAP = new IdentityHashMap<>();
+    private static Map<CatalogRegistryModule<?>, Class<? extends CatalogType>> REGISTRY_CATALOG_MAP = new HashMap<>();
+    private static Set<RegistryModule> REGISTRIES = new HashSet<>();
 
     private static List<Class<? extends RegistryModule>> MODULES = new ArrayList<>();
 
@@ -564,6 +564,14 @@ public class SpongeGameRegistry implements GameRegistry {
 
     public void registerAdditionals() {
         registerAdditionalPhase();
+    }
+
+    public static void clear() {
+        ORDERED_MODULES = null;
+        REGISTRY_CLASS_MAP = null;
+        REGISTRY_CATALOG_MAP = null;
+        REGISTRIES = null;
+        MODULES = null;
     }
 
     private void throwRegistryEvent(RegistryModule module) {
