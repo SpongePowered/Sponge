@@ -1479,10 +1479,6 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         }
         final SpongeConfig<WorldConfig> config = ((IMixinWorldServer) this.world).getWorldConfig();
         final Boolean worldPVP = config.getConfig().getWorld().getPVPEnabled();
-        if (worldPVP != null) {
-            cir.setReturnValue(worldPVP);
-            return;
-        }
-        cir.setReturnValue(this.canPlayersAttack());
+        cir.setReturnValue(worldPVP);
     }
 }
