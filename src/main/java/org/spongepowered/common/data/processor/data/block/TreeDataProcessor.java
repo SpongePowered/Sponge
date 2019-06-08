@@ -97,7 +97,7 @@ public class TreeDataProcessor extends AbstractCatalogDataProcessor<TreeType, Va
             stack.setItemDamage(this.setToMeta(value));
             return true;
         }
-        else if (stack.getItem() == ItemTypes.LOG2) {
+        else if (stack.getItem() == ItemTypes.LOG2 || stack.getItem() == ItemTypes.LEAVES2) {
             if (value == TreeTypes.OAK || value == TreeTypes.SPRUCE || value == TreeTypes.BIRCH || value == TreeTypes.JUNGLE) {
                 return false; // TODO
             }
