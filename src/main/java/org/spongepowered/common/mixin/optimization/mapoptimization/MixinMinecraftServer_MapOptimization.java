@@ -25,37 +25,32 @@
 package org.spongepowered.common.mixin.optimization.mapoptimization;
 
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.WorldServer;
 import net.minecraft.world.storage.MapData;
 import net.minecraft.world.storage.WorldSavedData;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.interfaces.world.IMixinMapData;
 import org.spongepowered.common.mixin.core.world.storage.IMixinMapStorage;
+import org.spongepowered.common.world.WorldManager;
 
 import java.util.List;
 
 @Mixin(MinecraftServer.class)
 public abstract class MixinMinecraftServer_MapOptimization {
 
-    @Shadow protected abstract void tick();
-
-    @Shadow public WorldServer[] worlds;
-
     // Sponge re-uses the same MapStorage for all worlds, so we only
     // need to tick it once per server tick
     @Inject(method = "tick", at = @At(value = "RETURN"))
-    private void onEndTick(CallbackInfo ci) {
-        List<WorldSavedData> loadedData = ((IMixinMapStorage) (this.worlds[0].getMapStorage())).getLoadedDataList();
-        for (WorldSavedData data: loadedData) {
-            if (!(data instanceof MapData)) {
+    private void onEndTickMapOptimization(CallbackInfo ci) {
+        final List<WorldSavedData> loadedData = ((IMixinMapStorage) (WorldManager.getWorldByDimensionId(0).orElse(null).getMapStorage())).getLoadedDataList();
+        for (WorldSavedData next : loadedData) {
+            if (!(next instanceof MapData)) {
                 continue;
             }
-            ((IMixinMapData) data).tickMap();
+
+            ((IMixinMapData) next).tickMap();
         }
     }
-
 }
