@@ -35,6 +35,7 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.common.entity.EntityUtil;
@@ -191,11 +192,15 @@ public abstract class PacketState<P extends PacketContext<P>> implements IPhaseS
         entities.add(entity);
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(player);
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, this.getEntitySpawnType(context));
             frame.addContext(EventContextKeys.NOTIFIER, player);
             frame.addContext(EventContextKeys.OWNER, player);
             return SpongeCommonEventFactory.callSpawnEntity(entities, context);
         }
+    }
+
+    public SpawnType getEntitySpawnType(P context) {
+        return SpawnTypes.PLACEMENT;
     }
 
 

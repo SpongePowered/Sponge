@@ -38,9 +38,10 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.entity.EntityUtil;
@@ -57,7 +58,6 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
-import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 
@@ -148,5 +148,15 @@ public final class PlaceBlockPacketState extends BasicPacketState {
         final IMixinContainer mixinContainer = ContainerUtil.toMixin(player.openContainer);
         mixinContainer.setCaptureInventory(false);
         mixinContainer.getCapturedTransactions().clear();
+    }
+
+    @Override
+    public SpawnType getEntitySpawnType(BasicPacketContext context) {
+        if (context.getItemUsed().getType().equals(ItemTypes.SPAWN_EGG)) {
+            return SpawnTypes.SPAWN_EGG;
+        }
+        // Some other items directly cause entities to be spawned, such as
+        // ender crystals. Default to PLACEMENT for those.
+        return SpawnTypes.PLACEMENT;
     }
 }
