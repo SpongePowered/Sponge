@@ -82,6 +82,11 @@ final class RestoringBlockPhaseState extends BlockPhaseState {
     }
 
     @Override
+    public boolean tracksOwnersAndNotifiers() {
+        return false;
+    }
+
+    @Override
     public boolean doesCaptureEntitySpawns() {
         return false; // Since we throw the spawn event directly
     }

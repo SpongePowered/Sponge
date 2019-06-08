@@ -386,7 +386,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @return Simple true false to determine whether this phase is providing owner/notifier information
      */
     default boolean tracksOwnersAndNotifiers() {
-        return false;
+        return true;
     }
     /**
      * Gets whether this state specifically supports splitting up {@link Block#dropBlockAsItem(net.minecraft.world.World, BlockPos, IBlockState, int)}

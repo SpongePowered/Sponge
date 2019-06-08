@@ -634,6 +634,11 @@ public abstract class BlockTransaction {
         }
 
         @Override
+        public boolean tracksOwnersAndNotifiers() {
+            return false;
+        }
+
+        @Override
         public boolean isRestoring() {
             return true;
         }

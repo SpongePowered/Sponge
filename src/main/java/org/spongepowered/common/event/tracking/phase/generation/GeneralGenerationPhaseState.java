@@ -164,6 +164,11 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
     }
 
     @Override
+    public boolean tracksOwnersAndNotifiers() {
+        return false;
+    }
+
+    @Override
     public boolean doesCaptureEntitySpawns() {
         return false;
     }
