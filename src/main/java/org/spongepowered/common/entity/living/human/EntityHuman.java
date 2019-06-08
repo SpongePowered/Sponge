@@ -340,7 +340,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
     }
 
     public void removeFromTabListDelayed(@Nullable EntityPlayerMP player, SPacketPlayerListItem removePacket) {
-        int delay = SpongeImpl.getGlobalConfig().getConfig().getEntity().getHumanPlayerListRemoveDelay();
+        int delay = SpongeImpl.getGlobalConfigAdapter().getConfig().getEntity().getHumanPlayerListRemoveDelay();
         Runnable removeTask = () -> this.pushPackets(player, removePacket);
         if (delay == 0) {
             removeTask.run();

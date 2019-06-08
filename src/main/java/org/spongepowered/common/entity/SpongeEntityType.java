@@ -136,7 +136,7 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
     }
 
     public void initializeTrackerState() {
-        SpongeConfig<TrackerConfig> trackerConfig = SpongeImpl.getTrackerConfig();
+        SpongeConfig<TrackerConfig> trackerConfig = SpongeImpl.getTrackerConfigAdapter();
         EntityTrackerCategory entityTracker = trackerConfig.getConfig().getEntityTracker();
         EntityTrackerModCategory modCapturing = entityTracker.getModMappings().get(this.modId);
 

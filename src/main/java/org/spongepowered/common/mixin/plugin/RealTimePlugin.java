@@ -45,7 +45,7 @@ public class RealTimePlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        return SpongeImpl.getGlobalConfig().getConfig().getModules().usePluginRealTime();
+        return SpongeImpl.getGlobalConfigAdapter().getConfig().getModules().usePluginRealTime();
     }
 
     @Override

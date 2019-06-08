@@ -69,7 +69,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -254,7 +253,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
 
     public P buildAndSwitch() {
         this.isCompleted = true;
-        if (SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().generateStackTracePerStateEntry()) {
+        if (SpongeImpl.getGlobalConfigAdapter().getConfig().getPhaseTracker().generateStackTracePerStateEntry()) {
             this.stackTrace = new Exception("Debug Trace").getStackTrace();
         }
         PhaseTracker.getInstance().switchToPhase(this.state, this);
@@ -644,7 +643,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     }
 
     public void printTrace(PrettyPrinter printer) {
-        if (SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().generateStackTracePerStateEntry()) {
+        if (SpongeImpl.getGlobalConfigAdapter().getConfig().getPhaseTracker().generateStackTracePerStateEntry()) {
             printer.add("Entrypoint:")
                 .add(this.stackTrace);
         }

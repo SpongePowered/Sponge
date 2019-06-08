@@ -49,8 +49,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.type.GeneralConfigBase;
+import org.spongepowered.common.config.category.WorldCategory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
@@ -61,10 +60,10 @@ import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinAnvilChunkLoader;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.util.CachedLong2ObjectMap;
-import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.world.SpongeEmptyChunk;
 import org.spongepowered.common.world.storage.SpongeChunkDataStream;
 import org.spongepowered.common.world.storage.WorldStorageUtil;
@@ -101,11 +100,13 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
             return;
         }
         this.EMPTY_CHUNK = new SpongeEmptyChunk(worldObjIn, 0, 0);
-        SpongeConfig<? extends GeneralConfigBase> spongeConfig = SpongeHooks.getWorldConfig(worldObjIn);
+        final WorldCategory worldCategory = ((IMixinWorldInfo) this.world.getWorldInfo()).getConfigAdapter().getConfig().getWorld();
+
         ((IMixinWorldServer) worldObjIn).updateConfigCache();
-        this.denyChunkRequests = spongeConfig.getConfig().getWorld().getDenyChunkRequests();
-        this.chunkUnloadDelay = spongeConfig.getConfig().getWorld().getChunkUnloadDelay() * 1000;
-        this.maxChunkUnloads = spongeConfig.getConfig().getWorld().getMaxChunkUnloads();
+
+        this.denyChunkRequests = worldCategory.getDenyChunkRequests();
+        this.chunkUnloadDelay = worldCategory.getChunkUnloadDelay() * 1000;
+        this.maxChunkUnloads = worldCategory.getMaxChunkUnloads();
     }
 
     @Override

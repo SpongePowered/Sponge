@@ -68,6 +68,7 @@ import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.GeneralConfigBase;
+import org.spongepowered.common.config.type.GlobalConfig;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -449,7 +450,7 @@ public final class WorldManager {
             ((IMixinWorldInfo) worldInfo).setDimensionId(WorldManager.getNextFreeDimensionId());
         }
         ((WorldProperties) worldInfo).setGeneratorType(archetype.getGeneratorType());
-        ((IMixinWorldInfo) worldInfo).getOrCreateWorldConfig().save();
+        ((IMixinWorldInfo) worldInfo).getConfigAdapter().save();
         registerWorldProperties((WorldProperties) worldInfo);
 
         SpongeImpl.postEvent(SpongeEventFactory.createConstructWorldPropertiesEvent(Sponge.getCauseStackManager().getCurrentCause(), archetype,
@@ -473,7 +474,7 @@ public final class WorldManager {
             new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), properties.getWorldName(), true, SpongeImpl
                     .getDataFixer()).saveWorldInfo((WorldInfo) properties);
         }
-        ((IMixinWorldInfo) properties).getOrCreateWorldConfig().save();
+        ((IMixinWorldInfo) properties).getConfigAdapter().save();
         // No return values or exceptions so can only assume true.
         return true;
     }
@@ -505,8 +506,10 @@ public final class WorldManager {
             return false;
         }
 
-        if (SpongeImpl.getGlobalConfig().getConfig().getModules().useOptimizations() &&
-                SpongeImpl.getGlobalConfig().getConfig().getOptimizations().useAsyncLighting()) {
+        final SpongeConfig<GlobalConfig> globalConfigAdapter = SpongeImpl.getGlobalConfigAdapter();
+
+        if (globalConfigAdapter.getConfig().getModules().useOptimizations() &&
+                globalConfigAdapter.getConfig().getOptimizations().useAsyncLighting()) {
 
             // The world is unloading - there's no point in running any more lighting tasks
             ((IMixinWorldServer) worldServer).getLightingExecutor().shutdownNow();
@@ -545,7 +548,7 @@ public final class WorldManager {
                     saveWorld(worldServer, true);
                 }
 
-                mixinWorldServer.getWorldConfig().save();
+                ((IMixinWorldInfo) worldServer.getWorldInfo()).getConfigAdapter().save();
             } catch (MinecraftException e) {
                 e.printStackTrace();
             } finally {
@@ -712,7 +715,7 @@ public final class WorldManager {
 
             // Step 2 - See if we are allowed to load it
             if (dimensionId != 0) {
-                final SpongeConfig<? extends GeneralConfigBase> spongeConfig = SpongeHooks.getSpongeConfig(((IMixinDimensionType)(Object) dimensionType).getConfigPath(), worldFolderName);
+                final SpongeConfig<? extends GeneralConfigBase> spongeConfig = SpongeHooks.getConfigAdapter(((IMixinDimensionType)(Object) dimensionType).getConfigPath(), worldFolderName);
                 if (!spongeConfig.getConfig().getWorld().isWorldEnabled()) {
                     SpongeImpl.getLogger().warn("World [{}] ({}/{}) is disabled. World will not be loaded...", worldFolder,
                         apiDimensionType.getId(), dimensionId);
@@ -783,8 +786,8 @@ public final class WorldManager {
             registerWorldProperties((WorldProperties) worldInfo);
 
             if (dimensionId != 0 && !((WorldProperties) worldInfo).loadOnStartup()) {
-                SpongeImpl.getLogger().warn("World [{}] ({}/{}) is set to not load on startup. To load it later, enable [load-on-startup] in config "
-                        + "or use a plugin", worldFolder, dimensionType.getId(), dimensionId);
+                SpongeImpl.getLogger().warn("World [{}] ({}/{}) is set to not load on startup. To load it later, enable "
+                    + "[load-on-startup] in config or use a plugin.", worldInfo.getWorldName(), apiDimensionType.getId(), dimensionId);
                 continue;
             }
 

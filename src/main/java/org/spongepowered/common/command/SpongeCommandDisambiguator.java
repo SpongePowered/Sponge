@@ -60,7 +60,7 @@ public class SpongeCommandDisambiguator implements Disambiguator {
     @NonnullByDefault
     public Optional<CommandMapping> disambiguate(@Nullable CommandSource source, String aliasUsed, List<CommandMapping> availableOptions) {
         if (availableOptions.size() > 1) {
-            final String chosenPlugin = SpongeImpl.getGlobalConfig().getConfig().getCommands().getAliases().get(aliasUsed.toLowerCase());
+            final String chosenPlugin = SpongeImpl.getGlobalConfigAdapter().getConfig().getCommands().getAliases().get(aliasUsed.toLowerCase());
             if (chosenPlugin != null) {
                 Optional<PluginContainer> container = this.game.getPluginManager().getPlugin(chosenPlugin);
                 if (!container.isPresent()) {

@@ -42,7 +42,7 @@ public class MixinNetHandlerPlayServer_MovementChecks {
 
     @Redirect(method = "processPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;isInvulnerableDimensionChange()Z", ordinal = 0))
     private boolean onPlayerMovedTooQuicklyCheck(EntityPlayerMP player) {
-        if (SpongeImpl.getGlobalConfig().getConfig().getMovementChecks().playerMovedTooQuickly()) {
+        if (SpongeImpl.getGlobalConfigAdapter().getConfig().getMovementChecks().playerMovedTooQuickly()) {
             return player.isInvulnerableDimensionChange();
         }
         return true; // The 'moved too quickly' check only executes if isInvulnerableDimensionChange return false
@@ -50,7 +50,7 @@ public class MixinNetHandlerPlayServer_MovementChecks {
 
     @Redirect(method = "processPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;isInvulnerableDimensionChange()Z", ordinal = 1))
     private boolean onMovedWronglyCheck(EntityPlayerMP player) {
-        if (SpongeImpl.getGlobalConfig().getConfig().getMovementChecks().movedWrongly()) {
+        if (SpongeImpl.getGlobalConfigAdapter().getConfig().getMovementChecks().movedWrongly()) {
             return player.isInvulnerableDimensionChange();
         }
         return true; // The 'moved too quickly' check only executes if isInvulnerableDimensionChange return false
@@ -60,7 +60,7 @@ public class MixinNetHandlerPlayServer_MovementChecks {
             from = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;motionZ:D", ordinal = 1),
             to = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;isSinglePlayer()Z", ordinal = 0)))
     private double onVehicleMovedTooQuicklyCheck(double val) {
-        if (SpongeImpl.getGlobalConfig().getConfig().getMovementChecks().playerVehicleMovedTooQuickly()) {
+        if (SpongeImpl.getGlobalConfigAdapter().getConfig().getMovementChecks().playerVehicleMovedTooQuickly()) {
             return val;
         }
         return Double.NaN; // The 'vehicle moved too quickly' check only executes if the squared difference of the motion vectors lengths is greater than 100
@@ -71,7 +71,7 @@ public class MixinNetHandlerPlayServer_MovementChecks {
             to  = @At(value = "INVOKE", target = "Lorg/apache/logging/log4j/Logger;warn(Ljava/lang/String;Ljava/lang/Object;)V", ordinal = 0, remap = false)
     ))
     private double onMovedWronglySecond(double val) {
-        if (SpongeImpl.getGlobalConfig().getConfig().getMovementChecks().movedWrongly()) {
+        if (SpongeImpl.getGlobalConfigAdapter().getConfig().getMovementChecks().movedWrongly()) {
             return val;
         }
         return Double.NaN; // The second 'moved wrongly' check only executes if the length of the movement vector is greater than 0.0625D

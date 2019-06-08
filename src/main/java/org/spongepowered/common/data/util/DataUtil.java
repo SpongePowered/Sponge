@@ -74,14 +74,12 @@ import org.spongepowered.common.util.TypeTokenHelper;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -241,11 +239,11 @@ public final class DataUtil {
     }
 
     private static void addFailedDeserialization(SerializedDataTransaction.Builder builder, DataView view, String dataId, @Nullable Throwable cause) {
-        SpongeImpl.getDataConfig().getConfig().getDataRegistrationConfig().addFailedData(dataId, cause);
-        SpongeImpl.getDataConfig().getConfig().getDataRegistrationConfig().purgeOrAllow(builder, dataId, view);
+        SpongeImpl.getCustomDataConfigAdapter().getConfig().getDataRegistrationConfig().addFailedData(dataId, cause);
+        SpongeImpl.getCustomDataConfigAdapter().getConfig().getDataRegistrationConfig().purgeOrAllow(builder, dataId, view);
         try {
             // we need to save the config with the updated values.
-            SpongeImpl.getDataConfig().save();
+            SpongeImpl.getCustomDataConfigAdapter().save();
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -55,12 +55,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.type.GeneralConfigBase;
+import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
+import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
@@ -90,20 +91,20 @@ public abstract class MixinWorldEntitySpawner {
      * @author blood - February 18th, 2017
      * @reason Refactor entire method for optimizations and spawn limits.
      *
-     * @param worldServerIn The world
+     * @param world The world
      * @param spawnHostileMobs If hostile entities can spawn
      * @param spawnPeacefulMobs If passive entities can spawn
      * @param spawnOnSetTickRate If tickrate has been reached for spawning passives
      * @return The amount of entities spawned
      */
     @Overwrite
-    public int findChunksForSpawning(WorldServer worldServerIn, boolean spawnHostileMobs, boolean spawnPeacefulMobs, boolean spawnOnSetTickRate) {
+    public int findChunksForSpawning(WorldServer world, boolean spawnHostileMobs, boolean spawnPeacefulMobs, boolean spawnOnSetTickRate) {
         if (!spawnHostileMobs && !spawnPeacefulMobs) {
             return 0;
         }
 
         try (PhaseContext<?> context = GenerationPhase.State.WORLD_SPAWNER_SPAWNING.createPhaseContext()
-                .world(worldServerIn)) {
+                .world(world)) {
             context.buildAndSwitch();
             Iterator<Chunk> chunkIterator = this.eligibleSpawnChunks.iterator();
             while (chunkIterator.hasNext()) {
@@ -112,18 +113,18 @@ public abstract class MixinWorldEntitySpawner {
                 chunkIterator.remove();
             }
 
-            IMixinWorldServer spongeWorld = ((IMixinWorldServer) worldServerIn);
+            IMixinWorldServer spongeWorld = ((IMixinWorldServer) world);
             spongeWorld.getTimingsHandler().mobSpawn.startTiming();
 
             int chunkSpawnCandidates = 0;
-            final int mobSpawnRange = Math.min(((IMixinWorldServer) worldServerIn).getWorldConfig().getConfig().getWorld().getMobSpawnRange(),
-                    ((org.spongepowered.api.world.World) worldServerIn).getViewDistance());
+            final int mobSpawnRange = Math.min(((IMixinWorldInfo) world.getWorldInfo()).getConfigAdapter().getConfig().getWorld().getMobSpawnRange(),
+                    ((org.spongepowered.api.world.World) world).getViewDistance());
             // Vanilla uses a div count of 289 (17x17) which assumes the view distance is 8.
             // Since we allow for custom ranges, we need to adjust the div count based on the
             // mob spawn range set by server.
             final int MOB_SPAWN_COUNT_DIV = (2 * mobSpawnRange + 1) * (2 * mobSpawnRange + 1);
 
-            for (EntityPlayer entityplayer : worldServerIn.playerEntities) {
+            for (EntityPlayer entityplayer : world.playerEntities) {
                 // We treat players who do not affect spawning as "spectators"
                 if (!((IMixinEntityPlayer) entityplayer).affectsSpawning() || entityplayer.isSpectator()) {
                     continue;
@@ -137,7 +138,7 @@ public abstract class MixinWorldEntitySpawner {
                         boolean flag = i == -mobSpawnRange || i == mobSpawnRange || j == -mobSpawnRange || j == mobSpawnRange;
                         final Chunk
                             chunk =
-                            ((IMixinChunkProviderServer) worldServerIn.getChunkProvider())
+                            ((IMixinChunkProviderServer) world.getChunkProvider())
                                 .getLoadedChunkWithoutMarkingActive(i + playerPosX, j + playerPosZ);
                         if (chunk == null || (chunk.unloadQueued && !((IMixinChunk) chunk).isPersistedChunk())) {
                             // Don't attempt to spawn in an unloaded chunk
@@ -147,8 +148,8 @@ public abstract class MixinWorldEntitySpawner {
                         final IMixinChunk spongeChunk = (IMixinChunk) chunk;
                         ++chunkSpawnCandidates;
                         final ChunkPos chunkPos = chunk.getPos();
-                        if (!flag && worldServerIn.getWorldBorder().contains(chunkPos)) {
-                            PlayerChunkMapEntry playerchunkmapentry = worldServerIn.getPlayerChunkMap().getEntry(chunkPos.x, chunkPos.z);
+                        if (!flag && world.getWorldBorder().contains(chunkPos)) {
+                            PlayerChunkMapEntry playerchunkmapentry = world.getPlayerChunkMap().getEntry(chunkPos.x, chunkPos.z);
 
                             if (playerchunkmapentry != null && playerchunkmapentry.isSentToPlayers() && !spongeChunk.isSpawning()) {
                                 this.eligibleSpawnChunks.add(chunk);
@@ -166,25 +167,25 @@ public abstract class MixinWorldEntitySpawner {
             }
 
             int totalSpawned = 0;
-            final long worldTotalTime = worldServerIn.getTotalWorldTime();
-            final SpongeConfig<? extends GeneralConfigBase> activeConfig = ((IMixinWorldServer) worldServerIn).getWorldConfig();
+            final long worldTotalTime = world.getTotalWorldTime();
+            final SpongeConfig<WorldConfig> configAdapter = ((IMixinWorldInfo) world.getWorldInfo()).getConfigAdapter();
 
             labelOuterLoop:
             for (EnumCreatureType enumCreatureType : EnumCreatureType.values()) {
                 int limit = 0;
                 int tickRate = 0;
                 if (enumCreatureType == EnumCreatureType.MONSTER) {
-                    limit = activeConfig.getConfig().getSpawner().getMonsterSpawnLimit();
-                    tickRate = activeConfig.getConfig().getSpawner().getMonsterTickRate();
+                    limit = configAdapter.getConfig().getSpawner().getMonsterSpawnLimit();
+                    tickRate = configAdapter.getConfig().getSpawner().getMonsterTickRate();
                 } else if (enumCreatureType == EnumCreatureType.CREATURE) {
-                    limit = activeConfig.getConfig().getSpawner().getAnimalSpawnLimit();
-                    tickRate = activeConfig.getConfig().getSpawner().getAnimalTickRate();
+                    limit = configAdapter.getConfig().getSpawner().getAnimalSpawnLimit();
+                    tickRate = configAdapter.getConfig().getSpawner().getAnimalTickRate();
                 } else if (enumCreatureType == EnumCreatureType.WATER_CREATURE) {
-                    limit = activeConfig.getConfig().getSpawner().getAquaticSpawnLimit();
-                    tickRate = activeConfig.getConfig().getSpawner().getAquaticTickRate();
+                    limit = configAdapter.getConfig().getSpawner().getAquaticSpawnLimit();
+                    tickRate = configAdapter.getConfig().getSpawner().getAquaticTickRate();
                 } else if (enumCreatureType == EnumCreatureType.AMBIENT) {
-                    limit = activeConfig.getConfig().getSpawner().getAmbientSpawnLimit();
-                    tickRate = activeConfig.getConfig().getSpawner().getAmbientTickRate();
+                    limit = configAdapter.getConfig().getSpawner().getAmbientSpawnLimit();
+                    tickRate = configAdapter.getConfig().getSpawner().getAmbientTickRate();
                 }
 
                 if (limit == 0 || tickRate == 0 || (worldTotalTime % tickRate) != 0L) {
@@ -192,7 +193,7 @@ public abstract class MixinWorldEntitySpawner {
                 }
 
                 if ((!enumCreatureType.getPeacefulCreature() || spawnPeacefulMobs) && (enumCreatureType.getPeacefulCreature() || spawnHostileMobs)) {
-                    int entityCount = SpongeImplHooks.countEntities(worldServerIn, enumCreatureType, true);
+                    int entityCount = SpongeImplHooks.countEntities(world, enumCreatureType, true);
                     int maxCount = limit * chunkSpawnCandidates / MOB_SPAWN_COUNT_DIV;
                     if (entityCount > maxCount) {
                         continue labelOuterLoop;
@@ -204,11 +205,11 @@ public abstract class MixinWorldEntitySpawner {
                     while (chunkIterator.hasNext() && mobLimit > 0) {
                         final Chunk chunk = chunkIterator.next();
                         final BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-                        final BlockPos blockpos = getRandomChunkPosition(worldServerIn, chunk);
+                        final BlockPos blockpos = getRandomChunkPosition(world, chunk);
                         int k1 = blockpos.getX();
                         int l1 = blockpos.getY();
                         int i2 = blockpos.getZ();
-                        IBlockState iblockstate = worldServerIn.getBlockState(blockpos);
+                        IBlockState iblockstate = world.getBlockState(blockpos);
 
                         if (!iblockstate.isNormalCube()) {
                             int spawnCount = 0;
@@ -221,18 +222,18 @@ public abstract class MixinWorldEntitySpawner {
                                 int l3 = MathHelper.ceil(Math.random() * 4.0D);
 
                                 for (int i4 = 0; i4 < l3; ++i4) {
-                                    l2 += worldServerIn.rand.nextInt(6) - worldServerIn.rand.nextInt(6);
-                                    i3 += worldServerIn.rand.nextInt(1) - worldServerIn.rand.nextInt(1);
-                                    j3 += worldServerIn.rand.nextInt(6) - worldServerIn.rand.nextInt(6);
+                                    l2 += world.rand.nextInt(6) - world.rand.nextInt(6);
+                                    i3 += world.rand.nextInt(1) - world.rand.nextInt(1);
+                                    j3 += world.rand.nextInt(6) - world.rand.nextInt(6);
                                     mutableBlockPos.setPos(l2, i3, j3);
                                     final double spawnX = l2 + 0.5F;
                                     final double spawnY = i3;
                                     final double spawnZ = j3 + 0.5F;
 
-                                    if (!worldServerIn.isAnyPlayerWithinRangeAt(spawnX, spawnY, spawnZ, 24.0D)
-                                        && worldServerIn.getSpawnPoint().distanceSq(spawnX, spawnY, spawnZ) >= 576.0D) {
+                                    if (!world.isAnyPlayerWithinRangeAt(spawnX, spawnY, spawnZ, 24.0D)
+                                        && world.getSpawnPoint().distanceSq(spawnX, spawnY, spawnZ) >= 576.0D) {
                                         if (spawnListEntry == null) {
-                                            spawnListEntry = worldServerIn.getSpawnListEntryForTypeAt(enumCreatureType, mutableBlockPos);
+                                            spawnListEntry = world.getSpawnListEntryForTypeAt(enumCreatureType, mutableBlockPos);
 
                                             if (spawnListEntry == null) {
                                                 break;
@@ -244,7 +245,7 @@ public abstract class MixinWorldEntitySpawner {
                                             Vector3d vector3d = new Vector3d(spawnX, spawnY, spawnZ);
                                             Transform<org.spongepowered.api.world.World>
                                                 transform =
-                                                new Transform<>((org.spongepowered.api.world.World) worldServerIn, vector3d);
+                                                new Transform<>((org.spongepowered.api.world.World) world, vector3d);
                                             ConstructEntityEvent.Pre
                                                 event =
                                                 SpongeEventFactory
@@ -255,32 +256,32 @@ public abstract class MixinWorldEntitySpawner {
                                             }
                                         }
 
-                                        if (worldServerIn.canCreatureTypeSpawnHere(enumCreatureType, spawnListEntry, mutableBlockPos)
+                                        if (world.canCreatureTypeSpawnHere(enumCreatureType, spawnListEntry, mutableBlockPos)
                                             && WorldEntitySpawner.canCreatureTypeSpawnAtLocation(
-                                            EntitySpawnPlacementRegistry.getPlacementForEntity(spawnListEntry.entityClass), worldServerIn,
+                                            EntitySpawnPlacementRegistry.getPlacementForEntity(spawnListEntry.entityClass), world,
                                             mutableBlockPos)) {
                                             EntityLiving entityliving;
 
                                             try {
                                                 entityliving =
-                                                    spawnListEntry.entityClass.getConstructor(new Class<?>[]{World.class}).newInstance(worldServerIn);
+                                                    spawnListEntry.entityClass.getConstructor(new Class<?>[]{World.class}).newInstance(world);
                                             } catch (Exception exception) {
                                                 exception.printStackTrace();
                                                 continue labelOuterLoop;
                                             }
 
-                                            entityliving.setLocationAndAngles(spawnX, spawnY, spawnZ, worldServerIn.rand.nextFloat() * 360.0F, 0.0F);
+                                            entityliving.setLocationAndAngles(spawnX, spawnY, spawnZ, world.rand.nextFloat() * 360.0F, 0.0F);
                                             final boolean entityNotColliding = entityliving.isNotColliding();
 
                                             final SpawnerSpawnType type = SpongeImplHooks.canEntitySpawnHere(entityliving, entityNotColliding);
                                             if (type != SpawnerSpawnType.NONE) {
                                                 if (type == SpawnerSpawnType.NORMAL) {
-                                                    ientitylivingdata = entityliving.onInitialSpawn(worldServerIn.getDifficultyForLocation(new BlockPos(entityliving)), ientitylivingdata);
+                                                    ientitylivingdata = entityliving.onInitialSpawn(world.getDifficultyForLocation(new BlockPos(entityliving)), ientitylivingdata);
                                                 }
 
                                                 if (entityNotColliding) {
                                                     ++spawnCount;
-                                                    worldServerIn.spawnEntity(entityliving);
+                                                    world.spawnEntity(entityliving);
                                                 } else {
                                                     entityliving.setDead();
                                                 }

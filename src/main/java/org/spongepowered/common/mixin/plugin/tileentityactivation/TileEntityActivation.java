@@ -40,10 +40,12 @@ import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.TileEntityActivationModCategory;
 import org.spongepowered.common.config.category.TileEntityActivationCategory;
 import org.spongepowered.common.config.type.GeneralConfigBase;
+import org.spongepowered.common.config.type.GlobalConfig;
+import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModData_Activation;
 import org.spongepowered.common.util.VecHelper;
 
@@ -61,18 +63,18 @@ public class TileEntityActivation {
             return;
         }
 
-        TileEntityActivationCategory config = ((IMixinWorldServer) tileEntity.getWorld()).getWorldConfig().getConfig().getTileEntityActivationRange();
-        TileEntityType type = ((org.spongepowered.api.block.tileentity.TileEntity) tileEntity).getType();
+        final TileEntityActivationCategory tileEntityActCat = ((IMixinWorldInfo) tileEntity.getWorld().getWorldInfo()).getConfigAdapter().getConfig().getTileEntityActivationRange();
+        final TileEntityType type = ((org.spongepowered.api.block.tileentity.TileEntity) tileEntity).getType();
 
-        IModData_Activation spongeTileEntity = (IModData_Activation) tileEntity;
-        SpongeTileEntityType spongeType = (SpongeTileEntityType) type;
+        final IModData_Activation spongeTileEntity = (IModData_Activation) tileEntity;
+        final SpongeTileEntityType spongeType = (SpongeTileEntityType) type;
         if (spongeType == null || spongeType.getModId() == null) {
             return;
         }
-        TileEntityActivationModCategory tileEntityMod = config.getModList().get(spongeType.getModId().toLowerCase());
-        int defaultActivationRange = config.getDefaultBlockRange();
-        int defaultTickRate = config.getDefaultTickRate();
-        if (tileEntityMod == null) {
+        final TileEntityActivationModCategory tileEntityActModCat = tileEntityActCat.getModList().get(spongeType.getModId().toLowerCase());
+        int defaultActivationRange = tileEntityActCat.getDefaultBlockRange();
+        int defaultTickRate = tileEntityActCat.getDefaultTickRate();
+        if (tileEntityActModCat == null) {
             // use default activation range
             spongeTileEntity.setActivationRange(defaultActivationRange);
             spongeTileEntity.setSpongeTickRate(defaultTickRate);
@@ -83,13 +85,13 @@ public class TileEntityActivation {
                 spongeTileEntity.setDefaultActivationState(false);
             }
         } else {
-            if (!tileEntityMod.isEnabled()) {
+            if (!tileEntityActModCat.isEnabled()) {
                 spongeTileEntity.setDefaultActivationState(true);
                 return;
             }
 
-            Integer defaultModActivationRange = tileEntityMod.getDefaultBlockRange();
-            Integer tileEntityActivationRange = tileEntityMod.getTileEntityRangeList().get(type.getName().toLowerCase());
+            Integer defaultModActivationRange = tileEntityActModCat.getDefaultBlockRange();
+            Integer tileEntityActivationRange = tileEntityActModCat.getTileEntityRangeList().get(type.getName().toLowerCase());
             if (defaultModActivationRange != null && tileEntityActivationRange == null) {
                 spongeTileEntity.setActivationRange(defaultModActivationRange);
                 if (defaultModActivationRange > 0) {
@@ -102,8 +104,8 @@ public class TileEntityActivation {
                 }
             }
 
-            Integer defaultModTickRate = tileEntityMod.getDefaultTickRate();
-            Integer tileEntityTickRate = tileEntityMod.getTileEntityTickRateList().get(type.getName().toLowerCase());
+            Integer defaultModTickRate = tileEntityActModCat.getDefaultTickRate();
+            Integer tileEntityTickRate = tileEntityActModCat.getTileEntityTickRateList().get(type.getName().toLowerCase());
             if (defaultModTickRate != null && tileEntityTickRate == null) {
                 spongeTileEntity.setSpongeTickRate(defaultModTickRate);
                 if (defaultModTickRate <= 0) {
@@ -224,15 +226,15 @@ public class TileEntityActivation {
     }
 
     public static void addTileEntityToConfig(World world, SpongeTileEntityType type) {
-        SpongeConfig<? extends GeneralConfigBase> worldConfig = ((IMixinWorldServer) world).getWorldConfig();
-        SpongeConfig<? extends GeneralConfigBase> globalConfig = SpongeImpl.getGlobalConfig();
-        if (worldConfig == null || globalConfig == null || type == null || !worldConfig.getConfig().getTileEntityActivationRange().autoPopulateData()) {
+        final SpongeConfig<WorldConfig> worldConfigAdapter = ((IMixinWorldInfo) world.getWorldInfo()).getConfigAdapter();
+        final SpongeConfig<GlobalConfig> globalConfigAdapter = SpongeImpl.getGlobalConfigAdapter();
+        if (!worldConfigAdapter.getConfig().getTileEntityActivationRange().autoPopulateData()) {
             return;
         }
 
         boolean requiresSave = false;
         final String tileModId = type.getModId().toLowerCase();
-        TileEntityActivationCategory activationCategory = globalConfig.getConfig().getTileEntityActivationRange();
+        TileEntityActivationCategory activationCategory = globalConfigAdapter.getConfig().getTileEntityActivationRange();
         TileEntityActivationModCategory tileEntityMod = activationCategory.getModList().get(tileModId);
         int defaultRange = activationCategory.getDefaultBlockRange();
         int defaultTickRate = activationCategory.getDefaultTickRate();
@@ -268,7 +270,7 @@ public class TileEntityActivation {
         }
 
         if (requiresSave) {
-            globalConfig.save();
+            globalConfigAdapter.save();
         }
     }
 }

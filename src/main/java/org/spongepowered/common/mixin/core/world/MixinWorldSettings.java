@@ -57,7 +57,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
@@ -103,7 +102,7 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
     @Inject(method = "<init>(Lnet/minecraft/world/storage/WorldInfo;)V", at = @At(value = "RETURN"))
     private void onConstruct(WorldInfo info, CallbackInfo ci) {
         final WorldProperties properties = (WorldProperties) info;
-        if (((IMixinWorldInfo) properties).getWorldConfig() != null) {
+        if (((IMixinWorldInfo) properties).getConfigAdapter() != null) {
             this.dimensionType = properties.getDimensionType();
             this.difficulty = properties.getDifficulty();
             this.serializationBehavior = properties.getSerializationBehavior();

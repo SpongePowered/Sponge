@@ -56,23 +56,23 @@ public class ConfigTeleportHelperFilter implements TeleportHelperFilter {
 
     private static void updateCacheIfNecessary() {
         if (floorBlockTypes == null) {
-            TeleportHelperCategory config = SpongeImpl.getGlobalConfig().getConfig().getTeleportHelper();
-            floorBlockTypes = config.getUnsafeFloorBlockIds().stream()
+            TeleportHelperCategory teleportHelperCat = SpongeImpl.getGlobalConfigAdapter().getConfig().getTeleportHelper();
+            floorBlockTypes = teleportHelperCat.getUnsafeFloorBlockIds().stream()
                     .map(x -> Sponge.getRegistry().getType(BlockType.class, x.toLowerCase(Locale.ENGLISH)).orElse(null))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
 
-            floorBlockStates = config.getUnsafeFloorBlockIds().stream()
+            floorBlockStates = teleportHelperCat.getUnsafeFloorBlockIds().stream()
                     .map(x -> Sponge.getRegistry().getType(BlockState.class, x.toLowerCase(Locale.ENGLISH)).orElse(null))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
 
-            bodyBlockTypes = config.getUnsafeBodyBlockIds().stream()
+            bodyBlockTypes = teleportHelperCat.getUnsafeBodyBlockIds().stream()
                     .map(x -> Sponge.getRegistry().getType(BlockType.class, x.toLowerCase(Locale.ENGLISH)).orElse(null))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
 
-            bodyBlockStates = config.getUnsafeBodyBlockIds().stream()
+            bodyBlockStates = teleportHelperCat.getUnsafeBodyBlockIds().stream()
                     .map(x -> Sponge.getRegistry().getType(BlockState.class, x.toLowerCase(Locale.ENGLISH)).orElse(null))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());

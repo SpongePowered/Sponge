@@ -88,6 +88,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.command.SpongeCommandManager;
+import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTrackerCrashHandler;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -633,7 +635,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             return this.tickCounter + 1;
         }
 
-        int autoPlayerSaveInterval = SpongeImpl.getGlobalConfig().getConfig().getWorld().getAutoPlayerSaveInterval();
+        int autoPlayerSaveInterval = SpongeImpl.getGlobalConfigAdapter().getConfig().getWorld().getAutoPlayerSaveInterval();
         if (autoPlayerSaveInterval > 0 && (this.tickCounter % autoPlayerSaveInterval == 0)) {
             this.getPlayerList().saveAllPlayerData();
         }
@@ -659,9 +661,9 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             if (worldserver != null && worldserver.getChunkProvider().canSave()) {
                 // Sponge start - check auto save interval in world config
                 if (this.isDedicatedServer() && this.isServerRunning()) {
-                    final IMixinWorldServer spongeWorld = (IMixinWorldServer) worldserver;
-                    final int autoSaveInterval = spongeWorld.getWorldConfig().getConfig().getWorld().getAutoSaveInterval();
-                    final boolean logAutoSave = spongeWorld.getWorldConfig().getConfig().getLogging().worldAutoSaveLogging();
+                    final SpongeConfig<WorldConfig> configAdapter = ((IMixinWorldInfo) worldserver.getWorldInfo()).getConfigAdapter();
+                    final int autoSaveInterval = configAdapter.getConfig().getWorld().getAutoSaveInterval();
+                    final boolean logAutoSave = configAdapter.getConfig().getLogging().worldAutoSaveLogging();
                     if (autoSaveInterval <= 0
                             || ((WorldProperties) worldserver.getWorldInfo()).getSerializationBehavior() != SerializationBehaviors.AUTOMATIC) {
                         if (logAutoSave) {

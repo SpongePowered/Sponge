@@ -32,7 +32,6 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockType;
@@ -50,7 +49,7 @@ import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.type.GeneralConfigBase;
+import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
@@ -106,7 +105,7 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
         if (this.world.isRemote) {
             return;
         }
-        if (PhaseTracker.getInstance().getCurrentState().tracksOwnersAndNotifiers()) {
+        if (!PhaseTracker.getInstance().getCurrentState().tracksOwnersAndNotifiers()) {
             // Don't track chunk gen
             return;
         }
@@ -133,9 +132,9 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
             }
         }
 
-        final SpongeConfig<? extends GeneralConfigBase> activeConfig = SpongeHooks.getWorldConfig((WorldServer) this.world);
-        if (activeConfig.getConfig().getLogging().blockTrackLogging()) {
-            if (!activeConfig.getConfig().getBlockTracking().getBlockBlacklist().contains(((BlockType) block).getId())) {
+        final SpongeConfig<WorldConfig> configAdapter = ((IMixinWorldInfo) world.getWorldInfo()).getConfigAdapter();
+        if (configAdapter.getConfig().getLogging().blockTrackLogging()) {
+            if (!configAdapter.getConfig().getBlockTracking().getBlockBlacklist().contains(((BlockType) block).getId())) {
                 SpongeHooks.logBlockTrack(this.world, block, pos, user, true);
             } else {
                 SpongeHooks.logBlockTrack(this.world, block, pos, user, false);
@@ -274,7 +273,7 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
         UUID uuid = (((IMixinWorldInfo) this.world.getWorldInfo()).getUniqueIdForIndex(ownerIndex)).orElse(null);
         if (uuid != null) {
             // Verify id is valid and not invalid
-            if (SpongeImpl.getGlobalConfig().getConfig().getWorld().getInvalidLookupUuids().contains(uuid)) {
+            if (SpongeImpl.getGlobalConfigAdapter().getConfig().getWorld().getInvalidLookupUuids().contains(uuid)) {
                 this.trackedIntBlockPositions.remove(key);
                 return Optional.empty();
             }

@@ -25,7 +25,6 @@
 package org.spongepowered.common.config;
 
 import com.google.common.reflect.TypeToken;
-import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.Types;
 import ninja.leaping.configurate.ValueType;
@@ -49,7 +48,6 @@ import org.spongepowered.common.util.IpSet;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;

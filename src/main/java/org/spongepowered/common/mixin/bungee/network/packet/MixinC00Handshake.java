@@ -39,8 +39,8 @@ public abstract class MixinC00Handshake {
 
     @Redirect(method = "readPacketData", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/PacketBuffer;readString(I)Ljava/lang/String;"))
     public String onReadPacketData(PacketBuffer buf, int value) {
-        if (!SpongeImpl.getGlobalConfig().getConfig().getModules().usePluginBungeeCord()
-                || !SpongeImpl.getGlobalConfig().getConfig().getBungeeCord().getIpForwarding()) {
+        if (!SpongeImpl.getGlobalConfigAdapter().getConfig().getModules().usePluginBungeeCord()
+                || !SpongeImpl.getGlobalConfigAdapter().getConfig().getBungeeCord().getIpForwarding()) {
             return buf.readString(255);
         }
         return buf.readString(Short.MAX_VALUE);

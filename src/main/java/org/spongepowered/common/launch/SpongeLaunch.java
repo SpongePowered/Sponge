@@ -63,7 +63,7 @@ public class SpongeLaunch {
 
     public static Path getAdditionalPluginsDir() {
         if (additionalPluginsDir == null) {
-            additionalPluginsDir = Paths.get(PathTokens.replace(SpongeImpl.getGlobalConfig().getConfig().getGeneral().pluginsDir()));
+            additionalPluginsDir = Paths.get(PathTokens.replace(SpongeImpl.getGlobalConfigAdapter().getConfig().getGeneral().pluginsDir()));
         }
 
         return additionalPluginsDir;
@@ -75,7 +75,7 @@ public class SpongeLaunch {
 
     public static Path getPluginConfigDir() {
         if (pluginConfigDir == null) {
-            pluginConfigDir = Paths.get(PathTokens.replace(SpongeImpl.getGlobalConfig().getConfig().getGeneral().configDir()));
+            pluginConfigDir = Paths.get(PathTokens.replace(SpongeImpl.getGlobalConfigAdapter().getConfig().getGeneral().configDir()));
         }
         return pluginConfigDir;
     }

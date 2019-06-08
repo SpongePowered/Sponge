@@ -95,7 +95,7 @@ public abstract class MixinServerCommandManager extends CommandHandler implement
         }
         final String cleanedCommand = command;
         if (!SpongeImplHooks.isMainThread()) {
-            final PhaseTrackerCategory trackerConfig = SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker();
+            final PhaseTrackerCategory trackerConfig = SpongeImpl.getGlobalConfigAdapter().getConfig().getPhaseTracker();
 
             PluginContainer activeModContainer = SpongeImplHooks.getActiveModContainer();
             String id = activeModContainer.getId();

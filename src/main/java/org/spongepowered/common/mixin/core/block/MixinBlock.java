@@ -449,7 +449,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     @Override
     public void initializeTrackerState() {
-        SpongeConfig<TrackerConfig> trackerConfig = SpongeImpl.getTrackerConfig();
+        SpongeConfig<TrackerConfig> trackerConfig = SpongeImpl.getTrackerConfigAdapter();
         BlockTrackerCategory blockTracker = trackerConfig.getConfig().getBlockTracker();
         String[] ids = this.getId().split(":");
         if (ids.length != 2) {

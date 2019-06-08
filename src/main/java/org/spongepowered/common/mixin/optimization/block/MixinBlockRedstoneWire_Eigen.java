@@ -60,10 +60,10 @@ public abstract class MixinBlockRedstoneWire_Eigen extends Block {
     // Note:  Search for [theosib] to find isolated lines that were modified.
 
     // Set to true to restore the vanilla algorithm for propagating redstone wire changed.
-    private boolean old_search = SpongeImpl.getGlobalConfig().getConfig().getOptimizations().getEigenRedstoneCategory().vanillaSearch();
+    private boolean old_search = SpongeImpl.getGlobalConfigAdapter().getConfig().getOptimizations().getEigenRedstoneCategory().vanillaSearch();
     
     // Set to true to restore the vanilla algorithm for computing wire power levels when powering off.
-    private boolean old_decrement = SpongeImpl.getGlobalConfig().getConfig().getOptimizations().getEigenRedstoneCategory().vanillaDecrement();
+    private boolean old_decrement = SpongeImpl.getGlobalConfigAdapter().getConfig().getOptimizations().getEigenRedstoneCategory().vanillaDecrement();
 
     // IMPORTANT:  It intended that these two flags be both true (for vanilla behavior) or both false
     // (for optimized behavior).  They are separated for testing purposes and to allow my earlier

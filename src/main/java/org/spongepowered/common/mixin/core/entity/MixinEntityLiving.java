@@ -68,7 +68,7 @@ import org.spongepowered.common.interfaces.ai.IMixinEntityAITasks;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 
 import java.util.Iterator;
 import java.util.List;
@@ -178,7 +178,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     @ModifyConstant(method = "despawnEntity", constant = @Constant(doubleValue = 16384.0D))
     private double getHardDespawnRange(double value) {
         if (!this.world.isRemote) {
-            return Math.pow(((IMixinWorldServer) this.world).getWorldConfig().getConfig().getEntity().getHardDespawnRange(), 2);
+            return Math.pow(((IMixinWorldInfo) this.world.getWorldInfo()).getConfigAdapter().getConfig().getEntity().getHardDespawnRange(), 2);
         }
         return value;
     }
@@ -187,7 +187,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     @ModifyConstant(method = "despawnEntity", constant = @Constant(doubleValue = 1024.0D), expect = 2)
     private double getSoftDespawnRange(double value) {
         if (!this.world.isRemote) {
-            return Math.pow(((IMixinWorldServer) this.world).getWorldConfig().getConfig().getEntity().getSoftDespawnRange(), 2);
+            return Math.pow(((IMixinWorldInfo) this.world.getWorldInfo()).getConfigAdapter().getConfig().getEntity().getSoftDespawnRange(), 2);
         }
         return value;
     }
@@ -195,7 +195,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     @ModifyConstant(method = "despawnEntity", constant = @Constant(intValue = 600))
     private int getMinimumLifetime(int value) {
         if (!this.world.isRemote) {
-            return ((IMixinWorldServer) this.world).getWorldConfig().getConfig().getEntity().getMinimumLife() * 20;
+            return ((IMixinWorldInfo) this.world.getWorldInfo()).getConfigAdapter().getConfig().getEntity().getMinimumLife() * 20;
         }
         return value;
     }

@@ -65,11 +65,13 @@ import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.EntityActivationModCategory;
 import org.spongepowered.common.config.category.EntityActivationRangeCategory;
 import org.spongepowered.common.config.type.GeneralConfigBase;
+import org.spongepowered.common.config.type.GlobalConfig;
+import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModData_Activation;
 
@@ -146,7 +148,8 @@ public class EntityActivationRange {
             return;
         }
 
-        EntityActivationRangeCategory config = ((IMixinWorldServer) entity.world).getWorldConfig().getConfig().getEntityActivationRange();
+        final EntityActivationRangeCategory config =
+            ((IMixinWorldInfo) entity.world.getWorldInfo()).getConfigAdapter().getConfig().getEntityActivationRange();
         EntityType type = ((org.spongepowered.api.entity.Entity) entity).getType();
         if (type == EntityTypes.UNKNOWN || !(type instanceof SpongeEntityType)) {
             spongeEntity.setDefaultActivationState(true);
@@ -432,19 +435,16 @@ public class EntityActivationRange {
         checkNotNull(world, "world");
         checkNotNull(type, "type");
 
-        SpongeConfig<? extends GeneralConfigBase> worldConfig = ((IMixinWorldServer) world).getWorldConfig();
-        SpongeConfig<? extends GeneralConfigBase> globalConfig = SpongeImpl.getGlobalConfig();
-        if (worldConfig == null || globalConfig == null || type == null) {
-            return;
-        }
+        final SpongeConfig<WorldConfig> worldConfigAdapter = ((IMixinWorldInfo) world.getWorldInfo()).getConfigAdapter();
+        final SpongeConfig<GlobalConfig> globalConfigAdapter = SpongeImpl.getGlobalConfigAdapter();
 
-        final boolean autoPopulate = worldConfig.getConfig().getEntityActivationRange().autoPopulateData();
+        final boolean autoPopulate = worldConfigAdapter.getConfig().getEntityActivationRange().autoPopulateData();
         boolean requiresSave = false;
         String entityType = "misc";
         entityType = EntityActivationRange.activationTypeMappings.get(activationType);
         final String entityModId = type.getModId().toLowerCase();
         final String entityId = type.getName().toLowerCase();
-        EntityActivationRangeCategory activationCategory = globalConfig.getConfig().getEntityActivationRange();
+        EntityActivationRangeCategory activationCategory = globalConfigAdapter.getConfig().getEntityActivationRange();
         EntityActivationModCategory entityMod = activationCategory.getModList().get(entityModId);
         Integer defaultActivationRange = activationCategory.getDefaultRanges().get(entityType);
         if (defaultActivationRange == null) {
@@ -485,7 +485,7 @@ public class EntityActivationRange {
         }
 
         if (autoPopulate && requiresSave) {
-            globalConfig.save();
+            globalConfigAdapter.save();
         }
     }
 }

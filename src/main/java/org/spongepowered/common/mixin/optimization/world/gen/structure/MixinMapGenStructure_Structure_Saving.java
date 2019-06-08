@@ -57,7 +57,7 @@ public abstract class MixinMapGenStructure_Structure_Saving extends MapGenBase {
 
     @Inject(method = "<init>", at = @At(value = "RETURN"))
     public void onConstruction(CallbackInfo ci) {
-        StructureSaveCategory structureSaveCategory = SpongeImpl.getGlobalConfig().getConfig().getOptimizations().getStructureSaveCategory();
+        StructureSaveCategory structureSaveCategory = SpongeImpl.getGlobalConfigAdapter().getConfig().getOptimizations().getStructureSaveCategory();
         if (structureSaveCategory.isEnabled()) {
             this.modId = SpongeImplHooks.getModIdFromClass(this.getClass());
             String structureName = this.getStructureName().toLowerCase();
@@ -66,7 +66,7 @@ public abstract class MixinMapGenStructure_Structure_Saving extends MapGenBase {
                 if (structureSaveCategory.autoPopulateData()) {
                     structureMod = new StructureModCategory();
                     structureSaveCategory.getModList().put(this.modId, structureMod);
-                    SpongeImpl.getGlobalConfig().save();
+                    SpongeImpl.getGlobalConfigAdapter().save();
                 }
             } else {
                 Boolean canSave = structureMod.getStructureList().get(structureName);
@@ -74,7 +74,7 @@ public abstract class MixinMapGenStructure_Structure_Saving extends MapGenBase {
                     this.canSaveStructures = canSave;
                 } else if (structureSaveCategory.autoPopulateData()) {
                     structureMod.getStructureList().put(structureName, true);
-                    SpongeImpl.getGlobalConfig().save();
+                    SpongeImpl.getGlobalConfigAdapter().save();
                 }
             }
         }

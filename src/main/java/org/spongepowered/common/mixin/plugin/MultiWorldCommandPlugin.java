@@ -60,10 +60,10 @@ public class MultiWorldCommandPlugin implements IMixinConfigPlugin {
             name = "seed";
         }
 
-        Map<String, Boolean> patches = SpongeImpl.getGlobalConfig().getConfig().getCommands().getMultiWorldCommandPatches();
+        Map<String, Boolean> patches = SpongeImpl.getGlobalConfigAdapter().getConfig().getCommands().getMultiWorldCommandPatches();
         if (!patches.containsKey(name)) {
             patches.put(name, true);
-            SpongeImpl.getGlobalConfig().save();
+            SpongeImpl.getGlobalConfigAdapter().save();
             return this.configState;
         }
 

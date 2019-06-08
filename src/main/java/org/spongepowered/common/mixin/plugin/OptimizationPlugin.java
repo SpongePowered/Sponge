@@ -51,7 +51,7 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        final GlobalConfig globalConfig = SpongeImpl.getGlobalConfig().getConfig();
+        final GlobalConfig globalConfig = SpongeImpl.getGlobalConfigAdapter().getConfig();
         if (globalConfig.getModules().useOptimizations()) {
             final Function<OptimizationCategory, Boolean> optimizationCategoryBooleanFunction = mixinEnabledMappings.get(mixinClassName);
             if (optimizationCategoryBooleanFunction == null) {

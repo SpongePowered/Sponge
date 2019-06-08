@@ -57,7 +57,7 @@ public class MixinChunk_TileEntityActivation {
 
         if (((IMixinWorldInfo) this.world.getWorldInfo()).isValid()) {
             final IModData_Activation spongeTile = (IModData_Activation) tileEntityIn;
-            final IMixinChunk spongeChunk = (IMixinChunk)(Object) this;
+            final IMixinChunk spongeChunk = (IMixinChunk) this;
             if (spongeChunk.isPersistedChunk()) {
                 // always activate TE's in persisted chunks
                 spongeTile.setDefaultActivationState(true);

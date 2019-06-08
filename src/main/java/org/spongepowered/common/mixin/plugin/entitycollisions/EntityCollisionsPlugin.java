@@ -48,7 +48,7 @@ public class EntityCollisionsPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        return SpongeImpl.getGlobalConfig().getConfig().getModules().usePluginEntityCollisions();
+        return SpongeImpl.getGlobalConfigAdapter().getConfig().getModules().usePluginEntityCollisions();
     }
 
     @Override

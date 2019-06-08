@@ -43,7 +43,6 @@ import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.game.state.GameStateEvent;
 import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.SpongeConfigSaveManager;
 import org.spongepowered.common.config.type.CustomDataConfig;
@@ -85,9 +84,9 @@ public final class SpongeImpl {
     public static final Random random = new Random();
 
     // Can't @Inject these because they are referenced before everything is initialized
-    @Nullable private static SpongeConfig<GlobalConfig> globalConfig;
-    @Nullable private static SpongeConfig<TrackerConfig> trackerConfig;
-    @Nullable private static SpongeConfig<CustomDataConfig> customDataConfig;
+    @Nullable private static SpongeConfig<GlobalConfig> globalConfigAdapter;
+    @Nullable private static SpongeConfig<TrackerConfig> trackerConfigAdapter;
+    @Nullable private static SpongeConfig<CustomDataConfig> customDataConfigAdapter;
     @Nullable private static SpongeConfigSaveManager configSaveManager;
     @Nullable private static PluginContainer minecraftPlugin;
     @Nullable private static PluginContainer spongecommon;
@@ -216,26 +215,26 @@ public final class SpongeImpl {
         return configSaveManager;
     }
 
-    public static SpongeConfig<GlobalConfig> getGlobalConfig() {
-        if (globalConfig == null) {
-            globalConfig = new SpongeConfig<>(GLOBAL, getSpongeConfigDir().resolve("global.conf"), ECOSYSTEM_ID, null, false);
+    public static SpongeConfig<GlobalConfig> getGlobalConfigAdapter() {
+        if (globalConfigAdapter == null) {
+            globalConfigAdapter = new SpongeConfig<>(GLOBAL, getSpongeConfigDir().resolve("global.conf"), ECOSYSTEM_ID, null, false);
         }
 
-        return globalConfig;
+        return globalConfigAdapter;
     }
 
-    public static SpongeConfig<CustomDataConfig> getDataConfig() {
-        if (customDataConfig == null) {
-            customDataConfig = new SpongeConfig<>(CUSTOM_DATA, getSpongeConfigDir().resolve("custom_data.conf"), ECOSYSTEM_ID, null, true);
+    public static SpongeConfig<CustomDataConfig> getCustomDataConfigAdapter() {
+        if (customDataConfigAdapter == null) {
+            customDataConfigAdapter = new SpongeConfig<>(CUSTOM_DATA, getSpongeConfigDir().resolve("custom_data.conf"), ECOSYSTEM_ID, null, true);
         }
-        return customDataConfig;
+        return customDataConfigAdapter;
     }
 
-    public static SpongeConfig<TrackerConfig> getTrackerConfig() {
-        if (trackerConfig == null) {
-            trackerConfig = new SpongeConfig<>(TRACKER, getSpongeConfigDir().resolve("tracker.conf"), ECOSYSTEM_ID, null, true);
+    public static SpongeConfig<TrackerConfig> getTrackerConfigAdapter() {
+        if (trackerConfigAdapter == null) {
+            trackerConfigAdapter = new SpongeConfig<>(TRACKER, getSpongeConfigDir().resolve("tracker.conf"), ECOSYSTEM_ID, null, true);
         }
-        return trackerConfig;
+        return trackerConfigAdapter;
     }
 
     public static List<PluginContainer> getInternalPlugins() {

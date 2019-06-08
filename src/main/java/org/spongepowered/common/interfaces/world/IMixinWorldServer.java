@@ -55,8 +55,6 @@ import javax.annotation.Nullable;
 
 public interface IMixinWorldServer extends IMixinWorld {
 
-    SpongeConfig<WorldConfig> getWorldConfig();
-
     Integer getDimensionId();
 
     void updateWorldGenerator();

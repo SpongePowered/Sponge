@@ -31,7 +31,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalListener;
-import com.google.common.cache.RemovalNotification;
 import com.google.common.collect.ImmutableMap;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -274,7 +273,7 @@ public class SqlServiceImpl implements SqlService, Closeable {
 
     @Override
     public Optional<String> getConnectionUrlFromAlias(String alias) {
-        return Optional.ofNullable(SpongeImpl.getGlobalConfig().getConfig().getSql().getAliases().get(alias));
+        return Optional.ofNullable(SpongeImpl.getGlobalConfigAdapter().getConfig().getSql().getAliases().get(alias));
     }
 
 }

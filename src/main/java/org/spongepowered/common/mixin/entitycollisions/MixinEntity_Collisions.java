@@ -40,10 +40,11 @@ import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.CollisionModCategory;
 import org.spongepowered.common.config.category.EntityCollisionCategory;
 import org.spongepowered.common.config.type.GeneralConfigBase;
+import org.spongepowered.common.config.type.GlobalConfig;
+import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.IModData_Collisions;
 
 @Mixin(value = net.minecraft.entity.Entity.class, priority = 1002)
@@ -113,11 +114,11 @@ public class MixinEntity_Collisions implements IModData_Collisions {
     }
 
     @Override
-    public void initializeCollisionState(World worldObj) {
-        SpongeConfig<? extends GeneralConfigBase> worldConfig = ((IMixinWorldServer) worldObj).getWorldConfig();
-        SpongeConfig<? extends GeneralConfigBase> globalConfig = SpongeImpl.getGlobalConfig();
-        EntityCollisionCategory worldCollCat = worldConfig.getConfig().getEntityCollisionCategory();
-        EntityCollisionCategory globalCollCat = globalConfig.getConfig().getEntityCollisionCategory();
+    public void initializeCollisionState(World world) {
+        final SpongeConfig<WorldConfig> worldConfigAdapter = ((IMixinWorldInfo) world.getWorldInfo()).getConfigAdapter();
+        final SpongeConfig<GlobalConfig> globalConfigAdapter = SpongeImpl.getGlobalConfigAdapter();
+        final EntityCollisionCategory worldCollCat = worldConfigAdapter.getConfig().getEntityCollisionCategory();
+        final EntityCollisionCategory globalCollCat = globalConfigAdapter.getConfig().getEntityCollisionCategory();
 
         this.setMaxCollisions(worldCollCat.getMaxEntitiesWithinAABB());
 
@@ -128,7 +129,7 @@ public class MixinEntity_Collisions implements IModData_Collisions {
             globalCollMod = new CollisionModCategory(this.getModDataId());
             globalCollCat.getModList().put(this.getModDataId(), globalCollMod);
             globalCollMod.getEntityList().put(this.getModDataName(), this.getMaxCollisions());
-            globalConfig.save();
+            globalConfigAdapter.save();
             return;
         } else if (worldCollMod != null) {
             if (!worldCollMod.isEnabled()) {
@@ -166,7 +167,7 @@ public class MixinEntity_Collisions implements IModData_Collisions {
         }
 
         if (requiresSave) {
-            globalConfig.save();
+            globalConfigAdapter.save();
         }
     }
 

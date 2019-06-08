@@ -151,7 +151,6 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.WorldCategory;
-import org.spongepowered.common.config.type.GeneralConfigBase;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
@@ -238,7 +237,6 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     private final Map<net.minecraft.entity.Entity, Vector3d> rotationUpdates = new HashMap<>();
     private SpongeChunkGenerator spongegen;
-    private SpongeConfig<WorldConfig> worldConfig;
     private long weatherStartTime;
     private Weather prevWeather;
     protected WorldTimingsHandler timings;
@@ -313,13 +311,14 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
 
         this.updateWorldGenerator();
-        // Need to set the active config before we call it.
-        this.chunkGCLoadThreshold = SpongeHooks.getWorldConfig((WorldServer) (Object) this).getConfig().getWorld().getChunkLoadThreshold();
-        this.chunkGCTickInterval = this.getWorldConfig().getConfig().getWorld().getTickInterval();
-        this.weatherIceAndSnowEnabled = this.getWorldConfig().getConfig().getWorld().getWeatherIceAndSnow();
-        this.weatherThunderEnabled = this.getWorldConfig().getConfig().getWorld().getWeatherThunder();
+
+        final WorldCategory worldCategory = ((IMixinWorldInfo) this.getWorldInfo()).getConfigAdapter().getConfig().getWorld();
+        this.chunkGCLoadThreshold = worldCategory.getChunkLoadThreshold();
+        this.chunkGCTickInterval = worldCategory.getTickInterval();
+        this.weatherIceAndSnowEnabled = worldCategory.getWeatherIceAndSnow();
+        this.weatherThunderEnabled = worldCategory.getWeatherThunder();
         this.updateEntityTick = 0;
-        this.setMemoryViewDistance(this.chooseViewDistanceValue(this.getWorldConfig().getConfig().getWorld().getViewDistance()));
+        this.setMemoryViewDistance(this.chooseViewDistanceValue(worldCategory.getViewDistance()));
     }
 
     @Redirect(method = "init", at = @At(value = "NEW", target = "net/minecraft/world/storage/MapStorage"))
@@ -398,25 +397,19 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     @Override
-    public SpongeConfig<WorldConfig> getWorldConfig() {
-        if (this.worldConfig == null) {
-            this.worldConfig = ((IMixinWorldInfo) this.worldInfo).getOrCreateWorldConfig();
-        }
-        return this.worldConfig;
-    }
-
-    @Override
     public void updateConfigCache() {
+        final SpongeConfig<WorldConfig> configAdapter = ((IMixinWorldInfo) this.worldInfo).getConfigAdapter();
+
         // update cached settings
-        this.chunkGCLoadThreshold = this.worldConfig.getConfig().getWorld().getChunkLoadThreshold();
-        this.chunkGCTickInterval = this.worldConfig.getConfig().getWorld().getTickInterval();
-        this.weatherIceAndSnowEnabled = this.worldConfig.getConfig().getWorld().getWeatherIceAndSnow();
-        this.weatherThunderEnabled = this.worldConfig.getConfig().getWorld().getWeatherThunder();
-        this.chunkUnloadDelay = this.worldConfig.getConfig().getWorld().getChunkUnloadDelay() * 1000;
+        this.chunkGCLoadThreshold = configAdapter.getConfig().getWorld().getChunkLoadThreshold();
+        this.chunkGCTickInterval = configAdapter.getConfig().getWorld().getTickInterval();
+        this.weatherIceAndSnowEnabled = configAdapter.getConfig().getWorld().getWeatherIceAndSnow();
+        this.weatherThunderEnabled = configAdapter.getConfig().getWorld().getWeatherThunder();
+        this.chunkUnloadDelay = configAdapter.getConfig().getWorld().getChunkUnloadDelay() * 1000;
         if (this.getChunkProvider() != null) {
-            final int maxChunkUnloads = this.worldConfig.getConfig().getWorld().getMaxChunkUnloads();
+            final int maxChunkUnloads = configAdapter.getConfig().getWorld().getMaxChunkUnloads();
             ((IMixinChunkProviderServer) this.getChunkProvider()).setMaxChunkUnloads(maxChunkUnloads < 1 ? 1 : maxChunkUnloads);
-            ((IMixinChunkProviderServer) this.getChunkProvider()).setDenyChunkRequests(this.worldConfig.getConfig().getWorld().getDenyChunkRequests());
+            ((IMixinChunkProviderServer) this.getChunkProvider()).setDenyChunkRequests(configAdapter.getConfig().getWorld().getDenyChunkRequests());
             for (net.minecraft.entity.Entity entity : this.loadedEntityList) {
                 if (entity instanceof IModData_Activation) {
                     ((IModData_Activation) entity).requiresActivationCacheRefresh(true);
@@ -2736,10 +2729,10 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     public void setViewDistance(final int viewDistance) {
         this.setMemoryViewDistance(viewDistance);
-        final SpongeConfig<? extends GeneralConfigBase> config = this.getWorldConfig();
+        final SpongeConfig<WorldConfig> configAdapter = ((IMixinWorldInfo) this.getWorldInfo()).getConfigAdapter();
         // don't use the parameter, use the field that has been clamped
-        config.getConfig().getWorld().setViewDistance(this.playerChunkMap.playerViewRadius);
-        config.save();
+        configAdapter.getConfig().getWorld().setViewDistance(this.playerChunkMap.playerViewRadius);
+        configAdapter.save();
     }
 
     private void setMemoryViewDistance(final int viewDistance) {
@@ -2762,7 +2755,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     public String toString() {
         return MoreObjects.toStringHelper(this)
                 .add("Name", this.worldInfo.getWorldName())
-                .add("DimensionId", ((IMixinWorldServer) this).getDimensionId())
+                .add("DimensionId", this.getDimensionId())
                 .add("DimensionType", ((org.spongepowered.api.world.DimensionType) (Object) this.provider.getDimensionType()).getId())
                 .add("DimensionTypeId", this.provider.getDimensionType().getId())
                 .toString();

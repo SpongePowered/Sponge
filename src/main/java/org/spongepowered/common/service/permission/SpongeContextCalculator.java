@@ -80,7 +80,7 @@ public class SpongeContextCalculator implements ContextCalculator<Subject> {
                         return builder.build();
                     }
                     builder.add(new Context(contextKey, addr.getHostAddress()));
-                    for (String set : Maps.filterValues(SpongeImpl.getGlobalConfig().getConfig().getIpSets(), input -> input.apply(addr)).keySet()) {
+                    for (String set : Maps.filterValues(SpongeImpl.getGlobalConfigAdapter().getConfig().getIpSets(), input -> input.apply(addr)).keySet()) {
                         builder.add(new Context(contextKey, set));
                     }
                     return builder.build();

@@ -1472,8 +1472,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Inject(method = "canAttackPlayer", at = @At("HEAD"), cancellable = true)
     private void onCanAttackPlayer(EntityPlayer other, CallbackInfoReturnable<Boolean> cir) {
-        final SpongeConfig<WorldConfig> config = ((IMixinWorldServer) this.world).getWorldConfig();
-        final boolean worldPVP = config.getConfig().getWorld().getPVPEnabled();
+        final boolean worldPVP = ((WorldProperties) other.world).isPVPEnabled();
 
         if (!worldPVP) {
             cir.setReturnValue(false);

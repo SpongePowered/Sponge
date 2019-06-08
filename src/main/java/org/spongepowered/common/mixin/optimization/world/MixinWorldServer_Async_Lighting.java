@@ -56,7 +56,7 @@ public abstract class MixinWorldServer_Async_Lighting extends MixinWorld impleme
     private static final short Y_SHORT_MASK = 0xFF;
 
     private ExecutorService lightExecutorService = 
-                Executors.newFixedThreadPool(SpongeImpl.getGlobalConfig().getConfig().getOptimizations().getAsyncLightingCategory().getNumThreads(), new ThreadFactoryBuilder().setNameFormat("Sponge - Async Light Thread").build());
+                Executors.newFixedThreadPool(SpongeImpl.getGlobalConfigAdapter().getConfig().getOptimizations().getAsyncLightingCategory().getNumThreads(), new ThreadFactoryBuilder().setNameFormat("Sponge - Async Light Thread").build());
 
     @Override
     public boolean checkLightFor(EnumSkyBlock lightType, BlockPos pos) {

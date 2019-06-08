@@ -204,7 +204,7 @@ class TimingsExport extends Thread {
         // Information on the users Config
 
         builder.add("config", JSONUtil.objectBuilder()
-                .add("sponge", serializeConfigNode(SpongeImpl.getGlobalConfig().getRootNode())));
+                .add("sponge", serializeConfigNode(SpongeImpl.getGlobalConfigAdapter().getRootNode())));
 
         new TimingsExport(listeners, builder.build(), history).start();
     }

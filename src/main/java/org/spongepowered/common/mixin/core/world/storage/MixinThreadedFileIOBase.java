@@ -44,7 +44,7 @@ public abstract class MixinThreadedFileIOBase {
 
     @Redirect(method = "processQueue", at = @At(value = "INVOKE", target = "Ljava/lang/Thread;sleep(J)V", ordinal = 0))
     public void onProcessQueueThreadSleep(long millis) {
-        if (!SpongeImpl.getGlobalConfig().getConfig().getGeneral().getFileIOThreadSleep()) {
+        if (!SpongeImpl.getGlobalConfigAdapter().getConfig().getGeneral().getFileIOThreadSleep()) {
             return;
         }
 

@@ -70,7 +70,7 @@ public abstract class MixinBlockLeaves extends MixinBlock {
 
     @Inject(method = "<init>", at = @At(value = "RETURN"))
     private void onLeavesConstruction(CallbackInfo ci) {
-        this.setTickRandomly(SpongeImpl.getGlobalConfig().getConfig().getWorld().getLeafDecay());
+        this.setTickRandomly(SpongeImpl.getGlobalConfigAdapter().getConfig().getWorld().getLeafDecay());
     }
 
     @Redirect(method = "updateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;I)Z"))

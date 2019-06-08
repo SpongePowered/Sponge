@@ -36,8 +36,8 @@ public class SpongeMetricsConfigManager implements MetricsConfigManager {
 
     @Override
     public boolean areMetricsEnabled(final PluginContainer container) {
-        final MetricsCategory metrics = SpongeImpl.getGlobalConfig().getConfig().getMetricsCategory();
-        return metrics.getPluginPermission(container).orElseGet(metrics::isGloballyEnabled);
+        final MetricsCategory metricsCategory = SpongeImpl.getGlobalConfigAdapter().getConfig().getMetricsCategory();
+        return metricsCategory.getPluginPermission(container).orElseGet(metricsCategory::isGloballyEnabled);
     }
 
 }

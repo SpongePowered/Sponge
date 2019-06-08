@@ -111,9 +111,9 @@ import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.item.IMixinItem;
-import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.interfaces.world.IMixinITeleporter;
 import org.spongepowered.common.interfaces.world.IMixinTeleporter;
+import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
@@ -394,7 +394,7 @@ public final class EntityUtil {
             return null;
         }
 
-        final Map<String, String> portalAgents = fromMixinWorld.getWorldConfig().getConfig().getWorld().getPortalAgents();
+        final Map<String, String> portalAgents = ((IMixinWorldInfo) fromWorld.getWorldInfo()).getConfigAdapter().getConfig().getWorld().getPortalAgents();
         String worldName;
 
         // Check if we're to use a different teleporter for this world
@@ -719,7 +719,7 @@ public final class EntityUtil {
         }
         for (EntityPlayerMP playerMP : playerMPs) {
             SpongeImpl.getGame().getScheduler().createTaskBuilder()
-                    .delayTicks(SpongeImpl.getGlobalConfig().getConfig().getEntity().getPaintingRespawnDelaly())
+                    .delayTicks(SpongeImpl.getGlobalConfigAdapter().getConfig().getEntity().getPaintingRespawnDelaly())
                     .execute(() -> {
                         final SPacketSpawnPainting packet = new SPacketSpawnPainting(painting);
                         playerMP.connection.sendPacket(packet);

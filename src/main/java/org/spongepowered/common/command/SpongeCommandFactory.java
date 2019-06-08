@@ -215,7 +215,7 @@ public class SpongeCommandFactory {
         nonFlagChildren.register(createSpongeWhichCommand(), "which");
         nonFlagChildren.register(createSpongeMetricsCommand(), "metrics");
         flagChildren.register(createSpongeChunksCommand(), "chunks");
-        flagChildren.register(createSpongeTpsCommand(), "tps");
+        flagChildren.register(createSpongeTPSCommand(), "tps");
         trackerFlagChildren.register(createSpongeConfigCommand(), "config");
         trackerFlagChildren.register(createSpongeReloadCommand(), "reload"); // TODO: Should these two be subcommands of config, and what is now config be set?
         trackerFlagChildren.register(createSpongeSaveCommand(), "save");
@@ -264,7 +264,7 @@ public class SpongeCommandFactory {
 
         public CommandResult execute(CommandSource src, CommandContext args, int successes) throws CommandException {
             if (args.hasAny("global")) {
-                src.sendMessage(Text.of("Global: ", processGlobal(SpongeImpl.getGlobalConfig(), src, args)));
+                src.sendMessage(Text.of("Global: ", processGlobal(SpongeImpl.getGlobalConfigAdapter(), src, args)));
                 ++successes;
             }
             if (args.hasAny("dimension")) {
@@ -280,7 +280,7 @@ public class SpongeCommandFactory {
                     if (!world.isPresent() && this.requireWorldLoaded) {
                         throw new CommandException(Text.of("World ", properties.getWorldName(), " is not loaded, cannot work with it"));
                     }
-                    src.sendMessage(Text.of("World ", properties.getWorldName(), ": ", processWorld(((IMixinWorldInfo) properties).getOrCreateWorldConfig(),
+                    src.sendMessage(Text.of("World ", properties.getWorldName(), ": ", processWorld(((IMixinWorldInfo) properties).getConfigAdapter(),
                             world.orElse(null), src, args)));
                     ++successes;
                 }
@@ -321,7 +321,7 @@ public class SpongeCommandFactory {
         public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
             int successes = 0;
             if (args.hasAny("tracker")) {
-                src.sendMessage(Text.of("Tracker: ", processTracker(SpongeImpl.getTrackerConfig(), src, args)));
+                src.sendMessage(Text.of("Tracker: ", processTracker(SpongeImpl.getTrackerConfigAdapter(), src, args)));
                 ++successes;
             }
 
@@ -812,7 +812,7 @@ public class SpongeCommandFactory {
                 .build();
     }
 
-    private static CommandSpec createSpongeTpsCommand() {
+    private static CommandSpec createSpongeTPSCommand() {
         return CommandSpec.builder()
                 .permission("sponge.command.tps")
                 .description(Text.of("Provides TPS (ticks per second) data for loaded worlds."))
@@ -845,10 +845,11 @@ public class SpongeCommandFactory {
                 getWorldTickTimes(((IMixinWorldServer) world).getDimensionId());
         final double worldMeanTickTime = mean(worldTickTimes) * 1.0e-6d;
         final double worldTps = Math.min(1000.0 / worldMeanTickTime, 20);
-        src.sendMessage(Text.of("World [", TextColors.DARK_GREEN, world.getName(), TextColors.RESET, "] (DIM",
-                ((IMixinWorldServer) world).getDimensionId(), ") TPS: ", TextColors.LIGHT_PURPLE,
-                THREE_DECIMAL_DIGITS_FORMATTER.format(worldTps), TextColors.RESET,  ", Mean: ", TextColors.RED,
-                THREE_DECIMAL_DIGITS_FORMATTER.format(worldMeanTickTime), "ms"));
+        src.sendMessage(Text.of("World [", TextColors.DARK_GREEN, world.getName(), TextColors.RESET, "] (",
+            ((IMixinWorldServer) world).getDimensionId(),
+            ") TPS: ", TextColors.LIGHT_PURPLE,
+            THREE_DECIMAL_DIGITS_FORMATTER.format(worldTps), TextColors.RESET,  ", Mean: ", TextColors.RED,
+            THREE_DECIMAL_DIGITS_FORMATTER.format(worldMeanTickTime), "ms"));
     }
 
     private static Long mean(long[] values) {
@@ -929,8 +930,8 @@ public class SpongeCommandFactory {
                 .description(Text.of("Gets or sets permission for metric plugins to operate."))
                 .permission("sponge.command.metrics")
                 .executor((source, context) -> {
-                    SpongeConfig<GlobalConfig> config = SpongeImpl.getGlobalConfig();
-                    MetricsCategory category = config.getConfig().getMetricsCategory();
+                    final SpongeConfig<GlobalConfig> configAdapter = SpongeImpl.getGlobalConfigAdapter();
+                    final MetricsCategory category = configAdapter.getConfig().getMetricsCategory();
                     if (!context.hasAny(PLUGIN_KEY)) {
                         // No plugins means that we deal with global state
                         if (category.isGloballyEnabled()) {
@@ -986,7 +987,7 @@ public class SpongeCommandFactory {
                                             return node;
                                         });
                             }
-                            config.save();
+                            configAdapter.save();
                         } else {
                             boolean state = category.getPluginPermission(container).orElseGet(category::isGloballyEnabled);
                             if (state) {

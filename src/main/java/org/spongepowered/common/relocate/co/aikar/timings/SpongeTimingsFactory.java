@@ -52,15 +52,15 @@ public class SpongeTimingsFactory implements TimingsFactory {
     private final boolean moduleEnabled;
 
     public SpongeTimingsFactory() {
-        this.moduleEnabled = SpongeImpl.getGlobalConfig().getConfig().getModules().usePluginTimings();
+        this.moduleEnabled = SpongeImpl.getGlobalConfigAdapter().getConfig().getModules().usePluginTimings();
     }
 
     public void init() {
-        TimingsCategory config = SpongeImpl.getGlobalConfig().getConfig().getTimings();
-        setVerboseTimingsEnabled(config.isVerbose());
-        setTimingsEnabled(this.moduleEnabled && config.isEnabled());
-        setHistoryInterval(config.getHistoryInterval());
-        setHistoryLength(config.getHistoryLength());
+        final TimingsCategory category = SpongeImpl.getGlobalConfigAdapter().getConfig().getTimings();
+        setVerboseTimingsEnabled(category.isVerbose());
+        setTimingsEnabled(this.moduleEnabled && category.isEnabled());
+        setHistoryInterval(category.getHistoryInterval());
+        setHistoryLength(category.getHistoryLength());
 
         SpongeImpl.getLogger().debug("Sponge Timings: " + this.timingsEnabled +
                                     " - Verbose: " + this.verboseEnabled +

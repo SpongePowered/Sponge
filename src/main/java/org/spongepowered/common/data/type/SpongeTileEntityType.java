@@ -71,7 +71,7 @@ public class SpongeTileEntityType extends SpongeCatalogType implements TileEntit
     }
 
     public void initializeTrackerState() {
-        SpongeConfig<TrackerConfig> trackerConfig = SpongeImpl.getTrackerConfig();
+        SpongeConfig<TrackerConfig> trackerConfig = SpongeImpl.getTrackerConfigAdapter();
         TileEntityTrackerCategory tileEntityTracker = trackerConfig.getConfig().getTileEntityTracker();
         final String modId = this.modId;
         final String name = this.name;
