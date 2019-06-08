@@ -136,32 +136,32 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
     }
 
     public void initializeTrackerState() {
-        SpongeConfig<TrackerConfig> trackerConfig = SpongeImpl.getTrackerConfigAdapter();
-        EntityTrackerCategory entityTracker = trackerConfig.getConfig().getEntityTracker();
-        EntityTrackerModCategory modCapturing = entityTracker.getModMappings().get(this.modId);
+        final SpongeConfig<TrackerConfig> trackerConfigAdapter = SpongeImpl.getTrackerConfigAdapter();
+        final EntityTrackerCategory entityTrackerCat = trackerConfigAdapter.getConfig().getEntityTracker();
+        EntityTrackerModCategory entityTrackerModCat = entityTrackerCat.getModMappings().get(this.modId);
 
-        if (modCapturing == null) {
-            modCapturing = new EntityTrackerModCategory();
-            entityTracker.getModMappings().put(this.modId, modCapturing);
+        if (entityTrackerModCat == null) {
+            entityTrackerModCat = new EntityTrackerModCategory();
+            entityTrackerCat.getModMappings().put(this.modId, entityTrackerModCat);
         }
-        if (!modCapturing.isEnabled()) {
+        if (!entityTrackerModCat.isEnabled()) {
             this.allowsBlockBulkCapture = false;
             this.allowsEntityBulkCapture = false;
             this.allowsBlockEventCreation = false;
             this.allowsEntityEventCreation = false;
-            modCapturing.getBlockBulkCaptureMap().computeIfAbsent(this.entityName.toLowerCase(Locale.ENGLISH), k -> this.allowsBlockBulkCapture);
-            modCapturing.getEntityBulkCaptureMap().computeIfAbsent(this.entityName.toLowerCase(Locale.ENGLISH), k -> this.allowsEntityBulkCapture);
-            modCapturing.getBlockEventCreationMap().computeIfAbsent(this.entityName.toLowerCase(Locale.ENGLISH), k -> this.allowsBlockEventCreation);
-            modCapturing.getEntityEventCreationMap().computeIfAbsent(this.entityName.toLowerCase(Locale.ENGLISH), k -> this.allowsEntityEventCreation);
+            entityTrackerModCat.getBlockBulkCaptureMap().computeIfAbsent(this.entityName.toLowerCase(Locale.ENGLISH), k -> this.allowsBlockBulkCapture);
+            entityTrackerModCat.getEntityBulkCaptureMap().computeIfAbsent(this.entityName.toLowerCase(Locale.ENGLISH), k -> this.allowsEntityBulkCapture);
+            entityTrackerModCat.getBlockEventCreationMap().computeIfAbsent(this.entityName.toLowerCase(Locale.ENGLISH), k -> this.allowsBlockEventCreation);
+            entityTrackerModCat.getEntityEventCreationMap().computeIfAbsent(this.entityName.toLowerCase(Locale.ENGLISH), k -> this.allowsEntityEventCreation);
         } else {
-            this.allowsBlockBulkCapture = modCapturing.getBlockBulkCaptureMap().computeIfAbsent(this.entityName.toLowerCase(Locale.ENGLISH), k -> true);
-            this.allowsEntityBulkCapture = modCapturing.getEntityBulkCaptureMap().computeIfAbsent(this.entityName.toLowerCase(Locale.ENGLISH), k -> true);
-            this.allowsBlockEventCreation = modCapturing.getBlockEventCreationMap().computeIfAbsent(this.entityName.toLowerCase(Locale.ENGLISH), k -> true);
-            this.allowsEntityEventCreation = modCapturing.getEntityEventCreationMap().computeIfAbsent(this.entityName.toLowerCase(Locale.ENGLISH), k -> true);
+            this.allowsBlockBulkCapture = entityTrackerModCat.getBlockBulkCaptureMap().computeIfAbsent(this.entityName.toLowerCase(Locale.ENGLISH), k -> true);
+            this.allowsEntityBulkCapture = entityTrackerModCat.getEntityBulkCaptureMap().computeIfAbsent(this.entityName.toLowerCase(Locale.ENGLISH), k -> true);
+            this.allowsBlockEventCreation = entityTrackerModCat.getBlockEventCreationMap().computeIfAbsent(this.entityName.toLowerCase(Locale.ENGLISH), k -> true);
+            this.allowsEntityEventCreation = entityTrackerModCat.getEntityEventCreationMap().computeIfAbsent(this.entityName.toLowerCase(Locale.ENGLISH), k -> true);
         }
 
-        if (entityTracker.autoPopulateData()) {
-            trackerConfig.save();
+        if (entityTrackerCat.autoPopulateData()) {
+            trackerConfigAdapter.save();
         }
 
         try {

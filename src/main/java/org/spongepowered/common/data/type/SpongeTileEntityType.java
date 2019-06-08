@@ -71,8 +71,8 @@ public class SpongeTileEntityType extends SpongeCatalogType implements TileEntit
     }
 
     public void initializeTrackerState() {
-        SpongeConfig<TrackerConfig> trackerConfig = SpongeImpl.getTrackerConfigAdapter();
-        TileEntityTrackerCategory tileEntityTracker = trackerConfig.getConfig().getTileEntityTracker();
+        final SpongeConfig<TrackerConfig> trackerConfigAdapter = SpongeImpl.getTrackerConfigAdapter();
+        final TileEntityTrackerCategory tileEntityTracker = trackerConfigAdapter.getConfig().getTileEntityTracker();
         final String modId = this.modId;
         final String name = this.name;
 
@@ -100,7 +100,7 @@ public class SpongeTileEntityType extends SpongeCatalogType implements TileEntit
         }
 
         if (tileEntityTracker.autoPopulateData()) {
-            trackerConfig.save();
+            trackerConfigAdapter.save();
         }
     }
 

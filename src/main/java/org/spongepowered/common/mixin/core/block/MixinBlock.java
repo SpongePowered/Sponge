@@ -449,8 +449,8 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     @Override
     public void initializeTrackerState() {
-        SpongeConfig<TrackerConfig> trackerConfig = SpongeImpl.getTrackerConfigAdapter();
-        BlockTrackerCategory blockTracker = trackerConfig.getConfig().getBlockTracker();
+        final SpongeConfig<TrackerConfig> trackerConfigAdapter = SpongeImpl.getTrackerConfigAdapter();
+        final BlockTrackerCategory blockTrackerCat = trackerConfigAdapter.getConfig().getBlockTracker();
         String[] ids = this.getId().split(":");
         if (ids.length != 2) {
             final PrettyPrinter printer = new PrettyPrinter(60).add("Malformatted Block ID discovered!").centre().hr()
@@ -474,11 +474,11 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
         final String modId = ids[0];
         final String name = ids[1];
 
-        BlockTrackerModCategory modCapturing = blockTracker.getModMappings().get(modId);
+        BlockTrackerModCategory blockTrackerModCat = blockTrackerCat.getModMappings().get(modId);
 
-        if (modCapturing == null) {
-            modCapturing = new BlockTrackerModCategory();
-            blockTracker.getModMappings().put(modId, modCapturing);
+        if (blockTrackerModCat == null) {
+            blockTrackerModCat = new BlockTrackerModCategory();
+            blockTrackerCat.getModMappings().put(modId, blockTrackerModCat);
         }
 
         // Determine if this block needs to be handled during WorldServer#addBlockEvent
@@ -543,24 +543,24 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
             }
         }
 
-        if (!modCapturing.isEnabled()) {
+        if (!blockTrackerModCat.isEnabled()) {
             this.allowsBlockBulkCapture = false;
             this.allowsEntityBulkCapture = false;
             this.allowsBlockEventCreation = false;
             this.allowsEntityEventCreation = false;
-            modCapturing.getBlockBulkCaptureMap().computeIfAbsent(name.toLowerCase(), k -> this.allowsBlockBulkCapture);
-            modCapturing.getEntityBulkCaptureMap().computeIfAbsent(name.toLowerCase(), k -> this.allowsEntityBulkCapture);
-            modCapturing.getBlockEventCreationMap().computeIfAbsent(name.toLowerCase(), k -> this.allowsBlockEventCreation);
-            modCapturing.getEntityEventCreationMap().computeIfAbsent(name.toLowerCase(), k -> this.allowsEntityEventCreation);
+            blockTrackerModCat.getBlockBulkCaptureMap().computeIfAbsent(name.toLowerCase(), k -> this.allowsBlockBulkCapture);
+            blockTrackerModCat.getEntityBulkCaptureMap().computeIfAbsent(name.toLowerCase(), k -> this.allowsEntityBulkCapture);
+            blockTrackerModCat.getBlockEventCreationMap().computeIfAbsent(name.toLowerCase(), k -> this.allowsBlockEventCreation);
+            blockTrackerModCat.getEntityEventCreationMap().computeIfAbsent(name.toLowerCase(), k -> this.allowsEntityEventCreation);
         } else {
-            this.allowsBlockBulkCapture = modCapturing.getBlockBulkCaptureMap().computeIfAbsent(name.toLowerCase(), k -> true);
-            this.allowsEntityBulkCapture = modCapturing.getEntityBulkCaptureMap().computeIfAbsent(name.toLowerCase(), k -> true);
-            this.allowsBlockEventCreation = modCapturing.getBlockEventCreationMap().computeIfAbsent(name.toLowerCase(), k -> true);
-            this.allowsEntityEventCreation = modCapturing.getEntityEventCreationMap().computeIfAbsent(name.toLowerCase(), k -> true);
+            this.allowsBlockBulkCapture = blockTrackerModCat.getBlockBulkCaptureMap().computeIfAbsent(name.toLowerCase(), k -> true);
+            this.allowsEntityBulkCapture = blockTrackerModCat.getEntityBulkCaptureMap().computeIfAbsent(name.toLowerCase(), k -> true);
+            this.allowsBlockEventCreation = blockTrackerModCat.getBlockEventCreationMap().computeIfAbsent(name.toLowerCase(), k -> true);
+            this.allowsEntityEventCreation = blockTrackerModCat.getEntityEventCreationMap().computeIfAbsent(name.toLowerCase(), k -> true);
         }
 
-        if (blockTracker.autoPopulateData()) {
-            trackerConfig.save();
+        if (blockTrackerCat.autoPopulateData()) {
+            trackerConfigAdapter.save();
         }
     }
 }

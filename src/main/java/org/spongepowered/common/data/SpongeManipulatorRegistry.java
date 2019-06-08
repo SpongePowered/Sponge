@@ -442,11 +442,11 @@ public class SpongeManipulatorRegistry implements SpongeAdditionalCatalogRegistr
         this.registrationMap = idBuilder.build();
         this.pluginBasedRegistrations = pluginBuilder.build();
 
-        final SpongeConfig<CustomDataConfig> dataConfig = SpongeImpl.getCustomDataConfigAdapter();
-        final CustomDataRegistrationCategory config = dataConfig.getConfig().getDataRegistrationConfig();
-        config.populateRegistrations(this.registrations);
-        // Save the list of registered id's, this way the config can be re-understood.
-        dataConfig.save();
+        final SpongeConfig<CustomDataConfig> customDataConfigAdapter = SpongeImpl.getCustomDataConfigAdapter();
+        final CustomDataRegistrationCategory customDataRegCat = customDataConfigAdapter.getConfig().getDataRegistrationConfig();
+        customDataRegCat.populateRegistrations(this.registrations);
+        // Save the list of registered id's, this way the customDataRegCat can be re-understood.
+        customDataConfigAdapter.save();
 
         this.tempRegistry = null; // Finalizes the registration by setting the temporary object to null
     }
