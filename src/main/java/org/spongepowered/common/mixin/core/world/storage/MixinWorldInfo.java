@@ -474,6 +474,16 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     }
 
     @Override
+    public boolean isPVPEnabled() {
+        return this.getOrCreateWorldConfig().getConfig().getWorld().getPVPEnabled();
+    }
+
+    @Override
+    public void setPVPEnabled(boolean enabled) {
+        this.getOrCreateWorldConfig().getConfig().getWorld().setPVPEnabled(enabled);
+    }
+
+    @Override
     public boolean doesGenerateBonusChest() {
         return this.generateBonusChest;
     }
@@ -678,16 +688,6 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     @Override
     public void setGenerateSpawnOnLoad(boolean state) {
         this.getOrCreateWorldConfig().getConfig().getWorld().setGenerateSpawnOnLoad(state);
-    }
-
-    @Override
-    public boolean isPVPEnabled() {
-        return this.getOrCreateWorldConfig().getConfig().getWorld().getPVPEnabled();
-    }
-
-    @Override
-    public void setPVPEnabled(boolean enabled) {
-        this.getOrCreateWorldConfig().getConfig().getWorld().setPVPEnabled(enabled);
     }
 
     @Override

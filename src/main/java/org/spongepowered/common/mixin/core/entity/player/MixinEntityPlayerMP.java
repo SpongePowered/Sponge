@@ -158,7 +158,10 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGameModeData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeJoinData;
 import org.spongepowered.common.data.util.DataConstants;
@@ -191,6 +194,7 @@ import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.interfaces.text.IMixinTitle;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.service.user.SpongeUserStorageService;
@@ -252,6 +256,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow public abstract void closeContainer();
 
     @Shadow public abstract WorldServer getServerWorld();
+
+    @Shadow protected abstract boolean canPlayersAttack();
 
     public int newExperience = 0;
     public int newLevel = 0;
@@ -1462,5 +1468,21 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             return villager.getDisplayName();
         }
         return new TextComponentString(SpongeTexts.toLegacy(this.displayName));
+    }
+
+    @Inject(method = "canAttackPlayer", at = @At("HEAD"), cancellable = true)
+    private void onCanAttackPlayer(EntityPlayer other, CallbackInfoReturnable<Boolean> cir) {
+        final boolean teamPVP = super.canAttackPlayer(other);
+        if (!teamPVP) {
+            cir.setReturnValue(false);
+            return;
+        }
+        final SpongeConfig<WorldConfig> config = ((IMixinWorldServer) this.world).getWorldConfig();
+        final Boolean worldPVP = config.getConfig().getWorld().getPVPEnabled();
+        if (worldPVP != null) {
+            cir.setReturnValue(worldPVP);
+            return;
+        }
+        cir.setReturnValue(this.canPlayersAttack());
     }
 }

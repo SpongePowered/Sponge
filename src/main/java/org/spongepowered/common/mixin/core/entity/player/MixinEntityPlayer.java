@@ -177,6 +177,10 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow protected abstract void spawnShoulderEntities();
     @Shadow public abstract boolean isCreative();
 
+    @Shadow public boolean canAttackPlayer(EntityPlayer other) {
+        return false;
+    }
+
     private boolean affectsSpawning = true;
     private UUID collidingEntityUuid = null;
     private Vector3d targetedLocation;

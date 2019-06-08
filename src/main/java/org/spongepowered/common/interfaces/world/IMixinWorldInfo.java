@@ -87,5 +87,4 @@ public interface IMixinWorldInfo {
      * Sets the difficulty without marking it as custom
      */
     void forceSetDifficulty(EnumDifficulty difficulty);
-
 }

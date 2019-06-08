@@ -790,7 +790,7 @@ public final class WorldManager {
 
             // Step 7 - Finally, we can create the world and tell it to load
             final WorldServer worldServer = createWorldFromProperties(dimensionId, saveHandler, worldInfo, worldSettings);
-
+            ;
             SpongeImpl.getLogger().info("Loading world [{}] ({}/{})", ((org.spongepowered.api.world.World) worldServer).getName(),
                 apiDimensionType.getId(), dimensionId);
         }
@@ -839,7 +839,6 @@ public final class WorldManager {
         }
 
         ((IMixinChunkProviderServer) worldServer.getChunkProvider()).setForceChunkRequests(true);
-
         SpongeImpl.postEvent(SpongeEventFactory.createLoadWorldEvent(Sponge.getCauseStackManager().getCurrentCause(),
             (org.spongepowered.api.world.World) worldServer));
 
@@ -1116,13 +1115,14 @@ public final class WorldManager {
         final EnumDifficulty serverDifficulty = SpongeImpl.getServer().getDifficulty();
 
         for (WorldServer worldServer : getWorlds()) {
-            adjustWorldForDifficulty(worldServer, ((IMixinWorldInfo) worldServer.getWorldInfo()).hasCustomDifficulty() ? worldServer.getWorldInfo()
-              .getDifficulty() : serverDifficulty, false);
+            final boolean alreadySet = ((IMixinWorldInfo) worldServer.getWorldInfo()).hasCustomDifficulty();
+            adjustWorldForDifficulty(worldServer, alreadySet ? worldServer.getWorldInfo().getDifficulty() : serverDifficulty, false);
         }
     }
 
     public static void adjustWorldForDifficulty(WorldServer worldServer, EnumDifficulty difficulty, boolean isCustom) {
         final MinecraftServer server = SpongeImpl.getServer();
+        final boolean alreadySet = ((IMixinWorldInfo) worldServer.getWorldInfo()).hasCustomDifficulty();
 
         if (worldServer.getWorldInfo().isHardcoreModeEnabled()) {
             difficulty = EnumDifficulty.HARD;
@@ -1133,10 +1133,12 @@ public final class WorldManager {
             worldServer.setAllowedSpawnTypes(server.allowSpawnMonsters(), server.getCanSpawnAnimals());
         }
 
-        if (!isCustom) {
-            ((IMixinWorldInfo) worldServer.getWorldInfo()).forceSetDifficulty(difficulty);
-        } else {
-            worldServer.getWorldInfo().setDifficulty(difficulty);
+        if (!alreadySet) {
+            if (!isCustom) {
+                ((IMixinWorldInfo) worldServer.getWorldInfo()).forceSetDifficulty(difficulty);
+            } else {
+                worldServer.getWorldInfo().setDifficulty(difficulty);
+            }
         }
     }
 

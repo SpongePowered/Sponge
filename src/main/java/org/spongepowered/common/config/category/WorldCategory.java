@@ -27,7 +27,6 @@ package org.spongepowered.common.config.category;
 import net.minecraft.launchwrapper.Launch;
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
-import org.spongepowered.api.world.difficulty.Difficulty;
 
 import java.io.IOException;
 import java.util.HashMap;
