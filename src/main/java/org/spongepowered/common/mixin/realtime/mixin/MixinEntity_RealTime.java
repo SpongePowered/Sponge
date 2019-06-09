@@ -31,26 +31,61 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Slice;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.mixin.realtime.IMixinRealTimeTicking;
 
-// TODO(amaranth): Should this handle fire ticks too? Mobs can't move fast enough
 @Mixin(Entity.class)
-public abstract class MixinEntity {
+public abstract class MixinEntity_RealTime {
 
-    private static final String ENTITY_RIDABLE_COOLDOWN_FIELD = "Lnet/minecraft/entity/Entity;rideCooldown:I";
-    private static final String ENTITY_PORTAL_COUNTER_FIELD = "Lnet/minecraft/entity/Entity;portalCounter:I";
     @Shadow protected int rideCooldown;
     @Shadow public World world;
     @Shadow protected int portalCounter;
+    @Shadow public int timeUntilPortal;
 
-    @Redirect(method = "onEntityUpdate", at = @At(value = "FIELD", target = ENTITY_RIDABLE_COOLDOWN_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
-    public void fixupEntityCooldown(Entity self, int modifier) {
+    @Redirect(method = "onEntityUpdate",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/entity/Entity;rideCooldown:I",
+            opcode = Opcodes.PUTFIELD
+        ),
+        slice = @Slice(
+            from = @At(
+                value = "INVOKE",
+                target = "Lnet/minecraft/entity/Entity;dismountRidingEntity()V"
+            ),
+            to = @At(
+                value = "FIELD",
+                target = "Lnet/minecraft/entity/Entity;distanceWalkedModified:F",
+                opcode = Opcodes.GETFIELD
+            )
+        )
+    )
+    private void adjustForRealTimeEntityCooldown(Entity self, int modifier) {
+        if (((IMixinWorld) this.world).isFake()) {
+            this.rideCooldown = modifier;
+            return;
+        }
         int ticks = (int) ((IMixinRealTimeTicking) this.world).getRealTimeTicks();
         this.rideCooldown = Math.max(0, this.rideCooldown - ticks);
     }
 
-    @Redirect(method = "onEntityUpdate", at = @At(value = "FIELD", target = ENTITY_PORTAL_COUNTER_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
-    public void fixupPortalCounter(Entity self, int modifier) {
+    @Redirect(method = "onEntityUpdate",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/entity/Entity;portalCounter:I",
+            opcode = Opcodes.PUTFIELD, ordinal = 0
+        ),
+        slice = @Slice(
+            from = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;getMaxInPortalTime()I"),
+            to = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;getPortalCooldown()I")
+        )
+    )
+    private void adjustForRealTimePortalCounter(Entity self, int modifier) {
+        if (((IMixinWorld) this.world).isFake()) {
+            this.portalCounter = modifier;
+            return;
+        }
         int ticks = (int) ((IMixinRealTimeTicking) this.world).getRealTimeTicks();
         this.portalCounter += ticks;
     }

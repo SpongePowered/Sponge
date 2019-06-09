@@ -24,32 +24,29 @@
  */
 package org.spongepowered.common.mixin.realtime.mixin;
 
-import net.minecraft.entity.item.EntityItem;
-import org.spongepowered.asm.lib.Opcodes;
+import net.minecraft.entity.EntityAgeable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.mixin.realtime.IMixinRealTimeTicking;
 
-@Mixin(EntityItem.class)
-public abstract class MixinEntityItem {
+@Mixin(EntityAgeable.class)
+public abstract class MixinEntityAgeable_RealTime extends MixinEntity_RealTime {
 
-    private static final String ENTITY_ITEM_DELAY_PICKUP_FIELD = "Lnet/minecraft/entity/item/EntityItem;pickupDelay:I";
-    private static final String ENTITY_ITEM_AGE_FIELD = "Lnet/minecraft/entity/item/EntityItem;age:I";
-    @Shadow private int pickupDelay;
-    @Shadow public int age;
+    @Shadow public abstract void setGrowingAge(int age);
 
-    @Redirect(method = "onUpdate", at = @At(value = "FIELD", target = ENTITY_ITEM_DELAY_PICKUP_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
-    public void fixupPickupDelay(EntityItem self, int modifier) {
-        int ticks = (int) ((IMixinRealTimeTicking) self.getEntityWorld()).getRealTimeTicks();
-        this.pickupDelay = Math.max(0, this.pickupDelay - ticks);
+    @Redirect(method = "onLivingUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityAgeable;setGrowingAge(I)V"))
+    private void adjustForRealTimeGrowingUp(EntityAgeable self, int age) {
+        if (((IMixinWorld) this.world).isFake()) {
+            this.setGrowingAge(age);
+            return;
+        }
+        // Subtract the one the original update method added
+        int diff = (int) ((IMixinRealTimeTicking) this.world).getRealTimeTicks() - 1;
+        this.setGrowingAge(Math.min(0, age + diff));
     }
 
-    @Redirect(method = "onUpdate", at = @At(value = "FIELD", target = ENTITY_ITEM_AGE_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
-    public void fixupAge(EntityItem self, int modifier) {
-        int ticks = (int) ((IMixinRealTimeTicking) self.getEntityWorld()).getRealTimeTicks();
-        this.age += ticks;
-    }
 
 }

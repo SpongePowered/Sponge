@@ -24,27 +24,41 @@
  */
 package org.spongepowered.common.mixin.realtime.mixin;
 
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.world.World;
 import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Slice;
+import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.mixin.realtime.IMixinRealTimeTicking;
 
 @Mixin(EntityPlayerMP.class)
-public abstract class MixinEntityPlayerMP extends Entity {
+public abstract class MixinEntityPlayerMP_RealTime extends MixinEntityPlayer_RealTime {
 
-    private static final String ENTITY_PLAYER_MP_PORTAL_COOLDOWN_FIELD = "Lnet/minecraft/entity/player/EntityPlayerMP;timeUntilPortal:I";
-
-    public MixinEntityPlayerMP(World worldIn) {
-        super(worldIn);
-    }
-
-    @Redirect(method = "decrementTimeUntilPortal", at = @At(value = "FIELD", target = ENTITY_PLAYER_MP_PORTAL_COOLDOWN_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
-    public void fixupPortalCooldown(EntityPlayerMP self, int modifier) {
-        int ticks = (int) ((IMixinRealTimeTicking) self.getEntityWorld()).getRealTimeTicks();
+    @Redirect(
+        method = "decrementTimeUntilPortal",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/entity/player/EntityPlayerMP;timeUntilPortal:I",
+            opcode = Opcodes.PUTFIELD
+        ),
+        slice = @Slice(
+            from = @At(
+                value = "FIELD",
+                target = "Lnet/minecraft/entity/player/EntityPlayerMP;invulnerableDimensionChange:Z",
+                opcode = Opcodes.GETFIELD
+            ),
+            to = @At("RETURN")
+        )
+    )
+    private void adjustForRealTimePortalCooldown(EntityPlayerMP self, int modifier) {
+        if (SpongeImplHooks.isFakePlayer((EntityPlayerMP) (Object) this) || ((IMixinWorld) this.world).isFake()) {
+            this.timeUntilPortal = modifier;
+            return;
+        }
+        int ticks = (int) ((IMixinRealTimeTicking) this.world).getRealTimeTicks();
         // The initially apparent function of timeUntilPortal is a cooldown for
         // nether portals. However, there is a much more important use:
         // preventing players from being immediately sent back to the other end

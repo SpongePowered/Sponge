@@ -24,24 +24,31 @@
  */
 package org.spongepowered.common.mixin.realtime.mixin;
 
-import net.minecraft.entity.monster.EntityZombieVillager;
+import net.minecraft.server.MinecraftServer;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.mixin.realtime.IMixinRealTimeTicking;
 
-@Mixin(EntityZombieVillager.class)
-public abstract class MixinEntityZombieVillager {
+@Mixin(MinecraftServer.class)
+public abstract class MixinMinecraftServer_RealTime implements IMixinRealTimeTicking {
 
-    private static final String ENTITY_ZOMBIE_GET_CONVERSION_BOOST_METHOD = "Lnet/minecraft/entity/monster/EntityZombieVillager;getConversionProgress()I";
+    private static long lastTickNanos = System.nanoTime();
+    private static long realTimeTicks = 1;
 
-    @Shadow protected abstract int getConversionProgress();
-
-    @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = ENTITY_ZOMBIE_GET_CONVERSION_BOOST_METHOD, ordinal = 0))
-    public int fixupConversionTimeBoost(EntityZombieVillager self) {
-        int ticks = (int) ((IMixinRealTimeTicking) self.getEntityWorld()).getRealTimeTicks();
-        return this.getConversionProgress() * ticks;
+    @Inject(method = "tick", at = @At("HEAD"))
+    private void adjustTickForRealTimeTicks(CallbackInfo ci) {
+        long currentNanos = System.nanoTime();
+        realTimeTicks = (currentNanos - lastTickNanos) / 50000000;
+        if (realTimeTicks < 1) {
+            realTimeTicks = 1;
+        }
+        lastTickNanos = currentNanos;
     }
 
+    @Override
+    public long getRealTimeTicks() {
+        return realTimeTicks;
+    }
 }

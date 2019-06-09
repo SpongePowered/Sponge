@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.realtime.mixin;
 
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.asm.lib.Opcodes;
@@ -32,25 +33,49 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.mixin.realtime.IMixinRealTimeTicking;
 
 @Mixin(NetHandlerPlayServer.class)
-public abstract class MixinNetHandlerPlayServer {
+public abstract class MixinNetHandlerPlayServer_RealTime {
 
-    private static final String NET_HANDLER_PLAY_CHAT_SPAM_FIELD = "Lnet/minecraft/network/NetHandlerPlayServer;chatSpamThresholdCount:I";
-    private static final String NET_HANDLER_PLAY_DROP_SPAM_FIELD = "Lnet/minecraft/network/NetHandlerPlayServer;itemDropThreshold:I";
     @Shadow private int chatSpamThresholdCount;
     @Shadow private int itemDropThreshold;
     @Shadow @Final private MinecraftServer server;
+    @Shadow public EntityPlayerMP player;
 
-    @Redirect(method = "update", at = @At(value = "FIELD", target = NET_HANDLER_PLAY_CHAT_SPAM_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
-    public void fixupChatSpamCheck(NetHandlerPlayServer self, int modifier) {
+    @Redirect(
+        method = "update",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/network/NetHandlerPlayServer;chatSpamThresholdCount:I",
+            opcode = Opcodes.PUTFIELD,
+            ordinal = 0
+        )
+    )
+    private void adjustForRealTimeChatSpamCheck(NetHandlerPlayServer self, int modifier) {
+        if (SpongeImplHooks.isFakePlayer(this.player) || ((IMixinWorld) this.player.world).isFake()) {
+            this.chatSpamThresholdCount = modifier;
+            return;
+        }
         int ticks = (int) ((IMixinRealTimeTicking) this.server).getRealTimeTicks();
         this.chatSpamThresholdCount = Math.max(0, this.chatSpamThresholdCount - ticks);
     }
 
-    @Redirect(method = "update", at = @At(value = "FIELD", target = NET_HANDLER_PLAY_DROP_SPAM_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
-    public void fixupDropSpamCheck(NetHandlerPlayServer self, int modifier) {
+    @Redirect(
+        method = "update",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/network/NetHandlerPlayServer;itemDropThreshold:I",
+            opcode = Opcodes.PUTFIELD, ordinal = 0
+        )
+    )
+    private void adjustForRealTimeDropSpamCheck(NetHandlerPlayServer self, int modifier) {
+        if (SpongeImplHooks.isFakePlayer(this.player) || ((IMixinWorld) this.player.world).isFake()) {
+            this.itemDropThreshold = modifier;
+            return;
+        }
         int ticks = (int) ((IMixinRealTimeTicking) this.server).getRealTimeTicks();
         this.itemDropThreshold = Math.max(0, this.itemDropThreshold - ticks);
     }

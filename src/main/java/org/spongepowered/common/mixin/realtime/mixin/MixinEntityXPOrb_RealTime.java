@@ -30,24 +30,66 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Slice;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.mixin.realtime.IMixinRealTimeTicking;
 
 @Mixin(EntityXPOrb.class)
-public abstract class MixinEntityXPOrb {
+public abstract class MixinEntityXPOrb_RealTime extends MixinEntity_RealTime {
 
-    private static final String ENTITY_XP_DELAY_PICKUP_FIELD = "Lnet/minecraft/entity/item/EntityXPOrb;delayBeforeCanPickup:I";
-    private static final String ENTITY_XP_AGE_FIELD = "Lnet/minecraft/entity/item/EntityXPOrb;xpOrbAge:I";
     @Shadow public int delayBeforeCanPickup;
     @Shadow public int xpOrbAge;
 
-    @Redirect(method = "onUpdate", at = @At(value = "FIELD", target = ENTITY_XP_DELAY_PICKUP_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
-    public void fixupPickupDelay(EntityXPOrb self, int modifier) {
-        int ticks = (int) ((IMixinRealTimeTicking) self.getEntityWorld()).getRealTimeTicks();
+    @Redirect(
+        method = "onUpdate",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/entity/item/EntityXPOrb;delayBeforeCanPickup:I",
+            opcode = Opcodes.PUTFIELD
+        ),
+        slice = @Slice(
+            from = @At(
+                value = "INVOKE",
+                target = "Lnet/minecraft/entity/Entity;onUpdate()V"
+            ),
+            to = @At(
+                value = "INVOKE",
+                target = "Lnet/minecraft/entity/item/EntityXPOrb;hasNoGravity()Z"
+            )
+        )
+    )
+    private void adjustForRealTimePickupDelay(EntityXPOrb self, int modifier) {
+        if (((IMixinWorld) this.world).isFake()) {
+            this.delayBeforeCanPickup = modifier;
+            return;
+        }
+        int ticks = (int) ((IMixinRealTimeTicking) this.world).getRealTimeTicks();
         this.delayBeforeCanPickup = Math.max(0, this.delayBeforeCanPickup - ticks);
     }
 
-    @Redirect(method = "onUpdate", at = @At(value = "FIELD", target = ENTITY_XP_AGE_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
-    public void fixupAge(EntityXPOrb self, int modifier) {
+    @Redirect(
+        method = "onUpdate",
+        at = @At(value = "FIELD",
+            target = "Lnet/minecraft/entity/item/EntityXPOrb;xpOrbAge:I",
+            opcode = Opcodes.PUTFIELD
+        ),
+        slice = @Slice(
+            from = @At(
+                value = "FIELD",
+                target = "Lnet/minecraft/entity/item/EntityXPOrb;xpColor:I",
+                opcode = Opcodes.PUTFIELD
+            ),
+            to = @At(
+                value = "CONSTANT",
+                args = "intValue=6000"
+            )
+        )
+    )
+    private void adjustForRealTimeAge(EntityXPOrb self, int modifier) {
+        if (((IMixinWorld) this.world).isFake()) {
+            this.xpOrbAge = modifier;
+            return;
+        }
         int ticks = (int) ((IMixinRealTimeTicking) self.getEntityWorld()).getRealTimeTicks();
         this.xpOrbAge += ticks;
     }

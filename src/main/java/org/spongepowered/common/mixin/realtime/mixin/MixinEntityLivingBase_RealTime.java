@@ -24,28 +24,38 @@
  */
 package org.spongepowered.common.mixin.realtime.mixin;
 
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.world.World;
 import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.mixin.realtime.IMixinRealTimeTicking;
 
-@Mixin(EntityLiving.class)
-public abstract class MixinEntityLiving extends EntityLivingBase {
+@Mixin(EntityLivingBase.class)
+public abstract class MixinEntityLivingBase_RealTime extends MixinEntity_RealTime {
 
-    private static final String ENTITY_LIVING_AGE_FIELD = "Lnet/minecraft/entity/EntityLiving;idleTime:I";
+    @Shadow public int deathTime;
+    @Shadow protected int idleTime;
 
-    public MixinEntityLiving(World worldIn) {
-        super(worldIn);
-    }
-
-    @Redirect(method = "updateEntityActionState", at = @At(value = "FIELD", target = ENTITY_LIVING_AGE_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
-    public void fixupEntityDespawnAge(EntityLiving self, int modifier) {
+    @Redirect(method = "onDeathUpdate", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/EntityLivingBase;deathTime:I", opcode = Opcodes.PUTFIELD, ordinal = 0))
+    private void adjustForRealTimeDeathTime(EntityLivingBase self, int vanillaNewDeathTime) {
+        if (((IMixinWorld) this.world).isFake()) {
+            this.deathTime = vanillaNewDeathTime;
+            return;
+        }
         int ticks = (int) ((IMixinRealTimeTicking) self.getEntityWorld()).getRealTimeTicks();
-        this.idleTime += ticks;
+        int newDeathTime = this.deathTime + ticks;
+        // At tick 20, XP is dropped and the death animation finishes. The
+        // entity is also removed from the world... except in the case of
+        // players, which are not removed until they log out or click Respawn.
+        // For players, then, let the death time pass 20 to avoid XP
+        // multiplication - not just duplication, but *multiplication*.
+        if (vanillaNewDeathTime <= 20 && newDeathTime > 20) {
+            newDeathTime = 20;
+        }
+        this.deathTime = newDeathTime;
     }
 
 }

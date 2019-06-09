@@ -24,26 +24,46 @@
  */
 package org.spongepowered.common.mixin.realtime.mixin;
 
-import net.minecraft.server.management.PlayerInteractionManager;
-import net.minecraft.world.World;
+import net.minecraft.entity.monster.EntityZombieVillager;
 import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Slice;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.mixin.realtime.IMixinRealTimeTicking;
 
-@Mixin(PlayerInteractionManager.class)
-public abstract class MixinPlayerInteractionManager {
+@Mixin(EntityZombieVillager.class)
+public abstract class MixinEntityZombieVillager_RealTime extends MixinEntityLivingBase_RealTime {
 
-    private static final String PLAYER_INTERACTION_BLOCK_DAMAGE_FIELD = "Lnet/minecraft/server/management/PlayerInteractionManager;curblockDamage:I";
-    @Shadow public World world;
-    @Shadow private int curblockDamage;
+    @Shadow protected abstract int getConversionProgress();
 
-    @Redirect(method = "updateBlockRemoving", at = @At(value = "FIELD", target = PLAYER_INTERACTION_BLOCK_DAMAGE_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
-    public void fixupDiggingTime(PlayerInteractionManager self, int modifier) {
-        int ticks = (int) ((IMixinRealTimeTicking) this.world.getMinecraftServer()).getRealTimeTicks();
-        this.curblockDamage += ticks;
+    @Redirect(
+        method = "onUpdate",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/entity/monster/EntityZombieVillager;getConversionProgress()I",
+            ordinal = 0
+        ),
+        slice = @Slice(
+            from = @At(
+                value = "INVOKE",
+                target = "Lnet/minecraft/entity/monster/EntityZombieVillager;isConverting()Z"
+            ),
+            to = @At(
+                value = "FIELD",
+                target = "Lnet/minecraft/entity/monster/EntityZombieVillager;conversionTime:I",
+                opcode = Opcodes.GETFIELD
+            )
+        )
+    )
+    private int adjustForRealTimeConversionTimeBoost(EntityZombieVillager self) {
+        if (((IMixinWorld) this.world).isFake()) {
+            return this.getConversionProgress();
+        }
+        int ticks = (int) ((IMixinRealTimeTicking) self.getEntityWorld()).getRealTimeTicks();
+        return this.getConversionProgress() * ticks;
     }
 
 }

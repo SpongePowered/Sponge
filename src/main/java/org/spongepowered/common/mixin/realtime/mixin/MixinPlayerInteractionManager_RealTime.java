@@ -24,38 +24,50 @@
  */
 package org.spongepowered.common.mixin.realtime.mixin;
 
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.server.management.PlayerInteractionManager;
+import net.minecraft.world.World;
 import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Slice;
+import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.mixin.realtime.IMixinRealTimeTicking;
 
-@Mixin(EntityPlayer.class)
-public abstract class MixinEntityPlayer {
+@Mixin(PlayerInteractionManager.class)
+public abstract class MixinPlayerInteractionManager_RealTime {
 
-    private static final String ENTITY_PLAYER_XP_COOLDOWN_FIELD = "Lnet/minecraft/entity/player/EntityPlayer;xpCooldown:I";
-    private static final String ENTITY_PLAYER_SLEEP_TIMER_FIELD = "Lnet/minecraft/entity/player/EntityPlayer;sleepTimer:I";
-    @Shadow public int xpCooldown;
-    @Shadow private int sleepTimer;
+    @Shadow public World world;
+    @Shadow private int curblockDamage;
 
-    @Redirect(method = "onUpdate", at = @At(value = "FIELD", target = ENTITY_PLAYER_XP_COOLDOWN_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
-    public void fixupXpCooldown(EntityPlayer self, int modifier) {
-        int ticks = (int) ((IMixinRealTimeTicking) self.getEntityWorld()).getRealTimeTicks();
-        this.xpCooldown = Math.max(0, this.xpCooldown - ticks);
-    }
+    @Shadow public EntityPlayerMP player;
 
-    @Redirect(method = "onUpdate", at = @At(value = "FIELD", target = ENTITY_PLAYER_SLEEP_TIMER_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
-    public void fixupSleepTimer(EntityPlayer self, int modifier) {
-        int ticks = (int) ((IMixinRealTimeTicking) self.getEntityWorld()).getRealTimeTicks();
-        this.sleepTimer += ticks;
-    }
-
-    @Redirect(method = "onUpdate", at = @At(value = "FIELD", target = ENTITY_PLAYER_SLEEP_TIMER_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 2))
-    public void fixupWakeTimer(EntityPlayer self, int modifier) {
-        int ticks = (int) ((IMixinRealTimeTicking) self.getEntityWorld()).getRealTimeTicks();
-        this.sleepTimer += ticks;
+    @Redirect(
+        method = "updateBlockRemoving",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/server/management/PlayerInteractionManager;curblockDamage:I",
+            opcode = Opcodes.PUTFIELD
+        ),
+        slice = @Slice(
+            from = @At("HEAD"),
+            to = @At(
+                value = "FIELD",
+                target = "Lnet/minecraft/server/management/PlayerInteractionManager;receivedFinishDiggingPacket:Z",
+                opcode = Opcodes.GETFIELD
+            )
+        )
+    )
+    private void adjustForRealTimeDiggingTime(PlayerInteractionManager self, int modifier) {
+        if (SpongeImplHooks.isFakePlayer(this.player) || ((IMixinWorld) this.world).isFake()) {
+            this.curblockDamage = modifier;
+            return;
+        }
+        int ticks = (int) ((IMixinRealTimeTicking) this.world.getMinecraftServer()).getRealTimeTicks();
+        this.curblockDamage += ticks;
     }
 
 }

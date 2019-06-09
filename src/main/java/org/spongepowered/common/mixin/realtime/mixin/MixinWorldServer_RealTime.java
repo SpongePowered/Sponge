@@ -24,25 +24,29 @@
  */
 package org.spongepowered.common.mixin.realtime.mixin;
 
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityBrewingStand;
-import org.spongepowered.asm.lib.Opcodes;
+import net.minecraft.world.WorldServer;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.mixin.realtime.IMixinRealTimeTicking;
 
-@Mixin(TileEntityBrewingStand.class)
-public abstract class MixinTileEntityBrewingStand extends TileEntity {
+@Mixin(WorldServer.class)
+public abstract class MixinWorldServer_RealTime extends MixinWorld_RealTime implements IMixinRealTimeTicking {
 
-    private static final String BREWING_STAND_BREW_TIME_FIELD = "Lnet/minecraft/tileentity/TileEntityBrewingStand;brewTime:I";
-    @Shadow private int brewTime;
-
-    @Redirect(method = "update", at = @At(value = "FIELD", target = BREWING_STAND_BREW_TIME_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
-    public void fixupBrewTime(TileEntityBrewingStand self, int modifier) {
-        int ticks = (int) ((IMixinRealTimeTicking) this.getWorld()).getRealTimeTicks();
-        this.brewTime = Math.max(0, this.brewTime - ticks);
+    @Inject(method = "tick", at = @At("HEAD"))
+    private void fixTimeOfDayForRealTime(CallbackInfo ci) {
+        if (this.isFake()) {
+            return;
+        }
+        if (this.worldInfo.getGameRulesInstance().getBoolean("doDaylightCycle")) {
+            // Subtract the one the original tick method is going to add
+            long diff = this.getRealTimeTicks() - 1;
+            // Don't set if we're not changing it as other mods might be listening for changes
+            if (diff > 0) {
+                this.worldInfo.setWorldTime(this.worldInfo.getWorldTime() + diff);
+            }
+        }
     }
 
 }

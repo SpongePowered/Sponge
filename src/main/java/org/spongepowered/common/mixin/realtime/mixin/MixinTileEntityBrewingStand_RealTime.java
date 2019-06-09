@@ -24,31 +24,36 @@
  */
 package org.spongepowered.common.mixin.realtime.mixin;
 
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntityBrewingStand;
+import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.mixin.realtime.IMixinRealTimeTicking;
 
-@Mixin(MinecraftServer.class)
-public abstract class MixinMinecraftServer implements IMixinRealTimeTicking {
+@Mixin(TileEntityBrewingStand.class)
+public abstract class MixinTileEntityBrewingStand_RealTime extends TileEntity {
 
-    private static long lastTickNanos = System.nanoTime();
-    private static long realTimeTicks = 1;
+    @Shadow private int brewTime;
 
-    @Inject(method = "tick", at = @At("HEAD"))
-    public void tick(CallbackInfo ci) {
-        long currentNanos = System.nanoTime();
-        realTimeTicks = (currentNanos - lastTickNanos) / 50000000;
-        if (realTimeTicks < 1) {
-            realTimeTicks = 1;
+    @Redirect(
+        method = "update",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/tileentity/TileEntityBrewingStand;brewTime:I",
+            opcode = Opcodes.PUTFIELD, ordinal = 0
+        )
+    )
+    private void adjustForRealTimeBrewTime(TileEntityBrewingStand self, int modifier) {
+        if (((IMixinWorld) this.world).isFake()) {
+            this.brewTime = modifier;
+            return;
         }
-        lastTickNanos = currentNanos;
+        int ticks = (int) ((IMixinRealTimeTicking) this.world).getRealTimeTicks();
+        this.brewTime = Math.max(0, this.brewTime - ticks);
     }
 
-    @Override
-    public long getRealTimeTicks() {
-        return realTimeTicks;
-    }
 }

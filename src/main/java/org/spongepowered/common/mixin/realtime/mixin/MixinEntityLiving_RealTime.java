@@ -24,29 +24,42 @@
  */
 package org.spongepowered.common.mixin.realtime.mixin;
 
-import net.minecraft.entity.EntityAgeable;
+import net.minecraft.entity.EntityLiving;
+import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Slice;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.mixin.realtime.IMixinRealTimeTicking;
 
-@Mixin(EntityAgeable.class)
-public abstract class MixinEntityAgeable {
+@Mixin(EntityLiving.class)
+public abstract class MixinEntityLiving_RealTime extends MixinEntityLivingBase_RealTime {
 
-    private static final String ENTITY_AGEABLE_SET_GROWING_AGE_METHOD = "Lnet/minecraft/entity/EntityAgeable;setGrowingAge(I)V";
 
-    @Redirect(method = "onLivingUpdate", at = @At(value = "INVOKE", target = ENTITY_AGEABLE_SET_GROWING_AGE_METHOD, ordinal = 0))
-    public void fixupGrowingUp(EntityAgeable self, int age) {
-        // Subtract the one the original update method added
-        int diff = (int) ((IMixinRealTimeTicking) self.getEntityWorld()).getRealTimeTicks() - 1;
-        self.setGrowingAge(Math.min(0, age + diff));
-    }
+    @Redirect(
+        method = "updateEntityActionState",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/entity/EntityLiving;idleTime:I",
+            opcode = Opcodes.PUTFIELD
+        ),
+        slice = @Slice(
+            from = @At("HEAD"),
+            to = @At(
+                value = "CONSTANT",
+                args = "stringValue=checkDespawn"
 
-    @Redirect(method = "onLivingUpdate", at = @At(value = "INVOKE", target = ENTITY_AGEABLE_SET_GROWING_AGE_METHOD, ordinal = 1))
-    public void fixupBreedingCooldown(EntityAgeable self, int age) {
-        // Subtract the one the original update method added
-        int diff = (int) ((IMixinRealTimeTicking) self.getEntityWorld()).getRealTimeTicks() - 1;
-        self.setGrowingAge(Math.max(0, age - diff));
+            )
+        )
+    )
+    private void adjustForRealTimeEntityDespawnAge(EntityLiving self, int modifier) {
+        if (((IMixinWorld) this.world).isFake()) {
+            this.idleTime = modifier;
+            return;
+        }
+        int ticks = (int) ((IMixinRealTimeTicking) self.getEntityWorld()).getRealTimeTicks();
+        this.idleTime += ticks;
     }
 
 }

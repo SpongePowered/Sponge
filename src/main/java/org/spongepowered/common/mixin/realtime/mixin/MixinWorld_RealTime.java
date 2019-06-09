@@ -24,33 +24,31 @@
  */
 package org.spongepowered.common.mixin.realtime.mixin;
 
-import net.minecraft.entity.EntityLivingBase;
-import org.spongepowered.asm.lib.Opcodes;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.World;
+import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.mixin.realtime.IMixinRealTimeTicking;
 
-@Mixin(EntityLivingBase.class)
-public abstract class MixinEntityLivingBase {
+import javax.annotation.Nullable;
 
-    private static final String ENTITY_LIVING_BASE_DEATH_TIME_FIELD = "Lnet/minecraft/entity/EntityLivingBase;deathTime:I";
-    @Shadow public int deathTime;
+@Mixin(World.class)
+public abstract class MixinWorld_RealTime implements IMixinRealTimeTicking, IMixinWorld {
 
-    @Redirect(method = "onDeathUpdate", at = @At(value = "FIELD", target = ENTITY_LIVING_BASE_DEATH_TIME_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
-    private void fixupDeathTime(EntityLivingBase self, int vanillaNewDeathTime) {
-        int ticks = (int) ((IMixinRealTimeTicking) self.getEntityWorld()).getRealTimeTicks();
-        int newDeathTime = this.deathTime + ticks;
-        // At tick 20, XP is dropped and the death animation finishes. The
-        // entity is also removed from the world... except in the case of
-        // players, which are not removed until they log out or click Respawn.
-        // For players, then, let the death time pass 20 to avoid XP
-        // multiplication - not just duplication, but *multiplication*.
-        if (vanillaNewDeathTime <= 20 && newDeathTime > 20) {
-            newDeathTime = 20;
+    @Shadow @Nullable public abstract MinecraftServer getMinecraftServer();
+
+    @Shadow protected WorldInfo worldInfo;
+
+    @Override
+    public long getRealTimeTicks() {
+        if (this.isFake()) {
+            return 1;
         }
-        this.deathTime = newDeathTime;
+        if (this.getMinecraftServer() != null) {
+            return ((IMixinRealTimeTicking) this.getMinecraftServer()).getRealTimeTicks();
+        }
+        return 1;
     }
-
 }
