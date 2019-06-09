@@ -1,0 +1,135 @@
+/*
+ * This file is part of Sponge, licensed under the MIT License (MIT).
+ *
+ * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) contributors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+package org.spongepowered.common.data.processor.multi.entity;
+
+import com.google.common.collect.ImmutableMap;
+import net.minecraft.entity.item.EntityArmorStand;
+import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableDisabledSlotsData;
+import org.spongepowered.api.data.manipulator.mutable.entity.DisabledSlotsData;
+import org.spongepowered.api.data.value.mutable.SetValue;
+import org.spongepowered.api.item.inventory.equipment.EquipmentType;
+import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeDisabledSlotsData;
+import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
+import org.spongepowered.common.data.value.mutable.SpongeSetValue;
+
+import java.util.*;
+
+public class DisabledSlotsDataProcessor extends AbstractEntityDataProcessor<EntityArmorStand, DisabledSlotsData, ImmutableDisabledSlotsData> {
+
+    public DisabledSlotsDataProcessor() {
+        super(EntityArmorStand.class);
+    }
+
+    private int populateChunkFromSet(Set<EquipmentType> value) {
+        int chunk = 0;
+
+        if (value.contains(EquipmentTypes.BOOTS)) chunk |= 1 << 1;
+        if (value.contains(EquipmentTypes.LEGGINGS)) chunk |= 1 << 2;
+        if (value.contains(EquipmentTypes.CHESTPLATE)) chunk |= 1 << 3;
+        if (value.contains(EquipmentTypes.HEADWEAR)) chunk |= 1 << 4;
+        return chunk;
+    }
+
+    @Override
+    protected boolean doesDataExist(EntityArmorStand dataHolder) {
+        return true;
+    }
+
+    @Override
+    protected boolean set(EntityArmorStand dataHolder, Map<Key<?>, Object> keyValues) {
+        int disabledSlots = 0;
+
+        if (keyValues.containsKey(Keys.ARMOR_STAND_TAKING_DISABLED)) {
+            Set<EquipmentType> takingDisabled = (Set<EquipmentType>) keyValues.get(Keys.ARMOR_STAND_TAKING_DISABLED);
+            disabledSlots |= (populateChunkFromSet(takingDisabled) << 8);
+        }
+
+        if (keyValues.containsKey(Keys.ARMOR_STAND_PLACING_DISABLED)) {
+            Set<EquipmentType> placingDisabled = (Set<EquipmentType>) keyValues.get(Keys.ARMOR_STAND_PLACING_DISABLED);
+            disabledSlots |= (populateChunkFromSet(placingDisabled) << 16);
+        }
+
+        dataHolder.disabledSlots = disabledSlots;
+        return true;
+    }
+
+    @Override
+    protected Map<Key<?>, ?> getValues(EntityArmorStand dataHolder) {
+        // try and keep the all chunk empty
+        int allChunk = dataHolder.disabledSlots & 0b1111_1111;
+        if (allChunk != 0) {
+            dataHolder.disabledSlots |= (allChunk << 8);
+            dataHolder.disabledSlots |= (allChunk << 16);
+            dataHolder.disabledSlots ^= 0b1111_1111;
+        }
+
+        int disabledSlots = dataHolder.disabledSlots;
+
+        Set<EquipmentType> takingDisabled = new HashSet();
+        if (((disabledSlots >> 1 + 8) & 1) != 0) takingDisabled.add(EquipmentTypes.BOOTS);
+        if (((disabledSlots >> 2 + 8) & 1) != 0) takingDisabled.add(EquipmentTypes.LEGGINGS);
+        if (((disabledSlots >> 3 + 8) & 1) != 0) takingDisabled.add(EquipmentTypes.CHESTPLATE);
+        if (((disabledSlots >> 4 + 8) & 1) != 0) takingDisabled.add(EquipmentTypes.HEADWEAR);
+
+        Set<EquipmentType> placingDisabled = new HashSet();
+        if (((disabledSlots >> 1 + 16) & 1) != 0) placingDisabled.add(EquipmentTypes.BOOTS);
+        if (((disabledSlots >> 2 + 16) & 1) != 0) placingDisabled.add(EquipmentTypes.LEGGINGS);
+        if (((disabledSlots >> 3 + 16) & 1) != 0) placingDisabled.add(EquipmentTypes.CHESTPLATE);
+        if (((disabledSlots >> 4 + 16) & 1) != 0) placingDisabled.add(EquipmentTypes.HEADWEAR);
+
+        return ImmutableMap.<Key<?>, Object>builder()
+                .put(Keys.ARMOR_STAND_PLACING_DISABLED, placingDisabled)
+                .put(Keys.ARMOR_STAND_TAKING_DISABLED, takingDisabled)
+                .build();
+    }
+
+    @Override
+    protected DisabledSlotsData createManipulator() {
+        return new SpongeDisabledSlotsData();
+    }
+
+    @Override
+    public Optional<DisabledSlotsData> fill(DataContainer container, DisabledSlotsData disabledSlotsData) {
+        if (container.contains(Keys.ARMOR_STAND_TAKING_DISABLED)) {
+            disabledSlotsData.set(Keys.ARMOR_STAND_TAKING_DISABLED, new HashSet<EquipmentType>((Collection<EquipmentType>) container.get(Keys.ARMOR_STAND_TAKING_DISABLED.getQuery()).get()));
+        }
+        if (container.contains(Keys.ARMOR_STAND_PLACING_DISABLED)) {
+            disabledSlotsData.set(Keys.ARMOR_STAND_PLACING_DISABLED, new HashSet<EquipmentType>((Collection<EquipmentType>) container.get(Keys.ARMOR_STAND_PLACING_DISABLED.getQuery()).get()));
+        }
+
+        return Optional.of(disabledSlotsData);
+    }
+
+    @Override
+    public DataTransactionResult remove(DataHolder dataHolder) {
+        return DataTransactionResult.failNoData();
+    }
+}

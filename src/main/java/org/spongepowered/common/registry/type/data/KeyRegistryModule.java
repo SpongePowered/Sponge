@@ -490,6 +490,10 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
 
         this.register("armor_stand_is_small", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("is_small").name("Is Small").query(of("IsSmall")).build());
 
+        this.register("armor_stand_taking_disabled", Key.builder().type(TypeTokens.SET_EQUIPMENT_TYPE_TOKEN).id("taking_disabled").name("Taking Disabled").query(of("TakingDisabled")).build());
+
+        this.register("armor_stand_placing_disabled", Key.builder().type(TypeTokens.SET_EQUIPMENT_TYPE_TOKEN).id("placing_disabled").name("Placing Disabled").query(of("PlacingDisabled")).build());
+
         this.register("is_silent", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("is_silent").name("Is Silent").query(of("IsSilent")).build());
 
         this.register("glowing", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("glowing").name("Glowing").query(of("Glowing")).build());
