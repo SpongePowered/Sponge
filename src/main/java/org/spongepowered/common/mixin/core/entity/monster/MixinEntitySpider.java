@@ -28,9 +28,10 @@ import net.minecraft.entity.monster.EntitySpider;
 import org.spongepowered.api.entity.living.monster.Spider;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.mixin.api.minecraft.entity.monster.MixinEntityMob_API;
 
 @Mixin(EntitySpider.class)
-public abstract class MixinEntitySpider extends MixinEntityMob implements Spider {
+public abstract class MixinEntitySpider extends MixinEntityMob_API implements Spider {
 
     @Shadow public abstract boolean isBesideClimbableBlock();
 

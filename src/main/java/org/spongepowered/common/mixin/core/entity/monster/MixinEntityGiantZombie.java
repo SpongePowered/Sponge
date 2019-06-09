@@ -27,8 +27,9 @@ package org.spongepowered.common.mixin.core.entity.monster;
 import net.minecraft.entity.monster.EntityGiantZombie;
 import org.spongepowered.api.entity.living.monster.Giant;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.mixin.api.minecraft.entity.monster.MixinEntityMob_API;
 
 @Mixin(EntityGiantZombie.class)
-public abstract class MixinEntityGiantZombie extends MixinEntityMob implements Giant {
+public abstract class MixinEntityGiantZombie extends MixinEntityMob_API implements Giant {
 
 }

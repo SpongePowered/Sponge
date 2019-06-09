@@ -27,8 +27,9 @@ package org.spongepowered.common.mixin.core.entity.monster;
 import net.minecraft.entity.monster.EntityEvoker;
 import org.spongepowered.api.entity.living.monster.Evoker;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.mixin.api.minecraft.entity.monster.MixinEntityMob_API;
 
 @Mixin(EntityEvoker.class)
-public abstract class MixinEntityEvoker extends MixinEntityMob implements Evoker {
+public abstract class MixinEntityEvoker extends MixinEntityMob_API implements Evoker {
 
 }

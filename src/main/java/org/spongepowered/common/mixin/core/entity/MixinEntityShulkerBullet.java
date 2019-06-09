@@ -47,6 +47,7 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IEntityTargetingEntity;
 import org.spongepowered.common.interfaces.entity.projectile.IMixinShulkerBullet;
+import org.spongepowered.common.mixin.api.minecraft.entity.MixinEntity_API;
 
 import java.util.List;
 import java.util.UUID;
@@ -54,7 +55,7 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 
 @Mixin(EntityShulkerBullet.class)
-public abstract class MixinEntityShulkerBullet extends MixinEntity implements ShulkerBullet, IEntityTargetingEntity, IMixinShulkerBullet {
+public abstract class MixinEntityShulkerBullet extends MixinEntity_API implements ShulkerBullet, IEntityTargetingEntity, IMixinShulkerBullet {
 
     @Shadow @Nullable private net.minecraft.entity.Entity target;
     @Shadow @Nullable private EnumFacing direction;

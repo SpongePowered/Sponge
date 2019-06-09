@@ -30,7 +30,6 @@ import net.minecraft.entity.item.EntityFallingBlock;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 import org.spongepowered.api.entity.FallingBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -45,10 +44,10 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.mixin.core.entity.MixinEntity;
+import org.spongepowered.common.mixin.api.minecraft.entity.MixinEntity_API;
 
 @Mixin(EntityFallingBlock.class)
-public abstract class MixinEntityFallingBlock extends MixinEntity implements FallingBlock {
+public abstract class MixinEntityFallingBlock extends MixinEntity_API implements FallingBlock {
 
     @Shadow public IBlockState fallTile;
 

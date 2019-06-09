@@ -27,9 +27,9 @@ package org.spongepowered.common.mixin.core.entity.monster;
 import net.minecraft.entity.monster.EntityGhast;
 import org.spongepowered.api.entity.living.monster.Ghast;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.mixin.core.entity.MixinEntityFlying;
+import org.spongepowered.common.mixin.api.minecraft.entity.MixinEntityFlying_API;
 
 @Mixin(EntityGhast.class)
-public abstract class MixinEntityGhast extends MixinEntityFlying implements Ghast {
+public abstract class MixinEntityGhast extends MixinEntityFlying_API implements Ghast {
 
 }

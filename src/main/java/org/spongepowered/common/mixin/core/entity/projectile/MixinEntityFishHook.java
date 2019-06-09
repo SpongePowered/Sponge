@@ -52,7 +52,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
-import org.spongepowered.common.mixin.core.entity.MixinEntity;
+import org.spongepowered.common.mixin.api.minecraft.entity.MixinEntity_API;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,7 +62,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 @Mixin(EntityFishHook.class)
-public abstract class MixinEntityFishHook extends MixinEntity implements FishHook {
+public abstract class MixinEntityFishHook extends MixinEntity_API implements FishHook {
 
     @Shadow @Nullable private EntityPlayer angler;
     @Shadow @Nullable public net.minecraft.entity.Entity caughtEntity;

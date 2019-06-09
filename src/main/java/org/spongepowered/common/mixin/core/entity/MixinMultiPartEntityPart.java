@@ -31,10 +31,10 @@ import org.spongepowered.api.entity.living.complex.EnderDragonPart;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.mixin.core.entity.MixinEntity;
+import org.spongepowered.common.mixin.api.minecraft.entity.MixinEntity_API;
 
 @Mixin(MultiPartEntityPart.class)
-public abstract class MixinMultiPartEntityPart extends MixinEntity implements EnderDragonPart {
+public abstract class MixinMultiPartEntityPart extends MixinEntity_API implements EnderDragonPart {
 
     @Shadow @Final public IEntityMultiPart parent;
 

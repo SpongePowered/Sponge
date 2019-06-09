@@ -27,8 +27,9 @@ package org.spongepowered.common.mixin.core.entity.monster;
 import net.minecraft.entity.monster.EntityVex;
 import org.spongepowered.api.entity.living.monster.Vex;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.mixin.api.minecraft.entity.monster.MixinEntityMob_API;
 
 @Mixin(EntityVex.class)
-public abstract class MixinEntityVex extends MixinEntityMob implements Vex {
+public abstract class MixinEntityVex extends MixinEntityMob_API implements Vex {
 
 }

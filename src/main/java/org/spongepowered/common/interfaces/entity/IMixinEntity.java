@@ -52,7 +52,7 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-public interface IMixinEntity extends org.spongepowered.api.entity.Entity, IMixinTrackable, IUserOrEntity {
+public interface IMixinEntity extends IMixinTrackable, IUserOrEntity {
 
     boolean isInConstructPhase();
 

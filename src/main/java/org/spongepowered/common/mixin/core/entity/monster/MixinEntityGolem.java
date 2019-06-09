@@ -27,9 +27,9 @@ package org.spongepowered.common.mixin.core.entity.monster;
 import net.minecraft.entity.monster.EntityGolem;
 import org.spongepowered.api.entity.living.golem.Golem;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.mixin.core.entity.MixinEntityCreature;
+import org.spongepowered.common.mixin.api.minecraft.entity.MixinEntityCreature_API;
 
 @Mixin(EntityGolem.class)
-public abstract class MixinEntityGolem extends MixinEntityCreature implements Golem {
+public abstract class MixinEntityGolem extends MixinEntityCreature_API implements Golem {
 
 }

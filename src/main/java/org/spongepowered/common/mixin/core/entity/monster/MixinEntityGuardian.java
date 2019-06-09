@@ -32,11 +32,12 @@ import org.spongepowered.api.entity.living.monster.Guardian;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.mixin.api.minecraft.entity.monster.MixinEntityMob_API;
 
 import java.util.Optional;
 
 @Mixin(EntityGuardian.class)
-public abstract class MixinEntityGuardian extends MixinEntityMob implements Guardian {
+public abstract class MixinEntityGuardian extends MixinEntityMob_API implements Guardian {
 
     @Shadow @Final private static DataParameter<Integer> TARGET_ENTITY;
     @Shadow private void setTargetedEntity(int entityId) { } // setTargetedEntity

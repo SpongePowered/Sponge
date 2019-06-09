@@ -39,14 +39,14 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.interfaces.entity.explosive.IMixinExplosive;
-import org.spongepowered.common.mixin.core.entity.MixinEntity;
+import org.spongepowered.common.mixin.api.minecraft.entity.MixinEntity_API;
 
 import java.util.Optional;
 
 import javax.annotation.Nullable;
 
 @Mixin(EntityEnderCrystal.class)
-public abstract class MixinEntityEnderCrystal extends MixinEntity implements EnderCrystal, IMixinExplosive {
+public abstract class MixinEntityEnderCrystal extends MixinEntity_API implements EnderCrystal, IMixinExplosive {
 
     private static final String TARGET_NEW_EXPLOSION = "Lnet/minecraft/world/World;createExplosion"
             + "(Lnet/minecraft/entity/Entity;DDDFZ)Lnet/minecraft/world/Explosion;";

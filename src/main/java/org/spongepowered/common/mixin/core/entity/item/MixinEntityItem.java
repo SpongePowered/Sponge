@@ -54,14 +54,13 @@ import org.spongepowered.common.interfaces.entity.item.IMixinEntityItem;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
-import org.spongepowered.common.mixin.core.entity.MixinEntity;
+import org.spongepowered.common.mixin.api.minecraft.entity.MixinEntity_API;
 
 import java.util.List;
 
 @Mixin(EntityItem.class)
-public abstract class MixinEntityItem extends MixinEntity implements Item, IMixinEntityItem {
+public abstract class MixinEntityItem extends MixinEntity_API implements Item, IMixinEntityItem {
 
     private static final int MAGIC_PREVIOUS = -1;
     @Shadow private int pickupDelay;

@@ -33,10 +33,10 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
 import org.spongepowered.common.interfaces.ITargetedLocation;
-import org.spongepowered.common.mixin.core.entity.MixinEntity;
+import org.spongepowered.common.mixin.api.minecraft.entity.MixinEntity_API;
 
 @Mixin(EntityEnderEye.class)
-public abstract class MixinEntityEnderEye extends MixinEntity implements EyeOfEnder, ITargetedLocation {
+public abstract class MixinEntityEnderEye extends MixinEntity_API implements EyeOfEnder, ITargetedLocation {
 
     @Shadow private double targetX;
     @Shadow private double targetY;

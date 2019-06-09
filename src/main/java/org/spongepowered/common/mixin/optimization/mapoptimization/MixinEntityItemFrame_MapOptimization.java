@@ -34,10 +34,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.interfaces.world.IMixinMapData;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.mixin.core.entity.MixinEntityHanging;
+import org.spongepowered.common.mixin.core.entity.item.MixinEntityItemFrame_Impl;
 
 @Mixin(EntityItemFrame.class)
-public abstract class MixinEntityItemFrame_MapOptimization extends MixinEntityHanging {
+public abstract class MixinEntityItemFrame_MapOptimization extends MixinEntityItemFrame_Impl {
 
     @Shadow public abstract ItemStack getDisplayedItem();
 

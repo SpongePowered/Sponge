@@ -36,12 +36,12 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.mixin.core.entity.MixinEntity;
+import org.spongepowered.common.mixin.api.minecraft.entity.MixinEntity_API;
 
 import javax.annotation.Nullable;
 
 @Mixin(EntityThrowable.class)
-public abstract class MixinEntityThrowable extends MixinEntity implements Projectile {
+public abstract class MixinEntityThrowable extends MixinEntity_API implements Projectile {
 
     @Shadow private EntityLivingBase thrower;
     @Shadow private String throwerName;

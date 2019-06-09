@@ -38,13 +38,14 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
+import org.spongepowered.common.mixin.api.minecraft.entity.monster.MixinEntityMob_API;
 
 import java.util.List;
 
 import javax.annotation.Nullable;
 
 @Mixin(EntityEnderman.class)
-public abstract class MixinEntityEnderman extends MixinEntityMob implements Enderman {
+public abstract class MixinEntityEnderman extends MixinEntityMob_API implements Enderman {
 
     @Shadow @Nullable public abstract IBlockState getHeldBlockState();
 

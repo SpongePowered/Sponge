@@ -34,12 +34,12 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSlimeData;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.mixin.core.entity.MixinEntityLiving;
+import org.spongepowered.common.mixin.api.minecraft.entity.MixinEntityLiving_API;
 
 import java.util.List;
 
 @Mixin(EntitySlime.class)
-public abstract class MixinEntitySlime extends MixinEntityLiving implements Slime {
+public abstract class MixinEntitySlime extends MixinEntityLiving_API implements Slime {
 
     @Shadow public abstract int getSlimeSize();
 

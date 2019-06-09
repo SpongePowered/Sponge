@@ -68,7 +68,7 @@ import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.IInventoryFabric;
-import org.spongepowered.common.mixin.core.entity.MixinEntityAgeable;
+import org.spongepowered.common.mixin.api.minecraft.entity.MixinEntityAgeable_API;
 import org.spongepowered.common.registry.SpongeVillagerRegistry;
 
 import java.util.List;
@@ -80,7 +80,7 @@ import javax.annotation.Nullable;
 @SuppressWarnings("rawtypes")
 @Mixin(EntityVillager.class)
 @Implements({@Interface(iface = Villager.class, prefix = "villager$"), @Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$")})
-public abstract class MixinEntityVillager extends MixinEntityAgeable implements Villager, IMixinVillager, CarriedInventory<Villager> {
+public abstract class MixinEntityVillager extends MixinEntityAgeable_API implements Villager, IMixinVillager, CarriedInventory<Villager> {
 
     @Shadow private boolean isPlaying; // isPlaying
     @Shadow private int careerId; // careerId

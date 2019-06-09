@@ -27,9 +27,9 @@ package org.spongepowered.common.mixin.core.entity.passive;
 import net.minecraft.entity.passive.EntityAmbientCreature;
 import org.spongepowered.api.entity.living.Ambient;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.mixin.core.entity.MixinEntityLiving;
+import org.spongepowered.common.mixin.api.minecraft.entity.MixinEntityLiving_API;
 
 @Mixin(EntityAmbientCreature.class)
-public abstract class MixinEntityAmbientCreature extends MixinEntityLiving implements Ambient {
+public abstract class MixinEntityAmbientCreature extends MixinEntityLiving_API implements Ambient {
 
 }

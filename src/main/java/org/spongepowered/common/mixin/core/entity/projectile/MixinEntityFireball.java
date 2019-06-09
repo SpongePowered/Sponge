@@ -36,12 +36,12 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.mixin.core.entity.MixinEntity;
+import org.spongepowered.common.mixin.api.minecraft.entity.MixinEntity_API;
 
 import javax.annotation.Nullable;
 
 @Mixin(EntityFireball.class)
-public abstract class MixinEntityFireball extends MixinEntity implements Fireball {
+public abstract class MixinEntityFireball extends MixinEntity_API implements Fireball {
 
     @Shadow public EntityLivingBase shootingEntity;
     @Shadow protected abstract void onImpact(RayTraceResult movingObjectPosition);

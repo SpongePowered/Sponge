@@ -35,12 +35,12 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExpOrbData;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.interfaces.entity.IMixinEntityXPOrb;
-import org.spongepowered.common.mixin.core.entity.MixinEntity;
+import org.spongepowered.common.mixin.api.minecraft.entity.MixinEntity_API;
 
 import java.util.List;
 
 @Mixin(EntityXPOrb.class)
-public abstract class MixinEntityXPOrb extends MixinEntity implements ExperienceOrb, IMixinEntityXPOrb {
+public abstract class MixinEntityXPOrb extends MixinEntity_API implements ExperienceOrb, IMixinEntityXPOrb {
 
     @Shadow public int xpValue;
 

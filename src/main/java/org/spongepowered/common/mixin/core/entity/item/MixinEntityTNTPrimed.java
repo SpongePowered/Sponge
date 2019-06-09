@@ -48,14 +48,14 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.interfaces.entity.IMixinEntityTNTPrimed;
-import org.spongepowered.common.mixin.core.entity.MixinEntity;
+import org.spongepowered.common.mixin.api.minecraft.entity.MixinEntity_API;
 
 import java.util.Optional;
 
 import javax.annotation.Nullable;
 
 @Mixin(EntityTNTPrimed.class)
-public abstract class MixinEntityTNTPrimed extends MixinEntity implements PrimedTNT, IMixinEntityTNTPrimed {
+public abstract class MixinEntityTNTPrimed extends MixinEntity_API implements PrimedTNT, IMixinEntityTNTPrimed {
 
     private static final String TARGET_NEW_EXPLOSION = "Lnet/minecraft/world/World;createExplosion"
             + "(Lnet/minecraft/entity/Entity;DDDFZ)Lnet/minecraft/world/Explosion;";

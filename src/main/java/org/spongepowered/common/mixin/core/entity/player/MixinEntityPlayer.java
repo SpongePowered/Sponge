@@ -122,7 +122,7 @@ import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
-import org.spongepowered.common.mixin.core.entity.MixinEntityLivingBase;
+import org.spongepowered.common.mixin.api.minecraft.entity.MixinEntityLivingBase_API;
 import org.spongepowered.common.registry.type.event.DamageSourceRegistryModule;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.serializer.LegacyTexts;
@@ -137,7 +137,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 @Mixin(EntityPlayer.class)
-public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements IMixinEntityPlayer, ITargetedLocation {
+public abstract class MixinEntityPlayer extends MixinEntityLivingBase_API implements IMixinEntityPlayer, ITargetedLocation {
 
     private static final String WORLD_PLAY_SOUND_AT =
             "Lnet/minecraft/world/World;playSound(Lnet/minecraft/entity/player/EntityPlayer;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V";

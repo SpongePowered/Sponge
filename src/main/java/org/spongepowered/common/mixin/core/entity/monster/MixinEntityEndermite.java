@@ -34,11 +34,12 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExpirableData;
 import org.spongepowered.common.data.value.SpongeValueFactory;
+import org.spongepowered.common.mixin.api.minecraft.entity.monster.MixinEntityMob_API;
 
 import java.util.List;
 
 @Mixin(EntityEndermite.class)
-public abstract class MixinEntityEndermite extends MixinEntityMob implements Endermite {
+public abstract class MixinEntityEndermite extends MixinEntityMob_API implements Endermite {
 
     @Shadow public int lifetime;
 

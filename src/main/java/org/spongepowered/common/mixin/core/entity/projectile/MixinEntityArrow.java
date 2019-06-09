@@ -43,14 +43,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.entity.projectile.IMixinEntityArrow;
-import org.spongepowered.common.mixin.core.entity.MixinEntity;
+import org.spongepowered.common.mixin.api.minecraft.entity.MixinEntity_API;
 
 import java.util.List;
 
 import javax.annotation.Nullable;
 
 @Mixin(EntityArrow.class)
-public abstract class MixinEntityArrow extends MixinEntity implements Arrow, IMixinEntityArrow {
+public abstract class MixinEntityArrow extends MixinEntity_API implements Arrow, IMixinEntityArrow {
 
     @Shadow public Entity shootingEntity;
     @Shadow private int ticksInAir;

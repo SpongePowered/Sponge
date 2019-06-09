@@ -42,13 +42,13 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.mixin.core.entity.MixinEntity;
+import org.spongepowered.common.mixin.api.minecraft.entity.MixinEntity_API;
 import org.spongepowered.common.util.VectorSerializer;
 
 import java.util.ArrayList;
 
 @Mixin(EntityMinecart.class)
-public abstract class MixinEntityMinecart extends MixinEntity implements Minecart {
+public abstract class MixinEntityMinecart extends MixinEntity_API implements Minecart {
 
     private static final double DEFAULT_AIRBORNE_MOD = 0.94999998807907104D;
     private static final double DEFAULT_DERAILED_MOD = 0.5D;

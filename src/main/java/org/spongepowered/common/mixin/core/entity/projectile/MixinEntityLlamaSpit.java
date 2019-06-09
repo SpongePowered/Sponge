@@ -30,10 +30,10 @@ import org.spongepowered.api.entity.projectile.LlamaSpit;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.mixin.core.entity.MixinEntity;
+import org.spongepowered.common.mixin.api.minecraft.entity.MixinEntity_API;
 
 @Mixin(EntityLlamaSpit.class)
-public abstract class MixinEntityLlamaSpit extends MixinEntity implements LlamaSpit {
+public abstract class MixinEntityLlamaSpit extends MixinEntity_API implements LlamaSpit {
 
     @Shadow public EntityLlama owner;
 

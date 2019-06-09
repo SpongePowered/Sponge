@@ -52,13 +52,13 @@ import org.spongepowered.common.data.manipulator.mutable.SpongeFireworkEffectDat
 import org.spongepowered.common.data.processor.common.FireworkUtils;
 import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
 import org.spongepowered.common.interfaces.entity.IMixinEntityFireworkRocket;
-import org.spongepowered.common.mixin.core.entity.MixinEntity;
+import org.spongepowered.common.mixin.api.minecraft.entity.MixinEntity_API;
 
 import java.util.List;
 import java.util.Optional;
 
 @Mixin(EntityFireworkRocket.class)
-public abstract class MixinEntityFireworkRocket extends MixinEntity implements Firework, IMixinEntityFireworkRocket {
+public abstract class MixinEntityFireworkRocket extends MixinEntity_API implements Firework, IMixinEntityFireworkRocket {
 
     private static final String TARGET_ENTITY_STATE = "Lnet/minecraft/world/World;setEntityState"
             + "(Lnet/minecraft/entity/Entity;B)V";
