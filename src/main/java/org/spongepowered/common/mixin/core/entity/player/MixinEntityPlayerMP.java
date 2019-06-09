@@ -1472,7 +1472,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Inject(method = "canAttackPlayer", at = @At("HEAD"), cancellable = true)
     private void onCanAttackPlayer(EntityPlayer other, CallbackInfoReturnable<Boolean> cir) {
-        final boolean worldPVP = ((WorldProperties) other.world).isPVPEnabled();
+        final boolean worldPVP = ((WorldProperties) other.world.getWorldInfo()).isPVPEnabled();
 
         if (!worldPVP) {
             cir.setReturnValue(false);
