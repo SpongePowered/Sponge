@@ -55,12 +55,12 @@ public class SpongeBodyPartRotationalData extends AbstractData<BodyPartRotationa
 
     public SpongeBodyPartRotationalData() {
         this(ImmutableMap.<BodyPart, Vector3d>builder()
-                .put(BodyParts.HEAD, DataConstants.DEFAULT_HEAD_ROTATION)
-                .put(BodyParts.CHEST, DataConstants.DEFAULT_CHEST_ROTATION)
-                .put(BodyParts.LEFT_ARM, DataConstants.DEFAULT_LEFT_ARM_ROTATION)
-                .put(BodyParts.RIGHT_ARM, DataConstants.DEFAULT_RIGHT_ARM_ROTATION)
-                .put(BodyParts.LEFT_LEG, DataConstants.DEFAULT_LEFT_LEG_ROTATION)
-                .put(BodyParts.RIGHT_LEG, DataConstants.DEFAULT_RIGHT_LEG_ROTATION)
+                .put(BodyParts.HEAD, DataConstants.Entity.ArmorStand.DEFAULT_HEAD_ROTATION)
+                .put(BodyParts.CHEST, DataConstants.Entity.ArmorStand.DEFAULT_CHEST_ROTATION)
+                .put(BodyParts.LEFT_ARM, DataConstants.Entity.ArmorStand.DEFAULT_LEFT_ARM_ROTATION)
+                .put(BodyParts.RIGHT_ARM, DataConstants.Entity.ArmorStand.DEFAULT_RIGHT_ARM_ROTATION)
+                .put(BodyParts.LEFT_LEG, DataConstants.Entity.ArmorStand.DEFAULT_LEFT_LEG_ROTATION)
+                .put(BodyParts.RIGHT_LEG, DataConstants.Entity.ArmorStand.DEFAULT_RIGHT_LEG_ROTATION)
                 .build());
     }
 

@@ -49,12 +49,12 @@ public abstract class MixinEntityHorse extends MixinAbstractHorse implements Rid
 
     @Override
     public Value<HorseStyle> style() {
-        return new SpongeValue<>(Keys.HORSE_STYLE, DataConstants.Horse.DEFAULT_STYLE, HorseStyleRegistryModule.getHorseStyle((EntityHorse) (Object) this));
+        return new SpongeValue<>(Keys.HORSE_STYLE, DataConstants.Entity.Horse.DEFAULT_STYLE, HorseStyleRegistryModule.getHorseStyle((EntityHorse) (Object) this));
     }
 
     @Override
     public Value<HorseColor> color() {
-        return new SpongeValue<>(Keys.HORSE_COLOR, DataConstants.Horse.DEFAULT_COLOR, HorseColorRegistryModule.getHorseColor((EntityHorse) (Object) this));
+        return new SpongeValue<>(Keys.HORSE_COLOR, DataConstants.Entity.Horse.DEFAULT_COLOR, HorseColorRegistryModule.getHorseColor((EntityHorse) (Object) this));
     }
 
     @Override
@@ -63,8 +63,8 @@ public abstract class MixinEntityHorse extends MixinAbstractHorse implements Rid
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
+    public void spongeApi$supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(getHorseData());
     }
 }

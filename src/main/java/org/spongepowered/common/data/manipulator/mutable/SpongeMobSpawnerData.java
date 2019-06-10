@@ -80,10 +80,10 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
     }
 
     public SpongeMobSpawnerData() {
-        this(DataConstants.DEFAULT_SPAWNER_REMAINING_DELAY, DataConstants.DEFAULT_SPAWNER_MINIMUM_SPAWN_DELAY,
-                DataConstants.DEFAULT_SPAWNER_MAXIMUM_SPAWN_DELAY, DataConstants.DEFAULT_SPAWNER_SPAWN_COUNT,
-                DataConstants.DEFAULT_SPAWNER_MAXMIMUM_NEARBY_ENTITIES, DataConstants.DEFAULT_SPAWNER_REQUIRED_PLAYER_RANGE,
-                DataConstants.DEFAULT_SPAWNER_SPAWN_RANGE, DataConstants.DEFAULT_SPAWNER_NEXT_ENTITY_TO_SPAWN, new WeightedTable<>());
+        this(DataConstants.TileEntity.Spawner.DEFAULT_SPAWNER_REMAINING_DELAY, DataConstants.TileEntity.Spawner.DEFAULT_SPAWNER_MINIMUM_SPAWN_DELAY,
+                DataConstants.TileEntity.Spawner.DEFAULT_SPAWNER_MAXIMUM_SPAWN_DELAY, DataConstants.TileEntity.Spawner.DEFAULT_SPAWNER_SPAWN_COUNT,
+                DataConstants.TileEntity.Spawner.DEFAULT_SPAWNER_MAXMIMUM_NEARBY_ENTITIES, DataConstants.TileEntity.Spawner.DEFAULT_SPAWNER_REQUIRED_PLAYER_RANGE,
+                DataConstants.TileEntity.Spawner.DEFAULT_SPAWNER_SPAWN_RANGE, DataConstants.TileEntity.Spawner.DEFAULT_SPAWNER_NEXT_ENTITY_TO_SPAWN, new WeightedTable<>());
     }
 
 
@@ -92,7 +92,7 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
         return SpongeValueFactory.boundedBuilder(Keys.SPAWNER_REMAINING_DELAY)
             .minimum((short) 0)
             .maximum(this.maximumDelay)
-            .defaultValue(DataConstants.DEFAULT_SPAWNER_REMAINING_DELAY)
+            .defaultValue(DataConstants.TileEntity.Spawner.DEFAULT_SPAWNER_REMAINING_DELAY)
             .actualValue(this.remainingDelay)
             .build();
     }
@@ -102,7 +102,7 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
         return SpongeValueFactory.boundedBuilder(Keys.SPAWNER_MINIMUM_DELAY)
             .minimum((short) 0)
             .maximum(Short.MAX_VALUE)
-            .defaultValue(DataConstants.DEFAULT_SPAWNER_MINIMUM_SPAWN_DELAY)
+            .defaultValue(DataConstants.TileEntity.Spawner.DEFAULT_SPAWNER_MINIMUM_SPAWN_DELAY)
             .actualValue(this.minimumDelay)
             .build();
     }
@@ -110,9 +110,9 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
     @Override
     public MutableBoundedValue<Short> maximumSpawnDelay() {
         return SpongeValueFactory.boundedBuilder(Keys.SPAWNER_MAXIMUM_DELAY)
-            .minimum(DataConstants.MINIMUM_SPAWNER_MAXIMUM_SPAWN_DELAY)
+            .minimum(DataConstants.TileEntity.Spawner.MINIMUM_SPAWNER_MAXIMUM_SPAWN_DELAY)
             .maximum(Short.MAX_VALUE)
-            .defaultValue(DataConstants.DEFAULT_SPAWNER_MAXIMUM_SPAWN_DELAY)
+            .defaultValue(DataConstants.TileEntity.Spawner.DEFAULT_SPAWNER_MAXIMUM_SPAWN_DELAY)
             .actualValue(this.maximumDelay)
             .build();
     }
@@ -122,7 +122,7 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
         return SpongeValueFactory.boundedBuilder(Keys.SPAWNER_SPAWN_COUNT)
             .minimum((short) 0)
             .maximum(Short.MAX_VALUE)
-            .defaultValue(DataConstants.DEFAULT_SPAWNER_SPAWN_COUNT)
+            .defaultValue(DataConstants.TileEntity.Spawner.DEFAULT_SPAWNER_SPAWN_COUNT)
             .actualValue(this.count)
             .build();
     }
@@ -132,7 +132,7 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
         return SpongeValueFactory.boundedBuilder(Keys.SPAWNER_MAXIMUM_NEARBY_ENTITIES)
             .minimum((short) 0)
             .maximum(Short.MAX_VALUE)
-            .defaultValue(DataConstants.DEFAULT_SPAWNER_MAXMIMUM_NEARBY_ENTITIES)
+            .defaultValue(DataConstants.TileEntity.Spawner.DEFAULT_SPAWNER_MAXMIMUM_NEARBY_ENTITIES)
             .actualValue(this.maximumEntities)
             .build();
     }
@@ -142,7 +142,7 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
         return SpongeValueFactory.boundedBuilder(Keys.SPAWNER_REQUIRED_PLAYER_RANGE)
             .minimum((short) 0)
             .maximum(Short.MAX_VALUE)
-            .defaultValue(DataConstants.DEFAULT_SPAWNER_REQUIRED_PLAYER_RANGE)
+            .defaultValue(DataConstants.TileEntity.Spawner.DEFAULT_SPAWNER_REQUIRED_PLAYER_RANGE)
             .actualValue(this.playerRange)
             .build();
     }
@@ -152,14 +152,14 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
         return SpongeValueFactory.boundedBuilder(Keys.SPAWNER_SPAWN_RANGE)
             .minimum((short) 0)
             .maximum(Short.MAX_VALUE)
-            .defaultValue(DataConstants.DEFAULT_SPAWNER_SPAWN_RANGE)
+            .defaultValue(DataConstants.TileEntity.Spawner.DEFAULT_SPAWNER_SPAWN_RANGE)
             .actualValue(this.spawnRange)
             .build();
     }
 
     @Override
     public Value<WeightedSerializableObject<EntityArchetype>> nextEntityToSpawn() {
-        return new SpongeValue<>(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN, DataConstants.DEFAULT_SPAWNER_NEXT_ENTITY_TO_SPAWN,
+        return new SpongeValue<>(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN, DataConstants.TileEntity.Spawner.DEFAULT_SPAWNER_NEXT_ENTITY_TO_SPAWN,
                 this.nextEntityToSpawn);
     }
 

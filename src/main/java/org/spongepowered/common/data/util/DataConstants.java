@@ -59,6 +59,7 @@ public final class DataConstants {
     public static final int DEFAULT_FIRE_DAMAGE_DELAY = 20;
     public static final int ADULT = 6000;
     public static final int CHILD = -24000;
+    public static final String FORCE_GAMEMODE_OVERRIDE = "minecraft.force-gamemode.override";
 
     private DataConstants() {}
 
@@ -68,8 +69,6 @@ public final class DataConstants {
     public static final boolean DEFAULT_DISARMED = true;
     public static final boolean DEFAULT_SHOULD_DROP = true;
     public static final boolean DEFAULT_PISTON_EXTENDED = false;
-
-    public static final int ELYTRA_FLYING_FLAG = 7;
 
     // A bunch of entity defaults (for use in constructing "default" values)
     public static final boolean CAN_FLY_DEFAULT = false;
@@ -96,48 +95,41 @@ public final class DataConstants {
     public static final double DEFAULT_SATURATION = 0;
     public static final int DEFAULT_FOOD_LEVEL = 20;
 
-    public static final double DEFAULT_FALLING_BLOCK_FALL_DAMAGE_PER_BLOCK = 2D;
-    public static final double DEFAULT_FALLING_BLOCK_MAX_FALL_DAMAGE = 40;
-    public static final boolean DEFAULT_FALLING_BLOCK_CAN_PLACE_AS_BLOCK = false;
-    public static final boolean DEFAULT_FALLING_BLOCK_CAN_DROP_AS_ITEM = true;
-    public static final int DEFAULT_FALLING_BLOCK_FALL_TIME = 1;
-    public static final boolean DEFAULT_FALLING_BLOCK_CAN_HURT_ENTITIES = false;
-    public static final BlockState DEFAULT_BLOCK_STATE = BlockTypes.STONE.getDefaultState();
-    
     public static final boolean ANGRY_DEFAULT = false;
     
     // Original (0) / Copy of original (1) / Copy of a copy (2) / Tattered (3)
     public static final int MAXIMUM_GENERATION = 3;
 
-    public static final Vector3d DEFAULT_HEAD_ROTATION = VecHelper.toVector3d(EntityArmorStand.DEFAULT_HEAD_ROTATION);
-    public static final Vector3d DEFAULT_CHEST_ROTATION = VecHelper.toVector3d(EntityArmorStand.DEFAULT_BODY_ROTATION);
-    public static final Vector3d DEFAULT_LEFT_ARM_ROTATION = VecHelper.toVector3d(EntityArmorStand.DEFAULT_LEFTARM_ROTATION);
-    public static final Vector3d DEFAULT_RIGHT_ARM_ROTATION = VecHelper.toVector3d(EntityArmorStand.DEFAULT_RIGHTARM_ROTATION);
-    public static final Vector3d DEFAULT_LEFT_LEG_ROTATION = VecHelper.toVector3d(EntityArmorStand.DEFAULT_LEFTLEG_ROTATION);
-    public static final Vector3d DEFAULT_RIGHT_LEG_ROTATION = VecHelper.toVector3d(EntityArmorStand.DEFAULT_RIGHTLEG_ROTATION);
+    public static final class TileEntity {
+        public static final class Structure {
 
-    // Structure block entity
-    public static final String DEFAULT_STRUCTURE_AUTHOR = ""; // intentionally empty, as in vanilla
-    public static final boolean DEFAULT_STRUCTURE_IGNORE_ENTITIES = true;
-    public static final float DEFAULT_STRUCTURE_INTEGRITY = 1.0F;
-    public static final StructureMode DEFAULT_STRUCTURE_MODE = StructureModes.DATA;
-    public static final Vector3i DEFAULT_STRUCTURE_POSITION = Vector3i.ONE;
-    public static final boolean DEFAULT_STRUCTURE_POWERED = false;
-    public static final boolean DEFAULT_STRUCTURE_SHOW_AIR = false;
-    public static final boolean DEFAULT_STRUCTURE_SHOW_BOUNDING_BOX = true;
-    public static final long DEFAULT_STRUCTURE_SEED = 0L;
-    public static final Vector3i DEFAULT_STRUCTURE_SIZE = Vector3i.ONE;
+            // Structure block entity
+            public static final String DEFAULT_STRUCTURE_AUTHOR = ""; // intentionally empty, as in vanilla
+            public static final boolean DEFAULT_STRUCTURE_IGNORE_ENTITIES = true;
+            public static final float DEFAULT_STRUCTURE_INTEGRITY = 1.0F;
+            public static final StructureMode DEFAULT_STRUCTURE_MODE = StructureModes.DATA;
+            public static final Vector3i DEFAULT_STRUCTURE_POSITION = Vector3i.ONE;
+            public static final boolean DEFAULT_STRUCTURE_POWERED = false;
+            public static final boolean DEFAULT_STRUCTURE_SHOW_AIR = false;
+            public static final boolean DEFAULT_STRUCTURE_SHOW_BOUNDING_BOX = true;
+            public static final long DEFAULT_STRUCTURE_SEED = 0L;
+            public static final Vector3i DEFAULT_STRUCTURE_SIZE = Vector3i.ONE;
+        }
 
-    public static final short MINIMUM_SPAWNER_MAXIMUM_SPAWN_DELAY = 1;
-    public static final short DEFAULT_SPAWNER_REMAINING_DELAY = 20;
-    public static final short DEFAULT_SPAWNER_MINIMUM_SPAWN_DELAY = 200;
-    public static final short DEFAULT_SPAWNER_MAXIMUM_SPAWN_DELAY = 800;
-    public static final short DEFAULT_SPAWNER_SPAWN_COUNT = 4;
-    public static final short DEFAULT_SPAWNER_MAXMIMUM_NEARBY_ENTITIES = 6;
-    public static final short DEFAULT_SPAWNER_REQUIRED_PLAYER_RANGE = 16;
-    public static final short DEFAULT_SPAWNER_SPAWN_RANGE = 4;
-    public static final WeightedSerializableObject<EntityArchetype> DEFAULT_SPAWNER_NEXT_ENTITY_TO_SPAWN = new WeightedSerializableObject<>
-            (EntityUtil.archetype(Catalog.DEFAULT_SPAWNER_ENTITY), 1);
+        public static final class Spawner {
+
+            public static final short MINIMUM_SPAWNER_MAXIMUM_SPAWN_DELAY = 1;
+            public static final short DEFAULT_SPAWNER_REMAINING_DELAY = 20;
+            public static final short DEFAULT_SPAWNER_MINIMUM_SPAWN_DELAY = 200;
+            public static final short DEFAULT_SPAWNER_MAXIMUM_SPAWN_DELAY = 800;
+            public static final short DEFAULT_SPAWNER_SPAWN_COUNT = 4;
+            public static final short DEFAULT_SPAWNER_MAXMIMUM_NEARBY_ENTITIES = 6;
+            public static final short DEFAULT_SPAWNER_REQUIRED_PLAYER_RANGE = 16;
+            public static final short DEFAULT_SPAWNER_SPAWN_RANGE = 4;
+            public static final WeightedSerializableObject<EntityArchetype> DEFAULT_SPAWNER_NEXT_ENTITY_TO_SPAWN = new WeightedSerializableObject<>
+                    (EntityUtil.archetype(Catalog.DEFAULT_SPAWNER_ENTITY), 1);
+        }
+    }
 
     public static final class Catalog {
 
@@ -167,6 +159,28 @@ public final class DataConstants {
     public static final class Entity {
 
         public static final double DEFAULT_ABSORPTION = 0.0f;
+        public static final String LIGHTNING_EFFECT = "effect";
+        public static final int ELYTRA_FLYING_FLAG = 7;
+
+        public static final class ArmorStand {
+
+            public static final Vector3d DEFAULT_HEAD_ROTATION = VecHelper.toVector3d(EntityArmorStand.DEFAULT_HEAD_ROTATION);
+            public static final Vector3d DEFAULT_CHEST_ROTATION = VecHelper.toVector3d(EntityArmorStand.DEFAULT_BODY_ROTATION);
+            public static final Vector3d DEFAULT_LEFT_ARM_ROTATION = VecHelper.toVector3d(EntityArmorStand.DEFAULT_LEFTARM_ROTATION);
+            public static final Vector3d DEFAULT_RIGHT_ARM_ROTATION = VecHelper.toVector3d(EntityArmorStand.DEFAULT_RIGHTARM_ROTATION);
+            public static final Vector3d DEFAULT_LEFT_LEG_ROTATION = VecHelper.toVector3d(EntityArmorStand.DEFAULT_LEFTLEG_ROTATION);
+            public static final Vector3d DEFAULT_RIGHT_LEG_ROTATION = VecHelper.toVector3d(EntityArmorStand.DEFAULT_RIGHTLEG_ROTATION);
+        }
+
+        public static final class FallingBlock {
+
+            public static final double DEFAULT_FALL_DAMAGE_PER_BLOCK = 2D;
+            public static final double DEFAULT_MAX_FALL_DAMAGE = 40;
+            public static final boolean DEFAULT_CAN_PLACE_AS_BLOCK = false;
+            public static final boolean DEFAULT_CAN_DROP_AS_ITEM = true;
+            public static final int DEFAULT_FALL_TIME = 1;
+            public static final boolean DEFAULT_CAN_HURT_ENTITIES = false;
+        }
 
         public static final class Item {
 
@@ -182,42 +196,69 @@ public final class DataConstants {
             private Item() {
             }
         }
-    }
 
-    public static final class Horse {
+        public static final class Horse {
 
-        public static final HorseStyle DEFAULT_STYLE = HorseStyles.NONE;
-        public static final HorseColor DEFAULT_COLOR = HorseColors.WHITE;
-        private Horse() {
+            public static final HorseStyle DEFAULT_STYLE = HorseStyles.NONE;
+            public static final HorseColor DEFAULT_COLOR = HorseColors.WHITE;
+            private Horse() {
+            }
+        }
+
+        public static final class Rabbit {
+
+            public static final RabbitType DEFAULT_TYPE = RabbitTypes.WHITE;
+
+            private Rabbit() {
+            }
+        }
+
+        public static final class Ocelot {
+
+            public static final OcelotType DEFAULT_TYPE = OcelotTypes.WILD_OCELOT;
+
+        }
+
+        public static final class Llama {
+
+            public static final LlamaVariant DEFAULT_VARIANT = LlamaVariants.WHITE;
+            public static final int DEFAULT_STRENGTH = 1;
+            public static final int MINIMUM_STRENGTH = 1;
+            public static final int MAXIMUM_STRENGTH = 5;
+
+        }
+
+        public static final class Parrot {
+
+            public static final ParrotVariant DEFAULT_VARIANT = ParrotVariants.RED;
+
+        }
+
+        public static final class EnderCrystal {
+
+            public static final int DEFAULT_EXPLOSION_STRENGTH = 6;
+        }
+
+        public static final class PrimedTNT {
+
+            public static final int DEFAULT_EXPLOSION_RADIUS = 4;
+        }
+
+        public static class Fireball {
+
+            public static final int DEFAULT_EXPLOSION_RADIUS = 1;
+        }
+
+        public static final class Minecart {
+
+            public static final double DEFAULT_AIRBORNE_MOD = 0.94999998807907104D;
+            public static final double DEFAULT_DERAILED_MOD = 0.5D;
+        }
+
+        public static final class WitherSkull {
+
+            public static final int DEFAULT_EXPLOSION_RADIUS = 1;
         }
     }
 
-    public static final class Rabbit {
-
-        public static final RabbitType DEFAULT_TYPE = RabbitTypes.WHITE;
-
-        private Rabbit() {
-        }
-    }
-
-    public static final class Ocelot {
-
-        public static final OcelotType DEFAULT_TYPE = OcelotTypes.WILD_OCELOT;
-
-    }
-
-    public static final class Llama {
-
-        public static final LlamaVariant DEFAULT_VARIANT = LlamaVariants.WHITE;
-        public static final int DEFAULT_STRENGTH = 1;
-        public static final int MINIMUM_STRENGTH = 1;
-        public static final int MAXIMUM_STRENGTH = 5;
-
-    }
-
-    public static final class Parrot {
-
-        public static final ParrotVariant DEFAULT_VARIANT = ParrotVariants.RED;
-
-    }
 }

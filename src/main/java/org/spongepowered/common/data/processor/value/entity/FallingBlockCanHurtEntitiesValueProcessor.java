@@ -44,7 +44,7 @@ public class FallingBlockCanHurtEntitiesValueProcessor extends AbstractSpongeVal
 
     @Override
     protected Value<Boolean> constructValue(Boolean value) {
-        return new SpongeValue<>(Keys.FALLING_BLOCK_CAN_HURT_ENTITIES, DataConstants.DEFAULT_FALLING_BLOCK_CAN_HURT_ENTITIES, value);
+        return new SpongeValue<>(Keys.FALLING_BLOCK_CAN_HURT_ENTITIES, DataConstants.Entity.FallingBlock.DEFAULT_CAN_HURT_ENTITIES, value);
     }
 
     @Override

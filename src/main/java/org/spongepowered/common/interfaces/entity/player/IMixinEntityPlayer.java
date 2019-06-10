@@ -26,7 +26,7 @@ package org.spongepowered.common.interfaces.entity.player;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
-import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.bridge.entity.IMixinEntity;
 
 import java.util.UUID;
 

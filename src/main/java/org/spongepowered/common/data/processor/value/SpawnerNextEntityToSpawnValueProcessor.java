@@ -49,7 +49,7 @@ public class SpawnerNextEntityToSpawnValueProcessor extends AbstractSpongeValueP
     @Override
     protected Value<WeightedSerializableObject<EntityArchetype>> constructValue(WeightedSerializableObject<EntityArchetype> actualValue) {
         return new SpongeValue<>(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN,
-                DataConstants.DEFAULT_SPAWNER_NEXT_ENTITY_TO_SPAWN, actualValue);
+                DataConstants.TileEntity.Spawner.DEFAULT_SPAWNER_NEXT_ENTITY_TO_SPAWN, actualValue);
     }
 
     @Override

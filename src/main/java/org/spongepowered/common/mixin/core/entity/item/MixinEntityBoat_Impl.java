@@ -44,11 +44,6 @@ public abstract class MixinEntityBoat_Impl extends MixinEntity_Impl {
     private double occupiedDecelerationSpeed = 0D;
     private double unoccupiedDecelerationSpeed = 0.8D;
 
-    @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
-        manipulators.add(get(TreeData.class).get());
-    }
 
     @Override
     public boolean isInWater() {

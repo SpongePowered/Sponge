@@ -40,14 +40,14 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
-import org.spongepowered.common.interfaces.entity.IMixinGriefer;
-import org.spongepowered.common.interfaces.entity.explosive.IMixinFusedExplosive;
+import org.spongepowered.common.bridge.entity.IMixinGriefer;
+import org.spongepowered.common.bridge.explosives.ImplBridgeFusedExplosive;
 import org.spongepowered.common.mixin.api.minecraft.entity.monster.MixinEntityMob_API;
 
 import java.util.Optional;
 
 @Mixin(value = EntityWither.class)
-public abstract class MixinEntityWither extends MixinEntityMob_API implements IMixinFusedExplosive {
+public abstract class MixinEntityWither extends MixinEntityMob_API implements ImplBridgeFusedExplosive {
 
     @Final @Shadow private BossInfoServer bossInfo;
     @Shadow public abstract int getWatchedTargetId(int p_82203_1_);

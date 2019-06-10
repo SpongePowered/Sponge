@@ -104,8 +104,8 @@ public abstract class MixinEntityShulker extends MixinEntityGolem implements Shu
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
+    public void spongeApi$supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(getDyeData());
         manipulators.add(getDirectionalData());
     }

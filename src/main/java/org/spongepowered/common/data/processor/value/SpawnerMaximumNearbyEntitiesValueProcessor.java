@@ -47,7 +47,7 @@ public class SpawnerMaximumNearbyEntitiesValueProcessor extends AbstractSpongeVa
         return SpongeValueFactory.boundedBuilder(this.key)
                 .minimum((short) 0)
                 .maximum(Short.MAX_VALUE)
-                .defaultValue(DataConstants.DEFAULT_SPAWNER_MAXMIMUM_NEARBY_ENTITIES)
+                .defaultValue(DataConstants.TileEntity.Spawner.DEFAULT_SPAWNER_MAXMIMUM_NEARBY_ENTITIES)
                 .actualValue(actualValue)
                 .build();
     }

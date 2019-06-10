@@ -51,7 +51,7 @@ public class HeadRotationValueProcessor extends AbstractSpongeValueProcessor<Ent
 
     @Override
     protected Value<Vector3d> constructValue(Vector3d actualValue) {
-        return new SpongeValue<>(Keys.HEAD_ROTATION, DataConstants.DEFAULT_HEAD_ROTATION, actualValue);
+        return new SpongeValue<>(Keys.HEAD_ROTATION, DataConstants.Entity.ArmorStand.DEFAULT_HEAD_ROTATION, actualValue);
     }
 
     @Override

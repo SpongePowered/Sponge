@@ -44,7 +44,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.interfaces.entity.IMixinEntityTNTPrimed;
-import org.spongepowered.common.interfaces.entity.explosive.IMixinFusedExplosive;
+import org.spongepowered.common.bridge.explosives.ImplBridgeFusedExplosive;
 
 @Mixin(BlockTNT.class)
 public abstract class MixinBlockTNT extends MixinBlock {
@@ -93,7 +93,7 @@ public abstract class MixinBlockTNT extends MixinBlock {
         // Called when prime triggered by explosion
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.DAMAGE_TYPE, DamageTypes.EXPLOSIVE);
-            boolean result =  ((IMixinFusedExplosive) tnt).shouldPrime() && world.spawnEntity(tnt);
+            boolean result = ((ImplBridgeFusedExplosive) tnt).shouldPrime() && world.spawnEntity(tnt);
             return result;
         }
     }

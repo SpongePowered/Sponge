@@ -7,22 +7,26 @@
     "compatibilityLevel": "JAVA_8",
     "mixins": [
         "ai.MixinAbstractAITask",
-        "org.spongepowered.common.mixin.core.api.data.MixinDataContainer",
-        "org.spongepowered.common.mixin.core.api.event.cause.damage.MixinAbstractDamageSource",
-        "org.spongepowered.common.mixin.core.api.event.cause.damage.MixinAbstractEntityDamageSource",
-        "org.spongepowered.common.mixin.core.api.item.merchant.MixinMerchant_Impl",
         "minecraft.entity.MixinEntity_API",
         "minecraft.entity.MixinEntityAgeable_API",
         "minecraft.entity.MixinEntityAreaEffectCloud_API",
+        "minecraft.entity.MixinEntityCreature_API",
+        "minecraft.entity.MixinEntityFlying_API",
+        "minecraft.entity.MixinEntityHanging_API",
+        "minecraft.entity.MixinEntityLeashKnot_API",
+        "minecraft.entity.MixinEntityLiving_API",
         "minecraft.entity.MixinEntityLivingBase_API",
-        "org.spongepowered.common.mixin.core.api.text.MixinText",
-        "org.spongepowered.common.mixin.core.api.text.MixinTextLiteral",
-        "org.spongepowered.common.mixin.core.api.text.MixinTextScore",
-        "org.spongepowered.common.mixin.core.api.text.MixinTextSelector",
-        "org.spongepowered.common.mixin.core.api.text.MixinTextTranslatable",
-        "org.spongepowered.common.mixin.core.api.text.title.MixinTitle",
-        "org.spongepowered.common.mixin.core.api.world.MixinLocatableBlock",
-        "org.spongepowered.common.mixin.core.api.world.MixinLocation"
+        "minecraft.entity.boss.MixinEntityDragon_API",
+        "minecraft.entity.boss.MixinEntityWither_API",
+        "minecraft.entity.item.MixinEntityArmorStand",
+        "minecraft.entity.item.MixinEntityBoat_API",
+        "minecraft.entity.item.MixinEntityItemFrame_API",
+        "minecraft.entity.item.MixinEntityPainting_API",
+        "minecraft.entity.monster.MixinEntityMob_API",
+        "minecraft.entity.monster.MixinEntityZombie_API"
+
+
+
     ],
     "injectors": {
         "defaultRequire": 1

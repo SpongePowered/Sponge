@@ -59,8 +59,8 @@ public abstract class MixinEntityEndermite extends MixinEntityMob_API implements
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
+    public void spongeApi$supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(getExpirableData());
     }
 }

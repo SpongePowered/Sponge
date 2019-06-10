@@ -95,7 +95,7 @@ public abstract class MixinEntityArmorStand_Impl extends MixinEntityLivingBase_I
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             DamageEventHandler.generateCauseFor(source, frame);
             DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(frame.getCurrentCause(), new ArrayList<>(),
-                    this, effectiveAmount);
+                (Entity) this, effectiveAmount);
             if (!SpongeImpl.postEvent(event)) {
                 this.damageArmorStand((float) event.getFinalDamage());
             }
@@ -119,7 +119,7 @@ public abstract class MixinEntityArmorStand_Impl extends MixinEntityLivingBase_I
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             DamageEventHandler.generateCauseFor(source, frame);
             DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(frame.getCurrentCause(), new ArrayList<>(),
-                    this, 0);
+                (Entity) this, 0);
             if (SpongeImpl.postEvent(event)) {
                 cir.setReturnValue(false);
             }

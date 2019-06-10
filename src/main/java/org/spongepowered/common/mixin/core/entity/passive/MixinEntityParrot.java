@@ -80,12 +80,12 @@ public abstract class MixinEntityParrot extends MixinEntityTameable implements P
 
     @Override
     public Value<ParrotVariant> variant() {
-        return new SpongeValue<>(Keys.PARROT_VARIANT, DataConstants.Parrot.DEFAULT_VARIANT, ParrotVariantRegistryModule.PARROT_VARIANT_IDMAP.get(this.getVariant()));
+        return new SpongeValue<>(Keys.PARROT_VARIANT, DataConstants.Entity.Parrot.DEFAULT_VARIANT, ParrotVariantRegistryModule.PARROT_VARIANT_IDMAP.get(this.getVariant()));
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
+    public void spongeApi$supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(new SpongeSittingData(this.shadow$isSitting()));
         manipulators.add(getParrotData());
     }

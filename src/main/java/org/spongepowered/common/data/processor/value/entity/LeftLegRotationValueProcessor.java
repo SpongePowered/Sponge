@@ -51,7 +51,7 @@ public class LeftLegRotationValueProcessor extends AbstractSpongeValueProcessor<
 
     @Override
     protected Value<Vector3d> constructValue(Vector3d actualValue) {
-        return new SpongeValue<>(Keys.LEFT_LEG_ROTATION, DataConstants.DEFAULT_LEFT_LEG_ROTATION, actualValue);
+        return new SpongeValue<>(Keys.LEFT_LEG_ROTATION, DataConstants.Entity.ArmorStand.DEFAULT_LEFT_LEG_ROTATION, actualValue);
     }
 
     @Override

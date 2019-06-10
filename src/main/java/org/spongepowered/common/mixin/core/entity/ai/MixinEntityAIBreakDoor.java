@@ -24,17 +24,13 @@
  */
 package org.spongepowered.common.mixin.core.entity.ai;
 
-import net.minecraft.block.BlockDoor;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.ai.EntityAIBreakDoor;
 import net.minecraft.entity.ai.EntityAIDoorInteract;
-import net.minecraft.world.GameRules;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.interfaces.entity.IMixinGriefer;
+import org.spongepowered.common.bridge.entity.IMixinGriefer;
 
 @Mixin(EntityAIBreakDoor.class)
 public abstract class MixinEntityAIBreakDoor extends EntityAIDoorInteract {

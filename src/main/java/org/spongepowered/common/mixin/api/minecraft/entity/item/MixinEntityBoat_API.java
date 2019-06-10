@@ -28,8 +28,11 @@ import net.minecraft.entity.item.EntityBoat;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.block.TreeData;
+import org.spongepowered.api.data.type.TreeTypes;
 import org.spongepowered.api.entity.vehicle.Boat;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.data.manipulator.mutable.block.SpongeTreeData;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.mixin.api.minecraft.entity.MixinEntity_API;
 
@@ -39,86 +42,30 @@ import java.util.List;
 @Mixin(EntityBoat.class)
 public abstract class MixinEntityBoat_API extends MixinEntity_API implements Boat {
 
-//    @Shadow private double speedMultiplier;
+    @Shadow public abstract EntityBoat.Type getBoatType();
 
     private double maxSpeed = 0.35D;
     private boolean moveOnLand = false;
     private double occupiedDecelerationSpeed = 0D;
     private double unoccupiedDecelerationSpeed = 0.8D;
 
-    private double tempMotionX;
-    private double tempMotionZ;
-    private double tempSpeedMultiplier;
-    private double initialDisplacement;
-
-    // All of these injections need to be rewritten.
-//    @Inject(method = "onUpdate()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityBoat;moveEntity(DDD)V"))
-//    public void implementLandBoats(CallbackInfo ci) {
-//        if (this.onGround && this.moveOnLand) {
-//            this.motionX /= 0.5;
-//            this.motionY /= 0.5;
-//            this.motionZ /= 0.5;
-//        }
-//    }
-//
-//    @Inject(method = "onUpdate()V", at = @At(value = "INVOKE", target = "java.lang.Math.sqrt(D)D", ordinal = 0))
-//    public void beforeModifyMotion(CallbackInfo ci) {
-//        this.initialDisplacement = Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
-//    }
-//
-//    @Inject(method = "onUpdate()V", at = @At(value = "INVOKE", target = "java.lang.Math.sqrt(D)D", ordinal = 1))
-//    public void beforeLimitSpeed(CallbackInfo ci) {
-//        this.tempMotionX = this.motionX;
-//        this.tempMotionZ = this.motionZ;
-//        this.tempSpeedMultiplier = this.speedMultiplier;
-//    }
-//
-//    @Inject(method = "onUpdate()V", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/item/EntityBoat;onGround:Z", ordinal = 1))
-//    public void afterLimitSpeed(CallbackInfo ci) {
-//        this.motionX = this.tempMotionX;
-//        this.motionZ = this.tempMotionZ;
-//        this.speedMultiplier = this.tempSpeedMultiplier;
-//        double displacement = Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
-//
-//        if (displacement > this.maxSpeed) {
-//            double ratio = this.maxSpeed / displacement;
-//            this.motionX *= ratio;
-//            this.motionZ *= ratio;
-//            displacement = this.maxSpeed;
-//        }
-//
-//        if ((displacement > this.initialDisplacement) && (this.speedMultiplier < this.maxSpeed)) {
-//            this.speedMultiplier += (this.maxSpeed - this.speedMultiplier) / this.maxSpeed * 100.0;
-//            this.speedMultiplier = Math.min(this.speedMultiplier, this.maxSpeed);
-//        } else {
-//            this.speedMultiplier -= (this.speedMultiplier - 0.07) / this.maxSpeed * 100.0;
-//            this.speedMultiplier = Math.max(this.speedMultiplier, 0.07);
-//        }
-//    }
-
-    // TODO: Re-enable this with support for multiple riding
-    /*@Inject(method = "onUpdate()V",
-            at = @At(value = "FIELD", target = "Lnet/minecraft/entity/item/EntityBoat;riddenByEntity:Lnet/minecraft/entity/Entity;", ordinal = 0))
-    public void implementCustomDeceleration(CallbackInfo ci) {
-        if (!(this.riddenByEntity instanceof EntityLivingBase)) {
-            double decel = this.riddenByEntity == null ? this.unoccupiedDecelerationSpeed : this.occupiedDecelerationSpeed;
-            this.motionX *= decel;
-            this.motionZ *= decel;
-
-            if (this.motionX < 0.00005) {
-                this.motionX = 0.0;
-            }
-
-            if (this.motionZ < 0.00005) {
-                this.motionZ = 0.0;
-            }
-        }
-    }*/
-
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
-        manipulators.add(get(TreeData.class).get());
+    public void spongeApi$supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        super.spongeApi$supplyVanillaManipulators(manipulators);
+        final EntityBoat.Type boatType = this.getBoatType();
+        if (boatType == EntityBoat.Type.OAK) {
+            manipulators.add(new SpongeTreeData(TreeTypes.OAK));
+        } else if ( boatType == EntityBoat.Type.BIRCH) {
+            manipulators.add(new SpongeTreeData(TreeTypes.BIRCH));
+        } else if ( boatType == EntityBoat.Type.JUNGLE) {
+            manipulators.add(new SpongeTreeData(TreeTypes.JUNGLE));
+        } else if ( boatType == EntityBoat.Type.DARK_OAK) {
+            manipulators.add(new SpongeTreeData(TreeTypes.DARK_OAK));
+        } else if ( boatType == EntityBoat.Type.ACACIA) {
+            manipulators.add(new SpongeTreeData(TreeTypes.ACACIA));
+        } else if ( boatType == EntityBoat.Type.SPRUCE) {
+            manipulators.add(new SpongeTreeData(TreeTypes.SPRUCE));
+        }
     }
 
     @Override
@@ -166,29 +113,4 @@ public abstract class MixinEntityBoat_API extends MixinEntity_API implements Boa
         this.unoccupiedDecelerationSpeed = unoccupiedDeceleration;
     }
 
-    @Override
-    public void readFromNbt(NBTTagCompound compound) {
-        super.readFromNbt(compound);
-        if (compound.hasKey(NbtDataUtil.BOAT_MAX_SPEED)) {
-            this.maxSpeed = compound.getDouble(NbtDataUtil.BOAT_MAX_SPEED);
-        }
-        if (compound.hasKey(NbtDataUtil.BOAT_MOVE_ON_LAND)) {
-            this.moveOnLand = compound.getBoolean(NbtDataUtil.BOAT_MOVE_ON_LAND);
-        }
-        if (compound.hasKey(NbtDataUtil.BOAT_OCCUPIED_DECELERATION_SPEED)) {
-            this.occupiedDecelerationSpeed = compound.getDouble(NbtDataUtil.BOAT_OCCUPIED_DECELERATION_SPEED);
-        }
-        if (compound.hasKey(NbtDataUtil.BOAT_UNOCCUPIED_DECELERATION_SPEED)) {
-            this.unoccupiedDecelerationSpeed = compound.getDouble(NbtDataUtil.BOAT_UNOCCUPIED_DECELERATION_SPEED);
-        }
-    }
-
-    @Override
-    public void writeToNbt(NBTTagCompound compound) {
-        super.writeToNbt(compound);
-        compound.setDouble(NbtDataUtil.BOAT_MAX_SPEED, this.maxSpeed);
-        compound.setBoolean(NbtDataUtil.BOAT_MOVE_ON_LAND, this.moveOnLand);
-        compound.setDouble(NbtDataUtil.BOAT_OCCUPIED_DECELERATION_SPEED, this.occupiedDecelerationSpeed);
-        compound.setDouble(NbtDataUtil.BOAT_UNOCCUPIED_DECELERATION_SPEED, this.unoccupiedDecelerationSpeed);
-    }
 }

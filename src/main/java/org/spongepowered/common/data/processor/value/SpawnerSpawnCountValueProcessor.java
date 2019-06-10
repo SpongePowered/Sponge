@@ -47,7 +47,7 @@ public class SpawnerSpawnCountValueProcessor extends AbstractSpongeValueProcesso
         return SpongeValueFactory.boundedBuilder(this.key)
                 .minimum((short) 0)
                 .maximum(Short.MAX_VALUE)
-                .defaultValue(DataConstants.DEFAULT_SPAWNER_SPAWN_COUNT)
+                .defaultValue(DataConstants.TileEntity.Spawner.DEFAULT_SPAWNER_SPAWN_COUNT)
                 .actualValue(actualValue)
                 .build();
     }

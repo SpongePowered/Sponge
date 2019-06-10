@@ -44,7 +44,7 @@ public class CanPlaceAsBlockValueProcessor extends AbstractSpongeValueProcessor<
 
     @Override
     protected Value<Boolean> constructValue(Boolean value) {
-        return new SpongeValue<>(Keys.CAN_PLACE_AS_BLOCK, DataConstants.DEFAULT_FALLING_BLOCK_CAN_PLACE_AS_BLOCK, value);
+        return new SpongeValue<>(Keys.CAN_PLACE_AS_BLOCK, DataConstants.Entity.FallingBlock.DEFAULT_CAN_PLACE_AS_BLOCK, value);
     }
 
     @Override

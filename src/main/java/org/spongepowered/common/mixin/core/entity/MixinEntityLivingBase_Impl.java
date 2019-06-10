@@ -55,18 +55,10 @@ import net.minecraft.world.WorldServer;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Transaction;
-import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.mutable.entity.DamageableData;
-import org.spongepowered.api.data.manipulator.mutable.entity.HealthData;
 import org.spongepowered.api.data.type.HandType;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
-import org.spongepowered.api.data.value.mutable.OptionalValue;
-import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.Transform;
-import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -79,7 +71,6 @@ import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.item.inventory.UseItemStackEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -93,14 +84,9 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeDamageableData;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthData;
 import org.spongepowered.common.data.util.DataConstants;
-import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.living.human.EntityHuman;
-import org.spongepowered.common.entity.projectile.ProjectileLauncher;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.event.damage.DamageObject;
@@ -676,7 +662,7 @@ public abstract class MixinEntityLivingBase_Impl extends MixinEntity_Impl implem
                 // Helmet
                 final ItemStack helmet = this.getItemStackFromSlot(EntityEquipmentSlot.HEAD);
                 // We still sanity check if a mod is calling to damage the entity with an anvil or falling block
-                // without using our mixin redirects in MixinEntityFallingBlock.
+                // without using our mixin redirects in MixinEntityFallingBlock_Impl.
                 if ((damageSource instanceof FallingBlockDamageSource) || damageSource == DamageSource.ANVIL || damageSource == DamageSource.FALLING_BLOCK && !helmet.isEmpty()) {
                     helmet.damageItem((int) (event.getBaseDamage() * 4.0F + this.rand.nextFloat() * event.getBaseDamage() * 2.0F), (EntityLivingBase) (Object) this);
                 }
@@ -1005,7 +991,7 @@ public abstract class MixinEntityLivingBase_Impl extends MixinEntity_Impl implem
 
     @Override
     public void setElytraFlying(boolean value) {
-        setFlag(DataConstants.ELYTRA_FLYING_FLAG, value);
+        setFlag(DataConstants.Entity.ELYTRA_FLYING_FLAG, value);
     }
 
     // Start implementation of UseItemstackEvent

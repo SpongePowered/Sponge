@@ -53,8 +53,8 @@ public abstract class MixinEntityPig extends MixinEntityAnimal implements Pig {
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
+    public void spongeApi$supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(this.getPigSaddleData());
     }
 }

@@ -35,7 +35,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.bridge.entity.IMixinEntity;
 
 @Mixin(EntityAIRunAroundLikeCrazy.class)
 public abstract class MixinEntityAIRunAroundLikeCrazy extends MixinEntityAIBase implements RunAroundLikeCrazyAITask {

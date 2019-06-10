@@ -25,9 +25,9 @@
 package org.spongepowered.common.interfaces.entity;
 
 import net.minecraft.entity.EntityLivingBase;
-import org.spongepowered.common.interfaces.entity.explosive.IMixinFusedExplosive;
+import org.spongepowered.common.bridge.explosives.ImplBridgeFusedExplosive;
 
-public interface IMixinEntityTNTPrimed extends IMixinFusedExplosive {
+public interface IMixinEntityTNTPrimed extends ImplBridgeFusedExplosive {
 
     void setDetonator(EntityLivingBase detonator);
 

@@ -49,8 +49,8 @@ public abstract class MixinEntityVindicator extends MixinEntityMob_API implement
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
+    public void spongeApi$supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(new SpongeJohnnyData(this.johnny));
     }
 

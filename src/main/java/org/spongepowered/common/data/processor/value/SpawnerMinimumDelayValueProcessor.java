@@ -47,7 +47,7 @@ public class SpawnerMinimumDelayValueProcessor extends AbstractSpongeValueProces
         return SpongeValueFactory.boundedBuilder(this.key)
                 .minimum((short) 0)
                 .maximum(Short.MAX_VALUE)
-                .defaultValue(DataConstants.DEFAULT_SPAWNER_MINIMUM_SPAWN_DELAY)
+                .defaultValue(DataConstants.TileEntity.Spawner.DEFAULT_SPAWNER_MINIMUM_SPAWN_DELAY)
                 .actualValue(actualValue)
                 .build();
     }

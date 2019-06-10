@@ -52,12 +52,12 @@ public abstract class MixinEntityRabbit extends MixinEntityAnimal implements Rab
 
     @Override
     public Value<RabbitType> variant() {
-        return new SpongeValue<>(Keys.RABBIT_TYPE, DataConstants.Rabbit.DEFAULT_TYPE, RabbitTypeRegistryModule.RABBIT_IDMAP.get(this.getRabbitType()));
+        return new SpongeValue<>(Keys.RABBIT_TYPE, DataConstants.Entity.Rabbit.DEFAULT_TYPE, RabbitTypeRegistryModule.RABBIT_IDMAP.get(this.getRabbitType()));
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
+    public void spongeApi$supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(getRabbitData());
     }
 }

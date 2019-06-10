@@ -46,7 +46,7 @@ public class MaxFallDamageValueProcessor extends AbstractSpongeValueProcessor<En
     protected MutableBoundedValue<Double> constructValue(Double value) {
         return SpongeValueFactory.boundedBuilder(Keys.MAX_FALL_DAMAGE)
                 .actualValue(value)
-                .defaultValue(DataConstants.DEFAULT_FALLING_BLOCK_MAX_FALL_DAMAGE)
+                .defaultValue(DataConstants.Entity.FallingBlock.DEFAULT_MAX_FALL_DAMAGE)
                 .minimum(0d)
                 .maximum(Double.MAX_VALUE)
                 .build();

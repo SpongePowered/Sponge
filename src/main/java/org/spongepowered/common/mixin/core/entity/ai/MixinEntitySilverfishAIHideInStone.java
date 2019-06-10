@@ -30,7 +30,7 @@ import net.minecraft.entity.monster.EntitySilverfish;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.interfaces.entity.IMixinGriefer;
+import org.spongepowered.common.bridge.entity.IMixinGriefer;
 
 @Mixin(EntitySilverfish.AIHideInStone.class)
 public abstract class MixinEntitySilverfishAIHideInStone extends MixinEntityAIWander {

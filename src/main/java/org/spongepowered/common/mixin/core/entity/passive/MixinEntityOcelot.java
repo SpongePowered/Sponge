@@ -95,12 +95,12 @@ public abstract class MixinEntityOcelot extends MixinEntityTameable implements O
 
     @Override
     public Value<OcelotType> variant() {
-        return new SpongeValue<>(Keys.OCELOT_TYPE, DataConstants.Ocelot.DEFAULT_TYPE, OcelotTypeRegistryModule.OCELOT_IDMAP.get(this.getTameSkin()));
+        return new SpongeValue<>(Keys.OCELOT_TYPE, DataConstants.Entity.Ocelot.DEFAULT_TYPE, OcelotTypeRegistryModule.OCELOT_IDMAP.get(this.getTameSkin()));
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
+    public void spongeApi$supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(new SpongeSittingData(this.shadow$isSitting()));
         manipulators.add(getOcelotData());
     }

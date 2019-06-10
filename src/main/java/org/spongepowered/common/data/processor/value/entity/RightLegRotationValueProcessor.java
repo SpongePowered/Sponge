@@ -51,7 +51,7 @@ public class RightLegRotationValueProcessor extends AbstractSpongeValueProcessor
 
     @Override
     protected Value<Vector3d> constructValue(Vector3d actualValue) {
-        return new SpongeValue<>(Keys.RIGHT_LEG_ROTATION, DataConstants.DEFAULT_RIGHT_LEG_ROTATION, actualValue);
+        return new SpongeValue<>(Keys.RIGHT_LEG_ROTATION, DataConstants.Entity.ArmorStand.DEFAULT_RIGHT_LEG_ROTATION, actualValue);
     }
 
     @Override

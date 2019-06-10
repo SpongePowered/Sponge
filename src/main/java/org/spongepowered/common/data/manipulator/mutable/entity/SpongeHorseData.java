@@ -70,12 +70,12 @@ public class SpongeHorseData extends AbstractData<HorseData, ImmutableHorseData>
 
     @Override
     public Value<HorseColor> color() {
-        return new SpongeValue<>(Keys.HORSE_COLOR, DataConstants.Horse.DEFAULT_COLOR, this.horseColor);
+        return new SpongeValue<>(Keys.HORSE_COLOR, DataConstants.Entity.Horse.DEFAULT_COLOR, this.horseColor);
     }
 
     @Override
     public Value<HorseStyle> style() {
-        return new SpongeValue<>(Keys.HORSE_STYLE, DataConstants.Horse.DEFAULT_STYLE, this.horseStyle);
+        return new SpongeValue<>(Keys.HORSE_STYLE, DataConstants.Entity.Horse.DEFAULT_STYLE, this.horseStyle);
     }
 
     @Override

@@ -48,8 +48,8 @@ public abstract class MixinEntityBlaze extends MixinEntityMob_API implements Bla
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
+    public void spongeApi$supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(new SpongeFlammableData(this.isBurning()));
     }
 }

@@ -64,20 +64,20 @@ public class ImmutableSpongeFallingBlockData extends AbstractImmutableData<Immut
         this.fallTime = fallTime;
         this.canHurtEntities = canHurtEntities;
 
-        this.fallDamagePerBlockValue = new ImmutableSpongeValue<>(Keys.FALL_DAMAGE_PER_BLOCK, DataConstants
-                .DEFAULT_FALLING_BLOCK_FALL_DAMAGE_PER_BLOCK, this.fallDamagePerBlock);
-        this.maxFallDamageValue = new ImmutableSpongeValue<>(Keys.MAX_FALL_DAMAGE, DataConstants.DEFAULT_FALLING_BLOCK_MAX_FALL_DAMAGE, this
+        this.fallDamagePerBlockValue = new ImmutableSpongeValue<>(Keys.FALL_DAMAGE_PER_BLOCK, DataConstants.Entity.FallingBlock
+                .DEFAULT_FALL_DAMAGE_PER_BLOCK, this.fallDamagePerBlock);
+        this.maxFallDamageValue = new ImmutableSpongeValue<>(Keys.MAX_FALL_DAMAGE, DataConstants.Entity.FallingBlock.DEFAULT_MAX_FALL_DAMAGE, this
                 .maxFallDamage);
         this.blockStateValue = new ImmutableSpongeValue<>(Keys.FALLING_BLOCK_STATE, DataConstants.Catalog.DEFAULT_FALLING_BLOCK_BLOCKSTATE, this
                 .blockState);
-        this.canPlaceAsBlockValue = new ImmutableSpongeValue<>(Keys.CAN_PLACE_AS_BLOCK, DataConstants
-                .DEFAULT_FALLING_BLOCK_CAN_PLACE_AS_BLOCK, this.canPlaceAsBlock);
-        this.canDropAsItemValue = new ImmutableSpongeValue<>(Keys.CAN_DROP_AS_ITEM, DataConstants.DEFAULT_FALLING_BLOCK_CAN_DROP_AS_ITEM,
+        this.canPlaceAsBlockValue = new ImmutableSpongeValue<>(Keys.CAN_PLACE_AS_BLOCK, DataConstants.Entity.FallingBlock
+                .DEFAULT_CAN_PLACE_AS_BLOCK, this.canPlaceAsBlock);
+        this.canDropAsItemValue = new ImmutableSpongeValue<>(Keys.CAN_DROP_AS_ITEM, DataConstants.Entity.FallingBlock.DEFAULT_CAN_DROP_AS_ITEM,
                 this.canDropAsItem);
-        this.fallTimeValue = new ImmutableSpongeValue<>(Keys.FALL_TIME, DataConstants.DEFAULT_FALLING_BLOCK_FALL_TIME,
+        this.fallTimeValue = new ImmutableSpongeValue<>(Keys.FALL_TIME, DataConstants.Entity.FallingBlock.DEFAULT_FALL_TIME,
                 this.fallTime);
-        this.canHurtEntitiesValue = new ImmutableSpongeValue<>(Keys.FALLING_BLOCK_CAN_HURT_ENTITIES, DataConstants
-                .DEFAULT_FALLING_BLOCK_CAN_HURT_ENTITIES, this.canHurtEntities);
+        this.canHurtEntitiesValue = new ImmutableSpongeValue<>(Keys.FALLING_BLOCK_CAN_HURT_ENTITIES, DataConstants.Entity.FallingBlock
+                .DEFAULT_CAN_HURT_ENTITIES, this.canHurtEntities);
 
         registerGetters();
     }

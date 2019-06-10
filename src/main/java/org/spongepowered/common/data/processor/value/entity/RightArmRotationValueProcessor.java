@@ -51,7 +51,7 @@ public class RightArmRotationValueProcessor extends AbstractSpongeValueProcessor
 
     @Override
     protected Value<Vector3d> constructValue(Vector3d actualValue) {
-        return new SpongeValue<>(Keys.RIGHT_ARM_ROTATION, DataConstants.DEFAULT_RIGHT_ARM_ROTATION, actualValue);
+        return new SpongeValue<>(Keys.RIGHT_ARM_ROTATION, DataConstants.Entity.ArmorStand.DEFAULT_RIGHT_ARM_ROTATION, actualValue);
     }
 
     @Override

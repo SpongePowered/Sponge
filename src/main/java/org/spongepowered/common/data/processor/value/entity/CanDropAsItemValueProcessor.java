@@ -44,7 +44,7 @@ public class CanDropAsItemValueProcessor extends AbstractSpongeValueProcessor<En
 
     @Override
     protected Value<Boolean> constructValue(Boolean value) {
-        return new SpongeValue<>(Keys.CAN_DROP_AS_ITEM, DataConstants.DEFAULT_FALLING_BLOCK_CAN_DROP_AS_ITEM, value);
+        return new SpongeValue<>(Keys.CAN_DROP_AS_ITEM, DataConstants.Entity.FallingBlock.DEFAULT_CAN_DROP_AS_ITEM, value);
     }
 
     @Override

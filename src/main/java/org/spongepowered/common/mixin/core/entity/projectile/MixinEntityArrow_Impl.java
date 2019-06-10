@@ -44,13 +44,14 @@ import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.entity.projectile.IMixinEntityArrow;
 import org.spongepowered.common.mixin.api.minecraft.entity.MixinEntity_API;
+import org.spongepowered.common.mixin.core.entity.MixinEntity_Impl;
 
 import java.util.List;
 
 import javax.annotation.Nullable;
 
 @Mixin(EntityArrow.class)
-public abstract class MixinEntityArrow_Impl extends MixinEntity_API implements Arrow, IMixinEntityArrow {
+public abstract class MixinEntityArrow_Impl extends MixinEntity_Impl implements IMixinEntityArrow {
 
     @Shadow public Entity shootingEntity;
     @Shadow private int ticksInAir;
@@ -68,33 +69,6 @@ public abstract class MixinEntityArrow_Impl extends MixinEntity_API implements A
     // Not all ProjectileSources are entities (e.g. BlockProjectileSource).
     // This field is used to store a ProjectileSource that isn't an entity.
     @Nullable public ProjectileSource projectileSource;
-
-    @Override
-    public ProjectileSource getShooter() {
-        if (this.projectileSource != null) {
-            return this.projectileSource;
-        } else if (this.shootingEntity instanceof ProjectileSource) {
-            return (ProjectileSource) this.shootingEntity;
-        }
-        return ProjectileSource.UNKNOWN;
-    }
-
-    @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
-        manipulators.add(getKnockbackData());
-    }
-
-    @Override
-    public void setShooter(ProjectileSource shooter) {
-        if (shooter instanceof Entity) {
-            // This allows things like Vanilla kill attribution to take place
-            this.shootingEntity = (Entity) shooter;
-        } else {
-            this.shootingEntity = null;
-        }
-        this.projectileSource = shooter;
-    }
 
     @Override
     public void readFromNbt(NBTTagCompound compound) {

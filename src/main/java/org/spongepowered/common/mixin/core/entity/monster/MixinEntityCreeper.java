@@ -41,8 +41,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.interfaces.entity.IMixinGriefer;
-import org.spongepowered.common.interfaces.entity.explosive.IMixinFusedExplosive;
+import org.spongepowered.common.bridge.entity.IMixinGriefer;
+import org.spongepowered.common.bridge.explosives.ImplBridgeFusedExplosive;
 import org.spongepowered.common.mixin.api.minecraft.entity.monster.MixinEntityMob_API;
 
 import java.util.Optional;
@@ -50,7 +50,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 @Mixin(EntityCreeper.class)
-public abstract class MixinEntityCreeper extends MixinEntityMob_API implements Creeper, IMixinFusedExplosive {
+public abstract class MixinEntityCreeper extends MixinEntityMob_API implements Creeper, ImplBridgeFusedExplosive {
 
     private static final String TARGET_NEW_EXPLOSION = "Lnet/minecraft/world/World;createExplosion"
             + "(Lnet/minecraft/entity/Entity;DDDFZ)Lnet/minecraft/world/Explosion;";

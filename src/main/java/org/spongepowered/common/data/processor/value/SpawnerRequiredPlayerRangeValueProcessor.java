@@ -47,7 +47,7 @@ public class SpawnerRequiredPlayerRangeValueProcessor extends AbstractSpongeValu
         return SpongeValueFactory.boundedBuilder(this.key)
                 .minimum((short) 0)
                 .maximum(Short.MAX_VALUE)
-                .defaultValue(DataConstants.DEFAULT_SPAWNER_REQUIRED_PLAYER_RANGE)
+                .defaultValue(DataConstants.TileEntity.Spawner.DEFAULT_SPAWNER_REQUIRED_PLAYER_RANGE)
                 .actualValue(actualValue)
                 .build();
     }

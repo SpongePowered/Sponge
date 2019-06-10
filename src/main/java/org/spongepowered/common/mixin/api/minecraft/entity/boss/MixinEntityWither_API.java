@@ -27,32 +27,20 @@ package org.spongepowered.common.mixin.api.minecraft.entity.boss;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.flowpowered.math.vector.Vector3d;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.boss.EntityWither;
 import net.minecraft.world.BossInfoServer;
 import org.spongepowered.api.boss.ServerBossBar;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.monster.Wither;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.explosion.Explosion;
-import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.Slice;
-import org.spongepowered.common.interfaces.entity.IMixinGriefer;
-import org.spongepowered.common.interfaces.entity.explosive.IMixinFusedExplosive;
+import org.spongepowered.common.bridge.explosives.ImplBridgeFusedExplosive;
 import org.spongepowered.common.mixin.api.minecraft.entity.monster.MixinEntityMob_API;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Mixin(value = EntityWither.class)
 public abstract class MixinEntityWither_API extends MixinEntityMob_API implements Wither {
@@ -92,30 +80,30 @@ public abstract class MixinEntityWither_API extends MixinEntityMob_API implement
 
     @Override
     public void detonate() {
-        ((IMixinFusedExplosive) this).setFuseTicksRemaining(1);
+        ((ImplBridgeFusedExplosive) this).setFuseTicksRemaining(1);
     }
 
     @Override
     public void prime() {
         checkState(!isPrimed(), "already primed");
-        if (((IMixinFusedExplosive) this).shouldPrime()) {
-            ((IMixinFusedExplosive) this).setFuseTicksRemaining(this.fuseDuration);
-            ((IMixinFusedExplosive) this).postPrime();
+        if (((ImplBridgeFusedExplosive) this).shouldPrime()) {
+            ((ImplBridgeFusedExplosive) this).setFuseTicksRemaining(this.fuseDuration);
+            ((ImplBridgeFusedExplosive) this).postPrime();
         }
     }
 
     @Override
     public void defuse() {
         checkState(isPrimed(), "not primed");
-        if (((IMixinFusedExplosive) this).shouldDefuse()) {
+        if (((ImplBridgeFusedExplosive) this).shouldDefuse()) {
             setInvulTime(0);
-            ((IMixinFusedExplosive) this).postDefuse();
+            ((ImplBridgeFusedExplosive) this).postDefuse();
         }
     }
 
     @Override
     public boolean isPrimed() {
-        return ((IMixinFusedExplosive) this).getFuseTicksRemaining() > 0;
+        return ((ImplBridgeFusedExplosive) this).getFuseTicksRemaining() > 0;
     }
 
 }

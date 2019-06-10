@@ -71,10 +71,12 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.GameState;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.mutable.entity.ExperienceHolderData;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Cancellable;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
@@ -123,6 +125,7 @@ import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.mixin.api.minecraft.entity.MixinEntityLivingBase_API;
+import org.spongepowered.common.mixin.core.entity.MixinEntityLivingBase_Impl;
 import org.spongepowered.common.registry.type.event.DamageSourceRegistryModule;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.serializer.LegacyTexts;
@@ -137,7 +140,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 @Mixin(EntityPlayer.class)
-public abstract class MixinEntityPlayer extends MixinEntityLivingBase_API implements IMixinEntityPlayer, ITargetedLocation {
+public abstract class MixinEntityPlayer extends MixinEntityLivingBase_Impl implements IMixinEntityPlayer, ITargetedLocation {
 
     private static final String WORLD_PLAY_SOUND_AT =
             "Lnet/minecraft/world/World;playSound(Lnet/minecraft/entity/player/EntityPlayer;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V";
@@ -150,12 +153,9 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase_API implem
     @Shadow public float experience;
     @Shadow public PlayerCapabilities capabilities;
     @Shadow public InventoryPlayer inventory;
-    @Shadow private BlockPos spawnPos;
-    @Shadow private BlockPos bedLocation;
-    @Shadow protected FoodStats foodStats;
+    @Shadow public BlockPos bedLocation;
     @Shadow public InventoryEnderChest enderChest;
 
-    @Shadow public abstract boolean canOpen(LockCode code);
     @Shadow public abstract boolean isPlayerSleeping();
     @Shadow public abstract boolean isSpectator();
     @Shadow public abstract int xpBarCap();
@@ -171,7 +171,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase_API implem
     @Shadow public abstract void takeStat(StatBase stat);
     @Shadow protected abstract void destroyVanishingCursedItems(); // Filter vanishing curse enchanted items
     @Shadow public void wakeUpPlayer(boolean immediately, boolean updateWorldFlag, boolean setSpawn) {};
-    @Shadow public abstract EntityItem dropItem(boolean dropAll);
+    @Shadow @Nullable public abstract EntityItem dropItem(boolean dropAll); // Overridden in MixinEntityPlayerMP for tracking
     @Shadow public abstract FoodStats getFoodStats();
     @Shadow public abstract GameProfile getGameProfile();
     @Shadow public abstract Scoreboard getWorldScoreboard();
@@ -382,11 +382,12 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase_API implem
     private boolean onSpongeIsPlayerSleeping(EntityPlayer self) {
         if (self.isPlayerSleeping()) {
             if (!((IMixinWorld) this.world).isFake()) {
-                Sponge.getCauseStackManager().pushCause(this);
-                SpongeImpl.postEvent(SpongeEventFactory.
-                        createSleepingEventTick(Sponge.getCauseStackManager().getCurrentCause(),
-                                                this.getWorld().createSnapshot(VecHelper.toVector3i(this.bedLocation)), this));
-                Sponge.getCauseStackManager().popCause();
+                final CauseStackManager csm = Sponge.getCauseStackManager();
+                csm.pushCause(this);
+                final BlockPos bedLocation = this.bedLocation;
+                final BlockSnapshot snapshot = ((org.spongepowered.api.world.World) this.world).createSnapshot(bedLocation.getX(), bedLocation.getY(), bedLocation.getZ());
+                SpongeImpl.postEvent(SpongeEventFactory.createSleepingEventTick(csm.getCurrentCause(), snapshot, (org.spongepowered.api.entity.Entity) this));
+                csm.popCause();
             }
             return true;
         }

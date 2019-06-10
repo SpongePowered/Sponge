@@ -53,35 +53,23 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExpirableData;
+import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLightningBolt;
-import org.spongepowered.common.interfaces.world.IMixinLocation;
+import org.spongepowered.common.mixin.api.minecraft.entity.effect.MixinEntityWeatherEffect_API;
+import org.spongepowered.common.mixin.core.entity.MixinEntity_Impl;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.List;
 
 @Mixin(EntityLightningBolt.class)
-public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect implements Lightning, IMixinEntityLightningBolt {
+public abstract class MixinEntityLightningBolt extends MixinEntity_Impl implements IMixinEntityLightningBolt {
 
     private final List<Entity> struckEntities = Lists.newArrayList();
     private final List<Transaction<BlockSnapshot>> struckBlocks = Lists.newArrayList();
     private boolean effect = false;
 
     @Shadow private int lightningState;
-
-    @Override
-    public boolean isEffect() {
-        return this.effect;
-    }
-
-    @Override
-    public void setEffect(boolean effect) {
-        this.effect = effect;
-        if (effect) {
-            this.struckBlocks.clear();
-            this.struckEntities.clear();
-        }
-    }
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z"))
@@ -152,37 +140,15 @@ public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect 
     @Override
     public void readFromNbt(NBTTagCompound compound) {
         super.readFromNbt(compound);
-        if (compound.hasKey("effect")) {
-            this.effect = compound.getBoolean("effect");
+        if (compound.hasKey(DataConstants.Entity.LIGHTNING_EFFECT)) {
+            this.effect = compound.getBoolean(DataConstants.Entity.LIGHTNING_EFFECT);
         }
     }
 
     @Override
     public void writeToNbt(NBTTagCompound compound) {
         super.writeToNbt(compound);
-        compound.setBoolean("effect", this.effect);
+        compound.setBoolean(DataConstants.Entity.LIGHTNING_EFFECT, this.effect);
     }
 
-    // Data delegated methods
-
-    @Override
-    public ExpirableData getExpiringData() {
-        return new SpongeExpirableData(this.lightningState, 2);
-    }
-
-    @Override
-    public MutableBoundedValue<Integer> expireTicks() {
-        return SpongeValueFactory.boundedBuilder(Keys.EXPIRATION_TICKS)
-                .minimum((int) Short.MIN_VALUE)
-                .maximum(2)
-                .defaultValue(2)
-                .actualValue(this.lightningState)
-                .build();
-    }
-
-    @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
-        manipulators.add(getExpiringData());
-    }
 }

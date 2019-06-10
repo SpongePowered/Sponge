@@ -59,10 +59,10 @@ public class SpongeFallingBlockData extends AbstractData<FallingBlockData, Immut
     }
 
     public SpongeFallingBlockData() {
-        this(DataConstants.DEFAULT_FALLING_BLOCK_FALL_DAMAGE_PER_BLOCK, DataConstants.DEFAULT_FALLING_BLOCK_MAX_FALL_DAMAGE, DataConstants.Catalog
-                        .DEFAULT_FALLING_BLOCK_BLOCKSTATE, DataConstants.DEFAULT_FALLING_BLOCK_CAN_PLACE_AS_BLOCK, DataConstants
-                        .DEFAULT_FALLING_BLOCK_CAN_DROP_AS_ITEM, DataConstants.DEFAULT_FALLING_BLOCK_FALL_TIME,
-                DataConstants.DEFAULT_FALLING_BLOCK_CAN_HURT_ENTITIES);
+        this(DataConstants.Entity.FallingBlock.DEFAULT_FALL_DAMAGE_PER_BLOCK, DataConstants.Entity.FallingBlock.DEFAULT_MAX_FALL_DAMAGE, DataConstants.Catalog
+                        .DEFAULT_FALLING_BLOCK_BLOCKSTATE, DataConstants.Entity.FallingBlock.DEFAULT_CAN_PLACE_AS_BLOCK, DataConstants.Entity.FallingBlock
+                        .DEFAULT_CAN_DROP_AS_ITEM, DataConstants.Entity.FallingBlock.DEFAULT_FALL_TIME,
+                DataConstants.Entity.FallingBlock.DEFAULT_CAN_HURT_ENTITIES);
     }
 
     @Override
@@ -106,7 +106,7 @@ public class SpongeFallingBlockData extends AbstractData<FallingBlockData, Immut
 
     @Override
     public Value<Double> fallDamagePerBlock() {
-        return new SpongeValue<>(Keys.FALL_DAMAGE_PER_BLOCK, DataConstants.DEFAULT_FALLING_BLOCK_FALL_DAMAGE_PER_BLOCK, this.fallDamagePerBlock);
+        return new SpongeValue<>(Keys.FALL_DAMAGE_PER_BLOCK, DataConstants.Entity.FallingBlock.DEFAULT_FALL_DAMAGE_PER_BLOCK, this.fallDamagePerBlock);
     }
 
     public void setMaxFallDamage(double value) {
@@ -119,7 +119,7 @@ public class SpongeFallingBlockData extends AbstractData<FallingBlockData, Immut
 
     @Override
     public Value<Double> maxFallDamage() {
-        return new SpongeValue<>(Keys.MAX_FALL_DAMAGE, DataConstants.DEFAULT_FALLING_BLOCK_MAX_FALL_DAMAGE, this.maxFallDamage);
+        return new SpongeValue<>(Keys.MAX_FALL_DAMAGE, DataConstants.Entity.FallingBlock.DEFAULT_MAX_FALL_DAMAGE, this.maxFallDamage);
     }
 
     public void setBlockState(BlockState value) {
@@ -145,7 +145,7 @@ public class SpongeFallingBlockData extends AbstractData<FallingBlockData, Immut
 
     @Override
     public Value<Boolean> canPlaceAsBlock() {
-        return new SpongeValue<>(Keys.CAN_PLACE_AS_BLOCK, DataConstants.DEFAULT_FALLING_BLOCK_CAN_PLACE_AS_BLOCK, this.canPlaceAsBlock);
+        return new SpongeValue<>(Keys.CAN_PLACE_AS_BLOCK, DataConstants.Entity.FallingBlock.DEFAULT_CAN_PLACE_AS_BLOCK, this.canPlaceAsBlock);
     }
 
     public void setCanDropAsItem(boolean value) {
@@ -158,7 +158,7 @@ public class SpongeFallingBlockData extends AbstractData<FallingBlockData, Immut
 
     @Override
     public Value<Boolean> canDropAsItem() {
-        return new SpongeValue<>(Keys.CAN_DROP_AS_ITEM, DataConstants.DEFAULT_FALLING_BLOCK_CAN_DROP_AS_ITEM, this.canDropAsItem);
+        return new SpongeValue<>(Keys.CAN_DROP_AS_ITEM, DataConstants.Entity.FallingBlock.DEFAULT_CAN_DROP_AS_ITEM, this.canDropAsItem);
     }
 
     public void setFallTime(int value) {
@@ -171,7 +171,7 @@ public class SpongeFallingBlockData extends AbstractData<FallingBlockData, Immut
 
     @Override
     public Value<Integer> fallTime() {
-        return new SpongeValue<>(Keys.FALL_TIME, DataConstants.DEFAULT_FALLING_BLOCK_FALL_TIME, this.fallTime);
+        return new SpongeValue<>(Keys.FALL_TIME, DataConstants.Entity.FallingBlock.DEFAULT_FALL_TIME, this.fallTime);
     }
 
     public void setCanHurtEntities(boolean value) {
@@ -184,7 +184,7 @@ public class SpongeFallingBlockData extends AbstractData<FallingBlockData, Immut
 
     @Override
     public Value<Boolean> canHurtEntities() {
-        return new SpongeValue<>(Keys.FALLING_BLOCK_CAN_HURT_ENTITIES, DataConstants.DEFAULT_FALLING_BLOCK_CAN_HURT_ENTITIES, this.canHurtEntities);
+        return new SpongeValue<>(Keys.FALLING_BLOCK_CAN_HURT_ENTITIES, DataConstants.Entity.FallingBlock.DEFAULT_CAN_HURT_ENTITIES, this.canHurtEntities);
     }
 
     @Override

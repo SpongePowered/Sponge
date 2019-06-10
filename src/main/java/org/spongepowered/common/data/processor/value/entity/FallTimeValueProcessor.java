@@ -44,7 +44,7 @@ public class FallTimeValueProcessor extends AbstractSpongeValueProcessor<EntityF
 
     @Override
     protected Value<Integer> constructValue(Integer value) {
-        return new SpongeValue<>(Keys.FALL_TIME, DataConstants.DEFAULT_FALLING_BLOCK_FALL_TIME, value);
+        return new SpongeValue<>(Keys.FALL_TIME, DataConstants.Entity.FallingBlock.DEFAULT_FALL_TIME, value);
     }
 
     @Override

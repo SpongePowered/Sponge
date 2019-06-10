@@ -51,7 +51,7 @@ public class ChestRotationValueProcessor extends AbstractSpongeValueProcessor<En
 
     @Override
     protected Value<Vector3d> constructValue(Vector3d actualValue) {
-        return new SpongeValue<>(Keys.CHEST_ROTATION, DataConstants.DEFAULT_CHEST_ROTATION, actualValue);
+        return new SpongeValue<>(Keys.CHEST_ROTATION, DataConstants.Entity.ArmorStand.DEFAULT_CHEST_ROTATION, actualValue);
     }
 
     @Override

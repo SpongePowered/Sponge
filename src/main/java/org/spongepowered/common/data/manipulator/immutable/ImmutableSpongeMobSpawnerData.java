@@ -68,10 +68,10 @@ public class ImmutableSpongeMobSpawnerData extends AbstractImmutableData<Immutab
     private final ImmutableWeightedCollectionValue<EntityArchetype> toSpawnValue;
 
     public ImmutableSpongeMobSpawnerData() {
-        this(DataConstants.DEFAULT_SPAWNER_REMAINING_DELAY, DataConstants.DEFAULT_SPAWNER_MINIMUM_SPAWN_DELAY,
-                DataConstants.DEFAULT_SPAWNER_MAXIMUM_SPAWN_DELAY, DataConstants.DEFAULT_SPAWNER_SPAWN_COUNT,
-                DataConstants.DEFAULT_SPAWNER_MAXMIMUM_NEARBY_ENTITIES, DataConstants.DEFAULT_SPAWNER_REQUIRED_PLAYER_RANGE,
-                DataConstants.DEFAULT_SPAWNER_SPAWN_RANGE, DataConstants.DEFAULT_SPAWNER_NEXT_ENTITY_TO_SPAWN, new WeightedTable<>());
+        this(DataConstants.TileEntity.Spawner.DEFAULT_SPAWNER_REMAINING_DELAY, DataConstants.TileEntity.Spawner.DEFAULT_SPAWNER_MINIMUM_SPAWN_DELAY,
+                DataConstants.TileEntity.Spawner.DEFAULT_SPAWNER_MAXIMUM_SPAWN_DELAY, DataConstants.TileEntity.Spawner.DEFAULT_SPAWNER_SPAWN_COUNT,
+                DataConstants.TileEntity.Spawner.DEFAULT_SPAWNER_MAXMIMUM_NEARBY_ENTITIES, DataConstants.TileEntity.Spawner.DEFAULT_SPAWNER_REQUIRED_PLAYER_RANGE,
+                DataConstants.TileEntity.Spawner.DEFAULT_SPAWNER_SPAWN_RANGE, DataConstants.TileEntity.Spawner.DEFAULT_SPAWNER_NEXT_ENTITY_TO_SPAWN, new WeightedTable<>());
     }
 
     public ImmutableSpongeMobSpawnerData(short remaining, short minSpawnDelay, short maxSpawnDelay, short count, short maxNearby,
@@ -137,7 +137,7 @@ public class ImmutableSpongeMobSpawnerData extends AbstractImmutableData<Immutab
                 .actualValue(spawnRange)
                 .build()
                 .asImmutable();
-        this.nextValue = new ImmutableSpongeValue<>(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN, DataConstants.DEFAULT_SPAWNER_NEXT_ENTITY_TO_SPAWN,
+        this.nextValue = new ImmutableSpongeValue<>(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN, DataConstants.TileEntity.Spawner.DEFAULT_SPAWNER_NEXT_ENTITY_TO_SPAWN,
                 this.nextToSpawn);
         this.toSpawnValue = new ImmutableSpongeWeightedCollectionValue<>(Keys.SPAWNER_ENTITIES, this.entitiesToSpawn);
 

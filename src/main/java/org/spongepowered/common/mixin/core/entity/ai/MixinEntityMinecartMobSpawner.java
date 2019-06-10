@@ -33,13 +33,13 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.manipulator.mutable.SpongeMobSpawnerData;
 import org.spongepowered.common.data.processor.common.SpawnerUtils;
 import org.spongepowered.common.interfaces.IMixinMobSpawner;
-import org.spongepowered.common.mixin.core.entity.item.MixinEntityMinecart;
+import org.spongepowered.common.mixin.core.entity.item.MixinEntityMinecart_Impl;
 import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.List;
 
 @Mixin(EntityMinecartMobSpawner.class)
-public abstract class MixinEntityMinecartMobSpawner extends MixinEntityMinecart implements MobSpawnerMinecart, IMixinMobSpawner {
+public abstract class MixinEntityMinecartMobSpawner extends MixinEntityMinecart_Impl implements MobSpawnerMinecart, IMixinMobSpawner {
 
     @Shadow private MobSpawnerBaseLogic mobSpawnerLogic;
 

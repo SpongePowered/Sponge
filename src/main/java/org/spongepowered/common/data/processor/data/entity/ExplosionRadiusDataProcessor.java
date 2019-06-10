@@ -38,7 +38,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExplosionR
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeOptionalValue;
 import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
-import org.spongepowered.common.interfaces.entity.explosive.IMixinExplosive;
+import org.spongepowered.common.bridge.explosives.ImplBridgeExplosive;
 
 import java.util.Optional;
 
@@ -52,13 +52,13 @@ public class ExplosionRadiusDataProcessor extends AbstractSingleDataSingleTarget
     @Override
     protected boolean set(Explosive explosive, Optional<Integer> value) {
         checkArgument(!value.isPresent() || value.get() >= 0, "value must be empty or no less than zero");
-        ((IMixinExplosive) explosive).setExplosionRadius(value);
+        ((ImplBridgeExplosive) explosive).setExplosionRadius(value);
         return true;
     }
 
     @Override
     protected Optional<Optional<Integer>> getVal(Explosive explosive) {
-        return Optional.of(((IMixinExplosive) explosive).getExplosionRadius());
+        return Optional.of(((ImplBridgeExplosive) explosive).getExplosionRadius());
     }
 
     @Override

@@ -42,16 +42,16 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.mutable.entity.IgniteableData;
+import org.spongepowered.api.data.manipulator.mutable.entity.VehicleData;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.EntityArchetype;
@@ -63,7 +63,6 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.util.RelativePositions;
@@ -76,6 +75,7 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGravityData;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
@@ -86,9 +86,8 @@ import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
-import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
-import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.bridge.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.interfaces.world.IMixinTeleporter;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -97,7 +96,6 @@ import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.WorldManager;
 
-import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
@@ -114,17 +112,6 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
 
     // @formatter:off
     protected final SpongeEntityType entityType = EntityTypeRegistryModule.getInstance().getForClass(((net.minecraft.entity.Entity) (Object) this).getClass());
-    private boolean teleporting;
-    private WeakReference<IMixinChunk> activeChunk = new WeakReference<>(null);
-    private float origWidth;
-    private float origHeight;
-    private boolean isConstructing = true;
-    @Nullable private Text displayName;
-    @Nullable private BlockState currentCollidingBlock;
-    @Nullable private BlockPos lastCollidedBlockPos;
-    @Nullable private net.minecraft.entity.Entity teleportVehicle;
-    // Used by tracker config
-    private boolean trackedInWorld = false;
 
     @Shadow @Nullable public net.minecraft.entity.Entity ridingEntity;
     @Shadow @Final private List<net.minecraft.entity.Entity> riddenByEntities;
@@ -615,7 +602,7 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
     @Override
     public Collection<DataManipulator<?, ?>> getContainers() {
         final List<DataManipulator<?, ?>> list = Lists.newArrayList();
-        this.supplyVanillaManipulators(list);
+        this.spongeApi$supplyVanillaManipulators(list);
         if (this instanceof IMixinCustomDataHolder && ((IMixinCustomDataHolder) this).hasManipulators()) {
             list.addAll(((IMixinCustomDataHolder) this).getCustomManipulators());
         }
@@ -684,5 +671,15 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
         return this.getValue(Keys.HAS_GRAVITY).get();
     }
 
+    protected void spongeApi$supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        Optional<VehicleData> vehicleData = this.get(VehicleData.class);
+        if (vehicleData.isPresent()) {
+            manipulators.add(vehicleData.get());
+        }
+        if (this.fire > 0) {
+            manipulators.add(this.get(IgniteableData.class).get());
+        }
+        manipulators.add(new SpongeGravityData(!this.hasNoGravity()));
+    }
 
 }
