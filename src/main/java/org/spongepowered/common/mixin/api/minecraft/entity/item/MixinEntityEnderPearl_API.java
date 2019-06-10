@@ -25,23 +25,9 @@
 package org.spongepowered.common.mixin.api.minecraft.entity.item;
 
 import net.minecraft.entity.item.EntityEnderPearl;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.projectile.EnderPearl;
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
-import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.mixin.api.minecraft.entity.projectile.MixinEntityThrowable_API;
-import org.spongepowered.common.mixin.core.entity.projectile.MixinEntityThrowable_Impl;
 
 @Mixin(EntityEnderPearl.class)
 public abstract class MixinEntityEnderPearl_API extends MixinEntityThrowable_API implements EnderPearl {

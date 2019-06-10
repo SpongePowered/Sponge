@@ -40,6 +40,7 @@ import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.bridge.explosives.ImplBridgeFusedExplosive;
 import org.spongepowered.common.interfaces.entity.IMixinEntityFireworkRocket;
 
 @Mixin(ItemFirework.class)
@@ -54,7 +55,7 @@ public class MixinItemFirework extends Item {
     private boolean onspawnEntity(World world, Entity firework, EntityPlayer player, World worldIn, BlockPos pos, EnumHand side, EnumFacing hitX, float hitY, float hitZ, float p_180614_9_) {
         ((Firework) firework).setShooter((ProjectileSource) player);
         Sponge.getCauseStackManager().pushCause(player);
-        this.primeCancelled = !((IMixinEntityFireworkRocket) firework).shouldPrime();
+        this.primeCancelled = !((ImplBridgeFusedExplosive) firework).shouldPrime();
         Sponge.getCauseStackManager().popCause();
         return !this.primeCancelled && world.spawnEntity(firework);
     }

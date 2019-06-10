@@ -31,7 +31,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.interfaces.world.IMixinMapData;
+import org.spongepowered.common.bridge.optimization.OptimizedMapData;
 import org.spongepowered.common.mixin.core.world.storage.IMixinMapStorage;
 import org.spongepowered.common.world.WorldManager;
 
@@ -50,7 +50,7 @@ public abstract class MixinMinecraftServer_MapOptimization {
                 continue;
             }
 
-            ((IMixinMapData) next).tickMap();
+            ((OptimizedMapData) next).tickMap();
         }
     }
 }

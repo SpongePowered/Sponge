@@ -68,26 +68,10 @@ import javax.annotation.Nullable;
 @Mixin(value = EntityLivingBase.class, priority = 999)
 public abstract class MixinEntityLivingBase_API extends MixinEntity_API implements Living {
 
-    private static final int MAX_DEATH_EVENTS_BEFORE_GIVING_UP = 3;
-
-    @Shadow public int maxHurtResistantTime;
-    @Shadow public int hurtTime;
-    @Shadow public int maxHurtTime;
-    @Shadow public float attackedAtYaw;
-    @Shadow public float limbSwingAmount;
-    @Shadow public boolean dead;
     @Shadow @Nullable public EntityLivingBase revengeTarget;
-    @Shadow protected int idleTime;
-    @Shadow protected int scoreValue;
-    @Shadow protected int recentlyHit;
-    @Shadow protected int activeItemStackUseCount;
-    @Shadow protected float lastDamage;
-    @Shadow @Nullable protected EntityPlayer attackingPlayer;
-    @Shadow protected ItemStack activeItemStack;
-    @Shadow private DamageSource lastDamageSource;
-    @Shadow private long lastDamageStamp;
 
-    @Shadow public void stopActiveHand() { }
+    @Shadow protected float lastDamage;
+
     @Shadow public abstract void setHealth(float health);
     @Shadow public abstract void setLastAttackedEntity(net.minecraft.entity.Entity entity);
     @Shadow public abstract void setRotationYawHead(float rotation);

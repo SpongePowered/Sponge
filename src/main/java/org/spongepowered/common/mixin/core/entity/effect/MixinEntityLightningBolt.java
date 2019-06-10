@@ -34,12 +34,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.Transaction;
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.mutable.entity.ExpirableData;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.weather.Lightning;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.action.LightningEvent;
@@ -52,38 +47,33 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExpirableData;
 import org.spongepowered.common.data.util.DataConstants;
-import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLightningBolt;
-import org.spongepowered.common.mixin.api.minecraft.entity.effect.MixinEntityWeatherEffect_API;
-import org.spongepowered.common.mixin.core.entity.MixinEntity_Impl;
+import org.spongepowered.common.mixin.core.entity.MixinEntity;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.List;
 
 @Mixin(EntityLightningBolt.class)
-public abstract class MixinEntityLightningBolt extends MixinEntity_Impl implements IMixinEntityLightningBolt {
+public abstract class MixinEntityLightningBolt extends MixinEntity implements IMixinEntityLightningBolt {
 
     private final List<Entity> struckEntities = Lists.newArrayList();
     private final List<Transaction<BlockSnapshot>> struckBlocks = Lists.newArrayList();
     private boolean effect = false;
 
-    @Shadow private int lightningState;
-
     @Redirect(method = "<init>", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z"))
-    public boolean onStrikeBlockInit(net.minecraft.world.World world, BlockPos pos, IBlockState blockState) {
-        return onStrikeBlock(world, pos, blockState);
+    private boolean spongeImpl$throwEventForChangingBlocks(net.minecraft.world.World world, BlockPos pos, IBlockState blockState) {
+        return spongeImpl$strikeBlockAndAddSnapshot(world, pos, blockState);
     }
 
     @Redirect(method = "onUpdate()V", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z"))
-    public boolean onStrikeBlockUpdate(net.minecraft.world.World world, BlockPos pos, IBlockState blockState) {
-        return onStrikeBlock(world, pos, blockState);
+    private boolean spongeImpl$throwEventForChangingBlockDuringUpdate(net.minecraft.world.World world, BlockPos pos, IBlockState blockState) {
+        return spongeImpl$strikeBlockAndAddSnapshot(world, pos, blockState);
     }
 
-    private boolean onStrikeBlock(net.minecraft.world.World world, BlockPos pos, IBlockState blockState) {
+    private boolean spongeImpl$strikeBlockAndAddSnapshot(net.minecraft.world.World world, BlockPos pos, IBlockState blockState) {
         if (!this.effect && ((World) world).containsBlock(pos.getX(), pos.getY(), pos.getZ())) {
             Vector3i pos3i = VecHelper.toVector3i(pos);
             Transaction<BlockSnapshot> transaction = new Transaction<BlockSnapshot>(new SpongeBlockSnapshotBuilder()
@@ -100,7 +90,7 @@ public abstract class MixinEntityLightningBolt extends MixinEntity_Impl implemen
 
     @Redirect(method = "onUpdate()V", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/entity/Entity;onStruckByLightning(Lnet/minecraft/entity/effect/EntityLightningBolt;)V"))
-    public void onStrikeEntity(net.minecraft.entity.Entity mcEntity, EntityLightningBolt lightningBolt) {
+    private void spongeImpl$AddEntityToListForEvent(net.minecraft.entity.Entity mcEntity, EntityLightningBolt lightningBolt) {
         if (!this.effect) {
             Entity entity = (Entity) mcEntity;
             if (!this.struckEntities.contains(entity)) {
@@ -110,7 +100,7 @@ public abstract class MixinEntityLightningBolt extends MixinEntity_Impl implemen
     }
 
     @Inject(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/effect/EntityLightningBolt;setDead()V"))
-    public void onLivingTimeExpired(CallbackInfo ci) {
+    private void spongeImpl$ThrowEventAndProcess(CallbackInfo ci) {
         if (this.isDead || this.world.isRemote) {
             return;
         }
@@ -138,16 +128,16 @@ public abstract class MixinEntityLightningBolt extends MixinEntity_Impl implemen
     }
 
     @Override
-    public void readFromNbt(NBTTagCompound compound) {
-        super.readFromNbt(compound);
+    public void spongeImpl$readFromSpongeCompound(NBTTagCompound compound) {
+        super.spongeImpl$readFromSpongeCompound(compound);
         if (compound.hasKey(DataConstants.Entity.LIGHTNING_EFFECT)) {
             this.effect = compound.getBoolean(DataConstants.Entity.LIGHTNING_EFFECT);
         }
     }
 
     @Override
-    public void writeToNbt(NBTTagCompound compound) {
-        super.writeToNbt(compound);
+    public void spongeImpl$writeToSpongeCompound(NBTTagCompound compound) {
+        super.spongeImpl$writeToSpongeCompound(compound);
         compound.setBoolean(DataConstants.Entity.LIGHTNING_EFFECT, this.effect);
     }
 

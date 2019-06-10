@@ -66,7 +66,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
-import net.minecraft.world.LockCode;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.GameState;
@@ -124,8 +123,7 @@ import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
-import org.spongepowered.common.mixin.api.minecraft.entity.MixinEntityLivingBase_API;
-import org.spongepowered.common.mixin.core.entity.MixinEntityLivingBase_Impl;
+import org.spongepowered.common.mixin.core.entity.MixinEntityLivingBase;
 import org.spongepowered.common.registry.type.event.DamageSourceRegistryModule;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.serializer.LegacyTexts;
@@ -140,7 +138,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 @Mixin(EntityPlayer.class)
-public abstract class MixinEntityPlayer extends MixinEntityLivingBase_Impl implements IMixinEntityPlayer, ITargetedLocation {
+public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements IMixinEntityPlayer, ITargetedLocation {
 
     private static final String WORLD_PLAY_SOUND_AT =
             "Lnet/minecraft/world/World;playSound(Lnet/minecraft/entity/player/EntityPlayer;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V";
@@ -695,7 +693,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase_Impl imple
                         isSprintingAttack = true;
                     }
 
-                    isCriticalAttack = isStrongAttack && this.fallDistance > 0.0F && !this.onGround && !this.isOnLadder() && !this.isInWater() && !this.isPotionActive(MobEffects.BLINDNESS) && !this.isRiding() && targetEntity instanceof EntityLivingBase;
+                    isCriticalAttack = isStrongAttack && this.fallDistance > 0.0F && !this.onGround && !this.isOnLadder() && !this.shadow$isInWater() && !this.isPotionActive(MobEffects.BLINDNESS) && !this.isRiding() && targetEntity instanceof EntityLivingBase;
                     isCriticalAttack = isCriticalAttack && !this.isSprinting();
 
                     if (isCriticalAttack) {
@@ -952,7 +950,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase_Impl imple
     }
 
     @Override
-    public boolean isImmuneToFireForIgniteEvent() {
+    public boolean spongeImpl$isImmuneToFireForIgniteEvent() {
         return this.isSpectator() || this.isCreative();
     }
 }

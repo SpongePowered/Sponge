@@ -34,9 +34,8 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.interfaces.world.IMixinMapData;
+import org.spongepowered.common.bridge.optimization.OptimizedMapData;
 
 @Mixin(EntityTrackerEntry.class)
 public abstract class MixinEntityTrackerEntry_MapOptimization {
@@ -54,7 +53,7 @@ public abstract class MixinEntityTrackerEntry_MapOptimization {
     @Redirect(method = "updatePlayerList", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;getItem()Lnet/minecraft/item/Item;", ordinal = 0))
     private Item onGetItem(ItemStack itemStack) {
         if (itemStack.getItem() instanceof ItemMap) {
-            ((IMixinMapData) ((ItemMap) itemStack.getItem()).getMapData(itemStack, this.trackedEntity.world)).updateItemFrameDecoration((EntityItemFrame) this.trackedEntity);
+            ((OptimizedMapData) ((ItemMap) itemStack.getItem()).getMapData(itemStack, this.trackedEntity.world)).updateItemFrameDecoration((EntityItemFrame) this.trackedEntity);
         }
         return null;
     }

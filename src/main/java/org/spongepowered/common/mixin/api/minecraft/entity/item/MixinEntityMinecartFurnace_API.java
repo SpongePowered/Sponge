@@ -27,12 +27,7 @@ package org.spongepowered.common.mixin.api.minecraft.entity.item;
 import net.minecraft.entity.item.EntityMinecartFurnace;
 import org.spongepowered.api.entity.vehicle.minecart.FurnaceMinecart;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.mixin.core.entity.item.MixinEntityMinecart_Impl;
 
 @Mixin(EntityMinecartFurnace.class)
 public abstract class MixinEntityMinecartFurnace_API extends MixinEntityMinecart_API implements FurnaceMinecart {

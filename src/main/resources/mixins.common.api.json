@@ -18,7 +18,7 @@
         "minecraft.entity.MixinEntityLivingBase_API",
         "minecraft.entity.boss.MixinEntityDragon_API",
         "minecraft.entity.boss.MixinEntityWither_API",
-        "minecraft.entity.item.MixinEntityArmorStand",
+        "minecraft.entity.item.MixinEntityArmorStand_API",
         "minecraft.entity.item.MixinEntityBoat_API",
         "minecraft.entity.item.MixinEntityItemFrame_API",
         "minecraft.entity.item.MixinEntityPainting_API",

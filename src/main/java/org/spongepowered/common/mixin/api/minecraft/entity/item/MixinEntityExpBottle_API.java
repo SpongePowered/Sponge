@@ -28,7 +28,6 @@ import net.minecraft.entity.item.EntityExpBottle;
 import org.spongepowered.api.entity.projectile.ThrownExpBottle;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.api.minecraft.entity.projectile.MixinEntityThrowable_API;
-import org.spongepowered.common.mixin.core.entity.projectile.MixinEntityThrowable_Impl;
 
 @Mixin(EntityExpBottle.class)
 public abstract class MixinEntityExpBottle_API extends MixinEntityThrowable_API implements ThrownExpBottle {

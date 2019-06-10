@@ -75,7 +75,7 @@ import javax.annotation.Nullable;
 
 @SuppressWarnings("rawtypes")
 @Mixin(InventoryPlayer.class)
-public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, PlayerInventory {
+public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer {
 
     @Shadow public int currentItem;
     @Shadow public EntityPlayer player;
@@ -178,35 +178,6 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
     @Override
     public Inventory getChild(Lens lens) {
         return null;
-    }
-
-    @Override
-    public Optional<Player> getCarrier() {
-        return Optional.ofNullable(this.carrier);
-    }
-
-    @Override
-    public MainPlayerInventory getMain() {
-        if (this.main == null && this.lens instanceof PlayerInventoryLens) {
-            this.main = (MainPlayerInventoryAdapter) ((PlayerInventoryLens) this.lens).getMainLens().getAdapter(this.inventory, this);
-        }
-        return this.main;
-    }
-
-    @Override
-    public EquipmentInventory getEquipment() {
-        if (this.equipment == null) {
-            this.equipment = (EquipmentInventoryAdapter) ((PlayerInventoryLens) this.lens).getEquipmentLens().getAdapter(this.inventory, this);
-        }
-        return this.equipment;
-    }
-
-    @Override
-    public Slot getOffhand() {
-        if (this.offhand == null && this.lens instanceof PlayerInventoryLens) {
-            this.offhand = (SlotAdapter) ((PlayerInventoryLens) this.lens).getOffhandLens().getAdapter(this.inventory, this);
-        }
-        return this.offhand;
     }
 
     @SuppressWarnings("unchecked")

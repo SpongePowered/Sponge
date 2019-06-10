@@ -39,14 +39,13 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAggressive
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAngerableData;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.interfaces.entity.IMixinAggressive;
-import org.spongepowered.common.interfaces.entity.IMixinAnger;
 import org.spongepowered.common.mixin.api.minecraft.entity.monster.MixinEntityZombie_API;
 
 import java.util.List;
 
 @Mixin(EntityPigZombie.class)
 @Implements(@Interface(iface = IMixinAggressive.class, prefix = "aggressive$"))
-public abstract class MixinEntityPigZombie extends MixinEntityZombie_API implements ZombiePigman, IMixinAnger {
+public abstract class MixinEntityPigZombie extends MixinEntityZombie_API implements ZombiePigman {
 
     @Shadow private int angerLevel;
 

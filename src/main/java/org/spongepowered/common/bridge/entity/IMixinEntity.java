@@ -52,20 +52,11 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-public interface IMixinEntity extends IMixinTrackable, IUserOrEntity {
+public interface IMixinEntity extends IMixinTrackable, IUserOrEntity, org.spongepowered.common.bridge.TimingHolder {
 
     boolean isInConstructPhase();
 
     void firePostConstructEvents();
-
-    /**
-     * Overridden method for Players to determine whether this entity is immune to fire
-     * such that {@link IgniteEntityEvent}s are not needed to be thrown as they cannot
-     * take fire damage, nor do they light on fire.
-     *
-     * @return True if this entity is immune to fire.
-     */
-    boolean isImmuneToFireForIgniteEvent();
 
     /**
      * Gets whether this entity has been added to a World's tracked entity lists
@@ -90,8 +81,6 @@ public interface IMixinEntity extends IMixinTrackable, IUserOrEntity {
 
     void setTeleportVehicle(Entity entity);
 
-    boolean dismountRidingEntity(DismountType type);
-
     boolean removePassengers(DismountType type);
 
     Optional<User> getTrackedPlayer(String nbtKey);
@@ -113,19 +102,6 @@ public interface IMixinEntity extends IMixinTrackable, IUserOrEntity {
     }
 
 
-    /**
-     * Read extra data (SpongeData) from the entity's NBT tag.
-     *
-     * @param compound The SpongeData compound to read from
-     */
-    void readFromNbt(NBTTagCompound compound);
-
-    /**
-     * Write extra data (SpongeData) to the entity's NBT tag.
-     *
-     * @param compound The SpongeData compound to write to
-     */
-    void writeToNbt(NBTTagCompound compound);
 
     void setImplVelocity(Vector3d velocity);
 

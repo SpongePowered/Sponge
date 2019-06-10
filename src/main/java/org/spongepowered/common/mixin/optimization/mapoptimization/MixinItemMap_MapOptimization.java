@@ -31,13 +31,13 @@ import net.minecraft.world.storage.MapData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.interfaces.world.IMixinMapData;
+import org.spongepowered.common.bridge.optimization.OptimizedMapData;
 
 @Mixin(ItemMap.class)
 public class MixinItemMap_MapOptimization {
 
     @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/MapData;updateVisiblePlayers(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/item/ItemStack;)V"))
     public void onUpdateVisiblePlayers(MapData mapData, EntityPlayer player, ItemStack itemStack) {
-        ((IMixinMapData) mapData).updatePlayer(player, itemStack);
+        ((OptimizedMapData) mapData).updatePlayer(player, itemStack);
     }
 }

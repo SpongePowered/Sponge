@@ -222,16 +222,16 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
     private double healthScale = 20;
 
     @Override
-    public void writeToNbt(NBTTagCompound compound) {
-        super.writeToNbt(compound);
+    public void spongeImpl$writeToSpongeCompound(NBTTagCompound compound) {
+        super.spongeImpl$writeToSpongeCompound(compound);
         if (this.healthScaling) {
             compound.setDouble(NbtDataUtil.HEALTH_SCALE, this.healthScale);
         }
     }
 
     @Override
-    public void readFromNbt(NBTTagCompound compound) {
-        super.readFromNbt(compound);
+    public void spongeImpl$readFromSpongeCompound(NBTTagCompound compound) {
+        super.spongeImpl$readFromSpongeCompound(compound);
         if (compound.hasKey(NbtDataUtil.HEALTH_SCALE, NbtDataUtil.TAG_DOUBLE)) {
             this.healthScaling = true;
             this.healthScale = compound.getDouble(NbtDataUtil.HEALTH_SCALE);
@@ -357,7 +357,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
         NBTTagCompound old = oldEntity.getEntityData();
         if (old.hasKey(NbtDataUtil.SPONGE_DATA)) {
             this.getEntityData().setTag(NbtDataUtil.SPONGE_DATA, old.getCompoundTag(NbtDataUtil.SPONGE_DATA));
-            this.readFromNbt(this.getSpongeData());
+            this.spongeImpl$readFromSpongeCompound(this.getSpongeData());
         }
     }
 
@@ -574,7 +574,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
                     return ((IMixinTeam) team).getNonTeamChannel();
                 }
             } else {
-                return this.getMessageChannel();
+                return ((Player) this).getMessageChannel();
             }
         }
 
@@ -612,12 +612,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
         this.velocityOverride = velocity;
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public CarriedInventory<? extends Carrier> getInventory() {
-        return (CarriedInventory<? extends Carrier>) this.inventory;
-    }
-
+    @SuppressWarnings("ConstantConditions")
     @Inject(method = "setGameType(Lnet/minecraft/world/GameType;)V", at = @At("HEAD"), cancellable = true)
     private void spongeImpl$onSetGameTypeThrowEvent(GameType gameType, CallbackInfo ci) {
         if (ShouldFire.CHANGE_GAME_MODE_EVENT_TARGET_PLAYER) {
@@ -625,7 +620,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
                 frame.pushCause(this);
                 ChangeGameModeEvent.TargetPlayer event =
                     SpongeEventFactory.createChangeGameModeEventTargetPlayer(frame.getCurrentCause(),
-                        (GameMode) (Object) this.interactionManager.getGameType(), (GameMode) (Object) gameType, this);
+                        (GameMode) (Object) this.interactionManager.getGameType(), (GameMode) (Object) gameType, (Player) this);
                 SpongeImpl.postEvent(event);
                 if (event.isCancelled()) {
                     ci.cancel();
@@ -641,7 +636,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
      * assigns the {@link #pendingGameType} returned by the event to the actual
      * local variable in the method.
      */
-    @ModifyVariable(method = "Lnet/minecraft/entity/player/EntityPlayerMP;setGameType(Lnet/minecraft/world/GameType;)V", at = @At(value = "HEAD", remap = false), argsOnly = true)
+    @ModifyVariable(method = "setGameType(Lnet/minecraft/world/GameType;)V", at = @At(value = "HEAD", remap = false), argsOnly = true)
     private GameType spongeImpl$assignPendingGameType(GameType gameType) {
         return this.pendingGameType;
     }

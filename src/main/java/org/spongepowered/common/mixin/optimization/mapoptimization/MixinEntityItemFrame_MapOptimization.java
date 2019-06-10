@@ -32,25 +32,25 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.interfaces.world.IMixinMapData;
+import org.spongepowered.common.bridge.optimization.OptimizedMapData;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.mixin.core.entity.item.MixinEntityItemFrame_Impl;
+import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
 @Mixin(EntityItemFrame.class)
-public abstract class MixinEntityItemFrame_MapOptimization extends MixinEntityItemFrame_Impl {
+public abstract class MixinEntityItemFrame_MapOptimization extends MixinEntity {
 
     @Shadow public abstract ItemStack getDisplayedItem();
 
     @Inject(method = "setDisplayedItemWithUpdate", at = @At(value = "HEAD"))
-    private void onSetItem(ItemStack stack, boolean p_174864_2_, CallbackInfo ci) {
+    private void mapOptimization$SetItemUpdateMapData(ItemStack stack, boolean p_174864_2_, CallbackInfo ci) {
         if (((IMixinWorld) this.world).isFake()) {
             return;
         }
 
         if (stack.getItem() instanceof ItemMap) {
-            ((IMixinMapData) ((ItemMap) stack.getItem()).getMapData(stack, this.world)).updateItemFrameDecoration((EntityItemFrame) (Object) this);
+            ((OptimizedMapData) ((ItemMap) stack.getItem()).getMapData(stack, this.world)).updateItemFrameDecoration((EntityItemFrame) (Object) this);
         } else if (this.getDisplayedItem().getItem() instanceof ItemMap && stack.isEmpty()) {
-            ((IMixinMapData) ((ItemMap) this.getDisplayedItem().getItem()).getMapData(stack, this.world)).removeItemFrame((EntityItemFrame) (Object) this);
+            ((OptimizedMapData) ((ItemMap) this.getDisplayedItem().getItem()).getMapData(stack, this.world)).removeItemFrame((EntityItemFrame) (Object) this);
         }
     }
 

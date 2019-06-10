@@ -43,15 +43,13 @@ import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.common.bridge.entity.IMixinGriefer;
 import org.spongepowered.common.bridge.explosives.ImplBridgeFusedExplosive;
 import org.spongepowered.common.mixin.api.minecraft.entity.monster.MixinEntityMob_API;
+import org.spongepowered.common.mixin.core.entity.monster.MixinEntityMob;
 
 import java.util.Optional;
 
 @Mixin(value = EntityWither.class)
-public abstract class MixinEntityWither extends MixinEntityMob_API implements ImplBridgeFusedExplosive {
+public abstract class MixinEntityWither extends MixinEntityMob implements ImplBridgeFusedExplosive {
 
-    @Final @Shadow private BossInfoServer bossInfo;
-    @Shadow public abstract int getWatchedTargetId(int p_82203_1_);
-    @Shadow public abstract void updateWatchedTargetId(int targetOffset, int newId);
     @Shadow public abstract void setInvulTime(int ticks);
     @Shadow public abstract int getInvulTime();
 
@@ -89,7 +87,7 @@ public abstract class MixinEntityWither extends MixinEntityMob_API implements Im
                 opcode = Opcodes.GETFIELD
             )
     )
-    private int onCanGrief(EntityWither thisEntity) {
+    private int spongeImpl$onCanGrief(EntityWither thisEntity) {
         return this.blockBreakCounter == 0 ? ((IMixinGriefer) this).canGrief() ? 0 : -1 : -1;
     }
 
@@ -146,7 +144,7 @@ public abstract class MixinEntityWither extends MixinEntityMob_API implements Im
 
     @Redirect(method = "updateAITasks", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;newExplosion"
                                                                             + "(Lnet/minecraft/entity/Entity;DDDFZZ)Lnet/minecraft/world/Explosion;"))
-    private net.minecraft.world.Explosion onExplode(net.minecraft.world.World worldObj, Entity self, double x,
+    private net.minecraft.world.Explosion spongeImpl$UseSpongeExplosion(net.minecraft.world.World worldObj, Entity self, double x,
                                                       double y, double z, float strength, boolean flaming,
                                                       boolean smoking) {
         return detonate(Explosion.builder()

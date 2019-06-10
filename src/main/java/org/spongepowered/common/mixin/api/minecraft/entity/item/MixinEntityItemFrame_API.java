@@ -25,25 +25,9 @@
 package org.spongepowered.common.mixin.api.minecraft.entity.item;
 
 import net.minecraft.entity.item.EntityItemFrame;
-import net.minecraft.util.DamageSource;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.hanging.ItemFrame;
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.entity.AttackEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.mixin.api.minecraft.entity.MixinEntityHanging_API;
-import org.spongepowered.common.mixin.core.entity.MixinEntityHanging_Impl;
-
-import java.util.ArrayList;
-
-import javax.annotation.Nullable;
 
 @Mixin(EntityItemFrame.class)
 public abstract class MixinEntityItemFrame_API extends MixinEntityHanging_API implements ItemFrame {

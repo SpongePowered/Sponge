@@ -26,12 +26,7 @@ package org.spongepowered.common.mixin.api.minecraft.entity.item;
 
 import net.minecraft.entity.item.EntityMinecartChest;
 import org.spongepowered.api.entity.vehicle.minecart.ChestMinecart;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
-import org.spongepowered.common.mixin.core.entity.item.MixinEntityMinecartContainer_Impl;
 
 @Mixin(EntityMinecartChest.class)
 public abstract class MixinEntityMinecartChest_API extends MixinEntityMinecartContainer_API<ChestMinecart> implements ChestMinecart {
