@@ -115,7 +115,7 @@ import org.spongepowered.common.interfaces.IMixinServerScoreboard;
 import org.spongepowered.common.interfaces.advancement.IMixinPlayerAdvancements;
 import org.spongepowered.common.bridge.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
-import org.spongepowered.common.interfaces.network.play.server.IMixinSPacketWorldBorder;
+import org.spongepowered.common.bridge.packet.WorldBorderPacketBridge;
 import org.spongepowered.common.interfaces.world.IMixinITeleporter;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.service.ban.SpongeIPBanList;
@@ -764,7 +764,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
             + "(Lnet/minecraft/network/Packet;)V", ordinal = 0))
     public void onWorldBorderInitializePacket(NetHandlerPlayServer invoker, Packet<?> packet, EntityPlayerMP playerMP, WorldServer worldServer) {
         if (worldServer.provider instanceof WorldProviderHell) {
-            ((IMixinSPacketWorldBorder) packet).netherifyCenterCoordinates();
+            ((WorldBorderPacketBridge) packet).bridge$changeCoordinatesForNether();
         }
 
         invoker.sendPacket(packet);

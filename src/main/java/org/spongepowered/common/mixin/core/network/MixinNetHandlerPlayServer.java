@@ -95,9 +95,7 @@ import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.tileentity.ChangeSignEvent;
@@ -136,7 +134,7 @@ import org.spongepowered.common.event.tracking.phase.tick.PlayerTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
-import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
+import org.spongepowered.common.bridge.packet.ResourcePackBridge;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
@@ -287,7 +285,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             while (now == this.field_194404_h || this.customKeepAliveCallbacks.containsKey(now)) {
                 now--;
             }
-            final ResourcePack resourcePack = ((IMixinPacketResourcePackSend) packetIn).getResourcePack();
+            final ResourcePack resourcePack = ((ResourcePackBridge) packetIn).bridge$getSpongePack();
             this.numResourcePacksInTransit.incrementAndGet();
             this.customKeepAliveCallbacks.put(now, () -> {
                 this.lastReceivedPack = resourcePack; // TODO do something with the old value

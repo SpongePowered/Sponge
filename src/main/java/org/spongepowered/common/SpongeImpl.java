@@ -241,6 +241,12 @@ public final class SpongeImpl {
         return internalPlugins;
     }
 
+    /**
+     * Throws the given event.
+     *
+     * @param event The event
+     * @return True if the event is cancellable and is cancelled, false if not cancelled
+     */
     public static boolean postEvent(Event event) {
         return Sponge.getEventManager().post(event);
     }

@@ -40,8 +40,7 @@ import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
-import org.spongepowered.common.interfaces.network.datasync.IMixinDataParameter;
-import org.spongepowered.common.registry.type.data.KeyRegistryModule;
+import org.spongepowered.common.bridge.packet.DataParameterBridge;
 
 import java.util.Map;
 import java.util.Optional;
@@ -51,6 +50,7 @@ public abstract class MixinEntityDataManager {
 
     // This overrides the setter for the entries of the
     // data manager to use a "faster" map.
+    @SuppressWarnings("unused")
     @Shadow @Final @Mutable private Map < Integer, EntityDataManager.DataEntry<? >> entries = new Int2ObjectOpenHashMap<>();
 
     // The rest is actually used in the overwrite below.
@@ -82,7 +82,7 @@ public abstract class MixinEntityDataManager {
             // Really silly reasons......
             // I don't know, ask Grum....
             if (this.entity != null && this.entity.world != null && !this.entity.world.isRemote) { // We only want to spam the server world ;)
-                final Optional<DataParameterConverter<T>> converter = ((IMixinDataParameter) key).getConverter();
+                final Optional<DataParameterConverter<T>> converter = ((DataParameterBridge) key).bridge$getDataConverter();
                 // At this point it is changing
                 if (converter.isPresent()) {
                     // Ok, we have a key ready to use the converter

@@ -27,16 +27,16 @@ package org.spongepowered.common.mixin.core.network.play.server;
 import net.minecraft.network.play.server.SPacketWorldBorder;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.network.play.server.IMixinSPacketWorldBorder;
+import org.spongepowered.common.bridge.packet.WorldBorderPacketBridge;
 
 @Mixin(SPacketWorldBorder.class)
-public abstract class MixinSPacketWorldBorder implements IMixinSPacketWorldBorder {
+public abstract class MixinSPacketWorldBorder implements WorldBorderPacketBridge {
 
     @Shadow private double centerX;
     @Shadow private double centerZ;
 
     @Override
-    public void netherifyCenterCoordinates() {
+    public void bridge$changeCoordinatesForNether() {
         this.centerX *= 8;
         this.centerZ *= 8;
     }

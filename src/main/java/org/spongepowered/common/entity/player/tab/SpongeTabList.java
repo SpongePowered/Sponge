@@ -30,17 +30,19 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Maps;
+import com.mojang.authlib.GameProfile;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.play.server.SPacketPlayerListHeaderFooter;
 import net.minecraft.network.play.server.SPacketPlayerListItem;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraft.world.GameType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.tab.TabList;
 import org.spongepowered.api.entity.living.player.tab.TabListEntry;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.common.interfaces.network.play.server.IMixinSPacketPlayerListItem;
+import org.spongepowered.common.mixin.core.network.play.server.AccessorSPacketPlayerListItem;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.Collection;
@@ -186,7 +188,11 @@ public final class SpongeTabList implements TabList {
     protected void sendUpdate(TabListEntry entry, SPacketPlayerListItem.Action action) {
         SPacketPlayerListItem packet = new SPacketPlayerListItem();
         packet.action = action;
-        ((IMixinSPacketPlayerListItem) packet).addEntry(entry);
+        ((AccessorSPacketPlayerListItem) packet).spongeBridge$getPlayerDatas()
+            .add(((SPacketPlayerListItem) (Object) this).new AddPlayerData((GameProfile) entry.getProfile(),
+                entry.getLatency(),
+                (GameType) (Object) entry.getGameMode(),
+                entry.getDisplayName().isPresent() ? SpongeTexts.toComponent(entry.getDisplayName().get()) : null);
         this.player.connection.sendPacket(packet);
     }
 
@@ -199,7 +205,7 @@ public final class SpongeTabList implements TabList {
      * @param packet The packet to process
      */
     public void updateEntriesOnSend(SPacketPlayerListItem packet) {
-        for (SPacketPlayerListItem.AddPlayerData data : packet.players) {
+        for (SPacketPlayerListItem.AddPlayerData data : ((AccessorSPacketPlayerListItem) packet).spongeBridge$getPlayerDatas()) {
             if (packet.action == SPacketPlayerListItem.Action.ADD_PLAYER) {
                 // If an entry with the same id exists nothing will be done
                 this.addEntry(data);

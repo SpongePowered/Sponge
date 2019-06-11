@@ -44,7 +44,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.bridge.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
-import org.spongepowered.common.mixin.core.network.datasync.IMixinEntityDataManager;
+import org.spongepowered.common.mixin.core.network.datasync.AccessorEntityDataManager;
 import org.spongepowered.common.network.SpoofedEntityDataManager;
 
 import java.util.Collection;
@@ -140,7 +140,7 @@ public abstract class MixinEntityTrackerEntry {
 
     @ModifyArg(method = "sendMetadata", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/server/SPacketEntityMetadata;<init>(ILnet/minecraft/network/datasync/EntityDataManager;Z)V"))
     private EntityDataManager spongeRelocateDataManager(EntityDataManager manager) {
-        final Entity player = ((IMixinEntityDataManager) manager).getEntity();
+        final Entity player = ((AccessorEntityDataManager) manager).spongeImpl$getEntity();
         if (player instanceof IMixinEntityPlayerMP) {
             if (((IMixinEntityPlayerMP) player).isHealthScaled()) {
                 return new SpoofedEntityDataManager(manager, player);

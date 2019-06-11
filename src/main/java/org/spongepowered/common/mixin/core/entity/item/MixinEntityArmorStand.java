@@ -50,7 +50,6 @@ import org.spongepowered.common.mixin.core.entity.MixinEntityLivingBase;
 import java.util.ArrayList;
 
 @Mixin(EntityArmorStand.class)
-@Implements(@Interface(iface = ArmorStand.class, prefix = "armor$"))
 public abstract class MixinEntityArmorStand extends MixinEntityLivingBase {
 
     @Shadow protected abstract void damageArmorStand(float damage);

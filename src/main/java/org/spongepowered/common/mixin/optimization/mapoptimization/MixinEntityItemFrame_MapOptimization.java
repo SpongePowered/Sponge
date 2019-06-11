@@ -48,9 +48,9 @@ public abstract class MixinEntityItemFrame_MapOptimization extends MixinEntity {
         }
 
         if (stack.getItem() instanceof ItemMap) {
-            ((OptimizedMapData) ((ItemMap) stack.getItem()).getMapData(stack, this.world)).updateItemFrameDecoration((EntityItemFrame) (Object) this);
+            ((OptimizedMapData) ((ItemMap) stack.getItem()).getMapData(stack, this.world)).bridge$updateItemFrameDecoration((EntityItemFrame) (Object) this);
         } else if (this.getDisplayedItem().getItem() instanceof ItemMap && stack.isEmpty()) {
-            ((OptimizedMapData) ((ItemMap) this.getDisplayedItem().getItem()).getMapData(stack, this.world)).removeItemFrame((EntityItemFrame) (Object) this);
+            ((OptimizedMapData) ((ItemMap) this.getDisplayedItem().getItem()).getMapData(stack, this.world)).bridge$removeItemFrame((EntityItemFrame) (Object) this);
         }
     }
 

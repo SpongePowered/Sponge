@@ -40,7 +40,7 @@ public abstract class MixinVillage {
     @Shadow private World world;
 
     @Inject(method = "isWoodDoor", at = @At("HEAD"), cancellable = true)
-    public void onIsWoodDoor(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
+    private void impl$isWoodDoor(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
         if (!this.world.isRemote && ((IMixinChunkProviderServer) this.world.getChunkProvider()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4) == null) {
             cir.setReturnValue(false);
         }

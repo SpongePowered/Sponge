@@ -40,6 +40,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.Locatable;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.bridge.TimingHolder;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.player.IUserOrEntity;
 import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
@@ -52,7 +53,7 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-public interface IMixinEntity extends IMixinTrackable, IUserOrEntity, org.spongepowered.common.bridge.TimingHolder {
+public interface IMixinEntity extends IMixinTrackable, IUserOrEntity, TimingHolder {
 
     boolean isInConstructPhase();
 
@@ -138,7 +139,7 @@ public interface IMixinEntity extends IMixinTrackable, IUserOrEntity, org.sponge
     void createForgeCapabilities();
 
     // Timings
-    Timing getTimingsHandler();
+    Timing spongeImpl$getTimingHandler();
 
     default void onJoinWorld() {
 

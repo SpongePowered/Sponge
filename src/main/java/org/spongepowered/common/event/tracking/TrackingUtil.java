@@ -173,7 +173,7 @@ public final class TrackingUtil {
 
         final EntityTickContext tickContext = TickPhase.Tick.ENTITY.createPhaseContext().source(entity);
         try (final EntityTickContext context = tickContext;
-             final Timing entityTiming = ((TimingHolder) entity).getTimingsHandler()
+             final Timing entityTiming = ((TimingHolder) entity).spongeImpl$getTimingHandler()
         ) {
             mixinEntity.getNotifierUser()
                     .ifPresent(context::notifier);
@@ -201,7 +201,7 @@ public final class TrackingUtil {
         final EntityTickContext tickContext = TickPhase.Tick.ENTITY.createPhaseContext().source(entity);
         try (
              final EntityTickContext context = tickContext;
-             final Timing entityTiming = mixinEntity.getTimingsHandler()
+             final Timing entityTiming = mixinEntity.spongeImpl$getTimingHandler()
              ) {
             entityTiming.startTiming();
             mixinEntity.getNotifierUser()

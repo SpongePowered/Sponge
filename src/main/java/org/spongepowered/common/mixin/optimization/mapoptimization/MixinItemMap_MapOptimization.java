@@ -38,6 +38,6 @@ public class MixinItemMap_MapOptimization {
 
     @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/MapData;updateVisiblePlayers(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/item/ItemStack;)V"))
     public void onUpdateVisiblePlayers(MapData mapData, EntityPlayer player, ItemStack itemStack) {
-        ((OptimizedMapData) mapData).updatePlayer(player, itemStack);
+        ((OptimizedMapData) mapData).bridge$updatePlayer(player, itemStack);
     }
 }

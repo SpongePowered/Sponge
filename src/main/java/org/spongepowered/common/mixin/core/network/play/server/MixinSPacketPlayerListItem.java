@@ -31,20 +31,19 @@ import net.minecraft.world.GameType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.network.play.server.IMixinSPacketPlayerListItem;
 
 import java.util.List;
 
 import javax.annotation.Nullable;
 
 @Mixin(SPacketPlayerListItem.class)
-public class MixinSPacketPlayerListItem implements IMixinSPacketPlayerListItem {
+public class MixinSPacketPlayerListItem {
 
     @Shadow @Final public List<SPacketPlayerListItem.AddPlayerData> players;
 
     @Override
     public void addEntry(GameProfile profile, int latency, GameType gameMode, @Nullable ITextComponent displayName) {
-        this.players.add(((SPacketPlayerListItem) (Object) this).new AddPlayerData(profile, latency, gameMode, displayName));
+        this.players.add();
     }
 
 }

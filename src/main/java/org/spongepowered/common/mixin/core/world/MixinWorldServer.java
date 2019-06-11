@@ -2367,7 +2367,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @Override
     public void stopTimingForWeatherEntityTickCrash(net.minecraft.entity.Entity updatingEntity) {
-        EntityUtil.toMixin(updatingEntity).getTimingsHandler().stopTiming();
+        EntityUtil.toMixin(updatingEntity).spongeImpl$getTimingHandler().stopTiming();
     }
 
     @Override
@@ -2388,7 +2388,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @Override
     public void stopTimingTickEntityCrash(net.minecraft.entity.Entity updatingEntity) {
-        EntityUtil.toMixin(updatingEntity).getTimingsHandler().stopTiming();
+        EntityUtil.toMixin(updatingEntity).spongeImpl$getTimingHandler().stopTiming();
     }
 
     @Override

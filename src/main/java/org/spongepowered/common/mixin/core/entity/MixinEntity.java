@@ -267,15 +267,15 @@ public abstract class MixinEntity implements IMixinEntity, IMixinTrackable {
     public void dismountRidingEntity() {
         if (this.ridingEntity != null) {
             if (this.getRidingEntity().isDead) {
-                this.dismountRidingEntity(DismountTypes.DEATH);
+                this.spongeImpl$dismountRidingEntity(DismountTypes.DEATH);
             } else {
-                this.dismountRidingEntity(DismountTypes.PLAYER);
+                this.spongeImpl$dismountRidingEntity(DismountTypes.PLAYER);
             }
         }
     }
 
     @SuppressWarnings("ConstantConditions")
-    public boolean dismountRidingEntity(DismountType type) {
+    private boolean spongeImpl$dismountRidingEntity(DismountType type) {
         if (!this.world.isRemote && (ShouldFire.RIDE_ENTITY_EVENT_DISMOUNT || ShouldFire.RIDE_ENTITY_EVENT)) {
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(this);
@@ -300,7 +300,7 @@ public abstract class MixinEntity implements IMixinEntity, IMixinTrackable {
     public boolean removePassengers(DismountType type) {
         boolean dismount = false;
         for (int i = this.riddenByEntities.size() - 1; i >= 0; --i) {
-            dismount = ((MixinEntity) (Object) this.riddenByEntities.get(i)).dismountRidingEntity(type) || dismount;
+            dismount = ((MixinEntity) (Object) this.riddenByEntities.get(i)).spongeImpl$dismountRidingEntity(type) || dismount;
         }
         return dismount;
     }

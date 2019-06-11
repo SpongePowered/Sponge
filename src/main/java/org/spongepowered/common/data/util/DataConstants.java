@@ -100,6 +100,12 @@ public final class DataConstants {
     // Original (0) / Copy of original (1) / Copy of a copy (2) / Tattered (3)
     public static final int MAXIMUM_GENERATION = 3;
 
+    public static final class Networking {
+
+        public static final int MAX_STRING_LENGTH_BYTES = Short.MAX_VALUE;
+        public static final int MAX_STRING_LENGTH = MAX_STRING_LENGTH_BYTES >> 2;
+    }
+
     public static final class TileEntity {
         public static final class Structure {
 

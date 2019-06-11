@@ -32,6 +32,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReport;
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
@@ -46,6 +47,7 @@ import net.minecraft.inventory.ContainerPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.tileentity.TileEntity;
@@ -73,8 +75,10 @@ import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.command.args.ChildCommandElementExecutor;
+import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.type.Profession;
 import org.spongepowered.api.event.block.InteractBlockEvent;
+import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
@@ -97,9 +101,11 @@ import org.spongepowered.common.interfaces.world.IMixinITeleporter;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.mixin.api.minecraft.item.MixinItem_API;
 import org.spongepowered.common.mixin.core.tileentity.MixinTileEntity;
 import org.spongepowered.common.mixin.core.world.MixinWorldServer;
 import org.spongepowered.common.mixin.plugin.tileentityactivation.TileEntityActivation;
+import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 import org.spongepowered.common.registry.type.entity.ProfessionRegistryModule;
 import org.spongepowered.common.util.SpawnerSpawnType;
 import org.spongepowered.common.world.WorldManager;
@@ -663,6 +669,7 @@ public final class SpongeImplHooks {
      * @param entity The vanilla entity item
      * @return The custom item entity for the dropped item
      */
+    @Nullable
     public static Entity getCustomEntityIfItem(Entity entity) {
         return entity;
     }
@@ -675,5 +682,33 @@ public final class SpongeImplHooks {
      */
     public static boolean shouldTickTile(ITickable tile) {
         return true;
+    }
+
+    /**
+     * Used for compatibility with Forge where Forge uses wrapped Items
+     * since they allow for registry replacements.
+     *
+     * @param mixinItem_api The item
+     * @return The resource location id
+     */
+    @Nullable
+    public static ResourceLocation getItemResourceLocation(Item mixinItem_api) {
+        return Item.REGISTRY.getNameForObject(mixinItem_api);
+    }
+
+    public static void registerItemForSpongeRegistry(int id, ResourceLocation textualID, Item itemIn) {
+        ItemTypeRegistryModule.getInstance().registerAdditionalCatalog((ItemType) itemIn);
+    }
+
+    public static void writeItemStackCapabilitiesToDataView(DataContainer container, net.minecraft.item.ItemStack stack) {
+
+    }
+
+    public static boolean canEnchantmentBeAppliedToItem(Enchantment enchantment, net.minecraft.item.ItemStack stack) {
+        return enchantment.canApply(stack);
+    }
+
+    public static void setCapabilitiesFromSpongeBuilder(ItemStack stack, NBTTagCompound compoundTag) {
+
     }
 }

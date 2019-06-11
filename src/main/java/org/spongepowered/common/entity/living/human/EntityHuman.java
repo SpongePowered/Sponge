@@ -67,6 +67,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.bridge.entity.IMixinEntity;
+import org.spongepowered.common.mixin.core.network.play.server.AccessorSPacketPlayerListItem;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -447,9 +448,11 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
      * @param action The action to apply on the tab list
      * @return A new tab list packet
      */
+    @SuppressWarnings("ConstantConditions")
     public SPacketPlayerListItem createPlayerListPacket(SPacketPlayerListItem.Action action) {
         SPacketPlayerListItem packet = new SPacketPlayerListItem(action);
-        packet.players.add(packet.new AddPlayerData(this.fakeProfile, 0, GameType.NOT_SET, this.getDisplayName()));
+        ((AccessorSPacketPlayerListItem) packet).spongeBridge$getPlayerDatas()
+            .add(packet.new AddPlayerData(this.fakeProfile, 0, GameType.NOT_SET, this.getDisplayName()));
         return packet;
     }
 

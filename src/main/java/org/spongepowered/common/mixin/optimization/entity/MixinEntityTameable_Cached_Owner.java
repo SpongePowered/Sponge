@@ -39,8 +39,9 @@ import javax.annotation.Nullable;
 
 @Mixin(EntityTameable.class)
 public abstract class MixinEntityTameable_Cached_Owner extends MixinEntityAnimal {
+
     @Shadow @Final protected static DataParameter<Optional<UUID>> OWNER_UNIQUE_ID;
-    @Nullable private Optional<UUID> cachedOwnerId;
+    @Nullable private UUID cachedOwnerId;
 
     /**
      * @author gabizou - July 26th, 2016
@@ -52,9 +53,9 @@ public abstract class MixinEntityTameable_Cached_Owner extends MixinEntityAnimal
     @Overwrite
     public UUID getOwnerId() {
         if (this.cachedOwnerId == null) {
-            this.cachedOwnerId = this.dataManager.get(OWNER_UNIQUE_ID);
+            this.cachedOwnerId = this.dataManager.get(OWNER_UNIQUE_ID).orNull();
         }
-        return this.cachedOwnerId.orNull();
+        return this.cachedOwnerId;
     }
 
     /**
@@ -65,8 +66,8 @@ public abstract class MixinEntityTameable_Cached_Owner extends MixinEntityAnimal
      */
     @Overwrite
     public void setOwnerId(@Nullable UUID ownerUuid) {
-        this.cachedOwnerId = Optional.fromNullable(ownerUuid);
-        this.dataManager.set(OWNER_UNIQUE_ID, this.cachedOwnerId);
+        this.cachedOwnerId = ownerUuid;
+        this.dataManager.set(OWNER_UNIQUE_ID, Optional.fromNullable(ownerUuid));
     }
 
 }

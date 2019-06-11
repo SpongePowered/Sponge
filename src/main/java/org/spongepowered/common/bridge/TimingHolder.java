@@ -4,6 +4,6 @@ import co.aikar.timings.Timing;
 
 public interface TimingHolder {
 
-    Timing getTimingsHandler();
+    Timing spongeImpl$getTimingHandler();
 
 }

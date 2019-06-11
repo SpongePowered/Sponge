@@ -33,7 +33,7 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 
 public interface SpongeGameDictionaryEntry extends GameDictionary.Entry {
 
-    ItemStack createDictionaryStack(int wildcardValue);
+    ItemStack bridge$createDictionaryStack(int wildcardValue);
 
     public static final class Specific implements SpongeGameDictionaryEntry {
 
@@ -61,7 +61,7 @@ public interface SpongeGameDictionaryEntry extends GameDictionary.Entry {
         }
 
         @Override
-        public ItemStack createDictionaryStack(int wildcardValue) {
+        public ItemStack bridge$createDictionaryStack(int wildcardValue) {
             return new ItemStack(this.type, 1, this.damage);
         }
 

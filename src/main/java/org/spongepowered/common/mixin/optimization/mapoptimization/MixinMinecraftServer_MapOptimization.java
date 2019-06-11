@@ -50,7 +50,7 @@ public abstract class MixinMinecraftServer_MapOptimization {
                 continue;
             }
 
-            ((OptimizedMapData) next).tickMap();
+            ((OptimizedMapData) next).bridge$tickMap();
         }
     }
 }

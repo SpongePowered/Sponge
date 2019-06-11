@@ -110,7 +110,7 @@ import org.spongepowered.common.bridge.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
-import org.spongepowered.common.interfaces.item.IMixinItem;
+import org.spongepowered.common.bridge.item.ImplItem;
 import org.spongepowered.common.interfaces.world.IMixinITeleporter;
 import org.spongepowered.common.interfaces.world.IMixinTeleporter;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
@@ -168,16 +168,15 @@ public final class EntityUtil {
      *  <p>Note that this is called only in SpongeVanilla or SpongeForge directly due to changes in signatures
      *  from Forge.</p>
      *
-     * @param mixinEntity The mixin entity being called
+     * @param entity The mixin entity being called
      * @param toSuggestedDimension The target dimension id suggested by mods and vanilla alike. The suggested
      *     dimension id can be erroneous and Vanilla will re-assign the variable to the overworld for
      *     silly things like entering an end portal while in the end.
      * @return The entity, if the teleport was not cancelled or something.
      */
     @Nullable
-    public static Entity transferEntityToDimension(IMixinEntity mixinEntity, int toSuggestedDimension, IMixinITeleporter teleporter,
+    public static Entity transferEntityToDimension(final Entity entity, int toSuggestedDimension, IMixinITeleporter teleporter,
         @Nullable MoveEntityEvent event) {
-        final Entity entity = toNative(mixinEntity);
 
         if (event == null) {
             // Assume portal
@@ -350,13 +349,13 @@ public final class EntityUtil {
     }
 
     public static MoveEntityEvent.Teleport handleDisplaceEntityTeleportEvent(Entity entityIn, Location<World> location) {
-        Transform<World> fromTransform = ((IMixinEntity) entityIn).getTransform();
+        Transform<World> fromTransform = ((org.spongepowered.api.entity.Entity) entityIn).getTransform();
         Transform<World> toTransform = fromTransform.setLocation(location).setRotation(new Vector3d(entityIn.rotationPitch, entityIn.rotationYaw, 0));
         return handleDisplaceEntityTeleportEvent(entityIn, fromTransform, toTransform);
     }
 
     public static MoveEntityEvent.Teleport handleDisplaceEntityTeleportEvent(Entity entityIn, double posX, double posY, double posZ, float yaw, float pitch) {
-        Transform<World> fromTransform = ((IMixinEntity) entityIn).getTransform();
+        Transform<World> fromTransform = ((org.spongepowered.api.entity.Entity) entityIn).getTransform();
         Transform<World> toTransform = fromTransform.setPosition(new Vector3d(posX, posY, posZ)).setRotation(new Vector3d(pitch, yaw, 0));
         return handleDisplaceEntityTeleportEvent(entityIn, fromTransform, toTransform);
     }
@@ -379,7 +378,8 @@ public final class EntityUtil {
         final MinecraftServer mcServer = SpongeImpl.getServer();
         final IMixinPlayerList mixinPlayerList = (IMixinPlayerList) mcServer.getPlayerList();
         final IMixinEntity mixinEntity = (IMixinEntity) entityIn;
-        final Transform<World> fromTransform = mixinEntity.getTransform();
+        final org.spongepowered.api.entity.Entity spongeEntity = (org.spongepowered.api.entity.Entity) entityIn;
+        final Transform<World> fromTransform = spongeEntity.getTransform();
         final WorldServer fromWorld = ((WorldServer) entityIn.world);
         final IMixinWorldServer fromMixinWorld = (IMixinWorldServer) fromWorld;
         boolean sameDimension = entityIn.dimension == targetDimensionId;
@@ -461,19 +461,19 @@ public final class EntityUtil {
             // Complete phases, just because we need to. The phases don't actually do anything, because the processing resides here.
 
             // Grab the exit location of entity after being placed into portal
-            final Transform<World> portalExitTransform = mixinEntity.getTransform().setExtent((World) toWorld);
+            final Transform<World> portalExitTransform = spongeEntity.getTransform().setExtent((World) toWorld);
             // Use setLocationAndAngles to avoid firing MoveEntityEvent to plugins
             mixinEntity.setLocationAndAngles(fromTransform);
             final MoveEntityEvent.Teleport.Portal event = SpongeEventFactory.createMoveEntityEventTeleportPortal(frame.getCurrentCause(), fromTransform, portalExitTransform, (PortalAgent) teleporter, mixinEntity, true);
             SpongeImpl.postEvent(event);
-            final Vector3i chunkPosition = mixinEntity.getLocation().getChunkPosition();
+            final Vector3i chunkPosition = spongeEntity.getLocation().getChunkPosition();
             final MultiBlockCaptureSupplier blockSupplier = context.getCapturedBlockSupplier();
             final Transform<World> toTransform = event.getToTransform();
 
             if (event.isCancelled()) {
                 // Mods may cancel this event in order to run custom transfer logic
                 // We need to make sure to only restore the location if
-                if (!portalExitTransform.getExtent().getUniqueId().equals(mixinEntity.getLocation().getExtent().getUniqueId())) {
+                if (!portalExitTransform.getExtent().getUniqueId().equals(spongeEntity.getLocation().getExtent().getUniqueId())) {
                     // update cache
                     if (teleporter instanceof IMixinTeleporter) {
                         ((IMixinTeleporter) teleporter).removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
@@ -484,7 +484,7 @@ public final class EntityUtil {
                 } else {
                     // Call setTransform to let plugins know mods changed the position
                     // Guarantees plugins such as Nucleus can track changed locations properly
-                    mixinEntity.setTransform(mixinEntity.getTransform());
+                    spongeEntity.setTransform(spongeEntity.getTransform());
                 }
                 return event;
             }
@@ -569,9 +569,7 @@ public final class EntityUtil {
         if (minecraftEntity instanceof EntityItem) {
             final ItemStack item = ((EntityItem) minecraftEntity).getItem();
             if (!item.isEmpty()) {
-                final Optional<Entity>
-                    customEntityItem =
-                    ((IMixinItem) item.getItem()).getCustomEntityItem(minecraftEntity.getEntityWorld(), minecraftEntity, item);
+                final Optional<Entity> customEntityItem = Optional.ofNullable(SpongeImplHooks.getCustomEntityIfItem(minecraftEntity));
                 if (customEntityItem.isPresent()) {
                     // Bypass spawning the entity item, since it is established that the custom entity is spawned.
                     final Entity entityToSpawn = customEntityItem.get();
@@ -590,10 +588,6 @@ public final class EntityUtil {
         // Allowed to call force spawn directly since we've applied creator and custom item logic already
         getMixinWorld(entity).forceSpawnEntity(entity);
         return true;
-    }
-
-    public static ItemStack getItem(Entity entity) {
-        return entity instanceof EntityItem ? ((EntityItem) entity).getItem() : ItemStack.EMPTY;
     }
 
     static final class EntityTrace {
@@ -1107,7 +1101,7 @@ public final class EntityUtil {
      * @return The item if it is to be spawned, null if to be ignored
      */
     @Nullable
-    public static ItemStack throwDropItemAndConstructEvent(IMixinEntity entity, double posX, double posY,
+    public static ItemStack throwDropItemAndConstructEvent(Entity entity, double posX, double posY,
         double posZ, ItemStackSnapshot snapshot, List<ItemStackSnapshot> original, CauseStackManager.StackFrame frame) {
         final IMixinEntityPlayer mixinPlayer;
         if (entity instanceof IMixinEntityPlayer) {
@@ -1134,7 +1128,7 @@ public final class EntityUtil {
         }
 
         // SECOND throw the ConstructEntityEvent
-        Transform<World> suggested = new Transform<>(entity.getWorld(), new Vector3d(posX, posY, posZ));
+        Transform<World> suggested = new Transform<>((World) entity.world, new Vector3d(posX, posY, posZ));
         frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
         ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), EntityTypes.ITEM, suggested);
         frame.removeContext(EventContextKeys.SPAWN_TYPE);

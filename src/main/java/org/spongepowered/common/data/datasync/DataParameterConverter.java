@@ -29,7 +29,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.network.datasync.DataParameter;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.common.interfaces.network.datasync.IMixinDataParameter;
+import org.spongepowered.common.bridge.packet.DataParameterBridge;
 
 import java.util.List;
 import java.util.Objects;
@@ -42,7 +42,7 @@ public abstract class DataParameterConverter<E> {
     @SuppressWarnings("unchecked")
     public DataParameterConverter(DataParameter<E> parameter) {
         this.parameter = parameter;
-        ((IMixinDataParameter<E>) parameter).setConverter(this);
+        ((DataParameterBridge<E>) parameter).bridge$setDataConverter(this);
     }
 
     public DataParameter<E> getParameter() {

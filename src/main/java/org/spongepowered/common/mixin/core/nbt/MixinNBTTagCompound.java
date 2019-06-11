@@ -52,8 +52,6 @@ import javax.annotation.Nullable;
 @Mixin(NBTTagCompound.class)
 public abstract class MixinNBTTagCompound extends NBTBase {
 
-    private static final String SET_TAG = "Lnet/minecraft/nbt/NBTTagCompound;setTag(Ljava/lang/String;Lnet/minecraft/nbt/NBTBase;)V";
-
     @Shadow @Final private Map<String, NBTBase> tagMap;
 
     @Redirect(method = "copy", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/NBTBase;copy()Lnet/minecraft/nbt/NBTBase;"))
@@ -92,7 +90,7 @@ public abstract class MixinNBTTagCompound extends NBTBase {
         }
     }
 
-    @Redirect(method = "copy", at = @At(value = "INVOKE", target = SET_TAG))
+    @Redirect(method = "copy", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/NBTTagCompound;setTag(Ljava/lang/String;Lnet/minecraft/nbt/NBTBase;)V"))
     private void onCopySet(NBTTagCompound compound, String string, @Nullable NBTBase base) {
         if (base == null) {
             IllegalStateException exception = new IllegalStateException("There is a null NBTBase in the compound for key: " + string);

@@ -36,12 +36,12 @@ import org.spongepowered.common.config.category.OptimizationCategory;
  */
 public interface OptimizedMapData {
 
-    void tickMap();
+    void bridge$tickMap();
 
-    void updatePlayer(EntityPlayer player, ItemStack mapStack);
+    void bridge$updatePlayer(EntityPlayer player, ItemStack mapStack);
 
-    void updateItemFrameDecoration(EntityItemFrame frame);
+    void bridge$updateItemFrameDecoration(EntityItemFrame frame);
 
-    void removeItemFrame(EntityItemFrame frame);
+    void bridge$removeItemFrame(EntityItemFrame frame);
 
 }

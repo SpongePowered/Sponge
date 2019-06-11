@@ -61,6 +61,7 @@ import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.dismount.DismountTypes;
 import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.text.translation.Translation;
@@ -92,6 +93,7 @@ import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.interfaces.world.IMixinTeleporter;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
+import org.spongepowered.common.mixin.core.entity.MixinEntity;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.WorldManager;
@@ -178,6 +180,8 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
     @Shadow protected abstract void setFlag(int flag, boolean set);
 
     // @formatter:on
+
+    @Shadow public abstract void dismountRidingEntity();
 
     @Override
     public EntitySnapshot createSnapshot() {
@@ -296,7 +300,7 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
                 // Re-attach passengers
                 for (net.minecraft.entity.Entity passenger : passengers) {
                     if (((World) passenger.getEntityWorld()).getUniqueId() != ((World) this.world).getUniqueId()) {
-                        ((IMixinEntity) passenger).setLocation(location);
+                        ((MixinEntity_API) (Object) passenger).setLocation(location);
                     }
                     passenger.startRiding(thisEntity, true);
                 }
@@ -543,7 +547,7 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
             return false;
         }
         if (getRidingEntity() != null) {
-            dismountRidingEntity();
+            this.dismountRidingEntity();
             return true;
         }
         return entity != null && entity.addPassenger(this);

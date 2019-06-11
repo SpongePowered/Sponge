@@ -5,6 +5,7 @@
     "refmap": "mixins.common.refmap.json",
     "target": "@env(DEFAULT)",
     "compatibilityLevel": "JAVA_8",
+    "mixinPriority": 900,
     "mixins": [
         "ai.MixinAbstractAITask",
         "minecraft.entity.MixinEntity_API",

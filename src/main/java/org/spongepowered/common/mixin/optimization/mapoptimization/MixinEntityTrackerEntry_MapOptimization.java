@@ -44,7 +44,7 @@ public abstract class MixinEntityTrackerEntry_MapOptimization {
 
     /**
      * When processing an EntitYItemFrame containing an ItemMap, we call
-     * updateItemFrameDecoration on its correspoding MapDAta
+     * bridge$updateItemFrameDecoration on its correspoding MapDAta
      *
      * <p>We always return 'null' here in order to prevent the original 'if' block from executing.</p>
      * @param itemStack
@@ -53,7 +53,7 @@ public abstract class MixinEntityTrackerEntry_MapOptimization {
     @Redirect(method = "updatePlayerList", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;getItem()Lnet/minecraft/item/Item;", ordinal = 0))
     private Item onGetItem(ItemStack itemStack) {
         if (itemStack.getItem() instanceof ItemMap) {
-            ((OptimizedMapData) ((ItemMap) itemStack.getItem()).getMapData(itemStack, this.trackedEntity.world)).updateItemFrameDecoration((EntityItemFrame) this.trackedEntity);
+            ((OptimizedMapData) ((ItemMap) itemStack.getItem()).getMapData(itemStack, this.trackedEntity.world)).bridge$updateItemFrameDecoration((EntityItemFrame) this.trackedEntity);
         }
         return null;
     }

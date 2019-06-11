@@ -123,7 +123,7 @@ public abstract class MixinMapData_MapOptimization extends WorldSavedData implem
 
     /**
      * @reason This method is absurdly inefficient. We completely replace
-     * its funcitonality with tickMap, which produces identical results with
+     * its funcitonality with bridge$tickMap, which produces identical results with
      * thousands fewer calls to InventoryPlayer#hasItemStack
      * @author Aaron1011 - August 8th, 2018
      */
@@ -137,31 +137,31 @@ public abstract class MixinMapData_MapOptimization extends WorldSavedData implem
      *
      * Before this method is called, all players have their inventories
      * (and therefore map items) ticked by the server. When a map item is ticked,
-     * our mixin makes it call MixinMapData#updatePlayer. This method
+     * our mixin makes it call MixinMapData#bridge$updatePlayer. This method
      * marks it as valid within MapData, and updates the decorations
      * from the 'Decorations' tag.
      *
-     * Inside tickMap(), we use the flag set by updatePlayer to
+     * Inside bridge$tickMap(), we use the flag set by bridge$updatePlayer to
      * determine whether or not to update or remove a player
      * from our map decorations. This eliminates the need
      * to do any InventoryPlayer#hasItemStack calls. If a player's
      * inventory contains a map corresponding to this MapData,
      * the flag will have been updated when it ticked. If the item
      * is removed from the player's inventory, the flag will
-     * no longer be set before tickMap() runs.
+     * no longer be set before bridge$tickMap() runs.
      *
-     * MixinMapData#updateItemFrameDecoration is run from
+     * MixinMapData#bridge$updateItemFrameDecoration is run from
      * MixinEntityTrackerEntry - once per Itemframe, not once
-     * per player per itemframe. updateItemFrameDecoration just
+     * per player per itemframe. bridge$updateItemFrameDecoration just
      * updates the frame's position (in case it teleported) in our
      * decorations. We skip running all of the unecessary logic that
      * Vanilla does (it calls updateVisiblePlayers), since that will
-     * be handled in tickMap(), which runs after all entities and items
+     * be handled in bridge$tickMap(), which runs after all entities and items
      * have ticked.
      *
      **/
     @Override
-    public void tickMap() {
+    public void bridge$tickMap() {
         List<IMixinMapInfo_MapOptimization> mapInfosToUpdate = new ArrayList<>(this.playersHashMap.size());
         try {
             Iterator<Map.Entry<EntityPlayer, MapData.MapInfo>> it = this.playersHashMap.entrySet().iterator();
@@ -235,7 +235,7 @@ public abstract class MixinMapData_MapOptimization extends WorldSavedData implem
                         this.playersHashMap.put(entityplayermp, (MapData.MapInfo) mapInfo);
                     }
 
-                    //mapdata.updateVisiblePlayers(entityplayermp, itemstack); - Sponge - this is handled above in tickMap
+                    //mapdata.updateVisiblePlayers(entityplayermp, itemstack); - Sponge - this is handled above in bridge$tickMap
                     Packet<?> packet = Items.FILLED_MAP.createMapDataPacket(this.dummyItemStack, (World) world, entityplayermp);
 
                     if (packet != null)
@@ -266,7 +266,7 @@ public abstract class MixinMapData_MapOptimization extends WorldSavedData implem
     }
 
     @Override
-    public void updatePlayer(EntityPlayer player, ItemStack mapStack) {
+    public void bridge$updatePlayer(EntityPlayer player, ItemStack mapStack) {
         MapData.MapInfo info = this.playersHashMap.get(player);
         if (info == null) {
             info = this.constructMapInfo(player);
@@ -291,7 +291,7 @@ public abstract class MixinMapData_MapOptimization extends WorldSavedData implem
     }
 
     @Override
-    public void updateItemFrameDecoration(EntityItemFrame frame) {
+    public void bridge$updateItemFrameDecoration(EntityItemFrame frame) {
         this.activeWorlds.add(((Entity) frame).getWorld().getUniqueId());
         if (this.trackingPosition) {
             BlockPos blockpos = frame.getHangingPosition();
@@ -303,7 +303,7 @@ public abstract class MixinMapData_MapOptimization extends WorldSavedData implem
     }
 
     @Override
-    public void removeItemFrame(EntityItemFrame frame) {
+    public void bridge$removeItemFrame(EntityItemFrame frame) {
         this.activeWorlds.remove(((Entity) frame).getWorld().getUniqueId());
         this.mapDecorations.remove("frame-" + frame.getEntityId());
     }

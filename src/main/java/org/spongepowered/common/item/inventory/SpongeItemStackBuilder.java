@@ -52,6 +52,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.persistence.NbtTranslator;
@@ -60,7 +61,6 @@ import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
-import org.spongepowered.common.interfaces.item.IMixinItemStack;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -330,10 +330,10 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         if (this.keyValues != null) {
             this.keyValues.forEach((key, value) -> stack.offer((Key) key, value));
         }
-        if (this.compound != null) {
+        if (this.compound != null && this.compound.hasKey(NbtDataUtil.FORGE_CAPS, NbtDataUtil.TAG_COMPOUND)) {
             final NBTTagCompound compoundTag = this.compound.getCompoundTag(NbtDataUtil.FORGE_CAPS);
             if (compoundTag != null) {
-                ((IMixinItemStack) stack).setCapabilitiesFromSpongeBuilder(compoundTag);
+                SpongeImplHooks.setCapabilitiesFromSpongeBuilder(stack, compoundTag);
             }
         }
 
