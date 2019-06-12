@@ -39,7 +39,7 @@ import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.player.SpongeUser;
-import org.spongepowered.common.interfaces.IMixinInventory;
+import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.CraftingGridInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.impl.comp.CraftingGridInventoryLensImpl;
@@ -123,9 +123,9 @@ public final class InventoryUtil {
         return SpongeImplHooks.toInventory(inventory, forgeItemHandler);
     }
 
-    public static IMixinInventory forCapture(Object toCapture) {
-        if (toCapture instanceof IMixinInventory) {
-            return ((IMixinInventory) toCapture);
+    public static TrackedInventoryBridge forCapture(Object toCapture) {
+        if (toCapture instanceof TrackedInventoryBridge) {
+            return ((TrackedInventoryBridge) toCapture);
         }
         return null;
     }

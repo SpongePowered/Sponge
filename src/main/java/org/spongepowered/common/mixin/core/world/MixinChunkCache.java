@@ -30,8 +30,8 @@ import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
+import org.spongepowered.common.bridge.world.ChunkBridge;
+import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
 
 @Mixin(ChunkCache.class)
 public class MixinChunkCache {
@@ -43,8 +43,8 @@ public class MixinChunkCache {
         }
 
         final net.minecraft.world.chunk.Chunk chunk =
-                ((IMixinChunkProviderServer) worldIn.getChunkProvider()).getLoadedChunkWithoutMarkingActive(chunkX, chunkZ);
-        IMixinChunk spongeChunk = (IMixinChunk) chunk;
+                ((ServerChunkProviderBridge) worldIn.getChunkProvider()).getLoadedChunkWithoutMarkingActive(chunkX, chunkZ);
+        ChunkBridge spongeChunk = (ChunkBridge) chunk;
         if (chunk == null || chunk.unloadQueued || !spongeChunk.areNeighborsLoaded()) {
             return null;
         }

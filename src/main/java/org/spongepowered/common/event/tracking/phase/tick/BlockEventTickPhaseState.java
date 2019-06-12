@@ -50,7 +50,7 @@ import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.bridge.world.ChunkBridge;
 import org.spongepowered.common.bridge.block.BlockEventDataBridge;
 import org.spongepowered.common.world.BlockChange;
 
@@ -96,7 +96,7 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
                                                WorldServer minecraftWorld, PlayerTracker.Type notifier) {
         // If we do not have a notifier at this point then there is no need to attempt to retrieve one from the chunk
         context.applyNotifierIfAvailable(user -> {
-            final IMixinChunk mixinChunk = (IMixinChunk) minecraftWorld.getChunk(notifyPos);
+            final ChunkBridge mixinChunk = (ChunkBridge) minecraftWorld.getChunk(notifyPos);
             mixinChunk.addTrackedBlockPosition(block, notifyPos, user, PlayerTracker.Type.NOTIFIER);
         });
     }
@@ -129,7 +129,7 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
         final SpongeBlockSnapshot original = (SpongeBlockSnapshot) snapshotTransaction.getOriginal();
         final BlockPos changedBlockPos = original.getBlockPos();
         original.getWorldServer().ifPresent(worldServer -> {
-            final IMixinChunk changedMixinChunk = (IMixinChunk) worldServer.getChunk(changedBlockPos);
+            final ChunkBridge changedMixinChunk = (ChunkBridge) worldServer.getChunk(changedBlockPos);
             changedMixinChunk.getBlockOwner(changedBlockPos)
                 .ifPresent(owner -> changedMixinChunk.addTrackedBlockPosition(block, changedBlockPos, owner, PlayerTracker.Type.OWNER));
             changedMixinChunk.getBlockNotifier(changedBlockPos)

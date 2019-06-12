@@ -32,7 +32,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAgeableData;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
@@ -50,9 +50,9 @@ public class ImmutableSpongeAgeableData extends AbstractImmutableData<ImmutableA
 
         this.ageValue = SpongeValueFactory.boundedBuilder(Keys.AGE)
                 .actualValue(this.age)
-                .defaultValue(DataConstants.ADULT)
-                .minimum(DataConstants.CHILD)
-                .maximum(DataConstants.ADULT)
+                .defaultValue(Constants.Entity.Ageable.ADULT)
+                .minimum(Constants.Entity.Ageable.CHILD)
+                .maximum(Constants.Entity.Ageable.ADULT)
                 .build().asImmutable();
 
         this.registerGetters();

@@ -56,23 +56,23 @@ public class SpongeItemStackSnapshotBuilder extends AbstractDataBuilder<ItemStac
 
     @Override
     protected Optional<ItemStackSnapshot> buildContent(DataView container) throws InvalidDataException {
-        if (container.contains(DataQueries.ITEM_TYPE, DataQueries.ITEM_COUNT)) {
-            final String itemString = getData(container, DataQueries.ITEM_TYPE, String.class);
+        if (container.contains(DataQueries.ItemStack.TYPE, DataQueries.ItemStack.COUNT)) {
+            final String itemString = getData(container, DataQueries.ItemStack.TYPE, String.class);
             final ItemType itemType = SpongeImpl.getRegistry().getType(ItemType.class, itemString).get();
             if (itemType == ItemTypes.NONE) {
                 return Optional.of(ItemTypeRegistryModule.getInstance().NONE_SNAPSHOT);
             }
-            final int count = getData(container, DataQueries.ITEM_COUNT, Integer.class);
-            final int damage = container.getInt(DataQueries.ITEM_DAMAGE_VALUE).orElse(0);
+            final int count = getData(container, DataQueries.ItemStack.COUNT, Integer.class);
+            final int damage = container.getInt(DataQueries.ItemStack.DAMAGE_VALUE).orElse(0);
             final ImmutableList<ImmutableDataManipulator<?, ?>> manipulators;
-            if (container.contains(DataQueries.DATA_MANIPULATORS)) {
-                manipulators = DataUtil.deserializeImmutableManipulatorList(container.getViewList(DataQueries.DATA_MANIPULATORS).get());
+            if (container.contains(DataQueries.Sponge.DATA_MANIPULATORS)) {
+                manipulators = DataUtil.deserializeImmutableManipulatorList(container.getViewList(DataQueries.Sponge.DATA_MANIPULATORS).get());
             } else {
                 manipulators = ImmutableList.of();
             }
             @Nullable final NBTTagCompound compound;
-            if (container.contains(DataQueries.UNSAFE_NBT)) {
-                compound = NbtTranslator.getInstance().translateData(container.getView(DataQueries.UNSAFE_NBT).get());
+            if (container.contains(DataQueries.Sponge.UNSAFE_NBT)) {
+                compound = NbtTranslator.getInstance().translateData(container.getView(DataQueries.Sponge.UNSAFE_NBT).get());
             } else {
                 compound = null;
             }

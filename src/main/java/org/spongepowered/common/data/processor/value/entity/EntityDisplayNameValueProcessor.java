@@ -32,10 +32,10 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.bridge.entity.EntityBridge;
 
 import java.util.Optional;
 

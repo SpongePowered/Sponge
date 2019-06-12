@@ -67,6 +67,7 @@ import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.bridge.world.ChunkBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.PhaseTrackerCategory;
 import org.spongepowered.common.config.type.GlobalConfig;
@@ -78,7 +79,6 @@ import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.tick.NeighborNotificationContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
-import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.interfaces.world.ServerWorldBridge;
@@ -86,7 +86,6 @@ import org.spongepowered.common.registry.type.event.SpawnTypeRegistryModule;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 import org.spongepowered.common.world.WorldManager;
-import org.spongepowered.common.world.WorldUtil;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -756,7 +755,7 @@ public final class PhaseTracker {
             return false;
         }
         final SpongeBlockChangeFlag spongeFlag = (SpongeBlockChangeFlag) flag;
-        final net.minecraft.world.World minecraftWorld = WorldUtil.asNative(mixinWorld);
+        final net.minecraft.world.World minecraftWorld = (WorldServer) mixinWorld;
 
         // Vanilla start - get the chunk
         final Chunk chunk = minecraftWorld.getChunk(pos);
@@ -798,7 +797,7 @@ public final class PhaseTracker {
         // because MixinChunk will perform the necessary changes, and appropriately prevent any specific
         // physics handling.
 
-        final IMixinChunk mixinChunk = (IMixinChunk) chunk;
+        final ChunkBridge mixinChunk = (ChunkBridge) chunk;
         // Sponge - Use our mixin method that allows using the BlockChangeFlag.
 
         final IBlockState originalBlockState = mixinChunk.setBlockState(pos, newState, currentState, spongeFlag);
@@ -925,10 +924,10 @@ public final class PhaseTracker {
      * @return True if the entity spawn was successful
      */
     @SuppressWarnings("rawtypes")
-    public boolean spawnEntity(World world, Entity entity) {
+    public boolean spawnEntity(WorldServer world, net.minecraft.entity.Entity entity) {
         checkNotNull(entity, "Entity cannot be null!");
         // Forge requires checking if we're restoring in a world to avoid spawning item drops.
-        if (entity instanceof EntityItem && SpongeImplHooks.isRestoringBlocks((net.minecraft.world.World) world)) {
+        if (entity instanceof EntityItem && SpongeImplHooks.isRestoringBlocks(world)) {
             return false;
         }
 
@@ -937,12 +936,10 @@ public final class PhaseTracker {
             ((EntityBridge) entity).firePostConstructEvents();
         }
 
-        final net.minecraft.entity.Entity minecraftEntity = EntityUtil.toNative(entity);
-        final WorldServer minecraftWorld = (WorldServer) world;
-        final ServerWorldBridge mixinWorldServer = (ServerWorldBridge) minecraftWorld;
+        final ServerWorldBridge mixinWorldServer = (ServerWorldBridge) world;
         final PhaseContext<?> context = this.stack.peek();
         final IPhaseState<?> phaseState = context.state;
-        final boolean isForced = minecraftEntity.forceSpawn || minecraftEntity instanceof EntityPlayer;
+        final boolean isForced = entity.forceSpawn || entity instanceof EntityPlayer;
 
         // Certain phases disallow entity spawns (such as block restoration)
         if (!isForced && !phaseState.doesAllowEntitySpawns()) {
@@ -950,28 +947,28 @@ public final class PhaseTracker {
         }
 
         // Sponge End - continue with vanilla mechanics
-        final int chunkX = MathHelper.floor(minecraftEntity.posX / 16.0D);
-        final int chunkZ = MathHelper.floor(minecraftEntity.posZ / 16.0D);
+        final int chunkX = MathHelper.floor(entity.posX / 16.0D);
+        final int chunkZ = MathHelper.floor(entity.posZ / 16.0D);
 
         if (!isForced && !mixinWorldServer.isMinecraftChunkLoaded(chunkX, chunkZ, true)) {
             return false;
         }
-            if (minecraftEntity instanceof EntityPlayer) {
-                EntityPlayer entityplayer = (EntityPlayer) minecraftEntity;
-                minecraftWorld.playerEntities.add(entityplayer);
-                minecraftWorld.updateAllPlayersSleepingFlag();
+            if (entity instanceof EntityPlayer) {
+                EntityPlayer entityplayer = (EntityPlayer) entity;
+                world.playerEntities.add(entityplayer);
+                world.updateAllPlayersSleepingFlag();
                 SpongeImplHooks.firePlayerJoinSpawnEvent((EntityPlayerMP) entityplayer);
             } else {
                 // Sponge start - check for vanilla owner
-                if (minecraftEntity instanceof IEntityOwnable) {
+                if (entity instanceof IEntityOwnable) {
                     IEntityOwnable ownable = (IEntityOwnable) entity;
                     net.minecraft.entity.Entity owner = ownable.getOwner();
                     if (owner instanceof EntityPlayer) {
                         context. owner = (User) owner;
-                        entity.setCreator(ownable.getOwnerId());
+                        ((Entity) entity).setCreator(ownable.getOwnerId());
                     }
-                } else if (minecraftEntity instanceof EntityThrowable) {
-                    EntityThrowable throwable = (EntityThrowable) minecraftEntity;
+                } else if (entity instanceof EntityThrowable) {
+                    EntityThrowable throwable = (EntityThrowable) entity;
                     EntityLivingBase thrower = throwable.getThrower();
                     if (thrower != null) {
                         User user;
@@ -982,7 +979,7 @@ public final class PhaseTracker {
                         }
                         if (user != null) {
                             context.owner = user;
-                            entity.setCreator(user.getUniqueId());
+                            ((Entity) entity).setCreator(user.getUniqueId());
                         }
                     }
                 }
@@ -1001,7 +998,7 @@ public final class PhaseTracker {
                         && ((IPhaseState) phaseState).tracksBlockSpecificDrops(context)
                         && context.getCaptureBlockPos().getPos().isPresent())) {
                     try {
-                        return ((IPhaseState) phaseState).spawnEntityOrCapture(context, entity, chunkX, chunkZ);
+                        return ((IPhaseState) phaseState).spawnEntityOrCapture(context, (Entity) entity, chunkX, chunkZ);
                     } catch (Exception | NoClassDefFoundError e) {
                         // Just in case something really happened, we should print a nice exception for people to
                         // paste us
@@ -1010,10 +1007,10 @@ public final class PhaseTracker {
                     }
                 }
             }
-            final net.minecraft.entity.Entity finalEntityToSpawn = SpongeImplHooks.getCustomEntityIfItem(minecraftEntity);
+            final net.minecraft.entity.Entity finalEntityToSpawn = SpongeImplHooks.getCustomEntityIfItem(entity);
             // Sponge end - continue on with the checks.
-            minecraftWorld.getChunk(chunkX, chunkZ).addEntity(finalEntityToSpawn);
-            minecraftWorld.loadedEntityList.add(finalEntityToSpawn);
+            world.getChunk(chunkX, chunkZ).addEntity(finalEntityToSpawn);
+            world.loadedEntityList.add(finalEntityToSpawn);
             mixinWorldServer.onSpongeEntityAdded(finalEntityToSpawn); // Sponge - Cannot add onEntityAdded to the access transformer because forge makes it public
             return true;
 

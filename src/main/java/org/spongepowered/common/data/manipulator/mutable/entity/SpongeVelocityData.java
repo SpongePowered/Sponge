@@ -64,9 +64,9 @@ public class SpongeVelocityData extends AbstractSingleData<Vector3d, VelocityDat
     public DataContainer toContainer() {
         return super.toContainer()
             .createView(Keys.VELOCITY.getQuery())
-            .set(DataQueries.VELOCITY_X, getValue().getX())
-            .set(DataQueries.VELOCITY_Y, getValue().getY())
-            .set(DataQueries.VELOCITY_Z, getValue().getZ())
+            .set(DataQueries.Sponge.VelocityData.VELOCITY_X, getValue().getX())
+            .set(DataQueries.Sponge.VelocityData.VELOCITY_Y, getValue().getY())
+            .set(DataQueries.Sponge.VelocityData.VELOCITY_Z, getValue().getZ())
             .getContainer();
     }
 

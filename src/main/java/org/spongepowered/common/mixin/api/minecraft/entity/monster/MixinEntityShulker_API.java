@@ -42,7 +42,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.manipulator.mutable.SpongeDyeableData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeDirectionalData;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.data.util.DirectionResolver;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.entity.projectile.ProjectileLauncher;
@@ -85,7 +85,7 @@ public abstract class MixinEntityShulker_API extends MixinEntityGolem_API implem
 
     @Override
     public Value<DyeColor> color() {
-        return new SpongeValue<>(Keys.DYE_COLOR, DataConstants.Catalog.DEFAULT_SHULKER_COLOR, getColor());
+        return new SpongeValue<>(Keys.DYE_COLOR, Constants.Catalog.DEFAULT_SHULKER_COLOR, getColor());
     }
 
     @Override

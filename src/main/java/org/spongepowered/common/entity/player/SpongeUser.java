@@ -423,9 +423,9 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         // TODO More data
         return DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, getContentVersion())
-                .set(DataQueries.USER_UUID, this.profile.getId())
-                .set(DataQueries.USER_NAME, this.profile.getName())
-                .set(DataQueries.USER_SPAWNS, this.spawnLocations);
+                .set(DataQueries.User.UUID, this.profile.getId())
+                .set(DataQueries.User.NAME, this.profile.getName())
+                .set(DataQueries.User.SPAWNS, this.spawnLocations);
     }
 
     @Override

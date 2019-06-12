@@ -32,10 +32,10 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.interfaces.block.tile.IMixinBanner;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -47,7 +47,7 @@ public class TileBannerBaseColorValueProcessor extends AbstractSpongeValueProces
 
     @Override
     protected Value<DyeColor> constructValue(DyeColor actualValue) {
-        return new SpongeValue<>(Keys.BANNER_BASE_COLOR, DataConstants.Catalog.DEFAULT_BANNER_BASE, actualValue);
+        return new SpongeValue<>(Keys.BANNER_BASE_COLOR, Constants.Catalog.DEFAULT_BANNER_BASE, actualValue);
     }
 
     @Override
@@ -66,7 +66,7 @@ public class TileBannerBaseColorValueProcessor extends AbstractSpongeValueProces
 
     @Override
     protected ImmutableValue<DyeColor> constructImmutableValue(DyeColor value) {
-        return ImmutableSpongeValue.cachedOf(Keys.BANNER_BASE_COLOR, DataConstants.Catalog.DEFAULT_BANNER_BASE, value);
+        return ImmutableSpongeValue.cachedOf(Keys.BANNER_BASE_COLOR, Constants.Catalog.DEFAULT_BANNER_BASE, value);
     }
 
     @Override

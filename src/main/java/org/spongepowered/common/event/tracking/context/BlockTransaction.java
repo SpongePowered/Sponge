@@ -44,7 +44,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
-import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
+import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -183,7 +183,7 @@ public abstract class BlockTransaction {
             final SpongeProxyBlockAccess proxyAccess = ((ServerWorldBridge) worldServer).getProxyAccess();
             final BlockPos targetPos = this.addedSnapshot.getBlockPos();
             proxyAccess.proceedWithAdd(targetPos, this.added);
-            ((IMixinTileEntity) this.added).setCaptured(false);
+            ((TileEntityBridge) this.added).setCaptured(false);
         }
 
         @Override
@@ -215,7 +215,7 @@ public abstract class BlockTransaction {
         @Override
         public void addToPrinter(PrettyPrinter printer) {
             printer.add("AddTileEntity")
-                .addWrapped(120, " %s : %s", this.affectedPosition, ((IMixinTileEntity) this.added).getPrettyPrinterString());
+                .addWrapped(120, " %s : %s", this.affectedPosition, ((TileEntityBridge) this.added).getPrettyPrinterString());
         }
     }
 
@@ -260,7 +260,7 @@ public abstract class BlockTransaction {
             }
             final WorldServer worldServer = maybeWorld.get();
             final SpongeProxyBlockAccess proxyAccess = ((ServerWorldBridge) worldServer).getProxyAccess();
-            ((IMixinTileEntity) this.removed).setCaptured(false); // Disable the capture logic in other places.
+            ((TileEntityBridge) this.removed).setCaptured(false); // Disable the capture logic in other places.
             proxyAccess.proceedWithRemoval(targetPosition, this.removed);
             // Reset captured state since we want it to be removed
             worldServer.updateComparatorOutputLevel(targetPosition, worldServer.getBlockState(targetPosition).getBlock());
@@ -269,7 +269,7 @@ public abstract class BlockTransaction {
         @Override
         public void addToPrinter(PrettyPrinter printer) {
             printer.add("RemoveTileEntity")
-                .add(" %s : %s", this.affectedPosition, ((IMixinTileEntity) this.removed).getPrettyPrinterString())
+                .add(" %s : %s", this.affectedPosition, ((TileEntityBridge) this.removed).getPrettyPrinterString())
                 .add(" %s : %s", this.affectedPosition, this.originalState)
             ;
         }
@@ -331,9 +331,9 @@ public abstract class BlockTransaction {
             final ServerWorldBridge mixinWorldServer = (ServerWorldBridge) this.added.getWorld();
             final BlockPos position = this.added.getPos();
             final SpongeProxyBlockAccess proxyAccess = mixinWorldServer.getProxyAccess();
-            ((IMixinTileEntity) this.removed).setCaptured(false);
+            ((TileEntityBridge) this.removed).setCaptured(false);
             proxyAccess.proceedWithRemoval(position, this.removed);
-            ((IMixinTileEntity) this.added).setCaptured(false);
+            ((TileEntityBridge) this.added).setCaptured(false);
             proxyAccess.proceedWithAdd(position, this.added);
         }
 

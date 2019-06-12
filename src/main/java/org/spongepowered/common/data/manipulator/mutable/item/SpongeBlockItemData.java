@@ -32,7 +32,7 @@ import org.spongepowered.api.data.manipulator.mutable.item.BlockItemData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeBlockItemData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class SpongeBlockItemData extends AbstractSingleData<BlockState, BlockItemData, ImmutableBlockItemData> implements BlockItemData {
@@ -42,7 +42,7 @@ public class SpongeBlockItemData extends AbstractSingleData<BlockState, BlockIte
     }
 
     public SpongeBlockItemData() {
-        this(DataConstants.Catalog.DEFAULT_BLOCK_STATE);
+        this(Constants.Catalog.DEFAULT_BLOCK_STATE);
     }
 
     @Override
@@ -58,7 +58,7 @@ public class SpongeBlockItemData extends AbstractSingleData<BlockState, BlockIte
 
     @Override
     public Value<BlockState> state() {
-        return new SpongeValue<>(Keys.ITEM_BLOCKSTATE, DataConstants.Catalog.DEFAULT_BLOCK_STATE, this.getValue());
+        return new SpongeValue<>(Keys.ITEM_BLOCKSTATE, Constants.Catalog.DEFAULT_BLOCK_STATE, this.getValue());
     }
 
     @Override

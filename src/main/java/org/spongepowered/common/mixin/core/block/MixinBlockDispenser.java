@@ -56,13 +56,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.bridge.world.ChunkBridge;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirectionalData;
 import org.spongepowered.common.data.util.DirectionResolver;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
-import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
@@ -115,7 +115,7 @@ public abstract class MixinBlockDispenser extends MixinBlock {
     private void impl$CreateContextOnDispensing(World worldIn, BlockPos pos, CallbackInfo ci) {
         final IBlockState state = worldIn.getBlockState(pos);
         final SpongeBlockSnapshot spongeBlockSnapshot = ((ServerWorldBridge) worldIn).createSpongeBlockSnapshot(state, state, pos, BlockChangeFlags.ALL);
-        final IMixinChunk mixinChunk = (IMixinChunk) worldIn.getChunk(pos);
+        final ChunkBridge mixinChunk = (ChunkBridge) worldIn.getChunk(pos);
         this.context = BlockPhase.State.DISPENSE.createPhaseContext()
             .source(spongeBlockSnapshot)
             .owner(() -> mixinChunk.getBlockOwner(pos))

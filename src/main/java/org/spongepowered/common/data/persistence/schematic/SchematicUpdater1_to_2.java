@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.persistence.schematic;
 
 import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
@@ -56,7 +57,7 @@ public class SchematicUpdater1_to_2 implements DataContentUpdater {
                     tile.remove(DataQueries.Schematic.Versions.V1_TILE_ENTITY_ID);
                     tile.set(DataQueries.Schematic.BLOCKENTITY_ID, id);
                 });
-                tile.remove(DataQueries.CONTENT_VERSION);
+                tile.remove(Queries.CONTENT_VERSION);
             });
             content.remove(DataQueries.Schematic.Versions.V1_TILE_ENTITY_DATA);
             content.set(DataQueries.Schematic.BLOCKENTITY_DATA, tiles);

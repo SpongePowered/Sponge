@@ -81,7 +81,7 @@ import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
-import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
+import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
 import org.spongepowered.common.util.SpongeHooks;
 
 import java.io.DataInputStream;
@@ -841,7 +841,7 @@ public final class WorldManager {
             worldServer.getWorldInfo().setGameType(server.getGameType());
         }
 
-        ((IMixinChunkProviderServer) worldServer.getChunkProvider()).setForceChunkRequests(true);
+        ((ServerChunkProviderBridge) worldServer.getChunkProvider()).setForceChunkRequests(true);
         SpongeImpl.postEvent(SpongeEventFactory.createLoadWorldEvent(Sponge.getCauseStackManager().getCurrentCause(),
             (org.spongepowered.api.world.World) worldServer));
 
@@ -854,7 +854,7 @@ public final class WorldManager {
             ((IMixinMinecraftServer) server).prepareSpawnArea(worldServer);
         }
 
-        ((IMixinChunkProviderServer) worldServer.getChunkProvider()).setForceChunkRequests(false);
+        ((ServerChunkProviderBridge) worldServer.getChunkProvider()).setForceChunkRequests(false);
 
         // While we try to prevnt mods from changing a worlds' WorldInfo, we aren't always
         // successful. We re-do the fake world check to catch any changes made to WorldInfo

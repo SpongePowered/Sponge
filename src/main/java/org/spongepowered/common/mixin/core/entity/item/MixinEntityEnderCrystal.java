@@ -37,7 +37,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
 import java.util.Optional;
@@ -47,7 +47,7 @@ import javax.annotation.Nullable;
 @Mixin(EntityEnderCrystal.class)
 public abstract class MixinEntityEnderCrystal extends MixinEntity implements ExplosiveBridge {
 
-    private int explosionStrength = DataConstants.Entity.EnderCrystal.DEFAULT_EXPLOSION_STRENGTH;
+    private int explosionStrength = Constants.Entity.EnderCrystal.DEFAULT_EXPLOSION_STRENGTH;
 
     // Explosive Impl
 
@@ -58,7 +58,7 @@ public abstract class MixinEntityEnderCrystal extends MixinEntity implements Exp
 
     @Override
     public void setExplosionRadius(Optional<Integer> radius) {
-        this.explosionStrength = radius.orElse(DataConstants.Entity.EnderCrystal.DEFAULT_EXPLOSION_STRENGTH);
+        this.explosionStrength = radius.orElse(Constants.Entity.EnderCrystal.DEFAULT_EXPLOSION_STRENGTH);
     }
 
     @Redirect(method = "attackEntityFrom",

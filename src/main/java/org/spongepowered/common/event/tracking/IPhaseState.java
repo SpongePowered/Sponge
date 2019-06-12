@@ -73,7 +73,7 @@ import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase.Listener
 import org.spongepowered.common.event.tracking.phase.tick.BlockTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.NeighborNotificationContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
-import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.bridge.world.ChunkBridge;
 import org.spongepowered.common.bridge.block.BlockEventDataBridge;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMapEntry;
 import org.spongepowered.common.interfaces.world.ServerWorldBridge;
@@ -81,7 +81,6 @@ import org.spongepowered.common.mixin.core.world.MixinChunk;
 import org.spongepowered.common.mixin.tracking.world.MixinChunk_Tracker;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
-import org.spongepowered.common.world.WorldUtil;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -725,8 +724,8 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param phaseContext the block tick context being entered
      */
     default void appendNotifierPreBlockTick(ServerWorldBridge mixinWorld, BlockPos pos, C context, BlockTickContext phaseContext) {
-        final Chunk chunk = WorldUtil.asNative(mixinWorld).getChunk(pos);
-        final IMixinChunk mixinChunk = (IMixinChunk) chunk;
+        final Chunk chunk = ((WorldServer) mixinWorld).getChunk(pos);
+        final ChunkBridge mixinChunk = (ChunkBridge) chunk;
         if (chunk != null && !chunk.isEmpty()) {
             mixinChunk.getBlockOwner(pos).ifPresent(phaseContext::owner);
             mixinChunk.getBlockNotifier(pos).ifPresent(phaseContext::notifier);

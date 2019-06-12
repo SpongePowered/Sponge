@@ -30,13 +30,13 @@ import org.spongepowered.api.data.manipulator.mutable.block.BrickData;
 import org.spongepowered.api.data.type.BrickType;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleCatalogData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeBrickData;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 
 public class ImmutableSpongeBrickData extends AbstractImmutableSingleCatalogData<BrickType, ImmutableBrickData, BrickData>
         implements ImmutableBrickData {
 
     public ImmutableSpongeBrickData(BrickType value) {
-        super(ImmutableBrickData.class, value, DataConstants.Catalog.DEFAULT_BRICK_TYPE, Keys.BRICK_TYPE, SpongeBrickData.class);
+        super(ImmutableBrickData.class, value, Constants.Catalog.DEFAULT_BRICK_TYPE, Keys.BRICK_TYPE, SpongeBrickData.class);
     }
 
 }

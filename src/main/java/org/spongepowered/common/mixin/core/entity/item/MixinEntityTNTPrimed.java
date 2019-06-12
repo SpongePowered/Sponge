@@ -40,7 +40,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.interfaces.entity.IMixinEntityTNTPrimed;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
@@ -54,7 +54,7 @@ public abstract class MixinEntityTNTPrimed extends MixinEntity implements IMixin
     @Shadow private int fuse;
 
     @Nullable private EntityLivingBase detonator;
-    private int explosionRadius = DataConstants.Entity.PrimedTNT.DEFAULT_EXPLOSION_RADIUS;
+    private int explosionRadius = Constants.Entity.PrimedTNT.DEFAULT_EXPLOSION_RADIUS;
     private int fuseDuration = 80;
     private boolean detonationCancelled;
 
@@ -70,7 +70,7 @@ public abstract class MixinEntityTNTPrimed extends MixinEntity implements IMixin
 
     @Override
     public void setExplosionRadius(Optional<Integer> radius) {
-        this.explosionRadius = radius.orElse(DataConstants.Entity.PrimedTNT.DEFAULT_EXPLOSION_RADIUS);
+        this.explosionRadius = radius.orElse(Constants.Entity.PrimedTNT.DEFAULT_EXPLOSION_RADIUS);
     }
 
     @Override

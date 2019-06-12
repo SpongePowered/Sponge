@@ -44,7 +44,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeParrotData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSittingData;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.registry.type.entity.ParrotVariantRegistryModule;
 
@@ -80,7 +80,7 @@ public abstract class MixinEntityParrot extends MixinEntityTameable implements P
 
     @Override
     public Value<ParrotVariant> variant() {
-        return new SpongeValue<>(Keys.PARROT_VARIANT, DataConstants.Entity.Parrot.DEFAULT_VARIANT, ParrotVariantRegistryModule.PARROT_VARIANT_IDMAP.get(this.getVariant()));
+        return new SpongeValue<>(Keys.PARROT_VARIANT, Constants.Entity.Parrot.DEFAULT_VARIANT, ParrotVariantRegistryModule.PARROT_VARIANT_IDMAP.get(this.getVariant()));
     }
 
     @Override

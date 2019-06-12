@@ -24,15 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.tileentity;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.tileentity.TileEntityDispenser;
-import org.spongepowered.api.block.tileentity.carrier.Dispenser;
-import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.entity.projectile.ProjectileLauncher;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
@@ -41,17 +35,15 @@ import org.spongepowered.common.item.inventory.lens.impl.ReusableLens;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
 
-import java.util.Optional;
-
 @SuppressWarnings("rawtypes")
 @NonnullByDefault
 @Mixin(TileEntityDispenser.class)
-public abstract class MixinTileEntityDispenser extends MixinTileEntityLockableLoot implements Dispenser {
+public abstract class MixinTileEntityDispenser extends MixinTileEntityLockableLoot {
 
     @SuppressWarnings("unchecked")
     @Override
     public ReusableLens<?> generateLens(Fabric fabric, InventoryAdapter adapter) {
-        return ReusableLens.getLens(GridInventoryLens.class, ((InventoryAdapter) this), this::generateSlotProvider, this::generateRootLens);
+        return ReusableLens.getLens(GridInventoryLens.class, this, this::generateSlotProvider, this::generateRootLens);
     }
 
     @SuppressWarnings("unchecked")
@@ -65,13 +57,4 @@ public abstract class MixinTileEntityDispenser extends MixinTileEntityLockableLo
         return new GridInventoryLensImpl(0, 3, 3, 3, thisClass, slots);
     }
 
-    @Override
-    public <T extends Projectile> Optional<T> launchProjectile(Class<T> projectileClass) {
-        return ProjectileLauncher.launch(checkNotNull(projectileClass, "projectileClass"), this, null);
-    }
-
-    @Override
-    public <T extends Projectile> Optional<T> launchProjectile(Class<T> projectileClass, Vector3d velocity) {
-        return ProjectileLauncher.launch(checkNotNull(projectileClass, "projectileClass"), this, checkNotNull(velocity, "velocity"));
-    }
 }

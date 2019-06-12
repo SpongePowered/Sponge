@@ -80,6 +80,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
+import org.spongepowered.common.bridge.world.ChunkBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
@@ -93,13 +94,13 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
-import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.interfaces.world.IMixinServerWorldEventHandler;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 import org.spongepowered.common.relocate.co.aikar.timings.WorldTimingsHandler;
 import org.spongepowered.common.util.NonNullArrayList;
+import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.common.world.WorldManager;
 import org.spongepowered.common.world.gen.SpongeChunkGenerator;
 
@@ -254,7 +255,7 @@ public abstract class MixinWorldServer_API extends MixinWorld_API {
             if (context != null) {
                 context.buildAndSwitch();
             }
-            return setBlockState(new BlockPos(x, y, z), (IBlockState) blockState, flag);
+            return setBlockState(new BlockPos(x, y, z), (IBlockState) blockState, ((SpongeBlockChangeFlag) flag).getRawFlag());
         }
     }
 
@@ -279,25 +280,25 @@ public abstract class MixinWorldServer_API extends MixinWorld_API {
         final net.minecraft.tileentity.TileEntity tile = chunk.getTileEntity(pos, Chunk.EnumCreateEntityType.CHECK);
         if (tile != null) {
             for (DataManipulator<?, ?> manipulator : ((CustomDataHolderBridge) tile).getCustomManipulators()) {
-                this.builder.add(manipulator);
+                builder.add(manipulator);
             }
             NBTTagCompound nbt = new NBTTagCompound();
             // Some mods like OpenComputers assert if attempting to save robot while moving
             try {
                 tile.writeToNBT(nbt);
-                this.builder.unsafeNbt(nbt);
+                builder.unsafeNbt(nbt);
             }
             catch(Throwable t) {
                 // ignore
             }
         }
-        ((IMixinChunk) chunk).getBlockOwnerUUID(pos).ifPresent(builder::creator);
-        ((IMixinChunk) chunk).getBlockNotifierUUID(pos).ifPresent(builder::notifier);
+        ((ChunkBridge) chunk).getBlockOwnerUUID(pos).ifPresent(builder::creator);
+        ((ChunkBridge) chunk).getBlockNotifierUUID(pos).ifPresent(builder::notifier);
 
         builder.flag(BlockChangeFlags.NONE);
 
 
-        return this.builder.build();
+        return builder.build();
     }
 
     @Override
@@ -378,9 +379,6 @@ public abstract class MixinWorldServer_API extends MixinWorld_API {
         }
         // Sponge End
     }
-
-
-    // ------------------------ End of Cause Tracking ------------------------------------
 
     @Override
     public boolean spawnEntity(Entity entity) {

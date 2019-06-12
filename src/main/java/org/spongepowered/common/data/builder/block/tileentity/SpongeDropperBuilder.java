@@ -41,8 +41,8 @@ public class SpongeDropperBuilder extends SpongeLockableBuilder<Dropper> {
     @Override
     protected Optional<Dropper> buildContent(DataView container) throws InvalidDataException {
         return super.buildContent(container).map(dropper -> {
-            if (container.contains(DataQueries.CUSTOM_NAME)) {
-                ((TileEntityDropper) dropper).setCustomName(container.getString(DataQueries.CUSTOM_NAME).get());
+            if (container.contains(DataQueries.BlockEntity.CUSTOM_NAME)) {
+                ((TileEntityDropper) dropper).setCustomName(container.getString(DataQueries.BlockEntity.CUSTOM_NAME).get());
             }
             ((TileEntityDropper) dropper).validate();
             return dropper;

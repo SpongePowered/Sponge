@@ -88,6 +88,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.TimingHolder;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
+import org.spongepowered.common.bridge.world.ChunkBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.data.nbt.CustomDataNbtUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -97,7 +98,6 @@ import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.event.damage.MinecraftBlockDamageSource;
-import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
@@ -125,7 +125,7 @@ public abstract class MixinEntity implements EntityBridge, TrackableBridge {
     // @formatter:off
     protected final SpongeEntityType entityType = EntityTypeRegistryModule.getInstance().getForClass(((Entity) (Object) this).getClass());
     private boolean teleporting;
-    private WeakReference<IMixinChunk> activeChunk = new WeakReference<>(null);
+    private WeakReference<ChunkBridge> activeChunk = new WeakReference<>(null);
     private float origWidth;
     private float origHeight;
     private boolean isConstructing = true;
@@ -805,18 +805,18 @@ public abstract class MixinEntity implements EntityBridge, TrackableBridge {
 
     @Override
     @Nullable
-    public IMixinChunk getActiveChunk() {
+    public ChunkBridge getActiveChunk() {
         return this.activeChunk.get();
     }
 
     @Override
-    public void setActiveChunk(@Nullable IMixinChunk chunk) {
-        this.activeChunk = new WeakReference<IMixinChunk>(chunk);
+    public void setActiveChunk(@Nullable ChunkBridge chunk) {
+        this.activeChunk = new WeakReference<ChunkBridge>(chunk);
     }
 
     @Override
     public boolean shouldTick() {
-        final IMixinChunk chunk = this.getActiveChunk();
+        final ChunkBridge chunk = this.getActiveChunk();
         // Don't tick if chunk is queued for unload or is in progress of being scheduled for unload
         // See https://github.com/SpongePowered/SpongeVanilla/issues/344
         return chunk == null || chunk.isActive();

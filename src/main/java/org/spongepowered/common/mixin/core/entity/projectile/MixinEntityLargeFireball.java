@@ -28,6 +28,9 @@ import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.EntityLargeFireball;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.entity.projectile.Projectile;
+import org.spongepowered.api.entity.projectile.explosive.fireball.Fireball;
+import org.spongepowered.api.entity.projectile.explosive.fireball.LargeFireball;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.world.Location;
@@ -39,7 +42,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -71,12 +74,12 @@ public abstract class MixinEntityLargeFireball extends MixinEntityFireball imple
         boolean griefer = ((GrieferBridge) this).bridge$CanGrief();
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(this);
-            frame.addContext(EventContextKeys.THROWER, getShooter()); // TODO - Remove in 1.13/API 8
-            frame.addContext(EventContextKeys.PROJECTILE_SOURCE, getShooter());
-            frame.pushCause(getShooter());
+            frame.addContext(EventContextKeys.THROWER, ((LargeFireball) this).getShooter()); // TODO - Remove in 1.13/API 8
+            frame.addContext(EventContextKeys.PROJECTILE_SOURCE, ((LargeFireball) this).getShooter());
+            frame.pushCause(((Projectile) this).getShooter());
             Optional<net.minecraft.world.Explosion> ex = detonate(Explosion.builder()
                 .location(new Location<>((World) worldObj, new Vector3d(x, y, z)))
-                .sourceExplosive(this)
+                .sourceExplosive(((LargeFireball) this))
                 .radius(strength)
                 .canCauseFire(flaming && griefer)
                 .shouldPlaySmoke(smoking && griefer)
@@ -93,7 +96,7 @@ public abstract class MixinEntityLargeFireball extends MixinEntityFireball imple
 
     @Override
     public void setExplosionRadius(Optional<Integer> radius) {
-        this.explosionPower = radius.orElse(DataConstants.Entity.Fireball.DEFAULT_EXPLOSION_RADIUS);
+        this.explosionPower = radius.orElse(Constants.Entity.Fireball.DEFAULT_EXPLOSION_RADIUS);
     }
 
 }

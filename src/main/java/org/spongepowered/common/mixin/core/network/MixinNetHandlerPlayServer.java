@@ -123,6 +123,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
 import org.spongepowered.common.event.ShouldFire;
@@ -132,7 +133,6 @@ import org.spongepowered.common.event.tracking.phase.packet.PacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.event.tracking.phase.tick.PlayerTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
-import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
 import org.spongepowered.common.bridge.packet.ResourcePackBridge;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
@@ -427,7 +427,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
 
         // Vanilla doesn't call detectAndSendChanges for 'invalid' clicks, since it restores the entire inventory
         // Passing 'captureOnly' as 'true' allows capturing to happen for event firing, but doesn't send any pointless packets
-        ((IMixinContainer) this.player.openContainer).detectAndSendChanges(true);
+        ((ContainerBridge) this.player.openContainer).detectAndSendChanges(true);
     }
 
     @Redirect(method = "processChatMessage", at = @At(value = "INVOKE", target = "Lorg/apache/commons/lang3/StringUtils;normalizeSpace(Ljava/lang/String;)Ljava/lang/String;", remap = false))

@@ -92,7 +92,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
-import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
+import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.world.IMixinITeleporter;
@@ -462,7 +462,7 @@ public final class SpongeImplHooks {
         return EnchantmentHelper.getLootingModifier(entity);
     }
 
-    public static double getWorldMaxEntityRadius(WorldServer mixinWorldServer) {
+    public static double getWorldMaxEntityRadius(WorldServer worldServer) {
         return 2.0D;
     }
 
@@ -522,7 +522,7 @@ public final class SpongeImplHooks {
         throw new UnsupportedOperationException("SpongeCommon does not have it's own ecosystem, this needs to be mixed into for implementations depending on SpongeCommon");
     }
 
-    public static TileEntityType getTileEntityType(Class<? extends IMixinTileEntity> aClass) {
+    public static TileEntityType getTileEntityType(Class<? extends TileEntity> aClass) {
         return SpongeImpl.getRegistry().getTranslated(aClass, TileEntityType.class);
     }
 

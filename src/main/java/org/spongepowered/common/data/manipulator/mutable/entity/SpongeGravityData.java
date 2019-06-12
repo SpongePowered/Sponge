@@ -30,16 +30,16 @@ import org.spongepowered.api.data.manipulator.mutable.entity.GravityData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeGravityData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 
 public class SpongeGravityData extends AbstractBooleanData<GravityData, ImmutableGravityData> implements GravityData {
 
     public SpongeGravityData(boolean value) {
-        super(GravityData.class, value, Keys.HAS_GRAVITY, ImmutableSpongeGravityData.class, DataConstants.DEFAULT_HAS_GRAVITY);
+        super(GravityData.class, value, Keys.HAS_GRAVITY, ImmutableSpongeGravityData.class, Constants.Entity.DEFAULT_HAS_GRAVITY);
     }
 
     public SpongeGravityData() {
-        this(DataConstants.DEFAULT_HAS_GRAVITY);
+        this(Constants.Entity.DEFAULT_HAS_GRAVITY);
     }
 
     @Override

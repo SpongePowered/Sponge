@@ -37,7 +37,7 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableAgeableD
 import org.spongepowered.api.data.manipulator.mutable.entity.AgeableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAgeableData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Map;
 import java.util.Optional;
@@ -50,7 +50,7 @@ public class AgeableDataProcessor extends AbstractEntityDataProcessor<EntityAgea
 
     @Override
     protected AgeableData createManipulator() {
-        return new SpongeAgeableData(DataConstants.ADULT, true);
+        return new SpongeAgeableData(Constants.Entity.Ageable.ADULT, true);
     }
 
     @Override
@@ -69,9 +69,9 @@ public class AgeableDataProcessor extends AbstractEntityDataProcessor<EntityAgea
         }
 
         if (adult) {
-            entity.setGrowingAge(DataConstants.ADULT);
+            entity.setGrowingAge(Constants.Entity.Ageable.ADULT);
         } else {
-            entity.setGrowingAge(DataConstants.CHILD);
+            entity.setGrowingAge(Constants.Entity.Ageable.CHILD);
         }
         return true;
 

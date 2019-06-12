@@ -24,67 +24,15 @@
  */
 package org.spongepowered.common.mixin.core.tileentity;
 
-import net.minecraft.tileentity.MobSpawnerBaseLogic;
 import net.minecraft.tileentity.TileEntityMobSpawner;
-import org.spongepowered.api.block.tileentity.MobSpawner;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.mutable.MobSpawnerData;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.manipulator.mutable.SpongeMobSpawnerData;
-import org.spongepowered.common.data.processor.common.SpawnerUtils;
-import org.spongepowered.common.interfaces.IMixinMobSpawner;
-
-import java.util.List;
 
 @NonnullByDefault
 @Mixin(TileEntityMobSpawner.class)
-public abstract class MixinTileEntityMobSpawner extends MixinTileEntity implements MobSpawner, IMixinMobSpawner {
-
-    @Shadow public abstract MobSpawnerBaseLogic getSpawnerBaseLogic();
-
-    @Override
-    public void spawnEntityBatchImmediately(boolean force) {
-        if (force) {
-            final short oldMaxNearby = (short) getLogic().maxNearbyEntities;
-            getLogic().maxNearbyEntities = Short.MAX_VALUE;
-
-            getLogic().spawnDelay = 0;
-            getLogic().updateSpawner();
-
-            getLogic().maxNearbyEntities = oldMaxNearby;
-        } else {
-            getLogic().spawnDelay = 0;
-        }
-    }
-
-    @Override
-    public MobSpawnerBaseLogic getLogic() {
-        return this.getSpawnerBaseLogic();
-    }
-
-    @Override
-    public MobSpawnerData getMobSpawnerData() {
-        return new SpongeMobSpawnerData(
-                (short) getLogic().spawnDelay,
-                (short) getLogic().minSpawnDelay,
-                (short) getLogic().maxSpawnDelay,
-                (short) getLogic().spawnCount,
-                (short) getLogic().maxNearbyEntities,
-                (short) getLogic().activatingRangeFromPlayer,
-                (short) getLogic().spawnRange,
-                SpawnerUtils.getNextEntity(getLogic()),
-                SpawnerUtils.getEntities(getLogic()));
-    }
-
-    @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
-        manipulators.add(getMobSpawnerData());
-    }
+public abstract class MixinTileEntityMobSpawner extends MixinTileEntity {
 
     @Override
     public SpawnType getTickedSpawnType() {

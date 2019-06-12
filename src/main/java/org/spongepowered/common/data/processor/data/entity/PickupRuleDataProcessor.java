@@ -36,7 +36,7 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongePickupRuleData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
@@ -62,12 +62,12 @@ public final class PickupRuleDataProcessor extends AbstractEntitySingleDataProce
 
     @Override
     protected ImmutableValue<PickupRule> constructImmutableValue(PickupRule value) {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, this.key, value, DataConstants.Catalog.DEFAULT_PICKUP_RULE);
+        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, this.key, value, Constants.Catalog.DEFAULT_PICKUP_RULE);
     }
 
     @Override
     protected Value<PickupRule> constructValue(PickupRule actualValue) {
-        return new SpongeValue<>(this.key, DataConstants.Catalog.DEFAULT_PICKUP_RULE, actualValue);
+        return new SpongeValue<>(this.key, Constants.Catalog.DEFAULT_PICKUP_RULE, actualValue);
     }
 
     @Override

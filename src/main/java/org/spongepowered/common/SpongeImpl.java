@@ -43,6 +43,7 @@ import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.game.state.GameStateEvent;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.SpongeConfigSaveManager;
 import org.spongepowered.common.config.type.CustomDataConfig;
@@ -290,4 +291,54 @@ public final class SpongeImpl {
         return containerOptional.get();
     }
 
+    public static int directionToIndex(Direction direction) {
+        switch (direction) {
+            case NORTH:
+            case NORTHEAST:
+            case NORTHWEST:
+                return 0;
+            case SOUTH:
+            case SOUTHEAST:
+            case SOUTHWEST:
+                return 1;
+            case EAST:
+                return 2;
+            case WEST:
+                return 3;
+            default:
+                throw new IllegalArgumentException("Unexpected direction");
+        }
+    }
+
+    public static Direction getCardinalDirection(Direction direction) {
+        switch (direction) {
+            case NORTH:
+            case NORTHEAST:
+            case NORTHWEST:
+                return Direction.NORTH;
+            case SOUTH:
+            case SOUTHEAST:
+            case SOUTHWEST:
+                return Direction.SOUTH;
+            case EAST:
+                return Direction.EAST;
+            case WEST:
+                return Direction.WEST;
+            default:
+                throw new IllegalArgumentException("Unexpected direction");
+        }
+    }
+
+    public static Direction getSecondaryDirection(Direction direction) {
+        switch (direction) {
+            case NORTHEAST:
+            case SOUTHEAST:
+                return Direction.EAST;
+            case NORTHWEST:
+            case SOUTHWEST:
+                return Direction.WEST;
+            default:
+                return Direction.NONE;
+        }
+    }
 }

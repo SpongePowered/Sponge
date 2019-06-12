@@ -102,12 +102,12 @@ public abstract class MixinItemStack_API implements DataHolder {
         if (this.shadow$isEmpty()) {
             throw new IllegalArgumentException("Cannot set data on empty item stacks!");
         }
-        if (!container.contains(DataQueries.UNSAFE_NBT)) {
+        if (!container.contains(DataQueries.Sponge.UNSAFE_NBT)) {
             throw new InvalidDataException("There's no NBT Data set in the provided container");
         }
-        final DataView nbtData = container.getView(DataQueries.UNSAFE_NBT).get();
+        final DataView nbtData = container.getView(DataQueries.Sponge.UNSAFE_NBT).get();
         try {
-            final int integer = container.getInt(DataQueries.ITEM_DAMAGE_VALUE).orElse(this.getItemDamage());
+            final int integer = container.getInt(DataQueries.ItemStack.DAMAGE_VALUE).orElse(this.getItemDamage());
             this.setItemDamage(integer);
             final NBTTagCompound stackCompound = NbtTranslator.getInstance().translate(nbtData);
             this.setTagCompound(stackCompound);
@@ -134,9 +134,9 @@ public abstract class MixinItemStack_API implements DataHolder {
     public DataContainer toContainer() {
         final DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, getContentVersion())
-                .set(DataQueries.ITEM_TYPE, this.itemstack$getType().getId())
-                .set(DataQueries.ITEM_COUNT, this.itemstack$getQuantity())
-                .set(DataQueries.ITEM_DAMAGE_VALUE, this.getItemDamage());
+                .set(DataQueries.ItemStack.TYPE, this.itemstack$getType().getId())
+                .set(DataQueries.ItemStack.COUNT, this.itemstack$getQuantity())
+                .set(DataQueries.ItemStack.DAMAGE_VALUE, this.getItemDamage());
         if (hasTagCompound()) { // no tag? no data, simple as that.
             final NBTTagCompound compound = getTagCompound().copy();
             if (compound.hasKey(NbtDataUtil.SPONGE_DATA)) {
@@ -148,13 +148,13 @@ public abstract class MixinItemStack_API implements DataHolder {
             NbtDataUtil.filterSpongeCustomData(compound); // We must filter the custom data so it isn't stored twice
             if (!compound.isEmpty()) {
                 final DataContainer unsafeNbt = NbtTranslator.getInstance().translateFrom(compound);
-                container.set(DataQueries.UNSAFE_NBT, unsafeNbt);
+                container.set(DataQueries.Sponge.UNSAFE_NBT, unsafeNbt);
             }
         }
         // We only need to include the custom data, not vanilla manipulators supported by sponge implementation
         final Collection<DataManipulator<?, ?>> manipulators = ((CustomDataHolderBridge) this).getCustomManipulators();
         if (!manipulators.isEmpty()) {
-            container.set(DataQueries.DATA_MANIPULATORS, DataUtil.getSerializedManipulatorList(manipulators));
+            container.set(DataQueries.Sponge.DATA_MANIPULATORS, DataUtil.getSerializedManipulatorList(manipulators));
         }
         try {
             SpongeImplHooks.writeItemStackCapabilitiesToDataView(container, (net.minecraft.item.ItemStack) (Object) this);

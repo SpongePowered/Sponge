@@ -289,22 +289,22 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         final DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, getContentVersion())
             .set(Queries.WORLD_ID, this.worldUniqueId.toString())
-            .createView(DataQueries.SNAPSHOT_WORLD_POSITION)
+            .createView(DataQueries.Sponge.SNAPSHOT_WORLD_POSITION)
                 .set(Queries.POSITION_X, this.pos.getX())
                 .set(Queries.POSITION_Y, this.pos.getY())
                 .set(Queries.POSITION_Z, this.pos.getZ())
             .getContainer()
-            .set(DataQueries.BLOCK_STATE, this.blockState);
+            .set(DataQueries.Block.BLOCK_STATE, this.blockState);
 
         if (this.blockState != this.extendedState) {
-            container.set(DataQueries.BLOCK_EXTENDED_STATE, this.extendedState);
+            container.set(DataQueries.Block.BLOCK_EXTENDED_STATE, this.extendedState);
         }
         if (this.compound != null) {
-            container.set(DataQueries.UNSAFE_NBT, NbtTranslator.getInstance().translateFrom(this.compound));
+            container.set(DataQueries.Sponge.UNSAFE_NBT, NbtTranslator.getInstance().translateFrom(this.compound));
         }
         final List<DataView> dataList = DataUtil.getSerializedImmutableManipulatorList(this.extraData);
         if (!dataList.isEmpty()) {
-            container.set(DataQueries.SNAPSHOT_TILE_DATA, dataList);
+            container.set(DataQueries.Sponge.SNAPSHOT_TILE_DATA, dataList);
         }
         return container;
     }

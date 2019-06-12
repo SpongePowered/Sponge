@@ -92,10 +92,10 @@ public class SpongeFluidStackSnapshot implements FluidStackSnapshot {
     public DataContainer toContainer() {
         DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, this.getContentVersion())
-            .set(DataQueries.FLUID_TYPE, this.fluidType.getId())
-            .set(DataQueries.FLUID_VOLUME, this.volume);
+            .set(DataQueries.Fluids.FLUID_TYPE, this.fluidType.getId())
+            .set(DataQueries.Fluids.FLUID_VOLUME, this.volume);
         if (this.extraData != null) {
-            container.set(DataQueries.UNSAFE_NBT, this.extraData);
+            container.set(DataQueries.Sponge.UNSAFE_NBT, this.extraData);
         }
         return container;
     }

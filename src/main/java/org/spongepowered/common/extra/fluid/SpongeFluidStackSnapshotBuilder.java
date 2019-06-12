@@ -73,8 +73,8 @@ public class SpongeFluidStackSnapshotBuilder extends AbstractDataBuilder<FluidSt
         this.volume = fluidStack.getVolume();
         DataContainer datacontainer = fluidStack.toContainer();
         this.container = null;
-        if (datacontainer.contains(DataQueries.UNSAFE_NBT)) {
-            this.container = datacontainer.getView(DataQueries.UNSAFE_NBT).get();
+        if (datacontainer.contains(DataQueries.Sponge.UNSAFE_NBT)) {
+            this.container = datacontainer.getView(DataQueries.Sponge.UNSAFE_NBT).get();
         }
         return this;
     }
@@ -111,19 +111,19 @@ public class SpongeFluidStackSnapshotBuilder extends AbstractDataBuilder<FluidSt
     @Override
     protected Optional<FluidStackSnapshot> buildContent(DataView container) throws InvalidDataException {
         try {
-            if (container.contains(DataQueries.FLUID_TYPE, DataQueries.FLUID_VOLUME)) {
-                final String fluidId = container.getString(DataQueries.FLUID_TYPE).get();
+            if (container.contains(DataQueries.Fluids.FLUID_TYPE, DataQueries.Fluids.FLUID_VOLUME)) {
+                final String fluidId = container.getString(DataQueries.Fluids.FLUID_TYPE).get();
                 final Optional<FluidType> type = Sponge.getRegistry().getType(FluidType.class, fluidId);
                 if (!type.isPresent()) {
                     throw new InvalidDataException("Unknown fluid id found: " + fluidId);
                 }
                 final FluidType fluidType = type.get();
-                final int volume = container.getInt(DataQueries.FLUID_VOLUME).get();
+                final int volume = container.getInt(DataQueries.Fluids.FLUID_VOLUME).get();
                 SpongeFluidStackSnapshotBuilder builder = new SpongeFluidStackSnapshotBuilder();
                 builder.fluid(fluidType)
                         .volume(volume);
-                if (container.contains(DataQueries.UNSAFE_NBT)) {
-                    builder.container = container.getView(DataQueries.UNSAFE_NBT).get().copy();
+                if (container.contains(DataQueries.Sponge.UNSAFE_NBT)) {
+                    builder.container = container.getView(DataQueries.Sponge.UNSAFE_NBT).get().copy();
                 }
                 return Optional.of(builder.build());
             }

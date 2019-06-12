@@ -85,7 +85,7 @@ import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -121,8 +121,6 @@ import javax.annotation.Nullable;
 @NonnullByDefault
 @Mixin(value = EntityLivingBase.class, priority = 999)
 public abstract class MixinEntityLivingBase extends MixinEntity implements IMixinEntityLivingBase {
-
-    private static final int MAX_DEATH_EVENTS_BEFORE_GIVING_UP = 3;
 
     @Shadow public int maxHurtResistantTime;
     @Shadow public int hurtTime;
@@ -235,7 +233,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
         // This will transitively call the forge event
         final boolean isMainThread = !((WorldBridge) this.world).isFake() || Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
         if (!this.isDead) { // isDead should be set later on in this method so we aren't re-throwing the events.
-            if (isMainThread && this.deathEventsPosted <= MAX_DEATH_EVENTS_BEFORE_GIVING_UP) {
+            if (isMainThread && this.deathEventsPosted <= Constants.Sponge.MAX_DEATH_EVENTS_BEFORE_GIVING_UP) {
                 // ignore because some moron is not resetting the entity.
                 this.deathEventsPosted++;
                 if (SpongeCommonEventFactory.callDestructEntityEventDeath((EntityLivingBase) (Object) this, cause, isMainThread).map(Cancellable::isCancelled).orElse(true)) {
@@ -991,7 +989,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
 
     @Override
     public void setElytraFlying(boolean value) {
-        setFlag(DataConstants.Entity.ELYTRA_FLYING_FLAG, value);
+        setFlag(Constants.Entity.ELYTRA_FLYING_FLAG, value);
     }
 
     // Start implementation of UseItemstackEvent

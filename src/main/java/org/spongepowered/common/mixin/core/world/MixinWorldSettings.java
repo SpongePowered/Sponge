@@ -144,7 +144,7 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
         }
         // If null, assume custom
         if (settings == null) {
-            settings = DataContainer.createNew().set(DataQueries.WORLD_CUSTOM_SETTINGS, generatorOptions);
+            settings = DataContainer.createNew().set(DataQueries.General.WORLD_CUSTOM_SETTINGS, generatorOptions);
         }
         this.generatorSettings = settings;
     }
@@ -298,7 +298,7 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
     @Override
     public void setGeneratorSettings(DataContainer generatorSettings) {
         // Update the generatorOptions string
-        Optional<String> optCustomSettings = generatorSettings.getString(DataQueries.WORLD_CUSTOM_SETTINGS);
+        Optional<String> optCustomSettings = generatorSettings.getString(DataQueries.General.WORLD_CUSTOM_SETTINGS);
         if (optCustomSettings.isPresent()) {
             this.generatorOptions = optCustomSettings.get();
         } else {

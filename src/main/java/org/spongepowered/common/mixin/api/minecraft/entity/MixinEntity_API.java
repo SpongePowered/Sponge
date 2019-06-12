@@ -91,7 +91,7 @@ import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.interfaces.world.IMixinTeleporter;
 import org.spongepowered.common.interfaces.world.ServerWorldBridge;
-import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
+import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.WorldManager;
@@ -242,7 +242,7 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
                 this.rotationYaw = (float) event.getToTransform().getYaw();
             }
 
-            final IMixinChunkProviderServer chunkProviderServer = (IMixinChunkProviderServer) ((WorldServer) this.world).getChunkProvider();
+            final ServerChunkProviderBridge chunkProviderServer = (ServerChunkProviderBridge) ((WorldServer) this.world).getChunkProvider();
             chunkProviderServer.setForceChunkRequests(true);
 
             final net.minecraft.entity.Entity thisEntity = (net.minecraft.entity.Entity) (Object) this;
@@ -575,28 +575,28 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
         final DataContainer unsafeNbt = NbtTranslator.getInstance().translateFrom(compound);
         final DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, getContentVersion())
-            .set(DataQueries.ENTITY_CLASS, this.getClass().getName())
+            .set(DataQueries.Entity.CLASS, this.getClass().getName())
             .set(Queries.WORLD_ID, transform.getExtent().getUniqueId().toString())
-            .createView(DataQueries.SNAPSHOT_WORLD_POSITION)
+            .createView(DataQueries.Sponge.SNAPSHOT_WORLD_POSITION)
                 .set(Queries.POSITION_X, transform.getPosition().getX())
                 .set(Queries.POSITION_Y, transform.getPosition().getY())
                 .set(Queries.POSITION_Z, transform.getPosition().getZ())
             .getContainer()
-            .createView(DataQueries.ENTITY_ROTATION)
+            .createView(DataQueries.Entity.ROTATION)
                 .set(Queries.POSITION_X, transform.getRotation().getX())
                 .set(Queries.POSITION_Y, transform.getRotation().getY())
                 .set(Queries.POSITION_Z, transform.getRotation().getZ())
             .getContainer()
-            .createView(DataQueries.ENTITY_SCALE)
+            .createView(DataQueries.Entity.SCALE)
                 .set(Queries.POSITION_X, transform.getScale().getX())
                 .set(Queries.POSITION_Y, transform.getScale().getY())
                 .set(Queries.POSITION_Z, transform.getScale().getZ())
             .getContainer()
-            .set(DataQueries.ENTITY_TYPE, this.entityType.getId())
-            .set(DataQueries.UNSAFE_NBT, unsafeNbt);
+            .set(DataQueries.Entity.TYPE, this.entityType.getId())
+            .set(DataQueries.Sponge.UNSAFE_NBT, unsafeNbt);
         final Collection<DataManipulator<?, ?>> manipulators = ((CustomDataHolderBridge) this).getCustomManipulators();
         if (!manipulators.isEmpty()) {
-            container.set(DataQueries.DATA_MANIPULATORS, DataUtil.getSerializedManipulatorList(manipulators));
+            container.set(DataQueries.Sponge.DATA_MANIPULATORS, DataUtil.getSerializedManipulatorList(manipulators));
         }
         return container;
     }

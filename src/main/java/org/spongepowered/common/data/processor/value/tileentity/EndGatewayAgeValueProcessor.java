@@ -32,7 +32,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.interfaces.block.tile.IMixinTileEntityEndGateway;
+import org.spongepowered.common.mixin.core.tileentity.AccessorTileEntityEndGateway;
 
 import java.util.Optional;
 
@@ -49,13 +49,13 @@ public class EndGatewayAgeValueProcessor extends AbstractSpongeValueProcessor<Ti
 
     @Override
     protected boolean set(TileEntityEndGateway container, Long value) {
-        ((IMixinTileEntityEndGateway) container).setAge(value);
+        ((AccessorTileEntityEndGateway) container).impl$setAge(value);
         return true;
     }
 
     @Override
     protected Optional<Long> getVal(TileEntityEndGateway container) {
-        return Optional.of(((IMixinTileEntityEndGateway) container).getAge());
+        return Optional.of(((AccessorTileEntityEndGateway) container).impl$getAge());
     }
 
     @Override

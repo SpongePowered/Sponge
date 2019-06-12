@@ -28,7 +28,7 @@ import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 
 import java.util.Optional;
 
-public final class SpongeEmptyCriterion implements ICriterion {
+public final class SpongeEmptyCriterion implements CriterionBridge {
 
     public static final SpongeEmptyCriterion INSTANCE = new SpongeEmptyCriterion();
 

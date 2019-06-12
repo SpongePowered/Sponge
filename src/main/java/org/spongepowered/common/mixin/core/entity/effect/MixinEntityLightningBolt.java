@@ -40,14 +40,13 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.action.LightningEvent;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLightningBolt;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 import org.spongepowered.common.util.VecHelper;
@@ -130,15 +129,15 @@ public abstract class MixinEntityLightningBolt extends MixinEntity implements IM
     @Override
     public void spongeImpl$readFromSpongeCompound(NBTTagCompound compound) {
         super.spongeImpl$readFromSpongeCompound(compound);
-        if (compound.hasKey(DataConstants.Entity.LIGHTNING_EFFECT)) {
-            this.effect = compound.getBoolean(DataConstants.Entity.LIGHTNING_EFFECT);
+        if (compound.hasKey(Constants.Entity.LIGHTNING_EFFECT)) {
+            this.effect = compound.getBoolean(Constants.Entity.LIGHTNING_EFFECT);
         }
     }
 
     @Override
     public void spongeImpl$writeToSpongeCompound(NBTTagCompound compound) {
         super.spongeImpl$writeToSpongeCompound(compound);
-        compound.setBoolean(DataConstants.Entity.LIGHTNING_EFFECT, this.effect);
+        compound.setBoolean(Constants.Entity.LIGHTNING_EFFECT, this.effect);
     }
 
 }

@@ -29,7 +29,7 @@ import net.minecraft.entity.item.EntityMinecart;
 import org.spongepowered.api.entity.vehicle.minecart.Minecart;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.mixin.api.minecraft.entity.MixinEntity_API;
 
 @Mixin(EntityMinecart.class)
@@ -39,8 +39,8 @@ public abstract class MixinEntityMinecart_API extends MixinEntity_API implements
 
     private double maxSpeed = 0.4D;
     private boolean slowWhenEmpty = true;
-    private Vector3d airborneMod = new Vector3d(DataConstants.Entity.Minecart.DEFAULT_AIRBORNE_MOD, DataConstants.Entity.Minecart.DEFAULT_AIRBORNE_MOD, DataConstants.Entity.Minecart.DEFAULT_AIRBORNE_MOD);
-    private Vector3d derailedMod = new Vector3d(DataConstants.Entity.Minecart.DEFAULT_DERAILED_MOD, DataConstants.Entity.Minecart.DEFAULT_DERAILED_MOD, DataConstants.Entity.Minecart.DEFAULT_DERAILED_MOD);
+    private Vector3d airborneMod = new Vector3d(Constants.Entity.Minecart.DEFAULT_AIRBORNE_MOD, Constants.Entity.Minecart.DEFAULT_AIRBORNE_MOD, Constants.Entity.Minecart.DEFAULT_AIRBORNE_MOD);
+    private Vector3d derailedMod = new Vector3d(Constants.Entity.Minecart.DEFAULT_DERAILED_MOD, Constants.Entity.Minecart.DEFAULT_DERAILED_MOD, Constants.Entity.Minecart.DEFAULT_DERAILED_MOD);
 
 
     @Override

@@ -43,7 +43,7 @@ import org.spongepowered.common.interfaces.advancement.IMixinPlayerAdvancements;
 import java.time.Instant;
 import java.util.Optional;
 
-public class SpongeScoreCriterionProgress implements ScoreCriterionProgress, ICriterionProgress {
+public class SpongeScoreCriterionProgress implements ScoreCriterionProgress, CriterionProgressBridge {
 
     private final SpongeScoreCriterion criterion;
     private final AdvancementProgress progress;

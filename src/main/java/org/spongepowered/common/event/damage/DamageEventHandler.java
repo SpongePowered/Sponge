@@ -64,11 +64,11 @@ import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.bridge.world.ChunkBridge;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.bridge.entity.EntityBridge;
-import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
+import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.util.VecHelper;
 
@@ -340,7 +340,7 @@ public class DamageEventHandler {
         int l = MathHelper.floor(bb.maxY + 1.0D);
         int i1 = MathHelper.floor(bb.minZ);
         int j1 = MathHelper.floor(bb.maxZ + 1.0D);
-        final IMixinChunkProviderServer spongeChunkProvider = (IMixinChunkProviderServer) entity.world.getChunkProvider();
+        final ServerChunkProviderBridge spongeChunkProvider = (ServerChunkProviderBridge) entity.world.getChunkProvider();
         for (int k1 = i; k1 < j; ++k1) {
             for (int l1 = k; l1 < l; ++l1) {
                 for (int i2 = i1; i2 < j1; ++i2) {
@@ -386,7 +386,7 @@ public class DamageEventHandler {
         } else if (damageSource instanceof BlockDamageSource) {
             Location<org.spongepowered.api.world.World> location = ((BlockDamageSource) damageSource).getLocation();
             BlockPos blockPos = VecHelper.toBlockPos(location);
-            final IMixinChunk mixinChunk = (IMixinChunk) ((net.minecraft.world.World) location.getExtent()).getChunk(blockPos);
+            final ChunkBridge mixinChunk = (ChunkBridge) ((net.minecraft.world.World) location.getExtent()).getChunk(blockPos);
             mixinChunk.getBlockNotifier(blockPos).ifPresent(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
             mixinChunk.getBlockOwner(blockPos).ifPresent(owner -> frame.addContext(EventContextKeys.CREATOR, owner));
         }

@@ -45,15 +45,15 @@ public class SpongeLockableBuilder<T extends TileEntityCarrier> extends Abstract
     @Override
     protected Optional<T> buildContent(DataView container) throws InvalidDataException {
         return super.buildContent(container).flatMap(lockable -> {
-            if (!container.contains(DataQueries.BLOCK_ENTITY_ITEM_CONTENTS)) {
+            if (!container.contains(DataQueries.BlockEntity.ITEM_CONTENTS)) {
                 ((TileEntity) lockable).invalidate();
                 return Optional.empty();
             }
-            List<DataView> contents = container.getViewList(DataQueries.BLOCK_ENTITY_ITEM_CONTENTS).get();
+            List<DataView> contents = container.getViewList(DataQueries.BlockEntity.ITEM_CONTENTS).get();
             for (DataView content: contents) {
                 net.minecraft.item.ItemStack stack = (net.minecraft.item.ItemStack) content
-                        .getSerializable(DataQueries.BLOCK_ENTITY_SLOT_ITEM, ItemStack.class).get();
-                ((IInventory) lockable).setInventorySlotContents(content.getInt(DataQueries.BLOCK_ENTITY_SLOT).get(), stack);
+                        .getSerializable(DataQueries.BlockEntity.SLOT_ITEM, ItemStack.class).get();
+                ((IInventory) lockable).setInventorySlotContents(content.getInt(DataQueries.BlockEntity.SLOT).get(), stack);
             }
             if (container.contains(Keys.LOCK_TOKEN.getQuery())) {
                 lockable.offer(Keys.LOCK_TOKEN, container.getString(Keys.LOCK_TOKEN.getQuery()).get());

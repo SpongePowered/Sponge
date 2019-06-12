@@ -136,7 +136,7 @@ public class SpongeLocatableBlockBuilder extends AbstractDataBuilder<LocatableBl
                 .orElseThrow(() -> new InvalidDataException("Could not locate an \"y\" coordinate in the container!"));
         final int z = container.getInt(Queries.POSITION_Z)
                 .orElseThrow(() -> new InvalidDataException("Could not locate an \"z\" coordinate in the container!"));
-        final BlockState blockState = container.getCatalogType(DataQueries.BLOCK_STATE, BlockState.class)
+        final BlockState blockState = container.getCatalogType(DataQueries.Block.BLOCK_STATE, BlockState.class)
                 .orElseThrow(() -> new InvalidDataException("Could not locate a BlockState"));
         final UUID worldId = container.getObject(Queries.WORLD_ID, UUID.class)
                 .orElseThrow(() -> new InvalidDataException("Could not locate a UUID"));

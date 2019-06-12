@@ -30,13 +30,13 @@ import org.spongepowered.api.data.manipulator.mutable.entity.AbsorptionData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeAbsorptionData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public final class SpongeAbsorptionData extends AbstractSingleData<Double, AbsorptionData, ImmutableAbsorptionData> implements AbsorptionData {
 
     public SpongeAbsorptionData() {
-        this(DataConstants.Entity.DEFAULT_ABSORPTION);
+        this(Constants.Entity.DEFAULT_ABSORPTION);
     }
 
     public SpongeAbsorptionData(double value) {
@@ -50,7 +50,7 @@ public final class SpongeAbsorptionData extends AbstractSingleData<Double, Absor
 
     @Override
     protected Value<Double> getValueGetter() {
-        return new SpongeValue<>(this.usedKey, DataConstants.Entity.DEFAULT_ABSORPTION, this.getValue());
+        return new SpongeValue<>(this.usedKey, Constants.Entity.DEFAULT_ABSORPTION, this.getValue());
     }
 
     @Override

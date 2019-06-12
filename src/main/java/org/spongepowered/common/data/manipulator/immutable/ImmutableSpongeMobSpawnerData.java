@@ -39,7 +39,7 @@ import org.spongepowered.api.util.weighted.WeightedSerializableObject;
 import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeMobSpawnerData;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeWeightedCollectionValue;
 
@@ -68,10 +68,10 @@ public class ImmutableSpongeMobSpawnerData extends AbstractImmutableData<Immutab
     private final ImmutableWeightedCollectionValue<EntityArchetype> toSpawnValue;
 
     public ImmutableSpongeMobSpawnerData() {
-        this(DataConstants.TileEntity.Spawner.DEFAULT_SPAWNER_REMAINING_DELAY, DataConstants.TileEntity.Spawner.DEFAULT_SPAWNER_MINIMUM_SPAWN_DELAY,
-                DataConstants.TileEntity.Spawner.DEFAULT_SPAWNER_MAXIMUM_SPAWN_DELAY, DataConstants.TileEntity.Spawner.DEFAULT_SPAWNER_SPAWN_COUNT,
-                DataConstants.TileEntity.Spawner.DEFAULT_SPAWNER_MAXMIMUM_NEARBY_ENTITIES, DataConstants.TileEntity.Spawner.DEFAULT_SPAWNER_REQUIRED_PLAYER_RANGE,
-                DataConstants.TileEntity.Spawner.DEFAULT_SPAWNER_SPAWN_RANGE, DataConstants.TileEntity.Spawner.DEFAULT_SPAWNER_NEXT_ENTITY_TO_SPAWN, new WeightedTable<>());
+        this(Constants.TileEntity.Spawner.DEFAULT_REMAINING_DELAY, Constants.TileEntity.Spawner.DEFAULT_MINIMUM_SPAWN_DELAY,
+                Constants.TileEntity.Spawner.DEFAULT_MAXIMUM_SPAWN_DELAY, Constants.TileEntity.Spawner.DEFAULT_SPAWN_COUNT,
+                Constants.TileEntity.Spawner.DEFAULT_MAXMIMUM_NEARBY_ENTITIES, Constants.TileEntity.Spawner.DEFAULT_REQUIRED_PLAYER_RANGE,
+                Constants.TileEntity.Spawner.DEFAULT_SPAWN_RANGE, Constants.TileEntity.Spawner.DEFAULT_NEXT_ENTITY_TO_SPAWN, new WeightedTable<>());
     }
 
     public ImmutableSpongeMobSpawnerData(short remaining, short minSpawnDelay, short maxSpawnDelay, short count, short maxNearby,
@@ -137,7 +137,7 @@ public class ImmutableSpongeMobSpawnerData extends AbstractImmutableData<Immutab
                 .actualValue(spawnRange)
                 .build()
                 .asImmutable();
-        this.nextValue = new ImmutableSpongeValue<>(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN, DataConstants.TileEntity.Spawner.DEFAULT_SPAWNER_NEXT_ENTITY_TO_SPAWN,
+        this.nextValue = new ImmutableSpongeValue<>(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN, Constants.TileEntity.Spawner.DEFAULT_NEXT_ENTITY_TO_SPAWN,
                 this.nextToSpawn);
         this.toSpawnValue = new ImmutableSpongeWeightedCollectionValue<>(Keys.SPAWNER_ENTITIES, this.entitiesToSpawn);
 

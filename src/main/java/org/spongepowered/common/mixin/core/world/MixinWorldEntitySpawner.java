@@ -54,16 +54,16 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.bridge.world.ChunkBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
-import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.ServerWorldBridge;
-import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
+import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.util.SpawnerSpawnType;
 
@@ -109,7 +109,7 @@ public abstract class MixinWorldEntitySpawner {
             Iterator<Chunk> chunkIterator = this.eligibleSpawnChunks.iterator();
             while (chunkIterator.hasNext()) {
                 Chunk chunk = chunkIterator.next();
-                ((IMixinChunk) chunk).setIsSpawning(false);
+                ((ChunkBridge) chunk).setIsSpawning(false);
                 chunkIterator.remove();
             }
 
@@ -138,14 +138,14 @@ public abstract class MixinWorldEntitySpawner {
                         boolean flag = i == -mobSpawnRange || i == mobSpawnRange || j == -mobSpawnRange || j == mobSpawnRange;
                         final Chunk
                             chunk =
-                            ((IMixinChunkProviderServer) world.getChunkProvider())
+                            ((ServerChunkProviderBridge) world.getChunkProvider())
                                 .getLoadedChunkWithoutMarkingActive(i + playerPosX, j + playerPosZ);
-                        if (chunk == null || (chunk.unloadQueued && !((IMixinChunk) chunk).isPersistedChunk())) {
+                        if (chunk == null || (chunk.unloadQueued && !((ChunkBridge) chunk).isPersistedChunk())) {
                             // Don't attempt to spawn in an unloaded chunk
                             continue;
                         }
 
-                        final IMixinChunk spongeChunk = (IMixinChunk) chunk;
+                        final ChunkBridge spongeChunk = (ChunkBridge) chunk;
                         ++chunkSpawnCandidates;
                         final ChunkPos chunkPos = chunk.getPos();
                         if (!flag && world.getWorldBorder().contains(chunkPos)) {
@@ -327,8 +327,8 @@ public abstract class MixinWorldEntitySpawner {
     private static BlockPos getRandomChunkPosition(World worldIn, int x, int z)
     {
         // Sponge start
-        final Chunk chunk = ((IMixinChunkProviderServer) worldIn.getChunkProvider()).getLoadedChunkWithoutMarkingActive(x, z);
-        if (chunk == null || (chunk.unloadQueued && !((IMixinChunk) chunk).isPersistedChunk())) {
+        final Chunk chunk = ((ServerChunkProviderBridge) worldIn.getChunkProvider()).getLoadedChunkWithoutMarkingActive(x, z);
+        if (chunk == null || (chunk.unloadQueued && !((ChunkBridge) chunk).isPersistedChunk())) {
             // Don't attempt to spawn in an unloaded chunk
             return null;
         }

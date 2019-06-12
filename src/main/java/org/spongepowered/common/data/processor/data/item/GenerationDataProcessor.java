@@ -35,7 +35,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeGenerationData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
@@ -60,7 +60,7 @@ public final class GenerationDataProcessor
                 .actualValue(actualValue)
                 .defaultValue(0)
                 .minimum(0)
-                .maximum(DataConstants.MAXIMUM_GENERATION)
+                .maximum(Constants.Item.Book.MAXIMUM_GENERATION)
                 .build();
     }
 

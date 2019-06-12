@@ -114,13 +114,13 @@ public class CustomDataNbtUtil {
         if (spongeTag.contains(DataQueries.General.CUSTOM_MANIPULATOR_LIST)) {
             customData = spongeTag.getViewList(DataQueries.General.CUSTOM_MANIPULATOR_LIST).orElseThrow(DataUtil.dataNotFound());
             for (DataView dataView : customData) {
-                final String dataId = dataView.getString(DataQueries.DATA_ID).orElseThrow(DataUtil.dataNotFound());
+                final String dataId = dataView.getString(DataQueries.Sponge.DATA_ID).orElseThrow(DataUtil.dataNotFound());
                 if (DataUtil.getRegistrationFor(manipulator).getId().equals(dataId)) {
-                    final DataView existingData = dataView.getView(DataQueries.INTERNAL_DATA).orElseThrow(DataUtil.dataNotFound());
+                    final DataView existingData = dataView.getView(DataQueries.Sponge.INTERNAL_DATA).orElseThrow(DataUtil.dataNotFound());
                     DataManipulator<?, ?> existing = deserialize(dataId, existingData);
                     isReplacing = existing != null;
                     final DataContainer container = manipulator.toContainer();
-                    dataView.set(DataQueries.INTERNAL_DATA, container);
+                    dataView.set(DataQueries.Sponge.INTERNAL_DATA, container);
                     if (isReplacing) {
                         return DataTransactionResult.successReplaceResult(manipulator.getValues(), existing.getValues());
                     }
@@ -132,8 +132,8 @@ public class CustomDataNbtUtil {
             customData = new ArrayList<>();
         }
         final DataContainer container = DataContainer.createNew();
-        container.set(DataQueries.DATA_ID, DataUtil.getRegistrationFor(manipulator).getId());
-        container.set(DataQueries.INTERNAL_DATA, manipulator.toContainer());
+        container.set(DataQueries.Sponge.DATA_ID, DataUtil.getRegistrationFor(manipulator).getId());
+        container.set(DataQueries.Sponge.INTERNAL_DATA, manipulator.toContainer());
         customData.add(container);
         spongeTag.set(DataQueries.General.CUSTOM_MANIPULATOR_LIST, customData);
         return DataTransactionResult.builder().result(DataTransactionResult.Type.SUCCESS).success(manipulator.getValues()).build();

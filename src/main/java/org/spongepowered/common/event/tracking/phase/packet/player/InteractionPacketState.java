@@ -51,13 +51,13 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.packet.PacketState;
-import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.util.VecHelper;
@@ -236,9 +236,9 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
                 }
             }));
 
-            final IMixinContainer mixinContainer = ContainerUtil.toMixin(player.openContainer);
+            final ContainerBridge mixinContainer = ContainerUtil.toMixin(player.openContainer);
             mixinContainer.setCaptureInventory(false);
-            mixinContainer.getCapturedTransactions().clear();
+            mixinContainer.bridge$getCapturedSlotTransactions().clear();
         }
     }
 

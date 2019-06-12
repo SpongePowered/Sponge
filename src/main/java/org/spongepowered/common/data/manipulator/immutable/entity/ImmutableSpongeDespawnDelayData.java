@@ -31,7 +31,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableIntData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeDespawnDelayData;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 public final class ImmutableSpongeDespawnDelayData extends AbstractImmutableIntData<ImmutableDespawnDelayData, DespawnDelayData>
@@ -40,9 +40,9 @@ public final class ImmutableSpongeDespawnDelayData extends AbstractImmutableIntD
     private final ImmutableValue<Boolean> infinite;
 
     public ImmutableSpongeDespawnDelayData(int value) {
-        super(ImmutableDespawnDelayData.class, value, Keys.DESPAWN_DELAY, SpongeDespawnDelayData.class, DataConstants.Entity.Item.MIN_DESPAWN_DELAY,
-                DataConstants.Entity.Item.MAX_DESPAWN_DELAY, DataConstants.Entity.Item.DEFAULT_DESPAWN_DELAY);
-        this.infinite = ImmutableSpongeValue.cachedOf(Keys.INFINITE_DESPAWN_DELAY, false, this.getValue() == DataConstants.Entity.Item.MAGIC_NO_DESPAWN);
+        super(ImmutableDespawnDelayData.class, value, Keys.DESPAWN_DELAY, SpongeDespawnDelayData.class, Constants.Entity.Item.MIN_DESPAWN_DELAY,
+                Constants.Entity.Item.MAX_DESPAWN_DELAY, Constants.Entity.Item.DEFAULT_DESPAWN_DELAY);
+        this.infinite = ImmutableSpongeValue.cachedOf(Keys.INFINITE_DESPAWN_DELAY, false, this.getValue() == Constants.Entity.Item.MAGIC_NO_DESPAWN);
     }
 
     @Override

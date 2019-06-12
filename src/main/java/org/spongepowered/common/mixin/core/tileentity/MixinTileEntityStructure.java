@@ -29,84 +29,81 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.tileentity.TileEntityStructure;
 import net.minecraft.util.math.BlockPos;
-import org.spongepowered.api.block.tileentity.Structure;
 import org.spongepowered.api.data.type.StructureMode;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.block.tile.IMixinTileEntityStructure;
+import org.spongepowered.common.bridge.tileentity.StructureBlockEntityBridge;
 import org.spongepowered.common.util.VecHelper;
 
 @Mixin(TileEntityStructure.class)
-public abstract class MixinTileEntityStructure extends MixinTileEntity implements Structure, IMixinTileEntityStructure {
+public abstract class MixinTileEntityStructure extends MixinTileEntity implements StructureBlockEntityBridge {
 
     @Shadow private String author;
     @Shadow private BlockPos position;
     @Shadow private BlockPos size = BlockPos.ORIGIN;
     @Shadow private TileEntityStructure.Mode mode;
     @Shadow private boolean ignoreEntities;
-    @Shadow private boolean powered;
     @Shadow private boolean showAir;
     @Shadow private boolean showBoundingBox;
     @Shadow private float integrity;
-    @Shadow private long seed;
 
     @Override
-    public String getAuthor() {
+    public String bridge$getAuthor() {
         return this.author;
     }
 
     @Override
-    public void setAuthor(String author) {
+    public void bridge$setAuthor(String author) {
         this.author = author;
     }
 
     @Override
-    public boolean shouldIgnoreEntities() {
+    public boolean bridge$shouldIgnoreEntities() {
         return this.ignoreEntities;
     }
 
     @Override
-    public float getIntegrity() {
+    public float bridge$getIntegrity() {
         return this.integrity;
     }
 
     @Override
-    public StructureMode getMode() {
+    public StructureMode bridge$getMode() {
         return (StructureMode) (Object) this.mode;
     }
 
     @Override
-    public void setMode(StructureMode mode) {
+    public void bridge$setMode(StructureMode mode) {
         this.mode = (TileEntityStructure.Mode) (Object) checkNotNull(mode, "mode");
     }
 
     @Override
-    public Vector3i getPosition() {
+    public Vector3i bridge$getPosition() {
         return VecHelper.toVector3i(this.position);
     }
 
     @Override
-    public void setPosition(Vector3i position) {
+    public void bridge$setPosition(Vector3i position) {
         this.position = VecHelper.toBlockPos(checkNotNull(position, "position"));
     }
 
     @Override
-    public boolean shouldShowAir() {
+    public boolean bridge$shouldShowAir() {
         return this.showAir;
     }
 
     @Override
-    public boolean shouldShowBoundingBox() {
+    public boolean bridge$shouldShowBoundingBox() {
         return this.showBoundingBox;
     }
 
     @Override
-    public Vector3i getSize() {
+    public Vector3i bridge$getSize() {
         return VecHelper.toVector3i(this.size);
     }
 
     @Override
-    public void setSize(Vector3i size) {
+    public void bridge$setSize(Vector3i size) {
         this.size = VecHelper.toBlockPos(checkNotNull(size, "size"));
     }
 

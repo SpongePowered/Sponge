@@ -50,8 +50,8 @@ public class SpongeBrewingStandBuilder extends SpongeLockableBuilder<BrewingStan
                 throw new InvalidDataException("The provided container does not contain the data to make a Banner!");
             }
             // Have to consider custom names as an option
-            if (container.contains(DataQueries.CUSTOM_NAME)) {
-                ((TileEntityBrewingStand) brewingStand).setName(container.getString(DataQueries.CUSTOM_NAME).get());
+            if (container.contains(DataQueries.BlockEntity.CUSTOM_NAME)) {
+                ((TileEntityBrewingStand) brewingStand).setName(container.getString(DataQueries.BlockEntity.CUSTOM_NAME).get());
             }
 
             final BrewingStandData brewingData = Sponge.getDataManager().getManipulatorBuilder(BrewingStandData.class).get().create();

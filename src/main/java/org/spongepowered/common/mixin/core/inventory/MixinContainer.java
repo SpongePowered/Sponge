@@ -66,9 +66,9 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
-import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.SlotCollectionIterator;
@@ -96,7 +96,7 @@ import javax.annotation.Nullable;
 @NonnullByDefault
 @Mixin(value = Container.class, priority = 998)
 @Implements({@Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$")})
-public abstract class MixinContainer implements org.spongepowered.api.item.inventory.Container, IMixinContainer, CarriedInventory<Carrier> {
+public abstract class MixinContainer implements org.spongepowered.api.item.inventory.Container, ContainerBridge, CarriedInventory<Carrier> {
 
     @Shadow public List<Slot> inventorySlots;
     @Shadow public NonNullList<ItemStack> inventoryItemStacks;
@@ -501,7 +501,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     }
 
     @Override
-    public List<SlotTransaction> getCapturedTransactions() {
+    public List<SlotTransaction> bridge$getCapturedSlotTransactions() {
         return this.capturedSlotTransactions;
     }
 

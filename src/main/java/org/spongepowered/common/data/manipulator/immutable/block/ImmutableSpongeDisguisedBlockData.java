@@ -30,12 +30,12 @@ import org.spongepowered.api.data.manipulator.mutable.block.DisguisedBlockData;
 import org.spongepowered.api.data.type.DisguisedBlockType;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleCatalogData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeDisguisedBlockData;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 
 public class ImmutableSpongeDisguisedBlockData extends AbstractImmutableSingleCatalogData<DisguisedBlockType, ImmutableDisguisedBlockData,
         DisguisedBlockData> implements ImmutableDisguisedBlockData {
 
     public ImmutableSpongeDisguisedBlockData(DisguisedBlockType value) {
-        super(ImmutableDisguisedBlockData.class, value, DataConstants.Catalog.DEFAULT_DISGUISED_BLOCK, Keys.DISGUISED_BLOCK_TYPE, SpongeDisguisedBlockData.class);
+        super(ImmutableDisguisedBlockData.class, value, Constants.Catalog.DEFAULT_DISGUISED_BLOCK, Keys.DISGUISED_BLOCK_TYPE, SpongeDisguisedBlockData.class);
     }
 }

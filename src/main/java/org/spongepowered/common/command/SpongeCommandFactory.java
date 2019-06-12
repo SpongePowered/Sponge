@@ -38,6 +38,7 @@ import static org.spongepowered.api.command.args.GenericArguments.string;
 import static org.spongepowered.api.command.args.GenericArguments.world;
 import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 
+import org.spongepowered.common.bridge.world.ChunkBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
@@ -98,7 +99,6 @@ import org.spongepowered.common.config.type.TrackerConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeEventManager;
-import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
@@ -531,7 +531,7 @@ public class SpongeCommandFactory {
                     }
                     final WorldServer worldServer = (WorldServer) entityPlayerMP.world;
                     final Chunk chunk = worldServer.getChunk(rayTraceResult.getBlockPos());
-                    final IMixinChunk mixinChunk = (IMixinChunk) chunk;
+                    final ChunkBridge mixinChunk = (ChunkBridge) chunk;
                     final IBlockState blockState = worldServer.getBlockState(rayTraceResult.getBlockPos());
                     final BlockState spongeState = BlockUtil.fromNative(blockState);
                     src.sendMessage(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "Block Type: ", TextColors.BLUE, TextStyles.RESET, spongeState.getId()));

@@ -104,7 +104,7 @@ public class SpongeLocatableBlock implements LocatableBlock {
                 .set(Queries.POSITION_X, this.position.getX())
                 .set(Queries.POSITION_Y, this.position.getY())
                 .set(Queries.POSITION_Z, this.position.getZ())
-                .set(DataQueries.BLOCK_STATE, this.blockState);
+                .set(DataQueries.Block.BLOCK_STATE, this.blockState);
     }
 
     @Override

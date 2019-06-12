@@ -36,7 +36,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.interfaces.ai.IMixinEntityAIBase;
+import org.spongepowered.common.bridge.entity.ai.EntityGoalBridge;
 import org.spongepowered.common.registry.type.entity.AITaskTypeModule;
 
 import java.util.Optional;
@@ -45,7 +45,7 @@ import javax.annotation.Nullable;
 
 @Mixin(EntityAIBase.class)
 @Implements(value = @Interface(iface = AITask.class, prefix = "task$"))
-public abstract class MixinEntityAIBase implements IMixinEntityAIBase {
+public abstract class MixinEntityAIBase implements EntityGoalBridge {
 
     @Shadow private int mutexBits;
 

@@ -53,7 +53,7 @@ import java.io.IOException;
 
 @NonnullByDefault
 @Mixin(WorldType.class)
-public abstract class MixinWorldType implements GeneratorType {
+public abstract class MixinWorldType {
 
     @Shadow @Final private String name;
     @Shadow @Final private int id;
@@ -66,47 +66,10 @@ public abstract class MixinWorldType implements GeneratorType {
 
 
     @Override
-    public String getId() {
-        return SpongeImplHooks.getModIdFromClass(this.getClass()) + ":" + CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, this.name);
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
-    }
-
-    @Override
-    public DataContainer getGeneratorSettings() {
-        // Minecraft stores the generator settings as a string. For the flat
-        // world, they use a custom format, for WorldType.CUSTOMIZED they use
-        // a serialized JSON string
-        if ((Object) this == WorldType.FLAT) {
-            String defaultSettings = FlatGeneratorInfo.getDefaultFlatGenerator().toString();
-            return DataContainer.createNew().set(DataQueries.WORLD_CUSTOM_SETTINGS, defaultSettings);
-        }
-        if ((Object) this == WorldType.CUSTOMIZED) {
-            // They easiest way to go from ChunkProviderSettings to DataContainer is via json and NBT
-            try {
-                return JsonDataFormat.serialize(ChunkGeneratorSettings.Factory.JSON_ADAPTER, new ChunkGeneratorSettings.Factory());
-            } catch (JsonParseException | IOException e) {
-                throw new AssertionError("Failed to serialize default settings of CUSTOMIZED world type", e);
-            }
-        }
-
-        return DataContainer.createNew();
-    }
-
-    @Override
-    public WorldGenerator createGenerator(World world) {
-        checkNotNull(world);
-        return ((ServerWorldBridge) world).createWorldGenerator(getGeneratorSettings());
-    }
-
-    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + this.getName().hashCode();
+        result = prime * result + this.name.hashCode();
         result = prime * result + this.id;
         return result;
     }
@@ -118,15 +81,15 @@ public abstract class MixinWorldType implements GeneratorType {
         }
 
         final WorldType other = (WorldType) obj;
-        return this.getName().equals(other.getName()) && this.id == other.getId();
+        return this.name.equals(other.getName()) && this.id == other.getId();
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("id", getId())
-                .add("name", getName())
-                .add("settings", getGeneratorSettings())
+                .add("id", ((GeneratorType) this).getId())
+                .add("name", this.name)
+                .add("settings", ((GeneratorType) this).getGeneratorSettings())
                 .toString();
     }
 }

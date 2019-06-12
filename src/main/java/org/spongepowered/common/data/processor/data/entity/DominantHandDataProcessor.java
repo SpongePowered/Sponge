@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
-import static org.spongepowered.common.data.util.DataConstants.Catalog.DEFAULT_HAND;
+import static org.spongepowered.common.util.Constants.Catalog.DEFAULT_HAND;
 
 import net.minecraft.entity.EntityLiving;
 import org.spongepowered.api.data.DataTransactionResult;

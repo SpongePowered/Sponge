@@ -42,7 +42,7 @@ import org.spongepowered.api.data.value.mutable.MapValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeBodyPartRotationalData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.data.value.mutable.SpongeMapValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
@@ -55,12 +55,12 @@ public class SpongeBodyPartRotationalData extends AbstractData<BodyPartRotationa
 
     public SpongeBodyPartRotationalData() {
         this(ImmutableMap.<BodyPart, Vector3d>builder()
-                .put(BodyParts.HEAD, DataConstants.Entity.ArmorStand.DEFAULT_HEAD_ROTATION)
-                .put(BodyParts.CHEST, DataConstants.Entity.ArmorStand.DEFAULT_CHEST_ROTATION)
-                .put(BodyParts.LEFT_ARM, DataConstants.Entity.ArmorStand.DEFAULT_LEFT_ARM_ROTATION)
-                .put(BodyParts.RIGHT_ARM, DataConstants.Entity.ArmorStand.DEFAULT_RIGHT_ARM_ROTATION)
-                .put(BodyParts.LEFT_LEG, DataConstants.Entity.ArmorStand.DEFAULT_LEFT_LEG_ROTATION)
-                .put(BodyParts.RIGHT_LEG, DataConstants.Entity.ArmorStand.DEFAULT_RIGHT_LEG_ROTATION)
+                .put(BodyParts.HEAD, Constants.Entity.ArmorStand.DEFAULT_HEAD_ROTATION)
+                .put(BodyParts.CHEST, Constants.Entity.ArmorStand.DEFAULT_CHEST_ROTATION)
+                .put(BodyParts.LEFT_ARM, Constants.Entity.ArmorStand.DEFAULT_LEFT_ARM_ROTATION)
+                .put(BodyParts.RIGHT_ARM, Constants.Entity.ArmorStand.DEFAULT_RIGHT_ARM_ROTATION)
+                .put(BodyParts.LEFT_LEG, Constants.Entity.ArmorStand.DEFAULT_LEFT_LEG_ROTATION)
+                .put(BodyParts.RIGHT_LEG, Constants.Entity.ArmorStand.DEFAULT_RIGHT_LEG_ROTATION)
                 .build());
     }
 

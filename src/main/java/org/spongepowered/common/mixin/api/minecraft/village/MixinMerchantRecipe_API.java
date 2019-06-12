@@ -104,12 +104,12 @@ public abstract class MixinMerchantRecipe_API implements TradeOffer {
     public DataContainer toContainer() {
         return DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, getContentVersion())
-                .set(DataQueries.TRADE_OFFER_FIRST_ITEM, this.getFirstBuyingItem())
-                .set(DataQueries.TRADE_OFFER_SECOND_ITEM, this.hasSecondItem() ? this.getSecondBuyingItem().get() : "none")
-                .set(DataQueries.TRADE_OFFER_BUYING_ITEM, this.getItemToBuy())
-                .set(DataQueries.TRADE_OFFER_GRANTS_EXPERIENCE, this.doesGrantExperience())
-                .set(DataQueries.TRADE_OFFER_MAX_USES, this.getMaxTradeUses())
-                .set(DataQueries.TRADE_OFFER_USES, this.getUses());
+                .set(DataQueries.TradeOffer.FIRST_QUERY, this.getFirstBuyingItem())
+                .set(DataQueries.TradeOffer.SECOND_QUERY, this.hasSecondItem() ? this.getSecondBuyingItem().get() : "none")
+                .set(DataQueries.TradeOffer.BUYING_QUERY, this.getItemToBuy())
+                .set(DataQueries.TradeOffer.EXPERIENCE_QUERY, this.doesGrantExperience())
+                .set(DataQueries.TradeOffer.MAX_QUERY, this.getMaxTradeUses())
+                .set(DataQueries.TradeOffer.USES_QUERY, this.getUses());
     }
 
 }

@@ -181,7 +181,7 @@ public interface MixinIBlockState_API extends IBlockState, BlockState {
     default DataContainer toContainer() {
         return DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, getContentVersion())
-                .set(DataQueries.BLOCK_STATE, getId());
+                .set(DataQueries.Block.BLOCK_STATE, getId());
     }
 
     @Override

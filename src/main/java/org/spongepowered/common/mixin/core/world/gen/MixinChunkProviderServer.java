@@ -49,6 +49,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.world.ChunkBridge;
 import org.spongepowered.common.config.category.WorldCategory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -57,12 +58,11 @@ import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
-import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinAnvilChunkLoader;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.ServerWorldBridge;
-import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
+import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
 import org.spongepowered.common.util.CachedLong2ObjectMap;
 import org.spongepowered.common.world.SpongeEmptyChunk;
 import org.spongepowered.common.world.storage.SpongeChunkDataStream;
@@ -73,7 +73,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 @Mixin(ChunkProviderServer.class)
-public abstract class MixinChunkProviderServer implements WorldStorage, IMixinChunkProviderServer {
+public abstract class MixinChunkProviderServer implements WorldStorage, ServerChunkProviderBridge {
 
     private SpongeEmptyChunk EMPTY_CHUNK;
     private boolean denyChunkRequests = true;
@@ -151,7 +151,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
     @Overwrite
     public void queueUnload(Chunk chunkIn)
     {
-        if (!((IMixinChunk) chunkIn).isPersistedChunk() && this.world.provider.canDropChunk(chunkIn.x, chunkIn.z))
+        if (!((ChunkBridge) chunkIn).isPersistedChunk() && this.world.provider.canDropChunk(chunkIn.x, chunkIn.z))
         {
             // Sponge - we avoid using the queue and simply check the unloaded flag during unloads
             //this.droppedChunksSet.add(Long.valueOf(ChunkPos.asLong(chunkIn.x, chunkIn.z)));
@@ -290,7 +290,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
             long now = System.currentTimeMillis();
             while (chunksUnloaded < this.maxChunkUnloads && iterator.hasNext()) {
                 Chunk chunk = iterator.next();
-                IMixinChunk spongeChunk = (IMixinChunk) chunk;
+                ChunkBridge spongeChunk = (ChunkBridge) chunk;
                 if (chunk != null && chunk.unloadQueued && !spongeChunk.isPersistedChunk()) {
                     if (this.getChunkUnloadDelay() > 0) {
                         if ((now - spongeChunk.getScheduledForUnload()) < this.chunkUnloadDelay) {
@@ -356,6 +356,6 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
         }
 
         this.loadedChunks.remove(ChunkPos.asLong(chunk.x, chunk.z));
-        ((IMixinChunk) chunk).setScheduledForUnload(-1);
+        ((ChunkBridge) chunk).setScheduledForUnload(-1);
     }
 }

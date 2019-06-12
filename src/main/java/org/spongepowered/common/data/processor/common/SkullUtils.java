@@ -37,7 +37,9 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedPlayerData;
 import org.spongepowered.common.data.type.SpongeSkullType;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.interfaces.block.tile.IMixinTileEntitySkull;
+import org.spongepowered.common.bridge.tileentity.SkullBlockEntityBridge;
+import org.spongepowered.common.mixin.core.tileentity.AccessorTileEntitySkull;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -46,11 +48,6 @@ import java.util.concurrent.ExecutionException;
 import javax.annotation.Nullable;
 
 public class SkullUtils {
-
-    /**
-     * There's not really a meaningful default value for this, since it's a CatalogType. However, the Vanilla give command defaults the skeleton type (index 0), so it's used as the default here.
-     */
-    public static final SkullType DEFAULT_TYPE = SkullTypes.SKELETON;
 
     public static boolean supportsObject(Object object) {
         return object instanceof TileEntitySkull || isValidItemStack(object);
@@ -62,7 +59,7 @@ public class SkullUtils {
                 return type;
             }
         }
-        return DEFAULT_TYPE;
+        return Constants.TileEntity.Skull.DEFAULT_TYPE;
     }
 
     public static boolean isValidItemStack(Object container) {
@@ -142,15 +139,15 @@ public class SkullUtils {
         }
     }
 
-    public static void updatePlayerProfile(IMixinTileEntitySkull skull) {
-        GameProfile profile = (GameProfile) skull.getPlayerProfile();
+    public static void updatePlayerProfile(SkullBlockEntityBridge skull) {
+        GameProfile profile = (GameProfile) ((AccessorTileEntitySkull) skull).accessor$getMojangProfile();
         if (profile != null && profile.getName().isPresent() && !profile.getName().get().isEmpty()) {
             if (profile.isFilled() && profile.getPropertyMap().containsKey("textures")) {
                 skull.markDirty();
             } else {
                 Sponge.getServer().getGameProfileManager().get(profile.getName().get()).handle((newProfile, thrown) -> {
                     if (newProfile != null) {
-                        skull.setPlayerProfile((com.mojang.authlib.GameProfile) newProfile, false);
+                        skull.bridge$setPlayerProfile((com.mojang.authlib.GameProfile) newProfile, false);
                         skull.markDirty();
                     } else {
                         SpongeImpl.getLogger().warn("Could not update player GameProfile for Skull: ",

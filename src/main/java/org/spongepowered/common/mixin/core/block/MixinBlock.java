@@ -97,7 +97,6 @@ import javax.annotation.Nullable;
 
 @NonnullByDefault
 @Mixin(value = Block.class, priority = 999)
-@Implements(@Interface(iface = BlockType.class, prefix = "block$"))
 public abstract class MixinBlock implements BlockBridge {
 
     private final boolean isVanilla = getClass().getName().startsWith("net.minecraft.");
@@ -119,7 +118,6 @@ public abstract class MixinBlock implements BlockBridge {
     @Shadow public abstract String getTranslationKey();
     @Shadow public abstract Material getMaterial(IBlockState state);
     @Shadow public abstract IBlockState shadow$getDefaultState();
-    @Shadow public abstract boolean shadow$getTickRandomly();
     @Shadow public abstract void dropBlockAsItem(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, int fortune);
     @Shadow public abstract BlockStateContainer getBlockState();
     @Shadow protected abstract Block setTickRandomly(boolean shouldTick);
@@ -127,11 +125,6 @@ public abstract class MixinBlock implements BlockBridge {
     @Inject(method = "registerBlock(ILnet/minecraft/util/ResourceLocation;Lnet/minecraft/block/Block;)V", at = @At("RETURN"))
     private static void onRegisterBlock(int id, ResourceLocation location, Block block, CallbackInfo ci) {
         BlockTypeRegistryModule.getInstance().registerFromGameData(location.toString(), (BlockType) block);
-    }
-
-    @Intrinsic
-    public boolean block$getTickRandomly() {
-        return shadow$getTickRandomly();
     }
 
     @Override

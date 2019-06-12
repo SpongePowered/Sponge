@@ -24,29 +24,16 @@
  */
 package org.spongepowered.common.mixin.core.world;
 
-import net.minecraft.profiler.Profiler;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.MinecraftException;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldServerMulti;
-import net.minecraft.world.storage.ISaveHandler;
-import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
 
 @NonnullByDefault
 @Mixin(WorldServerMulti.class)
-public abstract class MixinWorldServerMulti extends WorldServer {
-
-    @Shadow @Final private WorldServer delegate;
-
-    public MixinWorldServerMulti(MinecraftServer server, ISaveHandler saveHandlerIn, WorldInfo info, int dimensionId, Profiler profilerIn) {
-        super(server, saveHandlerIn, info, dimensionId, profilerIn);
-    }
+public abstract class MixinWorldServerMulti extends MixinWorldServer {
 
     /**
      * @author bloodmc

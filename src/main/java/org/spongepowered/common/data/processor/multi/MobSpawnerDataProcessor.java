@@ -37,32 +37,32 @@ import org.spongepowered.common.data.manipulator.mutable.SpongeMobSpawnerData;
 import org.spongepowered.common.data.processor.common.AbstractMultiDataSingleTargetProcessor;
 import org.spongepowered.common.data.processor.common.SpawnerUtils;
 import org.spongepowered.common.data.util.DataUtil;
-import org.spongepowered.common.interfaces.IMixinMobSpawner;
+import org.spongepowered.common.mixin.core.tileentity.AccessorTileEntityMobSpawner;
 
 import java.util.Map;
 import java.util.Optional;
 
-public class MobSpawnerDataProcessor extends AbstractMultiDataSingleTargetProcessor<IMixinMobSpawner, MobSpawnerData, ImmutableMobSpawnerData> {
+public class MobSpawnerDataProcessor extends AbstractMultiDataSingleTargetProcessor<AccessorTileEntityMobSpawner, MobSpawnerData, ImmutableMobSpawnerData> {
 
     public MobSpawnerDataProcessor() {
-        super(IMixinMobSpawner.class);
+        super(AccessorTileEntityMobSpawner.class);
     }
 
     @Override
-    protected boolean doesDataExist(IMixinMobSpawner entity) {
+    protected boolean doesDataExist(AccessorTileEntityMobSpawner entity) {
         return true;
     }
 
     @Override
-    protected boolean set(IMixinMobSpawner entity, Map<Key<?>, Object> values) {
-        MobSpawnerBaseLogic logic = entity.getLogic();
+    protected boolean set(AccessorTileEntityMobSpawner entity, Map<Key<?>, Object> values) {
+        MobSpawnerBaseLogic logic = entity.accessor$getSpawnerLogic();
         SpawnerUtils.applyData(logic, values);
         return true;
     }
 
     @Override
-    protected Map<Key<?>, ?> getValues(IMixinMobSpawner spawner) {
-        MobSpawnerBaseLogic logic = spawner.getLogic();
+    protected Map<Key<?>, ?> getValues(AccessorTileEntityMobSpawner spawner) {
+        MobSpawnerBaseLogic logic = spawner.accessor$getSpawnerLogic();
         Map<Key<?>, Object> values = Maps.newIdentityHashMap();
 
         values.put(Keys.SPAWNER_REMAINING_DELAY, (short) logic.spawnDelay);

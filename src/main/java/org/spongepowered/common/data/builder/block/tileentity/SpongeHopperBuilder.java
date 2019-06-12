@@ -42,8 +42,8 @@ public class SpongeHopperBuilder extends SpongeLockableBuilder<Hopper> {
     @Override
     protected Optional<Hopper> buildContent(DataView container) throws InvalidDataException {
         return super.buildContent(container).flatMap(hopper -> {
-            if (container.contains(DataQueries.CUSTOM_NAME)) {
-                ((TileEntityHopper) hopper).setCustomName(container.getString(DataQueries.CUSTOM_NAME).get());
+            if (container.contains(DataQueries.BlockEntity.CUSTOM_NAME)) {
+                ((TileEntityHopper) hopper).setCustomName(container.getString(DataQueries.BlockEntity.CUSTOM_NAME).get());
             }
             if (!container.contains(Keys.COOLDOWN.getQuery())) {
                 ((TileEntityHopper) hopper).invalidate();

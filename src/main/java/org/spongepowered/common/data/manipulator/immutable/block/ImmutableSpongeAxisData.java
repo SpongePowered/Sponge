@@ -33,12 +33,11 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleEnumData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeAxisData;
-import org.spongepowered.common.data.util.DataConstants;
 
 public class ImmutableSpongeAxisData extends AbstractImmutableSingleEnumData<Axis, ImmutableAxisData, AxisData> implements ImmutableAxisData {
 
     public ImmutableSpongeAxisData(Axis value) {
-        super(ImmutableAxisData.class, checkNotNull(value), DataConstants.DEFAULT_AXIS, Keys.AXIS, SpongeAxisData.class);
+        super(ImmutableAxisData.class, checkNotNull(value), Axis.X, Keys.AXIS, SpongeAxisData.class);
     }
 
     @Override

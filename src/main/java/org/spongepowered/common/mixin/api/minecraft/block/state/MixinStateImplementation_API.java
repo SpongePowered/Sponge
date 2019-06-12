@@ -352,7 +352,7 @@ public abstract class MixinStateImplementation_API extends BlockStateBase implem
     public DataContainer toContainer() {
         return DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, getContentVersion())
-            .set(DataQueries.BLOCK_STATE, this.getId());
+            .set(DataQueries.Block.BLOCK_STATE, this.getId());
     }
 
     @Override

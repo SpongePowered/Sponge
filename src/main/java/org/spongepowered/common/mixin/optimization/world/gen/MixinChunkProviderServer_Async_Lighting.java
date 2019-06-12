@@ -26,25 +26,25 @@ package org.spongepowered.common.mixin.optimization.world.gen;
 
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.gen.ChunkProviderServer;
+import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.bridge.world.ChunkBridge;
 
 @Mixin(value = ChunkProviderServer.class, priority = 1002)
 public abstract class MixinChunkProviderServer_Async_Lighting {
 
     @Shadow @Final public WorldServer world;
 
-    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lorg/spongepowered/common/interfaces/IMixinChunk;isPersistedChunk()Z", remap = false))
-    public boolean onTickIsPersisted(IMixinChunk chunk) {
-        if (chunk.isPersistedChunk() || chunk.getPendingLightUpdates().get() > 0
-                || this.world.getTotalWorldTime() - chunk.getLightUpdateTime() < 20) {
-            return true;
-        }
+    @Dynamic
+    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lorg/spongepowered/common/bridge/ChunkBridge;isPersistedChunk()Z", remap = false))
+    private boolean asyncLighting$UsePendingLightUpdatesForAsyncChunk(ChunkBridge chunk) {
+        return chunk.isPersistedChunk()
+               || chunk.getPendingLightUpdates().get() > 0
+               || this.world.getTotalWorldTime() - chunk.getLightUpdateTime() < 20;
 
-        return false;
     }
 }

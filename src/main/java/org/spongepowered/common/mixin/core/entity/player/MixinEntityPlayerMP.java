@@ -122,7 +122,8 @@ import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.bridge.inventory.ContainerBridge;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
@@ -134,7 +135,6 @@ import org.spongepowered.common.event.tracking.phase.entity.BasicEntityContext;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
-import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinServerScoreboard;
 import org.spongepowered.common.interfaces.IMixinSubject;
 import org.spongepowered.common.interfaces.IMixinTeam;
@@ -691,7 +691,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
                 .query(QueryOperationTypes.INVENTORY_PROPERTY.of(SlotIndex.of(this.inventory.currentItem)));
         final ItemStackSnapshot originalItem = ItemStackUtil.snapshotOf(currentItem);
         ItemStack itemToDrop = this.inventory.decrStackSize(this.inventory.currentItem, dropAll && !currentItem.isEmpty() ? currentItem.getCount() : 1);
-        ((IMixinContainer) this.inventoryContainer).getCapturedTransactions().add(new SlotTransaction(slot, originalItem, ItemStackUtil.snapshotOf(this.inventory.getCurrentItem())));
+        ((ContainerBridge) this.inventoryContainer).bridge$getCapturedSlotTransactions().add(new SlotTransaction(slot, originalItem, ItemStackUtil.snapshotOf(this.inventory.getCurrentItem())));
 
         return this.dropItem(itemToDrop, false, true);
     }
@@ -709,11 +709,11 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
 
     @Inject(method = "closeContainer", at = @At("RETURN"))
     public void onCloseContainer(CallbackInfo ci) {
-        IMixinContainer mixinContainer = (IMixinContainer) this.openContainer;
+        ContainerBridge mixinContainer = (ContainerBridge) this.openContainer;
         // Safety measure to avoid memory leaks as mods may call this directly
         if (mixinContainer.capturingInventory()) {
             mixinContainer.setCaptureInventory(false);
-            mixinContainer.getCapturedTransactions().clear();
+            mixinContainer.bridge$getCapturedSlotTransactions().clear();
         }
     }
 
@@ -721,7 +721,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
     public void onSetContainer(IInventory chestInventory, CallbackInfo ci) {
         if (!(chestInventory instanceof IInteractionObject) && this.openContainer instanceof ContainerChest && this.isSpectator()) {
             SpongeImpl.getLogger().warn("Opening fallback ContainerChest for inventory '{}'. Most API inventory methods will not be supported", chestInventory);
-            ((IMixinContainer) this.openContainer).setSpectatorChest(true);
+            ((ContainerBridge) this.openContainer).setSpectatorChest(true);
         }
     }
 
@@ -905,7 +905,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
     @Override
     public boolean hasForcedGamemodeOverridePermission() {
         final Player player = (Player) this;
-        return player.hasPermission(player.getActiveContexts(), DataConstants.FORCE_GAMEMODE_OVERRIDE);
+        return player.hasPermission(player.getActiveContexts(), Constants.Permissions.FORCE_GAMEMODE_OVERRIDE);
     }
 
     @Nullable private Text displayName = null;

@@ -24,58 +24,29 @@
  */
 package org.spongepowered.common.mixin.core.potion;
 
-import com.google.common.collect.ImmutableList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.RegistryNamespacedDefaultedByKey;
-import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.item.potion.PotionType;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.interfaces.potion.IMixinPotion;
 import org.spongepowered.common.registry.type.item.PotionTypeRegistryModule;
 
-import java.util.List;
-import java.util.Locale;
-
 @Mixin(net.minecraft.potion.PotionType.class)
-public abstract class MixinPotionType implements PotionType, IMixinPotion {
+public abstract class MixinPotionType {
 
-    @Shadow @Final private ImmutableList<net.minecraft.potion.PotionEffect> effects;
-
-    private String spongeResourceID;
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public List<PotionEffect> getEffects() {
-        return ((List) this.effects); // PotionEffect is mixed into
-    }
-
-    @Override
-    public String getId() {
-        return this.spongeResourceID;
-    }
-
-    @Override
-    public String getName() {
-        return this.spongeResourceID;
-    }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    @Redirect(method = "registerPotionType", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/registry/RegistryNamespacedDefaultedByKey;register(ILjava/lang/Object;Ljava/lang/Object;)V"))
-    private static void onPotionRegister(RegistryNamespacedDefaultedByKey registry, int id, Object location, Object potion) {
+    @Redirect(method = "registerPotionType",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/util/registry/RegistryNamespacedDefaultedByKey;register(ILjava/lang/Object;Ljava/lang/Object;)V"))
+    private static void impl$registerForSponge(RegistryNamespacedDefaultedByKey registry, int id, Object location, Object potion) {
         final ResourceLocation resource = (ResourceLocation) location;
         final net.minecraft.potion.PotionType mcPotion = (net.minecraft.potion.PotionType) potion;
 
-        ((IMixinPotion) mcPotion).setId(resource.toString().toLowerCase(Locale.ENGLISH));
         PotionTypeRegistryModule.getInstance().registerFromGameData(resource.toString(), (PotionType) mcPotion);
         registry.register(id, location, potion);
     }
 
-    @Override
-    public void setId(String id) {
-        this.spongeResourceID = id;
-    }
 }

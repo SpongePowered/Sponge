@@ -38,7 +38,6 @@ import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.user.UserStorageService;
-import org.spongepowered.api.world.Chunk;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -48,16 +47,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.bridge.world.ChunkBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
-import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
+import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.profile.SpongeProfileManager;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.SpongeUsernameCache;
 
@@ -69,35 +69,25 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 
 @Mixin(value = net.minecraft.world.chunk.Chunk.class, priority = 1111)
-public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
+public abstract class MixinChunk_Tracker implements ChunkBridge {
 
-    private static final int NUM_XZ_BITS = 4;
-    private static final int NUM_SHORT_Y_BITS = 8;
-    private static final int NUM_INT_Y_BITS = 24;
-    private static final int Y_SHIFT = NUM_XZ_BITS;
-    private static final short XZ_MASK = 0xF;
-    private static final short Y_SHORT_MASK = 0xFF;
-    private static final int Y_INT_MASK = 0xFFFFFF;
-    private SpongeProfileManager spongeProfileManager;
-    private UserStorageService userStorageService;
 
     @Shadow @Final private World world;
     @Shadow @Final public int x;
     @Shadow @Final public int z;
     @Shadow @Final private Map<BlockPos, TileEntity> tileEntities;
-
     @Shadow public abstract ChunkPos getPos();
 
+
+    @Nullable private UserStorageService userStorageService = impl$getUserServiceOnConstruction();
     private Map<Integer, PlayerTracker> trackedIntBlockPositions = new HashMap<>();
     private Map<Short, PlayerTracker> trackedShortBlockPositions = new HashMap<>();
 
-    @Final // need this constructor to never be overwritten by anything.
-    @Inject(method = "<init>(Lnet/minecraft/world/World;II)V", at = @At("RETURN"), remap = false)
-    private void onConstructedTracker(World world, int x, int z, CallbackInfo ci) {
-        if (!world.isRemote) {
-            this.spongeProfileManager = ((SpongeProfileManager) Sponge.getServer().getGameProfileManager());
-            this.userStorageService = SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get();
-        }
+    @Nullable
+    private UserStorageService impl$getUserServiceOnConstruction() {
+        return this.world != null && ((WorldBridge) this.world).isFake()
+               ? null
+               : SpongeImpl.getGame().getServiceManager().provideUnchecked(UserStorageService.class);
     }
 
     @Override
@@ -117,13 +107,13 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
         if (block instanceof ITileEntityProvider) {
             final TileEntity tileEntity = this.tileEntities.get(pos);
             if (tileEntity != null) {
-                IMixinTileEntity spongeTile = (IMixinTileEntity) tileEntity;
+                TileEntityBridge spongeTile = (TileEntityBridge) tileEntity;
                 if (trackerType == PlayerTracker.Type.NOTIFIER) {
                     if (spongeTile.getSpongeNotifier() == user) {
                         return;
                     }
                     spongeTile.setSpongeNotifier(user);
-                } else { 
+                } else {
                     if (spongeTile.getSpongeOwner() == user) {
                         return;
                     }
@@ -291,13 +281,13 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
         }
 
         // check mojang cache
-        GameProfile profile = this.spongeProfileManager.getCache().getById(uuid).orElse(null);
+        GameProfile profile = Sponge.getServer().getGameProfileManager().getCache().getById(uuid).orElse(null);
         if (profile != null) {
             return this.userStorageService.get(profile);
         }
 
         // If we reach this point, queue UUID for async lookup and return empty
-        this.spongeProfileManager.lookupUserAsync(uuid);
+        ((SpongeProfileManager) Sponge.getServer().getGameProfileManager()).lookupUserAsync(uuid);
         return Optional.empty();
     }
 
@@ -418,9 +408,9 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
      * Serialize this BlockPos into a short value
      */
     private short blockPosToShort(BlockPos pos) {
-        short serialized = (short) this.setNibble(0, pos.getX() & XZ_MASK, 0, NUM_XZ_BITS);
-        serialized = (short) this.setNibble(serialized, pos.getY() & Y_SHORT_MASK, 1, NUM_SHORT_Y_BITS);
-        serialized = (short) this.setNibble(serialized, pos.getZ() & XZ_MASK, 3, NUM_XZ_BITS);
+        short serialized = (short) this.setNibble(0, pos.getX() & Constants.Chunk.XZ_MASK, 0, Constants.Chunk.NUM_XZ_BITS);
+        serialized = (short) this.setNibble(serialized, pos.getY() & Constants.Chunk.Y_SHORT_MASK, 1, Constants.Chunk.NUM_SHORT_Y_BITS);
+        serialized = (short) this.setNibble(serialized, pos.getZ() & Constants.Chunk.XZ_MASK, 3, Constants.Chunk.NUM_XZ_BITS);
         return serialized;
     }
 
@@ -428,9 +418,9 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
      * Serialize this BlockPos into an int value
      */
     private int blockPosToInt(BlockPos pos) {
-        int serialized = this.setNibble(0, pos.getX() & XZ_MASK, 0, NUM_XZ_BITS);
-        serialized = this.setNibble(serialized, pos.getY() & Y_INT_MASK, 1, NUM_INT_Y_BITS);
-        serialized = this.setNibble(serialized, pos.getZ() & XZ_MASK, 7, NUM_XZ_BITS);
+        int serialized = this.setNibble(0, pos.getX() & Constants.Chunk.XZ_MASK, 0, Constants.Chunk.NUM_XZ_BITS);
+        serialized = this.setNibble(serialized, pos.getY() & Constants.Chunk.Y_INT_MASK, 1, Constants.Chunk.NUM_INT_Y_BITS);
+        serialized = this.setNibble(serialized, pos.getZ() & Constants.Chunk.XZ_MASK, 7, Constants.Chunk.NUM_XZ_BITS);
         return serialized;
     }
 }

@@ -31,12 +31,12 @@ import org.spongepowered.api.data.type.HandPreference;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleCatalogData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeDominantHandData;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 
 public class ImmutableSpongeDominantHandData extends AbstractImmutableSingleCatalogData<HandPreference, ImmutableDominantHandData, DominantHandData> implements ImmutableDominantHandData {
 
     public ImmutableSpongeDominantHandData(HandPreference type) {
-        super(ImmutableDominantHandData.class, type, DataConstants.Catalog.DEFAULT_HAND, Keys.DOMINANT_HAND, SpongeDominantHandData.class);
+        super(ImmutableDominantHandData.class, type, Constants.Catalog.DEFAULT_HAND, Keys.DOMINANT_HAND, SpongeDominantHandData.class);
     }
 
     @Override

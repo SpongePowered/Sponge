@@ -39,7 +39,7 @@ import org.spongepowered.api.data.type.BodyPart;
 import org.spongepowered.api.data.type.BodyParts;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeBodyPartRotationalData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.util.VecHelper;
 
@@ -108,17 +108,17 @@ public class ArmorStandBodyPartRotationalDataProcessor
         @SuppressWarnings("unchecked")
         Map<BodyPart, Vector3d> bodyRotations = (Map<BodyPart, Vector3d>) keyValues.get(Keys.BODY_ROTATIONS);
         Vector3d headRotation =
-                getValueFromTwoMapsOrUseFallback(keyValues, Keys.HEAD_ROTATION, bodyRotations, BodyParts.HEAD, DataConstants.Entity.ArmorStand.DEFAULT_HEAD_ROTATION);
+                getValueFromTwoMapsOrUseFallback(keyValues, Keys.HEAD_ROTATION, bodyRotations, BodyParts.HEAD, Constants.Entity.ArmorStand.DEFAULT_HEAD_ROTATION);
         Vector3d chestRotation = getValueFromTwoMapsOrUseFallback(keyValues, Keys.CHEST_ROTATION, bodyRotations, BodyParts.CHEST,
-                DataConstants.Entity.ArmorStand.DEFAULT_CHEST_ROTATION);
+                Constants.Entity.ArmorStand.DEFAULT_CHEST_ROTATION);
         Vector3d leftArmRotation = getValueFromTwoMapsOrUseFallback(keyValues, Keys.LEFT_ARM_ROTATION, bodyRotations, BodyParts.LEFT_ARM,
-                DataConstants.Entity.ArmorStand.DEFAULT_LEFT_ARM_ROTATION);
+                Constants.Entity.ArmorStand.DEFAULT_LEFT_ARM_ROTATION);
         Vector3d rightArmRotation = getValueFromTwoMapsOrUseFallback(keyValues, Keys.RIGHT_ARM_ROTATION, bodyRotations, BodyParts.RIGHT_ARM,
-                DataConstants.Entity.ArmorStand.DEFAULT_RIGHT_ARM_ROTATION);
+                Constants.Entity.ArmorStand.DEFAULT_RIGHT_ARM_ROTATION);
         Vector3d leftLegRotation = getValueFromTwoMapsOrUseFallback(keyValues, Keys.LEFT_LEG_ROTATION, bodyRotations, BodyParts.LEFT_LEG,
-                DataConstants.Entity.ArmorStand.DEFAULT_LEFT_LEG_ROTATION);
+                Constants.Entity.ArmorStand.DEFAULT_LEFT_LEG_ROTATION);
         Vector3d rightLegRotation = getValueFromTwoMapsOrUseFallback(keyValues, Keys.RIGHT_LEG_ROTATION, bodyRotations, BodyParts.RIGHT_LEG,
-                DataConstants.Entity.ArmorStand.DEFAULT_RIGHT_LEG_ROTATION);
+                Constants.Entity.ArmorStand.DEFAULT_RIGHT_LEG_ROTATION);
 
         dataHolder.setHeadRotation(VecHelper.toRotation(headRotation));
         dataHolder.setBodyRotation(VecHelper.toRotation(chestRotation));

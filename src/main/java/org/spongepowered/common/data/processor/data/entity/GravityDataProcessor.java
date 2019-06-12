@@ -35,7 +35,7 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.util.OptBool;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGravityData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
@@ -49,7 +49,7 @@ public class GravityDataProcessor extends AbstractEntitySingleDataProcessor<Enti
 
     @Override
     protected Value<Boolean> constructValue(Boolean actualValue) {
-        return new SpongeValue<>(this.key, DataConstants.DEFAULT_HAS_GRAVITY, actualValue);
+        return new SpongeValue<>(this.key, Constants.Entity.DEFAULT_HAS_GRAVITY, actualValue);
     }
 
     @Override
@@ -70,7 +70,7 @@ public class GravityDataProcessor extends AbstractEntitySingleDataProcessor<Enti
 
     @Override
     protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
-        return ImmutableSpongeValue.cachedOf(this.key, DataConstants.DEFAULT_HAS_GRAVITY, value);
+        return ImmutableSpongeValue.cachedOf(this.key, Constants.Entity.DEFAULT_HAS_GRAVITY, value);
     }
 
     @Override

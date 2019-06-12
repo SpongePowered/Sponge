@@ -45,14 +45,15 @@ public class PassedCookTimeValueProcessor extends AbstractSpongeValueProcessor<T
     protected MutableBoundedValue<Integer> constructValue(Integer defaultValue) {
         return SpongeValueFactory.boundedBuilder(Keys.PASSED_COOK_TIME)
                 .minimum(0)
-                .maximum(200) //TODO
-                .defaultValue(defaultValue)
+                .maximum(Integer.MAX_VALUE) //TODO
+                .defaultValue(200)
+                .actualValue(defaultValue)
                 .build();
     }
 
     @Override
     protected boolean set(TileEntityFurnace container, Integer value) {
-        if(container.getStackInSlot(0) == null || value > container.getField(3)){ //The passedCookTime of nothing cannot be set | Cannot be higher than the maximum
+        if(container.getStackInSlot(0).isEmpty() || value > container.getField(3)){ //The passedCookTime of nothing cannot be set | Cannot be higher than the maximum
             return false;
         }
 
@@ -62,7 +63,7 @@ public class PassedCookTimeValueProcessor extends AbstractSpongeValueProcessor<T
 
     @Override
     protected Optional<Integer> getVal(TileEntityFurnace container) {
-        return Optional.of(container.getStackInSlot(0) != null ? container.getField(2) : 0); //The passedCookTime of nothing cannot be set
+        return Optional.of(container.getStackInSlot(0).isEmpty() ? container.getField(2) : 0); //The passedCookTime of nothing cannot be set
     }
 
     @Override

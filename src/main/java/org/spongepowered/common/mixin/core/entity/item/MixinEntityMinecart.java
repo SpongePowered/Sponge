@@ -42,7 +42,7 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 import org.spongepowered.common.util.VectorSerializer;
 
@@ -53,8 +53,8 @@ public abstract class MixinEntityMinecart extends MixinEntity {
 
     private double maxSpeed = 0.4D;
     private boolean slowWhenEmpty = true;
-    private Vector3d airborneMod = new Vector3d(DataConstants.Entity.Minecart.DEFAULT_AIRBORNE_MOD, DataConstants.Entity.Minecart.DEFAULT_AIRBORNE_MOD, DataConstants.Entity.Minecart.DEFAULT_AIRBORNE_MOD);
-    private Vector3d derailedMod = new Vector3d(DataConstants.Entity.Minecart.DEFAULT_DERAILED_MOD, DataConstants.Entity.Minecart.DEFAULT_DERAILED_MOD, DataConstants.Entity.Minecart.DEFAULT_DERAILED_MOD);
+    private Vector3d airborneMod = new Vector3d(Constants.Entity.Minecart.DEFAULT_AIRBORNE_MOD, Constants.Entity.Minecart.DEFAULT_AIRBORNE_MOD, Constants.Entity.Minecart.DEFAULT_AIRBORNE_MOD);
+    private Vector3d derailedMod = new Vector3d(Constants.Entity.Minecart.DEFAULT_DERAILED_MOD, Constants.Entity.Minecart.DEFAULT_DERAILED_MOD, Constants.Entity.Minecart.DEFAULT_DERAILED_MOD);
 
     /**
      * @author Minecrell - December 5th, 2016
@@ -65,17 +65,17 @@ public abstract class MixinEntityMinecart extends MixinEntity {
         return this.maxSpeed;
     }
 
-    @ModifyConstant(method = "moveDerailedMinecart", constant = @Constant(doubleValue = DataConstants.Entity.Minecart.DEFAULT_DERAILED_MOD, ordinal = 0))
+    @ModifyConstant(method = "moveDerailedMinecart", constant = @Constant(doubleValue = Constants.Entity.Minecart.DEFAULT_DERAILED_MOD, ordinal = 0))
     private double onDecelerateX(double defaultValue) {
         return this.derailedMod.getX();
     }
 
-    @ModifyConstant(method = "moveDerailedMinecart", constant = @Constant(doubleValue = DataConstants.Entity.Minecart.DEFAULT_DERAILED_MOD, ordinal = 1))
+    @ModifyConstant(method = "moveDerailedMinecart", constant = @Constant(doubleValue = Constants.Entity.Minecart.DEFAULT_DERAILED_MOD, ordinal = 1))
     private double onDecelerateY(double defaultValue) {
         return this.derailedMod.getY();
     }
 
-    @ModifyConstant(method = "moveDerailedMinecart", constant = @Constant(doubleValue = DataConstants.Entity.Minecart.DEFAULT_DERAILED_MOD, ordinal = 2))
+    @ModifyConstant(method = "moveDerailedMinecart", constant = @Constant(doubleValue = Constants.Entity.Minecart.DEFAULT_DERAILED_MOD, ordinal = 2))
     private double onDecelerateZ(double defaultValue) {
         return this.derailedMod.getZ();
     }

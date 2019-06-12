@@ -40,7 +40,7 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.network.SpongeNetworkManager;
 
 import java.io.IOException;
@@ -414,22 +414,22 @@ public abstract class MixinPacketBuffer_API extends ByteBuf {
     }
 
     public String cbuf$readString() {
-        return this.readString(DataConstants.Networking.MAX_STRING_LENGTH);
+        return this.readString(Constants.Networking.MAX_STRING_LENGTH);
     }
 
     public String cbuf$getString(int index) {
         final int oldIndex = this.readerIndex();
         this.readerIndex(index);
-        final String value = this.readString(DataConstants.Networking.MAX_STRING_LENGTH);
+        final String value = this.readString(Constants.Networking.MAX_STRING_LENGTH);
         this.readerIndex(oldIndex);
         return value;
     }
 
     public ChannelBuf cbuf$writeUTF(String data) {
         byte[] bytes = data.getBytes(Charsets.UTF_8);
-        if (bytes.length > DataConstants.Networking.MAX_STRING_LENGTH_BYTES) {
+        if (bytes.length > Constants.Networking.MAX_STRING_LENGTH_BYTES) {
             throw new EncoderException("String too big (was " + data.length() + " bytes encoded, max "
-                                       + DataConstants.Networking.MAX_STRING_LENGTH_BYTES + ")");
+                                       + Constants.Networking.MAX_STRING_LENGTH_BYTES + ")");
         }
         this.writeShort(bytes.length);
         this.writeBytes(bytes);

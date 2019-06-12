@@ -51,10 +51,10 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
+import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 import org.spongepowered.common.mixin.core.world.MixinChunk;
-import org.spongepowered.common.mixin.core.world.MixinWorldServer_Accessor;
+import org.spongepowered.common.mixin.core.world.AccessorServerWorld;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
@@ -467,7 +467,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
                     if (isSame) {
                         changeBlock.ignoreBreakBlockLogic = true;
                         changeBlock.queuedRemoval = null;
-                        ((IMixinTileEntity) newTile).setCaptured(false);
+                        ((TileEntityBridge) newTile).setCaptured(false);
                         break;
                     }
                 }
@@ -647,7 +647,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
                 if (hasEvents) {
                     final SpongeBlockSnapshot original = (SpongeBlockSnapshot) transaction.getOriginal();
                     original.getWorldServer().ifPresent(worldServer -> {
-                        final MixinWorldServer_Accessor accessor = (MixinWorldServer_Accessor) worldServer;
+                        final AccessorServerWorld accessor = (AccessorServerWorld) worldServer;
                         final WorldServer.ServerBlockEventList queue = accessor.getBlockEventQueueForSponge()[accessor.getBlockEventCacheIndexForSponge()];
                         for (BlockEventData blockEventData : scheduledEvents.get(original.getBlockPos())) {
                             boolean equals = false;
@@ -711,7 +711,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
                     if (transaction.tilesAtTransaction != null) {
                         transaction.tilesAtTransaction.forEach((pos, tile) -> {
                             if (PRINT_TRANSACTIONS) {
-                                printer.addWrapped(120, "  %s : %s, %s", "UnaffectedTile", pos, tile == null ? "null" : ((IMixinTileEntity) tile).getPrettyPrinterString());
+                                printer.addWrapped(120, "  %s : %s, %s", "UnaffectedTile", pos, tile == null ? "null" : ((TileEntityBridge) tile).getPrettyPrinterString());
                             }
                             if (access != null) {
                                 access.pushTile(pos, tile);

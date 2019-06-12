@@ -43,16 +43,19 @@ public class SpongeBeaconBuilder extends SpongeLockableBuilder<Beacon> {
         super(Beacon.class, 1);
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     protected Optional<Beacon> buildContent(DataView container) throws InvalidDataException {
         return super.buildContent(container).flatMap(beacon -> {
-            if (!container.contains(DataQueries.PRIMARY) || !container.contains(DataQueries.SECONDARY)) {
-                return Optional.empty();
-            }
             final BeaconData beaconData = new SpongeBeaconData();
-            beaconData.set(Keys.BEACON_PRIMARY_EFFECT, Optional.of((PotionEffectType) Potion.getPotionById(container.getInt(DataQueries.PRIMARY).get())));
-            beaconData.set(Keys.BEACON_SECONDARY_EFFECT, Optional.of((PotionEffectType) Potion.getPotionById(container.getInt(DataQueries.SECONDARY).get())));
-
+            container.getInt(DataQueries.BlockEntity.Beacon.PRIMARY)
+                .map(Potion::getPotionById)
+                .map(potion -> (PotionEffectType) potion)
+                .ifPresent(potion -> beaconData.set(Keys.BEACON_PRIMARY_EFFECT, Optional.of(potion)));
+            container.getInt(DataQueries.BlockEntity.Beacon.SECONDARY)
+                .map(Potion::getPotionById)
+                .map(potion -> (PotionEffectType) potion)
+                .ifPresent(potion -> beaconData.set(Keys.BEACON_SECONDARY_EFFECT, Optional.of(potion)));
             beacon.offer(beaconData);
             ((TileEntityBeacon) beacon).validate();
             return Optional.of(beacon);

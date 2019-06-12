@@ -58,10 +58,10 @@ public class ImmutableSpongeRepresentedPlayerData
     public DataContainer toContainer() {
         final DataContainer container = super.toContainer();
         if (this.value.getUniqueId() != null) {
-            container.set(this.usedKey.getQuery().then(DataQueries.GAME_PROFILE_ID), this.value.getUniqueId().toString());
+            container.set(this.usedKey.getQuery().then(DataQueries.GameProfile.GAME_PROFILE_ID), this.value.getUniqueId().toString());
         }
         if (this.value.getName().isPresent()) {
-            container.set(this.usedKey.getQuery().then(DataQueries.GAME_PROFILE_NAME), this.value.getName().get());
+            container.set(this.usedKey.getQuery().then(DataQueries.GameProfile.GAME_PROFILE_NAME), this.value.getName().get());
         }
         return container;
     }

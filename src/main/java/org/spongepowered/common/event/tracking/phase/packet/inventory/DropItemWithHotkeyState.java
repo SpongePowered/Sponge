@@ -27,7 +27,6 @@ package org.spongepowered.common.event.tracking.phase.packet.inventory;
 import com.google.common.collect.Lists;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.CPacketClickWindow;
 import net.minecraft.network.play.client.CPacketPlayerDigging;
 import net.minecraft.util.EnumHand;
@@ -47,15 +46,14 @@ import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.packet.PacketConstants;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
-import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
-import org.spongepowered.common.item.inventory.util.InventoryUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -108,8 +106,8 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
                     }
 
                     Transaction<ItemStackSnapshot> cursorTrans = new Transaction<>(ItemStackSnapshot.NONE, ItemStackSnapshot.NONE);
-                    final IMixinContainer mixinContainer = ContainerUtil.toMixin( player.openContainer);
-                    List<SlotTransaction> slotTrans = mixinContainer.getCapturedTransactions();
+                    final ContainerBridge mixinContainer = ContainerUtil.toMixin( player.openContainer);
+                    List<SlotTransaction> slotTrans = mixinContainer.bridge$getCapturedSlotTransactions();
                     ClickInventoryEvent.Drop dropItemEvent = this.createInventoryEvent(player, ContainerUtil.fromNative(player.openContainer),
                             cursorTrans, Lists.newArrayList(slotTrans), entities,  usedButton, slot);
 
@@ -127,9 +125,9 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
                 .acceptAndClearIfNotEmpty(itemMapping -> {
 
                 });
-            final IMixinContainer mixinContainer = ContainerUtil.toMixin(player.openContainer);
+            final ContainerBridge mixinContainer = ContainerUtil.toMixin(player.openContainer);
             mixinContainer.setCaptureInventory(false);
-            mixinContainer.getCapturedTransactions().clear();
+            mixinContainer.bridge$getCapturedSlotTransactions().clear();
         }
     }
 

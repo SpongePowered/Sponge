@@ -56,7 +56,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeCareerData;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.entity.SpongeCareer;
 import org.spongepowered.common.entity.SpongeEntityMeta;
@@ -226,7 +226,7 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable_API impleme
 
     @Override
     public Value<Career> career() {
-        return new SpongeValue<>(Keys.CAREER, DataConstants.Catalog.CAREER_DEFAULT, getCareer());
+        return new SpongeValue<>(Keys.CAREER, Constants.Catalog.CAREER_DEFAULT, getCareer());
     }
 
     @Override

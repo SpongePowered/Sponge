@@ -54,7 +54,6 @@ import org.spongepowered.api.block.ScheduledBlockUpdate;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.util.AABB;
@@ -71,15 +70,10 @@ import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.event.ShouldFire;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.world.ChunkBridge;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMapEntry;
-import org.spongepowered.common.registry.type.world.BlockChangeFlagRegistryModule;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.common.world.extent.ExtentViewDownsize;
@@ -106,8 +100,6 @@ import javax.annotation.Nullable;
 @Mixin(net.minecraft.world.chunk.Chunk.class)
 public abstract class MixinChunk_API implements Chunk {
 
-
-
     @Shadow @Final private World world;
     @Shadow @Final public int x;
     @Shadow @Final public int z;
@@ -129,9 +121,6 @@ public abstract class MixinChunk_API implements Chunk {
     @Shadow public abstract BlockPos getPrecipitationHeight(BlockPos pos);
     // @formatter:on
 
-    private net.minecraft.world.chunk.Chunk[] neighbors = new net.minecraft.world.chunk.Chunk[4];
-
-    private static final Vector3i BIOME_SIZE = new Vector3i(SpongeChunkLayout.CHUNK_SIZE.getX(), 1, SpongeChunkLayout.CHUNK_SIZE.getZ());
     private Vector3i api$chunkPos = new Vector3i(this.x, 0, this.z);
     private Vector3i api$blockMin = SpongeChunkLayout.instance.forceToWorld(this.api$chunkPos);
     private Vector3i api$blockMax = this.api$blockMin.add(SpongeChunkLayout.CHUNK_SIZE).sub(1, 1, 1);
@@ -140,9 +129,9 @@ public abstract class MixinChunk_API implements Chunk {
     private UUID api$uuid = api$getUuidFromWorld();
 
     private UUID api$getUuidFromWorld() {
-        final UUID uuid = ((org.spongepowered.api.world.World) this.world).getUniqueId();
+        @Nullable final UUID uuid = ((org.spongepowered.api.world.World) this.world).getUniqueId();
         if (uuid != null) {
-            return new UUID(uuid.getMostSignificantBits() ^ (this.x * 2 + 1), uuid.getLeastSignificantBits() ^ this.z * 2 + 1));
+            return new UUID(uuid.getMostSignificantBits() ^ (this.x * 2 + 1), uuid.getLeastSignificantBits() ^ this.z * 2 + 1);
         }
         return UUID.randomUUID();
     }
@@ -174,7 +163,6 @@ public abstract class MixinChunk_API implements Chunk {
     }
 
     @Override
-    @SuppressWarnings("deprecation")
     public int getInhabittedTime() {
         return (int) this.inhabitedTime;
     }
@@ -245,7 +233,7 @@ public abstract class MixinChunk_API implements Chunk {
     @Override
     public boolean setBlock(int x, int y, int z, BlockState block) {
         checkBlockBounds(x, y, z);
-        return this.world.setBlockState(new BlockPos(x, y, z), (IBlockState) block, BlockChangeFlagRegistryModule.Flags.ALL);
+        return this.world.setBlockState(new BlockPos(x, y, z), (IBlockState) block, Constants.BlockChangeFlags.ALL);
     }
 
     @Override
@@ -297,7 +285,7 @@ public abstract class MixinChunk_API implements Chunk {
 
     @Override
     public Vector3i getBiomeSize() {
-        return BIOME_SIZE;
+        return Constants.Chunk.BIOME_SIZE;
     }
 
     @Override
@@ -352,31 +340,6 @@ public abstract class MixinChunk_API implements Chunk {
     @Override
     public MutableBlockVolumeWorker<Chunk> getBlockWorker() {
         return new SpongeMutableBlockVolumeWorker<>(this);
-    }
-
-    @Inject(method = "getEntitiesWithinAABBForEntity", at = @At(value = "RETURN"))
-    public void onGetEntitiesWithinAABBForEntity(Entity entityIn, AxisAlignedBB aabb, List<Entity> listToFill, Predicate<Entity> p_177414_4_,
-            CallbackInfo ci) {
-        if (((WorldBridge) this.world).isFake() || PhaseTracker.getInstance().getCurrentState().ignoresEntityCollisions()) {
-            return;
-        }
-
-        if (listToFill.size() == 0) {
-            return;
-        }
-
-        if (!ShouldFire.COLLIDE_ENTITY_EVENT) {
-            return;
-        }
-
-        CollideEntityEvent event = SpongeCommonEventFactory.callCollideEntityEvent(this.world, entityIn, listToFill);
-
-        if (event == null || event.isCancelled()) {
-            if (event == null && !PhaseTracker.getInstance().getCurrentState().isTicking()) {
-                return;
-            }
-            listToFill.clear();
-        }
     }
 
     @Override
@@ -672,13 +635,13 @@ public abstract class MixinChunk_API implements Chunk {
             return Optional.of(this);
         }
 
-        int index = directionToIndex(direction);
-        Direction secondary = getSecondaryDirection(direction);
+        int index = SpongeImpl.directionToIndex(direction);
+        Direction secondary = SpongeImpl.getSecondaryDirection(direction);
         Chunk neighbor = null;
-        neighbor = (Chunk) this.neighbors[index];
+        neighbor = (Chunk) ((ChunkBridge) this).getNeighborArray()[index];
 
         if (neighbor == null && shouldLoad) {
-            Vector3i neighborPosition = this.getPosition().add(getCardinalDirection(direction).asBlockOffset());
+            Vector3i neighborPosition = this.getPosition().add(SpongeImpl.getCardinalDirection(direction).asBlockOffset());
             Optional<Chunk> cardinal = this.getWorld().loadChunk(neighborPosition, true);
             if (cardinal.isPresent()) {
                 neighbor = cardinal.get();
@@ -690,57 +653,6 @@ public abstract class MixinChunk_API implements Chunk {
         }
 
         return Optional.ofNullable(neighbor);
-    }
-
-    private static int directionToIndex(Direction direction) {
-        switch (direction) {
-            case NORTH:
-            case NORTHEAST:
-            case NORTHWEST:
-                return 0;
-            case SOUTH:
-            case SOUTHEAST:
-            case SOUTHWEST:
-                return 1;
-            case EAST:
-                return 2;
-            case WEST:
-                return 3;
-            default:
-                throw new IllegalArgumentException("Unexpected direction");
-        }
-    }
-
-    private static Direction getCardinalDirection(Direction direction) {
-        switch (direction) {
-            case NORTH:
-            case NORTHEAST:
-            case NORTHWEST:
-                return Direction.NORTH;
-            case SOUTH:
-            case SOUTHEAST:
-            case SOUTHWEST:
-                return Direction.SOUTH;
-            case EAST:
-                return Direction.EAST;
-            case WEST:
-                return Direction.WEST;
-            default:
-                throw new IllegalArgumentException("Unexpected direction");
-        }
-    }
-
-    private static Direction getSecondaryDirection(Direction direction) {
-        switch (direction) {
-            case NORTHEAST:
-            case SOUTHEAST:
-                return Direction.EAST;
-            case NORTHWEST:
-            case SOUTHWEST:
-                return Direction.WEST;
-            default:
-                return Direction.NONE;
-        }
     }
 
 

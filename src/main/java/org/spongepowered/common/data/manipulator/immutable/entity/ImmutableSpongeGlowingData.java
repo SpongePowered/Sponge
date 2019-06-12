@@ -30,12 +30,12 @@ import org.spongepowered.api.data.manipulator.mutable.entity.GlowingData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGlowingData;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 
 public class ImmutableSpongeGlowingData extends AbstractImmutableBooleanData<ImmutableGlowingData, GlowingData> implements ImmutableGlowingData {
 
     public ImmutableSpongeGlowingData(boolean value) {
-        super(ImmutableGlowingData.class, value, Keys.GLOWING, SpongeGlowingData.class, DataConstants.DEFAULT_GLOWING);
+        super(ImmutableGlowingData.class, value, Keys.GLOWING, SpongeGlowingData.class, Constants.Entity.DEFAULT_GLOWING);
     }
 
     @Override

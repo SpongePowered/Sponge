@@ -27,7 +27,6 @@ package org.spongepowered.common.data.util;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.SpongeManipulatorRegistry;
 
 import java.util.Optional;
@@ -47,14 +46,14 @@ public class LegacyCustomDataClassContentUpdater implements DataContentUpdater {
     @SuppressWarnings("deprecation")
     @Override
     public DataView update(DataView content) {
-        final String className = content.getString(DataQueries.DATA_CLASS).get();
+        final String className = content.getString(DataQueries.Sponge.DATA_CLASS).get();
 
         final Optional<DataRegistration<?, ?>> registration = SpongeManipulatorRegistry.getInstance().getRegistrationForLegacyId(className);
         if (!registration.isPresent()) {
             return content;
         }
-        content.set(DataQueries.DATA_ID, registration.get().getId());
-        content.remove(DataQueries.DATA_CLASS);
+        content.set(DataQueries.Sponge.DATA_ID, registration.get().getId());
+        content.remove(DataQueries.Sponge.DATA_CLASS);
         return content;
     }
 }

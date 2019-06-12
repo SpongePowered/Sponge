@@ -41,13 +41,13 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.phase.packet.PacketConstants;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.event.tracking.phase.packet.PacketState;
-import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
@@ -124,7 +124,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
 
     @Override
     public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, InventoryPacketContext context) {
-        ((IMixinContainer) playerMP.openContainer).setCaptureInventory(true);
+        ((ContainerBridge) playerMP.openContainer).setCaptureInventory(true);
         context.addEntityDropCaptures();
     }
 
@@ -155,9 +155,9 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
         // firing invalid events.
         // See MixinNetHandlerPlayServer processClickWindow redirect for rest of fix.
         // --bloodmc
-        final IMixinContainer mixinContainer = ContainerUtil.toMixin(player.openContainer);
+        final ContainerBridge mixinContainer = ContainerUtil.toMixin(player.openContainer);
         if (!mixinContainer.capturingInventory() && !context.hasCaptures()) {
-            mixinContainer.getCapturedTransactions().clear();
+            mixinContainer.bridge$getCapturedSlotTransactions().clear();
             return;
         }
 
@@ -165,7 +165,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
         final Transaction<ItemStackSnapshot> cursorTransaction = this.getCursorTransaction(context, player);
 
         final net.minecraft.inventory.Container openContainer = player.openContainer;
-        final List<SlotTransaction> slotTransactions = mixinContainer.getCapturedTransactions();
+        final List<SlotTransaction> slotTransactions = mixinContainer.bridge$getCapturedSlotTransactions();
 
         final int usedButton = packetIn.getUsedButton();
         final List<Entity> capturedItems = new ArrayList<>();

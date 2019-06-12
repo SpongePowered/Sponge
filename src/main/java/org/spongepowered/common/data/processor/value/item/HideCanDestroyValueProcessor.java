@@ -25,12 +25,12 @@
 package org.spongepowered.common.data.processor.value.item;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 
 public class HideCanDestroyValueProcessor extends AbstractHideFlagsValueProcessor {
 
     public HideCanDestroyValueProcessor() {
-        super(Keys.HIDE_CAN_DESTROY, DataConstants.HIDE_CAN_DESTROY_FLAG);
+        super(Keys.HIDE_CAN_DESTROY, Constants.Item.HIDE_CAN_DESTROY_FLAG);
     }
 
 }

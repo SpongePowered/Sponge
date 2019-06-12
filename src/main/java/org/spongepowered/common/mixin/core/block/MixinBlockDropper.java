@@ -42,7 +42,7 @@ import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.interfaces.IMixinInventory;
+import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 
 @Mixin(BlockDropper.class)
 public abstract class MixinBlockDropper {
@@ -57,7 +57,7 @@ public abstract class MixinBlockDropper {
         tileentitydispenser.setInventorySlotContents(i, itemstack1);
         // Transfer worked if remainder is one less than the original stack
         if (itemstack1.getCount() == itemstack.getCount() - 1) {
-            IMixinInventory capture = forCapture(tileentitydispenser);
+            TrackedInventoryBridge capture = forCapture(tileentitydispenser);
             Inventory sourceInv = ((Inventory) tileentitydispenser);
             SpongeCommonEventFactory.captureTransaction(capture, sourceInv, i, itemstack);
             SpongeCommonEventFactory.callTransferPost(capture, sourceInv, ((Inventory) iinventory));
@@ -73,7 +73,7 @@ public abstract class MixinBlockDropper {
         tileentitydispenser.setInventorySlotContents(i, itemstack1);
         // Transfer worked if remainder is one less than the original stack
         if (itemstack1.getCount() == itemstack.getCount() - 1) {
-            IMixinInventory capture = forCapture(tileentitydispenser);
+            TrackedInventoryBridge capture = forCapture(tileentitydispenser);
             Inventory sourceInv = ((Inventory) tileentitydispenser);
             SpongeCommonEventFactory.captureTransaction(capture, sourceInv, i, itemstack);
             EnumFacing enumfacing = worldIn.getBlockState(pos).getValue(BlockDispenser.FACING);
@@ -96,9 +96,9 @@ public abstract class MixinBlockDropper {
         }
     }
 
-    private static IMixinInventory forCapture(Object toCapture) {
-        if (toCapture instanceof IMixinInventory) {
-            return ((IMixinInventory) toCapture);
+    private static TrackedInventoryBridge forCapture(Object toCapture) {
+        if (toCapture instanceof TrackedInventoryBridge) {
+            return ((TrackedInventoryBridge) toCapture);
         }
         return null;
     }

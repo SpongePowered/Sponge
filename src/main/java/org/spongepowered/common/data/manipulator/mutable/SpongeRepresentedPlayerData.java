@@ -26,6 +26,7 @@ package org.spongepowered.common.data.manipulator.mutable;
 
 import com.google.common.collect.Multimap;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableRepresentedPlayerData;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedPlayerData;
@@ -61,7 +62,7 @@ public class SpongeRepresentedPlayerData extends AbstractSingleData<GameProfile,
 
         @Override
         public DataContainer toContainer() {
-            return DataContainer.createNew().set(DataQueries.CONTENT_VERSION, this.getContentVersion());
+            return DataContainer.createNew().set(Queries.CONTENT_VERSION, this.getContentVersion());
         }
 
         @Override
@@ -102,10 +103,10 @@ public class SpongeRepresentedPlayerData extends AbstractSingleData<GameProfile,
     public DataContainer toContainer() {
         final DataContainer container = super.toContainer();
         if (this.getValue().getUniqueId() != null) {
-            container.set(this.usedKey.getQuery().then(DataQueries.GAME_PROFILE_ID), this.getValue().getUniqueId().toString());
+            container.set(this.usedKey.getQuery().then(DataQueries.GameProfile.GAME_PROFILE_ID), this.getValue().getUniqueId().toString());
         }
         if (this.getValue().getName().isPresent()) {
-            container.set(this.usedKey.getQuery().then(DataQueries.GAME_PROFILE_NAME), this.getValue().getName().get());
+            container.set(this.usedKey.getQuery().then(DataQueries.GameProfile.GAME_PROFILE_NAME), this.getValue().getName().get());
         }
         return container;
     }

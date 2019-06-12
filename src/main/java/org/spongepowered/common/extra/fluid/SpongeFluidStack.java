@@ -87,7 +87,7 @@ public class SpongeFluidStack implements FluidStack {
 
     @Override
     public boolean validateRawData(DataView container) {
-        return container.contains(Queries.CONTENT_VERSION, DataQueries.FLUID_TYPE, DataQueries.FLUID_VOLUME);
+        return container.contains(Queries.CONTENT_VERSION, DataQueries.Fluids.FLUID_TYPE, DataQueries.Fluids.FLUID_VOLUME);
     }
 
     @Override
@@ -97,16 +97,16 @@ public class SpongeFluidStack implements FluidStack {
             if (contentVersion != this.getContentVersion()) {
                 throw new InvalidDataException("Older content found! Cannot set raw data of older content!");
             }
-            final String fluidId = container.getString(DataQueries.FLUID_TYPE).get();
-            final int volume = container.getInt(DataQueries.FLUID_VOLUME).get();
+            final String fluidId = container.getString(DataQueries.Fluids.FLUID_TYPE).get();
+            final int volume = container.getInt(DataQueries.Fluids.FLUID_VOLUME).get();
             final Optional<FluidType> fluidType = Sponge.getRegistry().getType(FluidType.class, fluidId);
             if (!fluidType.isPresent()) {
                 throw new InvalidDataException("Unknown FluidType found! Requested: " + fluidId + "but got none.");
             }
             this.fluidType = fluidType.get();
             this.volume = volume;
-            if (container.contains(DataQueries.UNSAFE_NBT)) {
-                this.extraData = container.getView(DataQueries.UNSAFE_NBT).get().copy();
+            if (container.contains(DataQueries.Sponge.UNSAFE_NBT)) {
+                this.extraData = container.getView(DataQueries.Sponge.UNSAFE_NBT).get().copy();
             }
         } catch (Exception e) {
             throw new InvalidDataException("DataContainer contained invalid data!", e);
@@ -172,10 +172,10 @@ public class SpongeFluidStack implements FluidStack {
     public DataContainer toContainer() {
         DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, this.getContentVersion())
-            .set(DataQueries.FLUID_TYPE, this.fluidType.getId())
-            .set(DataQueries.FLUID_VOLUME, this.volume);
+            .set(DataQueries.Fluids.FLUID_TYPE, this.fluidType.getId())
+            .set(DataQueries.Fluids.FLUID_VOLUME, this.volume);
         if (this.extraData != null) {
-            container.set(DataQueries.UNSAFE_NBT, this.extraData);
+            container.set(DataQueries.Sponge.UNSAFE_NBT, this.extraData);
         }
         return container;
     }

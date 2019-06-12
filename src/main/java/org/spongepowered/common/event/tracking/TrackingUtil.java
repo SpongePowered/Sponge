@@ -77,6 +77,7 @@ import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.TimingHolder;
+import org.spongepowered.common.bridge.world.ChunkBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.ShouldFire;
@@ -89,9 +90,8 @@ import org.spongepowered.common.event.tracking.phase.tick.DimensionContext;
 import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.event.tracking.phase.tick.TileEntityTickContext;
-import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.bridge.block.BlockEventDataBridge;
-import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
+import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.interfaces.world.ServerWorldBridge;
@@ -101,7 +101,6 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
-import org.spongepowered.common.world.WorldUtil;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -151,8 +150,8 @@ public final class TrackingUtil {
             } catch (Throwable e) {
                 // ignore
             }
-            ((IMixinChunk) chunk).getBlockOwnerUUID(blockPos).ifPresent(builder::creator);
-            ((IMixinChunk) chunk).getBlockNotifierUUID(blockPos).ifPresent(builder::notifier);
+            ((ChunkBridge) chunk).getBlockOwnerUUID(blockPos).ifPresent(builder::creator);
+            ((ChunkBridge) chunk).getBlockNotifierUUID(blockPos).ifPresent(builder::notifier);
             final net.minecraft.tileentity.TileEntity tileEntity = chunk.getTileEntity(blockPos, Chunk.EnumCreateEntityType.CHECK);
             if (tileEntity != null) {
                 // We MUST only check to see if a TE exists to avoid creating a new one.
@@ -223,14 +222,14 @@ public final class TrackingUtil {
         checkArgument(tile instanceof TileEntity, "ITickable %s is not a TileEntity!", tile);
         checkNotNull(tile, "Cannot capture on a null ticking tile entity!");
         final net.minecraft.tileentity.TileEntity tileEntity = (net.minecraft.tileentity.TileEntity) tile;
-        final IMixinTileEntity mixinTileEntity = (IMixinTileEntity) tile;
+        final TileEntityBridge mixinTileEntity = (TileEntityBridge) tile;
         final BlockPos pos = tileEntity.getPos();
-        final IMixinChunk chunk = ((IMixinTileEntity) tile).getActiveChunk();
+        final ChunkBridge chunk = ((TileEntityBridge) tile).getActiveChunk();
         if (!mixinTileEntity.shouldTick()) {
             return;
         }
         if (chunk == null) {
-            mixinTileEntity.setActiveChunk((IMixinChunk) tileEntity.getWorld().getChunk(tileEntity.getPos()));
+            mixinTileEntity.setActiveChunk((ChunkBridge) tileEntity.getWorld().getChunk(tileEntity.getPos()));
         }
 
         final TileEntityTickContext context = TickPhase.Tick.TILE_ENTITY.createPhaseContext().source(mixinTileEntity);
@@ -254,7 +253,7 @@ public final class TrackingUtil {
             phaseContext.buildAndSwitch();
 
             mixinTileEntity.setIsTicking(true);
-            try (Timing timing = mixinTileEntity.getTimingsHandler().startTiming()) {
+            try (Timing timing = mixinTileEntity.spongeImpl$getTimingHandler().startTiming()) {
                 tile.update();
             }
         } catch (Exception e) {
@@ -269,8 +268,8 @@ public final class TrackingUtil {
 
     @SuppressWarnings("rawtypes")
     public static void updateTickBlock(ServerWorldBridge mixinWorld, Block block, BlockPos pos, IBlockState state, Random random) {
-        final WorldServer world = WorldUtil.asNative(mixinWorld);
-        final World apiWorld = WorldUtil.fromNative(world);
+        final WorldServer world = (WorldServer) mixinWorld;
+        final World apiWorld = (World) world;
 
         if (ShouldFire.TICK_BLOCK_EVENT) {
             BlockSnapshot snapshot = mixinWorld.createSpongeBlockSnapshot(state, state, pos, BlockChangeFlags.NONE);
@@ -304,8 +303,8 @@ public final class TrackingUtil {
     @SuppressWarnings("rawtypes")
     public static void randomTickBlock(ServerWorldBridge mixinWorld, Block block,
         BlockPos pos, IBlockState state, Random random) {
-        final WorldServer world = WorldUtil.asNative(mixinWorld);
-        final World apiWorld = WorldUtil.fromNative(world);
+        final WorldServer world = (WorldServer) mixinWorld;
+        final World apiWorld = (World) world;
 
         if (ShouldFire.TICK_BLOCK_EVENT) {
             final BlockSnapshot currentTickBlock = mixinWorld.createSpongeBlockSnapshot(state, state, pos, BlockChangeFlags.NONE);
@@ -384,7 +383,7 @@ public final class TrackingUtil {
 
     @Nullable
     public static User getNotifierOrOwnerFromBlock(WorldServer world, BlockPos blockPos) {
-        final IMixinChunk mixinChunk = (IMixinChunk) world.getChunk(blockPos);
+        final ChunkBridge mixinChunk = (ChunkBridge) world.getChunk(blockPos);
         User notifier = mixinChunk.getBlockNotifier(blockPos).orElse(null);
         if (notifier != null) {
             return notifier;
@@ -670,7 +669,7 @@ public final class TrackingUtil {
         final BlockPos pos = oldBlockSnapshot.getBlockPos();
         performBlockEntitySpawns(phaseState, phaseContext, oldBlockSnapshot, pos);
 
-        final WorldServer world = WorldUtil.asNative(mixinWorld);
+        final WorldServer world = (WorldServer) mixinWorld;
         SpongeHooks.logBlockAction(world, oldBlockSnapshot.blockChange, transaction);
         final SpongeBlockChangeFlag originalChangeFlag = oldBlockSnapshot.getChangeFlag();
         final IBlockState originalState = (IBlockState) oldBlockSnapshot.getState();
@@ -880,7 +879,7 @@ public final class TrackingUtil {
         final Block block = BlockUtil.toBlock(spongeSnapshot);
         spongeSnapshot.getWorldServer()
             .map(world -> world.getChunk(pos))
-            .map(chunk -> (IMixinChunk) chunk)
+            .map(chunk -> (ChunkBridge) chunk)
             .ifPresent(spongeChunk -> {
             final PlayerTracker.Type trackerType = blockChange == BlockChange.PLACE ? PlayerTracker.Type.OWNER : PlayerTracker.Type.NOTIFIER;
             spongeChunk.addTrackedBlockPosition(block, pos, user, trackerType);

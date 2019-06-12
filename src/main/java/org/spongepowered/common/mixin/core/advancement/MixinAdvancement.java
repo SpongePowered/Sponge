@@ -52,7 +52,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.advancement.ICriterion;
+import org.spongepowered.common.advancement.CriterionBridge;
 import org.spongepowered.common.advancement.SpongeAdvancementTree;
 import org.spongepowered.common.advancement.SpongeScoreCriterion;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -163,10 +163,10 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
         }
         this.toastText = toastText.build();
         final Set<String> scoreCriteria = new HashSet<>();
-        final Map<String, ICriterion> criterionMap = new HashMap<>();
+        final Map<String, CriterionBridge> criterionMap = new HashMap<>();
         for (Map.Entry<String, Criterion> entry : new HashMap<>(criteriaIn).entrySet()) {
             final IMixinCriterion mixinCriterion = (IMixinCriterion) entry.getValue();
-            final ICriterion criterion;
+            final CriterionBridge criterion;
             if (mixinCriterion.getScoreGoal() != null) {
                 criterion = new SpongeScoreCriterion(entry.getKey(), mixinCriterion.getScoreGoal(),
                         entry.getValue().getCriterionInstance());
@@ -174,7 +174,7 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
                 ((SpongeScoreCriterion) criterion).internalCriteria.forEach(
                         criterion1 -> criteriaIn.put(criterion1.getName(), (Criterion) criterion1));
             } else {
-                criterion = (ICriterion) mixinCriterion;
+                criterion = (CriterionBridge) mixinCriterion;
                 ((IMixinCriterion) criterion).setName(entry.getKey());
             }
             criterionMap.put(entry.getKey(), criterion);
@@ -184,7 +184,7 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
         for (String[] array : requirementsIn) {
             final Set<AdvancementCriterion> orCriteria = new HashSet<>();
             for (String name : array) {
-                final ICriterion criterion = criterionMap.get(name);
+                final CriterionBridge criterion = criterionMap.get(name);
                 if (criterion instanceof SpongeScoreCriterion) {
                     ((SpongeScoreCriterion) criterion).internalCriteria.forEach(
                             criterion1 -> entries.add(new String[] { criterion1.getName() }));

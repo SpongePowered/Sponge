@@ -26,33 +26,17 @@ package org.spongepowered.common.mixin.api.minecraft.entity.monster;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import com.flowpowered.math.vector.Vector3d;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.monster.EntityCreeper;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.mutable.entity.FuseData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.monster.Creeper;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.entity.GrieferBridge;
 import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFuseData;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-
-import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 @Mixin(EntityCreeper.class)
 public abstract class MixinEntityCreeper_API extends MixinEntityMob_API implements Creeper {
@@ -76,18 +60,18 @@ public abstract class MixinEntityCreeper_API extends MixinEntityMob_API implemen
     @Override
     public void prime() {
         checkState(!isPrimed(), "already primed");
-        setCreeperState(DataConstants.Entity.Creeper.STATE_PRIMED);
+        setCreeperState(Constants.Entity.Creeper.STATE_PRIMED);
     }
 
     @Override
     public void defuse() {
         checkState(isPrimed(), "not primed");
-        setCreeperState(DataConstants.Entity.Creeper.STATE_IDLE);
+        setCreeperState(Constants.Entity.Creeper.STATE_IDLE);
     }
 
     @Override
     public boolean isPrimed() {
-        return getCreeperState() == DataConstants.Entity.Creeper.STATE_PRIMED;
+        return getCreeperState() == Constants.Entity.Creeper.STATE_PRIMED;
     }
 
     @Override

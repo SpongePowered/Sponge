@@ -34,7 +34,7 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-public abstract class SpongeOperatorCriterionProgress implements ICriterionProgress {
+public abstract class SpongeOperatorCriterionProgress implements CriterionProgressBridge {
 
     final AdvancementProgress progress;
     private final SpongeOperatorCriterion criterion;

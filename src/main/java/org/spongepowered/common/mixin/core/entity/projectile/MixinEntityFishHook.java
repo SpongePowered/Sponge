@@ -40,6 +40,8 @@ import net.minecraft.world.storage.loot.LootTableList;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.projectile.FishHook;
+import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -75,7 +77,7 @@ public abstract class MixinEntityFishHook extends MixinEntity {
 
     @Inject(method = "setHookedEntity", at = @At("HEAD"), cancellable = true)
     private void onSetHookedEntity(CallbackInfo ci) {
-        if (SpongeImpl.postEvent(SpongeEventFactory.createFishingEventHookEntity(Sponge.getCauseStackManager().getCurrentCause(), this,
+        if (SpongeImpl.postEvent(SpongeEventFactory.createFishingEventHookEntity(Sponge.getCauseStackManager().getCurrentCause(), ((FishHook) this),
                 (Entity) this.caughtEntity))) {
             this.caughtEntity = null;
             ci.cancel();
@@ -112,7 +114,7 @@ public abstract class MixinEntityFishHook extends MixinEntity {
             }
             Sponge.getCauseStackManager().pushCause(this.angler);
 
-            if (SpongeImpl.postEvent(SpongeEventFactory.createFishingEventStop(Sponge.getCauseStackManager().getCurrentCause(), this, transactions))) {
+            if (SpongeImpl.postEvent(SpongeEventFactory.createFishingEventStop(Sponge.getCauseStackManager().getCurrentCause(), ((FishHook) this), transactions))) {
                 // Event is cancelled
                 return -1;
             }
@@ -173,12 +175,12 @@ public abstract class MixinEntityFishHook extends MixinEntity {
     @Override
     public void spongeImpl$readFromSpongeCompound(NBTTagCompound compound) {
         super.spongeImpl$readFromSpongeCompound(compound);
-        ProjectileSourceSerializer.readSourceFromNbt(compound, this);
+        ProjectileSourceSerializer.readSourceFromNbt(compound, ((FishHook) this));
     }
 
     @Override
     public void spongeImpl$writeToSpongeCompound(NBTTagCompound compound) {
         super.spongeImpl$writeToSpongeCompound(compound);
-        ProjectileSourceSerializer.writeSourceToNbt(compound, this.getShooter(), this.angler);
+        ProjectileSourceSerializer.writeSourceToNbt(compound, ((FishHook) this).getShooter(), this.angler);
     }
 }

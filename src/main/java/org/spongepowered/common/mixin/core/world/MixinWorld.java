@@ -80,13 +80,13 @@ import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
-import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
+import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.interfaces.world.ServerWorldBridge;
-import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
+import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
 import org.spongepowered.common.mixin.tileentityactivation.MixinWorldServer_TileEntityActivation;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.world.SpongeDimension;
@@ -109,12 +109,6 @@ public abstract class MixinWorld implements WorldBridge {
     private static final Vector3i BIOME_MIN = new Vector3i(BLOCK_MIN.getX(), 0, BLOCK_MIN.getZ());
     private static final Vector3i BIOME_MAX = new Vector3i(BLOCK_MAX.getX(), 256, BLOCK_MAX.getZ());
     private static final Vector3i BIOME_SIZE = BIOME_MAX.sub(BIOME_MIN).add(Vector3i.ONE);
-    private static final String
-            CHECK_NO_ENTITY_COLLISION =
-            "checkNoEntityCollision(Lnet/minecraft/util/math/AxisAlignedBB;Lnet/minecraft/entity/Entity;)Z";
-    private static final String
-            GET_ENTITIES_WITHIN_AABB =
-            "Lnet/minecraft/world/World;getEntitiesWithinAABBExcludingEntity(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/AxisAlignedBB;)Ljava/util/List;";
     public SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
 
     @Nullable private Context worldContext;
@@ -388,7 +382,7 @@ public abstract class MixinWorld implements WorldBridge {
     }
 
     // For invisibility
-    @Redirect(method = CHECK_NO_ENTITY_COLLISION, at = @At(value = "INVOKE", target = GET_ENTITIES_WITHIN_AABB))
+    @Redirect(method = "checkNoEntityCollision(Lnet/minecraft/util/math/AxisAlignedBB;Lnet/minecraft/entity/Entity;)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getEntitiesWithinAABBExcludingEntity(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/AxisAlignedBB;)Ljava/util/List;"))
     public List<net.minecraft.entity.Entity> filterInvisibile(net.minecraft.world.World world, net.minecraft.entity.Entity entityIn,
             AxisAlignedBB axisAlignedBB) {
         List<net.minecraft.entity.Entity> entities = world.getEntitiesWithinAABBExcludingEntity(entityIn, axisAlignedBB);
@@ -483,7 +477,7 @@ public abstract class MixinWorld implements WorldBridge {
      */
     @Overwrite
     public boolean canSeeSky(BlockPos pos) {
-        final net.minecraft.world.chunk.Chunk chunk = ((IMixinChunkProviderServer) this.chunkProvider).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
+        final net.minecraft.world.chunk.Chunk chunk = ((ServerChunkProviderBridge) this.chunkProvider).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
         if (chunk == null || chunk.unloadQueued) {
             return false;
         }
@@ -509,7 +503,7 @@ public abstract class MixinWorld implements WorldBridge {
     private void onLightGetBlockState(BlockPos pos, EnumSkyBlock enumSkyBlock, CallbackInfoReturnable<Integer> cir) {
         final net.minecraft.world.chunk.Chunk chunk;
         if (!this.isFake()) {
-            chunk = ((IMixinChunkProviderServer) ((WorldServer) (Object) this).getChunkProvider()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
+            chunk = ((ServerChunkProviderBridge) ((WorldServer) (Object) this).getChunkProvider()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
         } else {
             chunk = this.getChunk(pos);
         }
@@ -892,7 +886,7 @@ public abstract class MixinWorld implements WorldBridge {
             if (!tileentity.isInvalid() && tileentity.hasWorld()) {
                 BlockPos blockpos = tileentity.getPos();
 
-                if (((IMixinTileEntity) tileentity).shouldTick() && this.worldBorder.contains(blockpos)) { // Sponge
+                if (((TileEntityBridge) tileentity).shouldTick() && this.worldBorder.contains(blockpos)) { // Sponge
                     try {
                         this.profiler.func_194340_a(() -> String.valueOf(net.minecraft.tileentity.TileEntity.getKey(tileentity.getClass())));
                         SpongeImplHooks.onTETickStart(tileentity);
@@ -915,7 +909,7 @@ public abstract class MixinWorld implements WorldBridge {
                 iterator.remove();
                 this.loadedTileEntityList.remove(tileentity);
                 // Sponge start - use cached chunk
-                final net.minecraft.world.chunk.Chunk activeChunk = (net.minecraft.world.chunk.Chunk) ((IMixinTileEntity) tileentity).getActiveChunk();
+                final net.minecraft.world.chunk.Chunk activeChunk = (net.minecraft.world.chunk.Chunk) ((TileEntityBridge) tileentity).getActiveChunk();
                 if (activeChunk != null) {
                     //this.getChunk(tileentity.getPos()).removeTileEntity(tileentity.getPos());
                     //Forge: Bugfix: If we set the tile entity it immediately sets it in the chunk, so we could be desynced

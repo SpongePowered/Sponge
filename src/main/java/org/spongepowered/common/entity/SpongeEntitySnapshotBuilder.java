@@ -267,26 +267,26 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
 
     @Override
     protected Optional<EntitySnapshot> buildContent(DataView container) throws InvalidDataException {
-        if (!container.contains(Queries.WORLD_ID, DataQueries.ENTITY_TYPE, DataQueries.ENTITY_ROTATION, DataQueries.ENTITY_SCALE, DataQueries.SNAPSHOT_WORLD_POSITION)) {
+        if (!container.contains(Queries.WORLD_ID, DataQueries.Entity.TYPE, DataQueries.Entity.ROTATION, DataQueries.Entity.SCALE, DataQueries.Sponge.SNAPSHOT_WORLD_POSITION)) {
             return Optional.empty();
         }
         this.worldId = UUID.fromString(container.getString(Queries.WORLD_ID).get());
         this.position = DataUtil.getPosition3d(container);
-        this.rotation = DataUtil.getPosition3d(container, DataQueries.ENTITY_ROTATION);
-        this.scale = DataUtil.getPosition3d(container, DataQueries.ENTITY_SCALE);
-        final String entityTypeId = container.getString(DataQueries.ENTITY_TYPE).get();
+        this.rotation = DataUtil.getPosition3d(container, DataQueries.Entity.ROTATION);
+        this.scale = DataUtil.getPosition3d(container, DataQueries.Entity.SCALE);
+        final String entityTypeId = container.getString(DataQueries.Entity.TYPE).get();
         this.entityType = SpongeImpl.getRegistry().getType(EntityType.class, entityTypeId).get();
 
-        if (container.contains(DataQueries.DATA_MANIPULATORS)) {
-            this.manipulators = DataUtil.deserializeImmutableManipulatorList(container.getViewList(DataQueries.DATA_MANIPULATORS).get());
+        if (container.contains(DataQueries.Sponge.DATA_MANIPULATORS)) {
+            this.manipulators = DataUtil.deserializeImmutableManipulatorList(container.getViewList(DataQueries.Sponge.DATA_MANIPULATORS).get());
         } else {
             this.manipulators = ImmutableList.of();
         }
-        if (container.contains(DataQueries.UNSAFE_NBT)) {
-            this.compound = NbtTranslator.getInstance().translateData(container.getView(DataQueries.UNSAFE_NBT).get());
+        if (container.contains(DataQueries.Sponge.UNSAFE_NBT)) {
+            this.compound = NbtTranslator.getInstance().translateData(container.getView(DataQueries.Sponge.UNSAFE_NBT).get());
         }
-        if (container.contains(DataQueries.ENTITY_ID)) {
-            this.entityId = UUID.fromString(container.getString(DataQueries.ENTITY_ID).get());
+        if (container.contains(DataQueries.Entity.UUID)) {
+            this.entityId = UUID.fromString(container.getString(DataQueries.Entity.UUID).get());
         }
         return Optional.of(build());
     }

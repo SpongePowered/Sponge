@@ -43,8 +43,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
 import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
-import org.spongepowered.common.data.util.DataConstants;
-import org.spongepowered.common.mixin.api.minecraft.entity.monster.MixinEntityMob_API;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -76,7 +75,7 @@ public abstract class MixinEntityCreeper extends MixinEntityMob implements Fused
 
     @Override
     public void setExplosionRadius(Optional<Integer> radius) {
-        this.explosionRadius = radius.orElse(DataConstants.Entity.Creeper.DEFAULT_EXPLOSION_RADIUS);
+        this.explosionRadius = radius.orElse(Constants.Entity.Creeper.DEFAULT_EXPLOSION_RADIUS);
     }
 
     @Override
@@ -112,9 +111,9 @@ public abstract class MixinEntityCreeper extends MixinEntityMob implements Fused
             return;
         }
 
-        if (!((Creeper) this).isPrimed() && state == DataConstants.Entity.Creeper.STATE_PRIMED && !bridge$shouldPrime()) {
+        if (!((Creeper) this).isPrimed() && state == Constants.Entity.Creeper.STATE_PRIMED && !bridge$shouldPrime()) {
             ci.cancel();
-        } else if (((Creeper) this).isPrimed() && state == DataConstants.Entity.Creeper.STATE_IDLE && !bridge$shouldDefuse()) {
+        } else if (((Creeper) this).isPrimed() && state == Constants.Entity.Creeper.STATE_IDLE && !bridge$shouldDefuse()) {
             ci.cancel();
         } else if (getCreeperState() != state) {
             this.stateDirty = true;
@@ -128,9 +127,9 @@ public abstract class MixinEntityCreeper extends MixinEntityMob implements Fused
         }
 
         if (this.stateDirty) {
-            if (state == DataConstants.Entity.Creeper.STATE_PRIMED) {
+            if (state == Constants.Entity.Creeper.STATE_PRIMED) {
                 bridge$postPrime();
-            } else if (state == DataConstants.Entity.Creeper.STATE_IDLE) {
+            } else if (state == Constants.Entity.Creeper.STATE_IDLE) {
                 bridge$postDefuse();
             }
             this.stateDirty = false;

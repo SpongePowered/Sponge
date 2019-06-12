@@ -30,10 +30,10 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.util.DataConstants;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.bridge.entity.ItemEntityBridge;
+import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -50,7 +50,7 @@ public class InfiniteDespawnDelayValueProcessor extends AbstractSpongeValueProce
 
     @Override
     protected boolean set(EntityItem container, Boolean value) {
-        ((ItemEntityBridge) container).bridge$setDespawnDelay(value ? DataConstants.Entity.Item.MAGIC_NO_DESPAWN : DataConstants.Entity.Item.DEFAULT_DESPAWN_DELAY, value);
+        ((ItemEntityBridge) container).bridge$setDespawnDelay(value ? Constants.Entity.Item.MAGIC_NO_DESPAWN : Constants.Entity.Item.DEFAULT_DESPAWN_DELAY, value);
         return true;
     }
 

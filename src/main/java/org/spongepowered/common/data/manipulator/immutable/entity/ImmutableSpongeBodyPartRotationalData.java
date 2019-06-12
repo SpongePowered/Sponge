@@ -41,7 +41,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableMapValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeBodyPartRotationalData;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeMapValue;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
@@ -66,17 +66,17 @@ public class ImmutableSpongeBodyPartRotationalData extends AbstractImmutableData
         this.rotations = ImmutableMap.copyOf(checkNotNull(rotations, "rotations"));
         this.rotationsValue = new ImmutableSpongeMapValue<>(Keys.BODY_ROTATIONS, this.rotations);
         this.headRotationValue = new ImmutableSpongeValue<>(Keys.HEAD_ROTATION,
-                Optional.ofNullable(this.rotations.get(BodyParts.HEAD)).orElse(DataConstants.Entity.ArmorStand.DEFAULT_HEAD_ROTATION));
+                Optional.ofNullable(this.rotations.get(BodyParts.HEAD)).orElse(Constants.Entity.ArmorStand.DEFAULT_HEAD_ROTATION));
         this.chestRotationValue = new ImmutableSpongeValue<>(Keys.CHEST_ROTATION,
-                Optional.ofNullable(this.rotations.get(BodyParts.CHEST)).orElse(DataConstants.Entity.ArmorStand.DEFAULT_CHEST_ROTATION));
+                Optional.ofNullable(this.rotations.get(BodyParts.CHEST)).orElse(Constants.Entity.ArmorStand.DEFAULT_CHEST_ROTATION));
         this.leftArmRotationValue = new ImmutableSpongeValue<>(Keys.LEFT_ARM_ROTATION,
-                Optional.ofNullable(this.rotations.get(BodyParts.LEFT_ARM)).orElse(DataConstants.Entity.ArmorStand.DEFAULT_LEFT_ARM_ROTATION));
+                Optional.ofNullable(this.rotations.get(BodyParts.LEFT_ARM)).orElse(Constants.Entity.ArmorStand.DEFAULT_LEFT_ARM_ROTATION));
         this.rightArmRotationValue = new ImmutableSpongeValue<>(Keys.RIGHT_ARM_ROTATION,
-                Optional.ofNullable(this.rotations.get(BodyParts.RIGHT_ARM)).orElse(DataConstants.Entity.ArmorStand.DEFAULT_RIGHT_ARM_ROTATION));
+                Optional.ofNullable(this.rotations.get(BodyParts.RIGHT_ARM)).orElse(Constants.Entity.ArmorStand.DEFAULT_RIGHT_ARM_ROTATION));
         this.leftLegRotationValue = new ImmutableSpongeValue<>(Keys.LEFT_LEG_ROTATION,
-                Optional.ofNullable(this.rotations.get(BodyParts.LEFT_LEG)).orElse(DataConstants.Entity.ArmorStand.DEFAULT_LEFT_LEG_ROTATION));
+                Optional.ofNullable(this.rotations.get(BodyParts.LEFT_LEG)).orElse(Constants.Entity.ArmorStand.DEFAULT_LEFT_LEG_ROTATION));
         this.rightLegRotationValue = new ImmutableSpongeValue<>(Keys.RIGHT_LEG_ROTATION,
-                Optional.ofNullable(this.rotations.get(BodyParts.RIGHT_LEG)).orElse(DataConstants.Entity.ArmorStand.DEFAULT_RIGHT_LEG_ROTATION));
+                Optional.ofNullable(this.rotations.get(BodyParts.RIGHT_LEG)).orElse(Constants.Entity.ArmorStand.DEFAULT_RIGHT_LEG_ROTATION));
 
         registerGetters();
     }

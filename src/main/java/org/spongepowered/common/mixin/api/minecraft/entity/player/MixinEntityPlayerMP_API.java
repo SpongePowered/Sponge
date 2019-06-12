@@ -106,9 +106,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGameModeData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeJoinData;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
@@ -119,7 +120,6 @@ import org.spongepowered.common.entity.player.tab.SpongeTabList;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
-import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.bridge.packet.ResourcePackBridge;
 import org.spongepowered.common.interfaces.IMixinServerScoreboard;
 import org.spongepowered.common.interfaces.advancement.IMixinAdvancement;
@@ -311,7 +311,7 @@ public abstract class MixinEntityPlayerMP_API extends MixinEntityPlayer_API impl
     @SuppressWarnings({"unchecked", "ConstantConditions", "rawtypes"})
     @Override
     public Optional<Container> openInventory(Inventory inventory, Text displayName) {
-        if (((IMixinContainer) this.openContainer).isInUse()) {
+        if (((ContainerBridge) this.openContainer).isInUse()) {
             Cause cause = Sponge.getCauseStackManager().getCurrentCause();
             SpongeImpl.getLogger().warn("This player is currently modifying an open container. This action will be delayed.");
             Sponge.getScheduler().createTaskBuilder().delayTicks(0).execute(() -> {
@@ -330,7 +330,7 @@ public abstract class MixinEntityPlayerMP_API extends MixinEntityPlayer_API impl
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public boolean closeInventory() throws IllegalArgumentException {
-        if (((IMixinContainer) this.openContainer).isInUse()) {
+        if (((ContainerBridge) this.openContainer).isInUse()) {
             Cause cause = Sponge.getCauseStackManager().getCurrentCause();
             SpongeImpl.getLogger().warn("This player is currently modifying an open container. This action will be delayed.");
             Sponge.getScheduler().createTaskBuilder().delayTicks(0).execute(() -> {
@@ -535,7 +535,7 @@ public abstract class MixinEntityPlayerMP_API extends MixinEntityPlayer_API impl
 
     @Override
     public Value<GameMode> gameMode() {
-        return new SpongeValue<>(Keys.GAME_MODE, DataConstants.Catalog.DEFAULT_GAMEMODE,
+        return new SpongeValue<>(Keys.GAME_MODE, Constants.Catalog.DEFAULT_GAMEMODE,
                 (GameMode) (Object) this.interactionManager.getGameType());
     }
 

@@ -24,8 +24,7 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import java.util.Optional;
-
+import net.minecraft.entity.item.EntityArmorStand;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -37,11 +36,10 @@ import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcess
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeSetValue;
 
-import net.minecraft.entity.item.EntityArmorStand;
-
-import java.util.Set;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 public class TakingDisabledValueProcessor
 		extends AbstractSpongeValueProcessor<EntityArmorStand, Set<EquipmentType>, SetValue<EquipmentType>> {

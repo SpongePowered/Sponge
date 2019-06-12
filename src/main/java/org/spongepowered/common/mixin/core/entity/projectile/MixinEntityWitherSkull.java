@@ -29,6 +29,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.EntityWitherSkull;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.entity.projectile.explosive.WitherSkull;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.world.Location;
@@ -39,7 +40,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 
@@ -50,7 +51,7 @@ import javax.annotation.Nullable;
 @Mixin(EntityWitherSkull.class)
 public abstract class MixinEntityWitherSkull extends MixinEntityFireball implements ExplosiveBridge {
 
-    private int explosionRadius = DataConstants.Entity.WitherSkull.DEFAULT_EXPLOSION_RADIUS;
+    private int explosionRadius = Constants.Entity.WitherSkull.DEFAULT_EXPLOSION_RADIUS;
     private float damage = 0.0f;
     private boolean damageSet = false;
 
@@ -102,7 +103,7 @@ public abstract class MixinEntityWitherSkull extends MixinEntityFireball impleme
 
     @Override
     public void setExplosionRadius(Optional<Integer> explosionRadius) {
-        this.explosionRadius = explosionRadius.orElse(DataConstants.Entity.WitherSkull.DEFAULT_EXPLOSION_RADIUS);
+        this.explosionRadius = explosionRadius.orElse(Constants.Entity.WitherSkull.DEFAULT_EXPLOSION_RADIUS);
     }
 
     @SuppressWarnings("deprecation")
@@ -115,12 +116,12 @@ public abstract class MixinEntityWitherSkull extends MixinEntityFireball impleme
         boolean griefer = ((GrieferBridge) this).bridge$CanGrief();
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(this);
-            frame.addContext(EventContextKeys.THROWER, getShooter()); // TODO - Remove in API 8/1.13
-            frame.addContext(EventContextKeys.PROJECTILE_SOURCE, getShooter());
-            frame.pushCause(getShooter());
+            frame.addContext(EventContextKeys.THROWER, ((WitherSkull) this).getShooter()); // TODO - Remove in API 8/1.13
+            frame.addContext(EventContextKeys.PROJECTILE_SOURCE, ((WitherSkull) this).getShooter());
+            frame.pushCause(((WitherSkull) this).getShooter());
             return detonate(Explosion.builder()
                 .location(new Location<>((World) worldObj, new Vector3d(x, y, z)))
-                .sourceExplosive(this)
+                .sourceExplosive(((WitherSkull) this))
                 .radius(this.explosionRadius)
                 .canCauseFire(flaming)
                 .shouldPlaySmoke(smoking && griefer)

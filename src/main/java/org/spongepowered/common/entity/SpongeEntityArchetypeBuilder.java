@@ -31,9 +31,7 @@ import static org.spongepowered.api.entity.EntityTypes.UNKNOWN;
 
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
@@ -44,7 +42,6 @@ import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.common.data.nbt.NbtDataTypes;
 import org.spongepowered.common.data.nbt.validation.Validations;
-import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.DataVersions;
@@ -173,7 +170,7 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
         checkNotNull(this.entityType);
         checkState(this.entityType != UNKNOWN);
         if (this.entityData != null) {
-            this.entityData.remove(DataQueries.USER_UUID);
+            this.entityData.remove(DataQueries.User.UUID);
         }
         return new SpongeEntityArchetype(this);
     }

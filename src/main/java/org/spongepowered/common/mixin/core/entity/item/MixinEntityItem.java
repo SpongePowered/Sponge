@@ -37,7 +37,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.bridge.entity.ItemEntityBridge;
@@ -96,7 +96,7 @@ public abstract class MixinEntityItem extends MixinEntity implements ItemEntityB
         this.infinitePickupDelay = infinite;
         if (infinite && !previous) {
             this.previousPickupDelay = this.pickupDelay;
-            this.pickupDelay = DataConstants.Entity.Item.MAGIC_NO_PICKUP;
+            this.pickupDelay = Constants.Entity.Item.MAGIC_NO_PICKUP;
         } else if (!infinite) {
             this.previousPickupDelay = MAGIC_PREVIOUS;
         }
@@ -124,7 +124,7 @@ public abstract class MixinEntityItem extends MixinEntity implements ItemEntityB
         this.infiniteDespawnDelay = infinite;
         if (infinite && !previous) {
             this.previousDespawnDelay = this.age;
-            this.age = DataConstants.Entity.Item.MAGIC_NO_DESPAWN;
+            this.age = Constants.Entity.Item.MAGIC_NO_DESPAWN;
         } else if (!infinite) {
             this.previousDespawnDelay = MAGIC_PREVIOUS;
         }
@@ -152,8 +152,8 @@ public abstract class MixinEntityItem extends MixinEntity implements ItemEntityB
                 this.previousPickupDelay = this.pickupDelay;
             }
 
-            this.pickupDelay = DataConstants.Entity.Item.MAGIC_NO_PICKUP;
-        } else if (this.pickupDelay == DataConstants.Entity.Item.MAGIC_NO_PICKUP && this.previousPickupDelay != MAGIC_PREVIOUS) {
+            this.pickupDelay = Constants.Entity.Item.MAGIC_NO_PICKUP;
+        } else if (this.pickupDelay == Constants.Entity.Item.MAGIC_NO_PICKUP && this.previousPickupDelay != MAGIC_PREVIOUS) {
             this.pickupDelay = this.previousPickupDelay;
             this.previousPickupDelay = MAGIC_PREVIOUS;
         }
@@ -163,8 +163,8 @@ public abstract class MixinEntityItem extends MixinEntity implements ItemEntityB
                 this.previousDespawnDelay = this.age;
             }
 
-            this.age = DataConstants.Entity.Item.MAGIC_NO_DESPAWN;
-        } else if (this.age == DataConstants.Entity.Item.MAGIC_NO_DESPAWN && this.previousDespawnDelay != MAGIC_PREVIOUS) {
+            this.age = Constants.Entity.Item.MAGIC_NO_DESPAWN;
+        } else if (this.age == Constants.Entity.Item.MAGIC_NO_DESPAWN && this.previousDespawnDelay != MAGIC_PREVIOUS) {
             this.age = this.previousDespawnDelay;
             this.previousDespawnDelay = MAGIC_PREVIOUS;
         }

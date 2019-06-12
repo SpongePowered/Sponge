@@ -124,6 +124,8 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
+import org.spongepowered.common.bridge.inventory.ContainerBridge;
+import org.spongepowered.common.bridge.world.ChunkBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.inventory.UpdateAnvilEventCost;
@@ -131,9 +133,7 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
-import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.IMixinContainer;
-import org.spongepowered.common.interfaces.IMixinInventory;
+import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
@@ -148,7 +148,6 @@ import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
-import org.spongepowered.common.world.WorldUtil;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -645,9 +644,9 @@ public class SpongeCommonEventFactory {
 
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             if (extending) {
-                frame.addContext(EventContextKeys.PISTON_EXTEND, WorldUtil.fromNative(world));
+                frame.addContext(EventContextKeys.PISTON_EXTEND, (World) world);
             } else {
-                frame.addContext(EventContextKeys.PISTON_RETRACT, WorldUtil.fromNative(world));
+                frame.addContext(EventContextKeys.PISTON_RETRACT, (World) world);
             }
             return SpongeCommonEventFactory.callChangeBlockEventPre(world, ImmutableList.copyOf(locations), locatable)
                 .isCancelled();
@@ -671,7 +670,7 @@ public class SpongeCommonEventFactory {
                 context.addNotifierAndOwnerToCauseStack(frame);
             } else {
 
-                final IMixinChunk mixinChunk = (IMixinChunk) ((WorldServer) world).getChunk(sourcePos);
+                final ChunkBridge mixinChunk = (ChunkBridge) ((WorldServer) world).getChunk(sourcePos);
                 mixinChunk.getBlockNotifier(sourcePos).ifPresent(user -> frame.addContext(EventContextKeys.NOTIFIER, user));
                 mixinChunk.getBlockOwner(sourcePos).ifPresent(owner -> frame.addContext(EventContextKeys.OWNER, owner));
             }
@@ -1012,9 +1011,9 @@ public class SpongeCommonEventFactory {
                 if (!pos.equals(spongeEntity.getLastCollidedBlockPos())) {
                     final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
                     context.applyNotifierIfAvailable(notifier -> {
-                        IMixinChunk spongeChunk = spongeEntity.getActiveChunk();
+                        ChunkBridge spongeChunk = spongeEntity.getActiveChunk();
                         if (spongeChunk == null) {
-                            spongeChunk = (IMixinChunk) world.getChunk(pos);
+                            spongeChunk = (ChunkBridge) world.getChunk(pos);
                         }
                         spongeChunk.addTrackedBlockPosition(block, pos, notifier, PlayerTracker.Type.NOTIFIER);
 
@@ -1058,7 +1057,7 @@ public class SpongeCommonEventFactory {
                 // Track impact block if event is not cancelled
                 if (!cancelled && owner.isPresent()) {
                     BlockPos targetPos = VecHelper.toBlockPos(impactPoint.getBlockPosition());
-                    IMixinChunk spongeChunk = (IMixinChunk) projectile.world.getChunk(targetPos);
+                    ChunkBridge spongeChunk = (ChunkBridge) projectile.world.getChunk(targetPos);
                     spongeChunk.addTrackedBlockPosition((Block) targetBlock.getState().getType(), targetPos, owner.get(), PlayerTracker.Type.NOTIFIER);
                 }
             } else if (movingObjectPosition.entityHit != null) { // entity
@@ -1084,22 +1083,22 @@ public class SpongeCommonEventFactory {
             // Due to this, we can only send the original item that was clicked in slot
             Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(ItemStackSnapshot.NONE, ItemStackSnapshot.NONE);
             org.spongepowered.api.item.inventory.Slot slot = null;
-            if (((IMixinContainer) player.openContainer).getCapturedTransactions().isEmpty() && packetIn.getSlotId() >= 0
-                    && packetIn.getSlotId() < player.openContainer.inventorySlots.size()) {
-                slot = ((IMixinContainer)player.openContainer).getContainerSlot(packetIn.getSlotId());
+            if (((ContainerBridge) player.openContainer).bridge$getCapturedSlotTransactions().isEmpty() && packetIn.getSlotId() >= 0
+                && packetIn.getSlotId() < player.openContainer.inventorySlots.size()) {
+                slot = ((ContainerBridge)player.openContainer).getContainerSlot(packetIn.getSlotId());
                 if (slot != null) {
                     ItemStackSnapshot clickedItem = ItemStackUtil.snapshotOf(slot.peek().orElse(org.spongepowered.api.item.inventory.ItemStack.empty()));
                     ItemStackSnapshot replacement = ItemStackUtil.snapshotOf(packetIn.getStack());
                     SlotTransaction slotTransaction = new SlotTransaction(slot, clickedItem, replacement);
-                    ((IMixinContainer) player.openContainer).getCapturedTransactions().add(slotTransaction);
+                    ((ContainerBridge) player.openContainer).bridge$getCapturedSlotTransactions().add(slotTransaction);
                 }
             }
             ClickInventoryEvent.Creative event =
                 SpongeEventFactory.createClickInventoryEventCreative(frame.getCurrentCause(), cursorTransaction,
                     Optional.ofNullable(slot), (org.spongepowered.api.item.inventory.Container) player.openContainer,
-                    new ArrayList<>(((IMixinContainer) player.openContainer).getCapturedTransactions()));
-            ((IMixinContainer) player.openContainer).getCapturedTransactions().clear();
-            ((IMixinContainer) player.openContainer).setCaptureInventory(false);
+                    new ArrayList<>(((ContainerBridge) player.openContainer).bridge$getCapturedSlotTransactions()));
+            ((ContainerBridge) player.openContainer).bridge$getCapturedSlotTransactions().clear();
+            ((ContainerBridge) player.openContainer).setCaptureInventory(false);
             SpongeImpl.postEvent(event);
             frame.popCause();
             return event;
@@ -1120,7 +1119,7 @@ public class SpongeCommonEventFactory {
             return false;
         }
         // TODO - determine if/how we want to fire inventory events outside of click packet handlers
-        //((IMixinContainer) player.openContainer).setCaptureInventory(true);
+        //((ContainerBridge) player.openContainer).setCaptureInventory(true);
         // Custom cursor
         if (event.getCursorTransaction().getCustom().isPresent()) {
             handleCustomCursor(player, event.getCursorTransaction().getFinal());
@@ -1167,8 +1166,8 @@ public class SpongeCommonEventFactory {
                 handleCustomCursor(player, event.getCursorTransaction().getOriginal());
             }
         } else {
-            IMixinContainer mixinContainer = (IMixinContainer) player.openContainer;
-            mixinContainer.getCapturedTransactions().clear();
+            ContainerBridge mixinContainer = (ContainerBridge) player.openContainer;
+            mixinContainer.bridge$getCapturedSlotTransactions().clear();
             mixinContainer.setCaptureInventory(false);
             // Handle cursor
             if (!event.getCursorTransaction().isValid()) {
@@ -1255,7 +1254,7 @@ public class SpongeCommonEventFactory {
             return null;
         }
 
-        if (container instanceof IMixinContainer) {
+        if (container instanceof ContainerBridge) {
             // This overwrites the normal container behaviour and allows viewing
             // inventories that are more than 8 blocks away
             // This currently actually only works for the Containers mixed into
@@ -1263,7 +1262,7 @@ public class SpongeCommonEventFactory {
             // containers
 
             // Allow viewing inventory; except when dead
-            ((IMixinContainer) container).setCanInteractWith(p -> !p.isDead);
+            ((ContainerBridge) container).setCanInteractWith(p -> !p.isDead);
         }
 
         // This call must go at the end of this method,
@@ -1330,7 +1329,7 @@ public class SpongeCommonEventFactory {
         return event;
     }
 
-    public static boolean callTransferPost(IMixinInventory captureSource, Inventory source, Inventory destination) {
+    public static boolean callTransferPost(@Nullable TrackedInventoryBridge captureSource, @Nullable Inventory source, @Nullable Inventory destination) {
         // TODO make sure we never got null
         if (captureSource == null || source == null || destination == null) {
             return true;
@@ -1338,7 +1337,7 @@ public class SpongeCommonEventFactory {
         Sponge.getCauseStackManager().pushCause(source);
         ChangeInventoryEvent.Transfer.Post event =
                 SpongeEventFactory.createChangeInventoryEventTransferPost(Sponge.getCauseStackManager().getCurrentCause(),
-                        source, destination, captureSource.getCapturedTransactions());
+                        source, destination, captureSource.bridge$getCapturedSlotTransactions());
         SpongeImpl.postEvent(event);
         if (event.isCancelled()) {
             // restore inventories
@@ -1348,7 +1347,7 @@ public class SpongeCommonEventFactory {
             event.getTransactions().stream().filter(t -> !t.isValid() || t.getCustom().isPresent()).forEach(t -> t.getSlot().set(t.getFinal().createStack()));
         }
 
-        captureSource.getCapturedTransactions().clear();
+        captureSource.bridge$getCapturedSlotTransactions().clear();
         Sponge.getCauseStackManager().popCause();
 
         return event.isCancelled();
@@ -1361,13 +1360,12 @@ public class SpongeCommonEventFactory {
     /**
      * Captures a transaction
      *
-     * @param captureIn the {@link IMixinInventory} to capture the transaction in
+     * @param captureIn the {@link TrackedInventoryBridge} to capture the transaction in
      * @param inv the Inventory
      * @param index the affected SlotIndex
      * @param originalStack the original Stack
      */
-    @SuppressWarnings("deprecation")
-    public static void captureTransaction(IMixinInventory captureIn, Inventory inv, int index, ItemStack originalStack) {
+    public static void captureTransaction(@Nullable TrackedInventoryBridge captureIn, @Nullable Inventory inv, int index, ItemStack originalStack) {
         // TODO make sure we never got null
         if (captureIn == null || inv == null) {
             return;
@@ -1377,7 +1375,7 @@ public class SpongeCommonEventFactory {
             SlotTransaction trans = new SlotTransaction(slot.get(),
                     ItemStackUtil.snapshotOf(originalStack),
                     ItemStackUtil.snapshotOf(slot.get().peek().orElse(org.spongepowered.api.item.inventory.ItemStack.empty())));
-            captureIn.getCapturedTransactions().add(trans);
+            captureIn.bridge$getCapturedSlotTransactions().add(trans);
         } else {
             SpongeImpl.getLogger().warn("Unable to capture transaction from " + inv.getClass() + " at index " + index);
         }
@@ -1386,14 +1384,13 @@ public class SpongeCommonEventFactory {
     /**
      * Captures a transaction
      *
-     * @param captureIn the {@link IMixinInventory} to capture the transaction in
+     * @param captureIn the {@link TrackedInventoryBridge} to capture the transaction in
      * @param inv the Inventory
      * @param index the affected SlotIndex
      * @param transaction the transaction to execute
      * @return the result if the transaction
      */
-    @SuppressWarnings("deprecation")
-    public static ItemStack captureTransaction(IMixinInventory captureIn, Inventory inv, int index, Supplier<ItemStack> transaction) {
+    public static ItemStack captureTransaction(@Nullable TrackedInventoryBridge captureIn, @Nullable Inventory inv, int index, Supplier<ItemStack> transaction) {
         // TODO make sure we never got null
         if (captureIn == null || inv == null) {
             return transaction.get();
@@ -1408,7 +1405,7 @@ public class SpongeCommonEventFactory {
         ItemStack remaining = transaction.get();
         if (remaining.isEmpty()) {
             ItemStackSnapshot replacement = slot.get().peek().map(ItemStackUtil::snapshotOf).orElse(ItemStackSnapshot.NONE);
-            captureIn.getCapturedTransactions().add(new SlotTransaction(slot.get(), original, replacement));
+            captureIn.bridge$getCapturedSlotTransactions().add(new SlotTransaction(slot.get(), original, replacement));
         }
         return remaining;
     }
@@ -1417,10 +1414,6 @@ public class SpongeCommonEventFactory {
         SetAITargetEvent event = SpongeEventFactory.createSetAITargetEvent(Sponge.getCauseStackManager().getCurrentCause(), Optional.ofNullable(target), agent);
         SpongeImpl.postEvent(event);
         return event;
-    }
-
-    public static Inventory toInventory(IInventory iinventory) {
-        return ((Inventory) iinventory);
     }
 
     public static CraftItemEvent.Preview callCraftEventPre(EntityPlayer player, CraftingInventory inventory,
@@ -1446,7 +1439,7 @@ public class SpongeCommonEventFactory {
     public static CraftItemEvent.Craft callCraftEventPost(EntityPlayer player, CraftingInventory inventory, ItemStackSnapshot result,
            @Nullable CraftingRecipe recipe, Container container, List<SlotTransaction> transactions) {
         // Get previous cursor if captured
-        ItemStack previousCursor = ((IMixinContainer) container).getPreviousCursor();
+        ItemStack previousCursor = ((ContainerBridge) container).getPreviousCursor();
         if (previousCursor == null) {
             previousCursor = player.inventory.getItemStack(); // or get the current one
         }
@@ -1456,8 +1449,8 @@ public class SpongeCommonEventFactory {
                         cursorTransaction, Optional.ofNullable(recipe), Optional.of(slot), ((org.spongepowered.api.item.inventory.Container) container), transactions);
         SpongeImpl.postEvent(event);
 
-        boolean capture = ((IMixinContainer) container).capturingInventory();
-        ((IMixinContainer) container).setCaptureInventory(false);
+        boolean capture = ((ContainerBridge) container).capturingInventory();
+        ((ContainerBridge) container).setCaptureInventory(false);
         // handle slot-transactions
         PacketPhaseUtil.handleSlotRestore(player, container, new ArrayList<>(transactions), event.isCancelled());
         if (event.isCancelled() || !event.getCursorTransaction().isValid() || event.getCursorTransaction().getCustom().isPresent()) {
@@ -1470,7 +1463,7 @@ public class SpongeCommonEventFactory {
         }
 
         transactions.clear();
-        ((IMixinContainer) container).setCaptureInventory(capture);
+        ((ContainerBridge) container).setCaptureInventory(capture);
         return event;
     }
 

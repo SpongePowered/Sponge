@@ -190,8 +190,8 @@ public final class DataUtil {
         for (T manipulator : manipulators) {
             final DataContainer container = DataContainer.createNew();
             container.set(Queries.CONTENT_VERSION, DataVersions.Data.CURRENT_CUSTOM_DATA);
-            container.set(DataQueries.DATA_ID, func.apply(manipulator).getId())
-                     .set(DataQueries.INTERNAL_DATA, manipulator.toContainer());
+            container.set(DataQueries.Sponge.DATA_ID, func.apply(manipulator).getId())
+                     .set(DataQueries.Sponge.INTERNAL_DATA, manipulator.toContainer());
             builder.add(container);
         }
         return builder.build();
@@ -208,18 +208,18 @@ public final class DataUtil {
     }
 
     private static Optional<String> findDataId(SerializedDataTransaction.Builder builder, DataView view) {
-        final Optional<String> dataId = view.getString(DataQueries.DATA_ID);
+        final Optional<String> dataId = view.getString(DataQueries.Sponge.DATA_ID);
         if (!dataId.isPresent()) {
             // Show failed deserialization when this is v1 data
             @SuppressWarnings("deprecation")
-            String dataClass = view.getString(DataQueries.DATA_CLASS).orElseThrow(DataUtil.dataNotFound());
+            String dataClass = view.getString(DataQueries.Sponge.DATA_CLASS).orElseThrow(DataUtil.dataNotFound());
             addFailedDeserialization(builder, view, dataClass, null);
         }
         return dataId;
     }
 
     private static void tryDeserializeManipulator(SerializedDataTransaction.Builder builder, DataView view, String dataId) {
-        final DataView manipulatorView = view.getView(DataQueries.INTERNAL_DATA).orElseThrow(DataUtil.dataNotFound());
+        final DataView manipulatorView = view.getView(DataQueries.Sponge.INTERNAL_DATA).orElseThrow(DataUtil.dataNotFound());
         try {
             Optional<DataManipulator<?, ?>> build = deserializeManipulator(dataId, manipulatorView);
             if (build.isPresent()) {
@@ -265,8 +265,8 @@ public final class DataUtil {
         final ImmutableList.Builder<ImmutableDataManipulator<?, ?>> builder = ImmutableList.builder();
         for (DataView view : containers) {
             view = updateDataViewForDataManipulator(view);
-            final String dataId = view.getString(DataQueries.DATA_ID).orElseThrow(DataUtil.dataNotFound());
-            final DataView manipulatorView = view.getView(DataQueries.INTERNAL_DATA).orElseThrow(DataUtil.dataNotFound());
+            final String dataId = view.getString(DataQueries.Sponge.DATA_ID).orElseThrow(DataUtil.dataNotFound());
+            final DataView manipulatorView = view.getView(DataQueries.Sponge.INTERNAL_DATA).orElseThrow(DataUtil.dataNotFound());
             try {
                 deserializeManipulator(dataId, manipulatorView).map(DataManipulator::asImmutable).ifPresent(builder::add);
             } catch (Exception e) {
@@ -288,12 +288,12 @@ public final class DataUtil {
     }
 
     public static Vector3i getPosition3i(DataView view) {
-        return getPosition3i(view, DataQueries.SNAPSHOT_WORLD_POSITION);
+        return getPosition3i(view, DataQueries.Sponge.SNAPSHOT_WORLD_POSITION);
     }
 
     public static Vector3i getPosition3i(DataView view, DataQuery query) {
-        checkDataExists(view, DataQueries.SNAPSHOT_WORLD_POSITION);
-        final DataView internal = view.getView(DataQueries.SNAPSHOT_WORLD_POSITION).get();
+        checkDataExists(view, DataQueries.Sponge.SNAPSHOT_WORLD_POSITION);
+        final DataView internal = view.getView(DataQueries.Sponge.SNAPSHOT_WORLD_POSITION).get();
         final int x = internal.getInt(Queries.POSITION_X).get();
         final int y = internal.getInt(Queries.POSITION_Y).get();
         final int z = internal.getInt(Queries.POSITION_Z).get();
@@ -301,7 +301,7 @@ public final class DataUtil {
     }
 
     public static Vector3d getPosition3d(DataView view) {
-        return getPosition3d(view, DataQueries.SNAPSHOT_WORLD_POSITION);
+        return getPosition3d(view, DataQueries.Sponge.SNAPSHOT_WORLD_POSITION);
     }
 
     public static Vector3d getPosition3d(DataView view, DataQuery query) {

@@ -73,9 +73,9 @@ public class VelocityDataProcessor extends AbstractEntitySingleDataProcessor<Ent
     public Optional<VelocityData> fill(DataContainer container, VelocityData velocityData) {
         checkDataExists(container, Keys.VELOCITY.getQuery());
         final DataView internalView = container.getView(Keys.VELOCITY.getQuery()).get();
-        final double x = getData(internalView, DataQueries.VELOCITY_X, Double.class);
-        final double y = getData(internalView, DataQueries.VELOCITY_Y, Double.class);
-        final double z = getData(internalView, DataQueries.VELOCITY_Z, Double.class);
+        final double x = getData(internalView, DataQueries.Sponge.VelocityData.VELOCITY_X, Double.class);
+        final double y = getData(internalView, DataQueries.Sponge.VelocityData.VELOCITY_Y, Double.class);
+        final double z = getData(internalView, DataQueries.Sponge.VelocityData.VELOCITY_Z, Double.class);
         return Optional.of(velocityData.set(Keys.VELOCITY, new Vector3d(x, y, z)));
     }
 

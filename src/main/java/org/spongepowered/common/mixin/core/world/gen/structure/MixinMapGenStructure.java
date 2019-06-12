@@ -38,7 +38,7 @@ import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
+import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
 import org.spongepowered.common.mixin.core.world.gen.MixinMapGenBase;
 import org.spongepowered.common.world.gen.InternalPopulatorTypes;
 
@@ -85,7 +85,7 @@ public abstract class MixinMapGenStructure extends MixinMapGenBase implements Po
         if (generatingStructures) {
             return false;
         }
-        Chunk chunk = ((IMixinChunkProviderServer) worldIn.getChunkProvider()).getLoadedChunkWithoutMarkingActive(chunkCoord.x, chunkCoord.z);
+        Chunk chunk = ((ServerChunkProviderBridge) worldIn.getChunkProvider()).getLoadedChunkWithoutMarkingActive(chunkCoord.x, chunkCoord.z);
         if (chunk == null) {
             return false;
         }

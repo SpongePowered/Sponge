@@ -32,6 +32,8 @@ import net.minecraft.init.SoundEvents;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
+import org.spongepowered.api.entity.projectile.Projectile;
+import org.spongepowered.api.entity.projectile.arrow.Arrow;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -50,8 +52,8 @@ public abstract class MixinEntityArrow extends MixinEntity implements IMixinEnti
 
     @Shadow public Entity shootingEntity;
     @Shadow private int ticksInAir;
-    @Shadow public double damage;
-    @Shadow public boolean inGround;
+    @Shadow private double damage;
+    @Shadow protected boolean inGround;
     @Shadow public int arrowShake;
     @Shadow private int xTile;
     @Shadow private int yTile;
@@ -68,13 +70,13 @@ public abstract class MixinEntityArrow extends MixinEntity implements IMixinEnti
     @Override
     public void spongeImpl$readFromSpongeCompound(NBTTagCompound compound) {
         super.spongeImpl$readFromSpongeCompound(compound);
-        ProjectileSourceSerializer.readSourceFromNbt(compound, this);
+        ProjectileSourceSerializer.readSourceFromNbt(compound, ((Arrow) this));
     }
 
     @Override
     public void spongeImpl$writeToSpongeCompound(NBTTagCompound compound) {
         super.spongeImpl$writeToSpongeCompound(compound);
-        ProjectileSourceSerializer.writeSourceToNbt(compound, this.getShooter(), this.shootingEntity);
+        ProjectileSourceSerializer.writeSourceToNbt(compound, ((Arrow) this).getShooter(), this.shootingEntity);
     }
 
     /**
@@ -83,7 +85,7 @@ public abstract class MixinEntityArrow extends MixinEntity implements IMixinEnti
     @Inject(method = "onHit", at = @At("HEAD"), cancellable = true)
     private void onProjectileHit(RayTraceResult hitResult, CallbackInfo ci) {
         if (!this.world.isRemote) {
-            if (SpongeCommonEventFactory.handleCollideImpactEvent((EntityArrow) (Object) this, getShooter(), hitResult)) {
+            if (SpongeCommonEventFactory.handleCollideImpactEvent((EntityArrow) (Object) this, ((Arrow) this).getShooter(), hitResult)) {
                 // deflect and drop to ground
                 this.motionX *= -0.10000000149011612D;
                 this.motionY *= -0.10000000149011612D;

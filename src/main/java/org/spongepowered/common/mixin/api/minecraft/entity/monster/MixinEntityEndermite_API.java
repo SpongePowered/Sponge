@@ -33,7 +33,7 @@ import org.spongepowered.api.entity.living.monster.Endermite;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExpirableData;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.List;
@@ -45,14 +45,14 @@ public abstract class MixinEntityEndermite_API extends MixinEntityMob_API implem
 
     @Override
     public ExpirableData getExpirableData() {
-        return new SpongeExpirableData(this.lifetime, DataConstants.Entity.Silverfish.MAX_EXPIRATION_TICKS);
+        return new SpongeExpirableData(this.lifetime, Constants.Entity.Silverfish.MAX_EXPIRATION_TICKS);
     }
 
     @Override
     public MutableBoundedValue<Integer> expireTicks() {
         return SpongeValueFactory.boundedBuilder(Keys.EXPIRATION_TICKS)
                 .minimum(0)
-                .maximum(DataConstants.Entity.Silverfish.MAX_EXPIRATION_TICKS)
+                .maximum(Constants.Entity.Silverfish.MAX_EXPIRATION_TICKS)
                 .defaultValue(0)
                 .actualValue(this.lifetime)
                 .build();

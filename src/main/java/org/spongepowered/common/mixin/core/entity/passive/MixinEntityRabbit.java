@@ -34,7 +34,7 @@ import org.spongepowered.api.entity.living.animal.Rabbit;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeRabbitData;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.registry.type.entity.RabbitTypeRegistryModule;
 
@@ -52,7 +52,7 @@ public abstract class MixinEntityRabbit extends MixinEntityAnimal implements Rab
 
     @Override
     public Value<RabbitType> variant() {
-        return new SpongeValue<>(Keys.RABBIT_TYPE, DataConstants.Entity.Rabbit.DEFAULT_TYPE, RabbitTypeRegistryModule.RABBIT_IDMAP.get(this.getRabbitType()));
+        return new SpongeValue<>(Keys.RABBIT_TYPE, Constants.Entity.Rabbit.DEFAULT_TYPE, RabbitTypeRegistryModule.RABBIT_IDMAP.get(this.getRabbitType()));
     }
 
     @Override

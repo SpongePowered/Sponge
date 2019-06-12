@@ -107,7 +107,7 @@ import org.spongepowered.common.interfaces.IMixinSubject;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.ServerWorldBridge;
-import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
+import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
 import org.spongepowered.common.mixin.core.world.storage.MixinWorldInfo;
 import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.relocate.co.aikar.timings.TimingsManager;
@@ -366,7 +366,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             return;
         }
 
-        IMixinChunkProviderServer chunkProviderServer = (IMixinChunkProviderServer) worldServer.getChunkProvider();
+        ServerChunkProviderBridge chunkProviderServer = (ServerChunkProviderBridge) worldServer.getChunkProvider();
         chunkProviderServer.setForceChunkRequests(true);
 
         try (GenerationContext<GenericGenerationContext> context = GenerationPhase.State.TERRAIN_GENERATION.createPhaseContext()

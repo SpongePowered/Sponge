@@ -56,7 +56,7 @@ import java.util.Set;
 @SuppressWarnings("rawtypes")
 @NonnullByDefault
 @Mixin(TileEntityChest.class)
-public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot implements Chest, ILockableContainer {
+public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot {
 
     @Shadow public float lidAngle;
     @Shadow public int numPlayersUsing;
@@ -67,13 +67,11 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot i
 
     @Shadow public abstract void checkForAdjacentChests();
 
-    @SuppressWarnings("unchecked")
     @Override
     public ReusableLens<?> generateLens(Fabric fabric, InventoryAdapter adapter) {
-        return ReusableLens.getLens(GridInventoryLens.class, ((InventoryAdapter) this), this::generateSlotProvider, this::generateRootLens);
+        return ReusableLens.getLens(GridInventoryLens.class, this, this::generateSlotProvider, this::generateRootLens);
     }
 
-    @SuppressWarnings("unchecked")
     private SlotProvider generateSlotProvider() {
         return new SlotCollection.Builder().add(27).build();
     }
@@ -90,15 +88,19 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot i
      * @reason Overwritten in case chests ever attempt to tick
      */
     @Inject(method = "update", at = @At("HEAD"), cancellable = true)
-    private void onUpdate(CallbackInfo ci) {
+    private void impl$DisableTickingChestsOnServer(CallbackInfo ci) {
         if (this.world == null || !this.world.isRemote) {
             // chests should never tick on server
             ci.cancel();
         }
     }
 
-    @Inject(method = "openInventory", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;addBlockEvent(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;II)V"), cancellable = true)
-    private void onOpenInventory(EntityPlayer player, CallbackInfo ci) {
+    @Inject(method = "openInventory",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/World;addBlockEvent(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;II)V"),
+        cancellable = true)
+    private void impl$Moved(EntityPlayer player, CallbackInfo ci) {
         // Moved out of tick loop
         if (this.world == null) {
             ci.cancel();
@@ -127,8 +129,13 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot i
         }
     }
 
-    @Inject(method = "closeInventory", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;addBlockEvent(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;II)V"), cancellable = true)
-    private void onCloseInventory(EntityPlayer player, CallbackInfo ci) {
+    @Inject(
+        method = "closeInventory",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/World;addBlockEvent(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;II)V"),
+        cancellable = true)
+    private void impl$MovedSoundOutofTickLoop(EntityPlayer player, CallbackInfo ci) {
         // Moved out of tick loop
         if (this.world == null) {
             ci.cancel();
@@ -163,37 +170,5 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot i
         }
     }
 
-    @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
-        Optional<ConnectedDirectionData> connectedChestData = get(ConnectedDirectionData.class);
-        if (connectedChestData.isPresent()) {
-            manipulators.add(connectedChestData.get());
-        }
-    }
-
-    @Override
-    public Optional<Inventory> getDoubleChestInventory() {
-        return InventoryUtil.getDoubleChestInventory(((TileEntityChest)(Object) this));
-    }
-
-    @Override
-    public Set<Chest> getConnectedChests() {
-        this.checkForAdjacentChests();
-        Set<Chest> set = new HashSet<>();
-        if (this.adjacentChestXNeg != null) {
-            set.add(((Chest) this.adjacentChestXNeg));
-        }
-        if (this.adjacentChestXPos != null) {
-            set.add(((Chest) this.adjacentChestXPos));
-        }
-        if (this.adjacentChestZNeg != null) {
-            set.add(((Chest) this.adjacentChestZNeg));
-        }
-        if (this.adjacentChestZPos != null) {
-            set.add(((Chest) this.adjacentChestZPos));
-        }
-        return set;
-    }
 }
 

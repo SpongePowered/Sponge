@@ -30,12 +30,12 @@ import org.spongepowered.api.data.manipulator.mutable.entity.ArtData;
 import org.spongepowered.api.data.type.Art;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeArtData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 
 public class SpongeArtData extends AbstractSingleCatalogData<Art, ArtData, ImmutableArtData> implements ArtData {
 
     public SpongeArtData() {
-        this(DataConstants.Catalog.DEFAULT_ART);
+        this(Constants.Catalog.DEFAULT_ART);
     }
 
     public SpongeArtData(Art value) {

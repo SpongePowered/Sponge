@@ -39,12 +39,11 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.TileEntityActivationModCategory;
 import org.spongepowered.common.config.category.TileEntityActivationCategory;
-import org.spongepowered.common.config.type.GeneralConfigBase;
 import org.spongepowered.common.config.type.GlobalConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
-import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
+import org.spongepowered.common.bridge.world.ChunkBridge;
+import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModData_Activation;
 import org.spongepowered.common.util.VecHelper;
@@ -131,7 +130,7 @@ public class TileEntityActivation {
         for (PlayerChunkMapEntry playerChunkMapEntry : playerChunkMap.entries) {
             for (EntityPlayer player : playerChunkMapEntry.players) {
                 final Chunk chunk = playerChunkMapEntry.chunk;
-                if (chunk == null || chunk.unloadQueued || ((IMixinChunk) chunk).isPersistedChunk()) {
+                if (chunk == null || chunk.unloadQueued || ((ChunkBridge) chunk).isPersistedChunk()) {
                     continue;
                 }
 
@@ -152,7 +151,7 @@ public class TileEntityActivation {
         for (Map.Entry<BlockPos, TileEntity> mapEntry : chunk.getTileEntityMap().entrySet()) {
             final TileEntity tileEntity = mapEntry.getValue();
             final IModData_Activation spongeTileEntity = (IModData_Activation) tileEntity;
-            if (spongeTileEntity.getSpongeTickRate() <= 0 || !((IMixinTileEntity) tileEntity).shouldTick()) {
+            if (spongeTileEntity.getSpongeTickRate() <= 0 || !((TileEntityBridge) tileEntity).shouldTick()) {
                 // never activate
                 continue;
             }
@@ -195,7 +194,7 @@ public class TileEntityActivation {
         }
 
         final World world = tileEntity.getWorld();
-        final IMixinChunk activeChunk = ((IMixinTileEntity) tileEntity).getActiveChunk();
+        final ChunkBridge activeChunk = ((TileEntityBridge) tileEntity).getActiveChunk();
         if (activeChunk == null) {
             // Should never happen but just in case for mods, always tick
             return true;

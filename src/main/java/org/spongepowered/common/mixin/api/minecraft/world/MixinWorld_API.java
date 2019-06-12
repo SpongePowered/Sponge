@@ -32,6 +32,7 @@ import com.flowpowered.math.vector.Vector2d;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLiving;
@@ -54,6 +55,7 @@ import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.util.ClassInheritanceMultiMap;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -73,12 +75,25 @@ import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.Property;
+import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.merge.MergeFunction;
+import org.spongepowered.api.data.persistence.InvalidDataException;
+import org.spongepowered.api.data.property.PropertyStore;
+import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
@@ -90,6 +105,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.util.AABB;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.Functional;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.world.BlockChangeFlag;
@@ -110,16 +126,18 @@ import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
+import org.spongepowered.common.bridge.world.ChunkBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.registry.provider.DirectionFacingProvider;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
-import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
-import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
+import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeDimension;
 import org.spongepowered.common.world.extent.ExtentViewDownsize;
@@ -145,10 +163,6 @@ import javax.annotation.Nullable;
 @Mixin(net.minecraft.world.World.class)
 public abstract class MixinWorld_API implements World {
 
-    @Nullable private Context worldContext;
-    protected boolean processingExplosion = false;
-    protected SpongeDimension spongeDimensionWrapper = new SpongeDimension(this.provider);
-
     // @formatter:off
     @Shadow @Final public boolean isRemote;
     @Shadow @Final public WorldProvider provider;
@@ -156,54 +170,16 @@ public abstract class MixinWorld_API implements World {
     @Shadow @Final public Profiler profiler;
     @Shadow @Final public List<EntityPlayer> playerEntities;
     @Shadow @Final public List<net.minecraft.entity.Entity> loadedEntityList;
-    @Shadow @Final public List<net.minecraft.entity.Entity> weatherEffects;
-    @Shadow @Final public List<net.minecraft.entity.Entity> unloadedEntityList;
     @Shadow @Final public List<net.minecraft.tileentity.TileEntity> loadedTileEntityList;
-    @Shadow @Final public List<net.minecraft.tileentity.TileEntity> tickableTileEntities;
-    @Shadow @Final public List<net.minecraft.tileentity.TileEntity> tileEntitiesToBeRemoved;
-    @Shadow @Final private List<net.minecraft.tileentity.TileEntity> addedTileEntityList;
     @Shadow @Final protected ISaveHandler saveHandler;
     @Shadow protected List<IWorldEventListener> eventListeners;
-    @Shadow public int[] lightUpdateBlockList;
-    @Shadow public int skylightSubtracted;
-    @Shadow public int seaLevel;
-
-    @Shadow public boolean processingLoadedTiles;
-    @Shadow protected boolean scheduledUpdatesAreImmediate;
+    @Shadow private int seaLevel;
     @Shadow protected WorldInfo worldInfo;
-    @Shadow protected IChunkProvider chunkProvider;
-    @Shadow @Final public net.minecraft.world.border.WorldBorder worldBorder;
 
-    @Shadow protected int updateLCG;
     @Shadow public abstract net.minecraft.world.border.WorldBorder shadow$getWorldBorder();
-    @Shadow public abstract EnumDifficulty shadow$getDifficulty();
-
-    @Shadow protected abstract void tickPlayers();
-
-    @Shadow public net.minecraft.world.World init() {
-        // Should never be overwritten because this is @Shadow'ed
-        throw new RuntimeException("Bad things have happened");
-    }
-
-    // To be overridden in MixinWorldServer_Lighting
-    @Shadow public abstract int getLight(BlockPos pos);
-    @Shadow public abstract int getLight(BlockPos pos, boolean checkNeighbors);
-    @Shadow public abstract int getRawLight(BlockPos pos, EnumSkyBlock lightType);
-    @Shadow public abstract int getSkylightSubtracted();
+    @Shadow public net.minecraft.world.World init() { throw new RuntimeException("Bad things have happened"); }
     @Shadow public abstract net.minecraft.world.chunk.Chunk getChunk(BlockPos pos);
     @Shadow public abstract WorldInfo getWorldInfo();
-    @Shadow public abstract boolean checkLight(BlockPos pos);
-    @Shadow public abstract boolean checkLightFor(EnumSkyBlock lightType, BlockPos pos);
-    @Shadow public abstract boolean addTileEntity(net.minecraft.tileentity.TileEntity tile);
-    @Shadow public abstract void onEntityAdded(net.minecraft.entity.Entity entityIn);
-    @Shadow public abstract boolean isAreaLoaded(BlockPos from, BlockPos to);
-    @Shadow public abstract boolean isAreaLoaded(BlockPos center, int radius, boolean allowEmpty);
-    @Shadow public abstract boolean isAreaLoaded(int xStart, int yStart, int zStart, int xEnd, int yEnd, int zEnd, boolean allowEmpty);
-    @Shadow public abstract void onEntityRemoved(net.minecraft.entity.Entity entityIn);
-    @Shadow public abstract void updateEntity(net.minecraft.entity.Entity ent);
-    @Shadow public abstract boolean isBlockLoaded(BlockPos pos);
-    @Shadow public void markChunkDirty(BlockPos pos, net.minecraft.tileentity.TileEntity unusedTileEntity){};
-   // @Shadow public abstract List<Entity> getEntitiesInAABBexcluding(@Nullable net.minecraft.entity.Entity entityIn, AxisAlignedBB boundingBox, @Nullable Predicate <? super net.minecraft.entity.Entity > predicate);
     @Shadow public abstract Biome getBiome(BlockPos pos);
     @Shadow public abstract net.minecraft.world.chunk.Chunk getChunk(int chunkX, int chunkZ);
     @Shadow public abstract List<net.minecraft.entity.Entity> getEntities(Class<net.minecraft.entity.Entity> entityType,
@@ -211,22 +187,18 @@ public abstract class MixinWorld_API implements World {
     @Shadow public abstract <T extends net.minecraft.entity.Entity> List<T> getEntitiesWithinAABB(Class <? extends T > clazz, AxisAlignedBB aabb,
             com.google.common.base.Predicate<? super T > filter);
     @Shadow public abstract MinecraftServer getMinecraftServer();
-    // Methods needed for MixinWorldServer & Tracking
     @Shadow public abstract boolean setBlockState(BlockPos pos, IBlockState state);
-    @Shadow public abstract void notifyBlockUpdate(BlockPos pos, IBlockState oldState, IBlockState newState, int flags);
+    @Shadow public abstract boolean setBlockState(BlockPos pos, IBlockState state, int flags);
     @Shadow public abstract void playSound(EntityPlayer p_184148_1_, double p_184148_2_, double p_184148_4_, double p_184148_6_, SoundEvent p_184148_8_, net.minecraft.util.SoundCategory p_184148_9_, float p_184148_10_, float p_184148_11_);
     @Shadow public abstract BlockPos getPrecipitationHeight(BlockPos pos);
     @Shadow public abstract List<AxisAlignedBB> getCollisionBoxes(net.minecraft.entity.Entity entityIn, AxisAlignedBB bb);
-    @Shadow public abstract void notifyLightSet(BlockPos pos);
-    @Shadow @Nullable private net.minecraft.tileentity.TileEntity getPendingTileEntityAt(BlockPos p_189508_1_) {
-        return null; // Shadowed
-    }
     @Shadow public abstract int getHeight(int x, int z);
-
-
     @Shadow public abstract IBlockState getBlockState(BlockPos pos);
-
     @Shadow @Nullable public abstract net.minecraft.tileentity.TileEntity getTileEntity(BlockPos pos);
+
+    @Nullable private Context worldContext;
+    boolean processingExplosion = false;
+    private SpongeDimension spongeDimensionWrapper = new SpongeDimension(this.provider);
 
     @SuppressWarnings("unchecked")
     @Override
@@ -325,7 +297,7 @@ public abstract class MixinWorld_API implements World {
             }
 
             final ChunkProviderServer chunkProviderServer = (ChunkProviderServer) chunk.getWorld().getChunkProvider();
-            ((IMixinChunkProviderServer) chunkProviderServer).unloadChunkAndSave(chunk);
+            ((ServerChunkProviderBridge) chunkProviderServer).unloadChunkAndSave(chunk);
             net.minecraft.world.chunk.Chunk newChunk = chunkProviderServer.chunkGenerator.generateChunk(cx, cz);
             PlayerChunkMapEntry playerChunk = ((WorldServer) chunk.getWorld()).getPlayerChunkMap().getEntry(cx, cz);
             if (playerChunk != null) {
@@ -341,7 +313,7 @@ public abstract class MixinWorld_API implements World {
                     newChunk.addEntity(entity);
                 }
 
-                if (((IMixinChunkProviderServer) chunkProviderServer).getLoadedChunkWithoutMarkingActive(cx, cz) == null) {
+                if (((ServerChunkProviderBridge) chunkProviderServer).getLoadedChunkWithoutMarkingActive(cx, cz) == null) {
                     return Optional.of((Chunk) newChunk);
                 }
 
@@ -361,7 +333,7 @@ public abstract class MixinWorld_API implements World {
                 }
             }
 
-            return Optional.ofNullable((Chunk) newChunk);
+            return Optional.of((Chunk) newChunk);
         }
     }
 
@@ -589,53 +561,53 @@ public abstract class MixinWorld_API implements World {
 
     @Override
     public Vector3i getBiomeMin() {
-        return DataConstants.World.BIOME_MIN;
+        return Constants.World.BIOME_MIN;
     }
 
     @Override
     public Vector3i getBiomeMax() {
-        return DataConstants.World.BIOME_MAX;
+        return Constants.World.BIOME_MAX;
     }
 
     @Override
     public Vector3i getBiomeSize() {
-        return DataConstants.World.BIOME_SIZE;
+        return Constants.World.BIOME_SIZE;
     }
 
     @Override
     public Vector3i getBlockMin() {
-        return DataConstants.World.BLOCK_MIN;
+        return Constants.World.BLOCK_MIN;
     }
 
     @Override
     public Vector3i getBlockMax() {
-        return DataConstants.World.BLOCK_MAX;
+        return Constants.World.BLOCK_MAX;
     }
 
     @Override
     public Vector3i getBlockSize() {
-        return DataConstants.World.BLOCK_SIZE;
+        return Constants.World.BLOCK_SIZE;
     }
 
     @Override
     public boolean containsBiome(int x, int y, int z) {
-        return VecHelper.inBounds(x, y, z, DataConstants.World.BIOME_MIN, DataConstants.World.BIOME_MAX);
+        return VecHelper.inBounds(x, y, z, Constants.World.BIOME_MIN, Constants.World.BIOME_MAX);
     }
 
     @Override
     public boolean containsBlock(int x, int y, int z) {
-        return VecHelper.inBounds(x, y, z, DataConstants.World.BLOCK_MIN, DataConstants.World.BLOCK_MAX);
+        return VecHelper.inBounds(x, y, z, Constants.World.BLOCK_MIN, Constants.World.BLOCK_MAX);
     }
 
     private void checkBiomeBounds(int x, int y, int z) {
         if (!containsBiome(x, y, z)) {
-            throw new PositionOutOfBoundsException(new Vector3i(x, y, z), DataConstants.World.BIOME_MIN, DataConstants.World.BIOME_MAX);
+            throw new PositionOutOfBoundsException(new Vector3i(x, y, z), Constants.World.BIOME_MIN, Constants.World.BIOME_MAX);
         }
     }
 
     protected void checkBlockBounds(int x, int y, int z) {
         if (!containsBlock(x, y, z)) {
-            throw new PositionOutOfBoundsException(new Vector3i(x, y, z), DataConstants.World.BLOCK_MIN, DataConstants.World.BLOCK_MAX);
+            throw new PositionOutOfBoundsException(new Vector3i(x, y, z), Constants.World.BLOCK_MIN, Constants.World.BLOCK_MAX);
         }
     }
 
@@ -893,11 +865,11 @@ public abstract class MixinWorld_API implements World {
                 // Get the chunk and call the intersection method to perform the task locally
                 final Optional<Chunk> chunk = getChunkAtBlock(xChunk, 0, zChunk);
                 if (chunk.isPresent()) {
-                    ((IMixinChunk) chunk.get())
+                    ((ChunkBridge) chunk.get())
                             .getIntersectingEntities(chunkStart, direction, remainingDistance, filter, chunkStart.getY(), yNext, intersecting);
                 }
                 // If the intersections are near another chunk, its entities might be partially in the current chunk, so include it also
-                final IMixinChunk nearIntersections = getChunkNearIntersections(xChunk, zChunk, xCurrent, zCurrent, xNext, zNext);
+                final ChunkBridge nearIntersections = getChunkNearIntersections(xChunk, zChunk, xCurrent, zCurrent, xNext, zNext);
                 if (nearIntersections != null) {
                     nearIntersections
                             .getIntersectingEntities(chunkStart, direction, remainingDistance, filter, chunkStart.getY(), yNext, intersecting);
@@ -914,7 +886,7 @@ public abstract class MixinWorld_API implements World {
         return intersecting;
     }
 
-    private IMixinChunk getChunkNearIntersections(int xChunk, int zChunk, double xCurrent, double zCurrent, double xNext, double zNext) {
+    private ChunkBridge getChunkNearIntersections(int xChunk, int zChunk, double xCurrent, double zCurrent, double xNext, double zNext) {
         final int chunkWidth = SpongeChunkLayout.CHUNK_SIZE.getX();
         // Chunk corner coordinates
         final Vector2d c1 = new Vector2d(xChunk, zChunk);
@@ -929,42 +901,42 @@ public abstract class MixinWorld_API implements World {
         final boolean d21 = c1.distanceSquared(xNext, zNext) <= nearDistance2;
         if (d11 && d21) {
             // Near corner -x, -z
-            return (IMixinChunk) getChunkAtBlock(xChunk - chunkWidth, 0, zChunk - chunkWidth).orElse(null);
+            return (ChunkBridge) getChunkAtBlock(xChunk - chunkWidth, 0, zChunk - chunkWidth).orElse(null);
         }
         final boolean d12 = c2.distanceSquared(xCurrent, zCurrent) <= nearDistance2;
         final boolean d22 = c2.distanceSquared(xNext, zNext) <= nearDistance2;
         if (d12 && d22) {
             // Near corner +x, -z
-            return (IMixinChunk) getChunkAtBlock(xChunk + chunkWidth, 0, zChunk - chunkWidth).orElse(null);
+            return (ChunkBridge) getChunkAtBlock(xChunk + chunkWidth, 0, zChunk - chunkWidth).orElse(null);
         }
         final boolean d13 = c3.distanceSquared(xCurrent, zCurrent) <= nearDistance2;
         final boolean d23 = c3.distanceSquared(xNext, zNext) <= nearDistance2;
         if (d13 && d23) {
             // Near corner -x, +z
-            return (IMixinChunk) getChunkAtBlock(xChunk - chunkWidth, 0, zChunk + chunkWidth).orElse(null);
+            return (ChunkBridge) getChunkAtBlock(xChunk - chunkWidth, 0, zChunk + chunkWidth).orElse(null);
         }
         final boolean d14 = c4.distanceSquared(xCurrent, zCurrent) <= nearDistance2;
         final boolean d24 = c4.distanceSquared(xNext, zNext) <= nearDistance2;
         if (d14 && d24) {
             // Near corner +x, +z
-            return (IMixinChunk) getChunkAtBlock(xChunk + chunkWidth, 0, zChunk + chunkWidth).orElse(null);
+            return (ChunkBridge) getChunkAtBlock(xChunk + chunkWidth, 0, zChunk + chunkWidth).orElse(null);
         }
         // Look for two intersections being near the corners on the same face
         if (d11 && d23 || d21 && d13) {
             // Near face -x
-            return (IMixinChunk) getChunkAtBlock(xChunk - chunkWidth, 0, zChunk).orElse(null);
+            return (ChunkBridge) getChunkAtBlock(xChunk - chunkWidth, 0, zChunk).orElse(null);
         }
         if (d11 && d22 || d21 && d12) {
             // Near face -z
-            return (IMixinChunk) getChunkAtBlock(xChunk, 0, zChunk - chunkWidth).orElse(null);
+            return (ChunkBridge) getChunkAtBlock(xChunk, 0, zChunk - chunkWidth).orElse(null);
         }
         if (d14 && d22 || d24 && d12) {
             // Near face +x
-            return (IMixinChunk) getChunkAtBlock(xChunk + chunkWidth, 0, zChunk).orElse(null);
+            return (ChunkBridge) getChunkAtBlock(xChunk + chunkWidth, 0, zChunk).orElse(null);
         }
         if (d14 && d23 || d24 && d13) {
             // Near face +z
-            return (IMixinChunk) getChunkAtBlock(xChunk, 0, zChunk + chunkWidth).orElse(null);
+            return (ChunkBridge) getChunkAtBlock(xChunk, 0, zChunk + chunkWidth).orElse(null);
         }
         return null;
     }
@@ -975,29 +947,29 @@ public abstract class MixinWorld_API implements World {
         final Vector3d direction = yDirection < 0 ? Vector3d.UNIT_Y.negate() : Vector3d.UNIT_Y;
         final double endY = start.getY() + yDirection * distance;
         final Vector3i chunkPos = SpongeChunkLayout.instance.forceToChunk(start.toInt());
-        ((IMixinChunk) getChunk(chunkPos).get()).getIntersectingEntities(start, direction, distance, filter, start.getY(), endY, intersecting);
+        ((ChunkBridge) getChunk(chunkPos).get()).getIntersectingEntities(start, direction, distance, filter, start.getY(), endY, intersecting);
         // Check adjacent chunks if near them
         final int nearDistance = 2;
         // Neighbour -x chunk
         final Vector3i chunkBlockPos = SpongeChunkLayout.instance.forceToWorld(chunkPos);
         if (start.getX() - chunkBlockPos.getX() <= nearDistance) {
-            ((IMixinChunk) getChunk(chunkPos.add(-1, 0, 0)).get())
+            ((ChunkBridge) getChunk(chunkPos.add(-1, 0, 0)).get())
                     .getIntersectingEntities(start, direction, distance, filter, start.getY(), endY, intersecting);
         }
         // Neighbour -z chunk
         if (start.getZ() - chunkBlockPos.getZ() <= nearDistance) {
-            ((IMixinChunk) getChunk(chunkPos.add(0, 0, -1)).get())
+            ((ChunkBridge) getChunk(chunkPos.add(0, 0, -1)).get())
                     .getIntersectingEntities(start, direction, distance, filter, start.getY(), endY, intersecting);
         }
         // Neighbour +x chunk
         final int chunkWidth = SpongeChunkLayout.CHUNK_SIZE.getX();
         if (chunkBlockPos.getX() + chunkWidth - start.getX() <= nearDistance) {
-            ((IMixinChunk) getChunk(chunkPos.add(1, 0, 0)).get())
+            ((ChunkBridge) getChunk(chunkPos.add(1, 0, 0)).get())
                     .getIntersectingEntities(start, direction, distance, filter, start.getY(), endY, intersecting);
         }
         // Neighbour +z chunk
         if (chunkBlockPos.getZ() + chunkWidth - start.getZ() <= nearDistance) {
-            ((IMixinChunk) getChunk(chunkPos.add(0, 0, 1)).get())
+            ((ChunkBridge) getChunk(chunkPos.add(0, 0, 1)).get())
                     .getIntersectingEntities(start, direction, distance, filter, start.getY(), endY, intersecting);
         }
         return intersecting;
@@ -1034,4 +1006,229 @@ public abstract class MixinWorld_API implements World {
         return this.seaLevel;
     }
 
+
+    @Override
+    public <T extends Property<?, ?>> Optional<T> getProperty(int x, int y, int z, Class<T> propertyClass) {
+        final Optional<PropertyStore<T>> optional = Sponge.getPropertyRegistry().getStore(propertyClass);
+        return optional.flatMap(tPropertyStore -> tPropertyStore.getFor(new Location<>(this, x, y, z)));
+    }
+
+    @Override
+    public <T extends Property<?, ?>> Optional<T> getProperty(int x, int y, int z, Direction direction, Class<T> propertyClass) {
+        final Optional<PropertyStore<T>> optional = Sponge.getPropertyRegistry().getStore(propertyClass);
+        return optional.flatMap(tPropertyStore -> tPropertyStore.getFor(new Location<>(this, x, y, z), direction));
+    }
+
+    @Override
+    public Collection<Property<?, ?>> getProperties(int x, int y, int z) {
+        return SpongeImpl.getPropertyRegistry().getPropertiesFor(new Location<World>(this, x, y, z));
+    }
+
+    @Override
+    public Collection<Direction> getFacesWithProperty(int x, int y, int z, Class<? extends Property<?, ?>> propertyClass) {
+        final Optional<? extends PropertyStore<? extends Property<?, ?>>> optional = Sponge.getPropertyRegistry().getStore(propertyClass);
+        if (!optional.isPresent()) {
+            return Collections.emptyList();
+        }
+        final PropertyStore<? extends Property<?, ?>> store = optional.get();
+        final Location<World> loc = new Location<>(this, x, y, z);
+        ImmutableList.Builder<Direction> faces = ImmutableList.builder();
+        for (EnumFacing facing : EnumFacing.values()) {
+            Direction direction = DirectionFacingProvider.getInstance().getKey(facing).get();
+            if (store.getFor(loc, direction).isPresent()) {
+                faces.add(direction);
+            }
+        }
+        return faces.build();
+    }
+
+    @Override
+    public <E> Optional<E> get(int x, int y, int z, Key<? extends BaseValue<E>> key) {
+        final Optional<E> optional = getBlock(x, y, z).withExtendedProperties(new Location<>(this, x, y, z)).get(key);
+        if (optional.isPresent()) {
+            return optional;
+        }
+        final Optional<TileEntity> tileEntityOptional = getTileEntity(x, y, z);
+        return tileEntityOptional.flatMap(tileEntity -> tileEntity.get(key));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T extends DataManipulator<?, ?>> Optional<T> get(int x, int y, int z, Class<T> manipulatorClass) {
+        final Collection<DataManipulator<?, ?>> manipulators = getManipulators(x, y, z);
+        for (DataManipulator<?, ?> manipulator : manipulators) {
+            if (manipulatorClass.isInstance(manipulator)) {
+                return Optional.of((T) manipulator);
+            }
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public <T extends DataManipulator<?, ?>> Optional<T> getOrCreate(int x, int y, int z, Class<T> manipulatorClass) {
+        final Optional<T> optional = get(x, y, z, manipulatorClass);
+        if (optional.isPresent()) {
+            return optional;
+        }
+        final Optional<TileEntity> tileEntity = getTileEntity(x, y, z);
+        return tileEntity.flatMap(tileEntity1 -> tileEntity1.getOrCreate(manipulatorClass));
+    }
+
+    @Override
+    public <E, V extends BaseValue<E>> Optional<V> getValue(int x, int y, int z, Key<V> key) {
+        final BlockState blockState = getBlock(x, y, z).withExtendedProperties(new Location<>(this, x, y, z));
+        if (blockState.supports(key)) {
+            return blockState.getValue(key);
+        }
+        final Optional<TileEntity> tileEntity = getTileEntity(x, y, z);
+        if (tileEntity.isPresent() && tileEntity.get().supports(key)) {
+            return tileEntity.get().getValue(key);
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public boolean supports(int x, int y, int z, Key<?> key) {
+        final BlockState blockState = getBlock(x, y, z);
+        final boolean blockSupports = blockState.supports(key);
+        final Optional<TileEntity> tileEntity = getTileEntity(x, y, z);
+        final boolean tileEntitySupports = tileEntity.isPresent() && tileEntity.get().supports(key);
+        return blockSupports || tileEntitySupports;
+    }
+
+    @Override
+    public boolean supports(int x, int y, int z, Class<? extends DataManipulator<?, ?>> manipulatorClass) {
+        final BlockState blockState = getBlock(x, y, z);
+        final List<ImmutableDataManipulator<?, ?>> immutableDataManipulators = blockState.getManipulators();
+        boolean blockSupports = false;
+        for (ImmutableDataManipulator<?, ?> manipulator : immutableDataManipulators) {
+            if (manipulator.asMutable().getClass().isAssignableFrom(manipulatorClass)) {
+                blockSupports = true;
+                break;
+            }
+        }
+        if (!blockSupports) {
+            final Optional<TileEntity> tileEntity = getTileEntity(x, y, z);
+            final boolean tileEntitySupports;
+            tileEntitySupports = tileEntity.isPresent() && tileEntity.get().supports(manipulatorClass);
+            return tileEntitySupports;
+        }
+        return true;
+    }
+
+    @Override
+    public Set<Key<?>> getKeys(int x, int y, int z) {
+        final ImmutableSet.Builder<Key<?>> builder = ImmutableSet.builder();
+        final BlockState blockState = getBlock(x, y, z).withExtendedProperties(new Location<>(this, x, y, z));
+        builder.addAll(blockState.getKeys());
+        final Optional<TileEntity> tileEntity = getTileEntity(x, y, z);
+        tileEntity.ifPresent(tileEntity1 -> builder.addAll(tileEntity1.getKeys()));
+        return builder.build();
+    }
+
+    @Override
+    public Set<ImmutableValue<?>> getValues(int x, int y, int z) {
+        final ImmutableSet.Builder<ImmutableValue<?>> builder = ImmutableSet.builder();
+        final BlockState blockState = getBlock(x, y, z).withExtendedProperties(new Location<>(this, x, y, z));
+        builder.addAll(blockState.getValues());
+        final Optional<TileEntity> tileEntity = getTileEntity(x, y, z);
+        tileEntity.ifPresent(tileEntity1 -> builder.addAll(tileEntity1.getValues()));
+        return builder.build();
+    }
+
+    @Override
+    public <E> DataTransactionResult offer(int x, int y, int z, Key<? extends BaseValue<E>> key, E value) {
+        final BlockState blockState = getBlock(x, y, z).withExtendedProperties(new Location<>(this, x, y, z));
+        if (blockState.supports(key)) {
+            ImmutableValue<E> old = ((Value<E>) getValue(x, y, z, (Key) key).get()).asImmutable();
+            setBlock(x, y, z, blockState.with(key, value).get());
+            ImmutableValue<E> newVal = ((Value<E>) getValue(x, y, z, (Key) key).get()).asImmutable();
+            return DataTransactionResult.successReplaceResult(newVal, old);
+        }
+        return getTileEntity(x, y, z)
+            .map(tileEntity ->  tileEntity.offer(key, value))
+            .orElseGet(DataTransactionResult::failNoData);
+    }
+
+    @Override
+    public DataTransactionResult offer(int x, int y, int z, DataManipulator<?, ?> manipulator, MergeFunction function) {
+        final BlockState blockState = getBlock(x, y, z).withExtendedProperties(new Location<>(this, x, y, z));
+        final ImmutableDataManipulator<?, ?> immutableDataManipulator = manipulator.asImmutable();
+        if (blockState.supports((Class) immutableDataManipulator.getClass())) {
+            final List<ImmutableValue<?>> old = new ArrayList<>(blockState.getValues());
+            final BlockState newState = blockState.with(immutableDataManipulator).get();
+            old.removeAll(newState.getValues());
+            setBlock(x, y, z, newState);
+            return DataTransactionResult.successReplaceResult(old, manipulator.getValues());
+        }
+        return getTileEntity(x, y, z)
+            .map(tileEntity -> tileEntity.offer(manipulator, function))
+            .orElseGet(() -> DataTransactionResult.failResult(manipulator.getValues()));
+    }
+
+    @Override
+    public DataTransactionResult remove(int x, int y, int z, Class<? extends DataManipulator<?, ?>> manipulatorClass) {
+        final Optional<TileEntity> tileEntityOptional = getTileEntity(x, y, z);
+        return tileEntityOptional
+            .map(tileEntity -> tileEntity.remove(manipulatorClass))
+            .orElseGet(DataTransactionResult::failNoData);
+    }
+
+    @Override
+    public DataTransactionResult remove(int x, int y, int z, Key<?> key) {
+        final Optional<TileEntity> tileEntityOptional = getTileEntity(x, y, z);
+        return tileEntityOptional
+            .map(tileEntity -> tileEntity.remove(key))
+            .orElseGet(DataTransactionResult::failNoData);
+    }
+
+    @Override
+    public DataTransactionResult undo(int x, int y, int z, DataTransactionResult result) {
+        return DataTransactionResult.failNoData(); // todo
+    }
+
+    @Override
+    public DataTransactionResult copyFrom(int xTo, int yTo, int zTo, DataHolder from) {
+        return copyFrom(xTo, yTo, zTo, from, MergeFunction.IGNORE_ALL);
+    }
+
+    @Override
+    public DataTransactionResult copyFrom(int xTo, int yTo, int zTo, DataHolder from, MergeFunction function) {
+        final DataTransactionResult.Builder builder = DataTransactionResult.builder();
+        final Collection<DataManipulator<?, ?>> manipulators = from.getContainers();
+        for (DataManipulator<?, ?> manipulator : manipulators) {
+            builder.absorbResult(offer(xTo, yTo, zTo, manipulator, function));
+        }
+        return builder.build();
+    }
+
+    @Override
+    public DataTransactionResult copyFrom(int xTo, int yTo, int zTo, int xFrom, int yFrom, int zFrom, MergeFunction function) {
+        return copyFrom(xTo, yTo, zTo, new Location<World>(this, xFrom, yFrom, zFrom), function);
+    }
+
+    @Override
+    public Collection<DataManipulator<?, ?>> getManipulators(int x, int y, int z) {
+        final List<DataManipulator<?, ?>> list = new ArrayList<>();
+        final Collection<ImmutableDataManipulator<?, ?>> manipulators = this.getBlock(x, y, z)
+            .withExtendedProperties(new Location<>(this, x, y, z))
+            .getManipulators();
+        for (ImmutableDataManipulator<?, ?> immutableDataManipulator : manipulators) {
+            list.add(immutableDataManipulator.asMutable());
+        }
+        final Optional<TileEntity> optional = getTileEntity(x, y, z);
+        optional
+            .ifPresent(tileEntity -> list.addAll(tileEntity.getContainers()));
+        return list;
+    }
+
+    @Override
+    public boolean validateRawData(int x, int y, int z, DataView container) {
+        return false; // todo
+    }
+
+    @Override
+    public void setRawData(int x, int y, int z, DataView container) throws InvalidDataException {
+        // todo
+    }
 }

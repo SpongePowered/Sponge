@@ -35,10 +35,10 @@ import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.bridge.world.ChunkBridge;
 import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
 import org.spongepowered.common.interfaces.world.ServerWorldBridge;
-import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
+import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
 import org.spongepowered.common.mixin.core.world.MixinWorld;
 
 import java.util.List;
@@ -69,7 +69,7 @@ public abstract class MixinWorldServer_Async_Lighting extends MixinWorld impleme
         if (false && !this.isAreaLoaded(pos, 17, false)) {
             return false;
         } else {
-            final IMixinChunk spongeChunk = (IMixinChunk) currentChunk;
+            final ChunkBridge spongeChunk = (ChunkBridge) currentChunk;
             int i = 0;
             int j = 0;
             //this.theProfiler.startSection("getBrightness"); // Sponge - don't use profiler off of main thread
@@ -188,7 +188,7 @@ public abstract class MixinWorldServer_Async_Lighting extends MixinWorld impleme
             spongeChunk.getQueuedLightingUpdates(lightType).remove((Short) this.blockPosToShort(pos));
             spongeChunk.getPendingLightUpdates().decrementAndGet();
             for (net.minecraft.world.chunk.Chunk neighborChunk : neighbors) {
-                final IMixinChunk neighbor = (IMixinChunk) neighborChunk;
+                final ChunkBridge neighbor = (ChunkBridge) neighborChunk;
                 neighbor.getPendingLightUpdates().decrementAndGet();
             }
 
@@ -205,10 +205,10 @@ public abstract class MixinWorldServer_Async_Lighting extends MixinWorld impleme
         }
 
         if (currentChunk == null) {
-            currentChunk = ((IMixinChunkProviderServer) this.chunkProvider).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
+            currentChunk = ((ServerChunkProviderBridge) this.chunkProvider).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
         }
 
-        final IMixinChunk spongeChunk = (IMixinChunk) currentChunk;
+        final ChunkBridge spongeChunk = (ChunkBridge) currentChunk;
         if (currentChunk == null || currentChunk.unloadQueued || !spongeChunk.areNeighborsLoaded()) {
             return false;
         }
@@ -226,7 +226,7 @@ public abstract class MixinWorldServer_Async_Lighting extends MixinWorld impleme
         List<Chunk> neighbors = spongeChunk.getNeighbors();
 
         // add diagonal chunks
-        IMixinChunk southChunk = (IMixinChunk) spongeChunk.getNeighborChunk(0);
+        ChunkBridge southChunk = (ChunkBridge) spongeChunk.getNeighborChunk(0);
         if (southChunk != null) {
             Chunk southEastChunk = southChunk.getNeighborChunk(2);
             Chunk southWestChunk = southChunk.getNeighborChunk(3);
@@ -237,7 +237,7 @@ public abstract class MixinWorldServer_Async_Lighting extends MixinWorld impleme
                 neighbors.add(southWestChunk);
             }
         }
-        IMixinChunk northChunk = (IMixinChunk) spongeChunk.getNeighborChunk(1);
+        ChunkBridge northChunk = (ChunkBridge) spongeChunk.getNeighborChunk(1);
         if (northChunk != null) {
             Chunk northEastChunk = northChunk.getNeighborChunk(2);
             Chunk northWestChunk = northChunk.getNeighborChunk(3);
@@ -250,7 +250,7 @@ public abstract class MixinWorldServer_Async_Lighting extends MixinWorld impleme
         }
 
         for (net.minecraft.world.chunk.Chunk neighborChunk : neighbors) {
-            final IMixinChunk neighbor = (IMixinChunk) neighborChunk;
+            final ChunkBridge neighbor = (ChunkBridge) neighborChunk;
             neighbor.getPendingLightUpdates().incrementAndGet();
             neighbor.setLightUpdateTime(chunk.getWorld().getTotalWorldTime());
         }

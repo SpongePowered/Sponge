@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.tileentity;
 
+import org.spongepowered.common.bridge.world.ChunkBridge;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimings;
 import co.aikar.timings.Timing;
 import com.google.common.base.MoreObjects;
@@ -35,16 +36,10 @@ import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.block.tileentity.TileEntityArchetype;
-import org.spongepowered.api.block.tileentity.TileEntityType;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -55,20 +50,12 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeTileEntityArchetypeBuilder;
 import org.spongepowered.common.data.nbt.CustomDataNbtUtil;
-import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
-import org.spongepowered.common.data.util.DataQueries;
-import org.spongepowered.common.data.util.DataUtil;
-import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
+import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.registry.type.block.TileEntityTypeRegistryModule;
-import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 
 import java.lang.ref.WeakReference;
@@ -79,10 +66,9 @@ import javax.annotation.Nullable;
 
 @NonnullByDefault
 @Mixin(net.minecraft.tileentity.TileEntity.class)
-@Implements(@Interface(iface = IMixinTileEntity.class, prefix = "tile$"))
-public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
+@Implements(@Interface(iface = TileEntityBridge.class, prefix = "tile$"))
+abstract class MixinTileEntity implements TileEntityBridge {
 
-    private final TileEntityType tileType = SpongeImplHooks.getTileEntityType(this.getClass());
     // uses different name to not clash with SpongeForge
     private final boolean isTileVanilla = getClass().getName().startsWith("net.minecraft.");
     @Nullable private Timing timing;
@@ -91,7 +77,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     @Nullable private User spongeOwner;
     @Nullable private User spongeNotifier;
     private boolean isTicking = false;
-    private WeakReference<IMixinChunk> activeChunk = new WeakReference<>(null);
+    private WeakReference<ChunkBridge> activeChunk = new WeakReference<>(null);
     // Used by tracker config
     private boolean allowsBlockBulkCapture = true;
     private boolean allowsEntityBulkCapture = true;
@@ -110,7 +96,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     @Override @Shadow public abstract void markDirty();
 
     @Inject(method = "<init>*", at = @At("RETURN"))
-    public void onConstruction(CallbackInfo ci) {
+    private void impl$RefreshTrackerStates(CallbackInfo ci) {
         this.refreshTrackerStates();
     }
 
@@ -119,99 +105,22 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
         this.markDirty();
     }
 
-    @Inject(method = "markDirty", at = @At(value = "HEAD"))
-    public void onMarkDirty(CallbackInfo ci) {
-        if (this.world != null && !this.world.isRemote) {
-            // This handles transfers to this TE from a source such as a Hopper
-            PhaseTracker.getInstance().getCurrentContext().getSource(TileEntity.class).ifPresent(currentTick -> {
-                if (currentTick != this) {
-                    net.minecraft.tileentity.TileEntity te = (net.minecraft.tileentity.TileEntity) currentTick;
-//                    world.getCauseTracker().trackTargetBlockFromSource(te, te.getPos(), this.getBlockType(), this.pos, PlayerTracker.Type.NOTIFIER);
-                }
-            });
-        }
-    }
 
     @SuppressWarnings({"rawtypes"})
     @Inject(method = "register(Ljava/lang/String;Ljava/lang/Class;)V", at = @At(value = "RETURN"))
-    private static void onRegister(String name, Class clazz, CallbackInfo callbackInfo) {
+    private static void impl$registerTileEntityClassWithSpongeRegistry(String name, Class clazz, CallbackInfo callbackInfo) {
         if (clazz != null) {
             TileEntityTypeRegistryModule.getInstance().doTileEntityRegistration(clazz, name);
         }
     }
 
-    @Override
-    public Location<World> getLocation() {
-        return new Location<>((World) this.world, VecHelper.toVector3i(this.getPos()));
-    }
-
-    @Override
-    public int getContentVersion() {
-        return 1;
-    }
-
-    @Override
-    public DataContainer toContainer() {
-        final DataContainer container = DataContainer.createNew()
-            .set(Queries.CONTENT_VERSION, getContentVersion())
-            .set(Queries.WORLD_ID, ((World) this.world).getUniqueId().toString())
-            .set(Queries.POSITION_X, this.getPos().getX())
-            .set(Queries.POSITION_Y, this.getPos().getY())
-            .set(Queries.POSITION_Z, this.getPos().getZ())
-            .set(DataQueries.BLOCK_ENTITY_TILE_TYPE, this.tileType.getId());
-        final NBTTagCompound compound = new NBTTagCompound();
-        this.writeToNBT(compound);
-        NbtDataUtil.filterSpongeCustomData(compound); // We must filter the custom data so it isn't stored twice
-        container.set(DataQueries.UNSAFE_NBT, NbtTranslator.getInstance().translateFrom(compound));
-        final Collection<DataManipulator<?, ?>> manipulators = ((CustomDataHolderBridge) this).getCustomManipulators();
-        if (!manipulators.isEmpty()) {
-            container.set(DataQueries.DATA_MANIPULATORS, DataUtil.getSerializedManipulatorList(manipulators));
-        }
-        return container;
-    }
-
-    @Override
-    public boolean validateRawData(DataView container) {
-        return container.contains(Queries.WORLD_ID)
-            && container.contains(Queries.POSITION_X)
-            && container.contains(Queries.POSITION_Y)
-            && container.contains(Queries.POSITION_Z)
-            && container.contains(DataQueries.BLOCK_ENTITY_TILE_TYPE)
-            && container.contains(DataQueries.UNSAFE_NBT);
-    }
-
-    @Override
-    public void setRawData(DataView container) throws InvalidDataException {
-
-    }
-
-    @Override
-    public boolean isValid() {
-        return !this.tileEntityInvalid;
-    }
-
-    @Override
-    public void setValid(boolean valid) {
-        this.tileEntityInvalid = valid;
-    }
-
-    @Override
-    public final TileEntityType getType() {
-        return this.tileType;
-    }
-
-    @Override
-    public BlockState getBlock() {
-        return (BlockState) this.world.getBlockState(this.getPos());
-    }
-
     @Inject(method = "invalidate", at = @At("RETURN"))
-    public void onSpongeInvalidate(CallbackInfo ci) {
+    private void impl$RemoveActiveChunkOnInvalidate(CallbackInfo ci) {
         this.setActiveChunk(null);
     }
 
     /**
-     * Hooks into vanilla's writeToNBT to call {@link #writeToNbt}.
+     * Hooks into vanilla's writeToNBT to call {@link #bridge$writeToSpongeCompound}.
      * <p>
      * <p> This makes it easier for other entity mixins to override writeToNBT without having to specify the <code>@Inject</code> annotation. </p>
      *
@@ -219,14 +128,14 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
      * @param ci (Unused) callback info
      */
     @Inject(method = "Lnet/minecraft/tileentity/TileEntity;writeToNBT(Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/nbt/NBTTagCompound;", at = @At("HEAD"))
-    public void onWriteToNBT(NBTTagCompound compound, CallbackInfoReturnable<NBTTagCompound> ci) {
+    private void impl$WriteSpongeDataToCompound(NBTTagCompound compound, CallbackInfoReturnable<NBTTagCompound> ci) {
         if (!((CustomDataHolderBridge) this).getCustomManipulators().isEmpty()) {
-            this.writeToNbt(this.getSpongeData());
+            this.bridge$writeToSpongeCompound(this.getSpongeData());
         }
     }
 
     /**
-     * Hooks into vanilla's readFromNBT to call {@link #readFromNbt}.
+     * Hooks into vanilla's readFromNBT to call {@link #bridge$readFromSpongeCompound}.
      * <p>
      * <p> This makes it easier for other entity mixins to override readSpongeNBT without having to specify the <code>@Inject</code> annotation. </p>
      *
@@ -234,9 +143,9 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
      * @param ci (Unused) callback info
      */
     @Inject(method = "Lnet/minecraft/tileentity/TileEntity;readFromNBT(Lnet/minecraft/nbt/NBTTagCompound;)V", at = @At("RETURN"))
-    public void onReadFromNBT(NBTTagCompound compound, CallbackInfo ci) {
+    private void impl$ReadSpongeDataFromCompound(NBTTagCompound compound, CallbackInfo ci) {
         if (this.hasTileDataCompound()) {
-            this.readFromNbt(this.getSpongeData());
+            this.bridge$readFromSpongeCompound(this.getSpongeData());
         }
     }
 
@@ -245,9 +154,8 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
      *
      * @param compound The SpongeData compound to read from
      */
-    @Override
-    public void readFromNbt(NBTTagCompound compound) {
-        CustomDataNbtUtil.readCustomData(compound, this);
+    protected void bridge$readFromSpongeCompound(NBTTagCompound compound) {
+        CustomDataNbtUtil.readCustomData(compound, (TileEntity) this);
     }
 
     /**
@@ -255,9 +163,8 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
      *
      * @param compound The SpongeData compound to write to
      */
-    @Override
-    public void writeToNbt(NBTTagCompound compound) {
-        CustomDataNbtUtil.writeCustomData(compound, this);
+    protected void bridge$writeToSpongeCompound(NBTTagCompound compound) {
+        CustomDataNbtUtil.writeCustomData(compound, (TileEntity) this);
     }
 
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
@@ -280,7 +187,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     }
 
     @Override
-    public Timing getTimingsHandler() {
+    public Timing spongeImpl$getTimingHandler() {
         if (this.timing == null) {
             this.timing = SpongeTimings.getTileEntityTiming(this);
         }
@@ -335,12 +242,12 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
 
     @Override
     @Nullable
-    public IMixinChunk getActiveChunk() {
+    public ChunkBridge getActiveChunk() {
         return this.activeChunk.get();
     }
 
     @Override
-    public void setActiveChunk(@Nullable IMixinChunk chunk) {
+    public void setActiveChunk(@Nullable ChunkBridge chunk) {
         if (chunk == null && this.world != null && !this.world.isRemote && !this.isValid()) {
             if (this.isTicking) {
                 // If a TE is currently ticking and has been invalidated, delay clearing active chunk until finished
@@ -349,12 +256,12 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
                 return;
             }
         }
-        this.activeChunk = new WeakReference<IMixinChunk>(chunk);
+        this.activeChunk = new WeakReference<ChunkBridge>(chunk);
     }
 
     @Override
     public boolean shouldTick() {
-        final IMixinChunk chunk = this.getActiveChunk();
+        final ChunkBridge chunk = this.getActiveChunk();
         // Don't tick if chunk is queued for unload or is in progress of being scheduled for unload
         // See https://github.com/SpongePowered/SpongeVanilla/issues/344
         if (chunk == null) {

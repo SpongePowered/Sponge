@@ -35,7 +35,7 @@ import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
@@ -63,16 +63,16 @@ public abstract class MixinEntityLlama extends MixinAbstractHorse implements Lla
             setVariant(0); // Basically some validation
             variant = LlamaVariants.CREAMY;
         }
-        return new SpongeValue<>(Keys.LLAMA_VARIANT, DataConstants.Entity.Llama.DEFAULT_VARIANT, variant);
+        return new SpongeValue<>(Keys.LLAMA_VARIANT, Constants.Entity.Llama.DEFAULT_VARIANT, variant);
     }
 
     @Override
     public MutableBoundedValue<Integer> strength() {
         return SpongeValueFactory.getInstance()
                 .createBoundedValueBuilder(Keys.LLAMA_STRENGTH)
-                .defaultValue(DataConstants.Entity.Llama.DEFAULT_STRENGTH)
-                .minimum(DataConstants.Entity.Llama.MINIMUM_STRENGTH)
-                .maximum(DataConstants.Entity.Llama.MAXIMUM_STRENGTH)
+                .defaultValue(Constants.Entity.Llama.DEFAULT_STRENGTH)
+                .minimum(Constants.Entity.Llama.MINIMUM_STRENGTH)
+                .maximum(Constants.Entity.Llama.MAXIMUM_STRENGTH)
                 .actualValue(getStrength())
                 .build();
     }

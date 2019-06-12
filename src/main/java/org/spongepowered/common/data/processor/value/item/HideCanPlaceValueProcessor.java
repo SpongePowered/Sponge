@@ -25,11 +25,11 @@
 package org.spongepowered.common.data.processor.value.item;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 
 public class HideCanPlaceValueProcessor extends AbstractHideFlagsValueProcessor {
 
     public HideCanPlaceValueProcessor() {
-        super(Keys.HIDE_CAN_PLACE, DataConstants.HIDE_CAN_PLACE_FLAG);
+        super(Keys.HIDE_CAN_PLACE, Constants.Item.HIDE_CAN_PLACE_FLAG);
     }
 }

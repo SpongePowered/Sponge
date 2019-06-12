@@ -43,7 +43,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
 import org.spongepowered.common.interfaces.entity.IMixinEntityFireworkRocket;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
@@ -59,7 +59,7 @@ public abstract class MixinEntityFireworkRocket extends MixinEntity implements I
     @Shadow public abstract void onUpdate();
 
     private ProjectileSource projectileSource = ProjectileSource.UNKNOWN;
-    private int explosionRadius = DataConstants.Entity.Firework.DEFAULT_EXPLOSION_RADIUS;
+    private int explosionRadius = Constants.Entity.Firework.DEFAULT_EXPLOSION_RADIUS;
 
     @Override
     public void setModifier(byte modifier) {
@@ -106,7 +106,7 @@ public abstract class MixinEntityFireworkRocket extends MixinEntity implements I
 
     @Override
     public void setExplosionRadius(Optional<Integer> radius) {
-        this.explosionRadius = radius.orElse(DataConstants.Entity.Firework.DEFAULT_EXPLOSION_RADIUS);
+        this.explosionRadius = radius.orElse(Constants.Entity.Firework.DEFAULT_EXPLOSION_RADIUS);
     }
 
     @SuppressWarnings("deprecation")

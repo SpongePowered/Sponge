@@ -36,13 +36,13 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-public class SpongeScoreCriterion implements ScoreAdvancementCriterion, ICriterion {
+public class SpongeScoreCriterion implements ScoreAdvancementCriterion, CriterionBridge {
 
     public static boolean BYPASS_EVENT = false;
     static final String INTERNAL_SUFFIX_BASE = "&score_goal_id=";
 
     private final String name;
-    public final List<ICriterion> internalCriteria;
+    public final List<CriterionBridge> internalCriteria;
 
     @SuppressWarnings("ConstantConditions")
     public SpongeScoreCriterion(String name, int goal, @Nullable ICriterionInstance trigger) {
@@ -52,7 +52,7 @@ public class SpongeScoreCriterion implements ScoreAdvancementCriterion, ICriteri
             final Criterion criterion = i == 0 ? new Criterion(trigger) : new Criterion();
             ((IMixinCriterion) criterion).setScoreCriterion(this);
             ((IMixinCriterion) criterion).setName(name + INTERNAL_SUFFIX_BASE + i);
-            this.internalCriteria.add((ICriterion) criterion);
+            this.internalCriteria.add((CriterionBridge) criterion);
         }
     }
 

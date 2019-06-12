@@ -36,7 +36,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAbsorptionData;
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
@@ -67,12 +67,12 @@ public final class AbsorptionDataProcessor extends AbstractSingleDataSingleTarge
 
     @Override
     protected ImmutableValue<Double> constructImmutableValue(Double value) {
-        return new ImmutableSpongeValue<>(this.key, DataConstants.Entity.DEFAULT_ABSORPTION, value);
+        return new ImmutableSpongeValue<>(this.key, Constants.Entity.DEFAULT_ABSORPTION, value);
     }
 
     @Override
     protected Value<Double> constructValue(Double actualValue) {
-        return new SpongeValue<>(this.key, DataConstants.Entity.DEFAULT_ABSORPTION, actualValue);
+        return new SpongeValue<>(this.key, Constants.Entity.DEFAULT_ABSORPTION, actualValue);
     }
 
     @Override

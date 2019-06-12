@@ -38,10 +38,10 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.bridge.TimingHolder;
+import org.spongepowered.common.bridge.world.ChunkBridge;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.player.IUserOrEntity;
 import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
-import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.bridge.TrackableBridge;
 
 import java.util.Optional;
@@ -141,9 +141,10 @@ public interface EntityBridge extends TrackableBridge, IUserOrEntity, TimingHold
 
     }
 
-    @Nullable IMixinChunk getActiveChunk();
+    @Nullable
+    ChunkBridge getActiveChunk();
 
-    void setActiveChunk(IMixinChunk chunk);
+    void setActiveChunk(ChunkBridge chunk);
 
     boolean shouldTick();
 

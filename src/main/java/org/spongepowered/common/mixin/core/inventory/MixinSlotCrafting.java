@@ -52,8 +52,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
@@ -96,11 +96,11 @@ public abstract class MixinSlotCrafting extends Slot {
     @Inject(method = "onTake", at = @At("HEAD"))
     private void beforeTake(EntityPlayer thePlayer, ItemStack stack, CallbackInfoReturnable<ItemStack> cir) {
         this.lastRecipe = ((CraftingRecipe) CraftingManager.findMatchingRecipe(this.craftMatrix, thePlayer.world));
-        if (((IMixinContainer) thePlayer.openContainer).isShiftCrafting()) {
-            ((IMixinContainer) thePlayer.openContainer).detectAndSendChanges(true);
-            ((IMixinContainer) thePlayer.openContainer).setShiftCrafting(false);
+        if (((ContainerBridge) thePlayer.openContainer).isShiftCrafting()) {
+            ((ContainerBridge) thePlayer.openContainer).detectAndSendChanges(true);
+            ((ContainerBridge) thePlayer.openContainer).setShiftCrafting(false);
         }
-        ((IMixinContainer) thePlayer.openContainer).setFirePreview(false);
+        ((ContainerBridge) thePlayer.openContainer).setFirePreview(false);
 
         // When shift-crafting the crafted item was reduced to quantity 0
         // Grow the stack to copy it
@@ -133,9 +133,9 @@ public abstract class MixinSlotCrafting extends Slot {
         if (((WorldBridge) thePlayer.world).isFake()) {
             return;
         }
-        ((IMixinContainer) thePlayer.openContainer).detectAndSendChanges(true);
+        ((ContainerBridge) thePlayer.openContainer).detectAndSendChanges(true);
 
-        ((IMixinContainer) thePlayer.openContainer).setCaptureInventory(false);
+        ((ContainerBridge) thePlayer.openContainer).setCaptureInventory(false);
 
         Container container = thePlayer.openContainer;
         Inventory craftInv = ((Inventory) container).query(QueryOperationTypes.INVENTORY_TYPE.of(CraftingInventory.class));
@@ -146,7 +146,7 @@ public abstract class MixinSlotCrafting extends Slot {
 
         // retain only last slot-transactions on output slot
         SlotTransaction first = null;
-        List<SlotTransaction> capturedTransactions = ((IMixinContainer) container).getCapturedTransactions();
+        List<SlotTransaction> capturedTransactions = ((ContainerBridge) container).bridge$getCapturedSlotTransactions();
         for (Iterator<SlotTransaction> iterator = capturedTransactions.iterator(); iterator.hasNext(); ) {
             SlotTransaction trans = iterator.next();
             Optional<SlotIndex> slotIndex = trans.getSlot().getInventoryProperty(SlotIndex.class);
@@ -171,11 +171,11 @@ public abstract class MixinSlotCrafting extends Slot {
         CraftItemEvent.Craft event = SpongeCommonEventFactory.callCraftEventPost(thePlayer, craftingInventory,
                 craftedItem, this.lastRecipe, container, capturedTransactions);
 
-        ((IMixinContainer) container).setLastCraft(event);
-        ((IMixinContainer) container).setFirePreview(true);
+        ((ContainerBridge) container).setLastCraft(event);
+        ((ContainerBridge) container).setFirePreview(true);
         this.craftedStack = null;
 
-        List<SlotTransaction> previewTransactions = ((IMixinContainer) container).getPreviewTransactions();
+        List<SlotTransaction> previewTransactions = ((ContainerBridge) container).getPreviewTransactions();
         if (this.craftMatrix.isEmpty()) {
             return; // CraftMatrix is empty and/or no transaction present. Do not fire Preview.
         }

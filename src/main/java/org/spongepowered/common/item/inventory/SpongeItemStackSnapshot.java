@@ -204,14 +204,14 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     public DataContainer toContainer() {
         final DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, getContentVersion())
-            .set(DataQueries.ITEM_TYPE, this.isNone() ? ItemTypes.NONE.getId() : this.itemType.getId())
-            .set(DataQueries.ITEM_COUNT, this.quantity)
-            .set(DataQueries.ITEM_DAMAGE_VALUE, this.damageValue);
+            .set(DataQueries.ItemStack.TYPE, this.isNone() ? ItemTypes.NONE.getId() : this.itemType.getId())
+            .set(DataQueries.ItemStack.COUNT, this.quantity)
+            .set(DataQueries.ItemStack.DAMAGE_VALUE, this.damageValue);
         if (!this.manipulators.isEmpty()) {
-            container.set(DataQueries.DATA_MANIPULATORS, DataUtil.getSerializedImmutableManipulatorList(this.manipulators));
+            container.set(DataQueries.Sponge.DATA_MANIPULATORS, DataUtil.getSerializedImmutableManipulatorList(this.manipulators));
         }
         if (this.compound != null) {
-            container.set(DataQueries.UNSAFE_NBT, NbtTranslator.getInstance().translateFrom(this.compound));
+            container.set(DataQueries.Sponge.UNSAFE_NBT, NbtTranslator.getInstance().translateFrom(this.compound));
         }
         return container;
     }

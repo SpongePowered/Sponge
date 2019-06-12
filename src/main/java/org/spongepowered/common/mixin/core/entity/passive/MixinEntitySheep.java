@@ -36,7 +36,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.manipulator.mutable.SpongeDyeableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeShearedData;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.List;
@@ -54,7 +54,7 @@ public abstract class MixinEntitySheep extends MixinEntityAnimal implements Shee
 
     @Override
     public Value<DyeColor> color() {
-        return new SpongeValue<>(Keys.DYE_COLOR, DataConstants.Catalog.DEFAULT_SHEEP_COLOR, (DyeColor) (Object) getFleeceColor());
+        return new SpongeValue<>(Keys.DYE_COLOR, Constants.Catalog.DEFAULT_SHEEP_COLOR, (DyeColor) (Object) getFleeceColor());
     }
 
     @Override

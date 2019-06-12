@@ -58,7 +58,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.interfaces.ai.IMixinEntityAIBase;
+import org.spongepowered.common.bridge.entity.ai.EntityGoalBridge;
 import org.spongepowered.common.interfaces.ai.IMixinEntityAITasks;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
@@ -117,7 +117,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase {
                     task.priority, task.priority, (Goal<? extends Agent>) tasks, this, (AITask<?>) task.action);
             SpongeImpl.postEvent(event);
             if (event.isCancelled()) {
-                ((IMixinEntityAIBase) task.action).setGoal(null);
+                ((EntityGoalBridge) task.action).setGoal(null);
                 taskItr.remove();
             }
         }

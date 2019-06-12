@@ -55,18 +55,18 @@ public class SpongeParticleEffectBuilder extends AbstractDataBuilder<ParticleEff
 
     @Override
     protected Optional<ParticleEffect> buildContent(DataView container) throws InvalidDataException {
-        if (!container.contains(DataQueries.PARTICLE_TYPE, DataQueries.PARTICLE_OPTIONS)) {
+        if (!container.contains(DataQueries.Particles.PARTICLE_TYPE, DataQueries.Particles.PARTICLE_OPTIONS)) {
             return Optional.empty();
         }
-        ParticleType particleType = container.getCatalogType(DataQueries.PARTICLE_TYPE, ParticleType.class).get();
+        ParticleType particleType = container.getCatalogType(DataQueries.Particles.PARTICLE_TYPE, ParticleType.class).get();
         Map<ParticleOption<?>, Object> options = new HashMap<>();
-        container.getViewList(DataQueries.PARTICLE_OPTIONS).get().forEach(view -> {
-            ParticleOption<?> option = view.getCatalogType(DataQueries.PARTICLE_OPTION_KEY, ParticleOption.class).get();
+        container.getViewList(DataQueries.Particles.PARTICLE_OPTIONS).get().forEach(view -> {
+            ParticleOption<?> option = view.getCatalogType(DataQueries.Particles.PARTICLE_OPTION_KEY, ParticleOption.class).get();
             Object value;
             if (option.getValueType().isAssignableFrom(DataSerializable.class)) {
-                value = view.getSerializable(DataQueries.PARTICLE_OPTION_VALUE, (Class<? extends DataSerializable>) option.getValueType()).get();
+                value = view.getSerializable(DataQueries.Particles.PARTICLE_OPTION_VALUE, (Class<? extends DataSerializable>) option.getValueType()).get();
             } else {
-                value = view.getObject(DataQueries.PARTICLE_OPTION_VALUE, option.getValueType()).get();
+                value = view.getObject(DataQueries.Particles.PARTICLE_OPTION_VALUE, option.getValueType()).get();
             }
             options.put(option, value);
         });

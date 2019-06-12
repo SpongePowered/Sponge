@@ -61,17 +61,17 @@ import org.spongepowered.api.entity.explosive.FusedExplosive;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.bridge.world.ChunkBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.EntityActivationModCategory;
 import org.spongepowered.common.config.category.EntityActivationRangeCategory;
 import org.spongepowered.common.config.type.GlobalConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.entity.SpongeEntityType;
-import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
-import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
+import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModData_Activation;
 
 import java.util.Map;
@@ -242,7 +242,7 @@ public class EntityActivationRange {
             for (int i1 = i; i1 <= j; ++i1) {
                 for (int j1 = k; j1 <= l; ++j1) {
                     WorldServer worldserver = (WorldServer) world;
-                    Chunk chunk = ((IMixinChunkProviderServer) worldserver.getChunkProvider()).getLoadedChunkWithoutMarkingActive(i1, j1);
+                    Chunk chunk = ((ServerChunkProviderBridge) worldserver.getChunkProvider()).getLoadedChunkWithoutMarkingActive(i1, j1);
                     if (chunk != null) {
                         activateChunkEntities(player, chunk);
                     }
@@ -389,7 +389,7 @@ public class EntityActivationRange {
         if (entity.world.isRemote || !entity.addedToChunk || entity instanceof EntityFireworkRocket) {
             return true;
         }
-        final IMixinChunk activeChunk = ((EntityBridge) entity).getActiveChunk();
+        final ChunkBridge activeChunk = ((EntityBridge) entity).getActiveChunk();
         if (activeChunk == null) {
             // Should never happen but just in case for mods, always tick
             return true;

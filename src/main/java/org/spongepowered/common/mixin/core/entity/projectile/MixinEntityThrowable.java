@@ -28,6 +28,8 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.RayTraceResult;
+import org.spongepowered.api.entity.projectile.Projectile;
+import org.spongepowered.api.entity.projectile.explosive.WitherSkull;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -51,13 +53,13 @@ public abstract class MixinEntityThrowable extends MixinEntity {
     @Override
     public void spongeImpl$readFromSpongeCompound(NBTTagCompound compound) {
         super.spongeImpl$readFromSpongeCompound(compound);
-        ProjectileSourceSerializer.readSourceFromNbt(compound, this);
+        ProjectileSourceSerializer.readSourceFromNbt(compound, ((Projectile) this));
     }
 
     @Override
     public void spongeImpl$writeToSpongeCompound(NBTTagCompound compound) {
         super.spongeImpl$writeToSpongeCompound(compound);
-        ProjectileSourceSerializer.writeSourceToNbt(compound, this.getShooter(), this.thrower);
+        ProjectileSourceSerializer.writeSourceToNbt(compound, ((Projectile) this).getShooter(), this.thrower);
     }
 
     @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/projectile/EntityThrowable;onImpact(Lnet/minecraft/util/math/RayTraceResult;)V"))
@@ -67,7 +69,7 @@ public abstract class MixinEntityThrowable extends MixinEntity {
             return;
         }
 
-        if (!SpongeCommonEventFactory.handleCollideImpactEvent(projectile, this.getShooter(), movingObjectPosition)) {
+        if (!SpongeCommonEventFactory.handleCollideImpactEvent(projectile, ((Projectile) this).getShooter(), movingObjectPosition)) {
             this.onImpact(movingObjectPosition);
         }
     }

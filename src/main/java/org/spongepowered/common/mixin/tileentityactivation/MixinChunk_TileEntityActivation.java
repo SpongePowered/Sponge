@@ -35,8 +35,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.bridge.world.ChunkBridge;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
-import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModData_Activation;
 import org.spongepowered.common.mixin.plugin.tileentityactivation.TileEntityActivation;
@@ -57,7 +57,7 @@ public class MixinChunk_TileEntityActivation {
 
         if (((IMixinWorldInfo) this.world.getWorldInfo()).isValid()) {
             final IModData_Activation spongeTile = (IModData_Activation) tileEntityIn;
-            final IMixinChunk spongeChunk = (IMixinChunk) this;
+            final ChunkBridge spongeChunk = (ChunkBridge) this;
             if (spongeChunk.isPersistedChunk()) {
                 // always activate TE's in persisted chunks
                 spongeTile.setDefaultActivationState(true);

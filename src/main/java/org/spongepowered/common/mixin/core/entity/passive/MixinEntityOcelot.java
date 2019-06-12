@@ -47,7 +47,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeOcelotData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSittingData;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.registry.type.entity.OcelotTypeRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
@@ -95,7 +95,7 @@ public abstract class MixinEntityOcelot extends MixinEntityTameable implements O
 
     @Override
     public Value<OcelotType> variant() {
-        return new SpongeValue<>(Keys.OCELOT_TYPE, DataConstants.Entity.Ocelot.DEFAULT_TYPE, OcelotTypeRegistryModule.OCELOT_IDMAP.get(this.getTameSkin()));
+        return new SpongeValue<>(Keys.OCELOT_TYPE, Constants.Entity.Ocelot.DEFAULT_TYPE, OcelotTypeRegistryModule.OCELOT_IDMAP.get(this.getTameSkin()));
     }
 
     @Override

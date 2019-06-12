@@ -37,7 +37,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @NonnullByDefault
 @Mixin(TileEntityEnderChest.class)
-public abstract class MixinTileEntityEnderChest extends MixinTileEntity implements EnderChest {
+public abstract class MixinTileEntityEnderChest extends MixinTileEntity {
 
     @Shadow public float lidAngle;
     @Shadow public int numPlayersUsing;
@@ -48,7 +48,7 @@ public abstract class MixinTileEntityEnderChest extends MixinTileEntity implemen
      * @reason Overwritten in case ender chests ever attempt to tick
      */
     @Inject(method = "update", at = @At("HEAD"), cancellable = true)
-    public void onUpdate(CallbackInfo ci) {
+    private void impl$IgnoreTicking(CallbackInfo ci) {
         if (this.world == null || !this.world.isRemote) {
             // chests should never tick on server
             ci.cancel();
@@ -60,7 +60,7 @@ public abstract class MixinTileEntityEnderChest extends MixinTileEntity implemen
                     target = "Lnet/minecraft/world/World;addBlockEvent(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;II)V"
             ),
             cancellable = true)
-    public void onOpenChest(CallbackInfo ci) {
+    private void impl$PlaySoundOnServerOnlyDuringUseOnOpen(CallbackInfo ci) {
         // Moved out of tick loop
         if (this.world == null) {
             ci.cancel();
@@ -85,7 +85,7 @@ public abstract class MixinTileEntityEnderChest extends MixinTileEntity implemen
                     target = "Lnet/minecraft/world/World;addBlockEvent(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;II)V"
             ),
             cancellable = true)
-    public void onCloseChest(CallbackInfo ci) {
+    private void impl$PlaySoundOnServerOnlyDuringUseOnClose(CallbackInfo ci) {
         // Moved out of tick loop
         if (this.world == null) {
             ci.cancel();

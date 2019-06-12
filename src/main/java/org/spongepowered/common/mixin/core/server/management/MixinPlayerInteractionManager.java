@@ -71,12 +71,12 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.PacketContext;
-import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerInteractionManager;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
@@ -527,7 +527,7 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(player);
                 frame.addContext(EventContextKeys.BLOCK_HIT, blockSnapshot);
-                ((IMixinContainer) player.openContainer).setOpenLocation(blockSnapshot.getLocation().orElse(null));
+                ((ContainerBridge) player.openContainer).setOpenLocation(blockSnapshot.getLocation().orElse(null));
                 if (!SpongeCommonEventFactory.callInteractInventoryOpenEvent(player)) {
                     result = EnumActionResult.FAIL;
                     this.interactBlockRightClickEventCancelled = true;
