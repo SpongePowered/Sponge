@@ -51,7 +51,7 @@ import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
+import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
@@ -152,7 +152,7 @@ public abstract class MixinItemStack_API implements DataHolder {
             }
         }
         // We only need to include the custom data, not vanilla manipulators supported by sponge implementation
-        final Collection<DataManipulator<?, ?>> manipulators = ((IMixinCustomDataHolder) this).getCustomManipulators();
+        final Collection<DataManipulator<?, ?>> manipulators = ((CustomDataHolderBridge) this).getCustomManipulators();
         if (!manipulators.isEmpty()) {
             container.set(DataQueries.DATA_MANIPULATORS, DataUtil.getSerializedManipulatorList(manipulators));
         }
@@ -203,8 +203,8 @@ public abstract class MixinItemStack_API implements DataHolder {
             return manipulators;
         }
         ((ImplItem) item).bridge$getSpongeManipulatorsFor((net.minecraft.item.ItemStack) (Object) this, manipulators);
-        if (((IMixinCustomDataHolder) this).hasManipulators()) {
-            final List<DataManipulator<?, ?>> customManipulators = ((IMixinCustomDataHolder) this).getCustomManipulators();
+        if (((CustomDataHolderBridge) this).hasManipulators()) {
+            final List<DataManipulator<?, ?>> customManipulators = ((CustomDataHolderBridge) this).getCustomManipulators();
             manipulators.addAll(customManipulators);
         }
         return manipulators;

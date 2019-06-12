@@ -31,25 +31,21 @@ import net.minecraft.init.Blocks;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
-import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.WorldUtil;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
@@ -82,7 +78,7 @@ final class BlockDecayPhaseState extends BlockPhaseState {
         final LocatableBlock locatable = context.getSource(LocatableBlock.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over at a location!", context));
         final Location<World> worldLocation = locatable.getLocation();
-        final IMixinWorldServer mixinWorld = ((IMixinWorldServer) worldLocation.getExtent());
+        final ServerWorldBridge mixinWorld = ((ServerWorldBridge) worldLocation.getExtent());
         // TODO - Determine if we need to pass the supplier or perform some parameterized
         //  process if not empty method on the capture object.
         TrackingUtil.processBlockCaptures(this, context);

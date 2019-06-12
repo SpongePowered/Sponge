@@ -74,22 +74,22 @@ public abstract class MixinEntityTNTPrimed extends MixinEntity implements IMixin
     }
 
     @Override
-    public int getFuseDuration() {
+    public int bridge$getFuseDuration() {
         return this.fuseDuration;
     }
 
     @Override
-    public void setFuseDuration(int fuseTicks) {
+    public void bridge$setFuseDuration(int fuseTicks) {
         this.fuseDuration = fuseTicks;
     }
 
     @Override
-    public int getFuseTicksRemaining() {
+    public int bridge$getFuseTicksRemaining() {
         return this.fuse;
     }
 
     @Override
-    public void setFuseTicksRemaining(int fuseTicks) {
+    public void bridge$setFuseTicksRemaining(int fuseTicks) {
         this.fuse = fuseTicks;
     }
 
@@ -136,7 +136,7 @@ public abstract class MixinEntityTNTPrimed extends MixinEntity implements IMixin
                     frame.pushCause(this.detonator);
                 }
                 frame.pushCause(this);
-                postPrime();
+                bridge$postPrime();
             }
         }
     }

@@ -79,9 +79,9 @@ import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.tick.NeighborNotificationContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.block.IMixinBlock;
-import org.spongepowered.common.bridge.entity.IMixinEntity;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.bridge.block.BlockBridge;
+import org.spongepowered.common.bridge.entity.EntityBridge;
+import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 import org.spongepowered.common.registry.type.event.SpawnTypeRegistryModule;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
@@ -331,7 +331,7 @@ public final class PhaseTracker {
 
         if (this.stack.isEmpty()) {
             for (WorldServer world : WorldManager.getWorlds()) {
-                final IMixinWorldServer mixinWorld = (IMixinWorldServer) world;
+                final ServerWorldBridge mixinWorld = (ServerWorldBridge) world;
                 if (mixinWorld.getProxyAccess().hasProxy()) {
                     new PrettyPrinter().add("BlockPRoxy has extra proxies not pruned!").centre().hr()
                         .add("When completing the Phase: %s, some foreign BlockProxy was pushed, but never pruned.", state)
@@ -580,7 +580,7 @@ public final class PhaseTracker {
         }
     }
 
-    private void printUnexpectedBlockChange(IMixinWorldServer mixinWorld, BlockPos pos, IBlockState currentState,
+    private void printUnexpectedBlockChange(ServerWorldBridge mixinWorld, BlockPos pos, IBlockState currentState,
         IBlockState newState) {
         if (!SpongeImpl.getGlobalConfigAdapter().getConfig().getPhaseTracker().isVerbose()) {
             return;
@@ -657,7 +657,7 @@ public final class PhaseTracker {
      * @param sourcePos The source block position
      */
     @SuppressWarnings("rawtypes")
-    public void notifyBlockOfStateChange(final IMixinWorldServer mixinWorld, final IBlockState notifyState, final BlockPos notifyPos, final Block sourceBlock, final BlockPos sourcePos) {
+    public void notifyBlockOfStateChange(final ServerWorldBridge mixinWorld, final IBlockState notifyState, final BlockPos notifyPos, final Block sourceBlock, final BlockPos sourcePos) {
         if (!SpongeImplHooks.isMainThread()) {
             // lol no, report the block change properly
             new PrettyPrinter(60).add("Illegal Async PhaseTracker Access").centre().hr()
@@ -672,7 +672,7 @@ public final class PhaseTracker {
             // Sponge start - prepare notification
             final PhaseContext<?> peek = this.stack.peek();
             final IPhaseState state = peek.state;
-            if (!((IMixinBlock) notifyState.getBlock()).hasNeighborChangedLogic()) {
+            if (!((BlockBridge) notifyState.getBlock()).hasNeighborChangedLogic()) {
                 // A little short-circuit so we do not waste expense to call neighbor notifications on blocks that do
                 // not override the method neighborChanged
                 return;
@@ -738,7 +738,7 @@ public final class PhaseTracker {
      * @return True if the block was successfully set (or captured)
      */
     @SuppressWarnings("rawtypes")
-    public boolean setBlockState(final IMixinWorldServer mixinWorld, final BlockPos pos, final IBlockState newState, final BlockChangeFlag flag) {
+    public boolean setBlockState(final ServerWorldBridge mixinWorld, final BlockPos pos, final IBlockState newState, final BlockChangeFlag flag) {
         if (!SpongeImplHooks.isMainThread()) {
             // lol no, report the block change properly
             new PrettyPrinter(60).add("Illegal Async Block Change").centre().hr()
@@ -933,13 +933,13 @@ public final class PhaseTracker {
         }
 
         // Sponge Start - handle construction phases
-        if (((IMixinEntity) entity).isInConstructPhase()) {
-            ((IMixinEntity) entity).firePostConstructEvents();
+        if (((EntityBridge) entity).isInConstructPhase()) {
+            ((EntityBridge) entity).firePostConstructEvents();
         }
 
         final net.minecraft.entity.Entity minecraftEntity = EntityUtil.toNative(entity);
         final WorldServer minecraftWorld = (WorldServer) world;
-        final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) minecraftWorld;
+        final ServerWorldBridge mixinWorldServer = (ServerWorldBridge) minecraftWorld;
         final PhaseContext<?> context = this.stack.peek();
         final IPhaseState<?> phaseState = context.state;
         final boolean isForced = minecraftEntity.forceSpawn || minecraftEntity instanceof EntityPlayer;
@@ -976,7 +976,7 @@ public final class PhaseTracker {
                     if (thrower != null) {
                         User user;
                         if (!(thrower instanceof EntityPlayer)) {
-                            user = ((IMixinEntity) thrower).getCreatorUser().orElse(null);
+                            user = ((EntityBridge) thrower).getCreatorUser().orElse(null);
                         } else {
                             user = (User) thrower;
                         }
@@ -1031,13 +1031,13 @@ public final class PhaseTracker {
         checkNotNull(entity, "Entity cannot be null!");
 
         // Sponge Start - handle construction phases
-        if (((IMixinEntity) entity).isInConstructPhase()) {
-            ((IMixinEntity) entity).firePostConstructEvents();
+        if (((EntityBridge) entity).isInConstructPhase()) {
+            ((EntityBridge) entity).firePostConstructEvents();
         }
 
         final net.minecraft.entity.Entity minecraftEntity = EntityUtil.toNative(entity);
         final WorldServer worldServer = (WorldServer) world;
-        final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) worldServer;
+        final ServerWorldBridge mixinWorldServer = (ServerWorldBridge) worldServer;
         // Sponge End - continue with vanilla mechanics
 
         final int chunkX = MathHelper.floor(minecraftEntity.posX / 16.0D);

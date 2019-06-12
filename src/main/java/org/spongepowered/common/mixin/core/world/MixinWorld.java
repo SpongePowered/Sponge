@@ -27,96 +27,38 @@ package org.spongepowered.common.mixin.core.world;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.flowpowered.math.GenericMath;
-import com.flowpowered.math.vector.Vector2d;
-import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.MultiPartEntityPart;
-import net.minecraft.entity.effect.EntityLightningBolt;
-import net.minecraft.entity.item.EntityArmorStand;
-import net.minecraft.entity.item.EntityEnderPearl;
-import net.minecraft.entity.item.EntityFallingBlock;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.item.EntityPainting;
-import net.minecraft.entity.item.EntityPainting.EnumArt;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.play.server.SPacketBlockChange;
-import net.minecraft.network.play.server.SPacketChunkData;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.PlayerChunkMapEntry;
-import net.minecraft.util.ClassInheritanceMultiMap;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.GameRules;
-import net.minecraft.world.GameType;
-import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.IWorldEventListener;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
-import net.minecraft.world.WorldSettings;
-import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.chunk.IChunkProvider;
-import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
-import org.apache.commons.lang3.reflect.ConstructorUtils;
-import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.tileentity.TileEntity;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.EntitySnapshot;
-import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.projectile.EnderPearl;
-import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.service.context.Context;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.chat.ChatType;
-import org.spongepowered.api.text.title.Title;
-import org.spongepowered.api.util.AABB;
-import org.spongepowered.api.util.Functional;
-import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.api.world.BlockChangeFlag;
-import org.spongepowered.api.world.BlockChangeFlags;
-import org.spongepowered.api.world.Chunk;
-import org.spongepowered.api.world.ChunkPreGenerate;
-import org.spongepowered.api.world.ChunkRegenerateFlag;
-import org.spongepowered.api.world.Dimension;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.WorldBorder;
-import org.spongepowered.api.world.biome.BiomeType;
-import org.spongepowered.api.world.explosion.Explosion;
-import org.spongepowered.api.world.extent.Extent;
-import org.spongepowered.api.world.extent.worker.MutableBiomeVolumeWorker;
-import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
-import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -131,53 +73,35 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
-import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
-import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
-import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
-import org.spongepowered.common.bridge.entity.IMixinEntity;
+import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.mixin.tileentityactivation.MixinWorldServer_TileEntityActivation;
 import org.spongepowered.common.util.SpongeHooks;
-import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeDimension;
-import org.spongepowered.common.world.extent.ExtentViewDownsize;
-import org.spongepowered.common.world.extent.worker.SpongeMutableBiomeVolumeWorker;
-import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
-import org.spongepowered.common.world.pregen.SpongeChunkPreGenerateTask;
-import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
-import java.util.Set;
 import java.util.UUID;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
 @NonnullByDefault
 @Mixin(net.minecraft.world.World.class)
-public abstract class MixinWorld implements World, IMixinWorld {
+public abstract class MixinWorld implements WorldBridge {
 
     private static final Vector3i BLOCK_MIN = new Vector3i(-30000000, 0, -30000000);
     private static final Vector3i BLOCK_MAX = new Vector3i(30000000, 256, 30000000).sub(Vector3i.ONE);
@@ -327,327 +251,10 @@ public abstract class MixinWorld implements World, IMixinWorld {
         if (this.isFake() || entity == null) {
             return;
         }
-        if (entity.world != null && !((IMixinWorld) entity.world).isFake() && SpongeHooks.checkBoundingBoxSize(entity, axis)) {
+        if (entity.world != null && !((WorldBridge) entity.world).isFake() && SpongeHooks.checkBoundingBoxSize(entity, axis)) {
             // Removing misbehaved living entities
             cir.setReturnValue(new ArrayList<>());
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Collection<Player> getPlayers() {
-        return ImmutableList.copyOf((Collection<Player>) (Object) this.playerEntities);
-    }
-
-    /**
-     * Specifically verify the {@link UUID} for this world is going to be valid, in
-     * certain cases, there are mod worlds that are extending {@link net.minecraft.world.World}
-     * and have custom {@link WorldInfo}s, which ends up causing issues with
-     * plugins expecting a valid uuid for each world.
-     *
-     * <p>TODO There may be some issues with plugins somehow picking up these "fake"
-     * worlds with regards to their block changes, and therefor cause issues when
-     * those plugins are finding those worlds, instead of traditional
-     * {@link WorldServer} instances.</p>
-     *
-     * @return The world id, verified from the properties
-     */
-    @Override
-    public UUID getUniqueId() {
-        final WorldProperties properties = this.getProperties();
-        final UUID worldId = properties.getUniqueId();
-        if (worldId == null) {
-            // Some mod worlds make their own WorldInfos for "fake" worlds.
-            // Specifically fixes https://github.com/SpongePowered/SpongeForge/issues/1527
-            // and https://github.com/BuildCraft/BuildCraft/issues/3594
-            final IMixinWorldInfo mixinWorldInfo = (IMixinWorldInfo) properties;
-            mixinWorldInfo.setUniqueId(UUID.randomUUID());
-            return properties.getUniqueId();
-        }
-        return worldId;
-    }
-
-    @Override
-    public Optional<Chunk> getChunk(int x, int y, int z) {
-        if (!SpongeChunkLayout.instance.isValidChunk(x, y, z)) {
-            return Optional.empty();
-        }
-        final WorldServer worldserver = (WorldServer) (Object) this;
-        return Optional.ofNullable((Chunk) worldserver.getChunkProvider().getLoadedChunk(x, z));
-    }
-
-    @Override
-    public Optional<Chunk> loadChunk(int x, int y, int z, boolean shouldGenerate) {
-        if (!SpongeChunkLayout.instance.isValidChunk(x, y, z)) {
-            return Optional.empty();
-        }
-        final WorldServer worldserver = (WorldServer) (Object) this;
-        // If we aren't generating, return the chunk
-        if (!shouldGenerate) {
-            return Optional.ofNullable((Chunk) worldserver.getChunkProvider().loadChunk(x, z));
-        }
-        return Optional.ofNullable((Chunk) worldserver.getChunkProvider().provideChunk(x, z));
-    }
-
-    @Override
-    public Optional<Chunk> regenerateChunk(int cx, int cy, int cz, ChunkRegenerateFlag flag) {
-        List<EntityPlayerMP> playerList = new ArrayList<>();
-        List<net.minecraft.entity.Entity> entityList = new ArrayList<>();
-        Chunk spongeChunk = null;
-        try (PhaseContext<?> context = GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING.createPhaseContext()
-                .world((net.minecraft.world.World)(Object) this)) {
-            context.buildAndSwitch();
-            spongeChunk = this.loadChunk(cx, cy, cz, false).orElse(null);
-        }
-
-        if (spongeChunk == null) {
-            if (!flag.create()) {
-                return Optional.empty();
-            }
-            // This should generate a chunk so there won't be a need to regenerate one
-            return this.loadChunk(cx, cy, cz, true);
-        }
-
-        final net.minecraft.world.chunk.Chunk chunk = (net.minecraft.world.chunk.Chunk) spongeChunk;
-        final boolean keepEntities = flag.entities();
-        try (PhaseContext<?> context = GenerationPhase.State.CHUNK_REGENERATING.createPhaseContext()
-                .chunk(chunk)) {
-            context.buildAndSwitch();
-            // If we reached this point, an existing chunk was found so we need to regen
-            for (ClassInheritanceMultiMap<net.minecraft.entity.Entity> multiEntityList : chunk.getEntityLists()) {
-                for (net.minecraft.entity.Entity entity : multiEntityList) {
-                    if (entity instanceof EntityPlayerMP) {
-                        playerList.add((EntityPlayerMP) entity);
-                        entityList.add(entity);
-                    } else if (keepEntities) {
-                        entityList.add(entity);
-                    }
-                }
-            }
-
-            for (net.minecraft.entity.Entity entity : entityList) {
-                chunk.removeEntity(entity);
-            }
-
-            final ChunkProviderServer chunkProviderServer = (ChunkProviderServer) chunk.getWorld().getChunkProvider();
-            ((IMixinChunkProviderServer) chunkProviderServer).unloadChunkAndSave(chunk);
-            net.minecraft.world.chunk.Chunk newChunk = chunkProviderServer.chunkGenerator.generateChunk(cx, cz);
-            PlayerChunkMapEntry playerChunk = ((WorldServer) chunk.getWorld()).getPlayerChunkMap().getEntry(cx, cz);
-            if (playerChunk != null) {
-                playerChunk.chunk = newChunk;
-            }
-    
-            if (newChunk != null) {
-                WorldServer world = (WorldServer) newChunk.getWorld();
-                world.getChunkProvider().loadedChunks.put(ChunkPos.asLong(cx, cz), newChunk);
-                newChunk.onLoad();
-                newChunk.populate(world.getChunkProvider().chunkGenerator);
-                for (net.minecraft.entity.Entity entity: entityList) {
-                    newChunk.addEntity(entity);
-                }
-
-                if (((IMixinChunkProviderServer) chunkProviderServer).getLoadedChunkWithoutMarkingActive(cx, cz) == null) {
-                    return Optional.of((org.spongepowered.api.world.Chunk) newChunk);
-                }
-
-                final PlayerChunkMapEntry playerChunkMapEntry = ((WorldServer) newChunk.getWorld()).getPlayerChunkMap().getEntry(cx, cz);
-                if (playerChunkMapEntry != null) {
-                    List<EntityPlayerMP> chunkPlayers = playerChunkMapEntry.players;
-                    // We deliberately send two packets, to avoid sending a 'fullChunk' packet
-                    // (a changedSectionFilter of 65535). fullChunk packets cause the client to
-                    // completely overwrite its current chunk with a new chunk instance. This causes
-                    // weird issues, such as making any entities in that chunk invisible (until they leave it
-                    // for a new chunk)
-                    // - Aaron1011
-                    for (EntityPlayerMP playerMP: chunkPlayers) {
-                        playerMP.connection.sendPacket(new SPacketChunkData(newChunk, 65534));
-                        playerMP.connection.sendPacket(new SPacketChunkData(newChunk, 1));
-                    }
-                }
-            }
-
-            return Optional.ofNullable((org.spongepowered.api.world.Chunk) newChunk);
-        }
-    }
-
-    @Override
-    public int getHighestYAt(int x, int z) {
-        return this.getHeight(x, z);
-    }
-
-    @Override
-    public int getPrecipitationLevelAt(int x, int z) {
-        return this.getPrecipitationHeight(new BlockPos(x, 0, z)).getY();
-    }
-
-    @Override
-    public BlockState getBlock(int x, int y, int z) {
-        return (BlockState) getBlockState(new BlockPos(x, y, z));
-    }
-
-    @Override
-    public BlockType getBlockType(int x, int y, int z) {
-        // avoid intermediate object creation from using BlockState
-        return (BlockType) getChunk(x >> 4, z >> 4).getBlockState(new BlockPos(x, y, z)).getBlock();
-    }
-
-    @Override
-    public boolean setBlock(int x, int y, int z, BlockState block) {
-        return setBlock(x, y, z, block, BlockChangeFlags.ALL);
-    }
-
-
-    @Override
-    public BiomeType getBiome(int x, int y, int z) {
-        return (BiomeType) this.getBiome(new BlockPos(x, y, z));
-    }
-
-    @Override
-    public void setBiome(int x, int y, int z, BiomeType biome) {
-        checkBiomeBounds(x, y, z);
-        ((Chunk) getChunk(x >> 4, z >> 4)).setBiome(x, y, z, biome);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Collection<Entity> getEntities() {
-        return Lists.newArrayList((Collection<Entity>) (Object) this.loadedEntityList);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Collection<Entity> getEntities(Predicate<Entity> filter) {
-        // This already returns a new copy
-        return (Collection<Entity>) (Object) this.getEntities(net.minecraft.entity.Entity.class,
-                Functional.java8ToGuava((Predicate<net.minecraft.entity.Entity>) (Object) filter));
-    }
-
-    @Override
-    public Entity createEntity(EntityType type, Vector3d position) throws IllegalArgumentException, IllegalStateException {
-        return this.createEntity(type, position, false);
-    }
-
-    @Override
-    public Entity createEntityNaturally(EntityType type, Vector3d position) throws IllegalArgumentException, IllegalStateException {
-        return this.createEntity(type, position, true);
-    }
-
-    private Entity createEntity(EntityType type, Vector3d position, boolean naturally) throws IllegalArgumentException, IllegalStateException {
-        checkNotNull(type, "The entity type cannot be null!");
-        checkNotNull(position, "The position cannot be null!");
-
-        Entity entity = null;
-
-        Class<? extends Entity> entityClass = type.getEntityClass();
-        double x = position.getX();
-        double y = position.getY();
-        double z = position.getZ();
-
-        if (entityClass.isAssignableFrom(EntityPlayerMP.class) || entityClass.isAssignableFrom(MultiPartEntityPart.class)) {
-            // Unable to construct these
-            throw new IllegalArgumentException("Cannot construct " + type.getId() + " please look to using entity types correctly!");
-        }
-
-        net.minecraft.world.World world = (net.minecraft.world.World) (Object) this;
-
-        // TODO - archetypes should solve the problem of calling the correct constructor
-        // Not all entities have a single World parameter as their constructor
-        if (entityClass.isAssignableFrom(EntityLightningBolt.class)) {
-            entity = (Entity) new EntityLightningBolt(world, x, y, z, false);
-        } else if (entityClass.isAssignableFrom(EntityEnderPearl.class)) {
-            EntityArmorStand tempEntity = new EntityArmorStand(world, x, y, z);
-            tempEntity.posY -= tempEntity.getEyeHeight();
-            entity = (Entity) new EntityEnderPearl(world, tempEntity);
-            ((EnderPearl) entity).setShooter(ProjectileSource.UNKNOWN);
-        }
-
-        // Some entities need to have non-null fields (and the easiest way to
-        // set them is to use the more specialised constructor).
-        if (entityClass.isAssignableFrom(EntityFallingBlock.class)) {
-            entity = (Entity) new EntityFallingBlock(world, x, y, z, Blocks.SAND.getDefaultState());
-        } else if (entityClass.isAssignableFrom(EntityItem.class)) {
-            entity = (Entity) new EntityItem(world, x, y, z, new ItemStack(Blocks.STONE));
-        }
-
-        if (entity == null) {
-            try {
-                entity = ConstructorUtils.invokeConstructor(entityClass, this);
-                ((net.minecraft.entity.Entity) entity).setPosition(x, y, z);
-            } catch (Exception e) {
-                throw new RuntimeException("There was an issue attempting to construct " + type.getId(), e);
-            }
-        }
-
-        // TODO - replace this with an actual check
-        /*
-        if (entity instanceof EntityHanging) {
-            if (((EntityHanging) entity).facingDirection == null) {
-                // TODO Some sort of detection of a valid direction?
-                // i.e scan immediate blocks for something to attach onto.
-                ((EntityHanging) entity).facingDirection = EnumFacing.NORTH;
-            }
-            if (!((EntityHanging) entity).onValidSurface()) {
-                return Optional.empty();
-            }
-        }*/
-
-        if (naturally && entity instanceof EntityLiving) {
-            // Adding the default equipment
-            ((EntityLiving)entity).onInitialSpawn(world.getDifficultyForLocation(new BlockPos(x, y, z)), null);
-        }
-
-        if (entity instanceof EntityPainting) {
-            // This is default when art is null when reading from NBT, could
-            // choose a random art instead?
-            ((EntityPainting) entity).art = EnumArt.KEBAB;
-        }
-
-        return entity;
-    }
-
-    @Override
-    public Optional<Entity> createEntity(DataContainer entityContainer) {
-        // TODO once entity containers are implemented
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<Entity> createEntity(DataContainer entityContainer, Vector3d position) {
-        // TODO once entity containers are implemented
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<Entity> restoreSnapshot(EntitySnapshot snapshot, Vector3d position) {
-        EntitySnapshot entitySnapshot = snapshot.withLocation(new Location<>(this, position));
-        return entitySnapshot.restore();
-    }
-
-    @Override
-    public WorldBorder getWorldBorder() {
-        return (WorldBorder) shadow$getWorldBorder();
-    }
-
-    @Override
-    public ChunkPreGenerate.Builder newChunkPreGenerate(Vector3d center, double diameter) {
-        return new SpongeChunkPreGenerateTask.Builder(this, center, diameter);
-    }
-
-
-    @Override
-    public Dimension getDimension() {
-        return this.spongeDimensionWrapper;
-    }
-
-    @Override
-    public Optional<Entity> getEntity(UUID uuid) {
-        // Note that MixinWorldServer is properly overriding this to use it's own mapping.
-        for (net.minecraft.entity.Entity entity : this.loadedEntityList) {
-            if (entity.getUniqueID().equals(uuid)) {
-                return Optional.of((Entity) entity);
-            }
-        }
-        return Optional.empty();
     }
 
     @Inject(method = "onEntityAdded", at = @At("TAIL"))
@@ -729,463 +336,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return tileEntity.isInvalid();
     }
 
-    @SuppressWarnings({"unchecked"})
-    @Override
-    public Iterable<Chunk> getLoadedChunks() {
-        if (this.isFake()) { // If we're client side, we can't know solidly what loaded chunks are... need to do this in MixinWorldClient in forge.
-            return Collections.emptyList();
-        }
-        return (List<Chunk>) (List<?>) Lists.newArrayList(((WorldServer) (Object) this).getChunkProvider().getLoadedChunks());
-    }
-
-    @Override
-    public boolean unloadChunk(Chunk chunk) {
-        checkArgument(chunk != null, "Chunk cannot be null!");
-        return chunk.unloadChunk();
-    }
-
-    @Override
-    public WorldProperties getProperties() {
-        return (WorldProperties) this.worldInfo;
-    }
-
-    @Override
-    public Context getContext() {
-        if (this.worldContext == null) {
-            WorldInfo worldInfo = getWorldInfo();
-            if (worldInfo == null) {
-                // We still have to consider some mods are making dummy worlds that
-                // override getWorldInfo with a null, or submit a null value.
-                worldInfo = new WorldInfo(new WorldSettings(0, GameType.NOT_SET, false, false, WorldType.DEFAULT), "sponge$dummy_World");
-            }
-            this.worldContext = new Context(Context.WORLD_KEY, worldInfo.getWorldName());
-        }
-        return this.worldContext;
-    }
-    @Override
-    public Optional<TileEntity> getTileEntity(int x, int y, int z) {
-        net.minecraft.tileentity.TileEntity tileEntity = getTileEntity(new BlockPos(x, y, z));
-        if (tileEntity == null) {
-            return Optional.empty();
-        }
-        return Optional.of((TileEntity) tileEntity);
-    }
-
-    @Override
-    public Vector3i getBiomeMin() {
-        return BIOME_MIN;
-    }
-
-    @Override
-    public Vector3i getBiomeMax() {
-        return BIOME_MAX;
-    }
-
-    @Override
-    public Vector3i getBiomeSize() {
-        return BIOME_SIZE;
-    }
-
-    @Override
-    public Vector3i getBlockMin() {
-        return BLOCK_MIN;
-    }
-
-    @Override
-    public Vector3i getBlockMax() {
-        return BLOCK_MAX;
-    }
-
-    @Override
-    public Vector3i getBlockSize() {
-        return BLOCK_SIZE;
-    }
-
-    @Override
-    public boolean containsBiome(int x, int y, int z) {
-        return VecHelper.inBounds(x, y, z, BIOME_MIN, BIOME_MAX);
-    }
-
-    @Override
-    public boolean containsBlock(int x, int y, int z) {
-        return VecHelper.inBounds(x, y, z, BLOCK_MIN, BLOCK_MAX);
-    }
-
-    private void checkBiomeBounds(int x, int y, int z) {
-        if (!containsBiome(x, y, z)) {
-            throw new PositionOutOfBoundsException(new Vector3i(x, y, z), BIOME_MIN, BIOME_MAX);
-        }
-    }
-
-    private void checkBlockBounds(int x, int y, int z) {
-        if (!containsBlock(x, y, z)) {
-            throw new PositionOutOfBoundsException(new Vector3i(x, y, z), BLOCK_MIN, BLOCK_MAX);
-        }
-    }
-
-    @Override
-    public void sendMessage(ChatType type, Text message) {
-        checkNotNull(type, "type");
-        checkNotNull(message, "message");
-
-        for (Player player : this.getPlayers()) {
-            player.sendMessage(type, message);
-        }
-    }
-
-    @Override
-    public void sendTitle(Title title) {
-        checkNotNull(title, "title");
-
-        for (Player player : getPlayers()) {
-            player.sendTitle(title);
-        }
-    }
-
-    @Override
-    public void resetTitle() {
-        getPlayers().forEach(Player::resetTitle);
-    }
-
-    @Override
-    public void clearTitle() {
-        getPlayers().forEach(Player::clearTitle);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Collection<TileEntity> getTileEntities() {
-        return Lists.newArrayList((List<TileEntity>) (Object) this.loadedTileEntityList);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Collection<TileEntity> getTileEntities(Predicate<TileEntity> filter) {
-        return ((List<TileEntity>) (Object) this.loadedTileEntityList).stream()
-                .filter(filter)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public void triggerExplosion(Explosion explosion) {
-        checkNotNull(explosion, "explosion");
-        ((net.minecraft.world.Explosion) explosion).doExplosionA();
-        ((net.minecraft.world.Explosion) explosion).doExplosionB(true);
-    }
-
-    @Override
-    public Extent getExtentView(Vector3i newMin, Vector3i newMax) {
-        return new ExtentViewDownsize(this, newMin, newMax);
-    }
-
-    @Override
-    public MutableBiomeVolumeWorker<World> getBiomeWorker() {
-        return new SpongeMutableBiomeVolumeWorker<>(this);
-    }
-
-    @Override
-    public MutableBlockVolumeWorker<World> getBlockWorker() {
-        return new SpongeMutableBlockVolumeWorker<>(this);
-    }
-
-    @Override
-    public BlockSnapshot createSnapshot(int x, int y, int z) {
-        if (!containsBlock(x, y, z)) {
-            return BlockSnapshot.NONE;
-        }
-        World world = this;
-        BlockState state = world.getBlock(x, y, z);
-        Optional<TileEntity> te = world.getTileEntity(x, y, z);
-        SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder()
-                .blockState(state)
-                .worldId(world.getUniqueId())
-                .position(new Vector3i(x, y, z));
-        Optional<UUID> creator = getCreator(x, y, z);
-        Optional<UUID> notifier = getNotifier(x, y, z);
-        if (creator.isPresent()) {
-            builder.creator(creator.get());
-        }
-        if (notifier.isPresent()) {
-            builder.notifier(notifier.get());
-        }
-        if (te.isPresent()) {
-            final TileEntity tileEntity = te.get();
-            for (DataManipulator<?, ?> manipulator : ((IMixinCustomDataHolder) tileEntity).getCustomManipulators()) {
-                builder.add(manipulator);
-            }
-            final NBTTagCompound compound = new NBTTagCompound();
-            ((net.minecraft.tileentity.TileEntity) tileEntity).writeToNBT(compound);
-            builder.unsafeNbt(compound);
-        }
-        return builder.build();
-    }
-
-    @Override
-    public boolean restoreSnapshot(BlockSnapshot snapshot, boolean force, BlockChangeFlag flag) {
-        return snapshot.restore(force, flag);
-    }
-
-    @Override
-    public boolean restoreSnapshot(int x, int y, int z, BlockSnapshot snapshot, boolean force, BlockChangeFlag flag) {
-        snapshot = snapshot.withLocation(new Location<>(this, new Vector3i(x, y, z)));
-        return snapshot.restore(force, flag);
-    }
-
-    @Override
-    public Optional<UUID> getCreator(int x, int y, int z) {
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<UUID> getNotifier(int x, int y, int z) {
-        return Optional.empty();
-    }
-
-    @Override
-    public void setCreator(int x, int y, int z, @Nullable UUID uuid) {
-    }
-
-    @Override
-    public void setNotifier(int x, int y, int z, @Nullable UUID uuid) {
-    }
-
-    @Override
-    public Optional<AABB> getBlockSelectionBox(int x, int y, int z) {
-        final BlockPos pos = new BlockPos(x, y, z);
-        final IBlockState state = getBlockState(pos);
-        final AxisAlignedBB box = state.getBoundingBox((IBlockAccess) this, pos);
-        try {
-            return Optional.of(VecHelper.toSpongeAABB(box).offset(x, y, z));
-        } catch (IllegalArgumentException exception) {
-            // Box is degenerate
-            return Optional.empty();
-        }
-    }
-
-    @Override
-    public Set<Entity> getIntersectingEntities(AABB box, Predicate<Entity> filter) {
-        checkNotNull(box, "box");
-        checkNotNull(filter, "filter");
-        return getEntitiesWithinAABB(net.minecraft.entity.Entity.class, VecHelper.toMinecraftAABB(box), entity -> filter.test((Entity) entity))
-                .stream()
-                .map(entity -> (Entity) entity)
-                .collect(Collectors.toSet());
-    }
-
-    @Override
-    public Set<AABB> getIntersectingBlockCollisionBoxes(AABB box) {
-        checkNotNull(box, "box");
-        return getCollisionBoxes(null, VecHelper.toMinecraftAABB(box)).stream()
-                .map(VecHelper::toSpongeAABB)
-                .collect(Collectors.toSet());
-    }
-
-    @Override
-    public Set<AABB> getIntersectingCollisionBoxes(Entity owner, AABB box) {
-        checkNotNull(owner, "owner");
-        checkNotNull(box, "box");
-        return getCollisionBoxes((net.minecraft.entity.Entity) owner, VecHelper.toMinecraftAABB(box)).stream()
-                .map(VecHelper::toSpongeAABB)
-                .collect(Collectors.toSet());
-    }
-
-    @Override
-    public Set<EntityHit> getIntersectingEntities(Vector3d start, Vector3d end, Predicate<EntityHit> filter) {
-        checkNotNull(start, "start");
-        checkNotNull(end, "end");
-        final Vector3d diff = end.sub(start);
-        return getIntersectingEntities(start, diff.normalize(), diff.length(), filter);
-    }
-
-    @Override
-    public Set<EntityHit> getIntersectingEntities(Vector3d start, Vector3d direction, double distance, Predicate<EntityHit> filter) {
-        checkNotNull(start, "start");
-        checkNotNull(direction, "direction");
-        checkNotNull(filter, "filter");
-        // Ensure that the direction has unit length
-        direction = direction.normalize();
-        // If the direction is vertical only, we don't need to do any chunk tracing, just defer immediately to the containing chunk
-        if (direction.getX() == 0 && direction.getZ() == 0) {
-            return getIntersectingEntities(start, direction.getY(), distance, filter);
-
-        }
-        // Adapted from BlockRay
-        final int chunkWidth = SpongeChunkLayout.CHUNK_SIZE.getX();
-        // Figure out the direction of the ray for each axis
-        final int xPlaneIncrement = direction.getX() >= 0 ? chunkWidth : -chunkWidth;
-        final int zPlaneIncrement = direction.getZ() >= 0 ? chunkWidth : -chunkWidth;
-        // First planes are for the chunk that contains the coordinates
-        double xInChunk = GenericMath.mod(start.getX(), chunkWidth);
-        double zInChunk = GenericMath.mod(start.getZ(), chunkWidth);
-        int xPlaneNext = (int) (start.getX() - xInChunk);
-        int zPlaneNext = (int) (start.getZ() - zInChunk);
-        // Correct the next planes to they start just behind the starting position
-        if (xInChunk != 0 && direction.getX() < 0) {
-            xPlaneNext += chunkWidth;
-        }
-        if (zInChunk != 0 && direction.getZ() < 0) {
-            zPlaneNext += chunkWidth;
-        }
-        // Compute the first intersection solutions for each plane
-        double xPlaneT = (xPlaneNext - start.getX()) / direction.getX();
-        double zPlaneT = (zPlaneNext - start.getZ()) / direction.getZ();
-        // Keep track of the last distance using the t multiplier
-        double currentT = 0;
-        // Keep tack of the last intersection y coordinate
-        double xCurrent = start.getX();
-        double yCurrent = start.getY();
-        double zCurrent = start.getZ();
-        // Trace each chunks until the remaining distance goes below 0
-        double remainingDistance = distance;
-        // Trace the chunks in 2D to find which contain possibly intersecting entities
-        final Set<EntityHit> intersecting = new HashSet<>();
-        do {
-            final double nextT;
-            final double xNext;
-            final double yNext;
-            final double zNext;
-            // Find the closest intersection and its coordinates
-            if (xPlaneT < zPlaneT) {
-                nextT = xPlaneT;
-                // Update current position
-                xNext = xPlaneNext;
-                zNext = direction.getZ() * nextT + start.getZ();
-                // Prepare next intersection
-                xPlaneNext += xPlaneIncrement;
-                xPlaneT = (xPlaneNext - start.getX()) / direction.getX();
-            } else {
-                nextT = zPlaneT;
-                // Update current position
-                xNext = direction.getX() * nextT + start.getX();
-                zNext = zPlaneNext;
-                // Prepare next intersection
-                zPlaneNext += zPlaneIncrement;
-                zPlaneT = (zPlaneNext - start.getZ()) / direction.getZ();
-            }
-            // Don't go over the distance when calculating the next intersection y
-            yNext = direction.getY() * Math.min(nextT, distance) + start.getY();
-            // Ignore the first few intersections behind the starting position
-            // although we still use them to position the current coordinates on a chunk boundary
-            if (nextT >= 0) {
-                // Get the coordinates of the chunk that was last entered (correct for entering from the back plane)
-                xInChunk = GenericMath.mod(xCurrent, chunkWidth);
-                zInChunk = GenericMath.mod(zCurrent, chunkWidth);
-                final int xChunk = (int) (xCurrent - (xInChunk == 0 && direction.getX() < 0 ? chunkWidth : xInChunk));
-                final int zChunk = (int) (zCurrent - (zInChunk == 0 && direction.getZ() < 0 ? chunkWidth : zInChunk));
-                // Make sure the start position in the chunk is not before the world start position
-                final Vector3d chunkStart = currentT <= 0 ? start : new Vector3d(xCurrent, yCurrent, zCurrent);
-                // Get the chunk and call the intersection method to perform the task locally
-                final Optional<Chunk> chunk = getChunkAtBlock(xChunk, 0, zChunk);
-                if (chunk.isPresent()) {
-                    ((IMixinChunk) chunk.get())
-                            .getIntersectingEntities(chunkStart, direction, remainingDistance, filter, chunkStart.getY(), yNext, intersecting);
-                }
-                // If the intersections are near another chunk, its entities might be partially in the current chunk, so include it also
-                final IMixinChunk nearIntersections = getChunkNearIntersections(xChunk, zChunk, xCurrent, zCurrent, xNext, zNext);
-                if (nearIntersections != null) {
-                    nearIntersections
-                            .getIntersectingEntities(chunkStart, direction, remainingDistance, filter, chunkStart.getY(), yNext, intersecting);
-                }
-                // Remove the chunk from the distance
-                remainingDistance -= nextT - Math.max(0, currentT);
-            }
-            // Update the current intersection to the new one
-            currentT = nextT;
-            xCurrent = xNext;
-            yCurrent = yNext;
-            zCurrent = zNext;
-        } while (remainingDistance >= 0);
-        return intersecting;
-    }
-
-    private IMixinChunk getChunkNearIntersections(int xChunk, int zChunk, double xCurrent, double zCurrent, double xNext, double zNext) {
-        final int chunkWidth = SpongeChunkLayout.CHUNK_SIZE.getX();
-        // Chunk corner coordinates
-        final Vector2d c1 = new Vector2d(xChunk, zChunk);
-        final Vector2d c2 = new Vector2d(xChunk + chunkWidth, zChunk);
-        final Vector2d c3 = new Vector2d(xChunk, zChunk + chunkWidth);
-        final Vector2d c4 = new Vector2d(xChunk + chunkWidth, zChunk + chunkWidth);
-        // The square of the distance we consider as being near
-        final int nearDistance2 = 2 * 2;
-        // Under the assumption that both intersections aren't on the same face
-        // Look for two intersection being near the same corner
-        final boolean d11 = c1.distanceSquared(xCurrent, zCurrent) <= nearDistance2;
-        final boolean d21 = c1.distanceSquared(xNext, zNext) <= nearDistance2;
-        if (d11 && d21) {
-            // Near corner -x, -z
-            return (IMixinChunk) getChunkAtBlock(xChunk - chunkWidth, 0, zChunk - chunkWidth).orElse(null);
-        }
-        final boolean d12 = c2.distanceSquared(xCurrent, zCurrent) <= nearDistance2;
-        final boolean d22 = c2.distanceSquared(xNext, zNext) <= nearDistance2;
-        if (d12 && d22) {
-            // Near corner +x, -z
-            return (IMixinChunk) getChunkAtBlock(xChunk + chunkWidth, 0, zChunk - chunkWidth).orElse(null);
-        }
-        final boolean d13 = c3.distanceSquared(xCurrent, zCurrent) <= nearDistance2;
-        final boolean d23 = c3.distanceSquared(xNext, zNext) <= nearDistance2;
-        if (d13 && d23) {
-            // Near corner -x, +z
-            return (IMixinChunk) getChunkAtBlock(xChunk - chunkWidth, 0, zChunk + chunkWidth).orElse(null);
-        }
-        final boolean d14 = c4.distanceSquared(xCurrent, zCurrent) <= nearDistance2;
-        final boolean d24 = c4.distanceSquared(xNext, zNext) <= nearDistance2;
-        if (d14 && d24) {
-            // Near corner +x, +z
-            return (IMixinChunk) getChunkAtBlock(xChunk + chunkWidth, 0, zChunk + chunkWidth).orElse(null);
-        }
-        // Look for two intersections being near the corners on the same face
-        if (d11 && d23 || d21 && d13) {
-            // Near face -x
-            return (IMixinChunk) getChunkAtBlock(xChunk - chunkWidth, 0, zChunk).orElse(null);
-        }
-        if (d11 && d22 || d21 && d12) {
-            // Near face -z
-            return (IMixinChunk) getChunkAtBlock(xChunk, 0, zChunk - chunkWidth).orElse(null);
-        }
-        if (d14 && d22 || d24 && d12) {
-            // Near face +x
-            return (IMixinChunk) getChunkAtBlock(xChunk + chunkWidth, 0, zChunk).orElse(null);
-        }
-        if (d14 && d23 || d24 && d13) {
-            // Near face +z
-            return (IMixinChunk) getChunkAtBlock(xChunk, 0, zChunk + chunkWidth).orElse(null);
-        }
-        return null;
-    }
-
-    private Set<EntityHit> getIntersectingEntities(Vector3d start, double yDirection, double distance, Predicate<EntityHit> filter) {
-        final Set<EntityHit> intersecting = new HashSet<>();
-        // Current chunk
-        final Vector3d direction = yDirection < 0 ? Vector3d.UNIT_Y.negate() : Vector3d.UNIT_Y;
-        final double endY = start.getY() + yDirection * distance;
-        final Vector3i chunkPos = SpongeChunkLayout.instance.forceToChunk(start.toInt());
-        ((IMixinChunk) getChunk(chunkPos).get()).getIntersectingEntities(start, direction, distance, filter, start.getY(), endY, intersecting);
-        // Check adjacent chunks if near them
-        final int nearDistance = 2;
-        // Neighbour -x chunk
-        final Vector3i chunkBlockPos = SpongeChunkLayout.instance.forceToWorld(chunkPos);
-        if (start.getX() - chunkBlockPos.getX() <= nearDistance) {
-            ((IMixinChunk) getChunk(chunkPos.add(-1, 0, 0)).get())
-                    .getIntersectingEntities(start, direction, distance, filter, start.getY(), endY, intersecting);
-        }
-        // Neighbour -z chunk
-        if (start.getZ() - chunkBlockPos.getZ() <= nearDistance) {
-            ((IMixinChunk) getChunk(chunkPos.add(0, 0, -1)).get())
-                    .getIntersectingEntities(start, direction, distance, filter, start.getY(), endY, intersecting);
-        }
-        // Neighbour +x chunk
-        final int chunkWidth = SpongeChunkLayout.CHUNK_SIZE.getX();
-        if (chunkBlockPos.getX() + chunkWidth - start.getX() <= nearDistance) {
-            ((IMixinChunk) getChunk(chunkPos.add(1, 0, 0)).get())
-                    .getIntersectingEntities(start, direction, distance, filter, start.getY(), endY, intersecting);
-        }
-        // Neighbour +z chunk
-        if (chunkBlockPos.getZ() + chunkWidth - start.getZ() <= nearDistance) {
-            ((IMixinChunk) getChunk(chunkPos.add(0, 0, 1)).get())
-                    .getIntersectingEntities(start, direction, distance, filter, start.getY(), endY, intersecting);
-        }
-        return intersecting;
-    }
 
     @Nullable
     @Override
@@ -1221,7 +371,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         if (this.hasChecked) {
             return this.isDefinitelyFake;
         }
-        this.isDefinitelyFake = this.isRemote || this.worldInfo == null || this.worldInfo.getWorldName() == null ||!(this instanceof IMixinWorldServer);
+        this.isDefinitelyFake = this.isRemote || this.worldInfo == null || this.worldInfo.getWorldName() == null ||!(this instanceof ServerWorldBridge);
         this.hasChecked = true;
         return this.isDefinitelyFake;
     }
@@ -1245,7 +395,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         Iterator<net.minecraft.entity.Entity> iterator = entities.iterator();
         while (iterator.hasNext()) {
             net.minecraft.entity.Entity entity = iterator.next();
-            if (((IMixinEntity) entity).isVanished() && ((IMixinEntity) entity).ignoresCollision()) {
+            if (((EntityBridge) entity).isVanished() && ((EntityBridge) entity).ignoresCollision()) {
                 iterator.remove();
             }
         }
@@ -1255,40 +405,15 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Redirect(method = "getClosestPlayer(DDDDLcom/google/common/base/Predicate;)Lnet/minecraft/entity/player/EntityPlayer;", at = @At(value = "INVOKE", target = "Lcom/google/common/base/Predicate;apply(Ljava/lang/Object;)Z", remap = false))
     private boolean onGetClosestPlayerCheck(com.google.common.base.Predicate<net.minecraft.entity.Entity> predicate, Object entityPlayer) {
         EntityPlayer player = (EntityPlayer) entityPlayer;
-        IMixinEntity mixinEntity = (IMixinEntity) player;
+        EntityBridge mixinEntity = (EntityBridge) player;
         return predicate.apply(player) && !mixinEntity.isVanished();
     }
 
     @Inject(method = "playSound(Lnet/minecraft/entity/player/EntityPlayer;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V", at = @At("HEAD"), cancellable = true)
     private void spongePlaySoundAtEntity(EntityPlayer entity, double x, double y, double z, SoundEvent name, net.minecraft.util.SoundCategory category, float volume, float pitch, CallbackInfo callbackInfo) {
-        if (entity instanceof IMixinEntity) {
-            if (((IMixinEntity) entity).isVanished()) {
+        if (entity instanceof EntityBridge) {
+            if (((EntityBridge) entity).isVanished()) {
                 callbackInfo.cancel();
-            }
-        }
-    }
-
-    @Override
-    public void sendBlockChange(int x, int y, int z, BlockState state) {
-        checkNotNull(state, "state");
-        SPacketBlockChange packet = new SPacketBlockChange();
-        packet.blockPosition = new BlockPos(x, y, z);
-        packet.blockState = BlockUtil.toNative(state);
-
-        for (EntityPlayer player : this.playerEntities) {
-            if (player instanceof EntityPlayerMP) {
-                ((EntityPlayerMP) player).connection.sendPacket(packet);
-            }
-        }
-    }
-
-    @Override
-    public void resetBlockChange(int x, int y, int z) {
-        SPacketBlockChange packet = new SPacketBlockChange((net.minecraft.world.World) (Object) this, new BlockPos(x, y, z));
-
-        for (EntityPlayer player : this.playerEntities) {
-            if (player instanceof EntityPlayerMP) {
-                ((EntityPlayerMP) player).connection.sendPacket(packet);
             }
         }
     }
@@ -1683,7 +808,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             // int j = entity1.chunkCoordX;
             // int k1 = entity1.chunkCoordZ;
 
-            final net.minecraft.world.chunk.Chunk activeChunk = (net.minecraft.world.chunk.Chunk) ((IMixinEntity) entity1).getActiveChunk();
+            final net.minecraft.world.chunk.Chunk activeChunk = (net.minecraft.world.chunk.Chunk) ((EntityBridge) entity1).getActiveChunk();
             if (activeChunk != null) {
                 activeChunk.removeEntity(entity1);
             }
@@ -1739,7 +864,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 int l1 = entity2.chunkCoordX;
                 int i2 = entity2.chunkCoordZ;
 
-                final net.minecraft.world.chunk.Chunk activeChunk = (net.minecraft.world.chunk.Chunk) ((IMixinEntity) entity2).getActiveChunk();
+                final net.minecraft.world.chunk.Chunk activeChunk = (net.minecraft.world.chunk.Chunk) ((EntityBridge) entity2).getActiveChunk();
                 if (activeChunk == null) {
                     this.getChunk(l1, i2).removeEntity(entity2);
                 } else {
@@ -1864,11 +989,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     public void entityActivationCheck() {
         // Overridden in MixinWorldServer_Activation
-    }
-
-    @Override
-    public int getSeaLevel() {
-        return this.seaLevel;
     }
 
     protected void startEntityGlobalTimings() { }

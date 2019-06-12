@@ -46,7 +46,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.persistence.JsonDataFormat;
 import org.spongepowered.common.data.util.DataQueries;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 import org.spongepowered.common.registry.type.world.GeneratorTypeRegistryModule;
 
 import java.io.IOException;
@@ -99,7 +99,7 @@ public abstract class MixinWorldType implements GeneratorType {
     @Override
     public WorldGenerator createGenerator(World world) {
         checkNotNull(world);
-        return ((IMixinWorldServer) world).createWorldGenerator(getGeneratorSettings());
+        return ((ServerWorldBridge) world).createWorldGenerator(getGeneratorSettings());
     }
 
     @Override

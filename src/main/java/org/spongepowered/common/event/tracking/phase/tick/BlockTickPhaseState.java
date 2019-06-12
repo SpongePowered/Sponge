@@ -26,22 +26,16 @@ package org.spongepowered.common.event.tracking.phase.tick;
 
 import com.google.common.collect.ListMultimap;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockDynamicLiquid;
 import net.minecraft.block.BlockEventData;
 import net.minecraft.block.IGrowable;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.init.Blocks;
-import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldServer;
-import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
@@ -57,8 +51,7 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
-import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMapEntry;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 
@@ -71,7 +64,7 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
         super.getFrameModifier().andThen((frame, context) ->
             {
                 frame.pushCause(this.getLocatableBlockSourceFromContext(context));
-                context.tickingBlock.getTickFrameModifier().accept(frame, (IMixinWorldServer) context.world);
+                context.tickingBlock.getTickFrameModifier().accept(frame, (ServerWorldBridge) context.world);
             }
         );
     private final String name;

@@ -105,7 +105,7 @@ public abstract class MixinBlockLever extends MixinBlock {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class, DirectionResolver.getFor(intDir));
     }
 
-    public ImmutableAxisData getAxisData(IBlockState blockState) {
+    private ImmutableAxisData getAxisData(IBlockState blockState) {
         final BlockLever.EnumOrientation orientation = blockState.getValue(BlockLever.FACING);
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeAxisData.class, this.getAxisFromOrientation(orientation));
     }

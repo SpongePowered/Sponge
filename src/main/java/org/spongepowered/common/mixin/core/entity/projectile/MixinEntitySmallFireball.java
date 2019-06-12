@@ -30,7 +30,7 @@ import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.entity.IMixinGriefer;
+import org.spongepowered.common.bridge.entity.GrieferBridge;
 
 @Mixin(EntitySmallFireball.class)
 public abstract class MixinEntitySmallFireball extends MixinEntityFireball {
@@ -55,6 +55,6 @@ public abstract class MixinEntitySmallFireball extends MixinEntityFireball {
         )
     )
     private boolean onCanGrief(World world, BlockPos pos) {
-        return ((IMixinGriefer) this).canGrief() && world.isAirBlock(pos);
+        return ((GrieferBridge) this).bridge$CanGrief() && world.isAirBlock(pos);
     }
 }

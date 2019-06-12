@@ -71,6 +71,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -78,7 +79,6 @@ import org.spongepowered.common.event.tracking.phase.packet.PacketContext;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerInteractionManager;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.util.VecHelper;
 
@@ -463,7 +463,7 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
             // Sanity checks on the world being used (hey, i don't know the rules about clients...
             // and if the world is in fact a responsible server world.
             final EnumActionResult result = actionresult.getType();
-            if (!(worldIn instanceof IMixinWorld) || ((IMixinWorld) worldIn).isFake()) {
+            if (!(worldIn instanceof WorldBridge) || ((WorldBridge) worldIn).isFake()) {
                 return result;
             }
 

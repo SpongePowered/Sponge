@@ -47,6 +47,7 @@ import java.util.Optional;
 @Mixin(BlockStem.class)
 public abstract class MixinBlockStem extends MixinBlock {
 
+    @SuppressWarnings("RedundantTypeArguments") // some JDK's can fail to compile without the explicit type generics
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getGrowthData(blockState), getDirectionalData(blockState));

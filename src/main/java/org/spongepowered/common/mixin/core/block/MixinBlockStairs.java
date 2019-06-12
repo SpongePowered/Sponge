@@ -52,6 +52,7 @@ import java.util.Optional;
 @Mixin(BlockStairs.class)
 public abstract class MixinBlockStairs extends MixinBlock {
 
+    @SuppressWarnings("RedundantTypeArguments") // some JDK's can fail to compile without the explicit type generics
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getStairShapeFor(blockState), getPortionTypeFor(blockState),
@@ -64,12 +65,14 @@ public abstract class MixinBlockStairs extends MixinBlock {
                 || ImmutableDirectionalData.class.isAssignableFrom(immutable);
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableStairShapeData) {
             final BlockStairs.EnumShape stairShapeType = (BlockStairs.EnumShape) (Object) ((ImmutableStairShapeData) manipulator).type().get();
             return Optional.of((BlockState) blockState.withProperty(BlockStairs.SHAPE, stairShapeType));
-        } else if (manipulator instanceof ImmutablePortionData) {
+        }
+        if (manipulator instanceof ImmutablePortionData) {
             final PortionType portionType = ((ImmutablePortionData) manipulator).type().get();
             return Optional.of((BlockState) blockState.withProperty(BlockStairs.HALF, convertType((BlockSlab.EnumBlockHalf) (Object) portionType)));
         }
@@ -85,7 +88,8 @@ public abstract class MixinBlockStairs extends MixinBlock {
         if (key.equals(Keys.STAIR_SHAPE)) {
             final BlockStairs.EnumShape stairShapeType = (BlockStairs.EnumShape) value;
             return Optional.of((BlockState) blockState.withProperty(BlockStairs.SHAPE, stairShapeType));
-        } else if (key.equals(Keys.PORTION_TYPE)) {
+        }
+        if (key.equals(Keys.PORTION_TYPE)) {
             return Optional.of((BlockState) blockState.withProperty(BlockStairs.HALF, convertType((BlockSlab.EnumBlockHalf) value)));
         }
         if (key.equals(Keys.DIRECTION)) {
@@ -95,6 +99,7 @@ public abstract class MixinBlockStairs extends MixinBlock {
         return super.getStateWithValue(blockState, key, value);
     }
 
+    @SuppressWarnings("ConstantConditions")
     private ImmutableStairShapeData getStairShapeFor(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeStairShapeData.class,
                 (StairShape) (Object) blockState.getValue(BlockStairs.SHAPE));
@@ -110,6 +115,7 @@ public abstract class MixinBlockStairs extends MixinBlock {
                 DirectionResolver.getFor(blockState.getValue(BlockStairs.FACING)));
     }
 
+    @SuppressWarnings("ConstantConditions")
     private PortionType convertType(BlockStairs.EnumHalf type) {
         return (PortionType) (Object) BlockSlab.EnumBlockHalf.valueOf(type.getName().toUpperCase());
     }

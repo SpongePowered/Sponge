@@ -44,11 +44,11 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedItemData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.mixin.api.minecraft.entity.MixinEntity_API;
@@ -78,7 +78,7 @@ public abstract class MixinEntityItem_API extends MixinEntity_API implements Ite
 
     @ModifyConstant(method = "searchForOtherItemsNearby", constant = @Constant(doubleValue = 0.5D))
     private double getSearchRadius(double originalRadius) {
-        if (this.world.isRemote || ((IMixinWorld) this.world).isFake()) {
+        if (this.world.isRemote || ((WorldBridge) this.world).isFake()) {
             return originalRadius;
         }
         if (this.cachedRadius == -1) {

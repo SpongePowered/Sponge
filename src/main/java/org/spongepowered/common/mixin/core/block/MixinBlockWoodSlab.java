@@ -48,6 +48,7 @@ import java.util.Optional;
 @Mixin(BlockWoodSlab.class)
 public abstract class MixinBlockWoodSlab extends MixinBlock {
 
+    @SuppressWarnings("RedundantTypeArguments") // some JDK's can fail to compile without the explicit type generics
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getTreeTypeFor(blockState), getPortionTypeFor(blockState));
@@ -58,6 +59,7 @@ public abstract class MixinBlockWoodSlab extends MixinBlock {
         return ImmutableTreeData.class.isAssignableFrom(immutable) || ImmutablePortionData.class.isAssignableFrom(immutable);
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableTreeData) {
@@ -83,6 +85,7 @@ public abstract class MixinBlockWoodSlab extends MixinBlock {
         return super.getStateWithValue(blockState, key, value);
     }
 
+    @SuppressWarnings("ConstantConditions")
     private ImmutableTreeData getTreeTypeFor(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeTreeData.class, (TreeType) (Object) blockState.getValue(BlockPlanks.VARIANT));
     }

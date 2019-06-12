@@ -43,6 +43,7 @@ import java.util.Optional;
 @Mixin(BlockStoneBrick.class)
 public abstract class MixinBlockStoneBrick extends MixinBlock {
 
+    @SuppressWarnings("RedundantTypeArguments") // some JDK's can fail to compile without the explicit type generics
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getStoneBrickTypeFor(blockState));
@@ -53,6 +54,7 @@ public abstract class MixinBlockStoneBrick extends MixinBlock {
         return ImmutableBrickData.class.isAssignableFrom(immutable);
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableBrickData) {
@@ -71,6 +73,7 @@ public abstract class MixinBlockStoneBrick extends MixinBlock {
         return super.getStateWithValue(blockState, key, value);
     }
 
+    @SuppressWarnings("ConstantConditions")
     private ImmutableBrickData getStoneBrickTypeFor(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeBrickData.class,
                 (BrickType) (Object) blockState.getValue(BlockStoneBrick.VARIANT));

@@ -41,9 +41,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 
 import java.util.ArrayList;
@@ -97,9 +97,9 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstruct(World worldIn, int x, int z, CallbackInfo ci) {
-        this.isServerChunk = !((IMixinWorld) worldIn).isFake();
+        this.isServerChunk = !((WorldBridge) worldIn).isFake();
         if (this.isServerChunk) {
-            this.lightExecutorService = ((IMixinWorldServer) worldIn).getLightingExecutor();
+            this.lightExecutorService = ((ServerWorldBridge) worldIn).getLightingExecutor();
         }
     }
 
@@ -648,7 +648,7 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
                 if (chunk == null) {
                     continue;
                 }
-                ((IMixinWorldServer) this.world).updateLightAsync(EnumSkyBlock.SKY, new BlockPos(x1, j, z1), (Chunk)(Object) chunk);
+                ((ServerWorldBridge) this.world).updateLightAsync(EnumSkyBlock.SKY, new BlockPos(x1, j, z1), (Chunk)(Object) chunk);
             }
         }
 
@@ -668,7 +668,7 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
             return false;
         }
 
-        return ((IMixinWorldServer) this.world).updateLightAsync(lightType, pos, (Chunk)(Object) chunk);
+        return ((ServerWorldBridge) this.world).updateLightAsync(lightType, pos, (Chunk)(Object) chunk);
     }
 
     private boolean checkWorldLight(BlockPos pos) {
@@ -691,10 +691,10 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
 
         if (this.world.provider.hasSkyLight())
         {
-            flag |= ((IMixinWorldServer) this.world).updateLightAsync(EnumSkyBlock.SKY, pos, (Chunk)(Object) chunk);
+            flag |= ((ServerWorldBridge) this.world).updateLightAsync(EnumSkyBlock.SKY, pos, (Chunk)(Object) chunk);
         }
 
-        flag = flag | ((IMixinWorldServer) this.world).updateLightAsync(EnumSkyBlock.BLOCK, pos, (Chunk)(Object) chunk);
+        flag = flag | ((ServerWorldBridge) this.world).updateLightAsync(EnumSkyBlock.BLOCK, pos, (Chunk)(Object) chunk);
         return flag;
     }
 

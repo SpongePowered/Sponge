@@ -77,9 +77,9 @@ import org.spongepowered.common.interfaces.IMixinIntegratedServer;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.util.SpongeHooks;
@@ -131,13 +131,13 @@ public final class WorldManager {
     private static final Comparator<WorldServer>
             WORLD_SERVER_COMPARATOR =
             (world1, world2) -> {
-                final Integer world1DimId = ((IMixinWorldServer) world1).getDimensionId();
+                final Integer world1DimId = ((ServerWorldBridge) world1).getDimensionId();
 
                 if (world2 == null) {
                     return world1DimId;
                 }
 
-                final Integer world2DimId = ((IMixinWorldServer) world2).getDimensionId();
+                final Integer world2DimId = ((ServerWorldBridge) world2).getDimensionId();
                 return world1DimId - world2DimId;
             };
 
@@ -512,7 +512,7 @@ public final class WorldManager {
                 globalConfigAdapter.getConfig().getOptimizations().useAsyncLighting()) {
 
             // The world is unloading - there's no point in running any more lighting tasks
-            ((IMixinWorldServer) worldServer).getLightingExecutor().shutdownNow();
+            ((ServerWorldBridge) worldServer).getLightingExecutor().shutdownNow();
         }
 
         // Vanilla sometimes doesn't remove player entities from world first
@@ -539,7 +539,7 @@ public final class WorldManager {
                 return false;
             }
 
-            final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) worldServer;
+            final ServerWorldBridge mixinWorldServer = (ServerWorldBridge) worldServer;
             final int dimensionId = mixinWorldServer.getDimensionId();
 
             try {
@@ -859,7 +859,7 @@ public final class WorldManager {
         // While we try to prevnt mods from changing a worlds' WorldInfo, we aren't always
         // successful. We re-do the fake world check to catch any changes made to WorldInfo
         // that would make it invalid
-        ((IMixinWorld) worldServer).clearFakeCheck();
+        ((WorldBridge) worldServer).clearFakeCheck();
 
         return worldServer;
     }
@@ -904,7 +904,7 @@ public final class WorldManager {
         final List<WorldServer> worlds = new ArrayList<>(worldByDimensionId.values());
         final Iterator<WorldServer> iterator = worlds.iterator();
         while(iterator.hasNext()) {
-            final IMixinWorldServer mixinWorld = (IMixinWorldServer) iterator.next();
+            final ServerWorldBridge mixinWorld = (ServerWorldBridge) iterator.next();
             final Integer dimensionId = mixinWorld.getDimensionId();
             if (vanillaWorldIds.contains(dimensionId)) {
                 iterator.remove();
@@ -1288,7 +1288,7 @@ public final class WorldManager {
             return 1;
         }
 
-        return ((IMixinWorldServer) world).getDimensionId();
+        return ((ServerWorldBridge) world).getDimensionId();
     }
 
     @Nullable public static Integer getDimensionId(WorldServer world) {

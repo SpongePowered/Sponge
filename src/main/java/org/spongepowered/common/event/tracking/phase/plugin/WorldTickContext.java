@@ -28,8 +28,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
 
 public class WorldTickContext extends ListenerPhaseContext<WorldTickContext> {
 
@@ -53,7 +53,7 @@ public class WorldTickContext extends ListenerPhaseContext<WorldTickContext> {
     public PrettyPrinter printCustom(PrettyPrinter printer, int indent) {
         String s = String.format("%1$" + indent + "s", "");
         super.printCustom(printer, indent);
-        if (!((IMixinWorld) this.tickingWorld).isFake()) {
+        if (!((WorldBridge) this.tickingWorld).isFake()) {
             printer.add(s + "- %s: %s", "TickingWorld", ((org.spongepowered.api.world.World) this.tickingWorld).getName());
         } else {
             printer.add(s + "- %s: %s", "Ticking World", "Pseudo Fake World?" + this.tickingWorld);

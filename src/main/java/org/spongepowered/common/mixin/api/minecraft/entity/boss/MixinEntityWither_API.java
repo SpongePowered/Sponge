@@ -36,7 +36,7 @@ import org.spongepowered.api.entity.living.monster.Wither;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.explosives.ImplBridgeFusedExplosive;
+import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 import org.spongepowered.common.mixin.api.minecraft.entity.monster.MixinEntityMob_API;
 
 import java.util.ArrayList;
@@ -80,30 +80,30 @@ public abstract class MixinEntityWither_API extends MixinEntityMob_API implement
 
     @Override
     public void detonate() {
-        ((ImplBridgeFusedExplosive) this).setFuseTicksRemaining(1);
+        ((FusedExplosiveBridge) this).bridge$setFuseTicksRemaining(1);
     }
 
     @Override
     public void prime() {
         checkState(!isPrimed(), "already primed");
-        if (((ImplBridgeFusedExplosive) this).shouldPrime()) {
-            ((ImplBridgeFusedExplosive) this).setFuseTicksRemaining(this.fuseDuration);
-            ((ImplBridgeFusedExplosive) this).postPrime();
+        if (((FusedExplosiveBridge) this).bridge$shouldPrime()) {
+            ((FusedExplosiveBridge) this).bridge$setFuseTicksRemaining(this.fuseDuration);
+            ((FusedExplosiveBridge) this).bridge$postPrime();
         }
     }
 
     @Override
     public void defuse() {
         checkState(isPrimed(), "not primed");
-        if (((ImplBridgeFusedExplosive) this).shouldDefuse()) {
+        if (((FusedExplosiveBridge) this).bridge$shouldDefuse()) {
             setInvulTime(0);
-            ((ImplBridgeFusedExplosive) this).postDefuse();
+            ((FusedExplosiveBridge) this).bridge$postDefuse();
         }
     }
 
     @Override
     public boolean isPrimed() {
-        return ((ImplBridgeFusedExplosive) this).getFuseTicksRemaining() > 0;
+        return ((FusedExplosiveBridge) this).bridge$getFuseTicksRemaining() > 0;
     }
 
 }

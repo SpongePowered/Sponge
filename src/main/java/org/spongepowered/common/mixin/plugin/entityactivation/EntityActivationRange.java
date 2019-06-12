@@ -68,8 +68,8 @@ import org.spongepowered.common.config.type.GlobalConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.bridge.entity.IMixinEntity;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.bridge.entity.EntityBridge;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModData_Activation;
@@ -127,7 +127,7 @@ public class EntityActivationRange {
      */
     public static void initializeEntityActivationState(Entity entity) {
         final IModData_Activation spongeEntity = (IModData_Activation) entity;
-        if (((IMixinWorld) entity.world).isFake()) {
+        if (((WorldBridge) entity.world).isFake()) {
             return;
         }
 
@@ -217,7 +217,7 @@ public class EntityActivationRange {
      * @param world The world to perform activation checks in
      */
     public static void activateEntities(World world) {
-        if (((IMixinWorld) world).isFake()) {
+        if (((WorldBridge) world).isFake()) {
             return;
         }
 
@@ -264,7 +264,7 @@ public class EntityActivationRange {
                 EntityType type = ((org.spongepowered.api.entity.Entity) entity).getType();
                 final IModData_Activation spongeEntity = (IModData_Activation) entity;
                 long currentTick = SpongeImpl.getServer().getTickCounter();
-                if (!((IMixinEntity) entity).shouldTick()) {
+                if (!((EntityBridge) entity).shouldTick()) {
                     continue;
                 }
                 if (type == EntityTypes.UNKNOWN) {
@@ -389,7 +389,7 @@ public class EntityActivationRange {
         if (entity.world.isRemote || !entity.addedToChunk || entity instanceof EntityFireworkRocket) {
             return true;
         }
-        final IMixinChunk activeChunk = ((IMixinEntity) entity).getActiveChunk();
+        final IMixinChunk activeChunk = ((EntityBridge) entity).getActiveChunk();
         if (activeChunk == null) {
             // Should never happen but just in case for mods, always tick
             return true;

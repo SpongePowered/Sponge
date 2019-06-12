@@ -87,6 +87,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.TimingHolder;
+import org.spongepowered.common.bridge.entity.GrieferBridge;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.data.nbt.CustomDataNbtUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.EntityUtil;
@@ -96,13 +98,11 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.event.damage.MinecraftBlockDamageSource;
 import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.IMixinTrackable;
-import org.spongepowered.common.interfaces.block.IMixinBlock;
-import org.spongepowered.common.bridge.entity.IMixinEntity;
-import org.spongepowered.common.bridge.entity.IMixinGriefer;
+import org.spongepowered.common.bridge.TrackableBridge;
+import org.spongepowered.common.bridge.block.BlockBridge;
+import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.SpongeHooks;
@@ -120,7 +120,7 @@ import javax.annotation.Nullable;
     {@Interface(iface = org.spongepowered.api.entity.Entity.class, prefix = "entityApi$"),
      @Interface(iface = TimingHolder.class, prefix = "timing$")}
 )
-public abstract class MixinEntity implements IMixinEntity, IMixinTrackable {
+public abstract class MixinEntity implements EntityBridge, TrackableBridge {
 
     // @formatter:off
     protected final SpongeEntityType entityType = EntityTypeRegistryModule.getInstance().getForClass(((Entity) (Object) this).getClass());
@@ -204,8 +204,8 @@ public abstract class MixinEntity implements IMixinEntity, IMixinTrackable {
 
     @Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;dimension:I", opcode = Opcodes.PUTFIELD))
     private void onSet(Entity self, int dimensionId, net.minecraft.world.World worldIn) {
-        if (worldIn instanceof IMixinWorldServer) {
-            self.dimension = ((IMixinWorldServer) worldIn).getDimensionId();
+        if (worldIn instanceof ServerWorldBridge) {
+            self.dimension = ((ServerWorldBridge) worldIn).getDimensionId();
         } else {
             self.dimension = dimensionId;
         }
@@ -532,8 +532,8 @@ public abstract class MixinEntity implements IMixinEntity, IMixinTrackable {
      */
     protected void spongeImpl$readFromSpongeCompound(NBTTagCompound compound) {
         CustomDataNbtUtil.readCustomData(compound, ((org.spongepowered.api.entity.Entity) this));
-        if (this instanceof IMixinGriefer && ((IMixinGriefer) this).isGriefer() && compound.hasKey(NbtDataUtil.CAN_GRIEF)) {
-            ((IMixinGriefer) this).setCanGrief(compound.getBoolean(NbtDataUtil.CAN_GRIEF));
+        if (this instanceof GrieferBridge && ((GrieferBridge) this).bridge$isGriefer() && compound.hasKey(NbtDataUtil.CAN_GRIEF)) {
+            ((GrieferBridge) this).bridge$SetCanGrief(compound.getBoolean(NbtDataUtil.CAN_GRIEF));
         }
         if (compound.hasKey(NbtDataUtil.IS_VANISHED, NbtDataUtil.TAG_BYTE)) {
             this.setVanished(compound.getBoolean(NbtDataUtil.IS_VANISHED));
@@ -551,8 +551,8 @@ public abstract class MixinEntity implements IMixinEntity, IMixinTrackable {
      */
     protected void spongeImpl$writeToSpongeCompound(NBTTagCompound compound) {
         CustomDataNbtUtil.writeCustomData(compound, ((org.spongepowered.api.entity.Entity) this));
-        if (this instanceof IMixinGriefer && ((IMixinGriefer) this).isGriefer()) {
-            compound.setBoolean(NbtDataUtil.CAN_GRIEF, ((IMixinGriefer) this).canGrief());
+        if (this instanceof GrieferBridge && ((GrieferBridge) this).bridge$isGriefer()) {
+            compound.setBoolean(NbtDataUtil.CAN_GRIEF, ((GrieferBridge) this).bridge$CanGrief());
         }
         if (this.isVanished) {
             compound.setBoolean(NbtDataUtil.IS_VANISHED, true);
@@ -590,7 +590,7 @@ public abstract class MixinEntity implements IMixinEntity, IMixinTrackable {
                                                                         + "onEntityWalk(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/Entity;)V"))
     private void spongeImpl$onEntityCollideWithBlockThrowEventSponge(Block block, net.minecraft.world.World world, BlockPos pos, Entity entity) {
         // if block can't collide, return
-        if (!((IMixinBlock) block).hasCollideLogic()) {
+        if (!((BlockBridge) block).hasCollideLogic()) {
             return;
         }
 
@@ -612,7 +612,7 @@ public abstract class MixinEntity implements IMixinEntity, IMixinTrackable {
     @Redirect(method = "doBlockCollisions", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;onEntityCollision(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/Entity;)V")) // doBlockCollisions
     private void spongeImpl$onEntityCollideWithBlockState(Block block, net.minecraft.world.World world, BlockPos pos, IBlockState state, Entity entity) {
         // if block can't collide, return
-        if (!((IMixinBlock) block).hasCollideWithStateLogic()) {
+        if (!((BlockBridge) block).hasCollideWithStateLogic()) {
             return;
         }
 
@@ -694,7 +694,7 @@ public abstract class MixinEntity implements IMixinEntity, IMixinTrackable {
 
     @Redirect(method = "applyEntityCollision", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;noClip:Z", opcode = Opcodes.GETFIELD))
     private boolean spongeApplyEntityCollisionCheckVanish(Entity entity) {
-        return entity.noClip || ((IMixinEntity) entity).isVanished();
+        return entity.noClip || ((EntityBridge) entity).isVanished();
     }
 
     @Redirect(method = "doWaterSplashEffect", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnParticle(Lnet/minecraft/util/EnumParticleTypes;DDDDDD[I)V"))
@@ -852,7 +852,7 @@ public abstract class MixinEntity implements IMixinEntity, IMixinTrackable {
             at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;fire:I", opcode = Opcodes.PUTFIELD)
     )
     private void spongeImpl$ThrowIgniteEventForFire(Entity entity, int ticks) {
-        if (((IMixinWorld) world).isFake() || !ShouldFire.IGNITE_ENTITY_EVENT) {
+        if (((WorldBridge) world).isFake() || !ShouldFire.IGNITE_ENTITY_EVENT) {
             this.fire = ticks; // Vanilla functionality
             return;
         }

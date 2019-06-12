@@ -117,6 +117,7 @@ public abstract class MixinBlockRedstoneWire extends MixinBlock {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeConnectedDirectionData.class, directions);
     }
 
+    @SuppressWarnings("ConstantConditions")
     private ImmutableWireAttachmentData getWireAttachmentData(IBlockState blockState) {
         Map<Direction, WireAttachmentType> data = new HashMap<>();
         data.put(Direction.NORTH, (WireAttachmentType) (Object) blockState.getValue(BlockRedstoneWire.NORTH));

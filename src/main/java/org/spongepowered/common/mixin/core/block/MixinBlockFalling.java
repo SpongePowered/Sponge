@@ -42,17 +42,20 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.world.WorldBridge;
 
 @Mixin(BlockFalling.class)
 public class MixinBlockFalling {
 
-    private static final String WORLD_IS_AREA_LOADED =
-            "Lnet/minecraft/world/World;isAreaLoaded(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/BlockPos;)Z";
-
-    @Redirect(method = "checkFallable", at = @At(value = "INVOKE", target = WORLD_IS_AREA_LOADED))
-    private boolean onIsAreaLoadedCheck(World world, BlockPos pos, BlockPos to) {
+    @Redirect(method = "checkFallable",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/World;isAreaLoaded(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/BlockPos;)Z"
+        )
+    )
+    private boolean impl$CheckIfAreaIsLoadedAndIfThrownEventIsntCancelled(World world, BlockPos pos, BlockPos to) {
         if (world.isAreaLoaded(pos, to)) {
-            if (!world.isRemote) {
+            if (!((WorldBridge) world).isFake()) {
                 BlockPos actualPos = pos.add(32, 32, 32);
                 EntityType fallingBlock = EntityTypes.FALLING_BLOCK;
                 Vector3d position = new Vector3d(actualPos.getX() + 0.5D, actualPos.getY(), actualPos.getZ() + 0.5D);

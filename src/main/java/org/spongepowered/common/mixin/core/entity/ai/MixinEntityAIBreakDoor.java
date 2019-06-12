@@ -30,7 +30,7 @@ import net.minecraft.entity.ai.EntityAIDoorInteract;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.entity.IMixinGriefer;
+import org.spongepowered.common.bridge.entity.GrieferBridge;
 
 @Mixin(EntityAIBreakDoor.class)
 public abstract class MixinEntityAIBreakDoor extends EntityAIDoorInteract {
@@ -54,7 +54,7 @@ public abstract class MixinEntityAIBreakDoor extends EntityAIDoorInteract {
         )
     )
     private boolean spongeShouldExecuteForGriefer(EntityAIDoorInteract entityAIDoorInteract) {
-        return super.shouldExecute() && ((IMixinGriefer) this.entity).canGrief();
+        return super.shouldExecute() && ((GrieferBridge) this.entity).bridge$CanGrief();
 
     }
 }

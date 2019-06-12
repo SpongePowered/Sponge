@@ -54,7 +54,7 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinInventory;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
-import org.spongepowered.common.bridge.entity.IMixinEntity;
+import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
@@ -114,7 +114,7 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockableLoot 
 
     @Inject(method = "putDropInInventoryAllSlots", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;getItem()Lnet/minecraft/item/ItemStack;"))
     private static void onPutDrop(IInventory inventory, IInventory hopper, EntityItem entityItem, CallbackInfoReturnable<Boolean> callbackInfo) {
-        ((IMixinEntity) entityItem).getCreatorUser().ifPresent(owner -> {
+        ((EntityBridge) entityItem).getCreatorUser().ifPresent(owner -> {
             if (inventory instanceof TileEntity) {
                 TileEntity te = (TileEntity) inventory;
                 IMixinChunk spongeChunk = (IMixinChunk) ((IMixinTileEntity) te).getActiveChunk();

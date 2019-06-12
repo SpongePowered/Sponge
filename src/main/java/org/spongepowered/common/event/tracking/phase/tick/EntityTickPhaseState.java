@@ -98,8 +98,6 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
         phaseContext.addNotifierAndOwnerToCauseStack(frame);
         // If we're doing bulk captures for blocks, go ahead and do them. otherwise continue with entity checks
         if (phaseContext.allowsBulkBlockCaptures()) {
-            // TODO - Determine if we need to pass the supplier or perform some parameterized
-            //  process if not empty method on the capture object.
             if (!TrackingUtil.processBlockCaptures(this, phaseContext)) {
                 EntityUtil.toMixin(tickingEntity).onCancelledBlockChange(phaseContext);
             }

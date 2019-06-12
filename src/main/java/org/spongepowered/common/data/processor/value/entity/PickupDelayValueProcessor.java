@@ -33,7 +33,7 @@ import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.interfaces.entity.item.IMixinEntityItem;
+import org.spongepowered.common.bridge.entity.ItemEntityBridge;
 
 import java.util.Optional;
 
@@ -61,7 +61,7 @@ public class PickupDelayValueProcessor extends AbstractSpongeValueProcessor<Enti
 
     @Override
     protected Optional<Integer> getVal(EntityItem container) {
-        return Optional.of(((IMixinEntityItem) container).getPickupDelay());
+        return Optional.of(((ItemEntityBridge) container).bridge$getPickupDelay());
     }
 
     @Override

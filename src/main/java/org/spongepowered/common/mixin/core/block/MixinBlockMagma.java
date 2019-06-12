@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
+import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.block.BlockMagma;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -39,19 +40,26 @@ import org.spongepowered.common.util.VecHelper;
 @Mixin(BlockMagma.class)
 public abstract class MixinBlockMagma extends MixinBlock {
 
-    private static final String ATTACK_ENTITY_FROM = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z";
-
-    @Redirect(method = "onEntityWalk", at = @At(value = "INVOKE", target = ATTACK_ENTITY_FROM))
-    private boolean onEntityWalkRedirectForMagma(Entity entity, DamageSource originalDamageSource, float damage, net.minecraft.world.World world,
+    @Redirect(
+        method = "onEntityWalk",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"
+        )
+    )
+    private boolean impl$SwapDamageSourceForMagma(Entity entity, DamageSource source, float damage, World world,
             BlockPos pos, Entity original) {
         if (!world.isRemote) {
-            DamageSource.HOT_FLOOR =
-                    new MinecraftBlockDamageSource("hotFloor", new Location<>((World) world, VecHelper.toVector3i(pos))).setFireDamage();
-            boolean result = entity.attackEntityFrom(DamageSource.HOT_FLOOR, damage);
-            DamageSource.HOT_FLOOR = originalDamageSource;
-            return result;
+            try {
+                final Vector3i blockPosition = VecHelper.toVector3i(pos);
+                final Location<org.spongepowered.api.world.World> location = new Location<>((org.spongepowered.api.world.World) world, blockPosition);
+                DamageSource.HOT_FLOOR = new MinecraftBlockDamageSource("hotFloor", location).setFireDamage();
+                return entity.attackEntityFrom(DamageSource.HOT_FLOOR, damage);
+            } finally {
+                DamageSource.HOT_FLOOR = source;
+            }
         }
-        return entity.attackEntityFrom(originalDamageSource, damage);
+        return entity.attackEntityFrom(source, damage);
     }
 
 }

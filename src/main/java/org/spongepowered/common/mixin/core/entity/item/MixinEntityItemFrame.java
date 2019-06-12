@@ -45,7 +45,7 @@ import java.util.ArrayList;
 import javax.annotation.Nullable;
 
 @Mixin(EntityItemFrame.class)
-public abstract class MixinEntityItemFrame extends MixinEntityHanging implements ItemFrame {
+public abstract class MixinEntityItemFrame extends MixinEntityHanging  {
 
     @Shadow public abstract void setDisplayedItem(@Nullable net.minecraft.item.ItemStack p_82334_1_);
 
@@ -54,7 +54,7 @@ public abstract class MixinEntityItemFrame extends MixinEntityHanging implements
     private void onAttackEntityFrom(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(source);
-            AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.getCurrentCause(), new ArrayList<>(), this, 0, amount);
+            AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.getCurrentCause(), new ArrayList<>(), (ItemFrame) this, 0, amount);
             SpongeImpl.postEvent(event);
             if (event.isCancelled()) {
                 cir.setReturnValue(true);

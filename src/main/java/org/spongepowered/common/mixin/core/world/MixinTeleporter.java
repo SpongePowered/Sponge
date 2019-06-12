@@ -51,9 +51,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.interfaces.world.IMixinTeleporter;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 import org.spongepowered.common.registry.type.world.PortalAgentRegistryModule;
 import org.spongepowered.common.util.VecHelper;
 
@@ -305,7 +304,7 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
 
     // Adds boolean to turn on special tracking if called from API
     private Optional<Location<World>> createTeleporter(Location<World> nearLocation) {
-//        IMixinWorldServer spongeWorld = (IMixinWorldServer) nearLocation.getExtent();
+//        ServerWorldBridge spongeWorld = (ServerWorldBridge) nearLocation.getExtent();
 //        final PhaseTracker causeTracker = PhaseTracker.getInstance();
 //        if (plugin) {
 //            Cause teleportCause = Cause.of(NamedCause.source(this));
@@ -526,7 +525,7 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
                 .add("searchRadius", this.searchRadius)
                 .add("creationRadius", this.creationRadius)
                 .add("world", this.world.getWorldInfo().getWorldName())
-                .add("dimension", ((IMixinWorldServer) this.world).getDimensionId())
+                .add("dimension", ((ServerWorldBridge) this.world).getDimensionId())
                 .toString();
     }
 }

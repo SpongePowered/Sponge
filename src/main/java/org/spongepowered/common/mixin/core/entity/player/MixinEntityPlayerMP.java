@@ -94,14 +94,12 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.living.humanoid.ChangeGameModeEvent;
 import org.spongepowered.api.event.entity.living.humanoid.player.PlayerChangeClientSettingsEvent;
-import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.entity.Hotbar;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.service.user.UserStorageService;
@@ -140,11 +138,11 @@ import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinServerScoreboard;
 import org.spongepowered.common.interfaces.IMixinSubject;
 import org.spongepowered.common.interfaces.IMixinTeam;
-import org.spongepowered.common.bridge.entity.IMixinEntity;
+import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.service.user.SpongeUserStorageService;
 import org.spongepowered.common.text.SpongeTexts;
@@ -353,7 +351,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
     public void onClonePlayer(EntityPlayerMP oldPlayer, boolean respawnFromEnd, CallbackInfo ci) {
         // Copy over sponge data from the old player.
         // Allows plugins to specify data that persists after players respawn.
-        IMixinEntity oldEntity = (IMixinEntity) oldPlayer;
+        EntityBridge oldEntity = (EntityBridge) oldPlayer;
         NBTTagCompound old = oldEntity.getEntityData();
         if (old.hasKey(NbtDataUtil.SPONGE_DATA)) {
             this.getEntityData().setTag(NbtDataUtil.SPONGE_DATA, old.getCompoundTag(NbtDataUtil.SPONGE_DATA));
@@ -374,8 +372,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
     }
 
     @Override
-    public IMixinWorldServer getMixinWorld() {
-        return ((IMixinWorldServer) this.world);
+    public ServerWorldBridge getMixinWorld() {
+        return ((ServerWorldBridge) this.world);
     }
 
     /* // gabizou comment - Due to forge changes, this is now required to be injected/overwritten

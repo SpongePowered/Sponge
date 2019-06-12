@@ -47,8 +47,8 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.bridge.block.BlockEventDataBridge;
+import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -104,7 +104,7 @@ public abstract class PacketState<P extends PacketContext<P>> implements IPhaseS
 
     @Override
     public void appendNotifierToBlockEvent(P context, PhaseContext<?> currentContext,
-        IMixinWorldServer mixinWorldServer, BlockPos pos, IMixinBlockEventData blockEvent) {
+        ServerWorldBridge mixinWorldServer, BlockPos pos, BlockEventDataBridge blockEvent) {
 
     }
 

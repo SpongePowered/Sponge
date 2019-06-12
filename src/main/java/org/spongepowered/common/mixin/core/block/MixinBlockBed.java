@@ -35,16 +35,12 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableOccupiedData;
 import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeOccupiedData;
-import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Optional;
 
@@ -82,11 +78,6 @@ public abstract class MixinBlockBed extends MixinBlockHorizontal {
 
     private ImmutableOccupiedData getIsOccupiedFor(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeOccupiedData.class, blockState.getValue(BlockBed.OCCUPIED));
-    }
-
-    @Override
-    public Translation getTranslation() {
-        return new SpongeTranslation("item.bed.white.name");
     }
 
     @Inject(method = "hasRoomForPlayer", at = @At(value = "RETURN"), cancellable = true)

@@ -42,7 +42,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.entity.living.human.EntityHuman;
-import org.spongepowered.common.bridge.entity.IMixinEntity;
+import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.mixin.core.network.datasync.AccessorEntityDataManager;
 import org.spongepowered.common.network.SpoofedEntityDataManager;
@@ -118,14 +118,14 @@ public abstract class MixinEntityTrackerEntry {
 
     @Inject(method = "isVisibleTo", at = @At("HEAD"), cancellable = true)
     private void onVisibilityCheck(EntityPlayerMP entityPlayerMP, CallbackInfoReturnable<Boolean> callbackInfoReturnable) {
-        if (((IMixinEntity) this.trackedEntity).isVanished()) {
+        if (((EntityBridge) this.trackedEntity).isVanished()) {
             callbackInfoReturnable.setReturnValue(false);
         }
     }
 
     @Inject(method = "sendPacketToTrackedPlayers", at = @At("HEAD"), cancellable = true)
     private void checkIfTrackedIsInvisiblePriorToSendingPacketToPlayers(Packet<?> packet, CallbackInfo callBackInfo) {
-        if (((IMixinEntity) this.trackedEntity).isVanished()) {
+        if (((EntityBridge) this.trackedEntity).isVanished()) {
             callBackInfo.cancel();
         }
     }

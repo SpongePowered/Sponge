@@ -54,7 +54,7 @@ import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.DataVersions;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
+import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.SpongeGameDictionaryEntry;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
@@ -100,7 +100,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         ImmutableList.Builder<ImmutableDataManipulator<?, ?>> builder = ImmutableList.builder();
         ImmutableSet.Builder<Key<?>> keyBuilder = ImmutableSet.builder();
         ImmutableSet.Builder<ImmutableValue<?>> valueBuilder = ImmutableSet.builder();
-        for (DataManipulator<?, ?> manipulator : ((IMixinCustomDataHolder) itemStack).getCustomManipulators()) {
+        for (DataManipulator<?, ?> manipulator : ((CustomDataHolderBridge) itemStack).getCustomManipulators()) {
             builder.add(manipulator.asImmutable());
             keyBuilder.addAll(manipulator.getKeys());
             valueBuilder.addAll(manipulator.getValues());
@@ -315,7 +315,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     public ItemStackSnapshot merge(ItemStackSnapshot that, MergeFunction function) {
         final ItemStack thisCopy = this.privateStack.copy();
         final ItemStack thatCopy = that.createStack();
-        for (DataManipulator<?, ?> manipulator : ((IMixinCustomDataHolder) thatCopy).getCustomManipulators()) {
+        for (DataManipulator<?, ?> manipulator : ((CustomDataHolderBridge) thatCopy).getCustomManipulators()) {
             thisCopy.offer(manipulator, function);
         }
         return thisCopy.createSnapshot();

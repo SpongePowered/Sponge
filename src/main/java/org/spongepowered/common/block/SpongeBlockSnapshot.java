@@ -67,8 +67,8 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
-import org.spongepowered.common.interfaces.block.IMixinBlock;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.bridge.block.BlockBridge;
+import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 import org.spongepowered.common.registry.type.block.TileEntityTypeRegistryModule;
 import org.spongepowered.common.registry.type.world.BlockChangeFlagRegistryModule;
 import org.spongepowered.common.util.VecHelper;
@@ -177,7 +177,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         }
 
         WorldServer world = (WorldServer) optionalWorld.get();
-        final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) world;
+        final ServerWorldBridge mixinWorldServer = (ServerWorldBridge) world;
         // We need to deterministically define the context as nullable if we don't need to enter.
         // this way we guarantee an exit.
         try (PhaseContext<?> context = BlockPhase.State.RESTORING_BLOCKS.createPhaseContext()) {
@@ -355,7 +355,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
 
     @Override
     public Optional<BlockSnapshot> with(ImmutableDataManipulator<?, ?> valueContainer) {
-        if (((IMixinBlock) this.blockState.getType()).supports((Class<ImmutableDataManipulator<?, ?>>) valueContainer.getClass())) {
+        if (((BlockBridge) this.blockState.getType()).supports((Class<ImmutableDataManipulator<?, ?>>) valueContainer.getClass())) {
             final BlockState newState;
             boolean changeState = false;
             if (this.blockState.supports((Class<ImmutableDataManipulator<?, ?>>) valueContainer.getClass())) {

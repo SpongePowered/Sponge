@@ -26,19 +26,19 @@ package org.spongepowered.common.event;
 
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.world.chunk.LoadChunkEvent;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 
 public class SpongeCommonEventHooks {
 
     @Listener
     public void onChunkLoad(LoadChunkEvent event) {
-        final IMixinWorld world = (IMixinWorld) event.getTargetChunk().getWorld();
+        final WorldBridge world = (WorldBridge) event.getTargetChunk().getWorld();
         if (world.isFake()) {
             return;
         }
 
-        final IMixinWorldServer worldServer = (IMixinWorldServer) event.getTargetChunk().getWorld();
+        final ServerWorldBridge worldServer = (ServerWorldBridge) event.getTargetChunk().getWorld();
         worldServer.incrementChunkLoadCount();
     }
 }

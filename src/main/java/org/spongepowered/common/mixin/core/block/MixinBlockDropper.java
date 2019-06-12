@@ -58,9 +58,9 @@ public abstract class MixinBlockDropper {
         // Transfer worked if remainder is one less than the original stack
         if (itemstack1.getCount() == itemstack.getCount() - 1) {
             IMixinInventory capture = forCapture(tileentitydispenser);
-            Inventory sourceInv = toInventory(tileentitydispenser);
+            Inventory sourceInv = ((Inventory) tileentitydispenser);
             SpongeCommonEventFactory.captureTransaction(capture, sourceInv, i, itemstack);
-            SpongeCommonEventFactory.callTransferPost(capture, sourceInv, toInventory(iinventory));
+            SpongeCommonEventFactory.callTransferPost(capture, sourceInv, ((Inventory) iinventory));
         }
         callbackInfo.cancel();
     }
@@ -74,12 +74,12 @@ public abstract class MixinBlockDropper {
         // Transfer worked if remainder is one less than the original stack
         if (itemstack1.getCount() == itemstack.getCount() - 1) {
             IMixinInventory capture = forCapture(tileentitydispenser);
-            Inventory sourceInv = toInventory(tileentitydispenser);
+            Inventory sourceInv = ((Inventory) tileentitydispenser);
             SpongeCommonEventFactory.captureTransaction(capture, sourceInv, i, itemstack);
             EnumFacing enumfacing = worldIn.getBlockState(pos).getValue(BlockDispenser.FACING);
             BlockPos blockpos = pos.offset(enumfacing);
             IInventory iinventory = TileEntityHopper.getInventoryAtPosition(worldIn, (double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ());
-            SpongeCommonEventFactory.callTransferPost(capture, sourceInv, toInventory(iinventory));
+            SpongeCommonEventFactory.callTransferPost(capture, sourceInv, ((Inventory) iinventory));
         }
         callbackInfo.cancel();
     }
@@ -91,13 +91,9 @@ public abstract class MixinBlockDropper {
             BlockSourceImpl blocksourceimpl, TileEntityDispenser tileentitydispenser, int i, ItemStack itemstack,
             EnumFacing enumfacing, BlockPos blockpos, IInventory iinventory) {
         // Before putStackInInventoryAllSlots
-        if (SpongeCommonEventFactory.callTransferPre(toInventory(tileentitydispenser), toInventory(iinventory)).isCancelled()) {
+        if (SpongeCommonEventFactory.callTransferPre(((Inventory) tileentitydispenser), ((Inventory) iinventory)).isCancelled()) {
             ci.cancel();
         }
-    }
-
-    private static Inventory toInventory(IInventory iinventory) {
-        return ((Inventory) iinventory);
     }
 
     private static IMixinInventory forCapture(Object toCapture) {

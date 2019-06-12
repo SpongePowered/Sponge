@@ -46,7 +46,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.player.IUserOrEntity;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.interfaces.IMixinSubject;
-import org.spongepowered.common.bridge.entity.IMixinEntity;
+import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.world.WorldManager;
 
@@ -178,7 +178,7 @@ public abstract class MixinSpongeUser implements User, IMixinSubject, IUserOrEnt
     public void setInvulnerable(boolean value) {
         Optional<Player> playerOpt = getPlayer();
         if (playerOpt.isPresent()) {
-            ((IMixinEntity) playerOpt.get()).setInvulnerable(value);
+            ((EntityBridge) playerOpt.get()).setInvulnerable(value);
             return;
         }
         this.invulnerable = value;
@@ -194,7 +194,7 @@ public abstract class MixinSpongeUser implements User, IMixinSubject, IUserOrEnt
     public void setVanished(boolean vanished) {
         Optional<Player> playerOpt = getPlayer();
         if (playerOpt.isPresent()) {
-            ((IMixinEntity) playerOpt.get()).setVanished(vanished);
+            ((EntityBridge) playerOpt.get()).setVanished(vanished);
             return;
         }
         this.isVanished = vanished;
@@ -205,7 +205,7 @@ public abstract class MixinSpongeUser implements User, IMixinSubject, IUserOrEnt
     public boolean isVanished() {
         Optional<Player> playerOpt = getPlayer();
         if (playerOpt.isPresent()) {
-            return ((IMixinEntity) playerOpt.get()).isVanished();
+            return ((EntityBridge) playerOpt.get()).isVanished();
         }
         return this.isVanished;
     }

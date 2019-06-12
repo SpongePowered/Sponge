@@ -39,7 +39,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 
 @NonnullByDefault
 @Mixin(WorldProvider.class)
@@ -108,7 +108,7 @@ public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvid
     public boolean canDropChunk(int x, int z) {
         final boolean isSpawnChunk = this.world.isSpawnChunk(x, z);
 
-        return !isSpawnChunk || !SpongeImplHooks.shouldKeepSpawnLoaded(this.world.provider.getDimensionType(), ((IMixinWorldServer) this.world)
+        return !isSpawnChunk || !SpongeImplHooks.shouldKeepSpawnLoaded(this.world.provider.getDimensionType(), ((ServerWorldBridge) this.world)
                 .getDimensionId());
     }
 }

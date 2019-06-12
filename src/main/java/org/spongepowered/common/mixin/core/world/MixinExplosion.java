@@ -48,7 +48,6 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.world.ExplosionEvent;
-import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
@@ -61,14 +60,13 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.CaptureBlockPos;
 import org.spongepowered.common.interfaces.world.IMixinExplosion;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.ArrayList;
@@ -304,7 +302,7 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
             } // Sponge - brackets.
         }
         // Sponge Start - set up some variables for more fasts
-        @Nullable final PhaseContext<?> context = !((IMixinWorld) this.world).isFake() ? PhaseTracker.getInstance().getCurrentContext() : null;
+        @Nullable final PhaseContext<?> context = !((WorldBridge) this.world).isFake() ? PhaseTracker.getInstance().getCurrentContext() : null;
         final boolean hasCapturePos = context != null && context.state.requiresBlockPosTracking();
         // Sponge end
 

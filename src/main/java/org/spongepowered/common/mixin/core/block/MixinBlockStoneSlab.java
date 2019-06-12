@@ -40,18 +40,17 @@ import org.spongepowered.api.data.type.PortionType;
 import org.spongepowered.api.data.type.SlabType;
 import org.spongepowered.api.data.type.SlabTypes;
 import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongePortionData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeSlabData;
-import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Optional;
 
 @Mixin(value = {BlockStoneSlabNew.class, BlockStoneSlab.class})
 public abstract class MixinBlockStoneSlab extends MixinBlock {
 
+    @SuppressWarnings("RedundantTypeArguments") // some JDK's can fail to compile without the explicit type generics
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getSlabTypeFor(blockState), getPortionTypeFor(blockState));
@@ -136,13 +135,5 @@ public abstract class MixinBlockStoneSlab extends MixinBlock {
 
     private ImmutablePortionData getPortionTypeFor(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePortionData.class, blockState.getValue(BlockSlab.HALF));
-    }
-
-    @Override
-    public Translation getTranslation() {
-        if (getBlockState().getBlock() instanceof BlockStoneSlabNew) {
-            return new SpongeTranslation(getTranslationKey() + ".red_sandstone.name");
-        }
-        return super.getTranslation();
     }
 }

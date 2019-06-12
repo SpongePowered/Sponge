@@ -45,7 +45,7 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerProfileCache;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 
 import java.net.InetSocketAddress;
 import java.util.Optional;
@@ -112,7 +112,7 @@ public abstract class MixinDedicatedServer extends MinecraftServer implements Se
         final IPhaseState<?> phaseState = PhaseTracker.getInstance().getCurrentState();
         if (!phaseState.isInteraction()) {
             // TODO BLOCK_PROTECTED flag
-            if (SpongeCommonEventFactory.callChangeBlockEventPre((IMixinWorldServer) worldIn, pos, playerIn).isCancelled()) {
+            if (SpongeCommonEventFactory.callChangeBlockEventPre((ServerWorldBridge) worldIn, pos, playerIn).isCancelled()) {
                 return true;
             }
         }

@@ -38,6 +38,8 @@ import static org.spongepowered.api.command.args.GenericArguments.string;
 import static org.spongepowered.api.command.args.GenericArguments.world;
 import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 
+import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
 import co.aikar.timings.Timings;
 import com.google.common.collect.ImmutableList;
@@ -98,11 +100,9 @@ import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
-import org.spongepowered.common.bridge.entity.IMixinEntity;
+import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.world.WorldManager;
 
@@ -390,7 +390,7 @@ public class SpongeCommandFactory {
                     }
 
                     protected Text getChunksInfo(WorldServer worldserver) {
-                        if (((IMixinWorld) worldserver).isFake() || worldserver.getWorldInfo() == null) {
+                        if (((WorldBridge) worldserver).isFake() || worldserver.getWorldInfo() == null) {
                             return Text.of(NEWLINE_TEXT, "Fake world");
                         }
                         return Text.of(NEWLINE_TEXT, key("DimensionId: "), value(WorldManager.getDimensionId(worldserver)), NEWLINE_TEXT,
@@ -558,7 +558,7 @@ public class SpongeCommandFactory {
                         return CommandResult.empty();
                     }
                     final Entity entityHit = rayTraceResult.entityHit;
-                    final IMixinEntity mixinEntity = EntityUtil.toMixin(entityHit);
+                    final EntityBridge mixinEntity = EntityUtil.toMixin(entityHit);
                     final org.spongepowered.api.entity.Entity spongeEntity = EntityUtil.fromNative(entityHit);
                     final Text.Builder builder = Text.builder();
                     builder.append(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "EntityType: "))
@@ -842,11 +842,11 @@ public class SpongeCommandFactory {
 
     private static void printWorldTickTime(CommandSource src, World world) {
         final long[] worldTickTimes = ((IMixinMinecraftServer) SpongeImpl.getServer()).
-                getWorldTickTimes(((IMixinWorldServer) world).getDimensionId());
+                getWorldTickTimes(((ServerWorldBridge) world).getDimensionId());
         final double worldMeanTickTime = mean(worldTickTimes) * 1.0e-6d;
         final double worldTps = Math.min(1000.0 / worldMeanTickTime, 20);
         src.sendMessage(Text.of("World [", TextColors.DARK_GREEN, world.getName(), TextColors.RESET, "] (",
-            ((IMixinWorldServer) world).getDimensionId(),
+            ((ServerWorldBridge) world).getDimensionId(),
             ") TPS: ", TextColors.LIGHT_PURPLE,
             THREE_DECIMAL_DIGITS_FORMATTER.format(worldTps), TextColors.RESET,  ", Mean: ", TextColors.RED,
             THREE_DECIMAL_DIGITS_FORMATTER.format(worldMeanTickTime), "ms"));

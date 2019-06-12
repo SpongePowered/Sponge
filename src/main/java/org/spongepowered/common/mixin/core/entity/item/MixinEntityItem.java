@@ -40,14 +40,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.interfaces.entity.item.IMixinEntityItem;
+import org.spongepowered.common.bridge.entity.ItemEntityBridge;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
 @Mixin(EntityItem.class)
-public abstract class MixinEntityItem extends MixinEntity implements IMixinEntityItem {
+public abstract class MixinEntityItem extends MixinEntity implements ItemEntityBridge {
 
     private static final int MAGIC_PREVIOUS = -1;
     @Shadow private int pickupDelay;
@@ -68,13 +68,13 @@ public abstract class MixinEntityItem extends MixinEntity implements IMixinEntit
     public float dropChance = 1.0f;
 
     @Override
-    public boolean infinitePickupDelay() {
+    public boolean bridge$infinitePickupDelay() {
         return this.infinitePickupDelay;
     }
 
     @ModifyConstant(method = "searchForOtherItemsNearby", constant = @Constant(doubleValue = 0.5D))
-    private double getSearchRadius(double originalRadius) {
-        if (this.world.isRemote || ((IMixinWorld) this.world).isFake()) {
+    private double impl$changeSearchRadiusFromConfig(double originalRadius) {
+        if (this.world.isRemote || ((WorldBridge) this.world).isFake()) {
             return originalRadius;
         }
         if (this.cachedRadius == -1) {
@@ -85,12 +85,12 @@ public abstract class MixinEntityItem extends MixinEntity implements IMixinEntit
     }
 
     @Override
-    public int getPickupDelay() {
+    public int bridge$getPickupDelay() {
         return this.infinitePickupDelay ? this.previousPickupDelay : this.pickupDelay;
     }
 
     @Override
-    public void setPickupDelay(int delay, boolean infinite) {
+    public void bridge$setPickupDelay(int delay, boolean infinite) {
         this.pickupDelay = delay;
         boolean previous = this.infinitePickupDelay;
         this.infinitePickupDelay = infinite;
@@ -103,22 +103,22 @@ public abstract class MixinEntityItem extends MixinEntity implements IMixinEntit
     }
 
     @Override
-    public boolean infiniteDespawnDelay() {
+    public boolean bridge$infiniteDespawnDelay() {
         return this.infiniteDespawnDelay;
     }
 
     @Override
-    public int getDespawnDelay() {
+    public int bridge$getDespawnDelay() {
         return 6000 - (this.infiniteDespawnDelay ? this.previousDespawnDelay : this.age);
     }
 
     @Override
-    public void setDespawnDelay(int delay) {
+    public void bridge$setDespawnDelay(int delay) {
         this.age = 6000 - delay;
     }
 
     @Override
-    public void setDespawnDelay(int delay, boolean infinite) {
+    public void bridge$setDespawnDelay(int delay, boolean infinite) {
         this.age = 6000 - delay;
         boolean previous = this.infiniteDespawnDelay;
         this.infiniteDespawnDelay = infinite;
@@ -180,8 +180,15 @@ public abstract class MixinEntityItem extends MixinEntity implements IMixinEntit
         compound.setShort(NbtDataUtil.PREVIOUS_DESPAWN_DELAY, (short) this.previousDespawnDelay);
     }
 
-    @Inject(method = "onCollideWithPlayer", at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/minecraft/entity/item/EntityItem;getItem()Lnet/minecraft/item/ItemStack;"), cancellable = true)
-    public void spongeImpl$ThrowPickupEvent(EntityPlayer entityIn, CallbackInfo ci) {
+    @Inject(
+        method = "onCollideWithPlayer",
+        at = @At(
+            value = "INVOKE",
+            ordinal = 0,
+            target = "Lnet/minecraft/entity/item/EntityItem;getItem()Lnet/minecraft/item/ItemStack;"),
+        cancellable = true
+    )
+    private void spongeImpl$ThrowPickupEvent(EntityPlayer entityIn, CallbackInfo ci) {
         if (!SpongeCommonEventFactory.callPlayerChangeInventoryPickupPreEvent(entityIn, (EntityItem) (Object) this, this.pickupDelay, this.getCreator().orElse(null))) {
             ci.cancel();
         }

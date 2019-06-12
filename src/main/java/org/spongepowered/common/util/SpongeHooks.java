@@ -60,10 +60,10 @@ import org.spongepowered.common.config.type.GeneralConfigBase;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.entity.SpongeEntityType;
-import org.spongepowered.common.interfaces.IMixinTrackable;
-import org.spongepowered.common.interfaces.block.IMixinBlock;
+import org.spongepowered.common.bridge.TrackableBridge;
+import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModData_Activation;
 import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.IModData_Collisions;
 import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
@@ -81,7 +81,6 @@ import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -119,7 +118,7 @@ public class SpongeHooks {
 
         final SpongeConfig<WorldConfig> configAdapter = ((IMixinWorldInfo) entity.world.getWorldInfo()).getConfigAdapter();
         if (configAdapter.getConfig().getLogging().entityDeathLogging()) {
-            logInfo("Dim: {0} setDead(): {1}", ((IMixinWorldServer) entity.world).getDimensionId(), entity);
+            logInfo("Dim: {0} setDead(): {1}", ((ServerWorldBridge) entity.world).getDimensionId(), entity);
             logStack(configAdapter);
         }
     }
@@ -131,7 +130,7 @@ public class SpongeHooks {
 
         final SpongeConfig<WorldConfig> configAdapter = ((IMixinWorldInfo) entity.world.getWorldInfo()).getConfigAdapter();
         if (configAdapter.getConfig().getLogging().entityDespawnLogging()) {
-            logInfo("Dim: {0} Despawning ({1}): {2}", ((IMixinWorldServer) entity.world).getDimensionId(), reason, entity);
+            logInfo("Dim: {0} Despawning ({1}): {2}", ((ServerWorldBridge) entity.world).getDimensionId(), reason, entity);
             logStack(configAdapter);
         }
     }
@@ -151,7 +150,7 @@ public class SpongeHooks {
         if (configAdapter.getConfig().getLogging().entitySpawnLogging()) {
             logInfo("SPAWNED " + spawnName + " [World: {2}][DimId: {3}]",
                     entity.world.getWorldInfo().getWorldName(),
-                    ((IMixinWorldServer) entity.world).getDimensionId());
+                    ((ServerWorldBridge) entity.world).getDimensionId());
             logStack(configAdapter);
         }
     }
@@ -165,7 +164,7 @@ public class SpongeHooks {
         if (configAdapter.getConfig().getLogging().blockTrackLogging() && allowed) {
             logInfo("Tracking Block " + "[RootCause: {0}][World: {1}][Block: {2}][Pos: {3}]",
                     user.getName(),
-                    world.getWorldInfo().getWorldName() + "(" + ((IMixinWorldServer) world).getDimensionId() + ")",
+                world.getWorldInfo().getWorldName() + "(" + ((ServerWorldBridge) world).getDimensionId() + ")",
                     ((BlockType) block).getId(),
                     pos);
             logStack(configAdapter);
@@ -173,7 +172,7 @@ public class SpongeHooks {
             logInfo("Blacklisted! Unable to track Block " + "[RootCause: {0}][World: {1}][DimId: {2}][Block: {3}][Pos: {4}]",
                     user.getName(),
                     world.getWorldInfo().getWorldName(),
-                    ((IMixinWorldServer) world).getDimensionId(),
+                    ((ServerWorldBridge) world).getDimensionId(),
                     ((BlockType) block).getId(),
                     pos.getX() + ", " + pos.getY() + ", " + pos.getZ());
         }
@@ -190,7 +189,7 @@ public class SpongeHooks {
         if (type != null && type.allowsLogging(logging)) {
             logInfo("Block " + type.name() + " [World: {2}][DimId: {3}][OriginalState: {4}][NewState: {5}]",
                     world.getWorldInfo().getWorldName(),
-                    ((IMixinWorldServer) world).getDimensionId(),
+                    ((ServerWorldBridge) world).getDimensionId(),
                     transaction.getOriginal().getState(),
                     transaction.getFinal().getState());
             logStack(configAdapter);
@@ -204,7 +203,7 @@ public class SpongeHooks {
 
         final SpongeConfig<WorldConfig> configAdapter = ((IMixinWorldInfo) world.getWorldInfo()).getConfigAdapter();
         if (configAdapter.getConfig().getLogging().chunkLoadLogging()) {
-            logInfo("Load Chunk At [{0}] ({1}, {2})", ((IMixinWorldServer) world).getDimensionId(), chunkPos.getX(),
+            logInfo("Load Chunk At [{0}] ({1}, {2})", ((ServerWorldBridge) world).getDimensionId(), chunkPos.getX(),
                     chunkPos.getZ());
             logStack(configAdapter);
         }
@@ -217,7 +216,7 @@ public class SpongeHooks {
 
         final SpongeConfig<WorldConfig> configAdapter = ((IMixinWorldInfo) world.getWorldInfo()).getConfigAdapter();
         if (configAdapter.getConfig().getLogging().chunkUnloadLogging()) {
-            logInfo("Unload Chunk At [{0}] ({1}, {2})", ((IMixinWorldServer) world).getDimensionId(), chunkPos.getX(),
+            logInfo("Unload Chunk At [{0}] ({1}, {2})", ((ServerWorldBridge) world).getDimensionId(), chunkPos.getX(),
                     chunkPos.getZ());
             logStack(configAdapter);
         }
@@ -230,7 +229,7 @@ public class SpongeHooks {
 
         final SpongeConfig<WorldConfig> configAdapter = ((IMixinWorldInfo) world.getWorldInfo()).getConfigAdapter();
         if (configAdapter.getConfig().getLogging().chunkGCQueueUnloadLogging()) {
-            logInfo("Chunk GC Queued Chunk At [{0}] ({1}, {2} for unload)", ((IMixinWorldServer) world).getDimensionId(), chunk.x, chunk.z);
+            logInfo("Chunk GC Queued Chunk At [{0}] ({1}, {2} for unload)", ((ServerWorldBridge) world).getDimensionId(), chunk.x, chunk.z);
             logStack(configAdapter);
         }
     }
@@ -397,7 +396,7 @@ public class SpongeHooks {
         public int dimensionId;
 
         public CollisionWarning(World world, Entity entity) {
-            this.dimensionId = ((IMixinWorldServer) world).getDimensionId();
+            this.dimensionId = ((ServerWorldBridge) world).getDimensionId();
             this.blockPos = new BlockPos(entity.chunkCoordX, entity.chunkCoordY, entity.chunkCoordZ);
         }
 
@@ -472,8 +471,8 @@ public class SpongeHooks {
             if (blockType instanceof IModData_Collisions) {
                 ((IModData_Collisions) blockType).requiresCollisionsCacheRefresh(true);
             }
-            if (blockType instanceof IMixinTrackable) {
-                ((IMixinBlock) blockType).initializeTrackerState();
+            if (blockType instanceof TrackableBridge) {
+                ((BlockBridge) blockType).initializeTrackerState();
             }
         }
         for (TileEntityType tileEntityType : TileEntityTypeRegistryModule.getInstance().getAll()) {
@@ -487,7 +486,7 @@ public class SpongeHooks {
             final SpongeConfig<WorldConfig> configAdapter = ((IMixinWorldInfo) world.getWorldInfo()).getConfigAdapter();
             // Reload before updating world config cache
             configAdapter.load();
-            ((IMixinWorldServer) world).updateConfigCache();
+            ((ServerWorldBridge) world).updateConfigCache();
             for (Entity entity : world.loadedEntityList) {
                 if (entity instanceof IModData_Activation) {
                     ((IModData_Activation) entity).requiresActivationCacheRefresh(true);
@@ -495,16 +494,16 @@ public class SpongeHooks {
                 if (entity instanceof IModData_Collisions) {
                     ((IModData_Collisions) entity).requiresCollisionsCacheRefresh(true);
                 }
-                if (entity instanceof IMixinTrackable) {
-                    ((IMixinTrackable) entity).refreshTrackerStates();
+                if (entity instanceof TrackableBridge) {
+                    ((TrackableBridge) entity).refreshTrackerStates();
                 }
             }
             for (TileEntity tileEntity : world.loadedTileEntityList) {
                 if (tileEntity instanceof IModData_Activation) {
                     ((IModData_Activation) tileEntity).requiresActivationCacheRefresh(true);
                 }
-                if (tileEntity instanceof IMixinTrackable) {
-                    ((IMixinTrackable) tileEntity).refreshTrackerStates();
+                if (tileEntity instanceof TrackableBridge) {
+                    ((TrackableBridge) tileEntity).refreshTrackerStates();
                 }
             }
         }

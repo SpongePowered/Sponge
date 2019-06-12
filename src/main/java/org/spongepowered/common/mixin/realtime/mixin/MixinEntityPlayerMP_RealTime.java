@@ -31,7 +31,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.mixin.realtime.IMixinRealTimeTicking;
 
 @Mixin(EntityPlayerMP.class)
@@ -54,7 +54,7 @@ public abstract class MixinEntityPlayerMP_RealTime extends MixinEntityPlayer_Rea
         )
     )
     private void adjustForRealTimePortalCooldown(EntityPlayerMP self, int modifier) {
-        if (SpongeImplHooks.isFakePlayer((EntityPlayerMP) (Object) this) || ((IMixinWorld) this.world).isFake()) {
+        if (SpongeImplHooks.isFakePlayer((EntityPlayerMP) (Object) this) || ((WorldBridge) this.world).isFake()) {
             this.timeUntilPortal = modifier;
             return;
         }

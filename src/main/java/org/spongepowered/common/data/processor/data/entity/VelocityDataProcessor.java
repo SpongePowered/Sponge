@@ -43,7 +43,7 @@ import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataPr
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.bridge.entity.IMixinEntity;
+import org.spongepowered.common.bridge.entity.EntityBridge;
 
 import java.util.Optional;
 
@@ -60,13 +60,13 @@ public class VelocityDataProcessor extends AbstractEntitySingleDataProcessor<Ent
 
     @Override
     protected boolean set(Entity entity, Vector3d value) {
-        ((IMixinEntity) entity).setImplVelocity(value);
+        ((EntityBridge) entity).setImplVelocity(value);
         return true;
     }
 
     @Override
     protected Optional<Vector3d> getVal(Entity entity) {
-        return Optional.of(((IMixinEntity) entity).getVelocity());
+        return Optional.of(((EntityBridge) entity).getVelocity());
     }
 
     @Override

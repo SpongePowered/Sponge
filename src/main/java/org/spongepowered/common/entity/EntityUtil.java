@@ -106,15 +106,14 @@ import org.spongepowered.common.event.tracking.context.MultiBlockCaptureSupplier
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.entity.TeleportingContext;
 import org.spongepowered.common.interfaces.IMixinPlayerList;
-import org.spongepowered.common.bridge.entity.IMixinEntity;
+import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
-import org.spongepowered.common.bridge.item.ImplItem;
 import org.spongepowered.common.interfaces.world.IMixinITeleporter;
 import org.spongepowered.common.interfaces.world.IMixinTeleporter;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.registry.type.entity.ProfessionRegistryModule;
@@ -300,7 +299,7 @@ public final class EntityUtil {
         fromWorld.removeEntityDangerously(playerIn);
         playerIn.isDead = false;
         // we do not need to call transferEntityToWorld as we already have the correct transform and created the portal in handleDisplaceEntityPortalEvent
-        ((IMixinEntity) playerIn).setLocationAndAngles(event.getToTransform());
+        ((EntityBridge) playerIn).setLocationAndAngles(event.getToTransform());
         playerIn.setWorld(toWorld);
         toWorld.spawnEntity(playerIn);
         toWorld.updateEntityWithOptionalForce(playerIn, false);
@@ -377,11 +376,11 @@ public final class EntityUtil {
         SpongeImplHooks.registerPortalAgentType(teleporter);
         final MinecraftServer mcServer = SpongeImpl.getServer();
         final IMixinPlayerList mixinPlayerList = (IMixinPlayerList) mcServer.getPlayerList();
-        final IMixinEntity mixinEntity = (IMixinEntity) entityIn;
+        final EntityBridge mixinEntity = (EntityBridge) entityIn;
         final org.spongepowered.api.entity.Entity spongeEntity = (org.spongepowered.api.entity.Entity) entityIn;
         final Transform<World> fromTransform = spongeEntity.getTransform();
         final WorldServer fromWorld = ((WorldServer) entityIn.world);
-        final IMixinWorldServer fromMixinWorld = (IMixinWorldServer) fromWorld;
+        final ServerWorldBridge fromMixinWorld = (ServerWorldBridge) fromWorld;
         boolean sameDimension = entityIn.dimension == targetDimensionId;
         // handle the end
         if (targetDimensionId == 1 && fromWorld.provider instanceof WorldProviderEnd) {
@@ -527,12 +526,12 @@ public final class EntityUtil {
         }
     }
 
-    public static IMixinWorldServer getMixinWorld(org.spongepowered.api.entity.Entity entity) {
-        return (IMixinWorldServer) entity.getWorld();
+    public static ServerWorldBridge getMixinWorld(org.spongepowered.api.entity.Entity entity) {
+        return (ServerWorldBridge) entity.getWorld();
     }
 
-    public static IMixinWorldServer getMixinWorld(Entity entity) {
-        return (IMixinWorldServer) entity.world;
+    public static ServerWorldBridge getMixinWorld(Entity entity) {
+        return (ServerWorldBridge) entity.world;
     }
 
     public static WorldServer getMinecraftWorld(org.spongepowered.api.entity.Entity entity) {
@@ -778,7 +777,7 @@ public final class EntityUtil {
         }
 
         final Dimension targetDimension = (Dimension) targetWorld.provider;
-        int targetDimensionId = ((IMixinWorldServer) targetWorld).getDimensionId();
+        int targetDimensionId = ((ServerWorldBridge) targetWorld).getDimensionId();
         // Cannot respawn in requested world, use the fallback dimension for
         // that world. (Usually overworld unless a mod says otherwise).
         if (!targetDimension.allowsPlayerRespawns()) {
@@ -865,18 +864,18 @@ public final class EntityUtil {
         return (EntityPlayerMP) playerMP;
     }
 
-    public static IMixinEntity toMixin(Entity entity) {
-        if (!(entity instanceof IMixinEntity)) {
+    public static EntityBridge toMixin(Entity entity) {
+        if (!(entity instanceof EntityBridge)) {
             throw new IllegalArgumentException("Not a mixin Entity for this implementation!");
         }
-        return (IMixinEntity) entity;
+        return (EntityBridge) entity;
     }
 
-    public static IMixinEntity toMixin(org.spongepowered.api.entity.Entity entity) {
-        if (!(entity instanceof IMixinEntity)) {
+    public static EntityBridge toMixin(org.spongepowered.api.entity.Entity entity) {
+        if (!(entity instanceof EntityBridge)) {
             throw new IllegalArgumentException("Not a mixin Entity for this implementation!");
         }
-        return (IMixinEntity) entity;
+        return (EntityBridge) entity;
     }
 
     public static EntitySnapshot createSnapshot(Entity entity) {
@@ -963,7 +962,7 @@ public final class EntityUtil {
             // Sanity check, just like vanilla
             return null;
         }
-        final IMixinEntity mixinEntity = EntityUtil.toMixin(entity);
+        final EntityBridge mixinEntity = EntityUtil.toMixin(entity);
         // Now the real fun begins.
         final ItemStack item;
         final double posX = xPos;

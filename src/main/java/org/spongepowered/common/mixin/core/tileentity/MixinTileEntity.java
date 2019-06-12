@@ -66,7 +66,7 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
-import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
+import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.registry.type.block.TileEntityTypeRegistryModule;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
@@ -163,7 +163,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
         this.writeToNBT(compound);
         NbtDataUtil.filterSpongeCustomData(compound); // We must filter the custom data so it isn't stored twice
         container.set(DataQueries.UNSAFE_NBT, NbtTranslator.getInstance().translateFrom(compound));
-        final Collection<DataManipulator<?, ?>> manipulators = ((IMixinCustomDataHolder) this).getCustomManipulators();
+        final Collection<DataManipulator<?, ?>> manipulators = ((CustomDataHolderBridge) this).getCustomManipulators();
         if (!manipulators.isEmpty()) {
             container.set(DataQueries.DATA_MANIPULATORS, DataUtil.getSerializedManipulatorList(manipulators));
         }
@@ -220,7 +220,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
      */
     @Inject(method = "Lnet/minecraft/tileentity/TileEntity;writeToNBT(Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/nbt/NBTTagCompound;", at = @At("HEAD"))
     public void onWriteToNBT(NBTTagCompound compound, CallbackInfoReturnable<NBTTagCompound> ci) {
-        if (!((IMixinCustomDataHolder) this).getCustomManipulators().isEmpty()) {
+        if (!((CustomDataHolderBridge) this).getCustomManipulators().isEmpty()) {
             this.writeToNbt(this.getSpongeData());
         }
     }
@@ -268,8 +268,8 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     public Collection<DataManipulator<?, ?>> getContainers() {
         final List<DataManipulator<?, ?>> list = Lists.newArrayList();
         this.supplyVanillaManipulators(list);
-        if (this instanceof IMixinCustomDataHolder) {
-            list.addAll(((IMixinCustomDataHolder) this).getCustomManipulators());
+        if (this instanceof CustomDataHolderBridge) {
+            list.addAll(((CustomDataHolderBridge) this).getCustomManipulators());
         }
         return list;
     }

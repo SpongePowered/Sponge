@@ -38,17 +38,17 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.bridge.entity.GrieferBridge;
 import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.bridge.entity.IMixinGriefer;
-import org.spongepowered.common.bridge.explosives.ImplBridgeExplosive;
+import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 
 import java.util.Optional;
 
 import javax.annotation.Nullable;
 
 @Mixin(EntityWitherSkull.class)
-public abstract class MixinEntityWitherSkull extends MixinEntityFireball implements ImplBridgeExplosive {
+public abstract class MixinEntityWitherSkull extends MixinEntityFireball implements ExplosiveBridge {
 
     private int explosionRadius = DataConstants.Entity.WitherSkull.DEFAULT_EXPLOSION_RADIUS;
     private float damage = 0.0f;
@@ -112,7 +112,7 @@ public abstract class MixinEntityWitherSkull extends MixinEntityFireball impleme
     private net.minecraft.world.Explosion onExplode(net.minecraft.world.World worldObj, Entity self, double x,
         double y, double z, float strength, boolean flaming,
         boolean smoking) {
-        boolean griefer = ((IMixinGriefer) this).canGrief();
+        boolean griefer = ((GrieferBridge) this).bridge$CanGrief();
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(this);
             frame.addContext(EventContextKeys.THROWER, getShooter()); // TODO - Remove in API 8/1.13

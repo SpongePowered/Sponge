@@ -33,7 +33,7 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.bridge.entity.IMixinEntity;
+import org.spongepowered.common.bridge.entity.EntityBridge;
 
 import java.util.Optional;
 
@@ -51,10 +51,10 @@ public class VanishCollisionValueProcessor extends AbstractSpongeValueProcessor<
     @Override
     protected boolean set(Entity container, Boolean value) {
         if (!container.world.isRemote) {
-            if (!((IMixinEntity) container).isVanished()) {
+            if (!((EntityBridge) container).isVanished()) {
                 return false;
             }
-            ((IMixinEntity) container).setIgnoresCollision(value);
+            ((EntityBridge) container).setIgnoresCollision(value);
             return true;
         }
         return false;
@@ -62,7 +62,7 @@ public class VanishCollisionValueProcessor extends AbstractSpongeValueProcessor<
 
     @Override
     protected Optional<Boolean> getVal(Entity container) {
-        return Optional.of(((IMixinEntity) container).ignoresCollision());
+        return Optional.of(((EntityBridge) container).ignoresCollision());
     }
 
     @Override

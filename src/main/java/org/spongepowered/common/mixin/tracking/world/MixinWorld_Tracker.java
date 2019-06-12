@@ -31,7 +31,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 
 import java.util.Optional;
@@ -40,7 +40,7 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 
 @Mixin(value = net.minecraft.world.World.class, priority = 1111)
-public abstract class MixinWorld_Tracker implements World, IMixinWorld{
+public abstract class MixinWorld_Tracker implements World, WorldBridge {
 
     @Shadow public abstract net.minecraft.world.chunk.Chunk getChunk(BlockPos pos);
     @Shadow public abstract IChunkProvider getChunkProvider();

@@ -25,16 +25,8 @@
 package org.spongepowered.common.mixin.api.minecraft.entity.projectile;
 
 import net.minecraft.entity.projectile.EntitySmallFireball;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 import org.spongepowered.api.entity.projectile.explosive.fireball.SmallFireball;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.entity.IMixinGriefer;
-import org.spongepowered.common.data.util.NbtDataUtil;
 
 @Mixin(EntitySmallFireball.class)
 public abstract class MixinEntitySmallFireball_API extends MixinEntityFireball_API implements SmallFireball {

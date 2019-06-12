@@ -36,18 +36,17 @@ import org.spongepowered.api.data.manipulator.immutable.block.ImmutableGrowthDat
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableStoneData;
 import org.spongepowered.api.data.type.TreeType;
 import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeGrowthData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
-import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Optional;
 
 @Mixin(BlockSapling.class)
 public abstract class MixinBlockSapling extends MixinBlock {
 
+    @SuppressWarnings("RedundantTypeArguments") // some JDK's can fail to compile without the explicit type generics
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getTreeTypeFor(blockState), getGrowthData(blockState));
@@ -58,6 +57,7 @@ public abstract class MixinBlockSapling extends MixinBlock {
         return ImmutableStoneData.class.isAssignableFrom(immutable) || ImmutableGrowthData.class.isAssignableFrom(immutable);
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableStoneData) {
@@ -90,6 +90,7 @@ public abstract class MixinBlockSapling extends MixinBlock {
         return super.getStateWithValue(blockState, key, value);
     }
 
+    @SuppressWarnings("ConstantConditions")
     private ImmutableSpongeTreeData getTreeTypeFor(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeTreeData.class, (TreeType) (Object) blockState.getValue(BlockSapling.TYPE));
     }
@@ -98,8 +99,4 @@ public abstract class MixinBlockSapling extends MixinBlock {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.getValue(BlockSapling.STAGE), 0, 1);
     }
 
-    @Override
-    public Translation getTranslation() {
-        return new SpongeTranslation(this.getTranslationKey() + "." + BlockPlanks.EnumType.OAK.getTranslationKey() + ".name");
-    }
 }

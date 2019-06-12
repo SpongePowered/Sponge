@@ -32,8 +32,8 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.bridge.block.BlockEventDataBridge;
+import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 
 import javax.annotation.Nullable;
 
@@ -66,7 +66,7 @@ abstract class ListenerPhaseState<L extends ListenerPhaseContext<L>> extends Plu
 
     @Override
     public void appendNotifierToBlockEvent(L context, PhaseContext<?> currentContext,
-        IMixinWorldServer mixinWorldServer, BlockPos pos, IMixinBlockEventData blockEvent) {
+        ServerWorldBridge mixinWorldServer, BlockPos pos, BlockEventDataBridge blockEvent) {
 
     }
 

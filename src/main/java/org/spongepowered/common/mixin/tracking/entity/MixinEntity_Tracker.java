@@ -37,7 +37,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.bridge.entity.IMixinEntity;
+import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.util.SpongeUsernameCache;
 
@@ -47,7 +47,7 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 
 @Mixin(value = net.minecraft.entity.Entity.class, priority = 1111)
-public abstract class MixinEntity_Tracker implements Entity, IMixinEntity {
+public abstract class MixinEntity_Tracker implements Entity, EntityBridge {
 
     private SpongeProfileManager spongeProfileManager;
     private UserStorageService userStorageService;

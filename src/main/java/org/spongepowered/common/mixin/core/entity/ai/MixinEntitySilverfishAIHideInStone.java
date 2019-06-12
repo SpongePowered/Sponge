@@ -30,7 +30,7 @@ import net.minecraft.entity.monster.EntitySilverfish;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.entity.IMixinGriefer;
+import org.spongepowered.common.bridge.entity.GrieferBridge;
 
 @Mixin(EntitySilverfish.AIHideInStone.class)
 public abstract class MixinEntitySilverfishAIHideInStone extends MixinEntityAIWander {
@@ -39,6 +39,6 @@ public abstract class MixinEntitySilverfishAIHideInStone extends MixinEntityAIWa
             + "(Lnet/minecraft/block/state/IBlockState;)Z"))
     private boolean onCanGrief(IBlockState blockState) {
         return BlockSilverfish.canContainSilverfish(blockState) && this.entity.world.getGameRules().getBoolean("mobGriefing")
-                && ((IMixinGriefer) this.entity).canGrief();
+                && ((GrieferBridge) this.entity).bridge$CanGrief();
     }
 }

@@ -53,7 +53,7 @@ import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataVersions;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -144,7 +144,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
         final SpawnType require = Sponge.getCauseStackManager().getCurrentContext().require(EventContextKeys.SPAWN_TYPE);
         final SpawnEntityEvent.Custom event = SpongeEventFactory.createSpawnEntityEventCustom(Sponge.getCauseStackManager().getCurrentCause(), entities);
         if (!event.isCancelled()) {
-            final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) worldServer;
+            final ServerWorldBridge mixinWorldServer = (ServerWorldBridge) worldServer;
             entity.setPositionAndRotation(x, y, z, entity.rotationYaw, entity.rotationPitch);
             if (entity instanceof EntityLiving) {
                 // This is ok to force spawn since we aren't considering custom items.

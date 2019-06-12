@@ -84,6 +84,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.living.human.EntityHuman;
@@ -98,7 +99,6 @@ import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.lens.comp.HotbarLens;
@@ -233,7 +233,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
     public void onDeath(DamageSource cause) {
         // Sponge Start - Call our event, and forge's event
         // This will transitively call the forge event
-        final boolean isMainThread = !((IMixinWorld) this.world).isFake() || Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
+        final boolean isMainThread = !((WorldBridge) this.world).isFake() || Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
         if (!this.isDead) { // isDead should be set later on in this method so we aren't re-throwing the events.
             if (isMainThread && this.deathEventsPosted <= MAX_DEATH_EVENTS_BEFORE_GIVING_UP) {
                 // ignore because some moron is not resetting the entity.
@@ -324,7 +324,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
     @Nullable
     private EntityDeathContext createOrNullDeathPhase(boolean isMainThread, DamageSource source) {
         boolean tracksEntityDeaths = false;
-        if (((IMixinWorld) this.world).isFake() || !isMainThread) { // Short circuit to avoid erroring on handling
+        if (((WorldBridge) this.world).isFake() || !isMainThread) { // Short circuit to avoid erroring on handling
             return null;
         }
         final IPhaseState<?> state = PhaseTracker.getInstance().getCurrentContext().state;

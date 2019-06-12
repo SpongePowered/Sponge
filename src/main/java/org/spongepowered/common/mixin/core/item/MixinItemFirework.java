@@ -52,9 +52,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.bridge.explosives.ImplBridgeFusedExplosive;
+import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.ShouldFire;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
 @Mixin(ItemFirework.class)
@@ -137,7 +137,7 @@ public class MixinItemFirework extends Item {
      * @return True if the event is cancelled and the callback needs to be cancelled
      */
     private boolean spongeImpl$ThrowConstructPreEvent(World world, EntityPlayer player, ItemStack usedItem) {
-        if (ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE && !((IMixinWorld) world).isFake()) {
+        if (ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE && !((WorldBridge) world).isFake()) {
             final Vector3d targetPosition = new Vector3d(player.posX, player.posY , player.posZ);
             final Transform targetTransform = new Transform<>((org.spongepowered.api.world.World) world,
                 targetPosition);
@@ -192,7 +192,7 @@ public class MixinItemFirework extends Item {
      * @return True if the event is cancelled and the rocket should not be spawned
      */
     private boolean spongeImpl$ThrowPrimeEventAndGetCancel(World world, EntityPlayer player, EntityFireworkRocket rocket, ItemStack usedItem) {
-        if (((IMixinWorld) world).isFake() ) {
+        if (((WorldBridge) world).isFake() ) {
             return false;
         }
         ((Firework) rocket).setShooter((Player) player);
@@ -201,7 +201,7 @@ public class MixinItemFirework extends Item {
                 frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(usedItem));
                 frame.addContext(EventContextKeys.PROJECTILE_SOURCE, (ProjectileSource) player);
                 frame.pushCause(player);
-                if (!((ImplBridgeFusedExplosive) rocket).shouldPrime()) {
+                if (!((FusedExplosiveBridge) rocket).bridge$shouldPrime()) {
                     return true;
                 }
             }

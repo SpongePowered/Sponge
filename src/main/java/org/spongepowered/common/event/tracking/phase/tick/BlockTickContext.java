@@ -29,11 +29,11 @@ import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.interfaces.block.IMixinBlock;
+import org.spongepowered.common.bridge.block.BlockBridge;
 
 public class BlockTickContext extends LocationBasedTickContext<BlockTickContext> {
 
-    IMixinBlock tickingBlock;
+    BlockBridge tickingBlock;
     boolean providesModifier;
     World world;
 
@@ -46,7 +46,7 @@ public class BlockTickContext extends LocationBasedTickContext<BlockTickContext>
         super.source(owner);
         if (owner instanceof LocatableBlock) {
             final LocatableBlock locatableBlock = (LocatableBlock) owner;
-            final IMixinBlock mixinBlock = BlockUtil.toMixin(locatableBlock.getBlockState());
+            final BlockBridge mixinBlock = BlockUtil.toMixin(locatableBlock.getBlockState());
             this.tickingBlock = mixinBlock;
             this.providesModifier = !(mixinBlock instanceof BlockDynamicLiquid);
             this.world = locatableBlock.getWorld();

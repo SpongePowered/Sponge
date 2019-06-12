@@ -41,8 +41,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.entity.GrieferBridge;
 import org.spongepowered.common.event.ShouldFire;
-import org.spongepowered.common.bridge.entity.IMixinGriefer;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.ArrayList;
@@ -76,7 +76,7 @@ public abstract class MixinEntityEndermanAIPlaceBlock extends EntityAIBase {
     @Nullable
     private IBlockState onCanGrief(EntityEnderman entityEnderman) {
         final IBlockState heldBlockState = entityEnderman.getHeldBlockState();
-        return ((IMixinGriefer) this.enderman).canGrief() ? heldBlockState : null;
+        return ((GrieferBridge) this.enderman).bridge$CanGrief() ? heldBlockState : null;
     }
 
     /**

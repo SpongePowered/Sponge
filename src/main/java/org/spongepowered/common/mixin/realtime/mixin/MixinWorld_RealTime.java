@@ -29,13 +29,13 @@ import net.minecraft.world.World;
 import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.mixin.realtime.IMixinRealTimeTicking;
 
 import javax.annotation.Nullable;
 
 @Mixin(World.class)
-public abstract class MixinWorld_RealTime implements IMixinRealTimeTicking, IMixinWorld {
+public abstract class MixinWorld_RealTime implements IMixinRealTimeTicking, WorldBridge {
 
     @Shadow @Nullable public abstract MinecraftServer getMinecraftServer();
 

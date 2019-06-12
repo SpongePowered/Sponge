@@ -287,8 +287,8 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
         final NBTTagCompound spongeCompound = compound.getCompoundTag(NbtDataUtil.FORGE_DATA).getCompoundTag(NbtDataUtil.SPONGE_DATA);
         CustomDataNbtUtil.readCustomData(spongeCompound, ((DataHolder) this));
-        //if (this instanceof IMixinGriefer && ((IMixinGriefer) this).isGriefer() && compound.hasKey(NbtDataUtil.CAN_GRIEF)) {
-        //    ((IMixinGriefer) this).setCanGrief(compound.getBoolean(NbtDataUtil.CAN_GRIEF));
+        //if (this instanceof GrieferBridge && ((GrieferBridge) this).bridge$isGriefer() && compound.hasKey(NbtDataUtil.CAN_GRIEF)) {
+        //    ((GrieferBridge) this).bridge$SetCanGrief(compound.getBoolean(NbtDataUtil.CAN_GRIEF));
         //}
 
 

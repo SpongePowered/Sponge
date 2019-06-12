@@ -134,10 +134,10 @@ import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinInventory;
-import org.spongepowered.common.bridge.entity.IMixinEntity;
+import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.custom.CustomInventory;
@@ -497,11 +497,11 @@ public class SpongeCommonEventFactory {
         }
     }
 
-    public static ChangeBlockEvent.Pre callChangeBlockEventPre(IMixinWorldServer worldIn, BlockPos pos) {
+    public static ChangeBlockEvent.Pre callChangeBlockEventPre(ServerWorldBridge worldIn, BlockPos pos) {
         return callChangeBlockEventPre(worldIn, ImmutableList.of(new Location<>((World) worldIn, pos.getX(), pos.getY(), pos.getZ())), null);
     }
 
-    public static ChangeBlockEvent.Pre callChangeBlockEventPre(IMixinWorldServer worldIn, BlockPos pos, Object source) {
+    public static ChangeBlockEvent.Pre callChangeBlockEventPre(ServerWorldBridge worldIn, BlockPos pos, Object source) {
         return callChangeBlockEventPre(worldIn, ImmutableList.of(new Location<>((World) worldIn, pos.getX(), pos.getY(), pos.getZ())), source);
     }
 
@@ -514,7 +514,7 @@ public class SpongeCommonEventFactory {
      * @param source The source of event
      * @return The event
      */
-    private static ChangeBlockEvent.Pre callChangeBlockEventPre(IMixinWorldServer worldIn, ImmutableList<Location<World>> locations, @Nullable Object source) {
+    private static ChangeBlockEvent.Pre callChangeBlockEventPre(ServerWorldBridge worldIn, ImmutableList<Location<World>> locations, @Nullable Object source) {
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             final PhaseContext<?> phaseContext = PhaseTracker.getInstance().getCurrentContext();
             if (source == null) {
@@ -609,7 +609,7 @@ public class SpongeCommonEventFactory {
      *
      * @return if the event was cancelled
      */
-    public static boolean handlePistonEvent(IMixinWorldServer world, WorldServer.ServerBlockEventList list, Object obj, BlockPos pos, Block blockIn,
+    public static boolean handlePistonEvent(ServerWorldBridge world, WorldServer.ServerBlockEventList list, Object obj, BlockPos pos, Block blockIn,
             int eventId, int eventParam) {
         boolean extending = (eventId == 0);
         final IBlockState blockstate = ((net.minecraft.world.World) world).getBlockState(pos);
@@ -953,7 +953,7 @@ public class SpongeCommonEventFactory {
         }
         if (source instanceof EntityDamageSource) {
             EntityDamageSource damageSource = (EntityDamageSource) source;
-            IMixinEntity spongeEntity = (IMixinEntity) damageSource.getImmediateSource();
+            EntityBridge spongeEntity = (EntityBridge) damageSource.getImmediateSource();
             if (spongeEntity != null) {
                 sourceCreator = spongeEntity.getCreatorUser();
             }
@@ -996,7 +996,7 @@ public class SpongeCommonEventFactory {
             frame.pushCause( entity);
 
             if (!(entity instanceof EntityPlayer)) {
-                IMixinEntity spongeEntity = (IMixinEntity) entity;
+                EntityBridge spongeEntity = (EntityBridge) entity;
                 User user = spongeEntity.getCreatorUser().orElse(null);
                 if (user != null) {
                     frame.addContext(EventContextKeys.OWNER, user);
@@ -1008,7 +1008,7 @@ public class SpongeCommonEventFactory {
                     new Location<>((World) world, VecHelper.toVector3d(pos)), direction);
             boolean cancelled = SpongeImpl.postEvent(event);
             if (!cancelled) {
-                IMixinEntity spongeEntity = (IMixinEntity) entity;
+                EntityBridge spongeEntity = (EntityBridge) entity;
                 if (!pos.equals(spongeEntity.getLastCollidedBlockPos())) {
                     final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
                     context.applyNotifierIfAvailable(notifier -> {

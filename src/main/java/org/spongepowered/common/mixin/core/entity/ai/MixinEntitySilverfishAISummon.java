@@ -35,7 +35,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.entity.IMixinGriefer;
+import org.spongepowered.common.bridge.entity.GrieferBridge;
 
 @Mixin(EntitySilverfish.AISummonSilverfish.class)
 public abstract class MixinEntitySilverfishAISummon extends EntityAIBase {
@@ -59,7 +59,7 @@ public abstract class MixinEntitySilverfishAISummon extends EntityAIBase {
     )
     private boolean onCanGrief(World world, BlockPos pos, boolean dropBlock) {
         final IBlockState blockState = world.getBlockState(pos);
-        return ((IMixinGriefer) this.silverfish).canGrief()
+        return ((GrieferBridge) this.silverfish).bridge$CanGrief()
                ? world.destroyBlock(pos, dropBlock)
                : world.setBlockState(pos, blockState.getValue(BlockSilverfish.VARIANT).getModelBlock(), 3);
     }

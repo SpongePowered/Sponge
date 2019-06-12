@@ -38,7 +38,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
-import org.spongepowered.common.bridge.entity.IMixinGriefer;
+import org.spongepowered.common.bridge.entity.GrieferBridge;
 
 @Mixin(EntityAIEatGrass.class)
 public abstract class MixinEntityAIEatGrass extends EntityAIBase {
@@ -61,7 +61,7 @@ public abstract class MixinEntityAIEatGrass extends EntityAIBase {
     )
     @SuppressWarnings({"unchecked", "rawtypes"})
     private boolean onTallGrassApplyForGriefing(Predicate predicate, Object object) {
-        return ((IMixinGriefer) this.grassEaterEntity).canGrief() && predicate.apply(object);
+        return ((GrieferBridge) this.grassEaterEntity).bridge$CanGrief() && predicate.apply(object);
     }
 
     /**
@@ -89,6 +89,6 @@ public abstract class MixinEntityAIEatGrass extends EntityAIBase {
         )
     )
     private Block onSpongeGetBlockForgriefing(IBlockState state) {
-        return ((IMixinGriefer) this.grassEaterEntity).canGrief() ? state.getBlock() : Blocks.AIR;
+        return ((GrieferBridge) this.grassEaterEntity).bridge$CanGrief() ? state.getBlock() : Blocks.AIR;
     }
 }

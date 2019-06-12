@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.bridge.entity.IMixinGriefer;
+import org.spongepowered.common.bridge.entity.GrieferBridge;
 
 @Mixin(EntityAIHarvestFarmland.class)
 public abstract class MixinEntityAIHarvestFarmland extends EntityAIMoveToBlock {
@@ -60,7 +60,7 @@ public abstract class MixinEntityAIHarvestFarmland extends EntityAIMoveToBlock {
     )
     private void onCanGrief(CallbackInfoReturnable<Boolean> cir) {
         if (this.runDelay <= 0) {
-            if (!((IMixinGriefer) this.villager).canGrief()) {
+            if (!((GrieferBridge) this.villager).bridge$CanGrief()) {
                 cir.setReturnValue(false);
             }
         }

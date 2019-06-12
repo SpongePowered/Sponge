@@ -27,28 +27,25 @@ package org.spongepowered.common.mixin.core.entity.boss;
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.boss.EntityWither;
-import net.minecraft.world.BossInfoServer;
 import org.spongepowered.api.entity.living.monster.Wither;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.asm.lib.Opcodes;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
-import org.spongepowered.common.bridge.entity.IMixinGriefer;
-import org.spongepowered.common.bridge.explosives.ImplBridgeFusedExplosive;
-import org.spongepowered.common.mixin.api.minecraft.entity.monster.MixinEntityMob_API;
+import org.spongepowered.common.bridge.entity.GrieferBridge;
+import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 import org.spongepowered.common.mixin.core.entity.monster.MixinEntityMob;
 
 import java.util.Optional;
 
 @Mixin(value = EntityWither.class)
-public abstract class MixinEntityWither extends MixinEntityMob implements ImplBridgeFusedExplosive {
+public abstract class MixinEntityWither extends MixinEntityMob implements FusedExplosiveBridge {
 
     @Shadow public abstract void setInvulTime(int ticks);
     @Shadow public abstract int getInvulTime();
@@ -88,13 +85,13 @@ public abstract class MixinEntityWither extends MixinEntityMob implements ImplBr
             )
     )
     private int spongeImpl$onCanGrief(EntityWither thisEntity) {
-        return this.blockBreakCounter == 0 ? ((IMixinGriefer) this).canGrief() ? 0 : -1 : -1;
+        return this.blockBreakCounter == 0 ? ((GrieferBridge) this).bridge$CanGrief() ? 0 : -1 : -1;
     }
 
     @ModifyArg(method = "launchWitherSkullToCoords", at = @At(value = "INVOKE",
                target = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z"))
     private Entity onSpawnWitherSkull(Entity entity) {
-        ((IMixinGriefer) entity).setCanGrief(((IMixinGriefer) this).canGrief());
+        ((GrieferBridge) entity).bridge$SetCanGrief(((GrieferBridge) this).bridge$CanGrief());
         return entity;
     }
 
@@ -111,22 +108,22 @@ public abstract class MixinEntityWither extends MixinEntityMob implements ImplBr
     }
 
     @Override
-    public int getFuseDuration() {
+    public int bridge$getFuseDuration() {
         return this.fuseDuration;
     }
 
     @Override
-    public void setFuseDuration(int fuseTicks) {
+    public void bridge$setFuseDuration(int fuseTicks) {
         this.fuseDuration = fuseTicks;
     }
 
     @Override
-    public int getFuseTicksRemaining() {
+    public int bridge$getFuseTicksRemaining() {
         return getInvulTime();
     }
 
     @Override
-    public void setFuseTicksRemaining(int fuseTicks) {
+    public void bridge$setFuseTicksRemaining(int fuseTicks) {
         setInvulTime(fuseTicks);
     }
 
@@ -153,7 +150,7 @@ public abstract class MixinEntityWither extends MixinEntityMob implements ImplBr
                 .radius(this.explosionRadius)
                 .canCauseFire(flaming)
                 .shouldPlaySmoke(smoking)
-                .shouldBreakBlocks(smoking && ((IMixinGriefer) this).canGrief()))
+                .shouldBreakBlocks(smoking && ((GrieferBridge) this).bridge$CanGrief()))
                 .orElse(null);
     }
 

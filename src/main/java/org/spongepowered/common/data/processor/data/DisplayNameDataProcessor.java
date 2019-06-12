@@ -52,7 +52,7 @@ import org.spongepowered.common.data.manipulator.mutable.SpongeDisplayNameData;
 import org.spongepowered.common.data.processor.common.AbstractSingleDataProcessor;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.bridge.entity.IMixinEntity;
+import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.Optional;
@@ -79,7 +79,7 @@ public class DisplayNameDataProcessor extends AbstractSingleDataProcessor<Text, 
     @Override
     public Optional<DisplayNameData> from(DataHolder holder) {
         if (holder instanceof Entity) {
-            @Nullable Text displayName = ((IMixinEntity) holder).getDisplayNameText();
+            @Nullable Text displayName = ((EntityBridge) holder).getDisplayNameText();
             if (displayName != null) {
                 return Optional.of(new SpongeDisplayNameData(displayName));
             }
@@ -124,13 +124,13 @@ public class DisplayNameDataProcessor extends AbstractSingleDataProcessor<Text, 
 
     @Override
     public DataTransactionResult set(DataHolder holder, DisplayNameData manipulator, MergeFunction function) {
-        if (holder instanceof IMixinEntity && !(holder instanceof Player)) {
+        if (holder instanceof EntityBridge && !(holder instanceof Player)) {
             final Optional<DisplayNameData> old = from(holder);
             final DisplayNameData merged = checkNotNull(function).merge(old.orElse(null), manipulator);
             final Text newValue = merged.displayName().get();
             final ImmutableValue<Text> immutableValue = merged.displayName().asImmutable();
             try {
-                ((IMixinEntity) holder).setDisplayName(newValue);
+                ((EntityBridge) holder).setDisplayName(newValue);
                 if (old.isPresent()) {
                     return DataTransactionResult.successReplaceResult(old.get().displayName().asImmutable(), immutableValue);
                 }
@@ -175,7 +175,7 @@ public class DisplayNameDataProcessor extends AbstractSingleDataProcessor<Text, 
             final Optional<DisplayNameData> optional = this.from(holder);
             if (optional.isPresent()) {
                 try {
-                    ((IMixinEntity) holder).setDisplayName(null);
+                    ((EntityBridge) holder).setDisplayName(null);
                     return builder.replace(optional.get().getValues()).result(DataTransactionResult.Type.SUCCESS).build();
                 } catch (Exception e) {
                     SpongeImpl.getLogger().error("There was an issue resetting the display name from an Entity!", e);

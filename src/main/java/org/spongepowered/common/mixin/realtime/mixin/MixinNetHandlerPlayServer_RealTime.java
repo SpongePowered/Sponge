@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.mixin.realtime.IMixinRealTimeTicking;
 
 @Mixin(NetHandlerPlayServer.class)
@@ -55,7 +55,7 @@ public abstract class MixinNetHandlerPlayServer_RealTime {
         )
     )
     private void adjustForRealTimeChatSpamCheck(NetHandlerPlayServer self, int modifier) {
-        if (SpongeImplHooks.isFakePlayer(this.player) || ((IMixinWorld) this.player.world).isFake()) {
+        if (SpongeImplHooks.isFakePlayer(this.player) || ((WorldBridge) this.player.world).isFake()) {
             this.chatSpamThresholdCount = modifier;
             return;
         }
@@ -72,7 +72,7 @@ public abstract class MixinNetHandlerPlayServer_RealTime {
         )
     )
     private void adjustForRealTimeDropSpamCheck(NetHandlerPlayServer self, int modifier) {
-        if (SpongeImplHooks.isFakePlayer(this.player) || ((IMixinWorld) this.player.world).isFake()) {
+        if (SpongeImplHooks.isFakePlayer(this.player) || ((WorldBridge) this.player.world).isFake()) {
             this.itemDropThreshold = modifier;
             return;
         }

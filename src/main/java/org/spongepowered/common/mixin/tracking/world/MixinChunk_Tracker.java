@@ -48,6 +48,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.entity.PlayerTracker;
@@ -55,7 +56,6 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.util.SpongeHooks;
@@ -376,7 +376,7 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
 
     @Inject(method = "onLoad", at = @At("HEAD"))
     private void startLoad(CallbackInfo callbackInfo) {
-        final boolean isFake = ((IMixinWorld) this.world).isFake();
+        final boolean isFake = ((WorldBridge) this.world).isFake();
         if (!isFake) {
             if (!SpongeImplHooks.isMainThread()) {
                 final PrettyPrinter printer = new PrettyPrinter(60).add("Illegal Async Chunk Load").centre().hr()
@@ -405,7 +405,7 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
 
     @Inject(method = "onLoad", at = @At("RETURN"))
     private void endLoad(CallbackInfo callbackInfo) {
-        if (!((IMixinWorld) this.world).isFake() && SpongeImplHooks.isMainThread()) {
+        if (!((WorldBridge) this.world).isFake() && SpongeImplHooks.isMainThread()) {
             if (PhaseTracker.getInstance().getCurrentState() == GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING) {
                 return;
             }

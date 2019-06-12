@@ -36,7 +36,7 @@ import org.spongepowered.api.data.manipulator.mutable.entity.InvisibilityData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeInvisibilityData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.bridge.entity.IMixinEntity;
+import org.spongepowered.common.bridge.entity.EntityBridge;
 
 import java.util.Map;
 import java.util.Optional;
@@ -67,7 +67,7 @@ public class InvisibilityDataProcessor
             final boolean vanish = (Boolean) keyValues.get(Keys.VANISH);
             dataHolder.setInvisible(invis);
             if (vanish) {
-                final IMixinEntity mixinEntity = EntityUtil.toMixin(dataHolder);
+                final EntityBridge mixinEntity = EntityUtil.toMixin(dataHolder);
                 mixinEntity.setVanished(true);
                 mixinEntity.setIgnoresCollision(collision);
                 mixinEntity.setUntargetable(untargetable);
@@ -82,9 +82,9 @@ public class InvisibilityDataProcessor
     @Override
     protected Map<Key<?>, ?> getValues(Entity dataHolder) {
         return ImmutableMap.of(Keys.INVISIBLE, dataHolder.isInvisible(),
-                Keys.VANISH, ((IMixinEntity) dataHolder).isVanished(),
-                Keys.VANISH_IGNORES_COLLISION, ((IMixinEntity) dataHolder).ignoresCollision(),
-                Keys.VANISH_PREVENTS_TARGETING, ((IMixinEntity) dataHolder).isUntargetable());
+                Keys.VANISH, ((EntityBridge) dataHolder).isVanished(),
+                Keys.VANISH_IGNORES_COLLISION, ((EntityBridge) dataHolder).ignoresCollision(),
+                Keys.VANISH_PREVENTS_TARGETING, ((EntityBridge) dataHolder).isUntargetable());
     }
 
     @Override

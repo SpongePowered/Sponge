@@ -48,7 +48,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.mixin.core.entity.MixinEntityLiving;
 
@@ -164,10 +164,10 @@ public abstract class MixinEntityMob extends MixinEntityLiving {
             if (this.world.isThundering()) {
                 int j = this.world.getSkylightSubtracted();;
                 this.world.setSkylightSubtracted(10);
-                passes = !((IMixinWorldServer) this.world).isLightLevel(chunk, blockpos, this.rand.nextInt(9));
+                passes = !((ServerWorldBridge) this.world).isLightLevel(chunk, blockpos, this.rand.nextInt(9));
                 this.world.setSkylightSubtracted(j);
             } else { 
-                passes = !((IMixinWorldServer) this.world).isLightLevel(chunk, blockpos, this.rand.nextInt(9)); 
+                passes = !((ServerWorldBridge) this.world).isLightLevel(chunk, blockpos, this.rand.nextInt(9));
             }
 
             return passes;

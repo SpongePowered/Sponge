@@ -30,7 +30,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.mixin.realtime.IMixinRealTimeTicking;
 
 @Mixin(EntityLivingBase.class)
@@ -41,7 +41,7 @@ public abstract class MixinEntityLivingBase_RealTime extends MixinEntity_RealTim
 
     @Redirect(method = "onDeathUpdate", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/EntityLivingBase;deathTime:I", opcode = Opcodes.PUTFIELD, ordinal = 0))
     private void adjustForRealTimeDeathTime(EntityLivingBase self, int vanillaNewDeathTime) {
-        if (((IMixinWorld) this.world).isFake()) {
+        if (((WorldBridge) this.world).isFake()) {
             this.deathTime = vanillaNewDeathTime;
             return;
         }

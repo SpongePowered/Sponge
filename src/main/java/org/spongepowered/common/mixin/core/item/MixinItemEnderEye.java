@@ -42,7 +42,6 @@ import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.projectile.EyeOfEnder;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
@@ -53,7 +52,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.ShouldFire;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.bridge.world.WorldBridge;
 
 import javax.annotation.Nullable;
 
@@ -88,7 +87,7 @@ public class MixinItemEnderEye extends Item {
     )
     private void spongeImpl$ThrowPreBeforeSpawning(World worldIn, EntityPlayer playerIn, EnumHand handIn,
         CallbackInfoReturnable<ActionResult<ItemStack>> cir, ItemStack used, RayTraceResult rayTraceResult, @Nullable BlockPos targetPos) {
-        if (targetPos != null && !((IMixinWorld) worldIn).isFake() && ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
+        if (targetPos != null && !((WorldBridge) worldIn).isFake() && ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
             final Vector3d targetPosition = new Vector3d(playerIn.posX, playerIn.posY + (double) (playerIn.height / 2.0F), playerIn.posZ);
             final Transform targetTransform = new Transform<>((org.spongepowered.api.world.World) worldIn,
                 targetPosition);
@@ -139,7 +138,7 @@ public class MixinItemEnderEye extends Item {
     private void spongeImpl$setShooterBeforeSpawning(World worldIn, EntityPlayer playerIn, EnumHand handIn,
         CallbackInfoReturnable<ActionResult<ItemStack>> cir, ItemStack playerStack, RayTraceResult result,
         BlockPos targetPos, EntityEnderEye enderEye) {
-        if (((IMixinWorld) worldIn).isFake()) {
+        if (((WorldBridge) worldIn).isFake()) {
             return;
         }
         ((EyeOfEnder) enderEye).setShooter((ProjectileSource) playerIn);

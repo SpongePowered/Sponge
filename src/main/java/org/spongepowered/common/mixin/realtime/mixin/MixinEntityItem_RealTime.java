@@ -30,7 +30,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.mixin.realtime.IMixinRealTimeTicking;
 
 @Mixin(EntityItem.class)
@@ -41,7 +41,7 @@ public abstract class MixinEntityItem_RealTime extends MixinEntity_RealTime {
 
     @Redirect(method = "onUpdate", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/item/EntityItem;pickupDelay:I", opcode = Opcodes.PUTFIELD, ordinal = 0))
     private void adjustForRealTimePickupDelay(EntityItem self, int modifier) {
-        if (((IMixinWorld) this.world).isFake()) {
+        if (((WorldBridge) this.world).isFake()) {
             this.pickupDelay = modifier;
             return;
         }
@@ -51,7 +51,7 @@ public abstract class MixinEntityItem_RealTime extends MixinEntity_RealTime {
 
     @Redirect(method = "onUpdate", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/item/EntityItem;age:I", opcode = Opcodes.PUTFIELD, ordinal = 0))
     private void adjustForRealTimeAge(EntityItem self, int modifier) {
-        if (((IMixinWorld) this.world).isFake()) {
+        if (((WorldBridge) this.world).isFake()) {
             this.age = modifier;
             return;
         }

@@ -30,15 +30,17 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.entity.IMixinGriefer;
+import org.spongepowered.common.bridge.entity.GrieferBridge;
+import org.spongepowered.common.mixin.api.minecraft.entity.monster.MixinEntityGolem_API;
+import org.spongepowered.common.mixin.core.entity.MixinEntityLiving;
 
 @Mixin(EntitySnowman.class)
-public abstract class MixinEntitySnowman extends MixinEntityGolem implements SnowGolem {
+public abstract class MixinEntitySnowman extends MixinEntityLiving {
 
     @Inject(method = "onLivingUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/MathHelper;floor(D)I", ordinal = 3),
             cancellable = true)
     private void onCanGrief(CallbackInfo ci) {
-        if (!this.world.getGameRules().getBoolean("mobGriefing") || !((IMixinGriefer) this).canGrief()) {
+        if (!this.world.getGameRules().getBoolean("mobGriefing") || !((GrieferBridge) this).bridge$CanGrief()) {
             ci.cancel();
         }
     }

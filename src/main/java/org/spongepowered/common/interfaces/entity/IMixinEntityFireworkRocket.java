@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.interfaces.entity;
 
-import org.spongepowered.common.bridge.explosives.ImplBridgeFusedExplosive;
+import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 
-public interface IMixinEntityFireworkRocket extends ImplBridgeFusedExplosive {
+public interface IMixinEntityFireworkRocket extends FusedExplosiveBridge {
 
     void setModifier(byte modifier);
 

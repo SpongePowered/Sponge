@@ -152,6 +152,7 @@ import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.WorldCategory;
 import org.spongepowered.common.config.type.WorldConfig;
+import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
@@ -173,17 +174,17 @@ import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinNextTickListEntry;
-import org.spongepowered.common.interfaces.block.IMixinBlock;
-import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
+import org.spongepowered.common.bridge.block.BlockBridge;
+import org.spongepowered.common.bridge.block.BlockEventDataBridge;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
-import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
-import org.spongepowered.common.bridge.entity.IMixinEntity;
+import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
+import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMap;
 import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
 import org.spongepowered.common.interfaces.world.IMixinServerWorldEventHandler;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModData_Activation;
@@ -225,15 +226,8 @@ import java.util.function.Function;
 import javax.annotation.Nullable;
 
 @Mixin(WorldServer.class)
-@Implements(@Interface(iface = IMixinWorldServer.class, prefix = "worldServer$", unique = true))
-public abstract class MixinWorldServer extends MixinWorld implements IMixinWorldServer {
-
-    private static final String PROFILER_SS = "Lnet/minecraft/profiler/Profiler;startSection(Ljava/lang/String;)V";
-    private static final String PROFILER_ESS = "Lnet/minecraft/profiler/Profiler;endStartSection(Ljava/lang/String;)V";
-
-    private static final EnumFacing[] NOTIFY_DIRECTIONS = {EnumFacing.WEST, EnumFacing.EAST, EnumFacing.DOWN, EnumFacing.UP, EnumFacing.NORTH, EnumFacing.SOUTH};
-    // This is unordered, rather, it's naturally ordered by the enum, not by the order in which we notify neighbors.
-    private static final EnumSet<EnumFacing> NOTIFY_DIRECTION_SET = EnumSet.of(EnumFacing.WEST, EnumFacing.EAST, EnumFacing.DOWN, EnumFacing.UP, EnumFacing.NORTH, EnumFacing.SOUTH);
+@Implements(@Interface(iface = ServerWorldBridge.class, prefix = "worldServer$", unique = true))
+public abstract class MixinWorldServer extends MixinWorld implements ServerWorldBridge {
 
     private final Map<net.minecraft.entity.Entity, Vector3d> rotationUpdates = new HashMap<>();
     private SpongeChunkGenerator spongegen;
@@ -306,7 +300,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                         .newInstance(new Object[] {this});
             } catch (Exception e) {
                 SpongeImpl.getLogger().log(Level.ERROR, "Could not create PortalAgent of type " + portalAgentType.getId()
-                        + " for world " + this.getName() + ": " + e.getMessage() + ". Falling back to default...");
+                                                        + " for world " + ((org.spongepowered.api.world.World) this).getName() + ": " + e.getMessage() + ". Falling back to default...");
             }
         }
 
@@ -730,7 +724,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                                 // block.randomTick(this, new BlockPos(k1 + j, i2 + extendedblockstorage.getYLocation(), l1 + k), iblockstate, this.rand);
 
                                 BlockPos pos = new BlockPos(k1 + j, i2 + extendedblockstorage.getYLocation(), l1 + k);
-                                IMixinBlock spongeBlock = (IMixinBlock) block;
+                                BlockBridge spongeBlock = (BlockBridge) block;
                                 spongeBlock.getTimingsHandler().startTiming();
                                 final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
                                 final IPhaseState phaseState = context.state;
@@ -757,7 +751,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/WorldInfo;setDifficulty(Lnet/minecraft/world/EnumDifficulty;)V"))
     private void syncDifficultyDueToHardcore(WorldInfo worldInfo, EnumDifficulty newDifficulty) {
-        WorldManager.adjustWorldForDifficulty(WorldUtil.asNative((IMixinWorldServer) this), newDifficulty, false);
+        WorldManager.adjustWorldForDifficulty(WorldUtil.asNative((ServerWorldBridge) this), newDifficulty, false);
     }
 
     @Redirect(method = "updateBlockTick", at = @At(value = "INVOKE", target= "Lnet/minecraft/world/WorldServer;isAreaLoaded(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/BlockPos;)Z"))
@@ -901,7 +895,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Redirect(method = "addBlockEvent", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer$ServerBlockEventList;add(Ljava/lang/Object;)Z", remap = false))
     private boolean onAddBlockEvent(WorldServer.ServerBlockEventList list, Object obj, BlockPos pos, Block blockIn, int eventId, int eventParam) {
         final BlockEventData blockEventData = (BlockEventData) obj;
-        IMixinBlockEventData blockEvent = (IMixinBlockEventData) blockEventData;
+        BlockEventDataBridge blockEvent = (BlockEventDataBridge) blockEventData;
         final PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
         final IPhaseState phaseState = currentContext.state;
         // Short circuit phase states who do not track during block events
@@ -909,24 +903,24 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             return list.add(blockEventData);
         }
 
-        if (((IMixinBlock) blockIn).shouldFireBlockEvents()) {
-            blockEvent.setSourceUser(currentContext.getActiveUser());
+        if (((BlockBridge) blockIn).shouldFireBlockEvents()) {
+            blockEvent.setBridge$sourceUser(currentContext.getActiveUser());
             if (SpongeImplHooks.hasBlockTileEntity(blockIn, getBlockState(pos))) {
-                blockEvent.setTickTileEntity((TileEntity) getTileEntity(pos));
+                blockEvent.setBridge$TileEntity((TileEntity) getTileEntity(pos));
             }
-            if (blockEvent.getTickTileEntity() == null) {
+            if (blockEvent.getBridge$TileEntity() == null) {
                 final LocatableBlock locatable = new SpongeLocatableBlockBuilder()
                     .world(this)
                     .position(pos.getX(), pos.getY(), pos.getZ())
                     .state(this.getBlock(pos.getX(), pos.getY(), pos.getZ()))
                     .build();
-                blockEvent.setTickBlock(locatable);
+                blockEvent.setBridge$TickingLocatable(locatable);
             }
         }
 
         // Short circuit any additional handling. We've associated enough with the BlockEvent to
         // allow tracking to take place for other/future phases
-        if (!((IMixinBlock) blockIn).shouldFireBlockEvents()) {
+        if (!((BlockBridge) blockIn).shouldFireBlockEvents()) {
             return list.add((BlockEventData) obj);
         }
         // Occasionally, we have a phase state that will want to just capture the block events
@@ -952,7 +946,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
                 } else {
                     BlockSnapshot notifySource = null;
-                    if (!((IMixinBlock) blockIn).isVanilla() && currentContext.getNeighborNotificationSource() != null) {
+                    if (!((BlockBridge) blockIn).isVanilla() && currentContext.getNeighborNotificationSource() != null) {
                         notifySource = currentContext.getNeighborNotificationSource();
                     }
                     final BlockPos notificationPos = notifySource != null ? VecHelper.toBlockPos(notifySource.getLocation().get()) : pos;
@@ -1650,7 +1644,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
 
         // Else, we just do vanilla. If there's no listeners, we don't want to spam the notification event
-        for (EnumFacing direction : NOTIFY_DIRECTIONS) { // ORDER MATTERS, we have to keep order in which directions are notified.
+        for (EnumFacing direction : DataConstants.World.NOTIFY_DIRECTIONS) { // ORDER MATTERS, we have to keep order in which directions are notified.
             if (direction == skipSide) {
                 continue;
             }
@@ -1672,10 +1666,10 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
 
         if (ShouldFire.NOTIFY_NEIGHBOR_BLOCK_EVENT) {
-            throwNotifyNeighborAndCall(sourcePos, sourceBlock, NOTIFY_DIRECTION_SET);
+            throwNotifyNeighborAndCall(sourcePos, sourceBlock, DataConstants.World.NOTIFY_DIRECTION_SET);
         } else {
             // Else, we just do vanilla. If there's no listeners, we don't want to spam the notification event
-            for (EnumFacing direction : NOTIFY_DIRECTIONS) {
+            for (EnumFacing direction : DataConstants.World.NOTIFY_DIRECTIONS) {
                 final BlockPos notifyPos = sourcePos.offset(direction);
                 PhaseTracker.getInstance().notifyBlockOfStateChange(this, this.getBlockState(notifyPos), notifyPos, sourceBlock, sourcePos);
             }
@@ -1690,7 +1684,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     private void throwNotifyNeighborAndCall(BlockPos sourcePos, Block sourceBlock, EnumSet<EnumFacing> notifyDirectionSet) {
         final NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent(this, sourcePos, notifyDirectionSet);
         if (event == null || !event.isCancelled()) {
-            for (EnumFacing facing : NOTIFY_DIRECTIONS) {
+            for (EnumFacing facing : DataConstants.World.NOTIFY_DIRECTIONS) {
                 if (event != null) {
                     final Direction direction = DirectionFacingProvider.getInstance().getKey(facing).get();
                     if (!event.getNeighbors().keySet().contains(direction)) {
@@ -1861,7 +1855,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     // ------------------------ End of Cause Tracking ------------------------------------
 
-    // IMixinWorld method
+    // WorldBridge method
     @Override
     public void spongeNotifyNeighborsPostBlockChange(BlockPos pos, IBlockState newState, BlockChangeFlag flags) {
         if (flags.updateNeighbors()) {
@@ -1873,13 +1867,13 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
     }
 
-    // IMixinWorld method
+    // WorldBridge method
     @Override
     public void addEntityRotationUpdate(net.minecraft.entity.Entity entity, Vector3d rotation) {
         this.rotationUpdates.put(entity, rotation);
     }
 
-    // IMixinWorld method
+    // WorldBridge method
     @Override
     public void updateRotation(net.minecraft.entity.Entity entityIn) {
         Vector3d rotationUpdate = this.rotationUpdates.get(entityIn);
@@ -1893,7 +1887,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     public void onSpongeEntityAdded(net.minecraft.entity.Entity entity) {
         this.onEntityAdded(entity);
-        ((IMixinEntity) entity).onJoinWorld();
+        ((EntityBridge) entity).onJoinWorld();
     }
 
     @Override
@@ -1971,7 +1965,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             // We MUST only check to see if a TE exists to avoid creating a new one.
             if (tileEntity != null) {
                 TileEntity tile = (TileEntity) tileEntity;
-                for (DataManipulator<?, ?> manipulator : ((IMixinCustomDataHolder) tile).getCustomManipulators()) {
+                for (DataManipulator<?, ?> manipulator : ((CustomDataHolderBridge) tile).getCustomManipulators()) {
                     this.builder.add(manipulator);
                 }
                 NBTTagCompound nbt = new NBTTagCompound();
@@ -2433,30 +2427,30 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         TimingHistory.tileEntityTicks += this.loadedTileEntityList.size();
     }
 
-    @Inject(method = "tick", at = @At(value = "INVOKE_STRING", target = PROFILER_ESS, args = "ldc=tickPending") )
+    @Inject(method = "tick", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/profiler/Profiler;endStartSection(Ljava/lang/String;)V", args = "ldc=tickPending") )
     private void onBeginTickBlockUpdate(CallbackInfo ci) {
         this.timings.scheduledBlocks.startTiming();
     }
 
-    @Inject(method = "tick", at = @At(value = "INVOKE_STRING", target = PROFILER_ESS, args = "ldc=tickBlocks") )
+    @Inject(method = "tick", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/profiler/Profiler;endStartSection(Ljava/lang/String;)V", args = "ldc=tickBlocks") )
     private void onAfterTickBlockUpdate(CallbackInfo ci) {
         this.timings.scheduledBlocks.stopTiming();
         this.timings.updateBlocks.startTiming();
     }
 
-    @Inject(method = "tick", at = @At(value = "INVOKE_STRING", target = PROFILER_ESS, args = "ldc=chunkMap") )
+    @Inject(method = "tick", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/profiler/Profiler;endStartSection(Ljava/lang/String;)V", args = "ldc=chunkMap") )
     private void onBeginUpdateBlocks(CallbackInfo ci) {
         this.timings.updateBlocks.stopTiming();
         this.timings.doChunkMap.startTiming();
     }
 
-    @Inject(method = "tick", at = @At(value = "INVOKE_STRING", target = PROFILER_ESS, args = "ldc=village") )
+    @Inject(method = "tick", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/profiler/Profiler;endStartSection(Ljava/lang/String;)V", args = "ldc=village") )
     private void onBeginUpdateVillage(CallbackInfo ci) {
         this.timings.doChunkMap.stopTiming();
         this.timings.doVillages.startTiming();
     }
 
-    @Inject(method = "tick", at = @At(value = "INVOKE_STRING", target = PROFILER_ESS, args = "ldc=portalForcer"))
+    @Inject(method = "tick", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/profiler/Profiler;endStartSection(Ljava/lang/String;)V", args = "ldc=portalForcer"))
     private void onBeginUpdatePortal(CallbackInfo ci) {
         this.timings.doVillages.stopTiming();
         this.timings.doPortalForcer.startTiming();
@@ -2480,12 +2474,12 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     // TIMINGS
-    @Inject(method = "tickUpdates", at = @At(value = "INVOKE_STRING", target = PROFILER_SS, args = "ldc=cleaning"))
+    @Inject(method = "tickUpdates", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/profiler/Profiler;startSection(Ljava/lang/String;)V", args = "ldc=cleaning"))
     private void onTickUpdatesCleanup(boolean flag, CallbackInfoReturnable<Boolean> cir) {
         this.timings.scheduledBlocksCleanup.startTiming();
     }
 
-    @Inject(method = "tickUpdates", at = @At(value = "INVOKE_STRING", target = PROFILER_SS, args = "ldc=ticking"))
+    @Inject(method = "tickUpdates", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/profiler/Profiler;startSection(Ljava/lang/String;)V", args = "ldc=ticking"))
     private void onTickUpdatesTickingStart(boolean flag, CallbackInfoReturnable<Boolean> cir) {
         this.timings.scheduledBlocksCleanup.stopTiming();
         this.timings.scheduledBlocksTicking.startTiming();
@@ -2534,8 +2528,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     public void playCustomSound(@Nullable EntityPlayer player, double x, double y, double z, String soundIn, net.minecraft.util.SoundCategory category,
             float volume, float pitch) {
 
-        if (player instanceof IMixinEntity) {
-            if (((IMixinEntity) player).isVanished()) {
+        if (player instanceof EntityBridge) {
+            if (((EntityBridge) player).isVanished()) {
                 return;
             }
         }

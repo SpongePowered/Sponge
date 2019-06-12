@@ -34,19 +34,15 @@ import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.WorldServer;
-import net.minecraft.world.WorldServerMulti;
 import net.minecraft.world.chunk.Chunk;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 import org.spongepowered.common.world.BlockChange;
 
 import java.util.ArrayDeque;
@@ -73,7 +69,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
     @Nullable private Deque<BlockTransaction> processingStack;
     private boolean isNeighbor = false;
 
-    public SpongeProxyBlockAccess(IMixinWorldServer worldServer) {
+    public SpongeProxyBlockAccess(ServerWorldBridge worldServer) {
         this.processingWorld = ((WorldServer) worldServer);
     }
 
@@ -101,7 +97,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
             }
         }
         if (b && this.processingTransaction != null) {
-            PhaseTracker.getInstance().setBlockState((IMixinWorldServer) this.processingWorld, pos, state, BlockChangeFlags.NONE);
+            PhaseTracker.getInstance().setBlockState((ServerWorldBridge) this.processingWorld, pos, state, BlockChangeFlags.NONE);
         }
         return this;
     }
@@ -476,8 +472,8 @@ public final class SpongeProxyBlockAccess implements IBlockAccess, AutoCloseable
         }
     }
 
-    public IMixinWorldServer getWorld() {
-        return (IMixinWorldServer) this.processingWorld;
+    public ServerWorldBridge getWorld() {
+        return (ServerWorldBridge) this.processingWorld;
     }
 
     public void addToPrinter(PrettyPrinter printer) {

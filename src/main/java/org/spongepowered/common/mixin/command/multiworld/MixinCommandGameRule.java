@@ -34,7 +34,7 @@ import net.minecraft.world.GameRules;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 
 @Mixin(CommandGameRule.class)
 public abstract class MixinCommandGameRule {
@@ -45,7 +45,7 @@ public abstract class MixinCommandGameRule {
     private static int currentDimension;
 
     private static GameRules getGameRules(ICommandSender sender) {
-        currentDimension = ((IMixinWorldServer) sender.getEntityWorld()).getDimensionId();
+        currentDimension = ((ServerWorldBridge) sender.getEntityWorld()).getDimensionId();
         return sender.getEntityWorld().getGameRules();
     }
 

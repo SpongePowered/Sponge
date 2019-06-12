@@ -39,21 +39,16 @@ import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.bridge.entity.GrieferBridge;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeMoistureData;
-import org.spongepowered.common.bridge.entity.IMixinGriefer;
 
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 @Mixin(BlockFarmland.class)
 public abstract class MixinBlockFarmland extends MixinBlock {
 
-    @Nullable private Entity currentGriefer;
     @Shadow protected static void turnToDirt(World world, BlockPos pos) {}
 
     @Override
@@ -94,20 +89,15 @@ public abstract class MixinBlockFarmland extends MixinBlock {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeMoistureData.class, blockState.getValue(BlockFarmland.MOISTURE), 0, 7);
     }
 
-    @Inject(method = "onFallenUpon", at = @At(value = "HEAD"))
-    private void onFallenUponHead(World worldIn, BlockPos pos, Entity entityIn, float fallDistance, CallbackInfo ci) {
-        this.currentGriefer = entityIn;
-    }
-
-    @Inject(method = "onFallenUpon", at = @At(value = "RETURN"))
-    private void onEntityFallenUponReturn(World worldIn, BlockPos pos, Entity entityIn, float fallDistance, CallbackInfo ci) {
-        this.currentGriefer = null;
-    }
-
-    @Redirect(method = "onFallenUpon", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockFarmland;turnToDirt(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)V"))
-    private void beforeTurnToDirt(World world, BlockPos pos) {
-        if (this.currentGriefer instanceof IMixinGriefer && ((IMixinGriefer) this.currentGriefer).canGrief()) {
-            MixinBlockFarmland.turnToDirt(world, pos);
+    @Redirect(method = "onFallenUpon",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/block/BlockFarmland;turnToDirt(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)V"
+        )
+    )
+    private void impl$CheckIfGrieferCanGrief(World world, BlockPos pos, World worldIn, BlockPos samePos, Entity entityIn, float fallDistance) {
+        if (entityIn instanceof GrieferBridge && ((GrieferBridge) entityIn).bridge$CanGrief()) {
+            turnToDirt(world, pos);
         }
     }
 }

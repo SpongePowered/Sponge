@@ -55,13 +55,13 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.entity.GrieferBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.ai.IMixinEntityAIBase;
 import org.spongepowered.common.interfaces.ai.IMixinEntityAITasks;
-import org.spongepowered.common.bridge.entity.IMixinEntity;
-import org.spongepowered.common.bridge.entity.IMixinGriefer;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.bridge.entity.EntityBridge;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 
 import java.util.Iterator;
@@ -194,7 +194,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase {
     @Nullable
     @Redirect(method = "despawnEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getClosestPlayerToEntity(Lnet/minecraft/entity/Entity;D)Lnet/minecraft/entity/player/EntityPlayer;"))
     private EntityPlayer spongeImpl$despa(World world, net.minecraft.entity.Entity entity, double distance) {
-        return ((IMixinWorld) world).getClosestPlayerToEntityWhoAffectsSpawning(entity, distance);
+        return ((WorldBridge) world).getClosestPlayerToEntityWhoAffectsSpawning(entity, distance);
     }
 
     /**
@@ -209,7 +209,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase {
     private void onSetAttackTarget(@Nullable EntityLivingBase entitylivingbaseIn, CallbackInfo ci) {
         if (!this.world.isRemote && ShouldFire.SET_A_I_TARGET_EVENT) {
             if (entitylivingbaseIn != null) {
-                if (((IMixinEntity) entitylivingbaseIn).isVanished() && ((IMixinEntity) entitylivingbaseIn).isUntargetable()) {
+                if (((EntityBridge) entitylivingbaseIn).isVanished() && ((EntityBridge) entitylivingbaseIn).isUntargetable()) {
                     this.attackTarget = null;
                     ci.cancel();
                 } else {
@@ -235,7 +235,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase {
     @Overwrite
     public EntityLivingBase getAttackTarget() {
         if (this.attackTarget != null) {
-            if (((IMixinEntity) this.attackTarget).isVanished() && ((IMixinEntity) this.attackTarget).isUntargetable()) {
+            if (((EntityBridge) this.attackTarget).isVanished() && ((EntityBridge) this.attackTarget).isUntargetable()) {
                 this.attackTarget = null;
             }
         }
@@ -253,7 +253,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase {
      */
     @Redirect(method = "onLivingUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;canPickUpLoot()Z"))
     private boolean onCanGrief(EntityLiving thisEntity) {
-        return thisEntity.canPickUpLoot() && ((IMixinGriefer) this).canGrief();
+        return thisEntity.canPickUpLoot() && ((GrieferBridge) this).bridge$CanGrief();
     }
 
 

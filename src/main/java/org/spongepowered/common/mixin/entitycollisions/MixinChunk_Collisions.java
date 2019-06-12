@@ -41,7 +41,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.IModData_Collisions;
 
 import java.util.List;
@@ -85,7 +85,7 @@ public class MixinChunk_Collisions {
     }
 
     private <T extends Entity> boolean allowEntityCollision(List<T> listToFill) {
-        if (this.world instanceof IMixinWorldServer) {
+        if (this.world instanceof ServerWorldBridge) {
             if (PhaseTracker.getInstance().getCurrentState().ignoresEntityCollisions()) {
                 // allow explosions
                 return true;

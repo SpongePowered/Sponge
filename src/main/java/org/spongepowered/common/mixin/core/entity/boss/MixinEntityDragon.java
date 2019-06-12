@@ -36,7 +36,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
-import org.spongepowered.common.bridge.entity.IMixinGriefer;
+import org.spongepowered.common.bridge.entity.GrieferBridge;
 import org.spongepowered.common.mixin.core.entity.MixinEntityLiving;
 
 import javax.annotation.Nullable;
@@ -70,7 +70,7 @@ public abstract class MixinEntityDragon extends MixinEntityLiving {
         require = 0 // Forge rewrites the material request to block.isAir
     )
     private Block spongeImpl$onCanGrief(IBlockState state) {
-        return ((IMixinGriefer) this).canGrief() ? state.getBlock() : Blocks.AIR;
+        return ((GrieferBridge) this).bridge$CanGrief() ? state.getBlock() : Blocks.AIR;
     }
 
     /**

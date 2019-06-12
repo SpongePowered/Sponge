@@ -38,7 +38,7 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 import org.spongepowered.common.world.WorldUtil;
 
 import java.util.ArrayList;
@@ -95,7 +95,7 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
             .acceptAndClearIfNotEmpty(entities -> SpongeCommonEventFactory.callSpawnEntity(entities, context));
         final SpongeBlockSnapshot blockSnapshot = context.getSource(SpongeBlockSnapshot.class)
             .orElseThrow(TrackingUtil.throwWithContext("Could not find a block dropping items!", context));
-        final Optional<IMixinWorldServer> maybeWorld = blockSnapshot.getWorldServer().map(worldserver -> (IMixinWorldServer) worldserver);
+        final Optional<ServerWorldBridge> maybeWorld = blockSnapshot.getWorldServer().map(worldserver -> (ServerWorldBridge) worldserver);
 
         // TODO - Determine if we need to pass the supplier or perform some parameterized
         //  process if not empty method on the capture object.

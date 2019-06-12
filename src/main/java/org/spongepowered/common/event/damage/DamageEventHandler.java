@@ -67,7 +67,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.bridge.entity.IMixinEntity;
+import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.util.VecHelper;
@@ -371,14 +371,14 @@ public class DamageEventHandler {
         if (damageSource instanceof EntityDamageSourceIndirect) {
             net.minecraft.entity.Entity source = damageSource.getTrueSource();
             if (!(source instanceof EntityPlayer) && source != null) {
-                final IMixinEntity mixinEntity = EntityUtil.toMixin(source);
+                final EntityBridge mixinEntity = EntityUtil.toMixin(source);
                 mixinEntity.getNotifierUser().ifPresent(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
                 mixinEntity.getCreatorUser().ifPresent(owner -> frame.addContext(EventContextKeys.OWNER, owner));
             }
         } else if (damageSource instanceof EntityDamageSource) {
             net.minecraft.entity.Entity source = damageSource.getTrueSource();
             if (!(source instanceof EntityPlayer) && source != null) {
-                final IMixinEntity mixinEntity = EntityUtil.toMixin(source);
+                final EntityBridge mixinEntity = EntityUtil.toMixin(source);
                 // TODO only have a UUID, want a user
                 mixinEntity.getNotifierUser().ifPresent(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
                 mixinEntity.getCreatorUser().ifPresent(creator -> frame.addContext(EventContextKeys.CREATOR, creator));

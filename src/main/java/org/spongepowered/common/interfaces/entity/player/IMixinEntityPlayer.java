@@ -26,13 +26,13 @@ package org.spongepowered.common.interfaces.entity.player;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
-import org.spongepowered.common.bridge.entity.IMixinEntity;
+import org.spongepowered.common.bridge.entity.EntityBridge;
 
 import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-public interface IMixinEntityPlayer extends IMixinEntity {
+public interface IMixinEntityPlayer extends EntityBridge {
 
     @Nullable BlockPos getBedLocation(int dim);
 

@@ -30,7 +30,7 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 
 import javax.annotation.Nullable;
 
@@ -60,7 +60,7 @@ final class ChangingToDimensionState extends EntityPhaseState<TeleportingContext
     public boolean spawnEntityOrCapture(TeleportingContext context, Entity entity, int chunkX, int chunkZ) {
         final WorldServer worldServer = context.getTargetWorld();
         // Allowed to use the force spawn because it's the same "entity"
-        ((IMixinWorldServer) worldServer).forceSpawnEntity(entity);
+        ((ServerWorldBridge) worldServer).forceSpawnEntity(entity);
         return true;
     }
 

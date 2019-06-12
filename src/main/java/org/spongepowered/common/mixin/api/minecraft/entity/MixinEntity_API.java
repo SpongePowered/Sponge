@@ -61,7 +61,6 @@ import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.api.event.cause.entity.dismount.DismountTypes;
 import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.text.translation.Translation;
@@ -87,13 +86,12 @@ import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
-import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
-import org.spongepowered.common.bridge.entity.IMixinEntity;
+import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
+import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.interfaces.world.IMixinTeleporter;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
-import org.spongepowered.common.mixin.core.entity.MixinEntity;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.WorldManager;
@@ -253,17 +251,17 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
             boolean isTeleporting = true;
             boolean isChangingDimension = false;
             if (location.getExtent().getUniqueId() != ((World) this.world).getUniqueId()) {
-                if ((net.minecraft.entity.Entity) (Object) this instanceof EntityPlayerMP) {
+                if (((Entity) (Object) this) instanceof EntityPlayerMP) {
                     // Close open containers
                     final EntityPlayerMP entityPlayerMP = (EntityPlayerMP) (Object) this;
                     if (entityPlayerMP.openContainer != entityPlayerMP.inventoryContainer) {
                         ((Player) entityPlayerMP).closeInventory(); // Call API method to make sure we capture it
                     }
 
-                    EntityUtil.teleportPlayerToDimension(entityPlayerMP, ((IMixinWorldServer) location.getExtent()).getDimensionId(),
+                    EntityUtil.teleportPlayerToDimension(entityPlayerMP, ((ServerWorldBridge) location.getExtent()).getDimensionId(),
                         (IMixinTeleporter) ((WorldServer) location.getExtent()).getDefaultTeleporter(), event);
                 } else {
-                    EntityUtil.transferEntityToDimension(this, ((IMixinWorldServer) location.getExtent()).getDimensionId(),
+                    EntityUtil.transferEntityToDimension((Entity) (Object) this, ((ServerWorldBridge) location.getExtent()).getDimensionId(),
                         (IMixinTeleporter) ((WorldServer) location.getExtent()).getDefaultTeleporter(), event);
                 }
 
@@ -431,7 +429,7 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
                 getPosition().getZ(), (float) rotation.getY(), (float) rotation.getX(), (Set) EnumSet.noneOf(RelativePositions.class));
         } else {
             if (!this.world.isRemote) { // We can't set the rotation update on client worlds.
-                ((IMixinWorldServer) getWorld()).addEntityRotationUpdate((Entity) (Object) this, rotation);
+                ((ServerWorldBridge) getWorld()).addEntityRotationUpdate((Entity) (Object) this, rotation);
             }
 
             // Let the entity tracker do its job, this just updates the variables
@@ -596,7 +594,7 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
             .getContainer()
             .set(DataQueries.ENTITY_TYPE, this.entityType.getId())
             .set(DataQueries.UNSAFE_NBT, unsafeNbt);
-        final Collection<DataManipulator<?, ?>> manipulators = ((IMixinCustomDataHolder) this).getCustomManipulators();
+        final Collection<DataManipulator<?, ?>> manipulators = ((CustomDataHolderBridge) this).getCustomManipulators();
         if (!manipulators.isEmpty()) {
             container.set(DataQueries.DATA_MANIPULATORS, DataUtil.getSerializedManipulatorList(manipulators));
         }
@@ -607,8 +605,8 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
     public Collection<DataManipulator<?, ?>> getContainers() {
         final List<DataManipulator<?, ?>> list = Lists.newArrayList();
         this.spongeApi$supplyVanillaManipulators(list);
-        if (this instanceof IMixinCustomDataHolder && ((IMixinCustomDataHolder) this).hasManipulators()) {
-            list.addAll(((IMixinCustomDataHolder) this).getCustomManipulators());
+        if (this instanceof CustomDataHolderBridge && ((CustomDataHolderBridge) this).hasManipulators()) {
+            list.addAll(((CustomDataHolderBridge) this).getCustomManipulators());
         }
         return list;
     }
@@ -662,7 +660,7 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
     public boolean canSee(org.spongepowered.api.entity.Entity entity) {
         // note: this implementation will be changing with contextual data
         Optional<Boolean> optional = entity.get(Keys.VANISH);
-        return (!optional.isPresent() || !optional.get()) && !((IMixinEntity) entity).isVanished();
+        return (!optional.isPresent() || !optional.get()) && !((EntityBridge) entity).isVanished();
     }
 
     @Override

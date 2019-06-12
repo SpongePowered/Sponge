@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.data;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimings;
 import org.spongepowered.common.relocate.co.aikar.timings.TimingsManager;
 import net.minecraft.entity.Entity;
@@ -51,7 +50,7 @@ import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.ValueProcessor;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.entity.player.SpongeUser;
-import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
+import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -74,8 +73,8 @@ public abstract class MixinDataHolder implements DataHolder {
             SpongeTimings.dataGetManipulator.stopTimingIfSync();
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return (Optional<T>) from;
-        } else if (this instanceof IMixinCustomDataHolder) {
-            final Optional<T> custom = ((IMixinCustomDataHolder) this).getCustom(containerClass);
+        } else if (this instanceof CustomDataHolderBridge) {
+            final Optional<T> custom = ((CustomDataHolderBridge) this).getCustom(containerClass);
             SpongeTimings.dataGetManipulator.stopTimingIfSync();
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return custom;
@@ -96,8 +95,8 @@ public abstract class MixinDataHolder implements DataHolder {
             SpongeTimings.dataGetOrCreateManipulator.stopTimingIfSync();
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return created;
-        } else if (this instanceof IMixinCustomDataHolder) {
-            Optional<T> custom = ((IMixinCustomDataHolder) this).getCustom(containerClass);
+        } else if (this instanceof CustomDataHolderBridge) {
+            Optional<T> custom = ((CustomDataHolderBridge) this).getCustom(containerClass);
             if (custom.isPresent()) {
                 SpongeTimings.dataGetOrCreateManipulator.stopTimingIfSync();
                 TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
@@ -134,8 +133,8 @@ public abstract class MixinDataHolder implements DataHolder {
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return supports;
         }
-        if (this instanceof IMixinCustomDataHolder) {
-            Optional<?> custom = ((IMixinCustomDataHolder) this).getCustom(holderClass);
+        if (this instanceof CustomDataHolderBridge) {
+            Optional<?> custom = ((CustomDataHolderBridge) this).getCustom(holderClass);
             if (custom.isPresent()) {
                 SpongeTimings.dataSupportsManipulator.stopTimingIfSync();
                 TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
@@ -168,8 +167,8 @@ public abstract class MixinDataHolder implements DataHolder {
             SpongeTimings.dataOfferKey.stopTimingIfSync();
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return result;
-        } else if (this instanceof IMixinCustomDataHolder) {
-            final DataTransactionResult result = ((IMixinCustomDataHolder) this).offerCustom(key, value);
+        } else if (this instanceof CustomDataHolderBridge) {
+            final DataTransactionResult result = ((CustomDataHolderBridge) this).offerCustom(key, value);
             if ((Object) this instanceof SpongeUser) {
                 ((SpongeUser) (Object) this).markDirty();
             }
@@ -193,8 +192,8 @@ public abstract class MixinDataHolder implements DataHolder {
             SpongeTimings.dataOfferManipulator.stopTimingIfSync();
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return result;
-        } else if (this instanceof IMixinCustomDataHolder) {
-            final DataTransactionResult result = ((IMixinCustomDataHolder) this).offerCustom(valueContainer, function);
+        } else if (this instanceof CustomDataHolderBridge) {
+            final DataTransactionResult result = ((CustomDataHolderBridge) this).offerCustom(valueContainer, function);
             if ((Object) this instanceof SpongeUser) {
                 ((SpongeUser) (Object) this).markDirty();
             }
@@ -253,8 +252,8 @@ public abstract class MixinDataHolder implements DataHolder {
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
 
             return result;
-        } else if (this instanceof IMixinCustomDataHolder) {
-            final DataTransactionResult result = ((IMixinCustomDataHolder) this).removeCustom(containerClass);
+        } else if (this instanceof CustomDataHolderBridge) {
+            final DataTransactionResult result = ((CustomDataHolderBridge) this).removeCustom(containerClass);
             if ((Object) this instanceof SpongeUser) {
                 ((SpongeUser) (Object) this).markDirty();
             }
@@ -280,8 +279,8 @@ public abstract class MixinDataHolder implements DataHolder {
             SpongeTimings.dataRemoveKey.stopTimingIfSync();
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return result;
-        } else if (this instanceof IMixinCustomDataHolder) {
-            final DataTransactionResult result = ((IMixinCustomDataHolder) this).removeCustom(key);
+        } else if (this instanceof CustomDataHolderBridge) {
+            final DataTransactionResult result = ((CustomDataHolderBridge) this).removeCustom(key);
             SpongeTimings.dataRemoveKey.stopTimingIfSync();
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return result;
@@ -328,8 +327,8 @@ public abstract class MixinDataHolder implements DataHolder {
             SpongeTimings.dataGetByKey.stopTimingIfSync();
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return value;
-        } else if (this instanceof IMixinCustomDataHolder) {
-            final Optional<E> custom = ((IMixinCustomDataHolder) this).getCustom(key);
+        } else if (this instanceof CustomDataHolderBridge) {
+            final Optional<E> custom = ((CustomDataHolderBridge) this).getCustom(key);
             SpongeTimings.dataGetByKey.stopTimingIfSync();
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return custom;
@@ -349,8 +348,8 @@ public abstract class MixinDataHolder implements DataHolder {
             SpongeTimings.dataGetValue.stopTimingIfSync();
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return value;
-        } else if (this instanceof IMixinCustomDataHolder) {
-            final Optional<V> customValue = ((IMixinCustomDataHolder) this).getCustomValue(key);
+        } else if (this instanceof CustomDataHolderBridge) {
+            final Optional<V> customValue = ((CustomDataHolderBridge) this).getCustomValue(key);
             SpongeTimings.dataGetValue.stopTimingIfSync();
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return customValue;
@@ -371,8 +370,8 @@ public abstract class MixinDataHolder implements DataHolder {
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return supports;
         }
-        if (this instanceof IMixinCustomDataHolder) {
-            final boolean customSupport = ((IMixinCustomDataHolder) this).supportsCustom(key);
+        if (this instanceof CustomDataHolderBridge) {
+            final boolean customSupport = ((CustomDataHolderBridge) this).supportsCustom(key);
             SpongeTimings.dataSupportsKey.stopTimingIfSync();
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return customSupport;

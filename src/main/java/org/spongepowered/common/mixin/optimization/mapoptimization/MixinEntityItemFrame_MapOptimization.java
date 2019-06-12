@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.optimization.OptimizedMapData;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
 @Mixin(EntityItemFrame.class)
@@ -43,7 +43,7 @@ public abstract class MixinEntityItemFrame_MapOptimization extends MixinEntity {
 
     @Inject(method = "setDisplayedItemWithUpdate", at = @At(value = "HEAD"))
     private void mapOptimization$SetItemUpdateMapData(ItemStack stack, boolean p_174864_2_, CallbackInfo ci) {
-        if (((IMixinWorld) this.world).isFake()) {
+        if (((WorldBridge) this.world).isFake()) {
             return;
         }
 

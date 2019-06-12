@@ -32,6 +32,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.world.World;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.entity.projectile.Firework;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
@@ -42,6 +43,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
 import org.spongepowered.common.interfaces.entity.IMixinEntityFireworkRocket;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
@@ -51,17 +53,13 @@ import java.util.Optional;
 @Mixin(EntityFireworkRocket.class)
 public abstract class MixinEntityFireworkRocket extends MixinEntity implements IMixinEntityFireworkRocket {
 
-    private static final String TARGET_ENTITY_STATE = "Lnet/minecraft/world/World;setEntityState"
-            + "(Lnet/minecraft/entity/Entity;B)V";
-    private static final int DEFAULT_EXPLOSION_RADIUS = 0;
-
     @Shadow private int fireworkAge;
     @Shadow private int lifetime;
 
     @Shadow public abstract void onUpdate();
 
     private ProjectileSource projectileSource = ProjectileSource.UNKNOWN;
-    private int explosionRadius = DEFAULT_EXPLOSION_RADIUS;
+    private int explosionRadius = DataConstants.Entity.Firework.DEFAULT_EXPLOSION_RADIUS;
 
     @Override
     public void setModifier(byte modifier) {
@@ -71,7 +69,7 @@ public abstract class MixinEntityFireworkRocket extends MixinEntity implements I
     @Override
     public void spongeImpl$readFromSpongeCompound(NBTTagCompound compound) {
         super.spongeImpl$readFromSpongeCompound(compound);
-        ProjectileSourceSerializer.readSourceFromNbt(compound, this);
+        ProjectileSourceSerializer.readSourceFromNbt(compound, (Firework) this);
     }
 
     @Override
@@ -81,22 +79,22 @@ public abstract class MixinEntityFireworkRocket extends MixinEntity implements I
     }
 
     @Override
-    public int getFuseDuration() {
+    public int bridge$getFuseDuration() {
         return this.lifetime;
     }
 
     @Override
-    public void setFuseDuration(int fuseTicks) {
+    public void bridge$setFuseDuration(int fuseTicks) {
         this.lifetime = fuseTicks;
     }
 
     @Override
-    public int getFuseTicksRemaining() {
+    public int bridge$getFuseTicksRemaining() {
         return this.lifetime - this.fireworkAge;
     }
 
     @Override
-    public void setFuseTicksRemaining(int fuseTicks) {
+    public void bridge$setFuseTicksRemaining(int fuseTicks) {
         this.fireworkAge = 0;
         this.lifetime = fuseTicks;
     }
@@ -108,25 +106,25 @@ public abstract class MixinEntityFireworkRocket extends MixinEntity implements I
 
     @Override
     public void setExplosionRadius(Optional<Integer> radius) {
-        this.explosionRadius = radius.orElse(DEFAULT_EXPLOSION_RADIUS);
+        this.explosionRadius = radius.orElse(DataConstants.Entity.Firework.DEFAULT_EXPLOSION_RADIUS);
     }
 
     @SuppressWarnings("deprecation")
-    @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = TARGET_ENTITY_STATE))
+    @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setEntityState"
+                                                                       + "(Lnet/minecraft/entity/Entity;B)V"))
     private void onExplode(World world, Entity self, byte state) {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             // Fireworks don't typically explode like other explosives, but we'll
             // post an event regardless and if the radius is zero the explosion
             // won't be triggered (the default behavior).
             frame.pushCause(this);
-            frame.addContext(EventContextKeys.THROWER, getShooter()); // TODO - Remove in 1.13/API 8
-            frame.addContext(EventContextKeys.PROJECTILE_SOURCE, getShooter());
+            frame.addContext(EventContextKeys.THROWER, ((Firework) this).getShooter()); // TODO - Remove in 1.13/API 8
+            frame.addContext(EventContextKeys.PROJECTILE_SOURCE, ((Firework) this).getShooter());
             detonate(Explosion.builder()
-                .sourceExplosive(this)
-                .location(getLocation())
+                .sourceExplosive(((Firework) this))
+                .location(((Firework) this).getLocation())
                 .radius(this.explosionRadius))
                 .ifPresent(explosion -> world.setEntityState(self, state));
-            frame.popCause();
         }
     }
 
@@ -136,9 +134,9 @@ public abstract class MixinEntityFireworkRocket extends MixinEntity implements I
         if (this.fireworkAge == 1 && !this.world.isRemote) {
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(this);
-                frame.addContext(EventContextKeys.THROWER, getShooter()); // TODO - Remove in 1.13/API 8
-                frame.addContext(EventContextKeys.PROJECTILE_SOURCE, getShooter());
-                postPrime();
+                frame.addContext(EventContextKeys.THROWER, ((Firework) this).getShooter()); // TODO - Remove in 1.13/API 8
+                frame.addContext(EventContextKeys.PROJECTILE_SOURCE, ((Firework) this).getShooter());
+                bridge$postPrime();
             }
         }
     }

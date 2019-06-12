@@ -53,6 +53,7 @@ public abstract class MixinBlockPlanks extends MixinBlock {
         return ImmutableTreeData.class.isAssignableFrom(immutable);
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableTreeData) {
@@ -71,6 +72,7 @@ public abstract class MixinBlockPlanks extends MixinBlock {
         return super.getStateWithValue(blockState, key, value);
     }
 
+    @SuppressWarnings("ConstantConditions")
     private ImmutableTreeData getTreeTypeFor(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeTreeData.class, (TreeType) (Object) blockState.getValue(BlockPlanks.VARIANT));
     }

@@ -41,7 +41,7 @@ import org.spongepowered.common.data.persistence.SerializedDataTransaction;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
+import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -194,7 +194,7 @@ public class CustomDataNbtUtil {
 
     @SuppressWarnings("unchecked")
     public static void readCustomData(NBTTagCompound compound, DataHolder dataHolder) {
-        if (dataHolder instanceof IMixinCustomDataHolder) {
+        if (dataHolder instanceof CustomDataHolderBridge) {
             if (compound.hasKey(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_LIST)) {
                 final NBTTagList list = compound.getTagList(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_COMPOUND);
                 final ImmutableList.Builder<DataView> builder = ImmutableList.builder();
@@ -211,7 +211,7 @@ public class CustomDataNbtUtil {
                         dataHolder.offer(manipulator);
                     }
                     if (!transaction.failedData.isEmpty()) {
-                        ((IMixinCustomDataHolder) dataHolder).addFailedData(transaction.failedData);
+                        ((CustomDataHolderBridge) dataHolder).addFailedData(transaction.failedData);
                     }
                 } catch (InvalidDataException e) {
                     SpongeImpl.getLogger().error("Could not translate custom plugin data! ", e);
@@ -239,21 +239,21 @@ public class CustomDataNbtUtil {
                         // If for any reason a failed data was not deserialized, but
                         // there already exists new data, we just simply want to
                         // ignore the failed data for removal.
-                        if (!((IMixinCustomDataHolder) dataHolder).getCustom(manipulator.getClass()).isPresent()) {
+                        if (!((CustomDataHolderBridge) dataHolder).getCustom(manipulator.getClass()).isPresent()) {
                             dataHolder.offer(manipulator);
                         }
                     }
                 }
                 if (!transaction.failedData.isEmpty()) {
-                    ((IMixinCustomDataHolder) dataHolder).addFailedData(transaction.failedData);
+                    ((CustomDataHolderBridge) dataHolder).addFailedData(transaction.failedData);
                 }
             }
         }
     }
 
     public static void writeCustomData(NBTTagCompound compound, DataHolder dataHolder) {
-        if (dataHolder instanceof IMixinCustomDataHolder) {
-            final List<DataManipulator<?, ?>> manipulators = ((IMixinCustomDataHolder) dataHolder).getCustomManipulators();
+        if (dataHolder instanceof CustomDataHolderBridge) {
+            final List<DataManipulator<?, ?>> manipulators = ((CustomDataHolderBridge) dataHolder).getCustomManipulators();
             if (!manipulators.isEmpty()) {
                 final List<DataView> manipulatorViews = DataUtil.getSerializedManipulatorList(manipulators);
                 final NBTTagList manipulatorTagList = new NBTTagList();
@@ -262,7 +262,7 @@ public class CustomDataNbtUtil {
                 }
                 compound.setTag(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, manipulatorTagList);
             }
-            final List<DataView> failedData = ((IMixinCustomDataHolder) dataHolder).getFailedData();
+            final List<DataView> failedData = ((CustomDataHolderBridge) dataHolder).getFailedData();
             if (!failedData.isEmpty()) {
                 final NBTTagList failedList = new NBTTagList();
                 for (DataView failedDatum : failedData) {

@@ -104,9 +104,9 @@ import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.IMixinSubject;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.mixin.core.world.storage.MixinWorldInfo;
 import org.spongepowered.common.profile.SpongeProfileManager;
@@ -375,7 +375,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             context.buildAndSwitch();
             int i = 0;
             this.setUserMessage("menu.generatingTerrain");
-            LOGGER.info("Preparing start region for level {} ({})", ((IMixinWorldServer) worldServer).getDimensionId(), ((World) worldServer).getName());
+            LOGGER.info("Preparing start region for level {} ({})", ((ServerWorldBridge) worldServer).getDimensionId(), ((World) worldServer).getName());
             BlockPos blockpos = worldServer.getSpawnPoint();
             long j = MinecraftServer.getCurrentTimeMillis();
             for (int k = -192; k <= 192 && this.isServerRunning(); k += 16) {
@@ -422,7 +422,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Override
     public boolean unloadWorld(World world) {
         // API is not allowed to unload overworld
-        return ((IMixinWorldServer) world).getDimensionId() != 0 && WorldManager.unloadWorld((WorldServer) world, false, false);
+        return ((ServerWorldBridge) world).getDimensionId() != 0 && WorldManager.unloadWorld((WorldServer) world, false, false);
 
     }
 
@@ -613,7 +613,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Redirect(method = "addServerStatsToSnooper", at = @At(value = "FIELD", target = "Lnet/minecraft/world/WorldServer;provider:Lnet/minecraft/world/WorldProvider;", opcode = Opcodes.GETFIELD))
     private WorldProvider onGetWorldProviderForSnooper(WorldServer world) {
-        if (((IMixinWorld) world).isFake() || world.getWorldInfo() == null) {
+        if (((WorldBridge) world).isFake() || world.getWorldInfo() == null) {
             // Return overworld provider
             return ((net.minecraft.world.World) Sponge.getServer().getWorlds().iterator().next()).provider;
         }

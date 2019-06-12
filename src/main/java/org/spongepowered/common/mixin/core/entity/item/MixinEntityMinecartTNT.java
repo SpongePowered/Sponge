@@ -45,9 +45,9 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.bridge.explosives.ImplBridgeFusedExplosive;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
+import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -55,7 +55,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 @Mixin(EntityMinecartTNT.class)
-public abstract class MixinEntityMinecartTNT extends MixinEntityMinecart implements ImplBridgeFusedExplosive {
+public abstract class MixinEntityMinecartTNT extends MixinEntityMinecart implements FusedExplosiveBridge {
 
     @Shadow private int minecartTNTFuse;
 
@@ -77,22 +77,22 @@ public abstract class MixinEntityMinecartTNT extends MixinEntityMinecart impleme
     }
 
     @Override
-    public int getFuseDuration() {
+    public int bridge$getFuseDuration() {
         return this.fuseDuration;
     }
 
     @Override
-    public void setFuseDuration(int fuseTicks) {
+    public void bridge$setFuseDuration(int fuseTicks) {
         this.fuseDuration = fuseTicks;
     }
 
     @Override
-    public int getFuseTicksRemaining() {
+    public int bridge$getFuseTicksRemaining() {
         return this.minecartTNTFuse;
     }
 
     @Override
-    public void setFuseTicksRemaining(int fuseTicks) {
+    public void bridge$setFuseTicksRemaining(int fuseTicks) {
         this.minecartTNTFuse = fuseTicks;
     }
 
@@ -104,29 +104,29 @@ public abstract class MixinEntityMinecartTNT extends MixinEntityMinecart impleme
 
     @Inject(method = "onActivatorRailPass(IIIZ)V", at = @At("INVOKE"))
     private void onActivate(int x, int y, int z, boolean receivingPower, CallbackInfo ci) {
-        if (((IMixinWorld) this.world).isFake()) {
+        if (((WorldBridge) this.world).isFake()) {
             return;
         }
         if (receivingPower) {
-            ((IMixinWorldServer) this.world).getNotifier(x, y, z).ifPresent(notifier -> this.primeCause = notifier);
+            ((ServerWorldBridge) this.world).getNotifier(x, y, z).ifPresent(notifier -> this.primeCause = notifier);
         }
     }
 
     @Inject(method = "ignite", at = @At("INVOKE"), cancellable = true)
     private void preIgnite(CallbackInfo ci) {
-        if (!shouldPrime()) {
-            setFuseTicksRemaining(-1);
+        if (!bridge$shouldPrime()) {
+            bridge$setFuseTicksRemaining(-1);
             ci.cancel();
         }
     }
 
     @Inject(method = "ignite", at = @At("RETURN"))
     private void postSpongeIgnite(CallbackInfo ci) {
-        setFuseTicksRemaining(this.fuseDuration);
+        bridge$setFuseTicksRemaining(this.fuseDuration);
         if (this.primeCause != null) {
             Sponge.getCauseStackManager().pushCause(this.primeCause);
         }
-        postPrime();
+        bridge$postPrime();
         if (this.primeCause != null) {
             Sponge.getCauseStackManager().popCause();
         }

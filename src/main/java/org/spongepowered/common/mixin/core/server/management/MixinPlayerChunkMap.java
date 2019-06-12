@@ -36,7 +36,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMap;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 
 import javax.annotation.Nullable;
 
@@ -63,8 +63,8 @@ public abstract class MixinPlayerChunkMap implements IMixinPlayerChunkMap {
         // and queue the chunk to be unloaded.
         // -- blood
 
-        if (((IMixinWorldServer) this.world).getChunkGCTickInterval() <= 0
-                || ((IMixinWorldServer) this.world).getChunkUnloadDelay() <= 0) {
+        if (((ServerWorldBridge) this.world).getChunkGCTickInterval() <= 0
+                || ((ServerWorldBridge) this.world).getChunkUnloadDelay() <= 0) {
             chunkProvider.queueUnload(chunk);
         } else if (!((IMixinChunk) chunk).isPersistedChunk() && this.world.provider.canDropChunk(chunk.x, chunk.z)) {
             ((IMixinChunk) chunk).setScheduledForUnload(System.currentTimeMillis());

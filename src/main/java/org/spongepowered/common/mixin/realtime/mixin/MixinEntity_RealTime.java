@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.mixin.realtime.IMixinRealTimeTicking;
 
 @Mixin(Entity.class)
@@ -62,7 +62,7 @@ public abstract class MixinEntity_RealTime {
         )
     )
     private void adjustForRealTimeEntityCooldown(Entity self, int modifier) {
-        if (((IMixinWorld) this.world).isFake()) {
+        if (((WorldBridge) this.world).isFake()) {
             this.rideCooldown = modifier;
             return;
         }
@@ -82,7 +82,7 @@ public abstract class MixinEntity_RealTime {
         )
     )
     private void adjustForRealTimePortalCounter(Entity self, int modifier) {
-        if (((IMixinWorld) this.world).isFake()) {
+        if (((WorldBridge) this.world).isFake()) {
             this.portalCounter = modifier;
             return;
         }

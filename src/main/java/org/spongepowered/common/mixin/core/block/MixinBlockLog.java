@@ -40,7 +40,6 @@ import org.spongepowered.api.data.type.LogAxis;
 import org.spongepowered.api.data.type.TreeType;
 import org.spongepowered.api.data.type.TreeTypes;
 import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeLogAxisData;
@@ -50,11 +49,10 @@ import org.spongepowered.common.data.util.TreeTypeResolver;
 import java.util.List;
 import java.util.Optional;
 
-@NonnullByDefault
 @Mixin(BlockLog.class)
 public abstract class MixinBlockLog extends MixinBlock {
 
-    protected ImmutableTreeData getTreeData(IBlockState blockState) {
+    private ImmutableTreeData getTreeData(IBlockState blockState) {
         BlockPlanks.EnumType type;
         if(blockState.getBlock() instanceof BlockOldLog) {
             type = blockState.getValue(BlockOldLog.VARIANT);
@@ -69,7 +67,8 @@ public abstract class MixinBlockLog extends MixinBlock {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeTreeData.class, treeType);
     }
 
-    protected ImmutableLogAxisData getLogAxisData(IBlockState blockState) {
+    @SuppressWarnings("ConstantConditions")
+    private ImmutableLogAxisData getLogAxisData(IBlockState blockState) {
         final LogAxis logAxis = (LogAxis) (Object) blockState.getValue(BlockLog.LOG_AXIS);
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeLogAxisData.class, logAxis);
     }
@@ -80,13 +79,15 @@ public abstract class MixinBlockLog extends MixinBlock {
         return ImmutableTreeData.class.isAssignableFrom(immutable) || ImmutableLogAxisData.class.isAssignableFrom(immutable);
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableTreeData) {
             final TreeType treeType = ((ImmutableTreeData) manipulator).type().get();
             final BlockPlanks.EnumType type = TreeTypeResolver.getFor(treeType);
             return processLogType(blockState, type, treeType);
-        } else if (manipulator instanceof ImmutableLogAxisData) {
+        }
+        if (manipulator instanceof ImmutableLogAxisData) {
             final LogAxis logAxis = ((ImmutableLogAxisData) manipulator).type().get();
             return Optional.of((BlockState) blockState.withProperty(BlockLog.LOG_AXIS, (BlockLog.EnumAxis) (Object) logAxis));
         }

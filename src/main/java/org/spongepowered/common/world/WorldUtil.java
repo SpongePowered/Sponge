@@ -26,8 +26,8 @@ package org.spongepowered.common.world;
 
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 
 public final class WorldUtil {
 
@@ -38,7 +38,7 @@ public final class WorldUtil {
     return (T) world;
   }
 
-  public static WorldServer asNative(IMixinWorldServer world) {
+  public static WorldServer asNative(ServerWorldBridge world) {
     return (WorldServer) world;
   }
 
@@ -46,11 +46,11 @@ public final class WorldUtil {
     return (org.spongepowered.api.world.World) world;
   }
 
-  public static org.spongepowered.api.world.World fromNative(IMixinWorld world) {
+  public static org.spongepowered.api.world.World fromNative(WorldBridge world) {
     return (org.spongepowered.api.world.World) world;
   }
 
-  public static org.spongepowered.api.world.World fromNative(IMixinWorldServer world) {
+  public static org.spongepowered.api.world.World fromNative(ServerWorldBridge world) {
     return (org.spongepowered.api.world.World) world;
   }
 }

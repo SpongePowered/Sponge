@@ -80,7 +80,7 @@ import org.spongepowered.common.event.tracking.phase.generation.GenerationContex
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.generation.PopulatorPhaseContext;
 import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 import org.spongepowered.common.interfaces.world.gen.IChunkProviderOverworld;
 import org.spongepowered.common.interfaces.world.gen.IFlaggedPopulator;
 import org.spongepowered.common.interfaces.world.gen.IGenerationPopulator;
@@ -151,7 +151,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
                 chunkGeneratorName = "chunkGenerator (" + base.getClass().getName() + ")";
             }
             this.chunkGeneratorTiming =
-                    SpongeTimingsFactory.ofSafe(chunkGeneratorName, ((IMixinWorldServer) world).getTimingsHandler().chunkPopulate);
+                    SpongeTimingsFactory.ofSafe(chunkGeneratorName, ((ServerWorldBridge) world).getTimingsHandler().chunkPopulate);
         }
 
     }
@@ -292,7 +292,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
 
     @Override
     public void populate(int chunkX, int chunkZ) {
-        IMixinWorldServer world = (IMixinWorldServer) this.world;
+        ServerWorldBridge world = (ServerWorldBridge) this.world;
         world.getTimingsHandler().chunkPopulate.startTimingIfSync();
         this.chunkGeneratorTiming.startTimingIfSync();
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();

@@ -107,6 +107,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeExperienceHolderData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExperienceHolderData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthData;
@@ -120,8 +121,7 @@ import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.interfaces.ITargetedLocation;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.entity.MixinEntityLivingBase;
 import org.spongepowered.common.registry.type.event.DamageSourceRegistryModule;
@@ -379,7 +379,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;isPlayerSleeping()Z"))
     private boolean onSpongeIsPlayerSleeping(EntityPlayer self) {
         if (self.isPlayerSleeping()) {
-            if (!((IMixinWorld) this.world).isFake()) {
+            if (!((WorldBridge) this.world).isFake()) {
                 final CauseStackManager csm = Sponge.getCauseStackManager();
                 csm.pushCause(this);
                 final BlockPos bedLocation = this.bedLocation;
@@ -456,7 +456,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
         // Just sanity checks, if the player is not in a managed world, then don't bother either.
         // some fake players may exist in pseudo worlds as well, which means we don't want to
         // process on them since the world is not a valid world to plugins.
-        if (this.world instanceof IMixinWorld && !((IMixinWorld) this.world).isFake() && ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
+        if (this.world instanceof WorldBridge && !((WorldBridge) this.world).isFake() && ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
             // Note that this can potentially cause phase contexts to auto populate frames
             // we shouldn't rely so much on them, but sometimes the extra information is provided
             // through this method.
@@ -466,7 +466,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                 frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(stack));
                 // Then go ahead and call the event and return if it was cancelled
                 // if it was cancelled, then there should be no changes needed to roll back
-                return !SpongeCommonEventFactory.callChangeBlockEventPre(((IMixinWorldServer) this.world), pos, this).isCancelled();
+                return !SpongeCommonEventFactory.callChangeBlockEventPre(((ServerWorldBridge) this.world), pos, this).isCancelled();
             }
         }
         // Otherwise, if all else is ignored, or we're not throwing events, we're just going to return the
@@ -507,7 +507,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
             return null;
         }
         // Sponge Start - redirect to our handling to capture and throw events.
-        if (!((IMixinWorld) this.world).isFake()) {
+        if (!((WorldBridge) this.world).isFake()) {
             return EntityUtil.playerDropItem(this, droppedItem, dropAround, traceItem);
         }
         // Sponge end

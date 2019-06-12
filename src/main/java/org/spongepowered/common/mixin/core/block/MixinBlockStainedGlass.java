@@ -30,14 +30,14 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.interfaces.block.IMixinDyeableBlock;
+import org.spongepowered.common.bridge.block.DyeableBLockBridge;
 
 @Mixin(BlockStainedGlass.class)
-public abstract class MixinBlockStainedGlass extends MixinBlock implements IMixinDyeableBlock {
+public abstract class MixinBlockStainedGlass extends MixinBlock implements DyeableBLockBridge {
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    public void onInit(Material material, CallbackInfo ci) {
-        this.setProperty(BlockStainedGlass.COLOR);
+    private void impl$SetPropertyOnInit(Material material, CallbackInfo ci) {
+        this.bridge$SetColorPropertyEnum(BlockStainedGlass.COLOR);
     }
 
 }

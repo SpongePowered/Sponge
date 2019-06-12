@@ -26,7 +26,12 @@ package org.spongepowered.common.data.util;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
+import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityArmorStand;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.type.*;
@@ -40,6 +45,8 @@ import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.api.util.weighted.WeightedSerializableObject;
+
+import java.util.EnumSet;
 
 /**
  * A standard class where all various "constants" for various data are stored.
@@ -60,6 +67,23 @@ public final class DataConstants {
     public static final int ADULT = 6000;
     public static final int CHILD = -24000;
     public static final String FORCE_GAMEMODE_OVERRIDE = "minecraft.force-gamemode.override";
+
+    public static final class World {
+        public static final Vector3i BLOCK_MIN = new Vector3i(-30000000, 0, -30000000);
+        public static final Vector3i BIOME_MIN = new Vector3i(BLOCK_MIN.getX(), 0, BLOCK_MIN.getZ());
+        public static final Vector3i BLOCK_MAX = new Vector3i(30000000, 256, 30000000).sub(Vector3i.ONE);
+        public static final Vector3i BLOCK_SIZE = BLOCK_MAX.sub(BLOCK_MIN).add(Vector3i.ONE);
+        public static final Vector3i BIOME_MAX = new Vector3i(BLOCK_MAX.getX(), 256, BLOCK_MAX.getZ());
+        public static final Vector3i BIOME_SIZE = BIOME_MAX.sub(BIOME_MIN).add(Vector3i.ONE);
+        /**
+         * Specifically ordered for the order of notifications being sent out for
+         * when sending a request through {@link net.minecraft.world.World#notifyNeighborsOfStateChange(BlockPos, Block, boolean)}
+         * using
+         * {@link IBlockState#neighborChanged(net.minecraft.world.World, BlockPos, Block, BlockPos)}
+         */
+        public static final EnumFacing[] NOTIFY_DIRECTIONS = {EnumFacing.WEST, EnumFacing.EAST, EnumFacing.DOWN, EnumFacing.UP, EnumFacing.NORTH, EnumFacing.SOUTH};
+        public static final EnumSet<EnumFacing> NOTIFY_DIRECTION_SET = EnumSet.of(EnumFacing.WEST, EnumFacing.EAST, EnumFacing.DOWN, EnumFacing.UP, EnumFacing.NORTH, EnumFacing.SOUTH);
+    }
 
     private DataConstants() {}
 
@@ -178,6 +202,13 @@ public final class DataConstants {
             public static final Vector3d DEFAULT_RIGHT_LEG_ROTATION = VecHelper.toVector3d(EntityArmorStand.DEFAULT_RIGHTLEG_ROTATION);
         }
 
+        public static final class Creeper {
+
+            public static final int DEFAULT_EXPLOSION_RADIUS = 3;
+            public static final int STATE_IDLE = -1;
+            public static final int STATE_PRIMED = 1;
+        }
+
         public static final class FallingBlock {
 
             public static final double DEFAULT_FALL_DAMAGE_PER_BLOCK = 2D;
@@ -255,10 +286,20 @@ public final class DataConstants {
             public static final int DEFAULT_EXPLOSION_RADIUS = 1;
         }
 
+        public static final class Firework {
+
+            public static final int DEFAULT_EXPLOSION_RADIUS = 0;
+        }
+
         public static final class Minecart {
 
             public static final double DEFAULT_AIRBORNE_MOD = 0.94999998807907104D;
             public static final double DEFAULT_DERAILED_MOD = 0.5D;
+        }
+
+        public static final class Silverfish {
+
+            public static final int MAX_EXPIRATION_TICKS = 2400;
         }
 
         public static final class WitherSkull {

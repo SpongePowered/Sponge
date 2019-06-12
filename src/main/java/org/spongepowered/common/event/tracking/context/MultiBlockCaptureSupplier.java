@@ -52,7 +52,7 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 import org.spongepowered.common.mixin.core.world.MixinChunk;
 import org.spongepowered.common.mixin.core.world.MixinWorldServer_Accessor;
 import org.spongepowered.common.world.BlockChange;
@@ -401,7 +401,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
 
     }
 
-    public void captureNeighborNotification(IMixinWorldServer mixinWorldServer, IBlockState notifyState, BlockPos notifyPos, Block sourceBlock, BlockPos sourcePos) {
+    public void captureNeighborNotification(ServerWorldBridge mixinWorldServer, IBlockState notifyState, BlockPos notifyPos, Block sourceBlock, BlockPos sourcePos) {
         final int transactionIndex = ++this.transactionIndex;
         final IBlockState actualSourceState = ((WorldServer) mixinWorldServer).getBlockState(sourcePos);
         final BlockTransaction.NeighborNotification notification = new BlockTransaction.NeighborNotification(transactionIndex, this.snapshotIndex, mixinWorldServer,
@@ -415,7 +415,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
      * various transactional aspects, such as potential tile entity removals, replacements, etc. Specifically should never be called outside
      * of that reaction since {@link BlockTransaction#enqueueChanges(SpongeProxyBlockAccess, MultiBlockCaptureSupplier)}
      * does not get called automatically, it is called prior to queueing potential tile replacements, and prior to calling to
-     * {@link #logTileChange(IMixinWorldServer, BlockPos, TileEntity, TileEntity)} in the event a tile entity is going to be removed.
+     * {@link #logTileChange(ServerWorldBridge, BlockPos, TileEntity, TileEntity)} in the event a tile entity is going to be removed.
      *
      * @param originalBlockSnapshot The original snapshot being changed
      * @param newState The new state
@@ -432,7 +432,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
         return changeBlock;
     }
 
-    public void logTileChange(IMixinWorldServer mixinWorldServer, BlockPos pos, @Nullable TileEntity oldTile, @Nullable TileEntity newTile) {
+    public void logTileChange(ServerWorldBridge mixinWorldServer, BlockPos pos, @Nullable TileEntity oldTile, @Nullable TileEntity newTile) {
         final WorldServer world = (WorldServer) mixinWorldServer;
         final IBlockState current = world.getBlockState(pos);
 
@@ -535,7 +535,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
         snapshot.getWorldServer().ifPresent(worldServer -> {
             for (BlockTransaction prevChange = this.tail; prevChange != null; prevChange = prevChange.previous) {
                 if (!prevChange.isCancelled) {
-                    prevChange.cancel(worldServer, blockPos, ((IMixinWorldServer) worldServer).getProxyAccess());
+                    prevChange.cancel(worldServer, blockPos, ((ServerWorldBridge) worldServer).getProxyAccess());
                 }
             }
         });
@@ -585,7 +585,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
         // saw, so, we have to just provide the new state (extended states are calculated anyways).
         final IBlockState newActualState = this.head != null ? newState : newState.getActualState(worldServer, blockPos);
         final BlockSnapshot newSnapshot =
-            ((IMixinWorldServer) worldServer).createSpongeBlockSnapshot(newState, newActualState, blockPos, BlockChangeFlags.NONE);
+            ((ServerWorldBridge) worldServer).createSpongeBlockSnapshot(newState, newActualState, blockPos, BlockChangeFlags.NONE);
         // Up until this point, we can create a default Transaction
         if (this.multimap != null) { // But we need to check if there's any intermediary block changes...
             // And because multi is true, we can be sure the multimap is populated at least somewhere.
@@ -686,9 +686,10 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
                     transaction = next;
                     continue;
                 }
-                final Optional<IMixinWorldServer> maybeWorld = transaction.getWorldServer();
+                final Optional<ServerWorldBridge> maybeWorld = transaction.getWorldServer();
                 final BlockTransaction derp = transaction;
-                try (final SpongeProxyBlockAccess access = maybeWorld.map(IMixinWorldServer::getProxyAccess).map(proxy -> proxy.switchTo(derp)).orElse(null);
+                try (final SpongeProxyBlockAccess access = maybeWorld.map(
+                    ServerWorldBridge::getProxyAccess).map(proxy -> proxy.switchTo(derp)).orElse(null);
                      final SpongeProxyBlockAccess.Proxy ignored = maybeWorld.map(transaction::getProxy).orElse(null)){
                     final PrettyPrinter printer;
                     if (PRINT_TRANSACTIONS) {
@@ -730,7 +731,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
                         .addWrapped(60,
                             "BlockTransactions failing to process can lead to unintended consequences. If the exception is *directly* coming from Sponge's code, please report to Sponge.")
                         .add();
-                    maybeWorld.map(IMixinWorldServer::getProxyAccess).ifPresent(access -> access.addToPrinter(printer));
+                    maybeWorld.map(ServerWorldBridge::getProxyAccess).ifPresent(access -> access.addToPrinter(printer));
                     transaction.addToPrinter(printer);
                     printer.add();
                     printer
@@ -738,7 +739,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
                         .add(e)
                         .trace(System.err);
                 }
-                maybeWorld.map(IMixinWorldServer::getProxyAccess).ifPresent(transaction::postProcessBlocksAffected);
+                maybeWorld.map(ServerWorldBridge::getProxyAccess).ifPresent(transaction::postProcessBlocksAffected);
 
                 // Clean up
                 final BlockTransaction next = transaction.next;
@@ -771,7 +772,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
     }
 
     @SuppressWarnings("RedundantCast")
-    void getProxyOrCreate(IMixinWorldServer mixinWorldServer) {
+    void getProxyOrCreate(ServerWorldBridge mixinWorldServer) {
         if (this.processingWorlds == null) {
             this.processingWorlds = new LinkedHashMap<>();
         }

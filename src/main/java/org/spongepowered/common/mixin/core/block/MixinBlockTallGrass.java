@@ -49,6 +49,7 @@ public abstract class MixinBlockTallGrass extends MixinBlock {
         return super.supports(immutable) || ImmutableShrubData.class.isAssignableFrom(immutable);
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableShrubData) {
@@ -58,6 +59,7 @@ public abstract class MixinBlockTallGrass extends MixinBlock {
         return super.getStateWithData(blockState, manipulator);
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends BaseValue<E>> key, E value) {
         if (key.equals(Keys.SHRUB_TYPE)) {
@@ -68,6 +70,7 @@ public abstract class MixinBlockTallGrass extends MixinBlock {
         return super.getStateWithValue(blockState, key, value);
     }
 
+    @SuppressWarnings("RedundantTypeArguments") // some JDK's can fail to compile without the explicit type generics
     @Override
     public List<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getPlantData(blockState));

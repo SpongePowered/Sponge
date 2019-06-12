@@ -90,11 +90,11 @@ import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.event.tracking.phase.tick.TileEntityTickContext;
 import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
+import org.spongepowered.common.bridge.block.BlockEventDataBridge;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
-import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
-import org.spongepowered.common.bridge.entity.IMixinEntity;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
+import org.spongepowered.common.bridge.entity.EntityBridge;
+import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
@@ -166,7 +166,7 @@ public final class TrackingUtil {
     public static void tickEntity(net.minecraft.entity.Entity entity) {
         checkArgument(entity instanceof Entity, "Entity %s is not an instance of SpongeAPI's Entity!", entity);
         checkNotNull(entity, "Cannot capture on a null ticking entity!");
-        final IMixinEntity mixinEntity = EntityUtil.toMixin(entity);
+        final EntityBridge mixinEntity = EntityUtil.toMixin(entity);
         if (!mixinEntity.shouldTick()) {
             return;
         }
@@ -193,7 +193,7 @@ public final class TrackingUtil {
     public static void tickRidingEntity(net.minecraft.entity.Entity entity) {
         checkArgument(entity instanceof Entity, "Entity %s is not an instance of SpongeAPI's Entity!", entity);
         checkNotNull(entity, "Cannot capture on a null ticking entity!");
-        final IMixinEntity mixinEntity = EntityUtil.toMixin(entity);
+        final EntityBridge mixinEntity = EntityUtil.toMixin(entity);
         if (!mixinEntity.shouldTick()) {
             return;
         }
@@ -219,7 +219,7 @@ public final class TrackingUtil {
     }
 
     @SuppressWarnings({"unused", "try"})
-    public static void tickTileEntity(IMixinWorldServer mixinWorldServer, ITickable tile) {
+    public static void tickTileEntity(ServerWorldBridge mixinWorldServer, ITickable tile) {
         checkArgument(tile instanceof TileEntity, "ITickable %s is not a TileEntity!", tile);
         checkNotNull(tile, "Cannot capture on a null ticking tile entity!");
         final net.minecraft.tileentity.TileEntity tileEntity = (net.minecraft.tileentity.TileEntity) tile;
@@ -268,7 +268,7 @@ public final class TrackingUtil {
     }
 
     @SuppressWarnings("rawtypes")
-    public static void updateTickBlock(IMixinWorldServer mixinWorld, Block block, BlockPos pos, IBlockState state, Random random) {
+    public static void updateTickBlock(ServerWorldBridge mixinWorld, Block block, BlockPos pos, IBlockState state, Random random) {
         final WorldServer world = WorldUtil.asNative(mixinWorld);
         final World apiWorld = WorldUtil.fromNative(world);
 
@@ -302,7 +302,7 @@ public final class TrackingUtil {
     }
 
     @SuppressWarnings("rawtypes")
-    public static void randomTickBlock(IMixinWorldServer mixinWorld, Block block,
+    public static void randomTickBlock(ServerWorldBridge mixinWorld, Block block,
         BlockPos pos, IBlockState state, Random random) {
         final WorldServer world = WorldUtil.asNative(mixinWorld);
         final World apiWorld = WorldUtil.fromNative(world);
@@ -335,7 +335,7 @@ public final class TrackingUtil {
     }
 
 
-    public static void tickWorldProvider(IMixinWorldServer worldServer) {
+    public static void tickWorldProvider(ServerWorldBridge worldServer) {
         final WorldProvider worldProvider = ((WorldServer) worldServer).provider;
         try (DimensionContext context = TickPhase.Tick.DIMENSION.createPhaseContext().source(worldProvider)) {
             context.buildAndSwitch();
@@ -345,10 +345,10 @@ public final class TrackingUtil {
 
     public static boolean fireMinecraftBlockEvent(WorldServer worldIn, BlockEventData event) {
         IBlockState currentState = worldIn.getBlockState(event.getPosition());
-        final IMixinBlockEventData blockEvent = (IMixinBlockEventData) event;
+        final BlockEventDataBridge blockEvent = (BlockEventDataBridge) event;
         final BlockEventTickContext phaseContext = TickPhase.Tick.BLOCK_EVENT.createPhaseContext();
 
-        Object source = blockEvent.getTickTileEntity() != null ? blockEvent.getTickTileEntity() : blockEvent.getTickBlock();
+        Object source = blockEvent.getBridge$TileEntity() != null ? blockEvent.getBridge$TileEntity() : blockEvent.getBridge$TickingLocatable();
         if (source != null) {
             phaseContext.source(source);
         } else {
@@ -356,7 +356,7 @@ public final class TrackingUtil {
             return currentState.onBlockEventReceived(worldIn, event.getPosition(), event.getEventID(), event.getEventParameter());
         }
 
-        final User user = ((IMixinBlockEventData) event).getSourceUser();
+        final User user = ((BlockEventDataBridge) event).getBridge$sourceUser();
         if (user != null) {
             phaseContext.owner = user;
             phaseContext.notifier = user;
@@ -665,7 +665,7 @@ public final class TrackingUtil {
             SpongeImpl.getLogger().warn("Unloaded/Missing World for a captured block change! Skipping change: " + transactionForLogging);
             return;
         }
-        final IMixinWorldServer mixinWorld = (IMixinWorldServer) worldServer.get();
+        final ServerWorldBridge mixinWorld = (ServerWorldBridge) worldServer.get();
         // Reset any previously set transactions
         final BlockPos pos = oldBlockSnapshot.getBlockPos();
         performBlockEntitySpawns(phaseState, phaseContext, oldBlockSnapshot, pos);
@@ -735,7 +735,7 @@ public final class TrackingUtil {
     }
 
     public static void performNeighborAndClientNotifications(PhaseContext<?> phaseContext, int currentDepth,
-        SpongeBlockSnapshot newBlockSnapshot, IMixinWorldServer mixinWorld, BlockPos pos,
+        SpongeBlockSnapshot newBlockSnapshot, ServerWorldBridge mixinWorld, BlockPos pos,
         IBlockState newState, SpongeBlockChangeFlag changeFlag) {
         final Block newBlock = newState.getBlock();
         final IPhaseState phaseState = phaseContext.state;
@@ -890,7 +890,7 @@ public final class TrackingUtil {
     public static void addTileEntityToBuilder(@Nullable net.minecraft.tileentity.TileEntity existing, SpongeBlockSnapshotBuilder builder) {
         // We MUST only check to see if a TE exists to avoid creating a new one.
         TileEntity tile = (TileEntity) existing;
-        for (DataManipulator<?, ?> manipulator : ((IMixinCustomDataHolder) tile).getCustomManipulators()) {
+        for (DataManipulator<?, ?> manipulator : ((CustomDataHolderBridge) tile).getCustomManipulators()) {
             builder.add(manipulator);
         }
         NBTTagCompound nbt = new NBTTagCompound();

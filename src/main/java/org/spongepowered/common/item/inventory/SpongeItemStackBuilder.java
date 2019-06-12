@@ -60,7 +60,7 @@ import org.spongepowered.common.data.persistence.SerializedDataTransaction;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
+import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -146,7 +146,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
             if (itemCompound != null) {
                 this.compound = itemCompound.copy();
             }
-            this.itemDataSet.addAll(((IMixinCustomDataHolder) itemStack).getCustomManipulators());
+            this.itemDataSet.addAll(((CustomDataHolderBridge) itemStack).getCustomManipulators());
 
         } else {
             this.itemDataSet.addAll(itemStack.getContainers());
@@ -290,10 +290,10 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
             final SerializedDataTransaction transaction = DataUtil.deserializeManipulatorList(views);
             final List<DataManipulator<?, ?>> manipulators = transaction.deserializedManipulators;
             for (DataManipulator<?, ?> manipulator : manipulators) {
-                ((IMixinCustomDataHolder) itemStack).offerCustom(manipulator, MergeFunction.IGNORE_ALL);
+                ((CustomDataHolderBridge) itemStack).offerCustom(manipulator, MergeFunction.IGNORE_ALL);
             }
             if (!transaction.failedData.isEmpty()) {
-                ((IMixinCustomDataHolder) itemStack).addFailedData(transaction.failedData);
+                ((CustomDataHolderBridge) itemStack).addFailedData(transaction.failedData);
             }
         }
         return Optional.of((ItemStack) itemStack);

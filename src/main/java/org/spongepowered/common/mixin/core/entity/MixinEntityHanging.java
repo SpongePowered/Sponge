@@ -42,8 +42,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
 
 import java.util.ArrayList;
 
@@ -102,7 +102,7 @@ public abstract class MixinEntityHanging extends MixinEntity {
         // Sponge Start - Check for client worlds,, don't care about them really. If it's server world, then we care.
         final double xOffset = ((float) this.facingDirection.getXOffset() * 0.15F);
         final double zOffset = ((float) this.facingDirection.getZOffset() * 0.15F);
-        if (((IMixinWorld) this.world).isFake()) {
+        if (((WorldBridge) this.world).isFake()) {
             // Sponge End
             EntityItem entityitem = new EntityItem(this.world, this.posX + xOffset, this.posY + (double) offsetY, this.posZ + zOffset, stack);
             entityitem.setDefaultPickupDelay();

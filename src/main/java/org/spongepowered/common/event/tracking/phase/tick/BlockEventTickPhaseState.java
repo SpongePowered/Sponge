@@ -27,27 +27,22 @@ package org.spongepowered.common.event.tracking.phase.tick;
 import com.google.common.collect.ListMultimap;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItem;
-import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
-import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
@@ -55,10 +50,8 @@ import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.context.BlockTransaction;
 import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
-import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMapEntry;
+import org.spongepowered.common.bridge.block.BlockEventDataBridge;
 import org.spongepowered.common.world.BlockChange;
 
 import java.util.ArrayList;
@@ -71,13 +64,13 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
 
     private final BiConsumer<CauseStackManager.StackFrame, BlockEventTickContext> FRAME_MODIFIER =
             super.getFrameModifier().andThen((frame, context) -> {
-                final IMixinBlockEventData blockEventData = context.getSource(IMixinBlockEventData.class).orElse(null);
+                final BlockEventDataBridge blockEventData = context.getSource(BlockEventDataBridge.class).orElse(null);
                 if (blockEventData != null) {
-                    if (blockEventData.getTickTileEntity() != null) {
-                        frame.pushCause(blockEventData.getTickTileEntity());
-                    } else if (blockEventData.getTickBlock() != null) {
-                        frame.pushCause(blockEventData.getTickBlock());
-                        frame.addContext(EventContextKeys.BLOCK_EVENT_PROCESS, blockEventData.getTickBlock());
+                    if (blockEventData.getBridge$TileEntity() != null) {
+                        frame.pushCause(blockEventData.getBridge$TileEntity());
+                    } else if (blockEventData.getBridge$TickingLocatable() != null) {
+                        frame.pushCause(blockEventData.getBridge$TickingLocatable());
+                        frame.addContext(EventContextKeys.BLOCK_EVENT_PROCESS, blockEventData.getBridge$TickingLocatable());
                     }
                 }
             });

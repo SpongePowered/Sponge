@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.mixin.plugin.entityactivation.EntityActivationRange;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModData_Activation;
@@ -55,7 +55,7 @@ public abstract class MixinEntity_Activation implements Entity, IModData_Activat
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onEntityActivationConstruction(World world, CallbackInfo ci) {
-        if (world != null && !((IMixinWorld) world).isFake() && ((IMixinWorldInfo) world.getWorldInfo()).isValid()) {
+        if (world != null && !((WorldBridge) world).isFake() && ((IMixinWorldInfo) world.getWorldInfo()).isValid()) {
             EntityActivationRange.initializeEntityActivationState((net.minecraft.entity.Entity) (Object) this);
         }
     }

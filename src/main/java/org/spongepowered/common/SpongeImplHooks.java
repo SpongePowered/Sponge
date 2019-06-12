@@ -43,7 +43,6 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
-import net.minecraft.inventory.ContainerPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
@@ -91,19 +90,14 @@ import org.spongepowered.common.entity.SpongeProfession;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
-import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.world.IMixinITeleporter;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
-import org.spongepowered.common.mixin.api.minecraft.item.MixinItem_API;
-import org.spongepowered.common.mixin.core.tileentity.MixinTileEntity;
-import org.spongepowered.common.mixin.core.world.MixinWorldServer;
 import org.spongepowered.common.mixin.plugin.tileentityactivation.TileEntityActivation;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 import org.spongepowered.common.registry.type.entity.ProfessionRegistryModule;
@@ -468,7 +462,7 @@ public final class SpongeImplHooks {
         return EnchantmentHelper.getLootingModifier(entity);
     }
 
-    public static double getWorldMaxEntityRadius(IMixinWorldServer mixinWorldServer) {
+    public static double getWorldMaxEntityRadius(WorldServer mixinWorldServer) {
         return 2.0D;
     }
 

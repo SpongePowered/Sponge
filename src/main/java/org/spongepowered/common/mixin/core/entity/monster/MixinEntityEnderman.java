@@ -27,9 +27,6 @@ package org.spongepowered.common.mixin.core.entity.monster;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.monster.EntityEnderman;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.mutable.entity.ScreamingData;
-import org.spongepowered.api.entity.living.monster.Enderman;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
@@ -38,35 +35,26 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
-import org.spongepowered.common.mixin.api.minecraft.entity.monster.MixinEntityMob_API;
-
-import java.util.List;
 
 import javax.annotation.Nullable;
 
 @Mixin(EntityEnderman.class)
-public abstract class MixinEntityEnderman extends MixinEntityMob_API implements Enderman {
+public abstract class MixinEntityEnderman extends MixinEntityMob {
 
     @Shadow @Nullable public abstract IBlockState getHeldBlockState();
 
     @Shadow public abstract void setHeldBlockState(@Nullable IBlockState state);
 
     @Redirect(method = "teleportTo", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/monster/EntityEnderman;attemptTeleport(DDD)Z"))
-    public boolean redirectTeleportTo(EntityEnderman entityEnderman, double x, double y, double z) {
+    private boolean impl$CheckContextWithTeleport(EntityEnderman entityEnderman, double x, double y, double z) {
         if (entityEnderman.world.isRemote) {
             return entityEnderman.attemptTeleport(x, y, z);
         }
         
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.TELEPORT_TYPE, TeleportTypes.ENTITY_TELEPORT);
-            return attemptTeleport(x, y, z);
+            return this.attemptTeleport(x, y, z);
         }
-    }
-
-    @Override
-    public void spongeApi$supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(get(ScreamingData.class).get());
     }
 
     /**
