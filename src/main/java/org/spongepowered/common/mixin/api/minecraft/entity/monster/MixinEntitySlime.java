@@ -59,7 +59,7 @@ public abstract class MixinEntitySlime extends MixinEntityLiving_API implements 
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(List<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(getSlimeData());
     }

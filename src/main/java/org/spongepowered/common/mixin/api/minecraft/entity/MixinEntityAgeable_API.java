@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.api.minecraft.entity;
 
 import net.minecraft.entity.EntityAgeable;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.mutable.entity.AgeableData;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.Value;
@@ -32,6 +33,9 @@ import org.spongepowered.api.entity.living.Ageable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAgeableData;
+import org.spongepowered.common.data.value.SpongeValueFactory;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.util.Constants;
 
 @Mixin(EntityAgeable.class)
 public abstract class MixinEntityAgeable_API extends MixinEntityCreature_API implements Ageable {
@@ -53,11 +57,17 @@ public abstract class MixinEntityAgeable_API extends MixinEntityCreature_API imp
 
     @Override
     public MutableBoundedValue<Integer> age() {
-        return new ;
+        return SpongeValueFactory.boundedBuilder(Keys.AGE)
+            .minimum(Constants.Entity.Ageable.CHILD)
+            .maximum(Integer.MAX_VALUE)
+            .defaultValue(Constants.Entity.Ageable.ADULT)
+            .actualValue(this.getGrowingAge())
+            .build()
+            ;
     }
 
     @Override
     public Value<Boolean> adult() {
-        return null;
+        return new SpongeValue<>(Keys.IS_ADULT, true,  this.shadow$isChild());
     }
 }

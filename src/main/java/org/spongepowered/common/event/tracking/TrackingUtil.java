@@ -78,7 +78,6 @@ import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.TimingHolder;
 import org.spongepowered.common.bridge.world.ChunkBridge;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -165,14 +164,14 @@ public final class TrackingUtil {
     public static void tickEntity(net.minecraft.entity.Entity entity) {
         checkArgument(entity instanceof Entity, "Entity %s is not an instance of SpongeAPI's Entity!", entity);
         checkNotNull(entity, "Cannot capture on a null ticking entity!");
-        final EntityBridge mixinEntity = EntityUtil.toMixin(entity);
+        final EntityBridge mixinEntity = (EntityBridge) entity;
         if (!mixinEntity.shouldTick()) {
             return;
         }
 
         final EntityTickContext tickContext = TickPhase.Tick.ENTITY.createPhaseContext().source(entity);
         try (final EntityTickContext context = tickContext;
-             final Timing entityTiming = ((TimingHolder) entity).spongeImpl$getTimingHandler()
+             final Timing entityTiming = ((TimingHolder) entity).bridge$getTimingsHandler()
         ) {
             mixinEntity.getNotifierUser()
                     .ifPresent(context::notifier);
@@ -192,7 +191,7 @@ public final class TrackingUtil {
     public static void tickRidingEntity(net.minecraft.entity.Entity entity) {
         checkArgument(entity instanceof Entity, "Entity %s is not an instance of SpongeAPI's Entity!", entity);
         checkNotNull(entity, "Cannot capture on a null ticking entity!");
-        final EntityBridge mixinEntity = EntityUtil.toMixin(entity);
+        final EntityBridge mixinEntity = (EntityBridge) entity;
         if (!mixinEntity.shouldTick()) {
             return;
         }
@@ -200,7 +199,7 @@ public final class TrackingUtil {
         final EntityTickContext tickContext = TickPhase.Tick.ENTITY.createPhaseContext().source(entity);
         try (
              final EntityTickContext context = tickContext;
-             final Timing entityTiming = mixinEntity.spongeImpl$getTimingHandler()
+             final Timing entityTiming = mixinEntity.bridge$getTimingsHandler()
              ) {
             entityTiming.startTiming();
             mixinEntity.getNotifierUser()
@@ -253,7 +252,7 @@ public final class TrackingUtil {
             phaseContext.buildAndSwitch();
 
             mixinTileEntity.setIsTicking(true);
-            try (Timing timing = mixinTileEntity.spongeImpl$getTimingHandler().startTiming()) {
+            try (Timing timing = mixinTileEntity.bridge$getTimingsHandler().startTiming()) {
                 tile.update();
             }
         } catch (Exception e) {
@@ -773,7 +772,7 @@ public final class TrackingUtil {
         PhaseContext<?> phaseContext) {
         // Now we can spawn the entity items appropriately
         final List<Entity> itemDrops = entityItems.stream()
-                .map(EntityUtil::fromNative)
+                .map(entity -> (Entity) entity)
                 .collect(Collectors.toList());
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(newBlockSnapshot);
@@ -818,7 +817,7 @@ public final class TrackingUtil {
                     entityitem.setDefaultPickupDelay();
                     return entityitem;
                 })
-                .map(EntityUtil::fromNative)
+                .map(entity -> (Entity) entity)
                 .collect(Collectors.toList());
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(oldBlockSnapshot);
@@ -831,7 +830,7 @@ public final class TrackingUtil {
     private static void spawnEntitiesForBlock(Collection<net.minecraft.entity.Entity> entities, PhaseContext<?> phaseContext) {
         // Now we can spawn the entity items appropriately
         final List<Entity> entitiesSpawned = entities.stream()
-            .map(EntityUtil::fromNative)
+            .map(entity -> (Entity) entity)
             .collect(Collectors.toList());
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);

@@ -47,11 +47,10 @@ import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.packet.PacketConstants;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
-import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
+import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
 
@@ -77,7 +76,7 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
         final EntityPlayerMP player = context.getPacketPlayer();
         //final ItemStack usedStack = context.getItemUsed();
         //final ItemStackSnapshot usedSnapshot = ItemStackUtil.snapshotOf(usedStack);
-        final Entity spongePlayer = EntityUtil.fromNative(player);
+        final Entity spongePlayer = (Entity) player;
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(spongePlayer);
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
@@ -90,7 +89,7 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
 
                     final ArrayList<Entity> entities = new ArrayList<>();
                     for (EntityItem item : items) {
-                        entities.add(EntityUtil.fromNative(item));
+                        entities.add((Entity) item);
                     }
 
                     int usedButton;
@@ -113,7 +112,7 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
 
                     SpongeImpl.postEvent(dropItemEvent);
                     if (dropItemEvent.isCancelled() || PacketPhaseUtil.allTransactionsInvalid(dropItemEvent.getTransactions())) {
-                        ((IMixinEntityPlayerMP) player).restorePacketItem(EnumHand.MAIN_HAND);
+                        ((ServerPlayerEntityBridge) player).restorePacketItem(EnumHand.MAIN_HAND);
                         PacketPhaseUtil.handleSlotRestore(player, player.openContainer, dropItemEvent.getTransactions(), true);
                     } else {
                         processSpawnedEntities(player, dropItemEvent);

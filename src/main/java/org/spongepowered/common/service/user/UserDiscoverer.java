@@ -45,7 +45,7 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.profile.ProfileNotFoundException;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.player.SpongeUser;
-import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
+import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.world.WorldManager;
 
 import java.io.File;
@@ -252,7 +252,7 @@ class UserDiscoverer {
         // Although the player itself could be returned here (as Player extends
         // User), a plugin is more likely to cache the User object and we don't
         // want the player entity to be cached.
-        final IMixinEntityPlayerMP player = (IMixinEntityPlayerMP) playerList.getPlayerByUUID(uniqueId);
+        final ServerPlayerEntityBridge player = (ServerPlayerEntityBridge) playerList.getPlayerByUUID(uniqueId);
         if (player != null) {
             // If we're getting the online player, we want their current user,
             // rather than something that is recreated and may be out of sync

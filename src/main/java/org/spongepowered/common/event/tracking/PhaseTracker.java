@@ -1032,7 +1032,7 @@ public final class PhaseTracker {
             ((EntityBridge) entity).firePostConstructEvents();
         }
 
-        final net.minecraft.entity.Entity minecraftEntity = EntityUtil.toNative(entity);
+        final net.minecraft.entity.Entity minecraftEntity = (net.minecraft.entity.Entity) entity;
         final WorldServer worldServer = (WorldServer) world;
         final ServerWorldBridge mixinWorldServer = (ServerWorldBridge) worldServer;
         // Sponge End - continue with vanilla mechanics

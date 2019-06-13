@@ -522,7 +522,7 @@ public class SpongeCommandFactory {
                         src.sendMessage(Text.of(TextColors.RED, "Players must execute this command!"));
                         return CommandResult.empty();
                     }
-                    final EntityPlayerMP entityPlayerMP = EntityUtil.toNative((Player) src);
+                    final EntityPlayerMP entityPlayerMP = (EntityPlayerMP) (Player) src;
                     final RayTraceResult rayTraceResult = EntityUtil.rayTraceFromEntity(entityPlayerMP, 5, 1.0F);
                     if (rayTraceResult.typeOfHit != RayTraceResult.Type.BLOCK) {
                         src.sendMessage(Text.of(TextColors.RED, TextStyles.ITALIC,
@@ -550,7 +550,7 @@ public class SpongeCommandFactory {
                     if (!(src instanceof Player)) {
                         return CommandResult.empty();
                     }
-                    final EntityPlayerMP entityPlayerMP = EntityUtil.toNative((Player) src);
+                    final EntityPlayerMP entityPlayerMP = (EntityPlayerMP) (Player) src;
                     final RayTraceResult rayTraceResult = EntityUtil.rayTraceFromEntity(entityPlayerMP, 5, 1.0F, true);
                     if (rayTraceResult.typeOfHit != RayTraceResult.Type.ENTITY) {
                         src.sendMessage(Text.of(TextColors.RED, TextStyles.ITALIC,
@@ -558,8 +558,8 @@ public class SpongeCommandFactory {
                         return CommandResult.empty();
                     }
                     final Entity entityHit = rayTraceResult.entityHit;
-                    final EntityBridge mixinEntity = EntityUtil.toMixin(entityHit);
-                    final org.spongepowered.api.entity.Entity spongeEntity = EntityUtil.fromNative(entityHit);
+                    final EntityBridge mixinEntity = (EntityBridge) entityHit;
+                    final org.spongepowered.api.entity.Entity spongeEntity = (org.spongepowered.api.entity.Entity) entityHit;
                     final Text.Builder builder = Text.builder();
                     builder.append(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "EntityType: "))
                             .append(Text.of(TextColors.BLUE, TextStyles.RESET, spongeEntity.getType().getId()));

@@ -177,7 +177,7 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
 
                         final List<Entity> itemEntities = items.stream()
                             .map(data -> data.create(minecraftWorld))
-                            .map(EntityUtil::fromNative)
+                            .map(entity -> (Entity) entity)
                             .collect(Collectors.toList());
                         csm.pushCause(affectedEntity.get());
                         final DropItemEvent.Destruct destruct =

@@ -68,13 +68,13 @@ public abstract class MixinEntityArrow extends MixinEntity implements IMixinEnti
     @Nullable public ProjectileSource projectileSource;
 
     @Override
-    public void spongeImpl$readFromSpongeCompound(NBTTagCompound compound) {
+    public void spongeImpl$readFromSpongeCompound(final NBTTagCompound compound) {
         super.spongeImpl$readFromSpongeCompound(compound);
-        ProjectileSourceSerializer.readSourceFromNbt(compound, ((Arrow) this));
+        ProjectileSourceSerializer.readSourceFromNbt(compound, (Arrow) this);
     }
 
     @Override
-    public void spongeImpl$writeToSpongeCompound(NBTTagCompound compound) {
+    public void spongeImpl$writeToSpongeCompound(final NBTTagCompound compound) {
         super.spongeImpl$writeToSpongeCompound(compound);
         ProjectileSourceSerializer.writeSourceToNbt(compound, ((Arrow) this).getShooter(), this.shootingEntity);
     }
@@ -83,7 +83,7 @@ public abstract class MixinEntityArrow extends MixinEntity implements IMixinEnti
      * Collide impact event post for plugins to cancel impact.
      */
     @Inject(method = "onHit", at = @At("HEAD"), cancellable = true)
-    private void onProjectileHit(RayTraceResult hitResult, CallbackInfo ci) {
+    private void onProjectileHit(final RayTraceResult hitResult, final CallbackInfo ci) {
         if (!this.world.isRemote) {
             if (SpongeCommonEventFactory.handleCollideImpactEvent((EntityArrow) (Object) this, ((Arrow) this).getShooter(), hitResult)) {
                 // deflect and drop to ground
@@ -96,11 +96,11 @@ public abstract class MixinEntityArrow extends MixinEntity implements IMixinEnti
                 this.playSound(SoundEvents.ENTITY_ARROW_HIT, 1.0F, 1.2F / (this.rand.nextFloat() * 0.2F + 0.9F));
                 // if block was hit, change state to reflect it hit block to avoid onHit logic repeating indefinitely
                 if (hitResult.entityHit == null) {
-                    BlockPos blockpos = hitResult.getBlockPos();
+                    final BlockPos blockpos = hitResult.getBlockPos();
                     this.xTile = blockpos.getX();
                     this.yTile = blockpos.getY();
                     this.zTile = blockpos.getZ();
-                    IBlockState iblockstate = this.world.getBlockState(blockpos);
+                    final IBlockState iblockstate = this.world.getBlockState(blockpos);
                     this.inTile = iblockstate.getBlock();
                     this.inData = this.inTile.getMetaFromState(iblockstate);
                     this.inGround = true;

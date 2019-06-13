@@ -37,7 +37,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeDirectionalData;
 import org.spongepowered.common.data.util.DirectionResolver;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
 import java.util.List;
 
@@ -59,7 +58,7 @@ public abstract class MixinEntityHanging_API extends MixinEntity_API implements 
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(List<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(getDirectionalData());
     }

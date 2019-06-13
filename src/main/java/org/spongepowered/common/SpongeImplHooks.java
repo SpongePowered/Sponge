@@ -92,9 +92,8 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
-import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
-import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
+import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.interfaces.world.IMixinITeleporter;
 import org.spongepowered.common.item.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
@@ -428,11 +427,11 @@ public final class SpongeImplHooks {
     }
 
     public static BlockPos getBedLocation(EntityPlayer playerIn, int dimension) {
-        return ((IMixinEntityPlayer) playerIn).getBedLocation(dimension);
+        return ((PlayerEntityBridge) playerIn).getBedLocation(dimension);
     }
 
     public static boolean isSpawnForced(EntityPlayer playerIn, int dimension) {
-        return ((IMixinEntityPlayer) playerIn).isSpawnForced(dimension);
+        return ((PlayerEntityBridge) playerIn).isSpawnForced(dimension);
     }
 
     public static Inventory toInventory(Object inventory, @Nullable Object forgeItemHandler) {

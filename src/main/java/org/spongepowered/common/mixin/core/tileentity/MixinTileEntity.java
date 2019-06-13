@@ -72,7 +72,6 @@ abstract class MixinTileEntity implements TileEntityBridge {
     // uses different name to not clash with SpongeForge
     private final boolean isTileVanilla = getClass().getName().startsWith("net.minecraft.");
     @Nullable private Timing timing;
-    @Nullable private LocatableBlock locatableBlock;
     // caches owner and notifier to avoid constant lookups in chunk
     @Nullable private User spongeOwner;
     @Nullable private User spongeNotifier;
@@ -96,7 +95,7 @@ abstract class MixinTileEntity implements TileEntityBridge {
     @Override @Shadow public abstract void markDirty();
 
     @Inject(method = "<init>*", at = @At("RETURN"))
-    private void impl$RefreshTrackerStates(CallbackInfo ci) {
+    private void impl$RefreshTrackerStates(final CallbackInfo ci) {
         this.refreshTrackerStates();
     }
 
@@ -108,14 +107,14 @@ abstract class MixinTileEntity implements TileEntityBridge {
 
     @SuppressWarnings({"rawtypes"})
     @Inject(method = "register(Ljava/lang/String;Ljava/lang/Class;)V", at = @At(value = "RETURN"))
-    private static void impl$registerTileEntityClassWithSpongeRegistry(String name, Class clazz, CallbackInfo callbackInfo) {
+    private static void impl$registerTileEntityClassWithSpongeRegistry(final String name, final Class clazz, final CallbackInfo callbackInfo) {
         if (clazz != null) {
             TileEntityTypeRegistryModule.getInstance().doTileEntityRegistration(clazz, name);
         }
     }
 
     @Inject(method = "invalidate", at = @At("RETURN"))
-    private void impl$RemoveActiveChunkOnInvalidate(CallbackInfo ci) {
+    private void impl$RemoveActiveChunkOnInvalidate(final CallbackInfo ci) {
         this.setActiveChunk(null);
     }
 
@@ -127,8 +126,8 @@ abstract class MixinTileEntity implements TileEntityBridge {
      * @param compound The compound vanilla writes to (unused because we write to SpongeData)
      * @param ci (Unused) callback info
      */
-    @Inject(method = "Lnet/minecraft/tileentity/TileEntity;writeToNBT(Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/nbt/NBTTagCompound;", at = @At("HEAD"))
-    private void impl$WriteSpongeDataToCompound(NBTTagCompound compound, CallbackInfoReturnable<NBTTagCompound> ci) {
+    @Inject(method = "writeToNBT(Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/nbt/NBTTagCompound;", at = @At("HEAD"))
+    private void impl$WriteSpongeDataToCompound(final NBTTagCompound compound, final CallbackInfoReturnable<NBTTagCompound> ci) {
         if (!((CustomDataHolderBridge) this).getCustomManipulators().isEmpty()) {
             this.bridge$writeToSpongeCompound(this.getSpongeData());
         }
@@ -143,7 +142,7 @@ abstract class MixinTileEntity implements TileEntityBridge {
      * @param ci (Unused) callback info
      */
     @Inject(method = "Lnet/minecraft/tileentity/TileEntity;readFromNBT(Lnet/minecraft/nbt/NBTTagCompound;)V", at = @At("RETURN"))
-    private void impl$ReadSpongeDataFromCompound(NBTTagCompound compound, CallbackInfo ci) {
+    private void impl$ReadSpongeDataFromCompound(final NBTTagCompound compound, final CallbackInfo ci) {
         if (this.hasTileDataCompound()) {
             this.bridge$readFromSpongeCompound(this.getSpongeData());
         }
@@ -154,7 +153,7 @@ abstract class MixinTileEntity implements TileEntityBridge {
      *
      * @param compound The SpongeData compound to read from
      */
-    protected void bridge$readFromSpongeCompound(NBTTagCompound compound) {
+    protected void bridge$readFromSpongeCompound(final NBTTagCompound compound) {
         CustomDataNbtUtil.readCustomData(compound, (TileEntity) this);
     }
 
@@ -163,23 +162,10 @@ abstract class MixinTileEntity implements TileEntityBridge {
      *
      * @param compound The SpongeData compound to write to
      */
-    protected void bridge$writeToSpongeCompound(NBTTagCompound compound) {
+    protected void bridge$writeToSpongeCompound(final NBTTagCompound compound) {
         CustomDataNbtUtil.writeCustomData(compound, (TileEntity) this);
     }
 
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-
-    }
-
-    @Override
-    public Collection<DataManipulator<?, ?>> getContainers() {
-        final List<DataManipulator<?, ?>> list = Lists.newArrayList();
-        this.supplyVanillaManipulators(list);
-        if (this instanceof CustomDataHolderBridge) {
-            list.addAll(((CustomDataHolderBridge) this).getCustomManipulators());
-        }
-        return list;
-    }
 
     @Override
     public boolean isVanilla() {
@@ -187,50 +173,26 @@ abstract class MixinTileEntity implements TileEntityBridge {
     }
 
     @Override
-    public Timing spongeImpl$getTimingHandler() {
+    public Timing bridge$getTimingsHandler() {
         if (this.timing == null) {
-            this.timing = SpongeTimings.getTileEntityTiming(this);
+            this.timing = SpongeTimings.getTileEntityTiming((TileEntity) this);
         }
         return this.timing;
     }
 
     @Override
-    public TileEntityArchetype createArchetype() {
-        return new SpongeTileEntityArchetypeBuilder().tile(this).build();
-    }
-
-    @Override
-    public LocatableBlock getLocatableBlock() {
-        if (this.locatableBlock == null) {
-            final Chunk chunk = (Chunk) this.activeChunk.get();
-            BlockState blockState = null;
-            if (chunk != null) {
-                blockState = (BlockState) chunk.getBlockState(this.pos);
-            } else {
-                blockState = this.getBlock();
-            }
-            this.locatableBlock = new SpongeLocatableBlockBuilder()
-                .world((World) this.world)
-                .position(this.pos.getX(), this.pos.getY(), this.pos.getZ())
-                .state(blockState)
-                .build();
-        }
-
-        return this.locatableBlock;
-    }
-
-    @Override
-    public void setSpongeOwner(@Nullable User owner) {
+    public void setSpongeOwner(@Nullable final User owner) {
         this.spongeOwner = owner;
     }
 
+    @Nullable
     @Override
     public User getSpongeOwner() {
         return this.spongeOwner;
     }
 
     @Override
-    public void setSpongeNotifier(@Nullable User notifier) {
+    public void setSpongeNotifier(@Nullable final User notifier) {
         this.spongeNotifier = notifier;
     }
 
@@ -247,8 +209,8 @@ abstract class MixinTileEntity implements TileEntityBridge {
     }
 
     @Override
-    public void setActiveChunk(@Nullable ChunkBridge chunk) {
-        if (chunk == null && this.world != null && !this.world.isRemote && !this.isValid()) {
+    public void setActiveChunk(@Nullable final ChunkBridge chunk) {
+        if (chunk == null && this.world != null && !this.world.isRemote && this.tileEntityInvalid) {
             if (this.isTicking) {
                 // If a TE is currently ticking and has been invalidated, delay clearing active chunk until finished
                 // This is done to avoid issues during unwind when calling getActiveChunk
@@ -256,7 +218,7 @@ abstract class MixinTileEntity implements TileEntityBridge {
                 return;
             }
         }
-        this.activeChunk = new WeakReference<ChunkBridge>(chunk);
+        this.activeChunk = new WeakReference<>(chunk);
     }
 
     @Override
@@ -280,7 +242,7 @@ abstract class MixinTileEntity implements TileEntityBridge {
     }
 
     @Override
-    public void setIsTicking(boolean ticking) {
+    public void setIsTicking(final boolean ticking) {
         this.isTicking = ticking;
     }
 
@@ -310,24 +272,24 @@ abstract class MixinTileEntity implements TileEntityBridge {
     }
 
     @Override
-    public void setCaptured(boolean captured) {
+    public void setCaptured(final boolean captured) {
         this.isCaptured = captured;
     }
 
     @Override
     public void refreshTrackerStates() {
-        if (this.tileType != null) {
-            this.allowsBlockBulkCapture = ((SpongeTileEntityType) this.tileType).allowsBlockBulkCapture;
-            this.allowsEntityBulkCapture = ((SpongeTileEntityType) this.tileType).allowsEntityBulkCapture;
-            this.allowsBlockEventCreation = ((SpongeTileEntityType) this.tileType).allowsBlockEventCreation;
-            this.allowsEntityEventCreation = ((SpongeTileEntityType) this.tileType).allowsEntityEventCreation;
+        if (((TileEntity) this).getType() != null) {
+            this.allowsBlockBulkCapture = ((SpongeTileEntityType) ((TileEntity) this).getType()).allowsBlockBulkCapture;
+            this.allowsEntityBulkCapture = ((SpongeTileEntityType) ((TileEntity) this).getType()).allowsEntityBulkCapture;
+            this.allowsBlockEventCreation = ((SpongeTileEntityType) ((TileEntity) this).getType()).allowsBlockEventCreation;
+            this.allowsEntityEventCreation = ((SpongeTileEntityType) ((TileEntity) this).getType()).allowsEntityEventCreation;
         }
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-            .add("tileType", this.tileType.getId())
+            .add("tileType", ((TileEntity) this).getType().getId())
             .add("world", this.world)
             .add("pos", this.pos)
             .add("blockMetadata", this.blockMetadata)
@@ -336,7 +298,7 @@ abstract class MixinTileEntity implements TileEntityBridge {
 
     protected MoreObjects.ToStringHelper getPrettyPrinterStringHelper() {
         return MoreObjects.toStringHelper(this)
-            .add("type", this.tileType.getId())
+            .add("type", ((TileEntity) this).getType().getId())
             .add("world", this.world.getWorldInfo().getWorldName())
             .add("pos", this.pos);
     }

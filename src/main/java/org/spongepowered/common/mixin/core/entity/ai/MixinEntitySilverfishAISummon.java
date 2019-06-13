@@ -48,7 +48,9 @@ public abstract class MixinEntitySilverfishAISummon extends EntityAIBase {
      * would fail in forge environments. This changes the injection to a predictable
      * place where we still can forcibly call things but still cancel as needed.
      *
-     * @param cir
+     * @param world The World
+     * @param pos The target position
+     * @param dropBlock Whether to drop the block or not
      */
     @Redirect(
         method = "updateTask",
@@ -57,7 +59,7 @@ public abstract class MixinEntitySilverfishAISummon extends EntityAIBase {
             target = "Lnet/minecraft/world/World;destroyBlock(Lnet/minecraft/util/math/BlockPos;Z)Z"
         )
     )
-    private boolean onCanGrief(World world, BlockPos pos, boolean dropBlock) {
+    private boolean onCanGrief(final World world, final BlockPos pos, final boolean dropBlock) {
         final IBlockState blockState = world.getBlockState(pos);
         return ((GrieferBridge) this.silverfish).bridge$CanGrief()
                ? world.destroyBlock(pos, dropBlock)

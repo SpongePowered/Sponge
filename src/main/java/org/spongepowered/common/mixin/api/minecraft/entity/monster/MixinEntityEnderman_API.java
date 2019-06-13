@@ -36,7 +36,7 @@ import java.util.List;
 public abstract class MixinEntityEnderman_API extends MixinEntityMob_API implements Enderman {
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(List<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(get(ScreamingData.class).get());
     }

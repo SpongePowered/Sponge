@@ -106,6 +106,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGameModeData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeJoinData;
@@ -165,7 +166,7 @@ public abstract class MixinEntityPlayerMP_API extends MixinEntityPlayer_API impl
 
     @Nullable private Text displayName = null;
     private boolean sleepingIgnored;
-    private User user = getUserObject();
+    private User user = ((ServerPlayerEntityBridge) this).getUserObject();
     private Set<SkinPart> skinParts = Sets.newHashSet();
     private TabList tabList = new SpongeTabList((EntityPlayerMP) (Object) this);
     private Scoreboard spongeScoreboard = Sponge.getGame().getServer().getServerScoreboard().get();
@@ -540,7 +541,7 @@ public abstract class MixinEntityPlayerMP_API extends MixinEntityPlayer_API impl
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(List<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(getJoinData());
         manipulators.add(getGameModeData());

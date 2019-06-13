@@ -72,7 +72,6 @@ import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.type.Profession;
 import org.spongepowered.api.entity.EntityArchetype;
-import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Transform;
@@ -107,9 +106,8 @@ import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.entity.TeleportingContext;
 import org.spongepowered.common.interfaces.IMixinPlayerList;
 import org.spongepowered.common.bridge.entity.EntityBridge;
-import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
-import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
-import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
+import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
+import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.interfaces.world.IMixinITeleporter;
 import org.spongepowered.common.interfaces.world.IMixinTeleporter;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
@@ -117,6 +115,7 @@ import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.registry.type.entity.ProfessionRegistryModule;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.WorldManager;
 
@@ -135,11 +134,6 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
 public final class EntityUtil {
-
-    private static final BlockPos HANGING_OFFSET_EAST = new BlockPos(1, 1, 0);
-    private static final BlockPos HANGING_OFFSET_WEST = new BlockPos(-1, 1, 0);
-    private static final BlockPos HANGING_OFFSET_NORTH = new BlockPos(0, 1, -1);
-    private static final BlockPos HANGING_OFFSET_SOUTH = new BlockPos(0, 1, 1);
 
     public static final Function<PhaseContext<?>, Supplier<Optional<UUID>>> ENTITY_CREATOR_FUNCTION = (context) ->
         () -> Stream.<Supplier<Optional<User>>>builder()
@@ -285,7 +279,7 @@ public final class EntityUtil {
         final int dimensionId = playerIn.dimension;
 
         // Send dimension registration
-        if (((IMixinEntityPlayerMP) playerIn).usesCustomClient()) {
+        if (((ServerPlayerEntityBridge) playerIn).usesCustomClient()) {
             WorldManager.sendDimensionRegistration(playerIn, toWorld.provider);
         } else {
             // Force vanilla client to refresh its chunk cache if same dimension type
@@ -330,7 +324,7 @@ public final class EntityUtil {
         for (PotionEffect potioneffect : playerIn.getActivePotionEffects()) {
             playerIn.connection.sendPacket(new SPacketEntityEffect(playerIn.getEntityId(), potioneffect));
         }
-        ((IMixinEntityPlayerMP) playerIn).refreshXpHealthAndFood();
+        ((ServerPlayerEntityBridge) playerIn).refreshXpHealthAndFood();
 
         SpongeImplHooks.handlePostChangeDimensionEvent(playerIn, fromWorld, toWorld);
     }
@@ -564,7 +558,7 @@ public final class EntityUtil {
     }
 
     public static boolean processEntitySpawn(org.spongepowered.api.entity.Entity entity, Supplier<Optional<UUID>> supplier) {
-        final Entity minecraftEntity = toNative(entity);
+        final Entity minecraftEntity = (Entity) entity;
         if (minecraftEntity instanceof EntityItem) {
             final ItemStack item = ((EntityItem) minecraftEntity).getItem();
             if (!item.isEmpty()) {
@@ -573,7 +567,7 @@ public final class EntityUtil {
                     // Bypass spawning the entity item, since it is established that the custom entity is spawned.
                     final Entity entityToSpawn = customEntityItem.get();
                     supplier.get()
-                        .ifPresent(creator -> toMixin(entityToSpawn).setCreator(creator));
+                        .ifPresent(((org.spongepowered.api.entity.Entity) entityToSpawn)::setCreator);
                     // Since forge already has a new event thrown for the entity, we don't need to throw
                     // the event anymore as sponge plugins getting the event after forge mods will
                     // have the modified entity list for entities, so no need to re-capture the entities.
@@ -583,7 +577,7 @@ public final class EntityUtil {
             }
         }
         supplier.get()
-            .ifPresent(creator -> toMixin(entity).setCreator(creator));
+            .ifPresent(entity::setCreator);
         // Allowed to call force spawn directly since we've applied creator and custom item logic already
         getMixinWorld(entity).forceSpawnEntity(entity);
         return true;
@@ -613,7 +607,7 @@ public final class EntityUtil {
 
         Vec3d traceStart = EntityUtil.getPositionEyes(source, partialTicks);
         double blockDistance = (blockRay != null) ? blockRay.hitVec.distanceTo(traceStart) : traceDistance;
-        EntityTrace entityRay = EntityUtil.rayTraceEntities(source, traceDistance, partialTicks, blockDistance, traceStart);
+        EntityUtil.EntityTrace entityRay = EntityUtil.rayTraceEntities(source, traceDistance, partialTicks, blockDistance, traceStart);
 
         if (entityRay.entity != null && (entityRay.distance < blockDistance || blockRay == null)) {
             return entityRay.asRayTraceResult();
@@ -622,8 +616,8 @@ public final class EntityUtil {
         return blockRay;
     }
 
-    private static EntityTrace rayTraceEntities(Entity source, double traceDistance, float partialTicks, double blockDistance, Vec3d traceStart) {
-        EntityTrace trace = new EntityTrace(blockDistance);
+    private static EntityUtil.EntityTrace rayTraceEntities(Entity source, double traceDistance, float partialTicks, double blockDistance, Vec3d traceStart) {
+        EntityUtil.EntityTrace trace = new EntityUtil.EntityTrace(blockDistance);
 
         Vec3d lookDir = source.getLook(partialTicks).scale(traceDistance);
         Vec3d traceEnd = traceStart.add(lookDir);
@@ -752,13 +746,13 @@ public final class EntityUtil {
                     EnumFacing entityFacing = entityIn.getHorizontalFacing();
 
                     if (entityFacing == EnumFacing.NORTH) {
-                        return entityPos.equals(pos.add(HANGING_OFFSET_NORTH));
+                        return entityPos.equals(pos.add(Constants.Entity.HANGING_OFFSET_NORTH));
                     } else if (entityFacing == EnumFacing.SOUTH) {
-                        return entityIn.getPosition().equals(pos.add(HANGING_OFFSET_SOUTH));
+                        return entityIn.getPosition().equals(pos.add(Constants.Entity.HANGING_OFFSET_SOUTH));
                     } else if (entityFacing == EnumFacing.WEST) {
-                        return entityIn.getPosition().equals(pos.add(HANGING_OFFSET_WEST));
+                        return entityIn.getPosition().equals(pos.add(Constants.Entity.HANGING_OFFSET_WEST));
                     } else if (entityFacing == EnumFacing.EAST) {
-                        return entityIn.getPosition().equals(pos.add(HANGING_OFFSET_EAST));
+                        return entityIn.getPosition().equals(pos.add(Constants.Entity.HANGING_OFFSET_EAST));
                     }
                     return false;
                 });
@@ -800,86 +794,11 @@ public final class EntityUtil {
         return new Location<>((World) targetWorld, targetSpawnVec);
     }
 
-    public static Entity toNative(org.spongepowered.api.entity.Entity tickingEntity) {
-        if (!(tickingEntity instanceof Entity)) {
-            throw new IllegalArgumentException("Not a native Entity for this implementation!");
-        }
-        return (Entity) tickingEntity;
-    }
-
-    public static EntityLivingBase toNative(IMixinEntityLivingBase entityLivingBase) {
-        if (!(entityLivingBase instanceof EntityLivingBase)) {
-            throw new IllegalArgumentException("Not a native EntityLivingBase for this implementation!");
-        }
-        return (EntityLivingBase) entityLivingBase;
-    }
-
-    public static EntityPlayer toNative(IMixinEntityPlayer player) {
-        if (!(player instanceof EntityPlayer)) {
-            throw new IllegalArgumentException("Not a native EntityPlayer for this implementation!");
-        }
-        return (EntityPlayer) player;
-    }
-
-    @Nullable
-    public static Entity toNullableNative(@Nullable org.spongepowered.api.entity.Entity entity) {
-        if (entity == null) {
-            return null;
-        }
-        if (!(entity instanceof Entity)) {
-            throw new IllegalArgumentException("Not a native Entity for this implementation!");
-        }
-        return (Entity) entity;
-    }
-
-    public static org.spongepowered.api.entity.Entity fromNative(Entity entity) {
-        return (org.spongepowered.api.entity.Entity) entity;
-    }
-
     public static Living fromNativeToLiving(Entity entity) {
         if (!(entity instanceof Living)) {
             throw new IllegalArgumentException("Entity is incompatible with SpongeAPI Living interface: " + entity);
         }
         return (Living) entity;
-    }
-
-    public static EntityLivingBase toNative(Living entity) {
-        if (!(entity instanceof EntityLivingBase)) {
-            throw new IllegalArgumentException("Living entity is not compatible with this implementation: " + entity);
-        }
-        return (EntityLivingBase) entity;
-    }
-
-    public static EntityPlayerMP toNative(Player player) {
-        if (!(player instanceof EntityPlayerMP)) {
-            throw new IllegalArgumentException("Player entity is not compatible with this implementation: " + player);
-        }
-        return (EntityPlayerMP) player;
-    }
-
-    public static EntityPlayerMP toNative(IMixinEntityPlayerMP playerMP) {
-        if (!(playerMP instanceof EntityPlayerMP)) {
-            throw new IllegalArgumentException("Player entity is not compatible with this implementation: " + playerMP);
-        }
-        return (EntityPlayerMP) playerMP;
-    }
-
-    public static EntityBridge toMixin(Entity entity) {
-        if (!(entity instanceof EntityBridge)) {
-            throw new IllegalArgumentException("Not a mixin Entity for this implementation!");
-        }
-        return (EntityBridge) entity;
-    }
-
-    public static EntityBridge toMixin(org.spongepowered.api.entity.Entity entity) {
-        if (!(entity instanceof EntityBridge)) {
-            throw new IllegalArgumentException("Not a mixin Entity for this implementation!");
-        }
-        return (EntityBridge) entity;
-    }
-
-    public static EntitySnapshot createSnapshot(Entity entity) {
-        return fromNative(entity).createSnapshot();
     }
 
     private static void adjustEntityPostionForTeleport(IMixinPlayerList playerList, Entity entity, WorldServer fromWorld, WorldServer toWorld) {
@@ -962,7 +881,7 @@ public final class EntityUtil {
             // Sanity check, just like vanilla
             return null;
         }
-        final EntityBridge mixinEntity = EntityUtil.toMixin(entity);
+        final EntityBridge mixinEntity = (EntityBridge) entity;
         // Now the real fun begins.
         final ItemStack item;
         final double posX = xPos;
@@ -999,16 +918,16 @@ public final class EntityUtil {
                 return entityitem;
             }
             // FINALLY - Spawn the entity in the world if all else didn't fail
-            EntityUtil.processEntitySpawn(fromNative(entityitem), Optional::empty);
+            EntityUtil.processEntitySpawn((org.spongepowered.api.entity.Entity) entityitem, Optional::empty);
             return entityitem;
         }
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Nullable
-    public static EntityItem playerDropItem(IMixinEntityPlayer mixinPlayer, ItemStack droppedItem, boolean dropAround, boolean traceItem) {
+    public static EntityItem playerDropItem(PlayerEntityBridge mixinPlayer, ItemStack droppedItem, boolean dropAround, boolean traceItem) {
         mixinPlayer.shouldRestoreInventory(false);
-        final EntityPlayer player = EntityUtil.toNative(mixinPlayer);
+        final EntityPlayer player = (EntityPlayer) mixinPlayer;
 
         final double posX = player.posX;
         final double posY = player.posY - 0.3 + player.getEyeHeight();
@@ -1020,11 +939,11 @@ public final class EntityUtil {
         original.add(snapshot);
 
         final PhaseContext<?> phaseContext = PhaseTracker.getInstance().getCurrentContext();
-        final IPhaseState currentState = phaseContext.state;
+        @SuppressWarnings("RawTypeCanBeGeneric") final IPhaseState currentState = phaseContext.state;
 
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
 
-            item = throwDropItemAndConstructEvent(mixinPlayer, posX, posY, posZ, snapshot, original, frame);
+            item = throwDropItemAndConstructEvent((EntityPlayer) mixinPlayer, posX, posY, posZ, snapshot, original, frame);
 
             if (item == null || item.isEmpty()) {
                 return null;
@@ -1042,7 +961,7 @@ public final class EntityUtil {
                 entityitem.setThrower(player.getName());
             }
 
-            final Random random = mixinPlayer.getRandom();
+            final Random random = player.getRNG();
             if (dropAround) {
                 float f = random.nextFloat() * 0.5F;
                 float f1 = random.nextFloat() * ((float) Math.PI * 2F);
@@ -1061,7 +980,7 @@ public final class EntityUtil {
                 entityitem.motionZ += Math.sin(f3) * f2;
             }
             // FIFTH - Capture the entity maybe?
-            if (currentState.spawnItemOrCapture(phaseContext, EntityUtil.toNative(mixinPlayer), entityitem)) {
+            if (currentState.spawnItemOrCapture(phaseContext, (EntityPlayer) mixinPlayer, entityitem)) {
                 return entityitem;
             }
             // TODO - Investigate whether player drops are adding to the stat list in captures.
@@ -1102,9 +1021,9 @@ public final class EntityUtil {
     @Nullable
     public static ItemStack throwDropItemAndConstructEvent(Entity entity, double posX, double posY,
         double posZ, ItemStackSnapshot snapshot, List<ItemStackSnapshot> original, CauseStackManager.StackFrame frame) {
-        final IMixinEntityPlayer mixinPlayer;
-        if (entity instanceof IMixinEntityPlayer) {
-            mixinPlayer = (IMixinEntityPlayer) entity;
+        final PlayerEntityBridge mixinPlayer;
+        if (entity instanceof PlayerEntityBridge) {
+            mixinPlayer = (PlayerEntityBridge) entity;
         } else {
             mixinPlayer = null;
         }
@@ -1240,6 +1159,6 @@ public final class EntityUtil {
         for (Object potioneffect : player.getActivePotionEffects()) {
             player.connection.sendPacket(new SPacketEntityEffect(player.getEntityId(), (PotionEffect) potioneffect));
         }
-        ((IMixinEntityPlayerMP) player).refreshScaledHealth();
+        ((ServerPlayerEntityBridge) player).refreshScaledHealth();
     }
 }

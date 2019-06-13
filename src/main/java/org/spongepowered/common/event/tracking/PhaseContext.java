@@ -43,7 +43,6 @@ import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.context.BlockItemDropsSupplier;
 import org.spongepowered.common.event.tracking.context.BlockItemEntityDropsSupplier;
 import org.spongepowered.common.event.tracking.context.MultiBlockCaptureSupplier;
@@ -663,7 +662,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
                 return this.blockItemEntityDropsSupplier.get().get(pos.get()).add((EntityItem) entity);
             }
             // Otherwise just default to per block entity spawns
-            return this.blockEntitySpawnSupplier.get().get(pos.get()).add(EntityUtil.toNative(entity));
+            return this.blockEntitySpawnSupplier.get().get(pos.get()).add((net.minecraft.entity.Entity) entity);
 
             // Or check if we're just bulk capturing item entities
         } else if (entity instanceof EntityItem && this.capturedItemsSupplier != null) {

@@ -29,7 +29,6 @@ import net.minecraft.entity.passive.EntityAnimal;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.animal.Animal;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.entity.BreedEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -50,9 +49,10 @@ public abstract class MixinEntityAgeable extends MixinEntity {
         }
     }
 
+    @SuppressWarnings("deprecation")
     private void callReadyToMateEvent() {
         if (!((WorldBridge) this.world).isFake() && ShouldFire.BREED_ENTITY_EVENT_READY_TO_MATE && ((EntityAgeable) (Object) this) instanceof EntityAnimal) {
-            final BreedEntityEvent.ReadyToMate event =
+            final org.spongepowered.api.event.entity.BreedEntityEvent.ReadyToMate event =
                 SpongeEventFactory.createBreedEntityEventReadyToMate(Sponge.getCauseStackManager().getCurrentCause(), Optional.empty(), (Animal)
                     this);
             SpongeImpl.postEvent(event);

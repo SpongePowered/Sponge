@@ -120,9 +120,9 @@ public interface EntityBridge extends TrackableBridge, IUserOrEntity, TimingHold
 
     void setCurrentCollidingBlock(BlockState state);
 
-    BlockState getCurrentCollidingBlock();
+    @Nullable BlockState getCurrentCollidingBlock();
 
-    BlockPos getLastCollidedBlockPos();
+    @Nullable BlockPos getLastCollidedBlockPos();
 
     boolean isVanilla();
 
@@ -135,7 +135,8 @@ public interface EntityBridge extends TrackableBridge, IUserOrEntity, TimingHold
     void createForgeCapabilities();
 
     // Timings
-    Timing spongeImpl$getTimingHandler();
+    @Override
+    Timing bridge$getTimingsHandler();
 
     default void onJoinWorld() {
 
@@ -144,10 +145,11 @@ public interface EntityBridge extends TrackableBridge, IUserOrEntity, TimingHold
     @Nullable
     ChunkBridge getActiveChunk();
 
-    void setActiveChunk(ChunkBridge chunk);
+    void setActiveChunk(@Nullable ChunkBridge chunk);
 
     boolean shouldTick();
 
+    @Override
     void setInvulnerable(boolean value);
 
     default void clearWrappedCaptureList() {

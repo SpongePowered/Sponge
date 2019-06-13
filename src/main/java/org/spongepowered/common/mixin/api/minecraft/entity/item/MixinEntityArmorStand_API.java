@@ -110,7 +110,7 @@ public abstract class MixinEntityArmorStand_API extends MixinEntityLivingBase_AP
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(List<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(getBodyPartRotationalData());
         manipulators.add(getArmorStandData());

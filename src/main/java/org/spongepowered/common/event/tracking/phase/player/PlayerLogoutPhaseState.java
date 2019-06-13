@@ -69,7 +69,7 @@ final class PlayerLogoutPhaseState implements IPhaseState<GeneralizedContext> {
             phaseContext.getCapturedItemStackSupplier().acceptAndClearIfNotEmpty(items -> {
                 final List<Entity> drops = items.stream()
                     .map(drop -> drop.create(EntityUtil.getMinecraftWorld(player)))
-                    .map(EntityUtil::fromNative)
+                    .map(entity -> (Entity) entity)
                     .collect(Collectors.toList());
                 SpongeCommonEventFactory.callDropItemCustom(drops, phaseContext);
             });

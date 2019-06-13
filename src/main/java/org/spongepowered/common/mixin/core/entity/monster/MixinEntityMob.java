@@ -45,7 +45,6 @@ import org.spongepowered.api.event.entity.AttackEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.bridge.world.ChunkBridge;
 import org.spongepowered.common.interfaces.world.ServerWorldBridge;
@@ -92,7 +91,7 @@ public abstract class MixinEntityMob extends MixinEntityLiving {
         final DamageSource damageSource = DamageSource.causeMobDamage((EntityMob) (Object) this);
         Sponge.getCauseStackManager().pushCause(damageSource);
         final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), originalFunctions,
-                EntityUtil.fromNative(targetEntity), knockbackModifier, originalBaseDamage);
+            (org.spongepowered.api.entity.Entity) targetEntity, knockbackModifier, originalBaseDamage);
         SpongeImpl.postEvent(event);
         Sponge.getCauseStackManager().popCause();
         if (event.isCancelled()) {

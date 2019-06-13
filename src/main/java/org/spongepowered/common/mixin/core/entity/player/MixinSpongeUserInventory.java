@@ -61,9 +61,9 @@ import javax.annotation.Nullable;
 @Mixin(SpongeUserInventory.class)
 public abstract class MixinSpongeUserInventory implements MinecraftInventoryAdapter, UserInventory<User> {
 
-    @Shadow(remap = false) @Final public NonNullList<ItemStack> mainInventory;
-    @Shadow(remap = false) @Final public NonNullList<ItemStack> armorInventory;
-    @Shadow(remap = false) @Final public NonNullList<ItemStack> offHandInventory;
+    @Shadow(remap = false) @Final NonNullList<ItemStack> mainInventory;
+    @Shadow(remap = false) @Final NonNullList<ItemStack> armorInventory;
+    @Shadow(remap = false) @Final NonNullList<ItemStack> offHandInventory;
 
     @Shadow public abstract int getInventoryStackLimit();
 

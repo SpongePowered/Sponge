@@ -41,17 +41,7 @@ import java.util.List;
 @Mixin(EntityXPOrb.class)
 public abstract class MixinEntityXPOrb_API extends MixinEntity_API implements ExperienceOrb {
 
-    @Shadow public int xpValue;
-
-    @Override
-    public int getExperience() {
-        return this.xpValue;
-    }
-
-    @Override
-    public void setExperience(int experience) {
-        this.xpValue = experience;
-    }
+    @Shadow private int xpValue;
 
     @Override
     public Value<Integer> experience() {
@@ -69,7 +59,7 @@ public abstract class MixinEntityXPOrb_API extends MixinEntity_API implements Ex
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(final List<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(experienceHeld());
     }

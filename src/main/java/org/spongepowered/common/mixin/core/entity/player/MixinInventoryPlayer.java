@@ -116,9 +116,9 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer {
 
     @SuppressWarnings("unchecked")
     @Inject(method = "<init>*", at = @At("RETURN"), remap = false)
-    private void onConstructed(EntityPlayer playerIn, CallbackInfo ci) {
+    private void onConstructed(final EntityPlayer playerIn, final CallbackInfo ci) {
         // Find offhand slot
-        for (NonNullList<ItemStack> inventory : this.allInventories) {
+        for (final NonNullList<ItemStack> inventory : this.allInventories) {
             if (inventory == this.offHandInventory) {
                 break;
             }
@@ -130,7 +130,7 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer {
             this.carrier = (Player) playerIn;
 
             this.inventory = new IInventoryFabric((IInventory) this);
-            Class clazz = this.getClass();
+            final Class clazz = this.getClass();
             if (clazz == InventoryPlayer.class) { // Build Player Lens
                 // We only care about Server inventories
                 this.slots = new SlotCollection.Builder()
@@ -148,13 +148,13 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer {
                 this.lens = new PlayerInventoryLens(this, this.slots);
             } else if (this.getSizeInventory() != 0) { // Fallback OrderedLens when not 0 sized inventory
                 this.slots = new SlotCollection.Builder().add(this.getSizeInventory()).build();
-                this.lens = new OrderedInventoryLensImpl(0, this.getSizeInventory(), 1, slots);
+                this.lens = new OrderedInventoryLensImpl(0, this.getSizeInventory(), 1, this.slots);
             }
         }
     }
 
     @Override
-    public int getHeldItemIndex(EnumHand hand) {
+    public int getHeldItemIndex(final EnumHand hand) {
         switch (hand) {
             case MAIN_HAND:
                 return this.currentItem;
@@ -176,7 +176,7 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer {
     }
 
     @Override
-    public Inventory getChild(Lens lens) {
+    public Inventory getChild(final Lens lens) {
         return null;
     }
 
@@ -187,10 +187,10 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer {
     }
 
     @Override
-    public void setSelectedItem(int itemIndex, boolean notify) {
+    public void setSelectedItem(int itemIndex, final boolean notify) {
         itemIndex = itemIndex % 9;
         if (notify && this.player instanceof EntityPlayerMP) {
-            SPacketHeldItemChange packet = new SPacketHeldItemChange(itemIndex);
+            final SPacketHeldItemChange packet = new SPacketHeldItemChange(itemIndex);
             ((EntityPlayerMP)this.player).connection.sendPacket(packet);
         }
         this.currentItem = itemIndex;
@@ -202,7 +202,7 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer {
      */
     @Overwrite
     public void dropAllItems() { // dropAllItems
-        for (NonNullList<ItemStack> aitemstack : this.allInventories)
+        for (final NonNullList<ItemStack> aitemstack : this.allInventories)
         {
             for (int i = 0; i < aitemstack.size(); ++i)
             {
@@ -216,7 +216,7 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer {
     }
 
     @Override
-    public int getFirstAvailableSlot(ItemStack itemstack) {
+    public int getFirstAvailableSlot(final ItemStack itemstack) {
         for (int i = 0; i < this.mainInventory.size(); ++i) {
             int stackSize = itemstack.getCount();
 
@@ -248,7 +248,7 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer {
     }
 
     @Override
-    public void setCapture(boolean doCapture) {
+    public void setCapture(final boolean doCapture) {
         this.doCapture = doCapture;
     }
 
@@ -259,29 +259,29 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer {
 
     public Slot getSpongeSlot(int index) {
         if (index < getHotbarSize()) {
-            return this.getMain().getHotbar().getSlot(SlotIndex.of(index)).get();
+            return ((PlayerInventory) this).getMain().getHotbar().getSlot(SlotIndex.of(index)).get();
         }
         index -= getHotbarSize();
-        return this.getMain().getGrid().getSlot(SlotIndex.of(index)).get();
+        return ((PlayerInventory) this).getMain().getGrid().getSlot(SlotIndex.of(index)).get();
     }
 
     @Inject(method = "add", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/NonNullList;set(ILjava/lang/Object;)Ljava/lang/Object;", ordinal = 0))
-    public void onAdd(int index, ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
+    public void onAdd(final int index, final ItemStack stack, final CallbackInfoReturnable<Boolean> cir) {
         if (this.doCapture) {
             // Capture "damaged" items picked up
-            Slot slot = getSpongeSlot(index);
+            final Slot slot = getSpongeSlot(index);
             this.capturedTransactions.add(new SlotTransaction(slot, ItemStackSnapshot.NONE, ItemStackUtil.snapshotOf(stack)));
         }
     }
 
     @Redirect(method = "storePartialItemStack", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/InventoryPlayer;addResource(ILnet/minecraft/item/ItemStack;)I"))
-    public int onAdd(InventoryPlayer inv, int index, ItemStack stack) {
+    public int onAdd(final InventoryPlayer inv, final int index, final ItemStack stack) {
         if (this.doCapture) {
             // Capture items getting picked up
-            Slot slot = index == 40 ? this.getOffhand() : getSpongeSlot(index);
-            ItemStackSnapshot original = ItemStackUtil.snapshotOf(this.getStackInSlot(index));
-            int result = this.addResource(index, stack);
-            ItemStackSnapshot replacement = ItemStackUtil.snapshotOf(this.getStackInSlot(index));
+            final Slot slot = index == 40 ? ((PlayerInventory) this).getOffhand() : getSpongeSlot(index);
+            final ItemStackSnapshot original = ItemStackUtil.snapshotOf(this.getStackInSlot(index));
+            final int result = this.addResource(index, stack);
+            final ItemStackSnapshot replacement = ItemStackUtil.snapshotOf(this.getStackInSlot(index));
             this.capturedTransactions.add(new SlotTransaction(slot, original, replacement));
             return result;
         }
@@ -289,12 +289,14 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer {
 
     }
 
+    @Override
     public void cleanupDirty() {
         if (this.timesChanged != this.lastTimesChanged) {
             this.player.openContainer.detectAndSendChanges();
         }
     }
 
+    @Override
     public void markClean() {
         this.lastTimesChanged = this.timesChanged;
     }

@@ -52,7 +52,6 @@ import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -142,7 +141,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
         final ItemStack usedStack = phaseContext.getItemUsed();
         final HandType usedHand = phaseContext.getHandUsed();
         final ItemStackSnapshot usedSnapshot = ItemStackUtil.snapshotOf(usedStack);
-        final Entity spongePlayer = EntityUtil.fromNative(player);
+        final Entity spongePlayer = (Entity) player;
         final BlockSnapshot targetBlock = phaseContext.getTargetBlock();
 
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
@@ -168,7 +167,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
                 if (ShouldFire.DROP_ITEM_EVENT_DESTRUCT) {
                     for (Map.Entry<BlockPos, Collection<EntityItem>> entry : map.asMap().entrySet()) {
                         if (!entry.getValue().isEmpty()) {
-                            final List<Entity> items = entry.getValue().stream().map(EntityUtil::fromNative).collect(Collectors.toList());
+                            final List<Entity> items = entry.getValue().stream().map(entity -> (Entity) entity).collect(Collectors.toList());
                             final DropItemEvent.Destruct event =
                                 SpongeEventFactory.createDropItemEventDestruct(Sponge.getCauseStackManager().getCurrentCause(), items);
                             SpongeImpl.postEvent(event);
@@ -191,7 +190,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
                 .acceptAndClearIfNotEmpty(items -> {
                     final ArrayList<Entity> entities = new ArrayList<>();
                     for (EntityItem item : items) {
-                        entities.add(EntityUtil.fromNative(item));
+                        entities.add((Entity) item);
                     }
                     final DropItemEvent.Dispense dispense =
                         SpongeEventFactory.createDropItemEventDispense(Sponge.getCauseStackManager().getCurrentCause(), entities);

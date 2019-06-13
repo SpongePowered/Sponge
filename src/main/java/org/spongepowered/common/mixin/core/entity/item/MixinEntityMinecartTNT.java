@@ -31,6 +31,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityMinecartTNT;
 import net.minecraft.util.DamageSource;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.entity.vehicle.minecart.TNTMinecart;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.AttackEntityEvent;
@@ -61,19 +62,19 @@ public abstract class MixinEntityMinecartTNT extends MixinEntityMinecart impleme
 
     @Shadow public abstract void ignite();
 
-    private Optional<Integer> explosionRadius = Optional.empty();
+    @Nullable private Integer explosionRadius = null;
     private int fuseDuration = 80;
     private boolean detonationCancelled;
     @Nullable private Object primeCause;
 
     @Override
     public Optional<Integer> getExplosionRadius() {
-        return this.explosionRadius;
+        return Optional.ofNullable(this.explosionRadius);
     }
 
     @Override
-    public void setExplosionRadius(Optional<Integer> radius) {
-        this.explosionRadius = radius;
+    public void setExplosionRadius(final Optional<Integer> radius) {
+        this.explosionRadius = radius.orElse(null);
     }
 
     @Override
@@ -82,7 +83,7 @@ public abstract class MixinEntityMinecartTNT extends MixinEntityMinecart impleme
     }
 
     @Override
-    public void bridge$setFuseDuration(int fuseTicks) {
+    public void bridge$setFuseDuration(final int fuseTicks) {
         this.fuseDuration = fuseTicks;
     }
 
@@ -92,28 +93,28 @@ public abstract class MixinEntityMinecartTNT extends MixinEntityMinecart impleme
     }
 
     @Override
-    public void bridge$setFuseTicksRemaining(int fuseTicks) {
+    public void bridge$setFuseTicksRemaining(final int fuseTicks) {
         this.minecartTNTFuse = fuseTicks;
     }
 
 
     @Inject(method = "attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z", at = @At("INVOKE"))
-    private void onAttack(DamageSource damageSource, float amount, CallbackInfoReturnable<Boolean> ci) {
+    private void onAttack(final DamageSource damageSource, final float amount, final CallbackInfoReturnable<Boolean> ci) {
         this.primeCause = damageSource;
     }
 
     @Inject(method = "onActivatorRailPass(IIIZ)V", at = @At("INVOKE"))
-    private void onActivate(int x, int y, int z, boolean receivingPower, CallbackInfo ci) {
+    private void onActivate(final int x, final int y, final int z, final boolean receivingPower, final CallbackInfo ci) {
         if (((WorldBridge) this.world).isFake()) {
             return;
         }
         if (receivingPower) {
-            ((ServerWorldBridge) this.world).getNotifier(x, y, z).ifPresent(notifier -> this.primeCause = notifier);
+            ((World) this.world).getNotifier(x, y, z).ifPresent(notifier -> this.primeCause = notifier);
         }
     }
 
     @Inject(method = "ignite", at = @At("INVOKE"), cancellable = true)
-    private void preIgnite(CallbackInfo ci) {
+    private void preIgnite(final CallbackInfo ci) {
         if (!bridge$shouldPrime()) {
             bridge$setFuseTicksRemaining(-1);
             ci.cancel();
@@ -121,7 +122,7 @@ public abstract class MixinEntityMinecartTNT extends MixinEntityMinecart impleme
     }
 
     @Inject(method = "ignite", at = @At("RETURN"))
-    private void postSpongeIgnite(CallbackInfo ci) {
+    private void postSpongeIgnite(final CallbackInfo ci) {
         bridge$setFuseTicksRemaining(this.fuseDuration);
         if (this.primeCause != null) {
             Sponge.getCauseStackManager().pushCause(this.primeCause);
@@ -140,10 +141,10 @@ public abstract class MixinEntityMinecartTNT extends MixinEntityMinecart impleme
         )
     )
     @Nullable
-    private net.minecraft.world.Explosion onSpongeExplode(net.minecraft.world.World worldObj, Entity self, double x, double y, double z,
-        float strength, boolean smoking) {
-        return detonate(Explosion.builder().location(new Location<>((World) worldObj, new Vector3d(x, y, z))).sourceExplosive(this)
-                .radius(this.explosionRadius.isPresent() ? this.explosionRadius.get() : strength).shouldPlaySmoke(smoking).shouldBreakBlocks(smoking))
+    private net.minecraft.world.Explosion onSpongeExplode(final net.minecraft.world.World worldObj, final Entity self, final double x, final double y, final double z,
+        final float strength, final boolean smoking) {
+        return detonate(Explosion.builder().location(new Location<>((World) worldObj, new Vector3d(x, y, z))).sourceExplosive((TNTMinecart) this)
+                .radius(this.explosionRadius != null ? this.explosionRadius : strength).shouldPlaySmoke(smoking).shouldBreakBlocks(smoking))
                         .orElseGet(() -> {
                             this.detonationCancelled = true;
                             return null;
@@ -151,17 +152,18 @@ public abstract class MixinEntityMinecartTNT extends MixinEntityMinecart impleme
     }
 
     @Inject(method = "explodeCart", at = @At("RETURN"))
-    private void postExplode(CallbackInfo ci) {
+    private void postExplode(final CallbackInfo ci) {
         if (this.detonationCancelled) {
             this.detonationCancelled = this.isDead = false;
         }
     }
 
     @Inject(method = "attackEntityFrom", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityMinecartTNT;explodeCart(D)V"))
-    private void onAttackEntityFrom(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+    private void onAttackEntityFrom(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(source);
-            AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.getCurrentCause(), new ArrayList<>(), this, 0, amount);
+            final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.getCurrentCause(), new ArrayList<>(),
+                (TNTMinecart) this, 0, amount);
             SpongeImpl.postEvent(event);
             if (event.isCancelled()) {
                 cir.setReturnValue(true);

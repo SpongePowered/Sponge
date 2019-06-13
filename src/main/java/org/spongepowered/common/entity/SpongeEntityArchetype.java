@@ -137,7 +137,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
         this.data.removeTag("Pos");
         this.data.removeTag("Dimension");
 
-        final org.spongepowered.api.entity.Entity spongeEntity = EntityUtil.fromNative(entity);
+        final org.spongepowered.api.entity.Entity spongeEntity = (org.spongepowered.api.entity.Entity) entity;
         final List<org.spongepowered.api.entity.Entity> entities = new ArrayList<>();
         entities.add(spongeEntity);
         // We require spawn types. This is more of a sanity check to throw an IllegalStateException otherwise for the plugin developer to properly associate the type.
@@ -148,12 +148,12 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
             entity.setPositionAndRotation(x, y, z, entity.rotationYaw, entity.rotationPitch);
             if (entity instanceof EntityLiving) {
                 // This is ok to force spawn since we aren't considering custom items.
-                mixinWorldServer.forceSpawnEntity(EntityUtil.fromNative(entity));
+                mixinWorldServer.forceSpawnEntity((org.spongepowered.api.entity.Entity) entity);
                 ((EntityLiving) entity).onInitialSpawn(worldServer.getDifficultyForLocation(blockPos), null);
                 ((EntityLiving) entity).spawnExplosionParticle();
             } else {
                 // This is ok to force spawn since we aren't considering custom items.
-                mixinWorldServer.forceSpawnEntity(EntityUtil.fromNative(entity));
+                mixinWorldServer.forceSpawnEntity((org.spongepowered.api.entity.Entity) entity);
             }
             return Optional.of(spongeEntity);
         }

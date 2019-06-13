@@ -40,7 +40,6 @@ import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
@@ -88,7 +87,7 @@ public final class EnchantItemPacketState extends BasicInventoryPacketState {
         final int usedButton = packetIn.getButton();
         final List<Entity> capturedItems = new ArrayList<>();
         for (EntityItem entityItem : context.getCapturedItems()) {
-            capturedItems.add(EntityUtil.fromNative(entityItem));
+            capturedItems.add((Entity) entityItem);
         }
         context.getCapturedItems().clear();
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {

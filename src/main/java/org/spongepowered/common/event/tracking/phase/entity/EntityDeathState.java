@@ -33,10 +33,9 @@ import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.world.gamerule.DefaultGameRules;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
+import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 
 import java.util.ArrayList;
 import java.util.function.BiConsumer;
@@ -89,7 +88,7 @@ final class EntityDeathState extends EntityPhaseState<EntityDeathContext> {
         context.getPerEntityItemEntityDropSupplier().acceptAndRemoveIfPresent(dyingEntity.getUniqueId(), items -> {
             final ArrayList<Entity> entities = new ArrayList<>();
             for (EntityItem item : items) {
-                entities.add(EntityUtil.fromNative(item));
+                entities.add((Entity) item);
             }
 
             if (isPlayer) {
@@ -117,7 +116,7 @@ final class EntityDeathState extends EntityPhaseState<EntityDeathContext> {
             boolean keepInventoryRule = false;
 
             if (entityPlayer != null) {
-                if (((IMixinEntityPlayerMP) entityPlayer).keepInventory()) {
+                if (((ServerPlayerEntityBridge) entityPlayer).keepInventory()) {
                     keepInventoryRule = entityPlayer.world.getGameRules().getBoolean(DefaultGameRules.KEEP_INVENTORY);
                     // Set global keep-inventory gamerule so mods do not drop items
                     entityPlayer.world.getGameRules().setOrCreateGameRule(DefaultGameRules.KEEP_INVENTORY, "true");
@@ -126,7 +125,7 @@ final class EntityDeathState extends EntityPhaseState<EntityDeathContext> {
             SpongeCommonEventFactory.callDropItemDestruct(entities, context);
 
             if (entityPlayer != null) {
-                if (((IMixinEntityPlayerMP) entityPlayer).keepInventory()) {
+                if (((ServerPlayerEntityBridge) entityPlayer).keepInventory()) {
                     // Restore global keep-inventory gamerule
                     entityPlayer.world.getGameRules().setOrCreateGameRule(DefaultGameRules.KEEP_INVENTORY, String.valueOf(keepInventoryRule));
                 }

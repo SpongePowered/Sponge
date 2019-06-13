@@ -67,7 +67,8 @@ public abstract class MixinSpongeUser implements User, IMixinSubject, IUserOrEnt
     @Shadow private boolean invulnerable;
     @Shadow private boolean isVanished;
 
-    @Shadow protected abstract void markDirty();
+    @Shadow
+    public abstract void markDirty();
 
     @Shadow protected abstract SpongeUser loadEnderInventory();
 

@@ -29,7 +29,6 @@ import org.spongepowered.api.block.tileentity.FlowerPot;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.mixin.core.tileentity.MixinTileEntity;
 
 import java.util.List;
 import java.util.Optional;

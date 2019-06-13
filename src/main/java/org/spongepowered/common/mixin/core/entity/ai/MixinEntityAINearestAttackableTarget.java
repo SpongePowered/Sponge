@@ -39,8 +39,8 @@ public abstract class MixinEntityAINearestAttackableTarget extends MixinEntityAI
         implements FindNearestAttackableTargetAITask {
 
     @Shadow protected Class targetClass;
-    @Shadow private int targetChance;
-    @Shadow protected Predicate targetEntitySelector;
+    @Shadow protected int targetChance;
+    @Shadow public Predicate targetEntitySelector;
 
     @SuppressWarnings("unchecked")
     @Override

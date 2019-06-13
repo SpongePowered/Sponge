@@ -89,8 +89,9 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.tab.TabList;
 import org.spongepowered.api.event.Cancellable;
-import org.spongepowered.api.event.CauseStackManager.StackFrame;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.living.humanoid.ChangeGameModeEvent;
 import org.spongepowered.api.event.entity.living.humanoid.player.PlayerChangeClientSettingsEvent;
@@ -139,8 +140,8 @@ import org.spongepowered.common.interfaces.IMixinServerScoreboard;
 import org.spongepowered.common.interfaces.IMixinSubject;
 import org.spongepowered.common.interfaces.IMixinTeam;
 import org.spongepowered.common.bridge.entity.EntityBridge;
-import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
-import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
+import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
+import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
@@ -155,13 +156,14 @@ import org.spongepowered.common.world.border.PlayerOwnBorderListener;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 
 import javax.annotation.Nullable;
 
 @Mixin(EntityPlayerMP.class)
-public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements IMixinSubject, IMixinEntityPlayerMP, IMixinCommandSender,
+public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements IMixinSubject, ServerPlayerEntityBridge, IMixinCommandSender,
         IMixinCommandSource {
 
     @Shadow @Final public MinecraftServer server;
@@ -188,7 +190,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
 
     // Inventory
     @Shadow public abstract void closeScreen();
-    @Shadow public int currentWindowId;
+    @Shadow private int currentWindowId;
     @Shadow private void getNextWindowId() { }
 
     @Shadow public abstract void closeContainer();
@@ -205,7 +207,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
     // Used to restore original item received in a packet after canceling an event
     private ItemStack packetItem;
 
-    private User user = getUserObject();
+    @Nullable private User user = getUserObject();
 
     private Set<SkinPart> skinParts = Sets.newHashSet();
     private int viewDistance;
@@ -220,7 +222,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
     private double healthScale = 20;
 
     @Override
-    public void spongeImpl$writeToSpongeCompound(NBTTagCompound compound) {
+    public void spongeImpl$writeToSpongeCompound(final NBTTagCompound compound) {
         super.spongeImpl$writeToSpongeCompound(compound);
         if (this.healthScaling) {
             compound.setDouble(NbtDataUtil.HEALTH_SCALE, this.healthScale);
@@ -228,7 +230,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
     }
 
     @Override
-    public void spongeImpl$readFromSpongeCompound(NBTTagCompound compound) {
+    public void spongeImpl$readFromSpongeCompound(final NBTTagCompound compound) {
         super.spongeImpl$readFromSpongeCompound(compound);
         if (compound.hasKey(NbtDataUtil.HEALTH_SCALE, NbtDataUtil.TAG_DOUBLE)) {
             this.healthScaling = true;
@@ -241,7 +243,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
 
     @Inject(method = "removeEntity", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/network/NetHandlerPlayServer;sendPacket(Lnet/minecraft/network/Packet;)V"))
-    private void onRemoveEntity(Entity entityIn, CallbackInfo ci) {
+    private void onRemoveEntity(final Entity entityIn, final CallbackInfo ci) {
         if (entityIn instanceof EntityHuman) {
             ((EntityHuman) entityIn).onRemovedFrom((EntityPlayerMP) (Object) this);
         }
@@ -262,14 +264,14 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
      */
     @Override
     @Overwrite
-    public void onDeath(DamageSource cause) {
+    public void onDeath(final DamageSource cause) {
         // Sponge start
         final boolean isMainThread = Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
-        Optional<DestructEntityEvent.Death> optEvent = SpongeCommonEventFactory.callDestructEntityEventDeath((EntityPlayerMP) (Object) this, cause, isMainThread);
+        final Optional<DestructEntityEvent.Death> optEvent = SpongeCommonEventFactory.callDestructEntityEventDeath((EntityPlayerMP) (Object) this, cause, isMainThread);
         if (optEvent.map(Cancellable::isCancelled).orElse(true)) {
             return;
         }
-        DestructEntityEvent.Death event = optEvent.get();
+        final DestructEntityEvent.Death event = optEvent.get();
 
         // Double check that the PhaseTracker is already capturing the Death phase
         final boolean tracksEntityDeaths;
@@ -278,17 +280,17 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
         } else {
             tracksEntityDeaths = false;
         }
-        try (PhaseContext<?> context = createContextForDeath(cause, tracksEntityDeaths)) {
+        try (final PhaseContext<?> context = createContextForDeath(cause, tracksEntityDeaths)) {
             if (context != null) {
                 context.buildAndSwitch();
             }
             // Sponge end
 
-            boolean flag = this.world.getGameRules().getBoolean("showDeathMessages");
+            final boolean flag = this.world.getGameRules().getBoolean("showDeathMessages");
             this.connection.sendPacket(new SPacketCombatEvent(this.getCombatTracker(), SPacketCombatEvent.Event.ENTITY_DIED, flag));
 
             if (flag) {
-                Team team = this.getTeam();
+                final Team team = this.getTeam();
 
                 if (team != null && team.getDeathMessageVisibility() != Team.EnumVisible.ALWAYS) {
                     if (team.getDeathMessageVisibility() == Team.EnumVisible.HIDE_FOR_OTHER_TEAMS) {
@@ -311,15 +313,15 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
                 this.inventory.dropAllItems();
             }
 
-            for (ScoreObjective scoreobjective : this.getWorldScoreboard().getObjectivesFromCriteria(IScoreCriteria.DEATH_COUNT)) {
-                Score score = this.getWorldScoreboard().getOrCreateScore(this.getName(), scoreobjective);
+            for (final ScoreObjective scoreobjective : this.getWorldScoreboard().getObjectivesFromCriteria(IScoreCriteria.DEATH_COUNT)) {
+                final Score score = this.getWorldScoreboard().getOrCreateScore(this.getName(), scoreobjective);
                 score.incrementScore();
             }
 
-            EntityLivingBase entitylivingbase = this.getAttackingEntity();
+            final EntityLivingBase entitylivingbase = this.getAttackingEntity();
 
             if (entitylivingbase != null) {
-                EntityList.EntityEggInfo entitylist$entityegginfo = EntityList.ENTITY_EGGS.get(EntityList.getKey(entitylivingbase));
+                final EntityList.EntityEggInfo entitylist$entityegginfo = EntityList.ENTITY_EGGS.get(EntityList.getKey(entitylivingbase));
 
                 if (entitylist$entityegginfo != null) {
                     this.addStat(entitylist$entityegginfo.entityKilledByStat);
@@ -339,7 +341,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
     }
 
     @Nullable
-    private PhaseContext<?> createContextForDeath(DamageSource cause, boolean tracksEntityDeaths) {
+    private PhaseContext<?> createContextForDeath(final DamageSource cause, final boolean tracksEntityDeaths) {
         return !tracksEntityDeaths
                ? EntityPhase.State.DEATH.createPhaseContext()
                    .source(this)
@@ -348,11 +350,11 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
     }
 
     @Inject(method = "copyFrom", at = @At("HEAD"))
-    public void onClonePlayer(EntityPlayerMP oldPlayer, boolean respawnFromEnd, CallbackInfo ci) {
+    private void onClonePlayer(final EntityPlayerMP oldPlayer, final boolean respawnFromEnd, final CallbackInfo ci) {
         // Copy over sponge data from the old player.
         // Allows plugins to specify data that persists after players respawn.
-        EntityBridge oldEntity = (EntityBridge) oldPlayer;
-        NBTTagCompound old = oldEntity.getEntityData();
+        final EntityBridge oldEntity = (EntityBridge) oldPlayer;
+        final NBTTagCompound old = oldEntity.getEntityData();
         if (old.hasKey(NbtDataUtil.SPONGE_DATA)) {
             this.getEntityData().setTag(NbtDataUtil.SPONGE_DATA, old.getCompoundTag(NbtDataUtil.SPONGE_DATA));
             this.spongeImpl$readFromSpongeCompound(this.getSpongeData());
@@ -360,8 +362,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
     }
 
     @Redirect(method = "copyFrom", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z"))
-    private boolean keepInventory(GameRules gameRules, String key, EntityPlayerMP corpse, boolean keepEverything) {
-        boolean keep = ((IMixinEntityPlayer) corpse).keepInventory(); // Override Keep Inventory GameRule?
+    private boolean keepInventory(final GameRules gameRules, final String key, final EntityPlayerMP corpse, final boolean keepEverything) {
+        final boolean keep = ((PlayerEntityBridge) corpse).keepInventory(); // Override Keep Inventory GameRule?
         if (!keep) {
             // Copy corpse inventory to respawned player
             this.inventory.copyInventory(corpse.inventory);
@@ -401,7 +403,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
      */
     @Override
     @Overwrite
-    public void wakeUpPlayer(boolean immediately, boolean updateWorldFlag, boolean setSpawn) {
+    public void wakeUpPlayer(final boolean immediately, final boolean updateWorldFlag, final boolean setSpawn) {
         // Sponge start - enter phase
         try (final BasicEntityContext basicEntityContext = EntityPhase.State.PLAYER_WAKE_UP.createPhaseContext()
                 .source(this)
@@ -424,7 +426,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
 
     @Override
     public void forceRecreateUser() {
-        UserStorageService service = SpongeImpl.getGame().getServiceManager().provideUnchecked(UserStorageService.class);
+        final UserStorageService service = SpongeImpl.getGame().getServiceManager().provideUnchecked(UserStorageService.class);
         if (!(service instanceof SpongeUserStorageService)) {
             SpongeImpl.getLogger().error("Not re-creating User object for player {}, as UserStorageServer has been replaced with {}", this.getName(), service);
         } else {
@@ -448,19 +450,28 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
     }
 
     // Post before the player values are updated
+    @SuppressWarnings("ConstantConditions")
     @Inject(method = "handleClientSettings", at = @At("HEAD"))
-    public void postClientSettingsEvent(CPacketClientSettings packet, CallbackInfo ci) {
-        // TODO: add HandPreference to PlayerChangeClientSettingsEvent once DominantHandData is implemented
-        Sponge.getCauseStackManager().pushCause(this);
-        final PlayerChangeClientSettingsEvent event = SpongeEventFactory.createPlayerChangeClientSettingsEvent(Sponge.getCauseStackManager().getCurrentCause(),
-                (ChatVisibility) (Object) packet.getChatVisibility(), SkinUtil.fromFlags(packet.getModelPartFlags()),
-                LocaleCache.getLocale(packet.getLang()), this, packet.isColorsEnabled(), packet.view);
-        SpongeImpl.postEvent(event);
-        Sponge.getCauseStackManager().popCause();
+    private void postClientSettingsEvent(final CPacketClientSettings packet, final CallbackInfo ci) {
+        if (ShouldFire.PLAYER_CHANGE_CLIENT_SETTINGS) {
+            final CauseStackManager csm = Sponge.getCauseStackManager();
+            csm.pushCause(this);
+            try {
+                final Cause cause = csm.getCurrentCause();
+                final Set<SkinPart> skinParts = SkinUtil.fromFlags(packet.getModelPartFlags());
+                final Locale locale = LocaleCache.getLocale(packet.getLang());
+                final ChatVisibility visibility = (ChatVisibility) (Object) packet.getChatVisibility();
+                final PlayerChangeClientSettingsEvent event = SpongeEventFactory.createPlayerChangeClientSettingsEvent(cause, visibility, skinParts,
+                    locale, (Player) this, packet.isColorsEnabled(), packet.view);
+                SpongeImpl.postEvent(event);
+            } finally {
+                csm.popCause();
+            }
+        }
     }
 
     @Inject(method = "handleClientSettings", at = @At("RETURN"))
-    public void captureClientSettings(CPacketClientSettings packet, CallbackInfo ci) {
+    private void impl$updateSkinFromPacket(final CPacketClientSettings packet, final CallbackInfo ci) {
         this.skinParts = SkinUtil.fromFlags(packet.getModelPartFlags()); // Returned set is immutable
         this.viewDistance = packet.view;
     }
@@ -470,17 +481,17 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
      *
      * @reason Redirect messages sent to the player to fire a message event. Once the
      * event is handled, it will send the message to
-     * {@link #sendMessage(ChatType, Text)}.
+     * {@link Player#sendMessage(ChatType, Text)}.
      *
      * @param component The message
      */
     @Overwrite
-    public void sendMessage(ITextComponent component) {
+    public void sendMessage(final ITextComponent component) {
         if (this.isFake) {
             // Don't bother sending messages to fake players
             return;
         }
-        ChatUtil.sendMessage(component, MessageChannel.fixed(this), (CommandSource) this.server, false);
+        ChatUtil.sendMessage(component, MessageChannel.fixed((Player) this), (CommandSource) this.server, false);
     }
 
     /**
@@ -504,7 +515,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
     }
 
     @Override
-    public Tristate permDefault(String permission) {
+    public Tristate permDefault(final String permission) {
         return ((IMixinSubject) this.user).permDefault(permission);
     }
 
@@ -517,7 +528,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
     }
 
     @Override
-    public void setPacketItem(ItemStack itemstack) {
+    public void setPacketItem(final ItemStack itemstack) {
         this.packetItem = itemstack;
     }
 
@@ -527,14 +538,14 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
     }
 
     @Override
-    public void restorePacketItem(EnumHand hand) {
+    public void restorePacketItem(final EnumHand hand) {
         if (this.packetItem.isEmpty()) {
             return;
         }
 
         this.isChangingQuantityOnly = true;
         this.setHeldItem(hand, this.packetItem);
-        Slot slot = this.openContainer.getSlotFromInventory(this.inventory, this.inventory.currentItem);
+        final Slot slot = this.openContainer.getSlotFromInventory(this.inventory, this.inventory.currentItem);
         this.openContainer.detectAndSendChanges();
         this.isChangingQuantityOnly = false;
         // force client itemstack update if place event was cancelled
@@ -547,7 +558,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
     }
 
     @Override
-    public void setScoreboardOnRespawn(Scoreboard scoreboard) {
+    public void setScoreboardOnRespawn(final Scoreboard scoreboard) {
         this.spongeScoreboard = scoreboard;
         ((IMixinServerScoreboard) this.spongeScoreboard).addPlayer((EntityPlayerMP) (Object) this, false);
     }
@@ -561,9 +572,9 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
 
     @Override
     public MessageChannel getDeathMessageChannel() {
-        EntityPlayerMP player = (EntityPlayerMP) (Object) this;
+        final EntityPlayerMP player = (EntityPlayerMP) (Object) this;
         if (player.world.getGameRules().getBoolean("showDeathMessages")) {
-            @Nullable Team team = player.getTeam();
+            @Nullable final Team team = player.getTeam();
 
             if (team != null && team.getDeathMessageVisibility() != Team.EnumVisible.ALWAYS) {
                 if (team.getDeathMessageVisibility() == Team.EnumVisible.HIDE_FOR_OTHER_TEAMS) {
@@ -585,7 +596,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
     }
 
     @Inject(method = "markPlayerActive()V", at = @At("HEAD"))
-    private void onPlayerActive(CallbackInfo ci) {
+    private void onPlayerActive(final CallbackInfo ci) {
         ((IMixinNetHandlerPlayServer) this.connection).resendLatestResourcePackRequest();
     }
 
@@ -600,23 +611,23 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
     }
 
     @Override
-    public void setImplVelocity(Vector3d velocity) {
+    public void setImplVelocity(final Vector3d velocity) {
         super.setImplVelocity(velocity);
         this.velocityOverride = null;
     }
 
     @Override
-    public void setVelocityOverride(@Nullable Vector3d velocity) {
+    public void setVelocityOverride(@Nullable final Vector3d velocity) {
         this.velocityOverride = velocity;
     }
 
     @SuppressWarnings("ConstantConditions")
     @Inject(method = "setGameType(Lnet/minecraft/world/GameType;)V", at = @At("HEAD"), cancellable = true)
-    private void spongeImpl$onSetGameTypeThrowEvent(GameType gameType, CallbackInfo ci) {
+    private void spongeImpl$onSetGameTypeThrowEvent(final GameType gameType, final CallbackInfo ci) {
         if (ShouldFire.CHANGE_GAME_MODE_EVENT_TARGET_PLAYER) {
-            try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(this);
-                ChangeGameModeEvent.TargetPlayer event =
+                final ChangeGameModeEvent.TargetPlayer event =
                     SpongeEventFactory.createChangeGameModeEventTargetPlayer(frame.getCurrentCause(),
                         (GameMode) (Object) this.interactionManager.getGameType(), (GameMode) (Object) gameType, (Player) this);
                 SpongeImpl.postEvent(event);
@@ -635,18 +646,18 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
      * local variable in the method.
      */
     @ModifyVariable(method = "setGameType(Lnet/minecraft/world/GameType;)V", at = @At(value = "HEAD", remap = false), argsOnly = true)
-    private GameType spongeImpl$assignPendingGameType(GameType gameType) {
+    private GameType spongeImpl$assignPendingGameType(final GameType gameType) {
         return this.pendingGameType;
     }
 
     @Redirect(method = "onDeath", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z", ordinal = 0))
-    private boolean spongeImpl$SuppressDeathMessageDueToPriorEvent(GameRules gameRules, String gameRule) {
+    private boolean spongeImpl$SuppressDeathMessageDueToPriorEvent(final GameRules gameRules, final String gameRule) {
         return false; // Suppress death messages since this is handled together with the event calling
     }
 
     @Override
-    public void setTargetedLocation(@Nullable Vector3d vec) {
+    public void setTargetedLocation(@Nullable final Vector3d vec) {
         super.setTargetedLocation(vec);
         this.connection.sendPacket(new SPacketSpawnPosition(VecHelper.toBlockPos(this.getTargetedLocation())));
     }
@@ -658,12 +669,12 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
     }
 
     @Override
-    public void setDisplayName(@Nullable Text displayName) {
+    public void setDisplayName(@Nullable final Text displayName) {
         // Do nothing
     }
 
     @Override
-    public void sendBlockChange(BlockPos pos, IBlockState state) {
+    public void sendBlockChange(final BlockPos pos, final IBlockState state) {
         final SPacketBlockChange packet = new SPacketBlockChange();
         packet.blockPosition = pos;
         packet.blockState = state;
@@ -679,18 +690,18 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
      */
     @Override
     @Nullable
-    public EntityItem dropItem(boolean dropAll) {
+    public EntityItem dropItem(final boolean dropAll) {
         final ItemStack currentItem = this.inventory.getCurrentItem();
         if (currentItem.isEmpty()) {
             return null;
         }
 
         // Add SlotTransaction to PlayerContainer
-        org.spongepowered.api.item.inventory.Slot slot = ((Inventory) this.inventoryContainer)
+        final org.spongepowered.api.item.inventory.Slot slot = ((Inventory) this.inventoryContainer)
                 .query(QueryOperationTypes.INVENTORY_TYPE.of(Hotbar.class))
                 .query(QueryOperationTypes.INVENTORY_PROPERTY.of(SlotIndex.of(this.inventory.currentItem)));
         final ItemStackSnapshot originalItem = ItemStackUtil.snapshotOf(currentItem);
-        ItemStack itemToDrop = this.inventory.decrStackSize(this.inventory.currentItem, dropAll && !currentItem.isEmpty() ? currentItem.getCount() : 1);
+        final ItemStack itemToDrop = this.inventory.decrStackSize(this.inventory.currentItem, dropAll && !currentItem.isEmpty() ? currentItem.getCount() : 1);
         ((ContainerBridge) this.inventoryContainer).bridge$getCapturedSlotTransactions().add(new SlotTransaction(slot, originalItem, ItemStackUtil.snapshotOf(this.inventory.getCurrentItem())));
 
         return this.dropItem(itemToDrop, false, true);
@@ -708,8 +719,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
     }
 
     @Inject(method = "closeContainer", at = @At("RETURN"))
-    public void onCloseContainer(CallbackInfo ci) {
-        ContainerBridge mixinContainer = (ContainerBridge) this.openContainer;
+    private void onCloseContainer(final CallbackInfo ci) {
+        final ContainerBridge mixinContainer = (ContainerBridge) this.openContainer;
         // Safety measure to avoid memory leaks as mods may call this directly
         if (mixinContainer.capturingInventory()) {
             mixinContainer.setCaptureInventory(false);
@@ -718,7 +729,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
     }
 
     @Inject(method = "displayGUIChest", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/EntityPlayerMP;openContainer:Lnet/minecraft/inventory/Container;", opcode = Opcodes.PUTFIELD, ordinal = 1, shift = At.Shift.AFTER))
-    public void onSetContainer(IInventory chestInventory, CallbackInfo ci) {
+    private void onSetContainer(final IInventory chestInventory, final CallbackInfo ci) {
         if (!(chestInventory instanceof IInteractionObject) && this.openContainer instanceof ContainerChest && this.isSpectator()) {
             SpongeImpl.getLogger().warn("Opening fallback ContainerChest for inventory '{}'. Most API inventory methods will not be supported", chestInventory);
             ((ContainerBridge) this.openContainer).setSpectatorChest(true);
@@ -738,7 +749,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
      * @reason Vanilla is not updating the Client when Slot is SlotCrafting - this is an issue when plugins register new recipes
      */
     @Inject(method = "sendSlotContents", at = @At("HEAD"))
-    private void sendSlotContents(net.minecraft.inventory.Container containerToSend, int slotInd, ItemStack stack, CallbackInfo ci) {
+    private void sendSlotContents(
+        final net.minecraft.inventory.Container containerToSend, final int slotInd, final ItemStack stack, final CallbackInfo ci) {
         if (containerToSend.getSlot(slotInd) instanceof SlotCrafting) {
             this.connection.sendPacket(new SPacketSetSlot(containerToSend.windowId, slotInd, stack));
         }
@@ -760,17 +772,17 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
                     )
             )
     )
-    private float spongeGetScaledHealthForPacket(EntityPlayerMP entityPlayerMP) {
+    private float spongeGetScaledHealthForPacket(final EntityPlayerMP entityPlayerMP) {
         return getInternalScaledHealth();
     }
 
     @Inject(method = "onUpdateEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;getTotalArmorValue()I", ordinal = 0))
-    private void updateHealthPriorToArmor(CallbackInfo ci) {
+    private void updateHealthPriorToArmor(final CallbackInfo ci) {
         refreshScaledHealth();
     }
 
     @Override
-    public void setHealthScale(double scale) {
+    public void setHealthScale(final double scale) {
         checkArgument(scale > 0, "Health scale must be greater than 0!");
         checkArgument(scale < Float.MAX_VALUE, "Health scale cannot exceed Float.MAX_VALUE!");
         this.healthScale = scale;
@@ -794,12 +806,12 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
 
     }
 
-    public void sendHealthUpdate() {
+    private void sendHealthUpdate() {
         this.connection.sendPacket(new SPacketUpdateHealth(getInternalScaledHealth(), getFoodStats().getFoodLevel(), getFoodStats().getSaturationLevel()));
     }
 
     @Override
-    public void injectScaledHealth(Collection<IAttributeInstance> set, boolean force) {
+    public void injectScaledHealth(final Collection<IAttributeInstance> set, final boolean force) {
         if (!this.healthScaling && !force) {
             return;
         }
@@ -809,7 +821,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
         boolean foundMax = false; // Sometimes the max health isn't modified and no longer dirty
         for (final Iterator<IAttributeInstance> iter = set.iterator(); iter.hasNext(); ) {
             final IAttributeInstance dirtyInstance = iter.next();
-            if (dirtyInstance.getAttribute().getName().equals("generic.maxHealth")) {
+            if ("generic.maxHealth".equals(dirtyInstance.getAttribute().getName())) {
                 foundMax = true;
                 modifiers = dirtyInstance.getModifiers();
                 iter.remove();
@@ -842,8 +854,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
         return this.healthScale;
     }
 
-    float cachedHealth = -1;
-    float cachedScaledHealth = -1;
+    private float cachedHealth = -1;
+    private float cachedScaledHealth = -1;
 
     @Override
     public float getInternalScaledHealth() {
@@ -861,17 +873,17 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
             final IAttributeInstance maxAttribute = this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH);
             double modifiedScale = (float) this.healthScale;
             // Apply additive modifiers
-            for (AttributeModifier attributemodifier : maxAttribute.getModifiersByOperation(0)) {
+            for (final AttributeModifier attributemodifier : maxAttribute.getModifiersByOperation(0)) {
                 modifiedScale += attributemodifier.getAmount();
             }
 
 
             // Apply
-            for (AttributeModifier attributemodifier1 : maxAttribute.getModifiersByOperation(1)) {
+            for (final AttributeModifier attributemodifier1 : maxAttribute.getModifiersByOperation(1)) {
                 modifiedScale += modifiedScale * attributemodifier1.getAmount();
             }
 
-            for (AttributeModifier attributemodifier2 : maxAttribute.getModifiersByOperation(2)) {
+            for (final AttributeModifier attributemodifier2 : maxAttribute.getModifiersByOperation(2)) {
                 modifiedScale *= 1.0D + attributemodifier2.getAmount();
             }
 
@@ -888,7 +900,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
     }
 
     @Override
-    public void setHealthScaled(boolean scaled) {
+    public void setHealthScaled(final boolean scaled) {
         this.healthScaling = scaled;
     }
 
@@ -898,7 +910,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
     }
 
     @Redirect(method = "readEntityFromNBT", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getForceGamemode()Z"))
-    private boolean onCheckForcedGameMode(MinecraftServer minecraftServer) {
+    private boolean onCheckForcedGameMode(final MinecraftServer minecraftServer) {
         return minecraftServer.getForceGamemode() && !hasForcedGamemodeOverridePermission();
     }
 
@@ -911,12 +923,12 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
     @Nullable private Text displayName = null;
 
     @Override
-    public void setContainerDisplay(Text displayName) {
+    public void setContainerDisplay(final Text displayName) {
         this.displayName = displayName;
     }
 
     @Redirect(method = "displayGUIChest", at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/IInventory;getDisplayName()Lnet/minecraft/util/text/ITextComponent;"))
-    private ITextComponent onGetDisplayName(IInventory chestInventory) {
+    private ITextComponent onGetDisplayName(final IInventory chestInventory) {
         if (this.displayName == null) {
             return chestInventory.getDisplayName();
         }
@@ -924,7 +936,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
     }
 
     @Redirect(method = "displayGui", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/IInteractionObject;getDisplayName()Lnet/minecraft/util/text/ITextComponent;"))
-    private ITextComponent onGetDisplayName2(IInteractionObject guiOwner) {
+    private ITextComponent onGetDisplayName2(final IInteractionObject guiOwner) {
         if (this.displayName == null) {
             return guiOwner.getDisplayName();
         }
@@ -932,7 +944,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
     }
 
     @Redirect(method = "openGuiHorseInventory", at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/IInventory;getDisplayName()Lnet/minecraft/util/text/ITextComponent;"))
-    private ITextComponent onGetDisplayName3(IInventory inventoryIn) {
+    private ITextComponent onGetDisplayName3(final IInventory inventoryIn) {
         if (this.displayName == null) {
             return inventoryIn.getDisplayName();
         }
@@ -940,7 +952,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
     }
 
     @Redirect(method = "displayVillagerTradeGui", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/IMerchant;getDisplayName()Lnet/minecraft/util/text/ITextComponent;"))
-    private ITextComponent onGetDisplayName4(IMerchant villager) {
+    private ITextComponent onGetDisplayName4(final IMerchant villager) {
         if (this.displayName == null) {
             return villager.getDisplayName();
         }
@@ -948,7 +960,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
     }
 
     @Inject(method = "canAttackPlayer", at = @At("HEAD"), cancellable = true)
-    private void onCanAttackPlayer(EntityPlayer other, CallbackInfoReturnable<Boolean> cir) {
+    private void onCanAttackPlayer(final EntityPlayer other, final CallbackInfoReturnable<Boolean> cir) {
         final boolean worldPVP = ((WorldProperties) other.world.getWorldInfo()).isPVPEnabled();
 
         if (!worldPVP) {

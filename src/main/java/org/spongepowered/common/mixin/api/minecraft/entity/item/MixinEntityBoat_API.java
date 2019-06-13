@@ -25,15 +25,12 @@
 package org.spongepowered.common.mixin.api.minecraft.entity.item;
 
 import net.minecraft.entity.item.EntityBoat;
-import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.mutable.block.TreeData;
 import org.spongepowered.api.data.type.TreeTypes;
 import org.spongepowered.api.entity.vehicle.Boat;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeTreeData;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.mixin.api.minecraft.entity.MixinEntity_API;
 
 import java.util.List;
@@ -50,7 +47,7 @@ public abstract class MixinEntityBoat_API extends MixinEntity_API implements Boa
     private double unoccupiedDecelerationSpeed = 0.8D;
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(List<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         final EntityBoat.Type boatType = this.getBoatType();
         if (boatType == EntityBoat.Type.OAK) {

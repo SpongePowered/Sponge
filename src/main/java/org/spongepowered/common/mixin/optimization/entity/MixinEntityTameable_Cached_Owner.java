@@ -31,14 +31,14 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.mixin.core.entity.passive.MixinEntityAnimal;
+import org.spongepowered.common.mixin.api.minecraft.entity.passive.MixinEntityAnimal_API;
 
 import java.util.UUID;
 
 import javax.annotation.Nullable;
 
 @Mixin(EntityTameable.class)
-public abstract class MixinEntityTameable_Cached_Owner extends MixinEntityAnimal {
+public abstract class MixinEntityTameable_Cached_Owner extends MixinEntityAnimal_API {
 
     @Shadow @Final protected static DataParameter<Optional<UUID>> OWNER_UNIQUE_ID;
     @Nullable private UUID cachedOwnerId;

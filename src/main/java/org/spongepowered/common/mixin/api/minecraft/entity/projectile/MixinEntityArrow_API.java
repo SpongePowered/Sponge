@@ -58,7 +58,7 @@ public abstract class MixinEntityArrow_API extends MixinEntity_API implements Ar
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(List<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(getKnockbackData());
     }

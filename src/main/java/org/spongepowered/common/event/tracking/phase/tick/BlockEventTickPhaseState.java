@@ -46,7 +46,6 @@ import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -146,7 +145,7 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
                     .acceptAndClearIfNotEmpty(items -> {
                         final ArrayList<Entity> capturedEntities = new ArrayList<>();
                         for (EntityItem entity : items) {
-                            capturedEntities.add(EntityUtil.fromNative(entity));
+                            capturedEntities.add((Entity) entity);
                         }
                         SpongeCommonEventFactory.callSpawnEntity(capturedEntities, context);
                     });

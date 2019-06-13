@@ -39,7 +39,6 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongePassengerD
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
 import org.spongepowered.common.data.value.mutable.SpongeListValue;
-import org.spongepowered.common.entity.EntityUtil;
 
 import java.util.List;
 import java.util.Optional;
@@ -58,7 +57,7 @@ public class PassengerDataProcessor extends AbstractEntitySingleDataProcessor<ne
                 .map((uuid -> ((World) entity.getEntityWorld()).getEntity(uuid)))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .map(EntityUtil::toNative)
+                .map(tickingEntity -> (net.minecraft.entity.Entity) tickingEntity)
                 .collect(Collectors.toList());
 
         for (net.minecraft.entity.Entity passenger : passengers) {
@@ -76,7 +75,7 @@ public class PassengerDataProcessor extends AbstractEntitySingleDataProcessor<ne
         }
         final List<UUID> passengers = dataHolder.getPassengers()
                 .stream()
-                .map(EntityUtil::fromNative)
+                .map(entity -> (Entity) entity)
                 .map(Entity::getUniqueId)
                 .collect(Collectors.toList());
         return Optional.of(passengers);
@@ -99,7 +98,7 @@ public class PassengerDataProcessor extends AbstractEntitySingleDataProcessor<ne
             if (entity.getPassengers().isEmpty()) {
                 final ImmutableList<UUID> passengers = entity.getPassengers()
                         .stream()
-                        .map(EntityUtil::fromNative)
+                        .map(entity1 -> (Entity) entity1)
                         .map(Entity::getUniqueId)
                         .collect(ImmutableList.toImmutableList());
                 entity.removePassengers();

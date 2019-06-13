@@ -45,8 +45,9 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.explosive.Explosive;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.world.ExplosionEvent;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -61,26 +62,24 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.CaptureBlockPos;
-import org.spongepowered.common.interfaces.world.IMixinExplosion;
+import org.spongepowered.common.bridge.world.ExplosionBridge;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 
 import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.world.Explosion.class)
-public abstract class MixinExplosion implements Explosion, IMixinExplosion {
+public abstract class MixinExplosion implements ExplosionBridge {
 
     public Vector3d origin;
     public Vec3d position; // Added for Forge
@@ -101,9 +100,9 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
     @Shadow public float size;
 
     @Inject(method = "<init>*", at = @At("RETURN"))
-    private void onConstructed(net.minecraft.world.World world, Entity entity, double originX, double originY,
-            double originZ, float radius, boolean isFlaming, boolean isSmoking,
-            CallbackInfo ci) {
+    private void onConstructed(final net.minecraft.world.World world, final Entity entity, final double originX, final double originY,
+            final double originZ, final float radius, final boolean isFlaming, final boolean isSmoking,
+            final CallbackInfo ci) {
         this.origin = new Vector3d(this.x, this.y, this.z);
         // In Vanilla and Forge, 'damagesTerrain' controls both smoke particles and block damage
         // Sponge-created explosions will explicitly set 'shouldBreakBlocks' to its proper value
@@ -122,8 +121,8 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
         // Sponge Start - If the explosion should not break blocks, don't bother calculating it
         if (this.shouldBreakBlocks) {
             // Sponge End
-            Set<BlockPos> set = Sets.<BlockPos>newHashSet();
-            int i = 16;
+            final Set<BlockPos> set = Sets.<BlockPos>newHashSet();
+            final int i = 16;
 
             for (int j = 0; j < 16; ++j) {
                 for (int k = 0; k < 16; ++k) {
@@ -132,7 +131,7 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
                             double d0 = (double) ((float) j / 15.0F * 2.0F - 1.0F);
                             double d1 = (double) ((float) k / 15.0F * 2.0F - 1.0F);
                             double d2 = (double) ((float) l / 15.0F * 2.0F - 1.0F);
-                            double d3 = Math.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
+                            final double d3 = Math.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
                             d0 = d0 / d3;
                             d1 = d1 / d3;
                             d2 = d2 / d3;
@@ -141,12 +140,12 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
                             double d6 = this.y;
                             double d8 = this.z;
 
-                            for (float f1 = 0.3F; f > 0.0F; f -= 0.22500001F) {
-                                BlockPos blockpos = new BlockPos(d4, d6, d8);
-                                IBlockState iblockstate = this.world.getBlockState(blockpos);
+                            for (final float f1 = 0.3F; f > 0.0F; f -= 0.22500001F) {
+                                final BlockPos blockpos = new BlockPos(d4, d6, d8);
+                                final IBlockState iblockstate = this.world.getBlockState(blockpos);
 
                                 if (iblockstate.getMaterial() != Material.AIR) {
-                                    float f2 = this.exploder != null
+                                    final float f2 = this.exploder != null
                                                ? this.exploder.getExplosionResistance((net.minecraft.world.Explosion) (Object) this
                                             , this.world, blockpos, iblockstate)
                                                : iblockstate.getBlock().getExplosionResistance((Entity) null);
@@ -169,35 +168,34 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
 
             this.affectedBlockPositions.addAll(set);
         } // Sponge - Finish if statement
-        float f3 = this.size * 2.0F;
-        int k1 = MathHelper.floor(this.x - (double) f3 - 1.0D);
-        int l1 = MathHelper.floor(this.x + (double) f3 + 1.0D);
-        int i2 = MathHelper.floor(this.y - (double) f3 - 1.0D);
-        int i1 = MathHelper.floor(this.y + (double) f3 + 1.0D);
-        int j2 = MathHelper.floor(this.z - (double) f3 - 1.0D);
-        int j1 = MathHelper.floor(this.z + (double) f3 + 1.0D);
+        final float f3 = this.size * 2.0F;
+        final int k1 = MathHelper.floor(this.x - (double) f3 - 1.0D);
+        final int l1 = MathHelper.floor(this.x + (double) f3 + 1.0D);
+        final int i2 = MathHelper.floor(this.y - (double) f3 - 1.0D);
+        final int i1 = MathHelper.floor(this.y + (double) f3 + 1.0D);
+        final int j2 = MathHelper.floor(this.z - (double) f3 - 1.0D);
+        final int j1 = MathHelper.floor(this.z + (double) f3 + 1.0D);
 
         // Sponge Start - Check if this explosion should damage entities
-        List<Entity> list = this.shouldDamageEntities
+        final List<Entity> list = this.shouldDamageEntities
                             ? this.world.getEntitiesWithinAABBExcludingEntity(this.exploder, new AxisAlignedBB((double) k1, (double) i2, (double) j2, (double) l1, (double) i1, (double) j1))
                             : Collections.emptyList();
         // Now we can throw our Detonate Event
         if (ShouldFire.EXPLOSION_EVENT_DETONATE) {
             final List<Location<World>> blockPositions = new ArrayList<>(this.affectedBlockPositions.size());
             final List<org.spongepowered.api.entity.Entity> entities = new ArrayList<>(list.size());
-            for (BlockPos pos : this.affectedBlockPositions) {
+            for (final BlockPos pos : this.affectedBlockPositions) {
                 blockPositions.add(new Location<>((World) this.world, pos.getX(), pos.getY(), pos.getZ()));
             }
-            for (Entity entity : list) {
+            for (final Entity entity : list) {
                 // Make sure to check the entity is immune first.
                 if (!entity.isImmuneToExplosions()) {
                     entities.add((org.spongepowered.api.entity.Entity) entity);
                 }
             }
-            ExplosionEvent.Detonate
-                detonate =
-                SpongeEventFactory.createExplosionEventDetonate(Sponge.getCauseStackManager().getCurrentCause(), blockPositions, entities, this,
-                    (World) this.world);
+            final Cause cause = Sponge.getCauseStackManager().getCurrentCause();
+            final ExplosionEvent.Detonate detonate =
+                SpongeEventFactory.createExplosionEventDetonate(cause, blockPositions, entities, (Explosion) this, (World) this.world);
             SpongeImpl.postEvent(detonate);
             // Clear the positions so that they can be pulled from the event
             this.affectedBlockPositions.clear();
@@ -205,17 +203,17 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
                 return;
             }
             if (this.shouldBreakBlocks) {
-                for (Location<World> worldLocation : detonate.getAffectedLocations()) {
+                for (final Location<World> worldLocation : detonate.getAffectedLocations()) {
                     this.affectedBlockPositions.add(VecHelper.toBlockPos(worldLocation));
                 }
             }
             // Clear the list of entities so they can be pulled from the event.
             list.clear();
             if (this.shouldDamageEntities) {
-                for (org.spongepowered.api.entity.Entity entity : detonate.getEntities()) {
+                for (final org.spongepowered.api.entity.Entity entity : detonate.getEntities()) {
                     try {
-                        list.add(EntityUtil.toNative(entity));
-                    } catch (Exception e) {
+                        list.add((Entity) entity);
+                    } catch (final Exception e) {
                         // Do nothing, a plugin tried to use the wrong entity somehow.
                     }
                 }
@@ -223,26 +221,26 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
         }
         // Sponge End
 
-        Vec3d vec3d = new Vec3d(this.x, this.y, this.z);
+        final Vec3d vec3d = new Vec3d(this.x, this.y, this.z);
 
         for (int k2 = 0; k2 < list.size(); ++k2) {
-            Entity entity = list.get(k2);
+            final Entity entity = list.get(k2);
 
             if (!entity.isImmuneToExplosions()) {
-                double d12 = entity.getDistance(this.x, this.y, this.z) / (double) f3;
+                final double d12 = entity.getDistance(this.x, this.y, this.z) / (double) f3;
 
                 if (d12 <= 1.0D) {
                     double d5 = entity.posX - this.x;
                     double d7 = entity.posY + (double) entity.getEyeHeight() - this.y;
                     double d9 = entity.posZ - this.z;
-                    double d13 = (double) MathHelper.sqrt(d5 * d5 + d7 * d7 + d9 * d9);
+                    final double d13 = (double) MathHelper.sqrt(d5 * d5 + d7 * d7 + d9 * d9);
 
                     if (d13 != 0.0D) {
                         d5 = d5 / d13;
                         d7 = d7 / d13;
                         d9 = d9 / d13;
-                        double d14 = (double) this.world.getBlockDensity(vec3d, entity.getEntityBoundingBox());
-                        double d10 = (1.0D - d12) * d14;
+                        final double d14 = (double) this.world.getBlockDensity(vec3d, entity.getEntityBoundingBox());
+                        final double d10 = (1.0D - d12) * d14;
                         entity.attackEntityFrom(
                                 DamageSource.causeExplosionDamage((net.minecraft.world.Explosion) (Object) this), (float) ((int) ((d10 * d10 + d10) / 2.0D * 7.0D * (double) f3 + 1.0D)));
                         double d11 = 1.0D;
@@ -256,7 +254,7 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
                         entity.motionZ += d9 * d11;
 
                         if (entity instanceof EntityPlayer) {
-                            EntityPlayer entityplayer = (EntityPlayer) entity;
+                            final EntityPlayer entityplayer = (EntityPlayer) entity;
 
                             if (!entityplayer.isSpectator() && (!entityplayer.isCreative() || !entityplayer.capabilities.isFlying)) {
                                 this.playerKnockbackMap.put(entityplayer, new Vec3d(d5 * d10, d7 * d10, d9 * d10));
@@ -277,7 +275,7 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
      * Does the second part of the explosion (sound, particles, drop spawn)
      */
     @Overwrite
-    public void doExplosionB(boolean spawnParticles) {
+    public void doExplosionB(final boolean spawnParticles) {
         this.world.playSound((EntityPlayer) null, this.x, this.y, this.z, SoundEvents.ENTITY_GENERIC_EXPLODE,
             SoundCategory.BLOCKS, 4.0F, (1.0F + (this.world.rand.nextFloat() - this.world.rand.nextFloat()) * 0.2F) * 0.7F);
 
@@ -307,18 +305,18 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
         // Sponge end
 
         if (this.shouldBreakBlocks) { // Sponge - use 'shouldBreakBlocks' instead of 'damagesTerrain'
-            for (BlockPos blockpos : this.affectedBlockPositions) {
-                IBlockState iblockstate = this.world.getBlockState(blockpos);
-                Block block = iblockstate.getBlock();
+            for (final BlockPos blockpos : this.affectedBlockPositions) {
+                final IBlockState iblockstate = this.world.getBlockState(blockpos);
+                final Block block = iblockstate.getBlock();
 
                 if (spawnParticles) {
-                    double d0 = (double) ((float) blockpos.getX() + this.world.rand.nextFloat());
-                    double d1 = (double) ((float) blockpos.getY() + this.world.rand.nextFloat());
-                    double d2 = (double) ((float) blockpos.getZ() + this.world.rand.nextFloat());
+                    final double d0 = (double) ((float) blockpos.getX() + this.world.rand.nextFloat());
+                    final double d1 = (double) ((float) blockpos.getY() + this.world.rand.nextFloat());
+                    final double d2 = (double) ((float) blockpos.getZ() + this.world.rand.nextFloat());
                     double d3 = d0 - this.x;
                     double d4 = d1 - this.y;
                     double d5 = d2 - this.z;
-                    double d6 = (double) MathHelper.sqrt(d3 * d3 + d4 * d4 + d5 * d5);
+                    final double d6 = (double) MathHelper.sqrt(d3 * d3 + d4 * d4 + d5 * d5);
                     d3 = d3 / d6;
                     d4 = d4 / d6;
                     d5 = d5 / d6;
@@ -335,7 +333,7 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
                     if (block.canDropFromExplosion((net.minecraft.world.Explosion) (Object) this)) {
                         // Sponge Start - Track the block position being destroyed
                         // We need to capture this block position if necessary
-                        try (CaptureBlockPos pos = hasCapturePos ? context.getCaptureBlockPos() : null) {
+                        try (final CaptureBlockPos pos = hasCapturePos ? context.getCaptureBlockPos() : null) {
                             if (pos != null) {
                                 pos.setPos(blockpos);
                             }
@@ -346,7 +344,7 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
 
                     // Sponge Start - Track the block position being destroyed
                     // We need to capture this block position if necessary
-                    try (CaptureBlockPos pos = hasCapturePos ? context.getCaptureBlockPos() : null) {
+                    try (final CaptureBlockPos pos = hasCapturePos ? context.getCaptureBlockPos() : null) {
                         if (pos != null) {
                             pos.setPos(blockpos);
                         }
@@ -362,10 +360,10 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
         }
 
         if (this.causesFire) {
-            for (BlockPos blockpos1 : this.affectedBlockPositions) {
+            for (final BlockPos blockpos1 : this.affectedBlockPositions) {
                 if (this.world.getBlockState(blockpos1).getMaterial() == Material.AIR && this.world.getBlockState(blockpos1.down()).isFullBlock() && this.random.nextInt(3) == 0) {
                     // Sponge Start - Track the block position being destroyed
-                    try (CaptureBlockPos pos = hasCapturePos ? context.getCaptureBlockPos() : null) {
+                    try (final CaptureBlockPos pos = hasCapturePos ? context.getCaptureBlockPos() : null) {
                         if (pos != null) {
                             pos.setPos(blockpos1);
                         }
@@ -377,59 +375,23 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
         }
     }
 
-
-    @Nullable
-    private Location<World> location;
-
     @Override
-    public Location<World> getLocation() {
-        if (this.location == null) {
-            this.location = new Location<World>((World) this.world, this.origin);
-        }
-        return this.location;
-    }
-
-    @Override
-    public Optional<Explosive> getSourceExplosive() {
-        if (this.exploder instanceof Explosive) {
-            return Optional.of((Explosive) this.exploder);
-        }
-
-        return Optional.empty();
-    }
-
-    @Override
-    public float getRadius() {
-        return this.size;
-    }
-
-    @Override
-    public boolean canCauseFire() {
-        return this.causesFire;
-    }
-
-    @Override
-    public boolean shouldPlaySmoke() {
-        return this.damagesTerrain;
-    }
-
-    @Override
-    public boolean shouldBreakBlocks() {
+    public boolean bridge$getShouldDamageBlocks() {
         return this.shouldBreakBlocks;
     }
 
     @Override
-    public boolean shouldDamageEntities() {
+    public boolean bridge$getShouldDamageEntities() {
         return this.shouldDamageEntities;
     }
 
     @Override
-    public void setShouldBreakBlocks(boolean shouldBreakBlocks) {
+    public void setShouldBreakBlocks(final boolean shouldBreakBlocks) {
         this.shouldBreakBlocks = shouldBreakBlocks;
     }
 
     @Override
-    public void setShouldDamageEntities(boolean shouldDamageEntities) {
+    public void setShouldDamageEntities(final boolean shouldDamageEntities) {
         this.shouldDamageEntities = shouldDamageEntities;
     }
 

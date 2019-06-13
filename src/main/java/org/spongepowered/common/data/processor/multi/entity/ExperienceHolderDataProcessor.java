@@ -37,8 +37,8 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableExperien
 import org.spongepowered.api.data.manipulator.mutable.entity.ExperienceHolderData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExperienceHolderData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
-import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
-import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
+import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
+import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 
 import java.util.Map;
 import java.util.Optional;
@@ -64,7 +64,7 @@ public class ExperienceHolderDataProcessor extends AbstractEntityDataProcessor<E
         entity.experienceLevel = (Integer) keyValues.get(Keys.EXPERIENCE_LEVEL);
         entity.experienceTotal = (Integer) keyValues.get(Keys.TOTAL_EXPERIENCE);
         entity.experience = (float) (Integer) keyValues.get(Keys.EXPERIENCE_SINCE_LEVEL) / entity.xpBarCap();
-        ((IMixinEntityPlayerMP) entity).refreshExp();
+        ((ServerPlayerEntityBridge) entity).refreshExp();
         return true;
     }
 
@@ -72,7 +72,7 @@ public class ExperienceHolderDataProcessor extends AbstractEntityDataProcessor<E
     protected Map<Key<?>, ?> getValues(EntityPlayer entity) {
         final int level = entity.experienceLevel;
         final int totalExp = entity.experienceTotal;
-        final int expSinceLevel = ((IMixinEntityPlayer) entity).getExperienceSinceLevel();
+        final int expSinceLevel = ((PlayerEntityBridge) entity).getExperienceSinceLevel();
         final int expBetweenLevels = entity.xpBarCap();
         return ImmutableMap.<Key<?>, Object>of(Keys.EXPERIENCE_LEVEL, level,
                 Keys.TOTAL_EXPERIENCE, totalExp,

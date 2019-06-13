@@ -63,14 +63,19 @@ public abstract class MixinTileEntityBanner extends MixinTileEntity implements I
     private List<PatternLayer> patternLayers = Lists.newArrayList();
 
     @Inject(method = "setItemValues", at = @At("RETURN"))
-    private void onSetItemValues(CallbackInfo ci) {
+    private void onSetItemValues(final CallbackInfo ci) {
         impl$updatePatterns();
     }
 
     @Override
-    public void bridge$readFromSpongeCompound(NBTTagCompound compound) {
+    public void bridge$readFromSpongeCompound(final NBTTagCompound compound) {
         super.bridge$readFromSpongeCompound(compound);
         impl$updatePatterns();
+    }
+
+    @Override
+    protected void bridge$writeToSpongeCompound(final NBTTagCompound compound) {
+        super.bridge$writeToSpongeCompound(compound);
     }
 
     private void impl$markDirtyAndUpdate() {
@@ -83,10 +88,10 @@ public abstract class MixinTileEntityBanner extends MixinTileEntity implements I
     private void impl$updatePatterns() {
         this.patternLayers.clear();
         if (this.patterns != null) {
-            SpongeGameRegistry registry = SpongeImpl.getRegistry();
+            final SpongeGameRegistry registry = SpongeImpl.getRegistry();
             for (int i = 0; i < this.patterns.tagCount(); i++) {
-                NBTTagCompound tagCompound = this.patterns.getCompoundTagAt(i);
-                String patternId = tagCompound.getString(NbtDataUtil.BANNER_PATTERN_ID);
+                final NBTTagCompound tagCompound = this.patterns.getCompoundTagAt(i);
+                final String patternId = tagCompound.getString(NbtDataUtil.BANNER_PATTERN_ID);
                 this.patternLayers.add(new SpongePatternLayer(
                     SpongeImpl.getRegistry().getType(BannerPatternShape.class, patternId).get(),
                     registry.getType(DyeColor.class, EnumDyeColor.byDyeDamage(tagCompound.getInteger(NbtDataUtil.BANNER_PATTERN_COLOR)).getName()).get()));
@@ -101,12 +106,12 @@ public abstract class MixinTileEntityBanner extends MixinTileEntity implements I
     }
 
     @Override
-    public void setLayers(List<PatternLayer> layers) {
+    public void setLayers(final List<PatternLayer> layers) {
         this.patternLayers = new NonNullArrayList<>();
         this.patternLayers.addAll(layers);
         this.patterns = new NBTTagList();
-        for (PatternLayer layer : this.patternLayers) {
-            NBTTagCompound compound = new NBTTagCompound();
+        for (final PatternLayer layer : this.patternLayers) {
+            final NBTTagCompound compound = new NBTTagCompound();
             compound.setString(NbtDataUtil.BANNER_PATTERN_ID, layer.getShape().getName());
             compound.setInteger(NbtDataUtil.BANNER_PATTERN_COLOR, ((EnumDyeColor) (Object) layer.getColor()).getDyeDamage());
             this.patterns.appendTag(compound);
@@ -122,12 +127,12 @@ public abstract class MixinTileEntityBanner extends MixinTileEntity implements I
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public void setBaseColor(DyeColor baseColor) {
+    public void setBaseColor(final DyeColor baseColor) {
         checkNotNull(baseColor, "Null DyeColor!");
         try {
-            EnumDyeColor color = (EnumDyeColor) (Object) baseColor;
+            final EnumDyeColor color = (EnumDyeColor) (Object) baseColor;
             this.baseColor = color;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             this.baseColor = EnumDyeColor.BLACK;
         }
         impl$markDirtyAndUpdate();

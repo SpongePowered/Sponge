@@ -134,7 +134,7 @@ public final class PlaceBlockPacketState extends BasicPacketState {
         }
         context.getCapturedItemStackSupplier().acceptAndClearIfNotEmpty(drops -> {
             final List<Entity> entities =
-                drops.stream().map(drop -> drop.create(player.getServerWorld())).map(EntityUtil::fromNative)
+                drops.stream().map(drop -> drop.create(player.getServerWorld())).map(entity -> (Entity) entity)
                     .collect(Collectors.toList());
             if (!entities.isEmpty()) {
                 try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {

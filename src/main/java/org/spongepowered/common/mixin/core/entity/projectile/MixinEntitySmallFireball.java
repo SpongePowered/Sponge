@@ -42,7 +42,7 @@ public abstract class MixinEntitySmallFireball extends MixinEntityFireball {
      * complicated injectors that may not end up working. For a more precise point
      * of where this is redirectiong, refer to the mixin issue.
      *
-     * @see <a href="https://github.com/SpongePowered/Mixin/issues/250"/>
+     * @see <a href="https://github.com/SpongePowered/Mixin/issues/250">Issue</a>
      * @param world
      * @param pos
      * @return

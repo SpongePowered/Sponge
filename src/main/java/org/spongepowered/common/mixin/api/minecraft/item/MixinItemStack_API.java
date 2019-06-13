@@ -46,7 +46,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.bridge.item.ImplItem;
+import org.spongepowered.common.bridge.item.ItemBridge;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
@@ -202,7 +202,7 @@ public abstract class MixinItemStack_API implements DataHolder {
             printer.log(SpongeImpl.getLogger(), Level.WARN);
             return manipulators;
         }
-        ((ImplItem) item).bridge$getSpongeManipulatorsFor((net.minecraft.item.ItemStack) (Object) this, manipulators);
+        ((ItemBridge) item).bridge$getSpongeManipulatorsFor((net.minecraft.item.ItemStack) (Object) this, manipulators);
         if (((CustomDataHolderBridge) this).hasManipulators()) {
             final List<DataManipulator<?, ?>> customManipulators = ((CustomDataHolderBridge) this).getCustomManipulators();
             manipulators.addAll(customManipulators);

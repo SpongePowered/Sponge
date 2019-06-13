@@ -35,7 +35,6 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
@@ -79,7 +78,7 @@ public final class UnknownPacketState extends BasicPacketState {
                 SpongeCommonEventFactory.callSpawnEntity(entities, context);
             });
             context.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(entities -> {
-                final List<Entity> items = entities.stream().map(EntityUtil::fromNative).collect(Collectors.toList());
+                final List<Entity> items = entities.stream().map(entity -> (Entity) entity).collect(Collectors.toList());
                 SpongeCommonEventFactory.callSpawnEntity(items, context);
             });
         }
@@ -100,11 +99,11 @@ public final class UnknownPacketState extends BasicPacketState {
             for (Map.Entry<UUID, Collection<EntityItem>> entry : map.asMap().entrySet()) {
                 final UUID entityUuid = entry.getKey();
                 final net.minecraft.entity.Entity entityFromUuid = player.getServerWorld().getEntityFromUuid(entityUuid);
-                final Entity affectedEntity = EntityUtil.fromNative(entityFromUuid);
+                final Entity affectedEntity = (Entity) entityFromUuid;
                 if (entityFromUuid != null) {
                     final List<Entity> entities = entry.getValue()
                         .stream()
-                        .map(EntityUtil::fromNative)
+                        .map(entity -> (Entity) entity)
                         .collect(Collectors.toList());
                     if (!entities.isEmpty()) {
                         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
@@ -128,7 +127,7 @@ public final class UnknownPacketState extends BasicPacketState {
                 drops.stream().map(drop -> drop.create(player.getServerWorld())).collect(Collectors.toList());
             final List<Entity> entities = items
                 .stream()
-                .map(EntityUtil::fromNative)
+                .map(entity -> (Entity) entity)
                 .collect(Collectors.toList());
             if (!entities.isEmpty()) {
                 try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {

@@ -76,13 +76,12 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
-import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
+import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.interfaces.world.ServerWorldBridge;
@@ -254,14 +253,14 @@ public abstract class MixinWorld implements WorldBridge {
     @Inject(method = "onEntityAdded", at = @At("TAIL"))
     private void onEntityAddedToWorldMarkAsTracked(net.minecraft.entity.Entity entityIn, CallbackInfo ci) {
         if (!this.isFake()) { // Only set the value if the entity is not fake
-            EntityUtil.toMixin(entityIn).setTrackedInWorld(true);
+            ((EntityBridge) entityIn).setTrackedInWorld(true);
         }
     }
 
     @Inject(method = "onEntityRemoved", at = @At("TAIL"))
     private void onEntityRemovedFromWorldMarkAsUntracked(net.minecraft.entity.Entity entityIn, CallbackInfo ci) {
-        if (!this.isFake() || EntityUtil.toMixin(entityIn).isTrackedInWorld()) {
-            EntityUtil.toMixin(entityIn).setTrackedInWorld(false);
+        if (!this.isFake() || ((EntityBridge) entityIn).isTrackedInWorld()) {
+            ((EntityBridge) entityIn).setTrackedInWorld(false);
         }
     }
 
@@ -345,7 +344,7 @@ public abstract class MixinWorld implements WorldBridge {
 
         for (Object entity : this.playerEntities) {
             EntityPlayer player = (EntityPlayer) entity;
-            if (player == null || player.isDead || !((IMixinEntityPlayer) player).affectsSpawning()) {
+            if (player == null || player.isDead || !((PlayerEntityBridge) player).affectsSpawning()) {
                 continue;
             }
 
@@ -378,7 +377,7 @@ public abstract class MixinWorld implements WorldBridge {
     @Redirect(method = "isAnyPlayerWithinRangeAt", at = @At(value = "INVOKE", target = "Lcom/google/common/base/Predicate;apply(Ljava/lang/Object;)Z", remap = false))
     public boolean onIsAnyPlayerWithinRangePredicate(com.google.common.base.Predicate<EntityPlayer> predicate, Object object) {
         EntityPlayer player = (EntityPlayer) object;
-        return !(player.isDead || !((IMixinEntityPlayer) player).affectsSpawning()) && predicate.apply(player);
+        return !(player.isDead || !((PlayerEntityBridge) player).affectsSpawning()) && predicate.apply(player);
     }
 
     // For invisibility

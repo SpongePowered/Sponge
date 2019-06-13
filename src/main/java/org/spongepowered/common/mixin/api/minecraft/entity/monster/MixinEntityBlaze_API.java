@@ -33,7 +33,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFlammableData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.mixin.api.minecraft.entity.monster.MixinEntityMob_API;
 
 import java.util.List;
 
@@ -48,7 +47,7 @@ public abstract class MixinEntityBlaze_API extends MixinEntityMob_API implements
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(List<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(new SpongeFlammableData(this.isBurning()));
     }

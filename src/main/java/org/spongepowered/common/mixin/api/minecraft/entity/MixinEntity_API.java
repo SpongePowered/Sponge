@@ -202,8 +202,8 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
     }
 
     @Override
-    public boolean setLocationAndRotation(Location<World> location, Vector3d rotation) {
-        boolean result = setLocation(location);
+    public boolean setLocationAndRotation(final Location<World> location, final Vector3d rotation) {
+        final boolean result = setLocation(location);
         if (result) {
             setRotation(rotation);
             return true;
@@ -225,7 +225,7 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
 
         try (final BasicPluginContext context = PluginPhase.State.TELEPORT.createPhaseContext().buildAndSwitch()) {
 
-            MoveEntityEvent event;
+            final MoveEntityEvent event;
 
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 if (!frame.getCurrentContext().containsKey(EventContextKeys.TELEPORT_TYPE)) {
@@ -268,7 +268,7 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
                 isChangingDimension = true;
             }
 
-            double distance = location.getPosition().distance(this.getPosition());
+            final double distance = location.getPosition().distance(this.getPosition());
 
             if (distance <= 4) {
                 isTeleporting = false;
@@ -296,7 +296,7 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
 
             if (isTeleporting || isChangingDimension) {
                 // Re-attach passengers
-                for (net.minecraft.entity.Entity passenger : passengers) {
+                for (final net.minecraft.entity.Entity passenger : passengers) {
                     if (((World) passenger.getEntityWorld()).getUniqueId() != ((World) this.world).getUniqueId()) {
                         ((MixinEntity_API) (Object) passenger).setLocation(location);
                     }
@@ -310,7 +310,7 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
     }
 
     @Override
-    public boolean setLocationAndRotation(Location<World> location, Vector3d rotation, EnumSet<RelativePositions> relativePositions) {
+    public boolean setLocationAndRotation(final Location<World> location, final Vector3d rotation, final EnumSet<RelativePositions> relativePositions) {
         boolean relocated = true;
 
         if (relativePositions.isEmpty()) {
@@ -320,7 +320,7 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
         } else {
             if (((Entity) (Object) this) instanceof EntityPlayerMP && ((EntityPlayerMP) (Entity) (Object) this).connection != null) {
                 // Players use different logic, as they support real relative movement.
-                EnumSet<SPacketPlayerPosLook.EnumFlags> relativeFlags = EnumSet.noneOf(SPacketPlayerPosLook.EnumFlags.class);
+                final EnumSet<SPacketPlayerPosLook.EnumFlags> relativeFlags = EnumSet.noneOf(SPacketPlayerPosLook.EnumFlags.class);
 
                 if (relativePositions.contains(RelativePositions.X)) {
                     relativeFlags.add(SPacketPlayerPosLook.EnumFlags.X);
@@ -382,7 +382,7 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
     }
 
     @Override
-    public void setScale(Vector3d scale) {
+    public void setScale(final Vector3d scale) {
         // do nothing, Minecraft doesn't properly support this yet
     }
 
@@ -392,9 +392,9 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
     }
 
     @Override
-    public boolean setTransform(Transform<World> transform) {
+    public boolean setTransform(final Transform<World> transform) {
         checkNotNull(transform, "The transform cannot be null!");
-        boolean result = setLocation(transform.getLocation());
+        final boolean result = setLocation(transform.getLocation());
         if (result) {
             setRotation(transform.getRotation());
             setScale(transform.getScale());
@@ -405,7 +405,7 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
     }
 
     @Override
-    public boolean transferToWorld(World world, Vector3d position) {
+    public boolean transferToWorld(final World world, final Vector3d position) {
         checkNotNull(world, "World was null!");
         checkNotNull(position, "Position was null!");
         return setLocation(new Location<>(world, position));
@@ -418,7 +418,7 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public void setRotation(Vector3d rotation) {
+    public void setRotation(final Vector3d rotation) {
         checkNotNull(rotation, "Rotation was null!");
         if (isRemoved()) {
             return;
@@ -445,7 +445,7 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
         }
         try {
             return Optional.of(VecHelper.toSpongeAABB(boundingBox));
-        } catch (IllegalArgumentException exception) {
+        } catch (final IllegalArgumentException exception) {
             // Bounding box is degenerate, the entity doesn't actually have one
             return Optional.empty();
         }
@@ -473,7 +473,7 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
     }
 
     @Override
-    public boolean damage(double damage, org.spongepowered.api.event.cause.entity.damage.source.DamageSource damageSource) {
+    public boolean damage(final double damage, final org.spongepowered.api.event.cause.entity.damage.source.DamageSource damageSource) {
         if (!(damageSource instanceof DamageSource)) {
             SpongeImpl.getLogger().error("An illegal DamageSource was provided in the cause! The damage source must extend AbstractDamageSource!");
             return false;
@@ -509,13 +509,13 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
     }
 
     @Override
-    public boolean hasPassenger(org.spongepowered.api.entity.Entity entity) {
+    public boolean hasPassenger(final org.spongepowered.api.entity.Entity entity) {
         checkNotNull(entity);
         return entity.getPassengers().contains(this);
     }
 
     @Override
-    public boolean addPassenger(org.spongepowered.api.entity.Entity entity) {
+    public boolean addPassenger(final org.spongepowered.api.entity.Entity entity) {
         checkNotNull(entity);
         if (entity.getPassengers().contains(this)) {
             throw new IllegalArgumentException(String.format("Cannot add entity %s as a passenger of %s, because the former already has the latter as a passenger!", entity, this));
@@ -525,7 +525,7 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
     }
 
     @Override
-    public void removePassenger(org.spongepowered.api.entity.Entity entity) {
+    public void removePassenger(final org.spongepowered.api.entity.Entity entity) {
         checkNotNull(entity);
         if (!entity.getPassengers().contains(this)) {
             throw new IllegalArgumentException(String.format("Cannot remove entity %s, because it is not a passenger of %s ", entity, this));
@@ -540,7 +540,7 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
     }
 
     @Override
-    public boolean setVehicle(@Nullable org.spongepowered.api.entity.Entity entity) {
+    public boolean setVehicle(@Nullable final org.spongepowered.api.entity.Entity entity) {
         if (getRidingEntity() == null && entity == null) {
             return false;
         }
@@ -552,12 +552,12 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
     }
 
     @Override
-    public boolean validateRawData(DataView container) {
+    public boolean validateRawData(final DataView container) {
         return false;
     }
 
     @Override
-    public void setRawData(DataView container) throws InvalidDataException {
+    public void setRawData(final DataView container) throws InvalidDataException {
 
     }
 
@@ -619,11 +619,11 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
         try {
             final NBTTagCompound compound = new NBTTagCompound();
             writeToNBT(compound);
-            Entity entity = EntityList.createEntityByIDFromName(new ResourceLocation(this.entityType.getId()), this.world);
+            final Entity entity = EntityList.createEntityByIDFromName(new ResourceLocation(this.entityType.getId()), this.world);
             compound.setUniqueId(NbtDataUtil.UUID, entity.getUniqueID());
             entity.readFromNBT(compound);
             return (org.spongepowered.api.entity.Entity) entity;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new IllegalArgumentException("Could not copy the entity:", e);
         }
     }
@@ -639,11 +639,11 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
     }
 
     @Override
-    public void setCreator(@Nullable UUID uuid) {
+    public void setCreator(@Nullable final UUID uuid) {
     }
 
     @Override
-    public void setNotifier(@Nullable UUID uuid) {
+    public void setNotifier(@Nullable final UUID uuid) {
     }
 
     @Override
@@ -657,9 +657,9 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
     }
 
     @Override
-    public boolean canSee(org.spongepowered.api.entity.Entity entity) {
+    public boolean canSee(final org.spongepowered.api.entity.Entity entity) {
         // note: this implementation will be changing with contextual data
-        Optional<Boolean> optional = entity.get(Keys.VANISH);
+        final Optional<Boolean> optional = entity.get(Keys.VANISH);
         return (!optional.isPresent() || !optional.get()) && !((EntityBridge) entity).isVanished();
     }
 
@@ -673,11 +673,8 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
         return this.getValue(Keys.HAS_GRAVITY).get();
     }
 
-    protected void spongeApi$supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        Optional<VehicleData> vehicleData = this.get(VehicleData.class);
-        if (vehicleData.isPresent()) {
-            manipulators.add(vehicleData.get());
-        }
+    protected void spongeApi$supplyVanillaManipulators(final List<? super DataManipulator<?, ?>> manipulators) {
+        this.get(VehicleData.class).ifPresent(manipulators::add);
         if (this.fire > 0) {
             manipulators.add(this.get(IgniteableData.class).get());
         }

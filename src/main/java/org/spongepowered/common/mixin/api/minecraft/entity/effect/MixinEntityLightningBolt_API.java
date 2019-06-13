@@ -80,7 +80,7 @@ public abstract class MixinEntityLightningBolt_API extends MixinEntityWeatherEff
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(List<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(getExpiringData());
     }

@@ -46,7 +46,6 @@ import org.spongepowered.api.item.recipe.Recipe;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
@@ -89,7 +88,7 @@ public final class PlaceRecipePacketState extends BasicInventoryPacketState {
                 ((CraftingRecipe) recipe), player.openContainer, previewTransactions);
         previewTransactions.clear();
 
-        final Entity spongePlayer = EntityUtil.fromNative(player);
+        final Entity spongePlayer = (Entity) player;
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(spongePlayer);
             frame.pushCause(player.openContainer);

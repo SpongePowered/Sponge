@@ -104,7 +104,7 @@ public abstract class MixinEntityShulker_API extends MixinEntityGolem_API implem
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(List<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(getDyeData());
         manipulators.add(getDirectionalData());

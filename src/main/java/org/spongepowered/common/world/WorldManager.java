@@ -75,12 +75,12 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.interfaces.IMixinIntegratedServer;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
-import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
+import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.ServerWorldBridge;
-import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
+import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
 import org.spongepowered.common.util.SpongeHooks;
 
@@ -807,8 +807,8 @@ public final class WorldManager {
 
         worldSettings.setGeneratorOptions(generatorOptions);
 
-        ((IMixinWorldSettings) (Object) worldSettings).setDimensionType(dimensionType);
-        ((IMixinWorldSettings)(Object) worldSettings).setGenerateSpawnOnLoad(((IMixinDimensionType) dimensionType).shouldGenerateSpawnOnLoad());
+        ((WorldSettingsBridge) (Object) worldSettings).bridge$setDimensionType(dimensionType);
+        ((WorldSettingsBridge)(Object) worldSettings).bridge$setGenerateSpawnOnLoad(((IMixinDimensionType) dimensionType).shouldGenerateSpawnOnLoad());
 
         final WorldInfo worldInfo = new WorldInfo(worldSettings, worldFolderName);
         setUuidOnProperties(dimensionId == 0 ? currentSaveRoot.getParent() : currentSaveRoot, (WorldProperties) worldInfo);
@@ -1277,7 +1277,7 @@ public final class WorldManager {
     }
 
     public static int getClientDimensionId(EntityPlayerMP player, World world) {
-        if (!((IMixinEntityPlayerMP) player).usesCustomClient()) {
+        if (!((ServerPlayerEntityBridge) player).usesCustomClient()) {
             DimensionType type = world.provider.getDimensionType();
             if (type == DimensionType.OVERWORLD) {
                 return 0;

@@ -29,8 +29,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.mutable.entity.SittingData;
 import org.spongepowered.api.entity.living.animal.Wolf;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.asm.mixin.Implements;
@@ -41,32 +39,32 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAggressiveData;
 import org.spongepowered.common.interfaces.entity.IMixinAggressive;
+import org.spongepowered.common.mixin.core.entity.MixinEntityAgeable;
 
-import java.util.List;
 import java.util.Random;
 
 @Mixin(EntityWolf.class)
-@Implements(value = @Interface(iface = IMixinAggressive.class, prefix = "aggr$"))
-public abstract class MixinEntityWolf extends MixinEntityAnimal implements Wolf {
+public abstract class MixinEntityWolf extends MixinEntityAgeable implements IMixinAggressive {
 
-    @Shadow public abstract boolean isAngry();
+    @Shadow public abstract boolean shadow$isAngry();
+    @Shadow public abstract void shadow$setAngry(boolean angry);
 
-    @Shadow public abstract void setAngry(boolean angry);
-
+    @Override
     @Intrinsic
-    public boolean aggr$isAngry() {
-        return this.isAngry();
+    public boolean isAngry() {
+        return this.shadow$isAngry();
     }
 
+    @Override
     @Intrinsic
-    public void aggr$setAngry(boolean angry) {
-        this.setAngry(angry);
+    public void setAngry(boolean angry) {
+        this.shadow$setAngry(angry);
     }
 
-    @Redirect(method = "processInteract", at = @At(value = "INVOKE", target = "Ljava/util/Random;nextInt(I)I", ordinal = 0, remap = false))
-    public int onTame(Random rand, int bound, EntityPlayer player, EnumHand hand) {
+    @Redirect(method = "processInteract",
+        at = @At(value = "INVOKE", target = "Ljava/util/Random;nextInt(I)I", ordinal = 0, remap = false))
+    private int impl$ChangeRandomForTameEvent(Random rand, int bound, EntityPlayer player, EnumHand hand) {
         int random = rand.nextInt(bound);
         ItemStack stack = player.getHeldItem(hand);
         if (random == 0) {
@@ -74,7 +72,7 @@ public abstract class MixinEntityWolf extends MixinEntityAnimal implements Wolf 
             try {
                 Sponge.getCauseStackManager().pushCause(((org.spongepowered.api.item.inventory.ItemStack) stack).createSnapshot());
                 Sponge.getCauseStackManager().pushCause(player);
-                if (!SpongeImpl.postEvent(SpongeEventFactory.createTameEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), this))) {
+                if (!SpongeImpl.postEvent(SpongeEventFactory.createTameEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), (Wolf) this))) {
                     stack.grow(1);
                     return random;
                 }
@@ -85,10 +83,4 @@ public abstract class MixinEntityWolf extends MixinEntityAnimal implements Wolf 
         return 1;
     }
 
-    @Override
-    public void spongeApi$supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(get(SittingData.class).get());
-        manipulators.add(new SpongeAggressiveData(this.isAngry()));
-    }
 }

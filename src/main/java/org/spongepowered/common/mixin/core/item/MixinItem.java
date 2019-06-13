@@ -38,13 +38,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.bridge.item.ImplItem;
+import org.spongepowered.common.bridge.item.ItemBridge;
 import org.spongepowered.common.registry.SpongeGameDictionaryEntry;
 
 import java.util.List;
 
 @Mixin(Item.class)
-public abstract class MixinItem implements ImplItem, SpongeGameDictionaryEntry {
+public abstract class MixinItem implements ItemBridge, SpongeGameDictionaryEntry {
 
     @Shadow private String translationKey;
 

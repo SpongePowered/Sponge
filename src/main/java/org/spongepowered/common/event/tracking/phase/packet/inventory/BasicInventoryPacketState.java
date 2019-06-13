@@ -42,7 +42,6 @@ import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.phase.packet.PacketConstants;
@@ -169,7 +168,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
 
         final int usedButton = packetIn.getUsedButton();
         final List<Entity> capturedItems = new ArrayList<>();
-        context.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(items -> items.stream().map(EntityUtil::fromNative).forEach(capturedItems::add));
+        context.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(items -> items.stream().map(entity -> (Entity) entity).forEach(capturedItems::add));
         context.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(capturedItems::addAll);
 
         // MAKE SURE THAT THIS IS KEPT IN SYNC WITH THE REST OF THE METHOD

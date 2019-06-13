@@ -36,13 +36,13 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.interfaces.world.IMixinServerWorldEventHandler;
+import org.spongepowered.common.bridge.world.ServerWorldEventHandlerBridge;
 import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 
 import javax.annotation.Nullable;
 
 @Mixin(ServerWorldEventHandler.class)
-public abstract class MixinServerWorldEventHandler implements IMixinServerWorldEventHandler {
+public abstract class MixinServerWorldEventHandler implements ServerWorldEventHandlerBridge {
 
     @Shadow @Final private WorldServer world;
     @Shadow @Final private MinecraftServer server;

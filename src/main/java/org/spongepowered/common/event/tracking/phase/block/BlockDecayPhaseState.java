@@ -38,7 +38,6 @@ import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
@@ -86,7 +85,7 @@ final class BlockDecayPhaseState extends BlockPhaseState {
         context.getCapturedItemsSupplier()
             .acceptAndClearIfNotEmpty(items -> {
                 final List<Entity> entities = items.stream()
-                    .map(EntityUtil::fromNative)
+                    .map(entity -> (Entity) entity)
                     .collect(Collectors.toList());
                 Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
                 SpongeCommonEventFactory.callDropItemDestruct(entities, context);

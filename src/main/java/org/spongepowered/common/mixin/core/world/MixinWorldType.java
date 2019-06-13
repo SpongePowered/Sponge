@@ -24,32 +24,17 @@
  */
 package org.spongepowered.common.mixin.core.world;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.base.CaseFormat;
 import com.google.common.base.MoreObjects;
-import com.google.gson.JsonParseException;
 import net.minecraft.world.WorldType;
-import net.minecraft.world.gen.ChunkGeneratorSettings;
-import net.minecraft.world.gen.FlatGeneratorInfo;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.GeneratorType;
-import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.gen.WorldGenerator;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.data.persistence.JsonDataFormat;
-import org.spongepowered.common.data.util.DataQueries;
-import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 import org.spongepowered.common.registry.type.world.GeneratorTypeRegistryModule;
-
-import java.io.IOException;
 
 @NonnullByDefault
 @Mixin(WorldType.class)
@@ -61,9 +46,8 @@ public abstract class MixinWorldType {
     @Inject(method = "<init>(ILjava/lang/String;)V", at = @At("RETURN"))
     private void onConstructSpongeRegister(int id, String name, CallbackInfo callbackInfo) {
         // Ensures that new world types are automatically registered with the registry module
-        GeneratorTypeRegistryModule.getInstance().registerAdditionalCatalog(this);
+        GeneratorTypeRegistryModule.getInstance().registerAdditionalCatalog((GeneratorType) this);
     }
-
 
     @Override
     public int hashCode() {

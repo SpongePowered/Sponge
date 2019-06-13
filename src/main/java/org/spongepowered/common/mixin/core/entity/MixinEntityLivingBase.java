@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.entity;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.block.state.IBlockState;
@@ -55,9 +53,9 @@ import net.minecraft.world.WorldServer;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Transaction;
-import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.Transform;
+import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager;
@@ -84,8 +82,8 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -97,7 +95,6 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.entity.EntityDeathContext;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
-import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
@@ -108,6 +105,7 @@ import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.event.DamageSourceRegistryModule;
+import org.spongepowered.common.util.Constants;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -179,7 +177,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
     @Shadow protected abstract float getSoundPitch();
     @Shadow protected abstract boolean canDropLoot();
     @Shadow protected abstract SoundEvent getDeathSound();
-    @Shadow private boolean checkTotemDeathProtection(DamageSource p_190628_1_) {
+    @Shadow private boolean checkTotemDeathProtection(final DamageSource p_190628_1_) {
         return false; // SHADOWED
     }
 
@@ -193,17 +191,17 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
     }
 
     @Override
-    public void setMaxAir(int air) {
+    public void setMaxAir(final int air) {
         this.maxAir = air;
     }
 
     @Override
-    public void setLastDamage(double damage) {
+    public void setLastDamage(final double damage) {
         this.lastDamage = (float) damage;
     }
 
     @Override
-    public void spongeImpl$readFromSpongeCompound(NBTTagCompound compound) {
+    public void spongeImpl$readFromSpongeCompound(final NBTTagCompound compound) {
         super.spongeImpl$readFromSpongeCompound(compound);
         if (compound.hasKey("maxAir")) {
             this.maxAir = compound.getInteger("maxAir");
@@ -211,7 +209,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
     }
 
     @Override
-    public void spongeImpl$writeToSpongeCompound(NBTTagCompound compound) {
+    public void spongeImpl$writeToSpongeCompound(final NBTTagCompound compound) {
         super.spongeImpl$writeToSpongeCompound(compound);
         compound.setInteger("maxAir", this.maxAir);
     }
@@ -227,8 +225,9 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
      * the {@link PhaseContext} of the current {@link IPhaseState} at which this method is called. The compatibility
      * for Forge's events to throw are handled specially in SpongeForge.
      */
+    @SuppressWarnings("ConstantConditions")
     @Overwrite
-    public void onDeath(DamageSource cause) {
+    public void onDeath(final DamageSource cause) {
         // Sponge Start - Call our event, and forge's event
         // This will transitively call the forge event
         final boolean isMainThread = !((WorldBridge) this.world).isFake() || Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
@@ -258,8 +257,8 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
                 return;
             }
 
-            Entity entity = cause.getTrueSource();
-            EntityLivingBase entitylivingbase = this.getAttackingEntity();
+            final Entity entity = cause.getTrueSource();
+            final EntityLivingBase entitylivingbase = this.getAttackingEntity();
 
             if (this.scoreValue >= 0 && entitylivingbase != null) {
                 entitylivingbase.awardKillScore((EntityLivingBase) (Object) this, this.scoreValue, cause);
@@ -282,7 +281,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
                 }
 
                 if (this.canDropLoot() && this.world.getGameRules().getBoolean("doMobLoot")) {
-                    boolean flag = this.recentlyHit > 0;
+                    final boolean flag = this.recentlyHit > 0;
                     this.dropLoot(flag, i, cause);
                 }
 
@@ -313,14 +312,14 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
      * @param info The callback
      */
     @Inject(method = "setHealth", at = @At("HEAD"))
-    private void onSetHealthResetEvents(float health, CallbackInfo info) {
+    private void onSetHealthResetEvents(final float health, final CallbackInfo info) {
         if (this.getHealth() <= 0 && health > 0) {
             resetDeathEventsPosted();
         }
     }
 
     @Nullable
-    private EntityDeathContext createOrNullDeathPhase(boolean isMainThread, DamageSource source) {
+    private EntityDeathContext createOrNullDeathPhase(final boolean isMainThread, final DamageSource source) {
         boolean tracksEntityDeaths = false;
         if (((WorldBridge) this.world).isFake() || !isMainThread) { // Short circuit to avoid erroring on handling
             return null;
@@ -339,7 +338,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
     }
 
     @Redirect(method = "applyPotionDamageCalculations", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;isPotionActive(Lnet/minecraft/potion/Potion;)Z") )
-    private boolean onIsPotionActive(EntityLivingBase entityIn, Potion potion) {
+    private boolean onIsPotionActive(final EntityLivingBase entityIn, final Potion potion) {
         return false; // handled in our damageEntityHook
     }
 
@@ -351,7 +350,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
      * @param damage The damage to deal
      */
     @Redirect(method = "applyArmorCalculations", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;damageArmor(F)V") )
-    private void onDamageArmor(EntityLivingBase entityIn, float damage) {
+    private void onDamageArmor(final EntityLivingBase entityIn, final float damage) {
         // do nothing as this is handled in our damageEntityHook
     }
 
@@ -360,7 +359,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
      * @reason This shouldn't be used internally but a mod may still call it so we simply reroute to our hook.
      */
     @Overwrite
-    protected void damageEntity(DamageSource damageSource, float damage) {
+    protected void damageEntity(final DamageSource damageSource, final float damage) {
         this.damageEntityHook(damageSource, damage);
     }
 
@@ -371,9 +370,10 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
      *
      * @reason Reroute damageEntity calls to our hook in order to prevent damage.
      */
+    @SuppressWarnings("ConstantConditions")
     @Override
     @Overwrite
-    public boolean attackEntityFrom(DamageSource source, float amount) {
+    public boolean attackEntityFrom(final DamageSource source, final float amount) {
         // Sponge start - Add certain hooks for necessities
         this.lastDamageSource = source;
         if (source == null) {
@@ -407,7 +407,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
                 return false;
             } else {
 
-                float f = amount;
+                final float f = amount;
 
                 // Sponge - ignore as this is handled in our damageEntityHookge
 //                if ((source == DamageSource.ANVIL || source == DamageSource.FALLING_BLOCK) && !this.getItemStackFromSlot(EntityEquipmentSlot.HEAD).isEmpty())
@@ -419,7 +419,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
 
                 // Sponge - set the 'shield blocking ran' flag to the proper value, since
                 // we comment out the logic below
-                boolean flag = amount > 0.0F && this.canBlockDamageSource(source);
+                final boolean flag = amount > 0.0F && this.canBlockDamageSource(source);
 
                 // Sponge start - this is handled in our damageEntityHook
 //                boolean flag = false;
@@ -483,7 +483,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
                 }
 
                 this.attackedAtYaw = 0.0F;
-                Entity entity = source.getTrueSource();
+                final Entity entity = source.getTrueSource();
 
                 if (entity != null) {
                     if (entity instanceof EntityLivingBase) {
@@ -495,7 +495,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
                         this.attackingPlayer = (EntityPlayer) entity;
                     } else if (entity instanceof EntityTameable) {
 
-                        EntityTameable entitywolf = (EntityTameable)entity;
+                        final EntityTameable entitywolf = (EntityTameable)entity;
 
                         if (entitywolf.isTamed()) {
                             this.recentlyHit = 100;
@@ -510,7 +510,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
                     } else if (source instanceof net.minecraft.util.EntityDamageSource && ((net.minecraft.util.EntityDamageSource) source).getIsThornsDamage()) {
                         this.world.setEntityState((EntityLivingBase) (Object) this, (byte) 33);
                     } else {
-                        byte b0;
+                        final byte b0;
 
                         if (source == DamageSource.DROWN) {
                             b0 = 36;
@@ -520,7 +520,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
                             b0 = 2;
                         }
 
-                        this.world.setEntityState((EntityLivingBase) (Object) this, (byte) b0);
+                        this.world.setEntityState((EntityLivingBase) (Object) this, b0);
                     }
 
 
@@ -539,13 +539,13 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
                         this.attackedAtYaw = (float) (MathHelper.atan2(d0, d1) * 180.0D / Math.PI - (double) this.rotationYaw);
                         this.knockBack(entity, 0.4F, d1, d0);
                     } else {
-                        this.attackedAtYaw = (float) ((Math.random() * 2.0D) * 180);
+                        this.attackedAtYaw = (float) (Math.random() * 2.0D * 180);
                     }
                 }
 
                 if (this.getHealth() <= 0.0F) {
                     if (!this.checkTotemDeathProtection(source)) {
-                        SoundEvent soundevent = this.getDeathSound();
+                        final SoundEvent soundevent = this.getDeathSound();
 
                         if (flag1 && soundevent != null) {
                             this.playSound(soundevent, this.getSoundVolume(), this.getSoundPitch());
@@ -571,7 +571,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
                     this.lastDamageStamp = this.world.getTotalWorldTime();
                 }
 
-                if ((Object) this instanceof EntityPlayerMP) {
+                if ((EntityLivingBase) (Object) this instanceof EntityPlayerMP) {
                     CriteriaTriggers.ENTITY_HURT_PLAYER.trigger((EntityPlayerMP) (Object) this, source, f, amount, flag);
                 }
 
@@ -589,65 +589,54 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
      * This is necessary for invisibility checks so that vanish players don't actually send the particle stuffs.
      */
     @Redirect(method = "updateItemUse", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnParticle(Lnet/minecraft/util/EnumParticleTypes;DDDDDD[I)V"))
-    private void spawnItemParticle(World world, EnumParticleTypes particleTypes, double xCoord, double yCoord, double zCoord, double xOffset,
-            double yOffset, double zOffset, int ... p_175688_14_) {
+    private void spawnItemParticle(final World world, final EnumParticleTypes particleTypes, final double xCoord, final double yCoord, final double zCoord, final double xOffset,
+            final double yOffset, final double zOffset, final int ... p_175688_14_) {
         if (!this.isVanished()) {
             this.world.spawnParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset, p_175688_14_);
         }
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
-    public boolean damageEntityHook(DamageSource damageSource, float damage) {
+    public boolean damageEntityHook(final DamageSource damageSource, float damage) {
         if (!this.isEntityInvulnerable(damageSource)) {
-            final boolean human = (Object) this instanceof EntityPlayer;
+            final boolean human = (EntityLivingBase) (Object) this instanceof EntityPlayer;
             // apply forge damage hook
             damage = applyModDamage((EntityLivingBase) (Object) this, damageSource, damage);
-            float originalDamage = damage; // set after forge hook.
+            final float originalDamage = damage; // set after forge hook.
             if (damage <= 0) {
                 damage = 0;
             }
 
-            List<DamageFunction> originalFunctions = new ArrayList<>();
-            Optional<DamageFunction> hardHatFunction =
+            final List<DamageFunction> originalFunctions = new ArrayList<>();
+            final Optional<DamageFunction> hardHatFunction =
                 DamageEventHandler.createHardHatModifier((EntityLivingBase) (Object) this, damageSource);
-            Optional<List<DamageFunction>> armorFunction =
+            final Optional<List<DamageFunction>> armorFunction =
                 provideArmorModifiers((EntityLivingBase) (Object) this, damageSource, damage);
-            Optional<DamageFunction> resistanceFunction =
+            final Optional<DamageFunction> resistanceFunction =
                 DamageEventHandler.createResistanceModifier((EntityLivingBase) (Object) this, damageSource);
-            Optional<List<DamageFunction>> armorEnchantments =
+            final Optional<List<DamageFunction>> armorEnchantments =
                 DamageEventHandler.createEnchantmentModifiers((EntityLivingBase) (Object) this, damageSource);
-            Optional<DamageFunction> absorptionFunction =
+            final Optional<DamageFunction> absorptionFunction =
                 DamageEventHandler.createAbsorptionModifier((EntityLivingBase) (Object) this, damageSource);
-            Optional<DamageFunction> shieldFunction =
+            final Optional<DamageFunction> shieldFunction =
                 DamageEventHandler.createShieldFunction((EntityLivingBase) (Object) this, damageSource, damage);
 
-            if (hardHatFunction.isPresent()) {
-                originalFunctions.add(hardHatFunction.get());
-            }
+            hardHatFunction.ifPresent(originalFunctions::add);
 
-            if (shieldFunction.isPresent()) {
-                originalFunctions.add(shieldFunction.get());
-            }
+            shieldFunction.ifPresent(originalFunctions::add);
 
-            if (armorFunction.isPresent()) {
-                originalFunctions.addAll(armorFunction.get());
-            }
+            armorFunction.ifPresent(originalFunctions::addAll);
 
-            if (resistanceFunction.isPresent()) {
-                originalFunctions.add(resistanceFunction.get());
-            }
+            resistanceFunction.ifPresent(originalFunctions::add);
 
-            if (armorEnchantments.isPresent()) {
-                originalFunctions.addAll(armorEnchantments.get());
-            }
+            armorEnchantments.ifPresent(originalFunctions::addAll);
 
-            if (absorptionFunction.isPresent()) {
-                originalFunctions.add(absorptionFunction.get());
-            }
-            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            absorptionFunction.ifPresent(originalFunctions::add);
+            try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 DamageEventHandler.generateCauseFor(damageSource, frame);
 
-                DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(frame.getCurrentCause(), originalFunctions, (org.spongepowered.api.entity.Entity) this, originalDamage);
+                final DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(frame.getCurrentCause(), originalFunctions, (org.spongepowered.api.entity.Entity) this, originalDamage);
                 if (damageSource != DamageSourceRegistryModule.IGNORED_DAMAGE_SOURCE) { // Basically, don't throw an event if it's our own damage source
                     Sponge.getEventManager().post(event);
                 }
@@ -669,7 +658,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
                 if (shieldFunction.isPresent()) {
                     this.damageShield((float) event.getBaseDamage()); // TODO gabizou: Should this be in the API?
                     if (!damageSource.isProjectile()) {
-                        Entity entity = damageSource.getImmediateSource();
+                        final Entity entity = damageSource.getImmediateSource();
 
                         if (entity instanceof EntityLivingBase) {
                             this.blockUsingShield((EntityLivingBase) entity);
@@ -679,7 +668,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
 
                 // Armor
                 if (!damageSource.isUnblockable()) {
-                    for (DamageFunction modifier : event.getModifiers()) {
+                    for (final DamageFunction modifier : event.getModifiers()) {
                         applyArmorDamage((EntityLivingBase) (Object) this, damageSource, event, modifier.getModifier());
                     }
                 }
@@ -694,7 +683,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
                     if (human) {
                         ((EntityPlayer) (Object) this).addExhaustion(damageSource.getHungerDamage());
                     }
-                    float f2 = this.getHealth();
+                    final float f2 = this.getHealth();
 
                     this.setHealth(f2 - damage);
                     this.getCombatTracker().trackDamage(damageSource, f2, damage);
@@ -716,19 +705,20 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
      * @reason An overwrite avoids the need for a local-capture inject and two redirects
      */
     // TODO: Investigate mixing into setPositionAndUpdate to catch more teleports
+    @SuppressWarnings("ConstantConditions")
     @Overwrite
-    public boolean attemptTeleport(double x, double y, double z)
+    public boolean attemptTeleport(final double x, final double y, final double z)
     {
-        double d0 = this.posX;
-        double d1 = this.posY;
-        double d2 = this.posZ;
+        final double d0 = this.posX;
+        final double d1 = this.posY;
+        final double d2 = this.posZ;
         this.posX = x;
         this.posY = y;
         this.posZ = z;
         boolean flag = false;
         BlockPos blockpos = new BlockPos((Entity) (Object) this);
-        World world = this.world;
-        Random random = this.getRNG();
+        final World world = this.world;
+        final Random random = this.getRNG();
 
         if (world.isBlockLoaded(blockpos))
         {
@@ -736,8 +726,8 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
 
             while (!flag1 && blockpos.getY() > 0)
             {
-                BlockPos blockpos1 = blockpos.down();
-                IBlockState iblockstate = world.getBlockState(blockpos1);
+                final BlockPos blockpos1 = blockpos.down();
+                final IBlockState iblockstate = world.getBlockState(blockpos1);
 
                 if (iblockstate.getMaterial().blocksMovement())
                 {
@@ -754,17 +744,17 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
             {
                 // Sponge start
                 if (!world.isRemote) {
-                    Transform<org.spongepowered.api.world.World> fromTransform = ((org.spongepowered.api.entity.Entity) this).getTransform().setPosition(new Vector3d(d0, d1, d2));
-                    Transform<org.spongepowered.api.world.World> toTransform = ((org.spongepowered.api.entity.Entity) this).getTransform().setPosition(new Vector3d(this.posX, this.posY, this.posZ));
+                    final Transform<org.spongepowered.api.world.World> fromTransform = ((org.spongepowered.api.entity.Entity) this).getTransform().setPosition(new Vector3d(d0, d1, d2));
+                    final Transform<org.spongepowered.api.world.World> toTransform = ((org.spongepowered.api.entity.Entity) this).getTransform().setPosition(new Vector3d(this.posX, this.posY, this.posZ));
 
-                    MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent((Entity) (Object) this, fromTransform, toTransform);
+                    final MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent((Entity) (Object) this, fromTransform, toTransform);
                     if (event.isCancelled()) {
                         this.posX = d0;
                         this.posY = d1;
                         this.posZ = d2;
                         return false;
                     }
-                    Vector3d position = event.getToTransform().getPosition();
+                    final Vector3d position = event.getToTransform().getPosition();
                     this.rotationYaw = (float) event.getToTransform().getYaw();
                     this.rotationPitch = (float) event.getToTransform().getPitch();
                     this.setPositionAndUpdate(position.getX(), position.getY(), position.getZ());
@@ -784,12 +774,12 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
         {
             // Sponge start - this is technically a teleport, since it sends packets to players and calls 'updateEntityWithOptionalForce' - even though it doesn't really move the entity at all
             if (!world.isRemote) {
-                Transform<org.spongepowered.api.world.World> transform = ((org.spongepowered.api.entity.Entity) this).getTransform().setPosition(new Vector3d(d0, d1, d2));
-                MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent((Entity) (Object) this, transform, transform);
+                final Transform<org.spongepowered.api.world.World> transform = ((org.spongepowered.api.entity.Entity) this).getTransform().setPosition(new Vector3d(d0, d1, d2));
+                final MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent((Entity) (Object) this, transform, transform);
                 if (event.isCancelled()) {
                     return false;
                 }
-                Vector3d position = event.getToTransform().getPosition();
+                final Vector3d position = event.getToTransform().getPosition();
                 this.rotationYaw = (float) event.getToTransform().getYaw();
                 this.rotationPitch = (float) event.getToTransform().getPitch();
                 this.setPositionAndUpdate(position.getX(), position.getY(), position.getZ());
@@ -806,17 +796,17 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
 
             for (int j = 0; j < 128; ++j)
             {
-                double d6 = (double)j / 127.0D;
-                float f = (random.nextFloat() - 0.5F) * 0.2F;
-                float f1 = (random.nextFloat() - 0.5F) * 0.2F;
-                float f2 = (random.nextFloat() - 0.5F) * 0.2F;
-                double d3 = d0 + (this.posX - d0) * d6 + (random.nextDouble() - 0.5D) * (double)this.width * 2.0D;
-                double d4 = d1 + (this.posY - d1) * d6 + random.nextDouble() * (double)this.height;
-                double d5 = d2 + (this.posZ - d2) * d6 + (random.nextDouble() - 0.5D) * (double)this.width * 2.0D;
-                world.spawnParticle(EnumParticleTypes.PORTAL, d3, d4, d5, (double)f, (double)f1, (double)f2, new int[0]);
+                final double d6 = (double)j / 127.0D;
+                final float f = (random.nextFloat() - 0.5F) * 0.2F;
+                final float f1 = (random.nextFloat() - 0.5F) * 0.2F;
+                final float f2 = (random.nextFloat() - 0.5F) * 0.2F;
+                final double d3 = d0 + (this.posX - d0) * d6 + (random.nextDouble() - 0.5D) * (double)this.width * 2.0D;
+                final double d4 = d1 + (this.posY - d1) * d6 + random.nextDouble() * (double)this.height;
+                final double d5 = d2 + (this.posZ - d2) * d6 + (random.nextDouble() - 0.5D) * (double)this.width * 2.0D;
+                world.spawnParticle(EnumParticleTypes.PORTAL, d3, d4, d5, (double)f, (double)f1, (double)f2);
             }
 
-            if ((Object) this instanceof EntityCreature)
+            if ((EntityLivingBase) (Object) this instanceof EntityCreature)
             {
                 ((EntityCreature) (Object) this).getNavigator().clearPath();
             }
@@ -826,26 +816,27 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
     }
 
     @Override
-    public float applyModDamage(EntityLivingBase entityLivingBase, DamageSource source, float damage) {
+    public float applyModDamage(final EntityLivingBase entityLivingBase, final DamageSource source, final float damage) {
         return damage;
     }
 
     @Override
-    public Optional<List<DamageFunction>> provideArmorModifiers(EntityLivingBase entityLivingBase,
-                                                                                                         DamageSource source, double damage) {
+    public Optional<List<DamageFunction>> provideArmorModifiers(final EntityLivingBase entityLivingBase,
+                                                                                                         final DamageSource source, final double damage) {
         return DamageEventHandler.createArmorModifiers(entityLivingBase, source, damage);
     }
 
     @Override
-    public void applyArmorDamage(EntityLivingBase entityLivingBase, DamageSource source, DamageEntityEvent entityEvent, DamageModifier modifier) {
-        Optional<DamageObject> optional = modifier.getCause().first(DamageObject.class);
+    public void applyArmorDamage(
+        final EntityLivingBase entityLivingBase, final DamageSource source, final DamageEntityEvent entityEvent, final DamageModifier modifier) {
+        final Optional<DamageObject> optional = modifier.getCause().first(DamageObject.class);
         if (optional.isPresent()) {
             DamageEventHandler.acceptArmorModifier((EntityLivingBase) (Object) this, source, modifier, entityEvent.getDamage(modifier));
         }
     }
 
     @Override
-    public boolean hookModAttack(EntityLivingBase entityLivingBase, DamageSource source, float amount) {
+    public boolean hookModAttack(final EntityLivingBase entityLivingBase, final DamageSource source, final float amount) {
         return true;
     }
 
@@ -864,8 +855,9 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
     }
 
     @Redirect(method = "updateFallState", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;spawnParticle(Lnet/minecraft/util/EnumParticleTypes;DDDIDDDD[I)V"))
-    private void spongeSpawnParticleForFallState(WorldServer worldServer, EnumParticleTypes particleTypes, double xCoord, double yCoord,
-            double zCoord, int numberOfParticles, double xOffset, double yOffset, double zOffset, double particleSpeed, int... extraArgs) {
+    private void spongeSpawnParticleForFallState(
+        final WorldServer worldServer, final EnumParticleTypes particleTypes, final double xCoord, final double yCoord,
+            final double zCoord, final int numberOfParticles, final double xOffset, final double yOffset, final double zOffset, final double particleSpeed, final int... extraArgs) {
         if (!this.isVanished()) {
             worldServer.spawnParticle(particleTypes, xCoord, yCoord, zCoord, numberOfParticles, xOffset, yOffset, zOffset, particleSpeed, extraArgs);
         }
@@ -873,10 +865,10 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
     }
 
     @Redirect(method = "onEntityUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;onDeathUpdate()V"))
-    private void causeTrackDeathUpdate(EntityLivingBase entityLivingBase) {
+    private void causeTrackDeathUpdate(final EntityLivingBase entityLivingBase) {
         if (!entityLivingBase.world.isRemote) {
-            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
-                 PhaseContext<?> context = EntityPhase.State.DEATH_UPDATE.createPhaseContext().source(entityLivingBase)) {
+            try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
+                 final PhaseContext<?> context = EntityPhase.State.DEATH_UPDATE.createPhaseContext().source(entityLivingBase)) {
                 context.buildAndSwitch();
                 frame.pushCause(entityLivingBase);
                 ((IMixinEntityLivingBase) entityLivingBase).onSpongeDeathUpdate();
@@ -886,36 +878,37 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
         }
     }
 
-    private EquipmentSlotsFabric inventory = new EquipmentSlotsFabric(this);
+    private EquipmentSlotsFabric inventory = new EquipmentSlotsFabric((Living) this);
     private EnumMap<EntityEquipmentSlot, SlotLens> slotLens = new EnumMap<>(EntityEquipmentSlot.class);
 
     @Surrogate
-    private void onGetItemStackFromSlot(CallbackInfo ci, EntityEquipmentSlot[] slots, int j, int k,
-            EntityEquipmentSlot entityEquipmentSlot, ItemStack before) {
+    private void onGetItemStackFromSlot(final CallbackInfo ci, final EntityEquipmentSlot[] slots, final int j, final int k,
+            final EntityEquipmentSlot entityEquipmentSlot, final ItemStack before) {
         this.onGetItemStackFromSlot(ci, 0, slots, j, k, entityEquipmentSlot, before);
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Inject(method = "onUpdate", locals = LocalCapture.CAPTURE_FAILHARD,
             at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;getItemStackFromSlot(Lnet/minecraft/inventory/EntityEquipmentSlot;)Lnet/minecraft/item/ItemStack;"))
-    private void onGetItemStackFromSlot(CallbackInfo ci, int i_unused, EntityEquipmentSlot[] slots, int j, int k,
-                                        EntityEquipmentSlot entityEquipmentSlot, ItemStack before) {
-        if (this.ticksExisted == 1 && (Object)this instanceof EntityPlayer) {
+    private void onGetItemStackFromSlot(final CallbackInfo ci, final int i_unused, final EntityEquipmentSlot[] slots, final int j, final int k,
+                                        final EntityEquipmentSlot entityEquipmentSlot, final ItemStack before) {
+        if (this.ticksExisted == 1 && (EntityLivingBase) (Object) this instanceof EntityPlayer) {
             return; // Ignore Equipment on player spawn/respawn
         }
-        ItemStack after = this.getItemStackFromSlot(entityEquipmentSlot);
-        EntityLivingBase entity = EntityUtil.toNative((IMixinEntityLivingBase) this);
+        final ItemStack after = this.getItemStackFromSlot(entityEquipmentSlot);
+        final EntityLivingBase entity = (EntityLivingBase) (IMixinEntityLivingBase) this;
         if (!ItemStack.areItemStacksEqual(after, before)) {
-            InventoryAdapter slotAdapter;
+            final InventoryAdapter slotAdapter;
             if (entity instanceof EntityPlayerMP) {
-                SlotLens slotLens;
-                IMixinInventoryPlayer inventory = (IMixinInventoryPlayer) ((EntityPlayerMP) entity).inventory;
-                PlayerInventoryLens inventoryLens = (PlayerInventoryLens) inventory.getRootLens();
+                final SlotLens slotLens;
+                final IMixinInventoryPlayer inventory = (IMixinInventoryPlayer) ((EntityPlayerMP) entity).inventory;
+                final PlayerInventoryLens inventoryLens = (PlayerInventoryLens) inventory.getRootLens();
                 switch (entityEquipmentSlot) {
                     case OFFHAND:
                         slotLens = inventoryLens.getOffhandLens();
                         break;
                     case MAINHAND:
-                        HotbarLens hotbarLens = inventoryLens.getMainLens().getHotbar();
+                        final HotbarLens hotbarLens = inventoryLens.getMainLens().getHotbar();
                         slotLens = hotbarLens.getSlot(hotbarLens.getSelectedSlotIndex(inventory.getFabric()));
                         break;
                     default:
@@ -924,26 +917,26 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
                 slotAdapter = slotLens.getAdapter(inventory.getFabric(), inventory);
             } else {
                 if (this.slotLens.isEmpty()) {
-                    for (EntityEquipmentSlot slot : EntityEquipmentSlot.values()) {
+                    for (final EntityEquipmentSlot slot : EntityEquipmentSlot.values()) {
                         this.slotLens.put(slot, new SlotLensImpl(slot.getSlotIndex()));
                     }
                 }
                 slotAdapter = this.slotLens.get(entityEquipmentSlot).getAdapter(this.inventory, null);
             }
-            ChangeEntityEquipmentEvent event = SpongeCommonEventFactory.callChangeEntityEquipmentEvent(entity,
+            final ChangeEntityEquipmentEvent event = SpongeCommonEventFactory.callChangeEntityEquipmentEvent(entity,
                     ItemStackUtil.snapshotOf(before), ItemStackUtil.snapshotOf(after), (SlotAdapter) slotAdapter);
             if (event.isCancelled()) {
                 this.setItemStackToSlot(entityEquipmentSlot, before);
                 return;
             }
-            Transaction<ItemStackSnapshot> transaction = event.getTransaction();
+            final Transaction<ItemStackSnapshot> transaction = event.getTransaction();
             if (!transaction.isValid()) {
                 this.setItemStackToSlot(entityEquipmentSlot, before);
                 return;
             }
-            Optional<ItemStackSnapshot> optional = transaction.getCustom();
+            final Optional<ItemStackSnapshot> optional = transaction.getCustom();
             if (optional.isPresent()) {
-                ItemStack custom = ItemStackUtil.fromSnapshotToNative(optional.get());
+                final ItemStack custom = ItemStackUtil.fromSnapshotToNative(optional.get());
                 this.setItemStackToSlot(entityEquipmentSlot, custom);
             }
         }
@@ -955,9 +948,9 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
     }
 
     @Redirect(method = "onDeathUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;getExperiencePoints(Lnet/minecraft/entity/player/EntityPlayer;)I"))
-    private int onGetExperiencePoints(EntityLivingBase entity, EntityPlayer attackingPlayer) {
-        if (entity instanceof IMixinEntityPlayerMP) {
-            if (((IMixinEntityPlayerMP) entity).keepInventory()) {
+    private int onGetExperiencePoints(final EntityLivingBase entity, final EntityPlayer attackingPlayer) {
+        if (entity instanceof ServerPlayerEntityBridge) {
+            if (((ServerPlayerEntityBridge) entity).keepInventory()) {
                 return 0;
             }
         }
@@ -965,30 +958,23 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
     }
 
     @Inject(method = "onItemPickup", at = @At("HEAD"))
-    public void onEntityItemPickup(Entity entityItem, int unused, CallbackInfo ci) {
+    public void onEntityItemPickup(final Entity entityItem, final int unused, final CallbackInfo ci) {
         if (!this.world.isRemote) {
 //            EntityUtil.toMixin(entityItem).setDestructCause(Cause.of(NamedCause.of("PickedUp", this)));
         }
     }
 
     @Inject(method = "onItemUseFinish", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;resetActiveHand()V"))
-    private void updateHealthForUseFinish(CallbackInfo ci) {
-        if (this instanceof IMixinEntityPlayerMP) {
-            ((IMixinEntityPlayerMP) this).refreshScaledHealth();
+    private void updateHealthForUseFinish(final CallbackInfo ci) {
+        if (this instanceof ServerPlayerEntityBridge) {
+            ((ServerPlayerEntityBridge) this).refreshScaledHealth();
         }
     }
 
     // Data delegated methods
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
-        manipulators.add(getHealthData());
-    }
-
-
-    @Override
-    public void setElytraFlying(boolean value) {
+    public void setElytraFlying(final boolean value) {
         setFlag(Constants.Entity.ELYTRA_FLYING_FLAG, value);
     }
 
@@ -996,13 +982,13 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
 
     @Inject(method = "setActiveHand", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD,
             at = @At(value = "FIELD", target = "Lnet/minecraft/entity/EntityLivingBase;activeItemStack:Lnet/minecraft/item/ItemStack;"))
-    private void onSetActiveItemStack(EnumHand hand, CallbackInfo ci, ItemStack stack) {
+    private void onSetActiveItemStack(final EnumHand hand, final CallbackInfo ci, final ItemStack stack) {
         if (this.world.isRemote) {
             return;
         }
 
-        UseItemStackEvent.Start event;
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        final UseItemStackEvent.Start event;
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(stack);
             final HandType handType = (HandType) (Object) hand;
             this.addSelfToFrame(frame, snapshot, handType);
@@ -1018,7 +1004,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
     }
 
     @Redirect(method = "setActiveHand", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/EntityLivingBase;activeItemStackUseCount:I"))
-    private void getItemDuration(EntityLivingBase this$0, int count) {
+    private void getItemDuration(final EntityLivingBase this$0, final int count) {
         if (this.world.isRemote) {
             this.activeItemStackUseCount = count;
         }
@@ -1029,12 +1015,12 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
     // This ensures that the cause and context for these events
     // always have OWNER and NOTIFIER set (if possible),
     // as well as USED_ITEM and USED_HAND
-    private void addSelfToFrame(CauseStackManager.StackFrame frame, ItemStackSnapshot snapshot, HandType hand) {
+    private void addSelfToFrame(final CauseStackManager.StackFrame frame, final ItemStackSnapshot snapshot, final HandType hand) {
         frame.addContext(EventContextKeys.USED_HAND, hand);
         addSelfToFrame(frame, snapshot);
     }
 
-    private void addSelfToFrame(CauseStackManager.StackFrame frame, ItemStackSnapshot snapshot) {
+    private void addSelfToFrame(final CauseStackManager.StackFrame frame, final ItemStackSnapshot snapshot) {
         frame.pushCause(this);
         frame.addContext(EventContextKeys.USED_ITEM, snapshot);
         if (this instanceof User) {
@@ -1045,13 +1031,13 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
 
     @Redirect(method = "updateActiveHand",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;getItemInUseCount()I", ordinal = 0))
-    private int onGetRemainingItemDuration(EntityLivingBase self) {
+    private int onGetRemainingItemDuration(final EntityLivingBase self) {
         if (this.world.isRemote) {
             return self.getItemInUseCount();
         }
 
-        UseItemStackEvent.Tick event;
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        final UseItemStackEvent.Tick event;
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(this.activeItemStack);
             final HandType handType = (HandType) (Object) this.getActiveHand();
             this.addSelfToFrame(frame, snapshot, handType);
@@ -1074,16 +1060,17 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
         return getItemInUseCount();
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Inject(method = "onItemUseFinish", cancellable = true,
             at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;updateItemUse(Lnet/minecraft/item/ItemStack;I)V"))
-    private void onUpdateItemUse(CallbackInfo ci) {
+    private void onUpdateItemUse(final CallbackInfo ci) {
         if (this.world.isRemote) {
             return;
         }
 
 
-        UseItemStackEvent.Finish event;
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        final UseItemStackEvent.Finish event;
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(this.activeItemStack);
             final HandType handType = (HandType) (Object) this.getActiveHand();
             this.addSelfToFrame(frame, snapshot, handType);
@@ -1104,7 +1091,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
 
     @Redirect(method = "onItemUseFinish", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;"
             + "setHeldItem(Lnet/minecraft/util/EnumHand;Lnet/minecraft/item/ItemStack;)V"))
-    private void onSetHeldItem(EntityLivingBase self, EnumHand hand, @Nullable ItemStack stack) {
+    private void onSetHeldItem(final EntityLivingBase self, final EnumHand hand, final ItemStack stack) {
         if (this.world.isRemote) {
             self.setHeldItem(hand, stack);
             return;
@@ -1117,12 +1104,12 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
         // set the copy back in the player's hand, since it may have been already
         // modified if an ItemFood is being used.
 
-        ItemStackSnapshot activeItemStackSnapshot = ItemStackUtil.snapshotOf(this.activeItemStackCopy);
+        final ItemStackSnapshot activeItemStackSnapshot = ItemStackUtil.snapshotOf(this.activeItemStackCopy == null ? ItemStack.EMPTY : this.activeItemStackCopy);
 
 
-        UseItemStackEvent.Replace event;
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(stack);
+        final UseItemStackEvent.Replace event;
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(stack == null ? ItemStack.EMPTY : stack);
             final HandType handType = (HandType) (Object) hand;
             this.addSelfToFrame(frame, activeItemStackSnapshot, handType);
             event = SpongeEventFactory.createUseItemStackEventReplace(Sponge.getCauseStackManager().getCurrentCause(),
@@ -1143,14 +1130,15 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
         setHeldItem(hand, ItemStackUtil.fromSnapshotToNative(event.getItemStackResult().getFinal()));
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Redirect(method = "stopActiveHand", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;"
-            + "onPlayerStoppedUsing(Lnet/minecraft/world/World;Lnet/minecraft/entity/EntityLivingBase;I)V")) // stopActiveHand
-    private void onStopPlayerUsing(ItemStack stack, World world, EntityLivingBase self, int duration) {
+                                                                             + "onPlayerStoppedUsing(Lnet/minecraft/world/World;Lnet/minecraft/entity/EntityLivingBase;I)V")) // stopActiveHand
+    private void onStopPlayerUsing(final ItemStack stack, final World world, final EntityLivingBase self, final int duration) {
         if (this.world.isRemote) {
             stack.onPlayerStoppedUsing(world, self, duration);
             return;
         }
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(stack);
             final HandType handType = (HandType) (Object) this.getActiveHand();
             this.addSelfToFrame(frame, snapshot, handType);
@@ -1162,16 +1150,16 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
     }
 
     @Inject(method = "resetActiveHand", at = @At("HEAD"))
-    private void onResetActiveHand(CallbackInfo ci) {
+    private void onResetActiveHand(final CallbackInfo ci) {
         if (this.world.isRemote) {
             return;
         }
 
         // If we finished using an item, activeItemStackCopy will be non-null
         // However, if a player stopped using an item early, activeItemStackCopy will not be set
-        ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(this.activeItemStackCopy != null ? this.activeItemStackCopy : this.activeItemStack);
+        final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(this.activeItemStackCopy != null ? this.activeItemStackCopy : this.activeItemStack);
 
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             this.addSelfToFrame(frame, snapshot);
             SpongeImpl.postEvent(SpongeEventFactory.createUseItemStackEventReset(Sponge.getCauseStackManager().getCurrentCause(),
                     this.activeItemStackUseCount, this.activeItemStackUseCount, snapshot));

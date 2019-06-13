@@ -35,7 +35,7 @@ import org.spongepowered.api.data.manipulator.mutable.entity.ParrotData;
 import org.spongepowered.api.data.type.ParrotVariant;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.animal.Parrot;
-import org.spongepowered.api.event.CauseStackManager.StackFrame;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -44,6 +44,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeParrotData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSittingData;
+import org.spongepowered.common.mixin.api.minecraft.entity.passive.MixinEntityTameable_API;
+import org.spongepowered.common.mixin.core.entity.MixinEntityAgeable;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.registry.type.entity.ParrotVariantRegistryModule;
@@ -52,19 +54,18 @@ import java.util.List;
 import java.util.Random;
 
 @Mixin(EntityParrot.class)
-public abstract class MixinEntityParrot extends MixinEntityTameable implements Parrot {
+public abstract class MixinEntityParrot extends MixinEntityAgeable  {
 
-    @Shadow public abstract int getVariant();
-
-    @Redirect(method = "processInteract", at = @At(value = "INVOKE", target = "Ljava/util/Random;nextInt(I)I", ordinal = 0, remap = false))
-    public int onTame(Random rand, int bound, EntityPlayer player, EnumHand hand) {
+    @Redirect(method = "processInteract",
+        at = @At(value = "INVOKE", target = "Ljava/util/Random;nextInt(I)I", ordinal = 0, remap = false))
+    private int impl$TameEntityAndGetRandom(Random rand, int bound, EntityPlayer player, EnumHand hand) {
         ItemStack stack = player.getHeldItem(hand);
         int random = rand.nextInt(bound);
         if (random == 0) {
             stack.setCount(stack.getCount() + 1);
-            try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(player);
-                if (!SpongeImpl.postEvent(SpongeEventFactory.createTameEntityEvent(frame.getCurrentCause(), this))) {
+                if (!SpongeImpl.postEvent(SpongeEventFactory.createTameEntityEvent(frame.getCurrentCause(), (Parrot) this))) {
                     stack.setCount(stack.getCount() - 1);
                     return random;
                 }
@@ -73,21 +74,5 @@ public abstract class MixinEntityParrot extends MixinEntityTameable implements P
         return 1;
     }
 
-    @Override
-    public ParrotData getParrotData() {
-        return new SpongeParrotData(ParrotVariantRegistryModule.PARROT_VARIANT_IDMAP.get(this.getVariant()));
-    }
-
-    @Override
-    public Value<ParrotVariant> variant() {
-        return new SpongeValue<>(Keys.PARROT_VARIANT, Constants.Entity.Parrot.DEFAULT_VARIANT, ParrotVariantRegistryModule.PARROT_VARIANT_IDMAP.get(this.getVariant()));
-    }
-
-    @Override
-    public void spongeApi$supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        super.spongeApi$supplyVanillaManipulators(manipulators);
-        manipulators.add(new SpongeSittingData(this.shadow$isSitting()));
-        manipulators.add(getParrotData());
-    }
 
 }

@@ -31,7 +31,6 @@ import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
@@ -68,7 +67,7 @@ final class WorldTickPhaseState extends ListenerPhaseState<WorldTickContext> {
                             key.getZ()).build();
                     frame.pushCause(container);
                     frame.pushCause(block);
-                    final List<Entity> items = value.stream().map(EntityUtil::fromNative).collect(Collectors.toList());
+                    final List<Entity> items = value.stream().map(entity -> (Entity) entity).collect(Collectors.toList());
                     SpongeCommonEventFactory.callDropItemDestruct(items, phaseContext);
                 }
 

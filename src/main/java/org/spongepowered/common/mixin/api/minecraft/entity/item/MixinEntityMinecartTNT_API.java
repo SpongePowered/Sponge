@@ -30,6 +30,7 @@ import net.minecraft.entity.item.EntityMinecartTNT;
 import org.spongepowered.api.entity.vehicle.minecart.TNTMinecart;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 
 @Mixin(EntityMinecartTNT.class)
 public abstract class MixinEntityMinecartTNT_API extends MixinEntityMinecart_API implements TNTMinecart {
@@ -46,9 +47,9 @@ public abstract class MixinEntityMinecartTNT_API extends MixinEntityMinecart_API
     @Override
     public void defuse() {
         checkState(isPrimed(), "not primed");
-        if (shouldDefuse()) {
-            setFuseTicksRemaining(-1);
-            postDefuse();
+        if (((FusedExplosiveBridge) this).bridge$shouldDefuse()) {
+            ((FusedExplosiveBridge) this).bridge$setFuseTicksRemaining(-1);
+            ((FusedExplosiveBridge) this).bridge$postDefuse();
         }
     }
 
@@ -59,7 +60,7 @@ public abstract class MixinEntityMinecartTNT_API extends MixinEntityMinecart_API
 
     @Override
     public void detonate() {
-        setFuseTicksRemaining(0);
+        ((FusedExplosiveBridge) this).bridge$setFuseTicksRemaining(0);
     }
 
 }

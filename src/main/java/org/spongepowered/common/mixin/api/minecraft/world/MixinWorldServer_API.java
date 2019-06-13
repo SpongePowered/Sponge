@@ -95,7 +95,7 @@ import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
-import org.spongepowered.common.interfaces.world.IMixinServerWorldEventHandler;
+import org.spongepowered.common.bridge.world.ServerWorldEventHandlerBridge;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 import org.spongepowered.common.relocate.co.aikar.timings.WorldTimingsHandler;
@@ -430,8 +430,8 @@ public abstract class MixinWorldServer_API extends MixinWorld_API {
         } catch (IllegalStateException e) {
             // Otherwise send it as a custom sound
             this.eventListeners.stream()
-                .filter(listener -> listener instanceof IMixinServerWorldEventHandler)
-                .map(listener -> (IMixinServerWorldEventHandler) listener)
+                .filter(listener -> listener instanceof ServerWorldEventHandlerBridge)
+                .map(listener -> (ServerWorldEventHandlerBridge) listener)
                 .forEach(listener -> {
                     // There's no method for playing a custom sound to all, so I made one -_-
                     listener.playCustomSoundToAllNearExcept(null,

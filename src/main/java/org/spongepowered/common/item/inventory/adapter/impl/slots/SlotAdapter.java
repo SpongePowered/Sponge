@@ -62,8 +62,8 @@ public class SlotAdapter extends AbstractInventoryAdapter implements Slot {
     // Internal use for events, will be removed soon!
     public int slotNumber = -1;
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private static SlotLens getLens(net.minecraft.inventory.Slot slot) {
+    @SuppressWarnings("rawtypes")
+    private static SlotLens getLens(final net.minecraft.inventory.Slot slot) {
         if (((IMixinSlot) slot).getSlotIndex() >= 0) { // Normal Slot?
             if (slot.inventory instanceof InventoryAdapter) { // If the inventory is an adapter we can get the existing SlotLens
                 return ((InventoryAdapter) slot.inventory).getSlotProvider().getSlot(((IMixinSlot) slot).getSlotIndex());
@@ -74,7 +74,7 @@ public class SlotAdapter extends AbstractInventoryAdapter implements Slot {
         return new FakeSlotLensImpl(slot);
     }
 
-    public SlotAdapter(Fabric inventory, SlotLens lens, Inventory parent) {
+    public SlotAdapter(final Fabric inventory, final SlotLens lens, final Inventory parent) {
         super(inventory, lens, parent);
         this.slot = lens;
         this.ordinal = lens.getOrdinal(inventory);
@@ -97,7 +97,7 @@ public class SlotAdapter extends AbstractInventoryAdapter implements Slot {
         return (Iterable<T>) this.slots;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "deprecation"})
     @Override
     public <T extends Inventory> T first() {
         return (T) this;
@@ -105,7 +105,7 @@ public class SlotAdapter extends AbstractInventoryAdapter implements Slot {
 
     @Override
     public Optional<ItemStack> poll() {
-        net.minecraft.item.ItemStack stack = this.inventory.getStack(this.ordinal);
+        final net.minecraft.item.ItemStack stack = this.inventory.getStack(this.ordinal);
         if (stack.isEmpty()) {
             return Optional.<ItemStack>empty();
         }
@@ -115,7 +115,7 @@ public class SlotAdapter extends AbstractInventoryAdapter implements Slot {
 
     @Override
     public Optional<ItemStack> peek() {
-        net.minecraft.item.ItemStack stack = this.slot.getStack(this.inventory);
+        final net.minecraft.item.ItemStack stack = this.slot.getStack(this.inventory);
         if (stack.isEmpty()) {
             return Optional.empty();
         }
@@ -123,7 +123,7 @@ public class SlotAdapter extends AbstractInventoryAdapter implements Slot {
     }
 
     @Override
-    public InventoryTransactionResult offer(ItemStack stack) {
+    public InventoryTransactionResult offer(final ItemStack stack) {
 //        // TODO Correct the transaction based on how offer goes
 //        final net.minecraft.item.ItemStack old = this.inventory.getStack(this.ordinal);
 //        if (!ItemStackUtil.compare(old, stack)) {
@@ -146,13 +146,13 @@ public class SlotAdapter extends AbstractInventoryAdapter implements Slot {
 //        this.inventory.markDirty();
 //        return InventoryTransactionResult.successNoTransactions();
 
-        InventoryTransactionResult.Builder result = InventoryTransactionResult.builder().type(InventoryTransactionResult.Type.SUCCESS);
-        net.minecraft.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
+        final InventoryTransactionResult.Builder result = InventoryTransactionResult.builder().type(InventoryTransactionResult.Type.SUCCESS);
+        final net.minecraft.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
 
-        int maxStackSize = this.slot.getMaxStackSize(this.inventory);
+        final int maxStackSize = this.slot.getMaxStackSize(this.inventory);
         int remaining = stack.getQuantity();
 
-        net.minecraft.item.ItemStack old = this.slot.getStack(this.inventory);
+        final net.minecraft.item.ItemStack old = this.slot.getStack(this.inventory);
         int push = Math.min(remaining, maxStackSize);
         if (old.isEmpty() && this.slot.setStack(this.inventory, ItemStackUtil.cloneDefensiveNative(nativeStack, push))) {
             remaining -= push;
@@ -174,31 +174,29 @@ public class SlotAdapter extends AbstractInventoryAdapter implements Slot {
     }
 
     @Override
-    public boolean canFit(ItemStack stack) {
+    public boolean canFit(final ItemStack stack) {
         if (stack.isEmpty()) {
             return true;
         }
-        net.minecraft.item.ItemStack old = this.slot.getStack(this.inventory);
+        final net.minecraft.item.ItemStack old = this.slot.getStack(this.inventory);
         if (old.isEmpty()) {
             return this.getMaxStackSize() >= stack.getQuantity();
-        } else if (ItemStackUtil.compareIgnoreQuantity(old, stack)) {
-            return this.getMaxStackSize() - old.getCount() >= stack.getQuantity();
         }
-        return false;
+        return ItemStackUtil.compareIgnoreQuantity(old, stack) && this.getMaxStackSize() - old.getCount() >= stack.getQuantity();
     }
 
     @Override
-    public InventoryTransactionResult set(ItemStack stack) {
-        InventoryTransactionResult.Builder result = InventoryTransactionResult.builder().type(InventoryTransactionResult.Type.SUCCESS);
-        net.minecraft.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
+    public InventoryTransactionResult set(final ItemStack stack) {
+        final InventoryTransactionResult.Builder result = InventoryTransactionResult.builder().type(InventoryTransactionResult.Type.SUCCESS);
+        final net.minecraft.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
 
-        net.minecraft.item.ItemStack old = this.slot.getStack(this.inventory);
+        final net.minecraft.item.ItemStack old = this.slot.getStack(this.inventory);
         if (stack.getType() == ItemTypes.NONE) {
             clear(); // NONE item will clear the slot
             return result.replace(ItemStackUtil.fromNative(old)).build();
         }
         int remaining = stack.getQuantity();
-        int push = Math.min(remaining, this.slot.getMaxStackSize(this.inventory));
+        final int push = Math.min(remaining, this.slot.getMaxStackSize(this.inventory));
         if (this.slot.setStack(this.inventory, ItemStackUtil.cloneDefensiveNative(nativeStack, push))) {
             result.replace(ItemStackUtil.fromNative(old));
             remaining -= push;
@@ -237,26 +235,26 @@ public class SlotAdapter extends AbstractInventoryAdapter implements Slot {
     }
 
     @Override
-    public boolean contains(ItemStack stack) {
-        net.minecraft.item.ItemStack slotStack = this.slot.getStack(this.inventory);
+    public boolean contains(final ItemStack stack) {
+        final net.minecraft.item.ItemStack slotStack = this.slot.getStack(this.inventory);
         return slotStack.isEmpty() ? ItemStackUtil.toNative(stack).isEmpty() :
                 ItemStackUtil.compareIgnoreQuantity(slotStack, stack) && slotStack.getCount() >= stack.getQuantity();
     }
 
     @Override
-    public boolean containsAny(ItemStack stack) {
-        net.minecraft.item.ItemStack slotStack = this.slot.getStack(this.inventory);
+    public boolean containsAny(final ItemStack stack) {
+        final net.minecraft.item.ItemStack slotStack = this.slot.getStack(this.inventory);
         return slotStack.isEmpty() ? ItemStackUtil.toNative(stack).isEmpty() : ItemStackUtil.compareIgnoreQuantity(slotStack, stack);
     }
 
     @Override
-    public boolean contains(ItemType type) {
-        net.minecraft.item.ItemStack slotStack = this.slot.getStack(this.inventory);
+    public boolean contains(final ItemType type) {
+        final net.minecraft.item.ItemStack slotStack = this.slot.getStack(this.inventory);
         return slotStack.isEmpty() ? (type == null || type == ItemTypes.AIR) : slotStack.getItem().equals(type);
     }
 
     @Override
-    public Slot transform(Type type) {
+    public Slot transform(final Slot.Type type) {
         switch (type) {
             case INVENTORY:
                 if (this.inventory instanceof SlotFabric) {
@@ -273,7 +271,7 @@ public class SlotAdapter extends AbstractInventoryAdapter implements Slot {
 
     @Override
     public Slot transform() {
-        return this.transform(Type.INVENTORY);
+        return this.transform(Slot.Type.INVENTORY);
     }
 
     @Override
@@ -282,13 +280,13 @@ public class SlotAdapter extends AbstractInventoryAdapter implements Slot {
             private boolean iterated = false;
             @Override
             public boolean hasNext() {
-                return !iterated;
+                return !this.iterated;
             }
 
             @Override
             public Inventory next() {
-                if (iterated) throw new NoSuchElementException();
-                iterated = true;
+                if (this.iterated) throw new NoSuchElementException("Iterator is consumed");
+                this.iterated = true;
                 return SlotAdapter.this;
             }
         };

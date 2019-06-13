@@ -114,7 +114,7 @@ import org.spongepowered.common.interfaces.IMixinPlayerList;
 import org.spongepowered.common.interfaces.IMixinServerScoreboard;
 import org.spongepowered.common.interfaces.advancement.IMixinPlayerAdvancements;
 import org.spongepowered.common.bridge.entity.EntityBridge;
-import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
+import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.packet.WorldBorderPacketBridge;
 import org.spongepowered.common.interfaces.world.IMixinITeleporter;
 import org.spongepowered.common.interfaces.world.ServerWorldBridge;
@@ -235,7 +235,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         playerprofilecache.addEntry(gameprofile);
 
         // Sponge start - save changes to offline User before reading player data
-        SpongeUser user = (SpongeUser) ((IMixinEntityPlayerMP) playerIn).getUserObject();
+        SpongeUser user = (SpongeUser) ((ServerPlayerEntityBridge) playerIn).getUserObject();
         if (SpongeUser.dirtyUsers.contains(user)) {
             user.save();
         }
@@ -374,7 +374,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         // This allows #getWorldScoreboard to function
         // as normal, without causing issues when it is initialized on the client.
 
-        ((IMixinEntityPlayerMP) playerIn).initScoreboard();
+        ((ServerPlayerEntityBridge) playerIn).initScoreboard();
 
         for (PotionEffect potioneffect : playerIn.getActivePotionEffects()) {
             handler.sendPacket(new SPacketEntityEffect(playerIn.getEntityId(), potioneffect));
@@ -543,8 +543,8 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
             newPlayer.setSpawnPoint(bedPos, playerIn.isSpawnForced());
         }
 
-        ((IMixinEntityPlayerMP) newPlayer).setScoreboardOnRespawn(((Player) playerIn).getScoreboard());
-        ((IMixinEntityPlayerMP) playerIn).removeScoreboardOnRespawn();
+        ((ServerPlayerEntityBridge) newPlayer).setScoreboardOnRespawn(((Player) playerIn).getScoreboard());
+        ((ServerPlayerEntityBridge) playerIn).removeScoreboardOnRespawn();
 
         for (String s : playerIn.getTags()) {
             newPlayer.addTag(s);
@@ -587,7 +587,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         final int dimensionId = WorldManager.getClientDimensionId(newPlayer, worldServer);
 
         // Send dimension registration
-        if (((IMixinEntityPlayerMP) newPlayer).usesCustomClient()) {
+        if (((ServerPlayerEntityBridge) newPlayer).usesCustomClient()) {
             WorldManager.sendDimensionRegistration(newPlayer, worldServer.provider);
         } else {
             // Force vanilla client to refresh its chunk cache if same dimension type
@@ -624,7 +624,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         for (PotionEffect potioneffect : newPlayer.getActivePotionEffects()) {
             newPlayer.connection.sendPacket(new SPacketEntityEffect(newPlayer.getEntityId(), potioneffect));
         }
-        ((IMixinEntityPlayerMP) newPlayer).refreshScaledHealth();
+        ((ServerPlayerEntityBridge) newPlayer).refreshScaledHealth();
         SpongeCommonEventFactory.callPostPlayerRespawnEvent(newPlayer, conqueredEnd);
 
         return newPlayer;
@@ -775,7 +775,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         // Synchronise with user object
         NBTTagCompound nbt = new NBTTagCompound();
         player.writeToNBT(nbt);
-        ((SpongeUser) ((IMixinEntityPlayerMP) player).getUserObject()).readFromNbt(nbt);
+        ((SpongeUser) ((ServerPlayerEntityBridge) player).getUserObject()).readFromNbt(nbt);
 
         // Remove player reference from scoreboard
         ((IMixinServerScoreboard) ((Player) player).getScoreboard()).removePlayer(player, false);
@@ -862,7 +862,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
 
     @Inject(method = "createPlayerForUser", at = @At("RETURN"), cancellable = true)
     public void onCreatePlayerForUser(CallbackInfoReturnable<EntityPlayerMP> cir) {
-        ((IMixinEntityPlayerMP) cir.getReturnValue()).forceRecreateUser();
+        ((ServerPlayerEntityBridge) cir.getReturnValue()).forceRecreateUser();
     }
 
     @Override

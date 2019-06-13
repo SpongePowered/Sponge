@@ -206,7 +206,7 @@ import java.util.List;
 public final class CommonModuleRegistry {
 
     public static CommonModuleRegistry getInstance() {
-        return Holder.INSTANCE;
+        return CommonModuleRegistry.Holder.INSTANCE;
     }
 
     public void registerDefaultModules() {
@@ -458,7 +458,7 @@ public final class CommonModuleRegistry {
                 .registerModule(AdvancementType.class, new AdvancementTypeRegistryModule())
                 .registerModule(Trigger.class, TriggerTypeRegistryModule.getInstance())
                 .registerModule(new CriterionRegistryModule())
-                .registerModule(((Class<DataRegistration<?, ?>>) (Class<?>) DataRegistration.class), SpongeManipulatorRegistry.getInstance())
+                .registerModule((Class<DataRegistration<?, ?>>) (Class<?>) DataRegistration.class, SpongeManipulatorRegistry.getInstance())
                 .registerModule(new ItemStackComparatorRegistryModule())
                 .registerModule(HandPreference.class, HandPreferenceRegistryModule.getInstance())
 

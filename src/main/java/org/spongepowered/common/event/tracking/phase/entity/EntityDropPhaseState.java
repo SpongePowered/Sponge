@@ -33,7 +33,6 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
@@ -95,7 +94,7 @@ public class EntityDropPhaseState extends EntityPhaseState<BasicEntityContext> {
         context.getPerEntityItemEntityDropSupplier().acceptAndRemoveIfPresent(dyingEntity.getUniqueId(), items -> {
             final ArrayList<Entity> entities = new ArrayList<>();
             for (EntityItem item : items) {
-                entities.add(EntityUtil.fromNative(item));
+                entities.add((Entity) item);
             }
 
             if (isPlayer) {
@@ -120,10 +119,10 @@ public class EntityDropPhaseState extends EntityPhaseState<BasicEntityContext> {
             items.addAll(itemStacks);
 
             if (!items.isEmpty()) {
-                final net.minecraft.entity.Entity minecraftEntity = EntityUtil.toNative(dyingEntity);
+                final net.minecraft.entity.Entity minecraftEntity = (net.minecraft.entity.Entity) dyingEntity;
                 final List<Entity> itemEntities = items.stream()
                     .map(data -> data.create((WorldServer) minecraftEntity.world))
-                    .map(EntityUtil::fromNative)
+                    .map(entity -> (Entity) entity)
                     .collect(Collectors.toList());
 
                 if (isPlayer) {

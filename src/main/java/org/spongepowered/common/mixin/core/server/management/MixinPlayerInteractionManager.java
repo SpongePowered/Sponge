@@ -77,7 +77,7 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.PacketContext;
-import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
+import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerInteractionManager;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.util.VecHelper;
@@ -171,7 +171,7 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
         if (isCancelled) {
 
             final IBlockState state = this.player.world.getBlockState(pos);
-            ((IMixinEntityPlayerMP) this.player).sendBlockChange(pos, state);
+            ((ServerPlayerEntityBridge) this.player).sendBlockChange(pos, state);
             this.player.world.notifyBlockUpdate(pos, this.player.world.getBlockState(pos), state, 3);
             return;
         }

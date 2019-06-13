@@ -29,7 +29,6 @@ import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
 
@@ -66,12 +65,12 @@ public class EquipmentSlotsFabric implements Fabric {
 
     @Override
     public ItemStack getStack(int index) {
-        return EntityUtil.toNative(this.living).getItemStackFromSlot(SLOTS[index]);
+        return ((EntityLivingBase) this.living).getItemStackFromSlot(SLOTS[index]);
     }
 
     @Override
     public void setStack(int index, ItemStack stack) {
-        EntityUtil.toNative(this.living).setItemStackToSlot(SLOTS[index], stack);
+        ((EntityLivingBase) this.living).setItemStackToSlot(SLOTS[index], stack);
     }
 
     @Override
@@ -91,7 +90,7 @@ public class EquipmentSlotsFabric implements Fabric {
 
     @Override
     public void clear() {
-        EntityLivingBase entity = EntityUtil.toNative(this.living);
+        EntityLivingBase entity = (EntityLivingBase) this.living;
         for (EntityEquipmentSlot slot : SLOTS) {
             entity.setItemStackToSlot(slot, ItemStack.EMPTY);
         }

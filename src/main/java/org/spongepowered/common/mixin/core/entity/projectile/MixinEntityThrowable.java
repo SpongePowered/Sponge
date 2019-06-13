@@ -44,7 +44,7 @@ import javax.annotation.Nullable;
 @Mixin(EntityThrowable.class)
 public abstract class MixinEntityThrowable extends MixinEntity {
 
-    @Shadow private EntityLivingBase thrower;
+    @Shadow public EntityLivingBase thrower;
     @Shadow protected abstract void onImpact(RayTraceResult movingObjectPosition);
 
     @Nullable

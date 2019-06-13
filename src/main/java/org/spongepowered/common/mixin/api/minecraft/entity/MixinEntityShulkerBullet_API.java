@@ -89,7 +89,7 @@ public abstract class MixinEntityShulkerBullet_API extends MixinEntity_API imple
 
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(List<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(getTargetData());
         manipulators.add(getDirectionalData());

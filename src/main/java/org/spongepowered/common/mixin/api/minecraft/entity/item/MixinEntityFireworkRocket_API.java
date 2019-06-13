@@ -27,35 +27,19 @@ package org.spongepowered.common.mixin.api.minecraft.entity.item;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.Lists;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityFireworkRocket;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.EntityDamageSource;
-import net.minecraft.world.World;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.FireworkEffectData;
 import org.spongepowered.api.entity.projectile.Firework;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 import org.spongepowered.common.data.manipulator.mutable.SpongeFireworkEffectData;
 import org.spongepowered.common.data.processor.common.FireworkUtils;
-import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
-import org.spongepowered.common.interfaces.entity.IMixinEntityFireworkRocket;
 import org.spongepowered.common.mixin.api.minecraft.entity.MixinEntity_API;
 
 import java.util.List;
-import java.util.Optional;
 
 @Mixin(EntityFireworkRocket.class)
 public abstract class MixinEntityFireworkRocket_API extends MixinEntity_API implements Firework {
@@ -84,7 +68,7 @@ public abstract class MixinEntityFireworkRocket_API extends MixinEntity_API impl
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(List<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(this.getFireworkData());
     }
@@ -105,9 +89,9 @@ public abstract class MixinEntityFireworkRocket_API extends MixinEntity_API impl
     @Override
     public void defuse() {
         checkState(isPrimed(), "not primed");
-        if (shouldDefuse()) {
+        if (((FusedExplosiveBridge) this).bridge$shouldDefuse()) {
             setDead();
-            postDefuse();
+            ((FusedExplosiveBridge) this).bridge$postDefuse();
         }
     }
 

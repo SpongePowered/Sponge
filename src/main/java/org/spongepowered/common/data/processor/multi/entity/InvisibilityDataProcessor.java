@@ -35,7 +35,6 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableInvisibi
 import org.spongepowered.api.data.manipulator.mutable.entity.InvisibilityData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeInvisibilityData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 
 import java.util.Map;
@@ -67,12 +66,12 @@ public class InvisibilityDataProcessor
             final boolean vanish = (Boolean) keyValues.get(Keys.VANISH);
             dataHolder.setInvisible(invis);
             if (vanish) {
-                final EntityBridge mixinEntity = EntityUtil.toMixin(dataHolder);
+                final EntityBridge mixinEntity = (EntityBridge) dataHolder;
                 mixinEntity.setVanished(true);
                 mixinEntity.setIgnoresCollision(collision);
                 mixinEntity.setUntargetable(untargetable);
             } else {
-                EntityUtil.toMixin(dataHolder).setVanished(false);
+                ((EntityBridge) dataHolder).setVanished(false);
             }
             return true;
         }

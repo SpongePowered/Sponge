@@ -145,7 +145,7 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
                         Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
                         final ArrayList<Entity> capturedEntities = new ArrayList<>();
                         for (EntityItem entity : items) {
-                            capturedEntities.add(EntityUtil.fromNative(entity));
+                            capturedEntities.add((Entity) entity);
                         }
                         SpongeCommonEventFactory.callSpawnEntity(capturedEntities, context);
                     });

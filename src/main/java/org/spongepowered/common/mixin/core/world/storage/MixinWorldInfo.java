@@ -82,9 +82,9 @@ import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
-import org.spongepowered.common.interfaces.world.IMixinGameRules;
+import org.spongepowered.common.bridge.world.GameRulesBridge;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
-import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
+import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 import org.spongepowered.common.registry.type.world.DimensionTypeRegistryModule;
 import org.spongepowered.common.registry.type.world.PortalAgentRegistryModule;
 import org.spongepowered.common.registry.type.world.WorldGeneratorModifierRegistryModule;
@@ -191,7 +191,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         this.createWorldConfig();
         this.setEnabled(archetype.isEnabled());
         this.setLoadOnStartup(archetype.loadOnStartup());
-        if (((IMixinWorldSettings)(Object) settings).internalKeepSpawnLoaded() != null) {
+        if (((WorldSettingsBridge)(Object) settings).bridge$internalKeepSpawnLoaded() != null) {
             this.setKeepSpawnLoaded(archetype.doesKeepSpawnLoaded());
         }
         this.setGenerateSpawnOnLoad(archetype.doesGenerateSpawnOnLoad());
@@ -597,7 +597,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     @Override
     public boolean removeGameRule(String gameRule) {
         checkNotNull(gameRule, "The gamerule cannot be null!");
-        return ((IMixinGameRules) this.gameRules).removeGameRule(gameRule);
+        return ((GameRulesBridge) this.gameRules).removeGameRule(gameRule);
     }
 
     @Override

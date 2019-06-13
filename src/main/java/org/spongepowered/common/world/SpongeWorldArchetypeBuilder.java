@@ -50,7 +50,7 @@ import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
-import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
+import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 import org.spongepowered.common.registry.type.world.WorldArchetypeRegistryModule;
 import org.spongepowered.common.registry.type.world.WorldGeneratorModifierRegistryModule;
 
@@ -260,24 +260,24 @@ public class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder {
         final WorldSettings settings =
                 new WorldSettings(this.seed, (GameType) (Object) this.gameMode, this.mapFeaturesEnabled, this.hardcore,
                         (WorldType) this.generatorType);
-        IMixinWorldSettings spongeSettings = (IMixinWorldSettings) (Object) settings;
-        spongeSettings.setId(id);
-        spongeSettings.setName(name);
-        spongeSettings.setDimensionType(this.dimensionType);
-        spongeSettings.setDifficulty(this.difficulty);
-        spongeSettings.setSerializationBehavior(this.serializationBehavior);
-        spongeSettings.setGeneratorSettings(this.generatorSettings);
-        spongeSettings.setGeneratorModifiers(this.generatorModifiers);
-        spongeSettings.setEnabled(this.worldEnabled);
-        spongeSettings.setLoadOnStartup(this.loadOnStartup);
-        spongeSettings.setKeepSpawnLoaded(this.keepSpawnLoaded);
-        spongeSettings.setGenerateSpawnOnLoad(this.generateSpawnOnLoad);
-        spongeSettings.setPVPEnabled(this.pvpEnabled);
-        spongeSettings.setCommandsAllowed(this.commandsAllowed);
-        spongeSettings.setGenerateBonusChest(this.generateBonusChest);
-        spongeSettings.fromBuilder(true);
-        spongeSettings.setPortalAgentType(this.portalAgentType);
-        spongeSettings.setRandomSeed(this.seedRandomized);
+        WorldSettingsBridge spongeSettings = (WorldSettingsBridge) (Object) settings;
+        spongeSettings.bridge$setId(id);
+        spongeSettings.bridge$setName(name);
+        spongeSettings.bridge$setDimensionType(this.dimensionType);
+        spongeSettings.bridge$setDifficulty(this.difficulty);
+        spongeSettings.bridge$setSerializationBehavior(this.serializationBehavior);
+        spongeSettings.bridge$setGeneratorSettings(this.generatorSettings);
+        spongeSettings.bridge$setGeneratorModifiers(this.generatorModifiers);
+        spongeSettings.bridge$setEnabled(this.worldEnabled);
+        spongeSettings.bridge$setLoadOnStartup(this.loadOnStartup);
+        spongeSettings.bridge$setKeepSpawnLoaded(this.keepSpawnLoaded);
+        spongeSettings.bridge$setGenerateSpawnOnLoad(this.generateSpawnOnLoad);
+        spongeSettings.bridge$setPVPEnabled(this.pvpEnabled);
+        spongeSettings.bridge$setCommandsAllowed(this.commandsAllowed);
+        spongeSettings.bridge$setGenerateBonusChest(this.generateBonusChest);
+        spongeSettings.bridge$fromBuilder(true);
+        spongeSettings.bridge$setPortalAgentType(this.portalAgentType);
+        spongeSettings.bridge$setRandomSeed(this.seedRandomized);
         Sponge.getRegistry().register(WorldArchetype.class, (WorldArchetype) (Object) settings);
         return (WorldArchetype) (Object) settings;
     }

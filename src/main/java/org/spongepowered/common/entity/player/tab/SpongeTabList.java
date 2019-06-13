@@ -61,7 +61,7 @@ public final class SpongeTabList implements TabList {
     @Nullable private Text footer;
     private final Map<UUID, TabListEntry> entries = Maps.newHashMap();
 
-    public SpongeTabList(EntityPlayerMP player) {
+    public SpongeTabList(final EntityPlayerMP player) {
         this.player = player;
     }
 
@@ -76,7 +76,7 @@ public final class SpongeTabList implements TabList {
     }
 
     @Override
-    public TabList setHeader(@Nullable Text header) {
+    public TabList setHeader(@Nullable final Text header) {
         this.header = header;
 
         this.refreshClientHeaderFooter();
@@ -90,7 +90,7 @@ public final class SpongeTabList implements TabList {
     }
 
     @Override
-    public TabList setFooter(@Nullable Text footer) {
+    public TabList setFooter(@Nullable final Text footer) {
         this.footer = footer;
 
         this.refreshClientHeaderFooter();
@@ -99,7 +99,7 @@ public final class SpongeTabList implements TabList {
     }
 
     @Override
-    public TabList setHeaderAndFooter(@Nullable Text header, @Nullable Text footer) {
+    public TabList setHeaderAndFooter(@Nullable final Text header, @Nullable final Text footer) {
         // Do not call the methods, set directly
         this.header = header;
         this.footer = footer;
@@ -110,7 +110,7 @@ public final class SpongeTabList implements TabList {
     }
 
     private void refreshClientHeaderFooter() {
-        SPacketPlayerListHeaderFooter packet = new SPacketPlayerListHeaderFooter();
+        final SPacketPlayerListHeaderFooter packet = new SPacketPlayerListHeaderFooter();
         // MC-98180 - Sending null as header or footer will cause an exception on the client
         packet.header = this.header == null ? EMPTY_COMPONENT : SpongeTexts.toComponent(this.header);
         packet.footer = this.footer == null ? EMPTY_COMPONENT : SpongeTexts.toComponent(this.footer);
@@ -123,13 +123,13 @@ public final class SpongeTabList implements TabList {
     }
 
     @Override
-    public Optional<TabListEntry> getEntry(UUID uniqueId) {
+    public Optional<TabListEntry> getEntry(final UUID uniqueId) {
         checkNotNull(uniqueId, "unique id");
         return Optional.ofNullable(this.entries.get(uniqueId));
     }
 
     @Override
-    public TabList addEntry(TabListEntry entry) throws IllegalArgumentException {
+    public TabList addEntry(final TabListEntry entry) throws IllegalArgumentException {
         checkNotNull(entry, "builder");
         checkState(entry.getList().equals(this), "the provided tab list entry was not created for this tab list");
 
@@ -138,7 +138,7 @@ public final class SpongeTabList implements TabList {
         return this;
     }
 
-    private void addEntry(SPacketPlayerListItem.AddPlayerData entry) {
+    private void addEntry(final SPacketPlayerListItem.AddPlayerData entry) {
         if (!this.entries.containsKey(entry.getProfile().getId())) {
             this.addEntry(new SpongeTabListEntry(
                     this,
@@ -150,8 +150,8 @@ public final class SpongeTabList implements TabList {
         }
     }
 
-    private void addEntry(TabListEntry entry, boolean exceptionOnDuplicate) {
-        UUID uniqueId = entry.getProfile().getUniqueId();
+    private void addEntry(final TabListEntry entry, final boolean exceptionOnDuplicate) {
+        final UUID uniqueId = entry.getProfile().getUniqueId();
 
         if (exceptionOnDuplicate) {
             checkArgument(!this.entries.containsKey(uniqueId), "cannot add duplicate entry");
@@ -168,11 +168,11 @@ public final class SpongeTabList implements TabList {
     }
 
     @Override
-    public Optional<TabListEntry> removeEntry(UUID uniqueId) {
+    public Optional<TabListEntry> removeEntry(final UUID uniqueId) {
         checkNotNull(uniqueId, "unique id");
 
         if (this.entries.containsKey(uniqueId)) {
-            TabListEntry entry = this.entries.remove(uniqueId);
+            final TabListEntry entry = this.entries.remove(uniqueId);
             this.sendUpdate(entry, SPacketPlayerListItem.Action.REMOVE_PLAYER);
             return Optional.of(entry);
         }
@@ -185,14 +185,15 @@ public final class SpongeTabList implements TabList {
      * @param entry The entry to update
      * @param action The update action to perform
      */
-    protected void sendUpdate(TabListEntry entry, SPacketPlayerListItem.Action action) {
-        SPacketPlayerListItem packet = new SPacketPlayerListItem();
+    @SuppressWarnings("ConstantConditions")
+    void sendUpdate(final TabListEntry entry, final SPacketPlayerListItem.Action action) {
+        final SPacketPlayerListItem packet = new SPacketPlayerListItem();
         packet.action = action;
         ((AccessorSPacketPlayerListItem) packet).spongeBridge$getPlayerDatas()
             .add(((SPacketPlayerListItem) (Object) this).new AddPlayerData((GameProfile) entry.getProfile(),
                 entry.getLatency(),
                 (GameType) (Object) entry.getGameMode(),
-                entry.getDisplayName().isPresent() ? SpongeTexts.toComponent(entry.getDisplayName().get()) : null);
+                entry.getDisplayName().isPresent() ? SpongeTexts.toComponent(entry.getDisplayName().get()) : null));
         this.player.connection.sendPacket(packet);
     }
 
@@ -204,8 +205,9 @@ public final class SpongeTabList implements TabList {
      *
      * @param packet The packet to process
      */
-    public void updateEntriesOnSend(SPacketPlayerListItem packet) {
-        for (SPacketPlayerListItem.AddPlayerData data : ((AccessorSPacketPlayerListItem) packet).spongeBridge$getPlayerDatas()) {
+    @SuppressWarnings("ConstantConditions")
+    public void updateEntriesOnSend(final SPacketPlayerListItem packet) {
+        for (final SPacketPlayerListItem.AddPlayerData data : ((AccessorSPacketPlayerListItem) packet).spongeBridge$getPlayerDatas()) {
             if (packet.action == SPacketPlayerListItem.Action.ADD_PLAYER) {
                 // If an entry with the same id exists nothing will be done
                 this.addEntry(data);

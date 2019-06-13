@@ -39,7 +39,6 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAggressive
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAngerableData;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.interfaces.entity.IMixinAggressive;
-import org.spongepowered.common.mixin.api.minecraft.entity.monster.MixinEntityZombie_API;
 
 import java.util.List;
 
@@ -80,7 +79,7 @@ public abstract class MixinEntityPigZombie_API extends MixinEntityZombie_API imp
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(List<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(getAngerData());
         manipulators.add(new SpongeAggressiveData(isAngry()));

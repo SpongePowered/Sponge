@@ -31,6 +31,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.GameRules;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.type.*;
@@ -63,6 +64,7 @@ public final class Constants {
     public static final class Sponge {
 
         public static final int MAX_DEATH_EVENTS_BEFORE_GIVING_UP = 3;
+        public static final GameRules DEFAULT_GAME_RULES = new GameRules();
     }
 
     public static final class Permissions {
@@ -79,11 +81,11 @@ public final class Constants {
 
 
         public static final Vector3i BLOCK_MIN = new Vector3i(-30000000, 0, -30000000);
-        public static final Vector3i BIOME_MIN = new Vector3i(BLOCK_MIN.getX(), 0, BLOCK_MIN.getZ());
+        public static final Vector3i BIOME_MIN = new Vector3i(Constants.World.BLOCK_MIN.getX(), 0, Constants.World.BLOCK_MIN.getZ());
         public static final Vector3i BLOCK_MAX = new Vector3i(30000000, 256, 30000000).sub(Vector3i.ONE);
-        public static final Vector3i BLOCK_SIZE = BLOCK_MAX.sub(BLOCK_MIN).add(Vector3i.ONE);
-        public static final Vector3i BIOME_MAX = new Vector3i(BLOCK_MAX.getX(), 256, BLOCK_MAX.getZ());
-        public static final Vector3i BIOME_SIZE = BIOME_MAX.sub(BIOME_MIN).add(Vector3i.ONE);
+        public static final Vector3i BLOCK_SIZE = Constants.World.BLOCK_MAX.sub(Constants.World.BLOCK_MIN).add(Vector3i.ONE);
+        public static final Vector3i BIOME_MAX = new Vector3i(Constants.World.BLOCK_MAX.getX(), 256, Constants.World.BLOCK_MAX.getZ());
+        public static final Vector3i BIOME_SIZE = Constants.World.BIOME_MAX.sub(Constants.World.BIOME_MIN).add(Vector3i.ONE);
         /**
          * Specifically ordered for the order of notifications being sent out for
          * when sending a request through {@link net.minecraft.world.World#notifyNeighborsOfStateChange(BlockPos, Block, boolean)}
@@ -96,7 +98,7 @@ public final class Constants {
 
     public static final class Chunk {
 
-        public static final Direction[] CARDINAL_DIRECTIONS = new Direction[] {Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST};
+        public static final Direction[] CARDINAL_DIRECTIONS = {Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST};
         public static final Vector3i BIOME_SIZE = new Vector3i(SpongeChunkLayout.CHUNK_SIZE.getX(), 1, SpongeChunkLayout.CHUNK_SIZE.getZ());
 
         // Neighbor Constants
@@ -106,13 +108,13 @@ public final class Constants {
         public static final short XZ_MASK = 0xF;
         public static final short Y_SHORT_MASK = 0xFF;
         public static final int Y_INT_MASK = 0xFFFFFF;
-        private static final int Y_SHIFT = NUM_XZ_BITS;
+        private static final int Y_SHIFT = Constants.Chunk.NUM_XZ_BITS;
     }
 
     public static final class Networking {
 
         public static final int MAX_STRING_LENGTH_BYTES = Short.MAX_VALUE;
-        public static final int MAX_STRING_LENGTH = MAX_STRING_LENGTH_BYTES >> 2;
+        public static final int MAX_STRING_LENGTH = Constants.Networking.MAX_STRING_LENGTH_BYTES >> 2;
     }
 
     public static final class Item {
@@ -159,7 +161,7 @@ public final class Constants {
             public static final short DEFAULT_REQUIRED_PLAYER_RANGE = 16;
             public static final short DEFAULT_SPAWN_RANGE = 4;
             public static final WeightedSerializableObject<EntityArchetype> DEFAULT_NEXT_ENTITY_TO_SPAWN = new WeightedSerializableObject<>
-                    (EntityUtil.archetype(Catalog.DEFAULT_SPAWNER_ENTITY), 1);
+                    (EntityUtil.archetype(Constants.Catalog.DEFAULT_SPAWNER_ENTITY), 1);
         }
 
         public static final class Furnace {
@@ -215,6 +217,10 @@ public final class Constants {
         public static final boolean DEFAULT_HAS_GRAVITY = true;
         public static final boolean DEFAULT_GLOWING = false;
         public static final int DEFAULT_FIRE_DAMAGE_DELAY = 20;
+        public static final BlockPos HANGING_OFFSET_EAST = new BlockPos(1, 1, 0);
+        public static final BlockPos HANGING_OFFSET_WEST = new BlockPos(-1, 1, 0);
+        public static final BlockPos HANGING_OFFSET_NORTH = new BlockPos(0, 1, -1);
+        public static final BlockPos HANGING_OFFSET_SOUTH = new BlockPos(0, 1, 1);
 
         public static final class Ageable {
 
@@ -279,8 +285,8 @@ public final class Constants {
             public static final int MAX_DESPAWN_DELAY = Short.MAX_VALUE;
             public static final int DEFAULT_DESPAWN_DELAY = 0;
 
-            public static final int MAGIC_NO_PICKUP = MAX_PICKUP_DELAY;
-            public static final int MAGIC_NO_DESPAWN = MIN_DESPAWN_DELAY;
+            public static final int MAGIC_NO_PICKUP = Constants.Entity.Item.MAX_PICKUP_DELAY;
+            public static final int MAGIC_NO_DESPAWN = Constants.Entity.Item.MIN_DESPAWN_DELAY;
 
             private Item() {
             }
@@ -359,15 +365,19 @@ public final class Constants {
         // The flags that are naturally inverted are already inverted here by being masked in
         // with the opposite OR.
         // Example: If we DO want physics, we don't include the physics flag, if we DON'T want physics, we | it in.
-        public static final int ALL                         = NOTIFY_CLIENTS | NEIGHBOR_MASK;
-        public static final int NONE                        = NOTIFY_CLIENTS | PHYSICS_MASK | OBSERVER_MASK | FORCE_RE_RENDER;
-        public static final int NEIGHBOR                    = NOTIFY_CLIENTS | NEIGHBOR_MASK | PHYSICS_MASK | OBSERVER_MASK;
-        public static final int PHYSICS                     = NOTIFY_CLIENTS | OBSERVER_MASK;
-        public static final int OBSERVER                    = NOTIFY_CLIENTS | PHYSICS_MASK;
-        public static final int NEIGHBOR_PHYSICS            = NOTIFY_CLIENTS | NEIGHBOR_MASK | OBSERVER_MASK;
-        public static final int NEIGHBOR_OBSERVER           = NOTIFY_CLIENTS | NEIGHBOR_MASK | PHYSICS_MASK;
-        public static final int NEIGHBOR_PHYSICS_OBSERVER   = NOTIFY_CLIENTS | NEIGHBOR_MASK;
-        public static final int PHYSICS_OBSERVER            = NOTIFY_CLIENTS;
+        public static final int ALL                         = Constants.BlockChangeFlags.NOTIFY_CLIENTS | Constants.BlockChangeFlags.NEIGHBOR_MASK;
+        public static final int NONE                        =
+            Constants.BlockChangeFlags.NOTIFY_CLIENTS | Constants.BlockChangeFlags.PHYSICS_MASK | Constants.BlockChangeFlags.OBSERVER_MASK | Constants.BlockChangeFlags.FORCE_RE_RENDER;
+        public static final int NEIGHBOR                    =
+            Constants.BlockChangeFlags.NOTIFY_CLIENTS | Constants.BlockChangeFlags.NEIGHBOR_MASK | Constants.BlockChangeFlags.PHYSICS_MASK | Constants.BlockChangeFlags.OBSERVER_MASK;
+        public static final int PHYSICS                     = Constants.BlockChangeFlags.NOTIFY_CLIENTS | Constants.BlockChangeFlags.OBSERVER_MASK;
+        public static final int OBSERVER                    = Constants.BlockChangeFlags.NOTIFY_CLIENTS | Constants.BlockChangeFlags.PHYSICS_MASK;
+        public static final int NEIGHBOR_PHYSICS            = Constants.BlockChangeFlags.NOTIFY_CLIENTS | Constants.BlockChangeFlags.NEIGHBOR_MASK
+                                                              | Constants.BlockChangeFlags.OBSERVER_MASK;
+        public static final int NEIGHBOR_OBSERVER           = Constants.BlockChangeFlags.NOTIFY_CLIENTS | Constants.BlockChangeFlags.NEIGHBOR_MASK
+                                                              | Constants.BlockChangeFlags.PHYSICS_MASK;
+        public static final int NEIGHBOR_PHYSICS_OBSERVER   = Constants.BlockChangeFlags.NOTIFY_CLIENTS | Constants.BlockChangeFlags.NEIGHBOR_MASK;
+        public static final int PHYSICS_OBSERVER            = Constants.BlockChangeFlags.NOTIFY_CLIENTS;
 
     }
 

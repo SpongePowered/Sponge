@@ -44,6 +44,7 @@ import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -116,7 +117,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
                     .acceptAndClearIfNotEmpty(entities -> {
                         final ArrayList<Entity> capturedEntities = new ArrayList<>();
                         for (EntityItem entity : entities) {
-                            capturedEntities.add(EntityUtil.fromNative(entity));
+                            capturedEntities.add((Entity) entity);
                         }
                         SpongeCommonEventFactory.callSpawnEntity(capturedEntities, context);
                     });
@@ -129,7 +130,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
                 .acceptAndClearIfNotEmpty((id, item) -> {
                     frame.popCause();
                     final List<Entity> entities = new ArrayList<>();
-                    entities.add(EntityUtil.fromNative(item));
+                    entities.add((Entity) item);
                     final Optional<Entity> entity = tickingTile.getWorld().getEntity(id);
                     if (!entity.isPresent()) {
                         // Means that the tile entity is spawning an entity from another entity that doesn't exist
@@ -149,7 +150,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
                     frame.pushCause(tickingTile);
                     SpongeCommonEventFactory.callSpawnEntityCustom(entities, context);
                     // Now to clean up the list that is tied to the entity, so that this phase context isn't continuously wrapped
-                    EntityUtil.toMixin(nestedEntity).clearWrappedCaptureList();
+                    ((EntityBridge) nestedEntity).clearWrappedCaptureList();
                 });
         }
     }

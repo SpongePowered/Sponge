@@ -38,7 +38,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeCareerData
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.interfaces.entity.IMixinVillager;
+import org.spongepowered.common.bridge.entity.EntityVillagerBridge;
 
 import java.util.Optional;
 
@@ -56,13 +56,13 @@ public class CareerDataProcessor
 
     @Override
     protected boolean set(EntityVillager entity, Career value) {
-        ((IMixinVillager) entity).setCareer(value);
+        ((EntityVillagerBridge) entity).bridge$setCareer(value);
         return true;
     }
 
     @Override
     protected Optional<Career> getVal(EntityVillager entity) {
-        return Optional.of(((IMixinVillager) entity).getCareer());
+        return Optional.of(((EntityVillagerBridge) entity).bridge$getCareer());
     }
 
     @Override

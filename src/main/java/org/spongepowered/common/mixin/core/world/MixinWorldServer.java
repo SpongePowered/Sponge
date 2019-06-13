@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.world;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Predicate;
@@ -119,8 +116,6 @@ import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -135,13 +130,17 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
+import org.spongepowered.common.bridge.block.BlockBridge;
+import org.spongepowered.common.bridge.block.BlockEventDataBridge;
+import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
+import org.spongepowered.common.bridge.entity.EntityBridge;
+import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.bridge.world.ChunkBridge;
+import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.WorldCategory;
 import org.spongepowered.common.config.type.WorldConfig;
-import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.data.util.DataQueries;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
@@ -154,18 +153,12 @@ import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.interfaces.IMixinNextTickListEntry;
-import org.spongepowered.common.bridge.block.BlockBridge;
-import org.spongepowered.common.bridge.block.BlockEventDataBridge;
-import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
-import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
-import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMap;
 import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
-import org.spongepowered.common.interfaces.world.IMixinServerWorldEventHandler;
+import org.spongepowered.common.bridge.world.ServerWorldEventHandlerBridge;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.interfaces.world.ServerWorldBridge;
-import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
 import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModData_Activation;
 import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.IModData_Collisions;
@@ -173,6 +166,7 @@ import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.registry.type.world.BlockChangeFlagRegistryModule;
 import org.spongepowered.common.relocate.co.aikar.timings.TimingHistory;
 import org.spongepowered.common.relocate.co.aikar.timings.WorldTimingsHandler;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
@@ -199,7 +193,6 @@ import java.util.function.Function;
 import javax.annotation.Nullable;
 
 @Mixin(WorldServer.class)
-@Implements(@Interface(iface = ServerWorldBridge.class, prefix = "worldServer$", unique = true))
 public abstract class MixinWorldServer extends MixinWorld implements ServerWorldBridge {
 
     private final Map<net.minecraft.entity.Entity, Vector3d> rotationUpdates = new HashMap<>();
@@ -1694,7 +1687,7 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
             if (state.doesCaptureEntitySpawns()) {
                 for (Entity entity : context.getCapturedEntities()) {
                     // We can ignore the type check because we're already checking the instance class of the entity.
-                    if (clazz.isInstance(entity) && EntityUtil.toNative(entity).getEntityBoundingBox().intersects(aabb) && (filter == null || filter.apply((T) entity))) {
+                    if (clazz.isInstance(entity) && ((net.minecraft.entity.Entity) entity).getEntityBoundingBox().intersects(aabb) && (filter == null || filter.apply((T) entity))) {
                         list.add((T) entity);
                     }
                 }
@@ -2193,7 +2186,7 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
 
     @Override
     public void stopTimingForWeatherEntityTickCrash(net.minecraft.entity.Entity updatingEntity) {
-        EntityUtil.toMixin(updatingEntity).spongeImpl$getTimingHandler().stopTiming();
+        ((EntityBridge) updatingEntity).bridge$getTimingsHandler().stopTiming();
     }
 
     @Override
@@ -2214,7 +2207,7 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
 
     @Override
     public void stopTimingTickEntityCrash(net.minecraft.entity.Entity updatingEntity) {
-        EntityUtil.toMixin(updatingEntity).spongeImpl$getTimingHandler().stopTiming();
+        ((EntityBridge) updatingEntity).bridge$getTimingsHandler().stopTiming();
     }
 
     @Override
@@ -2234,7 +2227,7 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
 
     @Override
     public void stopTimingTickTileEntityCrash(net.minecraft.tileentity.TileEntity updatingTileEntity) {
-        ((TileEntityBridge) updatingTileEntity).spongeImpl$getTimingHandler().stopTiming();
+        ((TileEntityBridge) updatingTileEntity).bridge$getTimingsHandler().stopTiming();
     }
 
     @Override
@@ -2338,8 +2331,8 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
         }
 
         this.eventListeners.stream()
-                .filter(listener -> listener instanceof IMixinServerWorldEventHandler)
-                .map(listener -> (IMixinServerWorldEventHandler) listener)
+                .filter(listener -> listener instanceof ServerWorldEventHandlerBridge)
+                .map(listener -> (ServerWorldEventHandlerBridge) listener)
                 .forEach(listener -> {
                     // There's no method for playing a custom sound to all, so I made one -_-
                     listener.playCustomSoundToAllNearExcept(null, soundIn, category, x, y, z, volume, pitch);
