@@ -26,6 +26,12 @@ package org.spongepowered.common.config.category;
 
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+import org.spongepowered.api.block.tileentity.TileEntityType;
+import org.spongepowered.common.SpongeImplHooks;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @ConfigSerializable
 public class PhaseTrackerCategory extends ConfigCategory {
@@ -94,6 +100,45 @@ public class PhaseTrackerCategory extends ConfigCategory {
                                                             + "The default value should almost always work properly -  it's unlikely you'll ever have to change it.")
     private int maxBlockProcessingDepth = 1000;
 
+    @Setting(value = "report-null-source-blocks-on-neighbor-notifications",
+        comment = "If true, when a mod attempts to perform a neighbor notification\n"
+                  + "on a block, some mods do not know to perform a \'null\' check\n"
+                  + "on the source block of their TileEntity. This usually goes by\n"
+                  + "unnoticed by other mods, because they may perform \'==\' instance\n"
+                  + "equality checks instead of calling methods on the potentially\n"
+                  + "null Block, but Sponge uses the block to build information to\n"
+                  + "help tracking. This has caused issues in the past. Generally,\n"
+                  + "this can be useful for leaving \"true\" so a proper report is\n"
+                  + "generated once for your server, and can be reported to the\n"
+                  + "offending mod author.\n"
+                  + "This is 'false' by default in SpongeVanilla.\n"
+                  + "Review the following links for more info:\n"
+                  + " https://gist.github.com/gabizou/ad570dc09dfed259cac9d74284e78e8b\n"
+                  + " https://github.com/SpongePowered/SpongeForge/issues/2787\n"
+    )
+    private boolean reportNullSourceBlocks = !SpongeImplHooks.isVanilla();
+
+    @Setting(value = "auto-fix-null-source-block-providing-tile-entities",
+        comment = "A mapping that is semi-auto-populating for TileEntities whose types\n"
+                  + "are found to be providing \"null\" Block sources as neighbor notifications\n"
+                  + "that end up causing crashes or spam reports. If the value is set to \n"
+                  + "\"true\", then a \"workaround\" will be attempted. If not, the \n"
+                  + "\ncurrent BlockState at the target source will be queried from the world.\n"
+                  + "This map having a specific\n"
+                  + "entry of a TileEntity will prevent a log or warning come up to any logs\n"
+                  + "when that \"null\" arises, and Sponge will self-rectify the TileEntity\n"
+                  + "by calling the method \"getBlockType()\". It is advised that if the mod\n"
+                  + "id in question is coming up, that the mod author is notified about the\n"
+                  + "error-prone usage of the field \"blockType\". You can refer them to\n"
+                  + "the following links for the issue:\n"
+                  + " https://gist.github.com/gabizou/ad570dc09dfed259cac9d74284e78e8b\n"
+                  + " https://github.com/SpongePowered/SpongeForge/issues/2787\n"
+                  + "Also, please provide them with these links for the example PR to\n"
+                  + "fix the issue itself, as the fix is very simple:\n"
+                  + "https://github.com/TehNut/Soul-Shards-Respawn/pull/24\n"
+                  + "https://github.com/Epoxide-Software/Enchanting-Plus/pull/135\n"
+    ) private Map<String, Boolean> autoFixedTiles = new HashMap<>();
+
     public int getMaxBlockProcessingDepth() {
         return this.maxBlockProcessingDepth;
     }
@@ -120,5 +165,21 @@ public class PhaseTrackerCategory extends ConfigCategory {
 
     public int getMaximumRunawayCount() {
         return this.maxRunawayCount;
+    }
+
+    public boolean isReportNullSourceBlocks() {
+        return reportNullSourceBlocks;
+    }
+
+    public void setReportNullSourceBlocks(boolean reportNullSourceBlocks) {
+        this.reportNullSourceBlocks = reportNullSourceBlocks;
+    }
+
+    public Map<String, Boolean> getAutoFixedTiles() {
+        return autoFixedTiles;
+    }
+
+    public void setAutoFixedTiles(Map<String, Boolean> autoFixedTiles) {
+        this.autoFixedTiles = autoFixedTiles;
     }
 }

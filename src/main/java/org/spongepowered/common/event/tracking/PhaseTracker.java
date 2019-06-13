@@ -47,6 +47,7 @@ import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.User;
@@ -108,6 +109,7 @@ import javax.annotation.Nullable;
 public final class PhaseTracker {
     public static final PhaseTracker CLIENT = new PhaseTracker();
     public static final PhaseTracker SERVER = new PhaseTracker();
+
 
     public void init() {
         if (this != SERVER) {
@@ -459,35 +461,87 @@ public final class PhaseTracker {
         }
     }
 
-    private void printPhaseIncompatibility(IPhaseState<?> currentState, IPhaseState<?> incompatibleState) {
-        if (!SpongeImpl.getGlobalConfigAdapter().getConfig().getPhaseTracker().isVerbose() && !this.completedIncorrectStates.isEmpty()) {
-            for (Tuple<IPhaseState<?>, IPhaseState<?>> tuple : this.completedIncorrectStates) {
-                if ((tuple.getFirst().equals(currentState)
-                        && tuple.getSecond().equals(incompatibleState))) {
-                    // we've already printed once about the previous state and the current state
-                    // being completed incorrectly. only print it once.
-                    return;
-                }
-            }
-        }
-        PrettyPrinter printer = new PrettyPrinter(60);
-        printer.add("Switching Phase").centre().hr();
-        printer.add("Phase incompatibility detected! Attempting to switch to an invalid phase!");
-        printer.add("  %s : %s", "Current Phase", currentState.getPhase());
-        printer.add("  %s : %s", "Current State", currentState);
-        printer.add("  %s : %s", "Entering incompatible Phase", incompatibleState.getPhase());
-        printer.add("  %s : %s", "Entering incompatible State", incompatibleState);
-        printer.add("%s :", "Current phases");
-        this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
-        printer.add("  %s :", "Printing stack trace");
-        printer.add(new Exception("Stack trace"));
-        printer.add();
-        this.generateVersionInfo(printer);
-        printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
-        if (!SpongeImpl.getGlobalConfigAdapter().getConfig().getPhaseTracker().isVerbose()) {
-            this.completedIncorrectStates.add(Tuple.of(currentState, incompatibleState));
-        }
+    public static void printNullSourceForBlock(WorldServer worldServer, BlockPos pos, Block blockIn, BlockPos otherPos,
+        NullPointerException e) {
+        final PhaseTracker instance = PhaseTracker.getInstance();
+        final PrettyPrinter printer = new PrettyPrinter(60).add("Null Source Block from Unknown Source!").centre().hr()
+            .addWrapped("Hey, Sponge is saving the game from crashing or spamming because some source "
+                        + "put up a \"null\" Block as it's source for sending out a neighbor notification. "
+                        + "This is usually unsupported as the game will silently ignore some nulls by "
+                        + "performing \"==\" checks instead of calling methods, potentially making an "
+                        + "NPE. Because Sponge uses the source block to build information for tracking, "
+                        + "Sponge has to save the game from crashing by reporting this issue. Because the "
+                        + "source is unknown, it's recommended to report this issue to SpongeCommon's "
+                        + "issue tracker on GitHub. Please provide the following information: ")
+            .add()
+            .add(" %s : %s", "Source position", pos)
+            .add(" %s : %s", "World", ((World) worldServer).getName())
+            .add(" %s : %s", "Source Block Recovered", blockIn)
+            .add(" %s : %s", "Notified Position", otherPos).add();
+
+        instance.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
+        printer.add()
+            .add(" %s :", "StackTrace")
+            .add(e)
+            .add();
+        instance.generateVersionInfo(printer);
+        printer
+            .log(SpongeImpl.getLogger(), Level.WARN);
     }
+
+
+    public static void printNullSourceBlockWithTile(BlockPos pos, Block blockIn, BlockPos otherPos, TileEntityType type, boolean useTile,
+        NullPointerException e) {
+        final PhaseTracker instance = PhaseTracker.getInstance();
+        final PrettyPrinter printer = new PrettyPrinter(60).add("Null Source Block on TileEntity!").centre().hr()
+            .addWrapped("Hey, Sponge is saving the game from crashing because a TileEntity "
+                        + "is sending out a \'null\' Block as it's source (more likely) and "
+                        + "attempting to perform a neighbor notification with it. Because "
+                        + "this is guaranteed to lead to a crash or a spam of reports, "
+                        + "Sponge is going ahead and fixing the issue. The offending Tile "
+                        + "is " + type.getId())
+            .add()
+            .add("%s : %s", "Source position", pos)
+            .add("%s : %s", "Source TileEntity", type)
+            .add("%s : %s", "Recovered using TileEntity as Source", useTile)
+            .add("%s : %s", "Source Block Recovered", blockIn)
+            .add("%s : %s", "Notified Position", otherPos);
+        instance.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
+        printer.add()
+            .add(" %s :", "StackTrace")
+            .add(e)
+            .add();
+        instance.generateVersionInfo(printer);
+        printer
+            .log(SpongeImpl.getLogger(), Level.WARN);
+    }
+
+    public static void printNullSourceBlockNeighborNotificationWithNoTileSource(BlockPos pos, Block blockIn, BlockPos otherPos,
+        NullPointerException e) {
+        final PhaseTracker instance = PhaseTracker.getInstance();
+        final PrettyPrinter printer = new PrettyPrinter(60).add("Null Source Block on TileEntity!").centre().hr()
+            .addWrapped("Hey, Sponge is saving the game from crashing because a TileEntity "
+                        + "is sending out a \'null\' Block as it's source (more likely) and "
+                        + "attempting to perform a neighbor notification with it. Because "
+                        + "this is guaranteed to lead to a crash or a spam of reports, "
+                        + "Sponge is going ahead and fixing the issue. The offending Tile "
+                        + "is unknown, so we don't have any way to configure a reporting for you")
+            .add()
+            .add("%s : %s", "Source position", pos)
+            .add("%s : %s", "Source TileEntity", "UNKNOWN")
+            .add("%s : %s", "Recovered using TileEntity as Source", "false")
+            .add("%s : %s", "Source Block Recovered", blockIn)
+            .add("%s : %s", "Notified Position", otherPos);
+        instance.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
+        printer.add()
+            .add(" %s :", "StackTrace")
+            .add(e)
+            .add();
+        instance.generateVersionInfo(printer);
+        printer
+            .log(SpongeImpl.getLogger(), Level.WARN);
+    }
+
 
     public void printMessageWithCaughtException(String header, String subHeader, @Nullable Throwable e) {
         this.printMessageWithCaughtException(header, subHeader, this.getCurrentState(), this.getCurrentContext(), e);
@@ -568,16 +622,20 @@ public final class PhaseTracker {
             }
         }
         final PrettyPrinter printer = new PrettyPrinter(60).add("Exception attempting to capture a block change!").centre().hr();
+        printPhasestack(phaseData, e, printer);
+        printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
+        if (!SpongeImpl.getGlobalConfigAdapter().getConfig().getPhaseTracker().isVerbose()) {
+            this.printedExceptionsForBlocks.add(phaseState);
+        }
+    }
+
+    private void printPhasestack(PhaseContext<?> phaseData, Throwable e, PrettyPrinter printer) {
         printer.addWrapped(60, "%s :", "PhaseContext");
         CONTEXT_PRINTER.accept(printer, phaseData);
         printer.addWrapped(60, "%s :", "Phases remaining");
         this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
         printer.add("Stacktrace:");
         printer.add(e);
-        printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
-        if (!SpongeImpl.getGlobalConfigAdapter().getConfig().getPhaseTracker().isVerbose()) {
-            this.printedExceptionsForBlocks.add(phaseState);
-        }
     }
 
     private void printUnexpectedBlockChange(IMixinWorldServer mixinWorld, BlockPos pos, IBlockState currentState,
@@ -609,12 +667,7 @@ public final class PhaseTracker {
             }
         }
         final PrettyPrinter printer = new PrettyPrinter(60).add("Exception attempting to capture or spawn an Entity!").centre().hr();
-        printer.addWrapped(60, "%s :", "PhaseContext");
-        CONTEXT_PRINTER.accept(printer, context);
-        printer.addWrapped(60, "%s :", "Phases remaining");
-        this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
-        printer.add("Stacktrace:");
-        printer.add(e);
+        printPhasestack(context, e, printer);
         printer.log(SpongeImpl.getLogger(), Level.ERROR);
         if (!SpongeImpl.getGlobalConfigAdapter().getConfig().getPhaseTracker().isVerbose()) {
             this.printedExceptionsForEntities.add(context.state);
