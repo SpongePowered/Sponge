@@ -37,6 +37,7 @@
         "api.world.LocatableBlockMixin",
         "api.world.LocationMixin",
         "authlib.PropertyMapMixin",
+        "authlib.ProfileSearchResultsResponseSerializerMixin",
         "authlib.properties.PropertyMixin",
         "block.BlockAnvilMixin",
         "block.BlockBannerHangingMixin",
