@@ -160,8 +160,6 @@ import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGameModeData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeJoinData;
 import org.spongepowered.common.data.util.DataConstants;
@@ -194,7 +192,6 @@ import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.interfaces.text.IMixinTitle;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.service.user.SpongeUserStorageService;
@@ -276,6 +273,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     private GameType pendingGameType;
 
     private Scoreboard spongeScoreboard = Sponge.getGame().getServer().getServerScoreboard().get();
+    @Nullable private EntityPlayerMP delegate;
 
     @Nullable private Vector3d velocityOverride = null;
     private boolean healthScaling = false;
@@ -772,30 +770,32 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Override
     public void setScoreboard(Scoreboard scoreboard) {
+        if (this.delegate != null) {
+            ((Player) this.delegate).setScoreboard(scoreboard);
+            return;
+        }
         if (scoreboard == null) {
             scoreboard = Sponge.getGame().getServer().getServerScoreboard().get();
         }
-        ((IMixinServerScoreboard) this.spongeScoreboard).removePlayer((EntityPlayerMP) (Object) this, true);
+        this.getMixinScoreboard().removePlayer((EntityPlayerMP) (Object) this, true);
         this.spongeScoreboard = scoreboard;
-        ((IMixinServerScoreboard) this.spongeScoreboard).addPlayer((EntityPlayerMP) (Object) this, true);
+        this.getMixinScoreboard().addPlayer((EntityPlayerMP) (Object) this, true);
     }
 
     @Override
     public void initScoreboard() {
-        ((IMixinServerScoreboard) this.spongeScoreboard).addPlayer((EntityPlayerMP) (Object) this, true);
+        this.getMixinScoreboard().addPlayer((EntityPlayerMP) (Object) this, true);
     }
 
     @Override
     public void setScoreboardOnRespawn(Scoreboard scoreboard) {
         this.spongeScoreboard = scoreboard;
-        ((IMixinServerScoreboard) this.spongeScoreboard).addPlayer((EntityPlayerMP) (Object) this, false);
+        this.getMixinScoreboard().addPlayer((EntityPlayerMP) (Object) this, false);
     }
 
     @Override
     public void removeScoreboardOnRespawn() {
-        ((IMixinServerScoreboard) this.spongeScoreboard).removePlayer((EntityPlayerMP) (Object) this, false);
-        // This player is being removed, so this is fine
-        this.spongeScoreboard = null;
+        this.getMixinScoreboard().removePlayer((EntityPlayerMP) (Object) this, false);
     }
 
     @Override
@@ -825,12 +825,19 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Override
     public net.minecraft.scoreboard.Scoreboard getWorldScoreboard() {
-        return (net.minecraft.scoreboard.Scoreboard) this.spongeScoreboard;
+        return (net.minecraft.scoreboard.Scoreboard) this.getScoreboard();
     }
 
     @Override
     public Scoreboard getScoreboard() {
+        if (this.delegate != null) {
+            return ((Player) this.delegate).getScoreboard();
+        }
         return this.spongeScoreboard;
+    }
+
+    private IMixinServerScoreboard getMixinScoreboard() {
+        return (IMixinServerScoreboard) this.getScoreboard();
     }
 
     @Override
@@ -1417,6 +1424,11 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         throw new UnsupportedOperationException("This is an internal method not intended for use with Players " +
                 "as it causes the player to be placed into an undefined state. " +
                 "Consider putting them through the normal death process instead.");
+    }
+
+    @Override
+    public void setDelegateAfterRespawn(EntityPlayerMP delegate) {
+        this.delegate = delegate;
     }
 
     @Override

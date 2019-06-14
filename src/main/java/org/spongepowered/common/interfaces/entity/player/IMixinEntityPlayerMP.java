@@ -27,6 +27,7 @@ package org.spongepowered.common.interfaces.entity.player;
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
@@ -97,5 +98,7 @@ public interface IMixinEntityPlayerMP extends IMixinEntityPlayer {
     boolean hasForcedGamemodeOverridePermission();
 
     void setContainerDisplay(Text displayName);
+
+    void setDelegateAfterRespawn(EntityPlayerMP delegate);
 
 }

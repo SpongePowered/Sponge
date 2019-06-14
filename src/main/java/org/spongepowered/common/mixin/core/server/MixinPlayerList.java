@@ -553,6 +553,8 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         this.setPlayerGameTypeBasedOnOther(newPlayer, playerIn, worldServer);
         newPlayer.setSneaking(false);
 
+        ((IMixinEntityPlayerMP) newPlayer).setDelegateAfterRespawn(playerIn);
+
         // update to safe location
         toTransform = toTransform.setLocation(location);
 
