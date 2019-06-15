@@ -90,6 +90,7 @@ import org.spongepowered.api.service.whitelist.WhitelistService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gamerule.DefaultGameRules;
@@ -117,6 +118,7 @@ import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.network.play.server.IMixinSPacketWorldBorder;
 import org.spongepowered.common.interfaces.world.IMixinITeleporter;
+import org.spongepowered.common.interfaces.world.IMixinTeleporter;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.service.ban.SpongeIPBanList;
 import org.spongepowered.common.service.ban.SpongeUserListBans;
@@ -227,7 +229,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         }
     }
 
-    private void initializeConnectionToPlayer(NetworkManager netManager, EntityPlayerMP playerIn, @Nullable NetHandlerPlayServer handler) {
+    public void initializeConnectionToPlayer(NetworkManager netManager, EntityPlayerMP playerIn, @Nullable NetHandlerPlayServer handler) {
         GameProfile gameprofile = playerIn.getGameProfile();
         PlayerProfileCache playerprofilecache = this.server.getPlayerProfileCache();
         GameProfile gameprofile1 = playerprofilecache.getProfileByUUID(gameprofile.getId());
@@ -354,9 +356,9 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         this.playerLoggedIn(playerIn);
 
         // Sponge start - add world name to message
-        LOGGER.info(playerIn.getName() + "[" + s1 + "] logged in with entity id " + playerIn.getEntityId() + " in "
-                + worldServer.getWorldInfo().getWorldName() + "(" + ((IMixinWorldServer) worldServer).getDimensionId()
-                + ") at (" + playerIn.posX + ", " + playerIn.posY + ", " + playerIn.posZ + ")");
+        LOGGER.info("{} [{}] logged in with entity id [{}] in {} ({}/{}) at ({}, {}, {}).", playerIn.getName(), s1, playerIn.getEntityId(),
+            worldServer.getWorldInfo().getWorldName(), ((DimensionType) (Object) worldServer.provider.getDimensionType()).getId(),
+            ((IMixinWorldServer) worldServer).getDimensionId(), playerIn.posX, playerIn.posY, playerIn.posZ);
         // Sponge end
 
         this.updateTimeAndWeatherForPlayer(playerIn, worldServer);
@@ -527,7 +529,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
             playerinteractionmanager = new PlayerInteractionManager(this.server.getWorld(targetDimension));
         }
 
-        EntityPlayerMP newPlayer = new EntityPlayerMP(SpongeImpl.getServer(), worldServer, playerIn.getGameProfile(), playerinteractionmanager);
+        final EntityPlayerMP newPlayer = new EntityPlayerMP(SpongeImpl.getServer(), worldServer, playerIn.getGameProfile(), playerinteractionmanager);
         newPlayer.connection = playerIn.connection;
         newPlayer.copyFrom(playerIn, conqueredEnd);
         // set player dimension for RespawnPlayerEvent
@@ -627,124 +629,30 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
             newPlayer.connection.sendPacket(new SPacketEntityEffect(newPlayer.getEntityId(), potioneffect));
         }
         ((IMixinEntityPlayerMP) newPlayer).refreshScaledHealth();
+        newPlayer.connection.sendPacket(new SPacketHeldItemChange(playerIn.inventory.currentItem));
         SpongeCommonEventFactory.callPostPlayerRespawnEvent(newPlayer, conqueredEnd);
 
         return newPlayer;
     }
 
     /**
-     * @author blood - May 21st, 2016
-     * @author gabizou - June 2nd, 2016 - Update for 1.9.4 and cause tracker changes
-     *
-     * @reason - adjusted to support {@link MoveEntityEvent.Teleport.Portal}
-     *
-     * @param playerIn The player teleporting to another dimension
-     * @param targetDimensionId The id of target dimension.
-     * @param teleporter The teleporter used to transport and create the portal
-     */
-    @Override
-    public void transferPlayerToDimension(EntityPlayerMP playerIn, int targetDimensionId, Teleporter teleporter) {
-        MoveEntityEvent.Teleport.Portal event = EntityUtil.handleDisplaceEntityPortalEvent(playerIn, targetDimensionId, (IMixinITeleporter) teleporter);
-        if (event == null || event.isCancelled()) {
-            return;
-        }
-
-        EntityUtil.transferPlayerToDimension(event, playerIn);
-    }
-
-    // copy of transferEntityToWorld but only contains code to apply the location on entity before being placed into a portal
-    @Override
-    public void prepareEntityForPortal(Entity entityIn, WorldServer oldWorldIn, WorldServer toWorldIn) {
-        oldWorldIn.profiler.startSection("moving");
-        WorldProvider pOld = oldWorldIn.provider;
-        WorldProvider pNew = toWorldIn.provider;
-        double moveFactor = getMovementFactor(pOld) / getMovementFactor(pNew);
-        double x = entityIn.posX * moveFactor;
-        double y = entityIn.posY;
-        double z = entityIn.posZ * moveFactor;
-
-//        if (!(pNew instanceof WorldProviderEnd)) {
-//            x = MathHelper.clamp_double(x, toWorldIn.getWorldBorder().minX() + 16.0D, toWorldIn.getWorldBorder().maxX() - 16.0D);
-//            z = MathHelper.clamp_double(z, toWorldIn.getWorldBorder().minZ() + 16.0D, toWorldIn.getWorldBorder().maxZ() - 16.0D);
-//            entityIn.setLocationAndAngles(x, entityIn.posY, z, entityIn.rotationYaw, entityIn.rotationPitch);
-//        }
-
-        if (pNew instanceof WorldProviderEnd) {
-            BlockPos blockpos;
-
-            if (pOld instanceof WorldProviderEnd) {
-                blockpos = toWorldIn.getSpawnPoint();
-            } else {
-                blockpos = toWorldIn.getSpawnCoordinate();
-            }
-
-            x = blockpos.getX();
-            y = blockpos.getY();
-            z = blockpos.getZ();
-            entityIn.setLocationAndAngles(x, y, z, 90.0F, 0.0F);
-        }
-
-        if (!(pOld instanceof WorldProviderEnd)) {
-            oldWorldIn.profiler.startSection("placing");
-            x = MathHelper.clamp((int)x, -29999872, 29999872);
-            z = MathHelper.clamp((int)z, -29999872, 29999872);
-
-            if (entityIn.isEntityAlive()) {
-                entityIn.setLocationAndAngles(x, y, z, entityIn.rotationYaw, entityIn.rotationPitch);
-            }
-            oldWorldIn.profiler.endSection();
-        }
-
-        if (entityIn.isEntityAlive()) {
-            oldWorldIn.updateEntityWithOptionalForce(entityIn, false);
-        }
-
-        oldWorldIn.profiler.endSection();
-    }
-
-    /**
-     * @author blood - May 21st, 2016
-     *
-     * @reason - overwritten to redirect to our method that accepts a teleporter
+     * @author Zidane
+     * @reason Re-route to the common hook
      */
     @Overwrite
-    public void transferEntityToWorld(Entity entityIn, int p_82448_2_, WorldServer oldWorldIn, WorldServer toWorldIn) {
-        transferEntityToWorld(entityIn, p_82448_2_, oldWorldIn, toWorldIn, toWorldIn.getDefaultTeleporter());
+    public void transferEntityToWorld(Entity entityIn, int lastDimension, WorldServer oldWorldIn, WorldServer toWorldIn) {
+        EntityUtil.transferEntityToWorld(entityIn, null, toWorldIn, (IMixinITeleporter) toWorldIn.getDefaultTeleporter(), false);
     }
 
     /**
-     * @author blood - May 21st, 2016
-     *
-     * @reason - rewritten to capture a plugin or mod that attempts to call this method directly.
-     *
-     * @param entityIn The entity being teleported
-     * @param fromDimensionId The origin dimension id
-     * @param fromWorld The origin world
-     * @param toWorld The destination world
-     * @param teleporter The teleporter being used to transport the entity
+     * @author Zidane
+     * @reason Re-route to the common hook
      */
-    @Override
-    public void transferEntityToWorld(Entity entityIn, int fromDimensionId, WorldServer fromWorld, WorldServer toWorld, net.minecraft.world.Teleporter teleporter) {
-        // rewritten completely to handle our portal event
-        MoveEntityEvent.Teleport.Portal event = EntityUtil
-                .handleDisplaceEntityPortalEvent(entityIn, WorldManager.getDimensionId(toWorld), (IMixinITeleporter) teleporter);
-        if (event == null || event.isCancelled()) {
-            return;
-        }
+    @Overwrite
+    public void changePlayerDimension(EntityPlayerMP player, int dimension) {
+        final WorldServer toWorld = this.server.getWorld(dimension);
 
-        entityIn.setLocationAndAngles(event.getToTransform().getPosition().getX(), event.getToTransform().getPosition().getY(), event.getToTransform().getPosition().getZ(), (float) event.getToTransform().getYaw(), (float) event.getToTransform().getPitch());
-        toWorld.spawnEntity(entityIn);
-        toWorld.updateEntityWithOptionalForce(entityIn, false);
-        entityIn.setWorld(toWorld);
-    }
-
-    // forge utility method
-    @Override
-    public double getMovementFactor(WorldProvider provider) {
-        if (provider instanceof WorldProviderHell) {
-            return 8.0;
-        }
-        return 1.0;
+        EntityUtil.transferPlayerToWorld(player, null, toWorld, (IMixinITeleporter) toWorld.getDefaultTeleporter());
     }
 
     @Inject(method = "setPlayerManager", at = @At("HEAD"), cancellable = true)
@@ -764,7 +672,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
 
     @Redirect(method = "updateTimeAndWeatherForPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/NetHandlerPlayServer;sendPacket"
             + "(Lnet/minecraft/network/Packet;)V", ordinal = 0))
-    public void onWorldBorderInitializePacket(NetHandlerPlayServer invoker, Packet<?> packet, EntityPlayerMP playerMP, WorldServer worldServer) {
+    private void onWorldBorderInitializePacket(NetHandlerPlayServer invoker, Packet<?> packet, EntityPlayerMP playerMP, WorldServer worldServer) {
         if (worldServer.provider instanceof WorldProviderHell) {
             ((IMixinSPacketWorldBorder) packet).netherifyCenterCoordinates();
         }

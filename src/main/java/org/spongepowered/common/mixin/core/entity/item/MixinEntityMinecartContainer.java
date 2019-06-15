@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.entity.item;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityMinecartContainer;
 import net.minecraft.world.ILockableContainer;
 import net.minecraft.world.storage.loot.ILootContainer;
@@ -32,6 +33,8 @@ import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -45,12 +48,15 @@ import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollect
 import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.IInventoryFabric;
 
+import javax.annotation.Nullable;
+
 @SuppressWarnings({"rawtypes", "unchecked"})
 @Mixin(EntityMinecartContainer.class)
 @Implements({@Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$"),
              @Interface(iface = ContainerMinecart.class, prefix = "container$")})
 public abstract class MixinEntityMinecartContainer extends MixinEntityMinecart implements ILockableContainer, ILootContainer {
 
+    @Shadow public boolean dropContentsWhenDead;
     protected Fabric fabric = new IInventoryFabric(this);
     protected SlotCollection slots = new SlotCollection.Builder().add(this.getSizeInventory()).build();
     protected Lens lens;
@@ -77,5 +83,22 @@ public abstract class MixinEntityMinecartContainer extends MixinEntityMinecart i
     @SuppressWarnings("unchecked")
     public CarriedInventory<ContainerMinecart> container$getInventory() {
         return (CarriedInventory<ContainerMinecart>) this;
+    }
+
+    /**
+     * @author Zidane
+     * @reason Only have this Minecart not drop contents if we actually changed dimension
+     */
+    @Override
+    @Nullable
+    public Entity changeDimension(int dimensionIn) {
+        final Entity entity = super.changeDimension(dimensionIn);
+
+        if (entity instanceof EntityMinecartContainer) {
+            // We actually teleported so...
+            this.dropContentsWhenDead = false;
+        }
+
+        return entity;
     }
 }

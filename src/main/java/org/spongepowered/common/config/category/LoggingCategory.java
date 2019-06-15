@@ -65,7 +65,7 @@ public class LoggingCategory extends ConfigCategory {
     @Setting(value = "entity-speed-removal", comment = "Whether to log entity removals due to speed")
     private boolean logEntitySpeedRemoval = false;
     @Setting(value = "world-auto-save", comment = "Log when a world auto-saves its chunk data. Note: This may be spammy depending on the auto-save-interval configured for world.")
-    private boolean worldAutoSaveLogging = false;
+    private boolean logWorldAutomaticSaving = false;
 
     public boolean blockBreakLogging() {
         return this.blockBreakLogging;
@@ -179,7 +179,7 @@ public class LoggingCategory extends ConfigCategory {
         this.logEntitySpeedRemoval = flag;
     }
 
-    public boolean worldAutoSaveLogging() {
-        return this.worldAutoSaveLogging;
+    public boolean logWorldAutomaticSaving() {
+        return this.logWorldAutomaticSaving;
     }
 }

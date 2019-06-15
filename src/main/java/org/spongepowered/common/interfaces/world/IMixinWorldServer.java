@@ -55,7 +55,7 @@ import javax.annotation.Nullable;
 
 public interface IMixinWorldServer extends IMixinWorld {
 
-    Integer getDimensionId();
+    int getDimensionId();
 
     void updateWorldGenerator();
 

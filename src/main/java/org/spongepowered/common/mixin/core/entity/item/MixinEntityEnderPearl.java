@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.entity.item;
 
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityEnderPearl;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
@@ -35,6 +37,8 @@ import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -42,9 +46,12 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.mixin.core.entity.projectile.MixinEntityThrowable;
 
+import javax.annotation.Nullable;
+
 @Mixin(EntityEnderPearl.class)
 public abstract class MixinEntityEnderPearl extends MixinEntityThrowable implements EnderPearl {
 
+    @Shadow private EntityLivingBase perlThrower;
     public double damageAmount;
 
     @ModifyArg(method = "onImpact",
@@ -88,4 +95,21 @@ public abstract class MixinEntityEnderPearl extends MixinEntityThrowable impleme
         compound.setDouble(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT, this.damageAmount);
     }
 
+    /**
+     * @author Zidane
+     * @reason Only have this ender pearl remove the thrower references if we actually changed dimension
+     */
+    @Override
+    @Nullable
+    public Entity changeDimension(int dimensionIn) {
+        final Entity entity = super.changeDimension(dimensionIn);
+
+        if (entity instanceof EntityEnderPearl) {
+            // We actually teleported so...
+            this.perlThrower = null;
+            this.thrower = null;
+        }
+
+        return entity;
+    }
 }

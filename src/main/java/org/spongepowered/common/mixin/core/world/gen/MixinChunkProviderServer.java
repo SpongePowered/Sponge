@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.world.gen;
 
 import com.flowpowered.math.vector.Vector3i;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
@@ -219,11 +220,11 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
 
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final IPhaseState<?> currentState = phaseTracker.getCurrentState();
-        // TODO - write a tristate for whether the state can deny chunks
         // States that cannot deny chunks
         if (currentState == TickPhase.Tick.PLAYER
             || currentState == TickPhase.Tick.DIMENSION
             || currentState == EntityPhase.State.CHANGING_DIMENSION
+            || currentState == EntityPhase.State.INVOKING_TELEPORTER
             || currentState == EntityPhase.State.LEAVING_DIMENSION) {
             return false;
         }

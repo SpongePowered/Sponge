@@ -2624,7 +2624,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     private void stopSounds0(@Nullable SoundType sound, @Nullable SoundCategory category) {
         this.server.getPlayerList().sendPacketToAllPlayersInDimension(
-                SoundEffectHelper.createStopSoundPacket(sound, category), getDimensionId());
+                SoundEffectHelper.createStopSoundPacket(sound, category), this.getDimensionId());
     }
 
     @Override
@@ -2665,7 +2665,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     private void playRecord0(Vector3i position, @Nullable RecordType recordType) {
         this.server.getPlayerList().sendPacketToAllPlayersInDimension(
-                SpongeRecordType.createPacket(position, recordType), getDimensionId());
+                SpongeRecordType.createPacket(position, recordType), this.getDimensionId());
     }
 
     @Override
@@ -2810,7 +2810,6 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                 .add("Name", this.worldInfo.getWorldName())
                 .add("DimensionId", this.getDimensionId())
                 .add("DimensionType", ((org.spongepowered.api.world.DimensionType) (Object) this.provider.getDimensionType()).getId())
-                .add("DimensionTypeId", this.provider.getDimensionType().getId())
                 .toString();
     }
 }

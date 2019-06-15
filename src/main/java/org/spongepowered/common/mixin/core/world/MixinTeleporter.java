@@ -51,6 +51,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.phase.entity.InvokingTeleporterContext;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.interfaces.world.IMixinTeleporter;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -303,18 +305,7 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
         return this.createTeleporter(toLocation);
     }
 
-    // Adds boolean to turn on special tracking if called from API
     private Optional<Location<World>> createTeleporter(Location<World> nearLocation) {
-//        IMixinWorldServer spongeWorld = (IMixinWorldServer) nearLocation.getExtent();
-//        final PhaseTracker causeTracker = PhaseTracker.getInstance();
-//        if (plugin) {
-//            Cause teleportCause = Cause.of(NamedCause.source(this));
-//            if (causeTracker.getCurrentCause() != null) {
-//                teleportCause = teleportCause.merge(causeTracker.getCurrentCause());
-//            }
-//            causeTracker.addCause(teleportCause);
-//            causeTracker.setSpecificCapture(true);
-//        }
         double closest = -1.0D;
         int xNearTarget = nearLocation.getBlockX();
         int yNearTarget = nearLocation.getBlockY();
@@ -507,10 +498,23 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
 
     @Override
     public void placeEntity(net.minecraft.world.World world, Entity entity, float yaw) {
+        boolean didPort;
+
         if (entity instanceof EntityPlayerMP) {
             this.placeInPortal(entity, yaw);
+            didPort = true;
         } else {
-            this.placeInExistingPortal(entity, yaw);
+            if (((IMixinWorldServer) this.world).getDimensionId() == 1) {
+                didPort = true;
+            } else {
+                didPort = this.placeInExistingPortal(entity, yaw);
+            }
+        }
+
+        if (PhaseTracker.getInstance().getCurrentContext() instanceof InvokingTeleporterContext) {
+            if (!((InvokingTeleporterContext) PhaseTracker.getInstance().getCurrentContext()).getDidPort()) {
+                ((InvokingTeleporterContext) PhaseTracker.getInstance().getCurrentContext()).setDidPort(didPort);
+            }
         }
     }
 
@@ -526,7 +530,7 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
                 .add("searchRadius", this.searchRadius)
                 .add("creationRadius", this.creationRadius)
                 .add("world", this.world.getWorldInfo().getWorldName())
-                .add("dimension", ((IMixinWorldServer) this.world).getDimensionId())
+                .add("dimensionId", ((IMixinWorldServer) this.world).getDimensionId())
                 .toString();
     }
 }

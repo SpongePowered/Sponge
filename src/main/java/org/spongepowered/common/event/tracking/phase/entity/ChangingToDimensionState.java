@@ -24,40 +24,33 @@
  */
 package org.spongepowered.common.event.tracking.phase.entity;
 
-import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.event.entity.MoveEntityEvent;
-import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
-import javax.annotation.Nullable;
-
-final class ChangingToDimensionState extends EntityPhaseState<TeleportingContext> {
+final class ChangingToDimensionState extends EntityPhaseState<DimensionChangeContext> {
 
     ChangingToDimensionState() {
     }
 
     @Override
-    public TeleportingContext createPhaseContext() {
-        return new TeleportingContext(this)
+    public DimensionChangeContext createPhaseContext() {
+        return new DimensionChangeContext(this)
             .addBlockCaptures()
             .addEntityCaptures();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public void unwind(TeleportingContext context) {
+    public void unwind(DimensionChangeContext context) {
     }
 
     @Override
-    public boolean tracksBlockSpecificDrops(TeleportingContext context) {
+    public boolean tracksBlockSpecificDrops(DimensionChangeContext context) {
         return true;
     }
 
     @Override
-    public boolean spawnEntityOrCapture(TeleportingContext context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(DimensionChangeContext context, Entity entity, int chunkX, int chunkZ) {
         final WorldServer worldServer = context.getTargetWorld();
         // Allowed to use the force spawn because it's the same "entity"
         ((IMixinWorldServer) worldServer).forceSpawnEntity(entity);
@@ -67,37 +60,6 @@ final class ChangingToDimensionState extends EntityPhaseState<TeleportingContext
     @Override
     public boolean doesCaptureEntitySpawns() {
         return false;
-    }
-
-    @Nullable
-    @Override
-    public net.minecraft.entity.Entity returnTeleportResult(PhaseContext<?> context, MoveEntityEvent.Teleport.Portal event) {
-        final net.minecraft.entity.Entity teleportingEntity = context.getSource(net.minecraft.entity.Entity.class)
-                .orElseThrow(TrackingUtil.throwWithContext("Expected to be teleporting an entity!", context));
-        // The rest of this is to be handled in the phase.
-        if (event.isCancelled()) {
-            return null;
-        }
-
-        teleportingEntity.world.profiler.startSection("changeDimension");
-
-        WorldServer toWorld = (WorldServer) event.getToTransform().getExtent();
-
-        teleportingEntity.world.removeEntity(teleportingEntity);
-        teleportingEntity.isDead = false;
-        teleportingEntity.world.profiler.startSection("reposition");
-        final Vector3d position = event.getToTransform().getPosition();
-        teleportingEntity.setLocationAndAngles(position.getX(), position.getY(), position.getZ(), (float) event.getToTransform().getYaw(),
-                (float) event.getToTransform().getPitch());
-        toWorld.spawnEntity(teleportingEntity);
-        teleportingEntity.world = toWorld;
-
-        toWorld.updateEntityWithOptionalForce(teleportingEntity, false);
-        teleportingEntity.world.profiler.endStartSection("reloading");
-
-        teleportingEntity.world.profiler.endSection();
-        teleportingEntity.world.profiler.endSection();
-        return teleportingEntity;
     }
 
     @Override

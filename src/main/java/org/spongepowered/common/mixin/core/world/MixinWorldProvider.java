@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.world;
 
 import net.minecraft.world.World;
 import net.minecraft.world.WorldProvider;
+import net.minecraft.world.WorldProviderHell;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.border.WorldBorder;
 import org.spongepowered.api.service.context.Context;
@@ -88,6 +89,15 @@ public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvid
     @Override
     public void setGeneratorSettings(String generatorSettings) {
         this.generatorSettings = generatorSettings;
+    }
+
+    @Override
+    public float getMovementFactor() {
+        if (((Object) this) instanceof WorldProviderHell) {
+            return 8.0f;
+        } else {
+            return 1.0f;
+        }
     }
 
     @Override

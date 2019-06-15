@@ -24,34 +24,46 @@
  */
 package org.spongepowered.common.event.tracking.phase.entity;
 
-import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.phase.TrackingPhase;
+import net.minecraft.world.WorldServer;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
-public final class EntityPhase extends TrackingPhase {
+public final class InvokingTeleporterState extends EntityPhaseState<InvokingTeleporterContext> {
 
-    public static final class State {
-        public static final IPhaseState<EntityDeathContext> DEATH = new EntityDeathState();
-        public static final IPhaseState<BasicEntityContext> DEATH_UPDATE = new DeathUpdateState();
-        public static final IPhaseState<DimensionChangeContext> CHANGING_DIMENSION = new ChangingToDimensionState();
-        public static final IPhaseState<InvokingTeleporterContext> INVOKING_TELEPORTER = new InvokingTeleporterState();
-        public static final IPhaseState<BasicEntityContext> LEAVING_DIMENSION = new LeavingDimensionState();
-        public static final IPhaseState<BasicEntityContext> PLAYER_WAKE_UP = new PlayerWakeUpState();
-        public static final IPhaseState<BasicEntityContext> ENTITY_DROP_ITEMS = new EntityDropPhaseState();
-
-        private State() {
-        }
+    InvokingTeleporterState() {
     }
 
-
-    public static EntityPhase getInstance() {
-        return Holder.INSTANCE;
+    @Override
+    public InvokingTeleporterContext createPhaseContext() {
+        return new InvokingTeleporterContext(this)
+            .addBlockCaptures()
+            .addEntityCaptures();
     }
 
-    private EntityPhase() {
+    @Override
+    public void unwind(InvokingTeleporterContext context) {
     }
 
-    private static final class Holder {
-        static final EntityPhase INSTANCE = new EntityPhase();
+    @Override
+    public boolean tracksBlockSpecificDrops(InvokingTeleporterContext context) {
+        return true;
     }
 
+    @Override
+    public boolean spawnEntityOrCapture(InvokingTeleporterContext context, Entity entity, int chunkX, int chunkZ) {
+        final WorldServer worldServer = context.getTargetWorld();
+        // Allowed to use the force spawn because it's the same "entity"
+        ((IMixinWorldServer) worldServer).forceSpawnEntity(entity);
+        return true;
+    }
+
+    @Override
+    public boolean doesCaptureEntitySpawns() {
+        return false;
+    }
+
+    @Override
+    public boolean tracksEntitySpecificDrops() {
+        return true;
+    }
 }

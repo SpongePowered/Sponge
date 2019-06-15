@@ -32,4 +32,5 @@ public interface IMixinWorldProvider {
 
     void setGeneratorSettings(String generatorSettings);
 
+    float getMovementFactor();
 }

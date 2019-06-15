@@ -51,6 +51,7 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.network.play.server.SPacketDestroyEntities;
 import net.minecraft.network.play.server.SPacketPlayerListItem;
 import net.minecraft.network.play.server.SPacketPlayerPosLook;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.EnumParticleTypes;
@@ -235,6 +236,16 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
     @Shadow protected abstract void setFlag(int flag, boolean set);
 
     // @formatter:on
+
+    @Shadow @Nullable public abstract MinecraftServer getServer();
+
+    @Shadow @Nullable public Entity changeDimension(int dimensionIn) {
+        return (Entity) (Object) this;
+    }
+
+    @Shadow protected boolean inPortal;
+
+    @Shadow protected boolean inWater;
 
     @Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;dimension:I", opcode = Opcodes.PUTFIELD))
     private void onSet(net.minecraft.entity.Entity self, int dimensionId, net.minecraft.world.World worldIn) {
@@ -498,11 +509,11 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
                         ((Player) entityPlayerMP).closeInventory(); // Call API method to make sure we capture it
                     }
 
-                    EntityUtil.teleportPlayerToDimension(entityPlayerMP, ((IMixinWorldServer) location.getExtent()).getDimensionId(),
-                        (IMixinTeleporter) ((WorldServer) location.getExtent()).getDefaultTeleporter(), event);
+                    EntityUtil.transferPlayerToWorld(entityPlayerMP, (MoveEntityEvent.Teleport) event, (WorldServer) location.getExtent(),
+                        (IMixinTeleporter) ((WorldServer) location.getExtent()).getDefaultTeleporter());
                 } else {
-                    EntityUtil.transferEntityToDimension(this, ((IMixinWorldServer) location.getExtent()).getDimensionId(),
-                        (IMixinTeleporter) ((WorldServer) location.getExtent()).getDefaultTeleporter(), event);
+                    EntityUtil.transferEntityToWorld((Entity) (Object) this, (MoveEntityEvent.Teleport) event, (WorldServer) location.getExtent(),
+                        (IMixinTeleporter) ((WorldServer) location.getExtent()).getDefaultTeleporter(), false);
                 }
 
                 isChangingDimension = true;
@@ -515,21 +526,20 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
             }
 
             if (thisEntity instanceof EntityPlayerMP && ((EntityPlayerMP) thisEntity).connection != null) {
-                final EntityPlayerMP entityPlayerMP = (EntityPlayerMP) thisEntity;
+                final EntityPlayerMP player = (EntityPlayerMP) thisEntity;
 
                 // No reason to attempt to load chunks unless we're teleporting
                 if (isTeleporting || isChangingDimension) {
                     // Close open containers
-                    if (entityPlayerMP.openContainer != entityPlayerMP.inventoryContainer) {
-                        ((Player) entityPlayerMP).closeInventory(); // Call API method to make sure we capture it
+                    if (player.openContainer != player.inventoryContainer) {
+                        ((Player) player).closeInventory(); // Call API method to make sure we capture it
                     }
 
-                    ((WorldServer) location.getExtent()).getChunkProvider()
-                        .loadChunk(location.getChunkPosition().getX(), location.getChunkPosition().getZ());
+                    ((WorldServer) location.getExtent()).getChunkProvider().loadChunk(location.getChunkPosition().getX(), location.getChunkPosition().getZ());
                 }
-                entityPlayerMP.connection
+                player.connection
                     .setPlayerLocation(location.getX(), location.getY(), location.getZ(), thisEntity.rotationYaw, thisEntity.rotationPitch);
-                ((IMixinNetHandlerPlayServer) entityPlayerMP.connection).setLastMoveLocation(null); // Set last move to teleport target
+                ((IMixinNetHandlerPlayServer) player.connection).setLastMoveLocation(null); // Set last move to teleport target
             } else {
                 setPosition(location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ());
             }
@@ -561,6 +571,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
         }
         if (this.world != location.getExtent()) {
             this.world = (net.minecraft.world.World) location.getExtent();
+            this.dimension = ((IMixinWorldServer) this.world).getDimensionId();
         }
     }
 
@@ -578,6 +589,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
         }
         if (this.world != transform.getExtent()) {
             this.world = (net.minecraft.world.World) transform.getExtent();
+            this.dimension = ((IMixinWorldServer) this.world).getDimensionId();
         }
     }
 
