@@ -67,6 +67,10 @@ public class TimingsCategory extends ConfigCategory {
         this.enabled = enabled;
     }
 
+    public boolean isServerNamePrivacy() {
+        return this.serverNamePrivacy;
+    }
+
     public int getHistoryInterval() {
         return this.historyInterval;
     }
