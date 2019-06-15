@@ -89,6 +89,7 @@ import org.spongepowered.common.config.CatalogTypeTypeSerializer;
 import org.spongepowered.common.data.DataRegistrar;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.value.SpongeValueFactory;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.registry.SpongeGameRegistryRegisterEvent;
 import org.spongepowered.common.item.recipe.crafting.SpongeCraftingRecipeRegistry;
 import org.spongepowered.common.network.status.SpongeFavicon;
@@ -117,6 +118,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
@@ -147,9 +149,12 @@ public class SpongeGameRegistry implements GameRegistry {
     protected static final Map<Class<? extends CatalogType>, CatalogRegistryModule<?>> REGISTRY_MAP = new IdentityHashMap<>();
     private static final Map<Class<?>, Supplier<?>> BUILDER_SUPPLIERS = new IdentityHashMap<>();
 
-    private static final List<Class<? extends RegistryModule>> orderedModules = new ArrayList<>();
-    private static final Map<Class<? extends RegistryModule>, RegistryModule> REGISTRY_CLASS_MAP = new IdentityHashMap<>();
-    private static final Set<RegistryModule> REGISTRIES = new HashSet<>();
+    private static List<Class<? extends RegistryModule>> ORDERED_MODULES = new ArrayList<>();
+    private static Map<Class<? extends RegistryModule>, RegistryModule> REGISTRY_CLASS_MAP = new IdentityHashMap<>();
+    private static Map<CatalogRegistryModule<?>, Class<? extends CatalogType>> REGISTRY_CATALOG_MAP = new HashMap<>();
+    private static Set<RegistryModule> REGISTRIES = new HashSet<>();
+
+    private static List<Class<? extends RegistryModule>> MODULES = new ArrayList<>();
 
     @Inject
     public SpongeGameRegistry() {
@@ -199,7 +204,7 @@ public class SpongeGameRegistry implements GameRegistry {
     public void init() {
         this.phase = RegistrationPhase.INIT;
         syncModules();
-        registerModulePhase();
+        registerInitModulePhase();
     }
 
     public void postInit() {
@@ -214,16 +219,31 @@ public class SpongeGameRegistry implements GameRegistry {
         }
     }
 
+    private void registerInitModulePhase() {
+        for (Class<? extends RegistryModule> moduleClass : MODULES) {
+            final RegistryModule module = REGISTRY_CLASS_MAP.get(moduleClass);
+            checkState(module != null, "Something funky happened!");
+            if (REGISTRIES.contains(module)) {
+                if (RegistryModuleLoader.tryModulePhaseRegistration(module)) {
+                    REGISTRIES.remove(module);
+                }
+            }
+            if (ShouldFire.GAME_REGISTRY_EVENT_REGISTER) {
+                throwRegistryEvent(module);
+            }
+        }
+        registerAdditionalPhase();
+        MODULES = null;
+
+    }
+
     private void registerModulePhase() {
-        for (Class<? extends RegistryModule> moduleClass : orderedModules) {
+        for (Class<? extends RegistryModule> moduleClass : ORDERED_MODULES) {
             final RegistryModule module = REGISTRY_CLASS_MAP.get(moduleClass);
             checkState(module != null, "Something funky happened!");
             if (RegistryModuleLoader.tryModulePhaseRegistration(module)) {
                 REGISTRIES.remove(module);
             }
-        }
-        if (this.phase == RegistrationPhase.INIT) {
-            throwRegistryEvents();
         }
         registerAdditionalPhase();
     }
@@ -244,9 +264,10 @@ public class SpongeGameRegistry implements GameRegistry {
         }
 
         REGISTRY_MAP.put(catalogClass, registryModule);
+        REGISTRY_CATALOG_MAP.put(registryModule, catalogClass);
         REGISTRIES.add(registryModule);
         REGISTRY_CLASS_MAP.put(registryModule.getClass(), registryModule);
-        if (!orderedModules.isEmpty()) {
+        if (!ORDERED_MODULES.isEmpty()) {
             if (catalogClass.getName().contains("org.spongepowered.api") && catalogClass.getAnnotation(PluginProvidedRegistryModule.class) == null) {
                 throw new UnsupportedOperationException("Cannot register a module for an API defined class! That's the implementation's job!");
             }
@@ -268,9 +289,12 @@ public class SpongeGameRegistry implements GameRegistry {
         for (RegistryModule module : REGISTRIES) {
             addToGraph(module, graph);
         }
-        orderedModules.clear();
+        if (MODULES != null && ShouldFire.GAME_REGISTRY_EVENT_REGISTER) {
+            MODULES.addAll(ORDERED_MODULES);
+        }
+        ORDERED_MODULES.clear();
         try {
-            orderedModules.addAll(TopologicalOrder.createOrderedLoad(graph));
+            ORDERED_MODULES.addAll(TopologicalOrder.createOrderedLoad(graph));
         } catch (CyclicGraphException e) {
             StringBuilder msg = new StringBuilder();
             msg.append("Registry module dependencies are cyclical!\n");
@@ -542,31 +566,37 @@ public class SpongeGameRegistry implements GameRegistry {
         registerAdditionalPhase();
     }
 
-    private void throwRegistryEvents() {
-        for (Map.Entry<Class<? extends CatalogType>, CatalogRegistryModule<?>> entry : REGISTRY_MAP.entrySet()) {
-            throwRegistryEvent(entry.getKey(), entry.getValue());
-        }
+    public static void clear() {
+        ORDERED_MODULES = null;
+        REGISTRY_CLASS_MAP = null;
+        REGISTRY_CATALOG_MAP = null;
+        REGISTRIES = null;
+        MODULES = null;
+    }
+
+    private void throwRegistryEvent(RegistryModule module) {
+        final Class<? extends CatalogType> catalog = REGISTRY_CATALOG_MAP.get(module);
+        throwRegistryEvent(catalog, module);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes", "ConstantConditions"})
     private void throwRegistryEvent(Class<? extends CatalogType> catalogClass, RegistryModule module) {
         if (module instanceof AdditionalCatalogRegistryModule
-            && (!(module instanceof SpongeAdditionalCatalogRegistryModule)
-                || ((SpongeAdditionalCatalogRegistryModule) module).allowsApiRegistration())
-            && module.getClass().getAnnotation(CustomRegistrationPhase.class) == null) {
+                && (!(module instanceof SpongeAdditionalCatalogRegistryModule) || ((SpongeAdditionalCatalogRegistryModule) module).allowsApiRegistration())
+                && module.getClass().getAnnotation(CustomRegistrationPhase.class) == null) {
             if (catalogClass == null) {
                 // This isn't a valid registered registry
                 // We should throw an exception or print out an exception, but otherwise, not going to bother at this moment.
                 new PrettyPrinter(60).centre().add("Unregistered RegistryModule").hr()
-                    .addWrapped(60, "An unknown registry module was added to the ordered set of modules, but the "
-                                    + "module itself is not registered with the GameRegistry!")
-                    .add()
-                    .add("%s : %s", "Registry Module", module.toString())
-                    .add()
-                    .add(new Exception())
-                    .add()
-                    .add("To fix this, the developer providing the module needs to register the module correctly.")
-                    .trace();
+                        .addWrapped(60, "An unknown registry module was added to the ordered set of modules, but the "
+                                + "module itself is not registered with the GameRegistry!")
+                        .add()
+                        .add("%s : %s", "Registry Module", module.toString())
+                        .add()
+                        .add(new Exception())
+                        .add()
+                        .add("To fix this, the developer providing the module needs to register the module correctly.")
+                        .trace();
                 return;
             }
             final AdditionalCatalogRegistryModule registryModule = (AdditionalCatalogRegistryModule) module;
