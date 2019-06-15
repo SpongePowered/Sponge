@@ -34,9 +34,8 @@ import org.spongepowered.api.data.persistence.DataTranslators;
 import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.lwts.runner.LaunchWrapperTestRunner;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.zip.GZIPInputStream;
 
 @RunWith(LaunchWrapperTestRunner.class)
@@ -44,11 +43,11 @@ public class SchematicUpgradeTest {
 
     @Test
     public void testUpgradingv1Tov2() throws IOException {
-        File inputFile = new File(this.getClass().getClassLoader().getResource("loadv1.schematic").getFile());
-        DataContainer container = DataFormats.NBT.readFrom(new GZIPInputStream(new FileInputStream(inputFile)));
+        InputStream inputStream = this.getClass().getClassLoader().getResource("loadv1.schematic").openStream();
+        DataContainer container = DataFormats.NBT.readFrom(new GZIPInputStream(inputStream));
         final Schematic v1Schem = DataTranslators.SCHEMATIC.translate(container);
-        inputFile = new File(this.getClass().getClassLoader().getResource("loadv2.schematic").getFile());
-        container = DataFormats.NBT.readFrom(new GZIPInputStream(new FileInputStream(inputFile)));
+        inputStream = this.getClass().getClassLoader().getResource("loadv2.schematic").openStream();
+        container = DataFormats.NBT.readFrom(new GZIPInputStream(inputStream));
         final Schematic v2Schem = DataTranslators.SCHEMATIC.translate(container);
         assertEquals(v1Schem, v2Schem);
     }
