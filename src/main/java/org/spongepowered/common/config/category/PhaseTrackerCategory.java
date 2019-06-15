@@ -24,11 +24,13 @@
  */
 package org.spongepowered.common.config.category;
 
+import net.minecraft.launchwrapper.Launch;
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.common.SpongeImplHooks;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -116,7 +118,7 @@ public class PhaseTrackerCategory extends ConfigCategory {
                   + " https://gist.github.com/gabizou/ad570dc09dfed259cac9d74284e78e8b\n"
                   + " https://github.com/SpongePowered/SpongeForge/issues/2787\n"
     )
-    private boolean reportNullSourceBlocks = !SpongeImplHooks.isVanilla();
+    private boolean reportNullSourceBlocks = isVanilla();
 
     @Setting(value = "auto-fix-null-source-block-providing-tile-entities",
         comment = "A mapping that is semi-auto-populating for TileEntities whose types\n"
@@ -177,6 +179,14 @@ public class PhaseTrackerCategory extends ConfigCategory {
 
     public Map<String, Boolean> getAutoFixedTiles() {
         return autoFixedTiles;
+    }
+
+    private boolean isVanilla() {
+        try {
+            return Launch.classLoader.getClassBytes("net.minecraftforge.common.ForgeVersion") == null;
+        } catch (Throwable t) {
+            return true;
+        }
     }
 
     public void setAutoFixedTiles(Map<String, Boolean> autoFixedTiles) {
