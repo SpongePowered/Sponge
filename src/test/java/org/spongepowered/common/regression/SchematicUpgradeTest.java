@@ -45,10 +45,12 @@ public class SchematicUpgradeTest {
     public void testUpgradingv1Tov2() throws IOException {
         final ClassLoader classLoader = this.getClass().getClassLoader();
         try (final InputStream v1InputStream = classLoader.getResource("loadv1.schematic").openStream();
-             final InputStream v2InputStream = classLoader.getResource("loadv2.schematic").openStream()) {
-                final DataContainer v1Container = DataFormats.NBT.readFrom(new GZIPInputStream(v1InputStream));
+             final InputStream v2InputStream = classLoader.getResource("loadv2.schematic").openStream();
+             final GZIPInputStream v1GzipInputStream = new GZIPInputStream(v1InputStream);
+             final GZIPInputStream v2GzipInputStream = new GZIPInputStream(v2InputStream)){
+                final DataContainer v1Container = DataFormats.NBT.readFrom(v1GzipInputStream);
                 final Schematic v1Schem = DataTranslators.SCHEMATIC.translate(v1Container);
-                final DataContainer v2Container = DataFormats.NBT.readFrom(new GZIPInputStream(v2InputStream));
+                final DataContainer v2Container = DataFormats.NBT.readFrom(v2GzipInputStream);
                 final Schematic v2Schem = DataTranslators.SCHEMATIC.translate(v2Container);
                 assertEquals(v1Schem, v2Schem);
         }
