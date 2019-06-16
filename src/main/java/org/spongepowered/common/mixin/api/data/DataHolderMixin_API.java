@@ -194,8 +194,21 @@ public abstract class DataHolderMixin_API implements DataHolder {
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return result;
         } else if (this instanceof CustomDataHolderBridge) {
-            final DataTransactionResult result = ((CustomDataHolderBridge) this).bridge$offerCustom(valueContainer, function);
-            if ((Object) this instanceof SpongeUser) {
+            boolean isUser = ((Object) this) instanceof SpongeUser;
+            if (isUser) {
+                // prevent desync with online player
+                if (((User) this).isOnline()) {
+                    return ((User) this).getPlayer().get().offer(valueContainer, function);
+                }
+
+                // lazy load
+                if (isUser && !((SpongeUser) (Object) this).isInitialized()) {
+                    ((SpongeUser) (Object) this).initialize();
+                }
+            }
+            final DataTransactionResult result = ((CustomDataHolderBridge) this).offerCustom(valueContainer, function);
+
+            if (isUser) {
                 ((SpongeUser) (Object) this).markDirty();
             }
             SpongeTimings.dataOfferManipulator.stopTimingIfSync();

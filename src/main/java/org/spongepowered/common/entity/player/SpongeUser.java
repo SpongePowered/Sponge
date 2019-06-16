@@ -25,6 +25,7 @@
 package org.spongepowered.common.entity.player;
 
 import com.flowpowered.math.vector.Vector3d;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
@@ -33,6 +34,7 @@ import net.minecraft.inventory.InventoryEnderChest;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.world.WorldServer;
 import net.minecraft.world.storage.SaveHandler;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
@@ -64,6 +66,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -106,9 +111,9 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     private boolean isVanishCollide;
     private boolean isVanishTarget;
 
-    private SpongeUserInventory inventory; // lazy load when accessing inventory
-    private InventoryEnderChest enderChest; // lazy load when accessing inventory
-    private NBTTagCompound nbt = new NBTTagCompound();
+    @Nullable private SpongeUserInventory inventory; // lazy load when accessing inventory
+    @Nullable private InventoryEnderChest enderChest; // lazy load when accessing inventory
+    @Nullable private NBTTagCompound nbt;
 
     public SpongeUser(final GameProfile profile) {
         this.profile = profile;
@@ -116,6 +121,33 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
     private void reset() {
         this.spawnLocations.clear();
+    }
+
+    public boolean isInitialized() {
+        return this.nbt != null;
+    }
+
+    public void initialize() {
+        this.nbt = new NBTTagCompound();
+        Optional<WorldServer> worldServer = WorldManager.getWorldByDimensionId(0);
+        if (!worldServer.isPresent()) {
+            return;
+        }
+
+        // Note: Uses the overworld's player data
+        SaveHandler saveHandler = (SaveHandler) worldServer.get().getSaveHandler();
+        File file = new File(saveHandler.playersDirectory, this.profile.getId().toString() + ".dat");
+        if (!file.exists()) {
+            return;
+        }
+
+        try {
+            try (FileInputStream in = new FileInputStream(file)) {
+                readFromNbt(CompressedStreamTools.readCompressed(in));
+            }
+        } catch (IOException e) {
+            SpongeImpl.getLogger().warn("Corrupt user file {}", file, e);
+        }
     }
 
     public void readFromNbt(final NBTTagCompound compound) {
@@ -535,19 +567,10 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     }
 
     public void save() {
-        final SaveHandlerAccessor saveHandler = (SaveHandlerAccessor) WorldManager.getWorldByDimensionId(0).get().getSaveHandler();
-        final File dataFile = new File(saveHandler.accessor$getPlayersDirectory(), getUniqueId() + ".dat");
-        NBTTagCompound tag;
-        if (dataFile.isFile()) {
-            try {
-                tag = CompressedStreamTools.readCompressed(new FileInputStream(dataFile));
-            } catch (IOException ignored) {
-                // Nevermind
-                tag = new NBTTagCompound();
-            }
-        } else {
-            tag = new NBTTagCompound();
-        }
+        Preconditions.checkState(isInitialized(), "SpongeUser {} is not initialized", this.profile.getId());
+        final SaveHandler saveHandler = (SaveHandler) WorldManager.getWorldByDimensionId(0).get().getSaveHandler();
+        final File dataFile = new File(saveHandler.playersDirectory, getUniqueId() + ".dat");
+        NBTTagCompound tag = new NBTTagCompound();
         writeToNbt(tag);
         try (final FileOutputStream out = new FileOutputStream(dataFile)) {
             CompressedStreamTools.writeCompressed(tag, out);
