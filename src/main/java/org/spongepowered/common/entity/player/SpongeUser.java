@@ -645,4 +645,20 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         }
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final SpongeUser other = (SpongeUser) obj;
+        return this.profile.getId().equals(other.profile.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return this.profile.getId().hashCode();
+    }
 }
