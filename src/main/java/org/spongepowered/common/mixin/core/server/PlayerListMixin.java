@@ -484,11 +484,6 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         ChatUtil.sendMessage(component, MessageChannel.TO_ALL, (CommandSource) this.server, !isSystem);
     }
 
-    @Inject(method = "createPlayerForUser", at = @At("RETURN"), cancellable = true)
-    private void impl$forceRecreateUser(final CallbackInfoReturnable<EntityPlayerMP> cir) {
-        ((ServerPlayerEntityBridge) cir.getReturnValue()).bridge$forceRecreateUser();
-    }
-
     @Override
     public void bridge$reloadAdvancementProgress() {
         for (final PlayerAdvancements playerAdvancements : this.advancements.values()) {
