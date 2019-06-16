@@ -41,14 +41,6 @@ public class GlobalWorldCategory extends WorldCategory {
     @Setting(value = "leaf-decay", comment = "If 'true', natural leaf decay is allowed.")
     private boolean leafDecay = true;
 
-    @Setting(value = "gameprofile-lookup-batch-size", comment = "The amount of GameProfile requests to make against Mojang's session server. (Default: 1) \n"
-                                                              + "Note: Mojang accepts a maximum of 600 requests every 10 minutes from a single IP address. \n"
-                                                              + "If you are running multiple servers behind the same IP, it is recommended to raise the 'gameprofile-task-interval' setting  \n"
-                                                              + "in order to compensate for the amount requests being sent. \n"
-                                                              + "Finally, if set to 0 or less, the default batch size will be used. \n"
-                                                              + "For more information visit http://wiki.vg/Mojang_API")
-    private int gameProfileLookupBatchSize = 1;
-
     @Setting(value = "gameprofile-lookup-task-interval", comment = "The interval, in seconds, used by the GameProfileQueryTask to process queued GameProfile requests. (Default: 4) \n"
                                                                  + "Note: This setting should be raised if you experience the following error: \n"
                                                                  + "\"The client has sent too many requests within a certain amount of time\". \n"
@@ -75,13 +67,6 @@ public class GlobalWorldCategory extends WorldCategory {
 
     public void setLeafDecay(boolean flag) {
         this.leafDecay = flag;
-    }
-
-    public int getGameProfileLookupBatchSize() {
-        if (this.gameProfileLookupBatchSize <= 0) {
-            this.gameProfileLookupBatchSize = 1;
-        }
-        return this.gameProfileLookupBatchSize;
     }
 
     public int getGameProfileQueryTaskInterval() {
