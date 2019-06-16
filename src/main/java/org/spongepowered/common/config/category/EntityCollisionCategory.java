@@ -39,14 +39,10 @@ public class EntityCollisionCategory extends ConfigCategory {
                                                          + "performance when there are more than 8 entities on top of each other such as a 1x1 \n"
                                                          + "spawn pen. Set to 0 to disable.")
     private int maxEntitiesWithinAABB = 8;
-    @Setting(value = "defaults", comment = "Default maximum collisions used for all entities/blocks unless overridden.")
-    private Map<String, Integer> defaultMaxCollisions = new HashMap<>();
     @Setting(value = "mods", comment = "Per-mod overrides. Refer to the minecraft default mod for example.")
     private Map<String, CollisionModCategory> modList = new HashMap<>();
 
     public EntityCollisionCategory() {
-        this.defaultMaxCollisions.put("blocks", 8);
-        this.defaultMaxCollisions.put("entities", 8);
         this.modList.put("minecraft", new CollisionModCategory("minecraft"));
         this.modList.put("botania", new CollisionModCategory("botania"));
     }
@@ -57,10 +53,6 @@ public class EntityCollisionCategory extends ConfigCategory {
 
     public Map<String, CollisionModCategory> getModList() {
         return this.modList;
-    }
-
-    public Map<String, Integer> getDefaultMaxCollisions() {
-        return this.defaultMaxCollisions;
     }
 
     public int getMaxEntitiesWithinAABB() {
