@@ -67,7 +67,7 @@ public class TimingsCategory extends ConfigCategory {
         this.enabled = enabled;
     }
 
-    public boolean isServerNamePrivacy() {
+    public boolean isServerNamePrivate() {
         return this.serverNamePrivacy;
     }
 
