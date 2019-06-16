@@ -58,6 +58,7 @@ public class SpongeTimingsFactory implements TimingsFactory {
     public void init() {
         final TimingsCategory category = SpongeImpl.getGlobalConfigAdapter().getConfig().getTimings();
         TimingsManager.privacy = category.isServerNamePrivate();
+        TimingsManager.hiddenConfigs.addAll(category.getHiddenConfigEntries());
         setVerboseTimingsEnabled(category.isVerbose());
         setTimingsEnabled(this.moduleEnabled && category.isEnabled());
         setHistoryInterval(category.getHistoryInterval());
