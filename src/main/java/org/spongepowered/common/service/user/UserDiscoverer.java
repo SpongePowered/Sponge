@@ -306,13 +306,6 @@ class UserDiscoverer {
         // A call to create(GameProfile) will remove the profile UUID from nonExistentUsers, as the user
         // now exists!
         final User user = create((GameProfile) profile);
-        try {
-            try (final FileInputStream in = new FileInputStream(dataFile)) {
-                ((SpongeUser) user).readFromNbt(CompressedStreamTools.readCompressed(in));
-            }
-        } catch (ReportedException | IOException e) {
-            SpongeImpl.getLogger().warn("Corrupt user file {}", dataFile, e);
-        }
 
         return user;
     }

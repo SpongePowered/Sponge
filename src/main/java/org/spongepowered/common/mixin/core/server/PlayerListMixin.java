@@ -399,12 +399,8 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     }
 
     @Inject(method = "playerLoggedOut(Lnet/minecraft/entity/player/EntityPlayerMP;)V", at = @At("HEAD"))
+<<<<<<< HEAD:src/main/java/org/spongepowered/common/mixin/core/server/PlayerListMixin.java
     private void onPlayerLogOut(final EntityPlayerMP player, final CallbackInfo ci) {
-        // Synchronise with user object
-        final NBTTagCompound nbt = new NBTTagCompound();
-        player.writeToNBT(nbt);
-        ((SpongeUser) ((ServerPlayerEntityBridge) player).bridge$getUserObject()).readFromNbt(nbt);
-
         // Remove player reference from scoreboard
         ((ServerScoreboardBridge) ((Player) player).getScoreboard()).bridge$removePlayer(player, false);
     }
