@@ -575,6 +575,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         try (final FileOutputStream out = new FileOutputStream(dataFile)) {
             CompressedStreamTools.writeCompressed(tag, out);
             dirtyUsers.remove(this);
+            this.nbt = null;
         } catch (IOException e) {
             SpongeImpl.getLogger().warn("Failed to save user file [{}]!", dataFile, e);
         }
