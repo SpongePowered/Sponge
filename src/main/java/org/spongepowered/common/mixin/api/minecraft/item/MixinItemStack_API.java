@@ -61,8 +61,8 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.item.ItemStack.class)
-@Implements(@Interface(iface = ItemStack.class, prefix = "itemstack$"))
-public abstract class MixinItemStack_API implements DataHolder {
+@Implements(@Interface(iface = ItemStack.class, prefix = "apiStack$")) // We need to soft implement this interface due to a synthetic bridge method
+public abstract class MixinItemStack_API implements DataHolder {       // conflict from overriding ValueContainer#copy() from DataHolder
 
     @Shadow public abstract int getCount();
     @Shadow public abstract void setCount(int size); // Do not use field directly as Minecraft tracks the empty state
@@ -76,19 +76,19 @@ public abstract class MixinItemStack_API implements DataHolder {
     @Shadow public abstract net.minecraft.item.ItemStack shadow$copy();
     @Shadow public abstract Item shadow$getItem();
 
-    public int itemstack$getQuantity() {
+    public int apiStack$getQuantity() {
         return this.getCount();
     }
 
-    public ItemType itemstack$getType() {
+    public ItemType apiStack$getType() {
         return (ItemType) shadow$getItem();
     }
 
-    public void itemstack$setQuantity(int quantity) throws IllegalArgumentException {
+    public void apiStack$setQuantity(int quantity) throws IllegalArgumentException {
         this.setCount(quantity);
     }
 
-    public int itemstack$getMaxStackQuantity() {
+    public int apiStack$getMaxStackQuantity() {
         return getMaxStackSize();
     }
 
@@ -118,10 +118,10 @@ public abstract class MixinItemStack_API implements DataHolder {
 
     @Override
     public DataHolder copy() {
-        return this.itemstack$copy();
+        return this.apiStack$copy();
     }
 
-    public ItemStack itemstack$copy() {
+    public ItemStack apiStack$copy() {
         return (ItemStack) shadow$copy();
     }
 
@@ -134,8 +134,8 @@ public abstract class MixinItemStack_API implements DataHolder {
     public DataContainer toContainer() {
         final DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, getContentVersion())
-                .set(DataQueries.ItemStack.TYPE, this.itemstack$getType().getId())
-                .set(DataQueries.ItemStack.COUNT, this.itemstack$getQuantity())
+                .set(DataQueries.ItemStack.TYPE, this.apiStack$getType().getId())
+                .set(DataQueries.ItemStack.COUNT, this.apiStack$getQuantity())
                 .set(DataQueries.ItemStack.DAMAGE_VALUE, this.getItemDamage());
         if (hasTagCompound()) { // no tag? no data, simple as that.
             final NBTTagCompound compound = getTagCompound().copy();
@@ -164,15 +164,15 @@ public abstract class MixinItemStack_API implements DataHolder {
         return container;
     }
 
-    public Translation itemstack$getTranslation() {
+    public Translation apiStack$getTranslation() {
         return new SpongeTranslation(shadow$getItem().getTranslationKey((net.minecraft.item.ItemStack) (Object) this) + ".name");
     }
 
-    public ItemStackSnapshot itemstack$createSnapshot() {
-        return new SpongeItemStackSnapshot((ItemStack)this);
+    public ItemStackSnapshot apiStack$createSnapshot() {
+        return new SpongeItemStackSnapshot((ItemStack) this);
     }
 
-    public boolean itemstack$equalTo(ItemStack that) {
+    public boolean apiStack$equalTo(ItemStack that) {
         return net.minecraft.item.ItemStack.areItemStacksEqual(
                 (net.minecraft.item.ItemStack) (Object) this,
                 (net.minecraft.item.ItemStack) that
@@ -180,7 +180,7 @@ public abstract class MixinItemStack_API implements DataHolder {
     }
 
     @Intrinsic
-    public boolean itemstack$isEmpty() {
+    public boolean apiStack$isEmpty() {
         return this.shadow$isEmpty();
     }
 

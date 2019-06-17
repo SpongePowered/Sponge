@@ -199,6 +199,7 @@ public class ManipulatorTest {
     }
 
 
+    @SuppressWarnings("unchecked")
     private <T> T createType(Class<T> type) {
         if (CatalogType.class.isAssignableFrom(type)) {
             return (T) Sponge.getRegistry().getAllOf((Class<CatalogType>) type).iterator().next();
@@ -294,6 +295,7 @@ public class ManipulatorTest {
                     throw new IllegalArgumentException("[Serialization]: A builder did not translate the data manipulator: "
                             + this.dataName + "\n[Serialization]: Providing the DataContainer: " + container.toString());
                 }
+
                 final DataManipulator<?, ?> deserialized = this.builder.build(container).get();
                 final boolean equals = manipulator.equals(deserialized);
                 if (!equals) {

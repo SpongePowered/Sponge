@@ -41,7 +41,7 @@ public class MixinSpongeImplHooks_TileEntityActivation {
      * @param tickable The tile to tick
      * @return True if the tile should tick, false if not
      */
-    @Overwrite
+    @Overwrite(remap = false)
     public static boolean shouldTickTile(ITickable tickable) {
         final TileEntity tileEntity = (TileEntity) tickable;
         final boolean canUpdate = TileEntityActivation.checkIfActive(tileEntity);

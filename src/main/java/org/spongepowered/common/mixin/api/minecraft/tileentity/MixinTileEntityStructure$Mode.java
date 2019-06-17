@@ -35,12 +35,14 @@ import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.Locale;
 
+import javax.annotation.Nullable;
+
 @Mixin(TileEntityStructure.Mode.class)
 @Implements(@Interface(iface = StructureMode.class, prefix = "structure$"))
 public abstract class MixinTileEntityStructure$Mode implements StructureMode {
 
     @Shadow @Final private String modeName;
-    private String friendlyName = this.modeName.toUpperCase(Locale.ENGLISH);
+    @Nullable private String friendlyName;
 
     @Override
     public String getId() {
@@ -49,6 +51,9 @@ public abstract class MixinTileEntityStructure$Mode implements StructureMode {
 
     @Intrinsic
     public String structure$getName() {
+        if (this.friendlyName == null) {
+            this.friendlyName = this.modeName.toUpperCase(Locale.ENGLISH);
+        }
         return this.friendlyName;
     }
 

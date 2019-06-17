@@ -44,7 +44,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 import org.spongepowered.common.event.ShouldFire;
-import org.spongepowered.common.interfaces.entity.IMixinEntityTNTPrimed;
+import org.spongepowered.common.bridge.entity.item.TNTPrimedEntityBridge;
 
 import javax.annotation.Nullable;
 
@@ -66,13 +66,13 @@ public abstract class MixinBlockTNT extends MixinBlock {
     )
     private void impl$ThrowPrimeAndMaybeCancel(World worldIn, BlockPos pos, IBlockState state, @Nullable EntityLivingBase igniter,
         CallbackInfo ci, EntityTNTPrimed tnt) {
-        ((IMixinEntityTNTPrimed) tnt).setDetonator(igniter);
+        ((TNTPrimedEntityBridge) tnt).bridge$setDetonator(igniter);
         if (ShouldFire.PRIME_EXPLOSIVE_EVENT_PRE) {
             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 if (igniter != null) {
                     frame.addContext(EventContextKeys.IGNITER, (Living) igniter);
                 }
-                if (!((IMixinEntityTNTPrimed) tnt).bridge$shouldPrime()) {
+                if (!((TNTPrimedEntityBridge) tnt).bridge$shouldPrime()) {
                     ci.cancel();
                 }
             }

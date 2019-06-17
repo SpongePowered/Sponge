@@ -22,37 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.data;
+package org.spongepowered.common.bridge.entity.item;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.entity.Entity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
-import org.spongepowered.api.data.Property;
-import org.spongepowered.api.data.property.PropertyHolder;
-import org.spongepowered.api.data.property.PropertyStore;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.SpongeImpl;
+import net.minecraft.world.Explosion;
+import net.minecraft.world.World;
+import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 
-import java.util.Collection;
-import java.util.Optional;
+import javax.annotation.Nullable;
 
-@Mixin({Block.class, Entity.class, TileEntity.class, ItemStack.class})
-public abstract class MixinPropertyHolder implements PropertyHolder {
+public interface LargeFireballEntityBridge extends ExplosiveBridge {
 
-    @Override
-    public <T extends Property<?, ?>> Optional<T> getProperty(Class<T> propertyClass) {
-        final Optional<PropertyStore<T>> optional = SpongeImpl.getPropertyRegistry().getStore(propertyClass);
-        if (optional.isPresent()) {
-            return optional.get().getFor(this);
-        }
-        return Optional.empty();
-    }
+    @Nullable
+    Explosion bridge$throwExplosionEventAndExplode(World worldObj, @Nullable Entity nil,
+        double x, double y, double z, float strength, boolean flaming, boolean smoking);
 
-    @Override
-    public Collection<Property<?, ?>> getApplicableProperties() {
-        return SpongeImpl.getPropertyRegistry().getPropertiesFor(this);
 
-    }
 }

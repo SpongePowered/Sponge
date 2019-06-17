@@ -45,6 +45,7 @@ import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 import org.spongepowered.common.world.BlockChange;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
@@ -71,7 +72,7 @@ final class BlockDecayPhaseState extends BlockPhaseState {
         return this.BLOCK_DECAY_MODIFIER;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "RedundantCast"})
     @Override
     public void unwind(GeneralizedContext context) {
         final LocatableBlock locatable = context.getSource(LocatableBlock.class)
@@ -111,7 +112,7 @@ final class BlockDecayPhaseState extends BlockPhaseState {
             .acceptAndClearIfNotEmpty(drops -> {
                 drops.asMap().forEach((key, value) -> {
                     Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-                    SpongeCommonEventFactory.callDropItemDestruct(new ArrayList(value), context);
+                    SpongeCommonEventFactory.callDropItemDestruct(new ArrayList<>((Collection<? extends Entity>) (Collection<?>) value), context);
                 });
             });
 

@@ -41,6 +41,7 @@ import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -71,7 +72,7 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
                 .addEntityCaptures();
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "Duplicates", "RedundantCast"})
     @Override
     public void unwind(GeneralizedContext context) {
 
@@ -87,7 +88,7 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
             .acceptAndClearIfNotEmpty(drops -> {
                 drops.asMap().forEach((key, value) -> {
                     Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-                    SpongeCommonEventFactory.callDropItemDestruct(new ArrayList(value), context);
+                    SpongeCommonEventFactory.callDropItemDestruct(new ArrayList<>((Collection<? extends Entity>) (Collection<?>) value), context);
                 });
             });
         context.getCapturedEntitySupplier()

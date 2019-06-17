@@ -193,7 +193,8 @@ public final class EntityUtil {
         final Vector3d toPosition = toTransform.getPosition();
         entity.setLocationAndAngles(toPosition.getX(), toPosition.getY(), toPosition.getZ(), (float) toTransform.getYaw(), (float) toTransform.getPitch());
         entity.world = toWorld;
-        try (PhaseContext<?> ignored = EntityPhase.State.CHANGING_DIMENSION.createPhaseContext().setTargetWorld(toWorld).buildAndSwitch()) {
+        try (PhaseContext<?> ignored = EntityPhase.State.CHANGING_DIMENSION.createPhaseContext().setTargetWorld(toWorld)) {
+            ignored.buildAndSwitch();
             toWorld.spawnEntity(entity);
             toWorld.updateEntityWithOptionalForce(entity, false);
         }
@@ -457,7 +458,7 @@ public final class EntityUtil {
             final Transform<World> portalExitTransform = spongeEntity.getTransform().setExtent((World) toWorld);
             // Use setLocationAndAngles to avoid firing MoveEntityEvent to plugins
             mixinEntity.setLocationAndAngles(fromTransform);
-            final MoveEntityEvent.Teleport.Portal event = SpongeEventFactory.createMoveEntityEventTeleportPortal(frame.getCurrentCause(), fromTransform, portalExitTransform, (PortalAgent) teleporter, mixinEntity, true);
+            final MoveEntityEvent.Teleport.Portal event = SpongeEventFactory.createMoveEntityEventTeleportPortal(frame.getCurrentCause(), fromTransform, portalExitTransform, (PortalAgent) teleporter, (org.spongepowered.api.entity.Entity) entityIn, true);
             SpongeImpl.postEvent(event);
             final Vector3i chunkPosition = spongeEntity.getLocation().getChunkPosition();
             final MultiBlockCaptureSupplier blockSupplier = context.getCapturedBlockSupplier();
@@ -881,7 +882,6 @@ public final class EntityUtil {
             // Sanity check, just like vanilla
             return null;
         }
-        final EntityBridge mixinEntity = (EntityBridge) entity;
         // Now the real fun begins.
         final ItemStack item;
         final double posX = xPos;
@@ -900,7 +900,7 @@ public final class EntityUtil {
         // We want to frame ourselves here, because of the two events we have to throw, first for the drop item event, then the constructentityevent.
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             // Perform the event throws first, if they return false, return null
-            item = throwDropItemAndConstructEvent(mixinEntity, posX, posY, posZ, snapshot, original, frame);
+            item = throwDropItemAndConstructEvent(entity, posX, posY, posZ, snapshot, original, frame);
 
             if (item == null || item.isEmpty()) {
                 return null;

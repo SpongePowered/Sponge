@@ -46,15 +46,14 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
-import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.interfaces.entity.IMixinEntityLightningBolt;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.List;
 
 @Mixin(EntityLightningBolt.class)
-public abstract class MixinEntityLightningBolt extends MixinEntity implements IMixinEntityLightningBolt {
+public abstract class MixinEntityLightningBolt extends MixinEntity {
 
     private final List<Entity> struckEntities = Lists.newArrayList();
     private final List<Transaction<BlockSnapshot>> struckBlocks = Lists.newArrayList();

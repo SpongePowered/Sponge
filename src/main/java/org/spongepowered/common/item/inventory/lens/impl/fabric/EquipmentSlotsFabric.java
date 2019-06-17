@@ -35,6 +35,7 @@ import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
 import java.util.Collection;
 import java.util.Collections;
 
+@SuppressWarnings("unchecked")
 public class EquipmentSlotsFabric implements Fabric {
     private static final EntityEquipmentSlot[] SLOTS;
     private static final int MAX_STACK_SIZE = 64;

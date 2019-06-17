@@ -34,7 +34,7 @@ import org.spongepowered.common.bridge.entity.ai.EntityGoalBridge;
 
 import java.util.Optional;
 
-@Mixin(AbstractAITask.class)
+@Mixin(value = AbstractAITask.class, remap = false)
 public abstract class MixinAbstractAITask<O extends Agent> implements AITask<O> {
 
     /**

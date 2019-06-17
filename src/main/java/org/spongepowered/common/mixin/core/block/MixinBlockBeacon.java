@@ -31,14 +31,17 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
+import javax.annotation.Nullable;
+
 @Mixin(BlockBeacon.class)
 public abstract class MixinBlockBeacon {
 
 
     // For some reason, Vanilla runs this on a separate thread, which is utterly broken.
     // Here, we simply execute the Runnable directly, ignoring the execturo.
+    @Nullable
     @Redirect(method = "updateColorAsync", at = @At(value = "INVOKE", target = "Lcom/google/common/util/concurrent/ListeningExecutorService;submit(Ljava/lang/Runnable;)Lcom/google/common/util/concurrent/ListenableFuture;", remap = false))
-    private static ListenableFuture onSubmit(ListeningExecutorService service, Runnable runnable) {
+    private static ListenableFuture<?> onSubmit(ListeningExecutorService service, Runnable runnable) {
         runnable.run();
         return null;
     }

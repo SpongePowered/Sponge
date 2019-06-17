@@ -69,7 +69,7 @@ public abstract class MixinFurnaceRecipes_API implements SmeltingRecipeRegistry 
         return Optional.empty();
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "deprecation"})
     @Override
     public void register(SmeltingRecipe recipe) {
         ((SpongeAdditionalCatalogRegistryModule) this).registerAdditionalCatalog(recipe);

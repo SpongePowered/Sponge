@@ -51,6 +51,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * A context calculator handling world contexts.
  */
+@SuppressWarnings("deprecation")
 public class SpongeContextCalculator implements ContextCalculator<Subject> {
 
     private final LoadingCache<RemoteSource, Set<Context>> remoteIpCache = buildAddressCache(Context.REMOTE_IP_KEY, rs -> getAddress(rs, RemoteConnection::getAddress));

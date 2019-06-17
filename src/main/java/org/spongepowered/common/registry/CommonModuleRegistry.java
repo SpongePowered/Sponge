@@ -125,7 +125,6 @@ import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.api.world.gen.populator.*;
 import org.spongepowered.api.world.gen.type.BiomeTreeType;
 import org.spongepowered.api.world.gen.type.MushroomType;
-import org.spongepowered.api.world.schematic.BlockPaletteType;
 import org.spongepowered.api.world.schematic.PaletteType;
 import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.api.world.teleport.TeleportHelperFilter;
@@ -327,7 +326,7 @@ public final class CommonModuleRegistry {
         ;
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"unchecked", "rawtypes", "deprecation"})
     protected void registerCommonModules(SpongeGameRegistry registry) {
         registry.registerModule(new ArgumentRegistryModule())
                 .registerModule(BlockChangeFlagRegistryModule.getInstance())
@@ -437,7 +436,7 @@ public final class CommonModuleRegistry {
                 .registerModule(PortalAgentType.class, PortalAgentRegistryModule.getInstance())
                 .registerModule(HandType.class, HandTypeRegistryModule.getInstance())
                 .registerModule(PickupRule.class, new PickupRuleRegistryModule())
-                .registerModule(BlockPaletteType.class, new BlockPaletteTypeRegistryModule())
+                .registerModule(org.spongepowered.api.world.schematic.BlockPaletteType.class, new BlockPaletteTypeRegistryModule())
                 .registerModule((Class<PaletteType<?>>) (Class<?>) PaletteType.class, new PaletteTypeRegistryModule())
                 .registerModule(CollisionRule.class, new CollisionRuleRegistryModule())
                 .registerModule(DismountType.class, new DismountTypeRegistryModule())

@@ -33,18 +33,14 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.bridge.entity.EntityBridge;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface CustomDataHolderBridge {
-
-    default DataTransactionResult offerCustom(DataManipulator<?, ?> manipulator) {
-        return offerCustom(manipulator, MergeFunction.IGNORE_ALL);
-    }
 
     DataTransactionResult offerCustom(DataManipulator<?, ?> manipulator, MergeFunction function);
 

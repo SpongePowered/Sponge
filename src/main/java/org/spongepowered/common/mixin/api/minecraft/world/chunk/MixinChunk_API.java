@@ -162,6 +162,7 @@ public abstract class MixinChunk_API implements Chunk {
         return chunk != null;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public int getInhabittedTime() {
         return (int) this.inhabitedTime;

@@ -68,6 +68,7 @@ import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.Item;
 import org.spongepowered.api.entity.Transform;
+import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.entity.living.Human;
 import org.spongepowered.api.entity.living.Living;
@@ -93,6 +94,7 @@ import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.RotateEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.entity.ai.SetAITargetEvent;
+import org.spongepowered.api.event.entity.explosive.DetonateExplosiveEvent;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.event.item.inventory.CraftItemEvent;
@@ -116,6 +118,7 @@ import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
@@ -123,6 +126,7 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
+import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
 import org.spongepowered.common.bridge.world.ChunkBridge;
 import org.spongepowered.common.entity.EntityUtil;
@@ -130,6 +134,7 @@ import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.inventory.UpdateAnvilEventCost;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
@@ -300,7 +305,7 @@ public class SpongeCommonEventFactory {
 
 
 
-    public static boolean callPlayerChangeInventoryPickupPreEvent(final EntityPlayer player, final EntityItem itemToPickup, final int pickupDelay, final UUID creator) {
+    public static boolean callPlayerChangeInventoryPickupPreEvent(final EntityPlayer player, final EntityItem itemToPickup, final int pickupDelay) {
         final ItemStack stack = itemToPickup.getItem();
         Sponge.getCauseStackManager().pushCause(player);
         final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(stack);
@@ -772,33 +777,32 @@ public class SpongeCommonEventFactory {
         }
     }
 
-    public static InteractItemEvent.Secondary callInteractItemEventSecondary(final EntityPlayer player, final ItemStack stack, final EnumHand hand,
-            @Nullable final Vector3d hitVec, final Object hitTarget) {
-        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(player);
-            frame.addContext(EventContextKeys.OWNER, (User) player);
-            frame.addContext(EventContextKeys.NOTIFIER, (User) player);
-            if (hitTarget instanceof Entity) {
-                frame.addContext(EventContextKeys.ENTITY_HIT, ((Entity) hitTarget));
-            } else if (hitTarget instanceof BlockSnapshot) {
-                frame.addContext(EventContextKeys.BLOCK_HIT, (BlockSnapshot) hitTarget);
-            }
-            if (!stack.isEmpty()) {
-                frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(stack));
-            }
-            final HandType handType = (HandType) (Object) hand;
-            frame.addContext(EventContextKeys.USED_HAND, handType);
-            final InteractItemEvent.Secondary event;
-            if (hand == EnumHand.MAIN_HAND) {
-                event = SpongeEventFactory.createInteractItemEventSecondaryMainHand(frame.getCurrentCause(),
-                        HandTypes.MAIN_HAND, Optional.ofNullable(hitVec), ItemStackUtil.snapshotOf(stack));
-            } else {
-                event = SpongeEventFactory.createInteractItemEventSecondaryOffHand(frame.getCurrentCause(),
-                        HandTypes.OFF_HAND, Optional.ofNullable(hitVec), ItemStackUtil.snapshotOf(stack));
-            }
-            SpongeImpl.postEvent(event);
-            return event;
+    public static InteractItemEvent.Secondary callInteractItemEventSecondary(final CauseStackManager.StackFrame frame, final EntityPlayer player,
+        final ItemStack stack, final EnumHand hand,
+        @Nullable final Vector3d hitVec, final Object hitTarget) {
+        frame.pushCause(player);
+        frame.addContext(EventContextKeys.OWNER, (User) player);
+        frame.addContext(EventContextKeys.NOTIFIER, (User) player);
+        if (hitTarget instanceof Entity) {
+            frame.addContext(EventContextKeys.ENTITY_HIT, ((Entity) hitTarget));
+        } else if (hitTarget instanceof BlockSnapshot) {
+            frame.addContext(EventContextKeys.BLOCK_HIT, (BlockSnapshot) hitTarget);
         }
+        final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(stack);
+        if (!stack.isEmpty()) {
+            frame.addContext(EventContextKeys.USED_ITEM, snapshot);
+        }
+        final HandType handType = (HandType) (Object) hand;
+        frame.addContext(EventContextKeys.USED_HAND, handType);
+        final InteractItemEvent.Secondary event;
+        if (hand == EnumHand.MAIN_HAND) {
+            event = SpongeEventFactory.createInteractItemEventSecondaryMainHand(frame.getCurrentCause(), HandTypes.MAIN_HAND, Optional.ofNullable(hitVec), snapshot);
+        } else {
+            event = SpongeEventFactory.createInteractItemEventSecondaryOffHand(frame.getCurrentCause(), HandTypes.OFF_HAND, Optional.ofNullable(hitVec), snapshot);
+        }
+        SpongeImpl.postEvent(event);
+        return event;
+
     }
 
     public static InteractBlockEvent.Primary callInteractBlockEventPrimary(
@@ -1506,5 +1510,20 @@ public class SpongeCommonEventFactory {
             SpongeImpl.postEvent(event);
             return event;
         }
+    }
+
+    public static Optional<net.minecraft.world.Explosion> detonateExplosive(ExplosiveBridge explosiveBridge, Explosion.Builder builder) {
+        DetonateExplosiveEvent event = SpongeEventFactory.createDetonateExplosiveEvent(
+                Sponge.getCauseStackManager().getCurrentCause(), builder, builder.build(), (Explosive) explosiveBridge
+        );
+        if (!Sponge.getEventManager().post(event)) {
+            Explosion explosion = event.getExplosionBuilder().build();
+            if (explosion.getRadius() > 0) {
+                ((ServerWorldBridge) ((Explosive) explosiveBridge).getWorld()).triggerInternalExplosion(explosion,
+                        e -> GeneralPhase.State.EXPLOSION.createPhaseContext().explosion(e));
+            }
+            return Optional.of((net.minecraft.world.Explosion) explosion);
+        }
+        return Optional.empty();
     }
 }

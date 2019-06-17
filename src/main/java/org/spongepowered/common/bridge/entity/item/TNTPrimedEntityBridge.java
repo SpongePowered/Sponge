@@ -22,12 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge;
+package org.spongepowered.common.bridge.entity.item;
 
-import co.aikar.timings.Timing;
+import net.minecraft.entity.EntityLivingBase;
+import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 
-public interface TimingHolder {
+public interface TNTPrimedEntityBridge extends FusedExplosiveBridge {
 
-    Timing bridge$getTimingsHandler();
+    void bridge$setDetonator(EntityLivingBase detonator);
+
+    boolean bridge$isExploding();
 
 }

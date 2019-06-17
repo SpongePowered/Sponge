@@ -29,7 +29,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(WorldServer.class)
-public interface AccessorServerWorld {
+public interface AccessorServerWorld extends AccessorWorld {
 
     @Accessor("blockEventQueue")
     WorldServer.ServerBlockEventList[] getBlockEventQueueForSponge();

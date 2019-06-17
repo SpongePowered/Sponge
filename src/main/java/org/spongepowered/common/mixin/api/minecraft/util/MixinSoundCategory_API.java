@@ -36,14 +36,15 @@ import org.spongepowered.asm.mixin.Shadow;
 @Implements(@Interface(iface = org.spongepowered.api.effect.sound.SoundCategory.class, prefix = "category$"))
 public abstract class MixinSoundCategory_API implements org.spongepowered.api.effect.sound.SoundCategory {
 
-    @Shadow @Final private String name;
-
     @Shadow public abstract String shadow$getName();
 
-    private String id = "minecraft:" + this.name;
+    private String id;
 
     @Override
     public String getId() {
+        if (this.id == null) {
+            this.id = "minecraft:" + this.shadow$getName();
+        }
         return this.id;
     }
 

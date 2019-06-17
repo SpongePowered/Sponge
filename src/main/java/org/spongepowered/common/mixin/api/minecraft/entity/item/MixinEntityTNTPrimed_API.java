@@ -26,8 +26,6 @@ package org.spongepowered.common.mixin.api.minecraft.entity.item;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import com.flowpowered.math.vector.Vector3d;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityTNTPrimed;
 import org.spongepowered.api.Sponge;
@@ -36,18 +34,11 @@ import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.entity.explosive.PrimedTNT;
 import org.spongepowered.api.entity.living.Living;
-import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.world.BlockChangeFlags;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.interfaces.entity.IMixinEntityTNTPrimed;
+import org.spongepowered.common.bridge.entity.item.TNTPrimedEntityBridge;
+import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 import org.spongepowered.common.mixin.api.minecraft.entity.MixinEntity_API;
 
 import java.util.Optional;
@@ -74,13 +65,13 @@ public abstract class MixinEntityTNTPrimed_API extends MixinEntity_API implement
     @Override
     public void defuse() {
         checkState(isPrimed(), "not primed");
-        if (shouldDefuse()) {
+        if (((FusedExplosiveBridge) this).bridge$shouldDefuse()) {
             setDead();
             // Place a TNT block at the Entity's position
             Sponge.getCauseStackManager().pushCause(this);
             getWorld().setBlock((int) this.posX, (int) this.posY, (int) this.posZ, BlockState.builder().blockType(BLOCK_TYPE).build(), BlockChangeFlags.ALL);
             Sponge.getCauseStackManager().popCause();
-            postDefuse();
+            ((FusedExplosiveBridge) this).bridge$postDefuse();
         }
     }
 
@@ -93,7 +84,7 @@ public abstract class MixinEntityTNTPrimed_API extends MixinEntity_API implement
 
     @Override
     public boolean isPrimed() {
-        return this.fuse > 0 && this.fuse < this.fuseDuration && !this.isDead || this.exploding;
+        return this.fuse > 0 && this.fuse < this.fuseDuration && !this.isDead || ((TNTPrimedEntityBridge) this).bridge$isExploding();
     }
 
     @Override

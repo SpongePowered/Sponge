@@ -22,13 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.entity;
+package org.spongepowered.common.bridge.entity.item;
 
-import org.spongepowered.api.event.cause.Cause;
+import net.minecraft.entity.Entity;
+import net.minecraft.util.DamageSource;
+import net.minecraft.world.Explosion;
+import net.minecraft.world.World;
 
-public interface IMixinEntityLightningBolt {
+import javax.annotation.Nullable;
 
-    Cause getCause();
+public interface EntityEnderCrystalBridge {
 
-    void setCause(Cause cause);
+    @Nullable
+    Explosion bridge$ThrowEventWithDetonation(World world, @Nullable Entity nil, double x,
+        double y, double z, boolean smoking, @Nullable DamageSource source);
+
+
 }

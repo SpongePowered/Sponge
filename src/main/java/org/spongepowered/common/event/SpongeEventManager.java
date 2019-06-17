@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import co.aikar.timings.Timing;
+import org.spongepowered.common.event.tracking.phase.plugin.EventListenerPhaseContext;
 import org.spongepowered.common.relocate.co.aikar.timings.TimingsManager;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
@@ -445,7 +446,7 @@ public class SpongeEventManager implements EventManager {
     }
 
     @Nullable
-    private ListenerPhaseContext createPluginContext(RegisteredListener<?> handler) {
+    private EventListenerPhaseContext createPluginContext(RegisteredListener<?> handler) {
         if (PhaseTracker.getInstance().getCurrentState().allowsEventListener()) {
             return PluginPhase.Listener.GENERAL_LISTENER.createPhaseContext()
                 .source(handler.getPlugin());

@@ -842,7 +842,7 @@ public final class PhaseTracker {
                 final Cause currentCause = Sponge.getCauseStackManager().getCurrentCause();
                 final ChangeBlockEvent normalEvent =
                     originalBlockSnapshot.blockChange.createEvent(currentCause, transactions);
-                try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                try (@SuppressWarnings("try") final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                     SpongeImpl.postEvent(normalEvent);
                     // We put the normal event at the end of the cause, still keeping in line with the
                     // API contract that the ChangeBlockEvnets are pushed to the cause for Post, but they

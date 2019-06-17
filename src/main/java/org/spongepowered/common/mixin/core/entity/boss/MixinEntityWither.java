@@ -40,6 +40,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
 import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.mixin.core.entity.monster.MixinEntityMob;
 
 import java.util.Optional;
@@ -98,12 +99,12 @@ public abstract class MixinEntityWither extends MixinEntityMob implements FusedE
     // FusedExplosive Impl
 
     @Override
-    public Optional<Integer> getExplosionRadius() {
+    public Optional<Integer> bridge$getExplosionRadius() {
         return Optional.of(this.explosionRadius);
     }
 
     @Override
-    public void setExplosionRadius(Optional<Integer> radius) {
+    public void bridge$setExplosionRadius(Optional<Integer> radius) {
         this.explosionRadius = radius.orElse(7);
     }
 
@@ -144,7 +145,7 @@ public abstract class MixinEntityWither extends MixinEntityMob implements FusedE
     private net.minecraft.world.Explosion spongeImpl$UseSpongeExplosion(net.minecraft.world.World worldObj, Entity self, double x,
                                                       double y, double z, float strength, boolean flaming,
                                                       boolean smoking) {
-        return detonate(Explosion.builder()
+        return SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
                 .sourceExplosive((Wither) this)
                 .location(new Location<>((World) worldObj, new Vector3d(x, y, z)))
                 .radius(this.explosionRadius)

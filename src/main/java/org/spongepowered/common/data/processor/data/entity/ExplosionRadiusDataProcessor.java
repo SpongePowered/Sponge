@@ -52,13 +52,13 @@ public class ExplosionRadiusDataProcessor extends AbstractSingleDataSingleTarget
     @Override
     protected boolean set(Explosive explosive, Optional<Integer> value) {
         checkArgument(!value.isPresent() || value.get() >= 0, "value must be empty or no less than zero");
-        ((ExplosiveBridge) explosive).setExplosionRadius(value);
+        ((ExplosiveBridge) explosive).bridge$setExplosionRadius(value);
         return true;
     }
 
     @Override
     protected Optional<Optional<Integer>> getVal(Explosive explosive) {
-        return Optional.of(((ExplosiveBridge) explosive).getExplosionRadius());
+        return Optional.of(((ExplosiveBridge) explosive).bridge$getExplosionRadius());
     }
 
     @Override

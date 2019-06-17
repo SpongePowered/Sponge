@@ -35,6 +35,8 @@ import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.entity.living.Villager;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -49,8 +51,8 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-@SuppressWarnings("rawtypes")
 @Mixin(EntityVillager.class)
+@Implements(@Interface(iface = Villager.class, prefix = "apiVillager$"))
 public abstract class MixinEntityVillager_API extends MixinEntityAgeable_API implements Villager, CarriedInventory<Villager> {
 
     @Shadow public abstract void setProfession(int professionId);
@@ -60,7 +62,7 @@ public abstract class MixinEntityVillager_API extends MixinEntityAgeable_API imp
 
 
     @Intrinsic
-    public boolean isTrading() {
+    public boolean apiVillager$isTrading() {
         return this.shadow$isTrading();
     }
 

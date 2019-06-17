@@ -428,19 +428,21 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
         // Sponge - start
         final ItemStack oldStack = stack.copy();
         final BlockSnapshot currentSnapshot = BlockSnapshot.NONE;
-        final InteractItemEvent.Secondary event = SpongeCommonEventFactory.callInteractItemEventSecondary(player, oldStack, hand, null, currentSnapshot);
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            final InteractItemEvent.Secondary event = SpongeCommonEventFactory.callInteractItemEventSecondary(frame, player, oldStack, hand, null, currentSnapshot);
 
-        if (!ItemStack.areItemStacksEqual(oldStack, this.player.getHeldItem(hand))) {
-            ((PacketContext<?>) PhaseTracker.getInstance().getCurrentContext()).interactItemChanged(true);
-        }
+            if (!ItemStack.areItemStacksEqual(oldStack, this.player.getHeldItem(hand))) {
+                ((PacketContext<?>) PhaseTracker.getInstance().getCurrentContext()).interactItemChanged(true);
+            }
 
-        this.setLastInteractItemOnBlockCancelled(event.isCancelled()); //|| event.getUseItemResult() == Tristate.FALSE;
+            this.setLastInteractItemOnBlockCancelled(event.isCancelled()); //|| event.getUseItemResult() == Tristate.FALSE;
 
-        if (event.isCancelled()) {
-            this.interactBlockRightClickEventCancelled = true;
+            if (event.isCancelled()) {
+                this.interactBlockRightClickEventCancelled = true;
 
-            ((EntityPlayerMP) player).sendContainerToPlayer(player.inventoryContainer);
-            return EnumActionResult.FAIL;
+                ((EntityPlayerMP) player).sendContainerToPlayer(player.inventoryContainer);
+                return EnumActionResult.FAIL;
+            }
         }
         // Sponge End
 

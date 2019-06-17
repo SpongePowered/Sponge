@@ -249,7 +249,7 @@ public class AdvancementTest implements LoadableModule {
 
         @Listener
         public void onChangeBlock(ChangeBlockEvent.Break event, @First Player player) {
-            Trigger trigger = Sponge.getRegistry().getType(Trigger.class, ID + ":" + TRIGGER).get();
+            Trigger<?> trigger = Sponge.getRegistry().getType(Trigger.class, ID + ":" + TRIGGER).get();
             Advancement breakDirtAdvancement = Sponge.getRegistry().getType(Advancement.class, ID + ":" + BREAK_DIRT_ADVANCEMENT).get();
             Criterion breakDirtCriterion = Sponge.getRegistry().getType(Criterion.class, ID + ":" + BREAK_DIRT_CRITERION).get();
             for (Transaction<BlockSnapshot> transaction : event.getTransactions()) {

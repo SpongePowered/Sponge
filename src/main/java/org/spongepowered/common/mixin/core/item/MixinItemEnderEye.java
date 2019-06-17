@@ -89,7 +89,7 @@ public class MixinItemEnderEye extends Item {
         CallbackInfoReturnable<ActionResult<ItemStack>> cir, ItemStack used, RayTraceResult rayTraceResult, @Nullable BlockPos targetPos) {
         if (targetPos != null && !((WorldBridge) worldIn).isFake() && ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
             final Vector3d targetPosition = new Vector3d(playerIn.posX, playerIn.posY + (double) (playerIn.height / 2.0F), playerIn.posZ);
-            final Transform targetTransform = new Transform<>((org.spongepowered.api.world.World) worldIn,
+            final Transform<org.spongepowered.api.world.World> targetTransform = new Transform<>((org.spongepowered.api.world.World) worldIn,
                 targetPosition);
             ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(),
                 EntityTypes.EYE_OF_ENDER, targetTransform);

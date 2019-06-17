@@ -46,6 +46,7 @@ public abstract class MixinPropertyHelper_API<T extends Comparable<T>> implement
 
     @Nullable private String api$IdString = null;
 
+    @SuppressWarnings("rawtypes")
     @Override
     public String getId() {
         if (this.api$IdString == null) {
@@ -57,7 +58,7 @@ public abstract class MixinPropertyHelper_API<T extends Comparable<T>> implement
     @SuppressWarnings("unchecked")
     @Override
     public Optional<T> parseValue(String value) {
-        return Optional.ofNullable((T) ((IProperty<T>) this).parseValue(value).orNull());
+        return Optional.ofNullable(((IProperty<T>) this).parseValue(value).orNull());
     }
 
 }

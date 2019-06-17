@@ -26,7 +26,7 @@ package org.spongepowered.common.event;
 
 public class ShouldFire {
 
-    public static boolean PLAYER_CHANGE_CLIENT_SETTINGS = false;
+    public static boolean PLAYER_CHANGE_CLIENT_SETTINGS_EVENT = false;
     public static boolean CONSTRUCT_ENTITY_EVENT_PRE = false;
 
     // Format is event class name with underscores

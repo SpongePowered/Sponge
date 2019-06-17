@@ -22,13 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.entity;
+package org.spongepowered.common.bridge.entity.item;
 
-import net.minecraft.entity.EntityLivingBase;
-import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
+import net.minecraft.entity.Entity;
+import net.minecraft.util.DamageSource;
+import net.minecraft.world.Explosion;
+import net.minecraft.world.World;
+import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 
-public interface IMixinEntityTNTPrimed extends FusedExplosiveBridge {
+import javax.annotation.Nullable;
 
-    void setDetonator(EntityLivingBase detonator);
+public interface WitherSkullEntityBridge extends ExplosiveBridge {
+
+    @Nullable
+    Explosion bridge$CreateAndProcessExplosionEvent(net.minecraft.world.World worldObj, Entity self, double x,
+        double y, double z, float strength, boolean flaming,
+        boolean smoking);
+
 
 }

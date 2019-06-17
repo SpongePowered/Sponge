@@ -58,9 +58,9 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 @Mixin(value = BlockRedstoneWire.class, priority = 1001)
-public abstract class MixinBlockRedstoneWire extends Block {
+public abstract class MixinBlockRedstoneWire_PandaRedstone extends Block {
 
-    protected MixinBlockRedstoneWire(Material materialIn) {
+    protected MixinBlockRedstoneWire_PandaRedstone(Material materialIn) {
         super(materialIn);
     }
 

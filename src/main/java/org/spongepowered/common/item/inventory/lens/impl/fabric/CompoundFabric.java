@@ -33,6 +33,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+@SuppressWarnings("unchecked")
 public class CompoundFabric extends MinecraftFabric {
 
     private final MinecraftFabric fabric1;

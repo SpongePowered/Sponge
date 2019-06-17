@@ -1136,13 +1136,17 @@ public abstract class MixinWorld_API implements World {
         return builder.build();
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public <E> DataTransactionResult offer(int x, int y, int z, Key<? extends BaseValue<E>> key, E value) {
         final BlockState blockState = getBlock(x, y, z).withExtendedProperties(new Location<>(this, x, y, z));
         if (blockState.supports(key)) {
-            ImmutableValue<E> old = ((Value<E>) getValue(x, y, z, (Key) key).get()).asImmutable();
+            // The cast to (Key) must be there because of a silly capture generic failure of some JDK's. The
+            // Generics used will likely succeed in some IDE compilers, but occasionally fails for some javac
+            // Refer to https://gist.github.com/gabizou/c14ade79b02deeddd8f9bd17a43a4b20 for example of compiler error
+            ImmutableValue<E> old = getValue(x, y, z, key).map(v -> (Value<E>) v).get().asImmutable();
             setBlock(x, y, z, blockState.with(key, value).get());
-            ImmutableValue<E> newVal = ((Value<E>) getValue(x, y, z, (Key) key).get()).asImmutable();
+            ImmutableValue<E> newVal = getValue(x, y, z, key).map(v -> (Value<E>) v).get().asImmutable();
             return DataTransactionResult.successReplaceResult(newVal, old);
         }
         return getTileEntity(x, y, z)
@@ -1150,6 +1154,7 @@ public abstract class MixinWorld_API implements World {
             .orElseGet(DataTransactionResult::failNoData);
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public DataTransactionResult offer(int x, int y, int z, DataManipulator<?, ?> manipulator, MergeFunction function) {
         final BlockState blockState = getBlock(x, y, z).withExtendedProperties(new Location<>(this, x, y, z));

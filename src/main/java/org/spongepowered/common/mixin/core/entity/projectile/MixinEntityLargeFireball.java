@@ -29,7 +29,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.EntityLargeFireball;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.projectile.Projectile;
-import org.spongepowered.api.entity.projectile.explosive.fireball.Fireball;
 import org.spongepowered.api.entity.projectile.explosive.fireball.LargeFireball;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
@@ -41,7 +40,9 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
+import org.spongepowered.common.bridge.entity.item.LargeFireballEntityBridge;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
@@ -49,7 +50,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 @Mixin(EntityLargeFireball.class)
-public abstract class MixinEntityLargeFireball extends MixinEntityFireball implements ExplosiveBridge {
+public abstract class MixinEntityLargeFireball extends MixinEntityFireball implements LargeFireballEntityBridge {
 
     @Shadow public int explosionPower;
 
@@ -68,7 +69,9 @@ public abstract class MixinEntityLargeFireball extends MixinEntityFireball imple
             target = "Lnet/minecraft/world/World;newExplosion(Lnet/minecraft/entity/Entity;DDDFZZ)Lnet/minecraft/world/Explosion;"
         )
     )
-    private net.minecraft.world.Explosion onSpongeExplosion(net.minecraft.world.World worldObj, @Nullable Entity nil,
+    @Override
+    @Nullable
+    public net.minecraft.world.Explosion bridge$throwExplosionEventAndExplode(net.minecraft.world.World worldObj, @Nullable Entity nil,
         double x, double y, double z, float strength, boolean flaming,
         boolean smoking) {
         boolean griefer = ((GrieferBridge) this).bridge$CanGrief();
@@ -77,7 +80,7 @@ public abstract class MixinEntityLargeFireball extends MixinEntityFireball imple
             frame.addContext(EventContextKeys.THROWER, ((LargeFireball) this).getShooter()); // TODO - Remove in 1.13/API 8
             frame.addContext(EventContextKeys.PROJECTILE_SOURCE, ((LargeFireball) this).getShooter());
             frame.pushCause(((Projectile) this).getShooter());
-            Optional<net.minecraft.world.Explosion> ex = detonate(Explosion.builder()
+            Optional<net.minecraft.world.Explosion> ex = SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
                 .location(new Location<>((World) worldObj, new Vector3d(x, y, z)))
                 .sourceExplosive(((LargeFireball) this))
                 .radius(strength)
@@ -90,12 +93,12 @@ public abstract class MixinEntityLargeFireball extends MixinEntityFireball imple
     }
 
     @Override
-    public Optional<Integer> getExplosionRadius() {
+    public Optional<Integer> bridge$getExplosionRadius() {
         return Optional.of(this.explosionPower);
     }
 
     @Override
-    public void setExplosionRadius(Optional<Integer> radius) {
+    public void bridge$setExplosionRadius(Optional<Integer> radius) {
         this.explosionPower = radius.orElse(Constants.Entity.Fireball.DEFAULT_EXPLOSION_RADIUS);
     }
 

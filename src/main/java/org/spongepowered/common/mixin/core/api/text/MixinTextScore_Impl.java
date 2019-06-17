@@ -40,24 +40,25 @@ import java.util.Optional;
 @Mixin(value = ScoreText.class, remap = false)
 public abstract class MixinTextScore_Impl extends MixinText_Impl {
 
-    @Shadow @Final protected Score score;
-    @Shadow @Final protected Optional<String> override;
+    @Shadow @Final Score score;
+    @Shadow @Final Optional<String> override;
 
     @Shadow public abstract Score getScore();
 
+    @SuppressWarnings("deprecation")
     @Override
     protected TextComponentBase createComponent() {
         TextComponentScore textComponentScore;
         String name = TextSerializers.LEGACY_FORMATTING_CODE.serialize(this.score.getName());
-        if (score.getObjectives().isEmpty()) {
+        if (this.score.getObjectives().isEmpty()) {
             textComponentScore = new TextComponentScore(name, "");
         } else {
-            textComponentScore = new TextComponentScore(name, score.getObjectives().iterator().next().getName());
+            textComponentScore = new TextComponentScore(name, this.score.getObjectives().iterator().next().getName());
             if (Sponge.isServerAvailable()) {
                 textComponentScore.resolve((ICommandSender) Sponge.getServer());
             }
         }
-        override.ifPresent(textComponentScore::setValue);
+        this.override.ifPresent(textComponentScore::setValue);
         return textComponentScore;
     }
 }

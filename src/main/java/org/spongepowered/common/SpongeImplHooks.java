@@ -92,7 +92,6 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
-import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.interfaces.world.IMixinITeleporter;
 import org.spongepowered.common.item.inventory.util.InventoryUtil;
@@ -452,12 +451,12 @@ public final class SpongeImplHooks {
      * @author gabizou - April 21st, 2018
      * Gets the enchantment modifier for looting on the entity living base from the damage source, but in forge cases, we need to use their hooks.
      *
-     * @param mixinEntityLivingBase
+     * @param target
      * @param entity
      * @param cause
      * @return
      */
-    public static int getLootingEnchantmentModifier(IMixinEntityLivingBase mixinEntityLivingBase, EntityLivingBase entity, DamageSource cause) {
+    public static int getLootingEnchantmentModifier(EntityLivingBase target, EntityLivingBase entity, DamageSource cause) {
         return EnchantmentHelper.getLootingModifier(entity);
     }
 

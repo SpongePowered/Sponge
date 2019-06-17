@@ -196,7 +196,7 @@ public abstract class MixinEntityPlayerMP_API extends MixinEntityPlayer_API impl
 
     @Override
     public int getViewDistance() {
-        return this.viewDistance;
+        return ((ServerPlayerEntityBridge) this).bridge$getViewDistance();
     }
 
     @Override
@@ -494,12 +494,6 @@ public abstract class MixinEntityPlayerMP_API extends MixinEntityPlayer_API impl
     }
 
     @Override
-    public void setTargetedLocation(@Nullable Vector3d vec) {
-        super.setTargetedLocation(vec);
-        this.connection.sendPacket(new SPacketSpawnPosition(VecHelper.toBlockPos(this.getTargetedLocation())));
-    }
-
-    @Override
     public JoinData getJoinData() {
         return new SpongeJoinData(SpongePlayerDataHandler.getFirstJoined(this.getUniqueID()).get(), Instant.now());
     }
@@ -596,7 +590,7 @@ public abstract class MixinEntityPlayerMP_API extends MixinEntityPlayer_API impl
     public MessageChannelEvent.Chat simulateChat(Text message, Cause cause) {
         checkNotNull(message, "message");
 
-        TextComponentTranslation component = new TextComponentTranslation("chat.type.text", SpongeTexts.toComponent(this.getDisplayNameText()),
+        TextComponentTranslation component = new TextComponentTranslation("chat.type.text", SpongeTexts.toComponent(((ServerPlayerEntityBridge) this).getDisplayNameText()),
                 SpongeTexts.toComponent(message));
         final Text[] messages = SpongeTexts.splitChatMessage(component);
 

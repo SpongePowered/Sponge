@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.api.minecraft.tileentity;
 
 import com.google.common.collect.Lists;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityLockable;
 import net.minecraft.world.LockCode;
@@ -69,8 +70,8 @@ public abstract class MixinTileEntityLockable_API<T extends TileEntity & Carrier
             container.set(DataQueries.BlockEntity.LOCK_CODE, this.code.getLock());
         }
         List<DataView> items = Lists.newArrayList();
-        for (int i = 0; i < ((MinecraftInventoryAdapter) this).getSizeInventory(); i++) {
-            ItemStack stack = getStackInSlot(i);
+        for (int i = 0; i < ((IInventory) this).getSizeInventory(); i++) {
+            ItemStack stack = ((IInventory) this).getStackInSlot(i);
             if (!stack.isEmpty()) {
                 // todo make a helper object for this
                 DataContainer stackView = DataContainer.createNew()
@@ -111,10 +112,12 @@ public abstract class MixinTileEntityLockable_API<T extends TileEntity & Carrier
         return IMixinSingleBlockCarrier.getInventory(from, this);
     }
 
+    @SuppressWarnings("unchecked")
     public Optional<T> getTileEntity() {
         return Optional.of((T) this);
     }
 
+    @SuppressWarnings("unchecked")
     public Optional<T> getCarrier() {
         return Optional.of((T) this);
     }

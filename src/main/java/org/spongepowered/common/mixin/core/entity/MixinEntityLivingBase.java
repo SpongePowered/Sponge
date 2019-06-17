@@ -277,7 +277,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
                 if (entity instanceof EntityPlayer) {
                     // Sponge Start - use Forge hooks for the looting modifier.
                     //i = EnchantmentHelper.getLootingModifier((EntityLivingBase) entity);
-                    i = SpongeImplHooks.getLootingEnchantmentModifier(this, (EntityLivingBase) entity, cause);
+                    i = SpongeImplHooks.getLootingEnchantmentModifier((EntityLivingBase) (Object) this, (EntityLivingBase) entity, cause);
                 }
 
                 if (this.canDropLoot() && this.world.getGameRules().getBoolean("doMobLoot")) {

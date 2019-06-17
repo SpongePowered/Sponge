@@ -248,8 +248,8 @@ public abstract class MixinMapData_MapOptimization extends WorldSavedData implem
     }
 
     // Use playersHashMap instead of playersArrayList, since we skip updating playersArrayList
-    @Redirect(method = "updateMapData", at = @At(value = "INVOKE", target = "Ljava/util/List;iterator()Ljava/util/Iterator;"))
-    public Iterator onGetMapInfoIterator(List this$0) {
+    @Redirect(method = "updateMapData", at = @At(value = "INVOKE", target = "Ljava/util/List;iterator()Ljava/util/Iterator;", remap = false))
+    private Iterator<?> mapOptimization$GetIteratorFromPlayerHashMap(List<?> this$0) {
         return this.playersHashMap.values().iterator();
     }
 

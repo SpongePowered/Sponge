@@ -31,34 +31,29 @@ import net.minecraft.util.EnumHand;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.animal.Wolf;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.interfaces.entity.IMixinAggressive;
+import org.spongepowered.common.bridge.entity.AggressiveBridge;
 import org.spongepowered.common.mixin.core.entity.MixinEntityAgeable;
 
 import java.util.Random;
 
 @Mixin(EntityWolf.class)
-public abstract class MixinEntityWolf extends MixinEntityAgeable implements IMixinAggressive {
+public abstract class MixinEntityWolf extends MixinEntityAgeable implements AggressiveBridge {
 
     @Shadow public abstract boolean shadow$isAngry();
     @Shadow public abstract void shadow$setAngry(boolean angry);
 
     @Override
-    @Intrinsic
-    public boolean isAngry() {
+    public boolean bridge$isAngry() {
         return this.shadow$isAngry();
     }
 
     @Override
-    @Intrinsic
-    public void setAngry(boolean angry) {
+    public void bridge$setAngry(boolean angry) {
         this.shadow$setAngry(angry);
     }
 

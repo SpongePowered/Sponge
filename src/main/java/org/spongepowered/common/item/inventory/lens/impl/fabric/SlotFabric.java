@@ -34,6 +34,7 @@ import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
 import java.util.Collection;
 import java.util.Collections;
 
+@SuppressWarnings("unchecked")
 public class SlotFabric extends MinecraftFabric {
 
     private final Slot slot;

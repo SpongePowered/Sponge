@@ -35,6 +35,7 @@ public interface MixinSmeltingRecipe extends CatalogType {
 
     /**
      * @author Cybermaxke
+     * @reason Use id's from custom registry
      */
     @Overwrite(remap = false)
     @Override

@@ -59,7 +59,7 @@ abstract class ListenerPhaseState<L extends ListenerPhaseContext<L>> extends Plu
     }
 
     @Override
-    public boolean tracksBlockSpecificDrops(ListenerPhaseContext context) {
+    public boolean tracksBlockSpecificDrops(L context) {
         return true;
     }
 
@@ -80,7 +80,7 @@ abstract class ListenerPhaseState<L extends ListenerPhaseContext<L>> extends Plu
     }
 
     @Override
-    public void capturePlayerUsingStackToBreakBlock(@Nullable ItemStack stack, EntityPlayerMP playerMP, ListenerPhaseContext context) {
+    public void capturePlayerUsingStackToBreakBlock(@Nullable ItemStack stack, EntityPlayerMP playerMP, L context) {
         context.getCapturedPlayerSupplier().addPlayer(playerMP);
     }
 

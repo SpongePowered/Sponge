@@ -67,7 +67,7 @@ public class Query {
 
     @SuppressWarnings("unchecked")
     public Inventory execute() {
-        return this.execute((ResultAdapterProvider) Query.defaultResultProvider);
+        return this.execute(Query.defaultResultProvider);
     }
 
     public Inventory execute(ResultAdapterProvider resultProvider) {
@@ -91,7 +91,7 @@ public class Query {
             return resultProvider.getResultAdapter(this.inventory, matches, this.adapter);
         }
 
-        return ((ResultAdapterProvider)Query.defaultResultProvider).getResultAdapter(this.inventory, matches, this.adapter);
+        return Query.defaultResultProvider.getResultAdapter(this.inventory, matches, this.adapter);
     }
 
     private MutableLensSet depthFirstSearch(Lens lens) {

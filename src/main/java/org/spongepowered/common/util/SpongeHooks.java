@@ -525,6 +525,6 @@ public class SpongeHooks {
 
     public static CompletableFuture<CommentedConfigurationNode> savePluginsInMetricsConfig(Map<String, Boolean> entries) {
         return SpongeImpl.getGlobalConfigAdapter()
-                .updateSetting("metrics.plugin-permissions", entries, new TypeToken<Map<String, Boolean>>() {});
+                .updateSetting("metrics.plugin-permissions", entries, new TypeToken<Map<String, Boolean>>() { private static final long serialVersionUID = -1; });
     }
 }

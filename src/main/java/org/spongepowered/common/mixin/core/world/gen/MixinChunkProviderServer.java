@@ -174,7 +174,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, ServerCh
     }
 
     @Redirect(method = "provideChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/gen/ChunkProviderServer;loadChunk(II)Lnet/minecraft/world/chunk/Chunk;"))
-    public Chunk onProvideChunkHead(ChunkProviderServer chunkProviderServer, int x, int z) {
+    private Chunk impl$ProvideChunkForced(ChunkProviderServer chunkProviderServer, int x, int z) {
         if (!this.denyChunkRequests) {
             return this.loadChunk(x, z);
         }

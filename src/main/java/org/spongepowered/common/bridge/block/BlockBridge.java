@@ -60,7 +60,6 @@ import java.util.function.BiConsumer;
  */
 public interface BlockBridge extends TrackableBridge {
 
-    // Support methods for MixinStateImplementation
     /**
      * Gets all the {@link ImmutableDataManipulator}s for the provided
      * {@link IBlockState}.

@@ -86,6 +86,7 @@ public class SlotAdapter extends AbstractInventoryAdapter implements Slot {
         return this.ordinal;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public int getStackSize() {
         return this.slot.getStack(this.inventory).getCount();

@@ -36,6 +36,7 @@ import java.util.Optional;
 
 public class ShulkerSourceLogic implements ProjectileSourceLogic<Shulker> {
 
+    @SuppressWarnings("unchecked")
     @Override
     public <P extends Projectile> Optional<P> launch(ProjectileLogic<P> logic, Shulker source, Class<P> projectileClass, Object... args) {
         if (projectileClass == ShulkerBullet.class && args.length == 1 && args[0] instanceof Entity) {

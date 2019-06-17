@@ -38,15 +38,18 @@ import org.spongepowered.common.util.SpongeCatalogBuilder;
 
 import java.util.function.Predicate;
 
+import javax.annotation.Nullable;
+
 @NonnullByDefault
 public class SpongeSmeltingRecipeBuilder extends SpongeCatalogBuilder<SmeltingRecipe, SmeltingRecipe.Builder>
         implements SmeltingRecipe.Builder.ResultStep, SmeltingRecipe.Builder.EndStep {
 
-    private ItemStackSnapshot exemplaryResult;
-    private ItemStackSnapshot exemplaryIngredient;
-    private Predicate<ItemStackSnapshot> ingredientPredicate;
+    @Nullable private ItemStackSnapshot exemplaryResult;
+    @Nullable private ItemStackSnapshot exemplaryIngredient;
+    @Nullable private Predicate<ItemStackSnapshot> ingredientPredicate;
     private double experience;
 
+    @SuppressWarnings("deprecation")
     @Override
     public SmeltingRecipe.Builder from(SmeltingRecipe value) {
         checkNotNull(value, "value");
@@ -68,7 +71,6 @@ public class SpongeSmeltingRecipeBuilder extends SpongeCatalogBuilder<SmeltingRe
         return this;
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Override
     public EndStep result(ItemStackSnapshot result) {
         checkNotNull(result, "result");
@@ -77,7 +79,6 @@ public class SpongeSmeltingRecipeBuilder extends SpongeCatalogBuilder<SmeltingRe
         return this;
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Override
     public ResultStep ingredient(Predicate<ItemStackSnapshot> ingredientPredicate, ItemStackSnapshot exemplaryIngredient) {
         checkNotNull(ingredientPredicate, "ingredientPredicate");

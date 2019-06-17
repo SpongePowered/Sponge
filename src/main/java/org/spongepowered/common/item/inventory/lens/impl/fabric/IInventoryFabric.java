@@ -33,6 +33,7 @@ import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
 
 import java.util.Collection;
 
+@SuppressWarnings("unchecked")
 public class IInventoryFabric extends MinecraftFabric {
 
     private final IInventory inventory;

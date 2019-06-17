@@ -48,7 +48,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.interfaces.world.ServerWorldBridge;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -68,12 +68,12 @@ public abstract class MixinEntityMinecartTNT extends MixinEntityMinecart impleme
     @Nullable private Object primeCause;
 
     @Override
-    public Optional<Integer> getExplosionRadius() {
+    public Optional<Integer> bridge$getExplosionRadius() {
         return Optional.ofNullable(this.explosionRadius);
     }
 
     @Override
-    public void setExplosionRadius(final Optional<Integer> radius) {
+    public void bridge$setExplosionRadius(final Optional<Integer> radius) {
         this.explosionRadius = radius.orElse(null);
     }
 
@@ -143,7 +143,7 @@ public abstract class MixinEntityMinecartTNT extends MixinEntityMinecart impleme
     @Nullable
     private net.minecraft.world.Explosion onSpongeExplode(final net.minecraft.world.World worldObj, final Entity self, final double x, final double y, final double z,
         final float strength, final boolean smoking) {
-        return detonate(Explosion.builder().location(new Location<>((World) worldObj, new Vector3d(x, y, z))).sourceExplosive((TNTMinecart) this)
+        return SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder().location(new Location<>((World) worldObj, new Vector3d(x, y, z))).sourceExplosive((TNTMinecart) this)
                 .radius(this.explosionRadius != null ? this.explosionRadius : strength).shouldPlaySmoke(smoking).shouldBreakBlocks(smoking))
                         .orElseGet(() -> {
                             this.detonationCancelled = true;

@@ -58,71 +58,17 @@ import java.util.List;
 @Mixin(EntityItem.class)
 public abstract class MixinEntityItem_API extends MixinEntity_API implements Item {
 
-    private static final int MAGIC_PREVIOUS = -1;
-    @Shadow private int pickupDelay;
-    @Shadow private int age;
     @Shadow public abstract ItemStack getItem();
-    /**
-     * A simple cached value of the merge radius for this item.
-     * Since the value is configurable, the first time searching for
-     * other items, this value is cached.
-     */
-    private double cachedRadius = -1;
-
-    private int previousPickupDelay = MAGIC_PREVIOUS;
-    private boolean infinitePickupDelay;
-    private int previousDespawnDelay = MAGIC_PREVIOUS;
-    private boolean infiniteDespawnDelay;
-
-    public float dropChance = 1.0f;
-
-    @ModifyConstant(method = "searchForOtherItemsNearby", constant = @Constant(doubleValue = 0.5D))
-    private double getSearchRadius(double originalRadius) {
-        if (this.world.isRemote || ((WorldBridge) this.world).isFake()) {
-            return originalRadius;
-        }
-        if (this.cachedRadius == -1) {
-            final double configRadius = ((IMixinWorldInfo) this.world.getWorldInfo()).getConfigAdapter().getConfig().getWorld().getItemMergeRadius();
-            this.cachedRadius = configRadius < 0 ? 0 : configRadius;
-        }
-        return this.cachedRadius;
-    }
-
-
 
     @Override
     public Translation getTranslation() {
-        return getItemData().item().get().getType().getTranslation();
+        return ((org.spongepowered.api.item.inventory.ItemStack) getItem()).getTranslation();
     }
 
     @Override
     public ItemType getItemType() {
         return (ItemType) getItem().getItem();
     }
-
-    @Inject(method = "onCollideWithPlayer", at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/minecraft/entity/item/EntityItem;getItem()Lnet/minecraft/item/ItemStack;"), cancellable = true)
-    public void onPlayerItemPickup(EntityPlayer entityIn, CallbackInfo ci) {
-        if (!SpongeCommonEventFactory.callPlayerChangeInventoryPickupPreEvent(entityIn, (EntityItem) (Object) this, this.pickupDelay, this.getCreator().orElse(null))) {
-            ci.cancel();
-        }
-    }
-
-    @Redirect(method = "onCollideWithPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/InventoryPlayer;addItemStackToInventory(Lnet/minecraft/item/ItemStack;)Z"))
-    public boolean onAddItemStackToInventory(InventoryPlayer inventory, ItemStack itemStack, EntityPlayer player) {
-        IMixinInventoryPlayer inv = (IMixinInventoryPlayer) inventory;
-        inv.setCapture(true);
-        boolean added = inventory.addItemStackToInventory(itemStack);
-        inv.setCapture(false);
-        inv.getCapturedTransactions();
-        if (!SpongeCommonEventFactory.callPlayerChangeInventoryPickupEvent(player, inv)) {
-            return false;
-        }
-        return added;
-    }
-
-    // TODO non pre event
-
-    // Data delegated methods - Reduces potentially expensive lookups for accessing guaranteed data
 
     @Override
     public RepresentedItemData getItemData() {

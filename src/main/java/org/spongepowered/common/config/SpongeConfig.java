@@ -119,10 +119,11 @@ public class SpongeConfig<T extends ConfigBase> {
     private final String modId;
     private final boolean isDummy;
 
-    public static SpongeConfig newDummyConfig(Type type) {
-        return new SpongeConfig(type);
+    public static <T extends ConfigBase> SpongeConfig<T> newDummyConfig(Type type) {
+        return new SpongeConfig<>(type);
     }
 
+    @SuppressWarnings("unchecked")
     private SpongeConfig(Type type) {
         this.type = type;
         this.parent = null;

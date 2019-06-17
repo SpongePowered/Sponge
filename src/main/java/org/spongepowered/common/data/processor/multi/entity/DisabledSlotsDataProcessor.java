@@ -63,6 +63,7 @@ public class DisabledSlotsDataProcessor extends AbstractEntityDataProcessor<Enti
         return true;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     protected boolean set(EntityArmorStand dataHolder, Map<Key<?>, Object> keyValues) {
         int disabledSlots = 0;
@@ -93,13 +94,13 @@ public class DisabledSlotsDataProcessor extends AbstractEntityDataProcessor<Enti
 
         int disabledSlots = dataHolder.disabledSlots;
 
-        Set<EquipmentType> takingDisabled = new HashSet();
+        Set<EquipmentType> takingDisabled = new HashSet<>();
         if (((disabledSlots >> 1 + 8) & 1) != 0) takingDisabled.add(EquipmentTypes.BOOTS);
         if (((disabledSlots >> 2 + 8) & 1) != 0) takingDisabled.add(EquipmentTypes.LEGGINGS);
         if (((disabledSlots >> 3 + 8) & 1) != 0) takingDisabled.add(EquipmentTypes.CHESTPLATE);
         if (((disabledSlots >> 4 + 8) & 1) != 0) takingDisabled.add(EquipmentTypes.HEADWEAR);
 
-        Set<EquipmentType> placingDisabled = new HashSet();
+        Set<EquipmentType> placingDisabled = new HashSet<>();
         if (((disabledSlots >> 1 + 16) & 1) != 0) placingDisabled.add(EquipmentTypes.BOOTS);
         if (((disabledSlots >> 2 + 16) & 1) != 0) placingDisabled.add(EquipmentTypes.LEGGINGS);
         if (((disabledSlots >> 3 + 16) & 1) != 0) placingDisabled.add(EquipmentTypes.CHESTPLATE);
@@ -116,13 +117,16 @@ public class DisabledSlotsDataProcessor extends AbstractEntityDataProcessor<Enti
         return new SpongeDisabledSlotsData();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Optional<DisabledSlotsData> fill(DataContainer container, DisabledSlotsData disabledSlotsData) {
         if (container.contains(Keys.ARMOR_STAND_TAKING_DISABLED)) {
-            disabledSlotsData.set(Keys.ARMOR_STAND_TAKING_DISABLED, new HashSet<EquipmentType>((Collection<EquipmentType>) container.get(Keys.ARMOR_STAND_TAKING_DISABLED.getQuery()).get()));
+            disabledSlotsData.set(Keys.ARMOR_STAND_TAKING_DISABLED,
+                new HashSet<>((Collection<EquipmentType>) container.get(Keys.ARMOR_STAND_TAKING_DISABLED.getQuery()).get()));
         }
         if (container.contains(Keys.ARMOR_STAND_PLACING_DISABLED)) {
-            disabledSlotsData.set(Keys.ARMOR_STAND_PLACING_DISABLED, new HashSet<EquipmentType>((Collection<EquipmentType>) container.get(Keys.ARMOR_STAND_PLACING_DISABLED.getQuery()).get()));
+            disabledSlotsData.set(Keys.ARMOR_STAND_PLACING_DISABLED,
+                new HashSet<>((Collection<EquipmentType>) container.get(Keys.ARMOR_STAND_PLACING_DISABLED.getQuery()).get()));
         }
 
         return Optional.of(disabledSlotsData);

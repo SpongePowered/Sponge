@@ -292,7 +292,7 @@ public abstract class MixinChunk implements ChunkBridge, IMixinCachable {
 
     @SuppressWarnings({"unchecked"})
     @Inject(method = "getEntitiesOfTypeWithinAABB", at = @At(value = "RETURN"))
-    private void impl$throwCollsionEvent(final Class<? extends Entity> entityClass, final AxisAlignedBB aabb, final List listToFill,
+    private void impl$throwCollsionEvent(final Class<? extends Entity> entityClass, final AxisAlignedBB aabb, final List<Entity> listToFill,
         @SuppressWarnings("Guava") final Predicate<Entity> p_177430_4_, final CallbackInfo ci) {
         if (((WorldBridge) this.world).isFake() || PhaseTracker.getInstance().getCurrentState().ignoresEntityCollisions()) {
             return;

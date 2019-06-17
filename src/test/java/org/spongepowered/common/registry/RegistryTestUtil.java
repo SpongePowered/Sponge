@@ -45,9 +45,8 @@ class RegistryTestUtil {
 
     static Iterable<Object[]> generateRegistryTestObjects() {
 
-        final SpongeGameRegistry registry = (SpongeGameRegistry) Sponge.getGame().getRegistry();
         final ArrayList<Object[]> array = new ArrayList<>();
-        for (Map.Entry<Class<? extends CatalogType>, CatalogRegistryModule<?>> entry : registry.REGISTRY_MAP.entrySet()) {
+        for (Map.Entry<Class<? extends CatalogType>, CatalogRegistryModule<?>> entry : SpongeGameRegistry.REGISTRY_MAP.entrySet()) {
             for (CatalogType catalogType : entry.getValue().getAll()) {
                 array.add(new Object[]{entry.getKey().getSimpleName(), entry.getKey(), entry.getValue(), catalogType, catalogType.getId()});
             }
@@ -57,9 +56,8 @@ class RegistryTestUtil {
 
     static Iterable<Object[]> generateCatalogContainerTestObjects() {
 
-        final SpongeGameRegistry registry = (SpongeGameRegistry) Sponge.getGame().getRegistry();
         final ArrayList<Object[]> objects = new ArrayList<>();
-        for (Map.Entry<Class<? extends CatalogType>, CatalogRegistryModule<?>> entry : registry.REGISTRY_MAP.entrySet()) {
+        for (Map.Entry<Class<? extends CatalogType>, CatalogRegistryModule<?>> entry : SpongeGameRegistry.REGISTRY_MAP.entrySet()) {
             final Class<? extends CatalogType> key = entry.getKey();
             final CatalogedBy catalogedBy = key.getAnnotation(CatalogedBy.class);
             if (catalogedBy != null) {
@@ -78,9 +76,8 @@ class RegistryTestUtil {
 
     static Iterable<Object[]> generateCatalogTypeMethodTestObjects() {
 
-        final SpongeGameRegistry registry = (SpongeGameRegistry) Sponge.getGame().getRegistry();
         final ArrayList<Object[]> array = new ArrayList<>();
-        for (Map.Entry<Class<? extends CatalogType>, CatalogRegistryModule<?>> entry : registry.REGISTRY_MAP.entrySet()) {
+        for (Map.Entry<Class<? extends CatalogType>, CatalogRegistryModule<?>> entry : SpongeGameRegistry.REGISTRY_MAP.entrySet()) {
             for (CatalogType catalogType : entry.getValue().getAll()) {
                 for (Method method : getTestableApiMethods(getApplicableApiCatalogTypeInterfaces(catalogType))) {
                     array.add(new Object[] {entry.getKey().getSimpleName(), entry.getKey(), catalogType, catalogType.getId(), method,

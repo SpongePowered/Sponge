@@ -128,7 +128,7 @@ public class SpongeShapelessCraftingRecipeBuilder extends SpongeCatalogBuilder<S
         return this;
     }
 
-    @SuppressWarnings("ConstantConditions")
+    @SuppressWarnings("deprecation")
     @Override
     public ShapelessCraftingRecipe build(String id, Object plugin) {
         checkState(this.exemplaryResult != null && this.exemplaryResult != ItemStackSnapshot.NONE,
@@ -143,7 +143,8 @@ public class SpongeShapelessCraftingRecipeBuilder extends SpongeCatalogBuilder<S
             id = container.getId() + ":" + id;
         }
 
-        return ((ShapelessCraftingRecipe) new SpongeShapelessRecipe(id, groupName, ItemStackUtil.toNative(this.exemplaryResult.createStack()), ingredients));
+        return ((ShapelessCraftingRecipe) new SpongeShapelessRecipe(id, this.groupName, ItemStackUtil.toNative(this.exemplaryResult.createStack()),
+            this.ingredients));
     }
 
 }

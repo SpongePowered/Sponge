@@ -26,14 +26,8 @@ package org.spongepowered.common.mixin.core.tileentity;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.tileentity.TileEntitySkull;
-import org.spongepowered.api.profile.GameProfileManager;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.gen.Invoker;
-import org.spongepowered.common.bridge.tileentity.SkullBlockEntityBridge;
-import org.spongepowered.common.data.processor.common.SkullUtils;
 
 import javax.annotation.Nullable;
 

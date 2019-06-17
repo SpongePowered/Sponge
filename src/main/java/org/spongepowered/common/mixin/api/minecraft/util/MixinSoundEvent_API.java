@@ -31,21 +31,26 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
+import javax.annotation.Nullable;
+
 @Mixin(SoundEvent.class)
 public abstract class MixinSoundEvent_API implements SoundType {
 
     @Shadow @Final private ResourceLocation soundName;
 
-    private String id = this.soundName.toString();
+    @Nullable private String id;
 
     @Override
     public String getId() {
+        if (this.id == null) {
+            this.id = this.soundName.toString();
+        }
         return this.id;
     }
 
     @Override
     public String getName() {
-        return this.id;
+        return this.soundName.getPath();
     }
 
 }

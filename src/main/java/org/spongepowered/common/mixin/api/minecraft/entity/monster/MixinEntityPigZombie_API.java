@@ -30,38 +30,20 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.AngerableData;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.entity.living.monster.ZombiePigman;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAggressiveData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAngerableData;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.interfaces.entity.IMixinAggressive;
 
 import java.util.List;
 
 @Mixin(EntityPigZombie.class)
-@Implements(@Interface(iface = IMixinAggressive.class, prefix = "aggressive$"))
 public abstract class MixinEntityPigZombie_API extends MixinEntityZombie_API implements ZombiePigman {
 
     @Shadow private int angerLevel;
 
     @Shadow public abstract boolean isAngry();
-    
-    @Intrinsic
-    public boolean aggressive$isAngry() {
-        return this.isAngry();
-    }
-
-    public void aggressive$setAngry(boolean angry) {
-        if (angry) {
-            this.angerLevel = 400 + this.rand.nextInt(400);
-        } else {
-            this.angerLevel = 0;
-        }
-    }
 
     @Override
     public AngerableData getAngerData() {

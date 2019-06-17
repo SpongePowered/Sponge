@@ -42,7 +42,7 @@ import org.spongepowered.common.data.processor.common.FireworkUtils;
 import org.spongepowered.common.data.util.ComparatorUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
-import org.spongepowered.common.interfaces.entity.IMixinEntityFireworkRocket;
+import org.spongepowered.common.mixin.core.entity.AccessorEntity;
 import org.spongepowered.common.mixin.core.entity.item.AccessorEntityFireworkRocket;
 
 import java.util.Optional;
@@ -80,7 +80,7 @@ public class FireworkRocketDataProcessor extends
         ItemStack item = FireworkUtils.getItem(firework);
         NBTTagCompound fireworks = item.getOrCreateSubCompound("Fireworks");
         fireworks.setByte("Flight", modifier.byteValue());
-        ((AccessorEntityFireworkRocket) firework).spongeImpl$setLifeTime(10 * modifier.byteValue() + firework.rand.nextInt(6) + this.rand.nextInt(7));
+        ((AccessorEntityFireworkRocket) firework).spongeImpl$setLifeTime(10 * modifier.byteValue() + ((AccessorEntity) firework).accessor$getRandom().nextInt(6) + ((AccessorEntity) firework).accessor$getRandom().nextInt(7));
         return true;
     }
 

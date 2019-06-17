@@ -22,19 +22,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.storage;
+package org.spongepowered.common.mixin.api.data;
 
-import net.minecraft.world.storage.MapStorage;
-import net.minecraft.world.storage.WorldSavedData;
+import net.minecraft.block.Block;
+import net.minecraft.block.state.BlockStateContainer;
+import net.minecraft.entity.Entity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
+import org.spongepowered.api.data.Property;
+import org.spongepowered.api.data.property.PropertyHolder;
+import org.spongepowered.api.data.property.PropertyStore;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.common.SpongeImpl;
 
-import java.util.List;
+import java.util.Collection;
+import java.util.Optional;
 
-@Mixin(MapStorage.class)
-public interface IMixinMapStorage {
+@Mixin({Block.class, Entity.class, TileEntity.class, ItemStack.class})
+public abstract class MixinPropertyHolder implements PropertyHolder {
 
-    @Accessor
-    List<WorldSavedData> getLoadedDataList();
+    @Override
+    public <T extends Property<?, ?>> Optional<T> getProperty(Class<T> propertyClass) {
+        final Optional<PropertyStore<T>> optional = SpongeImpl.getPropertyRegistry().getStore(propertyClass);
+        if (optional.isPresent()) {
+            return optional.get().getFor(this);
+        }
+        return Optional.empty();
+    }
 
+    @Override
+    public Collection<Property<?, ?>> getApplicableProperties() {
+        return SpongeImpl.getPropertyRegistry().getPropertiesFor(this);
+
+    }
 }

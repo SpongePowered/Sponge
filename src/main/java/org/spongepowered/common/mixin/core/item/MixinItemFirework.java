@@ -139,7 +139,7 @@ public class MixinItemFirework extends Item {
     private boolean spongeImpl$ThrowConstructPreEvent(World world, EntityPlayer player, ItemStack usedItem) {
         if (ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE && !((WorldBridge) world).isFake()) {
             final Vector3d targetPosition = new Vector3d(player.posX, player.posY , player.posZ);
-            final Transform targetTransform = new Transform<>((org.spongepowered.api.world.World) world,
+            final Transform<org.spongepowered.api.world.World> targetTransform = new Transform<>((org.spongepowered.api.world.World) world,
                 targetPosition);
             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(usedItem));

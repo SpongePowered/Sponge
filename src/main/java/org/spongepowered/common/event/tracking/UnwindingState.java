@@ -175,7 +175,7 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
         ((IPhaseState) unwindingState).associateNeighborStateNotifier(unwindingContext, sourcePos, block, notifyPos, minecraftWorld, notifier);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "try"})
     @Override
     public void unwind(UnwindingPhaseContext context) {
         final IPhaseState<?> unwindingState = context.getUnwindingState();
@@ -223,6 +223,7 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
         }
     }
 
+    @SuppressWarnings("try")
     @Override
     public void postProcessSpecificBlockChange(UnwindingPhaseContext currentContext, BlockTransaction.ChangeBlock changeBlock, int depth) {
         if (PhaseTracker.checkMaxBlockProcessingDepth(this, currentContext, depth)) {

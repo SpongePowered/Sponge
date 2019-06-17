@@ -135,8 +135,13 @@ public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> imp
 
     @Override
     protected Optional<TradeOffer> buildContent(DataView container) throws InvalidDataException {
-        if (!container.contains(DataQueries.TradeOffer.FIRST_QUERY, DataQueries.TradeOffer.SECOND_QUERY, DataQueries.TradeOffer.EXPERIENCE_QUERY, DataQueries.TradeOffer.MAX_QUERY,
-                DataQueries.TradeOffer.USES_QUERY, DataQueries.TradeOffer.BUYING_QUERY)) {
+        if (!container.contains(
+            DataQueries.TradeOffer.FIRST_QUERY,
+            DataQueries.TradeOffer.SECOND_QUERY,
+            DataQueries.TradeOffer.EXPERIENCE_QUERY,
+            DataQueries.TradeOffer.MAX_QUERY,
+            DataQueries.TradeOffer.USES_QUERY,
+            DataQueries.TradeOffer.BUYING_QUERY)) {
             return Optional.empty();
         }
         final ItemStack firstItem = container.getSerializable(DataQueries.TradeOffer.FIRST_QUERY, ItemStack.class).get();

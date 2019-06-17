@@ -28,6 +28,7 @@ import net.minecraft.entity.item.EntityEnderPearl;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
@@ -64,7 +65,7 @@ public abstract class MixinEntityEnderPearl extends MixinEntityThrowable {
             frame.addContext(EventContextKeys.PROJECTILE_SOURCE, (Player) player);
             frame.addContext(EventContextKeys.THROWER, (Player) player); // TODO - remove in API 8/1.13
 
-            MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent(player, this.getLocation());
+            MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent(player, ((Entity) this).getLocation());
             if (event.isCancelled()) {
                 return true;
             }

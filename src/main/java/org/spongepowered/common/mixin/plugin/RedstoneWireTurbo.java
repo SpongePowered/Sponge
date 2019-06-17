@@ -323,7 +323,7 @@ public class RedstoneWireTurbo {
         // These need to receive block updates to inform them that
         // redstone wire values have changed.                              
         final Block block = oldState.getBlock();
-        if (block != wire) {
+        if (block != this.wire) {
             // Mark this block as not redstone wire and therefore
             // requiring updates
             upd1.type = UpdateNode.Type.OTHER;
@@ -341,9 +341,9 @@ public class RedstoneWireTurbo {
         // others are processed internally by the breadth first search
         // algorithm.  To preserve this game behavior, this check must
         // be replicated here.
-        if (!wire.canPlaceBlockAt(worldIn, pos)) {
+        if (!this.wire.canPlaceBlockAt(worldIn, pos)) {
             // Pop off the redstone dust
-            wire.dropBlockAsItem(worldIn, pos, oldState, 0);
+            this.wire.dropBlockAsItem(worldIn, pos, oldState, 0);
             worldIn.setBlockToAir(pos);
             
             // Mark this position as not being redstone wire
@@ -458,7 +458,7 @@ public class RedstoneWireTurbo {
         // UpdateNode object.  
         IBlockState newState;
         if (old_current_change) {
-            newState = wire.calculateCurrentChanges(worldIn, pos, pos, oldState);
+            newState = this.wire.calculateCurrentChanges(worldIn, pos, pos, oldState);
         } else {
             // Looking up block state is slow.  This accelerator includes a version of
             // calculateCurrentChanges that uses cahed wire values for a
@@ -497,14 +497,14 @@ public class RedstoneWireTurbo {
         for (int i=0; i<24; i++) {
             // Look up each neighbor in the node cache
             final BlockPos pos2 = neighbors[i];
-            UpdateNode upd2 = nodeCache.get(pos2);
+            UpdateNode upd2 = this.nodeCache.get(pos2);
             if (upd2 == null) {
                 // If this is a previously unreached position, create
                 // a new update node, add it to the cache, and identify what it is.
                 upd2 = new UpdateNode();
                 upd2.self = pos2;
                 upd2.parent = pos;
-                nodeCache.put(pos2, upd2);
+                this.nodeCache.put(pos2, upd2);
                 identifyNode(worldIn, upd2);
             }
 
@@ -599,7 +599,7 @@ public class RedstoneWireTurbo {
             // more than once.  Also, skip non-connecting redstone wire blocks
             if (upd2 != null && layer1 > upd2.layer) {
                 upd2.layer = layer1;
-                updateQueue1.add(upd2);
+                this.updateQueue1.add(upd2);
 
                 // Keep track of which block updated this neighbor
                 upd2.parent = pos;
@@ -615,7 +615,7 @@ public class RedstoneWireTurbo {
             final UpdateNode upd2 = upd1.neighbor_nodes[i];
             if (upd2 != null && layer2 > upd2.layer) {
                 upd2.layer = layer2;
-                updateQueue2.add(upd2);
+                this.updateQueue2.add(upd2);
                 upd2.parent = pos;
             }
         }
@@ -634,11 +634,11 @@ public class RedstoneWireTurbo {
     private int currentWalkLayer = 0;
 
     private void shiftQueue() {
-        final List<UpdateNode> t = updateQueue0;
+        final List<UpdateNode> t = this.updateQueue0;
         t.clear();
-        updateQueue0 = updateQueue1;
-        updateQueue1 = updateQueue2;
-        updateQueue2 = t;
+        this.updateQueue0 = this.updateQueue1;
+        this.updateQueue1 = this.updateQueue2;
+        this.updateQueue2 = t;
     }
 
     /*
@@ -649,12 +649,12 @@ public class RedstoneWireTurbo {
      */
     private void breadthFirstWalk(final World worldIn) {
         shiftQueue();
-        currentWalkLayer = 1;
+        this.currentWalkLayer = 1;
 
         // Loop over all layers
-        while (updateQueue0.size()>0 || updateQueue1.size()>0) {
+        while (this.updateQueue0.size() > 0 || this.updateQueue1.size() > 0) {
             // Get the set of blocks in this layer
-            final List<UpdateNode> thisLayer = updateQueue0;
+            final List<UpdateNode> thisLayer = this.updateQueue0;
             //if (thisLayer.size() < 1) {
                 //shiftQueue();
                 //currentWalkLayer++;
@@ -669,7 +669,7 @@ public class RedstoneWireTurbo {
                     // If the node is is redstone wire, 
                     // schedule updates to neighbors if its value
                     // has changed.  
-                    updateNode(worldIn, upd, currentWalkLayer);
+                    updateNode(worldIn, upd, this.currentWalkLayer);
                 } else {
                     // If this block is not redstone wire, send a block update.
                     // Redstone wire blocks get state updates, but they don't
@@ -683,16 +683,16 @@ public class RedstoneWireTurbo {
                     // already keeping track of all of the neighbor positions
                     // that need to be updated.  All on its own, handling neighbors 
                     // this way reduces block updates by 1/3 (24 instead of 36).
-                    worldIn.neighborChanged(upd.self, wire, upd.parent);
+                    worldIn.neighborChanged(upd.self, this.wire, upd.parent);
                 }
             }
 
             // Move on to the next layer
             shiftQueue();
-            currentWalkLayer++;
+            this.currentWalkLayer++;
         }
 
-        currentWalkLayer = 0;
+        this.currentWalkLayer = 0;
     }
 
 
@@ -726,26 +726,26 @@ public class RedstoneWireTurbo {
         if (source != null) {
             // If the cause of the redstone wire update is known, we can use that to help determine
             // direction of information flow.
-            UpdateNode src = nodeCache.get(source);
+            UpdateNode src = this.nodeCache.get(source);
             if (src == null) {
                 src = new UpdateNode();
                 src.self = source;
                 src.parent = source;
                 src.visited = true;
                 identifyNode(worldIn, src);
-                nodeCache.put(source, src);
+                this.nodeCache.put(source, src);
             }
         }
 
         // Find or generate a node for the redstone block position receiving the update
-        UpdateNode upd = nodeCache.get(pos);
+        UpdateNode upd = this.nodeCache.get(pos);
         if (upd == null) {
             upd = new UpdateNode();
             upd.self = pos;
             upd.parent = pos;
             upd.visited = true;
             identifyNode(worldIn, upd);
-            nodeCache.put(pos, upd);
+            this.nodeCache.put(pos, upd);
         }
         upd.currentState = newState;
 
@@ -767,7 +767,7 @@ public class RedstoneWireTurbo {
         // to schedule its neighbors.  By passing the current value of 'currentWalkLayer' to
         // propagateChanges, the neighbors of 'pos' are schedule for layers currentWalkLayer+1
         // and currentWalkLayer+2.
-        propagateChanges(worldIn, upd, currentWalkLayer);
+        propagateChanges(worldIn, upd, this.currentWalkLayer);
 
         // Return here.  The call stack will unwind back to the first call to
         // updateSurroundingRedstone, whereupon the new updates just scheduled will
@@ -787,7 +787,7 @@ public class RedstoneWireTurbo {
         // Check this block's neighbors and see if its power level needs to change
         // Use the calculateCurrentChanges method in BlockRedstoneWire since we have no
         // cached block states at this point.
-        final IBlockState newState = wire.calculateCurrentChanges(worldIn, pos, pos, state);
+        final IBlockState newState = this.wire.calculateCurrentChanges(worldIn, pos, pos, state);
         
         // If no change, exit
         if (newState == state) {
@@ -795,7 +795,7 @@ public class RedstoneWireTurbo {
         }
 
         // Check to see if this update was received during an on-going breadth first search
-        if (currentWalkLayer>0 || nodeCache.size()>0) {
+        if (this.currentWalkLayer > 0 || this.nodeCache.size() > 0) {
             // As breadthFirstWalk progresses, it sends block updates to neighbors.  Some of those
             // neighbors may affect the world so as to cause yet another redstone wire block to receive
             // an update.  If that happens, we need to integrate those redstone wire updates into the
@@ -811,7 +811,7 @@ public class RedstoneWireTurbo {
             src.self = source;
             src.parent = source;
             src.visited = true;
-            nodeCache.put(source, src);
+            this.nodeCache.put(source, src);
             identifyNode(worldIn, src);
         }
 
@@ -824,7 +824,7 @@ public class RedstoneWireTurbo {
         upd.currentState = newState;
         upd.type = UpdateNode.Type.REDSTONE;
         upd.visited = true;
-        nodeCache.put(pos, upd);
+        this.nodeCache.put(pos, upd);
         propagateChanges(worldIn, upd, 0);
     
         // Perform the walk over all directly reachable redstone wire blocks, propagating wire value 
@@ -835,7 +835,7 @@ public class RedstoneWireTurbo {
         // We do not want to keep around state information that may be changed by other code.
         // In theory, we could cache the neighbor block positions, but that is a separate
         // optimization.
-        nodeCache.clear();
+        this.nodeCache.clear();
 
         return newState;
     }
@@ -855,19 +855,19 @@ public class RedstoneWireTurbo {
     private IBlockState calculateCurrentChanges(final World worldIn, final UpdateNode upd)
     {
         IBlockState state = upd.currentState;
-        final int i = ((Integer)state.getValue(BlockRedstoneWire.POWER)).intValue();
+        final int i = state.getValue(BlockRedstoneWire.POWER).intValue();
         int j = 0;
         j = getMaxCurrentStrength(upd, j);
         int l = 0;
 
-        wire.canProvidePower = false;
+        this.wire.canProvidePower = false;
         // Unfortunately, World.isBlockIndirectlyGettingPowered is complicated,
         // and I'm not ready to try to replicate even more functionality from
         // elsewhere in Minecraft into this accelerator.  So sadly, we must
         // suffer the performance hit of this very expensive call.  If there
         // is consistency to what this call returns, we may be able to cache it.
         final int k = worldIn.getRedstonePowerFromNeighbors(upd.self);
-        wire.canProvidePower = true;
+        this.wire.canProvidePower = true;
 
         // The variable 'k' holds the maximum redstone power value of any adjacent blocks.
         // If 'k' has the highest level of all neighbors, then the power level of this 
@@ -938,7 +938,7 @@ public class RedstoneWireTurbo {
      */
     private static int getMaxCurrentStrength(final UpdateNode upd, final int strength) {   
         if (upd.type != UpdateNode.Type.REDSTONE) return strength;
-        final int i = ((Integer)upd.currentState.getValue(BlockRedstoneWire.POWER)).intValue();
+        final int i = upd.currentState.getValue(BlockRedstoneWire.POWER).intValue();
         return i > strength ? i : strength;
     }
 }

@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.api.minecraft.enchantment;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.RegistryNamespaced;
-import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.translation.Translation;
@@ -60,9 +59,8 @@ public abstract class MixinEnchantment_API implements EnchantmentType {
 
     @Shadow @Final public static RegistryNamespaced<ResourceLocation, Enchantment> REGISTRY;
 
-    @Override
     @Intrinsic
-    public String getId() {
+    public String enchantment$getId() {
         final ResourceLocation registeredId = REGISTRY.getNameForObject((Enchantment) (Object) this);
         return registeredId == null ? "unknown" : registeredId.toString();
     }

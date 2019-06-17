@@ -210,7 +210,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
     @Nullable private User user = getUserObject();
 
     private Set<SkinPart> skinParts = Sets.newHashSet();
-    private int viewDistance;
+    private int impl$viewDistance;
     private TabList tabList = new SpongeTabList((EntityPlayerMP) (Object) this);
 
     private GameType pendingGameType;
@@ -453,7 +453,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
     @SuppressWarnings("ConstantConditions")
     @Inject(method = "handleClientSettings", at = @At("HEAD"))
     private void postClientSettingsEvent(final CPacketClientSettings packet, final CallbackInfo ci) {
-        if (ShouldFire.PLAYER_CHANGE_CLIENT_SETTINGS) {
+        if (ShouldFire.PLAYER_CHANGE_CLIENT_SETTINGS_EVENT) {
             final CauseStackManager csm = Sponge.getCauseStackManager();
             csm.pushCause(this);
             try {
@@ -473,7 +473,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
     @Inject(method = "handleClientSettings", at = @At("RETURN"))
     private void impl$updateSkinFromPacket(final CPacketClientSettings packet, final CallbackInfo ci) {
         this.skinParts = SkinUtil.fromFlags(packet.getModelPartFlags()); // Returned set is immutable
-        this.viewDistance = packet.view;
+        this.impl$viewDistance = packet.view;
     }
 
     /**
@@ -970,5 +970,9 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
 
         final boolean teamPVP = super.canAttackPlayer(other);
         cir.setReturnValue(teamPVP);
+    }
+
+    public int bridge$getViewDistance() {
+        return this.impl$viewDistance;
     }
 }

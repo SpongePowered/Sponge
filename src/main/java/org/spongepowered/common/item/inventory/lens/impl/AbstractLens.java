@@ -162,12 +162,11 @@ public abstract class AbstractLens implements Lens {
         return this.adapterType;
     }
     
-    @SuppressWarnings("unchecked")
     @Override
     public ItemStack getStack(Fabric inv, int ordinal) {
         LensHandle lens = this.getLensForOrdinal(ordinal);
         if (lens == null) {
-            return ((ItemStack) ItemStack.EMPTY);
+            return ItemStack.EMPTY;
         }
         return lens.lens.getStack(inv, ordinal - lens.ordinal);
     }

@@ -47,10 +47,6 @@ public abstract class MixinEntityFireball extends MixinEntity {
     @Shadow public EntityLivingBase shootingEntity;
     @Shadow protected abstract void onImpact(RayTraceResult movingObjectPosition);
 
-    @Nullable
-    private ProjectileSource projectileSource = null;
-
-
     @Override
     public void spongeImpl$readFromSpongeCompound(NBTTagCompound compound) {
         super.spongeImpl$readFromSpongeCompound(compound);

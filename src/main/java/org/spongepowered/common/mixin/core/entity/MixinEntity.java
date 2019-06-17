@@ -202,6 +202,8 @@ public abstract class MixinEntity implements EntityBridge, TrackableBridge {
 
     // @formatter:on
 
+    @Shadow public abstract Entity getLowestRidingEntity();
+
     @Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;dimension:I", opcode = Opcodes.PUTFIELD))
     private void impl$UpdateDimension(final Entity self, final int dimensionId, final net.minecraft.world.World worldIn) {
         if (worldIn instanceof ServerWorldBridge) {

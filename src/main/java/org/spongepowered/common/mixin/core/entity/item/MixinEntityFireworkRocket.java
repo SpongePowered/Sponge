@@ -43,6 +43,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
 import org.spongepowered.common.interfaces.entity.IMixinEntityFireworkRocket;
@@ -100,12 +101,12 @@ public abstract class MixinEntityFireworkRocket extends MixinEntity implements I
     }
 
     @Override
-    public Optional<Integer> getExplosionRadius() {
+    public Optional<Integer> bridge$getExplosionRadius() {
         return Optional.of(this.explosionRadius);
     }
 
     @Override
-    public void setExplosionRadius(Optional<Integer> radius) {
+    public void bridge$setExplosionRadius(Optional<Integer> radius) {
         this.explosionRadius = radius.orElse(Constants.Entity.Firework.DEFAULT_EXPLOSION_RADIUS);
     }
 
@@ -120,7 +121,7 @@ public abstract class MixinEntityFireworkRocket extends MixinEntity implements I
             frame.pushCause(this);
             frame.addContext(EventContextKeys.THROWER, ((Firework) this).getShooter()); // TODO - Remove in 1.13/API 8
             frame.addContext(EventContextKeys.PROJECTILE_SOURCE, ((Firework) this).getShooter());
-            detonate(Explosion.builder()
+            SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
                 .sourceExplosive(((Firework) this))
                 .location(((Firework) this).getLocation())
                 .radius(this.explosionRadius))

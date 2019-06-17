@@ -139,7 +139,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
     }
 
 
-    private static Set<Class> containersFailedCapture = new HashSet<>();
+    private static Set<Class<?>> containersFailedCapture = new HashSet<>();
 
     @Override
     public void unwind(InventoryPacketContext context) {

@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.optimization.OptimizedMapData;
-import org.spongepowered.common.mixin.core.world.storage.IMixinMapStorage;
+import org.spongepowered.common.mixin.core.world.storage.AccessorMapStorage;
 import org.spongepowered.common.world.WorldManager;
 
 import java.util.List;
@@ -44,7 +44,7 @@ public abstract class MixinMinecraftServer_MapOptimization {
     // need to tick it once per server tick
     @Inject(method = "tick", at = @At(value = "RETURN"))
     private void onEndTickMapOptimization(CallbackInfo ci) {
-        final List<WorldSavedData> loadedData = ((IMixinMapStorage) (WorldManager.getWorldByDimensionId(0).orElse(null).getMapStorage())).getLoadedDataList();
+        final List<WorldSavedData> loadedData = ((AccessorMapStorage) (WorldManager.getWorldByDimensionId(0).orElse(null).getMapStorage())).getLoadedDataList();
         for (WorldSavedData next : loadedData) {
             if (!(next instanceof MapData)) {
                 continue;

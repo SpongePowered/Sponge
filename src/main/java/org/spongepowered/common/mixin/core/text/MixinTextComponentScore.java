@@ -40,9 +40,9 @@ import java.util.Optional;
 public abstract class MixinTextComponentScore extends MixinTextComponentBase {
 
     @Shadow @Final private String objective;
-
     @Shadow @Final private String name;
 
+    @SuppressWarnings("deprecation")
     @Override
     protected Text.Builder createBuilder() {
         if (Sponge.isServerAvailable()) {

@@ -26,16 +26,10 @@ package org.spongepowered.common.mixin.api.minecraft.entity.projectile;
 
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.projectile.EntityFireball;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.math.RayTraceResult;
 import org.spongepowered.api.entity.projectile.explosive.fireball.Fireball;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.mixin.api.minecraft.entity.MixinEntity_API;
 
 import javax.annotation.Nullable;
@@ -43,11 +37,9 @@ import javax.annotation.Nullable;
 @Mixin(EntityFireball.class)
 public abstract class MixinEntityFireball_API extends MixinEntity_API implements Fireball {
 
-    @Shadow public EntityLivingBase shootingEntity;
-    @Shadow protected abstract void onImpact(RayTraceResult movingObjectPosition);
+    @Shadow @Nullable public EntityLivingBase shootingEntity;
 
-    @Nullable
-    private ProjectileSource projectileSource = null;
+    @Nullable private ProjectileSource projectileSource = null;
 
     @Override
     public ProjectileSource getShooter() {
@@ -72,15 +64,4 @@ public abstract class MixinEntityFireball_API extends MixinEntity_API implements
         }
     }
 
-    @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/projectile/EntityFireball;onImpact(Lnet/minecraft/util/math/RayTraceResult;)V"))
-    public void onProjectileImpact(EntityFireball projectile, RayTraceResult movingObjectPosition) {
-        if (this.world.isRemote || movingObjectPosition.typeOfHit == RayTraceResult.Type.MISS) {
-            this.onImpact(movingObjectPosition);
-            return;
-        }
-
-        if (!SpongeCommonEventFactory.handleCollideImpactEvent(projectile, this.getShooter(), movingObjectPosition)) {
-            this.onImpact(movingObjectPosition);
-        }
-    }
 }

@@ -61,11 +61,13 @@ public class SpongeCraftingRecipeRegistry implements CraftingRecipeRegistry, Spo
     private SpongeCraftingRecipeRegistry() {
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void register(CraftingRecipe recipe) {
         registerAdditionalCatalog(recipe);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public Collection<CraftingRecipe> getRecipes() {
         return getAll();

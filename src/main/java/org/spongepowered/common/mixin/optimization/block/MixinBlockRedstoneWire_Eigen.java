@@ -49,7 +49,7 @@ import java.util.Set;
 public abstract class MixinBlockRedstoneWire_Eigen extends Block {
 
     @Shadow @Final private Set<BlockPos> blocksNeedingUpdate;
-    @Shadow private boolean canProvidePower;
+    @Shadow public boolean canProvidePower;
     @Shadow protected abstract int getMaxCurrentStrength(World worldIn, BlockPos pos, int strength);
 
     protected MixinBlockRedstoneWire_Eigen(Material materialIn) {
@@ -80,6 +80,11 @@ public abstract class MixinBlockRedstoneWire_Eigen extends Block {
         }
     }
 
+    /**
+     * @author unknown
+     * @reason eigen
+     */
+    @SuppressWarnings("deprecation")
     @Overwrite
     public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos)
     {
@@ -99,6 +104,10 @@ public abstract class MixinBlockRedstoneWire_Eigen extends Block {
         }
     }
 
+    /**
+     * @author unknown
+     * @reason eigen
+     */
     /*
      * Modified version of pre-existing updateSurroundingRedstone, which is called from
      * this.neighborChanged and a few other methods in this class.
@@ -106,7 +115,7 @@ public abstract class MixinBlockRedstoneWire_Eigen extends Block {
      */
     private IBlockState updateSurroundingRedstone(World worldIn, BlockPos pos, IBlockState state, BlockPos source)
     {
-        if (old_search) {
+        if (this.old_search) {
             state = this.calculateCurrentChanges(worldIn, pos, pos, state);
             List<BlockPos> list = Lists.newArrayList(this.blocksNeedingUpdate);
             this.blocksNeedingUpdate.clear();
@@ -118,10 +127,14 @@ public abstract class MixinBlockRedstoneWire_Eigen extends Block {
     
             return state;
         } else {
-            return turbo.updateSurroundingRedstone(worldIn, pos, state, source);
+            return this.turbo.updateSurroundingRedstone(worldIn, pos, state, source);
         }
     }
 
+    /**
+     * @author unknown
+     * @reason eigen
+     */
     /*
      * Slightly modified method to compute redstone wire power levels from neighboring blocks.
      * Modifications cut the number of power level changes by about 45% from vanilla, and this 
@@ -134,14 +147,14 @@ public abstract class MixinBlockRedstoneWire_Eigen extends Block {
     public IBlockState calculateCurrentChanges(World worldIn, BlockPos pos1, BlockPos pos2, IBlockState state)
     {
         IBlockState iblockstate = state;
-        int i = ((Integer)state.getValue(BlockRedstoneWire.POWER)).intValue();
+        int i = state.getValue(BlockRedstoneWire.POWER).intValue();
         int j = 0;
         j = this.getMaxCurrentStrength(worldIn, pos2, j);
         this.canProvidePower = false;
         int k = worldIn.getRedstonePowerFromNeighbors(pos1);
         this.canProvidePower = true;
 
-        if (old_decrement) {
+        if (this.old_decrement) {
             // This code is totally redundant to if statements just below the loop.
             if (k > 0 && k > j - 1)
             {
@@ -156,7 +169,7 @@ public abstract class MixinBlockRedstoneWire_Eigen extends Block {
         // redstone wire will be set to 'k'.  If 'k' is already 15, then nothing inside the 
         // following loop can affect the power level of the wire.  Therefore, the loop is 
         // skipped if k is already 15. 
-        if (old_search || k<15)
+        if (this.old_search || k < 15)
         for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL)
         {
             BlockPos blockpos = pos1.offset(enumfacing);
@@ -180,7 +193,7 @@ public abstract class MixinBlockRedstoneWire_Eigen extends Block {
             }
         }
 
-        if (old_decrement) {
+        if (this.old_decrement) {
             // The old code would decrement the wire value only by 1 at a time.
             if (l > j)
             {
@@ -219,7 +232,7 @@ public abstract class MixinBlockRedstoneWire_Eigen extends Block {
                 worldIn.setBlockState(pos1, state, 2);
             }
 
-            if (old_search) {
+            if (this.old_search) {
                 // The new search algorithm keeps track of blocks needing updates in its own data structures,
                 // so only add anything to blocksNeedingUpdate if we're using the vanilla update algorithm.
                 this.blocksNeedingUpdate.add(pos1);

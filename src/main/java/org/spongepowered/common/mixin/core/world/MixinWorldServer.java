@@ -41,6 +41,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.play.server.SPacketEntityVelocity;
 import net.minecraft.network.play.server.SPacketExplosion;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.scoreboard.Scoreboard;
@@ -54,6 +55,7 @@ import net.minecraft.util.ReportedException;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.EnumDifficulty;
@@ -981,7 +983,7 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     protected boolean onSetTileEntityForCapture(net.minecraft.tileentity.TileEntity newTile, BlockPos pos, net.minecraft.tileentity.TileEntity sameEntity) {
         if (this.isFake()) {
@@ -1260,6 +1262,7 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
     /**
      * Based off {@link WorldServer#newExplosion(net.minecraft.entity.Entity, double, double, double, float, boolean, boolean)}.
      */
+    @SuppressWarnings("unchecked")
     @Override
     public Explosion triggerInternalExplosion(org.spongepowered.api.world.explosion.Explosion explosion,
             Function<Explosion, PhaseContext<?>> contextCreator) {
@@ -1290,8 +1293,8 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
         }
 
         try (final PhaseContext<?> ignored = contextCreator.apply(mcExplosion)
-                .source(((Optional) explosion.getSourceExplosive()).orElse(this))
-                .buildAndSwitch()) {
+                .source(((Optional) explosion.getSourceExplosive()).orElse(this))) {
+            ignored.buildAndSwitch();
             final double x = mcExplosion.x;
             final double y = mcExplosion.y;
             final double z = mcExplosion.z;
@@ -1306,6 +1309,8 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
                 mcExplosion.clearAffectedBlockPositions();
             }
 
+            // Sponge Start - Don't send explosion packets, they're spammy, we can replicate it on the server entirely
+            /*
             for (EntityPlayer entityplayer : this.playerEntities) {
                 if (entityplayer.getDistanceSq(x, y, z) < 4096.0D) {
                     ((EntityPlayerMP) entityplayer).connection
@@ -1313,6 +1318,25 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
                             mcExplosion.getPlayerKnockbackMap().get(entityplayer)));
                 }
             }
+
+             */
+            // Use the knockback map and set velocities, since the explosion packet isn't sent, we need to replicate
+            // the players being moved.
+            for (EntityPlayer playerEntity : this.playerEntities) {
+                final Vec3d knockback = mcExplosion.getPlayerKnockbackMap().get(playerEntity);
+                if (knockback != null) {
+                    // In Vanilla, doExplosionB always updates the 'motion[xyz]' fields for every entity in range.
+                    // However, this field is completely ignored for players (since 'velocityChanged') is never set, and
+                    // a completely different value is sent through 'SPacketExplosion'.
+
+                    // To replicate this behavior, we manually send a velocity packet. It's critical that we don't simply
+                    // add to the 'motion[xyz]' fields, as that will end up using the value set by 'doExplosionB', which must be
+                    // ignored.
+                    ((EntityPlayerMP) playerEntity).connection.sendPacket(new SPacketEntityVelocity(playerEntity.getEntityId(), knockback.x, knockback.y, knockback.z));
+                }
+            }
+            // Sponge End
+
 
             // Sponge Start - end processing
             this.processingExplosion = false;

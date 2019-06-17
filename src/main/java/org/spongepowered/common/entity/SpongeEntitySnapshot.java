@@ -271,6 +271,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         return transform(key, input -> value);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Optional<EntitySnapshot> with(BaseValue<?> value) {
         return with((Key<? extends BaseValue<Object>>) value.getKey(), value.get());

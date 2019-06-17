@@ -84,20 +84,20 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
 
     // So that any additional optimizations can be added in succession.
     private static final Map<String, Function<OptimizationCategory, Boolean>> mixinEnabledMappings = ImmutableMap.<String, Function<OptimizationCategory, Boolean >> builder()
-            .put("org.spongepowered.common.mixin.optimization.MixinExplosion_Explosion",
-                    (module) -> true) // TODO the velocity changes need to be sent to the client
             .put("org.spongepowered.common.mixin.optimization.MixinSpongeImplHooks_Item_Pre_Merge",
                     OptimizationCategory::doDropsPreMergeItemDrops)
-            .put("org.spongepowered.common.mixin.optimization.MixinWorldServer_Explosion",
-                    (module) -> true) // TODO the velocity changes need to be sent to the client
-            .put("org.spongepowered.common.mixin.optimization.MixinSpongeImplHooks_Explosion",
-                    (module) -> true)
             .put("org.spongepowered.common.mixin.optimization.enchantment.MixinEnchantmentHelper_No_Source_Leak",
                     OptimizationCategory::useEnchantmentHelperFix)
-            .put("org.spongepowered.common.mixin.optimization.block.MixinBlockRedstoneWire_Eigen",
-                    OptimizationCategory::useEigenRedstone)
-            .put("org.spongepowered.common.mixin.optimization.block.MixinBlockRedstoneWire",
-                    OptimizationCategory::usePandaRedstone)
+            .put("org.spongepowered.common.mixin.optimization.block.MixinBlockRedstoneWire_Eigen", (optimization) -> {
+                    if (optimization.usePandaRedstone() && optimization.useEigenRedstone()) {
+                        // Disable panda redstone if eigen is enabled.
+                        optimization.setPandaRedstone(false);
+                    }
+                return optimization.useEigenRedstone() && !optimization.usePandaRedstone();
+            })
+            .put("org.spongepowered.common.mixin.optimization.block.MixinBlockRedstoneWire_PandaRedstone", (optimization) -> {
+                return optimization.usePandaRedstone() && !optimization.useEigenRedstone();
+                })
             .put("org.spongepowered.common.mixin.optimization.entity.MixinEntityTameable_Cached_Owner",
                     OptimizationCategory::useCacheTameableOwners)
             .put("org.spongepowered.common.mixin.optimization.network.play.server.MixinSPacketChunkData_Async_Lighting",

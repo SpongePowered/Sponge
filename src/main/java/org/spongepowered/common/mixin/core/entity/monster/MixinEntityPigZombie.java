@@ -22,14 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.entity;
+package org.spongepowered.common.mixin.core.entity.monster;
 
-import org.spongepowered.api.util.Direction;
+import net.minecraft.entity.monster.EntityPigZombie;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.bridge.entity.AggressiveBridge;
 
-public interface IMixinEntityHanging {
+@Mixin(EntityPigZombie.class)
+public abstract class MixinEntityPigZombie extends MixinEntityMob implements AggressiveBridge {
 
-    Direction getDirection();
+    @Shadow public int angerLevel;
+    @Shadow public abstract boolean isAngry();
 
-    void setDirection(Direction direction);
+    @Override
+    public boolean bridge$isAngry() {
+        return this.isAngry();
+    }
 
+    @Override
+    public void bridge$setAngry(boolean angry) {
+        if (angry) {
+            this.angerLevel = 400 + this.rand.nextInt(400);
+        } else {
+            this.angerLevel = 0;
+        }
+    }
 }

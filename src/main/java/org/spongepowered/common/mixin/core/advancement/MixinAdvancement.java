@@ -56,6 +56,7 @@ import org.spongepowered.common.advancement.CriterionBridge;
 import org.spongepowered.common.advancement.SpongeAdvancementTree;
 import org.spongepowered.common.advancement.SpongeScoreCriterion;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.phase.plugin.EventListenerPhaseContext;
 import org.spongepowered.common.event.tracking.phase.plugin.ListenerPhaseContext;
 import org.spongepowered.common.interfaces.advancement.IMixinAdvancement;
 import org.spongepowered.common.interfaces.advancement.IMixinCriterion;
@@ -103,7 +104,7 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
         return SpongeImplHooks.isMainThread();
     }
 
-    @SuppressWarnings("ConstantConditions")
+    @SuppressWarnings({"ConstantConditions", "unchecked"})
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onInit(ResourceLocation id, @Nullable Advancement parentIn, @Nullable DisplayInfo displayIn,
             AdvancementRewards rewardsIn, Map<String, Criterion> criteriaIn, String[][] requirementsIn, CallbackInfo ci) {
@@ -121,9 +122,9 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
             this.name = SpongeTexts.toPlain(displayIn.getTitle());
         }
         if (PhaseTracker.getInstance().getCurrentState().isEvent()) {
-            Object event = ((ListenerPhaseContext) PhaseTracker.getInstance().getCurrentContext()).getEvent();
+            Object event = ((EventListenerPhaseContext) PhaseTracker.getInstance().getCurrentContext()).getEvent();
             if (event instanceof GameRegistryEvent.Register) {
-                Class<? extends CatalogType> catalogType = ((GameRegistryEvent.Register) event).getCatalogType();
+                Class<? extends CatalogType> catalogType = ((GameRegistryEvent.Register<?>) event).getCatalogType();
                 if (catalogType.equals(org.spongepowered.api.advancement.Advancement.class) || catalogType.equals(AdvancementTree.class)) {
                     // Wait to set the parent until the advancement is registered
                     this.tempParent = parentIn;

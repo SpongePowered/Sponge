@@ -49,6 +49,8 @@ public interface ServerPlayerEntityBridge extends PlayerEntityBridge {
         return false;
     }
 
+    int bridge$getViewDistance();
+
     Optional<User> getBackingUser();
 
     User getUserObject();

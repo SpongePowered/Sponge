@@ -38,6 +38,7 @@ import org.spongepowered.common.world.pregen.SpongeChunkPreGenerateTask;
 
 @NonnullByDefault
 @Mixin(net.minecraft.world.border.WorldBorder.class)
+@Implements(@Interface(iface = WorldBorder.class, prefix = "apiBorder$"))
 public abstract class MixinWorldBorder_API implements WorldBorder {
 
     @Shadow public abstract double getCenterX();
@@ -57,27 +58,23 @@ public abstract class MixinWorldBorder_API implements WorldBorder {
     @Shadow public abstract void shadow$setWarningDistance(int distance);
     @Shadow public abstract double shadow$getDiameter();
 
-    @Override
     @Intrinsic
-    public int getWarningTime() {
+    public int apiBorder$getWarningTime() {
         return shadow$getWarningTime();
     }
 
-    @Override
     @Intrinsic
-    public void setWarningTime(final int time) {
+    public void apiBorder$setWarningTime(final int time) {
         shadow$setWarningTime(time);
     }
 
-    @Override
     @Intrinsic
-    public int getWarningDistance() {
+    public int apiBorder$getWarningDistance() {
         return shadow$getWarningDistance();
     }
 
-    @Override
     @Intrinsic
-    public void setWarningDistance(final int distance) {
+    public void apiBorder$setWarningDistance(final int distance) {
         shadow$setWarningDistance(distance);
     }
 
@@ -86,9 +83,8 @@ public abstract class MixinWorldBorder_API implements WorldBorder {
         return getTargetSize();
     }
 
-    @Override
     @Intrinsic
-    public double getDiameter() {
+    public double apiBorder$getDiameter() {
         return shadow$getDiameter();
     }
 
@@ -117,9 +113,8 @@ public abstract class MixinWorldBorder_API implements WorldBorder {
         return new Vector3d(getCenterX(), 0, getCenterZ());
     }
 
-    @Override
     @Intrinsic
-    public void setCenter(final double x, final double z) {
+    public void apiBorder$setCenter(final double x, final double z) {
         this.shadow$setCenter(x, z);
     }
 
@@ -134,14 +129,12 @@ public abstract class MixinWorldBorder_API implements WorldBorder {
     }
 
     @Intrinsic
-    @Override
-    public double getDamageAmount() {
+    public double apiBorder$getDamageAmount() {
         return shadow$getDamageAmount();
     }
 
     @Intrinsic
-    @Override
-    public void setDamageAmount(final double damage) {
+    public void apiBorder$setDamageAmount(final double damage) {
         shadow$setDamageAmount(damage);
     }
 

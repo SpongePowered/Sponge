@@ -40,16 +40,17 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
-import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.bridge.entity.item.WitherSkullEntityBridge;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
 import javax.annotation.Nullable;
 
 @Mixin(EntityWitherSkull.class)
-public abstract class MixinEntityWitherSkull extends MixinEntityFireball implements ExplosiveBridge {
+public abstract class MixinEntityWitherSkull extends MixinEntityFireball implements WitherSkullEntityBridge {
 
     private int explosionRadius = Constants.Entity.WitherSkull.DEFAULT_EXPLOSION_RADIUS;
     private float damage = 0.0f;
@@ -97,12 +98,12 @@ public abstract class MixinEntityWitherSkull extends MixinEntityFireball impleme
 
     // Explosive Impl
     @Override
-    public Optional<Integer> getExplosionRadius() {
+    public Optional<Integer> bridge$getExplosionRadius() {
         return Optional.of(this.explosionRadius);
     }
 
     @Override
-    public void setExplosionRadius(Optional<Integer> explosionRadius) {
+    public void bridge$setExplosionRadius(Optional<Integer> explosionRadius) {
         this.explosionRadius = explosionRadius.orElse(Constants.Entity.WitherSkull.DEFAULT_EXPLOSION_RADIUS);
     }
 
@@ -110,7 +111,7 @@ public abstract class MixinEntityWitherSkull extends MixinEntityFireball impleme
     @Redirect(method = "onImpact", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;newExplosion"
                                                                        + "(Lnet/minecraft/entity/Entity;DDDFZZ)Lnet/minecraft/world/Explosion;"))
     @Nullable
-    private net.minecraft.world.Explosion onExplode(net.minecraft.world.World worldObj, Entity self, double x,
+    public net.minecraft.world.Explosion bridge$CreateAndProcessExplosionEvent(net.minecraft.world.World worldObj, Entity self, double x,
         double y, double z, float strength, boolean flaming,
         boolean smoking) {
         boolean griefer = ((GrieferBridge) this).bridge$CanGrief();
@@ -119,7 +120,7 @@ public abstract class MixinEntityWitherSkull extends MixinEntityFireball impleme
             frame.addContext(EventContextKeys.THROWER, ((WitherSkull) this).getShooter()); // TODO - Remove in API 8/1.13
             frame.addContext(EventContextKeys.PROJECTILE_SOURCE, ((WitherSkull) this).getShooter());
             frame.pushCause(((WitherSkull) this).getShooter());
-            return detonate(Explosion.builder()
+            return SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
                 .location(new Location<>((World) worldObj, new Vector3d(x, y, z)))
                 .sourceExplosive(((WitherSkull) this))
                 .radius(this.explosionRadius)

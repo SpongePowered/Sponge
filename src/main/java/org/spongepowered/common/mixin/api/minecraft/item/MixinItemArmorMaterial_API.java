@@ -27,7 +27,10 @@ package org.spongepowered.common.mixin.api.minecraft.item;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemArmor;
 import org.spongepowered.api.data.type.ArmorType;
+import org.spongepowered.api.item.ItemType;
 import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -38,6 +41,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 @Mixin(ItemArmor.ArmorMaterial.class)
+@Implements(@Interface(iface = ArmorType.class, prefix = "apiArmor$"))
 public abstract class MixinItemArmorMaterial_API implements ArmorType {
 
     @Shadow @Final private String name;
@@ -48,16 +52,14 @@ public abstract class MixinItemArmorMaterial_API implements ArmorType {
         return "minecraft:" + this.name;
     }
 
-    @Override
     @Intrinsic
-    public String getName() {
+    public String apiArmor$getName() {
         return this.name.toUpperCase(Locale.ENGLISH);
     }
 
-    @SuppressWarnings({"unchecked", "rawTypes"})
     @Override
-    public Optional getRepairItemType() {
-        return Optional.ofNullable(shadow$getRepairItem());
+    public Optional<ItemType> getRepairItemType() {
+        return Optional.ofNullable((ItemType) shadow$getRepairItem());
     }
 
 }

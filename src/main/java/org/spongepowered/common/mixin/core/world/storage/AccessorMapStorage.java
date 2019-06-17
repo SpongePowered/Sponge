@@ -22,12 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.entity;
+package org.spongepowered.common.mixin.core.world.storage;
 
-public interface IMixinAggressive {
+import net.minecraft.world.storage.MapStorage;
+import net.minecraft.world.storage.WorldSavedData;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-    boolean isAngry();
+import java.util.List;
 
-    void setAngry(boolean angry);
+@Mixin(MapStorage.class)
+public interface AccessorMapStorage {
+
+    @Accessor
+    List<WorldSavedData> getLoadedDataList();
 
 }

@@ -87,7 +87,6 @@ import org.spongepowered.api.event.entity.AttackEntityEvent;
 import org.spongepowered.api.event.entity.ChangeEntityExperienceEvent;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
-import org.spongepowered.api.event.entity.living.humanoid.ChangeLevelEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
@@ -279,7 +278,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
         }
         int finalLevel = event.getFinalData().level().get();
         if (finalLevel != this.experienceLevel) {
-            @SuppressWarnings("deprecation") final ChangeLevelEvent levelEvent = SpongeEventFactory.createChangeLevelEventTargetPlayer(
+            @SuppressWarnings("deprecation") final org.spongepowered.api.event.entity.living.humanoid.ChangeLevelEvent levelEvent = SpongeEventFactory.createChangeLevelEventTargetPlayer(
                     Sponge.getCauseStackManager().getCurrentCause(), this.experienceLevel, finalLevel, (Player) this);
             SpongeImpl.postEvent(levelEvent);
             if (levelEvent.isCancelled()) {

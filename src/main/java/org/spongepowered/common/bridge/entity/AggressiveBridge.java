@@ -22,12 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge;
+package org.spongepowered.common.bridge.entity;
 
-import co.aikar.timings.Timing;
+public interface AggressiveBridge {
 
-public interface TimingHolder {
+    boolean bridge$isAngry();
 
-    Timing bridge$getTimingsHandler();
+    void bridge$setAngry(boolean angry);
 
 }
