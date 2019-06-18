@@ -35,6 +35,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
+import javax.annotation.Nullable;
+
 @Mixin(value = EnchantmentHelper.class, priority = 1001)
 public abstract class MixinEnchantmentHelper_No_Source_Leak {
 
@@ -43,11 +45,11 @@ public abstract class MixinEnchantmentHelper_No_Source_Leak {
     @Shadow @Final private static EnchantmentHelper.DamageIterator ENCHANTMENT_ITERATOR_DAMAGE;
 
 
-    @Shadow private static void applyEnchantmentModifierArray(EnchantmentHelper.IModifier modifier, Iterable<ItemStack> stacks) {
+    @Shadow private static void applyEnchantmentModifierArray(final EnchantmentHelper.IModifier modifier, final Iterable<ItemStack> stacks) {
         // SHADOW
     }
 
-    @Shadow private static void applyEnchantmentModifier(EnchantmentHelper.IModifier modifier, ItemStack stack) {
+    @Shadow private static void applyEnchantmentModifier(final EnchantmentHelper.IModifier modifier, final ItemStack stack) {
         // shadow
     }
 
@@ -57,7 +59,7 @@ public abstract class MixinEnchantmentHelper_No_Source_Leak {
      * Fixes MC-128547
      */
     @Overwrite
-    public static int getEnchantmentModifierDamage(Iterable<ItemStack> stacks, DamageSource source) {
+    public static int getEnchantmentModifierDamage(final Iterable<ItemStack> stacks, final DamageSource source) {
         ENCHANTMENT_MODIFIER_DAMAGE.damageModifier = 0;
         ENCHANTMENT_MODIFIER_DAMAGE.source = source;
         applyEnchantmentModifierArray(ENCHANTMENT_MODIFIER_DAMAGE, stacks);
@@ -72,7 +74,7 @@ public abstract class MixinEnchantmentHelper_No_Source_Leak {
      * Fixes MC-128547
      */
     @Overwrite
-    public static void applyThornEnchantments(EntityLivingBase p_151384_0_, Entity p_151384_1_) {
+    public static void applyThornEnchantments(@Nullable final EntityLivingBase p_151384_0_, final Entity p_151384_1_) {
         ENCHANTMENT_ITERATOR_HURT.attacker = p_151384_1_;
         ENCHANTMENT_ITERATOR_HURT.user = p_151384_0_;
 
@@ -96,7 +98,7 @@ public abstract class MixinEnchantmentHelper_No_Source_Leak {
      * Fixes MC-128547
      */
     @Overwrite
-    public static void applyArthropodEnchantments(EntityLivingBase p_151385_0_, Entity p_151385_1_) {
+    public static void applyArthropodEnchantments(@Nullable final EntityLivingBase p_151385_0_, final Entity p_151385_1_) {
         ENCHANTMENT_ITERATOR_DAMAGE.user = p_151385_0_;
         ENCHANTMENT_ITERATOR_DAMAGE.target = p_151385_1_;
 

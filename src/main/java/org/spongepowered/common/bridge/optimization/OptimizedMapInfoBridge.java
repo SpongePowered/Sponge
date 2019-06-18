@@ -22,12 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world;
+package org.spongepowered.common.bridge.optimization;
 
-public interface IMixinMapInfo_MapOptimization {
+public interface OptimizedMapInfoBridge {
 
-    void setValid(boolean valid);
+    void mapOptimizationBridge$setValid(boolean valid);
 
-    boolean isValid();
+    boolean mapOptimizationBridge$isValid();
 
 }

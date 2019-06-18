@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.optimization.mapoptimization;
+package org.spongepowered.common.mixin.optimization.world.storage;
 
 import net.minecraft.entity.item.EntityItemFrame;
 import net.minecraft.entity.player.EntityPlayer;
@@ -52,7 +52,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.optimization.OptimizedMapDataBridge;
-import org.spongepowered.common.interfaces.world.IMixinMapInfo_MapOptimization;
+import org.spongepowered.common.bridge.optimization.OptimizedMapInfoBridge;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -69,7 +69,7 @@ import java.util.UUID;
 public abstract class MixinMapData_MapOptimization extends WorldSavedData implements OptimizedMapDataBridge {
 
 
-    public MixinMapData_MapOptimization(String name) {
+    public MixinMapData_MapOptimization(final String name) {
         super(name);
     }
 
@@ -107,7 +107,7 @@ public abstract class MixinMapData_MapOptimization extends WorldSavedData implem
             } else {
                 dimensionField = MapData.class.getDeclaredField("field_76200_c");
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
         }
     }
@@ -117,7 +117,7 @@ public abstract class MixinMapData_MapOptimization extends WorldSavedData implem
     }
 
     @Inject(method = "<init>", at = @At(value = "RETURN"))
-    public void onInit(CallbackInfo ci) {
+    private void mapOptimization$initPlayerHashmap(final CallbackInfo ci) {
         this.playersHashMap = new LinkedHashMap<>();
     }
 
@@ -128,7 +128,7 @@ public abstract class MixinMapData_MapOptimization extends WorldSavedData implem
      * @author Aaron1011 - August 8th, 2018
      */
     @Overwrite
-    public void updateVisiblePlayers(EntityPlayer player, ItemStack mapStack) {
+    public void updateVisiblePlayers(final EntityPlayer player, final ItemStack mapStack) {
     }
 
     /**
@@ -162,20 +162,20 @@ public abstract class MixinMapData_MapOptimization extends WorldSavedData implem
      **/
     @Override
     public void bridge$tickMap() {
-        List<IMixinMapInfo_MapOptimization> mapInfosToUpdate = new ArrayList<>(this.playersHashMap.size());
+        final List<OptimizedMapInfoBridge> mapInfosToUpdate = new ArrayList<>(this.playersHashMap.size());
         try {
-            Iterator<Map.Entry<EntityPlayer, MapData.MapInfo>> it = this.playersHashMap.entrySet().iterator();
+            final Iterator<Map.Entry<EntityPlayer, MapData.MapInfo>> it = this.playersHashMap.entrySet().iterator();
             while (it.hasNext()) {
-                Map.Entry<EntityPlayer, MapData.MapInfo> entry = it.next();
-                EntityPlayer player = entry.getKey();
-                MapData.MapInfo mapInfo = entry.getValue();
-                IMixinMapInfo_MapOptimization mixinMapInfo = (IMixinMapInfo_MapOptimization) mapInfo;
+                final Map.Entry<EntityPlayer, MapData.MapInfo> entry = it.next();
+                final EntityPlayer player = entry.getKey();
+                final MapData.MapInfo mapInfo = entry.getValue();
+                final OptimizedMapInfoBridge mixinMapInfo = (OptimizedMapInfoBridge) mapInfo;
                 if (player.isDead) {
                     it.remove();
                     continue;
                 }
 
-                if (!mixinMapInfo.isValid()) {
+                if (!mixinMapInfo.mapOptimizationBridge$isValid()) {
                     this.mapDecorations.remove(player.getName());
                 } else {
                     if (this.trackingPosition && dimensionField.get(this).equals(player.dimension)) {
@@ -184,7 +184,7 @@ public abstract class MixinMapData_MapOptimization extends WorldSavedData implem
                     }
                     // We invalidate the player's map info every tick.
                     // If the map item is still in the player's hand, the MapInfo
-                    // will have setValid(true) called when the item ticks.
+                    // will have mapOptimizationBridge$setValid(true) called when the item ticks.
                     // Otherwise, it will remain invalid
                     mapInfosToUpdate.add(mixinMapInfo);
                 }
@@ -195,11 +195,11 @@ public abstract class MixinMapData_MapOptimization extends WorldSavedData implem
             // We only invalidate the MapInfos after calling updatePlayersInWorld
             // This allows updatePlayersInWorld to skip sending a duplicate packet
             // to players with a valid entry
-            for (IMixinMapInfo_MapOptimization mapInfo: mapInfosToUpdate) {
-                mapInfo.setValid(false);
+            for (final OptimizedMapInfoBridge mapInfo: mapInfosToUpdate) {
+                mapInfo.mapOptimizationBridge$setValid(false);
             }
 
-        } catch (Exception e) {
+        } catch (final Exception e) {
             SpongeImpl.getLogger().error("Exception ticking map data!", e);
         }
     }
@@ -216,27 +216,27 @@ public abstract class MixinMapData_MapOptimization extends WorldSavedData implem
     private void updatePlayersInWorld() {
         // Copied from EntityTrackerEntry#updatePlayerList
         if (Sponge.getServer().getRunningTimeTicks() % 10 == 0) {
-            for (org.spongepowered.api.world.World world: Sponge.getServer().getWorlds()) {
+            for (final org.spongepowered.api.world.World world: Sponge.getServer().getWorlds()) {
                 if (!this.activeWorlds.contains(world.getUniqueId())) {
                     continue;
                 }
-                for (Player player: world.getPlayers()) {
+                for (final Player player: world.getPlayers()) {
                     // Copied from EntityTrackerEntry#updatePlayerList
 
-                    EntityPlayerMP entityplayermp = (EntityPlayerMP) player;
-                    IMixinMapInfo_MapOptimization mapInfo = (IMixinMapInfo_MapOptimization) this.playersHashMap.get(player);
-                    if (mapInfo != null && mapInfo.isValid()) {
+                    final EntityPlayerMP entityplayermp = (EntityPlayerMP) player;
+                    OptimizedMapInfoBridge mapInfo = (OptimizedMapInfoBridge) this.playersHashMap.get(player);
+                    if (mapInfo != null && mapInfo.mapOptimizationBridge$isValid()) {
                         continue; // We've already sent the player a map data packet for this map
                     }
 
                     // Create a MapInfo for use by createMapDataPacket
                     if (mapInfo == null) {
-                        mapInfo = (IMixinMapInfo_MapOptimization) this.constructMapInfo(entityplayermp);
+                        mapInfo = (OptimizedMapInfoBridge) this.constructMapInfo(entityplayermp);
                         this.playersHashMap.put(entityplayermp, (MapData.MapInfo) mapInfo);
                     }
 
                     //mapdata.updateVisiblePlayers(entityplayermp, itemstack); - Sponge - this is handled above in bridge$tickMap
-                    Packet<?> packet = Items.FILLED_MAP.createMapDataPacket(this.dummyItemStack, (World) world, entityplayermp);
+                    final Packet<?> packet = Items.FILLED_MAP.createMapDataPacket(this.dummyItemStack, (World) world, entityplayermp);
 
                     if (packet != null)
                     {
@@ -249,7 +249,7 @@ public abstract class MixinMapData_MapOptimization extends WorldSavedData implem
 
     // Use playersHashMap instead of playersArrayList, since we skip updating playersArrayList
     @Redirect(method = "updateMapData", at = @At(value = "INVOKE", target = "Ljava/util/List;iterator()Ljava/util/Iterator;", remap = false))
-    private Iterator<?> mapOptimization$GetIteratorFromPlayerHashMap(List<?> this$0) {
+    private Iterator<?> mapOptimization$GetIteratorFromPlayerHashMap(final List<?> this$0) {
         return this.playersHashMap.values().iterator();
     }
 
@@ -257,30 +257,30 @@ public abstract class MixinMapData_MapOptimization extends WorldSavedData implem
 
     // MapInfo is a non-static inner class, so we need to use reflection to call
     // the constructor
-    private MapData.MapInfo constructMapInfo(EntityPlayer player) {
+    private MapData.MapInfo constructMapInfo(final EntityPlayer player) {
         try {
             return mapInfoConstructor.newInstance(this, player);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new RuntimeException("Failed to construct MapInfo for player " + player, e);
         }
     }
 
     @Override
-    public void bridge$updatePlayer(EntityPlayer player, ItemStack mapStack) {
+    public void bridge$updatePlayer(final EntityPlayer player, final ItemStack mapStack) {
         MapData.MapInfo info = this.playersHashMap.get(player);
         if (info == null) {
             info = this.constructMapInfo(player);
             this.playersHashMap.put(player, info);
         }
-        ((IMixinMapInfo_MapOptimization) info).setValid(true);
+        ((OptimizedMapInfoBridge) info).mapOptimizationBridge$setValid(true);
 
         if (mapStack.hasTagCompound() && mapStack.getTagCompound().hasKey("Decorations", 9))
         {
-            NBTTagList nbttaglist = mapStack.getTagCompound().getTagList("Decorations", 10);
+            final NBTTagList nbttaglist = mapStack.getTagCompound().getTagList("Decorations", 10);
 
             for (int j = 0; j < nbttaglist.tagCount(); ++j)
             {
-                NBTTagCompound nbttagcompound = nbttaglist.getCompoundTagAt(j);
+                final NBTTagCompound nbttagcompound = nbttaglist.getCompoundTagAt(j);
 
                 if (!this.mapDecorations.containsKey(nbttagcompound.getString("id")))
                 {
@@ -291,10 +291,10 @@ public abstract class MixinMapData_MapOptimization extends WorldSavedData implem
     }
 
     @Override
-    public void bridge$updateItemFrameDecoration(EntityItemFrame frame) {
+    public void bridge$updateItemFrameDecoration(final EntityItemFrame frame) {
         this.activeWorlds.add(((Entity) frame).getWorld().getUniqueId());
         if (this.trackingPosition) {
-            BlockPos blockpos = frame.getHangingPosition();
+            final BlockPos blockpos = frame.getHangingPosition();
             if (blockpos == null || frame.facingDirection == null) {
                 return;
             }
@@ -303,7 +303,7 @@ public abstract class MixinMapData_MapOptimization extends WorldSavedData implem
     }
 
     @Override
-    public void bridge$removeItemFrame(EntityItemFrame frame) {
+    public void bridge$removeItemFrame(final EntityItemFrame frame) {
         this.activeWorlds.remove(((Entity) frame).getWorld().getUniqueId());
         this.mapDecorations.remove("frame-" + frame.getEntityId());
     }

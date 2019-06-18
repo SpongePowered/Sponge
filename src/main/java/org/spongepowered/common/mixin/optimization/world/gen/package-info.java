@@ -22,22 +22,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.optimization.mapoptimization;
-
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemMap;
-import net.minecraft.item.ItemStack;
-import net.minecraft.world.storage.MapData;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.optimization.OptimizedMapDataBridge;
-
-@Mixin(ItemMap.class)
-public class MixinItemMap_MapOptimization {
-
-    @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/MapData;updateVisiblePlayers(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/item/ItemStack;)V"))
-    public void onUpdateVisiblePlayers(MapData mapData, EntityPlayer player, ItemStack itemStack) {
-        ((OptimizedMapDataBridge) mapData).bridge$updatePlayer(player, itemStack);
-    }
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault
+package org.spongepowered.common.mixin.optimization.world.gen;

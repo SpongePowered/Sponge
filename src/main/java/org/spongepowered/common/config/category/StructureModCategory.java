@@ -33,9 +33,15 @@ import java.util.Map;
 @ConfigSerializable
 public class StructureModCategory extends ConfigCategory {
 
-    @Setting(value = "enabled", comment = "If 'false', this mod will never save its structures.")
+    @Setting(value = "enabled", comment = "If 'false', this mod will never save its structures. This may\n"
+                                          + "break some mod functionalities when requesting to locate their\n"
+                                          + "structures in a World. If true, allows structures not overridden\n"
+                                          + "in the section below to be saved by default. If you wish to find\n"
+                                          + "a structure to prevent it being saved, enable 'auto-populate' and\n"
+                                          + "restart the server/world instance.")
     private boolean isEnabled = true;
-    @Setting(value = "structures")
+    @Setting(value = "structures", comment = "Per structure override. Having the value of 'false' will prevent\n"
+                                             + "that specific named structure from saving.")
     private Map<String, Boolean> structureList = new HashMap<>();
 
     public StructureModCategory() {

@@ -22,24 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.optimization.mapoptimization;
+package org.spongepowered.common.mixin.optimization.world.storage;
 
 import net.minecraft.world.storage.MapData;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.interfaces.world.IMixinMapInfo_MapOptimization;
+import org.spongepowered.common.bridge.optimization.OptimizedMapInfoBridge;
 
 @Mixin(MapData.MapInfo.class)
-public class MixinMapInfo_MapOptimization implements IMixinMapInfo_MapOptimization {
+public class MixinMapInfo_MapOptimization implements OptimizedMapInfoBridge {
 
     private boolean valid;
 
     @Override
-    public void setValid(boolean valid) {
+    public void mapOptimizationBridge$setValid(boolean valid) {
         this.valid = valid;
     }
 
     @Override
-    public boolean isValid() {
+    public boolean mapOptimizationBridge$isValid() {
         return this.valid;
     }
 

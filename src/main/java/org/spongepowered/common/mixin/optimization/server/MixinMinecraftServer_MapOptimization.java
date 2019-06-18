@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.optimization.mapoptimization;
+package org.spongepowered.common.mixin.optimization.server;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.storage.MapData;
