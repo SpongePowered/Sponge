@@ -72,8 +72,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.world.ChunkBridge;
-import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMapEntry;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.common.world.extent.ExtentViewDownsize;
@@ -121,28 +121,30 @@ public abstract class MixinChunk_API implements Chunk {
     @Shadow public abstract BlockPos getPrecipitationHeight(BlockPos pos);
     // @formatter:on
 
-    private Vector3i api$chunkPos = new Vector3i(this.x, 0, this.z);
-    private Vector3i api$blockMin = SpongeChunkLayout.instance.forceToWorld(this.api$chunkPos);
-    private Vector3i api$blockMax = this.api$blockMin.add(SpongeChunkLayout.CHUNK_SIZE).sub(1, 1, 1);
-    private Vector3i api$biomeMin = new Vector3i(this.api$blockMin.getX(), 0, this.api$blockMin.getZ());
-    private Vector3i api$biomeMax = new Vector3i(this.api$blockMax.getX(), 0, this.api$blockMax.getZ());
-    private UUID api$uuid = api$getUuidFromWorld();
-
-    private UUID api$getUuidFromWorld() {
-        @Nullable final UUID uuid = ((org.spongepowered.api.world.World) this.world).getUniqueId();
-        if (uuid != null) {
-            return new UUID(uuid.getMostSignificantBits() ^ (this.x * 2 + 1), uuid.getLeastSignificantBits() ^ this.z * 2 + 1);
-        }
-        return UUID.randomUUID();
-    }
+    @Nullable private Vector3i api$chunkPos;
+    @Nullable private Vector3i api$blockMin;
+    @Nullable private Vector3i api$blockMax;
+    @Nullable private Vector3i api$biomeMin;
+    @Nullable private Vector3i api$biomeMax;
+    @Nullable private UUID api$uuid;
 
     @Override
     public UUID getUniqueId() {
+        if (this.api$uuid == null) {
+            @Nullable final UUID uuid = ((org.spongepowered.api.world.World) this.world).getUniqueId();
+            if (uuid != null) {
+                this.api$uuid = new UUID(uuid.getMostSignificantBits() ^ (this.x * 2 + 1), uuid.getLeastSignificantBits() ^ this.z * 2 + 1);
+            }
+            this.api$uuid = UUID.randomUUID();
+        }
         return this.api$uuid;
     }
 
     @Override
     public Vector3i getPosition() {
+        if (this.api$chunkPos == null) {
+            this.api$chunkPos = new Vector3i(this.x, 0, this.z);
+        }
         return this.api$chunkPos;
     }
 
@@ -276,11 +278,17 @@ public abstract class MixinChunk_API implements Chunk {
 
     @Override
     public Vector3i getBiomeMin() {
+        if (this.api$biomeMin == null) {
+            this.api$biomeMin = new Vector3i(this.getBlockMin().getX(), 0, this.getBlockMin().getZ());
+        }
         return this.api$biomeMin;
     }
 
     @Override
     public Vector3i getBiomeMax() {
+        if (this.api$biomeMax == null) {
+            this.api$biomeMax = new Vector3i(this.getBlockMax().getX(), 0, this.getBlockMax().getZ());
+        }
         return this.api$biomeMax;
     }
 
@@ -291,11 +299,17 @@ public abstract class MixinChunk_API implements Chunk {
 
     @Override
     public Vector3i getBlockMin() {
+        if (this.api$blockMin == null) {
+            this.api$blockMin = SpongeChunkLayout.instance.forceToWorld(this.getPosition());
+        }
         return this.api$blockMin;
     }
 
     @Override
     public Vector3i getBlockMax() {
+        if (this.api$blockMax == null) {
+            this.api$blockMax = this.getBlockMin().add(SpongeChunkLayout.CHUNK_SIZE).sub(1, 1, 1);
+        }
         return this.api$blockMax;
     }
 
@@ -306,23 +320,23 @@ public abstract class MixinChunk_API implements Chunk {
 
     @Override
     public boolean containsBiome(int x, int y, int z) {
-        return VecHelper.inBounds(x, y, z, this.api$biomeMin, this.api$biomeMax);
+        return VecHelper.inBounds(x, y, z, this.getBiomeMin(), this.getBiomeMax());
     }
 
     @Override
     public boolean containsBlock(int x, int y, int z) {
-        return VecHelper.inBounds(x, y, z, this.api$blockMin, this.api$blockMax);
+        return VecHelper.inBounds(x, y, z, this.getBlockMin(), this.getBlockMax());
     }
 
     private void checkBiomeBounds(int x, int y, int z) {
         if (!containsBiome(x, y, z)) {
-            throw new PositionOutOfBoundsException(new Vector3i(x, y, z), this.api$biomeMin, this.api$biomeMax);
+            throw new PositionOutOfBoundsException(new Vector3i(x, y, z), this.getBiomeMin(), this.getBiomeMax());
         }
     }
 
     private void checkBlockBounds(int x, int y, int z) {
         if (!containsBlock(x, y, z)) {
-            throw new PositionOutOfBoundsException(new Vector3i(x, y, z), this.api$blockMin, this.api$blockMax);
+            throw new PositionOutOfBoundsException(new Vector3i(x, y, z), this.getBlockMin(), this.getBlockMax());
         }
     }
 
@@ -346,7 +360,7 @@ public abstract class MixinChunk_API implements Chunk {
     @Override
     public org.spongepowered.api.entity.Entity createEntity(EntityType type, Vector3d position)
             throws IllegalArgumentException, IllegalStateException {
-        return ((org.spongepowered.api.world.World) this.world).createEntity(type, this.api$chunkPos.mul(16).toDouble().add(position.min(15, this.api$blockMax.getY(), 15)));
+        return ((org.spongepowered.api.world.World) this.world).createEntity(type, this.getPosition().mul(16).toDouble().add(position.min(15, this.api$blockMax.getY(), 15)));
     }
 
     @Override
@@ -356,7 +370,7 @@ public abstract class MixinChunk_API implements Chunk {
 
     @Override
     public Optional<org.spongepowered.api.entity.Entity> createEntity(DataContainer entityContainer, Vector3d position) {
-        return ((org.spongepowered.api.world.World) this.world).createEntity(entityContainer, this.api$chunkPos.mul(16).toDouble().add(position.min(15, this.api$blockMax.getY(), 15)));
+        return ((org.spongepowered.api.world.World) this.world).createEntity(entityContainer, this.getPosition().mul(16).toDouble().add(position.min(15, this.api$blockMax.getY(), 15)));
     }
 
     @Override
@@ -487,7 +501,7 @@ public abstract class MixinChunk_API implements Chunk {
     public Set<AABB> getIntersectingBlockCollisionBoxes(AABB box) {
         final Vector3i max = this.api$blockMax.add(Vector3i.ONE);
         return ((org.spongepowered.api.world.World) this.world).getIntersectingBlockCollisionBoxes(box).stream()
-                .filter(aabb -> VecHelper.inBounds(aabb.getCenter(), this.api$blockMin, max))
+                .filter(aabb -> VecHelper.inBounds(aabb.getCenter(), this.getBlockMin(), max))
                 .collect(Collectors.toSet());
     }
 
@@ -495,7 +509,7 @@ public abstract class MixinChunk_API implements Chunk {
     public Set<AABB> getIntersectingCollisionBoxes(org.spongepowered.api.entity.Entity owner, AABB box) {
         final Vector3i max = this.api$blockMax.add(Vector3i.ONE);
         return ((org.spongepowered.api.world.World) this.world).getIntersectingCollisionBoxes(owner, box).stream()
-                .filter(aabb -> VecHelper.inBounds(aabb.getCenter(), this.api$blockMin, max))
+                .filter(aabb -> VecHelper.inBounds(aabb.getCenter(), this.getBlockMin(), max))
                 .collect(Collectors.toSet());
     }
 

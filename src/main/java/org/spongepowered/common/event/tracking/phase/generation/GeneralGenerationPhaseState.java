@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.BiConsumer;
 
 /**
  * A generalized generation phase state. Used for entering populator world generation,
@@ -170,6 +171,11 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
 
     @Override
     public boolean doesCaptureEntitySpawns() {
+        return false;
+    }
+
+    @Override
+    public boolean shouldProvideModifiers(G phaseContext) {
         return false;
     }
 
