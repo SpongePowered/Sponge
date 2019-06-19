@@ -54,6 +54,7 @@ import org.spongepowered.common.data.util.DataVersions;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.util.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -133,6 +134,13 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
 
         this.data.setTag("Pos", NbtDataUtil.newDoubleNBTList(x, y, z));
         this.data.setInteger("Dimension", ((WorldInfoBridge) location.getExtent().getProperties()).getDimensionId());
+        final boolean requiresInitialSpawn;
+        if (this.data.hasKey(Constants.Sponge.EntityArchetype.REQUIRES_EXTRA_INITIAL_SPAWN)) {
+            requiresInitialSpawn = !this.data.getBoolean(Constants.Sponge.EntityArchetype.REQUIRES_EXTRA_INITIAL_SPAWN);
+            this.data.removeTag(Constants.Sponge.EntityArchetype.REQUIRES_EXTRA_INITIAL_SPAWN);
+        } else {
+            requiresInitialSpawn = true;
+        }
         entity.readFromNBT(this.data);
         this.data.removeTag("Pos");
         this.data.removeTag("Dimension");
@@ -146,14 +154,13 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
         if (!event.isCancelled()) {
             final ServerWorldBridge mixinWorldServer = (ServerWorldBridge) worldServer;
             entity.setPositionAndRotation(x, y, z, entity.rotationYaw, entity.rotationPitch);
+            mixinWorldServer.bridge$forceSpawnEntity((org.spongepowered.api.entity.Entity) entity);
             if (entity instanceof EntityLiving) {
                 // This is ok to force spawn since we aren't considering custom items.
-                mixinWorldServer.bridge$forceSpawnEntity((org.spongepowered.api.entity.Entity) entity);
-                ((EntityLiving) entity).onInitialSpawn(worldServer.getDifficultyForLocation(blockPos), null);
+                if (requiresInitialSpawn) {
+                    ((EntityLiving) entity).onInitialSpawn(worldServer.getDifficultyForLocation(blockPos), null);
+                }
                 ((EntityLiving) entity).spawnExplosionParticle();
-            } else {
-                // This is ok to force spawn since we aren't considering custom items.
-                mixinWorldServer.bridge$forceSpawnEntity((org.spongepowered.api.entity.Entity) entity);
             }
             return Optional.of(spongeEntity);
         }

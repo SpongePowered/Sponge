@@ -46,6 +46,7 @@ import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.DataVersions;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -114,6 +115,7 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
         compound.removeTag(NbtDataUtil.UUID);
         compound.removeTag(NbtDataUtil.UUID_MOST);
         compound.removeTag(NbtDataUtil.UUID_LEAST);
+        compound.setBoolean(Constants.Sponge.EntityArchetype.REQUIRES_EXTRA_INITIAL_SPAWN, true);
         this.compound = compound;
         return this;
     }

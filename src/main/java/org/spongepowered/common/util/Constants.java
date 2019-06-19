@@ -65,6 +65,12 @@ public final class Constants {
 
         public static final int MAX_DEATH_EVENTS_BEFORE_GIVING_UP = 3;
         public static final GameRules DEFAULT_GAME_RULES = new GameRules();
+
+        public static final class EntityArchetype {
+
+            public static final String REQUIRES_EXTRA_INITIAL_SPAWN = "RequireInitialSpawn";
+
+        }
     }
 
     public static final class Permissions {
