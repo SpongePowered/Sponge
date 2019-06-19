@@ -393,7 +393,7 @@ public class SpongeCommandFactory {
                         if (((IMixinWorld) worldserver).isFake() || worldserver.getWorldInfo() == null) {
                             return Text.of(NEWLINE_TEXT, "Fake world");
                         }
-                        return Text.of(NEWLINE_TEXT, key("DimensionId: "), value(WorldManager.getDimensionId(worldserver)), NEWLINE_TEXT,
+                        return Text.of(NEWLINE_TEXT, key("DimensionId: "), value(((IMixinWorldServer) worldserver).getDimensionId()), NEWLINE_TEXT,
                                 key("Loaded chunks: "), value(worldserver.getChunkProvider().getLoadedChunkCount()), NEWLINE_TEXT,
                                 key("Active chunks: "), value(worldserver.getChunkProvider().getLoadedChunks().size()), NEWLINE_TEXT,
                                 key("Entities: "), value(worldserver.loadedEntityList.size()), NEWLINE_TEXT,

@@ -52,6 +52,7 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.chunk.storage.AnvilSaveHandler;
+import net.minecraft.world.chunk.storage.RegionFileCache;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.SaveHandler;
 import net.minecraft.world.storage.WorldInfo;
@@ -63,6 +64,7 @@ import org.spongepowered.api.util.file.CopyFileVisitor;
 import org.spongepowered.api.util.file.DeleteFileVisitor;
 import org.spongepowered.api.util.file.ForwardingFileVisitor;
 import org.spongepowered.api.world.DimensionTypes;
+import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeImpl;
@@ -131,13 +133,13 @@ public final class WorldManager {
     private static final Comparator<WorldServer>
             WORLD_SERVER_COMPARATOR =
             (world1, world2) -> {
-                final Integer world1DimId = ((IMixinWorldServer) world1).getDimensionId();
+                final int world1DimId = ((IMixinWorldServer) world1).getDimensionId();
 
                 if (world2 == null) {
                     return world1DimId;
                 }
 
-                final Integer world2DimId = ((IMixinWorldServer) world2).getDimensionId();
+                final int world2DimId = ((IMixinWorldServer) world2).getDimensionId();
                 return world1DimId - world2DimId;
             };
 
@@ -564,7 +566,11 @@ public final class WorldManager {
     }
 
     public static void saveWorld(WorldServer worldServer, boolean flush) throws MinecraftException {
-        worldServer.saveAllChunks(true, null);
+        if (((WorldProperties) worldServer.getWorldInfo()).getSerializationBehavior() == SerializationBehaviors.NONE) {
+            return;
+        } else {
+            worldServer.saveAllChunks(true, null);
+        }
         if (flush) {
             worldServer.flush();
         }
@@ -905,7 +911,7 @@ public final class WorldManager {
         final Iterator<WorldServer> iterator = worlds.iterator();
         while(iterator.hasNext()) {
             final IMixinWorldServer mixinWorld = (IMixinWorldServer) iterator.next();
-            final Integer dimensionId = mixinWorld.getDimensionId();
+            final int dimensionId = mixinWorld.getDimensionId();
             if (vanillaWorldIds.contains(dimensionId)) {
                 iterator.remove();
             }
@@ -1289,10 +1295,6 @@ public final class WorldManager {
         }
 
         return ((IMixinWorldServer) world).getDimensionId();
-    }
-
-    @Nullable public static Integer getDimensionId(WorldServer world) {
-        return ((IMixinWorldInfo) world.getWorldInfo()).getDimensionId();
     }
 
     public static boolean isKnownWorld(WorldServer world) {

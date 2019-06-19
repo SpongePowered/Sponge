@@ -25,31 +25,55 @@
 package org.spongepowered.common.event.tracking.phase.entity;
 
 import net.minecraft.world.WorldServer;
-import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.api.entity.Transform;
+import org.spongepowered.api.world.PortalAgent;
+import org.spongepowered.api.world.World;
 import org.spongepowered.common.event.tracking.IPhaseState;
 
-public class TeleportingContext extends EntityContext<TeleportingContext> {
+public final class InvokingTeleporterContext extends EntityContext<InvokingTeleporterContext> {
 
-    private WorldServer targetWorld;
+    private WorldServer world;
+    private PortalAgent agent;
+    private Transform<World> transform;
+    private boolean didPort = false;
 
-    TeleportingContext(
-        IPhaseState<? extends TeleportingContext> state) {
+    InvokingTeleporterContext(IPhaseState<? extends InvokingTeleporterContext> state) {
         super(state);
     }
 
-    public WorldServer getTargetWorld() {
-        return this.targetWorld;
-    }
-
-    public TeleportingContext setTargetWorld(WorldServer targetWorld) {
-        this.targetWorld = targetWorld;
+    public InvokingTeleporterContext setTargetWorld(WorldServer world) {
+        this.world = world;
         return this;
     }
 
-    @Override
-    public PrettyPrinter printCustom(PrettyPrinter printer, int indent) {
-        String s = String.format("%1$"+indent+"s", "");
-        return super.printCustom(printer, indent)
-            .add(s + "- %s: %s", "TargetTeleportWorld", this.targetWorld);
+    public WorldServer getTargetWorld() {
+        return this.world;
+    }
+
+    public InvokingTeleporterContext setTeleporter(PortalAgent agent) {
+        this.agent = agent;
+        return this;
+    }
+
+    public PortalAgent getTeleporter() {
+        return this.agent;
+    }
+
+    public InvokingTeleporterContext setExitTransform(Transform<World> transform) {
+        this.transform = transform;
+        return this;
+    }
+
+    public Transform<World> getExitTransform() {
+        return this.transform;
+    }
+
+    public InvokingTeleporterContext setDidPort(boolean didPort) {
+        this.didPort = didPort;
+        return this;
+    }
+
+    public boolean getDidPort() {
+        return this.didPort;
     }
 }

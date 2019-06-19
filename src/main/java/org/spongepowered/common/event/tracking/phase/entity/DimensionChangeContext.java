@@ -24,34 +24,32 @@
  */
 package org.spongepowered.common.event.tracking.phase.entity;
 
+import net.minecraft.world.WorldServer;
+import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 
-public final class EntityPhase extends TrackingPhase {
+public class DimensionChangeContext extends EntityContext<DimensionChangeContext> {
 
-    public static final class State {
-        public static final IPhaseState<EntityDeathContext> DEATH = new EntityDeathState();
-        public static final IPhaseState<BasicEntityContext> DEATH_UPDATE = new DeathUpdateState();
-        public static final IPhaseState<DimensionChangeContext> CHANGING_DIMENSION = new ChangingToDimensionState();
-        public static final IPhaseState<InvokingTeleporterContext> INVOKING_TELEPORTER = new InvokingTeleporterState();
-        public static final IPhaseState<BasicEntityContext> LEAVING_DIMENSION = new LeavingDimensionState();
-        public static final IPhaseState<BasicEntityContext> PLAYER_WAKE_UP = new PlayerWakeUpState();
-        public static final IPhaseState<BasicEntityContext> ENTITY_DROP_ITEMS = new EntityDropPhaseState();
+    private WorldServer targetWorld;
 
-        private State() {
-        }
+    DimensionChangeContext(
+        IPhaseState<? extends DimensionChangeContext> state) {
+        super(state);
     }
 
-
-    public static EntityPhase getInstance() {
-        return Holder.INSTANCE;
+    public WorldServer getTargetWorld() {
+        return this.targetWorld;
     }
 
-    private EntityPhase() {
+    public DimensionChangeContext setTargetWorld(WorldServer targetWorld) {
+        this.targetWorld = targetWorld;
+        return this;
     }
 
-    private static final class Holder {
-        static final EntityPhase INSTANCE = new EntityPhase();
+    @Override
+    public PrettyPrinter printCustom(PrettyPrinter printer, int indent) {
+        String s = String.format("%1$"+indent+"s", "");
+        return super.printCustom(printer, indent)
+            .add(s + "- %s: %s", "TargetTeleportWorld", this.targetWorld);
     }
-
 }
