@@ -94,5 +94,4 @@ public class GrowablePhaseState implements IPhaseState<GrowablePhaseContext> {
     public boolean doesBulkBlockCapture(GrowablePhaseContext context) {
         return true;
     }
-
 }

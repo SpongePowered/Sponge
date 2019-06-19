@@ -92,6 +92,11 @@ class DimensionTickPhaseState extends TickPhaseState<DimensionContext> {
     }
 
     @Override
+    public boolean allowChunkLoads() {
+        return true;
+    }
+
+    @Override
     public boolean doesCaptureEntitySpawns() {
         return false;
     }

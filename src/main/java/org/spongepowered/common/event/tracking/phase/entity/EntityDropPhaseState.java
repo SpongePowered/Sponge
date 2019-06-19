@@ -140,6 +140,4 @@ public class EntityDropPhaseState extends EntityPhaseState<BasicEntityContext> {
 
         });
     }
-
-
 }
