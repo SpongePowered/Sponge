@@ -41,7 +41,7 @@ import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 import org.spongepowered.common.bridge.world.ChunkBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
-import org.spongepowered.common.interfaces.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
 import co.aikar.timings.Timings;
 import com.google.common.collect.ImmutableList;
@@ -104,7 +104,6 @@ import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
 import org.spongepowered.common.util.SpongeHooks;
-import org.spongepowered.common.world.WorldManager;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -393,7 +392,7 @@ public class SpongeCommandFactory {
                         if (((WorldBridge) worldserver).isFake() || worldserver.getWorldInfo() == null) {
                             return Text.of(NEWLINE_TEXT, "Fake world");
                         }
-                        return Text.of(NEWLINE_TEXT, key("DimensionId: "), value(WorldManager.getDimensionId(worldserver)), NEWLINE_TEXT,
+                        return Text.of(NEWLINE_TEXT, key("DimensionId: "), value(((ServerWorldBridge) worldserver).bridge$getDimensionId()), NEWLINE_TEXT,
                                 key("Loaded chunks: "), value(worldserver.getChunkProvider().getLoadedChunkCount()), NEWLINE_TEXT,
                                 key("Active chunks: "), value(worldserver.getChunkProvider().getLoadedChunks().size()), NEWLINE_TEXT,
                                 key("Entities: "), value(worldserver.loadedEntityList.size()), NEWLINE_TEXT,

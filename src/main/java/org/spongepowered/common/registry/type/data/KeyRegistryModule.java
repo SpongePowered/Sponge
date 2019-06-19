@@ -78,7 +78,7 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
     @Override
     public void registerDefaults() {
         checkState(!SpongeDataManager.areRegistrationsComplete(), "Attempting to register Keys illegally!");
-        Sponge.getCauseStackManager().pushCause(SpongeImpl.getPlugin());
+        Sponge.getCauseStackManager().pushCause(SpongeImpl.getSpongePlugin());
 
         this.register("axis", Key.builder().type(TypeTokens.AXIS_VALUE_TOKEN).id("axis").name("Axis").query(of("Axis")).build());
 

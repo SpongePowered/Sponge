@@ -38,12 +38,12 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
-import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
-import org.spongepowered.common.interfaces.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.WorldProviderBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 
 @NonnullByDefault
 @Mixin(WorldProvider.class)
-public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvider {
+public abstract class MixinWorldProvider implements Dimension, WorldProviderBridge {
 
     @Shadow public WorldType terrainType;
     @Shadow protected World world;
@@ -86,8 +86,13 @@ public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvid
     }
 
     @Override
-    public void setGeneratorSettings(String generatorSettings) {
+    public void bridge$setGeneratorSettings(String generatorSettings) {
         this.generatorSettings = generatorSettings;
+    }
+
+    @Override
+    public float bridge$getMovementFactor() {
+        return 1.0f;
     }
 
     @Override
@@ -96,7 +101,7 @@ public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvid
     }
 
     @Override
-    public WorldBorder createServerWorldBorder() {
+    public WorldBorder bridge$createServerWorldBorder() {
         return createWorldBorder();
     }
 

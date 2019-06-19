@@ -41,8 +41,6 @@ import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.bridge.entity.EntityBridge;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
@@ -99,7 +97,7 @@ public final class AttackEntityPacketState extends BasicPacketState {
             // Something happened?
             return;
         }
-        final World spongeWorld = EntityUtil.getSpongeWorld(player);
+        final World spongeWorld = (World) player.world;
         ((Entity) entity).setNotifier(player.getUniqueID());
 
         context.getCapturedItemsSupplier()

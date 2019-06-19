@@ -33,7 +33,7 @@ import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.bridge.world.ChunkBridge;
 import org.spongepowered.common.bridge.block.BlockEventDataBridge;
-import org.spongepowered.common.interfaces.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 
 import javax.annotation.Nullable;
 

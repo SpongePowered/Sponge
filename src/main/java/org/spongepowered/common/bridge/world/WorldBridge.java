@@ -30,7 +30,6 @@ import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.world.Dimension;
-import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 
 import javax.annotation.Nullable;
 

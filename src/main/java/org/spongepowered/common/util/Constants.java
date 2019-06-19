@@ -94,6 +94,11 @@ public final class Constants {
          */
         public static final EnumFacing[] NOTIFY_DIRECTIONS = {EnumFacing.WEST, EnumFacing.EAST, EnumFacing.DOWN, EnumFacing.UP, EnumFacing.NORTH, EnumFacing.SOUTH};
         public static final EnumSet<EnumFacing> NOTIFY_DIRECTION_SET = EnumSet.of(EnumFacing.WEST, EnumFacing.EAST, EnumFacing.DOWN, EnumFacing.UP, EnumFacing.NORTH, EnumFacing.SOUTH);
+        public static final class Teleporter {
+
+            public static final int DEFAULT_SEARCH_RADIUS = 128;
+            public static final int DEFAULT_CREATION_RADIUS = 16;
+        }
     }
 
     public static final class Chunk {

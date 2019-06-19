@@ -22,26 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world;
+package org.spongepowered.common.bridge.world;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.world.Teleporter;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldProvider;
-import org.spongepowered.api.world.PortalAgentType;
 
 /**
  * Compatibility interface to handle Forge binary patching {@link Teleporter} to implement their ITeleporter
  */
-public interface IMixinITeleporter {
+public interface ForgeITeleporterBridge {
 
     // Copied from Forge to match their teleporter methods, this allows
     // the forge mod provided teleporters to still work with common
     // code.
-    void placeEntity(World world, Entity entity, float yaw);
+    void bridge$placeEntity(World world, Entity entity, float yaw);
 
     // used internally to handle vanilla hardcoding
-    default boolean isVanilla()
+    default boolean bridge$isVanilla()
     {
         return this.getClass().equals(Teleporter.class);
     }

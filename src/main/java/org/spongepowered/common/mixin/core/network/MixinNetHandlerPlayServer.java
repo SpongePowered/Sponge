@@ -515,7 +515,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                         event = SpongeEventFactory.createMoveEntityEventPosition(Sponge.getCauseStackManager().getCurrentCause(), fromTransform, toTransform, player);
                     }
                     if (SpongeImpl.postEvent(event)) {
-                        mixinPlayer.setLocationAndAngles(fromTransform);
+                        mixinPlayer.bridge$setLocationAndAngles(fromTransform);
                         this.lastMoveLocation = fromLocation;
                         mixinPlayer.setVelocityOverride(null);
                         return true;
@@ -527,7 +527,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                     }
                 }
                 if (!toTransform.equals(originalToTransform)) {
-                    mixinPlayer.setLocationAndAngles(toTransform);
+                    mixinPlayer.bridge$setLocationAndAngles(toTransform);
                     this.lastMoveLocation = toTransform.getLocation();
                     mixinPlayer.setVelocityOverride(null);
                     return true;

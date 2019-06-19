@@ -90,8 +90,8 @@ import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
-import org.spongepowered.common.interfaces.world.IMixinTeleporter;
-import org.spongepowered.common.interfaces.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.TeleporterBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.WorldManager;
@@ -212,6 +212,7 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
         return false;
     }
 
+    @SuppressWarnings({"ConstantConditions", "RedundantCast"})
     @Override
     public boolean setLocation(Location<World> location) {
         checkNotNull(location, "The location was null!");
@@ -226,7 +227,7 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
         try (final BasicPluginContext context = PluginPhase.State.TELEPORT.createPhaseContext()) {
             context.buildAndSwitch();
 
-            final MoveEntityEvent event;
+            MoveEntityEvent.Teleport event;
 
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 if (!frame.getCurrentContext().containsKey(EventContextKeys.TELEPORT_TYPE)) {
@@ -246,62 +247,60 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
             final ServerChunkProviderBridge chunkProviderServer = (ServerChunkProviderBridge) ((WorldServer) this.world).getChunkProvider();
             chunkProviderServer.setForceChunkRequests(true);
 
-            final net.minecraft.entity.Entity thisEntity = (net.minecraft.entity.Entity) (Object) this;
-            final List<net.minecraft.entity.Entity> passengers = thisEntity.getPassengers();
+            final List<net.minecraft.entity.Entity> passengers = ((Entity) (Object) this).getPassengers();
 
             boolean isTeleporting = true;
             boolean isChangingDimension = false;
             if (location.getExtent().getUniqueId() != ((World) this.world).getUniqueId()) {
-                if (((Entity) (Object) this) instanceof EntityPlayerMP) {
+                if ((net.minecraft.entity.Entity) (Object) this instanceof EntityPlayerMP) {
                     // Close open containers
                     final EntityPlayerMP entityPlayerMP = (EntityPlayerMP) (Object) this;
                     if (entityPlayerMP.openContainer != entityPlayerMP.inventoryContainer) {
                         ((Player) entityPlayerMP).closeInventory(); // Call API method to make sure we capture it
                     }
 
-                    EntityUtil.teleportPlayerToDimension(entityPlayerMP, ((ServerWorldBridge) location.getExtent()).bridge$getDimensionId(),
-                        (IMixinTeleporter) ((WorldServer) location.getExtent()).getDefaultTeleporter(), event);
+                    EntityUtil.transferPlayerToWorld(entityPlayerMP, event, (WorldServer) location.getExtent(),
+                        (TeleporterBridge) ((WorldServer) location.getExtent()).getDefaultTeleporter());
                 } else {
-                    EntityUtil.transferEntityToDimension((Entity) (Object) this, ((ServerWorldBridge) location.getExtent()).bridge$getDimensionId(),
-                        (IMixinTeleporter) ((WorldServer) location.getExtent()).getDefaultTeleporter(), event);
+                    EntityUtil.transferEntityToWorld((Entity) (Object) this, event, (WorldServer) location.getExtent(),
+                        (TeleporterBridge) ((WorldServer) location.getExtent()).getDefaultTeleporter(), false);
                 }
 
                 isChangingDimension = true;
             }
 
-            final double distance = location.getPosition().distance(this.getPosition());
+            double distance = location.getPosition().distance(this.getPosition());
 
             if (distance <= 4) {
                 isTeleporting = false;
             }
 
-            if (thisEntity instanceof EntityPlayerMP && ((EntityPlayerMP) thisEntity).connection != null) {
-                final EntityPlayerMP entityPlayerMP = (EntityPlayerMP) thisEntity;
+            if ((Entity) (Object) this instanceof EntityPlayerMP && ((EntityPlayerMP) (Entity) (Object) this).connection != null) {
+                final EntityPlayerMP player = (EntityPlayerMP) (Entity) (Object) this;
 
                 // No reason to attempt to load chunks unless we're teleporting
                 if (isTeleporting || isChangingDimension) {
                     // Close open containers
-                    if (entityPlayerMP.openContainer != entityPlayerMP.inventoryContainer) {
-                        ((Player) entityPlayerMP).closeInventory(); // Call API method to make sure we capture it
+                    if (player.openContainer != player.inventoryContainer) {
+                        ((Player) player).closeInventory(); // Call API method to make sure we capture it
                     }
 
-                    ((WorldServer) location.getExtent()).getChunkProvider()
-                        .loadChunk(location.getChunkPosition().getX(), location.getChunkPosition().getZ());
+                    ((WorldServer) location.getExtent()).getChunkProvider().loadChunk(location.getChunkPosition().getX(), location.getChunkPosition().getZ());
                 }
-                entityPlayerMP.connection
-                    .setPlayerLocation(location.getX(), location.getY(), location.getZ(), thisEntity.rotationYaw, thisEntity.rotationPitch);
-                ((IMixinNetHandlerPlayServer) entityPlayerMP.connection).setLastMoveLocation(null); // Set last move to teleport target
+                player.connection
+                    .setPlayerLocation(location.getX(), location.getY(), location.getZ(), ((Entity) (Object) this).rotationYaw, ((Entity) (Object) this).rotationPitch);
+                ((IMixinNetHandlerPlayServer) player.connection).setLastMoveLocation(null); // Set last move to teleport target
             } else {
                 setPosition(location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ());
             }
 
             if (isTeleporting || isChangingDimension) {
                 // Re-attach passengers
-                for (final net.minecraft.entity.Entity passenger : passengers) {
+                for (net.minecraft.entity.Entity passenger : passengers) {
                     if (((World) passenger.getEntityWorld()).getUniqueId() != ((World) this.world).getUniqueId()) {
-                        ((MixinEntity_API) (Object) passenger).setLocation(location);
+                        ((org.spongepowered.api.entity.Entity) passenger).setLocation(location);
                     }
-                    passenger.startRiding(thisEntity, true);
+                    passenger.startRiding((Entity) (Object) this, true);
                 }
             }
 
@@ -310,6 +309,7 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
         }
     }
 
+    @SuppressWarnings({"RedundantCast", "ConstantConditions"})
     @Override
     public boolean setLocationAndRotation(final Location<World> location, final Vector3d rotation, final EnumSet<RelativePositions> relativePositions) {
         boolean relocated = true;
@@ -321,7 +321,7 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
         } else {
             if (((Entity) (Object) this) instanceof EntityPlayerMP && ((EntityPlayerMP) (Entity) (Object) this).connection != null) {
                 // Players use different logic, as they support real relative movement.
-                final EnumSet<SPacketPlayerPosLook.EnumFlags> relativeFlags = EnumSet.noneOf(SPacketPlayerPosLook.EnumFlags.class);
+                EnumSet<SPacketPlayerPosLook.EnumFlags> relativeFlags = EnumSet.noneOf(SPacketPlayerPosLook.EnumFlags.class);
 
                 if (relativePositions.contains(RelativePositions.X)) {
                     relativeFlags.add(SPacketPlayerPosLook.EnumFlags.X);
@@ -344,7 +344,7 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
                 }
 
                 ((EntityPlayerMP) ((Entity) (Object) this)).connection.setPlayerLocation(location.getPosition().getX(), location.getPosition()
-                        .getY(), location.getPosition().getZ(), (float) rotation.getY(), (float) rotation.getX(), relativeFlags);
+                    .getY(), location.getPosition().getZ(), (float) rotation.getY(), (float) rotation.getX(), relativeFlags);
             } else {
                 Location<World> resultantLocation = getLocation();
                 Vector3d resultantRotation = getRotation();

@@ -170,7 +170,7 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
                     items.addAll(itemStacks);
                     itemStacks.clear();
 
-                    final WorldServer minecraftWorld = EntityUtil.getMinecraftWorld(affectedEntity.get());
+                    final WorldServer minecraftWorld = (WorldServer) affectedEntity.get().getWorld();
                     if (!items.isEmpty())
                     {
                         csm.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);

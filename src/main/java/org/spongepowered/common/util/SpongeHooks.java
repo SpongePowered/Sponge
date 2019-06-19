@@ -63,7 +63,7 @@ import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.block.BlockBridge;
-import org.spongepowered.common.interfaces.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.ActivationCapability;
 import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.CollisionsCapability;
 import org.spongepowered.common.registry.type.BlockTypeRegistryModule;

@@ -86,6 +86,7 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.ScheduledBlockUpdate;
 import org.spongepowered.api.block.tileentity.TileEntity;
+import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.persistence.DataFormats;
@@ -141,6 +142,7 @@ import org.spongepowered.common.bridge.world.ChunkBridge;
 import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.config.category.PhaseTrackerCategory;
 import org.spongepowered.common.config.category.WorldCategory;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.data.util.DataQueries;
@@ -158,8 +160,8 @@ import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.interfaces.IMixinNextTickListEntry;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMap;
 import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
-import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
-import org.spongepowered.common.interfaces.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.WorldProviderBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.ActivationCapability;
 import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.CollisionsCapability;
@@ -463,7 +465,7 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
                 chunkGenerator = currentGenerator;
             } else {
                 final WorldProvider worldProvider = worldServer.provider;
-                ((IMixinWorldProvider) worldProvider).setGeneratorSettings(settings);
+                ((WorldProviderBridge) worldProvider).bridge$setGeneratorSettings(settings);
                 chunkGenerator = worldProvider.createChunkGenerator();
             }
             biomeProvider = worldServer.provider.biomeProvider;
@@ -1491,6 +1493,57 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
         if (chunk == null) {
             return;
         }
+        //noinspection ConstantConditions
+        if (blockIn == null) {
+            // If the block is null, check with the PhaseState to see if it can perform a safe way
+            final PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
+            final PhaseTrackerCategory trackerConfig = SpongeImpl.getGlobalConfigAdapter().getConfig().getPhaseTracker();
+
+            if (currentContext.state == TickPhase.Tick.TILE_ENTITY) {
+                // Try to save ourselves
+                final TileEntityType type = currentContext.getSource(TileEntity.class).map(TileEntity::getType).orElse(null);
+                if (type != null) {
+                    final Map<String, Boolean> autoFixedTiles = trackerConfig.getAutoFixedTiles();
+                    final boolean contained = autoFixedTiles.containsKey(type.getId());
+                    // If we didn't map the tile entity yet, we should apply the mapping
+                    // based on whether the source is the same as the TileEntity.
+                    if (!contained) {
+                        if (pos.equals(currentContext.getSource(net.minecraft.tileentity.TileEntity.class).get().getPos())) {
+                            autoFixedTiles.put(type.getId(), true);
+                        } else {
+                            autoFixedTiles.put(type.getId(), false);
+                        }
+                    }
+                    final boolean useTile = contained && autoFixedTiles.get(type.getId());
+                    if (useTile) {
+                        blockIn = ((net.minecraft.tileentity.TileEntity) currentContext.getSource()).getBlockType();
+                    } else {
+                        blockIn = (pos.getX() >> 4 == chunk.x && pos.getZ() >> 4 == chunk.z)
+                                  ? chunk.getBlockState(pos).getBlock()
+                                  : this.getBlockState(pos).getBlock();
+                    }
+                    if (!contained && trackerConfig.isReportNullSourceBlocks()) {
+                        PhaseTracker.printNullSourceBlockWithTile(pos, blockIn, otherPos, type, useTile, new NullPointerException("Null Source Block For TileEntity Neighbor Notification"));
+                    }
+                } else {
+                    blockIn = (pos.getX() >> 4 == chunk.x && pos.getZ() >> 4 == chunk.z)
+                              ? chunk.getBlockState(pos).getBlock()
+                              : this.getBlockState(pos).getBlock();
+                    if (trackerConfig.isReportNullSourceBlocks()) {
+                        PhaseTracker.printNullSourceBlockNeighborNotificationWithNoTileSource(pos, blockIn, otherPos,
+                            new NullPointerException("Null Source Block For Neighbor Notification"));
+                    }
+                }
+
+            } else {
+                blockIn = (pos.getX() >> 4 == chunk.x && pos.getZ() >> 4 == chunk.z)
+                          ? chunk.getBlockState(pos).getBlock()
+                          : this.getBlockState(pos).getBlock();
+                if (trackerConfig.isReportNullSourceBlocks()) {
+                    PhaseTracker.printNullSourceForBlock(((WorldServer) (Object) this), pos, blockIn, otherPos, new NullPointerException("Null Source Block For Neighbor Notification"));
+                }
+            }
+        }
 
         PhaseTracker.getInstance().notifyBlockOfStateChange(this, this.getBlockState(pos), pos, blockIn, otherPos);
     }
@@ -2421,7 +2474,6 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
                 .add("Name", this.worldInfo.getWorldName())
                 .add("DimensionId", this.bridge$getDimensionId())
                 .add("DimensionType", ((org.spongepowered.api.world.DimensionType) (Object) this.provider.getDimensionType()).getId())
-                .add("DimensionTypeId", this.provider.getDimensionType().getId())
                 .toString();
     }
 }

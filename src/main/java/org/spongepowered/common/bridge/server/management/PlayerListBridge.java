@@ -22,29 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world;
+package org.spongepowered.common.bridge.server.management;
 
-import net.minecraft.world.WorldProviderHell;
-import net.minecraft.world.border.WorldBorder;
-import org.spongepowered.asm.mixin.Mixin;
+public interface PlayerListBridge {
 
-@Mixin(WorldProviderHell.class)
-public abstract class MixinWorldProviderHell extends MixinWorldProvider {
-
-    @Override
-    public float bridge$getMovementFactor() {
-        return 8.0f;
-    }
-
-    /**
-     * Since each World has a WorldBorder in Sponge, let the Nether
-     * based worlds use local coordinates, not adjusted ones based on Overworld's.
-     *
-     * @return The server world border
-     */
-    @Override
-    public WorldBorder bridge$createServerWorldBorder() {
-        return new WorldBorder();
-    }
-
+    void reloadAdvancementProgress();
 }

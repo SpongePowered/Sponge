@@ -42,7 +42,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.world.ChunkBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
-import org.spongepowered.common.interfaces.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.world.BlockChange;
 
 import java.util.ArrayDeque;

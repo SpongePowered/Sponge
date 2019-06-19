@@ -27,7 +27,7 @@ package org.spongepowered.common.event;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.world.chunk.LoadChunkEvent;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.interfaces.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 
 public class SpongeCommonEventHooks {
 

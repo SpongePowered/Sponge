@@ -63,6 +63,7 @@ import org.spongepowered.api.util.file.CopyFileVisitor;
 import org.spongepowered.api.util.file.DeleteFileVisitor;
 import org.spongepowered.api.util.file.ForwardingFileVisitor;
 import org.spongepowered.api.world.DimensionTypes;
+import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeImpl;
@@ -79,7 +80,7 @@ import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.interfaces.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
 import org.spongepowered.common.util.SpongeHooks;
@@ -131,13 +132,13 @@ public final class WorldManager {
     private static final Comparator<WorldServer>
             WORLD_SERVER_COMPARATOR =
             (world1, world2) -> {
-                final Integer world1DimId = ((ServerWorldBridge) world1).bridge$getDimensionId();
+                final int world1DimId = ((ServerWorldBridge) world1).bridge$getDimensionId();
 
                 if (world2 == null) {
                     return world1DimId;
                 }
 
-                final Integer world2DimId = ((ServerWorldBridge) world2).bridge$getDimensionId();
+                final int world2DimId = ((ServerWorldBridge) world2).bridge$getDimensionId();
                 return world1DimId - world2DimId;
             };
 
@@ -564,7 +565,11 @@ public final class WorldManager {
     }
 
     public static void saveWorld(WorldServer worldServer, boolean flush) throws MinecraftException {
-        worldServer.saveAllChunks(true, null);
+        if (((WorldProperties) worldServer.getWorldInfo()).getSerializationBehavior() == SerializationBehaviors.NONE) {
+            return;
+        } else {
+            worldServer.saveAllChunks(true, null);
+        }
         if (flush) {
             worldServer.flush();
         }
@@ -905,7 +910,7 @@ public final class WorldManager {
         final Iterator<WorldServer> iterator = worlds.iterator();
         while(iterator.hasNext()) {
             final ServerWorldBridge mixinWorld = (ServerWorldBridge) iterator.next();
-            final Integer dimensionId = mixinWorld.bridge$getDimensionId();
+            final int dimensionId = mixinWorld.bridge$getDimensionId();
             if (vanillaWorldIds.contains(dimensionId)) {
                 iterator.remove();
             }
@@ -1277,7 +1282,7 @@ public final class WorldManager {
     }
 
     public static int getClientDimensionId(EntityPlayerMP player, World world) {
-        if (!((ServerPlayerEntityBridge) player).usesCustomClient()) {
+        if (!((ServerPlayerEntityBridge) player).bridge$usesCustomClient()) {
             DimensionType type = world.provider.getDimensionType();
             if (type == DimensionType.OVERWORLD) {
                 return 0;
@@ -1289,10 +1294,6 @@ public final class WorldManager {
         }
 
         return ((ServerWorldBridge) world).bridge$getDimensionId();
-    }
-
-    @Nullable public static Integer getDimensionId(WorldServer world) {
-        return ((WorldInfoBridge) world.getWorldInfo()).getDimensionId();
     }
 
     public static boolean isKnownWorld(WorldServer world) {

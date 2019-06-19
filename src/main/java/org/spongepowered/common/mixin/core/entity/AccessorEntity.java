@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.entity;
 import net.minecraft.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
 
 import java.util.Random;
 
@@ -34,5 +35,7 @@ import java.util.Random;
 public interface AccessorEntity {
 
     @Accessor("rand") Random accessor$getRandom();
+
+    @Invoker("copyDataFromOld") void accessor$CopyDataFromOldEntity(Entity entity);
 
 }

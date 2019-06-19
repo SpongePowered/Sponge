@@ -29,7 +29,6 @@ import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.RayTraceResult;
 import org.spongepowered.api.entity.projectile.Projectile;
-import org.spongepowered.api.entity.projectile.explosive.WitherSkull;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;

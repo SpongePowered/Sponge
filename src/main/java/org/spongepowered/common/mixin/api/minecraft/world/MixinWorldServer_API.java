@@ -96,7 +96,7 @@ import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.world.ServerWorldEventHandlerBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
-import org.spongepowered.common.interfaces.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.util.NonNullArrayList;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.common.world.WorldManager;

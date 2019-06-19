@@ -48,7 +48,7 @@ import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.interfaces.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 
 import java.util.Random;

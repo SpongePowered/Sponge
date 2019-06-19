@@ -27,6 +27,7 @@ package org.spongepowered.common.bridge.entity.player;
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
@@ -34,8 +35,7 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
-import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
-import org.spongepowered.common.interfaces.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.world.border.PlayerOwnBorderListener;
 
 import java.util.Collection;
@@ -45,7 +45,7 @@ import javax.annotation.Nullable;
 
 public interface ServerPlayerEntityBridge extends PlayerEntityBridge {
 
-    default boolean usesCustomClient() {
+    default boolean bridge$usesCustomClient() {
         return false;
     }
 
@@ -100,5 +100,7 @@ public interface ServerPlayerEntityBridge extends PlayerEntityBridge {
     boolean hasForcedGamemodeOverridePermission();
 
     void setContainerDisplay(Text displayName);
+
+    void setDelegateAfterRespawn(EntityPlayerMP delegate);
 
 }

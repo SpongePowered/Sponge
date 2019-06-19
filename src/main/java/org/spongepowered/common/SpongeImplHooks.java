@@ -93,7 +93,7 @@ import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
-import org.spongepowered.common.interfaces.world.IMixinITeleporter;
+import org.spongepowered.common.bridge.world.ForgeITeleporterBridge;
 import org.spongepowered.common.item.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.mixin.plugin.tileentityactivation.TileEntityActivation;
@@ -228,7 +228,7 @@ public final class SpongeImplHooks {
         return world.getPlayerChunkMap().getChunkIterator();
     }
 
-    public static void registerPortalAgentType(@Nullable IMixinITeleporter teleporter) {
+    public static void registerPortalAgentType(@Nullable ForgeITeleporterBridge teleporter) {
         // Overwritten in SpongeForge
     }
 

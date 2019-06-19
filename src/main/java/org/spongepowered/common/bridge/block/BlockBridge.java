@@ -37,7 +37,7 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.TrackableBridge;
-import org.spongepowered.common.interfaces.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 
 import java.util.List;
 import java.util.Optional;

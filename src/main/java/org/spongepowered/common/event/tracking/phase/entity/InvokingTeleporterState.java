@@ -25,31 +25,45 @@
 package org.spongepowered.common.event.tracking.phase.entity;
 
 import net.minecraft.world.WorldServer;
-import org.spongepowered.asm.util.PrettyPrinter;
-import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 
-public class TeleportingContext extends EntityContext<TeleportingContext> {
+public final class InvokingTeleporterState extends EntityPhaseState<InvokingTeleporterContext> {
 
-    private WorldServer targetWorld;
-
-    TeleportingContext(
-        IPhaseState<? extends TeleportingContext> state) {
-        super(state);
-    }
-
-    public WorldServer getTargetWorld() {
-        return this.targetWorld;
-    }
-
-    public TeleportingContext setTargetWorld(WorldServer targetWorld) {
-        this.targetWorld = targetWorld;
-        return this;
+    InvokingTeleporterState() {
     }
 
     @Override
-    public PrettyPrinter printCustom(PrettyPrinter printer, int indent) {
-        String s = String.format("%1$"+indent+"s", "");
-        return super.printCustom(printer, indent)
-            .add(s + "- %s: %s", "TargetTeleportWorld", this.targetWorld);
+    public InvokingTeleporterContext createPhaseContext() {
+        return new InvokingTeleporterContext(this)
+            .addBlockCaptures()
+            .addEntityCaptures();
+    }
+
+    @Override
+    public void unwind(InvokingTeleporterContext context) {
+    }
+
+    @Override
+    public boolean tracksBlockSpecificDrops(InvokingTeleporterContext context) {
+        return true;
+    }
+
+    @Override
+    public boolean spawnEntityOrCapture(InvokingTeleporterContext context, Entity entity, int chunkX, int chunkZ) {
+        final WorldServer worldServer = context.getTargetWorld();
+        // Allowed to use the force spawn because it's the same "entity"
+        ((ServerWorldBridge) worldServer).bridge$forceSpawnEntity(entity);
+        return true;
+    }
+
+    @Override
+    public boolean doesCaptureEntitySpawns() {
+        return false;
+    }
+
+    @Override
+    public boolean tracksEntitySpecificDrops() {
+        return true;
     }
 }

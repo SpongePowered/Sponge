@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world;
+package org.spongepowered.common.bridge.world;
 
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.state.IBlockState;
@@ -52,7 +52,7 @@ import javax.annotation.Nullable;
 
 public interface ServerWorldBridge extends WorldBridge {
 
-    Integer bridge$getDimensionId();
+    int bridge$getDimensionId();
 
     Weather bridge$getPreviousWeather();
 

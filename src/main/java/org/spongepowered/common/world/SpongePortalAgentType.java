@@ -27,18 +27,17 @@ package org.spongepowered.common.world;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
-import net.minecraft.world.Teleporter;
 import org.spongepowered.api.world.PortalAgent;
 import org.spongepowered.api.world.PortalAgentType;
-import org.spongepowered.common.interfaces.world.IMixinITeleporter;
+import org.spongepowered.common.bridge.world.ForgeITeleporterBridge;
 
 public final class SpongePortalAgentType implements PortalAgentType {
 
     private final String name;
     private final String id;
-    private final Class<? extends IMixinITeleporter> portalAgentClass;
+    private final Class<? extends ForgeITeleporterBridge> portalAgentClass;
 
-    public SpongePortalAgentType(String id, String name, Class<? extends IMixinITeleporter> portalAgentClass) {
+    public SpongePortalAgentType(String id, String name, Class<? extends ForgeITeleporterBridge> portalAgentClass) {
         this.id = checkNotNull(id);
         this.name = checkNotNull(name);
         this.portalAgentClass = checkNotNull(portalAgentClass, "The class was null! The id was: " + id);

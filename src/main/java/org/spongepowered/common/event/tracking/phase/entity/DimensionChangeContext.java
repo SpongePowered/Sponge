@@ -22,23 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.event.tracking.phase.entity;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
+import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.common.event.tracking.IPhaseState;
 
-public interface IMixinPlayerList {
+public class DimensionChangeContext extends EntityContext<DimensionChangeContext> {
 
-    double getMovementFactor(WorldProvider worldProvider);
+    private WorldServer targetWorld;
 
-    void prepareEntityForPortal(Entity entityIn, WorldServer oldWorldIn, WorldServer toWorldIn);
+    DimensionChangeContext(
+        IPhaseState<? extends DimensionChangeContext> state) {
+        super(state);
+    }
 
-    void transferPlayerToDimension(EntityPlayerMP playerIn, int targetDimensionId, net.minecraft.world.Teleporter teleporter);
+    public WorldServer getTargetWorld() {
+        return this.targetWorld;
+    }
 
-    void transferEntityToWorld(Entity entityIn, int fromDimensionId, WorldServer fromWorld, WorldServer toWorld, net.minecraft.world
-            .Teleporter teleporter);
+    public DimensionChangeContext setTargetWorld(WorldServer targetWorld) {
+        this.targetWorld = targetWorld;
+        return this;
+    }
 
-    void reloadAdvancementProgress();
+    @Override
+    public PrettyPrinter printCustom(PrettyPrinter printer, int indent) {
+        String s = String.format("%1$"+indent+"s", "");
+        return super.printCustom(printer, indent)
+            .add(s + "- %s: %s", "TargetTeleportWorld", this.targetWorld);
+    }
 }

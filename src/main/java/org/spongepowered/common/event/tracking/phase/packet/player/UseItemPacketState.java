@@ -30,6 +30,7 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.CPacketPlayerTryUseItem;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
@@ -40,7 +41,6 @@ import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
@@ -96,7 +96,7 @@ public final class UseItemPacketState extends BasicPacketState {
         BasicPacketContext context) {
         Player player = context.getSpongePlayer();
         BlockPos pos = VecHelper.toBlockPos(transaction.getFinal().getLocation().get());
-        ChunkBridge spongeChunk = (ChunkBridge) EntityUtil.getMinecraftWorld(player).getChunk(pos);
+        ChunkBridge spongeChunk = (ChunkBridge) ((WorldServer) player.getWorld()).getChunk(pos);
         if (blockChange == BlockChange.PLACE) {
             spongeChunk.addTrackedBlockPosition((Block) transaction.getFinal().getState().getType(), pos, player, PlayerTracker.Type.OWNER);
         }

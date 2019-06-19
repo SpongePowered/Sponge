@@ -128,9 +128,9 @@ public interface EntityBridge extends TrackableBridge, IUserOrEntity, TimingHold
 
     void setDestructCause(Cause cause);
 
-    void setLocationAndAngles(Location<World> location);
+    void bridge$setLocationAndAngles(Location<World> location);
 
-    void setLocationAndAngles(Transform<World> transform);
+    void bridge$setLocationAndAngles(Transform<World> transform);
 
     void createForgeCapabilities();
 

@@ -24,17 +24,19 @@
  */
 package org.spongepowered.common.mixin.core.entity.item;
 
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityEnderPearl;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -42,10 +44,14 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.mixin.core.entity.projectile.MixinEntityThrowable;
 
+import javax.annotation.Nullable;
+
 @Mixin(EntityEnderPearl.class)
 public abstract class MixinEntityEnderPearl extends MixinEntityThrowable {
 
-    public double damageAmount;
+    @Shadow private EntityLivingBase perlThrower;
+
+    private double damageAmount;
 
     @ModifyArg(method = "onImpact",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"))
@@ -65,7 +71,7 @@ public abstract class MixinEntityEnderPearl extends MixinEntityThrowable {
             frame.addContext(EventContextKeys.PROJECTILE_SOURCE, (Player) player);
             frame.addContext(EventContextKeys.THROWER, (Player) player); // TODO - remove in API 8/1.13
 
-            MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent(player, ((Entity) this).getLocation());
+            MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent(player, ((org.spongepowered.api.entity.Entity) this).getLocation());
             if (event.isCancelled()) {
                 return true;
             }
@@ -88,4 +94,21 @@ public abstract class MixinEntityEnderPearl extends MixinEntityThrowable {
         compound.setDouble(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT, this.damageAmount);
     }
 
+    /**
+     * @author Zidane - June 2019 - 1.12.2
+     * @reason Only have this ender pearl remove the thrower references if we actually changed dimension
+     */
+    @Override
+    @Nullable
+    public Entity changeDimension(int dimensionIn) {
+        final Entity entity = super.changeDimension(dimensionIn);
+
+        if (entity instanceof EntityEnderPearl) {
+            // We actually teleported so...
+            this.perlThrower = null;
+            this.thrower = null;
+        }
+
+        return entity;
+    }
 }

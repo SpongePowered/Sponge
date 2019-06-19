@@ -66,6 +66,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.ChunkTicketManager;
+import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.api.world.World;
@@ -106,7 +107,7 @@ import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.IMixinSubject;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.interfaces.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
 import org.spongepowered.common.mixin.core.world.storage.MixinWorldInfo;
 import org.spongepowered.common.profile.SpongeProfileManager;
@@ -375,7 +376,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             context.buildAndSwitch();
             int i = 0;
             this.setUserMessage("menu.generatingTerrain");
-            LOGGER.info("Preparing start region for level {} ({})", ((ServerWorldBridge) worldServer).bridge$getDimensionId(), ((World) worldServer).getName());
+            LOGGER.info("Preparing start region for world {} ({}/{})", worldServer.getWorldInfo().getWorldName(),
+                ((DimensionType) (Object) worldServer.provider.getDimensionType()).getId(), ((ServerWorldBridge) worldServer).bridge$getDimensionId());
             BlockPos blockpos = worldServer.getSpawnPoint();
             long j = MinecraftServer.getCurrentTimeMillis();
             for (int k = -192; k <= 192 && this.isServerRunning(); k += 16) {
@@ -617,7 +619,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             // Return overworld provider
             return ((net.minecraft.world.World) Sponge.getServer().getWorlds().iterator().next()).provider;
         }
-        this.dimensionId = WorldManager.getDimensionId(world);
+        this.dimensionId = ((ServerWorldBridge) world).bridge$getDimensionId();
         return world.provider;
     }
 
@@ -657,18 +659,23 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         if (!this.enableSaving) {
             return;
         }
-        for (WorldServer worldserver : this.worlds) {
-            if (worldserver != null && worldserver.getChunkProvider().canSave()) {
+        for (WorldServer world : this.worlds) {
+            final boolean save = world.getChunkProvider().canSave() && ((WorldProperties) world.getWorldInfo()).getSerializationBehavior() != SerializationBehaviors.NONE;
+            boolean log = !dontLog;
+
+            if (save) {
                 // Sponge start - check auto save interval in world config
                 if (this.isDedicatedServer() && this.isServerRunning()) {
-                    final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) worldserver.getWorldInfo()).getConfigAdapter();
+                    final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) world.getWorldInfo()).getConfigAdapter();
                     final int autoSaveInterval = configAdapter.getConfig().getWorld().getAutoSaveInterval();
-                    final boolean logAutoSave = configAdapter.getConfig().getLogging().worldAutoSaveLogging();
+                    if (log) {
+                        log = configAdapter.getConfig().getLogging().logWorldAutomaticSaving();
+                    }
                     if (autoSaveInterval <= 0
-                            || ((WorldProperties) worldserver.getWorldInfo()).getSerializationBehavior() != SerializationBehaviors.AUTOMATIC) {
-                        if (logAutoSave) {
-                            LOGGER.warn("Auto-saving has been disabled for level \'" + worldserver.getWorldInfo().getWorldName() + "\'/"
-                                    + worldserver.provider.getDimensionType().getName() + ". "
+                            || ((WorldProperties) world.getWorldInfo()).getSerializationBehavior() != SerializationBehaviors.AUTOMATIC) {
+                        if (log) {
+                            LOGGER.warn("Auto-saving has been disabled for level \'" + world.getWorldInfo().getWorldName() + "\'/"
+                                    + world.provider.getDimensionType().getName() + ". "
                                     + "No chunk data will be auto-saved - to re-enable auto-saving set 'auto-save-interval' to a value greater than"
                                     + " zero in the corresponding world config.");
                         }
@@ -677,18 +684,18 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                     if (this.tickCounter % autoSaveInterval != 0) {
                         continue;
                     }
-                    if (logAutoSave) {
-                        LOGGER.info("Auto-saving chunks for level \'" + worldserver.getWorldInfo().getWorldName() + "\'/"
-                                + worldserver.provider.getDimensionType().getName());
+                    if (log) {
+                        LOGGER.info("Auto-saving chunks for level \'" + world.getWorldInfo().getWorldName() + "\'/"
+                                + world.provider.getDimensionType().getId());
                     }
-                } else if (!dontLog) {
-                    LOGGER.info("Saving chunks for level \'" + worldserver.getWorldInfo().getWorldName() + "\'/"
-                        + worldserver.provider.getDimensionType().getName());
+                } else if (log) {
+                    LOGGER.info("Saving chunks for level \'" + world.getWorldInfo().getWorldName() + "\'/"
+                        + world.provider.getDimensionType().getId());
                 }
 
                 // Sponge end
                 try {
-                    WorldManager.saveWorld(worldserver, false);
+                    WorldManager.saveWorld(world, false);
                 } catch (MinecraftException ex) {
                     ex.printStackTrace();
                 }

@@ -34,6 +34,7 @@ import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.CombatEntry;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
@@ -186,7 +187,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
         phaseContext.getCapturedItemStackSupplier()
                 .acceptAndClearIfNotEmpty(drops -> {
                     final List<Entity> items = drops.stream()
-                            .map(drop -> drop.create(EntityUtil.getMinecraftWorld(tickingEntity)))
+                            .map(drop -> drop.create((WorldServer) tickingEntity.getWorld()))
                             .map(entity -> (Entity) entity)
                             .collect(Collectors.toList());
                     frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
@@ -220,7 +221,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
     }
 
     private void appendContextOfPossibleEntityDeath(Entity tickingEntity, CauseStackManager.StackFrame frame) {
-        if (EntityUtil.isEntityDead(tickingEntity)) {
+        if (EntityUtil.isEntityDead((net.minecraft.entity.Entity) tickingEntity)) {
             if (tickingEntity instanceof EntityLivingBase) {
                 CombatEntry entry = ((EntityLivingBase) tickingEntity).getCombatTracker().getBestCombatEntry();
                 if (entry != null) {
@@ -244,7 +245,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
         if (blockChange == BlockChange.BREAK) {
             final Entity tickingEntity = context.getSource(Entity.class).get();
             final BlockPos blockPos = VecHelper.toBlockPos(transaction.getOriginal().getPosition());
-            for (EntityHanging entityHanging : EntityUtil.findHangingEntities(EntityUtil.getMinecraftWorld(tickingEntity), blockPos)) {
+            for (EntityHanging entityHanging : EntityUtil.findHangingEntities((WorldServer) tickingEntity.getWorld(), blockPos)) {
                 if (entityHanging instanceof EntityItemFrame) {
                     final EntityItemFrame itemFrame = (EntityItemFrame) entityHanging;
                     if (!itemFrame.isDead) {

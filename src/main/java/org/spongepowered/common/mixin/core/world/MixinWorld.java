@@ -49,12 +49,10 @@ import net.minecraft.world.IWorldEventListener;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.block.tileentity.TileEntity;
-import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.asm.lib.Opcodes;
@@ -82,8 +80,8 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
-import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
-import org.spongepowered.common.interfaces.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.WorldProviderBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.mixin.tileentityactivation.MixinWorldServer_TileEntityActivation;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.world.SpongeDimension;
@@ -224,7 +222,7 @@ public abstract class MixinWorld implements WorldBridge {
         if (this.isFake()) {
             return provider.createWorldBorder();
         }
-        return ((IMixinWorldProvider) provider).createServerWorldBorder();
+        return ((WorldProviderBridge) provider).bridge$createServerWorldBorder();
     }
 
     @Inject(method = "getCollisionBoxes(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/AxisAlignedBB;)Ljava/util/List;", at = @At("HEAD"), cancellable = true)

@@ -36,7 +36,6 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.world.WorldManager;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.DirectoryIteratorException;
@@ -45,6 +44,7 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -134,39 +134,15 @@ public final class SpongePlayerDataHandler {
         checkState(Holder.INSTANCE.hasInitialized, "PlayerDataHandler hasn't initialized yet!");
         SpongePlayerDataHandler instance = Holder.INSTANCE;
         try {
-            final Path newDatPath = instance.playerDir.resolve(id + ".dat.tmp");
-            if (Files.notExists(newDatPath)) {
-                // Ensure that where we want to put this at ALWAYS exists
-                Files.createDirectories(newDatPath.getParent());
-                Files.createFile(newDatPath);
-            }
+            // Ensure that where we want to put this at ALWAYS exists
+            Files.createDirectories(instance.playerDir);
 
             final Path finalDatPath = instance.playerDir.resolve(id + ".dat");
-
-            try (OutputStream stream = Files.newOutputStream(newDatPath)) {
+            final Path newDatPath = instance.playerDir.resolve(id + ".dat.tmp");
+            try (OutputStream stream = Files.newOutputStream(newDatPath, StandardOpenOption.CREATE)) {
                 CompressedStreamTools.writeCompressed(compound, stream);
-
-                try {
-                    Files.deleteIfExists(finalDatPath);
-                } catch (IOException ioe) {
-                    SpongeImpl.getLogger().error("Failed to delete the previous file [" + finalDatPath + "]!", ioe);
-                    return;
-                }
-
-                try {
-                    Files.move(newDatPath, finalDatPath,
-                            StandardCopyOption.REPLACE_EXISTING); // Replace is our last ditch effort to put this into place
-                } catch (IOException ioe) {
-                    SpongeImpl.getLogger().error("Could not rename file [{}] to [{}]!", newDatPath, finalDatPath);
-                    return;
-                }
-
-                try {
-                    Files.deleteIfExists(newDatPath);
-                } catch (IOException ioe) {
-                    SpongeImpl.getLogger().error("Could not delete file [{}]!", newDatPath);
-                }
             }
+            Files.move(newDatPath, finalDatPath, StandardCopyOption.REPLACE_EXISTING);
         } catch (Exception e) {
             SpongeImpl.getLogger().error("Failed to save player data for [{}]!", id, e);
         }

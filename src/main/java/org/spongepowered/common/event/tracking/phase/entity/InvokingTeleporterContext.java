@@ -24,34 +24,56 @@
  */
 package org.spongepowered.common.event.tracking.phase.entity;
 
+import net.minecraft.world.WorldServer;
+import org.spongepowered.api.entity.Transform;
+import org.spongepowered.api.world.PortalAgent;
+import org.spongepowered.api.world.World;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 
-public final class EntityPhase extends TrackingPhase {
+public final class InvokingTeleporterContext extends EntityContext<InvokingTeleporterContext> {
 
-    public static final class State {
-        public static final IPhaseState<EntityDeathContext> DEATH = new EntityDeathState();
-        public static final IPhaseState<BasicEntityContext> DEATH_UPDATE = new DeathUpdateState();
-        public static final IPhaseState<DimensionChangeContext> CHANGING_DIMENSION = new ChangingToDimensionState();
-        public static final IPhaseState<InvokingTeleporterContext> INVOKING_TELEPORTER = new InvokingTeleporterState();
-        public static final IPhaseState<BasicEntityContext> LEAVING_DIMENSION = new LeavingDimensionState();
-        public static final IPhaseState<BasicEntityContext> PLAYER_WAKE_UP = new PlayerWakeUpState();
-        public static final IPhaseState<BasicEntityContext> ENTITY_DROP_ITEMS = new EntityDropPhaseState();
+    private WorldServer world;
+    private PortalAgent agent;
+    private Transform<World> transform;
+    private boolean didPort = false;
 
-        private State() {
-        }
+    InvokingTeleporterContext(IPhaseState<? extends InvokingTeleporterContext> state) {
+        super(state);
     }
 
-
-    public static EntityPhase getInstance() {
-        return Holder.INSTANCE;
+    public InvokingTeleporterContext setTargetWorld(WorldServer world) {
+        this.world = world;
+        return this;
     }
 
-    private EntityPhase() {
+    public WorldServer getTargetWorld() {
+        return this.world;
     }
 
-    private static final class Holder {
-        static final EntityPhase INSTANCE = new EntityPhase();
+    public InvokingTeleporterContext setTeleporter(PortalAgent agent) {
+        this.agent = agent;
+        return this;
     }
 
+    public PortalAgent getTeleporter() {
+        return this.agent;
+    }
+
+    public InvokingTeleporterContext setExitTransform(Transform<World> transform) {
+        this.transform = transform;
+        return this;
+    }
+
+    public Transform<World> getExitTransform() {
+        return this.transform;
+    }
+
+    public InvokingTeleporterContext setDidPort(boolean didPort) {
+        this.didPort = didPort;
+        return this;
+    }
+
+    public boolean getDidPort() {
+        return this.didPort;
+    }
 }

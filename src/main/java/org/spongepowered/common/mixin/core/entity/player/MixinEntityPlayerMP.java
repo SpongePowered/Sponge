@@ -143,7 +143,7 @@ import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
-import org.spongepowered.common.interfaces.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.service.user.SpongeUserStorageService;
 import org.spongepowered.common.text.SpongeTexts;
@@ -216,6 +216,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
     private GameType pendingGameType;
 
     private Scoreboard spongeScoreboard = Sponge.getGame().getServer().getServerScoreboard().get();
+    @Nullable private EntityPlayerMP delegate;
 
     @Nullable private Vector3d velocityOverride = null;
     private boolean healthScaling = false;
@@ -554,20 +555,18 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
 
     @Override
     public void initScoreboard() {
-        ((IMixinServerScoreboard) this.spongeScoreboard).addPlayer((EntityPlayerMP) (Object) this, true);
+        ((IMixinServerScoreboard) this.getWorldScoreboard()).addPlayer((EntityPlayerMP) (Object) this, true);
     }
 
     @Override
     public void setScoreboardOnRespawn(final Scoreboard scoreboard) {
         this.spongeScoreboard = scoreboard;
-        ((IMixinServerScoreboard) this.spongeScoreboard).addPlayer((EntityPlayerMP) (Object) this, false);
+        ((IMixinServerScoreboard) ((Player) this).getScoreboard()).addPlayer((EntityPlayerMP) (Object) this, false);
     }
 
     @Override
     public void removeScoreboardOnRespawn() {
-        ((IMixinServerScoreboard) this.spongeScoreboard).removePlayer((EntityPlayerMP) (Object) this, false);
-        // This player is being removed, so this is fine
-        this.spongeScoreboard = null;
+        ((IMixinServerScoreboard) ((Player) this).getScoreboard()).removePlayer((EntityPlayerMP) (Object) this, false);
     }
 
     @Override
@@ -592,8 +591,9 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
 
     @Override
     public net.minecraft.scoreboard.Scoreboard getWorldScoreboard() {
-        return (net.minecraft.scoreboard.Scoreboard) this.spongeScoreboard;
+        return (net.minecraft.scoreboard.Scoreboard) ((Player) this).getScoreboard();
     }
+
 
     @Inject(method = "markPlayerActive()V", at = @At("HEAD"))
     private void onPlayerActive(final CallbackInfo ci) {
@@ -918,6 +918,11 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
     public boolean hasForcedGamemodeOverridePermission() {
         final Player player = (Player) this;
         return player.hasPermission(player.getActiveContexts(), Constants.Permissions.FORCE_GAMEMODE_OVERRIDE);
+    }
+
+    @Override
+    public void setDelegateAfterRespawn(EntityPlayerMP delegate) {
+        this.delegate = delegate;
     }
 
     @Nullable private Text displayName = null;

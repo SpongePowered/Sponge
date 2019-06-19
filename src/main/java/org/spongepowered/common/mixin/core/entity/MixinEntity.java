@@ -102,7 +102,7 @@ import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
-import org.spongepowered.common.interfaces.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.SpongeHooks;
@@ -199,6 +199,7 @@ public abstract class MixinEntity implements EntityBridge, TrackableBridge {
     @Shadow protected abstract void applyEnchantments(EntityLivingBase entityLivingBaseIn, Entity entityIn);
     @Shadow public abstract void extinguish();
     @Shadow protected abstract void setFlag(int flag, boolean set);
+    @Shadow @Nullable public Entity changeDimension(int dimension) { return null; } // Shadow
 
     // @formatter:on
 
@@ -393,7 +394,7 @@ public abstract class MixinEntity implements EntityBridge, TrackableBridge {
     // to avoid firing a DisplaceEntityEvent.Teleport
     @SuppressWarnings("ConstantConditions")
     @Override
-    public void setLocationAndAngles(final Location<World> location) {
+    public void bridge$setLocationAndAngles(final Location<World> location) {
         if ((Entity) (Object) this instanceof EntityPlayerMP) {
             ((EntityPlayerMP) (Object) this).connection.setPlayerLocation(location.getX(), location.getY(), location.getZ(), this.rotationYaw, this.rotationPitch);
         } else {
@@ -401,12 +402,13 @@ public abstract class MixinEntity implements EntityBridge, TrackableBridge {
         }
         if (this.world != location.getExtent()) {
             this.world = (net.minecraft.world.World) location.getExtent();
+            this.dimension = ((ServerWorldBridge) this.world).bridge$getDimensionId();
         }
     }
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public void setLocationAndAngles(final Transform<World> transform) {
+    public void bridge$setLocationAndAngles(final Transform<World> transform) {
         final Vector3d position = transform.getPosition();
         EntityPlayerMP player = null;
         if ((Entity) (Object) this instanceof EntityPlayerMP) {
@@ -419,6 +421,7 @@ public abstract class MixinEntity implements EntityBridge, TrackableBridge {
         }
         if (this.world != transform.getExtent()) {
             this.world = (net.minecraft.world.World) transform.getExtent();
+            this.dimension = ((ServerWorldBridge) this.world).bridge$getDimensionId();
         }
     }
 

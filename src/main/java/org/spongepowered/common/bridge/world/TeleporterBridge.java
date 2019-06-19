@@ -22,14 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world;
+package org.spongepowered.common.bridge.world;
 
-import net.minecraft.world.border.WorldBorder;
+import org.spongepowered.api.world.PortalAgentType;
 
-public interface IMixinWorldProvider {
+public interface TeleporterBridge extends ForgeITeleporterBridge {
 
-    WorldBorder createServerWorldBorder();
+  void bridge$removePortalPositionFromCache(Long portalLocation);
 
-    void setGeneratorSettings(String generatorSettings);
+  void bridge$setPortalAgentType(PortalAgentType type);
+
+  void bridge$setNetherPortalType(boolean isNetherPortal);
 
 }

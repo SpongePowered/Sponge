@@ -40,8 +40,6 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.bridge.entity.EntityBridge;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
@@ -98,7 +96,7 @@ public final class InteractAtEntityPacketState extends BasicPacketState {
             // Something happened?
             return;
         }
-        final World spongeWorld = EntityUtil.getSpongeWorld(player);
+        final World spongeWorld = (World) player.world;
         ((Entity) entity).setNotifier(player.getUniqueID());
 
 

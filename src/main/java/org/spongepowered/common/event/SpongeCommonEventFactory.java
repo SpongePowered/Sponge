@@ -141,7 +141,7 @@ import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
-import org.spongepowered.common.interfaces.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.custom.CustomInventory;
@@ -530,7 +530,7 @@ public class SpongeCommonEventFactory {
             if (source instanceof Player) {
                 player = (EntityPlayer) source;
                 if (SpongeImplHooks.isFakePlayer(player)) {
-                    frame.addContext(EventContextKeys.FAKE_PLAYER, EntityUtil.toPlayer(player));
+                    frame.addContext(EventContextKeys.FAKE_PLAYER, (Player) player);
                 }
             }
 
@@ -1498,7 +1498,7 @@ public class SpongeCommonEventFactory {
             final Cause cause = frame.getCurrentCause();
             final Transaction<ItemStackSnapshot> transaction = new Transaction<>(before, after);
             if (entity instanceof EntityPlayerMP) {
-                final Player player = EntityUtil.toPlayer((EntityPlayerMP) entity);
+                final Player player = (Player) (EntityPlayerMP) entity;
                 event = SpongeEventFactory.createChangeEntityEquipmentEventTargetPlayer(cause, player, slot, transaction);
             } else if (entity instanceof Human) {
                 final Human humanoid = (Human) entity;

@@ -57,13 +57,9 @@ import net.minecraft.server.management.UserListBans;
 import net.minecraft.server.management.UserListIPBans;
 import net.minecraft.server.management.UserListWhitelist;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.Teleporter;
-import net.minecraft.world.WorldProvider;
-import net.minecraft.world.WorldProviderEnd;
 import net.minecraft.world.WorldProviderHell;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.border.WorldBorder;
@@ -90,6 +86,7 @@ import org.spongepowered.api.service.whitelist.WhitelistService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gamerule.DefaultGameRules;
@@ -105,19 +102,19 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.bridge.entity.EntityBridge;
+import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
+import org.spongepowered.common.bridge.packet.WorldBorderPacketBridge;
+import org.spongepowered.common.bridge.server.management.PlayerListBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.event.tracking.phase.player.PlayerPhase;
-import org.spongepowered.common.interfaces.IMixinPlayerList;
 import org.spongepowered.common.interfaces.IMixinServerScoreboard;
 import org.spongepowered.common.interfaces.advancement.IMixinPlayerAdvancements;
-import org.spongepowered.common.bridge.entity.EntityBridge;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
-import org.spongepowered.common.bridge.packet.WorldBorderPacketBridge;
-import org.spongepowered.common.interfaces.world.IMixinITeleporter;
-import org.spongepowered.common.interfaces.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.ForgeITeleporterBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.service.ban.SpongeIPBanList;
 import org.spongepowered.common.service.ban.SpongeUserListBans;
 import org.spongepowered.common.service.permission.SpongePermissionService;
@@ -139,17 +136,12 @@ import javax.annotation.Nullable;
 
 @NonnullByDefault
 @Mixin(PlayerList.class)
-public abstract class MixinPlayerList implements IMixinPlayerList {
+public abstract class MixinPlayerList implements PlayerListBridge {
 
-    private static final String WRITE_PLAYER_DATA =
-            "Lnet/minecraft/world/storage/IPlayerFileData;writePlayerData(Lnet/minecraft/entity/player/EntityPlayer;)V";
-    private static final String
-            SERVER_SEND_PACKET_TO_ALL_PLAYERS =
-            "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V";
     @Shadow @Final private static Logger LOGGER;
     @Shadow @Final private MinecraftServer server;
-    @Shadow @Final public Map<UUID, EntityPlayerMP> uuidToPlayerMap;
-    @Shadow @Final public List<EntityPlayerMP> playerEntityList;
+    @Shadow @Final private Map<UUID, EntityPlayerMP> uuidToPlayerMap;
+    @Shadow @Final private List<EntityPlayerMP> playerEntityList;
     @Shadow @Final private Map<UUID, PlayerAdvancements> advancements;
     @Shadow private IPlayerFileData playerDataManager;
     @Shadow public abstract NBTTagCompound readPlayerDataFromFile(EntityPlayerMP playerIn);
@@ -227,7 +219,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         }
     }
 
-    private void initializeConnectionToPlayer(NetworkManager netManager, EntityPlayerMP playerIn, @Nullable NetHandlerPlayServer handler) {
+    public void initializeConnectionToPlayer(NetworkManager netManager, EntityPlayerMP playerIn, @Nullable NetHandlerPlayServer handler) {
         GameProfile gameprofile = playerIn.getGameProfile();
         PlayerProfileCache playerprofilecache = this.server.getPlayerProfileCache();
         GameProfile gameprofile1 = playerprofilecache.getProfileByUUID(gameprofile.getId());
@@ -354,9 +346,9 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         this.playerLoggedIn(playerIn);
 
         // Sponge start - add world name to message
-        LOGGER.info(playerIn.getName() + "[" + s1 + "] logged in with entity id " + playerIn.getEntityId() + " in "
-                + worldServer.getWorldInfo().getWorldName() + "(" + ((ServerWorldBridge) worldServer).bridge$getDimensionId()
-                + ") at (" + playerIn.posX + ", " + playerIn.posY + ", " + playerIn.posZ + ")");
+        LOGGER.info("{} [{}] logged in with entity id [{}] in {} ({}/{}) at ({}, {}, {}).", playerIn.getName(), s1, playerIn.getEntityId(),
+            worldServer.getWorldInfo().getWorldName(), ((DimensionType) (Object) worldServer.provider.getDimensionType()).getId(),
+            ((ServerWorldBridge) worldServer).bridge$getDimensionId(), playerIn.posX, playerIn.posY, playerIn.posZ);
         // Sponge end
 
         this.updateTimeAndWeatherForPlayer(playerIn, worldServer);
@@ -527,7 +519,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
             playerinteractionmanager = new PlayerInteractionManager(this.server.getWorld(targetDimension));
         }
 
-        EntityPlayerMP newPlayer = new EntityPlayerMP(SpongeImpl.getServer(), worldServer, playerIn.getGameProfile(), playerinteractionmanager);
+        final EntityPlayerMP newPlayer = new EntityPlayerMP(SpongeImpl.getServer(), worldServer, playerIn.getGameProfile(), playerinteractionmanager);
         newPlayer.connection = playerIn.connection;
         newPlayer.copyFrom(playerIn, conqueredEnd);
         // set player dimension for RespawnPlayerEvent
@@ -553,6 +545,8 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         this.setPlayerGameTypeBasedOnOther(newPlayer, playerIn, worldServer);
         newPlayer.setSneaking(false);
 
+        ((ServerPlayerEntityBridge) playerIn).setDelegateAfterRespawn(newPlayer);
+
         // update to safe location
         toTransform = toTransform.setLocation(location);
 
@@ -563,7 +557,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         EntityUtil.tempIsBedSpawn = false;
         SpongeImpl.postEvent(event);
         Sponge.getCauseStackManager().popCause();
-        ((EntityBridge) player).setLocationAndAngles(event.getToTransform());
+        ((EntityBridge) player).bridge$setLocationAndAngles(event.getToTransform());
         toTransform = event.getToTransform();
         location = toTransform.getLocation();
 
@@ -587,7 +581,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         final int dimensionId = WorldManager.getClientDimensionId(newPlayer, worldServer);
 
         // Send dimension registration
-        if (((ServerPlayerEntityBridge) newPlayer).usesCustomClient()) {
+        if (((ServerPlayerEntityBridge) newPlayer).bridge$usesCustomClient()) {
             WorldManager.sendDimensionRegistration(newPlayer, worldServer.provider);
         } else {
             // Force vanilla client to refresh its chunk cache if same dimension type
@@ -625,124 +619,30 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
             newPlayer.connection.sendPacket(new SPacketEntityEffect(newPlayer.getEntityId(), potioneffect));
         }
         ((ServerPlayerEntityBridge) newPlayer).refreshScaledHealth();
+        newPlayer.connection.sendPacket(new SPacketHeldItemChange(playerIn.inventory.currentItem));
         SpongeCommonEventFactory.callPostPlayerRespawnEvent(newPlayer, conqueredEnd);
 
         return newPlayer;
     }
 
     /**
-     * @author blood - May 21st, 2016
-     * @author gabizou - June 2nd, 2016 - Update for 1.9.4 and cause tracker changes
-     *
-     * @reason - adjusted to support {@link MoveEntityEvent.Teleport.Portal}
-     *
-     * @param playerIn The player teleporting to another dimension
-     * @param targetDimensionId The id of target dimension.
-     * @param teleporter The teleporter used to transport and create the portal
-     */
-    @Override
-    public void transferPlayerToDimension(EntityPlayerMP playerIn, int targetDimensionId, Teleporter teleporter) {
-        MoveEntityEvent.Teleport.Portal event = EntityUtil.handleDisplaceEntityPortalEvent(playerIn, targetDimensionId, (IMixinITeleporter) teleporter);
-        if (event == null || event.isCancelled()) {
-            return;
-        }
-
-        EntityUtil.transferPlayerToDimension(event, playerIn);
-    }
-
-    // copy of transferEntityToWorld but only contains code to apply the location on entity before being placed into a portal
-    @Override
-    public void prepareEntityForPortal(Entity entityIn, WorldServer oldWorldIn, WorldServer toWorldIn) {
-        oldWorldIn.profiler.startSection("moving");
-        WorldProvider pOld = oldWorldIn.provider;
-        WorldProvider pNew = toWorldIn.provider;
-        double moveFactor = getMovementFactor(pOld) / getMovementFactor(pNew);
-        double x = entityIn.posX * moveFactor;
-        double y = entityIn.posY;
-        double z = entityIn.posZ * moveFactor;
-
-//        if (!(pNew instanceof WorldProviderEnd)) {
-//            x = MathHelper.clamp_double(x, toWorldIn.getWorldBorder().minX() + 16.0D, toWorldIn.getWorldBorder().maxX() - 16.0D);
-//            z = MathHelper.clamp_double(z, toWorldIn.getWorldBorder().minZ() + 16.0D, toWorldIn.getWorldBorder().maxZ() - 16.0D);
-//            entityIn.setLocationAndAngles(x, entityIn.posY, z, entityIn.rotationYaw, entityIn.rotationPitch);
-//        }
-
-        if (pNew instanceof WorldProviderEnd) {
-            BlockPos blockpos;
-
-            if (pOld instanceof WorldProviderEnd) {
-                blockpos = toWorldIn.getSpawnPoint();
-            } else {
-                blockpos = toWorldIn.getSpawnCoordinate();
-            }
-
-            x = blockpos.getX();
-            y = blockpos.getY();
-            z = blockpos.getZ();
-            entityIn.setLocationAndAngles(x, y, z, 90.0F, 0.0F);
-        }
-
-        if (!(pOld instanceof WorldProviderEnd)) {
-            oldWorldIn.profiler.startSection("placing");
-            x = MathHelper.clamp((int)x, -29999872, 29999872);
-            z = MathHelper.clamp((int)z, -29999872, 29999872);
-
-            if (entityIn.isEntityAlive()) {
-                entityIn.setLocationAndAngles(x, y, z, entityIn.rotationYaw, entityIn.rotationPitch);
-            }
-            oldWorldIn.profiler.endSection();
-        }
-
-        if (entityIn.isEntityAlive()) {
-            oldWorldIn.updateEntityWithOptionalForce(entityIn, false);
-        }
-
-        oldWorldIn.profiler.endSection();
-    }
-
-    /**
-     * @author blood - May 21st, 2016
-     *
-     * @reason - overwritten to redirect to our method that accepts a teleporter
+     * @author Zidane
+     * @reason Re-route to the common hook
      */
     @Overwrite
-    public void transferEntityToWorld(Entity entityIn, int p_82448_2_, WorldServer oldWorldIn, WorldServer toWorldIn) {
-        transferEntityToWorld(entityIn, p_82448_2_, oldWorldIn, toWorldIn, toWorldIn.getDefaultTeleporter());
+    public void transferEntityToWorld(Entity entityIn, int lastDimension, WorldServer oldWorldIn, WorldServer toWorldIn) {
+        EntityUtil.transferEntityToWorld(entityIn, null, toWorldIn, (ForgeITeleporterBridge) toWorldIn.getDefaultTeleporter(), false);
     }
 
     /**
-     * @author blood - May 21st, 2016
-     *
-     * @reason - rewritten to capture a plugin or mod that attempts to call this method directly.
-     *
-     * @param entityIn The entity being teleported
-     * @param fromDimensionId The origin dimension id
-     * @param fromWorld The origin world
-     * @param toWorld The destination world
-     * @param teleporter The teleporter being used to transport the entity
+     * @author Zidane
+     * @reason Re-route to the common hook
      */
-    @Override
-    public void transferEntityToWorld(Entity entityIn, int fromDimensionId, WorldServer fromWorld, WorldServer toWorld, net.minecraft.world.Teleporter teleporter) {
-        // rewritten completely to handle our portal event
-        MoveEntityEvent.Teleport.Portal event = EntityUtil
-                .handleDisplaceEntityPortalEvent(entityIn, WorldManager.getDimensionId(toWorld), (IMixinITeleporter) teleporter);
-        if (event == null || event.isCancelled()) {
-            return;
-        }
+    @Overwrite
+    public void changePlayerDimension(EntityPlayerMP player, int dimension) {
+        final WorldServer toWorld = this.server.getWorld(dimension);
 
-        entityIn.setLocationAndAngles(event.getToTransform().getPosition().getX(), event.getToTransform().getPosition().getY(), event.getToTransform().getPosition().getZ(), (float) event.getToTransform().getYaw(), (float) event.getToTransform().getPitch());
-        toWorld.spawnEntity(entityIn);
-        toWorld.updateEntityWithOptionalForce(entityIn, false);
-        entityIn.setWorld(toWorld);
-    }
-
-    // forge utility method
-    @Override
-    public double getMovementFactor(WorldProvider provider) {
-        if (provider instanceof WorldProviderHell) {
-            return 8.0;
-        }
-        return 1.0;
+        EntityUtil.transferPlayerToWorld(player, null, toWorld, (ForgeITeleporterBridge) toWorld.getDefaultTeleporter());
     }
 
     @Inject(method = "setPlayerManager", at = @At("HEAD"), cancellable = true)
@@ -762,7 +662,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
 
     @Redirect(method = "updateTimeAndWeatherForPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/NetHandlerPlayServer;sendPacket"
             + "(Lnet/minecraft/network/Packet;)V", ordinal = 0))
-    public void onWorldBorderInitializePacket(NetHandlerPlayServer invoker, Packet<?> packet, EntityPlayerMP playerMP, WorldServer worldServer) {
+    private void onWorldBorderInitializePacket(NetHandlerPlayServer invoker, Packet<?> packet, EntityPlayerMP playerMP, WorldServer worldServer) {
         if (worldServer.provider instanceof WorldProviderHell) {
             ((WorldBorderPacketBridge) packet).bridge$changeCoordinatesForNether();
         }
@@ -796,7 +696,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         }
     }
 
-    @Inject(method = "playerLoggedIn", at = @At(value = "INVOKE", target = SERVER_SEND_PACKET_TO_ALL_PLAYERS, shift = At.Shift.BEFORE), cancellable = true)
+    @Inject(method = "playerLoggedIn", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V", shift = At.Shift.BEFORE), cancellable = true)
     public void playerLoggedIn2(EntityPlayerMP player, CallbackInfo ci) {
         // Create a packet to be used for players without context data
         SPacketPlayerListItem noSpecificViewerPacket = new SPacketPlayerListItem(SPacketPlayerListItem.Action.ADD_PLAYER, player);
@@ -821,13 +721,13 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         ci.cancel();
     }
 
-    @Inject(method = "writePlayerData", at = @At(target = WRITE_PLAYER_DATA, value = "INVOKE"))
+    @Inject(method = "writePlayerData", at = @At(target = "Lnet/minecraft/world/storage/IPlayerFileData;writePlayerData(Lnet/minecraft/entity/player/EntityPlayer;)V", value = "INVOKE"))
     private void onWritePlayerFile(EntityPlayerMP playerMP, CallbackInfo callbackInfo) {
         SpongePlayerDataHandler.savePlayer(playerMP.getUniqueID());
     }
 
     @ModifyVariable(method = "sendPlayerPermissionLevel", at = @At("HEAD"), argsOnly = true)
-    public int fixPermLevel(int permLevel) {
+    private int impl$UpdatePermLevel(int permLevel) {
         // If a non-default permission service is being used, then the op level will always be 0.
         // We force it to be 4 to ensure that the client is able to open command blocks (
         if (!(Sponge.getServiceManager().provideUnchecked(PermissionService.class) instanceof SpongePermissionService)) {
@@ -861,7 +761,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
     }
 
     @Inject(method = "createPlayerForUser", at = @At("RETURN"), cancellable = true)
-    public void onCreatePlayerForUser(CallbackInfoReturnable<EntityPlayerMP> cir) {
+    private void impl$forceRecreateUser(CallbackInfoReturnable<EntityPlayerMP> cir) {
         ((ServerPlayerEntityBridge) cir.getReturnValue()).forceRecreateUser();
     }
 

@@ -61,7 +61,7 @@ import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.interfaces.world.IMixinAnvilChunkLoader;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.interfaces.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
 import org.spongepowered.common.util.CachedLong2ObjectMap;
 import org.spongepowered.common.world.SpongeEmptyChunk;
@@ -219,11 +219,11 @@ public abstract class MixinChunkProviderServer implements WorldStorage, ServerCh
 
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final IPhaseState<?> currentState = phaseTracker.getCurrentState();
-        // TODO - write a tristate for whether the state can deny chunks
         // States that cannot deny chunks
         if (currentState == TickPhase.Tick.PLAYER
             || currentState == TickPhase.Tick.DIMENSION
             || currentState == EntityPhase.State.CHANGING_DIMENSION
+            || currentState == EntityPhase.State.INVOKING_TELEPORTER
             || currentState == EntityPhase.State.LEAVING_DIMENSION) {
             return false;
         }

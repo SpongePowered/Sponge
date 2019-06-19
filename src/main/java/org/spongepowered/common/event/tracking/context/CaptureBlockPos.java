@@ -28,7 +28,7 @@ import com.google.common.base.MoreObjects;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.interfaces.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 
 import java.lang.ref.WeakReference;
 import java.util.Optional;

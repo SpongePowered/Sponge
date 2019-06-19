@@ -29,7 +29,7 @@ import org.spongepowered.api.world.PortalAgent;
 import org.spongepowered.api.world.PortalAgentType;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.interfaces.world.IMixinITeleporter;
+import org.spongepowered.common.bridge.world.ForgeITeleporterBridge;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -39,23 +39,23 @@ import java.util.Optional;
 // This is a giant hack to allow passing a Forge ITeleporter to the API.
 // TODO: https://github.com/SpongePowered/SpongeForge/issues/2266
 public class VirtualPortalAgent implements PortalAgent {
-    private static final Map<Class<? extends IMixinITeleporter>, PortalAgentType> TYPES = new HashMap<>();
-    private final IMixinITeleporter teleporter;
+    private static final Map<Class<? extends ForgeITeleporterBridge>, PortalAgentType> TYPES = new HashMap<>();
+    private final ForgeITeleporterBridge teleporter;
     private final PortalAgentType type;
 
-    public static PortalAgent workaround(final IMixinITeleporter teleporter) {
+    public static PortalAgent workaround(final ForgeITeleporterBridge teleporter) {
         if (teleporter instanceof PortalAgent) {
             return (PortalAgent) teleporter;
         }
         return new VirtualPortalAgent(teleporter);
     }
 
-    public VirtualPortalAgent(final IMixinITeleporter teleporter) {
+    public VirtualPortalAgent(final ForgeITeleporterBridge teleporter) {
         this.teleporter = teleporter;
         this.type = getType(teleporter.getClass());
     }
 
-    private static PortalAgentType getType(final Class<? extends IMixinITeleporter> teleporterClass) {
+    private static PortalAgentType getType(final Class<? extends ForgeITeleporterBridge> teleporterClass) {
         return TYPES.computeIfAbsent(teleporterClass, klass -> {
             final String modId = SpongeImplHooks.getModIdFromClass(teleporterClass);
             final String name = teleporterClass.getSimpleName().toLowerCase(Locale.ENGLISH);
@@ -63,7 +63,7 @@ public class VirtualPortalAgent implements PortalAgent {
         });
     }
 
-    public IMixinITeleporter getTeleporter() {
+    public ForgeITeleporterBridge getTeleporter() {
         return this.teleporter;
     }
 

@@ -24,12 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.entity.item;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityMinecartContainer;
 import net.minecraft.world.ILockableContainer;
 import net.minecraft.world.storage.loot.ILootContainer;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
@@ -40,10 +42,13 @@ import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollect
 import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.IInventoryFabric;
 
-@SuppressWarnings({"rawtypes", "unchecked"})
+import javax.annotation.Nullable;
+
 @Mixin(EntityMinecartContainer.class)
 @Implements({@Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$")})
 public abstract class MixinEntityMinecartContainer extends MixinEntityMinecart implements ILockableContainer, ILootContainer {
+
+    @Shadow private boolean dropContentsWhenDead;
 
     protected Fabric fabric = new IInventoryFabric(this);
     protected SlotCollection slots = new SlotCollection.Builder().add(this.getSizeInventory()).build();
@@ -67,4 +72,20 @@ public abstract class MixinEntityMinecartContainer extends MixinEntityMinecart i
         return this.fabric;
     }
 
+    /**
+     * @author Zidane - June 2019 - 1.12.2
+     * @reason Only have this Minecart not drop contents if we actually changed dimension
+     */
+    @Override
+    @Nullable
+    public Entity changeDimension(int dimensionIn) {
+        final Entity entity = super.changeDimension(dimensionIn);
+
+        if (entity instanceof EntityMinecartContainer) {
+            // We actually teleported so...
+            this.dropContentsWhenDead = false;
+        }
+
+        return entity;
+    }
 }

@@ -81,7 +81,7 @@ import org.spongepowered.common.event.tracking.phase.generation.GenerationContex
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.generation.PopulatorPhaseContext;
 import org.spongepowered.common.bridge.world.ChunkBridge;
-import org.spongepowered.common.interfaces.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.interfaces.world.gen.IChunkProviderOverworld;
 import org.spongepowered.common.interfaces.world.gen.IFlaggedPopulator;
 import org.spongepowered.common.interfaces.world.gen.IGenerationPopulator;

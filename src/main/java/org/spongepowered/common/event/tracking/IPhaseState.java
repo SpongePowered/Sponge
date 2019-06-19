@@ -76,7 +76,7 @@ import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.bridge.world.ChunkBridge;
 import org.spongepowered.common.bridge.block.BlockEventDataBridge;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMapEntry;
-import org.spongepowered.common.interfaces.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.mixin.core.world.MixinChunk;
 import org.spongepowered.common.mixin.tracking.world.MixinChunk_Tracker;
 import org.spongepowered.common.world.BlockChange;
