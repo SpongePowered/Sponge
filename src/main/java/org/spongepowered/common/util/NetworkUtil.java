@@ -24,10 +24,65 @@
  */
 package org.spongepowered.common.util;
 
+import com.mojang.authlib.GameProfile;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.local.LocalAddress;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.NetHandlerPlayServer;
+import net.minecraft.network.NetworkManager;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.play.server.SPacketCustomPayload;
+import net.minecraft.network.play.server.SPacketDisconnect;
+import net.minecraft.network.play.server.SPacketEntityEffect;
+import net.minecraft.network.play.server.SPacketHeldItemChange;
+import net.minecraft.network.play.server.SPacketJoinGame;
+import net.minecraft.network.play.server.SPacketPlayerAbilities;
+import net.minecraft.network.play.server.SPacketServerDifficulty;
+import net.minecraft.network.play.server.SPacketSpawnPosition;
+import net.minecraft.potion.PotionEffect;
+import net.minecraft.server.management.PlayerList;
+import net.minecraft.server.management.PlayerProfileCache;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.world.WorldServer;
+import net.minecraft.world.chunk.storage.AnvilChunkLoader;
+import net.minecraft.world.storage.WorldInfo;
+import org.spongepowered.api.Server;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.entity.Transform;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.message.MessageEvent;
+import org.spongepowered.api.event.network.ClientConnectionEvent;
+import org.spongepowered.api.network.RemoteConnection;
+import org.spongepowered.api.resourcepack.ResourcePack;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.channel.MessageChannel;
+import org.spongepowered.api.world.DimensionType;
+import org.spongepowered.api.world.World;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.entity.player.SpongeUser;
+import org.spongepowered.common.mixin.core.server.AccessorPlayerList;
+import org.spongepowered.common.mixin.core.server.MixinPlayerList;
+import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.world.WorldManager;
+import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.time.Instant;
+import java.util.Optional;
+import java.util.UUID;
+
+import javax.annotation.Nullable;
 
 public final class NetworkUtil {
 
@@ -49,7 +104,7 @@ public final class NetworkUtil {
      * @param address The address to get the string representation of
      * @return The string representation of the host
      */
-    public static String getHostString(SocketAddress address) {
+    public static String getHostString(final SocketAddress address) {
         if (address instanceof InetSocketAddress) {
             return ((InetSocketAddress) address).getHostString();
         } else if (address instanceof LocalAddress) {
@@ -77,9 +132,252 @@ public final class NetworkUtil {
         return host;
     }
 
-    public static String substringBefore(String s, char c) {
-        int pos = s.indexOf(c);
+    public static String substringBefore(final String s, final char c) {
+        final int pos = s.indexOf(c);
         return pos >= 0 ? s.substring(0, pos) : s;
     }
 
+    /**
+     * Specifically de-duplicated clone from {@link PlayerList#initializeConnectionToPlayer(NetworkManager, EntityPlayerMP)}
+     * but because Forge changes the signature, we cannot provide the override in SpongeCommon, therefor we have to bridge
+     * it through an overwrite in SpongeVanilla and one in SpongeForge.
+     * @param playerList
+     * @param netManager
+     * @param playerIn
+     * @param handler
+     */
+    public static void initializeConnectionToPlayer(final PlayerList playerList, final NetworkManager netManager, final EntityPlayerMP playerIn, @Nullable NetHandlerPlayServer handler) {
+        final GameProfile gameprofile = playerIn.getGameProfile();
+        final PlayerProfileCache playerprofilecache = ((AccessorPlayerList) playerList).accessor$getPlayerListServer().getPlayerProfileCache();
+        final GameProfile gameprofile1 = playerprofilecache.getProfileByUUID(gameprofile.getId());
+        final String s = gameprofile1 == null ? gameprofile.getName() : gameprofile1.getName();
+        playerprofilecache.addEntry(gameprofile);
+
+        // Sponge start - save changes to offline User before reading player data
+        final SpongeUser user = (SpongeUser) ((ServerPlayerEntityBridge) playerIn).getUserObject();
+        if (SpongeUser.dirtyUsers.contains(user)) {
+            user.save();
+        }
+        // Sponge end
+
+        final NBTTagCompound nbttagcompound = playerList.readPlayerDataFromFile(playerIn);
+        WorldServer worldServer = ((AccessorPlayerList) playerList).accessor$getPlayerListServer().getWorld(playerIn.dimension);
+        final int actualDimensionId = ((ServerWorldBridge) worldServer).bridge$getDimensionId();
+        final BlockPos spawnPos;
+        // Join data
+        final Optional<Instant> firstJoined = SpongePlayerDataHandler.getFirstJoined(playerIn.getUniqueID());
+        final Instant lastJoined = Instant.now();
+        SpongePlayerDataHandler.setPlayerInfo(playerIn.getUniqueID(), firstJoined.orElse(lastJoined), lastJoined);
+
+        if (actualDimensionId != playerIn.dimension) {
+            SpongeImpl.getLogger().warn("Player [{}] has attempted to login to unloaded world [{}]. This is not safe so we have moved them to "
+                                        + "the default world's spawn point.", playerIn.getName(), playerIn.dimension);
+            if (!firstJoined.isPresent()) {
+                spawnPos = SpongeImplHooks.getRandomizedSpawnPoint(worldServer);
+            } else {
+                spawnPos = worldServer.getSpawnPoint();
+            }
+            playerIn.dimension = actualDimensionId;
+            playerIn.setPosition(spawnPos.getX(), spawnPos.getY(), spawnPos.getZ());
+        }
+
+        // Sponge start - fire login event
+        @Nullable final String kickReason = playerList.allowUserToConnect(netManager.getRemoteAddress(), gameprofile);
+        final Text disconnectMessage;
+        if (kickReason != null) {
+            disconnectMessage = SpongeTexts.fromLegacy(kickReason);
+        } else {
+            disconnectMessage = Text.of("You are not allowed to log in to this server.");
+        }
+
+        final Player player = (Player) playerIn;
+        final Transform<World> fromTransform = player.getTransform().setExtent((World) worldServer);
+
+        final ClientConnectionEvent.Login loginEvent;
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(user);
+            loginEvent = SpongeEventFactory.createClientConnectionEventLogin(
+                frame.getCurrentCause(), fromTransform, fromTransform, (RemoteConnection) netManager,
+                new MessageEvent.MessageFormatter(disconnectMessage), (org.spongepowered.api.profile.GameProfile) gameprofile, player, false
+            );
+
+            if (kickReason != null) {
+                loginEvent.setCancelled(true);
+            }
+
+            if (SpongeImpl.postEvent(loginEvent)) {
+                Sponge.getCauseStackManager().popCause();
+                final Optional<Text> message = loginEvent.isMessageCancelled() ? Optional.empty() : Optional.of(loginEvent.getMessage());
+                final ITextComponent reason;
+                if (message.isPresent()) {
+                    reason = SpongeTexts.toComponent(message.get());
+                } else {
+                    reason = new TextComponentTranslation("disconnect.disconnected");
+                }
+
+                try {
+                    ((AccessorPlayerList) playerList).accessor$getPlayerListLogger().info("Disconnecting " + (gameprofile != null ? gameprofile.toString() + " (" + netManager.getRemoteAddress().toString() + ")" : String.valueOf(netManager.getRemoteAddress() + ": " + reason.getUnformattedText())));
+                    netManager.sendPacket(new SPacketDisconnect(reason));
+                    netManager.closeChannel(reason);
+                } catch (Exception exception) {
+                    ((AccessorPlayerList) playerList).accessor$getPlayerListLogger().error("Error whilst disconnecting player", exception);
+                }
+                return;
+            }
+        }
+
+        // Sponge end
+
+        worldServer = (WorldServer) loginEvent.getToTransform().getExtent();
+        final double x = loginEvent.getToTransform().getPosition().getX();
+        final double y = loginEvent.getToTransform().getPosition().getY();
+        final double z = loginEvent.getToTransform().getPosition().getZ();
+        final float pitch = (float) loginEvent.getToTransform().getPitch();
+        final float yaw = (float) loginEvent.getToTransform().getYaw();
+
+        playerIn.dimension = ((ServerWorldBridge) worldServer).bridge$getDimensionId();
+        playerIn.setWorld(worldServer);
+        playerIn.interactionManager.setWorld((WorldServer) playerIn.world);
+        playerIn.setPositionAndRotation(x, y, z, yaw, pitch);
+        // make sure the chunk is loaded for login
+        worldServer.getChunkProvider().loadChunk(loginEvent.getToTransform().getLocation().getChunkPosition().getX(), loginEvent.getToTransform().getLocation().getChunkPosition().getZ());
+        // Sponge end
+
+        String s1 = "local";
+
+        if (netManager.getRemoteAddress() != null) {
+            s1 = netManager.getRemoteAddress().toString();
+        }
+
+        final WorldInfo worldinfo = worldServer.getWorldInfo();
+        final BlockPos spawnBlockPos = worldServer.getSpawnPoint();
+        ((AccessorPlayerList) playerList).accessor$setPlayerGameType(playerIn, null, worldServer);
+
+        // Sponge start
+        if (handler == null) {
+            // Create the handler here (so the player's gets set)
+            handler = new NetHandlerPlayServer(((AccessorPlayerList) playerList).accessor$getPlayerListServer(), netManager, playerIn);
+        }
+        playerIn.connection = handler;
+        SpongeImplHooks.fireServerConnectionEvent(netManager);
+        // Sponge end
+
+        // Support vanilla clients logging into custom dimensions
+        final int dimensionId = WorldManager.getClientDimensionId(playerIn, worldServer);
+
+        // Send dimension registration
+        WorldManager.sendDimensionRegistration(playerIn, worldServer.provider);
+
+        handler.sendPacket(new SPacketJoinGame(playerIn.getEntityId(), playerIn.interactionManager.getGameType(), worldinfo
+                .isHardcoreModeEnabled(), dimensionId, worldServer.getDifficulty(), playerList.getMaxPlayers(), worldinfo
+                .getTerrainType(), worldServer.getGameRules().getBoolean("reducedDebugInfo")));
+        handler.sendPacket(new SPacketCustomPayload("MC|Brand", (new PacketBuffer(Unpooled.buffer())).writeString(playerList
+                .getServerInstance().getServerModName())));
+        handler.sendPacket(new SPacketServerDifficulty(worldinfo.getDifficulty(), worldinfo.isDifficultyLocked()));
+        handler.sendPacket(new SPacketSpawnPosition(spawnBlockPos));
+        handler.sendPacket(new SPacketPlayerAbilities(playerIn.capabilities));
+        handler.sendPacket(new SPacketHeldItemChange(playerIn.inventory.currentItem));
+        playerList.updatePermissionLevel(playerIn);
+        playerIn.getStatFile().markAllDirty();
+        playerIn.getRecipeBook().init(playerIn);
+        ((AccessorPlayerList) playerList).accessor$getPlayerListServer().refreshStatusNextTick();
+
+        handler.setPlayerLocation(x, y, z, yaw, pitch);
+        playerList.playerLoggedIn(playerIn);
+
+        // Sponge start - add world name to message
+        ((AccessorPlayerList) playerList).accessor$getPlayerListLogger().info("{} [{}] logged in with entity id [{}] in {} ({}/{}) at ({}, {}, {}).", playerIn.getName(), s1, playerIn.getEntityId(),
+            worldServer.getWorldInfo().getWorldName(), ((DimensionType) (Object) worldServer.provider.getDimensionType()).getId(),
+            ((ServerWorldBridge) worldServer).bridge$getDimensionId(), playerIn.posX, playerIn.posY, playerIn.posZ);
+        // Sponge end
+
+        playerList.updateTimeAndWeatherForPlayer(playerIn, worldServer);
+
+        // Sponge Start - Use the server's ResourcePack object
+        final Optional<ResourcePack> pack = ((Server) ((AccessorPlayerList) playerList).accessor$getPlayerListServer()).getDefaultResourcePack();
+        pack.ifPresent(((Player) playerIn)::sendResourcePack);
+        // Sponge End
+
+        // Sponge Start
+        //
+        // This sends the objective/score creation packets
+        // to the player, without attempting to remove them from their
+        // previous scoreboard (which is set in a field initializer).
+        // This allows #getWorldScoreboard to function
+        // as normal, without causing issues when it is initialized on the client.
+
+        ((ServerPlayerEntityBridge) playerIn).initScoreboard();
+
+        for (final PotionEffect potioneffect : playerIn.getActivePotionEffects()) {
+            handler.sendPacket(new SPacketEntityEffect(playerIn.getEntityId(), potioneffect));
+        }
+
+        if (nbttagcompound != null) {
+            if (nbttagcompound.hasKey("RootVehicle", 10)) {
+                final NBTTagCompound nbttagcompound1 = nbttagcompound.getCompoundTag("RootVehicle");
+                final Entity entity2 = AnvilChunkLoader.readWorldEntity(nbttagcompound1.getCompoundTag("Entity"), worldServer, true);
+
+                if (entity2 != null) {
+                    final UUID uuid = nbttagcompound1.getUniqueId("Attach");
+
+                    if (entity2.getUniqueID().equals(uuid)) {
+                        playerIn.startRiding(entity2, true);
+                    } else {
+                        for (final Entity entity : entity2.getRecursivePassengers()) {
+                            if (entity.getUniqueID().equals(uuid)) {
+                                playerIn.startRiding(entity, true);
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!playerIn.isRiding()) {
+                        ((AccessorPlayerList) playerList).accessor$getPlayerListLogger().warn("Couldn\'t reattach entity to player");
+                        worldServer.removeEntityDangerously(entity2);
+
+                        for (final Entity entity3 : entity2.getRecursivePassengers()) {
+                            worldServer.removeEntityDangerously(entity3);
+                        }
+                    }
+                }
+            } else if (nbttagcompound.hasKey("Riding", 10)) {
+                final Entity entity1 = AnvilChunkLoader.readWorldEntity(nbttagcompound.getCompoundTag("Riding"), worldServer, true);
+
+                if (entity1 != null) {
+                    playerIn.startRiding(entity1, true);
+                }
+            }
+        }
+
+        playerIn.addSelfToInternalCraftingInventory();
+
+        final TextComponentTranslation chatcomponenttranslation;
+
+        if (!playerIn.getName().equalsIgnoreCase(s))
+        {
+            chatcomponenttranslation = new TextComponentTranslation("multiplayer.player.joined.renamed", playerIn.getDisplayName(), s);
+        }
+        else
+        {
+            chatcomponenttranslation = new TextComponentTranslation("multiplayer.player.joined", playerIn.getDisplayName());
+        }
+
+        chatcomponenttranslation.getStyle().setColor(TextFormatting.YELLOW);
+
+        // Fire PlayerJoinEvent
+        final Text originalMessage = SpongeTexts.toText(chatcomponenttranslation);
+        final MessageChannel originalChannel = player.getMessageChannel();
+        Sponge.getCauseStackManager().pushCause(player);
+        final ClientConnectionEvent.Join event = SpongeEventFactory.createClientConnectionEventJoin(
+                Sponge.getCauseStackManager().getCurrentCause(), originalChannel, Optional.of(originalChannel),
+                new MessageEvent.MessageFormatter(originalMessage), player, false
+        );
+        SpongeImpl.postEvent(event);
+        Sponge.getCauseStackManager().popCause();
+        // Send to the channel
+        if (!event.isMessageCancelled()) {
+            event.getChannel().ifPresent(channel -> channel.send(player, event.getMessage()));
+        }
+        // Sponge end
+    }
 }

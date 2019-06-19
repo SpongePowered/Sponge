@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.server;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.mojang.authlib.GameProfile;
-import io.netty.buffer.Unpooled;
 import net.minecraft.advancements.PlayerAdvancements;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -34,14 +33,9 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.network.play.server.SPacketCustomPayload;
-import net.minecraft.network.play.server.SPacketDisconnect;
 import net.minecraft.network.play.server.SPacketEntityEffect;
 import net.minecraft.network.play.server.SPacketEntityStatus;
 import net.minecraft.network.play.server.SPacketHeldItemChange;
-import net.minecraft.network.play.server.SPacketJoinGame;
-import net.minecraft.network.play.server.SPacketPlayerAbilities;
 import net.minecraft.network.play.server.SPacketPlayerListItem;
 import net.minecraft.network.play.server.SPacketRespawn;
 import net.minecraft.network.play.server.SPacketServerDifficulty;
@@ -52,41 +46,29 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.DemoPlayerInteractionManager;
 import net.minecraft.server.management.PlayerInteractionManager;
 import net.minecraft.server.management.PlayerList;
-import net.minecraft.server.management.PlayerProfileCache;
 import net.minecraft.server.management.UserListBans;
 import net.minecraft.server.management.UserListIPBans;
 import net.minecraft.server.management.UserListWhitelist;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.WorldProviderHell;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.border.WorldBorder;
-import net.minecraft.world.chunk.storage.AnvilChunkLoader;
 import net.minecraft.world.storage.IPlayerFileData;
 import net.minecraft.world.storage.WorldInfo;
 import org.apache.logging.log4j.Logger;
-import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.living.humanoid.player.RespawnPlayerEvent;
-import org.spongepowered.api.event.message.MessageEvent;
-import org.spongepowered.api.event.network.ClientConnectionEvent;
-import org.spongepowered.api.network.RemoteConnection;
-import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.service.ban.BanService;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.whitelist.WhitelistService;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gamerule.DefaultGameRules;
@@ -119,17 +101,15 @@ import org.spongepowered.common.service.ban.SpongeIPBanList;
 import org.spongepowered.common.service.ban.SpongeUserListBans;
 import org.spongepowered.common.service.permission.SpongePermissionService;
 import org.spongepowered.common.service.whitelist.SpongeUserListWhitelist;
-import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.chat.ChatUtil;
+import org.spongepowered.common.util.NetworkUtil;
 import org.spongepowered.common.world.WorldManager;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 
 import java.io.File;
 import java.net.SocketAddress;
-import java.time.Instant;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
@@ -186,259 +166,6 @@ public abstract class MixinPlayerList implements PlayerListBridge {
     @Redirect(method = "<init>", at = @At(value = "NEW", args = "class=net/minecraft/server/management/UserListWhitelist"))
     private UserListWhitelist createWhitelist(File file) {
         return new SpongeUserListWhitelist(file);
-    }
-
-    /**
-     * Bridge methods to proxy modified method in Vanilla, nothing in Forge
-     */
-    public void func_72355_a(NetworkManager netManager, EntityPlayerMP playerIn) {
-        this.initializeConnectionToPlayer(netManager, playerIn, null);
-    }
-
-    /**
-     * Bridge methods to proxy modified method in Vanilla, nothing in Forge
-     */
-    public void initializeConnectionToPlayer(NetworkManager netManager, EntityPlayerMP playerIn) {
-        initializeConnectionToPlayer(netManager, playerIn, null);
-    }
-
-    private void disconnectClient(NetworkManager netManager, Optional<Text> disconnectMessage, @Nullable GameProfile profile) {
-        ITextComponent reason;
-        if (disconnectMessage.isPresent()) {
-            reason = SpongeTexts.toComponent(disconnectMessage.get());
-        } else {
-            reason = new TextComponentTranslation("disconnect.disconnected");
-        }
-
-        try {
-            LOGGER.info("Disconnecting " + (profile != null ? profile.toString() + " (" + netManager.getRemoteAddress().toString() + ")" : String.valueOf(netManager.getRemoteAddress() + ": " + reason.getUnformattedText())));
-            netManager.sendPacket(new SPacketDisconnect(reason));
-            netManager.closeChannel(reason);
-        } catch (Exception exception) {
-            LOGGER.error("Error whilst disconnecting player", exception);
-        }
-    }
-
-    public void initializeConnectionToPlayer(NetworkManager netManager, EntityPlayerMP playerIn, @Nullable NetHandlerPlayServer handler) {
-        GameProfile gameprofile = playerIn.getGameProfile();
-        PlayerProfileCache playerprofilecache = this.server.getPlayerProfileCache();
-        GameProfile gameprofile1 = playerprofilecache.getProfileByUUID(gameprofile.getId());
-        String s = gameprofile1 == null ? gameprofile.getName() : gameprofile1.getName();
-        playerprofilecache.addEntry(gameprofile);
-
-        // Sponge start - save changes to offline User before reading player data
-        SpongeUser user = (SpongeUser) ((ServerPlayerEntityBridge) playerIn).getUserObject();
-        if (SpongeUser.dirtyUsers.contains(user)) {
-            user.save();
-        }
-        // Sponge end
-
-        NBTTagCompound nbttagcompound = this.readPlayerDataFromFile(playerIn);
-        WorldServer worldServer = this.server.getWorld(playerIn.dimension);
-        int actualDimensionId = ((ServerWorldBridge) worldServer).bridge$getDimensionId();
-        BlockPos spawnPos;
-        // Join data
-        Optional<Instant> firstJoined = SpongePlayerDataHandler.getFirstJoined(playerIn.getUniqueID());
-        Instant lastJoined = Instant.now();
-        SpongePlayerDataHandler.setPlayerInfo(playerIn.getUniqueID(), firstJoined.orElse(lastJoined), lastJoined);
-
-        if (actualDimensionId != playerIn.dimension) {
-            SpongeImpl.getLogger().warn("Player [{}] has attempted to login to unloaded world [{}]. This is not safe so we have moved them to "
-                    + "the default world's spawn point.", playerIn.getName(), playerIn.dimension);
-            if (!firstJoined.isPresent()) {
-                spawnPos = SpongeImplHooks.getRandomizedSpawnPoint(worldServer);
-            } else {
-                spawnPos = worldServer.getSpawnPoint();
-            }
-            playerIn.dimension = actualDimensionId;
-            playerIn.setPosition(spawnPos.getX(), spawnPos.getY(), spawnPos.getZ());
-        }
-
-        // Sponge start - fire login event
-        @Nullable String kickReason = this.allowUserToConnect(netManager.getRemoteAddress(), gameprofile);
-        Text disconnectMessage;
-        if (kickReason != null) {
-            disconnectMessage = SpongeTexts.fromLegacy(kickReason);
-        } else {
-            disconnectMessage = Text.of("You are not allowed to log in to this server.");
-        }
-
-        Player player = (Player) playerIn;
-        Transform<World> fromTransform = player.getTransform().setExtent((World) worldServer);
-
-        final ClientConnectionEvent.Login loginEvent;
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(user);
-            loginEvent = SpongeEventFactory.createClientConnectionEventLogin(
-                frame.getCurrentCause(), fromTransform, fromTransform, (RemoteConnection) netManager,
-                new MessageEvent.MessageFormatter(disconnectMessage), (org.spongepowered.api.profile.GameProfile) gameprofile, player, false
-            );
-
-            if (kickReason != null) {
-                loginEvent.setCancelled(true);
-            }
-
-            if (SpongeImpl.postEvent(loginEvent)) {
-                Sponge.getCauseStackManager().popCause();
-                final Optional<Text> message = loginEvent.isMessageCancelled() ? Optional.empty() : Optional.of(loginEvent.getMessage());
-                this.disconnectClient(netManager, message, gameprofile);
-                return;
-            }
-        }
-
-        // Sponge end
-
-        worldServer = (WorldServer) loginEvent.getToTransform().getExtent();
-        double x = loginEvent.getToTransform().getPosition().getX();
-        double y = loginEvent.getToTransform().getPosition().getY();
-        double z = loginEvent.getToTransform().getPosition().getZ();
-        float pitch = (float) loginEvent.getToTransform().getPitch();
-        float yaw = (float) loginEvent.getToTransform().getYaw();
-
-        playerIn.dimension = ((ServerWorldBridge) worldServer).bridge$getDimensionId();
-        playerIn.setWorld(worldServer);
-        playerIn.interactionManager.setWorld((WorldServer) playerIn.world);
-        playerIn.setPositionAndRotation(x, y, z, yaw, pitch);
-        // make sure the chunk is loaded for login
-        worldServer.getChunkProvider().loadChunk(loginEvent.getToTransform().getLocation().getChunkPosition().getX(), loginEvent.getToTransform().getLocation().getChunkPosition().getZ());
-        // Sponge end
-
-        String s1 = "local";
-
-        if (netManager.getRemoteAddress() != null) {
-            s1 = netManager.getRemoteAddress().toString();
-        }
-
-        final WorldInfo worldinfo = worldServer.getWorldInfo();
-        final BlockPos spawnBlockPos = worldServer.getSpawnPoint();
-        this.setPlayerGameTypeBasedOnOther(playerIn, null, worldServer);
-
-        // Sponge start
-        if (handler == null) {
-            // Create the handler here (so the player's gets set)
-            handler = new NetHandlerPlayServer(this.server, netManager, playerIn);
-        }
-        playerIn.connection = handler;
-        SpongeImplHooks.fireServerConnectionEvent(netManager);
-        // Sponge end
-
-        // Support vanilla clients logging into custom dimensions
-        final int dimensionId = WorldManager.getClientDimensionId(playerIn, worldServer);
-
-        // Send dimension registration
-        WorldManager.sendDimensionRegistration(playerIn, worldServer.provider);
-
-        handler.sendPacket(new SPacketJoinGame(playerIn.getEntityId(), playerIn.interactionManager.getGameType(), worldinfo
-                .isHardcoreModeEnabled(), dimensionId, worldServer.getDifficulty(), this.getMaxPlayers(), worldinfo
-                .getTerrainType(), worldServer.getGameRules().getBoolean("reducedDebugInfo")));
-        handler.sendPacket(new SPacketCustomPayload("MC|Brand", (new PacketBuffer(Unpooled.buffer())).writeString(this
-                .getServerInstance().getServerModName())));
-        handler.sendPacket(new SPacketServerDifficulty(worldinfo.getDifficulty(), worldinfo.isDifficultyLocked()));
-        handler.sendPacket(new SPacketSpawnPosition(spawnBlockPos));
-        handler.sendPacket(new SPacketPlayerAbilities(playerIn.capabilities));
-        handler.sendPacket(new SPacketHeldItemChange(playerIn.inventory.currentItem));
-        this.updatePermissionLevel(playerIn);
-        playerIn.getStatFile().markAllDirty();
-        playerIn.getRecipeBook().init(playerIn);
-        this.server.refreshStatusNextTick();
-
-        handler.setPlayerLocation(x, y, z, yaw, pitch);
-        this.playerLoggedIn(playerIn);
-
-        // Sponge start - add world name to message
-        LOGGER.info("{} [{}] logged in with entity id [{}] in {} ({}/{}) at ({}, {}, {}).", playerIn.getName(), s1, playerIn.getEntityId(),
-            worldServer.getWorldInfo().getWorldName(), ((DimensionType) (Object) worldServer.provider.getDimensionType()).getId(),
-            ((ServerWorldBridge) worldServer).bridge$getDimensionId(), playerIn.posX, playerIn.posY, playerIn.posZ);
-        // Sponge end
-
-        this.updateTimeAndWeatherForPlayer(playerIn, worldServer);
-
-        // Sponge Start - Use the server's ResourcePack object
-        Optional<ResourcePack> pack = ((Server)this.server).getDefaultResourcePack();
-        pack.ifPresent(((Player) playerIn)::sendResourcePack);
-        // Sponge End
-
-        // Sponge Start
-        //
-        // This sends the objective/score creation packets
-        // to the player, without attempting to remove them from their
-        // previous scoreboard (which is set in a field initializer).
-        // This allows #getWorldScoreboard to function
-        // as normal, without causing issues when it is initialized on the client.
-
-        ((ServerPlayerEntityBridge) playerIn).initScoreboard();
-
-        for (PotionEffect potioneffect : playerIn.getActivePotionEffects()) {
-            handler.sendPacket(new SPacketEntityEffect(playerIn.getEntityId(), potioneffect));
-        }
-
-        if (nbttagcompound != null) {
-            if (nbttagcompound.hasKey("RootVehicle", 10)) {
-                NBTTagCompound nbttagcompound1 = nbttagcompound.getCompoundTag("RootVehicle");
-                Entity entity2 = AnvilChunkLoader.readWorldEntity(nbttagcompound1.getCompoundTag("Entity"), worldServer, true);
-
-                if (entity2 != null) {
-                    UUID uuid = nbttagcompound1.getUniqueId("Attach");
-
-                    if (entity2.getUniqueID().equals(uuid)) {
-                        playerIn.startRiding(entity2, true);
-                    } else {
-                        for (Entity entity : entity2.getRecursivePassengers()) {
-                            if (entity.getUniqueID().equals(uuid)) {
-                                playerIn.startRiding(entity, true);
-                                break;
-                            }
-                        }
-                    }
-
-                    if (!playerIn.isRiding()) {
-                        LOGGER.warn("Couldn\'t reattach entity to player");
-                        worldServer.removeEntityDangerously(entity2);
-
-                        for (Entity entity3 : entity2.getRecursivePassengers()) {
-                            worldServer.removeEntityDangerously(entity3);
-                        }
-                    }
-                }
-            } else if (nbttagcompound.hasKey("Riding", 10)) {
-                Entity entity1 = AnvilChunkLoader.readWorldEntity(nbttagcompound.getCompoundTag("Riding"), worldServer, true);
-
-                if (entity1 != null) {
-                    playerIn.startRiding(entity1, true);
-                }
-            }
-        }
-
-        playerIn.addSelfToInternalCraftingInventory();
-
-        TextComponentTranslation chatcomponenttranslation;
-
-        if (!playerIn.getName().equalsIgnoreCase(s))
-        {
-            chatcomponenttranslation = new TextComponentTranslation("multiplayer.player.joined.renamed", playerIn.getDisplayName(), s);
-        }
-        else
-        {
-            chatcomponenttranslation = new TextComponentTranslation("multiplayer.player.joined", playerIn.getDisplayName());
-        }
-
-        chatcomponenttranslation.getStyle().setColor(TextFormatting.YELLOW);
-
-        // Fire PlayerJoinEvent
-        Text originalMessage = SpongeTexts.toText(chatcomponenttranslation);
-        MessageChannel originalChannel = player.getMessageChannel();
-        Sponge.getCauseStackManager().pushCause(player);
-        final ClientConnectionEvent.Join event = SpongeEventFactory.createClientConnectionEventJoin(
-                Sponge.getCauseStackManager().getCurrentCause(), originalChannel, Optional.of(originalChannel),
-                new MessageEvent.MessageFormatter(originalMessage), player, false
-        );
-        SpongeImpl.postEvent(event);
-        Sponge.getCauseStackManager().popCause();
-        // Send to the channel
-        if (!event.isMessageCancelled()) {
-            event.getChannel().ifPresent(channel -> channel.send(player, event.getMessage()));
-        }
-        // Sponge end
     }
 
     /**

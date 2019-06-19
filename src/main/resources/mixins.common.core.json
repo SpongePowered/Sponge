@@ -343,6 +343,7 @@
         "scoreboard.MixinScoreObjective",
         "scoreboard.MixinScorePlayerTeam",
         "scoreboard.MixinServerScoreboardPacketSending",
+        "server.AccessorPlayerList",
         "server.MixinMinecraftServer",
         "server.MixinPlayerList",
         "server.MixinServerCommandManager",
