@@ -588,7 +588,7 @@ public abstract class MixinEntity implements EntityBridge, TrackableBridge {
     }
 
     @Override
-    public void setImplVelocity(final Vector3d velocity) {
+    public void bridge$setImplVelocity(final Vector3d velocity) {
         this.motionX = checkNotNull(velocity).getX();
         this.motionY = velocity.getY();
         this.motionZ = velocity.getZ();

@@ -163,25 +163,18 @@ public abstract class MixinEntityPlayerMP_API extends MixinEntityPlayer_API impl
     @Shadow public abstract Entity getSpectatingEntity();
     @Shadow public abstract void setSpectatingEntity(Entity entity);
 
-
-    @Nullable private Text displayName = null;
     private boolean sleepingIgnored;
-    private User user = ((ServerPlayerEntityBridge) this).getUserObject();
-    private Set<SkinPart> skinParts = Sets.newHashSet();
     private TabList tabList = new SpongeTabList((EntityPlayerMP) (Object) this);
-    private Scoreboard spongeScoreboard = Sponge.getGame().getServer().getServerScoreboard().get();
-    @Nullable private Vector3d velocityOverride = null;
     @Nullable private WorldBorder worldBorder;
-    private final PlayerOwnBorderListener borderListener = new PlayerOwnBorderListener((EntityPlayerMP) (Object) this);
 
     @Override
     public GameProfile getProfile() {
-        return this.user.getProfile();
+        return ((ServerPlayerEntityBridge) this).bridge$getUser().getProfile();
     }
 
     @Override
     public boolean isOnline() {
-        return this.user.isOnline();
+        return ((ServerPlayerEntityBridge) this).bridge$getUser().isOnline();
     }
 
     @Override
@@ -211,11 +204,11 @@ public abstract class MixinEntityPlayerMP_API extends MixinEntityPlayer_API impl
 
     @Override
     public Set<SkinPart> getDisplayedSkinParts() {
-        return this.skinParts;
+        return ((ServerPlayerEntityBridge) this).bridge$getSkinParts();
     }
 
     @Override
-    public void sendMessage(ChatType type, Text message) {
+    public void sendMessage(final ChatType type, final Text message) {
         if (this.isFake) {
             // Don't bother sending messages to fake players
             return;
@@ -232,7 +225,7 @@ public abstract class MixinEntityPlayerMP_API extends MixinEntityPlayer_API impl
     }
 
     @Override
-    public void sendBookView(BookView bookView) {
+    public void sendBookView(final BookView bookView) {
         if (this.isFake) {
             // Don't bother sending messages to fake players
             return;
@@ -241,7 +234,7 @@ public abstract class MixinEntityPlayerMP_API extends MixinEntityPlayer_API impl
     }
 
     @Override
-    public void sendTitle(Title title) {
+    public void sendTitle(final Title title) {
         if (this.isFake) {
             // Don't bother sending messages to fake players
             return;
@@ -250,7 +243,7 @@ public abstract class MixinEntityPlayerMP_API extends MixinEntityPlayer_API impl
     }
 
     @Override
-    public void spawnParticles(ParticleEffect particleEffect, Vector3d position) {
+    public void spawnParticles(final ParticleEffect particleEffect, final Vector3d position) {
         if (this.isFake) {
             // Don't bother sending messages to fake players
             return;
@@ -259,7 +252,7 @@ public abstract class MixinEntityPlayerMP_API extends MixinEntityPlayer_API impl
     }
 
     @Override
-    public void spawnParticles(ParticleEffect particleEffect, Vector3d position, int radius) {
+    public void spawnParticles(final ParticleEffect particleEffect, final Vector3d position, final int radius) {
         if (this.isFake) {
             // Don't bother sending messages to fake players
             return;
@@ -268,11 +261,11 @@ public abstract class MixinEntityPlayerMP_API extends MixinEntityPlayer_API impl
         checkNotNull(position, "The position cannot be null");
         checkArgument(radius > 0, "The radius has to be greater then zero!");
 
-        List<Packet<?>> packets = SpongeParticleHelper.toPackets((SpongeParticleEffect) particleEffect, position);
+        final List<Packet<?>> packets = SpongeParticleHelper.toPackets((SpongeParticleEffect) particleEffect, position);
 
         if (!packets.isEmpty()) {
             if (position.sub(this.posX, this.posY, this.posZ).lengthSquared() < (long) radius * (long) radius) {
-                for (Packet<?> packet : packets) {
+                for (final Packet<?> packet : packets) {
                     this.connection.sendPacket(packet);
                 }
             }
@@ -296,7 +289,7 @@ public abstract class MixinEntityPlayerMP_API extends MixinEntityPlayer_API impl
 
     @Override
     public String getIdentifier() {
-        return this.user.getIdentifier();
+        return ((ServerPlayerEntityBridge) this).bridge$getUser().getIdentifier();
     }
 
     @Override
@@ -305,15 +298,15 @@ public abstract class MixinEntityPlayerMP_API extends MixinEntityPlayer_API impl
     }
 
     @Override
-    public Optional<Container> openInventory(Inventory inventory) throws IllegalArgumentException {
+    public Optional<Container> openInventory(final Inventory inventory) throws IllegalArgumentException {
         return this.openInventory(inventory, null);
     }
 
     @SuppressWarnings({"unchecked", "ConstantConditions", "rawtypes"})
     @Override
-    public Optional<Container> openInventory(Inventory inventory, Text displayName) {
+    public Optional<Container> openInventory(final Inventory inventory, final Text displayName) {
         if (((ContainerBridge) this.openContainer).isInUse()) {
-            Cause cause = Sponge.getCauseStackManager().getCurrentCause();
+            final Cause cause = Sponge.getCauseStackManager().getCurrentCause();
             SpongeImpl.getLogger().warn("This player is currently modifying an open container. This action will be delayed.");
             Sponge.getScheduler().createTaskBuilder().delayTicks(0).execute(() -> {
                 try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
@@ -332,7 +325,7 @@ public abstract class MixinEntityPlayerMP_API extends MixinEntityPlayer_API impl
     @Override
     public boolean closeInventory() throws IllegalArgumentException {
         if (((ContainerBridge) this.openContainer).isInUse()) {
-            Cause cause = Sponge.getCauseStackManager().getCurrentCause();
+            final Cause cause = Sponge.getCauseStackManager().getCurrentCause();
             SpongeImpl.getLogger().warn("This player is currently modifying an open container. This action will be delayed.");
             Sponge.getScheduler().createTaskBuilder().delayTicks(0).execute(() -> {
                 try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
@@ -344,26 +337,26 @@ public abstract class MixinEntityPlayerMP_API extends MixinEntityPlayer_API impl
             return false;
         }
         // Create Close_Window to capture item drops
-        try (PhaseContext<?> ctx = PacketPhase.General.CLOSE_WINDOW.createPhaseContext()
+        try (final PhaseContext<?> ctx = PacketPhase.General.CLOSE_WINDOW.createPhaseContext()
                 .source(this)
                 .packetPlayer(((EntityPlayerMP)(Object) this))
                 .openContainer(this.openContainer)
-                // intentionally missing the lastCursor to not double throw close event
+             // intentionally missing the lastCursor to not double throw close event
                 ) {
             ctx.buildAndSwitch();
-            ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(this.inventory.getItemStack());
+            final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(this.inventory.getItemStack());
             return !SpongeCommonEventFactory.callInteractInventoryCloseEvent(this.openContainer, (EntityPlayerMP) (Object) this, cursor, cursor, false).isCancelled();
         }
     }
 
     @Override
-    public void setScoreboard(Scoreboard scoreboard) {
-        if (scoreboard == null) {
-            scoreboard = Sponge.getGame().getServer().getServerScoreboard().get();
+    public void setScoreboard(final Scoreboard scoreboard) {
+        if (((ServerPlayerEntityBridge) this).bridge$hasDelegate()) {
+            ((Player) ((ServerPlayerEntityBridge) this).bridge$getDelegate()).setScoreboard(scoreboard);
         }
-        ((IMixinServerScoreboard) this.spongeScoreboard).removePlayer((EntityPlayerMP) (Object) this, true);
-        this.spongeScoreboard = scoreboard;
-        ((IMixinServerScoreboard) this.spongeScoreboard).addPlayer((EntityPlayerMP) (Object) this, true);
+        ((IMixinServerScoreboard) ((ServerPlayerEntityBridge) this).bridge$getScoreboard()).removePlayer((EntityPlayerMP) (Object) this, true);
+        ((ServerPlayerEntityBridge) this).bridge$replaceScoreboard(scoreboard);
+        ((IMixinServerScoreboard) ((ServerPlayerEntityBridge) this).bridge$getScoreboard()).addPlayer((EntityPlayerMP) (Object) this, true);
     }
 
     @Override
@@ -373,7 +366,7 @@ public abstract class MixinEntityPlayerMP_API extends MixinEntityPlayer_API impl
 
     @Override
     public Scoreboard getScoreboard() {
-        return this.spongeScoreboard;
+        return ((ServerPlayerEntityBridge) this).bridge$getScoreboard();
     }
 
     @Override
@@ -382,24 +375,25 @@ public abstract class MixinEntityPlayerMP_API extends MixinEntityPlayer_API impl
     }
 
     @Override
-    public void kick(Text message) {
+    public void kick(final Text message) {
         final ITextComponent component = SpongeTexts.toComponent(message);
         PlayerKickHelper.kickPlayer((EntityPlayerMP) (Object) this, component);
     }
 
     @Override
-    public void playSound(SoundType sound, SoundCategory category, Vector3d position, double volume) {
+    public void playSound(final SoundType sound, final SoundCategory category, final Vector3d position, final double volume) {
         this.playSound(sound, category, position, volume, 1);
     }
 
     @Override
-    public void playSound(SoundType sound, SoundCategory category, Vector3d position, double volume, double pitch) {
+    public void playSound(final SoundType sound, final SoundCategory category, final Vector3d position, final double volume, final double pitch) {
         this.playSound(sound, category, position, volume, pitch, 0);
     }
 
     @Override
-    public void playSound(SoundType sound, SoundCategory category, Vector3d position, double volume, double pitch, double minVolume) {
-        SoundEvent event;
+    public void playSound(
+        final SoundType sound, final SoundCategory category, final Vector3d position, final double volume, final double pitch, final double minVolume) {
+        final SoundEvent event;
         try {
             // Check if the event is registered (ie has an integer ID)
             event = SoundEvents.getRegisteredSoundEvent(sound.getId());
@@ -420,47 +414,47 @@ public abstract class MixinEntityPlayerMP_API extends MixinEntityPlayer_API impl
     }
 
     @Override
-    public void stopSounds(SoundType sound) {
+    public void stopSounds(final SoundType sound) {
         stopSounds0(checkNotNull(sound, "sound"), null);
     }
 
     @Override
-    public void stopSounds(SoundCategory category) {
+    public void stopSounds(final SoundCategory category) {
         stopSounds0(null, checkNotNull(category, "category"));
     }
 
     @Override
-    public void stopSounds(SoundType sound, SoundCategory category) {
+    public void stopSounds(final SoundType sound, final SoundCategory category) {
         stopSounds0(checkNotNull(sound, "sound"), checkNotNull(category, "category"));
     }
 
-    private void stopSounds0(@Nullable SoundType sound, @Nullable SoundCategory category) {
+    private void stopSounds0(@Nullable final SoundType sound, @Nullable final SoundCategory category) {
         this.connection.sendPacket(SoundEffectHelper.createStopSoundPacket(sound, category));
     }
 
     @Override
-    public void playRecord(Vector3i position, RecordType recordType) {
+    public void playRecord(final Vector3i position, final RecordType recordType) {
         playRecord0(position, checkNotNull(recordType, "recordType"));
     }
 
     @Override
-    public void stopRecord(Vector3i position) {
+    public void stopRecord(final Vector3i position) {
         playRecord0(position, null);
     }
 
-    private void playRecord0(Vector3i position, @Nullable RecordType recordType) {
+    private void playRecord0(final Vector3i position, @Nullable final RecordType recordType) {
         this.connection.sendPacket(SpongeRecordType.createPacket(position, recordType));
     }
 
     @Override
-    public void sendResourcePack(ResourcePack pack) {
-        SPacketResourcePackSend packet = new SPacketResourcePackSend();
+    public void sendResourcePack(final ResourcePack pack) {
+        final SPacketResourcePackSend packet = new SPacketResourcePackSend();
         ((ResourcePackBridge) packet).bridge$setSpongePack(pack);
         this.connection.sendPacket(packet);
     }
 
     @Inject(method = "markPlayerActive()V", at = @At("HEAD"))
-    private void onPlayerActive(CallbackInfo ci) {
+    private void onPlayerActive(final CallbackInfo ci) {
         ((IMixinNetHandlerPlayServer) this.connection).resendLatestResourcePackRequest();
     }
 
@@ -470,14 +464,14 @@ public abstract class MixinEntityPlayerMP_API extends MixinEntityPlayer_API impl
     }
 
     @Override
-    public void setSleepingIgnored(boolean sleepingIgnored) {
+    public void setSleepingIgnored(final boolean sleepingIgnored) {
         this.sleepingIgnored = sleepingIgnored;
     }
 
     @Override
     public Vector3d getVelocity() {
-        if (this.velocityOverride != null) {
-            return this.velocityOverride;
+        if (((ServerPlayerEntityBridge) this).bridge$getVelocityOverride() != null) {
+            return ((ServerPlayerEntityBridge) this).bridge$getVelocityOverride();
         }
         return super.getVelocity();
     }
@@ -535,13 +529,13 @@ public abstract class MixinEntityPlayerMP_API extends MixinEntityPlayer_API impl
     }
 
     @Override
-    public void spongeApi$supplyVanillaManipulators(List<? super DataManipulator<?, ?>> manipulators) {
+    public void spongeApi$supplyVanillaManipulators(final List<? super DataManipulator<?, ?>> manipulators) {
         super.spongeApi$supplyVanillaManipulators(manipulators);
         manipulators.add(getJoinData());
         manipulators.add(getGameModeData());
     }
 
-    public void sendBlockChange(BlockPos pos, IBlockState state) {
+    public void sendBlockChange(final BlockPos pos, final IBlockState state) {
         final SPacketBlockChange packet = new SPacketBlockChange();
         packet.blockPosition = pos;
         packet.blockState = state;
@@ -549,14 +543,14 @@ public abstract class MixinEntityPlayerMP_API extends MixinEntityPlayer_API impl
     }
 
     @Override
-    public void sendBlockChange(int x, int y, int z, BlockState state) {
+    public void sendBlockChange(final int x, final int y, final int z, final BlockState state) {
         checkNotNull(state, "state");
         this.sendBlockChange(new BlockPos(x, y, z), (IBlockState) state);
     }
 
     @Override
-    public void resetBlockChange(int x, int y, int z) {
-        SPacketBlockChange packet = new SPacketBlockChange(this.world, new BlockPos(x, y, z));
+    public void resetBlockChange(final int x, final int y, final int z) {
+        final SPacketBlockChange packet = new SPacketBlockChange(this.world, new BlockPos(x, y, z));
         this.connection.sendPacket(packet);
     }
 
@@ -582,15 +576,15 @@ public abstract class MixinEntityPlayerMP_API extends MixinEntityPlayer_API impl
     }
 
     @Override
-    public void setSpectatorTarget(@Nullable org.spongepowered.api.entity.Entity entity) {
+    public void setSpectatorTarget(@Nullable final org.spongepowered.api.entity.Entity entity) {
         this.setSpectatingEntity((Entity) entity);
     }
 
     @Override
-    public MessageChannelEvent.Chat simulateChat(Text message, Cause cause) {
+    public MessageChannelEvent.Chat simulateChat(final Text message, final Cause cause) {
         checkNotNull(message, "message");
 
-        TextComponentTranslation component = new TextComponentTranslation("chat.type.text", SpongeTexts.toComponent(((ServerPlayerEntityBridge) this).getDisplayNameText()),
+        final TextComponentTranslation component = new TextComponentTranslation("chat.type.text", SpongeTexts.toComponent(((ServerPlayerEntityBridge) this).getDisplayNameText()),
                 SpongeTexts.toComponent(message));
         final Text[] messages = SpongeTexts.splitChatMessage(component);
 
@@ -611,17 +605,17 @@ public abstract class MixinEntityPlayerMP_API extends MixinEntityPlayer_API impl
     }
 
     @Override
-    public void setWorldBorder(@Nullable WorldBorder border, Cause cause) {
+    public void setWorldBorder(@Nullable final WorldBorder border, final Cause cause) {
         if (this.worldBorder == border) {
             return; //do not fire an event since nothing would have changed
         }
         if (!SpongeImpl.postEvent(SpongeEventFactory.createChangeWorldBorderEventTargetPlayer(cause, Optional.ofNullable(this.worldBorder), Optional.ofNullable(border), this))) {
             if (this.worldBorder != null) { //is the world border about to be unset?
-                ((net.minecraft.world.border.WorldBorder) this.worldBorder).listeners.remove(this.borderListener); //remove the listener, if so
+                ((net.minecraft.world.border.WorldBorder) this.worldBorder).listeners.remove(((ServerPlayerEntityBridge) this).getWorldBorderListener()); //remove the listener, if so
             }
             this.worldBorder = border;
             if (this.worldBorder != null) {
-                ((net.minecraft.world.border.WorldBorder) this.worldBorder).addListener(this.borderListener);
+                ((net.minecraft.world.border.WorldBorder) this.worldBorder).addListener(((ServerPlayerEntityBridge) this).getWorldBorderListener());
                 this.connection.sendPacket(new SPacketWorldBorder((net.minecraft.world.border.WorldBorder) this.worldBorder, SPacketWorldBorder.Action.INITIALIZE));
             } else { //unset the border if null
                 this.connection.sendPacket(new SPacketWorldBorder(this.world.getWorldBorder(), SPacketWorldBorder.Action.INITIALIZE));
@@ -635,7 +629,7 @@ public abstract class MixinEntityPlayerMP_API extends MixinEntityPlayer_API impl
     }
 
     @Override
-    public AdvancementProgress getProgress(Advancement advancement) {
+    public AdvancementProgress getProgress(final Advancement advancement) {
         checkNotNull(advancement, "advancement");
         checkState(((IMixinAdvancement) advancement).isRegistered(), "The advancement must be registered");
         return (AdvancementProgress) this.advancements.getProgress((net.minecraft.advancements.Advancement) advancement);
@@ -659,9 +653,9 @@ public abstract class MixinEntityPlayerMP_API extends MixinEntityPlayer_API impl
     }
 
     @Override
-    public boolean setLocation(Vector3d position, UUID world) {
-        WorldProperties prop = Sponge.getServer().getWorldProperties(world).orElseThrow(() -> new IllegalArgumentException("Invalid World: No world found for UUID"));
-        World loaded = Sponge.getServer().loadWorld(prop).orElseThrow(() -> new IllegalArgumentException("Invalid World: Could not load world for UUID"));
+    public boolean setLocation(final Vector3d position, final UUID world) {
+        final WorldProperties prop = Sponge.getServer().getWorldProperties(world).orElseThrow(() -> new IllegalArgumentException("Invalid World: No world found for UUID"));
+        final World loaded = Sponge.getServer().loadWorld(prop).orElseThrow(() -> new IllegalArgumentException("Invalid World: Could not load world for UUID"));
         return this.setLocation(new Location<>(loaded, position));
     }
 

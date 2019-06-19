@@ -100,7 +100,7 @@ public interface EntityBridge extends TrackableBridge, IUserOrEntity, TimingHold
 
 
 
-    void setImplVelocity(Vector3d velocity);
+    void bridge$setImplVelocity(Vector3d velocity);
 
     boolean isVanished();
 

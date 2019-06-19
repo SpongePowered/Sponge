@@ -25,8 +25,6 @@
 package org.spongepowered.common.mixin.core.entity.player;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.Sets;
@@ -87,7 +85,6 @@ import org.spongepowered.api.data.type.SkinPart;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
-import org.spongepowered.api.entity.living.player.tab.TabList;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -109,7 +106,6 @@ import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.chat.ChatVisibility;
 import org.spongepowered.api.util.Tristate;
-import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -123,11 +119,13 @@ import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.entity.EntityBridge;
+import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
+import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.inventory.ContainerBridge;
-import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.living.human.EntityHuman;
-import org.spongepowered.common.entity.player.tab.SpongeTabList;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -139,15 +137,12 @@ import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.interfaces.IMixinServerScoreboard;
 import org.spongepowered.common.interfaces.IMixinSubject;
 import org.spongepowered.common.interfaces.IMixinTeam;
-import org.spongepowered.common.bridge.entity.EntityBridge;
-import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.service.user.SpongeUserStorageService;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.chat.ChatUtil;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.LocaleCache;
 import org.spongepowered.common.util.NetworkUtil;
 import org.spongepowered.common.util.SkinUtil;
@@ -178,6 +173,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
     @Shadow private float lastHealth;
     @Shadow private int lastFoodLevel;
     @Shadow public boolean isChangingQuantityOnly;
+    @Shadow private int currentWindowId;
 
     @Shadow public abstract Entity getSpectatingEntity();
     @Shadow public abstract void setSpectatingEntity(Entity entity);
@@ -187,46 +183,34 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
     @Shadow public abstract void displayGUIChest(IInventory chestInventory);
     @Shadow public abstract void displayGui(IInteractionObject guiOwner);
     @Shadow public abstract void openGuiHorseInventory(AbstractHorse horse, IInventory horseInventory);
-
-    // Inventory
     @Shadow public abstract void closeScreen();
-    @Shadow private int currentWindowId;
     @Shadow private void getNextWindowId() { }
-
     @Shadow public abstract void closeContainer();
-
     @Shadow public abstract WorldServer getServerWorld();
-
     @Shadow protected abstract boolean canPlayersAttack();
 
-    public int newExperience = 0;
-    public int newLevel = 0;
-    public int newTotalExperience = 0;
-    public boolean keepsLevel = false;
-    private boolean sleepingIgnored;
     // Used to restore original item received in a packet after canceling an event
-    private ItemStack packetItem;
-
-    @Nullable private User user = getUserObject();
-
-    private Set<SkinPart> skinParts = Sets.newHashSet();
+    private ItemStack impl$packetItem = ItemStack.EMPTY;
+    private User impl$user = getUserObject();
+    private Set<SkinPart> impl$skinParts = Sets.newHashSet();
     private int impl$viewDistance;
-    private TabList tabList = new SpongeTabList((EntityPlayerMP) (Object) this);
-
-    private GameType pendingGameType;
-
-    private Scoreboard spongeScoreboard = Sponge.getGame().getServer().getServerScoreboard().get();
-    @Nullable private EntityPlayerMP delegate;
-
-    @Nullable private Vector3d velocityOverride = null;
-    private boolean healthScaling = false;
-    private double healthScale = 20;
+    @Nullable private GameType impl$pendingGameType;
+    private Scoreboard impl$spongeScoreboard = Sponge.getGame().getServer().getServerScoreboard().get();
+    @Nullable private EntityPlayerMP impl$delegate;
+    @Nullable private Vector3d impl$velocityOverride = null;
+    private boolean impl$healthScaling = false;
+    private double impl$healthScale = Constants.Entity.Player.DEFAULT_HEALTH_SCALE;
+    private final PlayerOwnBorderListener borderListener = new PlayerOwnBorderListener((EntityPlayerMP) (Object) this);
+    private boolean keepInventory = false;
+    private float cachedHealth = -1;
+    private float cachedScaledHealth = -1;
+    @Nullable private Text displayName = null;
 
     @Override
     public void spongeImpl$writeToSpongeCompound(final NBTTagCompound compound) {
         super.spongeImpl$writeToSpongeCompound(compound);
-        if (this.healthScaling) {
-            compound.setDouble(NbtDataUtil.HEALTH_SCALE, this.healthScale);
+        if (this.impl$healthScaling) {
+            compound.setDouble(NbtDataUtil.HEALTH_SCALE, this.impl$healthScale);
         }
     }
 
@@ -234,13 +218,10 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
     public void spongeImpl$readFromSpongeCompound(final NBTTagCompound compound) {
         super.spongeImpl$readFromSpongeCompound(compound);
         if (compound.hasKey(NbtDataUtil.HEALTH_SCALE, NbtDataUtil.TAG_DOUBLE)) {
-            this.healthScaling = true;
-            this.healthScale = compound.getDouble(NbtDataUtil.HEALTH_SCALE);
+            this.impl$healthScaling = true;
+            this.impl$healthScale = compound.getDouble(NbtDataUtil.HEALTH_SCALE);
         }
     }
-
-    @Nullable private WorldBorder worldBorder;
-    private final PlayerOwnBorderListener borderListener = new PlayerOwnBorderListener((EntityPlayerMP) (Object) this);
 
     @Inject(method = "removeEntity", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/network/NetHandlerPlayServer;sendPacket(Lnet/minecraft/network/Packet;)V"))
@@ -250,7 +231,6 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
         }
     }
 
-    private boolean keepInventory = false;
 
     @Override
     public boolean keepInventory() {
@@ -431,14 +411,14 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
         if (!(service instanceof SpongeUserStorageService)) {
             SpongeImpl.getLogger().error("Not re-creating User object for player {}, as UserStorageServer has been replaced with {}", this.getName(), service);
         } else {
-            this.user = ((SpongeUserStorageService) service).forceRecreateUser((GameProfile) this.getGameProfile());
+            this.impl$user = ((SpongeUserStorageService) service).forceRecreateUser((GameProfile) this.getGameProfile());
         }
     }
 
     @Override
     public Optional<User> getBackingUser() {
         // may be null during initialization, mainly used to avoid potential stack overflow with #getUserObject
-        return Optional.ofNullable(this.user);
+        return Optional.ofNullable(this.impl$user);
     }
 
     @Override
@@ -448,6 +428,11 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
             return service.getOrCreate(SpongeUserStorageService.FAKEPLAYER_PROFILE);
         }
         return service.getOrCreate((GameProfile) this.getGameProfile());
+    }
+
+    @Override
+    public User bridge$getUser() {
+        return this.impl$user;
     }
 
     // Post before the player values are updated
@@ -473,7 +458,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
 
     @Inject(method = "handleClientSettings", at = @At("RETURN"))
     private void impl$updateSkinFromPacket(final CPacketClientSettings packet, final CallbackInfo ci) {
-        this.skinParts = SkinUtil.fromFlags(packet.getModelPartFlags()); // Returned set is immutable
+        this.impl$skinParts = SkinUtil.fromFlags(packet.getModelPartFlags()); // Returned set is immutable
         this.impl$viewDistance = packet.view;
     }
 
@@ -507,17 +492,17 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
 
     @Override
     public String getSubjectCollectionIdentifier() {
-        return ((IMixinSubject) this.user).getSubjectCollectionIdentifier();
+        return ((IMixinSubject) this.impl$user).getSubjectCollectionIdentifier();
     }
 
     @Override
     public String getIdentifier() {
-        return this.user.getIdentifier();
+        return this.impl$user.getIdentifier();
     }
 
     @Override
     public Tristate permDefault(final String permission) {
-        return ((IMixinSubject) this.user).permDefault(permission);
+        return ((IMixinSubject) this.impl$user).permDefault(permission);
     }
 
     @Override
@@ -529,8 +514,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
     }
 
     @Override
-    public void setPacketItem(final ItemStack itemstack) {
-        this.packetItem = itemstack;
+    public void bridge$setPacketItem(final ItemStack itemstack) {
+        this.impl$packetItem = itemstack;
     }
 
     @Override
@@ -539,18 +524,18 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
     }
 
     @Override
-    public void restorePacketItem(final EnumHand hand) {
-        if (this.packetItem.isEmpty()) {
+    public void bridge$restorePacketItem(final EnumHand hand) {
+        if (this.impl$packetItem.isEmpty()) {
             return;
         }
 
         this.isChangingQuantityOnly = true;
-        this.setHeldItem(hand, this.packetItem);
+        this.setHeldItem(hand, this.impl$packetItem);
         final Slot slot = this.openContainer.getSlotFromInventory(this.inventory, this.inventory.currentItem);
         this.openContainer.detectAndSendChanges();
         this.isChangingQuantityOnly = false;
         // force client itemstack update if place event was cancelled
-        this.connection.sendPacket(new SPacketSetSlot(this.openContainer.windowId, slot.slotNumber, this.packetItem));
+        this.connection.sendPacket(new SPacketSetSlot(this.openContainer.windowId, slot.slotNumber, this.impl$packetItem));
     }
 
     @Override
@@ -559,8 +544,21 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
     }
 
     @Override
+    public Scoreboard bridge$getScoreboard() {
+        return this.impl$spongeScoreboard;
+    }
+
+    @Override
+    public void bridge$replaceScoreboard(@Nullable Scoreboard scoreboard) {
+        if (scoreboard == null) {
+            scoreboard = Sponge.getGame().getServer().getServerScoreboard().get();
+        }
+        this.impl$spongeScoreboard = scoreboard;
+    }
+
+    @Override
     public void setScoreboardOnRespawn(final Scoreboard scoreboard) {
-        this.spongeScoreboard = scoreboard;
+        this.impl$spongeScoreboard = scoreboard;
         ((IMixinServerScoreboard) ((Player) this).getScoreboard()).addPlayer((EntityPlayerMP) (Object) this, false);
     }
 
@@ -611,14 +609,35 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
     }
 
     @Override
-    public void setImplVelocity(final Vector3d velocity) {
-        super.setImplVelocity(velocity);
-        this.velocityOverride = null;
+    public void bridge$setImplVelocity(final Vector3d velocity) {
+        super.bridge$setImplVelocity(velocity);
+        this.impl$velocityOverride = null;
     }
 
     @Override
-    public void setVelocityOverride(@Nullable final Vector3d velocity) {
-        this.velocityOverride = velocity;
+    public void bridge$setVelocityOverride(@Nullable final Vector3d velocity) {
+        this.impl$velocityOverride = velocity;
+    }
+
+    @Override
+    public Vector3d bridge$getVelocityOverride() {
+        return this.impl$velocityOverride;
+    }
+
+    @Override
+    public Set<SkinPart> bridge$getSkinParts() {
+        return this.impl$skinParts;
+    }
+
+    @Override
+    public boolean bridge$hasDelegate() {
+        return this.impl$delegate != null;
+    }
+
+    @Nullable
+    @Override
+    public EntityPlayerMP bridge$getDelegate() {
+        return this.impl$delegate;
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -634,20 +653,21 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
                 if (event.isCancelled()) {
                     ci.cancel();
                 }
-                this.pendingGameType = (GameType) (Object) event.getGameMode();
+                this.impl$pendingGameType = (GameType) (Object) event.getGameMode();
             }
-
+        } else {
+            this.impl$pendingGameType = gameType;
         }
     }
 
     /**
      * This injector must appear <b>after</b> {@link #spongeImpl$onSetGameTypeThrowEvent} since it
-     * assigns the {@link #pendingGameType} returned by the event to the actual
+     * assigns the {@link #impl$pendingGameType} returned by the event to the actual
      * local variable in the method.
      */
     @ModifyVariable(method = "setGameType(Lnet/minecraft/world/GameType;)V", at = @At(value = "HEAD", remap = false), argsOnly = true)
     private GameType spongeImpl$assignPendingGameType(final GameType gameType) {
-        return this.pendingGameType;
+        return this.impl$pendingGameType;
     }
 
     @Redirect(method = "onDeath", at = @At(value = "INVOKE",
@@ -741,7 +761,6 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
         return this.borderListener;
     }
 
-
     /**
      * Send SlotCrafting updates to client for custom recipes.
      *
@@ -785,8 +804,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
     public void setHealthScale(final double scale) {
         checkArgument(scale > 0, "Health scale must be greater than 0!");
         checkArgument(scale < Float.MAX_VALUE, "Health scale cannot exceed Float.MAX_VALUE!");
-        this.healthScale = scale;
-        this.healthScaling = true;
+        this.impl$healthScale = scale;
+        this.impl$healthScaling = true;
         refreshScaledHealth();
     }
 
@@ -812,7 +831,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
 
     @Override
     public void injectScaledHealth(final Collection<IAttributeInstance> set, final boolean force) {
-        if (!this.healthScaling && !force) {
+        if (!this.impl$healthScaling && !force) {
             return;
         }
         // We need to remove the existing attribute instance for max health, since it's not always going to be the
@@ -836,7 +855,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
 
         // We now re-create a new ranged attribute for our desired max health
         final RangedAttribute maxHealth =
-            new RangedAttribute(null, "generic.maxHealth", this.healthScaling ? this.healthScale : getMaxHealth(), 0.0D, Float.MAX_VALUE);
+            new RangedAttribute(null, "generic.maxHealth", this.impl$healthScaling ? this.impl$healthScale : getMaxHealth(), 0.0D, Float.MAX_VALUE);
         maxHealth.setDescription("Max Health");
         maxHealth.setShouldWatch(true); // needs to be watched
 
@@ -851,15 +870,12 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
 
     @Override
     public double getHealthScale() {
-        return this.healthScale;
+        return this.impl$healthScale;
     }
-
-    private float cachedHealth = -1;
-    private float cachedScaledHealth = -1;
 
     @Override
     public float getInternalScaledHealth() {
-        if (this.healthScaling) {
+        if (this.impl$healthScaling) {
             // Micro-optimization so we don't have to recalculate it all the time
             if (this.cachedHealth != -1 && this.getHealth() == this.cachedHealth) {
                 if (this.cachedScaledHealth != -1) {
@@ -871,7 +887,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
             // need to replicate what the mod may be trying to represent, regardless whether the health scale
             // says to show only x hearts.
             final IAttributeInstance maxAttribute = this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH);
-            double modifiedScale = (float) this.healthScale;
+            double modifiedScale = (float) this.impl$healthScale;
             // Apply additive modifiers
             for (final AttributeModifier attributemodifier : maxAttribute.getModifiersByOperation(0)) {
                 modifiedScale += attributemodifier.getAmount();
@@ -896,12 +912,12 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
 
     @Override
     public boolean isHealthScaled() {
-        return this.healthScaling;
+        return this.impl$healthScaling;
     }
 
     @Override
     public void setHealthScaled(final boolean scaled) {
-        this.healthScaling = scaled;
+        this.impl$healthScaling = scaled;
     }
 
     @Override
@@ -922,10 +938,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements I
 
     @Override
     public void setDelegateAfterRespawn(EntityPlayerMP delegate) {
-        this.delegate = delegate;
+        this.impl$delegate = delegate;
     }
-
-    @Nullable private Text displayName = null;
 
     @Override
     public void setContainerDisplay(final Text displayName) {

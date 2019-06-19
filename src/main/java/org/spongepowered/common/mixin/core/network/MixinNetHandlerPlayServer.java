@@ -496,7 +496,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                 rotationOnly = ShouldFire.ROTATE_ENTITY_EVENT;
             }
 
-            mixinPlayer.setVelocityOverride(toLocation.getPosition().sub(fromLocation.getPosition()));
+            mixinPlayer.bridge$setVelocityOverride(toLocation.getPosition().sub(fromLocation.getPosition()));
 
             double deltaSquared = toLocation.getPosition().distanceSquared(fromLocation.getPosition());
             double deltaAngleSquared = fromRotation.distanceSquared(toRotation);
@@ -517,7 +517,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                     if (SpongeImpl.postEvent(event)) {
                         mixinPlayer.bridge$setLocationAndAngles(fromTransform);
                         this.lastMoveLocation = fromLocation;
-                        mixinPlayer.setVelocityOverride(null);
+                        mixinPlayer.bridge$setVelocityOverride(null);
                         return true;
                     }
                     if (rotationOnly) {
@@ -529,13 +529,13 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                 if (!toTransform.equals(originalToTransform)) {
                     mixinPlayer.bridge$setLocationAndAngles(toTransform);
                     this.lastMoveLocation = toTransform.getLocation();
-                    mixinPlayer.setVelocityOverride(null);
+                    mixinPlayer.bridge$setVelocityOverride(null);
                     return true;
                 } else if (!fromTransform.getLocation().equals(player.getLocation()) && this.justTeleported) {
                     this.lastMoveLocation = player.getLocation();
                     // Prevent teleports during the move event from causing odd behaviors
                     this.justTeleported = false;
-                    mixinPlayer.setVelocityOverride(null);
+                    mixinPlayer.bridge$setVelocityOverride(null);
                     return true;
                 } else {
                     this.lastMoveLocation = toTransform.getLocation();
@@ -757,7 +757,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     public void onProcessPlayerDiggingDropItem(CPacketPlayerDigging packetIn, CallbackInfo ci) {
         final ItemStack stack = this.player.getHeldItemMainhand();
         if (!stack.isEmpty()) {
-            ((ServerPlayerEntityBridge) this.player).setPacketItem(stack.copy());
+            ((ServerPlayerEntityBridge) this.player).bridge$setPacketItem(stack.copy());
         }
     }
 
@@ -894,7 +894,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                     }
 
                     if (SpongeCommonEventFactory.callInteractItemEventPrimary(this.player, itemstack, hand, hitVec, entity).isCancelled()) {
-                        ((ServerPlayerEntityBridge) this.player).restorePacketItem(hand);
+                        ((ServerPlayerEntityBridge) this.player).bridge$restorePacketItem(hand);
                         return;
                     }
                     // Sponge end
@@ -907,7 +907,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
 
                     // Sponge start
                     if (SpongeCommonEventFactory.callInteractEntityEventPrimary(this.player, itemstack, entity, hand, hitVec).isCancelled()) {
-                        ((ServerPlayerEntityBridge) this.player).restorePacketItem(hand);
+                        ((ServerPlayerEntityBridge) this.player).bridge$restorePacketItem(hand);
                         return;
                     }
                     // Sponge end

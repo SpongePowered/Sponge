@@ -31,6 +31,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
+import org.spongepowered.api.data.type.SkinPart;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.text.Text;
@@ -40,6 +41,7 @@ import org.spongepowered.common.world.border.PlayerOwnBorderListener;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -57,7 +59,7 @@ public interface ServerPlayerEntityBridge extends PlayerEntityBridge {
 
     void forceRecreateUser();
 
-    void setVelocityOverride(@Nullable Vector3d velocity);
+    void bridge$setVelocityOverride(@Nullable Vector3d velocity);
 
     void sendBlockChange(BlockPos pos, IBlockState state);
 
@@ -73,9 +75,9 @@ public interface ServerPlayerEntityBridge extends PlayerEntityBridge {
 
     void refreshXpHealthAndFood();
 
-    void restorePacketItem(EnumHand hand);
+    void bridge$restorePacketItem(EnumHand hand);
 
-    void setPacketItem(ItemStack itemstack);
+    void bridge$setPacketItem(ItemStack itemstack);
 
     void refreshExp();
 
@@ -103,4 +105,17 @@ public interface ServerPlayerEntityBridge extends PlayerEntityBridge {
 
     void setDelegateAfterRespawn(EntityPlayerMP delegate);
 
+    Scoreboard bridge$getScoreboard();
+
+    void bridge$replaceScoreboard(@Nullable Scoreboard scoreboard);
+
+    Set<SkinPart> bridge$getSkinParts();
+
+    User bridge$getUser();
+    boolean bridge$hasDelegate();
+
+    @Nullable
+    EntityPlayerMP bridge$getDelegate();
+
+    Vector3d bridge$getVelocityOverride();
 }

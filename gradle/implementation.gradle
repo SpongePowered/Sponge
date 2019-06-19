@@ -15,7 +15,7 @@ dependencies {
     compile common.sourceSets.java6.output
     // This is provided at runtime for mixins to be able to perform class decompilation
     // of mixin post transacted methods.
-    runtime "net.minecraftforge:forgeflower:1.5.380.34"
+    runtime "net.minecraftforge:forgeflower:1.5.380.23"
 }
 
 sourceSets {

@@ -290,7 +290,6 @@ public abstract class MixinChunk implements ChunkBridge, IMixinCachable {
         }
     }
 
-    @SuppressWarnings({"unchecked"})
     @Inject(method = "getEntitiesOfTypeWithinAABB", at = @At(value = "RETURN"))
     private void impl$throwCollsionEvent(final Class<? extends Entity> entityClass, final AxisAlignedBB aabb, final List<Entity> listToFill,
         @SuppressWarnings("Guava") final Predicate<Entity> p_177430_4_, final CallbackInfo ci) {
@@ -708,7 +707,7 @@ public abstract class MixinChunk implements ChunkBridge, IMixinCachable {
     )
     private void impl$CloseTerrainGenerationState(final IChunkGenerator generator, final CallbackInfo info) {
         if (!this.world.isRemote) {
-            if (!(PhaseTracker.getInstance().getCurrentState() == GenerationPhase.State.TERRAIN_GENERATION)) {
+            if (!PhaseTracker.getInstance().getCurrentState().isRegeneration()) {
                 PhaseTracker.getInstance().getCurrentContext().close();
             }
         }

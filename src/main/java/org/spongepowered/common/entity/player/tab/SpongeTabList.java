@@ -189,11 +189,10 @@ public final class SpongeTabList implements TabList {
     void sendUpdate(final TabListEntry entry, final SPacketPlayerListItem.Action action) {
         final SPacketPlayerListItem packet = new SPacketPlayerListItem();
         packet.action = action;
-        ((AccessorSPacketPlayerListItem) packet).spongeBridge$getPlayerDatas()
-            .add(((SPacketPlayerListItem) (Object) this).new AddPlayerData((GameProfile) entry.getProfile(),
-                entry.getLatency(),
-                (GameType) (Object) entry.getGameMode(),
-                entry.getDisplayName().isPresent() ? SpongeTexts.toComponent(entry.getDisplayName().get()) : null));
+        final SPacketPlayerListItem.AddPlayerData data = packet.new AddPlayerData((GameProfile) entry.getProfile(),
+            entry.getLatency(), (GameType) (Object) entry.getGameMode(),
+            entry.getDisplayName().isPresent() ? SpongeTexts.toComponent(entry.getDisplayName().get()) : null);
+        ((AccessorSPacketPlayerListItem) packet).spongeBridge$getPlayerDatas().add(data);
         this.player.connection.sendPacket(packet);
     }
 

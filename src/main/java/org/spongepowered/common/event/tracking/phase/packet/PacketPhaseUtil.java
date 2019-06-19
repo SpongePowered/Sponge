@@ -197,7 +197,7 @@ public final class PacketPhaseUtil {
                         // update the reference of player
                         packetPlayer = ((NetHandlerPlayServer) netHandler).player;
                     }
-                    ((ServerPlayerEntityBridge) packetPlayer).setPacketItem(ItemStack.EMPTY);
+                    ((ServerPlayerEntityBridge) packetPlayer).bridge$setPacketItem(ItemStack.EMPTY);
                 }
             }
         } else { // client

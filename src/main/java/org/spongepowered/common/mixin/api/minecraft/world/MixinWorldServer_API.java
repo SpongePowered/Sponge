@@ -233,7 +233,7 @@ public abstract class MixinWorldServer_API extends MixinWorld_API {
     @Override
     public BlockSnapshot createSnapshot(int x, int y, int z) {
         checkBlockBounds(x, y, z);
-        if (!isChunkLoaded(x, z, false)) {
+        if (!isChunkLoaded(x >> 4, z >> 4, false)) {
             throw new IllegalStateException("Chunk not loaded");
         }
         BlockPos pos = new BlockPos(x, y, z);

@@ -60,7 +60,7 @@ public class VelocityDataProcessor extends AbstractEntitySingleDataProcessor<Ent
 
     @Override
     protected boolean set(Entity entity, Vector3d value) {
-        ((EntityBridge) entity).setImplVelocity(value);
+        ((EntityBridge) entity).bridge$setImplVelocity(value);
         return true;
     }
 

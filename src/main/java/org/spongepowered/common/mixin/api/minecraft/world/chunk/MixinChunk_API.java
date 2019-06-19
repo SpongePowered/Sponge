@@ -40,6 +40,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ClassInheritanceMultiMap;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
@@ -120,6 +121,8 @@ public abstract class MixinChunk_API implements Chunk {
     List<T> listToFill, Predicate <? super T > p_177430_4_);
     @Shadow public abstract BlockPos getPrecipitationHeight(BlockPos pos);
     // @formatter:on
+
+    @Shadow public abstract ChunkPos getPos();
 
     @Nullable private Vector3i api$chunkPos;
     @Nullable private Vector3i api$blockMin;

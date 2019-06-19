@@ -54,22 +54,21 @@ public class MixinBlockFalling {
         )
     )
     private boolean impl$CheckIfAreaIsLoadedAndIfThrownEventIsntCancelled(World world, BlockPos pos, BlockPos to) {
-        if (world.isAreaLoaded(pos, to)) {
-            if (!((WorldBridge) world).isFake()) {
-                BlockPos actualPos = pos.add(32, 32, 32);
-                EntityType fallingBlock = EntityTypes.FALLING_BLOCK;
-                Vector3d position = new Vector3d(actualPos.getX() + 0.5D, actualPos.getY(), actualPos.getZ() + 0.5D);
-                BlockSnapshot snapshot = ((org.spongepowered.api.world.World) world).createSnapshot(actualPos.getX(), actualPos.getY(), actualPos.getZ());
-                try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                    frame.pushCause(snapshot);
-                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.FALLING_BLOCK);
-                    Transform<org.spongepowered.api.world.World> worldTransform = new Transform<>((org.spongepowered.api.world.World) world, position);
-                    ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(),
-                            fallingBlock, worldTransform);
-                    SpongeImpl.postEvent(event);
-                    return !event.isCancelled();
-                }
+        if (world.isAreaLoaded(pos, to) && !((WorldBridge) world).isFake()) {
+
+            BlockPos actualPos = pos.add(32, 32, 32);
+            EntityType fallingBlock = EntityTypes.FALLING_BLOCK;
+            Vector3d position = new Vector3d(actualPos.getX() + 0.5D, actualPos.getY(), actualPos.getZ() + 0.5D);
+            BlockSnapshot snapshot = ((org.spongepowered.api.world.World) world).createSnapshot(actualPos.getX(), actualPos.getY(), actualPos.getZ());
+            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                frame.pushCause(snapshot);
+                frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.FALLING_BLOCK);
+                Transform<org.spongepowered.api.world.World> worldTransform = new Transform<>((org.spongepowered.api.world.World) world, position);
+                ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), fallingBlock, worldTransform);
+                SpongeImpl.postEvent(event);
+                return !event.isCancelled();
             }
+
         }
         return false;
     }
