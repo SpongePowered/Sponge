@@ -39,6 +39,6 @@ public class SpongeCommonEventHooks {
         }
 
         final ServerWorldBridge worldServer = (ServerWorldBridge) event.getTargetChunk().getWorld();
-        worldServer.incrementChunkLoadCount();
+        worldServer.bridge$incrementChunkLoadCount();
     }
 }

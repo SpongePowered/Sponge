@@ -40,6 +40,7 @@ import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 
 import org.spongepowered.common.bridge.world.ChunkBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
 import co.aikar.timings.Timings;
@@ -102,7 +103,6 @@ import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
-import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.world.WorldManager;
 
@@ -280,7 +280,7 @@ public class SpongeCommandFactory {
                     if (!world.isPresent() && this.requireWorldLoaded) {
                         throw new CommandException(Text.of("World ", properties.getWorldName(), " is not loaded, cannot work with it"));
                     }
-                    src.sendMessage(Text.of("World ", properties.getWorldName(), ": ", processWorld(((IMixinWorldInfo) properties).getConfigAdapter(),
+                    src.sendMessage(Text.of("World ", properties.getWorldName(), ": ", processWorld(((WorldInfoBridge) properties).getConfigAdapter(),
                             world.orElse(null), src, args)));
                     ++successes;
                 }
@@ -842,11 +842,11 @@ public class SpongeCommandFactory {
 
     private static void printWorldTickTime(CommandSource src, World world) {
         final long[] worldTickTimes = ((IMixinMinecraftServer) SpongeImpl.getServer()).
-                getWorldTickTimes(((ServerWorldBridge) world).getDimensionId());
+                getWorldTickTimes(((ServerWorldBridge) world).bridge$getDimensionId());
         final double worldMeanTickTime = mean(worldTickTimes) * 1.0e-6d;
         final double worldTps = Math.min(1000.0 / worldMeanTickTime, 20);
         src.sendMessage(Text.of("World [", TextColors.DARK_GREEN, world.getName(), TextColors.RESET, "] (",
-            ((ServerWorldBridge) world).getDimensionId(),
+            ((ServerWorldBridge) world).bridge$getDimensionId(),
             ") TPS: ", TextColors.LIGHT_PURPLE,
             THREE_DECIMAL_DIGITS_FORMATTER.format(worldTps), TextColors.RESET,  ", Mean: ", TextColors.RED,
             THREE_DECIMAL_DIGITS_FORMATTER.format(worldMeanTickTime), "ms"));

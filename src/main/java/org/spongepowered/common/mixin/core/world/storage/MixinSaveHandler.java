@@ -42,10 +42,10 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.IMixinSaveHandler;
-import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.world.WorldManager;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 
@@ -117,11 +117,11 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
                 throw new RuntimeException("Attempt failed when reading Sponge level data for [" + info.getWorldName() + "] from file [" +
                         actualFile.getName() + "]!", ex);
             }
-            ((IMixinWorldInfo) info).setSpongeRootLevelNBT(compound);
+            ((WorldInfoBridge) info).setSpongeRootLevelNBT(compound);
             if (compound.hasKey(NbtDataUtil.SPONGE_DATA)) {
                 final NBTTagCompound spongeCompound = compound.getCompoundTag(NbtDataUtil.SPONGE_DATA);
                 DataUtil.spongeDataFixer.process(FixTypes.LEVEL, spongeCompound);
-                ((IMixinWorldInfo) info).readSpongeNbt(spongeCompound);
+                ((WorldInfoBridge) info).readSpongeNbt(spongeCompound);
             }
         }
     }
@@ -132,7 +132,7 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
             final File spongeFile2 = new File(this.worldDirectory, "level_sponge.dat_old");
             final File spongeFile3 = new File(this.worldDirectory, "level_sponge.dat");
             try (final FileOutputStream stream = new FileOutputStream(spongeFile1)) {
-                CompressedStreamTools.writeCompressed(((IMixinWorldInfo) info).getSpongeRootLevelNbt(), stream);
+                CompressedStreamTools.writeCompressed(((WorldInfoBridge) info).getSpongeRootLevelNbt(), stream);
             }
             if (spongeFile2.exists()) {
                 spongeFile2.delete();

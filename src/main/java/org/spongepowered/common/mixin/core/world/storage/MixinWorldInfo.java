@@ -84,7 +84,7 @@ import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
-import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
+import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.registry.type.world.DimensionTypeRegistryModule;
 import org.spongepowered.common.registry.type.world.PortalAgentRegistryModule;
 import org.spongepowered.common.registry.type.world.WorldGeneratorModifierRegistryModule;
@@ -105,7 +105,7 @@ import javax.annotation.Nullable;
 @NonnullByDefault
 @Mixin(WorldInfo.class)
 @Implements(@Interface(iface = WorldProperties.class, prefix = "worldproperties$"))
-public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo {
+public abstract class MixinWorldInfo implements WorldProperties, WorldInfoBridge {
 
     @Shadow public long randomSeed;
     @Shadow private WorldType terrainType;

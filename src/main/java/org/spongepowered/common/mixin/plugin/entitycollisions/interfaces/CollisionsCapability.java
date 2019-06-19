@@ -26,25 +26,25 @@ package org.spongepowered.common.mixin.plugin.entitycollisions.interfaces;
 
 import net.minecraft.world.World;
 
-public interface IModData_Collisions {
+public interface CollisionsCapability {
 
-    int getMaxCollisions();
+    int collision$getMaxCollisions();
 
-    void setMaxCollisions(int max);
+    void collision$setMaxCollisions(int max);
 
-    void initializeCollisionState(World worldIn);
+    void collision$initializeCollisionState(World worldIn);
 
-    void requiresCollisionsCacheRefresh(boolean flag);
+    void collision$requiresCollisionsCacheRefresh(boolean flag);
 
-    boolean requiresCollisionsCacheRefresh();
+    boolean collision$requiresCollisionsCacheRefresh();
 
-    String getModDataName();
+    String collision$getModDataName();
 
-    void setModDataName(String name);
+    void collision$setModDataName(String name);
 
-    String getModDataId();
+    String collision$getModDataId();
 
-    void setModDataId(String id);
+    void collision$setModDataId(String id);
 
-    boolean isRunningCollideWithNearby();
+    boolean collision$isRunningCollideWithNearby();
 }

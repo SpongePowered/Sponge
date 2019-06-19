@@ -525,7 +525,7 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
                 .add("searchRadius", this.searchRadius)
                 .add("creationRadius", this.creationRadius)
                 .add("world", this.world.getWorldInfo().getWorldName())
-                .add("dimension", ((ServerWorldBridge) this.world).getDimensionId())
+                .add("dimension", ((ServerWorldBridge) this.world).bridge$getDimensionId())
                 .toString();
     }
 }

@@ -271,7 +271,7 @@ public final class TrackingUtil {
         final World apiWorld = (World) world;
 
         if (ShouldFire.TICK_BLOCK_EVENT) {
-            BlockSnapshot snapshot = mixinWorld.createSpongeBlockSnapshot(state, state, pos, BlockChangeFlags.NONE);
+            BlockSnapshot snapshot = mixinWorld.bridge$createSnapshot(state, state, pos, BlockChangeFlags.NONE);
             final TickBlockEvent event = SpongeEventFactory.createTickBlockEventScheduled(Sponge.getCauseStackManager().getCurrentCause(), snapshot);
             SpongeImpl.postEvent(event);
             if (event.isCancelled()) {
@@ -306,7 +306,7 @@ public final class TrackingUtil {
         final World apiWorld = (World) world;
 
         if (ShouldFire.TICK_BLOCK_EVENT) {
-            final BlockSnapshot currentTickBlock = mixinWorld.createSpongeBlockSnapshot(state, state, pos, BlockChangeFlags.NONE);
+            final BlockSnapshot currentTickBlock = mixinWorld.bridge$createSnapshot(state, state, pos, BlockChangeFlags.NONE);
             final TickBlockEvent
                 event =
                 SpongeEventFactory.createTickBlockEventRandom(Sponge.getCauseStackManager().getCurrentCause(), currentTickBlock);
@@ -744,7 +744,7 @@ public final class TrackingUtil {
             final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
             final BlockSnapshot previousNeighbor = context.neighborNotificationSource;
             context.neighborNotificationSource = newBlockSnapshot;
-            mixinWorld.spongeNotifyNeighborsPostBlockChange(pos, newState, changeFlag);
+            mixinWorld.bridge$NotifyNeighborsPostBlockChange(pos, newState, changeFlag);
             context.neighborNotificationSource = previousNeighbor;
         } else if (changeFlag.notifyObservers()) {
             ((net.minecraft.world.World) mixinWorld).updateObservingBlocksAt(pos, newBlock);

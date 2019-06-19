@@ -259,10 +259,10 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
                         ((Player) entityPlayerMP).closeInventory(); // Call API method to make sure we capture it
                     }
 
-                    EntityUtil.teleportPlayerToDimension(entityPlayerMP, ((ServerWorldBridge) location.getExtent()).getDimensionId(),
+                    EntityUtil.teleportPlayerToDimension(entityPlayerMP, ((ServerWorldBridge) location.getExtent()).bridge$getDimensionId(),
                         (IMixinTeleporter) ((WorldServer) location.getExtent()).getDefaultTeleporter(), event);
                 } else {
-                    EntityUtil.transferEntityToDimension((Entity) (Object) this, ((ServerWorldBridge) location.getExtent()).getDimensionId(),
+                    EntityUtil.transferEntityToDimension((Entity) (Object) this, ((ServerWorldBridge) location.getExtent()).bridge$getDimensionId(),
                         (IMixinTeleporter) ((WorldServer) location.getExtent()).getDefaultTeleporter(), event);
                 }
 
@@ -430,7 +430,7 @@ public abstract class MixinEntity_API implements org.spongepowered.api.entity.En
                 getPosition().getZ(), (float) rotation.getY(), (float) rotation.getX(), (Set) EnumSet.noneOf(RelativePositions.class));
         } else {
             if (!this.world.isRemote) { // We can't set the rotation update on client worlds.
-                ((ServerWorldBridge) getWorld()).addEntityRotationUpdate((Entity) (Object) this, rotation);
+                ((ServerWorldBridge) getWorld()).bridge$addEntityRotationUpdate((Entity) (Object) this, rotation);
             }
 
             // Let the entity tracker do its job, this just updates the variables

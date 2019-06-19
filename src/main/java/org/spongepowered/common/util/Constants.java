@@ -287,6 +287,7 @@ public final class Constants {
 
             public static final int MAGIC_NO_PICKUP = Constants.Entity.Item.MAX_PICKUP_DELAY;
             public static final int MAGIC_NO_DESPAWN = Constants.Entity.Item.MIN_DESPAWN_DELAY;
+            public static final int INFINITE_PICKUP_DELAY = 32767;
 
             private Item() {
             }

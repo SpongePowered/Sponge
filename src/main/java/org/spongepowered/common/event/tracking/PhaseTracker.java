@@ -331,7 +331,7 @@ public final class PhaseTracker {
         if (this.stack.isEmpty()) {
             for (WorldServer world : WorldManager.getWorlds()) {
                 final ServerWorldBridge mixinWorld = (ServerWorldBridge) world;
-                if (mixinWorld.getProxyAccess().hasProxy()) {
+                if (mixinWorld.bridge$getProxyAccess().hasProxy()) {
                     new PrettyPrinter().add("BlockPRoxy has extra proxies not pruned!").centre().hr()
                         .add("When completing the Phase: %s, some foreign BlockProxy was pushed, but never pruned.", state)
                         .add()
@@ -775,7 +775,7 @@ public final class PhaseTracker {
         // Sponge Start - micro optimization to avoid calling extra stuff on the same block state instance
         if (currentState == newState) {
             // Some micro optimization in case someone is trying to set the new state to the same as current
-            final SpongeProxyBlockAccess proxyAccess = mixinWorld.getProxyAccess();
+            final SpongeProxyBlockAccess proxyAccess = mixinWorld.bridge$getProxyAccess();
             if (proxyAccess.hasProxy() && proxyAccess.getBlockState(pos) != currentState) {
                 proxyAccess.onChunkChanged(pos, newState);
             }
@@ -950,7 +950,7 @@ public final class PhaseTracker {
         final int chunkX = MathHelper.floor(entity.posX / 16.0D);
         final int chunkZ = MathHelper.floor(entity.posZ / 16.0D);
 
-        if (!isForced && !mixinWorldServer.isMinecraftChunkLoaded(chunkX, chunkZ, true)) {
+        if (!isForced && !mixinWorldServer.bridge$isMinecraftChunkLoaded(chunkX, chunkZ, true)) {
             return false;
         }
             if (entity instanceof EntityPlayer) {
@@ -1011,7 +1011,7 @@ public final class PhaseTracker {
             // Sponge end - continue on with the checks.
             world.getChunk(chunkX, chunkZ).addEntity(finalEntityToSpawn);
             world.loadedEntityList.add(finalEntityToSpawn);
-            mixinWorldServer.onSpongeEntityAdded(finalEntityToSpawn); // Sponge - Cannot add onEntityAdded to the access transformer because forge makes it public
+            mixinWorldServer.bridge$onSpongeEntityAdded(finalEntityToSpawn); // Sponge - Cannot add onEntityAdded to the access transformer because forge makes it public
             return true;
 
     }
@@ -1041,7 +1041,7 @@ public final class PhaseTracker {
         final int chunkZ = MathHelper.floor(minecraftEntity.posZ / 16.0D);
         final boolean isForced = minecraftEntity.forceSpawn || minecraftEntity instanceof EntityPlayer;
 
-        if (!isForced && !mixinWorldServer.isMinecraftChunkLoaded(chunkX, chunkZ, true)) {
+        if (!isForced && !mixinWorldServer.bridge$isMinecraftChunkLoaded(chunkX, chunkZ, true)) {
             return false;
         }
         // Sponge Start - throw an event

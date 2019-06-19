@@ -45,7 +45,7 @@ public abstract class MixinCommandGameRule {
     private static int currentDimension;
 
     private static GameRules getGameRules(ICommandSender sender) {
-        currentDimension = ((ServerWorldBridge) sender.getEntityWorld()).getDimensionId();
+        currentDimension = ((ServerWorldBridge) sender.getEntityWorld()).bridge$getDimensionId();
         return sender.getEntityWorld().getGameRules();
     }
 

@@ -29,7 +29,7 @@ import net.minecraft.util.ITickable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModData_Activation;
+import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.ActivationCapability;
 import org.spongepowered.common.mixin.plugin.tileentityactivation.TileEntityActivation;
 
 @Mixin(value = SpongeImplHooks.class)
@@ -47,8 +47,8 @@ public class MixinSpongeImplHooks_TileEntityActivation {
         final boolean canUpdate = TileEntityActivation.checkIfActive(tileEntity);
 
         if (!canUpdate) {
-            ((IModData_Activation) tileEntity).incrementSpongeTicksExisted();
-            ((IModData_Activation) tileEntity).inactiveTick();
+            ((ActivationCapability) tileEntity).activation$incrementSpongeTicksExisted();
+            ((ActivationCapability) tileEntity).activation$inactiveTick();
             return false;
         }
         return true;

@@ -47,7 +47,7 @@ import org.spongepowered.common.entity.player.IUserOrEntity;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.interfaces.IMixinSubject;
 import org.spongepowered.common.bridge.entity.EntityBridge;
-import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
+import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.world.WorldManager;
 
 import java.util.Optional;
@@ -131,7 +131,7 @@ public abstract class MixinSpongeUser implements User, IMixinSubject, IUserOrEnt
             return playerOpt.get().setLocation(position, world);
         }
         WorldProperties prop = WorldManager.getWorldProperties(world).orElseThrow(() -> new IllegalArgumentException("Invalid World: No world found for UUID"));
-        Integer dimensionId = ((IMixinWorldInfo) prop).getDimensionId();
+        Integer dimensionId = ((WorldInfoBridge) prop).getDimensionId();
         if (dimensionId == null) {
             throw new IllegalArgumentException("Invalid World: missing dimensionID)");
         }

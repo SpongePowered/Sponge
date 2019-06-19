@@ -59,7 +59,7 @@ import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
+import org.spongepowered.common.bridge.world.WorldInfoBridge;
 
 import java.lang.ref.WeakReference;
 import java.util.Collection;
@@ -384,7 +384,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         builder.position = location.getPosition();
         builder.worldId = location.getExtent().getUniqueId();
         NBTTagCompound newCompound = this.compound.copy();
-        newCompound.setInteger("Dimension", ((IMixinWorldInfo) location.getExtent().getProperties()).getDimensionId());
+        newCompound.setInteger("Dimension", ((WorldInfoBridge) location.getExtent().getProperties()).getDimensionId());
         builder.compound = newCompound;
         return builder.build();
     }

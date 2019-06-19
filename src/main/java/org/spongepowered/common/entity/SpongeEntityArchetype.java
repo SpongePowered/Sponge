@@ -52,7 +52,7 @@ import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataVersions;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
+import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 
 import java.util.ArrayList;
@@ -132,7 +132,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
         }
 
         this.data.setTag("Pos", NbtDataUtil.newDoubleNBTList(x, y, z));
-        this.data.setInteger("Dimension", ((IMixinWorldInfo) location.getExtent().getProperties()).getDimensionId());
+        this.data.setInteger("Dimension", ((WorldInfoBridge) location.getExtent().getProperties()).getDimensionId());
         entity.readFromNBT(this.data);
         this.data.removeTag("Pos");
         this.data.removeTag("Dimension");
@@ -148,12 +148,12 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
             entity.setPositionAndRotation(x, y, z, entity.rotationYaw, entity.rotationPitch);
             if (entity instanceof EntityLiving) {
                 // This is ok to force spawn since we aren't considering custom items.
-                mixinWorldServer.forceSpawnEntity((org.spongepowered.api.entity.Entity) entity);
+                mixinWorldServer.bridge$forceSpawnEntity((org.spongepowered.api.entity.Entity) entity);
                 ((EntityLiving) entity).onInitialSpawn(worldServer.getDifficultyForLocation(blockPos), null);
                 ((EntityLiving) entity).spawnExplosionParticle();
             } else {
                 // This is ok to force spawn since we aren't considering custom items.
-                mixinWorldServer.forceSpawnEntity((org.spongepowered.api.entity.Entity) entity);
+                mixinWorldServer.bridge$forceSpawnEntity((org.spongepowered.api.entity.Entity) entity);
             }
             return Optional.of(spongeEntity);
         }
@@ -167,7 +167,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
         NBTTagCompound newCompound = this.data.copy();
         newCompound.setTag("Pos", NbtDataUtil
                 .newDoubleNBTList(new double[] { location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ() }));
-        newCompound.setInteger("Dimension", ((IMixinWorldInfo) location.getExtent().getProperties()).getDimensionId());
+        newCompound.setInteger("Dimension", ((WorldInfoBridge) location.getExtent().getProperties()).getDimensionId());
         builder.compound = newCompound;
         builder.worldId = location.getExtent().getUniqueId();
         builder.position = location.getPosition();

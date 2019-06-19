@@ -109,6 +109,6 @@ public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvid
         final boolean isSpawnChunk = this.world.isSpawnChunk(x, z);
 
         return !isSpawnChunk || !SpongeImplHooks.shouldKeepSpawnLoaded(this.world.provider.getDimensionType(), ((ServerWorldBridge) this.world)
-                .getDimensionId());
+                .bridge$getDimensionId());
     }
 }

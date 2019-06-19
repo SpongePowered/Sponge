@@ -243,7 +243,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
 
         NBTTagCompound nbttagcompound = this.readPlayerDataFromFile(playerIn);
         WorldServer worldServer = this.server.getWorld(playerIn.dimension);
-        int actualDimensionId = ((ServerWorldBridge) worldServer).getDimensionId();
+        int actualDimensionId = ((ServerWorldBridge) worldServer).bridge$getDimensionId();
         BlockPos spawnPos;
         // Join data
         Optional<Instant> firstJoined = SpongePlayerDataHandler.getFirstJoined(playerIn.getUniqueID());
@@ -303,7 +303,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         float pitch = (float) loginEvent.getToTransform().getPitch();
         float yaw = (float) loginEvent.getToTransform().getYaw();
 
-        playerIn.dimension = ((ServerWorldBridge) worldServer).getDimensionId();
+        playerIn.dimension = ((ServerWorldBridge) worldServer).bridge$getDimensionId();
         playerIn.setWorld(worldServer);
         playerIn.interactionManager.setWorld((WorldServer) playerIn.world);
         playerIn.setPositionAndRotation(x, y, z, yaw, pitch);
@@ -355,7 +355,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
 
         // Sponge start - add world name to message
         LOGGER.info(playerIn.getName() + "[" + s1 + "] logged in with entity id " + playerIn.getEntityId() + " in "
-                + worldServer.getWorldInfo().getWorldName() + "(" + ((ServerWorldBridge) worldServer).getDimensionId()
+                + worldServer.getWorldInfo().getWorldName() + "(" + ((ServerWorldBridge) worldServer).bridge$getDimensionId()
                 + ") at (" + playerIn.posX + ", " + playerIn.posY + ", " + playerIn.posZ + ")");
         // Sponge end
 
@@ -485,7 +485,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         final Transform<World> fromTransform = player.getTransform();
         WorldServer worldServer = this.server.getWorld(targetDimension);
         Transform<World> toTransform = new Transform<>(EntityUtil.getPlayerRespawnLocation(playerIn, worldServer), Vector3d.ZERO, Vector3d.ZERO);
-        targetDimension = ((ServerWorldBridge) toTransform.getExtent()).getDimensionId();
+        targetDimension = ((ServerWorldBridge) toTransform.getExtent()).bridge$getDimensionId();
         Location<World> location = toTransform.getLocation();
 
         // If coming from end, fire a teleport event for plugins
@@ -575,7 +575,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
 
         final ServerWorldBridge mixinWorldServer = (ServerWorldBridge) worldServer;
         // Set the dimension again in case a plugin changed the target world during RespawnPlayerEvent
-        newPlayer.dimension = mixinWorldServer.getDimensionId();
+        newPlayer.dimension = mixinWorldServer.bridge$getDimensionId();
         newPlayer.setWorld(worldServer);
         newPlayer.interactionManager.setWorld(worldServer);
 

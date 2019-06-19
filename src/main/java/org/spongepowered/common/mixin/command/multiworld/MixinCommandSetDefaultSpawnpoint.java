@@ -41,7 +41,7 @@ public abstract class MixinCommandSetDefaultSpawnpoint {
     @Redirect(method = "execute", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
     private void onSendSpawnPointPacket(PlayerList playerList, Packet<?> packet, MinecraftServer server, ICommandSender sender, String[] args) {
-        playerList.sendPacketToAllPlayersInDimension(packet, ((ServerWorldBridge) sender.getEntityWorld()).getDimensionId());
+        playerList.sendPacketToAllPlayersInDimension(packet, ((ServerWorldBridge) sender.getEntityWorld()).bridge$getDimensionId());
     }
 
 }

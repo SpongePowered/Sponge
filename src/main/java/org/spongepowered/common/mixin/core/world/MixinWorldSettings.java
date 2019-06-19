@@ -50,9 +50,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 import org.spongepowered.common.data.util.DataQueries;
-import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.registry.type.world.WorldGeneratorModifierRegistryModule;
 
 import java.io.IOException;
@@ -91,7 +91,7 @@ public abstract class MixinWorldSettings implements WorldSettingsBridge {
     @Inject(method = "<init>(Lnet/minecraft/world/storage/WorldInfo;)V", at = @At(value = "RETURN"))
     private void impl$reAssignValuesFromIncomingInfo(WorldInfo info, CallbackInfo ci) {
         final WorldProperties properties = (WorldProperties) info;
-        if (((IMixinWorldInfo) info).getConfigAdapter() != null) {
+        if (((WorldInfoBridge) info).getConfigAdapter() != null) {
             this.dimensionType = properties.getDimensionType();
             this.difficulty = properties.getDifficulty();
             this.serializationBehavior = properties.getSerializationBehavior();

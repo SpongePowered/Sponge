@@ -42,7 +42,6 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.play.server.SPacketEntityVelocity;
-import net.minecraft.network.play.server.SPacketExplosion;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.ScoreboardSaveData;
@@ -85,6 +84,7 @@ import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.ScheduledBlockUpdate;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -139,6 +139,7 @@ import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.bridge.world.ChunkBridge;
 import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
+import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.WorldCategory;
 import org.spongepowered.common.config.type.WorldConfig;
@@ -157,13 +158,11 @@ import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.interfaces.IMixinNextTickListEntry;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMap;
 import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
-import org.spongepowered.common.bridge.world.ServerWorldEventHandlerBridge;
-import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
-import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModData_Activation;
-import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.IModData_Collisions;
+import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.ActivationCapability;
+import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.CollisionsCapability;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.registry.type.world.BlockChangeFlagRegistryModule;
 import org.spongepowered.common.relocate.co.aikar.timings.TimingHistory;
@@ -269,9 +268,9 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
             }
         }
 
-        this.updateWorldGenerator();
+        this.bridge$updateWorldGenerator();
 
-        final WorldCategory worldCategory = ((IMixinWorldInfo) this.getWorldInfo()).getConfigAdapter().getConfig().getWorld();
+        final WorldCategory worldCategory = ((WorldInfoBridge) this.getWorldInfo()).getConfigAdapter().getConfig().getWorld();
         this.chunkGCLoadThreshold = worldCategory.getChunkLoadThreshold();
         this.chunkGCTickInterval = worldCategory.getTickInterval();
         this.weatherIceAndSnowEnabled = worldCategory.getWeatherIceAndSnow();
@@ -351,13 +350,13 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
     }
 
     @Override
-    public boolean isMinecraftChunkLoaded(int x, int z, boolean allowEmpty) {
+    public boolean bridge$isMinecraftChunkLoaded(int x, int z, boolean allowEmpty) {
         return this.isChunkLoaded(x, z, allowEmpty);
     }
 
     @Override
-    public void updateConfigCache() {
-        final SpongeConfig<WorldConfig> configAdapter = ((IMixinWorldInfo) this.worldInfo).getConfigAdapter();
+    public void bridge$updateConfigCache() {
+        final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) this.worldInfo).getConfigAdapter();
 
         // update cached settings
         this.chunkGCLoadThreshold = configAdapter.getConfig().getWorld().getChunkLoadThreshold();
@@ -370,30 +369,30 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
             ((ServerChunkProviderBridge) this.getChunkProvider()).setMaxChunkUnloads(maxChunkUnloads < 1 ? 1 : maxChunkUnloads);
             ((ServerChunkProviderBridge) this.getChunkProvider()).setDenyChunkRequests(configAdapter.getConfig().getWorld().getDenyChunkRequests());
             for (net.minecraft.entity.Entity entity : this.loadedEntityList) {
-                if (entity instanceof IModData_Activation) {
-                    ((IModData_Activation) entity).requiresActivationCacheRefresh(true);
+                if (entity instanceof ActivationCapability) {
+                    ((ActivationCapability) entity).activation$requiresActivationCacheRefresh(true);
                 }
-                if (entity instanceof IModData_Collisions) {
-                    ((IModData_Collisions) entity).requiresCollisionsCacheRefresh(true);
+                if (entity instanceof CollisionsCapability) {
+                    ((CollisionsCapability) entity).collision$requiresCollisionsCacheRefresh(true);
                 }
             }
         }
     }
 
     @Override
-    public void incrementChunkLoadCount() {
+    public void bridge$incrementChunkLoadCount() {
         if (this.chunkGCLoadThreshold > 0) {
             this.chunkLoadCount++;
         }
     }
 
     @Override
-    public void updateWorldGenerator() {
+    public void bridge$updateWorldGenerator() {
 
         // Get the default generator for the world type
         DataContainer generatorSettings = ((org.spongepowered.api.world.World) this).getProperties().getGeneratorSettings();
 
-        SpongeWorldGenerator newGenerator = this.createWorldGenerator(generatorSettings);
+        SpongeWorldGenerator newGenerator = this.bridge$createWorldGenerator(generatorSettings);
         // If the base generator is an IChunkProvider which implements
         // IPopulatorProvider we request that it add its populators not covered
         // by the base generation populator
@@ -412,7 +411,7 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
             modifier.modifyWorldGenerator(((org.spongepowered.api.world.World) this).getProperties(), generatorSettings, newGenerator);
         }
 
-        this.spongegen = this.createChunkGenerator(newGenerator);
+        this.spongegen = this.bridge$createChunkGenerator(newGenerator);
         this.spongegen.setGenerationPopulators(newGenerator.getGenerationPopulators());
         this.spongegen.setPopulators(newGenerator.getPopulators());
         this.spongegen.setBiomeOverrides(newGenerator.getBiomeSettings());
@@ -422,20 +421,20 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
     }
 
     @Override
-    public SpongeChunkGenerator createChunkGenerator(SpongeWorldGenerator newGenerator) {
+    public SpongeChunkGenerator bridge$createChunkGenerator(SpongeWorldGenerator newGenerator) {
         return new SpongeChunkGenerator((net.minecraft.world.World) (Object) this, newGenerator.getBaseGenerationPopulator(),
                 newGenerator.getBiomeGenerator());
     }
 
     @Override
-    public SpongeWorldGenerator createWorldGenerator(DataContainer settings) {
+    public SpongeWorldGenerator bridge$createWorldGenerator(DataContainer settings) {
         // Minecraft uses a string for world generator settings
         // This string can be a JSON string, or be a string of a custom format
 
         // Try to convert to custom format
         Optional<String> optCustomSettings = settings.getString(DataQueries.General.WORLD_CUSTOM_SETTINGS);
         if (optCustomSettings.isPresent()) {
-            return this.createWorldGenerator(optCustomSettings.get());
+            return this.bridge$createWorldGenerator(optCustomSettings.get());
         }
 
         String jsonSettings = "";
@@ -446,11 +445,11 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
                     ((net.minecraft.world.World) (Object) this).getWorldType(), this, e);
         }
 
-        return this.createWorldGenerator(jsonSettings);
+        return this.bridge$createWorldGenerator(jsonSettings);
     }
 
     @Override
-    public SpongeWorldGenerator createWorldGenerator(String settings) {
+    public SpongeWorldGenerator bridge$createWorldGenerator(String settings) {
         final WorldServer worldServer = (WorldServer) (Object) this;
         final WorldType worldType = worldServer.getWorldType();
         final IChunkGenerator chunkGenerator;
@@ -1064,11 +1063,6 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
         return this.proxyBlockAccess.getQueuedTileForRemoval(pos);
     }
 
-    @Override
-    public void addPostEventBlockEvents(List<BlockEventData> events) {
-        events.forEach(this.blockEventQueue[this.blockEventCacheIndex]::add);
-    }
-
     // Chunk GC
     @Override
     public void doChunkGC() {
@@ -1158,7 +1152,7 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
 
     @Redirect(method = "sendQueuedBlockEvents", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/DimensionType;getId()I"), expect = 0, require = 0)
     private int onGetDimensionIdForBlockEvents(DimensionType dimensionType) {
-        return this.getDimensionId();
+        return this.bridge$getDimensionId();
     }
 
 
@@ -1202,7 +1196,7 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
     // We expect 0 because forge patches it correctly
     @Redirect(method = "addWeatherEffect", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/DimensionType;getId()I"), expect = 0, require = 0)
     private int getDimensionIdForWeatherEffect(DimensionType id) {
-        return this.getDimensionId();
+        return this.bridge$getDimensionId();
     }
 
     /**
@@ -1388,7 +1382,7 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
     }
 
     @Override
-    public boolean setBlockState(BlockPos pos, IBlockState state, BlockChangeFlag flag) {
+    public boolean bridge$setBlockState(BlockPos pos, IBlockState state, BlockChangeFlag flag) {
         if (!this.isValid(pos)) {
             return false;
         } else if (this.worldInfo.getTerrainType() == WorldType.DEBUG_ALL_BLOCK_STATES) { // isRemote is always false since this is WorldServer
@@ -1453,7 +1447,7 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
         }
 
         // Sponge - reduce the call stack by calling the more direct method.
-        return this.setBlockState(pos, Blocks.AIR.getDefaultState(), BlockChangeFlags.ALL);
+        return this.bridge$setBlockState(pos, Blocks.AIR.getDefaultState(), BlockChangeFlags.ALL);
     }
 
     private net.minecraft.tileentity.TileEntity onChunkGetTileDuringRemoval(BlockPos pos) {
@@ -1630,7 +1624,7 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
         }
 
         TrackingUtil.tickEntity(entity);
-        updateRotation(entity);
+        bridge$updateRotation(entity);
     }
 
     @Override
@@ -1643,7 +1637,7 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
         }
 
         TrackingUtil.tickRidingEntity(entity);
-        updateRotation(entity);
+        bridge$updateRotation(entity);
     }
 
     /**
@@ -1734,7 +1728,7 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
 
     // WorldBridge method
     @Override
-    public void spongeNotifyNeighborsPostBlockChange(BlockPos pos, IBlockState newState, BlockChangeFlag flags) {
+    public void bridge$NotifyNeighborsPostBlockChange(BlockPos pos, IBlockState newState, BlockChangeFlag flags) {
         if (flags.updateNeighbors()) {
             this.notifyNeighborsRespectDebug(pos, newState.getBlock(), flags.notifyObservers());
 
@@ -1746,13 +1740,13 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
 
     // WorldBridge method
     @Override
-    public void addEntityRotationUpdate(net.minecraft.entity.Entity entity, Vector3d rotation) {
+    public void bridge$addEntityRotationUpdate(net.minecraft.entity.Entity entity, Vector3d rotation) {
         this.rotationUpdates.put(entity, rotation);
     }
 
     // WorldBridge method
     @Override
-    public void updateRotation(net.minecraft.entity.Entity entityIn) {
+    public void bridge$updateRotation(net.minecraft.entity.Entity entityIn) {
         Vector3d rotationUpdate = this.rotationUpdates.get(entityIn);
         if (rotationUpdate != null) {
             entityIn.rotationPitch = (float) rotationUpdate.getX();
@@ -1762,18 +1756,13 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
     }
 
     @Override
-    public void onSpongeEntityAdded(net.minecraft.entity.Entity entity) {
+    public void bridge$onSpongeEntityAdded(net.minecraft.entity.Entity entity) {
         this.onEntityAdded(entity);
         ((EntityBridge) entity).onJoinWorld();
     }
 
     @Override
-    public void onSpongeEntityRemoved(net.minecraft.entity.Entity entity) {
-        this.onEntityRemoved(entity);
-    }
-
-    @Override
-    public boolean forceSpawnEntity(Entity entity) {
+    public boolean bridge$forceSpawnEntity(Entity entity) {
         final net.minecraft.entity.Entity minecraftEntity = (net.minecraft.entity.Entity) entity;
         final int x = minecraftEntity.getPosition().getX();
         final int z = minecraftEntity.getPosition().getZ();
@@ -1797,13 +1786,13 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
 
         this.getChunk(chunkX, chunkZ).addEntity(entity);
         this.loadedEntityList.add(entity);
-        this.onSpongeEntityAdded(entity);
+        this.bridge$onSpongeEntityAdded(entity);
         return true;
     }
 
 
     @Override
-    public SpongeBlockSnapshot createSpongeBlockSnapshot(IBlockState state, IBlockState extended, BlockPos pos, BlockChangeFlag updateFlag) {
+    public SpongeBlockSnapshot bridge$createSnapshot(IBlockState state, IBlockState extended, BlockPos pos, BlockChangeFlag updateFlag) {
         final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
         builder.reset();
         builder.blockState((BlockState) state)
@@ -1843,7 +1832,7 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
     }
 
     @Override
-    public SpongeBlockSnapshot createSpongeSnapshotForTileEntity(IBlockState state, BlockPos pos, BlockChangeFlag updateFlag,
+    public SpongeBlockSnapshot bridge$createSnapshotWithEntity(IBlockState state, BlockPos pos, BlockChangeFlag updateFlag,
         @Nullable net.minecraft.tileentity.TileEntity tileEntity) {
         this.builder.reset();
         this.builder.blockState((BlockState) state)
@@ -1899,7 +1888,7 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
     private SpongeProxyBlockAccess proxyBlockAccess = new SpongeProxyBlockAccess(this);
 
     @Override
-    public SpongeProxyBlockAccess getProxyAccess() {
+    public SpongeProxyBlockAccess bridge$getProxyAccess() {
         return this.proxyBlockAccess;
     }
 
@@ -2074,7 +2063,7 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
     }
 
     @Override
-    public boolean isLightLevel(Chunk chunk, BlockPos pos, int level) {
+    public boolean bridge$isLightLevel(Chunk chunk, BlockPos pos, int level) {
         if (((IMixinBlockPos) pos).isValidPosition()) {
             if (this.getBlockState(pos).useNeighborBrightness()) {
                 if (this.getLight(pos.up(), false) >= level) {
@@ -2340,27 +2329,8 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
     }
 
     @Override
-    public WorldTimingsHandler getTimingsHandler() {
+    public WorldTimingsHandler bridge$getTimingsHandler() {
         return this.timings;
-    }
-
-    @Override
-    public void playCustomSound(@Nullable EntityPlayer player, double x, double y, double z, String soundIn, net.minecraft.util.SoundCategory category,
-            float volume, float pitch) {
-
-        if (player instanceof EntityBridge) {
-            if (((EntityBridge) player).isVanished()) {
-                return;
-            }
-        }
-
-        this.eventListeners.stream()
-                .filter(listener -> listener instanceof ServerWorldEventHandlerBridge)
-                .map(listener -> (ServerWorldEventHandlerBridge) listener)
-                .forEach(listener -> {
-                    // There's no method for playing a custom sound to all, so I made one -_-
-                    listener.playCustomSoundToAllNearExcept(null, soundIn, category, x, y, z, volume, pitch);
-                });
     }
 
     @Inject(method = "updateWeather", at = @At(value = "FIELD", target = "Lnet/minecraft/world/WorldServer;prevRainingStrength:F"), cancellable = true)
@@ -2389,13 +2359,39 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
     }
 
     @Override
-    public long getWeatherStartTime() {
+    public long bridge$getWeatherStartTime() {
         return this.weatherStartTime;
     }
 
     @Override
     public void setWeatherStartTime(long weatherStartTime) {
         this.weatherStartTime = weatherStartTime;
+    }
+
+    @Override
+    public Weather bridge$getPreviousWeather() {
+        return this.prevWeather;
+    }
+
+    @Override
+    public void bridge$setPreviousWeather(Weather weather) {
+        this.prevWeather = weather;
+    }
+
+    @Override
+    public SpongeChunkGenerator bridge$getSpongeGenerator() {
+        return this.spongegen;
+    }
+
+    @Nullable
+    @Override
+    public ScheduledBlockUpdate bridge$getScheduledBlockUpdate() {
+        return (ScheduledBlockUpdate) this.tmpScheduledObj;
+    }
+
+    @Override
+    public void bridge$setScheduledBlockUpdate(@Nullable ScheduledBlockUpdate sbu) {
+        this.tmpScheduledObj = (NextTickListEntry) sbu;
     }
 
     @Override
@@ -2423,7 +2419,7 @@ public abstract class MixinWorldServer extends MixinWorld implements ServerWorld
     public String toString() {
         return MoreObjects.toStringHelper(this)
                 .add("Name", this.worldInfo.getWorldName())
-                .add("DimensionId", this.getDimensionId())
+                .add("DimensionId", this.bridge$getDimensionId())
                 .add("DimensionType", ((org.spongepowered.api.world.DimensionType) (Object) this.provider.getDimensionType()).getId())
                 .add("DimensionTypeId", this.provider.getDimensionType().getId())
                 .toString();

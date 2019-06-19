@@ -49,13 +49,13 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.world.ChunkBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
-import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeHooks;
@@ -122,7 +122,7 @@ public abstract class MixinChunk_Tracker implements ChunkBridge {
             }
         }
 
-        final SpongeConfig<WorldConfig> configAdapter = ((IMixinWorldInfo) world.getWorldInfo()).getConfigAdapter();
+        final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) world.getWorldInfo()).getConfigAdapter();
         if (configAdapter.getConfig().getLogging().blockTrackLogging()) {
             if (!configAdapter.getConfig().getBlockTracking().getBlockBlacklist().contains(((BlockType) block).getId())) {
                 SpongeHooks.logBlockTrack(this.world, block, pos, user, true);
@@ -131,7 +131,7 @@ public abstract class MixinChunk_Tracker implements ChunkBridge {
             }
         }
 
-        final IMixinWorldInfo worldInfo = (IMixinWorldInfo) this.world.getWorldInfo();
+        final WorldInfoBridge worldInfo = (WorldInfoBridge) this.world.getWorldInfo();
         final int indexForUniqueId = worldInfo.getIndexForUniqueId(user.getUniqueId());
         if (pos.getY() <= 255) {
             short blockPos = this.blockPosToShort(pos);
@@ -260,7 +260,7 @@ public abstract class MixinChunk_Tracker implements ChunkBridge {
     }
 
     private Optional<UUID> getValidatedUUID(int key, int ownerIndex) {
-        UUID uuid = (((IMixinWorldInfo) this.world.getWorldInfo()).getUniqueIdForIndex(ownerIndex)).orElse(null);
+        UUID uuid = (((WorldInfoBridge) this.world.getWorldInfo()).getUniqueIdForIndex(ownerIndex)).orElse(null);
         if (uuid != null) {
             // Verify id is valid and not invalid
             if (SpongeImpl.getGlobalConfigAdapter().getConfig().getWorld().getInvalidLookupUuids().contains(uuid)) {
@@ -298,20 +298,20 @@ public abstract class MixinChunk_Tracker implements ChunkBridge {
             short blockPos = this.blockPosToShort(pos);
             final PlayerTracker shortTracker = this.trackedShortBlockPositions.get(blockPos);
             if (shortTracker != null) {
-                shortTracker.notifierIndex = uuid == null ? -1 : ((IMixinWorldInfo) this.world.getWorldInfo()).getIndexForUniqueId(uuid);
+                shortTracker.notifierIndex = uuid == null ? -1 : ((WorldInfoBridge) this.world.getWorldInfo()).getIndexForUniqueId(uuid);
             } else {
                 this.trackedShortBlockPositions.put(blockPos,
-                        new PlayerTracker(uuid == null ? -1 : ((IMixinWorldInfo) this.world.getWorldInfo()).getIndexForUniqueId(uuid),
+                        new PlayerTracker(uuid == null ? -1 : ((WorldInfoBridge) this.world.getWorldInfo()).getIndexForUniqueId(uuid),
                                 PlayerTracker.Type.NOTIFIER));
             }
         } else {
             int blockPos = this.blockPosToInt(pos);
             final PlayerTracker intTracker = this.trackedIntBlockPositions.get(blockPos);
             if (intTracker != null) {
-                intTracker.notifierIndex = uuid == null ? -1 : ((IMixinWorldInfo) this.world.getWorldInfo()).getIndexForUniqueId(uuid);
+                intTracker.notifierIndex = uuid == null ? -1 : ((WorldInfoBridge) this.world.getWorldInfo()).getIndexForUniqueId(uuid);
             } else {
                 this.trackedIntBlockPositions.put(blockPos,
-                        new PlayerTracker(uuid == null ? -1 : ((IMixinWorldInfo) this.world.getWorldInfo()).getIndexForUniqueId(uuid),
+                        new PlayerTracker(uuid == null ? -1 : ((WorldInfoBridge) this.world.getWorldInfo()).getIndexForUniqueId(uuid),
                                 PlayerTracker.Type.NOTIFIER));
             }
         }
@@ -324,18 +324,18 @@ public abstract class MixinChunk_Tracker implements ChunkBridge {
             short blockPos = this.blockPosToShort(pos);
             final PlayerTracker shortTracker = this.trackedShortBlockPositions.get(blockPos);
             if (shortTracker != null) {
-                shortTracker.ownerIndex = uuid == null ? -1 : ((IMixinWorldInfo) this.world.getWorldInfo()).getIndexForUniqueId(uuid);
+                shortTracker.ownerIndex = uuid == null ? -1 : ((WorldInfoBridge) this.world.getWorldInfo()).getIndexForUniqueId(uuid);
             } else {
-                this.trackedShortBlockPositions.put(blockPos, new PlayerTracker(uuid == null ? -1 : ((IMixinWorldInfo) this.world.getWorldInfo())
+                this.trackedShortBlockPositions.put(blockPos, new PlayerTracker(uuid == null ? -1 : ((WorldInfoBridge) this.world.getWorldInfo())
                         .getIndexForUniqueId(uuid), PlayerTracker.Type.OWNER));
             }
         } else {
             int blockPos = this.blockPosToInt(pos);
             final PlayerTracker intTracker = this.trackedIntBlockPositions.get(blockPos);
             if (intTracker != null) {
-                intTracker.ownerIndex = uuid == null ? -1 : ((IMixinWorldInfo) this.world.getWorldInfo()).getIndexForUniqueId(uuid);
+                intTracker.ownerIndex = uuid == null ? -1 : ((WorldInfoBridge) this.world.getWorldInfo()).getIndexForUniqueId(uuid);
             } else {
-                this.trackedIntBlockPositions.put(blockPos, new PlayerTracker(uuid == null ? -1 : ((IMixinWorldInfo) this.world.getWorldInfo())
+                this.trackedIntBlockPositions.put(blockPos, new PlayerTracker(uuid == null ? -1 : ((WorldInfoBridge) this.world.getWorldInfo())
                         .getIndexForUniqueId(uuid), PlayerTracker.Type.OWNER));
             }
         }

@@ -55,13 +55,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.world.ChunkBridge;
+import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
-import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
@@ -108,10 +108,10 @@ public abstract class MixinWorldEntitySpawner {
             }
 
             final ServerWorldBridge spongeWorld = (ServerWorldBridge) world;
-            spongeWorld.getTimingsHandler().mobSpawn.startTiming();
+            spongeWorld.bridge$getTimingsHandler().mobSpawn.startTiming();
 
             int chunkSpawnCandidates = 0;
-            final int mobSpawnRange = Math.min(((IMixinWorldInfo) world.getWorldInfo()).getConfigAdapter().getConfig().getWorld().getMobSpawnRange(),
+            final int mobSpawnRange = Math.min(((WorldInfoBridge) world.getWorldInfo()).getConfigAdapter().getConfig().getWorld().getMobSpawnRange(),
                     ((org.spongepowered.api.world.World) world).getViewDistance());
             // Vanilla uses a div count of 289 (17x17) which assumes the view distance is 8.
             // Since we allow for custom ranges, we need to adjust the div count based on the
@@ -156,13 +156,13 @@ public abstract class MixinWorldEntitySpawner {
 
             // If there are no eligible chunks, return early
             if (this.eligibleSpawnChunks.isEmpty()) {
-                spongeWorld.getTimingsHandler().mobSpawn.stopTiming();
+                spongeWorld.bridge$getTimingsHandler().mobSpawn.stopTiming();
                 return 0;
             }
 
             int totalSpawned = 0;
             final long worldTotalTime = world.getTotalWorldTime();
-            final SpongeConfig<WorldConfig> configAdapter = ((IMixinWorldInfo) world.getWorldInfo()).getConfigAdapter();
+            final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) world.getWorldInfo()).getConfigAdapter();
 
             labelOuterLoop:
             for (final EnumCreatureType enumCreatureType : EnumCreatureType.values()) {
@@ -296,7 +296,7 @@ public abstract class MixinWorldEntitySpawner {
                 }
             }
 
-            spongeWorld.getTimingsHandler().mobSpawn.stopTiming();
+            spongeWorld.bridge$getTimingsHandler().mobSpawn.stopTiming();
 
             return totalSpawned;
         }

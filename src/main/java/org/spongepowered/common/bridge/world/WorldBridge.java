@@ -29,6 +29,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.WorldInfo;
+import org.spongepowered.api.world.Dimension;
 import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 
 import javax.annotation.Nullable;
@@ -50,7 +51,7 @@ public interface WorldBridge {
      */
     boolean isFake();
 
-    long getWeatherStartTime();
+    long bridge$getWeatherStartTime();
 
     void setWeatherStartTime(long weatherStartTime);
 
@@ -65,4 +66,6 @@ public interface WorldBridge {
     int getRawBlockLight(BlockPos pos, EnumSkyBlock lightType);
 
     void clearFakeCheck();
+
+    Dimension bridge$getDimensionWrapper();
 }

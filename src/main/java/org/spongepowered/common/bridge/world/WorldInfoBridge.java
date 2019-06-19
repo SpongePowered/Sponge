@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world;
+package org.spongepowered.common.bridge.world;
 
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.scoreboard.ServerScoreboard;
@@ -37,7 +37,7 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-public interface IMixinWorldInfo {
+public interface WorldInfoBridge {
 
     NBTTagCompound getSpongeRootLevelNbt();
 

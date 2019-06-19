@@ -406,7 +406,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
         final IBlockState actualSourceState = ((WorldServer) mixinWorldServer).getBlockState(sourcePos);
         final BlockTransaction.NeighborNotification notification = new BlockTransaction.NeighborNotification(transactionIndex, this.snapshotIndex, mixinWorldServer,
             notifyState, notifyPos, sourceBlock, sourcePos, actualSourceState);
-        notification.enqueueChanges(mixinWorldServer.getProxyAccess(), this);
+        notification.enqueueChanges(mixinWorldServer.bridge$getProxyAccess(), this);
         logTransaction(notification);
     }
 
@@ -445,12 +445,12 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
                 }
                 changeBlock.queuedRemoval = oldTile;
                 if (changeBlock.queueTileSet == null) {
-                    mixinWorldServer.getProxyAccess().queueRemoval(oldTile);
+                    mixinWorldServer.bridge$getProxyAccess().queueRemoval(oldTile);
                 } else {
                     // Make sure the new tile entity has the correct position
                     changeBlock.queueTileSet.setPos(pos);
-                    mixinWorldServer.getProxyAccess().queueReplacement(changeBlock.queueTileSet, changeBlock.queuedRemoval);
-                    mixinWorldServer.getProxyAccess().unmarkRemoval(pos, oldTile);
+                    mixinWorldServer.bridge$getProxyAccess().queueReplacement(changeBlock.queueTileSet, changeBlock.queuedRemoval);
+                    mixinWorldServer.bridge$getProxyAccess().unmarkRemoval(pos, oldTile);
                 }
                 return;
             }
@@ -473,8 +473,8 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
                 }
             }
             if (isSame) {
-                if (mixinWorldServer.getProxyAccess().isTileQueuedForRemoval(pos, newTile)) {
-                    mixinWorldServer.getProxyAccess().unmarkRemoval(pos, newTile);
+                if (mixinWorldServer.bridge$getProxyAccess().isTileQueuedForRemoval(pos, newTile)) {
+                    mixinWorldServer.bridge$getProxyAccess().unmarkRemoval(pos, newTile);
                 }
                 return;
             }
@@ -482,29 +482,29 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
         final int transactionIndex = ++this.transactionIndex;
         if (oldTile != null) {
 
-            final SpongeBlockSnapshot snapshot = mixinWorldServer.createSpongeSnapshotForTileEntity(current, pos, BlockChangeFlags.NONE, oldTile);
+            final SpongeBlockSnapshot snapshot = mixinWorldServer.bridge$createSnapshotWithEntity(current, pos, BlockChangeFlags.NONE, oldTile);
             this.put(snapshot, current);
             if (newTile != null) {
                 // replacing a tile.
                 snapshot.blockChange = BlockChange.MODIFY;
                 final BlockTransaction.ReplaceTileEntity transaction = new BlockTransaction.ReplaceTileEntity(transactionIndex, this.snapshotIndex, newTile, oldTile, snapshot);
                 logTransaction(transaction);
-                transaction.enqueueChanges(mixinWorldServer.getProxyAccess(),this);
+                transaction.enqueueChanges(mixinWorldServer.bridge$getProxyAccess(),this);
                 return;
             }
             // Removing the tile
             snapshot.blockChange = BlockChange.BREAK;
             final BlockTransaction.RemoveTileEntity transaction = new BlockTransaction.RemoveTileEntity(transactionIndex, this.snapshotIndex, oldTile, snapshot);
-            transaction.enqueueChanges(mixinWorldServer.getProxyAccess(), this);
+            transaction.enqueueChanges(mixinWorldServer.bridge$getProxyAccess(), this);
             logTransaction(transaction);
             return;
         }
         if (newTile != null) {
-            final SpongeBlockSnapshot snapshot = mixinWorldServer.createSpongeSnapshotForTileEntity(current, pos, BlockChangeFlags.NONE, newTile);
+            final SpongeBlockSnapshot snapshot = mixinWorldServer.bridge$createSnapshotWithEntity(current, pos, BlockChangeFlags.NONE, newTile);
             snapshot.blockChange = BlockChange.PLACE;
             final BlockTransaction.AddTileEntity
                 transaction = new BlockTransaction.AddTileEntity(transactionIndex, this.snapshotIndex, newTile, snapshot);
-            transaction.enqueueChanges(mixinWorldServer.getProxyAccess(), this);
+            transaction.enqueueChanges(mixinWorldServer.bridge$getProxyAccess(), this);
             logTransaction(transaction);
         }
     }
@@ -535,7 +535,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
         snapshot.getWorldServer().ifPresent(worldServer -> {
             for (BlockTransaction prevChange = this.tail; prevChange != null; prevChange = prevChange.previous) {
                 if (!prevChange.isCancelled) {
-                    prevChange.cancel(worldServer, blockPos, ((ServerWorldBridge) worldServer).getProxyAccess());
+                    prevChange.cancel(worldServer, blockPos, ((ServerWorldBridge) worldServer).bridge$getProxyAccess());
                 }
             }
         });
@@ -585,7 +585,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
         // saw, so, we have to just provide the new state (extended states are calculated anyways).
         final IBlockState newActualState = this.head != null ? newState : newState.getActualState(worldServer, blockPos);
         final BlockSnapshot newSnapshot =
-            ((ServerWorldBridge) worldServer).createSpongeBlockSnapshot(newState, newActualState, blockPos, BlockChangeFlags.NONE);
+            ((ServerWorldBridge) worldServer).bridge$createSnapshot(newState, newActualState, blockPos, BlockChangeFlags.NONE);
         // Up until this point, we can create a default Transaction
         if (this.multimap != null) { // But we need to check if there's any intermediary block changes...
             // And because multi is true, we can be sure the multimap is populated at least somewhere.
@@ -689,7 +689,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
                 final Optional<ServerWorldBridge> maybeWorld = transaction.getWorldServer();
                 final BlockTransaction derp = transaction;
                 try (@SuppressWarnings("try") final SpongeProxyBlockAccess access = maybeWorld.map(
-                    ServerWorldBridge::getProxyAccess).map(proxy -> proxy.switchTo(derp)).orElse(null);
+                    ServerWorldBridge::bridge$getProxyAccess).map(proxy -> proxy.switchTo(derp)).orElse(null);
                      final SpongeProxyBlockAccess.Proxy ignored = maybeWorld.map(transaction::getProxy).orElse(null)){
                     final PrettyPrinter printer;
                     if (PRINT_TRANSACTIONS) {
@@ -731,7 +731,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
                         .addWrapped(60,
                             "BlockTransactions failing to process can lead to unintended consequences. If the exception is *directly* coming from Sponge's code, please report to Sponge.")
                         .add();
-                    maybeWorld.map(ServerWorldBridge::getProxyAccess).ifPresent(access -> access.addToPrinter(printer));
+                    maybeWorld.map(ServerWorldBridge::bridge$getProxyAccess).ifPresent(access -> access.addToPrinter(printer));
                     transaction.addToPrinter(printer);
                     printer.add();
                     printer
@@ -739,7 +739,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
                         .add(e)
                         .trace(System.err);
                 }
-                maybeWorld.map(ServerWorldBridge::getProxyAccess).ifPresent(transaction::postProcessBlocksAffected);
+                maybeWorld.map(ServerWorldBridge::bridge$getProxyAccess).ifPresent(transaction::postProcessBlocksAffected);
 
                 // Clean up
                 final BlockTransaction next = transaction.next;
@@ -778,7 +778,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
         }
         SpongeProxyBlockAccess.Proxy existing = this.processingWorlds.get((WorldServer) mixinWorldServer);
         if (existing == null) {
-            existing = mixinWorldServer.getProxyAccess().pushProxy();
+            existing = mixinWorldServer.bridge$getProxyAccess().pushProxy();
             this.processingWorlds.put((WorldServer) mixinWorldServer, existing);
         }
     }

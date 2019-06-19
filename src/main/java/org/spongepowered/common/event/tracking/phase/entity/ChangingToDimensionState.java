@@ -60,7 +60,7 @@ final class ChangingToDimensionState extends EntityPhaseState<TeleportingContext
     public boolean spawnEntityOrCapture(TeleportingContext context, Entity entity, int chunkX, int chunkZ) {
         final WorldServer worldServer = context.getTargetWorld();
         // Allowed to use the force spawn because it's the same "entity"
-        ((ServerWorldBridge) worldServer).forceSpawnEntity(entity);
+        ((ServerWorldBridge) worldServer).bridge$forceSpawnEntity(entity);
         return true;
     }
 

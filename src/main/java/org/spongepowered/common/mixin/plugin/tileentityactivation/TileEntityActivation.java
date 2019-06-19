@@ -44,8 +44,8 @@ import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.bridge.world.ChunkBridge;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
-import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
-import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModData_Activation;
+import org.spongepowered.common.bridge.world.WorldInfoBridge;
+import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.ActivationCapability;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.Map;
@@ -62,10 +62,10 @@ public class TileEntityActivation {
             return;
         }
 
-        final TileEntityActivationCategory tileEntityActCat = ((IMixinWorldInfo) tileEntity.getWorld().getWorldInfo()).getConfigAdapter().getConfig().getTileEntityActivationRange();
+        final TileEntityActivationCategory tileEntityActCat = ((WorldInfoBridge) tileEntity.getWorld().getWorldInfo()).getConfigAdapter().getConfig().getTileEntityActivationRange();
         final TileEntityType type = ((org.spongepowered.api.block.tileentity.TileEntity) tileEntity).getType();
 
-        final IModData_Activation spongeTileEntity = (IModData_Activation) tileEntity;
+        final ActivationCapability spongeTileEntity = (ActivationCapability) tileEntity;
         final SpongeTileEntityType spongeType = (SpongeTileEntityType) type;
         if (spongeType == null || spongeType.getModId() == null) {
             return;
@@ -75,45 +75,45 @@ public class TileEntityActivation {
         int defaultTickRate = tileEntityActCat.getDefaultTickRate();
         if (tileEntityActModCat == null) {
             // use default activation range
-            spongeTileEntity.setActivationRange(defaultActivationRange);
-            spongeTileEntity.setSpongeTickRate(defaultTickRate);
+            spongeTileEntity.activation$setActivationRange(defaultActivationRange);
+            spongeTileEntity.activation$setSpongeTickRate(defaultTickRate);
             if (defaultTickRate <= 0) {
-                spongeTileEntity.setDefaultActivationState(false);
+                spongeTileEntity.activation$setDefaultActivationState(false);
             }
             if (defaultActivationRange > 0) {
-                spongeTileEntity.setDefaultActivationState(false);
+                spongeTileEntity.activation$setDefaultActivationState(false);
             }
         } else {
             if (!tileEntityActModCat.isEnabled()) {
-                spongeTileEntity.setDefaultActivationState(true);
+                spongeTileEntity.activation$setDefaultActivationState(true);
                 return;
             }
 
             Integer defaultModActivationRange = tileEntityActModCat.getDefaultBlockRange();
             Integer tileEntityActivationRange = tileEntityActModCat.getTileEntityRangeList().get(type.getName().toLowerCase());
             if (defaultModActivationRange != null && tileEntityActivationRange == null) {
-                spongeTileEntity.setActivationRange(defaultModActivationRange);
+                spongeTileEntity.activation$setActivationRange(defaultModActivationRange);
                 if (defaultModActivationRange > 0) {
-                    spongeTileEntity.setDefaultActivationState(false);
+                    spongeTileEntity.activation$setDefaultActivationState(false);
                 }
             } else if (tileEntityActivationRange != null) {
-                spongeTileEntity.setActivationRange(tileEntityActivationRange);
+                spongeTileEntity.activation$setActivationRange(tileEntityActivationRange);
                 if (tileEntityActivationRange > 0) {
-                    spongeTileEntity.setDefaultActivationState(false);
+                    spongeTileEntity.activation$setDefaultActivationState(false);
                 }
             }
 
             Integer defaultModTickRate = tileEntityActModCat.getDefaultTickRate();
             Integer tileEntityTickRate = tileEntityActModCat.getTileEntityTickRateList().get(type.getName().toLowerCase());
             if (defaultModTickRate != null && tileEntityTickRate == null) {
-                spongeTileEntity.setSpongeTickRate(defaultModTickRate);
+                spongeTileEntity.activation$setSpongeTickRate(defaultModTickRate);
                 if (defaultModTickRate <= 0) {
-                    spongeTileEntity.setDefaultActivationState(false);
+                    spongeTileEntity.activation$setDefaultActivationState(false);
                 }
             } else if (tileEntityTickRate != null) {
-                spongeTileEntity.setSpongeTickRate(tileEntityTickRate);
+                spongeTileEntity.activation$setSpongeTickRate(tileEntityTickRate);
                 if (tileEntityTickRate <= 0) {
-                    spongeTileEntity.setDefaultActivationState(false);
+                    spongeTileEntity.activation$setDefaultActivationState(false);
                 }
             }
         }
@@ -150,33 +150,33 @@ public class TileEntityActivation {
         final long currentTick = SpongeImpl.getServer().getTickCounter();
         for (Map.Entry<BlockPos, TileEntity> mapEntry : chunk.getTileEntityMap().entrySet()) {
             final TileEntity tileEntity = mapEntry.getValue();
-            final IModData_Activation spongeTileEntity = (IModData_Activation) tileEntity;
-            if (spongeTileEntity.getSpongeTickRate() <= 0 || !((TileEntityBridge) tileEntity).shouldTick()) {
+            final ActivationCapability spongeTileEntity = (ActivationCapability) tileEntity;
+            if (spongeTileEntity.activation$getSpongeTickRate() <= 0 || !((TileEntityBridge) tileEntity).shouldTick()) {
                 // never activate
                 continue;
             }
-            if (!(tileEntity instanceof ITickable) || spongeTileEntity.getActivatedTick() == currentTick) {
+            if (!(tileEntity instanceof ITickable) || spongeTileEntity.activation$getActivatedTick() == currentTick) {
                 // already activated
                 continue;
             }
 
             final Vector3i tilePos = VecHelper.toVector3i(tileEntity.getPos());
-            if (currentTick > ((IModData_Activation) tileEntity).getActivatedTick()) {
-                if (spongeTileEntity.getDefaultActivationState()) {
-                    ((IModData_Activation) tileEntity).setActivatedTick(currentTick);
+            if (currentTick > ((ActivationCapability) tileEntity).activation$getActivatedTick()) {
+                if (spongeTileEntity.activation$getDefaultActivationState()) {
+                    ((ActivationCapability) tileEntity).activation$setActivatedTick(currentTick);
                     continue;
                 }
 
                 // check if activation cache needs to be updated
-                if (spongeTileEntity.requiresActivationCacheRefresh()) {
+                if (spongeTileEntity.activation$requiresActivationCacheRefresh()) {
                     TileEntityActivation.initializeTileEntityActivationState(tileEntity);
-                    spongeTileEntity.requiresActivationCacheRefresh(false);
+                    spongeTileEntity.activation$requiresActivationCacheRefresh(false);
                 }
 
-                int bbActivationRange = ((IModData_Activation) tileEntity).getActivationRange();
+                int bbActivationRange = ((ActivationCapability) tileEntity).activation$getActivationRange();
                 int blockDistance = Math.round(tilePos.distance(playerPos));
                 if (blockDistance <= bbActivationRange) {
-                    ((IModData_Activation) tileEntity).setActivatedTick(currentTick);
+                    ((ActivationCapability) tileEntity).activation$setActivatedTick(currentTick);
                 }
             }
         }
@@ -205,19 +205,19 @@ public class TileEntityActivation {
         }
 
         long currentTick = SpongeImpl.getServer().getTickCounter();
-        IModData_Activation spongeTileEntity = (IModData_Activation) tileEntity;
-        boolean isActive = activeChunk.isPersistedChunk() || spongeTileEntity.getActivatedTick() >= currentTick || spongeTileEntity.getDefaultActivationState();
+        ActivationCapability spongeTileEntity = (ActivationCapability) tileEntity;
+        boolean isActive = activeChunk.isPersistedChunk() || spongeTileEntity.activation$getActivatedTick() >= currentTick || spongeTileEntity.activation$getDefaultActivationState();
 
         // Should this tileentity tick?
         if (!isActive) {
-            if (spongeTileEntity.getActivatedTick() == Integer.MIN_VALUE) {
+            if (spongeTileEntity.activation$getActivatedTick() == Integer.MIN_VALUE) {
                 // Has not come across a player
                 return false;
             }
         }
 
         // check tick rate
-        if (isActive && world.getWorldInfo().getWorldTotalTime() % spongeTileEntity.getSpongeTickRate() != 0L) {
+        if (isActive && world.getWorldInfo().getWorldTotalTime() % spongeTileEntity.activation$getSpongeTickRate() != 0L) {
             isActive = false;
         }
 
@@ -225,7 +225,7 @@ public class TileEntityActivation {
     }
 
     public static void addTileEntityToConfig(World world, SpongeTileEntityType type) {
-        final SpongeConfig<WorldConfig> worldConfigAdapter = ((IMixinWorldInfo) world.getWorldInfo()).getConfigAdapter();
+        final SpongeConfig<WorldConfig> worldConfigAdapter = ((WorldInfoBridge) world.getWorldInfo()).getConfigAdapter();
         final SpongeConfig<GlobalConfig> globalConfigAdapter = SpongeImpl.getGlobalConfigAdapter();
         if (!worldConfigAdapter.getConfig().getTileEntityActivationRange().autoPopulateData()) {
             return;

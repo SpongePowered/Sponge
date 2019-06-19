@@ -50,6 +50,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.world.ChunkBridge;
+import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.config.category.WorldCategory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -60,7 +61,6 @@ import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.interfaces.world.IMixinAnvilChunkLoader;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
 import org.spongepowered.common.util.CachedLong2ObjectMap;
@@ -100,9 +100,9 @@ public abstract class MixinChunkProviderServer implements WorldStorage, ServerCh
             return;
         }
         this.EMPTY_CHUNK = new SpongeEmptyChunk(worldObjIn, 0, 0);
-        final WorldCategory worldCategory = ((IMixinWorldInfo) this.world.getWorldInfo()).getConfigAdapter().getConfig().getWorld();
+        final WorldCategory worldCategory = ((WorldInfoBridge) this.world.getWorldInfo()).getConfigAdapter().getConfig().getWorld();
 
-        ((ServerWorldBridge) worldObjIn).updateConfigCache();
+        ((ServerWorldBridge) worldObjIn).bridge$updateConfigCache();
 
         this.denyChunkRequests = worldCategory.getDenyChunkRequests();
         this.chunkUnloadDelay = worldCategory.getChunkUnloadDelay() * 1000;
@@ -284,7 +284,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, ServerCh
     {
         if (!this.world.disableLevelSaving && !((WorldBridge) this.world).isFake())
         {
-            ((ServerWorldBridge) this.world).getTimingsHandler().doChunkUnload.startTiming();
+            ((ServerWorldBridge) this.world).bridge$getTimingsHandler().doChunkUnload.startTiming();
             Iterator<Chunk> iterator = this.loadedChunks.values().iterator();
             int chunksUnloaded = 0;
             long now = System.currentTimeMillis();
@@ -305,7 +305,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, ServerCh
                     chunksUnloaded++;
                 }
             }
-            ((ServerWorldBridge) this.world).getTimingsHandler().doChunkUnload.stopTiming();
+            ((ServerWorldBridge) this.world).bridge$getTimingsHandler().doChunkUnload.stopTiming();
         }
 
         this.chunkLoader.chunkTick();

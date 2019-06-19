@@ -97,6 +97,7 @@ import org.spongepowered.api.world.gamerule.DefaultGameRules;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -110,7 +111,6 @@ import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.interfaces.world.IMixinITeleporter;
 import org.spongepowered.common.interfaces.world.IMixinTeleporter;
-import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
@@ -388,7 +388,7 @@ public final class EntityUtil {
             return null;
         }
 
-        final Map<String, String> portalAgents = ((IMixinWorldInfo) fromWorld.getWorldInfo()).getConfigAdapter().getConfig().getWorld().getPortalAgents();
+        final Map<String, String> portalAgents = ((WorldInfoBridge) fromWorld.getWorldInfo()).getConfigAdapter().getConfig().getWorld().getPortalAgents();
         String worldName;
 
         // Check if we're to use a different teleporter for this world
@@ -572,7 +572,7 @@ public final class EntityUtil {
                     // Since forge already has a new event thrown for the entity, we don't need to throw
                     // the event anymore as sponge plugins getting the event after forge mods will
                     // have the modified entity list for entities, so no need to re-capture the entities.
-                    getMixinWorld(entity).forceSpawnEntity(entity);
+                    getMixinWorld(entity).bridge$forceSpawnEntity(entity);
                     return true;
                 }
             }
@@ -580,7 +580,7 @@ public final class EntityUtil {
         supplier.get()
             .ifPresent(entity::setCreator);
         // Allowed to call force spawn directly since we've applied creator and custom item logic already
-        getMixinWorld(entity).forceSpawnEntity(entity);
+        getMixinWorld(entity).bridge$forceSpawnEntity(entity);
         return true;
     }
 
@@ -772,7 +772,7 @@ public final class EntityUtil {
         }
 
         final Dimension targetDimension = (Dimension) targetWorld.provider;
-        int targetDimensionId = ((ServerWorldBridge) targetWorld).getDimensionId();
+        int targetDimensionId = ((ServerWorldBridge) targetWorld).bridge$getDimensionId();
         // Cannot respawn in requested world, use the fallback dimension for
         // that world. (Usually overworld unless a mod says otherwise).
         if (!targetDimension.allowsPlayerRespawns()) {

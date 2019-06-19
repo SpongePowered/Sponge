@@ -163,10 +163,10 @@ public abstract class MixinEntityMob extends MixinEntityLiving {
             if (this.world.isThundering()) {
                 int j = this.world.getSkylightSubtracted();;
                 this.world.setSkylightSubtracted(10);
-                passes = !((ServerWorldBridge) this.world).isLightLevel(chunk, blockpos, this.rand.nextInt(9));
+                passes = !((ServerWorldBridge) this.world).bridge$isLightLevel(chunk, blockpos, this.rand.nextInt(9));
                 this.world.setSkylightSubtracted(j);
             } else { 
-                passes = !((ServerWorldBridge) this.world).isLightLevel(chunk, blockpos, this.rand.nextInt(9));
+                passes = !((ServerWorldBridge) this.world).bridge$isLightLevel(chunk, blockpos, this.rand.nextInt(9));
             }
 
             return passes;

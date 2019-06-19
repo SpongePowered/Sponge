@@ -34,7 +34,6 @@ import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.ai.Goal;
-import org.spongepowered.api.entity.ai.GoalType;
 import org.spongepowered.api.entity.ai.GoalTypes;
 import org.spongepowered.api.entity.ai.task.AITask;
 import org.spongepowered.api.entity.living.Agent;
@@ -61,13 +60,12 @@ import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
 import org.spongepowered.common.bridge.entity.ai.EntityGoalBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.ai.IMixinEntityAITasks;
-import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 
 import java.util.Iterator;
-import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -163,7 +161,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase {
     @ModifyConstant(method = "despawnEntity", constant = @Constant(doubleValue = 16384.0D))
     private double getHardDespawnRange(final double value) {
         if (!this.world.isRemote) {
-            return Math.pow(((IMixinWorldInfo) this.world.getWorldInfo()).getConfigAdapter().getConfig().getEntity().getHardDespawnRange(), 2);
+            return Math.pow(((WorldInfoBridge) this.world.getWorldInfo()).getConfigAdapter().getConfig().getEntity().getHardDespawnRange(), 2);
         }
         return value;
     }
@@ -172,7 +170,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase {
     @ModifyConstant(method = "despawnEntity", constant = @Constant(doubleValue = 1024.0D), expect = 2)
     private double getSoftDespawnRange(final double value) {
         if (!this.world.isRemote) {
-            return Math.pow(((IMixinWorldInfo) this.world.getWorldInfo()).getConfigAdapter().getConfig().getEntity().getSoftDespawnRange(), 2);
+            return Math.pow(((WorldInfoBridge) this.world.getWorldInfo()).getConfigAdapter().getConfig().getEntity().getSoftDespawnRange(), 2);
         }
         return value;
     }
@@ -180,7 +178,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase {
     @ModifyConstant(method = "despawnEntity", constant = @Constant(intValue = 600))
     private int getMinimumLifetime(final int value) {
         if (!this.world.isRemote) {
-            return ((IMixinWorldInfo) this.world.getWorldInfo()).getConfigAdapter().getConfig().getEntity().getMinimumLife() * 20;
+            return ((WorldInfoBridge) this.world.getWorldInfo()).getConfigAdapter().getConfig().getEntity().getMinimumLife() * 20;
         }
         return value;
     }

@@ -29,7 +29,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -44,7 +43,7 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.bridge.entity.ItemEntityBridge;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
+import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
 @Mixin(EntityItem.class)
@@ -79,7 +78,7 @@ public abstract class MixinEntityItem extends MixinEntity implements ItemEntityB
             return originalRadius;
         }
         if (this.cachedRadius == -1) {
-            final double configRadius = ((IMixinWorldInfo) this.world.getWorldInfo()).getConfigAdapter().getConfig().getWorld().getItemMergeRadius();
+            final double configRadius = ((WorldInfoBridge) this.world.getWorldInfo()).getConfigAdapter().getConfig().getWorld().getItemMergeRadius();
             this.cachedRadius = configRadius < 0 ? 0 : configRadius;
         }
         return this.cachedRadius;

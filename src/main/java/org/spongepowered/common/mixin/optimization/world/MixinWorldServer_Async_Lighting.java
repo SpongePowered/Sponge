@@ -60,12 +60,12 @@ public abstract class MixinWorldServer_Async_Lighting extends MixinWorld impleme
 
     @Override
     public boolean checkLightFor(EnumSkyBlock lightType, BlockPos pos) {
-        return this.updateLightAsync(lightType, pos, null);
+        return this.bridge$updateLightAsync(lightType, pos, null);
     }
 
     @Override
-    public boolean checkLightAsync(EnumSkyBlock lightType, BlockPos pos, net.minecraft.world.chunk.Chunk currentChunk, List<Chunk> neighbors) {
-        // Sponge - This check is not needed as neighbors are checked in updateLightAsync
+    public boolean bridge$checkLightAsync(EnumSkyBlock lightType, BlockPos pos, net.minecraft.world.chunk.Chunk currentChunk, List<Chunk> neighbors) {
+        // Sponge - This check is not needed as neighbors are checked in bridge$updateLightAsync
         if (false && !this.isAreaLoaded(pos, 17, false)) {
             return false;
         } else {
@@ -199,7 +199,7 @@ public abstract class MixinWorldServer_Async_Lighting extends MixinWorld impleme
     }
 
     @Override
-    public boolean updateLightAsync(EnumSkyBlock lightType, BlockPos pos, @Nullable Chunk currentChunk) {
+    public boolean bridge$updateLightAsync(EnumSkyBlock lightType, BlockPos pos, @Nullable Chunk currentChunk) {
         if (this.getMinecraftServer().isServerStopped() || this.lightExecutorService.isShutdown()) {
             return false;
         }
@@ -258,17 +258,17 @@ public abstract class MixinWorldServer_Async_Lighting extends MixinWorld impleme
         //System.out.println("size = " + ((ThreadPoolExecutor) this.lightExecutorService).getQueue().size());
         if (SpongeImpl.getServer().isCallingFromMinecraftThread()) {
             this.lightExecutorService.execute(() -> {
-                this.checkLightAsync(lightType, pos, chunk, neighbors);
+                this.bridge$checkLightAsync(lightType, pos, chunk, neighbors);
             });
         } else {
-            this.checkLightAsync(lightType, pos, chunk, neighbors);
+            this.bridge$checkLightAsync(lightType, pos, chunk, neighbors);
         }
 
         return true;
     }
 
     @Override
-    public ExecutorService getLightingExecutor() {
+    public ExecutorService bridge$getLightingExecutor() {
         return this.lightExecutorService;
     }
 

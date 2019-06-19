@@ -66,6 +66,7 @@ import org.spongepowered.api.world.DimensionTypes;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.GeneralConfigBase;
 import org.spongepowered.common.config.type.GlobalConfig;
@@ -78,7 +79,6 @@ import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
@@ -131,13 +131,13 @@ public final class WorldManager {
     private static final Comparator<WorldServer>
             WORLD_SERVER_COMPARATOR =
             (world1, world2) -> {
-                final Integer world1DimId = ((ServerWorldBridge) world1).getDimensionId();
+                final Integer world1DimId = ((ServerWorldBridge) world1).bridge$getDimensionId();
 
                 if (world2 == null) {
                     return world1DimId;
                 }
 
-                final Integer world2DimId = ((ServerWorldBridge) world2).getDimensionId();
+                final Integer world2DimId = ((ServerWorldBridge) world2).bridge$getDimensionId();
                 return world1DimId - world2DimId;
             };
 
@@ -349,8 +349,8 @@ public final class WorldManager {
         worldPropertiesByFolderName.put(properties.getWorldName(), properties);
         worldPropertiesByWorldUuid.put(properties.getUniqueId(), properties);
         worldUuidByFolderName.put(properties.getWorldName(), properties.getUniqueId());
-        worldFolderByDimensionId.put(((IMixinWorldInfo) properties).getDimensionId(), properties.getWorldName());
-        usedDimensionIds.add(((IMixinWorldInfo) properties).getDimensionId());
+        worldFolderByDimensionId.put(((WorldInfoBridge) properties).getDimensionId(), properties.getWorldName());
+        usedDimensionIds.add(((WorldInfoBridge) properties).getDimensionId());
     }
 
     public static void unregisterWorldProperties(WorldProperties properties, boolean freeDimensionId) {
@@ -358,9 +358,9 @@ public final class WorldManager {
         worldPropertiesByFolderName.remove(properties.getWorldName());
         worldPropertiesByWorldUuid.remove(properties.getUniqueId());
         worldUuidByFolderName.remove(properties.getWorldName());
-        worldFolderByDimensionId.remove(((IMixinWorldInfo) properties).getDimensionId());
-        if (((IMixinWorldInfo) properties).getDimensionId() != null && freeDimensionId) {
-            usedDimensionIds.remove(((IMixinWorldInfo) properties).getDimensionId());
+        worldFolderByDimensionId.remove(((WorldInfoBridge) properties).getDimensionId());
+        if (((WorldInfoBridge) properties).getDimensionId() != null && freeDimensionId) {
+            usedDimensionIds.remove(((WorldInfoBridge) properties).getDimensionId());
         }
     }
 
@@ -435,22 +435,22 @@ public final class WorldManager {
             }
         } else {
             // DimensionType must be set before world config is created to get proper path
-            ((IMixinWorldInfo) worldInfo).setDimensionType(archetype.getDimensionType());
-            ((IMixinWorldInfo) worldInfo).createWorldConfig();
+            ((WorldInfoBridge) worldInfo).setDimensionType(archetype.getDimensionType());
+            ((WorldInfoBridge) worldInfo).createWorldConfig();
             ((WorldProperties) worldInfo).setGeneratorModifiers(archetype.getGeneratorModifiers());
         }
 
         setUuidOnProperties(getCurrentSavesDirectory().get(), (WorldProperties) worldInfo);
         if (dimensionId != null) {
-            ((IMixinWorldInfo) worldInfo).setDimensionId(dimensionId);
-        } else if (((IMixinWorldInfo) worldInfo).getDimensionId() == null
-                //|| ((IMixinWorldInfo) worldInfo).getDimensionId() == Integer.MIN_VALUE // TODO: Evaulate all uses of Integer.MIN_VALUE for dimension ids
-                || getWorldByDimensionId(((IMixinWorldInfo) worldInfo).getDimensionId()).isPresent()) {
+            ((WorldInfoBridge) worldInfo).setDimensionId(dimensionId);
+        } else if (((WorldInfoBridge) worldInfo).getDimensionId() == null
+                //|| ((WorldInfoBridge) worldInfo).bridge$getDimensionId() == Integer.MIN_VALUE // TODO: Evaulate all uses of Integer.MIN_VALUE for dimension ids
+                || getWorldByDimensionId(((WorldInfoBridge) worldInfo).getDimensionId()).isPresent()) {
             // DimensionID is null or 0 or the dimensionID is already assinged to a loaded world
-            ((IMixinWorldInfo) worldInfo).setDimensionId(WorldManager.getNextFreeDimensionId());
+            ((WorldInfoBridge) worldInfo).setDimensionId(WorldManager.getNextFreeDimensionId());
         }
         ((WorldProperties) worldInfo).setGeneratorType(archetype.getGeneratorType());
-        ((IMixinWorldInfo) worldInfo).getConfigAdapter().save();
+        ((WorldInfoBridge) worldInfo).getConfigAdapter().save();
         registerWorldProperties((WorldProperties) worldInfo);
 
         SpongeImpl.postEvent(SpongeEventFactory.createConstructWorldPropertiesEvent(Sponge.getCauseStackManager().getCurrentCause(), archetype,
@@ -464,7 +464,7 @@ public final class WorldManager {
 
     public static boolean saveWorldProperties(WorldProperties properties) {
         checkNotNull(properties);
-        final Optional<WorldServer> optWorldServer = getWorldByDimensionId(((IMixinWorldInfo) properties).getDimensionId());
+        final Optional<WorldServer> optWorldServer = getWorldByDimensionId(((WorldInfoBridge) properties).getDimensionId());
         // If the World represented in the properties is still loaded, save the properties and have the World reload its info
         if (optWorldServer.isPresent()) {
             final WorldServer worldServer = optWorldServer.get();
@@ -474,7 +474,7 @@ public final class WorldManager {
             new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), properties.getWorldName(), true, SpongeImpl
                     .getDataFixer()).saveWorldInfo((WorldInfo) properties);
         }
-        ((IMixinWorldInfo) properties).getConfigAdapter().save();
+        ((WorldInfoBridge) properties).getConfigAdapter().save();
         // No return values or exceptions so can only assume true.
         return true;
     }
@@ -512,7 +512,7 @@ public final class WorldManager {
                 globalConfigAdapter.getConfig().getOptimizations().useAsyncLighting()) {
 
             // The world is unloading - there's no point in running any more lighting tasks
-            ((ServerWorldBridge) worldServer).getLightingExecutor().shutdownNow();
+            ((ServerWorldBridge) worldServer).bridge$getLightingExecutor().shutdownNow();
         }
 
         // Vanilla sometimes doesn't remove player entities from world first
@@ -540,7 +540,7 @@ public final class WorldManager {
             }
 
             final ServerWorldBridge mixinWorldServer = (ServerWorldBridge) worldServer;
-            final int dimensionId = mixinWorldServer.getDimensionId();
+            final int dimensionId = mixinWorldServer.bridge$getDimensionId();
 
             try {
                 // Don't save if server is stopping to avoid duplicate saving.
@@ -548,7 +548,7 @@ public final class WorldManager {
                     saveWorld(worldServer, true);
                 }
 
-                ((IMixinWorldInfo) worldServer.getWorldInfo()).getConfigAdapter().save();
+                ((WorldInfoBridge) worldServer.getWorldInfo()).getConfigAdapter().save();
             } catch (MinecraftException e) {
                 e.printStackTrace();
             } finally {
@@ -631,14 +631,14 @@ public final class WorldManager {
         }
 
         // TODO: Evaulate all uses of Integer.MIN_VALUE for dimension ids
-        if (((IMixinWorldInfo) properties).getDimensionId() == null /*|| ((IMixinWorldInfo) properties).getDimensionId() == Integer.MIN_VALUE*/) {
-            ((IMixinWorldInfo) properties).setDimensionId(getNextFreeDimensionId());
+        if (((WorldInfoBridge) properties).getDimensionId() == null /*|| ((WorldInfoBridge) properties).bridge$getDimensionId() == Integer.MIN_VALUE*/) {
+            ((WorldInfoBridge) properties).setDimensionId(getNextFreeDimensionId());
         }
         setUuidOnProperties(getCurrentSavesDirectory().get(), properties);
         registerWorldProperties(properties);
 
         final WorldInfo worldInfo = (WorldInfo) properties;
-        ((IMixinWorldInfo) worldInfo).createWorldConfig();
+        ((WorldInfoBridge) worldInfo).createWorldConfig();
 
         // check if enabled
         if (!((WorldProperties) worldInfo).isEnabled()) {
@@ -646,7 +646,7 @@ public final class WorldManager {
             return Optional.empty();
         }
 
-        final int dimensionId = ((IMixinWorldInfo) properties).getDimensionId();
+        final int dimensionId = ((WorldInfoBridge) properties).getDimensionId();
         registerDimension(dimensionId, (DimensionType) (Object) properties.getDimensionType());
         registerDimensionPath(dimensionId, worldFolder);
         SpongeImpl.getLogger().info("Loading world [{}] ({}/{})", properties.getWorldName(), properties.getDimensionType().getId(), dimensionId);
@@ -757,8 +757,8 @@ public final class WorldManager {
                         dimensionId, worldFolderName, worldSettings, generatorOptions);
             } else {
                 // create config
-                ((IMixinWorldInfo) worldInfo).setDimensionType(apiDimensionType);
-                ((IMixinWorldInfo) worldInfo).createWorldConfig();
+                ((WorldInfoBridge) worldInfo).setDimensionType(apiDimensionType);
+                ((WorldInfoBridge) worldInfo).createWorldConfig();
                 ((WorldProperties) worldInfo).setGenerateSpawnOnLoad(((IMixinDimensionType) (Object) dimensionType).shouldGenerateSpawnOnLoad());
             }
 
@@ -768,8 +768,8 @@ public final class WorldManager {
             }
 
             // Safety check to ensure the world info has the dimension id set
-            if (((IMixinWorldInfo) worldInfo).getDimensionId() == null) {
-                ((IMixinWorldInfo) worldInfo).setDimensionId(dimensionId);
+            if (((WorldInfoBridge) worldInfo).getDimensionId() == null) {
+                ((WorldInfoBridge) worldInfo).setDimensionId(dimensionId);
             }
 
             // Keep the LevelName in the LevelInfo up to date with the directory name
@@ -812,7 +812,7 @@ public final class WorldManager {
 
         final WorldInfo worldInfo = new WorldInfo(worldSettings, worldFolderName);
         setUuidOnProperties(dimensionId == 0 ? currentSaveRoot.getParent() : currentSaveRoot, (WorldProperties) worldInfo);
-        ((IMixinWorldInfo) worldInfo).setDimensionId(dimensionId);
+        ((WorldInfoBridge) worldInfo).setDimensionId(dimensionId);
         SpongeImpl.postEvent(SpongeEventFactory.createConstructWorldPropertiesEvent(Sponge.getCauseStackManager().getCurrentCause(),
                 (WorldArchetype) (Object) worldSettings, (WorldProperties) worldInfo));
 
@@ -905,7 +905,7 @@ public final class WorldManager {
         final Iterator<WorldServer> iterator = worlds.iterator();
         while(iterator.hasNext()) {
             final ServerWorldBridge mixinWorld = (ServerWorldBridge) iterator.next();
-            final Integer dimensionId = mixinWorld.getDimensionId();
+            final Integer dimensionId = mixinWorld.bridge$getDimensionId();
             if (vanillaWorldIds.contains(dimensionId)) {
                 iterator.remove();
             }
@@ -943,7 +943,7 @@ public final class WorldManager {
             uuid = properties.getUniqueId();
         }
 
-        ((IMixinWorldInfo) properties).setUniqueId(uuid);
+        ((WorldInfoBridge) properties).setUniqueId(uuid);
     }
 
     /**
@@ -1048,7 +1048,7 @@ public final class WorldManager {
         checkArgument(!worldPropertiesByFolderName.containsKey(copyName), "Destination world name already is registered!");
         final WorldInfo info = (WorldInfo) worldProperties;
 
-        final WorldServer worldServer = worldByDimensionId.get(((IMixinWorldInfo) info).getDimensionId().intValue());
+        final WorldServer worldServer = worldByDimensionId.get(((WorldInfoBridge) info).getDimensionId().intValue());
         if (worldServer != null) {
             try {
                 saveWorld(worldServer, true);
@@ -1069,7 +1069,7 @@ public final class WorldManager {
     public static Optional<WorldProperties> renameWorld(WorldProperties worldProperties, String newName) {
         checkNotNull(worldProperties);
         checkNotNull(newName);
-        checkState(!worldByDimensionId.containsKey(((IMixinWorldInfo) worldProperties).getDimensionId()), "World is still loaded!");
+        checkState(!worldByDimensionId.containsKey(((WorldInfoBridge) worldProperties).getDimensionId()), "World is still loaded!");
 
         final Path oldWorldFolder = getCurrentSavesDirectory().get().resolve(worldProperties.getWorldName());
         final Path newWorldFolder = oldWorldFolder.resolveSibling(newName);
@@ -1090,12 +1090,12 @@ public final class WorldManager {
 
         // As we are moving a world, we want to move the dimension ID and UUID with the world to ensure
         // plugins and Sponge do not break.
-        ((IMixinWorldInfo) info).setUniqueId(worldProperties.getUniqueId());
-        if (((IMixinWorldInfo) worldProperties).getDimensionId() != null) {
-            ((IMixinWorldInfo) info).setDimensionId(((IMixinWorldInfo) worldProperties).getDimensionId());
+        ((WorldInfoBridge) info).setUniqueId(worldProperties.getUniqueId());
+        if (((WorldInfoBridge) worldProperties).getDimensionId() != null) {
+            ((WorldInfoBridge) info).setDimensionId(((WorldInfoBridge) worldProperties).getDimensionId());
         }
 
-        ((IMixinWorldInfo) info).createWorldConfig();
+        ((WorldInfoBridge) info).createWorldConfig();
         new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), newName, true, SpongeImpl.getDataFixer())
                 .saveWorldInfo(info);
         registerWorldProperties((WorldProperties) info);
@@ -1105,7 +1105,7 @@ public final class WorldManager {
     public static CompletableFuture<Boolean> deleteWorld(WorldProperties worldProperties) {
         checkNotNull(worldProperties);
         checkArgument(worldPropertiesByWorldUuid.containsKey(worldProperties.getUniqueId()), "World properties not registered!");
-        checkState(!worldByDimensionId.containsKey(((IMixinWorldInfo) worldProperties).getDimensionId()), "World not unloaded!");
+        checkState(!worldByDimensionId.containsKey(((WorldInfoBridge) worldProperties).getDimensionId()), "World not unloaded!");
         return SpongeImpl.getScheduler().submitAsyncTask(new DeleteWorldTask(worldProperties));
     }
 
@@ -1118,14 +1118,14 @@ public final class WorldManager {
         final EnumDifficulty serverDifficulty = SpongeImpl.getServer().getDifficulty();
 
         for (WorldServer worldServer : getWorlds()) {
-            final boolean alreadySet = ((IMixinWorldInfo) worldServer.getWorldInfo()).hasCustomDifficulty();
+            final boolean alreadySet = ((WorldInfoBridge) worldServer.getWorldInfo()).hasCustomDifficulty();
             adjustWorldForDifficulty(worldServer, alreadySet ? worldServer.getWorldInfo().getDifficulty() : serverDifficulty, false);
         }
     }
 
     public static void adjustWorldForDifficulty(WorldServer worldServer, EnumDifficulty difficulty, boolean isCustom) {
         final MinecraftServer server = SpongeImpl.getServer();
-        final boolean alreadySet = ((IMixinWorldInfo) worldServer.getWorldInfo()).hasCustomDifficulty();
+        final boolean alreadySet = ((WorldInfoBridge) worldServer.getWorldInfo()).hasCustomDifficulty();
 
         if (worldServer.getWorldInfo().isHardcoreModeEnabled()) {
             difficulty = EnumDifficulty.HARD;
@@ -1138,7 +1138,7 @@ public final class WorldManager {
 
         if (!alreadySet) {
             if (!isCustom) {
-                ((IMixinWorldInfo) worldServer.getWorldInfo()).forceSetDifficulty(difficulty);
+                ((WorldInfoBridge) worldServer.getWorldInfo()).forceSetDifficulty(difficulty);
             } else {
                 worldServer.getWorldInfo().setDifficulty(difficulty);
             }
@@ -1165,7 +1165,7 @@ public final class WorldManager {
             }
 
             FileVisitor<Path> visitor = new CopyFileVisitor(newWorldFolder);
-            if (((IMixinWorldInfo) this.oldInfo).getDimensionId() == 0) {
+            if (((WorldInfoBridge) this.oldInfo).getDimensionId() == 0) {
                 oldWorldFolder = getCurrentSavesDirectory().get();
                 visitor = new ForwardingFileVisitor<Path>(visitor) {
 
@@ -1188,9 +1188,9 @@ public final class WorldManager {
 
             final WorldInfo info = new WorldInfo(this.oldInfo);
             info.setWorldName(this.newName);
-            ((IMixinWorldInfo) info).setDimensionId(getNextFreeDimensionId());
-            ((IMixinWorldInfo) info).setUniqueId(UUID.randomUUID());
-            ((IMixinWorldInfo) info).createWorldConfig();
+            ((WorldInfoBridge) info).setDimensionId(getNextFreeDimensionId());
+            ((WorldInfoBridge) info).setUniqueId(UUID.randomUUID());
+            ((WorldInfoBridge) info).createWorldConfig();
             registerWorldProperties((WorldProperties) info);
             new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), this.newName, true, SpongeImpl.getDataFixer())
                     .saveWorldInfo(info);
@@ -1288,11 +1288,11 @@ public final class WorldManager {
             return 1;
         }
 
-        return ((ServerWorldBridge) world).getDimensionId();
+        return ((ServerWorldBridge) world).bridge$getDimensionId();
     }
 
     @Nullable public static Integer getDimensionId(WorldServer world) {
-        return ((IMixinWorldInfo) world.getWorldInfo()).getDimensionId();
+        return ((WorldInfoBridge) world.getWorldInfo()).getDimensionId();
     }
 
     public static boolean isKnownWorld(WorldServer world) {

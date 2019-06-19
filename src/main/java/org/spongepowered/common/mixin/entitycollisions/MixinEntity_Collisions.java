@@ -37,131 +37,132 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.CollisionModCategory;
 import org.spongepowered.common.config.category.EntityCollisionCategory;
 import org.spongepowered.common.config.type.GlobalConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.entity.SpongeEntityType;
-import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
-import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.IModData_Collisions;
+import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.CollisionsCapability;
 
 @Mixin(value = net.minecraft.entity.Entity.class, priority = 1002)
-public class MixinEntity_Collisions implements IModData_Collisions {
+public class MixinEntity_Collisions implements CollisionsCapability {
 
-    private int maxCollisions = 8;
-    private boolean refreshCache = false;
-    private SpongeEntityType spongeEntityType;
-    private String entityName = "unknown";
-    private String entityModId = "unknown";
     @Shadow public World world;
+    private int collision$maxCollisions = 8;
+    private boolean collision$refreshCache = false;
+    private String collision$entityName = "unknown";
+    private String collision$entityModId = "unknown";
 
+    @SuppressWarnings("ConstantConditions")
     @Inject(method = "<init>", at = @At("RETURN"))
-    public void onEntityConstruction(World world, CallbackInfo ci) {
-        if (world != null && !((WorldBridge) world).isFake() && ((IMixinWorldInfo) world.getWorldInfo()).isValid()) {
+    private void collisions$InjectActivationInformation(World world, CallbackInfo ci) {
+        if (world != null && !((WorldBridge) world).isFake() && ((WorldInfoBridge) world.getWorldInfo()).isValid()) {
             EntityType entityType = ((Entity) this).getType();
             if (entityType == EntityTypes.UNKNOWN || !(entityType instanceof SpongeEntityType)) {
                 return;
             }
-            this.spongeEntityType = (SpongeEntityType) entityType;
 
-            if ((Object) this instanceof EntityItem) {
+
+            if ((net.minecraft.entity.Entity) (Object) this instanceof EntityItem) {
                 EntityItem item = (EntityItem) (Object) this;
                 ItemStack itemstack = item.getItem();
                 if (!itemstack.isEmpty()) {
-                    this.entityName = itemstack.getTranslationKey().replace("item.", "");
+                    this.collision$entityName = itemstack.getTranslationKey().replace("item.", "");
                 }
             } else {
-                this.entityName = this.spongeEntityType.getName();
+                this.collision$entityName = ((Entity) this).getType().getName();
             }
 
-            this.entityModId = this.spongeEntityType.getModId();
+            this.collision$entityModId = ((SpongeEntityType) ((Entity) this).getType()).getModId();
             if (!this.world.isRemote) {
-                initializeCollisionState(this.world);
+                collision$initializeCollisionState(this.world);
             }
         }
     }
 
     @Override
-    public int getMaxCollisions() {
-        return this.maxCollisions;
+    public int collision$getMaxCollisions() {
+        return this.collision$maxCollisions;
     }
 
     @Override
-    public void setMaxCollisions(int max) {
-        this.maxCollisions = max;
+    public void collision$setMaxCollisions(int max) {
+        this.collision$maxCollisions = max;
     }
 
     @Override
-    public void setModDataName(String name) {
-        this.entityName = name;
+    public void collision$setModDataName(String name) {
+        this.collision$entityName = name;
     }
 
     @Override
-    public String getModDataName() {
-        return this.entityName;
+    public String collision$getModDataName() {
+        return this.collision$entityName;
     }
 
     @Override
-    public String getModDataId() {
-        return this.entityModId;
+    public String collision$getModDataId() {
+        return this.collision$entityModId;
     }
 
     @Override
-    public void setModDataId(String id) {
-        this.entityModId = id;
+    public void collision$setModDataId(String id) {
+        this.collision$entityModId = id;
     }
 
+    @SuppressWarnings({"ConstantConditions", "Duplicates"})
     @Override
-    public void initializeCollisionState(World world) {
-        final SpongeConfig<WorldConfig> worldConfigAdapter = ((IMixinWorldInfo) world.getWorldInfo()).getConfigAdapter();
+    public void collision$initializeCollisionState(World world) {
+        final SpongeConfig<WorldConfig> worldConfigAdapter = ((WorldInfoBridge) world.getWorldInfo()).getConfigAdapter();
         final SpongeConfig<GlobalConfig> globalConfigAdapter = SpongeImpl.getGlobalConfigAdapter();
         final EntityCollisionCategory worldCollCat = worldConfigAdapter.getConfig().getEntityCollisionCategory();
         final EntityCollisionCategory globalCollCat = globalConfigAdapter.getConfig().getEntityCollisionCategory();
 
-        this.setMaxCollisions(worldCollCat.getMaxEntitiesWithinAABB());
+        this.collision$setMaxCollisions(worldCollCat.getMaxEntitiesWithinAABB());
 
         boolean requiresSave = false;
-        CollisionModCategory worldCollMod = worldCollCat.getModList().get(this.getModDataId());
-        CollisionModCategory globalCollMod = globalCollCat.getModList().get(this.getModDataId());
+        CollisionModCategory worldCollMod = worldCollCat.getModList().get(this.collision$getModDataId());
+        CollisionModCategory globalCollMod = globalCollCat.getModList().get(this.collision$getModDataId());
         if (worldCollMod == null && worldCollCat.autoPopulateData()) {
-            globalCollMod = new CollisionModCategory(this.getModDataId());
-            globalCollCat.getModList().put(this.getModDataId(), globalCollMod);
-            globalCollMod.getEntityList().put(this.getModDataName(), this.getMaxCollisions());
+            globalCollMod = new CollisionModCategory(this.collision$getModDataId());
+            globalCollCat.getModList().put(this.collision$getModDataId(), globalCollMod);
+            globalCollMod.getEntityList().put(this.collision$getModDataName(), this.collision$getMaxCollisions());
             globalConfigAdapter.save();
             return;
         } else if (worldCollMod != null) {
             if (!worldCollMod.isEnabled()) {
-                this.setMaxCollisions(-1);
+                this.collision$setMaxCollisions(-1);
                 return;
             }
             // check mod overrides
             Integer modCollisionMax = worldCollMod.getDefaultMaxCollisions().get("entities");
             if (modCollisionMax != null) {
-                this.setMaxCollisions(modCollisionMax);
+                this.collision$setMaxCollisions(modCollisionMax);
             }
 
             Integer entityMaxCollision = null;
-            if ((Object) this instanceof EntityItem) {
+            if ((net.minecraft.entity.Entity) (Object) this instanceof EntityItem) {
                 // check if all items are overridden
-                entityMaxCollision = worldCollMod.getEntityList().get(this.getModDataName());
+                entityMaxCollision = worldCollMod.getEntityList().get(this.collision$getModDataName());
             }
 
             if (entityMaxCollision == null) {
-                entityMaxCollision = worldCollMod.getEntityList().get(this.getModDataName());
+                entityMaxCollision = worldCollMod.getEntityList().get(this.collision$getModDataName());
             }
 
             // entity overrides
             if (entityMaxCollision == null && worldCollCat.autoPopulateData()) {
-                globalCollMod.getEntityList().put(this.getModDataName(), this.getMaxCollisions());
+                globalCollMod.getEntityList().put(this.collision$getModDataName(), this.collision$getMaxCollisions());
                 requiresSave = true;
             } else if (entityMaxCollision != null) {
-                this.setMaxCollisions(entityMaxCollision);
+                this.collision$setMaxCollisions(entityMaxCollision);
             }
         }
 
         // don't bother saving for negative values
-        if (this.getMaxCollisions() <= 0) {
+        if (this.collision$getMaxCollisions() <= 0) {
             return;
         }
 
@@ -171,17 +172,17 @@ public class MixinEntity_Collisions implements IModData_Collisions {
     }
 
     @Override
-    public void requiresCollisionsCacheRefresh(boolean flag) {
-        this.refreshCache = flag;
+    public void collision$requiresCollisionsCacheRefresh(boolean flag) {
+        this.collision$refreshCache = flag;
     }
 
     @Override
-    public boolean requiresCollisionsCacheRefresh() {
-        return this.refreshCache;
+    public boolean collision$requiresCollisionsCacheRefresh() {
+        return this.collision$refreshCache;
     }
 
     @Override
-    public boolean isRunningCollideWithNearby() {
+    public boolean collision$isRunningCollideWithNearby() {
         return false;
     }
 }

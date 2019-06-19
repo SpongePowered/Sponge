@@ -180,7 +180,7 @@ public abstract class BlockTransaction {
                 return;
             }
             final WorldServer worldServer = maybeWorld.get();
-            final SpongeProxyBlockAccess proxyAccess = ((ServerWorldBridge) worldServer).getProxyAccess();
+            final SpongeProxyBlockAccess proxyAccess = ((ServerWorldBridge) worldServer).bridge$getProxyAccess();
             final BlockPos targetPos = this.addedSnapshot.getBlockPos();
             proxyAccess.proceedWithAdd(targetPos, this.added);
             ((TileEntityBridge) this.added).setCaptured(false);
@@ -202,7 +202,7 @@ public abstract class BlockTransaction {
         @Nullable
         @Override
         public SpongeProxyBlockAccess.Proxy getProxy(ServerWorldBridge mixinWorldServer) {
-            final SpongeProxyBlockAccess proxyAccess = mixinWorldServer.getProxyAccess();
+            final SpongeProxyBlockAccess proxyAccess = mixinWorldServer.bridge$getProxyAccess();
             return proxyAccess.pushProxy();
         }
 
@@ -259,7 +259,7 @@ public abstract class BlockTransaction {
                 return;
             }
             final WorldServer worldServer = maybeWorld.get();
-            final SpongeProxyBlockAccess proxyAccess = ((ServerWorldBridge) worldServer).getProxyAccess();
+            final SpongeProxyBlockAccess proxyAccess = ((ServerWorldBridge) worldServer).bridge$getProxyAccess();
             ((TileEntityBridge) this.removed).setCaptured(false); // Disable the capture logic in other places.
             proxyAccess.proceedWithRemoval(targetPosition, this.removed);
             // Reset captured state since we want it to be removed
@@ -290,7 +290,7 @@ public abstract class BlockTransaction {
         @Nullable
         @Override
         public SpongeProxyBlockAccess.Proxy getProxy(ServerWorldBridge mixinWorldServer) {
-            return mixinWorldServer.getProxyAccess().pushProxy();
+            return mixinWorldServer.bridge$getProxyAccess().pushProxy();
         }
 
         @SuppressWarnings("unchecked")
@@ -330,7 +330,7 @@ public abstract class BlockTransaction {
             int currentDepth) {
             final ServerWorldBridge mixinWorldServer = (ServerWorldBridge) this.added.getWorld();
             final BlockPos position = this.added.getPos();
-            final SpongeProxyBlockAccess proxyAccess = mixinWorldServer.getProxyAccess();
+            final SpongeProxyBlockAccess proxyAccess = mixinWorldServer.bridge$getProxyAccess();
             ((TileEntityBridge) this.removed).setCaptured(false);
             proxyAccess.proceedWithRemoval(position, this.removed);
             ((TileEntityBridge) this.added).setCaptured(false);
@@ -353,7 +353,7 @@ public abstract class BlockTransaction {
         @Nullable
         @Override
         public SpongeProxyBlockAccess.Proxy getProxy(ServerWorldBridge mixinWorldServer) {
-            return mixinWorldServer.getProxyAccess().pushProxy();
+            return mixinWorldServer.bridge$getProxyAccess().pushProxy();
         }
 
         @SuppressWarnings("unchecked")
@@ -439,7 +439,7 @@ public abstract class BlockTransaction {
             final IBlockState oldState = (IBlockState) this.original.getState();
             // Any requests to the world need to propogate to having the "changed" block, before
             // the block potentially changes from future changes.
-            SpongeProxyBlockAccess proxyAccess = ((ServerWorldBridge) worldServer).getProxyAccess();
+            SpongeProxyBlockAccess proxyAccess = ((ServerWorldBridge) worldServer).bridge$getProxyAccess();
 
             // We can proceed to calling the break block logic since the new state has been "proxied" onto the world
             PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
@@ -491,7 +491,7 @@ public abstract class BlockTransaction {
         @Nullable
         @Override
         public SpongeProxyBlockAccess.Proxy getProxy(ServerWorldBridge mixinWorldServer) {
-            return mixinWorldServer.getProxyAccess().pushProxy();
+            return mixinWorldServer.bridge$getProxyAccess().pushProxy();
         }
 
         @SuppressWarnings("unchecked")
@@ -570,7 +570,7 @@ public abstract class BlockTransaction {
             final BlockPos notifyPos = this.notifyPos;
             final Block sourceBlock = this.sourceBlock;
             final BlockPos sourcePos = this.sourcePos;
-            SpongeProxyBlockAccess proxyAccess = worldServer.getProxyAccess();
+            SpongeProxyBlockAccess proxyAccess = worldServer.bridge$getProxyAccess();
             IBlockState blockState = proxyAccess.getBlockState(notifyPos);
             if (blockState == null) {
                 blockState = ((WorldServer) this.worldServer).getBlockState(notifyPos);

@@ -163,7 +163,7 @@ public abstract class MixinBlock implements BlockBridge {
         if (((WorldBridge) worldIn).isFake()) {
             return;
         }
-        final SpongeProxyBlockAccess proxyAccess = ((ServerWorldBridge) worldIn).getProxyAccess();
+        final SpongeProxyBlockAccess proxyAccess = ((ServerWorldBridge) worldIn).bridge$getProxyAccess();
         if (proxyAccess.hasProxy() && proxyAccess.isProcessingTransactionWithNextHavingBreak(pos, state)) {
             ci.cancel();
         }
@@ -263,7 +263,7 @@ public abstract class MixinBlock implements BlockBridge {
             if (shouldEnterBlockDropPhase) {
                 // TODO: Change source to LocatableBlock
                 PhaseContext<?> context = BlockPhase.State.BLOCK_DROP_ITEMS.createPhaseContext()
-                        .source(mixinWorld.createSpongeBlockSnapshot(state, state, pos, BlockChangeFlags.PHYSICS_OBSERVER));
+                        .source(mixinWorld.bridge$createSnapshot(state, state, pos, BlockChangeFlags.PHYSICS_OBSERVER));
                 // use current notifier and owner if available
                 currentContext.applyNotifierIfAvailable(context::notifier);
                 currentContext.applyOwnerIfAvailable(context::owner);

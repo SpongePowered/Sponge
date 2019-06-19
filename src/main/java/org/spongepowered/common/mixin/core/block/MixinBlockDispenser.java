@@ -114,7 +114,7 @@ public abstract class MixinBlockDispenser extends MixinBlock {
     @Inject(method = "dispense", at = @At(value = "HEAD"))
     private void impl$CreateContextOnDispensing(World worldIn, BlockPos pos, CallbackInfo ci) {
         final IBlockState state = worldIn.getBlockState(pos);
-        final SpongeBlockSnapshot spongeBlockSnapshot = ((ServerWorldBridge) worldIn).createSpongeBlockSnapshot(state, state, pos, BlockChangeFlags.ALL);
+        final SpongeBlockSnapshot spongeBlockSnapshot = ((ServerWorldBridge) worldIn).bridge$createSnapshot(state, state, pos, BlockChangeFlags.ALL);
         final ChunkBridge mixinChunk = (ChunkBridge) worldIn.getChunk(pos);
         this.context = BlockPhase.State.DISPENSE.createPhaseContext()
             .source(spongeBlockSnapshot)

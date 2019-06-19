@@ -60,8 +60,6 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.EnumDifficulty;
-import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.GameType;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.IWorldEventListener;
@@ -70,7 +68,6 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
@@ -131,12 +128,12 @@ import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.world.ChunkBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
-import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeDimension;
@@ -198,7 +195,6 @@ public abstract class MixinWorld_API implements World {
 
     @Nullable private Context worldContext;
     boolean processingExplosion = false;
-    private SpongeDimension spongeDimensionWrapper = new SpongeDimension(this.provider);
 
     @SuppressWarnings("unchecked")
     @Override
@@ -227,7 +223,7 @@ public abstract class MixinWorld_API implements World {
             // Some mod worlds make their own WorldInfos for "fake" worlds.
             // Specifically fixes https://github.com/SpongePowered/SpongeForge/issues/1527
             // and https://github.com/BuildCraft/BuildCraft/issues/3594
-            final IMixinWorldInfo mixinWorldInfo = (IMixinWorldInfo) properties;
+            final WorldInfoBridge mixinWorldInfo = (WorldInfoBridge) properties;
             mixinWorldInfo.setUniqueId(UUID.randomUUID());
             return properties.getUniqueId();
         }
@@ -503,7 +499,7 @@ public abstract class MixinWorld_API implements World {
 
     @Override
     public Dimension getDimension() {
-        return this.spongeDimensionWrapper;
+        return ((WorldBridge) this).bridge$getDimensionWrapper();
     }
 
     @Override

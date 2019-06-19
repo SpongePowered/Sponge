@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.world;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
@@ -59,6 +56,7 @@ import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.api.world.Dimension;
 import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -74,18 +72,18 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
+import org.spongepowered.common.bridge.entity.EntityBridge;
+import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
+import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
+import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
-import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
-import org.spongepowered.common.bridge.entity.EntityBridge;
-import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.interfaces.world.ServerWorldBridge;
-import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
 import org.spongepowered.common.mixin.tileentityactivation.MixinWorldServer_TileEntityActivation;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.world.SpongeDimension;
@@ -110,11 +108,10 @@ public abstract class MixinWorld implements WorldBridge {
     private static final Vector3i BIOME_SIZE = BIOME_MAX.sub(BIOME_MIN).add(Vector3i.ONE);
     public SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
 
-    @Nullable private Context worldContext;
-    protected boolean processingExplosion = false;
-    protected boolean isDefinitelyFake = false;
-    protected boolean hasChecked = false;
-    protected SpongeDimension spongeDimensionWrapper;
+    boolean processingExplosion = false;
+    private boolean isDefinitelyFake = false;
+    private boolean hasChecked = false;
+    private SpongeDimension spongeDimensionWrapper;
 
     // @formatter:off
     @Shadow @Final public boolean isRemote;
@@ -128,12 +125,12 @@ public abstract class MixinWorld implements WorldBridge {
     @Shadow @Final public List<net.minecraft.tileentity.TileEntity> loadedTileEntityList;
     @Shadow @Final public List<net.minecraft.tileentity.TileEntity> tickableTileEntities;
     @Shadow @Final public List<net.minecraft.tileentity.TileEntity> tileEntitiesToBeRemoved;
-    @Shadow @Final private List<net.minecraft.tileentity.TileEntity> addedTileEntityList;
+    @Shadow @Final public List<net.minecraft.tileentity.TileEntity> addedTileEntityList;
     @Shadow @Final protected ISaveHandler saveHandler;
     @Shadow protected List<IWorldEventListener> eventListeners;
-    @Shadow public int[] lightUpdateBlockList;
-    @Shadow public int skylightSubtracted;
-    @Shadow public int seaLevel;
+    @Shadow protected int[] lightUpdateBlockList; // Elevated to protected for subclass mixins to access when they're separated by package
+    @Shadow private int skylightSubtracted;
+    @Shadow private int seaLevel;
 
     @Shadow public boolean processingLoadedTiles;
     @Shadow protected boolean scheduledUpdatesAreImmediate;
@@ -155,39 +152,31 @@ public abstract class MixinWorld implements WorldBridge {
     // To be overridden in MixinWorldServer_Lighting
     @Shadow public abstract int getLight(BlockPos pos);
     @Shadow public abstract int getLight(BlockPos pos, boolean checkNeighbors);
-    @Shadow public abstract int getRawLight(BlockPos pos, EnumSkyBlock lightType);
+    @Shadow protected abstract int getRawLight(BlockPos pos, EnumSkyBlock lightType);
     @Shadow public abstract int getSkylightSubtracted();
     @Shadow public abstract net.minecraft.world.chunk.Chunk getChunk(BlockPos pos);
     @Shadow public abstract WorldInfo getWorldInfo();
-    @Shadow public abstract boolean checkLight(BlockPos pos);
     @Shadow public abstract boolean checkLightFor(EnumSkyBlock lightType, BlockPos pos);
     @Shadow public abstract boolean addTileEntity(net.minecraft.tileentity.TileEntity tile);
-    @Shadow public abstract void onEntityAdded(net.minecraft.entity.Entity entityIn);
-    @Shadow public abstract boolean isAreaLoaded(BlockPos from, BlockPos to);
+    @Shadow protected abstract void onEntityAdded(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract boolean isAreaLoaded(BlockPos center, int radius, boolean allowEmpty);
     @Shadow public abstract boolean isAreaLoaded(int xStart, int yStart, int zStart, int xEnd, int yEnd, int zEnd, boolean allowEmpty);
-    @Shadow public abstract void onEntityRemoved(net.minecraft.entity.Entity entityIn);
+    @Shadow protected abstract void onEntityRemoved(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract void updateEntity(net.minecraft.entity.Entity ent);
     @Shadow public abstract boolean isBlockLoaded(BlockPos pos);
     @Shadow public void markChunkDirty(BlockPos pos, net.minecraft.tileentity.TileEntity unusedTileEntity){};
-   // @Shadow public abstract List<Entity> getEntitiesInAABBexcluding(@Nullable net.minecraft.entity.Entity entityIn, AxisAlignedBB boundingBox, @Nullable Predicate <? super net.minecraft.entity.Entity > predicate);
     @Shadow public abstract boolean addWeatherEffect(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract Biome getBiome(BlockPos pos);
-    @Shadow public abstract BiomeProvider getBiomeProvider();
-    @Shadow public abstract boolean isBlockPowered(BlockPos pos);
     @Shadow public abstract net.minecraft.world.chunk.Chunk getChunk(int chunkX, int chunkZ);
     @Shadow public abstract List<net.minecraft.entity.Entity> getEntities(Class<net.minecraft.entity.Entity> entityType,
             com.google.common.base.Predicate<net.minecraft.entity.Entity> filter);
     @Shadow public abstract <T extends net.minecraft.entity.Entity> List<T> getEntitiesWithinAABB(Class <? extends T > clazz, AxisAlignedBB aabb,
             com.google.common.base.Predicate<? super T > filter);
-    @Shadow public abstract List<net.minecraft.entity.Entity> getEntitiesWithinAABBExcludingEntity(net.minecraft.entity.Entity entityIn, AxisAlignedBB bb);
     @Shadow public abstract MinecraftServer getMinecraftServer();
-    // Methods needed for MixinWorldServer & Tracking
     @Shadow public abstract boolean spawnEntity(net.minecraft.entity.Entity entity); // This is overridden in MixinWorldServer
     @Shadow public abstract void updateAllPlayersSleepingFlag();
     @Shadow public abstract boolean setBlockState(BlockPos pos, IBlockState state);
     @Shadow public abstract boolean setBlockState(BlockPos pos, IBlockState state, int flags);
-    @Shadow public abstract void immediateBlockTick(BlockPos pos, IBlockState state, Random random);
     @Shadow public abstract void updateComparatorOutputLevel(BlockPos pos, Block blockIn);
     @Shadow public abstract void neighborChanged(BlockPos pos, final Block blockIn, BlockPos otherPos);
     @Shadow public abstract void notifyNeighborsOfStateExcept(BlockPos pos, Block blockType, EnumFacing skipSide);
@@ -206,7 +195,6 @@ public abstract class MixinWorld implements WorldBridge {
     @Shadow public abstract BlockPos getPrecipitationHeight(BlockPos pos);
     @Shadow public abstract boolean canBlockFreezeNoWater(BlockPos pos);
     @Shadow public abstract boolean canSnowAt(BlockPos pos, boolean checkLight);
-    @Shadow public abstract List<AxisAlignedBB> getCollisionBoxes(net.minecraft.entity.Entity entityIn, AxisAlignedBB bb);
     @Shadow public abstract void notifyLightSet(BlockPos pos);
     @Shadow @Nullable private net.minecraft.tileentity.TileEntity getPendingTileEntityAt(BlockPos p_189508_1_) {
         return null; // Shadowed
@@ -215,17 +203,18 @@ public abstract class MixinWorld implements WorldBridge {
     @Shadow public boolean destroyBlock(BlockPos pos, boolean dropBlock) {
         return false; // shadowed
     }
-    @Shadow protected abstract void playEvent(int i, BlockPos pos, int stateId);
-
-    // @formatter:on
-
-    @Shadow
-    public boolean isBlockModifiable(EntityPlayer player, BlockPos pos) {
+    @Shadow public abstract void playEvent(int i, BlockPos pos, int stateId);
+    @Shadow public boolean isBlockModifiable(EntityPlayer player, BlockPos pos) {
         return true; // shadowed so we can call from MixinWorldServer in spongeforge.
     }
 
+    @Override
+    public Dimension bridge$getDimensionWrapper() {
+        return this.spongeDimensionWrapper;
+    }
+
     @Inject(method = "<init>", at = @At(value = "RETURN"))
-    public void onInit(CallbackInfo ci) {
+    private void onInit(CallbackInfo ci) {
         this.spongeDimensionWrapper = new SpongeDimension(this.provider);
     }
 
@@ -238,9 +227,8 @@ public abstract class MixinWorld implements WorldBridge {
         return ((IMixinWorldProvider) provider).createServerWorldBorder();
     }
 
-    @SuppressWarnings("rawtypes")
     @Inject(method = "getCollisionBoxes(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/AxisAlignedBB;)Ljava/util/List;", at = @At("HEAD"), cancellable = true)
-    public void onGetCollisionBoxes(net.minecraft.entity.Entity entity, AxisAlignedBB axis, CallbackInfoReturnable<List<AxisAlignedBB>> cir) {
+    private void onGetCollisionBoxes(net.minecraft.entity.Entity entity, AxisAlignedBB axis, CallbackInfoReturnable<List<AxisAlignedBB>> cir) {
         if (this.isFake() || entity == null) {
             return;
         }
@@ -375,15 +363,15 @@ public abstract class MixinWorld implements WorldBridge {
     }
 
     @Redirect(method = "isAnyPlayerWithinRangeAt", at = @At(value = "INVOKE", target = "Lcom/google/common/base/Predicate;apply(Ljava/lang/Object;)Z", remap = false))
-    public boolean onIsAnyPlayerWithinRangePredicate(com.google.common.base.Predicate<EntityPlayer> predicate, Object object) {
+    private boolean onIsAnyPlayerWithinRangePredicate(com.google.common.base.Predicate<EntityPlayer> predicate, Object object) {
         EntityPlayer player = (EntityPlayer) object;
         return !(player.isDead || !((PlayerEntityBridge) player).affectsSpawning()) && predicate.apply(player);
     }
 
     // For invisibility
     @Redirect(method = "checkNoEntityCollision(Lnet/minecraft/util/math/AxisAlignedBB;Lnet/minecraft/entity/Entity;)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getEntitiesWithinAABBExcludingEntity(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/AxisAlignedBB;)Ljava/util/List;"))
-    public List<net.minecraft.entity.Entity> filterInvisibile(net.minecraft.world.World world, net.minecraft.entity.Entity entityIn,
-            AxisAlignedBB axisAlignedBB) {
+    private List<net.minecraft.entity.Entity> filterInvisibile(net.minecraft.world.World world, net.minecraft.entity.Entity entityIn,
+        AxisAlignedBB axisAlignedBB) {
         List<net.minecraft.entity.Entity> entities = world.getEntitiesWithinAABBExcludingEntity(entityIn, axisAlignedBB);
         Iterator<net.minecraft.entity.Entity> iterator = entities.iterator();
         while (iterator.hasNext()) {
@@ -460,7 +448,7 @@ public abstract class MixinWorld implements WorldBridge {
     }
 
     @Inject(method = "getPlayerEntityByUUID", at = @At("HEAD"), cancellable = true)
-    public void onGetPlayerEntityByUUID(UUID uuid, CallbackInfoReturnable<UUID> cir) {
+    private void onGetPlayerEntityByUUID(UUID uuid, CallbackInfoReturnable<UUID> cir) {
         // avoid crashing server if passed a null UUID
         if (uuid == null) {
             cir.setReturnValue(null);

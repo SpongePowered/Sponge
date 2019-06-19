@@ -24,35 +24,35 @@
  */
 package org.spongepowered.common.mixin.plugin.entityactivation.interfaces;
 
-public interface IModData_Activation {
+public interface ActivationCapability {
 
     // entity activation
-    void inactiveTick();
+    void activation$inactiveTick();
 
-    byte getActivationType();
+    byte activation$getActivationType();
 
-    long getActivatedTick();
+    long activation$getActivatedTick();
 
-    boolean getDefaultActivationState();
+    boolean activation$getDefaultActivationState();
 
-    void setActivatedTick(long tick);
+    void activation$setActivatedTick(long tick);
 
-    int getActivationRange();
+    int activation$getActivationRange();
 
-    void setActivationRange(int range);
+    void activation$setActivationRange(int range);
 
-    void requiresActivationCacheRefresh(boolean flag);
+    void activation$requiresActivationCacheRefresh(boolean flag);
 
-    boolean requiresActivationCacheRefresh();
+    boolean activation$requiresActivationCacheRefresh();
 
-    void setDefaultActivationState(boolean defaultState);
+    void activation$setDefaultActivationState(boolean defaultState);
 
-    int getSpongeTicksExisted();
+    int activation$getSpongeTicksExisted();
 
-    void incrementSpongeTicksExisted();
+    void activation$incrementSpongeTicksExisted();
 
-    int getSpongeTickRate();
+    int activation$getSpongeTickRate();
 
-    void setSpongeTickRate(int tickRate);
+    void activation$setSpongeTickRate(int tickRate);
 
 }

@@ -419,7 +419,7 @@ public abstract class MixinChunk implements ChunkBridge, IMixinCachable {
                     // We want to queue the break logic later, while the transaction is processed
                     if (transaction != null) {
                         transaction.queueBreak = true;
-                        transaction.enqueueChanges(mixinWorld.getProxyAccess(), peek.getCapturedBlockSupplier());
+                        transaction.enqueueChanges(mixinWorld.bridge$getProxyAccess(), peek.getCapturedBlockSupplier());
                     }
                     currentBlock.breakBlock(this.world, pos, currentState);
                 }
@@ -432,7 +432,7 @@ public abstract class MixinChunk implements ChunkBridge, IMixinCachable {
                         // the removal.
                         ((TileEntityBridge) existing).setCaptured(true);
                         transaction.queuedRemoval = existing;
-                        transaction.enqueueChanges(mixinWorld.getProxyAccess(), peek.getCapturedBlockSupplier());
+                        transaction.enqueueChanges(mixinWorld.bridge$getProxyAccess(), peek.getCapturedBlockSupplier());
                     } else {
                         this.world.removeTileEntity(pos);
                     }
@@ -506,7 +506,7 @@ public abstract class MixinChunk implements ChunkBridge, IMixinCachable {
         // Sponge Start - Handle block physics only if we're actually the server world
         if (!isFake && currentState != newState) {
             // Reset the proxy access or add to the proxy state during processing.
-            ((ServerWorldBridge) this.world).getProxyAccess().onChunkChanged(pos, newState);
+            ((ServerWorldBridge) this.world).bridge$getProxyAccess().onChunkChanged(pos, newState);
         }
         if (!isFake && currentBlock != newBlock) {
             final boolean isBulkCapturing = ShouldFire.CHANGE_BLOCK_EVENT && state.doesBulkBlockCapture(peek);
@@ -561,7 +561,7 @@ public abstract class MixinChunk implements ChunkBridge, IMixinCachable {
                         tileentity.setWorld(this.world);
                         tileentity.setPos(pos);// Set the position
                     }
-                    transaction.enqueueChanges(mixinWorld.getProxyAccess(), peek.getCapturedBlockSupplier());
+                    transaction.enqueueChanges(mixinWorld.bridge$getProxyAccess(), peek.getCapturedBlockSupplier());
                 } else {
                     // Some mods are relying on the world being set prior to setting the tile
                     // world prior to the position. It's weird, but during block restores, this can
@@ -582,7 +582,7 @@ public abstract class MixinChunk implements ChunkBridge, IMixinCachable {
         } else if (transaction != null) {
             // We still want to enqueue any changes to the transaction, including any tiles removed
             // if there was a tile entity added, it will be logged above
-            transaction.enqueueChanges(mixinWorld.getProxyAccess(), peek.getCapturedBlockSupplier());
+            transaction.enqueueChanges(mixinWorld.bridge$getProxyAccess(), peek.getCapturedBlockSupplier());
         }
 
         this.dirty = true;

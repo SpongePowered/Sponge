@@ -24,25 +24,23 @@
  */
 package org.spongepowered.common.interfaces.world;
 
-import net.minecraft.block.Block;
-import net.minecraft.tileentity.TileEntity;
-import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.event.tracking.context.SpongeProxyBlockAccess;
-import org.spongepowered.common.relocate.co.aikar.timings.WorldTimingsHandler;
 import com.flowpowered.math.vector.Vector3d;
-import net.minecraft.block.BlockEventData;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.SoundCategory;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.chunk.Chunk;
+import org.spongepowered.api.block.ScheduledBlockUpdate;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.explosion.Explosion;
+import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.context.SpongeProxyBlockAccess;
+import org.spongepowered.common.relocate.co.aikar.timings.WorldTimingsHandler;
 import org.spongepowered.common.world.gen.SpongeChunkGenerator;
 import org.spongepowered.common.world.gen.SpongeWorldGenerator;
 
@@ -54,47 +52,49 @@ import javax.annotation.Nullable;
 
 public interface ServerWorldBridge extends WorldBridge {
 
-    Integer getDimensionId();
+    Integer bridge$getDimensionId();
 
-    void updateWorldGenerator();
+    Weather bridge$getPreviousWeather();
 
-    void updateRotation(Entity entityIn);
+    void bridge$setPreviousWeather(Weather weather);
 
-    void spongeNotifyNeighborsPostBlockChange(BlockPos pos, IBlockState newState, BlockChangeFlag flags);
+    void bridge$updateWorldGenerator();
 
-    boolean setBlockState(BlockPos pos, IBlockState state, BlockChangeFlag flag);
+    void bridge$updateRotation(Entity entityIn);
 
-    boolean forceSpawnEntity(org.spongepowered.api.entity.Entity entity);
+    void bridge$NotifyNeighborsPostBlockChange(BlockPos pos, IBlockState newState, BlockChangeFlag flags);
 
-    void onSpongeEntityAdded(Entity entity);
+    boolean bridge$setBlockState(BlockPos pos, IBlockState state, BlockChangeFlag flag);
 
-    void onSpongeEntityRemoved(Entity entity);
+    boolean bridge$forceSpawnEntity(org.spongepowered.api.entity.Entity entity);
 
-    void addEntityRotationUpdate(Entity entity, Vector3d rotation);
+    void bridge$onSpongeEntityAdded(Entity entity);
 
-    SpongeBlockSnapshot createSpongeBlockSnapshot(IBlockState state, IBlockState extended, BlockPos pos, BlockChangeFlag updateFlag);
+    void bridge$addEntityRotationUpdate(Entity entity, Vector3d rotation);
 
-    SpongeBlockSnapshot createSpongeSnapshotForTileEntity(IBlockState state, BlockPos pos, BlockChangeFlag updateFlag, @Nullable TileEntity tileEntity);
+    SpongeBlockSnapshot bridge$createSnapshot(IBlockState state, IBlockState extended, BlockPos pos, BlockChangeFlag updateFlag);
 
-    SpongeWorldGenerator createWorldGenerator(DataContainer settings);
+    SpongeBlockSnapshot bridge$createSnapshotWithEntity(IBlockState state, BlockPos pos, BlockChangeFlag updateFlag, @Nullable TileEntity tileEntity);
 
-    SpongeWorldGenerator createWorldGenerator(String settings);
+    SpongeWorldGenerator bridge$createWorldGenerator(DataContainer settings);
 
-    SpongeChunkGenerator createChunkGenerator(SpongeWorldGenerator newGenerator);
+    SpongeWorldGenerator bridge$createWorldGenerator(String settings);
+
+    SpongeChunkGenerator bridge$createChunkGenerator(SpongeWorldGenerator newGenerator);
 
     boolean isProcessingExplosion();
 
-    boolean isMinecraftChunkLoaded(int x, int z, boolean allowEmpty);
+    boolean bridge$isMinecraftChunkLoaded(int x, int z, boolean allowEmpty);
 
-    boolean isLightLevel(Chunk chunk, BlockPos pos, int level);
+    boolean bridge$isLightLevel(Chunk chunk, BlockPos pos, int level);
 
-    boolean updateLightAsync(EnumSkyBlock lightType, BlockPos pos, Chunk chunk);
+    boolean bridge$updateLightAsync(EnumSkyBlock lightType, BlockPos pos, Chunk chunk);
 
-    boolean checkLightAsync(EnumSkyBlock lightType, BlockPos pos, Chunk chunk, List<Chunk> neighbors);
+    boolean bridge$checkLightAsync(EnumSkyBlock lightType, BlockPos pos, Chunk chunk, List<Chunk> neighbors);
 
-    ExecutorService getLightingExecutor();
+    ExecutorService bridge$getLightingExecutor();
 
-    WorldTimingsHandler getTimingsHandler();
+    WorldTimingsHandler bridge$getTimingsHandler();
 
     int getChunkGCTickInterval();
 
@@ -102,17 +102,18 @@ public interface ServerWorldBridge extends WorldBridge {
 
     net.minecraft.world.Explosion triggerInternalExplosion(Explosion explosion, Function<net.minecraft.world.Explosion, PhaseContext<?>> contextCreator);
 
-    void playCustomSound(@Nullable EntityPlayer player, double x, double y, double z, String soundIn, SoundCategory category, float volume, float pitch);
-
     void doChunkGC();
 
-    void incrementChunkLoadCount();
+    void bridge$incrementChunkLoadCount();
 
-    void updateConfigCache();
+    void bridge$updateConfigCache();
 
-    void addPostEventBlockEvents(List<BlockEventData> events);
+    SpongeProxyBlockAccess bridge$getProxyAccess();
 
-    void spongeNotifyNeighborsWithoutObservers(BlockPos sourcePos, Block sourceBlock, boolean b);
+    SpongeChunkGenerator bridge$getSpongeGenerator();
 
-    SpongeProxyBlockAccess getProxyAccess();
+    @Nullable
+    ScheduledBlockUpdate bridge$getScheduledBlockUpdate();
+
+    void bridge$setScheduledBlockUpdate(@Nullable ScheduledBlockUpdate sbu);
 }

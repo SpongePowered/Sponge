@@ -36,9 +36,9 @@ public abstract class MixinEntityFireworkRocket_Activation extends MixinEntity_A
     @Shadow private int fireworkAge;
 
     @Override
-    public void inactiveTick() {
+    public void activation$inactiveTick() {
         this.fireworkAge += 1;
-        super.inactiveTick();
+        super.activation$inactiveTick();
     }
 
 }

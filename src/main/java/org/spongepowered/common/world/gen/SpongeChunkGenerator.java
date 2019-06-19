@@ -151,7 +151,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
                 chunkGeneratorName = "chunkGenerator (" + base.getClass().getName() + ")";
             }
             this.chunkGeneratorTiming =
-                    SpongeTimingsFactory.ofSafe(chunkGeneratorName, ((ServerWorldBridge) world).getTimingsHandler().chunkPopulate);
+                    SpongeTimingsFactory.ofSafe(chunkGeneratorName, ((ServerWorldBridge) world).bridge$getTimingsHandler().chunkPopulate);
         }
 
     }
@@ -293,7 +293,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
     @Override
     public void populate(int chunkX, int chunkZ) {
         ServerWorldBridge world = (ServerWorldBridge) this.world;
-        world.getTimingsHandler().chunkPopulate.startTimingIfSync();
+        world.bridge$getTimingsHandler().chunkPopulate.startTimingIfSync();
         this.chunkGeneratorTiming.startTimingIfSync();
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         this.rand.setSeed(this.world.getSeed());
@@ -393,7 +393,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
 
         BlockFalling.fallInstantly = false;
         this.chunkGeneratorTiming.stopTimingIfSync();
-        world.getTimingsHandler().chunkPopulate.stopTimingIfSync();
+        world.bridge$getTimingsHandler().chunkPopulate.stopTimingIfSync();
     }
 
     @Override

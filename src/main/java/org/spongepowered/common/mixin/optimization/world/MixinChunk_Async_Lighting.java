@@ -99,7 +99,7 @@ public abstract class MixinChunk_Async_Lighting implements ChunkBridge {
     public void onConstruct(World worldIn, int x, int z, CallbackInfo ci) {
         this.isServerChunk = !((WorldBridge) worldIn).isFake();
         if (this.isServerChunk) {
-            this.lightExecutorService = ((ServerWorldBridge) worldIn).getLightingExecutor();
+            this.lightExecutorService = ((ServerWorldBridge) worldIn).bridge$getLightingExecutor();
         }
     }
 
@@ -648,7 +648,7 @@ public abstract class MixinChunk_Async_Lighting implements ChunkBridge {
                 if (chunk == null) {
                     continue;
                 }
-                ((ServerWorldBridge) this.world).updateLightAsync(EnumSkyBlock.SKY, new BlockPos(x1, j, z1), (Chunk)(Object) chunk);
+                ((ServerWorldBridge) this.world).bridge$updateLightAsync(EnumSkyBlock.SKY, new BlockPos(x1, j, z1), (Chunk)(Object) chunk);
             }
         }
 
@@ -668,7 +668,7 @@ public abstract class MixinChunk_Async_Lighting implements ChunkBridge {
             return false;
         }
 
-        return ((ServerWorldBridge) this.world).updateLightAsync(lightType, pos, (Chunk)(Object) chunk);
+        return ((ServerWorldBridge) this.world).bridge$updateLightAsync(lightType, pos, (Chunk)(Object) chunk);
     }
 
     private boolean checkWorldLight(BlockPos pos) {
@@ -691,10 +691,10 @@ public abstract class MixinChunk_Async_Lighting implements ChunkBridge {
 
         if (this.world.provider.hasSkyLight())
         {
-            flag |= ((ServerWorldBridge) this.world).updateLightAsync(EnumSkyBlock.SKY, pos, (Chunk)(Object) chunk);
+            flag |= ((ServerWorldBridge) this.world).bridge$updateLightAsync(EnumSkyBlock.SKY, pos, (Chunk)(Object) chunk);
         }
 
-        flag = flag | ((ServerWorldBridge) this.world).updateLightAsync(EnumSkyBlock.BLOCK, pos, (Chunk)(Object) chunk);
+        flag = flag | ((ServerWorldBridge) this.world).bridge$updateLightAsync(EnumSkyBlock.BLOCK, pos, (Chunk)(Object) chunk);
         return flag;
     }
 

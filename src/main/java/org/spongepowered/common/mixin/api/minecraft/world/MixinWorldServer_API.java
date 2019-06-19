@@ -42,7 +42,6 @@ import net.minecraft.network.play.server.SPacketExplosion;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.server.management.PlayerList;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.Explosion;
@@ -96,22 +95,17 @@ import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.world.ServerWorldEventHandlerBridge;
-import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
+import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.interfaces.world.ServerWorldBridge;
-import org.spongepowered.common.relocate.co.aikar.timings.WorldTimingsHandler;
 import org.spongepowered.common.util.NonNullArrayList;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.common.world.WorldManager;
-import org.spongepowered.common.world.gen.SpongeChunkGenerator;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collection;
-import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
@@ -121,28 +115,6 @@ import javax.annotation.Nullable;
 
 @Mixin(WorldServer.class)
 public abstract class MixinWorldServer_API extends MixinWorld_API {
-
-    private static final String PROFILER_SS = "Lnet/minecraft/profiler/Profiler;startSection(Ljava/lang/String;)V";
-    private static final String PROFILER_ESS = "Lnet/minecraft/profiler/Profiler;endStartSection(Ljava/lang/String;)V";
-
-    private static final EnumFacing[] NOTIFY_DIRECTIONS = {EnumFacing.WEST, EnumFacing.EAST, EnumFacing.DOWN, EnumFacing.UP, EnumFacing.NORTH, EnumFacing.SOUTH};
-    // This is unordered, rather, it's naturally ordered by the enum, not by the order in which we notify neighbors.
-    private static final EnumSet<EnumFacing> NOTIFY_DIRECTION_SET = EnumSet.of(EnumFacing.WEST, EnumFacing.EAST, EnumFacing.DOWN, EnumFacing.UP, EnumFacing.NORTH, EnumFacing.SOUTH);
-
-    private final Map<net.minecraft.entity.Entity, Vector3d> rotationUpdates = new HashMap<>();
-    private SpongeChunkGenerator spongegen;
-    private long weatherStartTime;
-    private Weather prevWeather;
-    protected WorldTimingsHandler timings;
-    private int chunkGCTickCount = 0;
-    private int chunkGCLoadThreshold = 0;
-    private int chunkGCTickInterval = 600;
-    private int chunkLoadCount = 0;
-    private long chunkUnloadDelay = 30000;
-    private boolean weatherThunderEnabled = true;
-    private boolean weatherIceAndSnowEnabled = true;
-    private int dimensionId;
-    @Nullable private NextTickListEntry tmpScheduledObj;
 
     @Shadow @Final private MinecraftServer server;
     @Shadow @Final private Set<NextTickListEntry> pendingTickListEntriesHashSet;
@@ -155,13 +127,13 @@ public abstract class MixinWorldServer_API extends MixinWorld_API {
 
     @Shadow protected abstract void saveLevel() throws MinecraftException;
     @Shadow public abstract boolean fireBlockEvent(BlockEventData event);
-    @Shadow public abstract void createBonusChest();
+    @Shadow protected abstract void createBonusChest();
     @Shadow @Nullable public abstract net.minecraft.entity.Entity getEntityFromUuid(UUID uuid);
     @Shadow public abstract PlayerChunkMap getPlayerChunkMap();
     @Shadow public abstract ChunkProviderServer getChunkProvider();
-    @Shadow public abstract void playerCheckLight();
-    @Shadow public abstract BlockPos adjustPosToNearbyEntity(BlockPos pos);
-    @Shadow public boolean canAddEntity(net.minecraft.entity.Entity entityIn) {
+    @Shadow protected abstract void playerCheckLight();
+    @Shadow protected abstract BlockPos adjustPosToNearbyEntity(BlockPos pos);
+    @Shadow private boolean canAddEntity(net.minecraft.entity.Entity entityIn) {
         return false; // Shadowed
     }
     @Shadow public abstract void updateBlockTick(BlockPos pos, Block blockIn, int delay, int priority);
@@ -188,16 +160,15 @@ public abstract class MixinWorldServer_API extends MixinWorld_API {
 
     @Override
     public WorldGenerator getWorldGenerator() {
-        return this.spongegen;
+        return ((ServerWorldBridge) this).bridge$getSpongeGenerator();
     }
-
 
     @Override
     public ScheduledBlockUpdate addScheduledUpdate(int x, int y, int z, int priority, int ticks) {
         BlockPos pos = new BlockPos(x, y, z);
         this.updateBlockTick(pos, getBlockState(pos).getBlock(), ticks, priority);
-        ScheduledBlockUpdate sbu = (ScheduledBlockUpdate) this.tmpScheduledObj;
-        this.tmpScheduledObj = null;
+        ScheduledBlockUpdate sbu = ((ServerWorldBridge) this).bridge$getScheduledBlockUpdate();
+        ((ServerWorldBridge) this).bridge$setScheduledBlockUpdate(null);
         return sbu;
     }
 
@@ -469,7 +440,7 @@ public abstract class MixinWorldServer_API extends MixinWorld_API {
 
     private void apiImpl$stopSounds(@Nullable SoundType sound, @Nullable SoundCategory category) {
         this.server.getPlayerList().sendPacketToAllPlayersInDimension(
-                SoundEffectHelper.createStopSoundPacket(sound, category), ((ServerWorldBridge) this).getDimensionId());
+                SoundEffectHelper.createStopSoundPacket(sound, category), ((ServerWorldBridge) this).bridge$getDimensionId());
     }
 
     @Override
@@ -493,7 +464,7 @@ public abstract class MixinWorldServer_API extends MixinWorld_API {
             double z = position.getZ();
 
             for (Packet<?> packet : packets) {
-                playerList.sendToAllNearExcept(null, x, y, z, radius, ((ServerWorldBridge) this).getDimensionId(), packet);
+                playerList.sendToAllNearExcept(null, x, y, z, radius, ((ServerWorldBridge) this).bridge$getDimensionId(), packet);
             }
         }
     }
@@ -510,7 +481,7 @@ public abstract class MixinWorldServer_API extends MixinWorld_API {
 
     private void api$playRecord(Vector3i position, @Nullable RecordType recordType) {
         this.server.getPlayerList().sendPacketToAllPlayersInDimension(
-                SpongeRecordType.createPacket(position, recordType), ((ServerWorldBridge) this).getDimensionId());
+                SpongeRecordType.createPacket(position, recordType), ((ServerWorldBridge) this).bridge$getDimensionId());
     }
 
     @Override
@@ -544,7 +515,7 @@ public abstract class MixinWorldServer_API extends MixinWorld_API {
 
     @Override
     public long getRunningDuration() {
-        return this.worldInfo.getWorldTotalTime() - this.weatherStartTime;
+        return this.worldInfo.getWorldTotalTime() - ((ServerWorldBridge) this).bridge$getWeatherStartTime();
     }
 
     @Override
@@ -554,7 +525,7 @@ public abstract class MixinWorldServer_API extends MixinWorld_API {
 
     @Override
     public void setWeather(Weather weather, long duration) {
-        this.prevWeather = getWeather();
+        ((ServerWorldBridge) this).bridge$setPreviousWeather(this.getWeather());
         if (weather.equals(Weathers.CLEAR)) {
             this.worldInfo.setCleanWeatherTime((int) duration);
             this.worldInfo.setRainTime(0);
@@ -584,7 +555,7 @@ public abstract class MixinWorldServer_API extends MixinWorld_API {
     @Override
     public void setViewDistance(final int viewDistance) {
         this.playerChunkMap.setPlayerViewRadius(viewDistance);
-        final SpongeConfig<WorldConfig> configAdapter = ((IMixinWorldInfo) this.getWorldInfo()).getConfigAdapter();
+        final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) this.getWorldInfo()).getConfigAdapter();
         // don't use the parameter, use the field that has been clamped
         configAdapter.getConfig().getWorld().setViewDistance(this.playerChunkMap.playerViewRadius);
         configAdapter.save();
