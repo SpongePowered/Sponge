@@ -69,7 +69,7 @@ public abstract class MixinTileEntityFurnace_RealTime extends TileEntity {
             return;
         }
         int ticks = (int) ((IMixinRealTimeTicking) this.getWorld()).getRealTimeTicks();
-        this.furnaceBurnTime = Math.max(0, this.furnaceBurnTime - ticks);
+        this.furnaceBurnTime = Math.max(0, this.furnaceBurnTime - Math.max(1, ticks - 1));
     }
 
     @Redirect(

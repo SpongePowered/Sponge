@@ -64,7 +64,7 @@ public abstract class MixinEntityPlayer_RealTime extends MixinEntityLivingBase_R
             ),
             to = @At(
                 value = "CONSTANT",
-                args = "intvalue=100",
+                args = "intValue=100",
                 ordinal = 0
             )
         )
@@ -92,7 +92,7 @@ public abstract class MixinEntityPlayer_RealTime extends MixinEntityLivingBase_R
             ),
             to = @At(
                 value = "CONSTANT",
-                args = "intvalue=110"
+                args = "intValue=110"
             )
         )
     )

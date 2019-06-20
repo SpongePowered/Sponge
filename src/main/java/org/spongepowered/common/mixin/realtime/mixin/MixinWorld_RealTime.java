@@ -35,7 +35,7 @@ import org.spongepowered.common.mixin.realtime.IMixinRealTimeTicking;
 import javax.annotation.Nullable;
 
 @Mixin(World.class)
-public abstract class MixinWorld_RealTime implements IMixinRealTimeTicking, IMixinWorld {
+public abstract class MixinWorld_RealTime implements IMixinRealTimeTicking {
 
     @Shadow @Nullable public abstract MinecraftServer getMinecraftServer();
 
@@ -43,7 +43,7 @@ public abstract class MixinWorld_RealTime implements IMixinRealTimeTicking, IMix
 
     @Override
     public long getRealTimeTicks() {
-        if (this.isFake()) {
+        if (((IMixinWorld) this).isFake()) {
             return 1;
         }
         if (this.getMinecraftServer() != null) {
