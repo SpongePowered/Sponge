@@ -38,6 +38,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.TimingBridge;
+import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
@@ -53,7 +54,7 @@ import java.lang.ref.WeakReference;
 import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.tileentity.TileEntity.class)
-abstract class MixinTileEntity implements TileEntityBridge, DataCompoundHolder, TimingBridge {
+abstract class MixinTileEntity implements TileEntityBridge, DataCompoundHolder, TimingBridge, TrackableBridge {
 
     // uses different name to not clash with SpongeForge
     private final boolean isTileVanilla = getClass().getName().startsWith("net.minecraft.");
@@ -62,7 +63,6 @@ abstract class MixinTileEntity implements TileEntityBridge, DataCompoundHolder, 
     @Nullable private User spongeOwner;
     @Nullable private User spongeNotifier;
     private boolean isTicking = false;
-    private WeakReference<ChunkBridge> activeChunk = new WeakReference<>(null);
     // Used by tracker config
     private boolean allowsBlockBulkCapture = true;
     private boolean allowsEntityBulkCapture = true;

@@ -73,7 +73,6 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -123,20 +122,16 @@ public abstract class MixinEntity implements EntityBridge, TrackableBridge, Vani
 
     // @formatter:off
     protected final SpongeEntityType entityType = EntityTypeRegistryModule.getInstance().getForClass(((Entity) (Object) this).getClass());
-    private boolean teleporting;
-    private float origWidth;
-    private float origHeight;
     private boolean isConstructing = true;
     @Nullable private Text displayName;
     @Nullable private BlockState currentCollidingBlock;
     @Nullable private BlockPos lastCollidedBlockPos;
-    @Nullable private Entity teleportVehicle;
     private boolean trackedInWorld = false;
-    private boolean collision = false;
-    private boolean untargetable = false;
-    private boolean isVanished = false;
-    private boolean pendingVisibilityUpdate = false;
-    private int visibilityTicks = 0;
+    private boolean vanish$collision = false;
+    private boolean vanish$untargetable = false;
+    private boolean vanish$isVanished = false;
+    private boolean vanish$pendingVisibilityUpdate = false;
+    private int vanish$visibilityTicks = 0;
 
     @Shadow @Nullable public Entity ridingEntity;
     @Shadow @Final private List<Entity> riddenByEntities;
@@ -307,14 +302,6 @@ public abstract class MixinEntity implements EntityBridge, TrackableBridge, Vani
         return dismount;
     }
 
-    @Inject(method = "setSize", at = @At("RETURN"))
-    private void spongeImpl$onSpongeSetSize(final float width, final float height, final CallbackInfo ci) {
-        if (this.origWidth == 0 || this.origHeight == 0) {
-            this.origWidth = this.width;
-            this.origHeight = this.height;
-        }
-    }
-
     @Inject(method = "move", at = @At("HEAD"), cancellable = true)
     private void spongeImpl$onSpongeMoveEntity(final MoverType type, final double x, final double y, final double z, final CallbackInfo ci) {
         if (!this.world.isRemote && !SpongeHooks.checkEntitySpeed(((Entity) (Object) this), x, y, z)) {
@@ -428,11 +415,11 @@ public abstract class MixinEntity implements EntityBridge, TrackableBridge, Vani
     @SuppressWarnings("ConstantConditions")
     @Inject(method = "onUpdate", at = @At("RETURN"))
     private void spongeOnUpdate(final CallbackInfo callbackInfo) {
-        if (this.pendingVisibilityUpdate && !this.world.isRemote) {
+        if (this.vanish$pendingVisibilityUpdate && !this.world.isRemote) {
             final EntityTracker entityTracker = ((WorldServer) this.world).getEntityTracker();
             final EntityTrackerEntry lookup = entityTracker.trackedEntityHashTable.lookup(this.getEntityId());
-            if (this.visibilityTicks % 4 == 0) {
-                if (this.isVanished) {
+            if (this.vanish$visibilityTicks % 4 == 0) {
+                if (this.vanish$isVanished) {
                     for (final EntityPlayerMP entityPlayerMP : lookup.trackingPlayers) {
                         entityPlayerMP.connection.sendPacket(new SPacketDestroyEntities(this.getEntityId()));
                         if ((Entity) (Object) this instanceof EntityPlayerMP) {
@@ -441,8 +428,8 @@ public abstract class MixinEntity implements EntityBridge, TrackableBridge, Vani
                         }
                     }
                 } else {
-                    this.visibilityTicks = 1;
-                    this.pendingVisibilityUpdate = false;
+                    this.vanish$visibilityTicks = 1;
+                    this.vanish$pendingVisibilityUpdate = false;
                     for (final EntityPlayerMP entityPlayerMP : SpongeImpl.getServer().getPlayerList().getPlayers()) {
                         if ((Entity) (Object) this == entityPlayerMP) {
                             continue;
@@ -456,39 +443,12 @@ public abstract class MixinEntity implements EntityBridge, TrackableBridge, Vani
                     }
                 }
             }
-            if (this.visibilityTicks > 0) {
-                this.visibilityTicks--;
+            if (this.vanish$visibilityTicks > 0) {
+                this.vanish$visibilityTicks--;
             } else {
-                this.pendingVisibilityUpdate = false;
+                this.vanish$pendingVisibilityUpdate = false;
             }
         }
-    }
-
-
-    @Override
-    public boolean isTeleporting() {
-        return this.teleporting;
-    }
-
-    @Override
-    public Entity getTeleportVehicle() {
-        return this.teleportVehicle;
-    }
-
-    @Override
-    public void setIsTeleporting(final boolean teleporting) {
-        this.teleporting = teleporting;
-    }
-
-    @Override
-    public void setTeleportVehicle(final Entity vehicle) {
-        this.teleportVehicle = vehicle;
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    @Intrinsic
-    public List<org.spongepowered.api.entity.Entity> entity$getPassengers() {
-        return (List) shadow$getPassengers();
     }
 
     @Override
@@ -569,7 +529,7 @@ public abstract class MixinEntity implements EntityBridge, TrackableBridge, Vani
         if (this instanceof GrieferBridge && ((GrieferBridge) this).bridge$isGriefer()) {
             compound.setBoolean(NbtDataUtil.CAN_GRIEF, ((GrieferBridge) this).bridge$CanGrief());
         }
-        if (this.isVanished) {
+        if (this.vanish$isVanished) {
             compound.setBoolean(Constants.Sponge.Entity.IS_VANISHED, true);
             if (this.vanish$isUncollideable()) {
                 compound.setBoolean(Constants.Sponge.Entity.VANISH_UNCOLLIDEABLE, true);
@@ -686,34 +646,34 @@ public abstract class MixinEntity implements EntityBridge, TrackableBridge, Vani
 
     @Override
     public boolean vanish$isVanished() {
-        return this.isVanished;
+        return this.vanish$isVanished;
     }
 
     @Override
     public void vanish$setVanished(final boolean vanished) {
-        this.isVanished = vanished;
-        this.pendingVisibilityUpdate = true;
-        this.visibilityTicks = 20;
+        this.vanish$isVanished = vanished;
+        this.vanish$pendingVisibilityUpdate = true;
+        this.vanish$visibilityTicks = 20;
     }
 
     @Override
     public boolean vanish$isUncollideable() {
-        return this.collision;
+        return this.vanish$collision;
     }
 
     @Override
     public void vanish$setUncollideable(final boolean prevents) {
-        this.collision = prevents;
+        this.vanish$collision = prevents;
     }
 
     @Override
     public boolean vanish$isUntargetable() {
-        return this.untargetable;
+        return this.vanish$untargetable;
     }
 
     @Override
     public void vanish$setUntargetable(final boolean untargetable) {
-        this.untargetable = untargetable;
+        this.vanish$untargetable = untargetable;
     }
 
     /**
@@ -724,7 +684,7 @@ public abstract class MixinEntity implements EntityBridge, TrackableBridge, Vani
      */
     @Redirect(method = "playSound", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;isSilent()Z"))
     private boolean spongeImpl$checkIsSilentOrInvis(final Entity entity) {
-        return entity.isSilent() || this.isVanished;
+        return entity.isSilent() || this.vanish$isVanished;
     }
 
     @Redirect(method = "applyEntityCollision", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;noClip:Z", opcode = Opcodes.GETFIELD))
@@ -735,7 +695,7 @@ public abstract class MixinEntity implements EntityBridge, TrackableBridge, Vani
     @Redirect(method = "doWaterSplashEffect", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnParticle(Lnet/minecraft/util/EnumParticleTypes;DDDDDD[I)V"))
     private void spawnParticle(final net.minecraft.world.World world, final EnumParticleTypes particleTypes, final double xCoord, final double yCoord, final double zCoord,
         final double xOffset, final double yOffset, final double zOffset, final int... p_175688_14_) {
-        if (!this.isVanished) {
+        if (!this.vanish$isVanished) {
             this.world.spawnParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset, p_175688_14_);
         }
     }
@@ -743,7 +703,7 @@ public abstract class MixinEntity implements EntityBridge, TrackableBridge, Vani
     @Redirect(method = "createRunningParticles", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnParticle(Lnet/minecraft/util/EnumParticleTypes;DDDDDD[I)V"))
     private void runningSpawnParticle(final net.minecraft.world.World world, final EnumParticleTypes particleTypes, final double xCoord, final double yCoord, final double zCoord,
         final double xOffset, final double yOffset, final double zOffset, final int... p_175688_14_) {
-        if (!this.isVanished) {
+        if (!this.vanish$isVanished) {
             this.world.spawnParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset, p_175688_14_);
         }
     }

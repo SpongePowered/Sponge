@@ -31,7 +31,7 @@ import org.spongepowered.common.bridge.TrackableBridge;
 
 import javax.annotation.Nullable;
 
-public interface TileEntityBridge extends TrackableBridge {
+public interface TileEntityBridge {
 
     void bridge$markDirty();
 

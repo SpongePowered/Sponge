@@ -58,7 +58,7 @@ import java.util.function.BiConsumer;
  * simple cast. This is particularly useful for {@link BlockState}s as
  * they already know the type they need to focus on.</p>
  */
-public interface BlockBridge extends TrackableBridge {
+public interface BlockBridge {
 
     /**
      * Gets all the {@link ImmutableDataManipulator}s for the provided

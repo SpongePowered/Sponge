@@ -43,7 +43,7 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-public interface EntityBridge extends TrackableBridge {
+public interface EntityBridge {
 
     boolean isInConstructPhase();
 
@@ -63,14 +63,6 @@ public interface EntityBridge extends TrackableBridge {
      * @param tracked Tracked
      */
     void setTrackedInWorld(boolean tracked);
-
-    boolean isTeleporting();
-
-    void setIsTeleporting(boolean teleporting);
-
-    Entity getTeleportVehicle();
-
-    void setTeleportVehicle(Entity entity);
 
     boolean removePassengers(DismountType type);
 
