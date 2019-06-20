@@ -140,6 +140,4 @@ final class EntityDeathState extends EntityPhaseState<EntityDeathContext> {
         TrackingUtil.processBlockCaptures(this, context);
 
     }
-
-
 }

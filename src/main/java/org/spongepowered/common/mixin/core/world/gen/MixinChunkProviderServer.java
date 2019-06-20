@@ -49,20 +49,16 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
+import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
+import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.config.category.WorldCategory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.phase.TrackingPhases;
-import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
-import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
-import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.interfaces.world.IMixinAnvilChunkLoader;
-import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
-import org.spongepowered.common.bridge.world.ServerChunkProviderBridge;
 import org.spongepowered.common.util.CachedLong2ObjectMap;
 import org.spongepowered.common.world.SpongeEmptyChunk;
 import org.spongepowered.common.world.storage.SpongeChunkDataStream;
@@ -180,7 +176,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, ServerCh
         }
 
         Chunk chunk = this.getLoadedChunk(x, z);
-        if (chunk == null && this.canDenyChunkRequest()) {
+        if (chunk == null && !this.allowChunkLoads()) {
             return this.EMPTY_CHUNK;
         }
 
@@ -208,42 +204,19 @@ public abstract class MixinChunkProviderServer implements WorldStorage, ServerCh
         PhaseTracker.getInstance().getCurrentContext().close();
     }
 
-    private boolean canDenyChunkRequest() {
+    private boolean allowChunkLoads() {
         if (!SpongeImpl.getServer().isCallingFromMinecraftThread()) {
-            return true;
+            return false;
         }
 
         if (this.forceChunkRequests) {
-            return false;
+            return true;
         }
 
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final IPhaseState<?> currentState = phaseTracker.getCurrentState();
-        // States that cannot deny chunks
-        if (currentState == TickPhase.Tick.PLAYER
-            || currentState == TickPhase.Tick.DIMENSION
-            || currentState == EntityPhase.State.CHANGING_DIMENSION
-            || currentState == EntityPhase.State.INVOKING_TELEPORTER
-            || currentState == EntityPhase.State.LEAVING_DIMENSION) {
-            return false;
-        }
 
-        // States that can deny chunks
-        if (currentState == GenerationPhase.State.WORLD_SPAWNER_SPAWNING
-            || currentState == PluginPhase.Listener.PRE_SERVER_TICK_LISTENER
-            || currentState == PluginPhase.Listener.POST_SERVER_TICK_LISTENER) {
-            return true;
-        }
-
-        // Phases that can deny chunks
-        if (currentState.getPhase() == TrackingPhases.BLOCK
-            || currentState.getPhase() == TrackingPhases.ENTITY
-            || currentState.getPhase() == TrackingPhases.TICK) {
-            return true;
-        }
-
-
-        return false;
+        return currentState.allowChunkLoads();
     }
 
     @Override
