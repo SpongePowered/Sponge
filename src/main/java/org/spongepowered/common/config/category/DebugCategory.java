@@ -32,12 +32,6 @@ public class DebugCategory extends ConfigCategory {
 
     @Setting(value = "thread-contention-monitoring", comment = "If 'true', Java's thread contention monitoring for thread dumps is enabled.")
     private boolean enableThreadContentionMonitoring = false;
-    @Setting(value = "dump-chunks-on-deadlock", comment = "Dump chunks in the event of a deadlock")
-    private boolean dumpChunksOnDeadlock = false;
-    @Setting(value = "dump-heap-on-deadlock", comment = "Dump the heap in the event of a deadlock")
-    private boolean dumpHeapOnDeadlock = false;
-    @Setting(value = "dump-threads-on-warn", comment = "Dump the server thread on deadlock warning")
-    private boolean dumpThreadsOnWarn = false;
 
     @Setting(value = "concurrent-entity-checks", comment = "Detect and prevent certain attempts to use entities concurrently. \n"
                                                          + "WARNING: May drastically decrease server performance. Only set this to 'true' "
@@ -62,29 +56,5 @@ public class DebugCategory extends ConfigCategory {
 
     public void setEnableThreadContentionMonitoring(boolean enableThreadContentionMonitoring) {
         this.enableThreadContentionMonitoring = enableThreadContentionMonitoring;
-    }
-
-    public boolean dumpChunksOnDeadlock() {
-        return this.dumpChunksOnDeadlock;
-    }
-
-    public void setDumpChunksOnDeadlock(boolean dumpChunksOnDeadlock) {
-        this.dumpChunksOnDeadlock = dumpChunksOnDeadlock;
-    }
-
-    public boolean dumpHeapOnDeadlock() {
-        return this.dumpHeapOnDeadlock;
-    }
-
-    public void setDumpHeapOnDeadlock(boolean dumpHeapOnDeadlock) {
-        this.dumpHeapOnDeadlock = dumpHeapOnDeadlock;
-    }
-
-    public boolean dumpThreadsOnWarn() {
-        return this.dumpThreadsOnWarn;
-    }
-
-    public void setDumpThreadsOnWarn(boolean dumpThreadsOnWarn) {
-        this.dumpThreadsOnWarn = dumpThreadsOnWarn;
     }
 }

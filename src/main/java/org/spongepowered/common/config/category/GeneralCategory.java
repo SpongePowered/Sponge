@@ -29,9 +29,6 @@ import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 
 @ConfigSerializable
 public class GeneralCategory extends ConfigCategory {
-
-    @Setting(value = "disable-warnings", comment = "Disable warning messages to server admins")
-    private boolean disableWarnings = false;
     
     @Setting(value = "plugins-dir", comment = "Additional directory to search for plugins, relative to the \n"
                                             + "execution root or specified as an absolute path. \n"
@@ -49,14 +46,6 @@ public class GeneralCategory extends ConfigCategory {
                                            + "Note: It is not recommended to set this to \"${CANONICAL_CONFIG_DIR}/sponge\", as there is \n"
                                            + "a possibility that plugin configurations can conflict the Sponge core configurations. \n")
     private String configDir = "${CANONICAL_GAME_DIR}/config";
-
-    public boolean disableWarnings() {
-        return this.disableWarnings;
-    }
-
-    public void setDisableWarnings(boolean disableWarnings) {
-        this.disableWarnings = disableWarnings;
-    }
     
     public String pluginsDir() {
         return this.pluginsDir;

@@ -37,9 +37,6 @@ public class EntityCategory extends ConfigCategory {
     private int maxCollisionSize = 200;
     @Setting(value = "max-speed", comment = "Square of the maximum speed of an entity before removing it. Set to 0 to disable")
     private int maxSpeed = 100;
-    @Setting(value = "count-warn-size",
-            comment = "Number of entities in one dimension before logging a warning. Set to 0 to disable")
-    private int maxCountWarnSize = 0;
     @Setting(value = "item-despawn-rate", comment = "Controls the time in ticks for when an item despawns.")
     private int itemDespawnRate = 6000;
     @Setting(value = "human-player-list-remove-delay",
@@ -61,14 +58,6 @@ public class EntityCategory extends ConfigCategory {
 
     public void setMaxSpeed(int maxSpeed) {
         this.maxSpeed = maxSpeed;
-    }
-
-    public int getMaxCountWarnSize() {
-        return this.maxCountWarnSize;
-    }
-
-    public void setMaxCountWarnSize(int maxCountWarnSize) {
-        this.maxCountWarnSize = maxCountWarnSize;
     }
 
     public int getMaxBoundingBoxSize() {

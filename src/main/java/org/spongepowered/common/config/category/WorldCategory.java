@@ -40,12 +40,6 @@ public class WorldCategory extends ConfigCategory {
                                                    + "Note: 20 ticks is equivalent to 1 second.")
     private int autoSaveInterval = 900;
 
-    @Setting(value = "infinite-water-source", comment = "Vanilla water source behavior - is infinite")
-    private boolean infiniteWaterSource = false;
-
-    @Setting(value = "flowing-lava-decay", comment = "Lava behaves like vanilla water when source block is removed")
-    private boolean flowingLavaDecay = false;
-
     @Setting(value = "mob-spawn-range", comment = "Specifies the radius (in chunks) of where creatures will spawn. \n"
                                                 + "This value is capped to the current view distance setting in server.properties")
     private int mobSpawnRange = 4;
@@ -135,22 +129,6 @@ public class WorldCategory extends ConfigCategory {
 
     public int getAutoSaveInterval() {
         return this.autoSaveInterval;
-    }
-
-    public boolean hasInfiniteWaterSource() {
-        return this.infiniteWaterSource;
-    }
-
-    public void setInfiniteWaterSource(boolean infiniteWaterSource) {
-        this.infiniteWaterSource = infiniteWaterSource;
-    }
-
-    public boolean hasFlowingLavaDecay() {
-        return this.flowingLavaDecay;
-    }
-
-    public void setFlowingLavaDecay(boolean flowingLavaDecay) {
-        this.flowingLavaDecay = flowingLavaDecay;
     }
 
     public boolean isWorldEnabled() {
